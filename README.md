@@ -25,14 +25,14 @@ LaME is demonstrated using data from garnet-chlorite schists found in the Walter
 
 ## Planned functionality:
 
-Create custom maps and layouts
-Produce chemical profiles
-Diffusion modeling (1D and 2D)
-Temperature calculations
-Date estimates/maps for selected
-isotopic systems
-Batch processing of multiple samples
-Calculator for custom field generation
+* Create custom maps and layouts
+* Produce chemical profiles
+* Diffusion modeling (1D and 2D)
+* Temperature calculations
+* Date estimates/maps for selected
+* Isotopic systems
+* Batch processing of multiple samples
+* Calculator for custom field generation
 
 
 ## Development and Availability

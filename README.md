@@ -12,17 +12,23 @@ Isotope Selection: Simple intuitive window to choose elements used for analysis,
 ![Isotope Selection Window](images/Isotope_selection.png)
 
 Cluster Analysis: Enables effective categorization and analysis of geochemical data.
-![Cluster analysis](images/ws02_cluster_fuzzy_2_0.eps)
+
+![Cluster Analysis](images/ws02_cluster_fuzzy_2_0.png)
+
 
 Geochemical Plotting: Offers various plotting capabilities for both qualitative and quantitative analysis of mineral maps.
 
+![Ternary Plot](images/ternary_plot.png)
+
+Trace Element Compatibility Plots
+
+![Tec Analysis](images/n-dim_plot.png)
 
 User-Friendly Interface: Streamlined data handling process, making it accessible to users with varying levels of expertise.
-Demonstration
 
 Multi-view: Large canvas for multiple plots
 
-![Mulit-view Interface](images/TR3-06_Multiview_2.png)
+![Multi-view](images/TR3-06_Multiview_2.png)
 
 LaME is demonstrated using data from garnet-chlorite schists found in the Walter-Outalpa Shear Zone, South Australia.
 

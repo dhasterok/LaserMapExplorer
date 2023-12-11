@@ -25,13 +25,12 @@ Trace Element Compatibility Plots
 
 ![Tec Analysis](images/n-dim_plot.png)
 
-
 User-Friendly Interface: Streamlined data handling process, making it accessible to users with varying levels of expertise.
 
 Multi-view: Large canvas for multiple plots
 
-
 ![Mulit-view Interface](images/TR3-06_Multiview_2.png)
+
 
 LaME is demonstrated using data from garnet-chlorite schists found in the Walter-Outalpa Shear Zone, South Australia.
 

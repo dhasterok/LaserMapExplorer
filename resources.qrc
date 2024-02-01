@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file alias="zoom">resources/icons/icons8-zoom-50.png</file>
+        <file alias="axis">resources/icons/icons8-axis-24.png</file>
+        <file alias="home">resources/icons/icons8-home-50.png</file>
+        <file alias="move">resources/icons/icons8-move-50.png</file>
+        <file alias="preferences">resources/icons/icons8-preferences-50.png</file>
+        <file alias="save">resources/icons/icons8-save-50.png</file>
+        <file alias="down">resources/icons/down.png</file>
+        <file alias="up">resources/icons/up.png</file>
+        <file alias="delete">resources/icons/delete.png</file>
+    </qresource>
+</RCC>

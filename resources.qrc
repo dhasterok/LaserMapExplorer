@@ -32,5 +32,13 @@
         <file>resources/icons/icons8-select-all-50.png</file>
         <file>resources/icons/icons8-spiderweb-64.png</file>
         <file>resources/icons/icons8-trash-50.png</file>
+        <file>resources/icons/icons8-add-50.png</file>
+        <file>resources/icons/icons8-add-80.png</file>
+        <file>resources/icons/icons8-add-image-64.png</file>
+        <file>resources/icons/icons8-ball-point-pen-64.png</file>
+        <file>resources/icons/icons8-hide-50.png</file>
+        <file>resources/icons/icons8-hide-64.png</file>
+        <file>resources/icons/icons8-show-50.png</file>
+        <file>resources/icons/icons8-crop-64.png</file>
     </qresource>
 </RCC>

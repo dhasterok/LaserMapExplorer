@@ -119,9 +119,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonRemovePlots.clicked.connect(lambda: self.remove_multi_plot(self.comboBoxPlots.currentText()))
         #add ratio item to tree view
 
-        #tabs = self.tabWindow
+        #tabs = self.canvasWindow
         #tabs.tabCloseRequested.connect(lambda index: tabs.removeTab(index))
-        #self.tabWindow.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        #self.canvasWindow.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         #create plot tree
 
         self.create_tree()
@@ -159,7 +159,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.spinBox_Y.valueChanged.connect(lambda:self.update_plot(axis = True))
         self.spinBoxNBins.valueChanged.connect(self.update_plot)
         self.spinBoxBinWidth.valueChanged.connect(lambda: self.update_plot(bin_s=False))
-        self.toolBox.currentChanged.connect(lambda: self.tabWindow.setCurrentIndex(0))
+        self.toolBox.currentChanged.connect(lambda: self.canvasWindow.setCurrentIndex(0))
         #auto scale
         self.checkBoxAutoScale.clicked.connect( self.auto_scale )
 
@@ -167,7 +167,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         ###Filter
         self.pushButtonAddFilter.clicked.connect(self.update_filter_table)
         self.pushButtonFilterSelectAll.clicked.connect(self.select_all_rows)
-        self.pushButtonFilterRemove.clicked.connect(self.remove_selected_rows)
+        self.toolButtonFilterRemove.clicked.connect(self.remove_selected_rows)
         self.comboBoxFSelect.activated.connect(lambda: self.update_combo_boxes('f'))
         self.comboBoxFIsotope.activated.connect(self.update_filter_values)
         #     lambda: self.get_map_data(self.sample_id,isotope_1=self.comboBoxFIsotope_1.currentText(),
@@ -215,7 +215,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.radioButtonCFuzzy.toggled.connect(self.onRadioButtonToggled)
         self.radioButtonCKMediods.toggled.connect(self.onRadioButtonToggled)
         self.radioButtonCKMeans.toggled.connect(self.onRadioButtonToggled)
-        self.radioButtonCTSNE.toggled.connect(self.onRadioButtonToggled)
 
         # Connect the itemChanged signal to a slot
         self.tableWidgetViewGroups.itemChanged.connect(self.onClusterLabelChanged)
@@ -406,7 +405,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def update_plot(self,bin_s = True, axis = False):
         if self.update_spinboxes_bool:
-            self.tabWindow.setCurrentIndex(0)
+            self.canvasWindow.setCurrentIndex(0)
             lb = self.doubleSpinBoxLB.value()
             ub = self.doubleSpinBoxUB.value()
             d_lb = self.doubleSpinBoxDLB.value()
@@ -468,7 +467,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 layout.removeWidget(widget)  # Remove the widget from the layout
                 widget.setParent(None)      # Set the widget's parent to None
         # if widget is not None:
-        #     index = self.tabWindow.addTab( widget, selected_plot_name)
+        #     index = self.canvasWindow.addTab( widget, selected_plot_name)
         self.multi_view_index.pop(widget_index)
         for widget in self.multiview_info_label[selected_plot_name+'1']:
             widget.setParent(None)
@@ -489,12 +488,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         #get plot widget and view from plot_widget_dict
         for widget, view in zip(self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'],self.plot_widget_dict[plot_type][sample_id][plot_name]['view']):
-            if view == self.tabWindow.currentIndex():
+            if view == self.canvasWindow.currentIndex():
                 selected_plot_widget = widget
                 continue
             else:
                 selected_plot_widget = widget
-        if self.tabWindow.currentIndex() and plot_name not in self.multi_view_index:
+        if self.canvasWindow.currentIndex() and plot_name not in self.multi_view_index:
             #Multi view
             layout = self.widgetMultiView.layout()
 
@@ -509,15 +508,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # show plot sinc parent is visible
             selected_plot_widget.show()
             #remove tab
-            #self.tabWindow.removeTab(tab_index)
+            #self.canvasWindow.removeTab(tab_index)
             #get the the index of plot on multiview
             self.multi_view_index.append(plot_name)
-            #self.tabWindow.setEnabled(index,False)
+            #self.canvasWindow.setEnabled(index,False)
             #self.add_remove(plot_name)
             #reduce the index of widgets right hand side of index tab by one 
             self.comboBoxPlots.clear()
             self.comboBoxPlots.addItems(self.multi_view_index)
-        elif self.tabWindow.currentIndex()==0:
+        elif self.canvasWindow.currentIndex()==0:
             #Single view 
             self.single_plot_name = plot_name
 
@@ -753,7 +752,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.comboBoxSampleId.clear()
             self.comboBoxSampleId.addItems([os.path.splitext(file)[0] for file in self.csv_files])
             # Populate the sampleidcomboBox with the file names
-            self.tabWindow.setCurrentIndex(0)
+            self.canvasWindow.setCurrentIndex(0)
             self.change_sample(0, )
         # self.selected_directory='/Users/a1904121/LaserMapExplorer/laser_mapping/Alex_garnet_maps/processed data'
         # self.selected_directory='/Users/shavinkalu/Library/CloudStorage/GoogleDrive-a1904121@adelaide.edu.au/.shortcut-targets-by-id/1r_MeSExALnv9lHE58GoG7pbtC8TOwSk4/laser_mapping/Alex_garnet_maps/processed data'
@@ -763,7 +762,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxSampleId.clear()
         self.comboBoxSampleId.addItems([os.path.splitext(file)[0] for file in self.csv_files])
         # Populate the sampleidcomboBox with the file names
-        self.tabWindow.setCurrentIndex(0)
+        self.canvasWindow.setCurrentIndex(0)
         self.change_sample(0, )
 
     def remove_widgets_from_layout(self, layout, object_names_to_remove):
@@ -808,7 +807,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         plot_exist = False
         if plot_name in self.plot_widget_dict[plot_type][sample_id]:
             plot_exist = True
-            duplicate = len(self.plot_widget_dict[plot_type][sample_id][plot_name]['view'])==1 and self.plot_widget_dict[plot_type][sample_id][plot_name]['view'][0] != self.tabWindow.currentIndex()
+            duplicate = len(self.plot_widget_dict[plot_type][sample_id][plot_name]['view'])==1 and self.plot_widget_dict[plot_type][sample_id][plot_name]['view'][0] != self.canvasWindow.currentIndex()
 
 
 
@@ -838,7 +837,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             layoutLaserMap = QtWidgets.QGridLayout()
             widgetLaserMap.setLayout(layoutLaserMap)
             layoutLaserMap.setSpacing(0)
-            view = self.tabWindow.currentIndex()
+            view = self.canvasWindow.currentIndex()
             if duplicate: 
                 self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'].append(widgetLaserMap)
                 self.plot_widget_dict[plot_type][sample_id][plot_name]['view'].append(view)
@@ -938,7 +937,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         any_plot_hovered = False
         for k, (_, p, v, array) in self.lasermaps.items():
             # print(p.sceneBoundingRect(), pos)
-            if p.sceneBoundingRect().contains(pos_scene) and v == self.tabWindow.currentIndex() and not self.toolButtonPanSV.isChecked() and not self.toolButtonZoomSV.isChecked() :
+            if p.sceneBoundingRect().contains(pos_scene) and v == self.canvasWindow.currentIndex() and not self.toolButtonPanSV.isChecked() and not self.toolButtonZoomSV.isChecked() :
 
                 # mouse_point = p.vb.mapSceneToView(pos)
                 mouse_point = pos_view
@@ -954,7 +953,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     any_plot_hovered = True
                     value = array[y_i, x_i]  # assuming self.array is numpy self.array
 
-                    if self.tabWindow.currentIndex() == 0:
+                    if self.canvasWindow.currentIndex() == 0:
 
                         self.labelInfoX.setText('X: '+str(round(x)))
                         self.labelInfoY.setText('Y: '+str(round(y)))
@@ -979,7 +978,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def plot_laser_map_cont(self,layout,array,img,p1,cm, view):
         # Single views
-        if self.tabWindow.currentIndex()==0 and view==self.tabWindow.currentIndex():
+        if self.canvasWindow.currentIndex()==0 and view==self.canvasWindow.currentIndex():
             # Try to remove the colorbar just in case it was added somehow
             # for i in reversed(range(p1.layout.count())):  # Reverse to avoid skipping due to layout change
             #     item = p1.layout.itemAt(i)
@@ -1083,7 +1082,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     #     edges = np.arange(array.min(), array.max() + bin_width, bin_width)
 
     #     plot_exist = select_histogram in self.plot_widget_dict
-    #     duplicate = plot_exist and len(self.plot_widget_dict[select_histogram]['view']) == 1 and self.plot_widget_dict[select_histogram]['view'][0] != self.tabWindow.currentIndex()
+    #     duplicate = plot_exist and len(self.plot_widget_dict[select_histogram]['view']) == 1 and self.plot_widget_dict[select_histogram]['view'][0] != self.canvasWindow.currentIndex()
 
     #     if plot_exist and not duplicate:
     #         widgetHistogram = self.plot_widget_dict[select_histogram]['widget'][0]
@@ -1094,7 +1093,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     #         layout = QtWidgets.QVBoxLayout()
     #         widgetHistogram = QtWidgets.QWidget()
     #         widgetHistogram.setLayout(layout)
-    #         view = self.tabWindow.currentIndex()
+    #         view = self.canvasWindow.currentIndex()
     #         if duplicate:
     #             self.plot_widget_dict[select_histogram]['widget'].append(widgetHistogram)
     #             self.plot_widget_dict[select_histogram]['view'].append(view)
@@ -1144,7 +1143,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         edges = np.arange(array.min(), array.max() + bin_width, bin_width)
     
         plot_exist = plot_name in self.plot_widget_dict[plot_type][sample_id]
-        duplicate = plot_exist and len(self.plot_widget_dict[plot_type][sample_id][plot_name]['view']) == 1 and self.plot_widget_dict[plot_type][sample_id][plot_name]['view'][0] != self.tabWindow.currentIndex()
+        duplicate = plot_exist and len(self.plot_widget_dict[plot_type][sample_id][plot_name]['view']) == 1 and self.plot_widget_dict[plot_type][sample_id][plot_name]['view'][0] != self.canvasWindow.currentIndex()
     
 
         if plot_exist and not duplicate:
@@ -1164,7 +1163,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             toolbar = NavigationToolbar(figure_canvas, widgetHistogram)  # Create the toolbar for the canvas
             widgetHistogram.layout().addWidget(toolbar)  # Add the toolbar to the widget
             widgetHistogram.layout().addWidget(figure_canvas)
-            view = self.tabWindow.currentIndex()
+            view = self.canvasWindow.currentIndex()
 
             if duplicate:
                 self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'].append(widgetHistogram)
@@ -1173,7 +1172,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.plot_widget_dict[plot_type][sample_id][plot_name] = {'widget': [widgetHistogram], 'info': plot_information, 'view': [view]}
             
 
-            # self.tabWindow.setCurrentIndex(view)
+            # self.canvasWindow.setCurrentIndex(view)
             # Assuming you have a method to add the widget to the tab
             # self.add_histogram_tab(widgetHistogram, plot_name)
 
@@ -1329,7 +1328,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         widgetScatter.setLayout(layout)
         # scatter_plot = pg.PlotWidget(title=select_scatter)
         scatter_plot = FigureCanvas(fig)
-        view = self.tabWindow.currentIndex()
+        view = self.canvasWindow.currentIndex()
         # Add the plot widget to your layout
         layout.insertWidget(0,scatter_plot)
         toolbar = NavigationToolbar(scatter_plot)  # Create the toolbar for the canvas
@@ -1481,7 +1480,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # widgetClusterMap.layout().addWidget(toolbar)
         self.plot_widget_dict['clustering'][self.sample_id][plot_name] = {'widget': [widgetClusterMap],
                                                               'info': {'plot_type': plot_type, 'sample_id': self.sample_id},
-                                                              'view': [self.tabWindow.currentIndex()]}
+                                                              'view': [self.canvasWindow.currentIndex()]}
         plot_information = {
             'plot_name': plot_name,
             'sample_id': self.sample_id,
@@ -1661,7 +1660,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # widgetNDim.layout().addWidget(toolbar)
         self.plot_widget_dict[plot_type][self.sample_id][plot_name] = {'widget': [widgetNDim],
                                                               'info': {'plot_type': plot_type, 'sample_id': self.sample_id},
-                                                              'view': [self.tabWindow.currentIndex()]}
+                                                              'view': [self.canvasWindow.currentIndex()]}
         plot_information = {
             'plot_name': self.sample_id +f'_{plot_type}',
             'sample_id': self.sample_id,
@@ -1787,8 +1786,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             algorithm = 'KMediods'
         elif self.radioButtonCKMeans.isChecked():
             algorithm = 'KMeans'
-        elif self.radioButtonCTSNE.isChecked():
-           algorithm = 'tSNE'
 
         if algorithm in self.cluster_results:
             if not self.cluster_results[algorithm].empty:
@@ -2085,7 +2082,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # comboBoxScatterSelectX
 
     def update_spinboxes(self,parameters,bins,bin_width, auto_scale):
-        if self.tabWindow.currentIndex()==0:
+        if self.canvasWindow.currentIndex()==0:
             self.update_spinboxes_bool = False
 
             self.spinBoxX.setValue(int(parameters['x_max']))
@@ -2877,7 +2874,7 @@ class Profiling:
                     self.profiles[k] = [(x,y, circ_val,scatter, interpolate)]
 
 
-                if self.main_window.tabWindow.currentIndex() == 1:
+                if self.main_window.canvasWindow.currentIndex() == 1:
                     # Add the scatter item to all other plots and save points in self.profiles
                     for k, (_, p, v, array) in self.main_window.lasermaps.items():
                         circ_val = []
@@ -2925,7 +2922,7 @@ class Profiling:
                         y_i = round(y*self.array_y/self.main_window.y_range)
                         # Add the scatter item to all other plots and save points in self.profiles
                         _, p, v, array= self.main_window.lasermaps[k]
-                        if v==self.main_window.tabWindow.currentIndex() and self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #only add scatters to other lasermaps of same sample
+                        if v==self.main_window.canvasWindow.currentIndex() and self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #only add scatters to other lasermaps of same sample
                             # Create a scatter plot item at the clicked position
                             scatter = ScatterPlotItem([x], [y], symbol='+', size=5)
                             p.addItem(scatter)
@@ -2996,7 +2993,7 @@ class Profiling:
             # Group profiles based on range similarity
             profile_groups = {}
             keys = []
-            if self.main_window.tabWindow.currentIndex(): #multiview
+            if self.main_window.canvasWindow.currentIndex(): #multiview
                 keys= [k for k in profiles.keys() if k[-1]== '1']
 
 

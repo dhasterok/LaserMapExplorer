@@ -9,5 +9,28 @@
         <file alias="down">resources/icons/down.png</file>
         <file alias="up">resources/icons/up.png</file>
         <file alias="delete">resources/icons/delete.png</file>
+        <file>resources/icons/icons8-analysis-50.png</file>
+        <file>resources/icons/icons8-atom-47.png</file>
+        <file>resources/icons/icons8-atom-50.png</file>
+        <file>resources/icons/icons8-atom-64.png</file>
+        <file>resources/icons/icons8-billiard-balls-53.png</file>
+        <file>resources/icons/icons8-billiard-balls-68.png</file>
+        <file>resources/icons/icons8-cancel-48.png</file>
+        <file>resources/icons/icons8-cells-48.png</file>
+        <file>resources/icons/icons8-cluster-64.png</file>
+        <file>resources/icons/icons8-connect-50-2.png</file>
+        <file>resources/icons/icons8-connect-50.png</file>
+        <file>resources/icons/icons8-done-48.png</file>
+        <file>resources/icons/icons8-exercise-50.png</file>
+        <file>resources/icons/icons8-explosion-64.png</file>
+        <file>resources/icons/icons8-heat-map-100.png</file>
+        <file>resources/icons/icons8-honeycomb-48.png</file>
+        <file>resources/icons/icons8-radar-plot-50.png</file>
+        <file>resources/icons/icons8-radar-plot-80.png</file>
+        <file>resources/icons/icons8-run-80.png</file>
+        <file>resources/icons/icons8-scatter-plot-80.png</file>
+        <file>resources/icons/icons8-select-all-50.png</file>
+        <file>resources/icons/icons8-spiderweb-64.png</file>
+        <file>resources/icons/icons8-trash-50.png</file>
     </qresource>
 </RCC>

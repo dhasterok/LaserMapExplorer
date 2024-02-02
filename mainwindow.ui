@@ -230,7 +230,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="TreeView">
        <property name="geometry">
@@ -686,9 +686,9 @@
      </widget>
     </item>
     <item row="0" column="1">
-     <widget class="QTabWidget" name="CanvasWindow">
+     <widget class="QTabWidget" name="canvasWindow">
       <property name="currentIndex">
-       <number>2</number>
+       <number>1</number>
       </property>
       <property name="documentMode">
        <bool>false</bool>
@@ -699,7 +699,7 @@
       <property name="tabBarAutoHide">
        <bool>false</bool>
       </property>
-      <widget class="QWidget" name="SingleViewTab">
+      <widget class="QWidget" name="singleViewTab">
        <attribute name="title">
         <string>Single View</string>
        </attribute>
@@ -850,7 +850,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="MultiViewTab">
+      <widget class="QWidget" name="multiViewTab">
        <attribute name="title">
         <string>Multi View</string>
        </attribute>
@@ -1045,7 +1045,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="QuickView">
+      <widget class="QWidget" name="quickViewTab">
        <attribute name="title">
         <string>Quick View</string>
        </attribute>
@@ -1067,7 +1067,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="SelectIsotopePage">
        <property name="geometry">
@@ -1178,10 +1178,10 @@
        <widget class="QToolButton" name="toolButtonLoadIsotopes">
         <property name="geometry">
          <rect>
-          <x>200</x>
-          <y>20</y>
-          <width>81</width>
-          <height>21</height>
+          <x>210</x>
+          <y>10</y>
+          <width>40</width>
+          <height>40</height>
          </rect>
         </property>
         <property name="toolTip">
@@ -1189,6 +1189,16 @@
         </property>
         <property name="text">
          <string>Select Tool</string>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/icons/resources/icons/icons8-atom-64.png</normaloff>:/icons/resources/icons/icons8-atom-64.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
         </property>
        </widget>
        <widget class="QComboBox" name="comboBoxRefMaterial">
@@ -2378,24 +2388,9 @@
          </column>
          <column>
           <property name="text">
-           <string>Norm</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
            <string>Select</string>
           </property>
          </column>
-        </widget>
-        <widget class="QSpinBox" name="spinBox_3">
-         <property name="geometry">
-          <rect>
-           <x>230</x>
-           <y>110</y>
-           <width>42</width>
-           <height>22</height>
-          </rect>
-         </property>
         </widget>
         <widget class="QLabel" name="label_47">
          <property name="geometry">
@@ -2453,22 +2448,6 @@
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_48">
-         <property name="geometry">
-          <rect>
-           <x>130</x>
-           <y>110</y>
-           <width>91</width>
-           <height>21</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Move selected</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
         <widget class="QPushButton" name="pushButtonNDimPlot">
@@ -2876,7 +2855,7 @@
          </rect>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="page_14">
          <widget class="QGroupBox" name="groupBox_12">
@@ -3074,17 +3053,27 @@
             </item>
            </layout>
           </widget>
-          <widget class="QPushButton" name="pushButtonRunClustering">
+          <widget class="QToolButton" name="toolButtonRunClustering">
            <property name="geometry">
             <rect>
              <x>10</x>
              <y>300</y>
-             <width>101</width>
-             <height>31</height>
+             <width>40</width>
+             <height>40</height>
             </rect>
            </property>
            <property name="text">
             <string>Run Selected</string>
+           </property>
+           <property name="icon">
+            <iconset resource="resources.qrc">
+             <normaloff>:/icons/resources/icons/icons8-run-80.png</normaloff>:/icons/resources/icons/icons8-run-80.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
            </property>
           </widget>
          </widget>

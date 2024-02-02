@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 12.0.1, 2024-02-01T12:13:38. -->
+<!-- Written by QtCreator 12.0.1, 2024-02-02T12:25:16. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
-  <value type="QByteArray">{40c6b79a-cff9-404f-bd1b-76b96a25d438}</value>
+  <value type="QByteArray">{e01341c0-a6b7-4900-9b32-1ac2f80165ec}</value>
  </data>
  <data>
   <variable>ProjectExplorer.Project.ActiveTarget</variable>
@@ -76,7 +76,7 @@
     <value type="bool" key="ClangTools.AnalyzeOpenFiles">true</value>
     <value type="bool" key="ClangTools.BuildBeforeAnalysis">true</value>
     <value type="QString" key="ClangTools.DiagnosticConfig">Builtin.DefaultTidyAndClazy</value>
-    <value type="int" key="ClangTools.ParallelJobs">4</value>
+    <value type="int" key="ClangTools.ParallelJobs">6</value>
     <value type="bool" key="ClangTools.PreferConfigFile">true</value>
     <valuelist type="QVariantList" key="ClangTools.SelectedDirs"/>
     <valuelist type="QVariantList" key="ClangTools.SelectedFiles"/>
@@ -89,14 +89,14 @@
   <variable>ProjectExplorer.Project.Target.0</variable>
   <valuemap type="QVariantMap">
    <value type="QString" key="DeviceType">Desktop</value>
-   <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Desktop (arm-darwin-generic-mach_o-64bit)</value>
-   <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Desktop (arm-darwin-generic-mach_o-64bit)</value>
-   <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">{1959ce0b-5364-4f6a-87dc-8263d8019ea4}</value>
+   <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Desktop (x86-darwin-generic-mach_o-32bit)</value>
+   <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Desktop (x86-darwin-generic-mach_o-32bit)</value>
+   <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">{ade555f2-4de7-40e7-88dc-64e152f8b67a}</value>
    <value type="qlonglong" key="ProjectExplorer.Target.ActiveBuildConfiguration">0</value>
    <value type="qlonglong" key="ProjectExplorer.Target.ActiveDeployConfiguration">0</value>
    <value type="qlonglong" key="ProjectExplorer.Target.ActiveRunConfiguration">0</value>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.0">
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">/Users/shavinkalu/Library/CloudStorage/GoogleDrive-a1904121@adelaide.edu.au/Other computers/My Mac/LaserMapExplorerPyQT/LaserMapExplorer</value>
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">/Users/dhasterok/Documents/GitHub/LaserMapExplorer</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
@@ -145,13 +145,13 @@
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
     <value type="bool" key="PE.EnvironmentAspect.PrintOnRun">false</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">mainwindow.py</value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">PythonEditor.RunConfiguration./Users/shavinkalu/Library/CloudStorage/GoogleDrive-a1904121@adelaide.edu.au/Other computers/My Mac/LaserMapExplorerPyQT/LaserMapExplorer/mainwindow.py</value>
-    <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">/Users/shavinkalu/Library/CloudStorage/GoogleDrive-a1904121@adelaide.edu.au/Other computers/My Mac/LaserMapExplorerPyQT/LaserMapExplorer/mainwindow.py</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">PythonEditor.RunConfiguration./Users/dhasterok/Documents/GitHub/LaserMapExplorer/mainwindow.py</value>
+    <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">/Users/dhasterok/Documents/GitHub/LaserMapExplorer/mainwindow.py</value>
     <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">false</value>
-    <value type="QString" key="PythonEditor.RunConfiguation.Script">/Users/shavinkalu/Library/CloudStorage/GoogleDrive-a1904121@adelaide.edu.au/Other computers/My Mac/LaserMapExplorerPyQT/LaserMapExplorer/mainwindow.py</value>
+    <value type="QString" key="PythonEditor.RunConfiguation.Script">/Users/dhasterok/Documents/GitHub/LaserMapExplorer/mainwindow.py</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">/Users/shavinkalu/Library/CloudStorage/GoogleDrive-a1904121@adelaide.edu.au/Other computers/My Mac/LaserMapExplorerPyQT/LaserMapExplorer</value>
+    <value type="QString" key="RunConfiguration.WorkingDirectory.default">/Users/dhasterok/Documents/GitHub/LaserMapExplorer</value>
    </valuemap>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.RunConfiguration.1">
     <value type="bool" key="Analyzer.Perf.Settings.UseGlobalSettings">true</value>
@@ -163,13 +163,13 @@
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
     <value type="bool" key="PE.EnvironmentAspect.PrintOnRun">false</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">IsotopeSelectionDialog.py</value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">PythonEditor.RunConfiguration./Users/shavinkalu/Library/CloudStorage/GoogleDrive-a1904121@adelaide.edu.au/Other computers/My Mac/LaserMapExplorerPyQT/LaserMapExplorer/IsotopeSelectionDialog.py</value>
-    <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">/Users/shavinkalu/Library/CloudStorage/GoogleDrive-a1904121@adelaide.edu.au/Other computers/My Mac/LaserMapExplorerPyQT/LaserMapExplorer/IsotopeSelectionDialog.py</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">PythonEditor.RunConfiguration./Users/dhasterok/Documents/GitHub/LaserMapExplorer/IsotopeSelectionDialog.py</value>
+    <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">/Users/dhasterok/Documents/GitHub/LaserMapExplorer/IsotopeSelectionDialog.py</value>
     <value type="bool" key="ProjectExplorer.RunConfiguration.Customized">false</value>
-    <value type="QString" key="PythonEditor.RunConfiguation.Script">/Users/shavinkalu/Library/CloudStorage/GoogleDrive-a1904121@adelaide.edu.au/Other computers/My Mac/LaserMapExplorerPyQT/LaserMapExplorer/IsotopeSelectionDialog.py</value>
+    <value type="QString" key="PythonEditor.RunConfiguation.Script">/Users/dhasterok/Documents/GitHub/LaserMapExplorer/IsotopeSelectionDialog.py</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">/Users/shavinkalu/Library/CloudStorage/GoogleDrive-a1904121@adelaide.edu.au/Other computers/My Mac/LaserMapExplorerPyQT/LaserMapExplorer</value>
+    <value type="QString" key="RunConfiguration.WorkingDirectory.default">/Users/dhasterok/Documents/GitHub/LaserMapExplorer</value>
    </valuemap>
    <value type="qlonglong" key="ProjectExplorer.Target.RunConfigurationCount">2</value>
   </valuemap>

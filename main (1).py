@@ -39,7 +39,7 @@ from radar import Radar
 from calculator import CalWindow
 import scipy.stats
 ## !pyrcc5 resources.qrc -o resources_rc.py
-## !pyuic5 mainwindow.ui -o MainWindow.py
+## pyuic5 mainwindow.ui -o MainWindow.py
 ## !pyuic5 -x IsotopeSelectionDialog.ui -o IsotopeSelectionDialog.py
 # pylint: disable=fixme, line-too-long, no-name-in-module, trailing-whitespace
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -739,22 +739,23 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     
                                                 
     def open_directory(self):
-        # dialog = QFileDialog()
-        # dialog.setFileMode(QFileDialog.Directory)
-        # # Set the default directory to the current working directory
-        # # dialog.setDirectory(os.getcwd())
+        dialog = QFileDialog()
+        dialog.setFileMode(QFileDialog.Directory)
+        # Set the default directory to the current working directory
+        # dialog.setDirectory(os.getcwd())
         # dialog.setDirectory('/Users/shavinkalu/Library/CloudStorage/GoogleDrive-a1904121@adelaide.edu.au/.shortcut-targets-by-id/1r_MeSExALnv9lHE58GoG7pbtC8TOwSk4/laser_mapping/Alex_garnet_maps/')
-        # if dialog.exec_():
-        #     self.selected_directory = dialog.selectedFiles()[0]
-        #     file_list = os.listdir(self.selected_directory)
-        #     self.csv_files = [file for file in file_list if file.endswith('.csv')]
-        #     self.comboBoxSampleId.clear()
-        #     self.comboBoxSampleId.addItems([os.path.splitext(file)[0] for file in self.csv_files])
-        #     # Populate the sampleidcomboBox with the file names
-        #     self.tabWindow.setCurrentIndex(0)
-        #     self.change_sample(0, )
-        self.selected_directory='/Users/a1904121/LaserMapExplorer/laser_mapping/Alex_garnet_maps/processed data'
+        if dialog.exec_():
+            self.selected_directory = dialog.selectedFiles()[0]
+            file_list = os.listdir(self.selected_directory)
+            self.csv_files = [file for file in file_list if file.endswith('.csv')]
+            self.comboBoxSampleId.clear()
+            self.comboBoxSampleId.addItems([os.path.splitext(file)[0] for file in self.csv_files])
+            # Populate the sampleidcomboBox with the file names
+            self.tabWindow.setCurrentIndex(0)
+            self.change_sample(0, )
+        # self.selected_directory='/Users/a1904121/LaserMapExplorer/laser_mapping/Alex_garnet_maps/processed data'
         # self.selected_directory='/Users/shavinkalu/Library/CloudStorage/GoogleDrive-a1904121@adelaide.edu.au/.shortcut-targets-by-id/1r_MeSExALnv9lHE58GoG7pbtC8TOwSk4/laser_mapping/Alex_garnet_maps/processed data'
+        # self.selected_directory=''
         file_list = os.listdir(self.selected_directory)
         self.csv_files = [file for file in file_list if file.endswith('.csv')]
         self.comboBoxSampleId.clear()

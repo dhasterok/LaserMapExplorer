@@ -57,7 +57,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.clipped_ratio_data = pd.DataFrame()
         self.clipped_isotope_data = {}
         self.sample_data_dict = {}
-        self.plot_widget_dict ={}
+        self.plot_widget_dict ={'lasermap':{},'histogram':{},'lasermap_norm':{},'clustering':{},'scatter':{},'n-dim':{}}
         self.multi_view_index = []
         self.laser_map_dict = {}
         self.multiview_info_label = {}
@@ -68,6 +68,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.proxies = []
         self.prev_plot = ''
         self.pop_plot = ''
+        self.plot_id = {'clustering':{},'scatter':{},'n-dim':{}}
+        self.fuzzy_results={}
         self.matplotlib_canvas = None
         self.pyqtgraph_widget = None
         self.isUpdatingTable = False
@@ -478,18 +480,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxPlots.clear()
         self.comboBoxPlots.addItems(self.multi_view_index)
         
-    def add_plot(self, info, current_plot_df = None):
+    def add_plot(self, plot_information, current_plot_df = None):
         
-        selected_plot_name = info['plot_name']
+        plot_name = plot_information['plot_name']
+        sample_id = plot_information['sample_id']
+        plot_type = plot_information['plot_type']
         
         #get plot widget and view from plot_widget_dict
-        for widget, view in zip(self.plot_widget_dict[selected_plot_name]['widget'],self.plot_widget_dict[selected_plot_name]['view']):
+        for widget, view in zip(self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'],self.plot_widget_dict[plot_type][sample_id][plot_name]['view']):
             if view == self.tabWindow.currentIndex():
                 selected_plot_widget = widget
                 continue
             else:
                 selected_plot_widget = widget
-        if self.tabWindow.currentIndex() and selected_plot_name not in self.multi_view_index:
+        if self.tabWindow.currentIndex() and plot_name not in self.multi_view_index:
             #Multi view
             layout = self.widgetMultiView.layout()
 
@@ -506,15 +510,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #remove tab
             #self.tabWindow.removeTab(tab_index)
             #get the the index of plot on multiview
-            self.multi_view_index.append(selected_plot_name)
+            self.multi_view_index.append(plot_name)
             #self.tabWindow.setEnabled(index,False)
-            #self.add_remove(selected_plot_name)
+            #self.add_remove(plot_name)
             #reduce the index of widgets right hand side of index tab by one 
             self.comboBoxPlots.clear()
             self.comboBoxPlots.addItems(self.multi_view_index)
         elif self.tabWindow.currentIndex()==0:
             #Single view 
-            self.single_plot_name = selected_plot_name
+            self.single_plot_name = plot_name
             #remove plot from multi view if the plot is already in multiview
                 
             layout = self.widgetSingleView.layout()
@@ -526,9 +530,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     if widget is not None:
                         layout.removeWidget(widget)  # Remove the widget from the layout
                         widget.setParent(None)      # Set the widget's parent to None
-            # selected_plot_widget = self.plot_widget_dict[selected_plot_name]['widget']
-            self.current_plot = selected_plot_name
-            self.current_plot_information = info
+            # selected_plot_widget = self.plot_widget_dict[plot_type][sample_id][plot_name]['widget']
+            self.current_plot = plot_name
+            self.current_plot_information = plot_information
             self.current_plot_df = current_plot_df
             layout.addWidget(selected_plot_widget)
             selected_plot_widget.show()
@@ -722,12 +726,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             
             
     def update_all_plots(self):
-        for plot in self.plot_widget_dict.keys():
-            # if plot in self.multi_view_index:
-            info = self.plot_widget_dict[plot]['info']
-            if info['plot_type'] == 'hist' or info['plot_type'] == 'laser' or info['plot_type'] == 'norm':
-                self.get_map_data(sample_id=info['sample_id'], isotope_1 =info['isotope_1'],isotope_2= info['isotope_2'],plot_type = info['plot_type'], plot =False )
         
+        for plot_type in self.plot_widget_dict.keys():
+            if plot_type == 'histogram' or plot_type == 'lasermap' or plot_type == 'lasernorm':
+                for sample_id, plot in self.plot_widget_dict.items():
+                    info = plot['info']
+                    self.get_map_data(sample_id=info['sample_id'], isotope_1 =info['isotope_1'],isotope_2= info['isotope_2'],plot_type = info['plot_type'], plot =False )
+            
 
     
                                                 
@@ -783,7 +788,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         layout.update()        
 
     def plot_laser_map(self, current_plot_df, plot_information):
-        select_laser_map=plot_information['plot_name']
+        plot_name = plot_information['plot_name']
+        sample_id = plot_information['sample_id']
+        plot_type = plot_information['plot_type']
         
         array = np.reshape(current_plot_df['array'].values,
                                     (current_plot_df['Y'].nunique(),
@@ -793,14 +800,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
         duplicate = False
         plot_exist = False
-        if select_laser_map in self.plot_widget_dict:
+        if plot_name in self.plot_widget_dict[plot_type][sample_id]:
             plot_exist = True
-            duplicate = len(self.plot_widget_dict[select_laser_map]['view'])==1 and self.plot_widget_dict[select_laser_map]['view'][0] != self.tabWindow.currentIndex()
+            duplicate = len(self.plot_widget_dict[plot_type][sample_id][plot_name]['view'])==1 and self.plot_widget_dict[plot_type][sample_id][plot_name]['view'][0] != self.tabWindow.currentIndex()
 
         
         
         if plot_exist and not duplicate:
-            widget_info = self.plot_widget_dict[select_laser_map]
+            widget_info = self.plot_widget_dict[plot_type][sample_id][plot_name]
             for widgetLaserMap, view in zip(widget_info['widget'],widget_info['view']):
                 glw = widgetLaserMap.findChild(pg.GraphicsLayoutWidget, 'plotLaserMap')
                 p1 = glw.getItem(0, 0)  # Assuming ImageItem is the first item in the plot
@@ -827,10 +834,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             layoutLaserMap.setSpacing(0)
             view = self.tabWindow.currentIndex()
             if duplicate: 
-                self.plot_widget_dict[select_laser_map]['widget'].append(widgetLaserMap)
-                self.plot_widget_dict[select_laser_map]['view'].append(view)
+                self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'].append(widgetLaserMap)
+                self.plot_widget_dict[plot_type][sample_id][plot_name]['view'].append(view)
             else:
-                self.plot_widget_dict[select_laser_map] = {'widget':[widgetLaserMap],
+                self.plot_widget_dict[plot_type][sample_id][plot_name] = {'widget':[widgetLaserMap],
                                                       'info':plot_information, 'view':[view]}
             # self.array = array[:, ::-1]
             layout = widgetLaserMap.layout()
@@ -846,7 +853,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             img.setColorMap(cm)
             # img.setLookupTable(cm.getLookupTable())
             #--- add non-interactive image with integrated color ------------------
-            p1 = glw.addPlot(0,0,title=select_laser_map.replace('_',' '))
+            p1 = glw.addPlot(0,0,title=plot_name.replace('_',' '))
             # p1.setRange(padding=0)
             p1.showAxes(False, showValues=(True,False,False,True) )
             
@@ -864,7 +871,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             
             # Optionally, configure the appearance
             # For example, set the size of the crosshair
-            name = select_laser_map+str(view)
+            name = plot_name+str(view)
             self.lasermaps[name] = (target, p1, view, array)
 
             
@@ -880,13 +887,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 labelInfoVL = QtWidgets.QLabel(self.groupBoxInfoM)
                 # labelInfoVL.setMaximumSize(QtCore.QSize(20, 16777215))
                 labelInfoVL.setObjectName("labelInfoVL"+name)
-                labelInfoVL.setText(select_laser_map)
+                labelInfoVL.setText(plot_name)
                 font = QtGui.QFont()
                 font.setPointSize(9)
                 labelInfoVL.setFont(font)
                 verticalLayout = QtWidgets.QVBoxLayout()
                 # Naming the verticalLayout
-                verticalLayout.setObjectName(select_laser_map + str(view))
+                verticalLayout.setObjectName(plot_name + str(view))
                 verticalLayout.addWidget(labelInfoVL)
                 
                 labelInfoV = QtWidgets.QLabel(self.groupBoxInfoM)
@@ -1063,75 +1070,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         vb.enableAutoRange()
         histogram.autoHistogramRange()
 
-    # def plot_histogram(self, current_plot_df, plot_information, bin_width):
-    #     select_histogram = plot_information['plot_name']
-    #     array = current_plot_df['array'].values
-    #     edges = np.arange(array.min(), array.max() + bin_width, bin_width)
-
-    #     plot_exist = select_histogram in self.plot_widget_dict
-    #     duplicate = plot_exist and len(self.plot_widget_dict[select_histogram]['view']) == 1 and self.plot_widget_dict[select_histogram]['view'][0] != self.tabWindow.currentIndex()
-
-    #     if plot_exist and not duplicate:
-    #         widgetHistogram = self.plot_widget_dict[select_histogram]['widget'][0]
-    #         histogram_plot = widgetHistogram.findChild(pg.PlotWidget)
-    #         histogram_plot.clear()
-    #         self.update_histogram(array, edges, histogram_plot)
-    #     else:
-    #         layout = QtWidgets.QVBoxLayout()
-    #         widgetHistogram = QtWidgets.QWidget()
-    #         widgetHistogram.setLayout(layout)
-    #         view = self.tabWindow.currentIndex()
-    #         if duplicate:
-    #             self.plot_widget_dict[select_histogram]['widget'].append(widgetHistogram)
-    #             self.plot_widget_dict[select_histogram]['view'].append(view)
-    #         else:
-    #             self.plot_widget_dict[select_histogram] = {'widget': [widgetHistogram], 'info': plot_information, 'view': [view]}
-    #         histogram_plot = pg.PlotWidget(title=select_histogram)
-    #         self.update_histogram(array, edges, histogram_plot)
-    #         layout.addWidget(histogram_plot)
-    #         histogram_plot.setBackground('w')
-
-    # def update_histogram(self, array, edges, histogram_plot):
-    #     # Create a legend
-    #     legend = pg.LegendItem(offset=(70, 30))  # Adjust offset as needed
-    #     legend.setParentItem(histogram_plot.graphicsItem())  # Add legend to the histogram plot
-
-        
-    #     if 'algorithm' in self.current_group and self.current_group['algorithm'] in self.cluster_results:
-    #         # Color the histogram based on clusters
-    #         for cluster in self.current_group['clusters']:
-    #             cluster_num = int(cluster.split()[1])  # Assuming cluster name format is "Cluster X"
-    #             cluster_indices = np.where(self.cluster_results[self.current_group['algorithm']] == cluster_num)[0]
-    #             cluster_data = array[cluster_indices]
-    #             hist, _ = np.histogram(cluster_data.flatten(), bins=edges)
-    #             # Adjust color with transparency (alpha)
-    #             color = pg.intColor(cluster_num, alpha=80)  # Adjust alpha value (0-255) for transparency
-    #             bar_graph_item = pg.BarGraphItem(x0=edges[:-1], x1=edges[1:], height=hist, brush=color)
-    #             histogram_plot.addItem(bar_graph_item)
-    #             # Add item to legend
-    #             legend.addItem(bar_graph_item, f'Cluster {cluster_num}')
-    #     else:
-    #         # Regular histogram
-    #         hist, _ = np.histogram(array.flatten(), bins=edges)
-    #         bar_graph_item = pg.BarGraphItem(x0=edges[:-1], x1=edges[1:], height=hist, brush='b')
-    #         histogram_plot.addItem(bar_graph_item)
-    #     histogram_plot.setLabel('left', 'Frequency')
-    #     histogram_plot.setLabel('bottom', 'Value')
     
     def plot_histogram(self, current_plot_df, plot_information, bin_width):
         
         mask = self.filter_mask & self.polygon_mask & current_plot_df['array'].notna()
         
-        select_histogram = plot_information['plot_name']
-        
+        plot_name = plot_information['plot_name']
+        sample_id = plot_information['sample_id']
+        plot_type = plot_information['plot_type']
         array = current_plot_df['array'][mask].values
         edges = np.arange(array.min(), array.max() + bin_width, bin_width)
     
-        plot_exist = select_histogram in self.plot_widget_dict
-        duplicate = plot_exist and len(self.plot_widget_dict[select_histogram]['view']) == 1 and self.plot_widget_dict[select_histogram]['view'][0] != self.tabWindow.currentIndex()
+        plot_exist = plot_name in self.plot_widget_dict[plot_type][sample_id]
+        duplicate = plot_exist and len(self.plot_widget_dict[plot_type][sample_id][plot_name]['view']) == 1 and self.plot_widget_dict[plot_type][sample_id][plot_name]['view'][0] != self.tabWindow.currentIndex()
     
         if plot_exist and not duplicate:
-            widgetHistogram = self.plot_widget_dict[select_histogram]['widget'][0]
+            widgetHistogram = self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'][0]
             figure_canvas = widgetHistogram.findChild(FigureCanvas)
             figure_canvas.figure.clear()
             ax = figure_canvas.figure.subplots()
@@ -1150,14 +1104,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             view = self.tabWindow.currentIndex()
             
             if duplicate:
-                self.plot_widget_dict[select_histogram]['widget'].append(widgetHistogram)
-                self.plot_widget_dict[select_histogram]['view'].append(view)
+                self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'].append(widgetHistogram)
+                self.plot_widget_dict[plot_type][sample_id][plot_name]['view'].append(view)
             else:
-                self.plot_widget_dict[select_histogram] = {'widget': [widgetHistogram], 'info': plot_information, 'view': [view]}
+                self.plot_widget_dict[plot_type][sample_id][plot_name] = {'widget': [widgetHistogram], 'info': plot_information, 'view': [view]}
             
             # self.tabWindow.setCurrentIndex(view)
             # Assuming you have a method to add the widget to the tab
-            # self.add_histogram_tab(widgetHistogram, select_histogram)
+            # self.add_histogram_tab(widgetHistogram, plot_name)
 
     def update_histogram(self, array, edges, ax):
         # Clear previous histogram
@@ -1318,7 +1272,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # widgetScatter.layout().addWidget(toolbar)
         
         
-        self.plot_widget_dict[select_scatter] = {'widget':[widgetScatter],
+        self.plot_widget_dict['scatter'][self.sample_id][select_scatter] = {'widget':[widgetScatter],
                                                'info':plot_information, 'view':[view]}
         self.update_tree(plot_information['plot_name'], data = plot_information, tree = 'Scatter')
         self.add_plot(plot_information)
@@ -1327,7 +1281,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
     def plot_clustering(self):
-        df_filtered, mask = self.get_processed_data()
+        df_filtered, mask, isotopes = self.get_processed_data()
         filtered_array =df_filtered.values
         # filtered_array = df_filtered.dropna(axis=0, how='any').values
         
@@ -1367,11 +1321,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             }
             
 
-        self.process_clustering_methods( n_clusters, exponent, distance_type,fuzzy_cluster_number,  filtered_array,clustering_algorithms, mask)
+        self.process_clustering_methods( n_clusters, exponent, distance_type,fuzzy_cluster_number,  filtered_array,clustering_algorithms, mask, )
  
     
     def process_clustering_methods(self, n_clusters, exponent, distance_type, fuzzy_cluster_number, filtered_array, clustering_algorithms, mask):
-    
+        #create unique id if new plot
+        plot_type = 'clustering'
+        if self.sample_id in self.plot_id[plot_type]:
+            self.plot_id[plot_type][self.sample_id]  = self.plot_id[plot_type][self.sample_id]+1
+        else:
+            self.plot_id[plot_type][self.sample_id]  = 0
+            
+        plot_name =  plot_type+str(self.plot_id[plot_type][self.sample_id])
+        
         # Create figure 
         fig = Figure(figsize=(6, 4))
         # Adjust subplot parameters here for better alignment
@@ -1386,21 +1348,23 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if name == 'Fuzzy':
                 cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(filtered_array.T, n_clusters, exponent, error=0.00001, maxiter=1000,seed =23)
                 # cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(array.T, n_clusters, exponent, error=0.005, maxiter=1000,seed =23)
-                if fuzzy_cluster_number>0:
-                    labels = u[fuzzy_cluster_number-1,:]
-                else:
-                    labels = np.argmax(u, axis=0)
-                    self.cluster_results[name][mask] = ['Cluster '+str(c) for c in labels]
+                for n in range(n_clusters):
+                    self.fuzzy_results[n] = u[n-1,:]
+                    if fuzzy_cluster_number>0:
+                        labels = self.fuzzy_results[fuzzy_cluster_number]
+                    else:
+                        labels = np.argmax(u, axis=0)
+                        self.cluster_results[name][mask] = ['Cluster '+str(c) for c in labels]
             else:
                 model = clustering.fit(filtered_array)
                 labels = model.predict(filtered_array)
                 self.cluster_results[name][mask] = ['Cluster '+str(c) for c in labels]
             # Plot each clustering result
             self.plot_clustering_result(ax, labels, name, fuzzy_cluster_number)
-        
-        
+            
+            
         # Create and add the widget to layout
-        self.add_clustering_widget_to_layout(fig, 'clustering')
+        self.add_clustering_widget_to_layout(fig,plot_name, plot_type)
         
     def plot_clustering_result(self, ax, labels, method_name, fuzzy_cluster_number):
         reshaped_array = np.reshape(labels, (self.clipped_isotope_data[self.sample_id]['X'].nunique(), self.clipped_isotope_data[self.sample_id]['Y'].nunique()))
@@ -1438,7 +1402,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         ax.set_title(f'{method_name} Clustering')
         ax.set_axis_off()
  
-    def add_clustering_widget_to_layout(self, fig, plot_type):
+    def add_clustering_widget_to_layout(self, fig,plot_name, plot_type):
+
+        
         widgetClusterMap = QtWidgets.QWidget()
         widgetClusterMap.setLayout(QtWidgets.QVBoxLayout())
         figure_canvas = FigureCanvas(fig)
@@ -1446,16 +1412,32 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         widgetClusterMap.setObjectName('plotClusterMap')
         widgetClusterMap.layout().addWidget(figure_canvas)
         # widgetClusterMap.layout().addWidget(toolbar)
-        self.plot_widget_dict[self.sample_id + f'_{plot_type}'] = {'widget': [widgetClusterMap],
+        self.plot_widget_dict['clustering'][self.sample_id][plot_name] = {'widget': [widgetClusterMap],
                                                               'info': {'plot_type': plot_type, 'sample_id': self.sample_id},
                                                               'view': [self.tabWindow.currentIndex()]}
         plot_information = {
-            'plot_name': self.sample_id +f'_{plot_type}',
+            'plot_name': plot_name,
             'sample_id': self.sample_id,
             'plot_type': plot_type
         }
         self.update_tree(plot_information['plot_name'], data = plot_information, tree = 'Clustering')
         self.add_plot(plot_information)
+        
+        
+    def update_plot_with_new_colormap(self):
+        if self.fig and self.clustering_results:
+            for name, results in self.clustering_results.items():
+                labels = results['labels']
+                method_name = results['method_name']
+                fuzzy_cluster_number = results['fuzzy_cluster_number']
+                # Find the corresponding axis to update
+                ax_index = list(self.clustering_results.keys()).index(name)
+                ax = self.axs[ax_index]
+                # Redraw the plot with the new colormap on the existing axis
+                self.plot_clustering_result(ax, labels, method_name, fuzzy_cluster_number)
+            
+            # Redraw the figure canvas to reflect the updates
+            self.fig.canvas.draw_idle()
         
     def update_cluster_ui(self):
         if self.radioButtonKMeans.isChecked():
@@ -1512,21 +1494,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.labelFCView.setEnabled(True)
         
     
-    def get_processed_data(self, norm = True):
+    def get_processed_data(self):
         # return normalised, filtered data with that will be used for analysis
         use_isotopes = self.isotopes_df.loc[(self.isotopes_df['use']==True) & (self.isotopes_df['sample_id']==self.sample_id), 'isotopes'].values
+        
+        
         # Combine the two masks to create a final mask
         nan_mask = self.processed_isotope_data[self.sample_id][use_isotopes].notna().all(axis=1) 
-        mask = self.filter_mask & self.polygon_mask  & nan_mask
-        if norm:
-            df_filtered = self.processed_isotope_data[self.sample_id][use_isotopes][mask]
-        else:
-            df_filtered = self.clipped_isotope_data[self.sample_id][use_isotopes][mask]
-        return df_filtered, mask
+        mask = self.filter_mask & self.polygon_mask  & nan_mask & self.axis_mask
+        
+        df_filtered = self.processed_isotope_data[self.sample_id][use_isotopes][mask]
+
+        return df_filtered, mask, use_isotopes
         
 
     def plot_n_dim(self):
-        df_filtered, mask = self.get_processed_data(norm = False)
+
+        
+        df_filtered, mask,_  = self.get_processed_data()
         
         
         ref_i = self.comboBoxNDimRefMaterial.currentIndex()
@@ -1596,10 +1581,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         widgetNDim.setObjectName('plotNDim')
         widgetNDim.layout().addWidget(figure_canvas)
         
-        plot_type = self.comboBoxNDimIsotopeSet.currentText()
+        plot_type = 'n-dim'
+        #create unique id if new plot
+        if self.sample_id in self.plot_id[plot_type]:
+            self.plot_id[plot_type][self.sample_id]  = self.plot_id[plot_type][self.sample_id]+1
+        else:
+            self.plot_id[plot_type][self.sample_id]  = 0  
+        plot_name =  plot_type+str(self.plot_id[plot_type][self.sample_id])
+        
         toolbar = NavigationToolbar(figure_canvas)  # Create the toolbar for the canvas
         # widgetNDim.layout().addWidget(toolbar)
-        self.plot_widget_dict[self.sample_id + f'_{plot_type}'] = {'widget': [widgetNDim],
+        self.plot_widget_dict[plot_type][self.sample_id][plot_name] = {'widget': [widgetNDim],
                                                               'info': {'plot_type': plot_type, 'sample_id': self.sample_id},
                                                               'view': [self.tabWindow.currentIndex()]}
         plot_information = {
@@ -1912,8 +1904,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # isotopes = add_ree(isotopes)
             self.isotopes_df = pd.concat([self.isotopes_df, isotopes])
             
-            
-            
+            # add sample_id to self.plot_widget_dict
+            for plot_type in self.plot_widget_dict.keys():
+                if self.sample_id not in self.plot_widget_dict[plot_type]:
+                    self.plot_widget_dict[plot_type][self.sample_id]={}
             # set mask of size of isotope array
             self.filter_mask = np.ones_like( self.sample_data_dict[self.sample_id]['X'].values, dtype=bool)
             self.polygon_mask = np.ones_like( self.sample_data_dict[self.sample_id]['X'], dtype=bool)
@@ -2062,7 +2056,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.update_spinboxes_bool = True
         
         
-    def get_map_data(self,sample_id, isotope_1=None, isotope_2=None, plot_type = 'laser', plot= True,auto_scale = False, update = False):
+    def get_map_data(self,sample_id, isotope_1=None, isotope_2=None, plot_type = 'lasermap', plot= True,auto_scale = False, update = False):
         """
         Retrieves and processes the mapping data for the given sample and isotopes, then plots the result if required.
     
@@ -2126,7 +2120,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 current_plot_df = self.processed_isotope_data[sample_id][[isotope_1,'X','Y']].rename(columns = {isotope_1:'array'})
                 
                 
-            isotope_str =  sample_id+ '_' +isotope_1
+            isotope_str =   isotope_1
         else:
                 
             ratio_df = selected_sample[[isotope_1, isotope_2]] #consider original data for ratio
@@ -2190,7 +2184,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 parameters  = self.ratios_df.iloc[idx]
             self.plot_type = plot_type
-            isotope_str = sample_id+ '_' + isotope_1 + '/' + isotope_2
+            isotope_str =   isotope_1 + '/' + isotope_2
             
             if update: #update clipped ratio df
                 self.clipped_ratio_data[isotope_str] = current_plot_df['array'].values
@@ -2199,21 +2193,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         bin_width = (np.nanmax(current_plot_df['array']) - np.nanmin(current_plot_df['array'])) / bins
         
         # current_plot_df = current_plot_df[self.axis_mask].reset_index(drop=True)
-        if plot_type=='laser':
+        if plot_type=='lasermap':
             plot_information={'plot_name':isotope_str,'sample_id':sample_id,
                               'isotope_1':isotope_1, 'isotope_2':isotope_2,
                               'plot_type':plot_type}
             self.plot_laser_map(current_plot_df,plot_information)
             self.update_spinboxes(parameters,bins, bin_width, auto_scale_param)
-        elif plot_type=='hist': 
-            isotope_str = isotope_str+'_hist'
+        elif plot_type=='historgram': 
+            
             plot_information={'plot_name':isotope_str,'sample_id':sample_id,
                               'isotope_1':isotope_1, 'isotope_2':isotope_2,
                               'plot_type':plot_type}
             self.plot_histogram(current_plot_df,plot_information,bin_width = bin_width)
             self.update_spinboxes(parameters,bins, bin_width, auto_scale_param)
-        elif plot_type == 'norm':
-            isotope_str = isotope_str+'_norm'
+        elif plot_type == 'lasermap_norm':
             ref_data_chem = self.ref_data.iloc[self.comboBoxRefMaterial.currentIndex()]
             ref_data_chem.index = [col.replace('_ppm', '') for col in ref_data_chem.index]
             ref_series =  ref_data_chem[re.sub(r'\d', '', isotope_1).lower()]
@@ -2364,16 +2357,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if level_1_data == 'Isotope' :
             self.get_map_data(level_2_data,level_3_data)
         if level_1_data == 'Normalised Isotope' :
-            self.get_map_data(level_2_data,level_3_data, plot_type='norm')
+            self.get_map_data(level_2_data,level_3_data, plot_type='lasermap_norm')
         elif level_1_data == 'Histogram' :
-            self.get_map_data(level_2_data,level_3_data,plot_type='hist')
+            self.get_map_data(level_2_data,level_3_data,plot_type='histogram')
         # self.add_plot(val.data())
         elif level_1_data == 'Ratio' :
             isotopes= level_3_data.split(' / ')
             self.get_map_data(level_2_data,isotopes[0],isotopes[1])
             
         elif ((level_1_data == 'Clustering') or (level_1_data=='Scatter')):
-            self.add_plot({'plot_name':level_3_data})
+            plot_info ={'plot_name':level_3_data, 'plot_type':level_1_data.lower(),'sample_id':level_2_data }
+            self.add_plot(plot_info)
                 
     def open_select_isotope_dialog(self):
         isotopes_list = self.isotopes_df['isotopes'].values
@@ -2723,7 +2717,11 @@ class IsotopeSelectionWindow(QDialog, Ui_Dialog):
         self.listUpdated.emit()
     
     def populate_isotope_list(self,line):
-        isotope_pair, selection = line.strip().split(',')
+        if ',' in line: 
+            isotope_pair, norm = line.strip().split(',') #get norm returned from load isotope
+        else:
+            isotope_pair = line
+            norm = 'linear'
         if '/' in isotope_pair:
             row_header, col_header = isotope_pair.split(' / ')
         else:
@@ -2745,7 +2743,7 @@ class IsotopeSelectionWindow(QDialog, Ui_Dialog):
             self.tableWidgetSelected.setItem(newRow, 0, QTableWidgetItem(isotope_pair))
             combo = QComboBox()
             combo.addItems(['linear', 'log', 'logit'])
-            combo.setCurrentText(selection)
+            combo.setCurrentText(norm)
             self.tableWidgetSelected.setCellWidget(newRow, 1, combo)
             
 class CustomAxis(AxisItem):

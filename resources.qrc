@@ -40,5 +40,9 @@
         <file>resources/icons/icons8-hide-64.png</file>
         <file>resources/icons/icons8-show-50.png</file>
         <file>resources/icons/icons8-crop-64.png</file>
+        <file>resources/icons/icons8-add-file-64.png</file>
+        <file>resources/icons/icons8-fit-to-width-64.png</file>
+        <file>resources/icons/icons8-rotate-180-50.png</file>
+        <file>resources/icons/icons8-swap-64.png</file>
     </qresource>
 </RCC>

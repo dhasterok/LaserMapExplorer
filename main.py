@@ -2666,9 +2666,9 @@ class IsotopeSelectionWindow(QDialog, Ui_Dialog):
 
     def get_color_for_correlation(self, correlation):
             # Map correlation to RGB color
-            r = 255 * (correlation > 0) * (abs(correlation))
-            b = 0
-            g = 255 * (correlation < 0) * ( abs(correlation))
+            r = 255 * (1 - (correlation > 0) * ( abs(correlation)))
+            g = 255 * (1 - abs(correlation))
+            b = 255 * (1 - (correlation < 0) * ( abs(correlation)))
             return QColor(int(r), int(g),int(b))
 
     def create_colorbar(self):

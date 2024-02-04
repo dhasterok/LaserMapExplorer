@@ -39,10 +39,40 @@
         <file>resources/icons/icons8-hide-50.png</file>
         <file>resources/icons/icons8-hide-64.png</file>
         <file>resources/icons/icons8-show-50.png</file>
-        <file>resources/icons/icons8-crop-64.png</file>
         <file>resources/icons/icons8-add-file-64.png</file>
         <file>resources/icons/icons8-fit-to-width-64.png</file>
         <file>resources/icons/icons8-rotate-180-50.png</file>
         <file>resources/icons/icons8-swap-64.png</file>
+        <file>resources/icons/icons8-location-marker-48.png</file>
+        <file>resources/icons/icons8-move-49.png</file>
+        <file>resources/icons/icons8-rocket-48.png</file>
+        <file>resources/icons/icons8-add-48.png</file>
+        <file>resources/icons/icons8-edit-48.png</file>
+        <file>resources/icons/icons8-crop-64.png</file>
+        <file>resources/icons/icons8-ruler-50.png</file>
+        <file>resources/icons/icons8-graph-60.png</file>
+        <file>resources/icons/icons8-polyline-40.png</file>
+        <file>resources/icons/icons8-add-text-50.png</file>
+        <file>resources/icons/icons8-dashed-line-48.png</file>
+        <file>resources/icons/icons8-dashed-line-50.png</file>
+        <file>resources/icons/icons8-dashed-line-80.png</file>
+        <file>resources/icons/icons8-link-50.png</file>
+        <file>resources/icons/icons8-calculator-48.png</file>
+        <file>resources/icons/icons8-add-folder-40.png</file>
+        <file>resources/icons/icons8-bar-chart-50.png</file>
+        <file>resources/icons/icons8-histogram-32.png</file>
+        <file>resources/icons/icons8-filter-50-2.png</file>
+        <file>resources/icons/icons8-filter-50.png</file>
+        <file>resources/icons/icons8-reset-64-2.png</file>
+        <file>resources/icons/icons8-reset-64.png</file>
+        <file>resources/icons/icons8-map-50.png</file>
+        <file>resources/icons/icons8-mask-64.png</file>
+        <file>resources/icons/icon-gradient-32.png</file>
+        <file>resources/icons/icon-swap-64.png</file>
+        <file>resources/icons/icons8-histogram-64.png</file>
+        <file>resources/icons/icons8-delete-link-50.png</file>
+        <file>resources/icons/icons8-anonymous-mask-dark-50.png</file>
+        <file>resources/icons/icons8-anonymous-mask-light-50.png</file>
+        <file>resources/icons/icons8-minus-64.png</file>
     </qresource>
 </RCC>

@@ -76,8 +76,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         colormaps = pg.colormap.listMaps('matplotlib')
         self.comboBoxCM.clear()
         self.comboBoxCM.addItems(colormaps)
-        self.comboBoxCMG.clear()
-        self.comboBoxCMG.addItems(colormaps)
+        self.comboBoxCM.clear()
+        self.comboBoxCM.addItems(colormaps)
         self.cursor = False
         self.comboBoxCM.activated.connect(self.update_all_plots)
         layout_single_view = QtWidgets.QVBoxLayout()
@@ -165,8 +165,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
         ###Filter
-        self.pushButtonAddFilter.clicked.connect(self.update_filter_table)
-        self.pushButtonFilterSelectAll.clicked.connect(self.select_all_rows)
+        self.toolButtonAddFilter.clicked.connect(self.update_filter_table)
+        self.toolButtonFilterSelectAll.clicked.connect(self.select_all_rows)
         self.toolButtonFilterRemove.clicked.connect(self.remove_selected_rows)
         self.comboBoxFSelect.activated.connect(lambda: self.update_combo_boxes('f'))
         self.comboBoxFIsotope.activated.connect(self.update_filter_values)
@@ -174,7 +174,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #                           isotope_2=self.comboBoxFIsotope_2.currentText(),view = 1))
 
         #scatterplot
-        self.pushButtonPlotScatter.clicked.connect(self.plot_scatter)
+        self.toolButtonPlotScatter.clicked.connect(self.plot_scatter)
 
 
         self.comboBoxScatterSelectX.activated.connect(lambda: self.update_combo_boxes('x'))
@@ -189,38 +189,39 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         distance_metrics = ['cityblock', 'cosine', 'euclidean', 'l1', 'l2', 'manhattan']
         self.comboBoxClusterDistance.clear()
         self.comboBoxClusterDistance.addItems(distance_metrics)
-        # Connect radio buttons to the slot function
-        self.radioButtonKMeans.setChecked(True)
-        self.radioButtonKMeans.clicked.connect(self.update_cluster_ui)
-        self.radioButtonKMedoids.clicked.connect(self.update_cluster_ui)
-        self.radioButtonFuzzy.clicked.connect(self.update_cluster_ui)
-        self.radioButtonClusterAll.clicked.connect(self.update_cluster_ui)
 
-        self.pushButtonRunClustering.clicked.connect(self.plot_clustering)
+        # Connect radio buttons to the slot function
+        #self.radioButtonKMeans.setChecked(True)
+        #self.radioButtonKMeans.clicked.connect(self.update_cluster_ui)
+        #self.radioButtonKMedoids.clicked.connect(self.update_cluster_ui)
+        #self.radioButtonFuzzy.clicked.connect(self.update_cluster_ui)
+        #self.radioButtonClusterAll.clicked.connect(self.update_cluster_ui)
+
+        self.toolButtonRunClustering.clicked.connect(self.plot_clustering)
 
         # Connect slider's value changed signal to a function
         self.spinBoxNClusters.valueChanged.connect(lambda: self.spinBoxFCView.setMaximum(self.spinBoxNClusters.value()))
 
-        self.horizontalSliderExponent.setMinimum(10)  # Represents 1.0 (since 10/10 = 1.0)
-        self.horizontalSliderExponent.setMaximum(30)  # Represents 3.0 (since 30/10 = 3.0)
-        self.horizontalSliderExponent.setSingleStep(1)  # Represents 0.1 (since 1/10 = 0.1)
-        self.horizontalSliderExponent.setTickInterval(1)
+        self.horizontalSliderClusterExponent.setMinimum(10)  # Represents 1.0 (since 10/10 = 1.0)
+        self.horizontalSliderClusterExponent.setMaximum(30)  # Represents 3.0 (since 30/10 = 3.0)
+        self.horizontalSliderClusterExponent.setSingleStep(1)  # Represents 0.1 (since 1/10 = 0.1)
+        self.horizontalSliderClusterExponent.setTickInterval(1)
 
 
-        self.horizontalSliderExponent.valueChanged.connect(lambda value: self.labelExponent.setText(str(value/10)))
+        self.horizontalSliderClusterExponent.valueChanged.connect(lambda value: self.labelClusterExponent.setText(str(value/10)))
         self.update_cluster_ui()
 
         # Connect color point radio button signals to a slot
-        self.radioButtonCNone.toggled.connect(self.onRadioButtonToggled)
-        self.radioButtonCFuzzy.toggled.connect(self.onRadioButtonToggled)
-        self.radioButtonCKMediods.toggled.connect(self.onRadioButtonToggled)
-        self.radioButtonCKMeans.toggled.connect(self.onRadioButtonToggled)
+        #self.radioButtonCNone.toggled.connect(self.onRadioButtonToggled)
+        #self.radioButtonCFuzzy.toggled.connect(self.onRadioButtonToggled)
+        #self.radioButtonCKMediods.toggled.connect(self.onRadioButtonToggled)
+        #self.radioButtonCKMeans.toggled.connect(self.onRadioButtonToggled)
 
         # Connect the itemChanged signal to a slot
         self.tableWidgetViewGroups.itemChanged.connect(self.onClusterLabelChanged)
 
 
-        self.radioButtonCNone.setChecked(True)
+        self.comboBoxColorMethod.currentText() == 'none'
         # self.tableWidgetViewGroups.selectionModel().selectionChanged.connect(self.update_clusters)
 
 
@@ -229,26 +230,26 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         isotop_set = ['majors', 'full trace', 'REE', 'metals']
         self.comboBoxNDimIsotopeSet.addItems(isotop_set)
         self.comboBoxNDimRefMaterial.addItems(ref_list.values)
-        self.pushButtonNDimAdd.clicked.connect(self.update_n_dim_table)
-        self.pushButtonNDimPlot.clicked.connect(self.plot_n_dim)
+        self.toolButtonNDimAdd.clicked.connect(self.update_n_dim_table)
+        self.toolButtonNDimPlot.clicked.connect(self.plot_n_dim)
 
         # plot profile
         self.lineEditPointRadius.setValidator(QIntValidator())
         self.lineEditYThresh.setValidator(QIntValidator())
         self.profiling = Profiling(self)
-        # self.pushButtonPlotProfile.clicked.connect(lambda: self.plot_profiles(self.comboBoxProfile1.currentText(), self.comboBoxProfile2.currentText()))
+        # self.toolButtonPlotProfile.clicked.connect(lambda: self.plot_profiles(self.comboBoxProfile1.currentText(), self.comboBoxProfile2.currentText()))
         # self.comboBoxProfile1.activated.connect(lambda: self.update_profile_comboboxes(False) )
-        self.pushButtonClearProfile.clicked.connect(self.profiling.on_clear_profile_clicked)
-        # self.pushButtonStartProfile.clicked.connect(lambda :self.pushButtonStartProfile.setChecked(True))
-        # self.pushButtonStartProfile.setCheckable(True)
+        self.toolButtonClearProfile.clicked.connect(self.profiling.on_clear_profile_clicked)
+        # self.toolButtonStartProfile.clicked.connect(lambda :self.toolButtonStartProfile.setChecked(True))
+        # self.toolButtonStartProfile.setCheckable(True)
         # self.comboBoxProfile2.activated.connect(self.update_profile_comboboxes)
         self.toolButtonPointUp.clicked.connect(self.profiling.move_point_up)
         self.toolButtonPointDown.clicked.connect(self.profiling.move_point_down)
         self.toolButtonPointDelete.clicked.connect(self.profiling.delete_point)
         self.comboBoxProfileSort.activated.connect(self.plot_profile_and_table)
-        self.pushButtonIPProfile.clicked.connect(lambda: self.profiling.interpolate_points(interpolation_distance=int(self.lineEditIntDist.text()), radius= int(self.lineEditPointRadius.text())))
+        self.toolButtonIPProfile.clicked.connect(lambda: self.profiling.interpolate_points(interpolation_distance=int(self.lineEditIntDist.text()), radius= int(self.lineEditPointRadius.text())))
         self.comboBoxPointType.activated.connect(lambda:self.profiling.plot_profiles())
-        self.pushButtonPlotProfile.clicked.connect(lambda:self.profiling.plot_profiles())
+        self.toolButtonPlotProfile.clicked.connect(lambda:self.profiling.plot_profiles())
 
         #SV/MV tool box
         self.toolButtonPanSV.setCheckable(True)
@@ -411,7 +412,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             d_lb = self.doubleSpinBoxDLB.value()
             d_ub = self.doubleSpinBoxDUB.value()
 
-            x_range= [self.spinBox_X.value(),self.spinBoxX.value()]
+            x_range = [self.spinBox_X.value(),self.spinBoxX.value()]
             y_range = [self.spinBox_Y.value(),self.spinBoxY.value()]
             bins = self.spinBoxNBins.value()
             isotope_str = self.current_plot
@@ -571,9 +572,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def update_filter_values(self):
         isotope_1 = self.comboBoxFIsotope.currentText()
-        isotope_2  = None
-        isotope_select =self.comboBoxFSelect.currentText()
-
+        isotope_2 = None
+        isotope_select = self.comboBoxFSelect.currentText()
+        
         if isotope_select == 'Isotope':
             f_val = self.isotopes_df.loc[(self.isotopes_df['sample_id'] == self.sample_id)
                                         & (self.isotopes_df['isotopes'] == isotope_1)].iloc[0][['v_min', 'v_max']]
@@ -593,10 +594,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.filter_df.at[row, 'use'] = state == QtCore.Qt.Checked
 
 
-
         isotope_1 = self.comboBoxFIsotope.currentText()
-        isotope_2  = None
-        isotope_select =self.comboBoxFSelect.currentText()
+        isotope_2 = None
+        isotope_select = self.comboBoxFSelect.currentText()
         f_min = float(self.lineEditFMin.text())
         f_max = float(self.lineEditFMax.text())
         # Add a new row at the end of the table
@@ -611,7 +611,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         chkBoxItem_select = QTableWidgetItem()
         chkBoxItem_select.setFlags(QtCore.Qt.ItemIsUserCheckable |
                             QtCore.Qt.ItemIsEnabled)
-        ratio =False
+        ratio = False
         if isotope_select == 'Isotope':
             chkBoxItem_select.setCheckState(QtCore.Qt.Unchecked)
             norm = self.isotopes_df.loc[(self.isotopes_df['sample_id'] == self.sample_id)
@@ -1350,14 +1350,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
         n_clusters = self.spinBoxNClusters.value()
-        exponent = float(self.horizontalSliderExponent.value()) / 10
+        exponent = float(self.horizontalSliderClusterExponent.value()) / 10
         if exponent == 1:
             exponent = 1.0001
         distance_type = self.comboBoxClusterDistance.currentText()
         fuzzy_cluster_number = self.spinBoxFCView.value()
 
-
-        if self.radioButtonClusterAll.isChecked():
+        if self.comboBoxClusterMethod.currentText() == 'all':
             # clustering_algorithms = {
             #     'KMeans': KMeans(n_clusters=n_clusters, init='k-means++'),
             #     'KMedoids': KMedoids(n_clusters=n_clusters, metric=distance_type),  # Assuming implementation
@@ -1369,16 +1368,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 'KMeans': KMeans(n_clusters=n_clusters, init='k-means++'),
                 'Fuzzy': 'fuzzy'  # Placeholder for fuzzy
             }
-        elif self.radioButtonKMeans.isChecked():
+        elif self.comboBoxClusterMethod.currentText() == 'k-means':
             clustering_algorithms = {
                 'KMeans': KMeans(n_clusters=n_clusters, init='k-means++')
                 }
-        elif self.radioButtonKMedoids.isChecked():
+        elif self.comboBoxClusterMethod.currentText() == 'k-medoids':
             clustering_algorithms = {
                 'KMedoids': KMedoids(n_clusters=n_clusters, metric=distance_type)  # Placeholder for fuzzy
             }
 
-        elif self.radioButtonFuzzy.isChecked():
+        elif self.comboBoxClusterMethod.currentText() == 'fuzzy c-means':
             clustering_algorithms = {
                 'Fuzzy': 'fuzzy'  # Placeholder for fuzzy
             }
@@ -1449,7 +1448,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             unique_labels = np.unique(['Cluster '+str(c) for c in labels])
             unique_labels.sort()
             n_clusters = len(unique_labels)
-            cmap = plt.get_cmap(self.comboBoxCMG.currentText(), n_clusters)
+            cmap = plt.get_cmap(self.comboBoxCM.currentText(), n_clusters)
             # Extract colors from the colormap
             colors = [cmap(i) for i in range(cmap.N)]
             # Assign these colors to self.group_cmap
@@ -1506,56 +1505,56 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
 
     def update_cluster_ui(self):
-        if self.radioButtonKMeans.isChecked():
+        if self.comboBoxClusterMethod.currentText() == 'k-means':
             # Enable parameters relevant to KMeans
             self.spinBoxNClusters.setEnabled(True)
-            self.horizontalSliderExponent.setEnabled(False)  # Not used in KMeans
+            self.horizontalSliderClusterExponent.setEnabled(False)  # Not used in KMeans
             self.comboBoxClusterDistance.setEnabled(False)  # Not used in KMeans
             self.spinBoxFCView.setEnabled(False)
 
-            self.labelExponent.setEnabled(False)
+            self.labelClusterExponent.setEnabled(False)
             self.labelNClusters.setEnabled(True)
             self.labelExponen.setEnabled(False)
             self.labelClusterDistance.setEnabled(False)
             self.labelFCView.setEnabled(False)
 
-        elif self.radioButtonKMedoids.isChecked():
+        elif self.comboBoxClusterMethod.currentText() == 'k-medoids':
             # Enable parameters relevant to KMedoids
             self.spinBoxNClusters.setEnabled(True)
-            self.horizontalSliderExponent.setEnabled(False)  # Not used in KMedoids
+            self.horizontalSliderClusterExponent.setEnabled(False)  # Not used in KMedoids
             self.comboBoxClusterDistance.setEnabled(True)  # Distance metric is relevant
             self.spinBoxFCView.setEnabled(False)
 
-            self.labelExponent.setEnabled(False)
+            self.labelClusterExponent.setEnabled(False)
             self.labelNClusters.setEnabled(True)
             self.labelExponen.setEnabled(False)
             self.labelClusterDistance.setEnabled(True)
             self.labelFCView.setEnabled(False)
 
-        elif self.radioButtonFuzzy.isChecked():
+        elif self.comboBoxClusterMethod.currentText() == 'fuzzy c-means':
             # Enable parameters relevant to Fuzzy Clustering
             self.spinBoxNClusters.setEnabled(True)
-            self.horizontalSliderExponent.setEnabled(True)  # Exponent is relevant
+            self.horizontalSliderClusterExponent.setEnabled(True)  # Exponent is relevant
             self.comboBoxClusterDistance.setEnabled(False)  # Distance metric may not be relevant, depending on implementation
             self.spinBoxFCView.setEnabled(True)
 
             self.labelNClusters.setEnabled(True)
-            self.labelExponen.setEnabled(True)
-            self.labelExponent.setEnabled(True)
+            self.labelClusterExponent.setEnabled(True)
+            self.labelClusterExponent.setEnabled(True)
             self.labelClusterDistance.setEnabled(False)
             self.labelFCView.setEnabled(True)
 
 
-        elif self.radioButtonClusterAll.isChecked():
+        elif self.comboBoxClusterMethod.currentText() == 'all':
             # Enable parameters relevant to Fuzzy Clustering
             self.spinBoxNClusters.setEnabled(True)
-            self.horizontalSliderExponent.setEnabled(True)  # Exponent is relevant
+            self.horizontalSliderClusterExponent.setEnabled(True)  # Exponent is relevant
             self.comboBoxClusterDistance.setEnabled(True)  # Distance metric may not be relevant, depending on implementation
             self.spinBoxFCView.setEnabled(True)
 
             self.labelNClusters.setEnabled(True)
-            self.labelExponen.setEnabled(True)
-            self.labelExponent.setEnabled(True)
+            self.labelClusterExponent.setEnabled(True)
+            self.labelClusterExponent.setEnabled(True)
             self.labelClusterDistance.setEnabled(True)
             self.labelFCView.setEnabled(True)
         
@@ -1778,13 +1777,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.tableWidgetViewGroups.setHorizontalHeaderLabels(['Groups'])
         algorithm = ''
         # Check which radio button is checked and update the list widget
-        if self.radioButtonCNone.isChecked():
+        if self.comboBoxColorMethod.currentText() == 'none':
             pass  # No clusters to display for 'None'
-        elif self.radioButtonCFuzzy.isChecked():
+        elif self.comboBoxColorMethod.currentText() == 'k-means':
             algorithm = 'Fuzzy'
-        elif self.radioButtonCKMediods.isChecked():
+        elif self.comboBoxColorMethod.currentText() == 'k-medoids':
             algorithm = 'KMediods'
-        elif self.radioButtonCKMeans.isChecked():
+        elif self.comboBoxColorMethod.currentText() == 'fuzzy c-means':
             algorithm = 'KMeans'
 
         if algorithm in self.cluster_results:
@@ -2843,7 +2842,7 @@ class Profiling:
         self.array_y = None
     def on_plot_clicked(self, event,array,k, plot,radius=5):
         # if event.button() == QtCore.Qt.LeftButton and self.main_window.pushButtonStartProfile.isChecked():
-        if event.button() == QtCore.Qt.LeftButton and self.main_window.pushButtonPlotProfile.isChecked():
+        if event.button() == QtCore.Qt.LeftButton and self.main_window.toolButtonPlotProfile.isChecked():
             # Convert the click position to plot coordinates
             click_pos = plot.vb.mapSceneToView(event.scenePos())
             x, y = click_pos.x(), click_pos.y()
@@ -2896,7 +2895,7 @@ class Profiling:
         """
         Interpolate linear points between each pair of points in the profiles.
         """
-        if self.main_window.pushButtonIPProfile.isChecked():
+        if self.main_window.toolButtonIPProfile.isChecked():
             interpolate = True
             for k, points in self.profiles.items():
                 for i in range(len(points) - 1):

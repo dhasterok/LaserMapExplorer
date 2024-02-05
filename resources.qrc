@@ -74,5 +74,8 @@
         <file>resources/icons/icons8-anonymous-mask-dark-50.png</file>
         <file>resources/icons/icons8-anonymous-mask-light-50.png</file>
         <file>resources/icons/icons8-minus-64.png</file>
+        <file>resources/icons/icons8-country-80.png</file>
+        <file>resources/icons/icons8-mind-map-50.png</file>
+        <file>resources/icons/icons8-mind-map-filled-50.png</file>
     </qresource>
 </RCC>

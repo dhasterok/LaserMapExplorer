@@ -2299,7 +2299,7 @@
        <string/>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="SelectIsotopePage">
        <property name="geometry">
@@ -6146,7 +6146,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionOpen"/>
-   <addaction name="actionSelect_Analytes"/>
+   <addaction name="actionSelectAnalytes"/>
    <addaction name="actionCalculator"/>
   </widget>
   <action name="actionOpen">
@@ -6214,7 +6214,7 @@
     </font>
    </property>
   </action>
-  <action name="actionSelect_Analytes">
+  <action name="actionSelectAnalytes">
    <property name="checkable">
     <bool>false</bool>
    </property>

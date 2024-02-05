@@ -111,6 +111,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #
 
         self.toolButtonLoadIsotopes.clicked.connect(self.open_select_isotope_dialog)
+        self.actionSelectAnalytes.triggered.connect(self.open_select_isotope_dialog)
 
 
 
@@ -161,7 +162,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.spinBoxBinWidth.valueChanged.connect(lambda: self.update_plot(bin_s=False))
         self.toolBox.currentChanged.connect(lambda: self.canvasWindow.setCurrentIndex(0))
         #auto scale
-        self.checkBoxAutoScale.clicked.connect( self.auto_scale )
+        #self.checkBoxAutoScale.clicked.connect( self.auto_scale )
+        self.toolButtonAutoScale.setChecked(True)
 
 
         ###Filter
@@ -384,7 +386,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if isotope_1 and not isotope_2:
 
                 self.isotopes_df.loc[(self.isotopes_df['sample_id']==self.sample_id)
-                                  & (self.isotopes_df['isotopes']==isotope_1),'auto_scale']  = self.checkBoxAutoScale.isChecked()
+                                  & (self.isotopes_df['isotopes']==isotope_1),'auto_scale']  = self.toolButtonAutoScale.isChecked()
                 self.isotopes_df.loc[(self.isotopes_df['sample_id']==self.sample_id)
                                          & (self.isotopes_df['isotopes']==isotope_1),
                                          ['upper_bound','lower_bound','d_l_bound', 'd_u_bound']] = [ub,lb,d_lb, d_ub]
@@ -393,7 +395,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             else:
                 self.ratios_df.loc[(self.ratios_df['sample_id']==self.sample_id)
                                          & (self.ratios_df['isotope_1']==isotope_1)
-                                         & (self.ratios_df['isotope_2']==isotope_2),'auto_scale']  = self.checkBoxAutoScale.isChecked()
+                                         & (self.ratios_df['isotope_2']==isotope_2),'auto_scale']  = self.toolButtonAutoScale.isChecked()
                 self.ratios_df.loc[(self.ratios_df['sample_id']==self.sample_id)
                                           & (self.ratios_df['isotope_1']==isotope_1)
                                           & (self.ratios_df['isotope_2']==isotope_2),
@@ -417,7 +419,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             bins = self.spinBoxNBins.value()
             isotope_str = self.current_plot
             isotope_str_list = isotope_str.split('_')
-            auto_scale = self.checkBoxAutoScale.isChecked()
+            auto_scale = self.toolButtonAutoScale.isChecked()
             sample_id = self.current_plot_information['sample_id']
             isotope_1 = self.current_plot_information['isotope_1']
             isotope_2 = self.current_plot_information['isotope_2']
@@ -2085,8 +2087,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.update_spinboxes_bool = False
 
             self.spinBoxX.setValue(int(parameters['x_max']))
-
-            self.checkBoxAutoScale.setChecked(auto_scale)
+            
+            self.toolButtonAutoScale.setChecked(auto_scale)
             if auto_scale:
                 self.doubleSpinBoxDUB.setEnabled(True)
                 self.doubleSpinBoxDLB.setEnabled(True)

@@ -241,7 +241,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.profiling = Profiling(self)
         # self.toolButtonPlotProfile.clicked.connect(lambda: self.plot_profiles(self.comboBoxProfile1.currentText(), self.comboBoxProfile2.currentText()))
         # self.comboBoxProfile1.activated.connect(lambda: self.update_profile_comboboxes(False) )
-        self.toolButtonClearProfile.clicked.connect(self.profiling.on_clear_profile_clicked)
+        # self.toolButtonClearProfile.clicked.connect(self.profiling.on_clear_profile_clicked)
         # self.toolButtonStartProfile.clicked.connect(lambda :self.toolButtonStartProfile.setChecked(True))
         # self.toolButtonStartProfile.setCheckable(True)
         # self.comboBoxProfile2.activated.connect(self.update_profile_comboboxes)
@@ -730,16 +730,54 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def update_all_plots(self):
 
-        for plot_type in self.plot_widget_dict.keys():
+        for plot_type,sample_ids in self.plot_widget_dict.items():
             if plot_type == 'histogram' or plot_type == 'lasermap' or plot_type == 'lasernorm':
-                for sample_id, plot in self.plot_widget_dict.items():
-                    info = plot['info']
-                    self.get_map_data(sample_id=info['sample_id'], isotope_1 =info['isotope_1'],isotope_2= info['isotope_2'],plot_type = info['plot_type'], plot =False )
-            
+                for sample_id, plots in sample_ids.items():
+                    for plot_name, plot in plots.items():
+                        info = plot['info']
+                        self.get_map_data(sample_id=info['sample_id'], isotope_1 =info['isotope_1'],isotope_2= info['isotope_2'],plot_type = info['plot_type'], plot =False )
+            if plot_type == 'clustering':
+                for sample_id, plots in sample_ids.items():
+                    for plot_name, plot in plots.items():
+                        # Retrieve the widget and figure for the specified plot
+                        widgetClusterMap = plot['widget'][0]
+                        
+                        n_clusters = int(plot['info']['n_clusters'])
+                        figure_canvas = widgetClusterMap.layout().itemAt(0).widget()
+                        fig = figure_canvas.figure
+                
+                        # Get the new colormap from the comboBox
+                        new_cmap_name = self.comboBoxCM.currentText()
+                        new_cmap = plt.get_cmap(new_cmap_name,5)
+                        img = []
+                        for ax in fig.get_axes():
+                            # Retrieve the image object from the axes
+                            # Recalculate boundaries and normalization based on the new colormap and clusters
+                            
+                            boundaries = np.arange(-0.5, n_clusters, 1)
+                            norm = BoundaryNorm(boundaries, n_clusters, clip=True)
+                            images = ax.get_images()
+                            if len(images)>0:
+                                im = images[0]
+                                img.append([ax,im]) #store image and axis in list
+                                # Update image with the new colormap and normalization
+                                im.set_cmap(new_cmap)
+                                im.set_norm(norm)
+                        for (ax, im) in img:
+                            #remove colobar axis
 
-
-
-
+                            cb = im.colorbar   
+                            
+                            # Do any actions on the colorbar object (e.g. remove it)
+                            cb.remove()
+                            # Redraw the canvas to reflect the updates
+                            #plot new colorbar
+                            fig.colorbar(im, ax=ax, boundaries=boundaries[:-1], ticks=np.arange(n_clusters), orientation=self.comboBoxCBP.currentText().lower())
+                            figure_canvas.draw()
+                        # Redraw the figure layout to adjust for any changes
+                        fig.tight_layout()
+                        # Redraw the canvas to reflect the updates
+                        figure_canvas.draw()
 
     def open_directory(self):
         dialog = QFileDialog()
@@ -865,14 +903,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # p1.setRange(padding=0)
             p1.showAxes(False, showValues=(True,False,False,True) )
 
-
-
+            #supress right click menu
+            p1.setMenuEnabled(False)
 
             p1.addItem(img)
             # print(p1.getAspectRatio())
             p1.setAspectLocked()
 
-
+    
             # ... Inside your plotting function
             target = pg.TargetItem(symbol = '+')
             p1.addItem(target)
@@ -1253,25 +1291,27 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def plot_scatter(self):
 
         x, y, z, c = self.get_scatter_values()
-        df = pd.DataFrame({
-            x['elements']: x['array'],
-            y['elements']: y['array'],
-            z['elements']: z['array']
-        })
-        el_list  = df.columns
-        el_list_lower = [re.sub(r'\d', '', el).lower() for el in el_list]
-        df.columns = el_list_lower
+        
+        
+        # df = pd.DataFrame({
+        #     x['elements']: x['array'],
+        #     y['elements']: y['array'],
+        #     z['elements']: z['array']
+        # })
+        # el_list  = df.columns
+        # el_list_lower = [re.sub(r'\d', '', el).lower() for el in el_list]
+        # df.columns = el_list_lower
 
 
 
-        ref_data_chem = self.ref_data.iloc[self.comboBoxNDimRefMaterial.currentIndex()]
-        ref_data_chem.index = [col.replace('_ppm', '') for col in ref_data_chem.index]
-        ref_series = ref_data_chem[el_list_lower].squeeze()
-        df = df.div(ref_series, axis= 1)
+        # ref_data_chem = self.ref_data.iloc[self.comboBoxNDimRefMaterial.currentIndex()]
+        # ref_data_chem.index = [col.replace('_ppm', '') for col in ref_data_chem.index]
+        # ref_series = ref_data_chem[el_list_lower].squeeze()
+        # df = df.div(ref_series, axis= 1)
 
-        df = df.dropna(axis = 0).astype('int64')
+        # df = df.dropna(axis = 0).astype('int64')
 
-        x['array'], y['array'], z['array'] = df.iloc[:, 0].values, df.iloc[:, 1].values, df.iloc[:, 2].values
+        # x['array'], y['array'], z['array'] = df.iloc[:, 0].values, df.iloc[:, 1].values, df.iloc[:, 2].values
 
 
 
@@ -1480,12 +1520,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         widgetClusterMap.layout().addWidget(figure_canvas)
         # widgetClusterMap.layout().addWidget(toolbar)
         self.plot_widget_dict['clustering'][self.sample_id][plot_name] = {'widget': [widgetClusterMap],
-                                                              'info': {'plot_type': plot_type, 'sample_id': self.sample_id},
+                                                              'info': {'plot_type': plot_type, 'sample_id': self.sample_id, 'n_clusters': self.spinBoxNClusters.value()},
                                                               'view': [self.canvasWindow.currentIndex()]}
         plot_information = {
             'plot_name': plot_name,
             'sample_id': self.sample_id,
-            'plot_type': plot_type
+            'plot_type': plot_type,
+            
         }
         self.update_tree(plot_information['plot_name'], data = plot_information, tree = 'Clustering')
         self.add_plot(plot_information)
@@ -2595,13 +2636,12 @@ class IsotopeSelectionWindow(QDialog, Ui_Dialog):
         self.tableWidgetIsotopes.setHorizontalHeader(RotatedHeaderView(self.tableWidgetIsotopes))
         self.tableWidgetIsotopes.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
         self.tableWidgetIsotopes.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
-
+        self.comboBoxScale.currentIndexChanged.connect(self.update_all_combos)
 
         self.tableWidgetIsotopes.setVerticalHeaderLabels(isotopes)
         self.correlation_methods = [
             "Pearson",
             "Spearman",
-            "Kendall"
         ]
 
         for method in self.correlation_methods:
@@ -2624,7 +2664,7 @@ class IsotopeSelectionWindow(QDialog, Ui_Dialog):
 
         self.pushButtonCancel.clicked.connect(self.reject)
         self.comboBoxCorrelation.activated.connect(self.calculate_correlation)
-
+        self.tableWidgetIsotopes.setStyleSheet("QTableWidget::item:selected {background-color: yellow;}")
         if len(self.selected_pairs)>0:
             for line in self.selected_pairs:
                 self.populate_isotope_list(line)
@@ -2646,6 +2686,39 @@ class IsotopeSelectionWindow(QDialog, Ui_Dialog):
                 else:
                     item.setSelected(False)
                     self.remove_isotope_from_list(row, column)
+                    
+    def update_all_combos(self):
+        # Get the currently selected value in comboBoxScale
+        selected_scale = self.comboBoxScale.currentText()
+        
+        # Iterate through all rows in tableWidgetSelected to update combo boxes
+        for row in range(self.tableWidgetSelected.rowCount()):
+            combo = self.tableWidgetSelected.cellWidget(row, 1)
+            if combo is not None:  # Make sure there is a combo box in this cell
+                combo.setCurrentText(selected_scale)  # Update the combo box value
+    def update_scale(self):
+        # Initialize a variable to store the first combo box's selection
+        first_selection = None
+        mixed = False  # Flag to indicate mixed selections
+
+        # Iterate through all rows in tableWidgetSelected to check combo boxes
+        for row in range(self.tableWidgetSelected.rowCount()):
+            combo = self.tableWidgetSelected.cellWidget(row, 1)
+            if combo is not None:  # Make sure there is a combo box in this cell
+                # If first_selection has not been set, store the current combo box's selection
+                if first_selection is None:
+                    first_selection = combo.currentText()
+                # If the current combo box's selection does not match first_selection, set mixed to True
+                elif combo.currentText() != first_selection:
+                    mixed = True
+                    break  # No need to check further
+
+        # If selections are mixed, set comboBoxScale to 'mixed', else set it to match first_selection
+        if mixed:
+            self.comboBoxScale.setCurrentText('mixed')
+        else:
+            self.comboBoxScale.setCurrentText(first_selection)
+
 
     def calculate_correlation(self):
         selected_method = self.comboBoxCorrelation.currentText().lower()
@@ -2729,7 +2802,7 @@ class IsotopeSelectionWindow(QDialog, Ui_Dialog):
 
         # Add dropdown to the second column
         combo = QComboBox()
-        combo.addItems(['linear', 'log', 'logit'])
+        combo.addItems(['linear', 'log'])
         self.tableWidgetSelected.setCellWidget(newRow, 1, combo)
         self.update_list()
 
@@ -2817,7 +2890,7 @@ class IsotopeSelectionWindow(QDialog, Ui_Dialog):
             combo.addItems(['linear', 'log', 'logit'])
             combo.setCurrentText(norm)
             self.tableWidgetSelected.setCellWidget(newRow, 1, combo)
-
+            combo.currentIndexChanged.connect(self.update_scale)
 class CustomAxis(AxisItem):
     def __init__(self, *args, **kwargs):
         AxisItem.__init__(self, *args, **kwargs)
@@ -2842,6 +2915,7 @@ class Profiling:
         self.i_profiles = {} #interpolated profiles
         self.array_x = None
         self.array_y = None
+        
     def on_plot_clicked(self, event,array,k, plot,radius=5):
         # if event.button() == QtCore.Qt.LeftButton and self.main_window.pushButtonStartProfile.isChecked():
         if event.button() == QtCore.Qt.LeftButton and self.main_window.toolButtonPlotProfile.isChecked():

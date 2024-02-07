@@ -2839,59 +2839,134 @@ class Profiling:
         # Initialize other necessary attributes
         # Initialize variables and states as needed
         self.profiles = {}
-        self.i_profiles = {} #interpolated profiles
+        self.i_profiles = {}        #interpolated profiles
         self.array_x = None
         self.array_y = None
+        self.point_selected = False # move point button selected
+        self.pind = -1              # index for move point
+
     def on_plot_clicked(self, event,array,k, plot,radius=5):
+        
+        # turn off profile (need to suppress context menu on right click)
+        if event.button() == QtCore.Qt.RightButton and self.main_window.toolButtonPlotProfile.isChecked():
+            self.main_window.toolButtonPlotProfile.setChecked(False)
+            self.main_window.toolButtonPointMove.setEnabled(True)
+            return
+        elif event.button() == QtCore.Qt.RightButton and self.main_window.toolButtonPointMove.isChecked():
+            self.main_window.toolButtonPointMove.setChecked(False)
+            return
+        elif event.button() == QtCore.Qt.RightButton or event.button() == QtCore.Qt.MiddleButton:
+            return
+        
+        # get click location
+        click_pos = plot.vb.mapSceneToView(event.scenePos())
+        x, y = click_pos.x(), click_pos.y()
+        
+        # Convert the click position to plot coordinates
+        self.array_x = array.shape[1]
+        self.array_y = array.shape[0]
+        x_i = round(x*self.array_x/self.main_window.x_range)
+        y_i = round(y*self.array_y/self.main_window.y_range)
+        interpolate = False
+        
+        # Ensure indices are within plot bounds
+        if not(0 <= x_i < self.array_x) or not(0 <= y_i < self.array_y):
+            #do nothing
+            return
+        
         # if event.button() == QtCore.Qt.LeftButton and self.main_window.pushButtonStartProfile.isChecked():
         if event.button() == QtCore.Qt.LeftButton and self.main_window.toolButtonPlotProfile.isChecked():
-            # Convert the click position to plot coordinates
-            click_pos = plot.vb.mapSceneToView(event.scenePos())
-            x, y = click_pos.x(), click_pos.y()
-            self.array_x = array.shape[1]
-            self.array_y = array.shape[0]
-            x_i = round(x*self.array_x /self.main_window.x_range)
-            y_i = round(y*self.array_y/self.main_window.y_range)
-            interpolate = False
-            # Ensure indices are within bounds
-            if 0 <= x_i < self.array_x  and 0 <= y_i < self.array_y:
-                # Create a scatter plot item at the clicked position
-                scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
-                plot.addItem(scatter)
-                # Find all points within the specified radius
-                circ_val = []
-                circ_cord = []
-                for i in range(max(0, y_i - radius), min(self.array_y, y_i + radius + 1)):
-                    for j in range(max(0, x_i - radius), min(self.array_x , x_i + radius + 1)):
-                        if np.sqrt((x_i - j)**2 + (y_i - i)**2) <= radius:
-                            value = array[i, j]
-                            circ_cord.append([i, j])
+        
+            # Create a scatter plot item at the clicked position
+            scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
+            plot.addItem(scatter)
+            # Find all points within the specified radius
+            circ_val = []
+            circ_cord = []
+            for i in range(max(0, y_i - radius), min(self.array_y, y_i + radius + 1)):
+                for j in range(max(0, x_i - radius), min(self.array_x , x_i + radius + 1)):
+                    if np.sqrt((x_i - j)**2 + (y_i - i)**2) <= radius:
+                        value = array[i, j]
+                        circ_cord.append([i, j])
+                        circ_val.append( value)
+
+            #add values within circle of radius in self.profiles
+            if k in self.profiles:
+                self.profiles[k].append((x,y,circ_val,scatter, interpolate))
+            else:
+                self.profiles[k] = [(x,y, circ_val,scatter, interpolate)]
+
+
+            if self.main_window.canvasWindow.currentIndex() == 1:
+                # Add the scatter item to all other plots and save points in self.profiles
+                for k, (_, p, v, array) in self.main_window.lasermaps.items():
+                    circ_val = []
+                    if p != plot and v==1 and self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #only add scatters to other lasermaps of same sample
+                        # Create a scatter plot item at the clicked position
+                        scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
+                        p.addItem(scatter)
+                        for c in circ_cord:
+                            value = array[c[0], c[1]]
                             circ_val.append( value)
+                        if k in self.profiles:
+                            self.profiles[k].append((x,y,circ_val, scatter, interpolate))
+                        else:
+                            self.profiles[k] = [(x,y, circ_val,scatter, interpolate)]
+        
+            # move point
+        #elif event.button() == QtCore.Qt.LeftButton and not(self.main_window.toolButtonPlotProfile.isChecked()) and self.main_window.toolButtonPointMove.isChecked():
+        #    if self.point_selected:
+        #        # Create a scatter plot item at the clicked position
+        #        scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
+        #        plot.addItem(scatter)
+        #        # Find all points within the specified radius
+        #        circ_val = []
+        #        circ_cord = []
+        #        for i in range(max(0, y_i - radius), min(self.array_y, y_i + radius + 1)):
+        #            for j in range(max(0, x_i - radius), min(self.array_x , x_i + radius + 1)):
+        #                if np.sqrt((x_i - j)**2 + (y_i - i)**2) <= radius:
+        #                    value = array[i, j]
+        #                    circ_cord.append([i, j])
+        #                    circ_val.append( value)
 
-                #add values within circle of radius in self.profiles
-                if k in self.profiles:
-                    self.profiles[k].append((x,y,circ_val,scatter, interpolate))
-                else:
-                    self.profiles[k] = [(x,y, circ_val,scatter, interpolate)]
+        #        #add values within circle of radius in self.profiles
+        #        if k in self.profiles:
+        #            self.profiles[k].append((x,y,circ_val,scatter, interpolate))
+        #        else:
+        #            self.profiles[k] = [(x,y, circ_val,scatter, interpolate)]
 
 
-                if self.main_window.canvasWindow.currentIndex() == 1:
-                    # Add the scatter item to all other plots and save points in self.profiles
-                    for k, (_, p, v, array) in self.main_window.lasermaps.items():
-                        circ_val = []
-                        if p != plot and v==1 and self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #only add scatters to other lasermaps of same sample
-                            # Create a scatter plot item at the clicked position
-                            scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
-                            p.addItem(scatter)
-                            for c in circ_cord:
-                                value = array[c[0], c[1]]
-                                circ_val.append( value)
-                            if k in self.profiles:
-                                self.profiles[k].append((x,y,circ_val, scatter, interpolate))
-                            else:
-                                self.profiles[k] = [(x,y, circ_val,scatter, interpolate)]
-            self.plot_profiles()
-            self.update_table_widget()
+        #        if self.main_window.canvasWindow.currentIndex() == 1:
+        #            # Add the scatter item to all other plots and save points in self.profiles
+        #            for k, (_, p, v, array) in self.main_window.lasermaps.items():
+        #                circ_val = []
+        #                if p != plot and v==1 and self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #only add scatters to other lasermaps of same sample
+        #                    # Create a scatter plot item at the clicked position
+        #                    scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
+        #                    p.addItem(scatter)
+        #                    for c in circ_cord:
+        #                        value = array[c[0], c[1]]
+        #                        circ_val.append( value)
+        #                    if k in self.profiles:
+        #                        self.profiles[k].append((x,y,circ_val, scatter, interpolate))
+        #                    else:
+        #                        self.profiles[k] = [(x,y, circ_val,scatter, interpolate)]
+        #        # find nearest profile point
+        #    else:
+        #        mindist = 10^12
+        #        for k in self.profiles.values():
+        #            dist = min((k[0][0] - x)**2 + (k[0][1] - y)**2)
+        #            if mindist > dist:
+        #                mindist = dist
+        #                self.pind = k
+        #        if not(round(d*self.array_x/self.main_window.x_range) < 10):
+        #            self.pind = -1
+        #        else:
+        #            self.point_selected = True
+
+        self.plot_profiles()
+        self.update_table_widget()
+    
 
     def interpolate_points(self, interpolation_distance,radius):
         """

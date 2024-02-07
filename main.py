@@ -241,7 +241,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.profiling = Profiling(self)
         # self.toolButtonPlotProfile.clicked.connect(lambda: self.plot_profiles(self.comboBoxProfile1.currentText(), self.comboBoxProfile2.currentText()))
         # self.comboBoxProfile1.activated.connect(lambda: self.update_profile_comboboxes(False) )
-        self.toolButtonClearProfile.clicked.connect(self.profiling.on_clear_profile_clicked)
+        # self.toolButtonClearProfile.clicked.connect(self.profiling.on_clear_profile_clicked)
         # self.toolButtonStartProfile.clicked.connect(lambda :self.toolButtonStartProfile.setChecked(True))
         # self.toolButtonStartProfile.setCheckable(True)
         # self.comboBoxProfile2.activated.connect(self.update_profile_comboboxes)
@@ -483,11 +483,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxPlots.addItems(self.multi_view_index)
 
     def add_plot(self, plot_information, current_plot_df = None):
-        
+
         plot_name = plot_information['plot_name']
         sample_id = plot_information['sample_id']
         plot_type = plot_information['plot_type']
-        
+
 
         #get plot widget and view from plot_widget_dict
         for widget, view in zip(self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'],self.plot_widget_dict[plot_type][sample_id][plot_name]['view']):
@@ -516,11 +516,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.multi_view_index.append(plot_name)
             #self.canvasWindow.setEnabled(index,False)
             #self.add_remove(plot_name)
-            #reduce the index of widgets right hand side of index tab by one 
+            #reduce the index of widgets right hand side of index tab by one
             self.comboBoxPlots.clear()
             self.comboBoxPlots.addItems(self.multi_view_index)
         elif self.canvasWindow.currentIndex()==0:
-            #Single view 
+            #Single view
             self.single_plot_name = plot_name
 
             #remove plot from multi view if the plot is already in multiview
@@ -576,7 +576,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         isotope_1 = self.comboBoxFIsotope.currentText()
         isotope_2 = None
         isotope_select = self.comboBoxFSelect.currentText()
-        
+
         if isotope_select == 'Isotope':
             f_val = self.isotopes_df.loc[(self.isotopes_df['sample_id'] == self.sample_id)
                                         & (self.isotopes_df['isotopes'] == isotope_1)].iloc[0][['v_min', 'v_max']]
@@ -730,16 +730,54 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def update_all_plots(self):
 
-        for plot_type in self.plot_widget_dict.keys():
+        for plot_type,sample_ids in self.plot_widget_dict.items():
             if plot_type == 'histogram' or plot_type == 'lasermap' or plot_type == 'lasernorm':
-                for sample_id, plot in self.plot_widget_dict.items():
-                    info = plot['info']
-                    self.get_map_data(sample_id=info['sample_id'], isotope_1 =info['isotope_1'],isotope_2= info['isotope_2'],plot_type = info['plot_type'], plot =False )
-            
+                for sample_id, plots in sample_ids.items():
+                    for plot_name, plot in plots.items():
+                        info = plot['info']
+                        self.get_map_data(sample_id=info['sample_id'], isotope_1 =info['isotope_1'],isotope_2= info['isotope_2'],plot_type = info['plot_type'], plot =False )
+            if plot_type == 'clustering':
+                for sample_id, plots in sample_ids.items():
+                    for plot_name, plot in plots.items():
+                        # Retrieve the widget and figure for the specified plot
+                        widgetClusterMap = plot['widget'][0]
 
+                        n_clusters = int(plot['info']['n_clusters'])
+                        figure_canvas = widgetClusterMap.layout().itemAt(0).widget()
+                        fig = figure_canvas.figure
 
+                        # Get the new colormap from the comboBox
+                        new_cmap_name = self.comboBoxCM.currentText()
+                        new_cmap = plt.get_cmap(new_cmap_name,5)
+                        img = []
+                        for ax in fig.get_axes():
+                            # Retrieve the image object from the axes
+                            # Recalculate boundaries and normalization based on the new colormap and clusters
 
+                            boundaries = np.arange(-0.5, n_clusters, 1)
+                            norm = BoundaryNorm(boundaries, n_clusters, clip=True)
+                            images = ax.get_images()
+                            if len(images)>0:
+                                im = images[0]
+                                img.append([ax,im]) #store image and axis in list
+                                # Update image with the new colormap and normalization
+                                im.set_cmap(new_cmap)
+                                im.set_norm(norm)
+                        for (ax, im) in img:
+                            #remove colobar axis
 
+                            cb = im.colorbar
+
+                            # Do any actions on the colorbar object (e.g. remove it)
+                            cb.remove()
+                            # Redraw the canvas to reflect the updates
+                            #plot new colorbar
+                            fig.colorbar(im, ax=ax, boundaries=boundaries[:-1], ticks=np.arange(n_clusters), orientation=self.comboBoxCBP.currentText().lower())
+                            figure_canvas.draw()
+                        # Redraw the figure layout to adjust for any changes
+                        fig.tight_layout()
+                        # Redraw the canvas to reflect the updates
+                        figure_canvas.draw()
 
     def open_directory(self):
         dialog = QFileDialog()
@@ -797,7 +835,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         plot_name = plot_information['plot_name']
         sample_id = plot_information['sample_id']
         plot_type = plot_information['plot_type']
-        
+
 
         array = np.reshape(current_plot_df['array'].values,
                                     (current_plot_df['Y'].nunique(),
@@ -840,7 +878,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             widgetLaserMap.setLayout(layoutLaserMap)
             layoutLaserMap.setSpacing(0)
             view = self.canvasWindow.currentIndex()
-            if duplicate: 
+            if duplicate:
                 self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'].append(widgetLaserMap)
                 self.plot_widget_dict[plot_type][sample_id][plot_name]['view'].append(view)
 
@@ -865,8 +903,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # p1.setRange(padding=0)
             p1.showAxes(False, showValues=(True,False,False,True) )
 
-
-
+            #supress right click menu
+            p1.setMenuEnabled(False)
 
             p1.addItem(img)
             # print(p1.getAspectRatio())
@@ -1137,16 +1175,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         mask = self.filter_mask & self.polygon_mask & current_plot_df['array'].notna()
 
-        
+
         plot_name = plot_information['plot_name']
         sample_id = plot_information['sample_id']
         plot_type = plot_information['plot_type']
         array = current_plot_df['array'][mask].values
         edges = np.arange(array.min(), array.max() + bin_width, bin_width)
-    
+
         plot_exist = plot_name in self.plot_widget_dict[plot_type][sample_id]
         duplicate = plot_exist and len(self.plot_widget_dict[plot_type][sample_id][plot_name]['view']) == 1 and self.plot_widget_dict[plot_type][sample_id][plot_name]['view'][0] != self.canvasWindow.currentIndex()
-    
+
 
         if plot_exist and not duplicate:
             widgetHistogram = self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'][0]
@@ -1172,7 +1210,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.plot_widget_dict[plot_type][sample_id][plot_name]['view'].append(view)
             else:
                 self.plot_widget_dict[plot_type][sample_id][plot_name] = {'widget': [widgetHistogram], 'info': plot_information, 'view': [view]}
-            
+
 
             # self.canvasWindow.setCurrentIndex(view)
             # Assuming you have a method to add the widget to the tab
@@ -1253,25 +1291,27 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def plot_scatter(self):
 
         x, y, z, c = self.get_scatter_values()
-        df = pd.DataFrame({
-            x['elements']: x['array'],
-            y['elements']: y['array'],
-            z['elements']: z['array']
-        })
-        el_list  = df.columns
-        el_list_lower = [re.sub(r'\d', '', el).lower() for el in el_list]
-        df.columns = el_list_lower
+
+
+        # df = pd.DataFrame({
+        #     x['elements']: x['array'],
+        #     y['elements']: y['array'],
+        #     z['elements']: z['array']
+        # })
+        # el_list  = df.columns
+        # el_list_lower = [re.sub(r'\d', '', el).lower() for el in el_list]
+        # df.columns = el_list_lower
 
 
 
-        ref_data_chem = self.ref_data.iloc[self.comboBoxNDimRefMaterial.currentIndex()]
-        ref_data_chem.index = [col.replace('_ppm', '') for col in ref_data_chem.index]
-        ref_series = ref_data_chem[el_list_lower].squeeze()
-        df = df.div(ref_series, axis= 1)
+        # ref_data_chem = self.ref_data.iloc[self.comboBoxNDimRefMaterial.currentIndex()]
+        # ref_data_chem.index = [col.replace('_ppm', '') for col in ref_data_chem.index]
+        # ref_series = ref_data_chem[el_list_lower].squeeze()
+        # df = df.div(ref_series, axis= 1)
 
-        df = df.dropna(axis = 0).astype('int64')
+        # df = df.dropna(axis = 0).astype('int64')
 
-        x['array'], y['array'], z['array'] = df.iloc[:, 0].values, df.iloc[:, 1].values, df.iloc[:, 2].values
+        # x['array'], y['array'], z['array'] = df.iloc[:, 0].values, df.iloc[:, 1].values, df.iloc[:, 2].values
 
 
 
@@ -1386,8 +1426,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
         self.process_clustering_methods( n_clusters, exponent, distance_type,fuzzy_cluster_number,  filtered_array,clustering_algorithms, mask, )
- 
-    
+
+
     def process_clustering_methods(self, n_clusters, exponent, distance_type, fuzzy_cluster_number, filtered_array, clustering_algorithms, mask):
         #create unique id if new plot
         plot_type = 'clustering'
@@ -1395,10 +1435,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.plot_id[plot_type][self.sample_id]  = self.plot_id[plot_type][self.sample_id]+1
         else:
             self.plot_id[plot_type][self.sample_id]  = 0
-            
+
         plot_name =  plot_type+str(self.plot_id[plot_type][self.sample_id])
-        
-        # Create figure 
+
+        # Create figure
 
         fig = Figure(figsize=(6, 4))
         # Adjust subplot parameters here for better alignment
@@ -1426,11 +1466,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.cluster_results[name][mask] = ['Cluster '+str(c) for c in labels]
             # Plot each clustering result
             self.plot_clustering_result(ax, labels, name, fuzzy_cluster_number)
-            
-            
+
+
         # Create and add the widget to layout
         self.add_clustering_widget_to_layout(fig,plot_name, plot_type)
-        
+
 
     def plot_clustering_result(self, ax, labels, method_name, fuzzy_cluster_number):
         reshaped_array = np.reshape(labels, (self.clipped_isotope_data[self.sample_id]['X'].nunique(), self.clipped_isotope_data[self.sample_id]['Y'].nunique()))
@@ -1467,10 +1507,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # fig.canvas.manager.window.move(0,0)
         ax.set_title(f'{method_name} Clustering')
         ax.set_axis_off()
- 
+
     def add_clustering_widget_to_layout(self, fig,plot_name, plot_type):
 
-        
+
 
         widgetClusterMap = QtWidgets.QWidget()
         widgetClusterMap.setLayout(QtWidgets.QVBoxLayout())
@@ -1480,16 +1520,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         widgetClusterMap.layout().addWidget(figure_canvas)
         # widgetClusterMap.layout().addWidget(toolbar)
         self.plot_widget_dict['clustering'][self.sample_id][plot_name] = {'widget': [widgetClusterMap],
-                                                              'info': {'plot_type': plot_type, 'sample_id': self.sample_id},
+                                                              'info': {'plot_type': plot_type, 'sample_id': self.sample_id, 'n_clusters': self.spinBoxNClusters.value()},
                                                               'view': [self.canvasWindow.currentIndex()]}
         plot_information = {
             'plot_name': plot_name,
             'sample_id': self.sample_id,
-            'plot_type': plot_type
+            'plot_type': plot_type,
+
         }
         self.update_tree(plot_information['plot_name'], data = plot_information, tree = 'Clustering')
         self.add_plot(plot_information)
-        
+
     def update_plot_with_new_colormap(self):
         if self.fig and self.clustering_results:
             for name, results in self.clustering_results.items():
@@ -1501,10 +1542,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 ax = self.axs[ax_index]
                 # Redraw the plot with the new colormap on the existing axis
                 self.plot_clustering_result(ax, labels, method_name, fuzzy_cluster_number)
-            
+
             # Redraw the figure canvas to reflect the updates
             self.fig.canvas.draw_idle()
-        
+
 
     def update_cluster_ui(self):
         if self.comboBoxClusterMethod.currentText() == 'k-means':
@@ -1559,26 +1600,26 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.labelClusterExponent.setEnabled(True)
             self.labelClusterDistance.setEnabled(True)
             self.labelFCView.setEnabled(True)
-        
-    
+
+
     def get_processed_data(self):
         # return normalised, filtered data with that will be used for analysis
         use_isotopes = self.isotopes_df.loc[(self.isotopes_df['use']==True) & (self.isotopes_df['sample_id']==self.sample_id), 'isotopes'].values
         # Combine the two masks to create a final mask
-        nan_mask = self.processed_isotope_data[self.sample_id][use_isotopes].notna().all(axis=1) 
+        nan_mask = self.processed_isotope_data[self.sample_id][use_isotopes].notna().all(axis=1)
         mask = self.filter_mask & self.polygon_mask  & nan_mask & self.axis_mask
-        
+
         df_filtered = self.processed_isotope_data[self.sample_id][use_isotopes][mask]
 
         return df_filtered, mask, use_isotopes
-        
+
 
     def plot_n_dim(self):
 
-        
+
         df_filtered, mask,_  = self.get_processed_data()
-        
-        
+
+
 
         ref_i = self.comboBoxNDimRefMaterial.currentIndex()
 
@@ -1647,15 +1688,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         widgetNDim.setObjectName('plotNDim')
         widgetNDim.layout().addWidget(figure_canvas)
 
-        
+
         plot_type = 'n-dim'
         #create unique id if new plot
         if self.sample_id in self.plot_id[plot_type]:
             self.plot_id[plot_type][self.sample_id]  = self.plot_id[plot_type][self.sample_id]+1
         else:
-            self.plot_id[plot_type][self.sample_id]  = 0  
+            self.plot_id[plot_type][self.sample_id]  = 0
         plot_name =  plot_type+str(self.plot_id[plot_type][self.sample_id])
-        
+
 
         toolbar = NavigationToolbar(figure_canvas)  # Create the toolbar for the canvas
         # widgetNDim.layout().addWidget(toolbar)
@@ -1969,7 +2010,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # print(isotopes)
             # isotopes = add_ree(isotopes)
             self.isotopes_df = pd.concat([self.isotopes_df, isotopes])
-            
+
             # add sample_id to self.plot_widget_dict
             for plot_type in self.plot_widget_dict.keys():
                 if self.sample_id not in self.plot_widget_dict[plot_type]:
@@ -2087,7 +2128,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.update_spinboxes_bool = False
 
             self.spinBoxX.setValue(int(parameters['x_max']))
-            
+
             self.toolButtonAutoScale.setChecked(auto_scale)
             if auto_scale:
                 self.doubleSpinBoxDUB.setEnabled(True)
@@ -2121,8 +2162,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.lineEditFMax.setText(str(self.dynamic_format(parameters['v_max'])))
 
             self.update_spinboxes_bool = True
-        
-        
+
+
     def get_map_data(self,sample_id, isotope_1=None, isotope_2=None, plot_type = 'lasermap', plot= True,auto_scale = False, update = False):
 
         """
@@ -2253,7 +2294,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 parameters  = self.ratios_df.iloc[idx]
             self.plot_type = plot_type
             isotope_str =   isotope_1 + '/' + isotope_2
-            
+
 
             if update: #update clipped ratio df
                 self.clipped_ratio_data[isotope_str] = current_plot_df['array'].values
@@ -2269,8 +2310,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.plot_laser_map(current_plot_df,plot_information)
             self.update_spinboxes(parameters,bins, bin_width, auto_scale_param)
 
-        elif plot_type=='historgram': 
-            
+        elif plot_type=='historgram':
+
 
             plot_information={'plot_name':isotope_str,'sample_id':sample_id,
                               'isotope_1':isotope_1, 'isotope_2':isotope_2,
@@ -2439,7 +2480,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         elif ((level_1_data == 'Clustering') or (level_1_data=='Scatter')):
             plot_info ={'plot_name':level_3_data, 'plot_type':level_1_data.lower(),'sample_id':level_2_data }
             self.add_plot(plot_info)
-                
+
 
     def open_select_isotope_dialog(self):
         isotopes_list = self.isotopes_df['isotopes'].values
@@ -2595,13 +2636,12 @@ class IsotopeSelectionWindow(QDialog, Ui_Dialog):
         self.tableWidgetIsotopes.setHorizontalHeader(RotatedHeaderView(self.tableWidgetIsotopes))
         self.tableWidgetIsotopes.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
         self.tableWidgetIsotopes.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
-
+        self.comboBoxScale.currentIndexChanged.connect(self.update_all_combos)
 
         self.tableWidgetIsotopes.setVerticalHeaderLabels(isotopes)
         self.correlation_methods = [
             "Pearson",
             "Spearman",
-            "Kendall"
         ]
 
         for method in self.correlation_methods:
@@ -2624,7 +2664,7 @@ class IsotopeSelectionWindow(QDialog, Ui_Dialog):
 
         self.pushButtonCancel.clicked.connect(self.reject)
         self.comboBoxCorrelation.activated.connect(self.calculate_correlation)
-
+        self.tableWidgetIsotopes.setStyleSheet("QTableWidget::item:selected {background-color: yellow;}")
         if len(self.selected_pairs)>0:
             for line in self.selected_pairs:
                 self.populate_isotope_list(line)
@@ -2646,6 +2686,39 @@ class IsotopeSelectionWindow(QDialog, Ui_Dialog):
                 else:
                     item.setSelected(False)
                     self.remove_isotope_from_list(row, column)
+
+    def update_all_combos(self):
+        # Get the currently selected value in comboBoxScale
+        selected_scale = self.comboBoxScale.currentText()
+
+        # Iterate through all rows in tableWidgetSelected to update combo boxes
+        for row in range(self.tableWidgetSelected.rowCount()):
+            combo = self.tableWidgetSelected.cellWidget(row, 1)
+            if combo is not None:  # Make sure there is a combo box in this cell
+                combo.setCurrentText(selected_scale)  # Update the combo box value
+    def update_scale(self):
+        # Initialize a variable to store the first combo box's selection
+        first_selection = None
+        mixed = False  # Flag to indicate mixed selections
+
+        # Iterate through all rows in tableWidgetSelected to check combo boxes
+        for row in range(self.tableWidgetSelected.rowCount()):
+            combo = self.tableWidgetSelected.cellWidget(row, 1)
+            if combo is not None:  # Make sure there is a combo box in this cell
+                # If first_selection has not been set, store the current combo box's selection
+                if first_selection is None:
+                    first_selection = combo.currentText()
+                # If the current combo box's selection does not match first_selection, set mixed to True
+                elif combo.currentText() != first_selection:
+                    mixed = True
+                    break  # No need to check further
+
+        # If selections are mixed, set comboBoxScale to 'mixed', else set it to match first_selection
+        if mixed:
+            self.comboBoxScale.setCurrentText('mixed')
+        else:
+            self.comboBoxScale.setCurrentText(first_selection)
+
 
     def calculate_correlation(self):
         selected_method = self.comboBoxCorrelation.currentText().lower()
@@ -2729,7 +2802,7 @@ class IsotopeSelectionWindow(QDialog, Ui_Dialog):
 
         # Add dropdown to the second column
         combo = QComboBox()
-        combo.addItems(['linear', 'log', 'logit'])
+        combo.addItems(['linear', 'log'])
         self.tableWidgetSelected.setCellWidget(newRow, 1, combo)
         self.update_list()
 
@@ -2789,7 +2862,7 @@ class IsotopeSelectionWindow(QDialog, Ui_Dialog):
         self.listUpdated.emit()
 
     def populate_isotope_list(self,line):
-        if ',' in line: 
+        if ',' in line:
             isotope_pair, norm = line.strip().split(',') #get norm returned from load isotope
         else:
             isotope_pair = line
@@ -2817,7 +2890,7 @@ class IsotopeSelectionWindow(QDialog, Ui_Dialog):
             combo.addItems(['linear', 'log', 'logit'])
             combo.setCurrentText(norm)
             self.tableWidgetSelected.setCellWidget(newRow, 1, combo)
-
+            combo.currentIndexChanged.connect(self.update_scale)
 class CustomAxis(AxisItem):
     def __init__(self, *args, **kwargs):
         AxisItem.__init__(self, *args, **kwargs)
@@ -2846,7 +2919,7 @@ class Profiling:
         self.pind = -1              # index for move point
 
     def on_plot_clicked(self, event,array,k, plot,radius=5):
-        
+
         # turn off profile (need to suppress context menu on right click)
         if event.button() == QtCore.Qt.RightButton and self.main_window.toolButtonPlotProfile.isChecked():
             self.main_window.toolButtonPlotProfile.setChecked(False)
@@ -2857,26 +2930,26 @@ class Profiling:
             return
         elif event.button() == QtCore.Qt.RightButton or event.button() == QtCore.Qt.MiddleButton:
             return
-        
+
         # get click location
         click_pos = plot.vb.mapSceneToView(event.scenePos())
         x, y = click_pos.x(), click_pos.y()
-        
+
         # Convert the click position to plot coordinates
         self.array_x = array.shape[1]
         self.array_y = array.shape[0]
         x_i = round(x*self.array_x/self.main_window.x_range)
         y_i = round(y*self.array_y/self.main_window.y_range)
         interpolate = False
-        
+
         # Ensure indices are within plot bounds
         if not(0 <= x_i < self.array_x) or not(0 <= y_i < self.array_y):
             #do nothing
             return
-        
+
         # if event.button() == QtCore.Qt.LeftButton and self.main_window.pushButtonStartProfile.isChecked():
         if event.button() == QtCore.Qt.LeftButton and self.main_window.toolButtonPlotProfile.isChecked():
-        
+
             # Create a scatter plot item at the clicked position
             scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
             plot.addItem(scatter)
@@ -2912,7 +2985,7 @@ class Profiling:
                             self.profiles[k].append((x,y,circ_val, scatter, interpolate))
                         else:
                             self.profiles[k] = [(x,y, circ_val,scatter, interpolate)]
-        
+
             # move point
         #elif event.button() == QtCore.Qt.LeftButton and not(self.main_window.toolButtonPlotProfile.isChecked()) and self.main_window.toolButtonPointMove.isChecked():
         #    if self.point_selected:
@@ -2966,7 +3039,7 @@ class Profiling:
 
         self.plot_profiles()
         self.update_table_widget()
-    
+
 
     def interpolate_points(self, interpolation_distance,radius):
         """

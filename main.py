@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QCheckBox,QComboBox,  QTableWidgetItem, QHBoxLayout,QVBoxLayout, QGridLayout, QFileDialog,QProgressDialog, QWidget, QTabWidget, QDialog, QLabel, QListWidgetItem
+from PyQt5.QtWidgets import QCheckBox,QComboBox,  QTableWidgetItem, QHBoxLayout,QVBoxLayout, QGridLayout, QFileDialog,QProgressDialog, QWidget, QTabWidget, QDialog, QLabel, QListWidgetItem, QTableWidget
 from PyQt5.Qt import QStandardItemModel,QStandardItem
 from pyqtgraph import PlotWidget, ScatterPlotItem, mkPen, AxisItem
 from pyqtgraph.Qt import QtWidgets
@@ -70,6 +70,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.pop_plot = ''
         self.plot_id = {'clustering':{},'scatter':{},'n-dim':{}}
         self.fuzzy_results={}
+        self.current_group = {'algorithm':None,'clusters': None}
         self.matplotlib_canvas = None
         self.pyqtgraph_widget = None
         self.isUpdatingTable = False
@@ -218,7 +219,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #self.radioButtonCFuzzy.toggled.connect(self.onRadioButtonToggled)
         #self.radioButtonCKMediods.toggled.connect(self.onRadioButtonToggled)
         #self.radioButtonCKMeans.toggled.connect(self.onRadioButtonToggled)
-
+        self.comboBoxColorMethod.currentIndexChanged.connect(self.group_changed)
         # Connect the itemChanged signal to a slot
         self.tableWidgetViewGroups.itemChanged.connect(self.onClusterLabelChanged)
 
@@ -245,14 +246,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # self.toolButtonStartProfile.clicked.connect(lambda :self.toolButtonStartProfile.setChecked(True))
         # self.toolButtonStartProfile.setCheckable(True)
         # self.comboBoxProfile2.activated.connect(self.update_profile_comboboxes)
+        #select entire row
+        self.tableWidgetProfilePoints.setSelectionBehavior(QTableWidget.SelectRows)
         self.toolButtonPointUp.clicked.connect(self.profiling.move_point_up)
         self.toolButtonPointDown.clicked.connect(self.profiling.move_point_down)
         self.toolButtonPointDelete.clicked.connect(self.profiling.delete_point)
-        self.comboBoxProfileSort.activated.connect(self.plot_profile_and_table)
+        self.comboBoxProfileSort.currentIndexChanged.connect(self.plot_profile_and_table)
         self.toolButtonIPProfile.clicked.connect(lambda: self.profiling.interpolate_points(interpolation_distance=int(self.lineEditIntDist.text()), radius= int(self.lineEditPointRadius.text())))
-        self.comboBoxPointType.activated.connect(lambda:self.profiling.plot_profiles())
-        self.toolButtonPlotProfile.clicked.connect(lambda:self.profiling.plot_profiles())
-
+        self.comboBoxPointType.currentIndexChanged.connect(lambda:self.profiling.plot_profiles())
+        # self.toolButtonPlotProfile.clicked.connect(lambda:self.profiling.plot_profiles())
+        self.toolButtonPointSelectAll.clicked.connect(self.tableWidgetProfilePoints.selectAll)
         #SV/MV tool box
         self.toolButtonPanSV.setCheckable(True)
         self.toolButtonPanMV.setCheckable(True)
@@ -546,9 +549,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 widget = selected_plot_widget.layout().itemAt(i).widget()
                 if isinstance(widget, FigureCanvas):
                     self.matplotlib_canvas = widget
+                    self.pyqtgraph_widget = None
                     break
                 elif isinstance(widget, pg.GraphicsLayoutWidget):
                     self.pyqtgraph_widget = widget
+                    self.matplotlib_canvas = None
                     break
 
         # After adding the plots, refresh windows to fix toggle button issue
@@ -736,48 +741,61 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     for plot_name, plot in plots.items():
                         info = plot['info']
                         self.get_map_data(sample_id=info['sample_id'], isotope_1 =info['isotope_1'],isotope_2= info['isotope_2'],plot_type = info['plot_type'], plot =False )
-            if plot_type == 'clustering':
+            else:
                 for sample_id, plots in sample_ids.items():
                     for plot_name, plot in plots.items():
                         # Retrieve the widget and figure for the specified plot
-                        widgetClusterMap = plot['widget'][0]
-
-                        n_clusters = int(plot['info']['n_clusters'])
-                        figure_canvas = widgetClusterMap.layout().itemAt(0).widget()
+                        plot_widget = plot['widget'][0]
+                        figure_canvas = plot_widget.layout().itemAt(0).widget()
                         fig = figure_canvas.figure
-
-                        # Get the new colormap from the comboBox
-                        new_cmap_name = self.comboBoxCM.currentText()
-                        new_cmap = plt.get_cmap(new_cmap_name,5)
-                        img = []
-                        for ax in fig.get_axes():
-                            # Retrieve the image object from the axes
-                            # Recalculate boundaries and normalization based on the new colormap and clusters
-
-                            boundaries = np.arange(-0.5, n_clusters, 1)
-                            norm = BoundaryNorm(boundaries, n_clusters, clip=True)
-                            images = ax.get_images()
-                            if len(images)>0:
-                                im = images[0]
-                                img.append([ax,im]) #store image and axis in list
-                                # Update image with the new colormap and normalization
-                                im.set_cmap(new_cmap)
-                                im.set_norm(norm)
-                        for (ax, im) in img:
-                            #remove colobar axis
-
-                            cb = im.colorbar
-
-                            # Do any actions on the colorbar object (e.g. remove it)
-                            cb.remove()
-                            # Redraw the canvas to reflect the updates
-                            #plot new colorbar
-                            fig.colorbar(im, ax=ax, boundaries=boundaries[:-1], ticks=np.arange(n_clusters), orientation=self.comboBoxCBP.currentText().lower())
+                        if plot_type == 'clustering':
+                                    n_clusters = int(plot['info']['n_clusters'])
+                                    # Get the new colormap from the comboBox
+                                    new_cmap_name = self.comboBoxCM.currentText()
+                                    new_cmap = plt.get_cmap(new_cmap_name,5)
+                                    img = []
+                                    for ax in fig.get_axes():
+                                        # Retrieve the image object from the axes
+                                        # Recalculate boundaries and normalization based on the new colormap and clusters
+            
+                                        boundaries = np.arange(-0.5, n_clusters, 1)
+                                        norm = BoundaryNorm(boundaries, n_clusters, clip=True)
+                                        images = ax.get_images()
+                                        if len(images)>0:
+                                            im = images[0]
+                                            img.append([ax,im]) #store image and axis in list
+                                            # Update image with the new colormap and normalization
+                                            im.set_cmap(new_cmap)
+                                            im.set_norm(norm)
+                                    for (ax, im) in img:
+                                        #remove colobar axis
+            
+                                        cb = im.colorbar
+            
+                                        # Do any actions on the colorbar object (e.g. remove it)
+                                        cb.remove()
+                                        # Redraw the canvas to reflect the updates
+                                        #plot new colorbar
+                                        fig.colorbar(im, ax=ax, boundaries=boundaries[:-1], ticks=np.arange(n_clusters), orientation=self.comboBoxCBP.currentText().lower())
+                                        figure_canvas.draw()
+                                    # Redraw the figure layout to adjust for any changes
+                                    fig.tight_layout()
+                                    # Redraw the canvas to reflect the updates
+                                    figure_canvas.draw()
+                        elif plot_type == 'scatter':
+                            # Retrieve the plot information
+                            plot_info = plot['info']
+                            #remove colorbar
+                            fig.axes[1].clear()
+                            fig.axes[1].remove()
+                            # fig.axes[1].clear()
+                            fig.subplots_adjust(bottom=0)  #default right padding
+                            # figure_canvas.draw()
+                            # fig.tight_layout()  # Automatically adjust layout
+                            self.plot_scatter(update= True, values = plot_info['values'], plot_type = plot_info['plot_type'], fig =plot_info['fig'], ternary_plot = plot_info['ternary_plot'] )
+                            fig.tight_layout()
                             figure_canvas.draw()
-                        # Redraw the figure layout to adjust for any changes
-                        fig.tight_layout()
-                        # Redraw the canvas to reflect the updates
-                        figure_canvas.draw()
+                        
 
     def open_directory(self):
         dialog = QFileDialog()
@@ -1288,11 +1306,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
 
-    def plot_scatter(self):
-
-        x, y, z, c = self.get_scatter_values()
-
-
+    def plot_scatter(self, update=False, values = None, plot_type= None, fig= None, ternary_plot= None):
+        if not update:
+            x, y, z, c = self.get_scatter_values() #get scatter values from elements chosen 
+            plot_type =  self.comboBoxScatterType.currentText().lower()
+        else:
+            # get saved scatter values to update plot 
+            x, y, z, c  = values
+            
+        cb = None    
         # df = pd.DataFrame({
         #     x['elements']: x['array'],
         #     y['elements']: y['array'],
@@ -1315,31 +1337,33 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
 
-        plot_type =  self.comboBoxScatterType.currentText().lower()
+        
         cmap = matplotlib.colormaps.get_cmap(self.comboBoxCM.currentText())
 
         if len(z['array'])>0 and len(c['array'])>0:  # 3d scatter plot with color
 
             labels = [x['elements'], y['elements'], z['elements']]
-
-            ternary_plot = ternary(labels,plot_type,mul_axis=True )
-            fig = ternary_plot.fig
+            
+            if not update:
+                ternary_plot = ternary(labels,plot_type,mul_axis=True )
+                fig = ternary_plot.fig
 
 
 
             if plot_type =='scatter':
-                ternary_plot.ternscatter(x['array'], y['array'], z['array'], categories=  c['array'], cmap=cmap, orientation = self.comboBoxCBP.currentText().lower())
+                _, cb = ternary_plot.ternscatter(x['array'], y['array'], z['array'], categories=  c['array'], cmap=cmap, orientation = self.comboBoxCBP.currentText().lower())
 
             else:
                 ternary_plot.ternhex(x['array'], y['array'], z['array'], val= c['array'],n=int(self.spinBoxScatterN.value()), cmap = cmap, orientation = self.comboBoxCBP.currentText().lower())
 
 
-            select_scatter = f"{x['elements']}_{y['elements']}_{z['elements']}_{c['elements']}_scatter"
+            select_scatter = f"{x['elements']}_{y['elements']}_{z['elements']}_{c['elements']}_{plot_type}"
         elif len(z['array'])>0:  # Ternary plot
 
             labels = [x['elements'], y['elements'], z['elements']]
-            ternary_plot = ternary(labels,plot_type)
-            fig = ternary_plot.fig
+            if not update:
+                ternary_plot = ternary(labels,plot_type)
+                fig = ternary_plot.fig
             if plot_type =='scatter':
                 if self.current_group['algorithm'] in self.cluster_results:
                     cluster_labels = self.cluster_results[self.current_group['algorithm']]
@@ -1349,38 +1373,45 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             else:
                 ternary_plot.ternhex(x['array'], y['array'], z['array'],n=int(self.spinBoxScatterN.value()), color_map = cmap, orientation = self.comboBoxCBP.currentText().lower())
             fig.subplots_adjust(left=0.05, right=1)
-            select_scatter = f"{x['elements']}_{y['elements']}_{z['elements']}_scatter"
+            select_scatter = f"{x['elements']}_{y['elements']}_{z['elements']}_{plot_type}"
             # fig.tight_layout()
         else:  # 2d scatter plot
-            fig = Figure()
+            if not update:
+                fig = Figure()
             ax = fig.add_subplot(111)
             ax.scatter(x['array'], y['array'], alpha=0.5)
-            select_scatter = f"{x['elements']}_{y['elements']}_scatter"
-
-        plot_information = {
-            'plot_name': select_scatter,
-            'sample_id': self.sample_id,
-            'plot_type': 'scatter'
-        }
-
-        # Create a Matplotlib figure and axis
-
-        widgetScatter = QtWidgets.QWidget()
-        layout = QtWidgets.QVBoxLayout()
-        widgetScatter.setLayout(layout)
-        # scatter_plot = pg.PlotWidget(title=select_scatter)
-        scatter_plot = FigureCanvas(fig)
-        view = self.canvasWindow.currentIndex()
-        # Add the plot widget to your layout
-        layout.insertWidget(0,scatter_plot)
-        toolbar = NavigationToolbar(scatter_plot)  # Create the toolbar for the canvas
-        # widgetScatter.layout().addWidget(toolbar)
-
-        self.plot_widget_dict['scatter'][self.sample_id][select_scatter] = {'widget':[widgetScatter],
-
-                                               'info':plot_information, 'view':[view]}
-        self.update_tree(plot_information['plot_name'], data = plot_information, tree = 'Scatter')
-        self.add_plot(plot_information)
+            select_scatter = f"{x['elements']}_{y['elements']}_{plot_type}"
+        
+        
+        if not update:
+            plot_information = {
+                'plot_name': select_scatter,
+                'sample_id': self.sample_id,
+                'plot_type': plot_type,
+                'values': (x, y, z, c),
+                'fig': fig,
+                'ternary_plot': ternary_plot,
+                'colorbar': cb
+            }
+    
+            # Create a Matplotlib figure and axis
+    
+            widgetScatter = QtWidgets.QWidget()
+            layout = QtWidgets.QVBoxLayout()
+            widgetScatter.setLayout(layout)
+            # scatter_plot = pg.PlotWidget(title=select_scatter)
+            scatter_plot = FigureCanvas(fig)
+            view = self.canvasWindow.currentIndex()
+            # Add the plot widget to your layout
+            layout.insertWidget(0,scatter_plot)
+            toolbar = NavigationToolbar(scatter_plot)  # Create the toolbar for the canvas
+            # widgetScatter.layout().addWidget(toolbar)
+    
+            self.plot_widget_dict['scatter'][self.sample_id][select_scatter] = {'widget':[widgetScatter],
+    
+                                                   'info':plot_information, 'view':[view]}
+            self.update_tree(plot_information['plot_name'], data = plot_information, tree = 'Scatter')
+            self.add_plot(plot_information)
 
 
 
@@ -1814,7 +1845,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
 
-    def onRadioButtonToggled(self):
+    def group_changed(self):
         # Clear the list widget
         self.tableWidgetViewGroups.clear()
         self.tableWidgetViewGroups.setHorizontalHeaderLabels(['Groups'])
@@ -1822,11 +1853,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Check which radio button is checked and update the list widget
         if self.comboBoxColorMethod.currentText() == 'none':
             pass  # No clusters to display for 'None'
-        elif self.comboBoxColorMethod.currentText() == 'k-means':
+        elif self.comboBoxColorMethod.currentText() == 'fuzzy c-means':
             algorithm = 'Fuzzy'
         elif self.comboBoxColorMethod.currentText() == 'k-medoids':
             algorithm = 'KMediods'
-        elif self.comboBoxColorMethod.currentText() == 'fuzzy c-means':
+        elif self.comboBoxColorMethod.currentText() == 'k-means':
             algorithm = 'KMeans'
 
         if algorithm in self.cluster_results:
@@ -2927,6 +2958,7 @@ class Profiling:
             return
         elif event.button() == QtCore.Qt.RightButton and self.main_window.toolButtonPointMove.isChecked():
             self.main_window.toolButtonPointMove.setChecked(False)
+            self.point_selected = False
             return
         elif event.button() == QtCore.Qt.RightButton or event.button() == QtCore.Qt.MiddleButton:
             return
@@ -2985,8 +3017,11 @@ class Profiling:
                             self.profiles[k].append((x,y,circ_val, scatter, interpolate))
                         else:
                             self.profiles[k] = [(x,y, circ_val,scatter, interpolate)]
+                            
+            self.plot_profiles()
+            self.update_table_widget()
 
-            # move point
+                    # move point
         #elif event.button() == QtCore.Qt.LeftButton and not(self.main_window.toolButtonPlotProfile.isChecked()) and self.main_window.toolButtonPointMove.isChecked():
         #    if self.point_selected:
         #        # Create a scatter plot item at the clicked position
@@ -3036,9 +3071,68 @@ class Profiling:
         #            self.pind = -1
         #        else:
         #            self.point_selected = True
+          # move point
+        elif event.button() == QtCore.Qt.LeftButton and not(self.main_window.toolButtonPlotProfile.isChecked()) and self.main_window.toolButtonPointMove.isChecked():
+            if self.point_selected:
+                #remove selected point
+                prev_scatter = self.profiles[k][self.pind][3]
+                plot.removeItem(prev_scatter)
+                
+                
+                # Create a scatter plot item at the clicked position
+                scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
+                plot.addItem(scatter)
+                # Find all points within the specified radius
+                circ_val = []
+                circ_cord = []
+                for i in range(max(0, y_i - radius), min(self.array_y, y_i + radius + 1)):
+                    for j in range(max(0, x_i - radius), min(self.array_x , x_i + radius + 1)):
+                        if np.sqrt((x_i - j)**2 + (y_i - i)**2) <= radius:
+                            value = array[i, j]
+                            circ_cord.append([i, j])
+                            circ_val.append( value)
 
-        self.plot_profiles()
-        self.update_table_widget()
+                #update self.pind index of self.profiles with new point data
+                if k in self.profiles:
+
+                    self.profiles[k][self.pind] = (x,y, circ_val,scatter, interpolate)
+
+
+                if self.main_window.canvasWindow.currentIndex() == 1:
+                    # Add the scatter item to all other plots and save points in self.profiles
+                    for k, (_, p, v, array) in self.main_window.lasermaps.items():
+                        circ_val = []
+                        if p != plot and v==1 and self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #only add scatters to other lasermaps of same sample
+                            # Create a scatter plot item at the clicked position
+                            scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
+                            p.addItem(scatter)
+                            for c in circ_cord:
+                                value = array[c[0], c[1]]
+                                circ_val.append( value)
+                            if k in self.profiles:
+                                self.profiles[k][self.pind] = (x,y, circ_val,scatter, interpolate)
+                
+                #update plot and table widget
+                self.plot_profiles()
+                self.update_table_widget()
+                if self.main_window.toolButtonIPProfile.isChecked(): #reset interpolation if selected
+                    self.clear_interpolation()
+                    self.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
+            else:
+                # find nearest profile point
+                mindist = 10**12
+                for i, (x_p,y_p,_,_,interpolate) in enumerate(self.profiles[k]):
+                    dist = (x_p - x)**2 + (y_p - y)**2
+                    if mindist > dist:
+                        mindist = dist
+                        self.pind = i
+                        self.point_selected = True
+                # if not(round(mindist*self.array_x/self.main_window.x_range) < 10):
+                #     self.pind = -1
+                # else:
+                #     self.point_selected = True
+
+
 
 
     def interpolate_points(self, interpolation_distance,radius):
@@ -3086,27 +3180,27 @@ class Profiling:
                                 self.i_profiles[k].append((x,y,circ_val, scatter, interpolate))
 
                     self.i_profiles[k].append(end_point)
-
-
-
             # After interpolation, update the plot and table widget
             self.plot_profiles(interpolate= interpolate)
         else:
-            # remove interpolation
-            for key, profile in self.i_profiles.items():
-                for point in profile:
-                    scatter_item = point[3]  # Access the scatter plot item
-                    interpolate =point[4]
-                    if interpolate:
-                        _, plot, _, _ = self.main_window.lasermaps[key]
-                        plot.removeItem(scatter_item)
+            self.clear_interpolation()
             #plot original profile
             self.plot_profiles(interpolate= False)
         # self.update_table_widget(interpolate= True)
 
-
-    def plot_profiles(self,interpolate= False):
-        def process_points( points, sort_axis='x'):
+    def clear_interpolation(self):
+            # remove interpolation
+            if len(self.i_profiles)>0:
+                for key, profile in self.i_profiles.items():
+                    for point in profile:
+                        scatter_item = point[3]  # Access the scatter plot item
+                        interpolate =point[4]
+                        if interpolate:
+                            _, plot, _, _ = self.main_window.lasermaps[key]
+                            plot.removeItem(scatter_item)
+                            
+    def plot_profiles(self,interpolate= False, sort_axis='x'):
+        def process_points( points, sort_axis):
             # Sort the points based on the user-specified axis
             if sort_axis == 'x':
                 points.sort(key=lambda p: p[0])  # Sort by x-coordinate of median point
@@ -3183,12 +3277,14 @@ class Profiling:
 
             return profile_groups, colors
 
+
         if not interpolate:
             profiles = self.profiles
         else:
             profiles = self.i_profiles
-
-        if len(profiles)>0:
+        
+        print(list(profiles.values()))
+        if len(list(profiles.values())[0])>0: #if self.profiles has values
             self.main_window.tabWidget.setCurrentIndex(1) #show profile plot tab
             sort_axis=self.main_window.comboBoxProfileSort.currentText()
             range_threshold=int(self.main_window.lineEditYThresh.text())
@@ -3267,6 +3363,13 @@ class Profiling:
             # Add the new plot widget to the layout
             self.main_window.widgetProfilePlot.layout().addWidget(widget)
             widget.show()
+        else:
+            # Clear the profile plot widget
+            layout = self.main_window.widgetProfilePlot.layout()
+            while layout.count():
+                child = layout.takeAt(0)
+                if child.widget():
+                    child.widget().deleteLater()
 
     def on_clear_profile_clicked(self):
         # Clear all scatter plot items from the lasermaps
@@ -3329,10 +3432,15 @@ class Profiling:
                 if row >0:
                     profile[row], profile[row -1 ] = profile[row - 1], profile[row]
             self.plot_profiles(sort_axis = False)
+            if self.main_window.toolButtonIPProfile.isChecked(): #reset interpolation if selected
+                self.clear_interpolation()
+                self.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
+                
     def move_point_down(self):
         self.main_window.comboBoxProfileSort.setCurrentIndex(0) #set dropdown sort to no
         # Similar to move_point_up, but moving the row down
         row = self.main_window.tableWidgetProfilePoints.currentRow()
+        print(row)
         max_row = self.main_window.tableWidgetProfilePoints.rowCount() - 1
         if row < max_row:
             self.main_window.tableWidgetProfilePoints.insertRow(row + 2)
@@ -3345,23 +3453,29 @@ class Profiling:
                 if row < len(profile) - 1:
                     profile[row], profile[row + 1] = profile[row + 1], profile[row]
             self.plot_profiles(sort_axis = False)
-
+            if self.main_window.toolButtonIPProfile.isChecked(): #reset interpolation if selected
+                self.clear_interpolation()
+                self.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
 
     def delete_point(self):
-        # Get selected row and delete it
-        row = self.main_window.tableWidgetProfilePoints.currentRow()
-        self.main_window.tableWidgetProfilePoints.removeRow(row)
-
-        # remove point from each profile and its corresponding scatter plot item
-        for key, profile in self.profiles.items():
-            if row < len(profile):
-                scatter_item = profile[row][3]  # Access the scatter plot item
-                for _, (_, plot, _, _) in self.main_window.lasermaps.items():
-                    plot.removeItem(scatter_item)
-                profile.pop(row) #index starts at 0
+        
+        rows = [index.row() for index in self.main_window.tableWidgetProfilePoints.selectionModel().selectedRows()][::-1] #sort descending to pop in order
+        for row in rows:
+            # Get selected row and delete it
+            self.main_window.tableWidgetProfilePoints.removeRow(row)
+            # remove point from each profile and its corresponding scatter plot item
+            for key, profile in self.profiles.items():
+                if row < len(profile):
+                    scatter_item = profile[row][3]  # Access the scatter plot item
+                    for _, (_, plot, _, _) in self.main_window.lasermaps.items():
+                        plot.removeItem(scatter_item)
+                    profile.pop(row) #index starts at 0
         self.plot_profiles(sort_axis = False)
-
-
+        if self.main_window.toolButtonIPProfile.isChecked(): #reset interpolation if selected
+            self.clear_interpolation()
+            self.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
+        
+        
 
     def toggle_buttons(self, enable):
         self.main_window.toolButtonPointUp.setEnabled(enable)

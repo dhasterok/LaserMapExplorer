@@ -231,7 +231,7 @@ class ternary:
             y[ind] = -y[ind]
         
         if categories is None:
-            t = self.axs[0].scatter(x, y, s=size, c=cmap(0.5), marker=symbol, alpha=alpha)
+            t = self.axs[0].scatter(x, y, s=size, color=cmap(0.5), marker=symbol, alpha=alpha)
             return t
         elif not labels:
             # Handle continuous categories
@@ -268,7 +268,7 @@ class ternary:
             cbar.ax.set_xticklabels(unique_categories)  #
             
 
-        return self.axs
+        return self.axs, cbar
             # # Scatter plot for each category
             # for i, category in enumerate(unique_categories):
             #     # Select data for the current category

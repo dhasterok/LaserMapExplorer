@@ -89,12 +89,12 @@
      </property>
      <item>
       <property name="text">
-       <string>log</string>
+       <string>linear</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>linear</string>
+       <string>log</string>
       </property>
      </item>
      <item>

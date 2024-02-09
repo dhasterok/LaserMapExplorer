@@ -76,6 +76,16 @@ class Ui_Dialog(object):
         self.pushButtonDone.setText(_translate("Dialog", "Done"))
         self.label.setText(_translate("Dialog", "Selected list"))
         self.comboBoxScale.setToolTip(_translate("Dialog", "Apply scale to all samples"))
-        self.comboBoxScale.setItemText(0, _translate("Dialog", "log"))
-        self.comboBoxScale.setItemText(1, _translate("Dialog", "linear"))
+        self.comboBoxScale.setItemText(0, _translate("Dialog", "linear"))
+        self.comboBoxScale.setItemText(1, _translate("Dialog", "log"))
         self.comboBoxScale.setItemText(2, _translate("Dialog", "mixed"))
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    Dialog = QtWidgets.QDialog()
+    ui = Ui_Dialog()
+    ui.setupUi(Dialog)
+    Dialog.show()
+    sys.exit(app.exec_())

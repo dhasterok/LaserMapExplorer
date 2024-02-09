@@ -326,7 +326,7 @@ class ternary:
                         hex_yv = [hex_yv[4], hex_yv[1], hex_yv[2], hex_yv[3], hex_yv[4]]
         
                 # Add the hexagon to the hexbin list.
-                hexbin.append({'xv': np.array(hex_xv), 'yv': np.array(hex_yv)})
+                hexbin.append({'xv': np.array(hex_xv), 'yv': np.array(hex_yv),'xc': hex_center_x,'yc': hex_center_y})
                 
             for i in range(1, j + 1): #columns
                 # Calculate the center coordinates for each hexagon.
@@ -338,7 +338,7 @@ class ternary:
                 hex_yv = yv + hex_center_y
                 
                 # Add the hexagon to the hexbin list.
-                hexbin.append({'xv': np.array(hex_xv), 'yv': np.array(hex_yv)})
+                hexbin.append({'xv': np.array(hex_xv), 'yv': np.array(hex_yv),'xc': hex_center_x,'yc': hex_center_y})
                 
 
                 
@@ -353,7 +353,7 @@ class ternary:
                 
                 
                 # Add the hexagon to the hexbin list.
-                hexbin.append({'xv': np.array(hex_xv), 'yv': np.array(hex_yv)})
+                hexbin.append({'xv': np.array(hex_xv), 'yv': np.array(hex_yv),'xc': hex_center_x,'yc': hex_center_y})
             
             
         # Add the topmost hexagon (at the top of the ternary plot).
@@ -363,7 +363,7 @@ class ternary:
         top_hex_yv = [top_hex_yv[3], top_hex_yv[4], 3 * n * y, top_hex_yv[3]]
         
         # Add the top hexagon to the hexbin list.
-        hexbin.append({'xv': np.array(top_hex_xv), 'yv': np.array(top_hex_yv)})
+        hexbin.append({'xv': np.array(top_hex_xv), 'yv': np.array(top_hex_yv),'xc': hex_center_x,'yc': hex_center_y})
 
         return hexbin
     
@@ -414,6 +414,94 @@ class ternary:
             ax.set_aspect('equal', 'box')
             ax.set_title(k)
             plt.colorbar(cm.ScalarMappable(norm=norm, cmap=color_map), ax=ax, fraction=0.046, pad=0.04, orientation=orientation)
+
+    def terncolor(self, a, b, c, ca = [0, 0, 0], cb = [0, 255, 0], cc = [255, 255 ,0], p = [1/3, 1/3, 1/3], cp = []):
+        # normalize ternary coordinates
+    
+        T = np.array(a) + np.array( b) + np.array(c)
+        a = a/T
+        b = b/T
+        c = c/T
+        p = np.array(p)
+
+        ca = np.array(ca)
+        cb = np.array(cb)
+        cc = np.array(cc)
+        cp = np.array(cp)
+
+
+        if len(cp) == 0:
+            cp = (ca + cb + cc)/3
+        
+        cval = self.cplane(a,b,c,ca,cb,cc,p,cp)
+        
+        return cval
+
+
+#    def [ca,cb,cc] = getcmap(cmapname)
+#
+#    switch cmapname
+#        case "kgy"
+#            ca = [0 0 0];
+#            cb = [0 1 0];
+#            cc = [1 1 0];
+#        case "ybg"
+#            ca = [1 1 0];
+#            cb = [0 0 0.5];
+#            cc = [0 0.7 0.3];
+#        case "ycm"
+#            ca = [1 1 0];
+#            cb = [0 1 1];
+#            cc = [1 0 1];
+#        case "grb"
+#            ca = [0 1 0];
+#            cb = [1 0 0];
+#            cc = [0 0 1];
+#        otherwise
+#            error('Unknown colormap name.');
+#    end
+
+
+    def cplane(self,a,b,c,ca,cb,cc,p,cp):
+
+        [xp,yp] = self.tern2xy(p[0],p[1],p[2])
+
+        [xa,ya] = self.tern2xy(1,0,0)
+        [xb,yb] = self.tern2xy(0,1,0)
+        [xc,yc] = self.tern2xy(0,0,1)
+
+        [xd,yd] = self.tern2xy(a,b,c)
+
+        cval = np.zeros([len(a),3])
+
+        points = [(xd[i],yd[i]) for i in range(len(xd))]
+        p = Path([ [xa, ya],[xb, yb],[xp, yp] ],closed=True)
+        inpoly = p.contains_points(points)
+        cval[inpoly,:] = self.cplanexy(xd[inpoly],yd[inpoly],xp,yp,cp,xa,ya,ca,xb,yb,cb)
+
+        p = Path([[xa, ya],[xc, yc],[xp, yp]],closed=True)
+        inpoly = p.contains_points(points)
+        cval[inpoly,:] = self.cplanexy(xd[inpoly],yd[inpoly],xp,yp,cp,xa,ya,ca,xc,yc,cc)
+        
+        p = Path([[xc, yc],[xb, yb],[xp, yp]],closed=True)
+        inpoly = p.contains_points(points)
+        cval[inpoly,:] = self.cplanexy(xd[inpoly],yd[inpoly],xp,yp,cp, xc,yc,cc, xb,yb,cb)
+
+        return cval
+
+
+    def cplanexy(self, xd,yd, xp,yp,cp, x1,y1,cv1, x2,y2,cv2):
+
+        cval = np.zeros([len(xd),3])
+        for i in range(0,2):
+            v1 = [xp - x1, yp - y1, cp[i] - cv1[i]]
+            v2 = [xp - x2, yp - y2, cp[i] - cv2[i]]
+
+            n = np.cross(v1,v2)
+
+            cval[:,i] = cv1[i] + (-n[0]*(xd - x1) - n[1]*(yd - y1))/n[2]
+        
+        return cval
 
 
 # # # Example usage

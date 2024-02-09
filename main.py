@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QCheckBox,QComboBox,  QTableWidgetItem, QHBoxLayout,QVBoxLayout, QGridLayout, QFileDialog,QProgressDialog, QWidget, QTabWidget, QDialog, QLabel, QListWidgetItem, QTableWidget
+from PyQt5.QtWidgets import QColorDialog, QCheckBox,QComboBox,  QTableWidgetItem, QHBoxLayout,QVBoxLayout, QGridLayout, QFileDialog,QProgressDialog, QWidget, QTabWidget, QDialog, QLabel, QListWidgetItem, QTableWidget
 from PyQt5.Qt import QStandardItemModel,QStandardItem
 from pyqtgraph import PlotWidget, ScatterPlotItem, mkPen, AxisItem
 from pyqtgraph.Qt import QtWidgets
@@ -263,6 +263,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonZoomSV.setCheckable(True)
         self.toolButtonZoomMV.setCheckable(True)
 
+        self.toolButtonOverlayColor.clicked.connect(self.OverlayColorSelect)
+        self.toolButtonTCmapAColor.clicked.connect(self.TCmapAColorSelect)
+        self.toolButtonTCmapBColor.clicked.connect(self.TCmapBColorSelect)
+        self.toolButtonTCmapCColor.clicked.connect(self.TCmapCColorSelect)
+        self.toolButtonTCmapMColor.clicked.connect(self.TCmapMColorSelect)
 
         self.toolButtonHomeSV.clicked.connect(lambda: self.toolbar_plotting('home', 'SV', self.toolButtonHomeSV.isChecked()))
         # self.toolButtonHomeMV.clicked.connect
@@ -283,6 +288,44 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # self.toolButtonSaveMV.clicked.connect
 
         self.actionCalculator.triggered.connect(self.open_calculator)
+
+#    def color_picker(self):
+#        color = QColorDialog.getColor()
+#
+#        if color.isValid():
+#            return color
+#        else:
+#            return
+        
+    def OverlayColorSelect(self):
+        color = QColorDialog.getColor()
+
+        if color.isValid():
+            self.toolButtonOverlayColor.setStyleSheet("background-color: %s;" % color.name())
+        
+    def TCmapAColorSelect(self):
+        color = QColorDialog.getColor()
+
+        if color.isValid():
+            self.toolButtonTCmapAColor.setStyleSheet("background-color: %s;" % color.name())
+
+    def TCmapBColorSelect(self):
+        color = QColorDialog.getColor()
+
+        if color.isValid():
+            self.toolButtonTCmapBColor.setStyleSheet("background-color: %s;" % color.name())
+
+    def TCmapCColorSelect(self):
+        color = QColorDialog.getColor()
+
+        if color.isValid():
+            self.toolButtonTCmapCColor.setStyleSheet("background-color: %s;" % color.name())
+
+    def TCmapMColorSelect(self):
+        color = QColorDialog.getColor()
+
+        if color.isValid():
+            self.toolButtonTCmapMColor.setStyleSheet("background-color: %s;" % color.name())
 
     def open_calculator(self):
         isotopes_list = self.isotopes_df['isotopes'].values
@@ -3474,8 +3517,7 @@ class Profiling:
         if self.main_window.toolButtonIPProfile.isChecked(): #reset interpolation if selected
             self.clear_interpolation()
             self.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
-        
-        
+
 
     def toggle_buttons(self, enable):
         self.main_window.toolButtonPointUp.setEnabled(enable)

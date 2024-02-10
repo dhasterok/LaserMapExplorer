@@ -180,11 +180,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonPlotScatter.clicked.connect(self.plot_scatter)
 
 
+        #Should be deleted once cropping works
         self.comboBoxScatterSelectX.activated.connect(lambda: self.update_combo_boxes('x'))
         self.comboBoxScatterSelectY.activated.connect(lambda: self.update_combo_boxes('y'))
         self.comboBoxScatterSelectZ.activated.connect(lambda: self.update_combo_boxes('z'))
         self.comboBoxScatterSelectC.activated.connect(lambda: self.update_combo_boxes('c'))
-
 
 
         #Clustering
@@ -263,11 +263,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonZoomSV.setCheckable(True)
         self.toolButtonZoomMV.setCheckable(True)
 
+        # colormaps
         self.toolButtonOverlayColor.clicked.connect(self.OverlayColorSelect)
+        self.toolButtonOverlayColor.setStyleSheet("background-color: white;")
         self.toolButtonTCmapAColor.clicked.connect(self.TCmapAColorSelect)
         self.toolButtonTCmapBColor.clicked.connect(self.TCmapBColorSelect)
         self.toolButtonTCmapCColor.clicked.connect(self.TCmapCColorSelect)
         self.toolButtonTCmapMColor.clicked.connect(self.TCmapMColorSelect)
+        self.comboBoxTernaryColormap.currentIndexChanged.connect(lambda: self.TernaryColormapChanged())
+        self.TernaryColormapChanged()
 
         self.toolButtonHomeSV.clicked.connect(lambda: self.toolbar_plotting('home', 'SV', self.toolButtonHomeSV.isChecked()))
         # self.toolButtonHomeMV.clicked.connect
@@ -289,43 +293,99 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.actionCalculator.triggered.connect(self.open_calculator)
 
-#    def color_picker(self):
-#        color = QColorDialog.getColor()
-#
-#        if color.isValid():
-#            return color
-#        else:
-#            return
-        
+    # color picking functions
     def OverlayColorSelect(self):
         color = QColorDialog.getColor()
 
         if color.isValid():
             self.toolButtonOverlayColor.setStyleSheet("background-color: %s;" % color.name())
+            print(color.name())
         
     def TCmapAColorSelect(self):
         color = QColorDialog.getColor()
 
         if color.isValid():
             self.toolButtonTCmapAColor.setStyleSheet("background-color: %s;" % color.name())
+            self.comboBoxTernaryColormap.setCurrentText("user defined")
 
     def TCmapBColorSelect(self):
         color = QColorDialog.getColor()
 
         if color.isValid():
             self.toolButtonTCmapBColor.setStyleSheet("background-color: %s;" % color.name())
+            self.comboBoxTernaryColormap.setCurrentText("user defined")
 
     def TCmapCColorSelect(self):
         color = QColorDialog.getColor()
 
         if color.isValid():
             self.toolButtonTCmapCColor.setStyleSheet("background-color: %s;" % color.name())
+            self.comboBoxTernaryColormap.setCurrentText("user defined")
 
     def TCmapMColorSelect(self):
         color = QColorDialog.getColor()
 
         if color.isValid():
             self.toolButtonTCmapMColor.setStyleSheet("background-color: %s;" % color.name())
+            self.comboBoxTernaryColormap.setCurrentText("user defined")
+
+    def TernaryColormapChanged(self):
+        match self.comboBoxTernaryColormap.currentText():
+            case "yellow-navy-green-white":
+                self.toolButtonTCmapAColor.setStyleSheet("background-color: yellow")
+                self.toolButtonTCmapBColor.setStyleSheet("background-color: navy")
+                self.toolButtonTCmapCColor.setStyleSheet("background-color: green")
+                self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
+            case "yellow-red-blue":
+                self.toolButtonTCmapAColor.setStyleSheet("background-color: yellow")
+                self.toolButtonTCmapBColor.setStyleSheet("background-color: red")
+                self.toolButtonTCmapCColor.setStyleSheet("background-color: blue")
+                self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
+            case "yellow-red-blue-white":
+                self.toolButtonTCmapAColor.setStyleSheet("background-color: yellow")
+                self.toolButtonTCmapBColor.setStyleSheet("background-color: red")
+                self.toolButtonTCmapCColor.setStyleSheet("background-color: blue")
+                self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
+            case "black-green-yellow-white":
+                self.toolButtonTCmapAColor.setStyleSheet("background-color: black")
+                self.toolButtonTCmapBColor.setStyleSheet("background-color: green")
+                self.toolButtonTCmapCColor.setStyleSheet("background-color: yellow")
+                self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
+            case "yellow-green-navy":
+                self.toolButtonTCmapAColor.setStyleSheet("background-color: yellow")
+                self.toolButtonTCmapBColor.setStyleSheet("background-color: green")
+                self.toolButtonTCmapCColor.setStyleSheet("background-color: navy")
+                self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
+            case "yellow-green-navy-white":
+                self.toolButtonTCmapAColor.setStyleSheet("background-color: yellow")
+                self.toolButtonTCmapBColor.setStyleSheet("background-color: green")
+                self.toolButtonTCmapCColor.setStyleSheet("background-color: navy")
+                self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
+            case "yellow-cyan-magenta":
+                self.toolButtonTCmapAColor.setStyleSheet("background-color: yellow")
+                self.toolButtonTCmapBColor.setStyleSheet("background-color: cyan")
+                self.toolButtonTCmapCColor.setStyleSheet("background-color: magenta")
+                self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
+            case "yellow-cyan-magenta-white":
+                self.toolButtonTCmapAColor.setStyleSheet("background-color: yellow")
+                self.toolButtonTCmapBColor.setStyleSheet("background-color: cyan")
+                self.toolButtonTCmapCColor.setStyleSheet("background-color: magenta")
+                self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
+            case "green-red-blue":
+                self.toolButtonTCmapAColor.setStyleSheet("background-color: #00FF00")
+                self.toolButtonTCmapBColor.setStyleSheet("background-color: red")
+                self.toolButtonTCmapCColor.setStyleSheet("background-color: blue")
+                self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
+            case "orange-violet-green-white":
+                self.toolButtonTCmapAColor.setStyleSheet("background-color: #FF8000")
+                self.toolButtonTCmapBColor.setStyleSheet("background-color: #8000FF")
+                self.toolButtonTCmapCColor.setStyleSheet("background-color: #00FF80")
+                self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
+            case "orange-violet-blue-white":
+                self.toolButtonTCmapAColor.setStyleSheet("background-color: #FF8000")
+                self.toolButtonTCmapBColor.setStyleSheet("background-color: #8000FF")
+                self.toolButtonTCmapCColor.setStyleSheet("background-color: #0080FF")
+                self.toolButtonTCmapMColor.setStyleSheet("background-color: white") 
 
     def open_calculator(self):
         isotopes_list = self.isotopes_df['isotopes'].values

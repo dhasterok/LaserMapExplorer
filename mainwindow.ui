@@ -399,13 +399,13 @@
      <widget class="QToolBox" name="toolBoxTreeView">
       <property name="minimumSize">
        <size>
-        <width>200</width>
+        <width>221</width>
         <height>0</height>
        </size>
       </property>
       <property name="maximumSize">
        <size>
-        <width>220</width>
+        <width>221</width>
         <height>16777215</height>
        </size>
       </property>
@@ -415,14 +415,14 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="TreeView">
        <property name="geometry">
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>220</width>
+         <width>221</width>
          <height>794</height>
         </rect>
        </property>
@@ -435,7 +435,7 @@
           <x>0</x>
           <y>0</y>
           <width>221</width>
-          <height>661</height>
+          <height>651</height>
          </rect>
         </property>
         <property name="font">
@@ -453,7 +453,7 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>220</width>
+         <width>221</width>
          <height>794</height>
         </rect>
        </property>
@@ -601,7 +601,7 @@
           <rect>
            <x>10</x>
            <y>20</y>
-           <width>236</width>
+           <width>201</width>
            <height>405</height>
           </rect>
          </property>
@@ -1007,7 +1007,22 @@
             </item>
             <item>
              <property name="text">
-              <string>yellow-orange-red-black</string>
+              <string>green-red-blue</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>orange-violet-green-white</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>orange-violet-blue-white</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>user defined</string>
              </property>
             </item>
            </widget>
@@ -1021,7 +1036,7 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>220</width>
+         <width>221</width>
          <height>794</height>
         </rect>
        </property>
@@ -2455,8 +2470,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>300</width>
-         <height>563</height>
+         <width>100</width>
+         <height>30</height>
         </rect>
        </property>
        <attribute name="label">
@@ -2617,8 +2632,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>300</width>
-         <height>563</height>
+         <width>100</width>
+         <height>30</height>
         </rect>
        </property>
        <attribute name="label">
@@ -3276,8 +3291,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>300</width>
-         <height>563</height>
+         <width>100</width>
+         <height>30</height>
         </rect>
        </property>
        <attribute name="label">
@@ -3523,8 +3538,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>300</width>
-         <height>563</height>
+         <width>100</width>
+         <height>30</height>
         </rect>
        </property>
        <attribute name="label">
@@ -4627,8 +4642,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>300</width>
-         <height>563</height>
+         <width>100</width>
+         <height>30</height>
         </rect>
        </property>
        <attribute name="label">
@@ -5202,8 +5217,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>300</width>
-         <height>563</height>
+         <width>100</width>
+         <height>30</height>
         </rect>
        </property>
        <attribute name="label">
@@ -5366,8 +5381,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>300</width>
-         <height>563</height>
+         <width>100</width>
+         <height>30</height>
         </rect>
        </property>
        <attribute name="label">
@@ -5885,8 +5900,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>300</width>
-         <height>563</height>
+         <width>100</width>
+         <height>30</height>
         </rect>
        </property>
        <attribute name="label">
@@ -6360,8 +6375,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>300</width>
-         <height>563</height>
+         <width>100</width>
+         <height>30</height>
         </rect>
        </property>
        <attribute name="label">

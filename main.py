@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QCheckBox,QComboBox,  QTableWidgetItem, QHBoxLayout,QVBoxLayout, QGridLayout, QFileDialog,QProgressDialog, QWidget, QTabWidget, QDialog, QLabel, QListWidgetItem, QTableWidget
+from PyQt5.QtWidgets import QColorDialog, QCheckBox,QComboBox,  QTableWidgetItem, QHBoxLayout,QVBoxLayout, QGridLayout, QFileDialog,QProgressDialog, QWidget, QTabWidget, QDialog, QLabel, QListWidgetItem, QTableWidget
 from PyQt5.Qt import QStandardItemModel,QStandardItem
 from pyqtgraph import PlotWidget, ScatterPlotItem, mkPen, AxisItem
 from pyqtgraph.Qt import QtWidgets
@@ -178,13 +178,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         #scatterplot
         self.toolButtonPlotScatter.clicked.connect(self.plot_scatter)
+        self.toolButtonTernaryMap.clicked.connect(self.plot_ternarymap)
 
-
+        #Should be deleted once cropping works
         self.comboBoxScatterSelectX.activated.connect(lambda: self.update_combo_boxes('x'))
         self.comboBoxScatterSelectY.activated.connect(lambda: self.update_combo_boxes('y'))
         self.comboBoxScatterSelectZ.activated.connect(lambda: self.update_combo_boxes('z'))
         self.comboBoxScatterSelectC.activated.connect(lambda: self.update_combo_boxes('c'))
-
 
 
         #Clustering
@@ -229,11 +229,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
         # N-Dim Plot
-
-        isotop_set = ['majors', 'full trace', 'REE', 'metals']
-        self.comboBoxNDimIsotopeSet.addItems(isotop_set)
+        isotope_set = ['majors', 'full trace', 'REE', 'metals']
+        self.comboBoxNDimIsotopeSet.addItems(isotope_set)
         self.comboBoxNDimRefMaterial.addItems(ref_list.values)
-        self.toolButtonNDimAdd.clicked.connect(self.update_n_dim_table)
+        self.toolButtonNDimIsotopeAdd.clicked.connect(lambda: self.update_n_dim_table(0))
+        self.toolButtonNDimIsotopeSetAdd.clicked.connect(lambda: self.update_n_dim_table(1))
         self.toolButtonNDimPlot.clicked.connect(self.plot_n_dim)
 
         # plot profile
@@ -263,6 +263,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonZoomSV.setCheckable(True)
         self.toolButtonZoomMV.setCheckable(True)
 
+        # colormaps
+        self.toolButtonOverlayColor.clicked.connect(self.OverlayColorSelect)
+        self.toolButtonOverlayColor.setStyleSheet("background-color: white;")
+        self.toolButtonTCmapAColor.clicked.connect(self.TCmapAColorSelect)
+        self.toolButtonTCmapBColor.clicked.connect(self.TCmapBColorSelect)
+        self.toolButtonTCmapCColor.clicked.connect(self.TCmapCColorSelect)
+        self.toolButtonTCmapMColor.clicked.connect(self.TCmapMColorSelect)
+        self.comboBoxTernaryColormap.currentIndexChanged.connect(lambda: self.TernaryColormapChanged())
+        self.TernaryColormapChanged()
 
         self.toolButtonHomeSV.clicked.connect(lambda: self.toolbar_plotting('home', 'SV', self.toolButtonHomeSV.isChecked()))
         # self.toolButtonHomeMV.clicked.connect
@@ -283,6 +292,100 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # self.toolButtonSaveMV.clicked.connect
 
         self.actionCalculator.triggered.connect(self.open_calculator)
+
+    # color picking functions
+    def OverlayColorSelect(self):
+        color = QColorDialog.getColor()
+
+        if color.isValid():
+            self.toolButtonOverlayColor.setStyleSheet("background-color: %s;" % color.name())
+            print(color.name())
+        
+    def TCmapAColorSelect(self):
+        color = QColorDialog.getColor()
+
+        if color.isValid():
+            self.toolButtonTCmapAColor.setStyleSheet("background-color: %s;" % color.name())
+            self.comboBoxTernaryColormap.setCurrentText("user defined")
+
+    def TCmapBColorSelect(self):
+        color = QColorDialog.getColor()
+
+        if color.isValid():
+            self.toolButtonTCmapBColor.setStyleSheet("background-color: %s;" % color.name())
+            self.comboBoxTernaryColormap.setCurrentText("user defined")
+
+    def TCmapCColorSelect(self):
+        color = QColorDialog.getColor()
+
+        if color.isValid():
+            self.toolButtonTCmapCColor.setStyleSheet("background-color: %s;" % color.name())
+            self.comboBoxTernaryColormap.setCurrentText("user defined")
+
+    def TCmapMColorSelect(self):
+        color = QColorDialog.getColor()
+
+        if color.isValid():
+            self.toolButtonTCmapMColor.setStyleSheet("background-color: %s;" % color.name())
+            self.comboBoxTernaryColormap.setCurrentText("user defined")
+
+    def TernaryColormapChanged(self):
+        match self.comboBoxTernaryColormap.currentText():
+            case "yellow-navy-green-white":
+                self.toolButtonTCmapAColor.setStyleSheet("background-color: yellow")
+                self.toolButtonTCmapBColor.setStyleSheet("background-color: navy")
+                self.toolButtonTCmapCColor.setStyleSheet("background-color: green")
+                self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
+            case "yellow-red-blue":
+                self.toolButtonTCmapAColor.setStyleSheet("background-color: yellow")
+                self.toolButtonTCmapBColor.setStyleSheet("background-color: red")
+                self.toolButtonTCmapCColor.setStyleSheet("background-color: blue")
+                self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
+            case "yellow-red-blue-white":
+                self.toolButtonTCmapAColor.setStyleSheet("background-color: yellow")
+                self.toolButtonTCmapBColor.setStyleSheet("background-color: red")
+                self.toolButtonTCmapCColor.setStyleSheet("background-color: blue")
+                self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
+            case "black-green-yellow-white":
+                self.toolButtonTCmapAColor.setStyleSheet("background-color: black")
+                self.toolButtonTCmapBColor.setStyleSheet("background-color: green")
+                self.toolButtonTCmapCColor.setStyleSheet("background-color: yellow")
+                self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
+            case "yellow-green-navy":
+                self.toolButtonTCmapAColor.setStyleSheet("background-color: yellow")
+                self.toolButtonTCmapBColor.setStyleSheet("background-color: green")
+                self.toolButtonTCmapCColor.setStyleSheet("background-color: navy")
+                self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
+            case "yellow-green-navy-white":
+                self.toolButtonTCmapAColor.setStyleSheet("background-color: yellow")
+                self.toolButtonTCmapBColor.setStyleSheet("background-color: green")
+                self.toolButtonTCmapCColor.setStyleSheet("background-color: navy")
+                self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
+            case "yellow-cyan-magenta":
+                self.toolButtonTCmapAColor.setStyleSheet("background-color: yellow")
+                self.toolButtonTCmapBColor.setStyleSheet("background-color: cyan")
+                self.toolButtonTCmapCColor.setStyleSheet("background-color: magenta")
+                self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
+            case "yellow-cyan-magenta-white":
+                self.toolButtonTCmapAColor.setStyleSheet("background-color: yellow")
+                self.toolButtonTCmapBColor.setStyleSheet("background-color: cyan")
+                self.toolButtonTCmapCColor.setStyleSheet("background-color: magenta")
+                self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
+            case "green-red-blue":
+                self.toolButtonTCmapAColor.setStyleSheet("background-color: #00FF00")
+                self.toolButtonTCmapBColor.setStyleSheet("background-color: red")
+                self.toolButtonTCmapCColor.setStyleSheet("background-color: blue")
+                self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
+            case "orange-violet-green-white":
+                self.toolButtonTCmapAColor.setStyleSheet("background-color: #FF8000")
+                self.toolButtonTCmapBColor.setStyleSheet("background-color: #8000FF")
+                self.toolButtonTCmapCColor.setStyleSheet("background-color: #00FF80")
+                self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
+            case "orange-violet-blue-white":
+                self.toolButtonTCmapAColor.setStyleSheet("background-color: #FF8000")
+                self.toolButtonTCmapBColor.setStyleSheet("background-color: #8000FF")
+                self.toolButtonTCmapCColor.setStyleSheet("background-color: #0080FF")
+                self.toolButtonTCmapMColor.setStyleSheet("background-color: white") 
 
     def open_calculator(self):
         isotopes_list = self.isotopes_df['isotopes'].values
@@ -1272,7 +1375,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         x = (1 - b) * h / np.cos(np.pi/6) - y * np.tan(np.pi/6) - w
         return x, y
 
-
+    # extracts data for scatter plot
     def get_scatter_values(self):
         value_dict = {
             'x': {'elements': None, 'type': None, 'array': None},
@@ -1301,8 +1404,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             value_dict[k]['array'] = df['array'][self.filter_mask].values if not df.empty else []
 
         return value_dict['x'], value_dict['y'], value_dict['z'], value_dict['c']
-
-
 
 
 
@@ -1413,7 +1514,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.update_tree(plot_information['plot_name'], data = plot_information, tree = 'Scatter')
             self.add_plot(plot_information)
 
-
+    def plot_ternarymap(self):
+        return
 
 
     def plot_clustering(self):
@@ -1655,17 +1757,25 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         ref_i = self.comboBoxNDimRefMaterial.currentIndex()
 
 
-        q = self.dialNDimQ.value()
-        quantiles = [0.25, 0.5, 0.75]
-        if q== '1':
-            quantiles = 0.5
-        elif q=='2':
-            quantiles = [0.25, 0.75]
-        elif q=='3':
-            quantiles = [0.25, 0.5, 0.75]
-        elif q=='4':
-            quantiles = [0.05, 0.25, 0.5, 0.75, 0.95]
-
+        #q = self.dialNDimQ.value()
+        #quantiles = [0.25, 0.5, 0.75]
+        #if q== '1':
+        #    quantiles = 0.5
+        #elif q=='2':
+        #    quantiles = [0.25, 0.75]
+        #elif q=='3':
+        #    quantiles = [0.25, 0.5, 0.75]
+        #elif q=='4':
+        #    quantiles = [0.05, 0.25, 0.5, 0.75, 0.95]
+        match self.comboBoxNDimQuantiles.currentIndex():
+            case 0:
+                quantiles = 0.5
+            case 1:
+                quantiles = [0.25, 0.75]
+            case 2:
+                quantiles = [0.25, 0.5, 0.75]
+            case 3:
+                quantiles = [0.05, 0.25, 0.5, 0.75, 0.95]
 
 
         if self.comboBoxNDimPlotType.currentText() == 'Radar':
@@ -1740,41 +1850,40 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'plot_type': plot_type
         }
         self.update_tree(plot_information['plot_name'], data = plot_information, tree = 'n-Dim')
+        print(plot_information)
         self.add_plot(plot_information)
 
-    def update_n_dim_table(self):
+    def update_n_dim_table(self,caller):
 
         def on_use_checkbox_state_changed(row, state):
             # Update the 'use' value in the filter_df for the given row
             self.filter_df.at[row, 'use'] = state == QtCore.Qt.Checked
 
+        if caller == 0:
+            el_list = [self.comboBoxNDimIsotope.currentText()]
+            self.comboBoxNDimIsotopeSet.setCurrentText = 'user defined'
+        elif caller == 1:
+            isotope_set = self.comboBoxNDimIsotopeSet.currentText().lower()
 
-        isotope_1 = self.comboBoxNDimIsotope.currentText()
-
-        # isotope_select =self.comboBoxNDimSelect.currentText()
-
-        isotope_set =self.comboBoxNDimIsotopeSet.currentText().lower()
-
-        if isotope_set == 'user defined':
-            el_list= [isotope_1]
-        elif isotope_set == 'majors':
-            el_list = ['Si','Ti','Al','Fe','Mn','Mg','Ca','Na','K','P']
-        elif isotope_set == 'full trace':
-            el_list = ['Cs','Rb','Ba','Th','U','K','Nb','Ta','La','Ce','Pb','Mo','Pr','Sr','P','Ga','Zr','Hf','Nd','Sm','Eu','Li','Ti','Gd','Dy','Ho','Y','Er','Yb','Lu']
-        elif isotope_set == 'ree':
-            el_list = ['La','Ce','Pr','Nd','Pm','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb','Lu']
-        elif isotope_set == 'metals':
-            el_list = ['Na','Al','Ca','Zn','Sc','Cu','Fe','Mn','V','Co','Mg','Ni','Cr'];
+            ####
+            #### This needs to be set up more generic so that a user defined sets can be added to the list
+            ####
+            if isotope_set == 'majors':
+                el_list = ['Si','Ti','Al','Fe','Mn','Mg','Ca','Na','K','P']
+            elif isotope_set == 'full trace':
+                el_list = ['Cs','Rb','Ba','Th','U','K','Nb','Ta','La','Ce','Pb','Mo','Pr','Sr','P','Ga','Zr','Hf','Nd','Sm','Eu','Li','Ti','Gd','Dy','Ho','Y','Er','Yb','Lu']
+            elif isotope_set == 'ree':
+                el_list = ['La','Ce','Pr','Nd','Pm','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb','Lu']
+            elif isotope_set == 'metals':
+                el_list = ['Na','Al','Ca','Zn','Sc','Cu','Fe','Mn','V','Co','Mg','Ni','Cr']
 
         isotopes_list = self.isotopes_df.loc[(self.isotopes_df['sample_id']==self.sample_id), 'isotopes'].values
 
-
-
-
-
-
         isotopes = [col for iso in el_list for col in isotopes_list if re.sub(r'\d', '', col).lower() == iso.lower()]
 
+        print(el_list)
+        print(isotopes_list)
+        print(isotopes)
         self.n_dim_list.extend(isotopes)
 
         for isotope in isotopes:
@@ -1993,6 +2102,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.sample_id = os.path.splitext(self.csv_files[index])[0]
 
         # print(self.self.sample_id)
+        ####
+        #### Need to fix this so that it calculates the size appropriately when they load
+        #### Also need a program that correctly converts a iolite file to one that is read in hear.
+        ####
         if self.sample_id == 'TR1-07':
             self.aspect_ratio = 0.976
         elif self.sample_id == 'TR3-06':
@@ -3474,8 +3587,7 @@ class Profiling:
         if self.main_window.toolButtonIPProfile.isChecked(): #reset interpolation if selected
             self.clear_interpolation()
             self.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
-        
-        
+
 
     def toggle_buttons(self, enable):
         self.main_window.toolButtonPointUp.setEnabled(enable)

@@ -77,5 +77,9 @@
         <file>resources/icons/icons8-country-80.png</file>
         <file>resources/icons/icons8-mind-map-50.png</file>
         <file>resources/icons/icons8-mind-map-filled-50.png</file>
+        <file>resources/icons/icons8-illuminati-64.png</file>
+        <file>resources/icons/icons8-illuminati-100.png</file>
+        <file>resources/icons/icons8-add-bookmark-50.png</file>
+        <file>resources/icons/icons8-add-list-50.png</file>
     </qresource>
 </RCC>

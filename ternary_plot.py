@@ -415,7 +415,7 @@ class ternary:
             ax.set_title(k)
             plt.colorbar(cm.ScalarMappable(norm=norm, cmap=color_map), ax=ax, fraction=0.046, pad=0.04, orientation=orientation)
 
-    def terncolor(self, a, b, c, ca = [0, 0, 0], cb = [0, 255, 0], cc = [255, 255 ,0], p = [1/3, 1/3, 1/3], cp = []):
+    def terncolor(self, a, b, c, ca = [0, 0, 0], cb = [0, 1, 0], cc = [1, 1 ,0], p = [1/3, 1/3, 1/3], cp = []):
         # normalize ternary coordinates
     
         T = np.array(a) + np.array( b) + np.array(c)
@@ -467,39 +467,52 @@ class ternary:
         [xp,yp] = self.tern2xy(p[0],p[1],p[2])
 
         [xa,ya] = self.tern2xy(1,0,0)
+        ya += 1e-8
         [xb,yb] = self.tern2xy(0,1,0)
+        xb -= 1e-8
+        yb -= 1e-12
         [xc,yc] = self.tern2xy(0,0,1)
+        xc += 1e-8
+        yc -= 1e-12
 
         [xd,yd] = self.tern2xy(a,b,c)
 
         cval = np.zeros([len(a),3])
-
-        points = [(xd[i],yd[i]) for i in range(len(xd))]
-        p = Path([ [xa, ya],[xb, yb],[xp, yp] ],closed=True)
+        points = np.column_stack((xd,yd))
+        # points = [Point(xd[i],yd[i]) for i in range(len(xd))]
+        p = Path([ [xa, ya],[xb, yb],[xp, yp] ])
         inpoly = p.contains_points(points)
+        # poly = Polygon([ [xa, ya],[xb, yb],[xp, yp] ])
+        # inpoly = [(poly.contains(point) or poly.intersects(point)) for point in points] 
         cval[inpoly,:] = self.cplanexy(xd[inpoly],yd[inpoly],xp,yp,cp,xa,ya,ca,xb,yb,cb)
 
-        p = Path([[xa, ya],[xc, yc],[xp, yp]],closed=True)
+        p = Path([[xa, ya],[xc, yc],[xp, yp]])
         inpoly = p.contains_points(points)
+        # poly = Polygon([ [xa, ya],[xc, yc],[xp, yp] ])
+        # inpoly = [(poly.contains(point) or poly.intersects(point)) for point in points] 
         cval[inpoly,:] = self.cplanexy(xd[inpoly],yd[inpoly],xp,yp,cp,xa,ya,ca,xc,yc,cc)
         
-        p = Path([[xc, yc],[xb, yb],[xp, yp]],closed=True)
+        p = Path([[xc, yc],[xb, yb],[xp, yp]])
         inpoly = p.contains_points(points)
+        # poly = Polygon([ [xc, yc],[xb, yb],[xp, yp] ])
+        # inpoly = [(poly.contains(point) or poly.intersects(point)) for point in points] 
         cval[inpoly,:] = self.cplanexy(xd[inpoly],yd[inpoly],xp,yp,cp, xc,yc,cc, xb,yb,cb)
-
+        
+        cval[cval<0] = 0
+        cval[cval>1] = 1
         return cval
 
 
     def cplanexy(self, xd,yd, xp,yp,cp, x1,y1,cv1, x2,y2,cv2):
 
         cval = np.zeros([len(xd),3])
-        for i in range(0,2):
+        for i in range(0,3):
             v1 = [xp - x1, yp - y1, cp[i] - cv1[i]]
             v2 = [xp - x2, yp - y2, cp[i] - cv2[i]]
 
             n = np.cross(v1,v2)
 
-            cval[:,i] = cv1[i] + (-n[0]*(xd - x1) - n[1]*(yd - y1))/n[2]
+            cval[:,i] = cp[i] + (-n[0]*(xd - xp) - n[1]*(yd - yp))/n[2]
         
         return cval
 

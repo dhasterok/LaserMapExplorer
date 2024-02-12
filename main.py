@@ -1866,7 +1866,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.filter_df.at[row, 'use'] = state == QtCore.Qt.Checked
 
         if caller == 0:
-            el_list = [self.comboBoxNDimIsotope.currentText()]
+            el_list = [self.comboBoxNDimIsotope.currentText().lower()]
             self.comboBoxNDimIsotopeSet.setCurrentText = 'user defined'
         elif caller == 1:
             isotope_set = self.comboBoxNDimIsotopeSet.currentText().lower()
@@ -1885,7 +1885,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         isotopes_list = self.isotopes_df.loc[(self.isotopes_df['sample_id']==self.sample_id), 'isotopes'].values
 
-        isotopes = [col for iso in el_list for col in isotopes_list if re.sub(r'\d', '', col).lower() == iso.lower()]
+        isotopes = [col for iso in el_list for col in isotopes_list if re.sub(r'\d', '', col).lower() == re.sub(r'\d', '',iso).lower()]
 
         print(el_list)
         print(isotopes_list)
@@ -3318,10 +3318,10 @@ class Profiling:
                         mindist = dist
                         self.pind = i
                         self.point_selected = True
-                # if not(round(mindist*self.array_x/self.main_window.x_range) < 10):
-                #     self.pind = -1
-                # else:
-                #     self.point_selected = True
+                if not(round(mindist*self.array_x/self.main_window.x_range) < 10):
+                    self.pind = -1
+                else:
+                    self.point_selected = True
 
 
 

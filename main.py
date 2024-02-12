@@ -167,15 +167,23 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonAutoScale.setChecked(True)
 
 
-        ###Filter Tab
+        # Filter Tabs
         #-------------------------
+        # left pane
         self.toolButtonAddFilter.clicked.connect(self.update_filter_table)
-        self.toolButtonFilterSelectAll.clicked.connect(self.select_all_rows)
-        self.toolButtonFilterRemove.clicked.connect(self.remove_selected_rows)
         self.comboBoxFSelect.activated.connect(lambda: self.update_combo_boxes('f'))
         self.comboBoxFIsotope.activated.connect(self.update_filter_values)
         #     lambda: self.get_map_data(self.sample_id,isotope_1=self.comboBoxFIsotope_1.currentText(),
         #                           isotope_2=self.comboBoxFIsotope_2.currentText(),view = 1))
+
+        # central-bottom pane
+        self.toolButtonFilterUp.clicked.connect(lambda: self.table_fcn.move_row_up('Filters'))
+        self.toolButtonFilterDown.clicked.connect(lambda: self.table_fcn.move_row_down('Filters'))
+        # There is currently a special function for removing rows, convert to table_fcn.delete_row
+        self.toolButtonFilterRemove.clicked.connect(self.remove_selected_rows)
+        self.toolButtonFilterRemove.clicked.connect(lambda: self.table_fcn.delete_row('Filters'))
+        self.toolButtonFilterSelectAll.clicked.connect(self.tableWidgetFilters.selectAll)
+
 
         # Scatter and Ternary Tab
         #-------------------------
@@ -230,12 +238,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         isotope_set = ['majors', 'full trace', 'REE', 'metals']
         self.comboBoxNDimIsotopeSet.addItems(isotope_set)
         self.comboBoxNDimRefMaterial.addItems(ref_list.values)
-        self.toolButtonNDimIsotopeAdd.clicked.connect(lambda: self.update_n_dim_table(0))
-        self.toolButtonNDimIsotopeSetAdd.clicked.connect(lambda: self.update_n_dim_table(1))
+        self.toolButtonNDimIsotopeAdd.clicked.connect(lambda: self.update_n_dim_table('IsotopeAdd'))
+        self.toolButtonNDimIsotopeSetAdd.clicked.connect(lambda: self.update_n_dim_table('IsotopeSetAdd'))
         self.toolButtonNDimPlot.clicked.connect(self.plot_n_dim)
-        self.toolButtonNDimUp.clicked.connect(lambda: self.table_fcn.move_point_up)
-        self.toolButtonNDimDown.clicked.connect(lambda: self.table_fcn.move_point_down)
-        self.toolButtonNDimDelete.clicked.connect(lambda: self.table_fcn.delete_point)
+        self.toolButtonNDimUp.clicked.connect(lambda: self.table_fcn.move_row_up('NDim'))
+        self.toolButtonNDimDown.clicked.connect(lambda: self.table_fcn.move_row_down('NDim'))
+        self.toolButtonNDimSelectAll.clicked.connect(self.tableWidgetNDim.selectAll)
+        self.toolButtonNDimRemove.clicked.connect(lambda: self.table_fcn.delete_row('NDim'))
         #self.toolButtonNDimSaveList.clicked.connect(self.ndim_table.save_list)
 
 
@@ -252,14 +261,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # self.comboBoxProfile2.activated.connect(self.update_profile_comboboxes)
         #select entire row
         self.tableWidgetProfilePoints.setSelectionBehavior(QTableWidget.SelectRows)
-        self.toolButtonPointUp.clicked.connect(lambda: self.table_fcn.move_point_up)
-        self.toolButtonPointDown.clicked.connect(lambda: self.table_fcn.move_point_down)
-        self.toolButtonPointDelete.clicked.connect(lambda: self.table_fcn.delete_point)
+        self.toolButtonPointUp.clicked.connect(lambda: self.table_fcn.move_row_up('Profiling'))
+        self.toolButtonPointDown.clicked.connect(lambda: self.table_fcn.move_row_down('Profiling'))
+        self.toolButtonPointDelete.clicked.connect(lambda: self.table_fcn.delete_row('Profiling'))
         self.comboBoxProfileSort.currentIndexChanged.connect(self.plot_profile_and_table)
         self.toolButtonIPProfile.clicked.connect(lambda: self.profiling.interpolate_points(interpolation_distance=int(self.lineEditIntDist.text()), radius= int(self.lineEditPointRadius.text())))
         self.comboBoxPointType.currentIndexChanged.connect(lambda:self.profiling.plot_profiles())
         # self.toolButtonPlotProfile.clicked.connect(lambda:self.profiling.plot_profiles())
         self.toolButtonPointSelectAll.clicked.connect(self.tableWidgetProfilePoints.selectAll)
+
+
         #SV/MV tool box
         self.toolButtonPanSV.setCheckable(True)
         self.toolButtonPanMV.setCheckable(True)
@@ -716,8 +727,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         f_min = float(self.lineEditFMin.text())
         f_max = float(self.lineEditFMax.text())
         # Add a new row at the end of the table
-        row = self.tableWidgetFilterTable.rowCount()
-        self.tableWidgetFilterTable.insertRow(row)
+        row = self.tableWidgetFilters.rowCount()
+        self.tableWidgetFilters.insertRow(row)
 
         # Create a QCheckBox for the 'use' column
         chkBoxItem_use = QtWidgets.QCheckBox()
@@ -739,24 +750,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 norm = self.ratios_df.loc[(self.ratios_df['sample_id'] == self.sample_id)
                                           & (self.ratios_df['isotope_1'] == isotope_1) & (self.ratios_df['isotope_2'] == isotope_2)].iloc[0]['norm']
 
-        self.tableWidgetFilterTable.setCellWidget(row, 0, chkBoxItem_use)
-        self.tableWidgetFilterTable.setItem(row, 1,
+        self.tableWidgetFilters.setCellWidget(row, 0, chkBoxItem_use)
+        self.tableWidgetFilters.setItem(row, 1,
                                  QtWidgets.QTableWidgetItem(self.sample_id))
-        self.tableWidgetFilterTable.setItem(row, 2,
+        self.tableWidgetFilters.setItem(row, 2,
                                  QtWidgets.QTableWidgetItem(isotope_1))
-        self.tableWidgetFilterTable.setItem(row, 3,
+        self.tableWidgetFilters.setItem(row, 3,
                                  QtWidgets.QTableWidgetItem(isotope_2))
 
-        self.tableWidgetFilterTable.setItem(row, 4,
+        self.tableWidgetFilters.setItem(row, 4,
                                  QtWidgets.QTableWidgetItem(ratio))
 
-        self.tableWidgetFilterTable.setItem(row, 5,
+        self.tableWidgetFilters.setItem(row, 5,
                                  QtWidgets.QTableWidgetItem(self.dynamic_format(f_min)))
-        self.tableWidgetFilterTable.setItem(row, 6,
+        self.tableWidgetFilters.setItem(row, 6,
                                  QtWidgets.QTableWidgetItem(self.dynamic_format(f_max)))
 
 
-        self.tableWidgetFilterTable.setItem(row, 7,
+        self.tableWidgetFilters.setItem(row, 7,
                                  chkBoxItem_select)
 
 
@@ -777,27 +788,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.filter_mask = self.filter_mask & (isotope_df['array'].values <= filter_row['f_min']) | (isotope_df['array'].values >= filter_row['f_max'])
 
 
-    def select_all_rows(self):
-        for row in range(self.tableWidgetFilterTable.rowCount()):
-            # Assuming the checkbox is in the 0th column
-            chkBoxItem = self.tableWidgetFilterTable.item(row, 7)
-            chkBoxItem.setCheckState(QtCore.Qt.Checked)
-
     def remove_selected_rows(self,sample):
         # We loop in reverse to avoid issues when removing rows
-        for row in range(self.tableWidgetFilterTable.rowCount()-1, -1, -1):
-            chkBoxItem = self.tableWidgetFilterTable.item(row, 7)
-            sample_id = self.tableWidgetFilterTable.item(row, 1).text()
-            isotope_1 = self.tableWidgetFilterTable.item(row, 2).text()
-            isotope_2 = self.tableWidgetFilterTable.item(row, 3).text()
-            ratio = bool(self.tableWidgetFilterTable.item(row, 4).text())
+        for row in range(self.tableWidgetFilters.rowCount()-1, -1, -1):
+            chkBoxItem = self.tableWidgetFilters.item(row, 7)
+            sample_id = self.tableWidgetFilters.item(row, 1).text()
+            isotope_1 = self.tableWidgetFilters.item(row, 2).text()
+            isotope_2 = self.tableWidgetFilters.item(row, 3).text()
+            ratio = bool(self.tableWidgetFilters.item(row, 4).text())
             if chkBoxItem.checkState() == QtCore.Qt.Checked:
-                self.tableWidgetFilterTable.removeRow(row)
+                self.tableWidgetFilters.removeRow(row)
                 if not ratio:
                     self.filter_df.drop(self.filter_df[(self.filter_df['sample_id'] == sample_id)
                                            & (self.filter_df['isotope_1'] == isotope_1)& (self.filter_df['ratio'] == ratio)].index, inplace=True)
                 else:
-                # Remove corresponding row from filter_df
+                    # Remove corresponding row from filter_df
                     self.filter_df.drop(self.filter_df[(self.filter_df['sample_id'] == sample_id)
                                            & (self.filter_df['isotope_1'] == isotope_1)& (self.filter_df['isotope_2'] == isotope_2)].index, inplace=True)
         self.update_filter_mask(sample_id)
@@ -1755,24 +1760,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def plot_n_dim(self):
 
-
         df_filtered, mask,_  = self.get_processed_data()
-
-
 
         ref_i = self.comboBoxNDimRefMaterial.currentIndex()
 
-
-        #q = self.dialNDimQ.value()
-        #quantiles = [0.25, 0.5, 0.75]
-        #if q== '1':
-        #    quantiles = 0.5
-        #elif q=='2':
-        #    quantiles = [0.25, 0.75]
-        #elif q=='3':
-        #    quantiles = [0.25, 0.5, 0.75]
-        #elif q=='4':
-        #    quantiles = [0.05, 0.25, 0.5, 0.75, 0.95]
+        # Get quantile for plotting TEC & radar plots
         match self.comboBoxNDimQuantiles.currentIndex():
             case 0:
                 quantiles = 0.5
@@ -1859,16 +1851,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         print(plot_information)
         self.add_plot(plot_information)
 
-    def update_n_dim_table(self,caller):
+    def update_n_dim_table(self,calling_widget):
 
         def on_use_checkbox_state_changed(row, state):
             # Update the 'use' value in the filter_df for the given row
             self.filter_df.at[row, 'use'] = state == QtCore.Qt.Checked
 
-        if caller == 0:
+        if calling_widget == 'IsotopeAdd':
             el_list = [self.comboBoxNDimIsotope.currentText().lower()]
             self.comboBoxNDimIsotopeSet.setCurrentText = 'user defined'
-        elif caller == 1:
+        elif calling_widget == 'IsotopeSetAdd':
             isotope_set = self.comboBoxNDimIsotopeSet.currentText().lower()
 
             ####
@@ -1887,9 +1879,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         isotopes = [col for iso in el_list for col in isotopes_list if re.sub(r'\d', '', col).lower() == re.sub(r'\d', '',iso).lower()]
 
-        print(el_list)
-        print(isotopes_list)
-        print(isotopes)
         self.n_dim_list.extend(isotopes)
 
         for isotope in isotopes:
@@ -3068,53 +3057,103 @@ class Table_Fcn:
         self.point_selected = False # move point button selected
         self.pind = -1              # index for move point
 
-    def move_point_up(self):
-        self.main_window.comboBoxProfileSort.setCurrentIndex(0) #set dropdown sort to no
+    def move_row_up(self,calling_widget):
+        match calling_widget:
+            case 'Profiling':
+                self.main_window.comboBoxProfileSort.setCurrentIndex(0) #set dropdown sort to no
+                table = self.main_window.tableWidgetProfilePoints
+            case 'NDim':
+                table = self.main_window.tableWidgetNDim
+            case 'Filters':
+                table = self.main_window.tableWidgetFilters
+
         # Get selected row
-        row = self.main_window.tableWidgetProfilePoints.currentRow()
+        row = table.currentRow()
 
         if row > 0:
-            self.main_window.tableWidgetProfilePoints.insertRow(row - 1)
-            for i in range(self.main_window.tableWidgetProfilePoints.columnCount()):
-                self.main_window.tableWidgetProfilePoints.setItem(row - 1, i, self.main_window.tableWidgetProfilePoints.takeItem(row + 1, i))
-            self.main_window.tableWidgetProfilePoints.removeRow(row + 1)
-            self.main_window.tableWidgetProfilePoints.setCurrentCell(row - 1, 0)
-            # Update self.profiles here accordingly
-            for key, profile in self.profiles.items():
-                if row >0:
-                    profile[row], profile[row -1 ] = profile[row - 1], profile[row]
-            self.plot_profiles(sort_axis = False)
-            if self.main_window.toolButtonIPProfile.isChecked(): #reset interpolation if selected
-                self.clear_interpolation()
-                self.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
-                
-    def move_point_down(self):
-        self.main_window.comboBoxProfileSort.setCurrentIndex(0) #set dropdown sort to no
-        # Similar to move_point_up, but moving the row down
-        row = self.main_window.tableWidgetProfilePoints.currentRow()
-        print(row)
-        max_row = self.main_window.tableWidgetProfilePoints.rowCount() - 1
-        if row < max_row:
-            self.main_window.tableWidgetProfilePoints.insertRow(row + 2)
-            for i in range(self.main_window.tableWidgetProfilePoints.columnCount()):
-                self.main_window.tableWidgetProfilePoints.setItem(row + 2, i, self.main_window.tableWidgetProfilePoints.takeItem(row, i))
-            self.main_window.tableWidgetProfilePoints.removeRow(row)
-            self.main_window.tableWidgetProfilePoints.setCurrentCell(row + 1, 0)
-            # update point order of each profile
-            for key, profile in self.profiles.items():
-                if row < len(profile) - 1:
-                    profile[row], profile[row + 1] = profile[row + 1], profile[row]
-            self.plot_profiles(sort_axis = False)
-            if self.main_window.toolButtonIPProfile.isChecked(): #reset interpolation if selected
-                self.clear_interpolation()
-                self.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
+            table.insertRow(row - 1)
+            for i in range(table.columnCount()):
+                table.setItem(row - 1, i, table.takeItem(row + 1, i))
+            table.removeRow(row + 1)
+            table.setCurrentCell(row - 1, 0)
 
-    def delete_point(self):
+            match calling_widget:
+                case 'Profiling':
+                    # Update self.profiles here accordingly
+                    for key, profile in self.profiles.items():
+                        if row >0:
+                            profile[row], profile[row -1 ] = profile[row - 1], profile[row]
+                    self.plot_profiles(sort_axis = False)
+                    if self.main_window.toolButtonIPProfile.isChecked(): #reset interpolation if selected
+                        self.clear_interpolation()
+                        self.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
+                #case 'NDim':
+                    # update plot
+
+                #case 'Filters':
+                    # update filters
+                    # update plots
         
-        rows = [index.row() for index in self.main_window.tableWidgetProfilePoints.selectionModel().selectedRows()][::-1] #sort descending to pop in order
+        match calling_widget:
+            case 'Profiling':
+                self.main_window.tableWidgetProfilePoints = table
+            case 'NDim':
+                self.main_window.tableWidgetNDim = table
+            case 'Filters':
+                self.main_window.tableWidgetFilters = table
+                
+    def move_row_down(self,calling_widget):
+        match calling_widget:
+            case 'Profiling':
+                self.main_window.comboBoxProfileSort.setCurrentIndex(0) #set dropdown sort to no
+                table = self.main_window.tableWidgetProfilePoints
+            case 'NDim':
+                table = self.main_window.tableWidgetNDim
+            case 'Filters':
+                table = self.main_window.tableWidgetFilters
+
+        # Similar to move_row_up, but moving the row down
+        row = table.currentRow()
+        print(row)
+        max_row = table.rowCount() - 1
+        if row < max_row:
+            table.insertRow(row + 2)
+            for i in range(table.columnCount()):
+                table.setItem(row + 2, i, table.takeItem(row, i))
+            table.removeRow(row)
+            table.setCurrentCell(row + 1, 0)
+            match calling_widget:
+                case 'Profiling':
+                    # update point order of each profile
+                    for key, profile in self.profiles.items():
+                        if row < len(profile) - 1:
+                            profile[row], profile[row + 1] = profile[row + 1], profile[row]
+                    self.plot_profiles(sort_axis = False)
+                    if self.main_window.toolButtonIPProfile.isChecked(): #reset interpolation if selected
+                        self.clear_interpolation()
+                        self.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
+        
+        match calling_widget:
+            case 'Profiling':
+                self.main_window.tableWidgetProfilePoints = table
+            case 'NDim':
+                self.main_window.tableWidgetNDim = table
+            case 'Filters':
+                self.main_window.tableWidgetFilters = table
+
+    def delete_row(self,calling_widget):
+        match calling_widget:
+            case 'Profiling':
+                table = self.main_window.tableWidgetProfilePoints
+            case 'NDim':
+                table = self.main_window.tableWidgetNDim
+            case 'Filters':
+                table = self.main_window.tableWidgetFilters
+        
+        rows = [index.row() for index in table.selectionModel().selectedRows()][::-1] #sort descending to pop in order
         for row in rows:
             # Get selected row and delete it
-            self.main_window.tableWidgetProfilePoints.removeRow(row)
+            table.removeRow(row)
             # remove point from each profile and its corresponding scatter plot item
             for key, profile in self.profiles.items():
                 if row < len(profile):
@@ -3122,10 +3161,19 @@ class Table_Fcn:
                     for _, (_, plot, _, _) in self.main_window.lasermaps.items():
                         plot.removeItem(scatter_item)
                     profile.pop(row) #index starts at 0
-        self.plot_profiles(sort_axis = False)
-        if self.main_window.toolButtonIPProfile.isChecked(): #reset interpolation if selected
-            self.clear_interpolation()
-            self.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
+        
+        match calling_widget:
+            case 'Profiling':
+                self.plot_profiles(sort_axis = False)
+                if self.main_window.toolButtonIPProfile.isChecked(): #reset interpolation if selected
+                    self.clear_interpolation()
+                    self.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
+
+                self.main_window.tableWidgetProfilePoints = table
+            case 'NDim':
+                self.main_window.tableWidgetNDim = table
+            case 'Filters':
+                self.main_window.tableWidgetFilters = table
 
 
 class Profiling:

@@ -3127,10 +3127,10 @@ class Profiling:
                         mindist = dist
                         self.pind = i
                         self.point_selected = True
-                # if not(round(mindist*self.array_x/self.main_window.x_range) < 10):
-                #     self.pind = -1
-                # else:
-                #     self.point_selected = True
+                if not(round(mindist*self.array_x/self.main_window.x_range) < 10):
+                    self.pind = -1
+                else:
+                    self.point_selected = True
 
 
 

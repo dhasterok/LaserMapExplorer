@@ -17,9 +17,6 @@ import pandas as pd
 import matplotlib.cm as cm
 import matplotlib.colors as colors
 from matplotlib.colors import BoundaryNorm, ListedColormap
-from shapely.geometry import Point
-from shapely.geometry.polygon import Polygon
-
 # import ternary
 class ternary:
     def __init__(self, labels,plot_type= 'scatter',  n=3, dg =0.1, dt=0.1, mul_axis = False):

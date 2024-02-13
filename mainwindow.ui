@@ -43,7 +43,7 @@
        <string/>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="SelectIsotopePage">
        <property name="geometry">
@@ -2520,6 +2520,9 @@
             <property name="toolTip">
              <string>Add isotopes or select set below</string>
             </property>
+            <property name="accessibleName">
+             <string>NDim</string>
+            </property>
             <property name="selectionBehavior">
              <enum>QAbstractItemView::SelectRows</enum>
             </property>
@@ -3751,6 +3754,9 @@
              <font>
               <pointsize>11</pointsize>
              </font>
+            </property>
+            <property name="accessibleName">
+             <string>Profiling</string>
             </property>
             <property name="sizeAdjustPolicy">
              <enum>QAbstractScrollArea::AdjustToContents</enum>
@@ -6306,6 +6312,9 @@
                <width>480</width>
                <height>160</height>
               </size>
+             </property>
+             <property name="accessibleName">
+              <string>Filters</string>
              </property>
              <property name="selectionBehavior">
               <enum>QAbstractItemView::SelectRows</enum>

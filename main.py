@@ -269,7 +269,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxPointType.currentIndexChanged.connect(lambda:self.profiling.plot_profiles())
         # self.toolButtonPlotProfile.clicked.connect(lambda:self.profiling.plot_profiles())
         self.toolButtonPointSelectAll.clicked.connect(self.tableWidgetProfilePoints.selectAll)
+        # Connect toolButtonProfileEditToggle's clicked signal to toggle edit mode
+        # self.toolButtonProfileEditToggle.clicked.connect(self.profiling.toggle_edit_mode)
 
+        # Connect toolButtonProfilePointToggle's clicked signal to toggle point visibility
+        # self.toolButtonProfilePointToggle.clicked.connect(self.profiling.toggle_point_visibility)
 
         #SV/MV tool box
         self.toolButtonPanSV.setCheckable(True)
@@ -1767,7 +1771,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Get quantile for plotting TEC & radar plots
         match self.comboBoxNDimQuantiles.currentIndex():
             case 0:
-                quantiles = 0.5
+                quantiles = [0.5]
             case 1:
                 quantiles = [0.25, 0.75]
             case 2:
@@ -1775,8 +1779,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case 3:
                 quantiles = [0.05, 0.25, 0.5, 0.75, 0.95]
 
-
-        if self.comboBoxNDimPlotType.currentText() == 'Radar':
+        plot_name = self.comboBoxNDimPlotType.currentText()
+        if plot_name == 'Radar':
             axes_interval = 5
             if self.current_group['algorithm'] in self.cluster_results:
                 # Get the cluster labels for the data
@@ -1834,7 +1838,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.plot_id[plot_type][self.sample_id]  = self.plot_id[plot_type][self.sample_id]+1
         else:
             self.plot_id[plot_type][self.sample_id]  = 0
-        plot_name =  plot_type+str(self.plot_id[plot_type][self.sample_id])
+        plot_name =  plot_name +'_'+str(self.plot_id[plot_type][self.sample_id])
 
 
         toolbar = NavigationToolbar(figure_canvas)  # Create the toolbar for the canvas
@@ -1843,12 +1847,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                                               'info': {'plot_type': plot_type, 'sample_id': self.sample_id},
                                                               'view': [self.canvasWindow.currentIndex()]}
         plot_information = {
-            'plot_name': self.sample_id +f'_{plot_type}',
+            'plot_name': f'{plot_name}',
             'sample_id': self.sample_id,
             'plot_type': plot_type
         }
         self.update_tree(plot_information['plot_name'], data = plot_information, tree = 'n-Dim')
-        print(plot_information)
         self.add_plot(plot_information)
 
     def update_n_dim_table(self,calling_widget):
@@ -3172,8 +3175,18 @@ class Table_Fcn:
                 self.main_window.tableWidgetProfilePoints = table
             case 'NDim':
                 self.main_window.tableWidgetNDim = table
-            case 'Filters':
-                self.main_window.tableWidgetFilters = table
+        #     case 'Filters':
+        #         self.main_window.tableWidgetFilters = table
+        #         if chkBoxItem.checkState() == QtCore.Qt.Checked:
+        #             self.tableWidgetFilters.removeRow(row)
+        #             if not ratio:
+        #                 self.filter_df.drop(self.filter_df[(self.filter_df['sample_id'] == sample_id)
+        #                                        & (self.filter_df['isotope_1'] == isotope_1)& (self.filter_df['ratio'] == ratio)].index, inplace=True)
+        #             else:
+        #                 # Remove corresponding row from filter_df
+        #                 self.filter_df.drop(self.filter_df[(self.filter_df['sample_id'] == sample_id)
+        #                                        & (self.filter_df['isotope_1'] == isotope_1)& (self.filter_df['isotope_2'] == isotope_2)].index, inplace=True)
+        # self.update_filter_mask(sample_id)
 
 
 class Profiling:
@@ -3544,25 +3557,26 @@ class Profiling:
             # Group profiles and set up the figure
             profile_groups,colors = group_profiles_by_range(sort_axis, range_threshold, interpolate, point_type)
             # Initialize the figure
-            fig = Figure()
+            self.fig = Figure()
             num_groups = len(profile_groups)
             num_subplots = (num_groups + 1) // 2  # Two groups per subplot, rounding up
             subplot_idx = 1
 
             # Adjust subplot spacing
             # fig.subplots_adjust(hspace=0.1)  # Adjust vertical spacing
-            ax = fig.add_subplot(num_subplots, 1, subplot_idx)
+            ax = self.fig.add_subplot(num_subplots, 1, subplot_idx)
             for idx, (range_value, group_profiles) in enumerate(profile_groups.items()):
                 if idx > 1 and idx % 2 == 0:  # Create a new subplot for every 2 groups after the first two
                     subplot_idx += 1
-                    ax = fig.add_subplot(num_subplots, 1, subplot_idx)
+                    ax = self.fig.add_subplot(num_subplots, 1, subplot_idx)
                 elif idx % 2 == 1:  # Create a new subplot for every 2 groups after the first two
                     ax = ax.twinx()
                 el_labels = []
                 # Plot each profile in the group
                 if point_type == 'mean':
                     for g_idx,(profile_key, distances, means,s_errors) in enumerate(group_profiles):
-                        ax.errorbar(distances, means, yerr=s_errors, fmt='o', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0, label=f'{profile_key[:-1]}')
+                        line, caplines, barlinecols= ax.errorbar(distances, means, yerr=s_errors, fmt='o', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0, label=f'{profile_key[:-1]}', picker = 5)
+                        
                         el_labels.append(profile_key[:-1].split('_')[-1]) #get element name
                         y_axis_text = ','.join(el_labels)
                         ax.set_ylabel(f'{y_axis_text}')
@@ -3573,10 +3587,13 @@ class Profiling:
                         #asymmetric error bars
                         errors = [[median - lower for median, lower in zip(medians, lowers)],
                             [upper - median for upper, median in zip(uppers, medians)]]
-                        ax.errorbar(distances, medians, yerr=errors, fmt='o', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0, label=f'{profile_key[:-1]}')
+                        line, caplines, barlinecols = ax.errorbar(distances, medians, yerr=errors, fmt='o', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0, label=f'{profile_key[:-1]}', picker = 5)
                         el_labels.append(profile_key[:-1].split('_')[-1]) #get element name
                         y_axis_text = ','.join(el_labels)
                         ax.set_ylabel(f'{y_axis_text}')
+                
+                line.set_picker(5)  # Set picker tolerance
+                self.errorbars.append((line, caplines, barlinecols))
             # Set labels only for the bottom subplot
                 if subplot_idx == num_subplots:
                     ax.set_xlabel('Distance')
@@ -3588,12 +3605,14 @@ class Profiling:
                 legend_loc = 'upper left' if idx % 2 == 0 else 'upper right'
                 # ax.legend(title=f'Axis {idx}', loc=legend_loc, bbox_to_anchor=(1.05, 1))
 
-            # fig.tight_layout(pad=3, h_pad=None, w_pad=None, rect=None)
-            fig.tight_layout(pad=3,w_pad=0, h_pad=0)
-            fig.subplots_adjust(wspace=0, hspace=0)
-            fig.legend(loc='outside right upper')
+            # self.fig.tight_layout(pad=3, h_pad=None, w_pad=None, rect=None)
+            self.fig.tight_layout(pad=3,w_pad=0, h_pad=0)
+            self.fig.subplots_adjust(wspace=0, hspace=0)
+            self.fig.legend(loc='outside right upper')
+            #Connect the pick_event signal to a handler that will process the picked points.
+            self.fig.canvas.mpl_connect('pick_event', self.on_pick)
             # Embed the matplotlib plot in a QWidget
-            canvas = FigureCanvas(fig)
+            canvas = FigureCanvas(self.fig)
             widget = QWidget()
             layout = QVBoxLayout(widget)
             layout.addWidget(canvas)
@@ -3661,6 +3680,35 @@ class Profiling:
         self.main_window.toolButtonPointUp.setEnabled(enable)
         self.main_window.toolButtonPointDown.setEnabled(enable)
         self.main_window.toolButtonPointDelete.setEnabled(enable)
+    
+    def on_pick(self, event):
+        if self.edit_mode_enabled and isinstance(event.artist, Line2D):
+            # Get the index of the picked point (error bar)
+            ind = event.ind[0]
+            # Toggle selection state
+            self.selected_points[ind] = not self.selected_points.get(ind, False)
+        # Update plot to indicate selection
+        for idx, (line, caplines, barlinecols) in enumerate(self.errorbars):
+            if self.selected_points.get(idx, False):
+                # Change color to grey for selected
+                line.set_color('grey')
+                for capline in caplines:
+                    capline.set_color('grey')
+                for barlinecol in barlinecols:
+                    barlinecol.set_color('grey')
+            else:
+                # Reset to original color if not selected
+                line.set_color('blue')  # Or whatever your original color is
+                for capline in caplines:
+                    capline.set_color('blue')
+                for barlinecol in barlinecols:
+                    barlinecol.set_color('blue')
+    
+    # def toggle_edit_mode(self):
+        
+        
+        
+        
 
 
 

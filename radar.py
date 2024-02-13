@@ -240,8 +240,8 @@ class Radar:
         
         
         # Calculate positions for the isocurve labels
-        x_isocurves = np.cos(theta[:, None]) * radius
-        y_isocurves = np.sin(theta[:, None]) * radius
+        # x_isocurves = np.cos(theta[:, None]) * radius
+        # y_isocurves = np.sin(theta[:, None]) * radius
         
         # Iterate through all the number of points
         for j in range(field_count):
@@ -250,7 +250,7 @@ class Radar:
 
             # Display axis text for each isocurve
             for i in range(1, len(radius)):
-                ax.text(theta[j], radius[i], f"{row_axis_labels[i]:.{axes_precision}f}",
+                ax.text(theta[j], radius[i], f"{row_axis_labels[i-1]:.{axes_precision}f}",
                 color='k', fontsize=8,
                 ha='center', va='center')
 

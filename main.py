@@ -113,7 +113,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.toolButtonLoadIsotopes.clicked.connect(self.open_select_isotope_dialog)
         self.actionSelectAnalytes.triggered.connect(self.open_select_isotope_dialog)
-
+        self.actionSpotData.triggered.connect(self.select_spotdata_tab)
+        self.actionFilter_Tools.triggered.connect(self.select_filter_tab)
+        self.actionBiPlot.triggered.connect(self.select_biplot_tab)
+        self.actionTEC.triggered.connect(self.select_ndim_tab)
+        self.actionPolygon.triggered.connect(self.select_filter_tab)
+        self.actionProfiles.triggered.connect(self.select_profiling_tab)
+        self.actionCluster.triggered.connect(self.select_clustering_tab)
 
 
         #self.comboBoxPlots.activated.connect(lambda: self.add_remove(self.comboBoxPlots.currentText()))
@@ -316,6 +322,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # self.toolButtonSaveMV.clicked.connect
 
         self.actionCalculator.triggered.connect(self.open_calculator)
+
+    # toolbar functions
+    def select_spotdata_tab(self):
+        self.toolBox.setCurrentIndex(2)
+    def select_filter_tab(self):
+        self.toolBox.setCurrentIndex(3)
+        self.tabWidget.setCurrentIndex(1)
+    def select_biplot_tab(self):
+        self.toolBox.setCurrentIndex(4)
+    def select_ndim_tab(self):
+        self.toolBox.setCurrentIndex(5)
+    def select_pca_tab(self):
+        self.toolBox.setCurrentIndex(6)
+    def select_clustering_tab(self):
+        self.toolBox.setCurrentIndex(7)
+    def select_profiling_tab(self):
+        self.toolBox.setCurrentIndex(8)
+
 
     # color picking functions
     def OverlayColorSelect(self):
@@ -725,6 +749,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.lineEditFMax.setText(str(self.dynamic_format(f_val['v_max'])))
 
     def update_filter_table(self):
+        # open tabFilterList
+        self.tabWidget.setCurrentIndex(1)
 
         def on_use_checkbox_state_changed(row, state):
             # Update the 'use' value in the filter_df for the given row
@@ -946,6 +972,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Populate the sampleidcomboBox with the file names
         self.canvasWindow.setCurrentIndex(0)
         self.change_sample(0, )
+
+        self.toolBox.setCurrentIndex(0)
 
     def remove_widgets_from_layout(self, layout, object_names_to_remove):
         """
@@ -3202,6 +3230,7 @@ class Profiling:
 
         # if event.button() == QtCore.Qt.LeftButton and self.main_window.pushButtonStartProfile.isChecked():
         if event.button() == QtCore.Qt.LeftButton and self.main_window.toolButtonPlotProfile.isChecked():
+            self.main_window.tabWidget.setCurrentIndex(2)
 
             # Create a scatter plot item at the clicked position
             scatter = ScatterPlotItem([x], [y], symbol='+', size=10)

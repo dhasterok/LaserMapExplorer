@@ -94,22 +94,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         layout_profile_view = QtWidgets.QVBoxLayout()
         layout_profile_view.setSpacing(0)
+
+        # Menu and Toolbar
+        #-------------------------
         self.widgetProfilePlot.setLayout(layout_profile_view)
         # Connect the "Open" action to a function
         self.actionOpen.triggered.connect(self.open_directory)
-
-        #Selecting isotopes
-        # Connect the currentIndexChanged signal of comboBoxSampleId to load_data method
-        self.comboBoxSampleId.activated.connect(
-            lambda: self.change_sample(self.comboBoxSampleId.currentIndex()))
-
-        # self.toolButtonAddRatio.clicked.connect(lambda: self.ratios_items.appendRow(StandardItem(self.ratio_name)))
-
-
-        # self.comboBoxFIsotope.activated.connect(
-        #     lambda: self.get_map_data(self.sample_id,isotope_1=self.comboBoxFIsotope_1.currentText(),
-        #                           isotope_2=self.comboBoxFIsotope_2.currentText(),view = 1))
-        #
 
         self.toolButtonLoadIsotopes.clicked.connect(self.open_select_isotope_dialog)
         self.actionSelectAnalytes.triggered.connect(self.open_select_isotope_dialog)
@@ -121,6 +111,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionProfiles.triggered.connect(self.select_profiling_tab)
         self.actionCluster.triggered.connect(self.select_clustering_tab)
 
+        # Selecting isotopes
+        #-------------------------
+        # Connect the currentIndexChanged signal of comboBoxSampleId to load_data method
+        self.comboBoxSampleId.activated.connect(
+            lambda: self.change_sample(self.comboBoxSampleId.currentIndex()))
+
+        # self.toolButtonAddRatio.clicked.connect(lambda: self.ratios_items.appendRow(StandardItem(self.ratio_name)))
+
+
+        # self.comboBoxFIsotope.activated.connect(
+        #     lambda: self.get_map_data(self.sample_id,isotope_1=self.comboBoxFIsotope_1.currentText(),
+        #                           isotope_2=self.comboBoxFIsotope_2.currentText(),view = 1))
+        #
 
         #self.comboBoxPlots.activated.connect(lambda: self.add_remove(self.comboBoxPlots.currentText()))
         #self.toolButtonAddPlots.clicked.connect(lambda: self.add_multi_plot(self.comboBoxPlots.currentText()))
@@ -146,7 +149,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxNorm.addItems(['linear','log','logit'])
         self.comboBoxNorm.activated.connect(lambda: self.update_norm(self.sample_id, self.comboBoxNorm.currentText(), update = True))
 
-        #preprocess
+        # Preprocess Tab
+        #-------------------------
         self.doubleSpinBoxUB.setMaximum(100)
         self.doubleSpinBoxUB.setMinimum(0)
         self.doubleSpinBoxLB.setMaximum(100)
@@ -204,7 +208,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxScatterSelectC.activated.connect(lambda: self.update_combo_boxes('c'))
 
 
-        #Clustering Tab
+        # Clustering Tab
         #-------------------------
         # Populate the comboBoxCluster with distance metrics
         distance_metrics = ['cityblock', 'cosine', 'euclidean', 'l1', 'l2', 'manhattan']
@@ -226,18 +230,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_cluster_ui()
 
         # Connect color point radio button signals to a slot
-        #self.radioButtonCNone.toggled.connect(self.onRadioButtonToggled)
-        #self.radioButtonCFuzzy.toggled.connect(self.onRadioButtonToggled)
-        #self.radioButtonCKMediods.toggled.connect(self.onRadioButtonToggled)
-        #self.radioButtonCKMeans.toggled.connect(self.onRadioButtonToggled)
         self.comboBoxColorMethod.currentIndexChanged.connect(self.group_changed)
         # Connect the itemChanged signal to a slot
         self.tableWidgetViewGroups.itemChanged.connect(self.onClusterLabelChanged)
 
-
         self.comboBoxColorMethod.currentText() == 'none'
         # self.tableWidgetViewGroups.selectionModel().selectionChanged.connect(self.update_clusters)
 
+        # Scatter and Ternary Tab
+        #-------------------------
+        self.comboBoxScatterType.activated.connect(self.toggle_heatmap_resolution)
 
         # N-Dim Tab
         #-------------------------
@@ -1454,7 +1456,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         return value_dict['x'], value_dict['y'], value_dict['z'], value_dict['c']
 
-
+    def toggle_heatmap_resolution(self):
+        match self.comboBoxScatterType.currentText().lower():
+            case 'scatter':
+                self.spinBoxHeatmapN.setEnabled(False)
+            case 'heatmap':
+                self.spinBoxHeatmapN.setEnabled(True)
 
     def plot_scatter(self, update=False, values = None, plot_type= None, fig= None, ternary_plot= None):
         if not update:
@@ -1504,7 +1511,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 _, cb = ternary_plot.ternscatter(x['array'], y['array'], z['array'], categories=  c['array'], cmap=cmap, orientation = self.comboBoxCBP.currentText().lower())
 
             else:
-                ternary_plot.ternhex(x['array'], y['array'], z['array'], val= c['array'],n=int(self.spinBoxScatterN.value()), cmap = cmap, orientation = self.comboBoxCBP.currentText().lower())
+                ternary_plot.ternhex(x['array'], y['array'], z['array'], val= c['array'],n=int(self.spinBoxHeatmapN.value()), cmap = cmap, orientation = self.comboBoxCBP.currentText().lower())
 
 
             select_scatter = f"{x['elements']}_{y['elements']}_{z['elements']}_{c['elements']}_{plot_type}"
@@ -1521,7 +1528,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 else:
                     ternary_plot.ternscatter(x['array'], y['array'], z['array'],cmap= cmap)
             else:
-                ternary_plot.ternhex(x['array'], y['array'], z['array'],n=int(self.spinBoxScatterN.value()), color_map = cmap, orientation = self.comboBoxCBP.currentText().lower())
+                ternary_plot.ternhex(x['array'], y['array'], z['array'],n=int(self.spinBoxHeatmapN.value()), color_map = cmap, orientation = self.comboBoxCBP.currentText().lower())
             fig.subplots_adjust(left=0.05, right=1)
             select_scatter = f"{x['elements']}_{y['elements']}_{z['elements']}_{plot_type}"
             # fig.tight_layout()

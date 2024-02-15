@@ -39,6 +39,10 @@ import matplotlib.ticker as ticker
 from radar import Radar
 from calculator import CalWindow
 import scipy.stats
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+
+pg.setConfigOption('imageAxisOrder', 'row-major') # best performance
 ## !pyrcc5 resources.qrc -o resources_rc.py
 ## pyuic5 mainwindow.ui -o MainWindow.py
 ## !pyuic5 -x IsotopeSelectionDialog.ui -o IsotopeSelectionDialog.py
@@ -58,7 +62,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.clipped_ratio_data = pd.DataFrame()
         self.clipped_isotope_data = {}
         self.sample_data_dict = {}
-        self.plot_widget_dict ={'lasermap':{},'histogram':{},'lasermap_norm':{},'clustering':{},'scatter':{},'n-dim':{}}
+        self.plot_widget_dict ={'lasermap':{},'histogram':{},'lasermap_norm':{},'clustering':{},'scatter':{},'n-dim':{},'correlation':{}, 'pca':{}}
         self.multi_view_index = []
         self.laser_map_dict = {}
         self.multiview_info_label = {}
@@ -69,6 +73,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.proxies = []
         self.prev_plot = ''
         self.pop_plot = ''
+        self.order= 'F'
         self.swap_xy_val = False
         self.plot_id = {'clustering':{},'scatter':{},'n-dim':{}}
         self.fuzzy_results={}
@@ -326,7 +331,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonTCmapMColor.clicked.connect(self.TCmapMColorSelect)
         self.comboBoxTernaryColormap.currentIndexChanged.connect(lambda: self.TernaryColormapChanged())
         self.TernaryColormapChanged()
-
+        
+        
+        # Plot toolbar
+        #-------------------------
+        
         self.toolButtonHomeSV.clicked.connect(lambda: self.toolbar_plotting('home', 'SV', self.toolButtonHomeSV.isChecked()))
         # self.toolButtonHomeMV.clicked.connect
 
@@ -346,9 +355,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # self.toolButtonSaveMV.clicked.connect
 
         self.actionCalculator.triggered.connect(self.open_calculator)
+        
+        # PCA components
+        #-------------------------
+        
+        self.toolButtonPCAPlot.clicked.connect(self.plot_pca)
 
     def swap_xy(self):
         self.swap_xy_val = not self.swap_xy_val
+        
+        if self.swap_xy_val:
+            self.order = 'C'
+        else:
+        
+            self.order = 'F'
         # swap x and y
         # print(self.sample_data_dict[self.sample_id][['X','Y']])
         self.swap_xy_data(self.sample_data_dict[self.sample_id])
@@ -1070,14 +1090,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         sample_id = plot_information['sample_id']
         plot_type = plot_information['plot_type']
 
-        if self.swap_xy_val:
-            order = 'C'
-        else:
-        
-            order = 'F'
+
         array = np.reshape(current_plot_df['array'].values,
                                     (current_plot_df['Y'].nunique(),
-                                     current_plot_df['X'].nunique()), order=order)[ ::-1, :] #reverse order of rows
+                                     current_plot_df['X'].nunique()), order=self.order)
         self.x_range = current_plot_df['X'].max() - current_plot_df['X'].min()
         self.y_range = current_plot_df['Y'].max() - current_plot_df['Y'].min()
         print(self.x_range)
@@ -1096,7 +1112,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 glw = widgetLaserMap.findChild(pg.GraphicsLayoutWidget, 'plotLaserMap')
                 p1 = glw.getItem(0, 0)  # Assuming ImageItem is the first item in the plot
                 img = p1.items[0]
-                img.setImage(image=array.T)
+                img.setImage(image=array)
+                p1.invertY(True)   # vertical axis counts top to bottom
                 #set aspect ratio of rectangle
                 img.setRect(0,0,self.x_range,self.y_range)
                 cm = pg.colormap.get(self.comboBoxCM.currentText(), source = 'matplotlib')
@@ -1131,8 +1148,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             glw = pg.GraphicsLayoutWidget(show=True)
             glw.setObjectName('plotLaserMap')
             # Create the ImageItem
-            img = pg.ImageItem(image=array.T)
-
+            img = pg.ImageItem(image=array)
+            
             #set aspect ratio of rectangle
             img.setRect(0,0,self.x_range,self.y_range)
             # img.setAs
@@ -1143,7 +1160,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             p1 = glw.addPlot(0,0,title=plot_name.replace('_',' '))
             # p1.setRange(padding=0)
             p1.showAxes(False, showValues=(True,False,False,True) )
-
+            p1.invertY(True) 
             #supress right click menu
             p1.setMenuEnabled(False)
 
@@ -1412,13 +1429,31 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     #     histogram_plot.setLabel('left', 'Frequency')
     #     histogram_plot.setLabel('bottom', 'Value')
     
-    def plot_pca(self, current_pca_df, plot_information):
+    def plot_pca(self):
+        pca_dict = {}
+        
+        df_filtered, mask, isotopes = self.get_processed_data()
+        
+        # Preprocess the data
+        scaler = StandardScaler()
+        df_scaled = scaler.fit_transform(df_filtered)
+        
+        # Perform PCA
+        pca = PCA(n_components=min(len(df_filtered.columns), len(df_filtered)))  # Adjust n_components as needed
+        pca_results = pca.fit_transform(df_scaled)
+        
+        # Convert PCA results to DataFrame for easier plotting
+        pca_dict['results'] =  pd.DataFrame(pca_results, columns=[f'PC{i+1}' for i in range(pca.n_components_)])
+        pca_dict['explained_variance_ratio'] = pca.explained_variance_ratio_
+        pca_dict['components_'] = pca.components_
+        
+        
         # Determine which PCA plot to create based on the combobox selection
-        pca_plot_type = self.comboxPCAPlotTypes.currentText()
+        pca_plot_type = self.comboBoxPCAPlotType.currentText()
     
-        plot_name = plot_information['plot_name']
-        sample_id = plot_information['sample_id']
-        plot_type = 'PCA'  # Assuming all PCA plots fall under a common plot type
+        plot_name = pca_plot_type
+        sample_id = self.sample_id
+        plot_type = 'pca'  # Assuming all PCA plots fall under a common plot type
     
         plot_exist = plot_name in self.plot_widget_dict[plot_type][sample_id]
         duplicate = plot_exist and len(self.plot_widget_dict[plot_type][sample_id][plot_name]['view']) == 1 and self.plot_widget_dict[plot_type][sample_id][plot_name]['view'][0] != self.canvasWindow.currentIndex()
@@ -1428,12 +1463,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             figure_canvas = widgetPCA.findChild(FigureCanvas)
             figure_canvas.figure.clear()
             ax = figure_canvas.figure.subplots()
-            self.update_pca_plot(current_pca_df, pca_plot_type, ax)
+            self.update_pca_plot(pca_dict, pca_plot_type, ax)
             figure_canvas.draw()
         else:
             figure = Figure()
             ax = figure.add_subplot(111)
-            self.update_pca_plot(current_pca_df, pca_plot_type, ax)
+            self.update_pca_plot(pca_dict, pca_plot_type, ax)
             widgetPCA = QtWidgets.QWidget()
             widgetPCA.setLayout(QtWidgets.QVBoxLayout())
             figure_canvas = FigureCanvas(figure)
@@ -1441,7 +1476,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             widgetPCA.layout().addWidget(toolbar)
             widgetPCA.layout().addWidget(figure_canvas)
             view = self.canvasWindow.currentIndex()
-    
+            
+            plot_information = {
+                'plot_name': plot_name,
+                'sample_id': self.sample_id,
+                'plot_type': plot_type,
+
+            }
+            
             if duplicate:
                 self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'].append(widgetPCA)
                 self.plot_widget_dict[plot_type][sample_id][plot_name]['view'].append(view)
@@ -1449,62 +1491,51 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.plot_widget_dict[plot_type][sample_id][plot_name] = {'widget': [widgetPCA], 'info': plot_information, 'view': [view]}
     
             # Additional steps to add the PCA widget to the appropriate container in the UI
-            # self.add_pca_tab(widgetPCA, plot_name)
+            self.add_plot(plot_information)
             
             
             
             
 
-    def update_pca_plot(self, pca_df, pca_plot_type, ax):
-        if pca_plot_type == 'Variance Plot':
-            # Code to plot PCA Variance plot
-            self.plot_variance_plot(pca_df, ax)
-        elif pca_plot_type == 'Vector Plot':
-            # Code to plot PCA Vector plot
-            self.plot_vector_plot(pca_df, ax)
-        elif pca_plot_type == 'PC X vs PC Y':
-            # Code to plot PCA PC X vs PC Y
-            self.plot_pc_x_vs_pc_y(pca_df, ax)
+    def update_pca_plot(self, pca_dict, pca_plot_type, ax):
+        if pca_plot_type == 'Variance':
+            # Assuming pca_dict contains variance ratios for the principal components
+            variances = pca_dict['explained_variance_ratio']
+            ax.bar(range(1, len(variances) + 1), variances)
+            ax.set_xlabel('Principal Component')
+            ax.set_ylabel('Variance Ratio')
+            ax.set_title('PCA Variance Explained')
+            ax.set_xticks(range(1, len(variances) + 1))
+            ax.set_xticklabels([f'PC{i}' for i in range(1, len(variances) + 1)], rotation=45)
+        elif pca_plot_type == 'Vectors':
+            # Assuming pca_dict contains 'components_' from PCA analysis with columns for each variable
+            vectors = pca_dict['components_'].T  # Transpose to have variables on rows
+            for i, vector in enumerate(vectors):
+                ax.arrow(0, 0, vector[0], vector[1], head_width=0.05, head_length=0.1, fc='k', ec='k')
+                ax.text(vector[0], vector[1], f"Var{i+1}", color='red')
+            ax.set_xlabel('PC 1')
+            ax.set_ylabel('PC 2')
+            ax.set_title('PCA Vector Plot')
+            ax.grid()
+        elif pca_plot_type == 'PC X vs. PC Y':
+            pc_x = int(self.spinBoxPCX.value())
+            pc_y = int(self.spinBoxPCY.value())
+            pca_df = pca_dict['results']
+            # Assuming pca_df contains scores for the principal components
+            ax.scatter(pca_df[f'PC{pc_x}'], pca_df[f'PC{pc_y}'])
+            ax.set_xlabel(f'PC{pc_x}')
+            ax.set_ylabel(f'PC{pc_y}')
+            ax.set_title(f'PCA Plot: PC{pc_x} vs PC{pc_y}')
         elif pca_plot_type == 'PC X Score Map':
-            # Code to plot PCA PC X Score Map
-            self.plot_pc_x_score_map(pca_df, ax)
+            pc_x = int(self.spinBoxPCX.value())
+            pca_df = pca_dict['results']
+            # Assuming pca_df contains scores for the principal components
+            ax.bar(range(len(pca_df)), pca_df[f'PC{pc_x}'])
+            ax.set_xlabel('Sample Index')
+            ax.set_ylabel(f'PC{pc_x} Score')
+            ax.set_title(f'PCA Score Map for PC{pc_x}')
         else:
             print(f"Unknown PCA plot type: {pca_plot_type}")
-        
-    def plot_variance_plot(self, pca_df, ax):
-         # Assuming pca_df contains variance ratios for the principal components
-        variances = pca_df['explained_variance_ratio']
-        ax.bar(range(1, len(variances) + 1), variances)
-        ax.set_xlabel('Principal Component')
-        ax.set_ylabel('Variance Ratio')
-        ax.set_title('PCA Variance Explained')
-        ax.set_xticks(range(1, len(variances) + 1))
-        ax.set_xticklabels([f'PC{i}' for i in range(1, len(variances) + 1)], rotation=45)
-        
-    def plot_vector_plot(self, pca_df, ax):
-        # Assuming pca_df contains 'components_' from PCA analysis with columns for each variable
-        vectors = pca_df['components_'].T  # Transpose to have variables on rows
-        for i, vector in enumerate(vectors):
-            ax.arrow(0, 0, vector[0], vector[1], head_width=0.05, head_length=0.1, fc='k', ec='k')
-            ax.text(vector[0], vector[1], f"Var{i+1}", color='red')
-        ax.set_xlabel('PC 1')
-        ax.set_ylabel('PC 2')
-        ax.set_title('PCA Vector Plot')
-        ax.grid()
-
-    def plot_pc_x_vs_pc_y(self, pca_df, ax, pc_x=1, pc_y=2):
-        # Assuming pca_df contains scores for the principal components
-        ax.scatter(pca_df[f'PC{pc_x}'], pca_df[f'PC{pc_y}'])
-        ax.set_xlabel(f'PC{pc_x}')
-        ax.set_ylabel(f'PC{pc_y}')
-        ax.set_title(f'PCA Plot: PC{pc_x} vs PC{pc_y}')
-
-    def plot_pc_x_score_map(self, pca_df, ax, pc_x=1):
-        # Assuming pca_df contains scores for the principal components
-        ax.bar(range(len(pca_df)), pca_df[f'PC{pc_x}'])
-        ax.set_xlabel('Sample Index')
-        ax.set_ylabel(f'PC{pc_x} Score')
-        ax.set_title(f'PCA Score Map for PC{pc_x}')
 
 
     def plot_histogram(self, current_plot_df, plot_information, bin_width):
@@ -1839,7 +1870,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
     def plot_clustering_result(self, ax, labels, method_name, fuzzy_cluster_number):
-        reshaped_array = np.reshape(labels, (self.clipped_isotope_data[self.sample_id]['X'].nunique(), self.clipped_isotope_data[self.sample_id]['Y'].nunique()))
+        reshaped_array = np.reshape(labels, (self.clipped_isotope_data[self.sample_id]['Y'].nunique(), self.clipped_isotope_data[self.sample_id]['X'].nunique()), order=self.order)
 
         x_range = self.clipped_isotope_data[self.sample_id]['X'].max() -  self.clipped_isotope_data[self.sample_id]['X'].min()
         y_range = self.clipped_isotope_data[self.sample_id]['Y'].max() -  self.clipped_isotope_data[self.sample_id]['Y'].min()
@@ -1850,7 +1881,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if method_name == 'Fuzzy' and fuzzy_cluster_number>0:
             cmap = plt.get_cmap(self.comboBoxCM.currentText())
             # img = ax.imshow(reshaped_array.T, cmap=cmap,  aspect=aspect_ratio)
-            img = ax.imshow(reshaped_array.T, cmap=cmap,  aspect=aspect_ratio)
+            img = ax.imshow(reshaped_array, cmap=cmap,  aspect=aspect_ratio)
             fig.colorbar(img, ax=ax, orientation = self.comboBoxCBP.currentText().lower())
         else:
             unique_labels = np.unique(['Cluster '+str(c) for c in labels])
@@ -1865,7 +1896,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             boundaries = np.arange(-0.5, n_clusters, 1)
             norm = BoundaryNorm(boundaries, cmap.N, clip=True)
-            img = ax.imshow(reshaped_array.T.astype('float'), cmap=cmap, norm=norm, aspect = aspect_ratio)
+            img = ax.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect = aspect_ratio)
             fig.colorbar(img, ax=ax, ticks=np.arange(0, n_clusters), orientation = self.comboBoxCBP.currentText().lower())
 
         fig.subplots_adjust(left=0.05, right=1)  # Adjust these values as needed

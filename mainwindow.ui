@@ -2163,7 +2163,7 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tabNotes">
        <property name="toolTip">
@@ -2177,8 +2177,8 @@
          <rect>
           <x>10</x>
           <y>10</y>
-          <width>631</width>
-          <height>221</height>
+          <width>526</width>
+          <height>201</height>
          </rect>
         </property>
         <property name="cursor" stdset="0">
@@ -2193,9 +2193,9 @@
        <widget class="QWidget" name="layoutWidget">
         <property name="geometry">
          <rect>
-          <x>20</x>
-          <y>10</y>
-          <width>621</width>
+          <x>10</x>
+          <y>5</y>
+          <width>526</width>
           <height>211</height>
          </rect>
         </property>
@@ -2498,7 +2498,7 @@
             <property name="minimumSize">
              <size>
               <width>0</width>
-              <height>240</height>
+              <height>200</height>
              </size>
             </property>
            </widget>
@@ -2636,7 +2636,7 @@
        <string/>
       </property>
       <property name="currentIndex">
-       <number>4</number>
+       <number>5</number>
       </property>
       <widget class="QWidget" name="SelectIsotopePage">
        <property name="enabled">
@@ -4550,7 +4550,7 @@
        <widget class="QToolButton" name="toolButtonPlotScatter">
         <property name="geometry">
          <rect>
-          <x>250</x>
+          <x>255</x>
           <y>250</y>
           <width>32</width>
           <height>32</height>
@@ -4781,7 +4781,7 @@
           <rect>
            <x>10</x>
            <y>20</y>
-           <width>291</width>
+           <width>281</width>
            <height>80</height>
           </rect>
          </property>
@@ -4803,6 +4803,12 @@
           </item>
           <item row="1" column="1">
            <widget class="QComboBox" name="comboBoxScatterSelectC">
+            <property name="maximumSize">
+             <size>
+              <width>100</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="font">
              <font>
               <pointsize>11</pointsize>
@@ -4865,6 +4871,12 @@
           </item>
           <item row="0" column="1">
            <widget class="QComboBox" name="comboBoxScatterType">
+            <property name="maximumSize">
+             <size>
+              <width>100</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="font">
              <font>
               <pointsize>11</pointsize>
@@ -4887,6 +4899,12 @@
           </item>
           <item row="1" column="2">
            <widget class="QComboBox" name="comboBoxScatterIsotopeC">
+            <property name="maximumSize">
+             <size>
+              <width>100</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="font">
              <font>
               <pointsize>11</pointsize>
@@ -4901,6 +4919,12 @@
            <widget class="QSpinBox" name="spinBoxHeatmapN">
             <property name="enabled">
              <bool>false</bool>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>100</width>
+              <height>16777215</height>
+             </size>
             </property>
             <property name="font">
              <font>
@@ -4930,7 +4954,7 @@
        <widget class="QToolButton" name="toolButtonTernaryMap">
         <property name="geometry">
          <rect>
-          <x>200</x>
+          <x>215</x>
           <y>250</y>
           <width>32</width>
           <height>32</height>

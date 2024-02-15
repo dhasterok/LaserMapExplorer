@@ -69,6 +69,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.proxies = []
         self.prev_plot = ''
         self.pop_plot = ''
+        self.swap_xy_val = False
         self.plot_id = {'clustering':{},'scatter':{},'n-dim':{}}
         self.fuzzy_results={}
         self.current_group = {'algorithm':None,'clusters': None}
@@ -168,6 +169,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Preprocess Tab
         #-------------------------
+        
         self.toolButtonSwapXY.clicked.connect(self.swap_xy)
 
         self.doubleSpinBoxUB.setMaximum(100)
@@ -346,13 +348,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionCalculator.triggered.connect(self.open_calculator)
 
     def swap_xy(self):
-
+        self.swap_xy_val = not self.swap_xy_val
         # swap x and y
-        print(self.sample_data_dict[self.sample_id][['X','Y']])
+        # print(self.sample_data_dict[self.sample_id][['X','Y']])
         self.swap_xy_data(self.sample_data_dict[self.sample_id])
-        print(self.sample_data_dict[self.sample_id][['X','Y']])
-        self.swap_xy_data(self.clipped_isotope_data[self.sample_id])
-        self.swap_xy_data(self.processed_isotope_data[self.sample_id])
+
+        self.swap_xy_data(self.clipped_isotope_data[self.sample_id]) #this rotates processed data as well
+        
         self.swap_xy_data(self.cluster_results)
 
         # update plots
@@ -1068,13 +1070,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         sample_id = plot_information['sample_id']
         plot_type = plot_information['plot_type']
 
-
+        if self.swap_xy_val:
+            order = 'C'
+        else:
+        
+            order = 'F'
         array = np.reshape(current_plot_df['array'].values,
                                     (current_plot_df['Y'].nunique(),
-                                     current_plot_df['X'].nunique()), order='F')[ ::-1, :] #reverse order of rows
+                                     current_plot_df['X'].nunique()), order=order)[ ::-1, :] #reverse order of rows
         self.x_range = current_plot_df['X'].max() - current_plot_df['X'].min()
         self.y_range = current_plot_df['Y'].max() - current_plot_df['Y'].min()
         print(self.x_range)
+        print(self.y_range)
         duplicate = False
         plot_exist = False
         if plot_name in self.plot_widget_dict[plot_type][sample_id]:
@@ -1090,6 +1097,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 p1 = glw.getItem(0, 0)  # Assuming ImageItem is the first item in the plot
                 img = p1.items[0]
                 img.setImage(image=array.T)
+                #set aspect ratio of rectangle
+                img.setRect(0,0,self.x_range,self.y_range)
                 cm = pg.colormap.get(self.comboBoxCM.currentText(), source = 'matplotlib')
                 img.setColorMap(cm)
                 histogram = widgetLaserMap.findChild(pg.HistogramLUTWidget, 'histogram')
@@ -1402,6 +1411,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     #         histogram_plot.addItem(bar_graph_item)
     #     histogram_plot.setLabel('left', 'Frequency')
     #     histogram_plot.setLabel('bottom', 'Value')
+    
     def plot_pca(self, current_pca_df, plot_information):
         # Determine which PCA plot to create based on the combobox selection
         pca_plot_type = self.comboxPCAPlotTypes.currentText()
@@ -1461,8 +1471,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             print(f"Unknown PCA plot type: {pca_plot_type}")
         
-    def plot_variance_plot
-     # Assuming pca_df contains variance ratios for the principal components
+    def plot_variance_plot(self, pca_df, ax):
+         # Assuming pca_df contains variance ratios for the principal components
         variances = pca_df['explained_variance_ratio']
         ax.bar(range(1, len(variances) + 1), variances)
         ax.set_xlabel('Principal Component')
@@ -1470,6 +1480,32 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         ax.set_title('PCA Variance Explained')
         ax.set_xticks(range(1, len(variances) + 1))
         ax.set_xticklabels([f'PC{i}' for i in range(1, len(variances) + 1)], rotation=45)
+        
+    def plot_vector_plot(self, pca_df, ax):
+        # Assuming pca_df contains 'components_' from PCA analysis with columns for each variable
+        vectors = pca_df['components_'].T  # Transpose to have variables on rows
+        for i, vector in enumerate(vectors):
+            ax.arrow(0, 0, vector[0], vector[1], head_width=0.05, head_length=0.1, fc='k', ec='k')
+            ax.text(vector[0], vector[1], f"Var{i+1}", color='red')
+        ax.set_xlabel('PC 1')
+        ax.set_ylabel('PC 2')
+        ax.set_title('PCA Vector Plot')
+        ax.grid()
+
+    def plot_pc_x_vs_pc_y(self, pca_df, ax, pc_x=1, pc_y=2):
+        # Assuming pca_df contains scores for the principal components
+        ax.scatter(pca_df[f'PC{pc_x}'], pca_df[f'PC{pc_y}'])
+        ax.set_xlabel(f'PC{pc_x}')
+        ax.set_ylabel(f'PC{pc_y}')
+        ax.set_title(f'PCA Plot: PC{pc_x} vs PC{pc_y}')
+
+    def plot_pc_x_score_map(self, pca_df, ax, pc_x=1):
+        # Assuming pca_df contains scores for the principal components
+        ax.bar(range(len(pca_df)), pca_df[f'PC{pc_x}'])
+        ax.set_xlabel('Sample Index')
+        ax.set_ylabel(f'PC{pc_x} Score')
+        ax.set_title(f'PCA Score Map for PC{pc_x}')
+
 
     def plot_histogram(self, current_plot_df, plot_information, bin_width):
 

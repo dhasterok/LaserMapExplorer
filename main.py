@@ -98,8 +98,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Menu and Toolbar
         #-------------------------
         self.widgetProfilePlot.setLayout(layout_profile_view)
+        
         # Connect the "Open" action to a function
         self.actionOpen.triggered.connect(self.open_directory)
+        # Intialize Tabs as not enabled
+        self.SelectIsotopePage.setEnabled(False)
+        self.PreprocessPage.setEnabled(False)
+        self.SpotDataPage.setEnabled(False)
+        self.FilterPage.setEnabled(False)
+        self.ScatterPage.setEnabled(False)
+        self.NDIMPage.setEnabled(False)
+        self.PCAPage.setEnabled(False)
+        self.ClusteringPage.setEnabled(False)
+        self.ProfilingPage.setEnabled(False)
+        self.SpecialFunctionPage.setEnabled(False)
 
         self.toolButtonLoadIsotopes.clicked.connect(self.open_select_isotope_dialog)
         self.actionSelectAnalytes.triggered.connect(self.open_select_isotope_dialog)
@@ -111,6 +123,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionProfiles.triggered.connect(self.select_profiling_tab)
         self.actionCluster.triggered.connect(self.select_clustering_tab)
 
+        # Select Isotope Tab
+        #-------------------------
+        self.ref_data = pd.read_excel('earthref.xlsx')
+        ref_list = self.ref_data['layer']+' ['+self.ref_data['model']+'] '+ self.ref_data['reference']
+
+        self.comboBoxRefMaterial.addItems(ref_list.values)          # Select Isotope Tab
+        self.comboBoxNDimRefMaterial.addItems(ref_list.values)      # NDim Tab
+        self.comboBoxRefMaterial.activated.connect(lambda: self.change_ref_material(self.comboBoxRefMaterial, self.comboBoxNDimRefMaterial))
+        self.comboBoxNDimRefMaterial.activated.connect(lambda: self.change_ref_material(self.comboBoxNDimRefMaterial, self.comboBoxRefMaterial))
+ 
         # Selecting isotopes
         #-------------------------
         # Connect the currentIndexChanged signal of comboBoxSampleId to load_data method
@@ -138,12 +160,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.create_tree()
         self.open_directory()
 
-        #load ref table
-        self.ref_data = pd.read_excel('earthref.xlsx')
-        ref_list = self.ref_data['layer']+' ['+self.ref_data['model']+'] '+ self.ref_data['reference']
-        self.comboBoxRefMaterial.addItems(ref_list.values)
-        self.comboBoxRefMaterial.activated.connect(self.update_all_plots)
-
         #normalising
         self.comboBoxNorm.clear()
         self.comboBoxNorm.addItems(['linear','log','logit'])
@@ -151,6 +167,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Preprocess Tab
         #-------------------------
+        self.toolButtonSwapXY.clicked.connect(self.swap_xy)
+
         self.doubleSpinBoxUB.setMaximum(100)
         self.doubleSpinBoxUB.setMinimum(0)
         self.doubleSpinBoxLB.setMaximum(100)
@@ -169,6 +187,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.spinBoxY.valueChanged.connect(lambda:self.update_plot(axis = True))
         self.spinBox_X.valueChanged.connect(lambda:self.update_plot(axis = True))
         self.spinBox_Y.valueChanged.connect(lambda:self.update_plot(axis = True))
+        self.toolButtonFullView.clicked.connect(self.reset_to_full_view)
         self.spinBoxNBins.valueChanged.connect(self.update_plot)
         self.spinBoxBinWidth.valueChanged.connect(lambda: self.update_plot(bin_s=False))
         self.toolBox.currentChanged.connect(lambda: self.canvasWindow.setCurrentIndex(0))
@@ -246,7 +265,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.table_fcn = Table_Fcn(self)
         isotope_set = ['majors', 'full trace', 'REE', 'metals']
         self.comboBoxNDimIsotopeSet.addItems(isotope_set)
-        self.comboBoxNDimRefMaterial.addItems(ref_list.values)
+        #self.comboBoxNDimRefMaterial.addItems(ref_list.values) This is done with the Set Isotope tab initialization above.
         self.toolButtonNDimIsotopeAdd.clicked.connect(lambda: self.update_n_dim_table('IsotopeAdd'))
         self.toolButtonNDimIsotopeSetAdd.clicked.connect(lambda: self.update_n_dim_table('IsotopeSetAdd'))
         self.toolButtonNDimPlot.clicked.connect(self.plot_n_dim)
@@ -325,6 +344,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.actionCalculator.triggered.connect(self.open_calculator)
 
+    def swap_xy(self):
+
+        # swap x and y
+        print(self.sample_data_dict[self.sample_id][['X','Y']])
+        self.swap_xy_data(self.sample_data_dict[self.sample_id])
+        print(self.sample_data_dict[self.sample_id][['X','Y']])
+        self.swap_xy_data(self.clipped_isotope_data[self.sample_id])
+        self.swap_xy_data(self.processed_isotope_data[self.sample_id])
+        self.swap_xy_data(self.cluster_results)
+
+        # update plots
+        self.update_all_plots()
+
+    def swap_xy_data(self, df):
+        xtemp = df['Y']
+        df['Y'] = df['X']
+        df['X'] = xtemp 
+
     # toolbar functions
     def select_spotdata_tab(self):
         self.toolBox.setCurrentIndex(2)
@@ -342,6 +379,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def select_profiling_tab(self):
         self.toolBox.setCurrentIndex(8)
 
+    def change_ref_material(self, comboBox1, comboBox2):
+        comboBox2.setCurrentIndex(comboBox1.currentIndex())
+        self.update_all_plots()
+
+    def reset_to_full_view(self):
+        self.spinBox_X.setValue(self.spinBox_X.minimum())
+        self.spinBoxX.setValue(self.spinBoxX.maximum())
+        self.spinBox_Y.setValue(self.spinBox_Y.minimum())
+        self.spinBoxY.setValue(self.spinBoxY.maximum())
+
+        self.update_all_plots()
 
     # color picking functions
     def OverlayColorSelect(self):
@@ -977,6 +1025,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.toolBox.setCurrentIndex(0)
 
+        self.SelectIsotopePage.setEnabled(True)
+        self.PreprocessPage.setEnabled(True)
+        self.SpotDataPage.setEnabled(True)
+        self.FilterPage.setEnabled(True)
+        self.ScatterPage.setEnabled(True)
+        self.NDIMPage.setEnabled(True)
+        self.PCAPage.setEnabled(True)
+        self.ClusteringPage.setEnabled(True)
+        self.ProfilingPage.setEnabled(True)
+        self.SpecialFunctionPage.setEnabled(True)
+
     def remove_widgets_from_layout(self, layout, object_names_to_remove):
         """
         Remove widgets from the provided layout based on their objectName properties.
@@ -1014,7 +1073,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                      current_plot_df['X'].nunique()), order='F')[ ::-1, :] #reverse order of rows
         self.x_range = current_plot_df['X'].max() - current_plot_df['X'].min()
         self.y_range = current_plot_df['Y'].max() - current_plot_df['Y'].min()
-
+        print(self.x_range)
         duplicate = False
         plot_exist = False
         if plot_name in self.plot_widget_dict[plot_type][sample_id]:
@@ -1456,6 +1515,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         return value_dict['x'], value_dict['y'], value_dict['z'], value_dict['c']
 
+    # toggle heatmap resolution spinBox when the scatter type comboBox is changed
     def toggle_heatmap_resolution(self):
         match self.comboBoxScatterType.currentText().lower():
             case 'scatter':
@@ -1491,8 +1551,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # df = df.dropna(axis = 0).astype('int64')
 
         # x['array'], y['array'], z['array'] = df.iloc[:, 0].values, df.iloc[:, 1].values, df.iloc[:, 2].values
-
-
 
 
         cmap = matplotlib.colormaps.get_cmap(self.comboBoxCM.currentText())
@@ -1539,6 +1597,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             ax.scatter(x['array'], y['array'], alpha=0.5)
             select_scatter = f"{x['elements']}_{y['elements']}_{plot_type}"
 
+            # add labels
+            xlbl = self.comboBoxScatterIsotopeX.currentText() 
+            ylbl = self.comboBoxScatterIsotopeY.currentText() 
+            match self.comboBoxScatterSelectX.currentText().lower():
+                case 'isotope':
+                    xlbl += ' ('+self.lineEditConcentrationUnits.text()+')'
+            match self.comboBoxScatterSelectX.currentText().lower():
+                case 'isotope':
+                    ylbl += ' ('+self.lineEditConcentrationUnits.text()+')'
+            ax.set_xlabel(xlbl)
+            ax.set_ylabel(ylbl)
+            ax.tick_params(labelbottom=True, labeltop=False, labelleft=True, labelright=False, bottom=True, top=True, left=True, right=True)
+
+            ax.set_box_aspect(1.0)
 
         if not update:
             plot_information = {
@@ -1746,7 +1818,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             self.labelClusterExponent.setEnabled(False)
             self.labelNClusters.setEnabled(True)
-            self.labelExponen.setEnabled(False)
+            self.labelExponent.setEnabled(False)
             self.labelClusterDistance.setEnabled(False)
             self.labelFCView.setEnabled(False)
 
@@ -1759,7 +1831,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             self.labelClusterExponent.setEnabled(False)
             self.labelNClusters.setEnabled(True)
-            self.labelExponen.setEnabled(False)
+            self.labelExponent.setEnabled(False)
             self.labelClusterDistance.setEnabled(True)
             self.labelFCView.setEnabled(False)
 

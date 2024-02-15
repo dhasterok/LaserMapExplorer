@@ -74,6 +74,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.prev_plot = ''
         self.pop_plot = ''
         self.order= 'F'
+        self.update_spinboxes_bool = False
+        self.default_bins = 100
         self.swap_xy_val = False
         self.plot_id = {'clustering':{},'scatter':{},'n-dim':{}}
         self.fuzzy_results={}
@@ -166,7 +168,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #create plot tree
 
         self.create_tree()
-        self.open_directory()
+        # self.open_directory()
 
         #normalising
         self.comboBoxNorm.clear()
@@ -201,9 +203,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.spinBoxBinWidth.valueChanged.connect(lambda: self.update_plot(bin_s=False))
         self.toolBox.currentChanged.connect(lambda: self.canvasWindow.setCurrentIndex(0))
         #auto scale
-        #self.checkBoxAutoScale.clicked.connect( self.auto_scale )
+        self.toolButtonAutoScale.clicked.connect(lambda: self.auto_scale(False) )
         self.toolButtonAutoScale.setChecked(True)
-
+        self.toolButtonHistogramReset.clicked.connect(lambda: self.update_plot(reset = True))
 
         # Filter Tabs
         #-------------------------
@@ -591,12 +593,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             isotope_1 = self.current_plot_information['isotope_1']
             isotope_2 = self.current_plot_information['isotope_2']
             plot_type = self.current_plot_information['plot_type']
-            auto_scale = True
             lb = self.doubleSpinBoxLB.value()
             ub = self.doubleSpinBoxUB.value()
             d_lb = self.doubleSpinBoxDLB.value()
             d_ub = self.doubleSpinBoxDUB.value()
-
+            auto_scale = self.toolButtonAutoScale.isChecked()
             # if isotope_1 and not isotope_2:
             #     auto_scale_value = self.isotopes_df.loc[(self.isotopes_df['sample_id']==self.sample_id)
             #                      & (self.isotopes_df['isotopes']==isotope_1),'auto_scale'].values[0]
@@ -607,16 +608,23 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
 
-
-            # if auto_scale_value and not update: #user unticks auto_scale
-            #     auto_scale = False
-
-
-
+            print(auto_scale)
+            if auto_scale and not update:
+                #reset to default auto scale values
+                lb = 0.05
+                ub = 99.5
+                d_lb = 99
+                d_ub = 99
+                
+            elif not auto_scale and not update:
+                # show unbounded plot when auto scale switched off
+                lb = 0
+                ub = 100
+                
             if isotope_1 and not isotope_2:
 
                 self.isotopes_df.loc[(self.isotopes_df['sample_id']==self.sample_id)
-                                  & (self.isotopes_df['isotopes']==isotope_1),'auto_scale']  = self.toolButtonAutoScale.isChecked()
+                                  & (self.isotopes_df['isotopes']==isotope_1),'auto_scale']  = auto_scale
                 self.isotopes_df.loc[(self.isotopes_df['sample_id']==self.sample_id)
                                          & (self.isotopes_df['isotopes']==isotope_1),
                                          ['upper_bound','lower_bound','d_l_bound', 'd_u_bound']] = [ub,lb,d_lb, d_ub]
@@ -625,18 +633,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             else:
                 self.ratios_df.loc[(self.ratios_df['sample_id']==self.sample_id)
                                          & (self.ratios_df['isotope_1']==isotope_1)
-                                         & (self.ratios_df['isotope_2']==isotope_2),'auto_scale']  = self.toolButtonAutoScale.isChecked()
+                                         & (self.ratios_df['isotope_2']==isotope_2),'auto_scale']  = auto_scale
                 self.ratios_df.loc[(self.ratios_df['sample_id']==self.sample_id)
                                           & (self.ratios_df['isotope_1']==isotope_1)
                                           & (self.ratios_df['isotope_2']==isotope_2),
                                           ['upper_bound','lower_bound','d_l_bound', 'd_u_bound']] = [ub,lb,d_lb, d_ub]
-            self.get_map_data(self.sample_id, isotope_1 = isotope_1, isotope_2 = isotope_2, plot_type = plot_type, auto_scale = auto_scale, update = True)
+            self.get_map_data(self.sample_id, isotope_1 = isotope_1, isotope_2 = isotope_2, plot_type = plot_type, update = True)
 
             self.update_filter_values()
 
 
 
-    def update_plot(self,bin_s = True, axis = False):
+    def update_plot(self,bin_s = True, axis = False, reset= False):
         if self.update_spinboxes_bool:
             self.canvasWindow.setCurrentIndex(0)
             lb = self.doubleSpinBoxLB.value()
@@ -673,16 +681,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.clipped_isotope_data[sample_id][isotope_1] = current_plot_df['array'].values
             self.update_norm(sample_id, isotope = isotope_1)
             current_plot_df = current_plot_df[self.axis_mask].reset_index(drop=True)
-            if plot_type=='hist':
+            if plot_type=='histogram':
+                if reset:
+                    bins  = self.default_bins
                 # If bin_width is not specified, calculate it
                 if bin_s:
                     bin_width = data_range / bins
-                    self.spinBoxBinWidth.setValue(int(bin_width))
+                    self.spinBoxBinWidth.setValue(int(np.floor(bin_width)))
                 else:
                     bin_width = self.spinBoxBinWidth.value()
-                    bins = int(data_range / bin_width)
+                    bins = int(np.floor(data_range / bin_width))
                     self.spinBoxNBins.setValue(bins)
-                self.plot_histogram(current_plot_df,bins,bin_width ,self.current_plot_information)
+                self.plot_histogram(current_plot_df,self.current_plot_information, bin_width )
             else:
                 self.plot_laser_map(current_plot_df, self.current_plot_information)
             # self.add_plot(isotope_str,clipped_isotope_array)
@@ -929,7 +939,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def update_norm(self,sample_id, norm = None, isotope=None, update = False):
         if not norm:
             norm = self.isotopes_df.loc[(self.isotopes_df['sample_id']==sample_id)
-                                 & (self.isotopes_df['isotopes']==isotope),'norm'][0]
+                                 & (self.isotopes_df['isotopes']==isotope),'norm'].values[0]
         if isotope: #if normalising single isotope
             isotopes = [isotope]
             self.isotopes_df.loc[(self.isotopes_df['sample_id']==sample_id)
@@ -1098,8 +1108,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                      current_plot_df['X'].nunique()), order=self.order)
         self.x_range = current_plot_df['X'].max() - current_plot_df['X'].min()
         self.y_range = current_plot_df['Y'].max() - current_plot_df['Y'].min()
-        print(self.x_range)
-        print(self.y_range)
         duplicate = False
         plot_exist = False
         if plot_name in self.plot_widget_dict[plot_type][sample_id]:
@@ -1177,7 +1185,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             # Optionally, configure the appearance
             # For example, set the size of the crosshair
-            name = plot_name+str(view)
+            name = sample_id+plot_name+str(view)
             self.lasermaps[name] = (target, p1, view, array)
 
 
@@ -1434,7 +1442,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def plot_pca(self):
         pca_dict = {}
         
-        df_filtered, mask, isotopes = self.get_processed_data()
+        df_filtered, isotopes = self.get_processed_data()
         
         # Preprocess the data
         scaler = StandardScaler()
@@ -1576,7 +1584,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def plot_correlation(self, plot =False):
         correlation_dict = {}
         
-        df_filtered, mask, isotopes = self.get_processed_data()
+        df_filtered, isotopes = self.get_processed_data()
         
         # Calculate the correlation matrix
         correlation_matrix = df_filtered.corr()
@@ -1609,7 +1617,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             widgetCorrelation.setLayout(QtWidgets.QVBoxLayout())
             figure_canvas = FigureCanvas(figure)
             toolbar = NavigationToolbar(figure_canvas, widgetCorrelation)
-            widgetCorrelation.layout().addWidget(toolbar)
+            # widgetCorrelation.layout().addWidget(toolbar)
             widgetCorrelation.layout().addWidget(figure_canvas)
             view = self.canvasWindow.currentIndex()
             
@@ -1635,8 +1643,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         correlation_matrix = correlation_dict['correlation_matrix']
         cax = ax.imshow(correlation_matrix, cmap=cmap, aspect='auto')
         
+        fig = ax.get_figure()
         # Add colorbar to the plot
-        cbar = plt.colorbar(cax, ax=ax)
+        cbar = fig.colorbar(cax, ax=ax)
         cbar.set_label('Correlation coefficient')
         
         # Set tick labels
@@ -1893,7 +1902,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
     def plot_clustering(self):
-        df_filtered, mask, isotopes = self.get_processed_data()
+        df_filtered, isotopes = self.get_processed_data()
         filtered_array =df_filtered.values
         # filtered_array = df_filtered.dropna(axis=0, how='any').values
 
@@ -1932,10 +1941,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             }
 
 
-        self.process_clustering_methods( n_clusters, exponent, distance_type,fuzzy_cluster_number,  filtered_array,clustering_algorithms, mask, )
+        self.process_clustering_methods( n_clusters, exponent, distance_type,fuzzy_cluster_number,  filtered_array,clustering_algorithms )
 
 
-    def process_clustering_methods(self, n_clusters, exponent, distance_type, fuzzy_cluster_number, filtered_array, clustering_algorithms, mask):
+    def process_clustering_methods(self, n_clusters, exponent, distance_type, fuzzy_cluster_number, filtered_array, clustering_algorithms):
         #create unique id if new plot
         plot_type = 'clustering'
         if self.sample_id in self.plot_id[plot_type]:
@@ -1957,20 +1966,23 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # fig.subplots_adjust(left=0, right=1)
 
             ax = fig.add_subplot(subplot_num)
+            
+            # Create labels array filled with -1
+            labels = np.full(filtered_array.shape[0], -1, dtype=int)
             if name == 'Fuzzy':
                 cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(filtered_array.T, n_clusters, exponent, error=0.00001, maxiter=1000,seed =23)
                 # cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(array.T, n_clusters, exponent, error=0.005, maxiter=1000,seed =23)
                 for n in range(n_clusters):
                     self.fuzzy_results[n] = u[n-1,:]
                     if fuzzy_cluster_number>0:
-                        labels = self.fuzzy_results[fuzzy_cluster_number]
+                        labels[self.mask] = self.fuzzy_results[fuzzy_cluster_number][self.mask]
                     else:
-                        labels = np.argmax(u, axis=0)
-                        self.cluster_results[name][mask] = ['Cluster '+str(c) for c in labels]
+                        labels[self.mask] = np.argmax(u, axis=0)[self.mask]
+                        self.cluster_results[name][self.mask] = ['Cluster '+str(c) for c in labels]
             else:
                 model = clustering.fit(filtered_array)
-                labels = model.predict(filtered_array)
-                self.cluster_results[name][mask] = ['Cluster '+str(c) for c in labels]
+                labels[self.mask] = model.predict(filtered_array[self.mask])
+                self.cluster_results[name][self.mask] = ['Cluster '+str(c) for c in labels]
             # Plot each clustering result
             self.plot_clustering_result(ax, labels, name, fuzzy_cluster_number)
 
@@ -2114,16 +2126,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         use_isotopes = self.isotopes_df.loc[(self.isotopes_df['use']==True) & (self.isotopes_df['sample_id']==self.sample_id), 'isotopes'].values
         # Combine the two masks to create a final mask
         nan_mask = self.processed_isotope_data[self.sample_id][use_isotopes].notna().all(axis=1)
-        mask = self.filter_mask & self.polygon_mask  & nan_mask & self.axis_mask
+        self.mask = self.filter_mask & self.polygon_mask  & nan_mask & self.axis_mask
 
-        df_filtered = self.processed_isotope_data[self.sample_id][use_isotopes][mask]
+        df_filtered = self.processed_isotope_data[self.sample_id][use_isotopes]
 
-        return df_filtered, mask, use_isotopes
+        return df_filtered, use_isotopes
 
 
     def plot_n_dim(self):
 
-        df_filtered, mask,_  = self.get_processed_data()
+        df_filtered, _  = self.get_processed_data()
+        df_filtered = df_filtered[self.mask]
 
         ref_i = self.comboBoxNDimRefMaterial.currentIndex()
 
@@ -2144,8 +2157,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if self.current_group['algorithm'] in self.cluster_results:
                 # Get the cluster labels for the data
 
-                cluster_labels = self.cluster_results[self.current_group['algorithm']]
-                df_filtered['clusters'] = cluster_labels[mask]
+                cluster_labels = self.cluster_results[self.current_group['algorithm']][self.mask]
+                df_filtered['clusters'] = cluster_labels
 
                 radar = Radar(df_filtered, fields = self.n_dim_list, quantiles=quantiles, axes_interval = axes_interval, group_field ='clusters', groups = np.unique(cluster_labels.dropna()))
 
@@ -2161,8 +2174,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             yl = [np.inf, -np.inf]
             if self.current_group['algorithm'] in self.cluster_results:
                 # Get the cluster labels for the data
-                cluster_labels = self.cluster_results[self.current_group['algorithm']]
-                df_filtered['clusters'] = cluster_labels[mask]
+                cluster_labels = self.cluster_results[self.current_group['algorithm']][self.mask]
+                df_filtered['clusters'] = cluster_labels
                 clusters = np.unique(cluster_labels)
 
                 # Plot tec for all clusters
@@ -2667,7 +2680,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.update_spinboxes_bool = True
 
 
-    def get_map_data(self,sample_id, isotope_1=None, isotope_2=None, plot_type = 'lasermap', plot= True,auto_scale = False, update = False):
+    def get_map_data(self,sample_id, isotope_1=None, isotope_2=None, plot_type = 'lasermap', plot= True, update = False):
 
         """
         Retrieves and processes the mapping data for the given sample and isotopes, then plots the result if required.
@@ -2705,6 +2718,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             ub = parameters['upper_bound']
             d_lb = parameters['d_l_bound']
             d_ub = parameters['d_u_bound']
+            
             # if plot is None: #only update x and y for plotting for analysis use original x and y range
             #     x_range = [current_plot_df['X'].min(), current_plot_df['X'].max()]
             #     y_range = [current_plot_df['Y'].min(), current_plot_df['Y'].max()]
@@ -2789,7 +2803,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                     if auto_scale_param:
 
-                        current_plot_df = self.scale_plot(current_plot_df, lq= lb, uq=ub,d_lb=d_lb, d_ub=d_ub, x_range = x_range, y_range = y_range, norm=norm, outlier=auto_scale)
+                        current_plot_df = self.scale_plot(current_plot_df, lq= lb, uq=ub,d_lb=d_lb, d_ub=d_ub, x_range = x_range, y_range = y_range, norm=norm, outlier=auto_scale_param)
                     else:
 
                         current_plot_df = self.scale_plot(current_plot_df, lq= lb, uq=ub,d_lb=d_lb, d_ub=d_ub, x_range = x_range, y_range = y_range, norm=norm)
@@ -2801,7 +2815,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             if update: #update clipped ratio df
                 self.clipped_ratio_data[isotope_str] = current_plot_df['array'].values
-        bins =100
+        bins =self.default_bins
 
         bin_width = (np.nanmax(current_plot_df['array']) - np.nanmin(current_plot_df['array'])) / bins
 
@@ -2813,7 +2827,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.plot_laser_map(current_plot_df,plot_information)
             self.update_spinboxes(parameters,bins, bin_width, auto_scale_param)
 
-        elif plot_type=='historgram':
+        elif plot_type=='histogram':
 
 
             plot_information={'plot_name':isotope_str,'sample_id':sample_id,
@@ -3025,13 +3039,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                         if not check: #if ratio doesnt exist
                             child_item = StandardItem(ratio_name)
-                            child_item.setBackground(QBrush(QColor(255, 255, 0)))
+                            child_item.setBackground(QBrush(QColor(255, 255, 200)))
                             item.appendRow(child_item)
                         else:
-                            item.setBackground(QBrush(QColor(255, 255, 0)))
+                            item.setBackground(QBrush(QColor(255, 255, 200)))
                     else: #single isotope
                         item,check = self.find_leaf(tree = self.isotopes_items, branch = self.sample_id, leaf = isotope_pair)
-                        item.setBackground(QBrush(QColor(255, 255, 0)))
+                        item.setBackground(QBrush(QColor(255, 255, 200)))
                         self.isotopes_df.loc[(self.isotopes_df['sample_id']==self.sample_id) & (self.isotopes_df['isotopes']==isotope_pair),'use'] = True
                         self.update_norm(self.sample_id,norm,isotope_pair)
 

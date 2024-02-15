@@ -2639,7 +2639,7 @@
        <string/>
       </property>
       <property name="currentIndex">
-       <number>5</number>
+       <number>7</number>
       </property>
       <widget class="QWidget" name="SelectIsotopePage">
        <property name="enabled">
@@ -2673,7 +2673,7 @@
           <rect>
            <x>10</x>
            <y>0</y>
-           <width>281</width>
+           <width>288</width>
            <height>111</height>
           </rect>
          </property>
@@ -3218,6 +3218,9 @@
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
+            <property name="maximum">
+             <number>9999</number>
+            </property>
            </widget>
           </item>
           <item row="1" column="0">
@@ -3234,6 +3237,9 @@
            <widget class="QSpinBox" name="spinBoxNBins">
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+            <property name="maximum">
+             <number>9999</number>
             </property>
            </widget>
           </item>
@@ -5982,6 +5988,9 @@
                 </item>
                 <item>
                  <widget class="QSlider" name="horizontalSliderClusterExponent">
+                  <property name="enabled">
+                   <bool>true</bool>
+                  </property>
                   <property name="maximumSize">
                    <size>
                     <width>150</width>

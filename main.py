@@ -16,6 +16,7 @@ import matplotlib
 matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+from matplotlib.collections import PathCollection
 import matplotlib.pyplot as plt
 from IsotopeSelectionDialog import Ui_Dialog
 from PyQt5.QtWidgets import QStyledItemDelegate
@@ -298,10 +299,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # self.toolButtonPlotProfile.clicked.connect(lambda:self.profiling.plot_profiles())
         self.toolButtonPointSelectAll.clicked.connect(self.tableWidgetProfilePoints.selectAll)
         # Connect toolButtonProfileEditToggle's clicked signal to toggle edit mode
-        # self.toolButtonProfileEditToggle.clicked.connect(self.profiling.toggle_edit_mode)
+        self.toolButtonProfileEditToggle.clicked.connect(self.profiling.toggle_edit_mode)
 
         # Connect toolButtonProfilePointToggle's clicked signal to toggle point visibility
-        # self.toolButtonProfilePointToggle.clicked.connect(self.profiling.toggle_point_visibility)
+        self.toolButtonProfilePointToggle.clicked.connect(self.profiling.toggle_point_visibility)
 
         #SV/MV tool box
         self.toolButtonPanSV.setCheckable(True)
@@ -3230,6 +3231,7 @@ class Table_Fcn:
                         self.clear_interpolation()
                         self.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
 
+
     def delete_row(self,table):
 
         rows = [index.row() for index in table.selectionModel().selectedRows()][::-1] #sort descending to pop in order
@@ -3241,17 +3243,19 @@ class Table_Fcn:
                     table.removeRow(row)
                     # remove point from each profile and its corresponding scatter plot item
 
+
                     for key, profile in self.profiles.items():
                         if row < len(profile):
                             scatter_item = profile[row][3]  # Access the scatter plot item
                             for _, (_, plot, _, _) in self.main_window.lasermaps.items():
                                 plot.removeItem(scatter_item)
                             profile.pop(row) #index starts at 0
+                       
+                self.main_window.profiling.plot_profiles(sort_axis = False)
 
-                self.plot_profiles(sort_axis = False)
                 if self.main_window.toolButtonIPProfile.isChecked(): #reset interpolation if selected
-                    self.clear_interpolation()
-                    self.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
+                    self.main_window.profiling.clear_interpolation()
+                    self.main_window.profiling.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
 
             case 'NDim':
                 for row in rows:
@@ -3276,7 +3280,11 @@ class Profiling:
         self.array_y = None
         self.point_selected = False # move point button selected
         self.pind = -1              # index for move point
-
+        self.all_errorbars = []      #stores points of profiles
+        self.selected_points = {}  # Track selected points, e.g., {point_index: selected_state}
+        self.edit_mode_enabled = False  # Track if edit mode is enabled
+        self.original_colors = {}
+        self.scatter_size =64
     def on_plot_clicked(self, event,array,k, plot,radius=5):
 
         # turn off profile (need to suppress context menu on right click)
@@ -3611,10 +3619,9 @@ class Profiling:
             profiles = self.profiles
         else:
             profiles = self.i_profiles
-
-        print(list(profiles.values()))
+            
         if len(list(profiles.values())[0])>0: #if self.profiles has values
-            self.main_window.tabWidget.setCurrentIndex(1) #show profile plot tab
+            self.main_window.tabWidget.setCurrentIndex(2) #show profile plot tab
             sort_axis=self.main_window.comboBoxProfileSort.currentText()
             range_threshold=int(self.main_window.lineEditYThresh.text())
             # Clear existing plot
@@ -3627,7 +3634,7 @@ class Profiling:
             # Get the colormap specified by the user
             cmap = matplotlib.colormaps.get_cmap(self.main_window.comboBoxCM.currentText())
             # Determine point type from the pushButtonProfileType text
-            if self.main_window.comboBoxPointType.currentText() == 'median':
+            if self.main_window.comboBoxPointType.currentText() == 'median + IQR':
                 point_type = 'median'
             else:
                 point_type ='mean'
@@ -3638,7 +3645,8 @@ class Profiling:
             num_groups = len(profile_groups)
             num_subplots = (num_groups + 1) // 2  # Two groups per subplot, rounding up
             subplot_idx = 1
-
+            #reset existing error_bar list
+            self.all_errorbars = []
             # Adjust subplot spacing
             # fig.subplots_adjust(hspace=0.1)  # Adjust vertical spacing
             ax = self.fig.add_subplot(num_subplots, 1, subplot_idx)
@@ -3652,11 +3660,23 @@ class Profiling:
                 # Plot each profile in the group
                 if point_type == 'mean':
                     for g_idx,(profile_key, distances, means,s_errors) in enumerate(group_profiles):
-                        line, caplines, barlinecols= ax.errorbar(distances, means, yerr=s_errors, fmt='o', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0, label=f'{profile_key[:-1]}', picker = 5)
+                        # Plot markers with ax.scatter
+                        scatter = ax.scatter(distances, means, color=colors[idx+g_idx], s=64, picker=5)
+                        
+                        # Store additional information needed to identify points upon picking
+                        self.scatter_info = scatter
+                        
+                        self.original_colors[scatter] = colors[idx+g_idx]  # Assuming colors is accessible
+        
+                        #plot errorbars with no marker
+                        self.line, self.caplines, self.barlinecols= ax.errorbar(distances, means, yerr=s_errors, fmt='none', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0, label=f'{profile_key[:-1]}')
+                        
 
                         el_labels.append(profile_key[:-1].split('_')[-1]) #get element name
                         y_axis_text = ','.join(el_labels)
                         ax.set_ylabel(f'{y_axis_text}')
+                        # Append the new Line2D objects to the list
+                        # self.markers.extend(marker)
                 else:
                     for g_idx,(profile_key, distances, medians, lowers, uppers) in enumerate(group_profiles):
 
@@ -3664,13 +3684,19 @@ class Profiling:
                         #asymmetric error bars
                         errors = [[median - lower for median, lower in zip(medians, lowers)],
                             [upper - median for upper, median in zip(uppers, medians)]]
-                        line, caplines, barlinecols = ax.errorbar(distances, medians, yerr=errors, fmt='o', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0, label=f'{profile_key[:-1]}', picker = 5)
+                        # Plot markers with ax.scatter
+                        scatter = ax.scatter(distances, medians, color=colors[idx+g_idx],s=self.scatter_size, picker=5, gid=profile_key, edgecolors = 'none')
+                        #plot errorbars with no marker
+                        _, _, barlinecols = ax.errorbar(distances, medians, yerr=errors, fmt='none', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0, label=f'{profile_key[:-1]}')
+                        
+                        
+                        self.all_errorbars.append((scatter,barlinecols[0]))
+                        self.original_colors[profile_key] = colors[idx+g_idx]  # Assuming colors is accessible
+                        self.selected_points[profile_key] = [False] * len(medians)
                         el_labels.append(profile_key[:-1].split('_')[-1]) #get element name
                         y_axis_text = ','.join(el_labels)
                         ax.set_ylabel(f'{y_axis_text}')
 
-                line.set_picker(5)  # Set picker tolerance
-                self.errorbars.append((line, caplines, barlinecols))
             # Set labels only for the bottom subplot
                 if subplot_idx == num_subplots:
                     ax.set_xlabel('Distance')
@@ -3699,12 +3725,7 @@ class Profiling:
             self.main_window.widgetProfilePlot.layout().addWidget(widget)
             widget.show()
         else:
-            # Clear the profile plot widget
-            layout = self.main_window.widgetProfilePlot.layout()
-            while layout.count():
-                child = layout.takeAt(0)
-                if child.widget():
-                    child.widget().deleteLater()
+            self.on_clear_profile_clicked()
 
     def on_clear_profile_clicked(self):
         # Clear all scatter plot items from the lasermaps
@@ -3759,32 +3780,89 @@ class Profiling:
         self.main_window.toolButtonPointDelete.setEnabled(enable)
 
     def on_pick(self, event):
-        if self.edit_mode_enabled and isinstance(event.artist, Line2D):
-            # Get the index of the picked point (error bar)
-            ind = event.ind[0]
+        print(event.artist)
+        if self.edit_mode_enabled and isinstance(event.artist, PathCollection):
+            # The picked scatter plot
+            picked_scatter = event.artist
+            # Indices of the picked points, could be multiple if overlapping
+            ind = event.ind[0]  # Let's handle the first picked point for simplicity
+            profile_key = picked_scatter.get_gid()
+            # Determine the color of the picked point
+            facecolors = picked_scatter.get_facecolors().copy()
+            original_color = matplotlib.colors.to_rgba(self.original_colors[profile_key])  # Assuming you have a way to map indices to original colors
+            
+            print(ind)
             # Toggle selection state
-            self.selected_points[ind] = not self.selected_points.get(ind, False)
-        # Update plot to indicate selection
-        for idx, (line, caplines, barlinecols) in enumerate(self.errorbars):
-            if self.selected_points.get(idx, False):
-                # Change color to grey for selected
-                line.set_color('grey')
-                for capline in caplines:
-                    capline.set_color('grey')
-                for barlinecol in barlinecols:
-                    barlinecol.set_color('grey')
+            self.selected_points[profile_key][ind] = not self.selected_points[profile_key][ind]
+        
+            num_points = len(picked_scatter.get_offsets())
+            # If initially, there's only one color for all points,
+            # we might need to ensure the array is expanded to explicitly cover all points.
+            if len(facecolors) == 1 and num_points > 1:
+                facecolors = np.tile(facecolors, (num_points, 1))
+            
+        
+            if not self.selected_points[profile_key][ind]:   
+                # If already grey (picked)
+                # Set to original color
+                facecolors[ind] = matplotlib.colors.to_rgba(original_color)
             else:
-                # Reset to original color if not selected
-                line.set_color('blue')  # Or whatever your original color is
-                for capline in caplines:
-                    capline.set_color('blue')
-                for barlinecol in barlinecols:
-                    barlinecol.set_color('blue')
+                # Set to grey
+                facecolors[ind] = (0.75, 0.75, 0.75, 1)
+            
+            picked_scatter.set_facecolors(facecolors)
+            # Update the scatter plot sizes
+            picked_scatter.set_sizes(np.full(num_points, self.scatter_size))
+            self.fig.canvas.draw_idle()
+    
+    def toggle_edit_mode(self):
+        
+        self.edit_mode_enabled = not self.edit_mode_enabled
+        
+    def toggle_point_visibility(self):
+        for profile_key in self.selected_points.keys():
+            # Retrieve the scatter object using its profile key
+            scatter, barlinecol = self.get_scatter_errorbar_by_gid(profile_key)
+            if scatter is None:
+                continue
+    
+            facecolors = scatter.get_facecolors().copy()
+            num_points = len(scatter.get_offsets())
+            
+            # If initially, there's only one color for all points, expand the colors array
+            if len(facecolors) == 1 and num_points > 1:
+                facecolors = np.tile(facecolors, (num_points, 1))
+                
+                
+            # Get the current array of colors (RGBA) for the LineCollection
+            line_colors = barlinecol.get_colors().copy()
+        
+            # Ensure the color array is not a single color by expanding it if necessary
+            if len(line_colors) == 1 and len(barlinecol.get_segments()) > 1:
+                line_colors = np.tile(line_colors, (num_points, 1))
+    
 
-    # def toggle_edit_mode(self):
+    
+            # Iterate through each point to adjust visibility based on selection state
+            for idx, selected in enumerate(self.selected_points[profile_key]):
+                if selected:
+                    if facecolors[idx][-1] > 0:
+                        # Toggle visibility by setting alpha to 0 (invisible) or back to its original value
+                        new_alpha = 0.0
+                    else:
+                        new_alpha= 1.0  # Assume original alpha was 1.0
+                    line_colors[idx][-1] = new_alpha  # Set alpha to 0 for the line at index idx
+                    facecolors[idx][-1] = new_alpha #hid/unhide scatter
+            barlinecol.set_colors(line_colors)
+            scatter.set_facecolors(facecolors)
+        self.fig.canvas.draw_idle()
 
-
-
+    def get_scatter_errorbar_by_gid(self, gid):
+        #return the correct scatter for corresponding key
+        for (scatter, errorbars) in self.all_errorbars: 
+            if scatter.get_gid() == gid:
+                return (scatter, errorbars)
+        return None
 
 
 

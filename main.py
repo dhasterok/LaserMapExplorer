@@ -102,8 +102,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         layout_profile_view = QtWidgets.QVBoxLayout()
         layout_profile_view.setSpacing(0)
 
-        self.setWindowTitle(str("LaME: Laser Map Explorer"))
-        
         # Menu and Toolbar
         #-------------------------
         self.widgetProfilePlot.setLayout(layout_profile_view)

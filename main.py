@@ -39,6 +39,7 @@ import matplotlib.ticker as ticker
 from radar import Radar
 from calculator import CalWindow
 import scipy.stats
+pg.setConfigOption('imageAxisOrder', 'row-major') # best performance
 ## !pyrcc5 resources.qrc -o resources_rc.py
 ## pyuic5 mainwindow.ui -o MainWindow.py
 ## !pyuic5 -x IsotopeSelectionDialog.ui -o IsotopeSelectionDialog.py
@@ -69,6 +70,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.proxies = []
         self.prev_plot = ''
         self.pop_plot = ''
+        self.order= 'F'
         self.swap_xy_val = False
         self.plot_id = {'clustering':{},'scatter':{},'n-dim':{}}
         self.fuzzy_results={}
@@ -349,6 +351,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def swap_xy(self):
         self.swap_xy_val = not self.swap_xy_val
+        
+        if self.swap_xy_val:
+            self.order = 'C'
+        else:
+        
+            self.order = 'F'
         # swap x and y
         # print(self.sample_data_dict[self.sample_id][['X','Y']])
         self.swap_xy_data(self.sample_data_dict[self.sample_id])
@@ -1070,14 +1078,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         sample_id = plot_information['sample_id']
         plot_type = plot_information['plot_type']
 
-        if self.swap_xy_val:
-            order = 'C'
-        else:
-        
-            order = 'F'
+
         array = np.reshape(current_plot_df['array'].values,
                                     (current_plot_df['Y'].nunique(),
-                                     current_plot_df['X'].nunique()), order=order)[ ::-1, :] #reverse order of rows
+                                     current_plot_df['X'].nunique()), order=self.order)
         self.x_range = current_plot_df['X'].max() - current_plot_df['X'].min()
         self.y_range = current_plot_df['Y'].max() - current_plot_df['Y'].min()
         print(self.x_range)
@@ -1096,7 +1100,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 glw = widgetLaserMap.findChild(pg.GraphicsLayoutWidget, 'plotLaserMap')
                 p1 = glw.getItem(0, 0)  # Assuming ImageItem is the first item in the plot
                 img = p1.items[0]
-                img.setImage(image=array.T)
+                img.setImage(image=array)
+                p1.invertY(True)   # vertical axis counts top to bottom
                 #set aspect ratio of rectangle
                 img.setRect(0,0,self.x_range,self.y_range)
                 cm = pg.colormap.get(self.comboBoxCM.currentText(), source = 'matplotlib')
@@ -1131,8 +1136,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             glw = pg.GraphicsLayoutWidget(show=True)
             glw.setObjectName('plotLaserMap')
             # Create the ImageItem
-            img = pg.ImageItem(image=array.T)
-
+            img = pg.ImageItem(image=array)
+            
             #set aspect ratio of rectangle
             img.setRect(0,0,self.x_range,self.y_range)
             # img.setAs
@@ -1143,7 +1148,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             p1 = glw.addPlot(0,0,title=plot_name.replace('_',' '))
             # p1.setRange(padding=0)
             p1.showAxes(False, showValues=(True,False,False,True) )
-
+            p1.invertY(True) 
             #supress right click menu
             p1.setMenuEnabled(False)
 
@@ -1839,7 +1844,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
     def plot_clustering_result(self, ax, labels, method_name, fuzzy_cluster_number):
-        reshaped_array = np.reshape(labels, (self.clipped_isotope_data[self.sample_id]['X'].nunique(), self.clipped_isotope_data[self.sample_id]['Y'].nunique()))
+        reshaped_array = np.reshape(labels, (self.clipped_isotope_data[self.sample_id]['Y'].nunique(), self.clipped_isotope_data[self.sample_id]['X'].nunique()), order=self.order)
 
         x_range = self.clipped_isotope_data[self.sample_id]['X'].max() -  self.clipped_isotope_data[self.sample_id]['X'].min()
         y_range = self.clipped_isotope_data[self.sample_id]['Y'].max() -  self.clipped_isotope_data[self.sample_id]['Y'].min()
@@ -1850,7 +1855,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if method_name == 'Fuzzy' and fuzzy_cluster_number>0:
             cmap = plt.get_cmap(self.comboBoxCM.currentText())
             # img = ax.imshow(reshaped_array.T, cmap=cmap,  aspect=aspect_ratio)
-            img = ax.imshow(reshaped_array.T, cmap=cmap,  aspect=aspect_ratio)
+            img = ax.imshow(reshaped_array, cmap=cmap,  aspect=aspect_ratio)
             fig.colorbar(img, ax=ax, orientation = self.comboBoxCBP.currentText().lower())
         else:
             unique_labels = np.unique(['Cluster '+str(c) for c in labels])
@@ -1865,7 +1870,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             boundaries = np.arange(-0.5, n_clusters, 1)
             norm = BoundaryNorm(boundaries, cmap.N, clip=True)
-            img = ax.imshow(reshaped_array.T.astype('float'), cmap=cmap, norm=norm, aspect = aspect_ratio)
+            img = ax.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect = aspect_ratio)
             fig.colorbar(img, ax=ax, ticks=np.arange(0, n_clusters), orientation = self.comboBoxCBP.currentText().lower())
 
         fig.subplots_adjust(left=0.05, right=1)  # Adjust these values as needed

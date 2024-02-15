@@ -3159,41 +3159,18 @@ class Table_Fcn:
                         self.clear_interpolation()
                         self.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
 
-<<<<<<< HEAD
-    def delete_row(self,calling_widget):
-        match calling_widget:
-            case 'Profiling':
-                table = self.main_window.tableWidgetProfilePoints
-            case 'NDim':
-                table = self.main_window.tableWidgetNDim
-            case 'Filters':
-                table = self.main_window.tableWidgetFilters
-        
-        
-        
-        match calling_widget:
-            case 'Profiling':
-                rows = [index.row() for index in table.selectionModel().selectedRows()][::-1] #sort descending to pop in order
-=======
+
     def delete_row(self,table):
 
         rows = [index.row() for index in table.selectionModel().selectedRows()][::-1] #sort descending to pop in order
 
         match table.accessibleName():
             case 'Profiling':
->>>>>>> 071bcb2922e2c2350008f675f4c24a27d1e27cf0
                 for row in rows:
                     # Get selected row and delete it
                     table.removeRow(row)
                     # remove point from each profile and its corresponding scatter plot item
-<<<<<<< HEAD
-                    for key, profile in self.profiles.items():
-                        scatter_item = profile[row][3]  # Access the scatter plot item
-                        for _, (_, plot, _, _) in self.main_window.lasermaps.items():
-                            plot.removeItem(scatter_item)
-                        profile.pop(row) #index starts at 0
-                self.main_window.profiling.plot_profiles(sort_axis = False)
-=======
+
 
                     for key, profile in self.profiles.items():
                         if row < len(profile):
@@ -3201,9 +3178,9 @@ class Table_Fcn:
                             for _, (_, plot, _, _) in self.main_window.lasermaps.items():
                                 plot.removeItem(scatter_item)
                             profile.pop(row) #index starts at 0
+                       
+                self.main_window.profiling.plot_profiles(sort_axis = False)
 
-                self.plot_profiles(sort_axis = False)
->>>>>>> 071bcb2922e2c2350008f675f4c24a27d1e27cf0
                 if self.main_window.toolButtonIPProfile.isChecked(): #reset interpolation if selected
                     self.main_window.profiling.clear_interpolation()
                     self.main_window.profiling.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
@@ -3570,12 +3547,7 @@ class Profiling:
             profiles = self.profiles
         else:
             profiles = self.i_profiles
-<<<<<<< HEAD
-        
-=======
-
-        print(list(profiles.values()))
->>>>>>> 071bcb2922e2c2350008f675f4c24a27d1e27cf0
+            
         if len(list(profiles.values())[0])>0: #if self.profiles has values
             self.main_window.tabWidget.setCurrentIndex(2) #show profile plot tab
             sort_axis=self.main_window.comboBoxProfileSort.currentText()
@@ -3590,7 +3562,7 @@ class Profiling:
             # Get the colormap specified by the user
             cmap = matplotlib.colormaps.get_cmap(self.main_window.comboBoxCM.currentText())
             # Determine point type from the pushButtonProfileType text
-            if self.main_window.comboBoxPointType.currentText() == 'median':
+            if self.main_window.comboBoxPointType.currentText() == 'median + IQR':
                 point_type = 'median'
             else:
                 point_type ='mean'
@@ -3616,7 +3588,6 @@ class Profiling:
                 # Plot each profile in the group
                 if point_type == 'mean':
                     for g_idx,(profile_key, distances, means,s_errors) in enumerate(group_profiles):
-<<<<<<< HEAD
                         # Plot markers with ax.scatter
                         scatter = ax.scatter(distances, means, color=colors[idx+g_idx], s=64, picker=5)
                         
@@ -3628,10 +3599,7 @@ class Profiling:
                         #plot errorbars with no marker
                         self.line, self.caplines, self.barlinecols= ax.errorbar(distances, means, yerr=s_errors, fmt='none', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0, label=f'{profile_key[:-1]}')
                         
-=======
-                        line, caplines, barlinecols= ax.errorbar(distances, means, yerr=s_errors, fmt='o', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0, label=f'{profile_key[:-1]}', picker = 5)
 
->>>>>>> 071bcb2922e2c2350008f675f4c24a27d1e27cf0
                         el_labels.append(profile_key[:-1].split('_')[-1]) #get element name
                         y_axis_text = ','.join(el_labels)
                         ax.set_ylabel(f'{y_axis_text}')
@@ -3656,17 +3624,7 @@ class Profiling:
                         el_labels.append(profile_key[:-1].split('_')[-1]) #get element name
                         y_axis_text = ','.join(el_labels)
                         ax.set_ylabel(f'{y_axis_text}')
-<<<<<<< HEAD
-                        # Append the new Line2D objects to the list
-                        # self.markers.extend(marker)
-                
 
-                
-=======
-
-                line.set_picker(5)  # Set picker tolerance
-                self.errorbars.append((line, caplines, barlinecols))
->>>>>>> 071bcb2922e2c2350008f675f4c24a27d1e27cf0
             # Set labels only for the bottom subplot
                 if subplot_idx == num_subplots:
                     ax.set_xlabel('Distance')
@@ -3777,7 +3735,6 @@ class Profiling:
                 # Set to original color
                 facecolors[ind] = matplotlib.colors.to_rgba(original_color)
             else:
-<<<<<<< HEAD
                 # Set to grey
                 facecolors[ind] = (0.75, 0.75, 0.75, 1)
             
@@ -3834,20 +3791,7 @@ class Profiling:
             if scatter.get_gid() == gid:
                 return (scatter, errorbars)
         return None
-=======
-                # Reset to original color if not selected
-                line.set_color('blue')  # Or whatever your original color is
-                for capline in caplines:
-                    capline.set_color('blue')
-                for barlinecol in barlinecols:
-                    barlinecol.set_color('blue')
 
-    # def toggle_edit_mode(self):
-
-
-
-
->>>>>>> 071bcb2922e2c2350008f675f4c24a27d1e27cf0
 
 
 

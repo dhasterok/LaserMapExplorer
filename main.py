@@ -1402,6 +1402,74 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     #         histogram_plot.addItem(bar_graph_item)
     #     histogram_plot.setLabel('left', 'Frequency')
     #     histogram_plot.setLabel('bottom', 'Value')
+    def plot_pca(self, current_pca_df, plot_information):
+        # Determine which PCA plot to create based on the combobox selection
+        pca_plot_type = self.comboxPCAPlotTypes.currentText()
+    
+        plot_name = plot_information['plot_name']
+        sample_id = plot_information['sample_id']
+        plot_type = 'PCA'  # Assuming all PCA plots fall under a common plot type
+    
+        plot_exist = plot_name in self.plot_widget_dict[plot_type][sample_id]
+        duplicate = plot_exist and len(self.plot_widget_dict[plot_type][sample_id][plot_name]['view']) == 1 and self.plot_widget_dict[plot_type][sample_id][plot_name]['view'][0] != self.canvasWindow.currentIndex()
+    
+        if plot_exist and not duplicate:
+            widgetPCA = self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'][0]
+            figure_canvas = widgetPCA.findChild(FigureCanvas)
+            figure_canvas.figure.clear()
+            ax = figure_canvas.figure.subplots()
+            self.update_pca_plot(current_pca_df, pca_plot_type, ax)
+            figure_canvas.draw()
+        else:
+            figure = Figure()
+            ax = figure.add_subplot(111)
+            self.update_pca_plot(current_pca_df, pca_plot_type, ax)
+            widgetPCA = QtWidgets.QWidget()
+            widgetPCA.setLayout(QtWidgets.QVBoxLayout())
+            figure_canvas = FigureCanvas(figure)
+            toolbar = NavigationToolbar(figure_canvas, widgetPCA)
+            widgetPCA.layout().addWidget(toolbar)
+            widgetPCA.layout().addWidget(figure_canvas)
+            view = self.canvasWindow.currentIndex()
+    
+            if duplicate:
+                self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'].append(widgetPCA)
+                self.plot_widget_dict[plot_type][sample_id][plot_name]['view'].append(view)
+            else:
+                self.plot_widget_dict[plot_type][sample_id][plot_name] = {'widget': [widgetPCA], 'info': plot_information, 'view': [view]}
+    
+            # Additional steps to add the PCA widget to the appropriate container in the UI
+            # self.add_pca_tab(widgetPCA, plot_name)
+            
+            
+            
+            
+
+    def update_pca_plot(self, pca_df, pca_plot_type, ax):
+        if pca_plot_type == 'Variance Plot':
+            # Code to plot PCA Variance plot
+            self.plot_variance_plot(pca_df, ax)
+        elif pca_plot_type == 'Vector Plot':
+            # Code to plot PCA Vector plot
+            self.plot_vector_plot(pca_df, ax)
+        elif pca_plot_type == 'PC X vs PC Y':
+            # Code to plot PCA PC X vs PC Y
+            self.plot_pc_x_vs_pc_y(pca_df, ax)
+        elif pca_plot_type == 'PC X Score Map':
+            # Code to plot PCA PC X Score Map
+            self.plot_pc_x_score_map(pca_df, ax)
+        else:
+            print(f"Unknown PCA plot type: {pca_plot_type}")
+        
+    def plot_variance_plot
+     # Assuming pca_df contains variance ratios for the principal components
+        variances = pca_df['explained_variance_ratio']
+        ax.bar(range(1, len(variances) + 1), variances)
+        ax.set_xlabel('Principal Component')
+        ax.set_ylabel('Variance Ratio')
+        ax.set_title('PCA Variance Explained')
+        ax.set_xticks(range(1, len(variances) + 1))
+        ax.set_xticklabels([f'PC{i}' for i in range(1, len(variances) + 1)], rotation=45)
 
     def plot_histogram(self, current_plot_df, plot_information, bin_width):
 

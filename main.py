@@ -95,11 +95,25 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         layout_profile_view = QtWidgets.QVBoxLayout()
         layout_profile_view.setSpacing(0)
+
+        # Menu and Toolbar
+        #-------------------------
         self.widgetProfilePlot.setLayout(layout_profile_view)
         # Connect the "Open" action to a function
         self.actionOpen.triggered.connect(self.open_directory)
 
-        #Selecting isotopes
+        self.toolButtonLoadIsotopes.clicked.connect(self.open_select_isotope_dialog)
+        self.actionSelectAnalytes.triggered.connect(self.open_select_isotope_dialog)
+        self.actionSpotData.triggered.connect(self.select_spotdata_tab)
+        self.actionFilter_Tools.triggered.connect(self.select_filter_tab)
+        self.actionBiPlot.triggered.connect(self.select_biplot_tab)
+        self.actionTEC.triggered.connect(self.select_ndim_tab)
+        self.actionPolygon.triggered.connect(self.select_filter_tab)
+        self.actionProfiles.triggered.connect(self.select_profiling_tab)
+        self.actionCluster.triggered.connect(self.select_clustering_tab)
+
+        # Selecting isotopes
+        #-------------------------
         # Connect the currentIndexChanged signal of comboBoxSampleId to load_data method
         self.comboBoxSampleId.activated.connect(
             lambda: self.change_sample(self.comboBoxSampleId.currentIndex()))
@@ -111,11 +125,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #     lambda: self.get_map_data(self.sample_id,isotope_1=self.comboBoxFIsotope_1.currentText(),
         #                           isotope_2=self.comboBoxFIsotope_2.currentText(),view = 1))
         #
-
-        self.toolButtonLoadIsotopes.clicked.connect(self.open_select_isotope_dialog)
-        self.actionSelectAnalytes.triggered.connect(self.open_select_isotope_dialog)
-
-
 
         #self.comboBoxPlots.activated.connect(lambda: self.add_remove(self.comboBoxPlots.currentText()))
         #self.toolButtonAddPlots.clicked.connect(lambda: self.add_multi_plot(self.comboBoxPlots.currentText()))
@@ -141,7 +150,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxNorm.addItems(['linear','log','logit'])
         self.comboBoxNorm.activated.connect(lambda: self.update_norm(self.sample_id, self.comboBoxNorm.currentText(), update = True))
 
-        #preprocess
+        # Preprocess Tab
+        #-------------------------
         self.doubleSpinBoxUB.setMaximum(100)
         self.doubleSpinBoxUB.setMinimum(0)
         self.doubleSpinBoxLB.setMaximum(100)
@@ -178,11 +188,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #                           isotope_2=self.comboBoxFIsotope_2.currentText(),view = 1))
 
         # central-bottom pane
-        self.toolButtonFilterUp.clicked.connect(lambda: self.table_fcn.move_row_up('Filters'))
-        self.toolButtonFilterDown.clicked.connect(lambda: self.table_fcn.move_row_down('Filters'))
+        self.toolButtonFilterUp.clicked.connect(lambda: self.table_fcn.move_row_up(self.tableWidgetFilters))
+        self.toolButtonFilterDown.clicked.connect(lambda: self.table_fcn.move_row_down(self.tableWidgetFilters))
         # There is currently a special function for removing rows, convert to table_fcn.delete_row
         self.toolButtonFilterRemove.clicked.connect(self.remove_selected_rows)
-        self.toolButtonFilterRemove.clicked.connect(lambda: self.table_fcn.delete_row('Filters'))
+        self.toolButtonFilterRemove.clicked.connect(lambda: self.table_fcn.delete_row(self.tableWidgetFilters))
         self.toolButtonFilterSelectAll.clicked.connect(self.tableWidgetFilters.selectAll)
 
 
@@ -192,13 +202,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonTernaryMap.clicked.connect(self.plot_ternarymap)
 
         #Should be deleted once cropping works
+        self.toolButtonCrop.clicked.connect(self.crop_map)
         self.comboBoxScatterSelectX.activated.connect(lambda: self.update_combo_boxes('x'))
         self.comboBoxScatterSelectY.activated.connect(lambda: self.update_combo_boxes('y'))
         self.comboBoxScatterSelectZ.activated.connect(lambda: self.update_combo_boxes('z'))
         self.comboBoxScatterSelectC.activated.connect(lambda: self.update_combo_boxes('c'))
 
 
-        #Clustering Tab
+        # Clustering Tab
         #-------------------------
         # Populate the comboBoxCluster with distance metrics
         distance_metrics = ['cityblock', 'cosine', 'euclidean', 'l1', 'l2', 'manhattan']
@@ -220,18 +231,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_cluster_ui()
 
         # Connect color point radio button signals to a slot
-        #self.radioButtonCNone.toggled.connect(self.onRadioButtonToggled)
-        #self.radioButtonCFuzzy.toggled.connect(self.onRadioButtonToggled)
-        #self.radioButtonCKMediods.toggled.connect(self.onRadioButtonToggled)
-        #self.radioButtonCKMeans.toggled.connect(self.onRadioButtonToggled)
         self.comboBoxColorMethod.currentIndexChanged.connect(self.group_changed)
         # Connect the itemChanged signal to a slot
         self.tableWidgetViewGroups.itemChanged.connect(self.onClusterLabelChanged)
 
-
         self.comboBoxColorMethod.currentText() == 'none'
         # self.tableWidgetViewGroups.selectionModel().selectionChanged.connect(self.update_clusters)
 
+        # Scatter and Ternary Tab
+        #-------------------------
+        self.comboBoxScatterType.activated.connect(self.toggle_heatmap_resolution)
 
         # N-Dim Tab
         #-------------------------
@@ -242,10 +251,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonNDimIsotopeAdd.clicked.connect(lambda: self.update_n_dim_table('IsotopeAdd'))
         self.toolButtonNDimIsotopeSetAdd.clicked.connect(lambda: self.update_n_dim_table('IsotopeSetAdd'))
         self.toolButtonNDimPlot.clicked.connect(self.plot_n_dim)
-        self.toolButtonNDimUp.clicked.connect(lambda: self.table_fcn.move_row_up('NDim'))
-        self.toolButtonNDimDown.clicked.connect(lambda: self.table_fcn.move_row_down('NDim'))
+        self.toolButtonNDimUp.clicked.connect(lambda: self.table_fcn.move_row_up(self.tableWidgetNDim))
+        self.toolButtonNDimDown.clicked.connect(lambda: self.table_fcn.move_row_down(self.tableWidgetNDim))
         self.toolButtonNDimSelectAll.clicked.connect(self.tableWidgetNDim.selectAll)
-        self.toolButtonNDimRemove.clicked.connect(lambda: self.table_fcn.delete_row('NDim'))
+        self.toolButtonNDimRemove.clicked.connect(lambda: self.table_fcn.delete_row(self.tableWidgetNDim))
         #self.toolButtonNDimSaveList.clicked.connect(self.ndim_table.save_list)
 
 
@@ -262,12 +271,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # self.comboBoxProfile2.activated.connect(self.update_profile_comboboxes)
         #select entire row
         self.tableWidgetProfilePoints.setSelectionBehavior(QTableWidget.SelectRows)
-        self.toolButtonPointUp.clicked.connect(lambda: self.table_fcn.move_row_up('Profiling'))
-        self.toolButtonPointDown.clicked.connect(lambda: self.table_fcn.move_row_down('Profiling'))
-        self.toolButtonPointDelete.clicked.connect(lambda: self.table_fcn.delete_row('Profiling'))
+        self.toolButtonPointUp.clicked.connect(lambda: self.table_fcn.move_row_up(self.tableWidgetProfilePoints))
+        self.toolButtonPointDown.clicked.connect(lambda: self.table_fcn.move_row_down(self.tableWidgetProfilePoints))
+        self.toolButtonPointDelete.clicked.connect(lambda: self.table_fcn.delete_row(self.tableWidgetProfilePoints))
         self.comboBoxProfileSort.currentIndexChanged.connect(self.plot_profile_and_table)
         self.toolButtonIPProfile.clicked.connect(lambda: self.profiling.interpolate_points(interpolation_distance=int(self.lineEditIntDist.text()), radius= int(self.lineEditPointRadius.text())))
-        self.comboBoxPointType.currentIndexChanged.connect(lambda:self.profiling.plot_profiles())
+        self.comboBoxPointType.currentIndexChanged.connect(lambda: self.profiling.plot_profiles())
         # self.toolButtonPlotProfile.clicked.connect(lambda:self.profiling.plot_profiles())
         self.toolButtonPointSelectAll.clicked.connect(self.tableWidgetProfilePoints.selectAll)
         # Connect toolButtonProfileEditToggle's clicked signal to toggle edit mode
@@ -285,9 +294,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Styling Tab
         #-------------------------
-        # colormaps
+        # overlay and annotation properties
         self.toolButtonOverlayColor.clicked.connect(self.OverlayColorSelect)
-        self.toolButtonOverlayColor.setStyleSheet("background-color: white;")
+        #self.toolButtonOverlayColor.setStyleSheet("background-color: white;")
+
+        # ternary colormaps
         self.toolButtonTCmapAColor.clicked.connect(self.TCmapAColorSelect)
         self.toolButtonTCmapBColor.clicked.connect(self.TCmapBColorSelect)
         self.toolButtonTCmapCColor.clicked.connect(self.TCmapCColorSelect)
@@ -315,6 +326,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.actionCalculator.triggered.connect(self.open_calculator)
 
+    # toolbar functions
+    def select_spotdata_tab(self):
+        self.toolBox.setCurrentIndex(2)
+    def select_filter_tab(self):
+        self.toolBox.setCurrentIndex(3)
+        self.tabWidget.setCurrentIndex(1)
+    def select_biplot_tab(self):
+        self.toolBox.setCurrentIndex(4)
+    def select_ndim_tab(self):
+        self.toolBox.setCurrentIndex(5)
+    def select_pca_tab(self):
+        self.toolBox.setCurrentIndex(6)
+    def select_clustering_tab(self):
+        self.toolBox.setCurrentIndex(7)
+    def select_profiling_tab(self):
+        self.toolBox.setCurrentIndex(8)
+
+
     # color picking functions
     def OverlayColorSelect(self):
         color = QColorDialog.getColor()
@@ -322,7 +351,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if color.isValid():
             self.toolButtonOverlayColor.setStyleSheet("background-color: %s;" % color.name())
             print(color.name())
-        
+
     def TCmapAColorSelect(self):
         color = QColorDialog.getColor()
 
@@ -407,7 +436,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.toolButtonTCmapAColor.setStyleSheet("background-color: #FF8000")
                 self.toolButtonTCmapBColor.setStyleSheet("background-color: #8000FF")
                 self.toolButtonTCmapCColor.setStyleSheet("background-color: #0080FF")
-                self.toolButtonTCmapMColor.setStyleSheet("background-color: white") 
+                self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
 
     def open_calculator(self):
         isotopes_list = self.isotopes_df['isotopes'].values
@@ -586,6 +615,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # self.add_plot(isotope_str,clipped_isotope_array)
 
 
+    def crop_map(self):
+        return
+
 
 
     def remove_multi_plot(self, selected_plot_name):
@@ -720,6 +752,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.lineEditFMax.setText(str(self.dynamic_format(f_val['v_max'])))
 
     def update_filter_table(self):
+        # open tabFilterList
+        self.tabWidget.setCurrentIndex(1)
 
         def on_use_checkbox_state_changed(row, state):
             # Update the 'use' value in the filter_df for the given row
@@ -876,7 +910,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                     for ax in fig.get_axes():
                                         # Retrieve the image object from the axes
                                         # Recalculate boundaries and normalization based on the new colormap and clusters
-            
+
                                         boundaries = np.arange(-0.5, n_clusters, 1)
                                         norm = BoundaryNorm(boundaries, n_clusters, clip=True)
                                         images = ax.get_images()
@@ -888,9 +922,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                             im.set_norm(norm)
                                     for (ax, im) in img:
                                         #remove colobar axis
-            
+
                                         cb = im.colorbar
-            
+
                                         # Do any actions on the colorbar object (e.g. remove it)
                                         cb.remove()
                                         # Redraw the canvas to reflect the updates
@@ -914,7 +948,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                             self.plot_scatter(update= True, values = plot_info['values'], plot_type = plot_info['plot_type'], fig =plot_info['fig'], ternary_plot = plot_info['ternary_plot'] )
                             fig.tight_layout()
                             figure_canvas.draw()
-                        
+
 
     def open_directory(self):
         dialog = QFileDialog()
@@ -941,6 +975,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Populate the sampleidcomboBox with the file names
         self.canvasWindow.setCurrentIndex(0)
         self.change_sample(0, )
+
+        self.toolBox.setCurrentIndex(0)
 
     def remove_widgets_from_layout(self, layout, object_names_to_remove):
         """
@@ -1421,17 +1457,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         return value_dict['x'], value_dict['y'], value_dict['z'], value_dict['c']
 
-
+    def toggle_heatmap_resolution(self):
+        match self.comboBoxScatterType.currentText().lower():
+            case 'scatter':
+                self.spinBoxHeatmapN.setEnabled(False)
+            case 'heatmap':
+                self.spinBoxHeatmapN.setEnabled(True)
 
     def plot_scatter(self, update=False, values = None, plot_type= None, fig= None, ternary_plot= None):
         if not update:
-            x, y, z, c = self.get_scatter_values() #get scatter values from elements chosen 
+            x, y, z, c = self.get_scatter_values() #get scatter values from elements chosen
             plot_type =  self.comboBoxScatterType.currentText().lower()
         else:
-            # get saved scatter values to update plot 
+            # get saved scatter values to update plot
             x, y, z, c  = values
-            
-        cb = None    
+
+        cb = None
         # df = pd.DataFrame({
         #     x['elements']: x['array'],
         #     y['elements']: y['array'],
@@ -1454,13 +1495,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
 
-        
+
         cmap = matplotlib.colormaps.get_cmap(self.comboBoxCM.currentText())
 
         if len(z['array'])>0 and len(c['array'])>0:  # 3d scatter plot with color
 
             labels = [x['elements'], y['elements'], z['elements']]
-            
+
             if not update:
                 ternary_plot = ternary(labels,plot_type,mul_axis=True )
                 fig = ternary_plot.fig
@@ -1471,7 +1512,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 _, cb = ternary_plot.ternscatter(x['array'], y['array'], z['array'], categories=  c['array'], cmap=cmap, orientation = self.comboBoxCBP.currentText().lower())
 
             else:
-                ternary_plot.ternhex(x['array'], y['array'], z['array'], val= c['array'],n=int(self.spinBoxScatterN.value()), cmap = cmap, orientation = self.comboBoxCBP.currentText().lower())
+                ternary_plot.ternhex(x['array'], y['array'], z['array'], val= c['array'],n=int(self.spinBoxHeatmapN.value()), cmap = cmap, orientation = self.comboBoxCBP.currentText().lower())
 
 
             select_scatter = f"{x['elements']}_{y['elements']}_{z['elements']}_{c['elements']}_{plot_type}"
@@ -1488,7 +1529,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 else:
                     ternary_plot.ternscatter(x['array'], y['array'], z['array'],cmap= cmap)
             else:
-                ternary_plot.ternhex(x['array'], y['array'], z['array'],n=int(self.spinBoxScatterN.value()), color_map = cmap, orientation = self.comboBoxCBP.currentText().lower())
+                ternary_plot.ternhex(x['array'], y['array'], z['array'],n=int(self.spinBoxHeatmapN.value()), color_map = cmap, orientation = self.comboBoxCBP.currentText().lower())
             fig.subplots_adjust(left=0.05, right=1)
             select_scatter = f"{x['elements']}_{y['elements']}_{z['elements']}_{plot_type}"
             # fig.tight_layout()
@@ -1498,8 +1539,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             ax = fig.add_subplot(111)
             ax.scatter(x['array'], y['array'], alpha=0.5)
             select_scatter = f"{x['elements']}_{y['elements']}_{plot_type}"
-        
-        
+
+
         if not update:
             plot_information = {
                 'plot_name': select_scatter,
@@ -1510,9 +1551,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 'ternary_plot': ternary_plot,
                 'colorbar': cb
             }
-    
+
             # Create a Matplotlib figure and axis
-    
+
             widgetScatter = QtWidgets.QWidget()
             layout = QtWidgets.QVBoxLayout()
             widgetScatter.setLayout(layout)
@@ -1523,9 +1564,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             layout.insertWidget(0,scatter_plot)
             toolbar = NavigationToolbar(scatter_plot)  # Create the toolbar for the canvas
             # widgetScatter.layout().addWidget(toolbar)
-    
+
             self.plot_widget_dict['scatter'][self.sample_id][select_scatter] = {'widget':[widgetScatter],
-    
+
                                                    'info':plot_information, 'view':[view]}
             self.update_tree(plot_information['plot_name'], data = plot_information, tree = 'Scatter')
             self.add_plot(plot_information)
@@ -3061,18 +3102,11 @@ class Table_Fcn:
         self.point_selected = False # move point button selected
         self.pind = -1              # index for move point
 
-    def move_row_up(self,calling_widget):
-        match calling_widget:
-            case 'Profiling':
-                self.main_window.comboBoxProfileSort.setCurrentIndex(0) #set dropdown sort to no
-                table = self.main_window.tableWidgetProfilePoints
-            case 'NDim':
-                table = self.main_window.tableWidgetNDim
-            case 'Filters':
-                table = self.main_window.tableWidgetFilters
-
+    def move_row_up(self, table):
         # Get selected row
         row = table.currentRow()
+        if len(table.selectedItems()) > 0:
+            return
 
         if row > 0:
             table.insertRow(row - 1)
@@ -3081,8 +3115,10 @@ class Table_Fcn:
             table.removeRow(row + 1)
             table.setCurrentCell(row - 1, 0)
 
-            match calling_widget:
+            match table.accessibleName():
                 case 'Profiling':
+                    self.main_window.comboBoxProfileSort.setCurrentIndex(0) #set dropdown sort to no
+
                     # Update self.profiles here accordingly
                     for key, profile in self.profiles.items():
                         if row >0:
@@ -3097,28 +3133,14 @@ class Table_Fcn:
                 #case 'Filters':
                     # update filters
                     # update plots
-        
-        match calling_widget:
-            case 'Profiling':
-                self.main_window.tableWidgetProfilePoints = table
-            case 'NDim':
-                self.main_window.tableWidgetNDim = table
-            case 'Filters':
-                self.main_window.tableWidgetFilters = table
-                
-    def move_row_down(self,calling_widget):
-        match calling_widget:
-            case 'Profiling':
-                self.main_window.comboBoxProfileSort.setCurrentIndex(0) #set dropdown sort to no
-                table = self.main_window.tableWidgetProfilePoints
-            case 'NDim':
-                table = self.main_window.tableWidgetNDim
-            case 'Filters':
-                table = self.main_window.tableWidgetFilters
+
+    def move_row_down(self,table):
 
         # Similar to move_row_up, but moving the row down
         row = table.currentRow()
-        print(row)
+        if len(table.selectedItems()) > 0:
+            return
+
         max_row = table.rowCount() - 1
         if row < max_row:
             table.insertRow(row + 2)
@@ -3126,7 +3148,7 @@ class Table_Fcn:
                 table.setItem(row + 2, i, table.takeItem(row, i))
             table.removeRow(row)
             table.setCurrentCell(row + 1, 0)
-            match calling_widget:
+            match table.accesibleName():
                 case 'Profiling':
                     # update point order of each profile
                     for key, profile in self.profiles.items():
@@ -3136,15 +3158,8 @@ class Table_Fcn:
                     if self.main_window.toolButtonIPProfile.isChecked(): #reset interpolation if selected
                         self.clear_interpolation()
                         self.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
-        
-        match calling_widget:
-            case 'Profiling':
-                self.main_window.tableWidgetProfilePoints = table
-            case 'NDim':
-                self.main_window.tableWidgetNDim = table
-            case 'Filters':
-                self.main_window.tableWidgetFilters = table
 
+<<<<<<< HEAD
     def delete_row(self,calling_widget):
         match calling_widget:
             case 'Profiling':
@@ -3159,35 +3174,50 @@ class Table_Fcn:
         match calling_widget:
             case 'Profiling':
                 rows = [index.row() for index in table.selectionModel().selectedRows()][::-1] #sort descending to pop in order
+=======
+    def delete_row(self,table):
+
+        rows = [index.row() for index in table.selectionModel().selectedRows()][::-1] #sort descending to pop in order
+
+        match table.accessibleName():
+            case 'Profiling':
+>>>>>>> 071bcb2922e2c2350008f675f4c24a27d1e27cf0
                 for row in rows:
                     # Get selected row and delete it
                     table.removeRow(row)
                     # remove point from each profile and its corresponding scatter plot item
+<<<<<<< HEAD
                     for key, profile in self.profiles.items():
                         scatter_item = profile[row][3]  # Access the scatter plot item
                         for _, (_, plot, _, _) in self.main_window.lasermaps.items():
                             plot.removeItem(scatter_item)
                         profile.pop(row) #index starts at 0
                 self.main_window.profiling.plot_profiles(sort_axis = False)
+=======
+
+                    for key, profile in self.profiles.items():
+                        if row < len(profile):
+                            scatter_item = profile[row][3]  # Access the scatter plot item
+                            for _, (_, plot, _, _) in self.main_window.lasermaps.items():
+                                plot.removeItem(scatter_item)
+                            profile.pop(row) #index starts at 0
+
+                self.plot_profiles(sort_axis = False)
+>>>>>>> 071bcb2922e2c2350008f675f4c24a27d1e27cf0
                 if self.main_window.toolButtonIPProfile.isChecked(): #reset interpolation if selected
                     self.main_window.profiling.clear_interpolation()
                     self.main_window.profiling.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
 
-                self.main_window.tableWidgetProfilePoints = table
             case 'NDim':
-                self.main_window.tableWidgetNDim = table
-        #     case 'Filters':
-        #         self.main_window.tableWidgetFilters = table
-        #         if chkBoxItem.checkState() == QtCore.Qt.Checked:
-        #             self.tableWidgetFilters.removeRow(row)
-        #             if not ratio:
-        #                 self.filter_df.drop(self.filter_df[(self.filter_df['sample_id'] == sample_id)
-        #                                        & (self.filter_df['isotope_1'] == isotope_1)& (self.filter_df['ratio'] == ratio)].index, inplace=True)
-        #             else:
-        #                 # Remove corresponding row from filter_df
-        #                 self.filter_df.drop(self.filter_df[(self.filter_df['sample_id'] == sample_id)
-        #                                        & (self.filter_df['isotope_1'] == isotope_1)& (self.filter_df['isotope_2'] == isotope_2)].index, inplace=True)
-        # self.update_filter_mask(sample_id)
+                for row in rows:
+                    # Get selected row and delete it
+                    table.removeRow(row)
+
+            case 'Filters':
+                for row in rows:
+                    # Get selected row and delete it
+                    table.removeRow(row)
+
 
 
 class Profiling:
@@ -3238,6 +3268,7 @@ class Profiling:
 
         # if event.button() == QtCore.Qt.LeftButton and self.main_window.pushButtonStartProfile.isChecked():
         if event.button() == QtCore.Qt.LeftButton and self.main_window.toolButtonPlotProfile.isChecked():
+            self.main_window.tabWidget.setCurrentIndex(2)
 
             # Create a scatter plot item at the clicked position
             scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
@@ -3274,7 +3305,7 @@ class Profiling:
                             self.profiles[k].append((x,y,circ_val, scatter, interpolate))
                         else:
                             self.profiles[k] = [(x,y, circ_val,scatter, interpolate)]
-                            
+
             self.plot_profiles()
             self.update_table_widget()
 
@@ -3334,8 +3365,8 @@ class Profiling:
                 #remove selected point
                 prev_scatter = self.profiles[k][self.pind][3]
                 plot.removeItem(prev_scatter)
-                
-                
+
+
                 # Create a scatter plot item at the clicked position
                 scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
                 plot.addItem(scatter)
@@ -3368,7 +3399,7 @@ class Profiling:
                                 circ_val.append( value)
                             if k in self.profiles:
                                 self.profiles[k][self.pind] = (x,y, circ_val,scatter, interpolate)
-                
+
                 #update plot and table widget
                 self.plot_profiles()
                 self.update_table_widget()
@@ -3455,7 +3486,7 @@ class Profiling:
                         if interpolate:
                             _, plot, _, _ = self.main_window.lasermaps[key]
                             plot.removeItem(scatter_item)
-                            
+
     def plot_profiles(self,interpolate= False, sort_axis='x'):
         def process_points( points, sort_axis):
             # Sort the points based on the user-specified axis
@@ -3539,7 +3570,12 @@ class Profiling:
             profiles = self.profiles
         else:
             profiles = self.i_profiles
+<<<<<<< HEAD
         
+=======
+
+        print(list(profiles.values()))
+>>>>>>> 071bcb2922e2c2350008f675f4c24a27d1e27cf0
         if len(list(profiles.values())[0])>0: #if self.profiles has values
             self.main_window.tabWidget.setCurrentIndex(2) #show profile plot tab
             sort_axis=self.main_window.comboBoxProfileSort.currentText()
@@ -3580,6 +3616,7 @@ class Profiling:
                 # Plot each profile in the group
                 if point_type == 'mean':
                     for g_idx,(profile_key, distances, means,s_errors) in enumerate(group_profiles):
+<<<<<<< HEAD
                         # Plot markers with ax.scatter
                         scatter = ax.scatter(distances, means, color=colors[idx+g_idx], s=64, picker=5)
                         
@@ -3591,6 +3628,10 @@ class Profiling:
                         #plot errorbars with no marker
                         self.line, self.caplines, self.barlinecols= ax.errorbar(distances, means, yerr=s_errors, fmt='none', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0, label=f'{profile_key[:-1]}')
                         
+=======
+                        line, caplines, barlinecols= ax.errorbar(distances, means, yerr=s_errors, fmt='o', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0, label=f'{profile_key[:-1]}', picker = 5)
+
+>>>>>>> 071bcb2922e2c2350008f675f4c24a27d1e27cf0
                         el_labels.append(profile_key[:-1].split('_')[-1]) #get element name
                         y_axis_text = ','.join(el_labels)
                         ax.set_ylabel(f'{y_axis_text}')
@@ -3615,11 +3656,17 @@ class Profiling:
                         el_labels.append(profile_key[:-1].split('_')[-1]) #get element name
                         y_axis_text = ','.join(el_labels)
                         ax.set_ylabel(f'{y_axis_text}')
+<<<<<<< HEAD
                         # Append the new Line2D objects to the list
                         # self.markers.extend(marker)
                 
 
                 
+=======
+
+                line.set_picker(5)  # Set picker tolerance
+                self.errorbars.append((line, caplines, barlinecols))
+>>>>>>> 071bcb2922e2c2350008f675f4c24a27d1e27cf0
             # Set labels only for the bottom subplot
                 if subplot_idx == num_subplots:
                     ax.set_xlabel('Distance')
@@ -3701,7 +3748,7 @@ class Profiling:
         self.main_window.toolButtonPointUp.setEnabled(enable)
         self.main_window.toolButtonPointDown.setEnabled(enable)
         self.main_window.toolButtonPointDelete.setEnabled(enable)
-    
+
     def on_pick(self, event):
         print(event.artist)
         if self.edit_mode_enabled and isinstance(event.artist, PathCollection):
@@ -3730,6 +3777,7 @@ class Profiling:
                 # Set to original color
                 facecolors[ind] = matplotlib.colors.to_rgba(original_color)
             else:
+<<<<<<< HEAD
                 # Set to grey
                 facecolors[ind] = (0.75, 0.75, 0.75, 1)
             
@@ -3786,6 +3834,20 @@ class Profiling:
             if scatter.get_gid() == gid:
                 return (scatter, errorbars)
         return None
+=======
+                # Reset to original color if not selected
+                line.set_color('blue')  # Or whatever your original color is
+                for capline in caplines:
+                    capline.set_color('blue')
+                for barlinecol in barlinecols:
+                    barlinecol.set_color('blue')
+
+    # def toggle_edit_mode(self):
+
+
+
+
+>>>>>>> 071bcb2922e2c2350008f675f4c24a27d1e27cf0
 
 
 

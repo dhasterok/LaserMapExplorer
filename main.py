@@ -86,6 +86,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxCM.addItems(colormaps)
         self.comboBoxCM.clear()
         self.comboBoxCM.addItems(colormaps)
+        self.cm = self.comboBoxCM.currentText()
         self.cursor = False
         self.comboBoxCM.activated.connect(self.update_all_plots)
         layout_single_view = QtWidgets.QVBoxLayout()
@@ -360,6 +361,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #-------------------------
         
         self.toolButtonPCAPlot.clicked.connect(self.plot_pca)
+        
+        
 
     def swap_xy(self):
         self.swap_xy_val = not self.swap_xy_val
@@ -957,7 +960,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
     def update_all_plots(self):
-
+        self.cm = self.comboBoxCM.currentText()
         for plot_type,sample_ids in self.plot_widget_dict.items():
             if plot_type == 'histogram' or plot_type == 'lasermap' or plot_type == 'lasernorm':
                 for sample_id, plots in sample_ids.items():
@@ -974,8 +977,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         if plot_type == 'clustering':
                                     n_clusters = int(plot['info']['n_clusters'])
                                     # Get the new colormap from the comboBox
-                                    new_cmap_name = self.comboBoxCM.currentText()
-                                    new_cmap = plt.get_cmap(new_cmap_name,5)
+                                    new_cmap = plt.get_cmap(self.cm,5)
                                     img = []
                                     for ax in fig.get_axes():
                                         # Retrieve the image object from the axes
@@ -1116,7 +1118,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 p1.invertY(True)   # vertical axis counts top to bottom
                 #set aspect ratio of rectangle
                 img.setRect(0,0,self.x_range,self.y_range)
-                cm = pg.colormap.get(self.comboBoxCM.currentText(), source = 'matplotlib')
+                cm = pg.colormap.get(self.cm, source = 'matplotlib')
                 img.setColorMap(cm)
                 histogram = widgetLaserMap.findChild(pg.HistogramLUTWidget, 'histogram')
                 if histogram:
@@ -1153,7 +1155,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #set aspect ratio of rectangle
             img.setRect(0,0,self.x_range,self.y_range)
             # img.setAs
-            cm = pg.colormap.get(self.comboBoxCM.currentText(), source = 'matplotlib')
+            cm = pg.colormap.get(self.cm, source = 'matplotlib')
             img.setColorMap(cm)
             # img.setLookupTable(cm.getLookupTable())
             #--- add non-interactive image with integrated color ------------------
@@ -1492,31 +1494,65 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     
             # Additional steps to add the PCA widget to the appropriate container in the UI
             self.add_plot(plot_information)
-            
+            self.update_tree(plot_information['plot_name'], data = plot_information, tree = 'PCA')
             
             
             
 
     def update_pca_plot(self, pca_dict, pca_plot_type, ax):
         if pca_plot_type == 'Variance':
-            # Assuming pca_dict contains variance ratios for the principal components
+            
+            # pca_dict contains variance ratios for the principal components
             variances = pca_dict['explained_variance_ratio']
-            ax.bar(range(1, len(variances) + 1), variances)
+            cumulative_variances = variances.cumsum()  # Calculate cumulative explained variance
+            
+            # Number of principal components
+            n_components = range(1, len(variances) + 1)
+            
+            # Plotting the explained variance
+            ax.plot(n_components, variances, marker='o', linestyle='-', color='b', label='Explained Variance')
+            
+            # Plotting the cumulative explained variance
+            ax.plot(n_components, cumulative_variances, marker='s', linestyle='--', color='r', label='Cumulative Explained Variance')
+            
+            # Adding labels, title, and legend
             ax.set_xlabel('Principal Component')
             ax.set_ylabel('Variance Ratio')
             ax.set_title('PCA Variance Explained')
-            ax.set_xticks(range(1, len(variances) + 1))
+            ax.set_xticks(n_components)
             ax.set_xticklabels([f'PC{i}' for i in range(1, len(variances) + 1)], rotation=45)
+            ax.legend()
+            
+            # Adjust the y-axis limit to make sure the plot includes all markers and lines
+            ax.set_ylim([0, 1.05])  # Assuming variance ratios are between 0 and 1
         elif pca_plot_type == 'Vectors':
-            # Assuming pca_dict contains 'components_' from PCA analysis with columns for each variable
-            vectors = pca_dict['components_'].T  # Transpose to have variables on rows
-            for i, vector in enumerate(vectors):
-                ax.arrow(0, 0, vector[0], vector[1], head_width=0.05, head_length=0.1, fc='k', ec='k')
-                ax.text(vector[0], vector[1], f"Var{i+1}", color='red')
-            ax.set_xlabel('PC 1')
-            ax.set_ylabel('PC 2')
-            ax.set_title('PCA Vector Plot')
-            ax.grid()
+            # pca_dict contains 'components_' from PCA analysis with columns for each variable
+            components = pca_dict['components_']  # No need to transpose for heatmap representation
+            
+            # Number of components and variables
+            n_components = components.shape[0]
+            n_variables = components.shape[1]
+            
+            cmap = plt.get_cmap(self.cm)
+            cax = ax.imshow(components, cmap=cmap, aspect='auto')
+            fig = ax.get_figure()
+            # Adding a colorbar at the bottom of the plot
+            cbar = fig.colorbar(cax, orientation='horizontal', pad=0.2)
+            cbar.set_label('PCA Score')
+            
+            # Setting the labels for x and y axes
+            ax.set_xticks(np.arange(n_components))
+            ax.set_yticks(np.arange(n_variables))
+            
+            ax.set_xticklabels([f'PC{i+1}' for i in range(n_components)])
+            ax.set_yticklabels([f'Var{i+1}' for i in range(n_variables)], rotation=45)
+            
+            ax.set_xlabel('Principal Components')
+            ax.set_ylabel('Variables')
+            ax.set_title('PCA Components Heatmap')
+            
+            # Optional: Rotate x-axis labels for better readability
+            # plt.xticks(rotation=45)
         elif pca_plot_type == 'PC X vs. PC Y':
             pc_x = int(self.spinBoxPCX.value())
             pc_y = int(self.spinBoxPCY.value())
@@ -1537,6 +1573,80 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             print(f"Unknown PCA plot type: {pca_plot_type}")
 
+    def plot_correlation(self, plot =False):
+        correlation_dict = {}
+        
+        df_filtered, mask, isotopes = self.get_processed_data()
+        
+        # Calculate the correlation matrix
+        correlation_matrix = df_filtered.corr()
+        
+        # Store the correlation matrix for plotting
+        correlation_dict['correlation_matrix'] = correlation_matrix
+        
+        # Determine which correlation plot to create based on the combobox selection (assuming you have a combobox for different types of correlation plots, if not just set a default plot type)
+        correlation_plot_type = 'Heatmap'
+        
+        plot_name = correlation_plot_type
+        sample_id = self.sample_id
+        plot_type = 'correlation'  # Assuming all correlation plots fall under a common plot type
+        
+        plot_exist = plot_name in self.plot_widget_dict[plot_type][sample_id]
+        duplicate = plot_exist and len(self.plot_widget_dict[plot_type][sample_id][plot_name]['view']) == 1 and self.plot_widget_dict[plot_type][sample_id][plot_name]['view'][0] != self.canvasWindow.currentIndex()
+        
+        if plot_exist and not duplicate:
+            widgetCorrelation = self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'][0]
+            figure_canvas = widgetCorrelation.findChild(FigureCanvas)
+            figure_canvas.figure.clear()
+            ax = figure_canvas.figure.subplots()
+            self.update_correlation_plot(correlation_dict, ax)
+            figure_canvas.draw()
+        else:
+            figure = Figure()
+            ax = figure.add_subplot(111)
+            self.update_correlation_plot(correlation_dict, ax)
+            widgetCorrelation = QtWidgets.QWidget()
+            widgetCorrelation.setLayout(QtWidgets.QVBoxLayout())
+            figure_canvas = FigureCanvas(figure)
+            toolbar = NavigationToolbar(figure_canvas, widgetCorrelation)
+            widgetCorrelation.layout().addWidget(toolbar)
+            widgetCorrelation.layout().addWidget(figure_canvas)
+            view = self.canvasWindow.currentIndex()
+            
+            plot_information = {
+                'plot_name': plot_name,
+                'sample_id': self.sample_id,
+                'plot_type': plot_type,
+            }
+            
+            if duplicate:
+                self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'].append(widgetCorrelation)
+                self.plot_widget_dict[plot_type][sample_id][plot_name]['view'].append(view)
+            else:
+                self.plot_widget_dict[plot_type][sample_id][plot_name] = {'widget': [widgetCorrelation], 'info': plot_information, 'view': [view]}
+            
+            # Additional steps to add the Correlation widget to the appropriate container in the UI
+            if plot:
+                self.add_plot(plot_information) #do not plot correlation when directory changes
+            self.update_tree(plot_information['plot_name'], data=plot_information, tree='Correlation')
+
+    def update_correlation_plot(self, correlation_dict, ax):
+        cmap = plt.get_cmap(self.cm)
+        correlation_matrix = correlation_dict['correlation_matrix']
+        cax = ax.imshow(correlation_matrix, cmap=cmap, aspect='auto')
+        
+        # Add colorbar to the plot
+        cbar = plt.colorbar(cax, ax=ax)
+        cbar.set_label('Correlation coefficient')
+        
+        # Set tick labels
+        ticks = np.arange(len(correlation_matrix.columns))
+        ax.set_xticks(ticks)
+        ax.set_yticks(ticks)
+        ax.set_xticklabels(correlation_matrix.columns, rotation=45, ha='right')
+        ax.set_yticklabels(correlation_matrix.columns)
+        
+        ax.set_title('Correlation Matrix Heatmap')
 
     def plot_histogram(self, current_plot_df, plot_information, bin_width):
 
@@ -1568,7 +1678,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             widgetHistogram.setLayout(QtWidgets.QVBoxLayout())
             figure_canvas = FigureCanvas(figure)
             toolbar = NavigationToolbar(figure_canvas, widgetHistogram)  # Create the toolbar for the canvas
-            widgetHistogram.layout().addWidget(toolbar)  # Add the toolbar to the widget
+            # widgetHistogram.layout().addWidget(toolbar)  # Add the toolbar to the widget
             widgetHistogram.layout().addWidget(figure_canvas)
             view = self.canvasWindow.currentIndex()
 
@@ -1689,7 +1799,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # x['array'], y['array'], z['array'] = df.iloc[:, 0].values, df.iloc[:, 1].values, df.iloc[:, 2].values
 
 
-        cmap = matplotlib.colormaps.get_cmap(self.comboBoxCM.currentText())
+        cmap = matplotlib.colormaps.get_cmap(self.cm)
 
         if len(z['array'])>0 and len(c['array'])>0:  # 3d scatter plot with color
 
@@ -1879,7 +1989,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # aspect_ratio = 0.617
         fig = ax.figure
         if method_name == 'Fuzzy' and fuzzy_cluster_number>0:
-            cmap = plt.get_cmap(self.comboBoxCM.currentText())
+            cmap = plt.get_cmap(self.cm)
             # img = ax.imshow(reshaped_array.T, cmap=cmap,  aspect=aspect_ratio)
             img = ax.imshow(reshaped_array, cmap=cmap,  aspect=aspect_ratio)
             fig.colorbar(img, ax=ax, orientation = self.comboBoxCBP.currentText().lower())
@@ -1887,7 +1997,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             unique_labels = np.unique(['Cluster '+str(c) for c in labels])
             unique_labels.sort()
             n_clusters = len(unique_labels)
-            cmap = plt.get_cmap(self.comboBoxCM.currentText(), n_clusters)
+            cmap = plt.get_cmap(self.cm, n_clusters)
             # Extract colors from the colormap
             colors = [cmap(i) for i in range(cmap.N)]
             # Assign these colors to self.group_cmap
@@ -2448,6 +2558,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.update_tree(self.selected_isotopes)
 
             self.update_spinboxes_bool = True  # Place this line at end of method
+            
+            self.plot_correlation()
 
 
 
@@ -2829,9 +2941,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.correlation_items = StandardItem('Correlation', 14, True)
             self.scatter_items = StandardItem('Scatter', 14, True)
             self.n_dim_items = StandardItem('n-Dim', 14, True)
+            self.pca_items = StandardItem('PCA', 14, True)
             self.clustering_items = StandardItem('Clustering', 14, True)
+            
             rootNode.appendRows([self.isotopes_items,self.norm_isotopes_items,self.ratios_items,self.histogram_items,self.correlation_items, self.scatter_items,
-                                 self.n_dim_items,self.clustering_items])
+                                 self.n_dim_items, self.pca_items, self.clustering_items])
             treeView.setModel(treeModel)
             treeView.expandAll()
             treeView.doubleClicked.connect(self.tree_double_click)
@@ -2868,7 +2982,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             isotopes= level_3_data.split(' / ')
             self.get_map_data(level_2_data,isotopes[0],isotopes[1])
 
-        elif ((level_1_data == 'Clustering') or (level_1_data=='Scatter')):
+        elif ((level_1_data == 'Clustering') or (level_1_data=='Scatter') or (level_1_data=='n-dim') or (level_1_data=='PCA')or (level_1_data=='Correlation')):
             plot_info ={'plot_name':level_3_data, 'plot_type':level_1_data.lower(),'sample_id':level_2_data }
             self.add_plot(plot_info)
 
@@ -2930,6 +3044,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         elif tree == 'n-Dim':
             self.add_tree_item(self.sample_id,self.n_dim_items,leaf,data)
+            
+        elif tree == 'PCA':
+            self.add_tree_item(self.sample_id,self.pca_items,leaf,data)
+        elif tree == 'Correlation':
+            self.add_tree_item(self.sample_id,self.correlation_items,leaf,data)
 
 
 

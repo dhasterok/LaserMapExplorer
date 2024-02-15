@@ -102,6 +102,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         layout_profile_view = QtWidgets.QVBoxLayout()
         layout_profile_view.setSpacing(0)
 
+        self.setWindowTitle(str("LaME: Laser Map Explorer"))
+        
         # Menu and Toolbar
         #-------------------------
         self.widgetProfilePlot.setLayout(layout_profile_view)
@@ -325,9 +327,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #self.toolButtonOverlayColor.setStyleSheet("background-color: white;")
 
         # ternary colormaps
-        self.toolButtonTCmapAColor.clicked.connect(self.TCmapAColorSelect)
-        self.toolButtonTCmapBColor.clicked.connect(self.TCmapBColorSelect)
-        self.toolButtonTCmapCColor.clicked.connect(self.TCmapCColorSelect)
+        self.toolButtonTCmapXColor.clicked.connect(self.TCmapXColorSelect)
+        self.toolButtonTCmapYColor.clicked.connect(self.TCmapYColorSelect)
+        self.toolButtonTCmapZColor.clicked.connect(self.TCmapZColorSelect)
         self.toolButtonTCmapMColor.clicked.connect(self.TCmapMColorSelect)
         self.comboBoxTernaryColormap.currentIndexChanged.connect(lambda: self.TernaryColormapChanged())
         self.TernaryColormapChanged()
@@ -422,26 +424,26 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.toolButtonOverlayColor.setStyleSheet("background-color: %s;" % color.name())
             print(color.name())
 
-    def TCmapAColorSelect(self):
+    def TCmapXColorSelect(self):
         color = QColorDialog.getColor()
 
         if color.isValid():
-            self.toolButtonTCmapAColor.setStyleSheet("background-color: %s;" % color.name())
+            self.toolButtonTCmapXColor.setStyleSheet("background-color: %s;" % color.name())
             self.comboBoxTernaryColormap.setCurrentText("user defined")
 
-    def TCmapBColorSelect(self):
+    def TCmapYColorSelect(self):
         color = QColorDialog.getColor()
 
         if color.isValid():
-            self.toolButtonTCmapBColor.setStyleSheet("background-color: %s;" % color.name())
+            self.toolButtonTCmapYColor.setStyleSheet("background-color: %s;" % color.name())
             self.comboBoxTernaryColormap.setCurrentText("user defined")
 
-    def TCmapCColorSelect(self):
+    def TCmapZColorSelect(self):
         color = QColorDialog.getColor()
 
         if color.isValid():
-            self.toolButtonTCmapCColor.setStyleSheet("background-color: %s;" % color.name())
-            self.comboBoxTernaryColormap.setCurrentText("user defined")
+            self.toolButtonTCmapZColor.setStyleSheet("background-color: %s;" % color.name())
+            self.comboBoxTernaryCcolormap.setCurrentText("user defined")
 
     def TCmapMColorSelect(self):
         color = QColorDialog.getColor()
@@ -453,59 +455,59 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def TernaryColormapChanged(self):
         match self.comboBoxTernaryColormap.currentText():
             case "yellow-navy-green-white":
-                self.toolButtonTCmapAColor.setStyleSheet("background-color: yellow")
-                self.toolButtonTCmapBColor.setStyleSheet("background-color: navy")
-                self.toolButtonTCmapCColor.setStyleSheet("background-color: green")
+                self.toolButtonTCmapXColor.setStyleSheet("background-color: yellow")
+                self.toolButtonTCmapYColor.setStyleSheet("background-color: navy")
+                self.toolButtonTCmapZColor.setStyleSheet("background-color: green")
                 self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
             case "yellow-red-blue":
-                self.toolButtonTCmapAColor.setStyleSheet("background-color: yellow")
-                self.toolButtonTCmapBColor.setStyleSheet("background-color: red")
-                self.toolButtonTCmapCColor.setStyleSheet("background-color: blue")
-                self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
+                self.toolButtonTCmapXColor.setStyleSheet("background-color: yellow")
+                self.toolButtonTCmapYColor.setStyleSheet("background-color: red")
+                self.toolButtonTCmapZColor.setStyleSheet("background-color: blue")
+                self.toolButtonTCmapMColor.setStyleSheet("background-color: none")
             case "yellow-red-blue-white":
-                self.toolButtonTCmapAColor.setStyleSheet("background-color: yellow")
-                self.toolButtonTCmapBColor.setStyleSheet("background-color: red")
-                self.toolButtonTCmapCColor.setStyleSheet("background-color: blue")
+                self.toolButtonTCmapXColor.setStyleSheet("background-color: yellow")
+                self.toolButtonTCmapYColor.setStyleSheet("background-color: red")
+                self.toolButtonTCmapZColor.setStyleSheet("background-color: blue")
                 self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
             case "black-green-yellow-white":
-                self.toolButtonTCmapAColor.setStyleSheet("background-color: black")
-                self.toolButtonTCmapBColor.setStyleSheet("background-color: green")
-                self.toolButtonTCmapCColor.setStyleSheet("background-color: yellow")
+                self.toolButtonTCmapXColor.setStyleSheet("background-color: black")
+                self.toolButtonTCmapYColor.setStyleSheet("background-color: green")
+                self.toolButtonTCmapZColor.setStyleSheet("background-color: yellow")
                 self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
             case "yellow-green-navy":
-                self.toolButtonTCmapAColor.setStyleSheet("background-color: yellow")
-                self.toolButtonTCmapBColor.setStyleSheet("background-color: green")
-                self.toolButtonTCmapCColor.setStyleSheet("background-color: navy")
-                self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
+                self.toolButtonTCmapXColor.setStyleSheet("background-color: yellow")
+                self.toolButtonTCmapYColor.setStyleSheet("background-color: green")
+                self.toolButtonTCmapZColor.setStyleSheet("background-color: navy")
+                self.toolButtonTCmapMColor.setStyleSheet("background-color: none")
             case "yellow-green-navy-white":
-                self.toolButtonTCmapAColor.setStyleSheet("background-color: yellow")
-                self.toolButtonTCmapBColor.setStyleSheet("background-color: green")
-                self.toolButtonTCmapCColor.setStyleSheet("background-color: navy")
+                self.toolButtonTCmapXColor.setStyleSheet("background-color: yellow")
+                self.toolButtonTCmapYColor.setStyleSheet("background-color: green")
+                self.toolButtonTCmapZColor.setStyleSheet("background-color: navy")
                 self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
             case "yellow-cyan-magenta":
-                self.toolButtonTCmapAColor.setStyleSheet("background-color: yellow")
-                self.toolButtonTCmapBColor.setStyleSheet("background-color: cyan")
-                self.toolButtonTCmapCColor.setStyleSheet("background-color: magenta")
-                self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
+                self.toolButtonTCmapXColor.setStyleSheet("background-color: yellow")
+                self.toolButtonTCmapYColor.setStyleSheet("background-color: cyan")
+                self.toolButtonTCmapZColor.setStyleSheet("background-color: magenta")
+                self.toolButtonTCmapMColor.setStyleSheet("background-color: none")
             case "yellow-cyan-magenta-white":
-                self.toolButtonTCmapAColor.setStyleSheet("background-color: yellow")
-                self.toolButtonTCmapBColor.setStyleSheet("background-color: cyan")
-                self.toolButtonTCmapCColor.setStyleSheet("background-color: magenta")
+                self.toolButtonTCmapXColor.setStyleSheet("background-color: yellow")
+                self.toolButtonTCmapYColor.setStyleSheet("background-color: cyan")
+                self.toolButtonTCmapZColor.setStyleSheet("background-color: magenta")
                 self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
             case "green-red-blue":
-                self.toolButtonTCmapAColor.setStyleSheet("background-color: #00FF00")
-                self.toolButtonTCmapBColor.setStyleSheet("background-color: red")
-                self.toolButtonTCmapCColor.setStyleSheet("background-color: blue")
-                self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
+                self.toolButtonTCmapXColor.setStyleSheet("background-color: #00FF00")
+                self.toolButtonTCmapYColor.setStyleSheet("background-color: red")
+                self.toolButtonTCmapZColor.setStyleSheet("background-color: blue")
+                self.toolButtonTCmapMColor.setStyleSheet("background-color: none")
             case "orange-violet-green-white":
-                self.toolButtonTCmapAColor.setStyleSheet("background-color: #FF8000")
-                self.toolButtonTCmapBColor.setStyleSheet("background-color: #8000FF")
-                self.toolButtonTCmapCColor.setStyleSheet("background-color: #00FF80")
+                self.toolButtonTCmapXColor.setStyleSheet("background-color: #FF8000")
+                self.toolButtonTCmapYColor.setStyleSheet("background-color: #8000FF")
+                self.toolButtonTCmapZColor.setStyleSheet("background-color: #00FF80")
                 self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
             case "orange-violet-blue-white":
-                self.toolButtonTCmapAColor.setStyleSheet("background-color: #FF8000")
-                self.toolButtonTCmapBColor.setStyleSheet("background-color: #8000FF")
-                self.toolButtonTCmapCColor.setStyleSheet("background-color: #0080FF")
+                self.toolButtonTCmapXColor.setStyleSheet("background-color: #FF8000")
+                self.toolButtonTCmapYColor.setStyleSheet("background-color: #8000FF")
+                self.toolButtonTCmapZColor.setStyleSheet("background-color: #0080FF")
                 self.toolButtonTCmapMColor.setStyleSheet("background-color: white")
 
     def open_calculator(self):
@@ -1746,7 +1748,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             ax.set_ylabel(ylbl)
             ax.tick_params(labelbottom=True, labeltop=False, labelleft=True, labelright=False, bottom=True, top=True, left=True, right=True)
 
-            ax.set_box_aspect(1.0)
+            ax.set_box_aspect(float(self.lineEditAspectRatio.Text()))
 
         if not update:
             plot_information = {
@@ -3796,7 +3798,7 @@ class Profiling:
                 if point_type == 'mean':
                     for g_idx,(profile_key, distances, means,s_errors) in enumerate(group_profiles):
                         # Plot markers with ax.scatter
-                        scatter = ax.scatter(distances, means, color=colors[idx+g_idx], s=64, picker=5)
+                        scatter = ax.scatter(distances, means, color=colors[idx+g_idx], s=64, picker=5, zorder=2*g_idx+1)
                         
                         # Store additional information needed to identify points upon picking
                         self.scatter_info = scatter
@@ -3804,7 +3806,7 @@ class Profiling:
                         self.original_colors[scatter] = colors[idx+g_idx]  # Assuming colors is accessible
         
                         #plot errorbars with no marker
-                        self.line, self.caplines, self.barlinecols= ax.errorbar(distances, means, yerr=s_errors, fmt='none', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0, label=f'{profile_key[:-1]}')
+                        self.line, self.caplines, self.barlinecols= ax.errorbar(distances, means, yerr=s_errors, fmt='none', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0, label=f'{profile_key[:-1]}', zorder=2*g_idx)
                         
 
                         el_labels.append(profile_key[:-1].split('_')[-1]) #get element name
@@ -3820,9 +3822,9 @@ class Profiling:
                         errors = [[median - lower for median, lower in zip(medians, lowers)],
                             [upper - median for upper, median in zip(uppers, medians)]]
                         # Plot markers with ax.scatter
-                        scatter = ax.scatter(distances, medians, color=colors[idx+g_idx],s=self.scatter_size, picker=5, gid=profile_key, edgecolors = 'none')
+                        scatter = ax.scatter(distances, medians, color=colors[idx+g_idx],s=self.scatter_size, picker=5, gid=profile_key, edgecolors = 'none', zorder=2*g_idx+1)
                         #plot errorbars with no marker
-                        _, _, barlinecols = ax.errorbar(distances, medians, yerr=errors, fmt='none', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0, label=f'{profile_key[:-1]}')
+                        _, _, barlinecols = ax.errorbar(distances, medians, yerr=errors, fmt='none', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0, label=f'{profile_key[:-1]}', zorder=2*g_idx)
                         
                         
                         self.all_errorbars.append((scatter,barlinecols[0]))

@@ -254,6 +254,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
         self.horizontalSliderClusterExponent.valueChanged.connect(lambda value: self.labelClusterExponent.setText(str(value/10)))
+        self.comboBoxClusterMethod.activated.connect(self.update_cluster_ui)
         self.update_cluster_ui()
 
         # Connect color point radio button signals to a slot
@@ -1945,58 +1946,72 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
     def update_cluster_ui(self):
+        # update_clusters_ui - Enables/disables tools associated with clusters
+
+        # Number of Clusters
+        self.labelNClusters.setEnabled(True)
+        self.spinBoxNClusters.setEnabled(True)
+
         if self.comboBoxClusterMethod.currentText() == 'k-means':
             # Enable parameters relevant to KMeans
-            self.spinBoxNClusters.setEnabled(True)
-            self.horizontalSliderClusterExponent.setEnabled(False)  # Not used in KMeans
-            self.comboBoxClusterDistance.setEnabled(False)  # Not used in KMeans
-            self.spinBoxFCView.setEnabled(False)
-
-            self.labelClusterExponent.setEnabled(False)
-            self.labelNClusters.setEnabled(True)
+            # Exponent
             self.labelExponent.setEnabled(False)
+            self.labelClusterExponent.setEnabled(False)
+            self.horizontalSliderClusterExponent.setEnabled(False)
+
+            # Distance
             self.labelClusterDistance.setEnabled(False)
+            self.comboBoxClusterDistance.setEnabled(False)
+
+            # FC View
             self.labelFCView.setEnabled(False)
+            self.spinBoxFCView.setEnabled(False)
 
         elif self.comboBoxClusterMethod.currentText() == 'k-medoids':
             # Enable parameters relevant to KMedoids
-            self.spinBoxNClusters.setEnabled(True)
-            self.horizontalSliderClusterExponent.setEnabled(False)  # Not used in KMedoids
-            self.comboBoxClusterDistance.setEnabled(True)  # Distance metric is relevant
-            self.spinBoxFCView.setEnabled(False)
-
-            self.labelClusterExponent.setEnabled(False)
-            self.labelNClusters.setEnabled(True)
+            # Exponent
             self.labelExponent.setEnabled(False)
+            self.labelClusterExponent.setEnabled(False)
+            self.horizontalSliderClusterExponent.setEnabled(False)
+
+            # Distance
             self.labelClusterDistance.setEnabled(True)
+            self.comboBoxClusterDistance.setEnabled(True)
+
+            # FC View
             self.labelFCView.setEnabled(False)
+            self.spinBoxFCView.setEnabled(False)
 
         elif self.comboBoxClusterMethod.currentText() == 'fuzzy c-means':
             # Enable parameters relevant to Fuzzy Clustering
-            self.spinBoxNClusters.setEnabled(True)
-            self.horizontalSliderClusterExponent.setEnabled(True)  # Exponent is relevant
-            self.comboBoxClusterDistance.setEnabled(False)  # Distance metric may not be relevant, depending on implementation
-            self.spinBoxFCView.setEnabled(True)
+            # Exponent
+            self.labelExponent.setEnabled(True)
+            self.labelClusterExponent.setEnabled(True)
+            self.horizontalSliderClusterExponent.setEnabled(True)
 
-            self.labelNClusters.setEnabled(True)
-            self.labelClusterExponent.setEnabled(True)
-            self.labelClusterExponent.setEnabled(True)
+            # Distance
             self.labelClusterDistance.setEnabled(False)
-            self.labelFCView.setEnabled(True)
+            self.comboBoxClusterDistance.setEnabled(False)
 
+            # FC View
+            self.labelFCView.setEnabled(True)
+            self.spinBoxFCView.setEnabled(True)
 
         elif self.comboBoxClusterMethod.currentText() == 'all':
             # Enable parameters relevant to Fuzzy Clustering
-            self.spinBoxNClusters.setEnabled(True)
-            self.horizontalSliderClusterExponent.setEnabled(True)  # Exponent is relevant
-            self.comboBoxClusterDistance.setEnabled(True)  # Distance metric may not be relevant, depending on implementation
+            # Exponent
+            self.labelExponent.setEnabled(True)
+            self.labelClusterExponent.setEnabled(True)
+            self.horizontalSliderClusterExponent.setEnabled(True)
+
+            # Distance
+            self.labelClusterDistance.setEnabled(True)
+            self.comboBoxClusterDistance.setEnabled(True)
+
+            # FC View
+            self.labelFCView.setEnabled(True)
             self.spinBoxFCView.setEnabled(True)
 
-            self.labelNClusters.setEnabled(True)
-            self.labelClusterExponent.setEnabled(True)
-            self.labelClusterExponent.setEnabled(True)
-            self.labelClusterDistance.setEnabled(True)
-            self.labelFCView.setEnabled(True)
 
 
     def get_processed_data(self):

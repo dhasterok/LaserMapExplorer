@@ -43,7 +43,7 @@
        <string/>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>7</number>
       </property>
       <widget class="QWidget" name="SelectIsotopePage">
        <property name="enabled">
@@ -1161,7 +1161,7 @@
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>80</y>
+          <y>65</y>
           <width>301</width>
           <height>131</height>
          </rect>
@@ -1348,7 +1348,7 @@
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>220</y>
+          <y>200</y>
           <width>301</width>
           <height>231</height>
          </rect>
@@ -1813,7 +1813,7 @@
           <x>0</x>
           <y>0</y>
           <width>301</width>
-          <height>71</height>
+          <height>61</height>
          </rect>
         </property>
         <property name="toolTip">
@@ -1826,7 +1826,7 @@
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>25</y>
+           <y>20</y>
            <width>176</width>
            <height>36</height>
           </rect>
@@ -3279,7 +3279,7 @@
             <x>0</x>
             <y>20</y>
             <width>301</width>
-            <height>236</height>
+            <height>226</height>
            </rect>
           </property>
           <property name="title">
@@ -3294,7 +3294,7 @@
              <x>10</x>
              <y>10</y>
              <width>281</width>
-             <height>220</height>
+             <height>211</height>
             </rect>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_11">
@@ -5799,7 +5799,7 @@
          <enum>QFrame::Raised</enum>
         </property>
         <property name="currentIndex">
-         <number>2</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="StyleGeneral">
          <property name="geometry">

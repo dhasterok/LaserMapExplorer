@@ -82,6 +82,5 @@
         <file>resources/icons/icons8-add-bookmark-50.png</file>
         <file>resources/icons/icons8-add-list-50.png</file>
         <file>resources/icons/icons8-spotlight-40.png</file>
-        <file>resources/icons/icons8-gear-48.png</file>
     </qresource>
 </RCC>

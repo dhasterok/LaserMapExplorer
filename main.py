@@ -1238,6 +1238,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # p1.autoRange()
             layout.addWidget(glw, 0, 0, 3, 2)
             glw.setBackground('w')
+            
+            #add zoom window
+            self.setup_zoom_window(layout)
             self.plot_laser_map_cont(layout,array,img,p1,cm,view)
 
     def mouse_moved(self,event,plot):
@@ -1255,7 +1258,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # print(x,y)
                 x_i = round(x*array.shape[1]/self.x_range)
                 y_i = round(y*array.shape[0]/self.y_range)
+                
+                
+                
                 if 0 <= x_i < array.shape[1] and 0 <= y_i < array.shape[0] :
+                    # Update the zoom window based on the current mouse position
+                    self.update_zoom_window(x, y,array)
                     if not self.cursor:
                         QtWidgets.QApplication.setOverrideCursor(Qt.BlankCursor)
                         self.cursor = True
@@ -1340,105 +1348,53 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             cbar.setLevels([array.min(), array.max()])
 
 
+    def setup_zoom_window(self, layout):
+        # Create a GraphicsLayoutWidget for the zoom window
+        self.zoomWindow = pg.GraphicsLayoutWidget(show=True)
+        self.zoomPlot = self.zoomWindow.addPlot(title="Zoom")
+        self.zoomImg = pg.ImageItem()
+        self.zoomPlot.addItem(self.zoomImg)
+        # You might need to adjust the layout position according to your UI design
+        layout.addWidget(self.zoomWindow, 0, 3, 1, 2)  # Example placement
+        # Setup initial properties of the zoom window
+        self.zoomFactor = 5  # How much to zoom in
+        self.zoomPlot.showGrid(x=True, y=True)
+        self.zoomPlot.setAspectLocked(True)
+        self.zoomPlot.invertY(True) 
+        
+        # Optionally, set up a crosshair or marker in the zoom window
+        self.zoomTarget = pg.TargetItem(symbol='+')
+        self.zoomPlot.addItem(self.zoomTarget)
+        self.zoomTarget.hide()  # Initially hidden
+        
+    def update_zoom_window(self, x, y,array):
+        zoom_factor = 5  # Magnification factor for the zoom window
+        array_shape = array.shape
+        x_range, y_range = self.x_range, self.y_range
+    
+        # Determine the bounds for the zoom window based on the mouse position
+        zoom_scale = 0.1  # Adjust based on how much zoom you want
+        x_min_zoom = max(x - self.x_range * zoom_scale, 0)
+        x_max_zoom = min(x + self.x_range * zoom_scale, self.x_range)
+        y_min_zoom = max(y - self.y_range * zoom_scale, 0)
+        y_max_zoom = min(y + self.y_range * zoom_scale, self.y_range)
+        # print(x_min_zoom,x_max_zoom,y_min_zoom,y_max_zoom)
+        # Update the zoom window's view to the region around the cursor
+        # self.zoomPlot.setXRange(x_min_zoom, x_max_zoom, padding=0)
+        # self.zoomPlot.setYRange(y_min_zoom, y_max_zoom, padding=0)
 
-        # distances, medians, lowers, uppers = process_points(profile1_points, sort_axis='x')
-        # errors = [upper - lower for upper, lower in zip(uppers, lowers)]
-
-        # fig = Figure()
-        # ax1 = fig.add_subplot(111)
-        # ax1.errorbar(distances, medians, yerr=errors, fmt='o', color='b', ecolor='lightgray', elinewidth=3, capsize=0)
-        # ax1.set_xlabel('Distance')
-        # ax1.set_ylabel('Profile 1 Values', color='b')
-
-        # if profile2_key:
-        #     profile2_points = self.profiles[profile2_key]
-        #     distances2, medians2, lowers2, uppers2 = process_points(profile2_points, sort_axis='x')
-        #     errors2 = [upper - lower for upper, lower in zip(uppers2, lowers2)]
-
-        #     ax2 = ax1.twinx()
-        #     ax2.errorbar(distances2, medians2, yerr=errors2, fmt='o', color='r', ecolor='lightgray', elinewidth=3, capsize=0)
-        #     ax2.set_ylabel('Profile 2 Values', color='r')
-
-        #     # Set window title for comparison
-        #     fig.suptitle(f'Comparison: {profile1_key[:-1]} vs {profile2_key[:-1]}')
-        # else:
-        #     # Set window title for single profile
-        #     fig.suptitle(f'Profile {profile1_key[:-1]}')
-
-        # fig.tight_layout(pad=0, h_pad=None, w_pad=None, rect=None)
-
-        # # Embed the matplotlib plot in a QWidget
-        # canvas = FigureCanvas(fig)
-        # widget = QtWidgets.QWidget()
-        # layout = QVBoxLayout(widget)
-        # layout.addWidget(canvas)
-        # widget.setLayout(layout)
-
-        # # Remove current plot from the layout and add the new one
-        # for i in reversed(range(self.widgetProfilePlot.layout().count())):
-        #     self.widgetProfilePlot.layout().itemAt(i).widget().setParent(None)
-
-        # self.widgetProfilePlot.layout().addWidget(widget)
-        # widget.show()
+        # Update the image in the zoom window to reflect the new view
+        self.zoomImg.setImage(image=array)  # Ensure `self.array` is updated to the current plot data
+        self.zoomImg.setRect(0,0,self.x_range,self.y_range)
+        self.zoomImg.setColorMap(pg.colormap.get(self.cm, source = 'matplotlib'))
+        self.zoomImg.getViewBox().setRange(QtCore.QRectF(x_min_zoom, y_min_zoom, x_max_zoom - x_min_zoom, y_max_zoom - y_min_zoom))
+        self.zoomTarget.setPos(x, y)  # Update target position
+        self.zoomTarget.show()
 
     def reset_zoom(self, vb,histogram):
         vb.enableAutoRange()
         histogram.autoHistogramRange()
 
-    # def plot_histogram(self, current_plot_df, plot_information, bin_width):
-    #     select_histogram = plot_information['plot_name']
-    #     array = current_plot_df['array'].values
-    #     edges = np.arange(array.min(), array.max() + bin_width, bin_width)
-
-    #     plot_exist = select_histogram in self.plot_widget_dict
-    #     duplicate = plot_exist and len(self.plot_widget_dict[select_histogram]['view']) == 1 and self.plot_widget_dict[select_histogram]['view'][0] != self.canvasWindow.currentIndex()
-
-    #     if plot_exist and not duplicate:
-    #         widgetHistogram = self.plot_widget_dict[select_histogram]['widget'][0]
-    #         histogram_plot = widgetHistogram.findChild(pg.PlotWidget)
-    #         histogram_plot.clear()
-    #         self.update_histogram(array, edges, histogram_plot)
-    #     else:
-    #         layout = QtWidgets.QVBoxLayout()
-    #         widgetHistogram = QtWidgets.QWidget()
-    #         widgetHistogram.setLayout(layout)
-    #         view = self.canvasWindow.currentIndex()
-    #         if duplicate:
-    #             self.plot_widget_dict[select_histogram]['widget'].append(widgetHistogram)
-    #             self.plot_widget_dict[select_histogram]['view'].append(view)
-    #         else:
-    #             self.plot_widget_dict[select_histogram] = {'widget': [widgetHistogram], 'info': plot_information, 'view': [view]}
-    #         histogram_plot = pg.PlotWidget(title=select_histogram)
-    #         self.update_histogram(array, edges, histogram_plot)
-    #         layout.addWidget(histogram_plot)
-    #         histogram_plot.setBackground('w')
-
-    # def update_histogram(self, array, edges, histogram_plot):
-    #     # Create a legend
-    #     legend = pg.LegendItem(offset=(70, 30))  # Adjust offset as needed
-    #     legend.setParentItem(histogram_plot.graphicsItem())  # Add legend to the histogram plot
-
-
-    #     if 'algorithm' in self.current_group and self.current_group['algorithm'] in self.cluster_results:
-    #         # Color the histogram based on clusters
-    #         for cluster in self.current_group['clusters']:
-    #             cluster_num = int(cluster.split()[1])  # Assuming cluster name format is "Cluster X"
-    #             cluster_indices = np.where(self.cluster_results[self.current_group['algorithm']] == cluster_num)[0]
-    #             cluster_data = array[cluster_indices]
-    #             hist, _ = np.histogram(cluster_data.flatten(), bins=edges)
-    #             # Adjust color with transparency (alpha)
-    #             color = pg.intColor(cluster_num, alpha=80)  # Adjust alpha value (0-255) for transparency
-    #             bar_graph_item = pg.BarGraphItem(x0=edges[:-1], x1=edges[1:], height=hist, brush=color)
-    #             histogram_plot.addItem(bar_graph_item)
-    #             # Add item to legend
-    #             legend.addItem(bar_graph_item, f'Cluster {cluster_num}')
-    #     else:
-    #         # Regular histogram
-    #         hist, _ = np.histogram(array.flatten(), bins=edges)
-    #         bar_graph_item = pg.BarGraphItem(x0=edges[:-1], x1=edges[1:], height=hist, brush='b')
-    #         histogram_plot.addItem(bar_graph_item)
-    #     histogram_plot.setLabel('left', 'Frequency')
-    #     histogram_plot.setLabel('bottom', 'Value')
     
     def plot_pca(self):
         pca_dict = {}
@@ -3878,7 +3834,7 @@ class Profiling:
             original_min = None
             twinx_min = None
             original_max = None
-            twinx_min = None
+            twinx_max = None
             # Adjust subplot spacing
             # fig.subplots_adjust(hspace=0.1)  # Adjust vertical spacing
             ax = self.fig.add_subplot(num_subplots, 1, subplot_idx)

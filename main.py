@@ -3448,14 +3448,6 @@ class CustomAxis(AxisItem):
 class Table_Fcn:
     def __init__(self,main_window):
         self.main_window = main_window
-        # Initialize other necessary attributes
-        # Initialize variables and states as needed
-        self.profiles = {}
-        self.i_profiles = {}        #interpolated profiles
-        self.array_x = None
-        self.array_y = None
-        self.point_selected = False # move point button selected
-        self.pind = -1              # index for move point
 
     def move_row_up(self, table):
         # Get selected row
@@ -3475,7 +3467,7 @@ class Table_Fcn:
                     self.main_window.comboBoxProfileSort.setCurrentIndex(0) #set dropdown sort to no
 
                     # Update self.profiles here accordingly
-                    for key, profile in self.profiles.items():
+                    for key, profile in self.main_window.profiling.profiles.items():
                         if row >0:
                             profile[row], profile[row -1 ] = profile[row - 1], profile[row]
                     self.plot_profiles(sort_axis = False)
@@ -3506,7 +3498,7 @@ class Table_Fcn:
             match table.accesibleName():
                 case 'Profiling':
                     # update point order of each profile
-                    for key, profile in self.profiles.items():
+                    for key, profile in self.main_window.profiling.profiles.items():
                         if row < len(profile) - 1:
                             profile[row], profile[row + 1] = profile[row + 1], profile[row]
                     self.plot_profiles(sort_axis = False)
@@ -3527,7 +3519,7 @@ class Table_Fcn:
                     # remove point from each profile and its corresponding scatter plot item
 
 
-                    for key, profile in self.profiles.items():
+                    for key, profile in self.main_window.profiling.profiles.items():
                         if row < len(profile):
                             scatter_item = profile[row][3]  # Access the scatter plot item
                             for _, (_, plot, _, _) in self.main_window.lasermaps.items():
@@ -3641,57 +3633,7 @@ class Profiling:
             self.plot_profiles()
             self.update_table_widget()
 
-                    # move point
-        #elif event.button() == QtCore.Qt.LeftButton and not(self.main_window.toolButtonPlotProfile.isChecked()) and self.main_window.toolButtonPointMove.isChecked():
-        #    if self.point_selected:
-        #        # Create a scatter plot item at the clicked position
-        #        scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
-        #        plot.addItem(scatter)
-        #        # Find all points within the specified radius
-        #        circ_val = []
-        #        circ_cord = []
-        #        for i in range(max(0, y_i - radius), min(self.array_y, y_i + radius + 1)):
-        #            for j in range(max(0, x_i - radius), min(self.array_x , x_i + radius + 1)):
-        #                if np.sqrt((x_i - j)**2 + (y_i - i)**2) <= radius:
-        #                    value = array[i, j]
-        #                    circ_cord.append([i, j])
-        #                    circ_val.append( value)
-
-        #        #add values within circle of radius in self.profiles
-        #        if k in self.profiles:
-        #            self.profiles[k].append((x,y,circ_val,scatter, interpolate))
-        #        else:
-        #            self.profiles[k] = [(x,y, circ_val,scatter, interpolate)]
-
-
-        #        if self.main_window.canvasWindow.currentIndex() == 1:
-        #            # Add the scatter item to all other plots and save points in self.profiles
-        #            for k, (_, p, v, array) in self.main_window.lasermaps.items():
-        #                circ_val = []
-        #                if p != plot and v==1 and self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #only add scatters to other lasermaps of same sample
-        #                    # Create a scatter plot item at the clicked position
-        #                    scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
-        #                    p.addItem(scatter)
-        #                    for c in circ_cord:
-        #                        value = array[c[0], c[1]]
-        #                        circ_val.append( value)
-        #                    if k in self.profiles:
-        #                        self.profiles[k].append((x,y,circ_val, scatter, interpolate))
-        #                    else:
-        #                        self.profiles[k] = [(x,y, circ_val,scatter, interpolate)]
-        #        # find nearest profile point
-        #    else:
-        #        mindist = 10^12
-        #        for k in self.profiles.values():
-        #            dist = min((k[0][0] - x)**2 + (k[0][1] - y)**2)
-        #            if mindist > dist:
-        #                mindist = dist
-        #                self.pind = k
-        #        if not(round(d*self.array_x/self.main_window.x_range) < 10):
-        #            self.pind = -1
-        #        else:
-        #            self.point_selected = True
-          # move point
+        
         elif event.button() == QtCore.Qt.LeftButton and not(self.main_window.toolButtonPlotProfile.isChecked()) and self.main_window.toolButtonPointMove.isChecked():
             if self.point_selected:
                 #remove selected point
@@ -3876,11 +3818,11 @@ class Profiling:
 
                     for group_key, _ in profile_groups.items():
                         if abs(range_value - group_key) <= range_threshold:
-                            profile_groups[group_key].append((k, distances, mean, s_error))
+                            profile_groups[group_key].append((k, distances, mean, s_error, np.min(mean)))
                             similar_group_found = True
                             break
                     if not similar_group_found:
-                        profile_groups[range_value] = [(k, distances, mean, s_error)]
+                        profile_groups[range_value] = [(k, distances, mean, s_error, np.min(mean, np.max(mean)))]
                 else:
 
                     range_value = np.max(medians)- np.min(medians)
@@ -3889,11 +3831,11 @@ class Profiling:
 
                     for group_key, _ in profile_groups.items():
                         if abs(range_value - group_key) <= range_threshold:
-                            profile_groups[group_key].append((k, distances, medians, lowers, uppers))
+                            profile_groups[group_key].append((k, distances, medians, lowers, uppers, np.min(medians), np.max(medians)))
                             similar_group_found = True
                             break
                     if not similar_group_found:
-                        profile_groups[range_value] = [(k, distances, medians, lowers, uppers)]
+                        profile_groups[range_value] = [(k, distances, medians, lowers, uppers, np.min(medians), np.max(medians))]
 
             return profile_groups, colors
 
@@ -3925,60 +3867,143 @@ class Profiling:
             profile_groups,colors = group_profiles_by_range(sort_axis, range_threshold, interpolate, point_type)
             # Initialize the figure
             self.fig = Figure()
+            #Connect the pick_event signal to a handler that will process the picked points.
+            self.fig.canvas.mpl_connect('pick_event', self.on_pick)
             num_groups = len(profile_groups)
             num_subplots = (num_groups + 1) // 2  # Two groups per subplot, rounding up
             subplot_idx = 1
             #reset existing error_bar list
             self.all_errorbars = []
+            original_range = None
+            original_min = None
+            twinx_min = None
+            original_max = None
+            twinx_min = None
             # Adjust subplot spacing
             # fig.subplots_adjust(hspace=0.1)  # Adjust vertical spacing
             ax = self.fig.add_subplot(num_subplots, 1, subplot_idx)
+            
             for idx, (range_value, group_profiles) in enumerate(profile_groups.items()):
+                scale_factor = 0
                 if idx > 1 and idx % 2 == 0:  # Create a new subplot for every 2 groups after the first two
                     subplot_idx += 1
                     ax = self.fig.add_subplot(num_subplots, 1, subplot_idx)
-                elif idx % 2 == 1:  # Create a new subplot for every 2 groups after the first two
-                    ax = ax.twinx()
+                    original_range = range_value
+                    
+                elif idx % 2 == 1:  # Create a new axis for every second group
+                    
+                    twinx_range = range_value
+                    scale_factor = original_range/twinx_range
+                    ax2 = ax.twinx()
+                    ax.set_zorder(ax2.get_zorder()+1)
+                    # ax = ax2
+                else:
+                    original_range = range_value
                 el_labels = []
                 # Plot each profile in the group
                 if point_type == 'mean':
-                    for g_idx,(profile_key, distances, means,s_errors) in enumerate(group_profiles):
-                        # Plot markers with ax.scatter
-                        scatter = ax.scatter(distances, means, color=colors[idx+g_idx], s=64, picker=5, zorder=2*g_idx+1)
-                        
-                        # Store additional information needed to identify points upon picking
-                        self.scatter_info = scatter
-                        
-                        self.original_colors[scatter] = colors[idx+g_idx]  # Assuming colors is accessible
-        
-                        #plot errorbars with no marker
-                        self.line, self.caplines, self.barlinecols= ax.errorbar(distances, means, yerr=s_errors, fmt='none', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0, label=f'{profile_key[:-1]}', zorder=2*g_idx)
-                        
-
+                    for g_idx,(profile_key, distances, means,s_errors, min_val, max_val) in enumerate(group_profiles):
+                        if scale_factor>0: #needs scaling 
+                            if g_idx == 0: #the min value of the group is stored in first row of each group_profiles
+                                twinx_min = min_val
+                                twinx_min = max_val
+                                # Scale values and errors
+                                scaled_values = [(value - twinx_min) * scale_factor + original_min for value in means]
+                                scaled_errors = [error * scale_factor for error in s_errors]
+                                                    
+                            # Plot markers with ax.scatter
+                            scatter = ax.scatter(distances, scaled_values, color=colors[idx+g_idx], s=64, picker=5, label=f'{profile_key[:-1]}')
+                            
+                            #plot errorbars with no marker
+                            _, _, barlinecols = ax.errorbar(distances, scaled_errors, yerr=scaled_errors, fmt='none', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0)
+                            # Assuming you have the scaling factors and original data range
+                            scale_factor = (original_max - original_min) / (twinx_max - twinx_min)
+                            
+                            # Determine positions for custom ticks on ax2
+                            # Choose representative values from the original scale you want as ticks on ax2
+                            original_tick_values = [twinx_min, (twinx_max + twinx_min) / 2, twinx_max]
+                            
+                            # Calculate the scaled positions of these ticks on ax
+                            scaled_tick_positions = [(value - twinx_min) * scale_factor + original_min for value in original_tick_values]
+                            
+                        else:
+                            if g_idx == 0:
+                                original_min = min_val
+                                original_max = max_val
+                            # Plot markers with ax.scatter
+                            scatter = ax.scatter(distances, means, color=colors[idx+g_idx], s=64, picker=5, label=f'{profile_key[:-1]}')
+                            
+                            #plot errorbars with no marker
+                            _, _, barlinecols = ax.errorbar(distances, means, yerr=s_errors, fmt='none', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0)
+                            
+                        self.all_errorbars.append((scatter,barlinecols[0]))
+                        self.original_colors[profile_key] = colors[idx+g_idx]  # Assuming colors is accessible
+                        self.selected_points[profile_key] = [False] * len(means)
                         el_labels.append(profile_key[:-1].split('_')[-1]) #get element name
                         y_axis_text = ','.join(el_labels)
-                        ax.set_ylabel(f'{y_axis_text}')
+                        if scale_factor>0:
+                            ax2.set_ylabel(f'{y_axis_text}')
+                            ax2.set_yticks(scaled_tick_positions)
+                            ax2.set_yticklabels([f"{value:.2f}" for value in original_tick_values])
+                        else:
+                            ax.set_ylabel(f'{y_axis_text}')
                         # Append the new Line2D objects to the list
                         # self.markers.extend(marker)
                 else:
-                    for g_idx,(profile_key, distances, medians, lowers, uppers) in enumerate(group_profiles):
-
-                        # errors = [upper - lower for upper, lower in zip(uppers, lowers)]
+                    for g_idx,(profile_key, distances, medians, lowers, uppers, min_val, max_val) in enumerate(group_profiles):
                         #asymmetric error bars
                         errors = [[median - lower for median, lower in zip(medians, lowers)],
                             [upper - median for upper, median in zip(uppers, medians)]]
-                        # Plot markers with ax.scatter
-                        scatter = ax.scatter(distances, medians, color=colors[idx+g_idx],s=self.scatter_size, picker=5, gid=profile_key, edgecolors = 'none', zorder=2*g_idx+1)
-                        #plot errorbars with no marker
-                        _, _, barlinecols = ax.errorbar(distances, medians, yerr=errors, fmt='none', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0, label=f'{profile_key[:-1]}', zorder=2*g_idx)
+                        if scale_factor>0: #needs scaling 
+                            if g_idx == 0: #the min value of the group is stored in first row of each group_profiles
+                                twinx_min = min_val
+                                twinx_max = max_val
+                            
+                            
+                            # Scale values and errors
+                            scaled_values = [(value - twinx_min) * scale_factor + original_min for value in medians]
+                            # Assuming errors is structured as [lower_errors, upper_errors]
+                            scaled_lower_errors = [error * scale_factor for error in errors[0]]
+                            scaled_upper_errors = [error * scale_factor for error in errors[1]]
+                            
+                            # Now, scaled_errors is ready to be used in plotting functions
+                            scaled_errors = [scaled_lower_errors, scaled_upper_errors]
+                            # Plot markers with ax.scatter
+                            scatter = ax.scatter(distances, scaled_values, color=colors[idx+g_idx],s=self.scatter_size, picker=5, gid=profile_key, edgecolors = 'none', label=f'{profile_key[:-1]}')
+                            # ax2.scatter(distances, medians, color=colors[idx+g_idx],s=self.scatter_size, picker=5, gid=profile_key, edgecolors = 'none', label=f'{profile_key[:-1]}')
+                            #plot errorbars with no marker
+                            _, _, barlinecols = ax.errorbar(distances, scaled_values, yerr=scaled_errors, fmt='none', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0)
                         
-                        
+                            
+                            # Assuming you have the scaling factors and original data range
+                            scale_factor = (original_max - original_min) / (twinx_max - twinx_min)
+                            
+                            # Determine positions for custom ticks on ax2
+                            # Choose representative values from the original scale you want as ticks on ax2
+                            original_tick_values = [twinx_min, (twinx_max + twinx_min) / 2, twinx_max]
+                            
+                            # Calculate the scaled positions of these ticks on ax
+                            scaled_tick_positions = [(value - twinx_min) * scale_factor + original_min for value in original_tick_values]
+                        else:
+                            if g_idx == 0: #the min value of the group is stored in first row of each group_profiles
+                                original_min = min_val
+                                original_max = max_val
+                            
+                            # Plot markers with ax.scatter
+                            scatter = ax.scatter(distances, medians, color=colors[idx+g_idx],s=self.scatter_size, picker=5, gid=profile_key, edgecolors = 'none', label=f'{profile_key[:-1]}')
+                            #plot errorbars with no marker
+                            _, _, barlinecols = ax.errorbar(distances, medians, yerr=errors, fmt='none', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0)
                         self.all_errorbars.append((scatter,barlinecols[0]))
                         self.original_colors[profile_key] = colors[idx+g_idx]  # Assuming colors is accessible
                         self.selected_points[profile_key] = [False] * len(medians)
                         el_labels.append(profile_key[:-1].split('_')[-1]) #get element name
                         y_axis_text = ','.join(el_labels)
-                        ax.set_ylabel(f'{y_axis_text}')
+                        if scale_factor>0:
+                            ax2.set_ylabel(f'{y_axis_text}')
+                            ax2.set_yticks(scaled_tick_positions)
+                            ax2.set_yticklabels([f"{value:.2f}" for value in original_tick_values])
+                        else:
+                            ax.set_ylabel(f'{y_axis_text}')
 
             # Set labels only for the bottom subplot
                 if subplot_idx == num_subplots:
@@ -3995,8 +4020,7 @@ class Profiling:
             self.fig.tight_layout(pad=3,w_pad=0, h_pad=0)
             self.fig.subplots_adjust(wspace=0, hspace=0)
             self.fig.legend(loc='outside right upper')
-            #Connect the pick_event signal to a handler that will process the picked points.
-            self.fig.canvas.mpl_connect('pick_event', self.on_pick)
+
             # Embed the matplotlib plot in a QWidget
             canvas = FigureCanvas(self.fig)
             widget = QWidget()
@@ -4063,7 +4087,7 @@ class Profiling:
         self.main_window.toolButtonPointDelete.setEnabled(enable)
 
     def on_pick(self, event):
-        print(event.artist)
+        
         if self.edit_mode_enabled and isinstance(event.artist, PathCollection):
             # The picked scatter plot
             picked_scatter = event.artist
@@ -4074,7 +4098,6 @@ class Profiling:
             facecolors = picked_scatter.get_facecolors().copy()
             original_color = matplotlib.colors.to_rgba(self.original_colors[profile_key])  # Assuming you have a way to map indices to original colors
             
-            print(ind)
             # Toggle selection state
             self.selected_points[profile_key][ind] = not self.selected_points[profile_key][ind]
         

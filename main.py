@@ -1223,8 +1223,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 if self.prev_plot:
                     del self.lasermaps[self.prev_plot]
                 self.prev_plot = name
+                self.init_zoom_view(p1,array)
 
-
+            
 
             # Create a SignalProxy to handle mouse movement events
             # self.proxy = pg.SignalProxy(p1.scene().sigMouseMoved, rateLimit=60, slot=self.mouseMoved)
@@ -1240,7 +1241,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             glw.setBackground('w')
             
             #add zoom window
-            self.setup_zoom_window(layout)
+            # self.setup_zoom_window(layout)
+            
             self.plot_laser_map_cont(layout,array,img,p1,cm,view)
 
     def mouse_moved(self,event,plot):
@@ -1263,7 +1265,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 
                 if 0 <= x_i < array.shape[1] and 0 <= y_i < array.shape[0] :
                     # Update the zoom window based on the current mouse position
-                    self.update_zoom_window(x, y,array)
+                    # self.update_zoom_window(x, y,array)
+                    
+                    
+
                     if not self.cursor:
                         QtWidgets.QApplication.setOverrideCursor(Qt.BlankCursor)
                         self.cursor = True
@@ -1271,7 +1276,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     value = array[y_i, x_i]  # assuming self.array is numpy self.array
 
                     if self.canvasWindow.currentIndex() == 0:
-
+                        # Update the position of the zoom view
+                        self.update_zoom_view_position(x, y,array)
+                        
+                        
                         self.labelInfoX.setText('X: '+str(round(x)))
                         self.labelInfoY.setText('Y: '+str(round(y)))
                         self.labelInfoV.setText('V: '+str(round(value,2)))
@@ -1348,48 +1356,102 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             cbar.setLevels([array.min(), array.max()])
 
 
-    def setup_zoom_window(self, layout):
-        # Create a GraphicsLayoutWidget for the zoom window
-        self.zoomWindow = pg.GraphicsLayoutWidget(show=True)
-        self.zoomPlot = self.zoomWindow.addPlot(title="Zoom")
+    # def setup_zoom_window(self, layout):
+    #     # Create a GraphicsLayoutWidget for the zoom window
+    #     self.zoomWindow = pg.GraphicsLayoutWidget(show=True)
+    #     self.zoomPlot = self.zoomWindow.addPlot(title="Zoom")
+    #     self.zoomImg = pg.ImageItem()
+    #     self.zoomPlot.addItem(self.zoomImg)
+    #     # You might need to adjust the layout position according to your UI design
+    #     layout.addWidget(self.zoomWindow, 0, 3, 1, 2)  # Example placement
+    #     # Setup initial properties of the zoom window
+    #     self.zoomFactor = 5  # How much to zoom in
+    #     self.zoomPlot.showGrid(x=True, y=True)
+    #     self.zoomPlot.setAspectLocked(True)
+    #     self.zoomPlot.invertY(True) 
+        
+    #     # Optionally, set up a crosshair or marker in the zoom window
+    #     self.zoomTarget = pg.TargetItem(symbol='+')
+    #     self.zoomPlot.addItem(self.zoomTarget)
+    #     self.zoomTarget.hide()  # Initially hidden
+        
+     # def update_zoom_window(self, x, y,array,key):
+     #     zoom_factor = 5  # Magnification factor for the zoom window
+     #     array_shape = array.shape
+     #     x_range, y_range = self.x_range, self.y_range
+     
+     #     # Determine the bounds for the zoom window based on the mouse position
+     #     zoom_scale = 0.1  # Adjust based on how much zoom you want
+     #     x_min_zoom = max(x - self.x_range * zoom_scale, 0)
+     #     x_max_zoom = min(x + self.x_range * zoom_scale, self.x_range)
+     #     y_min_zoom = max(y - self.y_range * zoom_scale, 0)
+     #     y_max_zoom = min(y + self.y_range * zoom_scale, self.y_range)
+     #     # print(x_min_zoom,x_max_zoom,y_min_zoom,y_max_zoom)
+     #     # Update the zoom window's view to the region around the cursor
+     #     # self.zoomPlot.setXRange(x_min_zoom, x_max_zoom, padding=0)
+     #     # self.zoomPlot.setYRange(y_min_zoom, y_max_zoom, padding=0)
+
+     #     # Update the image in the zoom window to reflect the new view
+     #     self.zoomImg.setImage(image=array)  # Ensure `self.array` is updated to the current plot data
+     #     self.zoomImg.setRect(0,0,self.x_range,self.y_range)
+     #     self.zoomImg.setColorMap(pg.colormap.get(self.cm, source = 'matplotlib'))
+     #     self.zoomImg.getViewBox().setRange(QtCore.QRectF(x_min_zoom, y_min_zoom, x_max_zoom - x_min_zoom, y_max_zoom - y_min_zoom))
+     #     self.zoomTarget.setPos(x, y)  # Update target position
+     #     self.zoomTarget.show()
+        
+    def init_zoom_view(self,p,array):
+        # Set the initial zoom level
+        self.zoomLevel = 0.02  # Adjust as needed for initial zoom level
+        self.mainPlot = p
+        # Create a ViewBox for the zoomed view
+        self.zoomViewBox = pg.ViewBox(border={'color': 'w', 'width': 1})
         self.zoomImg = pg.ImageItem()
-        self.zoomPlot.addItem(self.zoomImg)
-        # You might need to adjust the layout position according to your UI design
-        layout.addWidget(self.zoomWindow, 0, 3, 1, 2)  # Example placement
-        # Setup initial properties of the zoom window
-        self.zoomFactor = 5  # How much to zoom in
-        self.zoomPlot.showGrid(x=True, y=True)
-        self.zoomPlot.setAspectLocked(True)
-        self.zoomPlot.invertY(True) 
+        self.zoomViewBox.addItem(self.zoomImg)
+        self.zoomViewBox.setAspectLocked(True)
+        self.zoomViewBox.invertY(True) 
+        # Add the zoom ViewBox as an item to the main plot (self.mainPlot is your primary plot object)
+        self.mainPlot.addItem(self.zoomViewBox, ignoreBounds=True)
+        
+        # Configure initial size and position (you'll update this dynamically later)
+        self.zoomViewBox.setFixedWidth(400)  # Width of the zoom box in pixels
+        self.zoomViewBox.setFixedHeight(400)  # Height of the zoom box in pixels
         
         # Optionally, set up a crosshair or marker in the zoom window
-        self.zoomTarget = pg.TargetItem(symbol='+')
-        self.zoomPlot.addItem(self.zoomTarget)
+        self.zoomTarget = pg.TargetItem(symbol='+', size = 5)
+        self.zoomViewBox.addItem(self.zoomTarget)
         self.zoomTarget.hide()  # Initially hidden
         
-    def update_zoom_window(self, x, y,array):
-        zoom_factor = 5  # Magnification factor for the zoom window
-        array_shape = array.shape
-        x_range, y_range = self.x_range, self.y_range
+        
+        self.update_zoom_view_position(0, 0, array)  # Initial position
     
-        # Determine the bounds for the zoom window based on the mouse position
-        zoom_scale = 0.1  # Adjust based on how much zoom you want
-        x_min_zoom = max(x - self.x_range * zoom_scale, 0)
-        x_max_zoom = min(x + self.x_range * zoom_scale, self.x_range)
-        y_min_zoom = max(y - self.y_range * zoom_scale, 0)
-        y_max_zoom = min(y + self.y_range * zoom_scale, self.y_range)
-        # print(x_min_zoom,x_max_zoom,y_min_zoom,y_max_zoom)
-        # Update the zoom window's view to the region around the cursor
-        # self.zoomPlot.setXRange(x_min_zoom, x_max_zoom, padding=0)
-        # self.zoomPlot.setYRange(y_min_zoom, y_max_zoom, padding=0)
-
-        # Update the image in the zoom window to reflect the new view
-        self.zoomImg.setImage(image=array)  # Ensure `self.array` is updated to the current plot data
+        
+        
+    def update_zoom_view_position(self, x, y, array):
+        # Assuming you have a method like this to update the zoom view
+        # Calculate the new position for the zoom view
+        xOffset = 50  # Horizontal offset from cursor to avoid overlap
+        yOffset = 100  # Vertical offset from cursor to display below it
+    
+        # Adjust position to ensure the zoom view remains within the plot bounds
+        x_pos = min(max(x + xOffset, 0), self.mainPlot.viewRect().width() - self.zoomViewBox.width())
+        y_pos = min(max(y + yOffset, 0), self.mainPlot.viewRect().height() - self.zoomViewBox.height())
+    
+        # Update the position of the zoom view
+        self.zoomViewBox.setGeometry(x_pos, y_pos, self.zoomViewBox.width(), self.zoomViewBox.height())
+        
+        # Calculate the region to zoom in on
+        zoomRect = QtCore.QRectF(x - self.x_range * self.zoomLevel, y - self.y_range * self.zoomLevel, self.x_range * self.zoomLevel * 2, self.y_range * self.zoomLevel * 2)
+    
+        # Update the zoom view's displayed region
+        # self.zoomViewBox.setRange(rect=zoomRect, padding=0)
+        self.zoomImg.setImage(image=array)  # Make sure this uses the current image data
+        
         self.zoomImg.setRect(0,0,self.x_range,self.y_range)
+        self.zoomViewBox.setRange(zoomRect) # Set the zoom area in the image
         self.zoomImg.setColorMap(pg.colormap.get(self.cm, source = 'matplotlib'))
-        self.zoomImg.getViewBox().setRange(QtCore.QRectF(x_min_zoom, y_min_zoom, x_max_zoom - x_min_zoom, y_max_zoom - y_min_zoom))
         self.zoomTarget.setPos(x, y)  # Update target position
         self.zoomTarget.show()
+        self.zoomViewBox.setZValue(1e10)
 
     def reset_zoom(self, vb,histogram):
         vb.enableAutoRange()

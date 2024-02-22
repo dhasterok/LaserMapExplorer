@@ -50,7 +50,7 @@
        <string/>
       </property>
       <property name="currentIndex">
-       <number>4</number>
+       <number>5</number>
       </property>
       <widget class="QWidget" name="SelectIsotopePage">
        <property name="enabled">
@@ -2810,6 +2810,16 @@
                  </property>
                 </item>
                </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="labelShowMass">
+                <property name="text">
+                 <string>Show mass</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QCheckBox" name="checkBoxShowMass"/>
               </item>
              </layout>
             </item>
@@ -5821,7 +5831,7 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="TreeView">
        <property name="geometry">
@@ -6600,10 +6610,10 @@
               </size>
              </property>
              <property name="minimum">
-              <double>1.000000000000000</double>
+              <double>2.000000000000000</double>
              </property>
              <property name="maximum">
-              <double>16.000000000000000</double>
+              <double>32.000000000000000</double>
              </property>
              <property name="singleStep">
               <double>1.000000000000000</double>

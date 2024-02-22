@@ -13,6 +13,13 @@
   <property name="windowTitle">
    <string>LaME: Laser Map Explorer</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/icons/resources/icons/LaME-64.png</normaloff>:/icons/resources/icons/LaME-64.png</iconset>
+  </property>
+  <property name="unifiedTitleAndToolBarOnMac">
+   <bool>false</bool>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <property name="font">
     <font>
@@ -43,7 +50,7 @@
        <string/>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="SelectIsotopePage">
        <property name="enabled">
@@ -66,7 +73,7 @@
           <x>0</x>
           <y>0</y>
           <width>301</width>
-          <height>156</height>
+          <height>191</height>
          </rect>
         </property>
         <property name="title">
@@ -78,7 +85,7 @@
            <x>5</x>
            <y>5</y>
            <width>291</width>
-           <height>146</height>
+           <height>178</height>
           </rect>
          </property>
          <layout class="QFormLayout" name="formLayout_3">
@@ -198,7 +205,7 @@
             </item>
            </widget>
           </item>
-          <item row="3" column="1">
+          <item row="4" column="1">
            <widget class="QToolButton" name="toolButtonLoadIsotopes">
             <property name="maximumSize">
              <size>
@@ -224,7 +231,7 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
+          <item row="4" column="0">
            <widget class="QLabel" name="label_9">
             <property name="font">
              <font>
@@ -234,6 +241,38 @@
             <property name="text">
              <string>Isotope select</string>
             </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="labelCorrelationMethod">
+            <property name="text">
+             <string>Corr. Method</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QComboBox" name="comboBoxCorrelationMethod">
+            <property name="maximumSize">
+             <size>
+              <width>200</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <item>
+             <property name="text">
+              <string>Pearson</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Spearman</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Kendall</string>
+             </property>
+            </item>
            </widget>
           </item>
          </layout>
@@ -2205,7 +2244,7 @@
           <x>-5</x>
           <y>175</y>
           <width>306</width>
-          <height>96</height>
+          <height>121</height>
          </rect>
         </property>
         <property name="title">
@@ -2217,7 +2256,7 @@
            <x>10</x>
            <y>25</y>
            <width>286</width>
-           <height>66</height>
+           <height>90</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_7">
@@ -2312,6 +2351,12 @@
                   <height>18</height>
                  </size>
                 </property>
+                <property name="toolTip">
+                 <string>Pick color for top vertex</string>
+                </property>
+                <property name="accessibleName">
+                 <string>Top ternary color</string>
+                </property>
                 <property name="text">
                  <string>X</string>
                 </property>
@@ -2324,6 +2369,12 @@
                   <width>18</width>
                   <height>18</height>
                  </size>
+                </property>
+                <property name="toolTip">
+                 <string>Pick color for left vertex</string>
+                </property>
+                <property name="accessibleName">
+                 <string>Left ternary color</string>
                 </property>
                 <property name="text">
                  <string>Y</string>
@@ -2338,6 +2389,12 @@
                   <height>18</height>
                  </size>
                 </property>
+                <property name="toolTip">
+                 <string>Pick color for right vertex</string>
+                </property>
+                <property name="accessibleName">
+                 <string>Right ternary color</string>
+                </property>
                 <property name="text">
                  <string>Z</string>
                 </property>
@@ -2351,6 +2408,12 @@
                   <height>18</height>
                  </size>
                 </property>
+                <property name="toolTip">
+                 <string>Pick color for central vertex</string>
+                </property>
+                <property name="accessibleName">
+                 <string>Central ternary color</string>
+                </property>
                 <property name="text">
                  <string>M</string>
                 </property>
@@ -2362,6 +2425,29 @@
           </item>
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_11">
+            <item>
+             <widget class="QToolButton" name="toolButtonSaveTernaryColormap">
+              <property name="maximumSize">
+               <size>
+                <width>32</width>
+                <height>32</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>...</string>
+              </property>
+              <property name="icon">
+               <iconset resource="resources.qrc">
+                <normaloff>:/icons/save</normaloff>:/icons/save</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>24</width>
+                <height>24</height>
+               </size>
+              </property>
+             </widget>
+            </item>
             <item>
              <spacer name="verticalSpacer_10">
               <property name="orientation">
@@ -5058,6 +5144,9 @@
             <height>450</height>
            </size>
           </property>
+          <property name="toolTip">
+           <string>Remove selected plots from tree</string>
+          </property>
          </widget>
         </item>
         <item>
@@ -5732,7 +5821,7 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="TreeView">
        <property name="geometry">
@@ -5744,7 +5833,7 @@
         </rect>
        </property>
        <attribute name="label">
-        <string>Plot Tree View</string>
+        <string>Plot Selector</string>
        </attribute>
        <widget class="QTreeView" name="treeView">
         <property name="geometry">
@@ -5763,6 +5852,63 @@
         <property name="mouseTracking">
          <bool>true</bool>
         </property>
+       </widget>
+       <widget class="QWidget" name="horizontalLayoutWidget_13">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>655</y>
+          <width>221</width>
+          <height>36</height>
+         </rect>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_17">
+         <item>
+          <spacer name="horizontalSpacer_9">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QToolButton" name="toolButtonRemovePlot">
+           <property name="minimumSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Remove selected plot</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="resources.qrc">
+             <normaloff>:/icons/delete</normaloff>:/icons/delete</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>24</width>
+             <height>24</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </widget>
       <widget class="QWidget" name="pageStyles">
@@ -5792,6 +5938,9 @@
           <bold>false</bold>
          </font>
         </property>
+        <property name="toolTip">
+         <string/>
+        </property>
         <property name="frameShape">
          <enum>QFrame::Panel</enum>
         </property>
@@ -5806,8 +5955,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>219</width>
-           <height>484</height>
+           <width>100</width>
+           <height>30</height>
           </rect>
          </property>
          <attribute name="icon">
@@ -5823,12 +5972,12 @@
             <x>5</x>
             <y>5</y>
             <width>211</width>
-            <height>121</height>
+            <height>229</height>
            </rect>
           </property>
-          <layout class="QFormLayout" name="formLayout_10">
+          <layout class="QFormLayout" name="formLayoutStyleGeneral">
            <item row="0" column="0">
-            <widget class="QLabel" name="label_2">
+            <widget class="QLabel" name="labelAnalyteUnits">
              <property name="font">
               <font>
                <pointsize>11</pointsize>
@@ -5841,7 +5990,7 @@
             </widget>
            </item>
            <item row="0" column="1">
-            <widget class="QLineEdit" name="lineEditConcentrationUnits">
+            <widget class="QLineEdit" name="lineEditAnalyteUnits">
              <property name="maximumSize">
               <size>
                <width>115</width>
@@ -5868,7 +6017,7 @@
               </font>
              </property>
              <property name="text">
-              <string>Scale units</string>
+              <string>Distance</string>
              </property>
             </widget>
            </item>
@@ -5891,8 +6040,8 @@
              </property>
             </widget>
            </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_62">
+           <item row="5" column="0">
+            <widget class="QLabel" name="labelFontSize">
              <property name="font">
               <font>
                <pointsize>11</pointsize>
@@ -5907,39 +6056,14 @@
              </property>
             </widget>
            </item>
-           <item row="2" column="1">
-            <widget class="QLineEdit" name="lineEditPlotFontSize">
-             <property name="maximumSize">
-              <size>
-               <width>115</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>11</pointsize>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="toolTip">
-              <string>Change the starting seed</string>
-             </property>
-             <property name="text">
-              <string>11</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0">
+           <item row="6" column="0">
             <widget class="QLabel" name="labelTtickDirection">
              <property name="text">
               <string>Tick direction</string>
              </property>
             </widget>
            </item>
-           <item row="3" column="1">
+           <item row="6" column="1">
             <widget class="QComboBox" name="comboBoxTickDirection">
              <item>
               <property name="text">
@@ -5949,6 +6073,108 @@
              <item>
               <property name="text">
                <string>in</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>inout</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>none</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="5" column="1">
+            <widget class="QDoubleSpinBox" name="doubleSpinBoxFontSize">
+             <property name="decimals">
+              <number>1</number>
+             </property>
+             <property name="minimum">
+              <double>6.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>24.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.500000000000000</double>
+             </property>
+             <property name="value">
+              <double>11.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="labelTemperature">
+             <property name="text">
+              <string>Temperature</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QComboBox" name="comboBoxTUnits">
+             <item>
+              <property name="text">
+               <string>°C</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>K</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="labelPressure">
+             <property name="text">
+              <string>Pressure</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QComboBox" name="comboBoxPUnits">
+             <item>
+              <property name="text">
+               <string>MPa</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>GPa</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>kbar</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="labelDate">
+             <property name="text">
+              <string>Date</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QComboBox" name="comboBoxDateUnits">
+             <item>
+              <property name="text">
+               <string>ka</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Ma</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Ga</string>
               </property>
              </item>
             </widget>
@@ -5977,13 +6203,13 @@
            <rect>
             <x>5</x>
             <y>0</y>
-            <width>211</width>
-            <height>131</height>
+            <width>219</width>
+            <height>164</height>
            </rect>
           </property>
-          <layout class="QFormLayout" name="formLayout_7">
+          <layout class="QFormLayout" name="formLayoutStyleMaps">
            <item row="0" column="0">
-            <widget class="QLabel" name="label_49">
+            <widget class="QLabel" name="labelMapColormap">
              <property name="font">
               <font>
                <pointsize>11</pointsize>
@@ -5999,7 +6225,7 @@
             </widget>
            </item>
            <item row="0" column="1">
-            <widget class="QComboBox" name="comboBoxCM">
+            <widget class="QComboBox" name="comboBoxMapColormap">
              <property name="maximumSize">
               <size>
                <width>115</width>
@@ -6015,7 +6241,7 @@
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QLabel" name="label_50">
+            <widget class="QLabel" name="labelColorbarOrientation">
              <property name="font">
               <font>
                <pointsize>11</pointsize>
@@ -6023,7 +6249,7 @@
               </font>
              </property>
              <property name="text">
-              <string>Scale location</string>
+              <string>Direction</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -6031,7 +6257,7 @@
             </widget>
            </item>
            <item row="1" column="1">
-            <widget class="QComboBox" name="comboBox_24">
+            <widget class="QComboBox" name="comboBoxColorbarDirection">
              <property name="maximumSize">
               <size>
                <width>115</width>
@@ -6049,6 +6275,115 @@
                <string>none</string>
               </property>
              </item>
+             <item>
+              <property name="text">
+               <string>horizontal</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>vertical</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="labelScaleDirection">
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Scale direction</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QComboBox" name="comboBoxScaleDirection">
+             <property name="maximumSize">
+              <size>
+               <width>115</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+               <bold>false</bold>
+              </font>
+             </property>
+             <item>
+              <property name="text">
+               <string>none</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>horizontal</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>vertical</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="labelOverlayColor">
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Overlay color</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QToolButton" name="toolButtonOverlayColor">
+             <property name="maximumSize">
+              <size>
+               <width>18</width>
+               <height>18</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="toolTip">
+              <string>Pick color for map overlay</string>
+             </property>
+             <property name="accessibleName">
+              <string>Overlay color</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="labelScaleLocation">
+             <property name="text">
+              <string>Scale location</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QComboBox" name="comboBoxScaleLocation">
              <item>
               <property name="text">
                <string>northeast</string>
@@ -6069,83 +6404,6 @@
                <string>southeast</string>
               </property>
              </item>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_52">
-             <property name="font">
-              <font>
-               <pointsize>11</pointsize>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="text">
-              <string>Scale direction</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QComboBox" name="comboBoxCBP">
-             <property name="maximumSize">
-              <size>
-               <width>115</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>11</pointsize>
-               <bold>false</bold>
-              </font>
-             </property>
-             <item>
-              <property name="text">
-               <string>horizontal</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>vertical</string>
-              </property>
-             </item>
-            </widget>
-           </item>
-           <item row="3" column="0">
-            <widget class="QLabel" name="label_56">
-             <property name="font">
-              <font>
-               <pointsize>11</pointsize>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="text">
-              <string>Overlay color</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="1">
-            <widget class="QToolButton" name="toolButtonOverlayColor">
-             <property name="maximumSize">
-              <size>
-               <width>18</width>
-               <height>18</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>11</pointsize>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
             </widget>
            </item>
           </layout>
@@ -6172,11 +6430,11 @@
            <rect>
             <x>5</x>
             <y>0</y>
-            <width>211</width>
-            <height>311</height>
+            <width>212</width>
+            <height>367</height>
            </rect>
           </property>
-          <layout class="QFormLayout" name="formLayout_11">
+          <layout class="QFormLayout" name="formLayoutScatter">
            <item row="0" column="0">
             <widget class="QLabel" name="labelScatterPlotType">
              <property name="font">
@@ -6197,7 +6455,7 @@
             <widget class="QComboBox" name="comboBoxScatterType">
              <property name="maximumSize">
               <size>
-               <width>115</width>
+               <width>125</width>
                <height>16777215</height>
               </size>
              </property>
@@ -6223,7 +6481,7 @@
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QLabel" name="labelScatterPlotType_2">
+            <widget class="QLabel" name="labelHeatmapResolution">
              <property name="font">
               <font>
                <pointsize>11</pointsize>
@@ -6239,13 +6497,13 @@
             </widget>
            </item>
            <item row="1" column="1">
-            <widget class="QSpinBox" name="spinBoxHeatmapN">
+            <widget class="QSpinBox" name="spinBoxHeatmapResolution">
              <property name="enabled">
               <bool>false</bool>
              </property>
              <property name="maximumSize">
               <size>
-               <width>115</width>
+               <width>125</width>
                <height>16777215</height>
               </size>
              </property>
@@ -6273,7 +6531,7 @@
             </widget>
            </item>
            <item row="2" column="0">
-            <widget class="QLabel" name="labelSymbol">
+            <widget class="QLabel" name="labelMarker">
              <property name="font">
               <font>
                <pointsize>11</pointsize>
@@ -6286,10 +6544,10 @@
             </widget>
            </item>
            <item row="2" column="1">
-            <widget class="QComboBox" name="comboBoxSymbol">
+            <widget class="QComboBox" name="comboBoxMarker">
              <property name="maximumSize">
               <size>
-               <width>115</width>
+               <width>125</width>
                <height>16777215</height>
               </size>
              </property>
@@ -6327,17 +6585,36 @@
             </widget>
            </item>
            <item row="3" column="0">
-            <widget class="QLabel" name="labelPointSize">
+            <widget class="QLabel" name="labelMarkerSize">
              <property name="text">
-              <string>Point size</string>
+              <string>Size</string>
              </property>
             </widget>
            </item>
            <item row="3" column="1">
-            <widget class="QDoubleSpinBox" name="doubleSpinBoxPointSize"/>
+            <widget class="QDoubleSpinBox" name="doubleSpinBoxMarkerSize">
+             <property name="maximumSize">
+              <size>
+               <width>125</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="minimum">
+              <double>1.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>16.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>1.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>6.000000000000000</double>
+             </property>
+            </widget>
            </item>
-           <item row="5" column="0">
-            <widget class="QLabel" name="labelScatterColor">
+           <item row="6" column="0">
+            <widget class="QLabel" name="labelColorByField">
              <property name="font">
               <font>
                <pointsize>11</pointsize>
@@ -6352,11 +6629,11 @@
              </property>
             </widget>
            </item>
-           <item row="5" column="1">
-            <widget class="QComboBox" name="comboBoxScatterSelectC">
+           <item row="6" column="1">
+            <widget class="QComboBox" name="comboBoxColorByField">
              <property name="maximumSize">
               <size>
-               <width>100</width>
+               <width>125</width>
                <height>16777215</height>
               </size>
              </property>
@@ -6371,7 +6648,17 @@
              </property>
              <item>
               <property name="text">
+               <string>None</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
                <string>Isotope</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Isotope (normalized)</string>
               </property>
              </item>
              <item>
@@ -6406,8 +6693,8 @@
              </item>
             </widget>
            </item>
-           <item row="6" column="0">
-            <widget class="QLabel" name="labelScatterColor_2">
+           <item row="7" column="0">
+            <widget class="QLabel" name="labelColorField">
              <property name="font">
               <font>
                <pointsize>11</pointsize>
@@ -6422,11 +6709,11 @@
              </property>
             </widget>
            </item>
-           <item row="6" column="1">
-            <widget class="QComboBox" name="comboBoxScatterIsotopeC">
+           <item row="7" column="1">
+            <widget class="QComboBox" name="comboBoxColorField">
              <property name="maximumSize">
               <size>
-               <width>100</width>
+               <width>125</width>
                <height>16777215</height>
               </size>
              </property>
@@ -6441,7 +6728,7 @@
              </property>
             </widget>
            </item>
-           <item row="8" column="0">
+           <item row="10" column="0">
             <widget class="QLabel" name="labelAspectRatio">
              <property name="font">
               <font>
@@ -6454,7 +6741,7 @@
              </property>
             </widget>
            </item>
-           <item row="8" column="1">
+           <item row="10" column="1">
             <widget class="QLineEdit" name="lineEditAspectRatio">
              <property name="maximumSize">
               <size>
@@ -6477,17 +6764,29 @@
              </property>
             </widget>
            </item>
-           <item row="7" column="0">
+           <item row="9" column="0">
             <widget class="QLabel" name="labelTransparency">
              <property name="text">
               <string>Transparency</string>
              </property>
             </widget>
            </item>
-           <item row="7" column="1">
+           <item row="9" column="1">
             <layout class="QHBoxLayout" name="horizontalLayout_13">
              <item>
-              <widget class="QLabel" name="labelClusterTransparency">
+              <widget class="QLabel" name="labelMarkerAlpha">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>20</height>
+                </size>
+               </property>
                <property name="maximumSize">
                 <size>
                  <width>20</width>
@@ -6509,10 +6808,22 @@
               </widget>
              </item>
              <item>
-              <widget class="QSlider" name="horizontalSliderClusterTransparency">
+              <widget class="QSlider" name="horizontalSliderMarkerAlpha">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>100</width>
+                 <height>0</height>
+                </size>
+               </property>
                <property name="maximumSize">
                 <size>
-                 <width>150</width>
+                 <width>100</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -6529,7 +6840,7 @@
                 <number>100</number>
                </property>
                <property name="singleStep">
-                <number>5</number>
+                <number>1</number>
                </property>
                <property name="sliderPosition">
                 <number>100</number>
@@ -6549,6 +6860,12 @@
            </item>
            <item row="4" column="1">
             <widget class="QComboBox" name="comboBoxLineWidth">
+             <property name="maximumSize">
+              <size>
+               <width>125</width>
+               <height>16777215</height>
+              </size>
+             </property>
              <item>
               <property name="text">
                <string>0.25</string>
@@ -6591,6 +6908,79 @@
              </item>
             </widget>
            </item>
+           <item row="8" column="0">
+            <widget class="QLabel" name="labelFieldColormap">
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Colormap</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="1">
+            <widget class="QComboBox" name="comboBoxFieldColormap">
+             <property name="maximumSize">
+              <size>
+               <width>125</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+               <bold>false</bold>
+              </font>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QLabel" name="labelMarkerColor">
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Color</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="1">
+            <widget class="QToolButton" name="toolButtonMarkerColor">
+             <property name="maximumSize">
+              <size>
+               <width>18</width>
+               <height>18</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="toolTip">
+              <string>Pick color for scatter marker</string>
+             </property>
+             <property name="accessibleName">
+              <string>Scatter color</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
           </layout>
          </widget>
         </widget>
@@ -6599,8 +6989,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>219</width>
-           <height>484</height>
+           <width>100</width>
+           <height>30</height>
           </rect>
          </property>
          <attribute name="icon">
@@ -6614,7 +7004,7 @@
           <property name="geometry">
            <rect>
             <x>5</x>
-            <y>45</y>
+            <y>95</y>
             <width>211</width>
             <height>181</height>
            </rect>
@@ -6635,6 +7025,11 @@
             </font>
            </property>
           </column>
+          <column>
+           <property name="text">
+            <string>Color</string>
+           </property>
+          </column>
          </widget>
          <widget class="QWidget" name="formLayoutWidget_2">
           <property name="geometry">
@@ -6642,7 +7037,7 @@
             <x>5</x>
             <y>5</y>
             <width>211</width>
-            <height>31</height>
+            <height>64</height>
            </rect>
           </property>
           <layout class="QFormLayout" name="formLayoutGroupStyles">
@@ -6701,13 +7096,45 @@
              </item>
             </widget>
            </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="labelClusterColormap">
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Colormap</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QComboBox" name="comboBoxClusterColormap">
+             <property name="maximumSize">
+              <size>
+               <width>115</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+               <bold>false</bold>
+              </font>
+             </property>
+            </widget>
+           </item>
           </layout>
          </widget>
          <widget class="QWidget" name="horizontalLayoutWidget_10">
           <property name="geometry">
            <rect>
             <x>5</x>
-            <y>230</y>
+            <y>280</y>
             <width>211</width>
             <height>36</height>
            </rect>
@@ -6882,7 +7309,7 @@
         </widget>
        </widget>
       </widget>
-      <widget class="QWidget" name="page_12">
+      <widget class="QWidget" name="Calculator">
        <property name="geometry">
         <rect>
          <x>0</x>

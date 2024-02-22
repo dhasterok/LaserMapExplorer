@@ -19,8 +19,42 @@ import matplotlib.colors as colors
 from matplotlib.colors import BoundaryNorm, ListedColormap
 # import ternary
 class ternary:
+    """Initialize the ternary plotting class.
+
+    Attributes
+    ----------
+    labels:
+    plot_type: str
+    n: int
+        number of vertices (3, ternary plot; 4, quaternary plot)
+    dg: double
+        grid spacing (0,1), default is 0.1
+    dt: double
+        tick spacing (0,1), default is 0.1
+    mul_axis: bool
+        multiple axes for heatmaps showing the median, standard deviation,
+        and number of data, default is False
+        
+    Methods
+    -------
+    ternary_axes(labels)
+    ternary_ticks(spacing)
+    ternary_grid(ax, spacing)
+    tern2xy(a,b,c)
+    xy2tern(x,y)
+    ternscatter(a, b, c, d=None, size=36, cmap=None, categories=None,labels = False, 
+        alpha=1, symbol='o', ax=None, orientation='horizontal')
+    ternhex(a, b, c, val=None, n=10, color_map=None, orientation = 'horizontal')
+    hexagon(n)
+    terncolor(a, b, c, ca=[1, 1, 0], cb=[0.3, 73, 0.1], cc=[0, 0, 0.15], p=[1/3, 1/3, 1/3], cp=[])
+    cplane(a,b,c,ca,cb,cc,p,cp)
+    cplanexy(xd,yd, xp,yp,cp, x1,y1,cv1, x2,y2,cv2)
+
+    Parameter
+    ---------
+    """
     def __init__(self, labels,plot_type= 'scatter',  n=3, dg =0.1, dt=0.1, mul_axis = False):
-        """Initialize the Ternary plotting class."""
+       
         self.labels = labels
         self.n = n
         self.plot_type = plot_type
@@ -30,18 +64,15 @@ class ternary:
         if dg and plot_type == 'scatter':
             self.ternary_grid(spacing=dg)
         if dt and plot_type == 'scatter':
-            self.ternary_ticks(spacing=dt)
-        
-
-    
+            self.ternary_ticks(spacing=dt)    
 
     def ternary_ticks(self, spacing=0.1):
-        """
-        Adds ternary tick marks to ternary axes.
+        """Adds ternary tick marks to ternary axes.
         
-        Args:
-        - spacing: Distance between tick marks.
-        - nvertices: Number of vertices, either 3 for ternary or 4 for quaternary.
+        Parameter
+        ---------
+        spacing: double
+            Distance between tick marks.
         """
 
         if self.n not in [3, 4]:
@@ -75,23 +106,22 @@ class ternary:
                 ax.plot(xb, -yb, 'k-', linewidth=1)
                 ax.plot(xc, -yc, 'k-', linewidth=1)
 
-    def ternary_axes(self,Labels):
+    def ternary_axes(self,labels):
         """
         Set up ternary plot axes with optional labeling for a quaternary plot.
         
-        Args:
-        - labels: List of strings for the labels of the axes.
+        Parameter
+        ---------
+        labels: list(str)
+            List of strings for the labels of the axes.
         
-        Returns:
-        - fig: The matplotlib figure object.
-        - ax: The matplotlib axes object.
+        Return
+        ------
+        fig: matplotlib.figure
+        ax: list(matplotlib.axes)
         """
-        
-        
         if self.n not in [3, 4]:
-            raise ValueError('nvertices can be 3 or 4.')
-        
-
+            raise ValueError('n vertices must be 3 (ternary) or 4 (quaternary).')
             
         fig = Figure(figsize=(6, 4))
         
@@ -114,38 +144,67 @@ class ternary:
                 ax.plot([-w, 0, w, -w], [0, -h, 0, 0], '-k', linewidth=1)
         
             # Set labels
-            ax.text(0, h, Labels[0], ha='center', va='bottom', fontsize=12)
-            ax.text(-w*0.85, -h*0.03, Labels[1], ha='right', va='center', fontsize=12)
-            ax.text(w*0.85, -h*0.03, Labels[2], ha='left', va='center', fontsize=12)
+            ax.text(0, h, labels[0], ha='center', va='bottom', fontsize=11)
+            ax.text(-w*0.85, -h*0.03, labels[1], ha='right', va='center', fontsize=11)
+            ax.text(w*0.85, -h*0.03, labels[2], ha='left', va='center', fontsize=11)
             if self.n == 4:
-                ax.text(0, -h, Labels[3], ha='center', va='top', fontsize=12)
+                ax.text(0, -h, labels[3], ha='center', va='top', fontsize=11)
     
         return fig, axs
     
             
             
     def tern2xy(self,a, b, c):
-            w = 0.5
-            h = 0.5 / np.tan(np.pi/6)
-            s = a + b + c
-            a = a / s
-            b = b / s
-            c = c / s
-            y = a * h
-            x = (1 - b) * h / np.cos(np.pi/6) - y * np.tan(np.pi/6) - w
-            return x, y
-        
-    def xy2tern(self,x, y):
         """
-        Converts cartesian (x,y) points to ternary (a,b,c) coordinates. 
+        Converts ternary (a,b,c) points to cartesian (x,y) coordinates. 
+
         The cartesian origin is defined as the midpoint on the B-C edge.
     
         The order of the axes are as follows:
                          A
-                        / \
-                       /   \
+                        /-\\
+                       /---\\
                       B --- C
         where the cartesian origin is defined at the midpoint between B and C.
+        Parameter
+        ---------
+        a: np.array
+        b: np.array
+        c: np.array
+        """
+        w = 0.5
+        h = 0.5 / np.tan(np.pi/6)
+
+        # total
+        s = a + b + c
+
+        # normalize coordinates on [0,1]
+        a = a / s
+        b = b / s
+        c = c / s
+
+        # convert to cartesian
+        y = a * h
+        x = (1 - b) * h / np.cos(np.pi/6) - y * np.tan(np.pi/6) - w
+
+        return x, y
+        
+    def xy2tern(self,x, y):
+        """
+        Converts cartesian (x,y) points to ternary (a,b,c) coordinates. 
+
+        The cartesian origin is defined as the midpoint on the B-C edge.
+    
+        The order of the axes are as follows:
+                         A
+                        /-\\
+                       /---\\
+                      B --- C
+        where the cartesian origin is defined at the midpoint between B and C.
+        Parameter
+        ---------
+        x: np.array
+        y: np.array
         """
         
         # half-width
@@ -167,11 +226,14 @@ class ternary:
         """
         Adds ternary grid lines to ternary axes.
     
-        Parameters:
-            spacing (float): Grid spacing. Default is 0.1 units.
-            nvertices (int): Number of vertices, either 3 or 4.
-            ax (matplotlib.axes): Axes object for plotting. If None, the current axes is used.
-    
+        Parameter
+        ---------
+        spacing: float
+            Grid spacing. Default is 0.1 units.
+        nvertices: int
+            Number of vertices, either 3 or 4.
+        ax: matplotlib.axes
+            Axes object for plotting. If None, the current axes is used.
         """
         if self.n not in [3, 4]:
             raise ValueError('nvertices can be 3 or 4.')
@@ -200,18 +262,29 @@ class ternary:
     
     
     def ternscatter(self, a, b, c, d=None, size=36, cmap=None, categories=None,labels = False, 
-                    alpha=1, symbol='o', ax=None, orientation ='horizontal', ):
-        """
-        Scatter plot data on ternary axes.
+                    alpha=1, symbol='o', ax=None, orientation ='horizontal'):
+        """Scatter plot data on ternary axes.
         
-        Args:
-        ...
+        Parameter
+        ---------
+        a: np.array
+        b: np.array
+        c: np.array
+        d: np.array
+        size: double
+            size of marker
+        cmap:
+            colormap
+        categories:
+        labels:
         
-        Returns:
-        t: scatter plot object
-        leg: legend (if applicable)
+        Return
+        ------
+        t:
+             scatter plot object
+        leg:
+            legend (if applicable)
         """
-    
         if cmap is None:
             cmap = plt.cm.get_cmap('plasma')
             # cmap = cm.get_cmap(cmap)
@@ -277,6 +350,20 @@ class ternary:
             # return t
     
     def hexagon(self, n):
+        """Creates hexagonal bins within a ternary
+        
+        Parameter
+        ---------
+        n: int
+            Hexagonal cell resolution, equivalent to n+1 cells across the bottom
+            ternary axis            
+
+        Return
+        ------
+        hexbin: dict
+            Dictionary of hexagonal bins, including verticies, in cartesian
+            coordinates and the center of each cell
+        """
         # Check if 'n' is a positive integer. If not, raise an error.
         if n <= 0 or int(n) != n:
             raise ValueError('n must be a positive integer.')
@@ -368,6 +455,20 @@ class ternary:
         return hexbin
     
     def ternhex(self, a, b, c, val=None, n=10, color_map=None, orientation = 'horizontal'):
+        """Creates a heatmap from a set of hexgonal bins
+        
+        Parameter
+        ---------
+        a, b, c: np.array
+            locations of points within a ternary system
+        val: 
+        n: int
+            resolution factor (n+1 hexagons across bottom axis)
+        color_map:
+            colormap, default is None
+        orientation: str
+            orientation of colormap, 'horizontal' (default) or vertical
+        """
         #hexagonal heatmaps
         hexbin = self.hexagon(n)
         if val is None:
@@ -415,7 +516,28 @@ class ternary:
             ax.set_title(k)
             plt.colorbar(cm.ScalarMappable(norm=norm, cmap=color_map), ax=ax, fraction=0.046, pad=0.04, orientation=orientation)
 
-    def terncolor(self, a, b, c, ca = [0, 0, 0], cb = [0, 1, 0], cc = [1, 1 ,0], p = [1/3, 1/3, 1/3], cp = []):
+    def terncolor(self, a, b, c, ca = [1, 1, 0], cb = [0.3, 73, 0.1], cc = [0, 0 , 0.15], p = [1/3, 1/3, 1/3], cp = []):
+        """Computes colors using a ternary colormap
+       Given four colors, one for each vertex of a ternary and a fourth at an arbitrary
+        location within the triangle, the function computes a gradient for any set of points
+        within the triangle.
+        
+        Parameter
+        ---------
+        a, b, c: (Nx1) np.array
+            points where color is computed
+        ca, cb, cc: (1x3) np.array (optional)
+            color at each vertex, default color scheme is yellow-green-navy
+        p: (1x3) np.array (optional)
+            location of point within ternary associated with cp
+        cp: (1x3) np.array (optional)
+            color at p, default is [], which will use average of colors
+
+        Return
+        ------
+        cval: (Nx3) np.array
+            colors at (a,b,c) 
+        """
         # normalize ternary coordinates
     
         T = np.array(a) + np.array( b) + np.array(c)
@@ -438,32 +560,29 @@ class ternary:
         return cval
 
 
-#    def [ca,cb,cc] = getcmap(cmapname)
-#
-#    switch cmapname
-#        case "kgy"
-#            ca = [0 0 0];
-#            cb = [0 1 0];
-#            cc = [1 1 0];
-#        case "ybg"
-#            ca = [1 1 0];
-#            cb = [0 0 0.5];
-#            cc = [0 0.7 0.3];
-#        case "ycm"
-#            ca = [1 1 0];
-#            cb = [0 1 1];
-#            cc = [1 0 1];
-#        case "grb"
-#            ca = [0 1 0];
-#            cb = [1 0 0];
-#            cc = [0 0 1];
-#        otherwise
-#            error('Unknown colormap name.');
-#    end
-
-
     def cplane(self,a,b,c,ca,cb,cc,p,cp):
+        """Determines colors for a set of points (a,b,c) within a ternary
+        
+        Given four colors, one for each vertex of a ternary and a fourth at an arbitrary
+        location within the triangle, the function computes a gradient for any set of points
+        within the triangle.
+        
+        Parameter
+        ---------
+        a, b, c: (Nx1) np.array
+            points where color is computed
+        ca, cb, cc: (1x3) np.array
+            color at each vertex
+        p: (1x3) np.array
+            location of point within ternary associated with cp
+        cp: (1x3) np.array
+            color at p
 
+        Return
+        ------
+        cval: (Nx3) np.array
+            colors at (a,b,c)
+        """
         [xp,yp] = self.tern2xy(p[0],p[1],p[2])
 
         [xa,ya] = self.tern2xy(1,0,0)
@@ -504,7 +623,28 @@ class ternary:
 
 
     def cplanexy(self, xd,yd, xp,yp,cp, x1,y1,cv1, x2,y2,cv2):
+        """Fits a plane to (x,y,color) data
+        
+        Fits a plane using three points in (x,y,color) space and then interpolates the
+        color of know points.
 
+        Parameter
+        ---------
+        xd, yd: np.array
+            coordinates of data points to interpolate color
+        xp,yp: double
+            location of point within ternary
+        cp: (1x3) np.array
+            color of point within ternary
+        x1,y1: double
+            location of one ternary vertex
+        cv1: (1x3) np.array
+            color at one vertex
+        x2,y2: double
+            location of second ternary vertex
+        cv2: (1x3) np.array
+            color at second vertex
+        """
         cval = np.zeros([len(xd),3])
         for i in range(0,3):
             v1 = [xp - x1, yp - y1, cp[i] - cv1[i]]

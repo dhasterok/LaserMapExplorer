@@ -111,7 +111,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.cluster_tab_id = 7
         self.profile_tab_id = 8
         self.special_tab_id = 9
-        
+
         # create dictionaries for default plot styles
         self.markerdict = {'circle':'o', 'square':'s', 'diamond':'d', 'triangle (up)':'^', 'triangle (down)':'v', 'hexagon':'h', 'pentagon':'p'}
         self.comboBoxMarker.clear()
@@ -123,8 +123,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.pca_tab_id: {'Colormap':'viridis', 'ColorbarDirection':'vertical', 'ScaleLocation':'southeast', 'ScaleDirection':'horizontal', 'OverlayColor':'#ffffff'},
             self.cluster_tab_id: {'Colormap':'viridis', 'ColorbarDirection':'vertical', 'ScaleLocation':'southeast', 'ScaleDirection':'horizontal', 'OverlayColor':'#ffffff'}}
         self.current_scatter_type = {self.sample_tab_id:'Heatmap', self.scatter_tab_id:'Scatter', self.pca_tab_id:'Scatter', self.profile_tab_id:'Scatter'}
-        self.scatter_style = {self.sample_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'RdBu', 'Alpha':30, 'AspectRatio':1.0}, 
-            self.scatter_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Alpha':30, 'AspectRatio':1.0}, 
+        self.scatter_style = {self.sample_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'RdBu', 'Alpha':30, 'AspectRatio':1.0},
+            self.scatter_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Alpha':30, 'AspectRatio':1.0},
             self.pca_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Alpha':30, 'AspectRatio':1.0},
             self.profile_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Alpha':30, 'AspectRatio':1.0}}
         self.heatmap_style = {self.sample_tab_id: {'Resolution':1, 'Colormap':'RdBu'},
@@ -142,7 +142,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Menu and Toolbar
         #-------------------------
         self.widgetProfilePlot.setLayout(layout_profile_view)
-        
+
         # Connect the "Open" action to a function
         self.actionOpen.triggered.connect(self.open_directory)
         # Intialize Tabs as not enabled
@@ -176,7 +176,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxNDimRefMaterial.addItems(ref_list.values)      # NDim Tab
         self.comboBoxRefMaterial.activated.connect(lambda: self.change_ref_material(self.comboBoxRefMaterial, self.comboBoxNDimRefMaterial))
         self.comboBoxNDimRefMaterial.activated.connect(lambda: self.change_ref_material(self.comboBoxNDimRefMaterial, self.comboBoxRefMaterial))
- 
+
         # Selecting isotopes
         #-------------------------
         # Connect the currentIndexChanged signal of comboBoxSampleId to load_data method
@@ -211,7 +211,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Preprocess Tab
         #-------------------------
-        
+
         self.toolButtonSwapXY.clicked.connect(self.swap_xy)
 
         self.doubleSpinBoxUB.setMaximum(100)
@@ -284,10 +284,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             schemes.append(cmap['scheme'])
         self.comboBoxTernaryColormap.addItems(schemes)
         self.comboBoxTernaryColormap.addItem('user defined')
-        
+
         # dialog for adding and saving new colormaps
         self.toolButtonSaveTernaryColormap.clicked.connect(self.input_ternary_name_dlg)
-        
+
         # select new ternary colors
         self.toolButtonTCmapXColor.clicked.connect(lambda: self.buttonColorSelect(self.toolButtonTCmapXColor))
         self.toolButtonTCmapYColor.clicked.connect(lambda: self.buttonColorSelect(self.toolButtonTCmapYColor))
@@ -402,11 +402,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         setattr(self.comboBoxFieldColormap, "allItems", lambda: [self.comboBoxFieldColormap.itemText(i) for i in range(self.comboBoxFieldColormap.count())])
 
         self.comboBoxColorByField.activated.connect(lambda: self.toggle_color_by_field(self.toolBox.currentIndex()))
-        self.horizontalSliderMarkerAlpha.valueChanged.connect(self.slider_alpha_changed) 
-        
+        self.horizontalSliderMarkerAlpha.valueChanged.connect(self.slider_alpha_changed)
+
         # Plot toolbar
         #-------------------------
-        
+
         self.toolButtonHomeSV.clicked.connect(lambda: self.toolbar_plotting('home', 'SV', self.toolButtonHomeSV.isChecked()))
         # self.toolButtonHomeMV.clicked.connect
 
@@ -426,10 +426,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # self.toolButtonSaveMV.clicked.connect
 
         self.actionCalculator.triggered.connect(self.open_calculator)
-        
+
         # PCA components
         #-------------------------
-        
+
         self.toolButtonPCAPlot.clicked.connect(self.plot_pca)
 
         self.toolbox_changed()
@@ -496,18 +496,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def swap_xy(self):
         """Swaps X and Y coordinates of sample map"""
         self.swap_xy_val = not self.swap_xy_val
-        
+
         if self.swap_xy_val:
             self.order = 'C'
         else:
-        
+
             self.order = 'F'
         # swap x and y
         # print(self.sample_data_dict[self.sample_id][['X','Y']])
         self.swap_xy_data(self.sample_data_dict[self.sample_id])
 
         self.swap_xy_data(self.clipped_isotope_data[self.sample_id]) #this rotates processed data as well
-        
+
         self.swap_xy_data(self.cluster_results)
 
         # update plots
@@ -515,20 +515,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def swap_xy_data(self, df):
         """Swaps X and Y of a dataframe
-        
+
         Parameter
         ---------
         df: pandas.DataFrame
         """
         xtemp = df['Y']
         df['Y'] = df['X']
-        df['X'] = xtemp 
+        df['X'] = xtemp
 
     # toolbar functions
 
     def open_tab(self, tab_name):
         """Opens specified toolBox tab
-        
+
         Parameter
         ---------
         tab_name: str
@@ -561,7 +561,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def change_ref_material(self, comboBox1, comboBox2):
         """Changes reference computing normalized isotopes
-        
+
         Sets all QComboBox to a common normalizing reference.
 
         Parameters
@@ -586,7 +586,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # get a named list of current fields for sample
     def get_field_list(self, set_name='isotope'):
         """Gets the fields associated with a defined set
-        
+
         Set names are consistent with QComboBox.
 
         Parameters
@@ -622,7 +622,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # color picking functions
     def buttonColorSelect(self, button):
         """Select background color of button
-        
+
         Parameter
         ---------
         button: QPushbutton | QToolButton
@@ -636,7 +636,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def get_hex_color(self, color):
         """Converts QColor to hex-rgb format
-        
+
         Parameter
         ---------
         color: QColor
@@ -704,10 +704,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def scale_plot(self, current_plot_df, lq, uq, d_lb, d_ub, norm='linear', outlier=False):
         """Scales data by linear, log, or logit tranform
-        
+
         Parameter
         ---------
-        current_plot_df: 
+        current_plot_df:
         lq: double
             lower quantile
         uq: double
@@ -748,13 +748,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def auto_scale(self,update = False):
         """Auto-scales pixel values in map
-        
+
         Outliers can make it difficult to view the variations of values within a map.
         This is a larger problem for linear scales, but can happen when log-scaled. Auto-
         scaling the data clips the values at a lower and upper bound.  Auto-scaling may be
         acceptable as minerals that were not specifically calibrated can have erroneously
         high or low (even negative) values.
-        
+
         Parameter
         ---------
         update: bool
@@ -785,12 +785,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 ub = 99.5
                 d_lb = 99
                 d_ub = 99
-                
+
             elif not auto_scale and not update:
                 # show unbounded plot when auto scale switched off
                 lb = 0
                 ub = 100
-                
+
             if isotope_1 and not isotope_2:
 
                 self.isotopes_df.loc[(self.isotopes_df['sample_id']==self.sample_id)
@@ -975,13 +975,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def activate_ratios(self, state):
         """Adds ratios selection as options to certain comboBoxes and plot tree
-        
+
         Activate ratios by selecting them in the Isotope Select dialog.
-        
+
         Parameter
         ---------
         state: bool
-            
+
         """
         if state == 2:  # Qt.Checked
             # Call your method here when the comboBox is checked
@@ -1343,7 +1343,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             glw.setObjectName('plotLaserMap')
             # Create the ImageItem
             img = pg.ImageItem(image=array)
-            
+
             #set aspect ratio of rectangle
             img.setRect(0,0,self.x_range,self.y_range)
             # img.setAs
@@ -1354,7 +1354,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             p1 = glw.addPlot(0,0,title=plot_name.replace('_',' '))
             # p1.setRange(padding=0)
             p1.showAxes(False, showValues=(True,False,False,True) )
-            p1.invertY(True) 
+            p1.invertY(True)
             #supress right click menu
             p1.setMenuEnabled(False)
 
@@ -1406,6 +1406,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 if self.prev_plot:
                     del self.lasermaps[self.prev_plot]
                 self.prev_plot = name
+                self.init_zoom_view(p1,array)
 
 
 
@@ -1421,6 +1422,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # p1.autoRange()
             layout.addWidget(glw, 0, 0, 3, 2)
             glw.setBackground('w')
+
+            #add zoom window
+            # self.setup_zoom_window(layout)
+
             self.plot_laser_map_cont(layout,array,img,p1,cm,view)
 
     def mouse_moved(self,event,plot):
@@ -1438,7 +1443,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # print(x,y)
                 x_i = round(x*array.shape[1]/self.x_range)
                 y_i = round(y*array.shape[0]/self.y_range)
+
+
+
                 if 0 <= x_i < array.shape[1] and 0 <= y_i < array.shape[0] :
+                    # Update the zoom window based on the current mouse position
+                    # self.update_zoom_window(x, y,array)
+
+
+
                     if not self.cursor:
                         QtWidgets.QApplication.setOverrideCursor(Qt.BlankCursor)
                         self.cursor = True
@@ -1446,6 +1459,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     value = array[y_i, x_i]  # assuming self.array is numpy self.array
 
                     if self.canvasWindow.currentIndex() == 0:
+                        # Update the position of the zoom view
+                        self.update_zoom_view_position(x, y,array)
+
 
                         self.labelInfoX.setText('X: '+str(round(x)))
                         self.labelInfoY.setText('Y: '+str(round(y)))
@@ -1523,135 +1539,137 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             cbar.setLevels([array.min(), array.max()])
 
 
+    # def setup_zoom_window(self, layout):
+    #     # Create a GraphicsLayoutWidget for the zoom window
+    #     self.zoomWindow = pg.GraphicsLayoutWidget(show=True)
+    #     self.zoomPlot = self.zoomWindow.addPlot(title="Zoom")
+    #     self.zoomImg = pg.ImageItem()
+    #     self.zoomPlot.addItem(self.zoomImg)
+    #     # You might need to adjust the layout position according to your UI design
+    #     layout.addWidget(self.zoomWindow, 0, 3, 1, 2)  # Example placement
+    #     # Setup initial properties of the zoom window
+    #     self.zoomFactor = 5  # How much to zoom in
+    #     self.zoomPlot.showGrid(x=True, y=True)
+    #     self.zoomPlot.setAspectLocked(True)
+    #     self.zoomPlot.invertY(True)
 
-        # distances, medians, lowers, uppers = process_points(profile1_points, sort_axis='x')
-        # errors = [upper - lower for upper, lower in zip(uppers, lowers)]
+    #     # Optionally, set up a crosshair or marker in the zoom window
+    #     self.zoomTarget = pg.TargetItem(symbol='+')
+    #     self.zoomPlot.addItem(self.zoomTarget)
+    #     self.zoomTarget.hide()  # Initially hidden
 
-        # fig = Figure()
-        # ax1 = fig.add_subplot(111)
-        # ax1.errorbar(distances, medians, yerr=errors, fmt='o', color='b', ecolor='lightgray', elinewidth=3, capsize=0)
-        # ax1.set_xlabel('Distance')
-        # ax1.set_ylabel('Profile 1 Values', color='b')
+     # def update_zoom_window(self, x, y,array,key):
+     #     zoom_factor = 5  # Magnification factor for the zoom window
+     #     array_shape = array.shape
+     #     x_range, y_range = self.x_range, self.y_range
 
-        # if profile2_key:
-        #     profile2_points = self.profiles[profile2_key]
-        #     distances2, medians2, lowers2, uppers2 = process_points(profile2_points, sort_axis='x')
-        #     errors2 = [upper - lower for upper, lower in zip(uppers2, lowers2)]
+     #     # Determine the bounds for the zoom window based on the mouse position
+     #     zoom_scale = 0.1  # Adjust based on how much zoom you want
+     #     x_min_zoom = max(x - self.x_range * zoom_scale, 0)
+     #     x_max_zoom = min(x + self.x_range * zoom_scale, self.x_range)
+     #     y_min_zoom = max(y - self.y_range * zoom_scale, 0)
+     #     y_max_zoom = min(y + self.y_range * zoom_scale, self.y_range)
+     #     # print(x_min_zoom,x_max_zoom,y_min_zoom,y_max_zoom)
+     #     # Update the zoom window's view to the region around the cursor
+     #     # self.zoomPlot.setXRange(x_min_zoom, x_max_zoom, padding=0)
+     #     # self.zoomPlot.setYRange(y_min_zoom, y_max_zoom, padding=0)
 
-        #     ax2 = ax1.twinx()
-        #     ax2.errorbar(distances2, medians2, yerr=errors2, fmt='o', color='r', ecolor='lightgray', elinewidth=3, capsize=0)
-        #     ax2.set_ylabel('Profile 2 Values', color='r')
+     #     # Update the image in the zoom window to reflect the new view
+     #     self.zoomImg.setImage(image=array)  # Ensure `self.array` is updated to the current plot data
+     #     self.zoomImg.setRect(0,0,self.x_range,self.y_range)
+     #     self.zoomImg.setColorMap(pg.colormap.get(self.cm, source = 'matplotlib'))
+     #     self.zoomImg.getViewBox().setRange(QtCore.QRectF(x_min_zoom, y_min_zoom, x_max_zoom - x_min_zoom, y_max_zoom - y_min_zoom))
+     #     self.zoomTarget.setPos(x, y)  # Update target position
+     #     self.zoomTarget.show()
 
-        #     # Set window title for comparison
-        #     fig.suptitle(f'Comparison: {profile1_key[:-1]} vs {profile2_key[:-1]}')
-        # else:
-        #     # Set window title for single profile
-        #     fig.suptitle(f'Profile {profile1_key[:-1]}')
+    def init_zoom_view(self,p,array):
+        # Set the initial zoom level
+        self.zoomLevel = 0.02  # Adjust as needed for initial zoom level
+        self.mainPlot = p
+        # Create a ViewBox for the zoomed view
+        self.zoomViewBox = pg.ViewBox(border={'color': 'w', 'width': 1})
+        self.zoomImg = pg.ImageItem()
+        self.zoomViewBox.addItem(self.zoomImg)
+        self.zoomViewBox.setAspectLocked(True)
+        self.zoomViewBox.invertY(True)
+        # Add the zoom ViewBox as an item to the main plot (self.mainPlot is your primary plot object)
+        self.mainPlot.addItem(self.zoomViewBox, ignoreBounds=True)
 
-        # fig.tight_layout(pad=0, h_pad=None, w_pad=None, rect=None)
+        # Configure initial size and position (you'll update this dynamically later)
+        self.zoomViewBox.setFixedWidth(400)  # Width of the zoom box in pixels
+        self.zoomViewBox.setFixedHeight(400)  # Height of the zoom box in pixels
 
-        # # Embed the matplotlib plot in a QWidget
-        # canvas = FigureCanvas(fig)
-        # widget = QtWidgets.QWidget()
-        # layout = QVBoxLayout(widget)
-        # layout.addWidget(canvas)
-        # widget.setLayout(layout)
+        # Optionally, set up a crosshair or marker in the zoom window
+        self.zoomTarget = pg.TargetItem(symbol='+', size = 5)
+        self.zoomViewBox.addItem(self.zoomTarget)
+        self.zoomTarget.hide()  # Initially hidden
 
-        # # Remove current plot from the layout and add the new one
-        # for i in reversed(range(self.widgetProfilePlot.layout().count())):
-        #     self.widgetProfilePlot.layout().itemAt(i).widget().setParent(None)
 
-        # self.widgetProfilePlot.layout().addWidget(widget)
-        # widget.show()
+        self.update_zoom_view_position(0, 0, array)  # Initial position
+
+
+
+    def update_zoom_view_position(self, x, y, array):
+        # Assuming you have a method like this to update the zoom view
+        # Calculate the new position for the zoom view
+        xOffset = 50  # Horizontal offset from cursor to avoid overlap
+        yOffset = 100  # Vertical offset from cursor to display below it
+
+        # Adjust position to ensure the zoom view remains within the plot bounds
+        x_pos = min(max(x + xOffset, 0), self.mainPlot.viewRect().width() - self.zoomViewBox.width())
+        y_pos = min(max(y + yOffset, 0), self.mainPlot.viewRect().height() - self.zoomViewBox.height())
+
+        # Update the position of the zoom view
+        self.zoomViewBox.setGeometry(x_pos, y_pos, self.zoomViewBox.width(), self.zoomViewBox.height())
+
+        # Calculate the region to zoom in on
+        zoomRect = QtCore.QRectF(x - self.x_range * self.zoomLevel, y - self.y_range * self.zoomLevel, self.x_range * self.zoomLevel * 2, self.y_range * self.zoomLevel * 2)
+
+        # Update the zoom view's displayed region
+        # self.zoomViewBox.setRange(rect=zoomRect, padding=0)
+        self.zoomImg.setImage(image=array)  # Make sure this uses the current image data
+
+        self.zoomImg.setRect(0,0,self.x_range,self.y_range)
+        self.zoomViewBox.setRange(zoomRect) # Set the zoom area in the image
+        self.zoomImg.setColorMap(pg.colormap.get(self.cm, source = 'matplotlib'))
+        self.zoomTarget.setPos(x, y)  # Update target position
+        self.zoomTarget.show()
+        self.zoomViewBox.setZValue(1e10)
 
     def reset_zoom(self, vb,histogram):
         vb.enableAutoRange()
         histogram.autoHistogramRange()
 
-    # def plot_histogram(self, current_plot_df, plot_information, bin_width):
-    #     select_histogram = plot_information['plot_name']
-    #     array = current_plot_df['array'].values
-    #     edges = np.arange(array.min(), array.max() + bin_width, bin_width)
 
-    #     plot_exist = select_histogram in self.plot_widget_dict
-    #     duplicate = plot_exist and len(self.plot_widget_dict[select_histogram]['view']) == 1 and self.plot_widget_dict[select_histogram]['view'][0] != self.canvasWindow.currentIndex()
-
-    #     if plot_exist and not duplicate:
-    #         widgetHistogram = self.plot_widget_dict[select_histogram]['widget'][0]
-    #         histogram_plot = widgetHistogram.findChild(pg.PlotWidget)
-    #         histogram_plot.clear()
-    #         self.update_histogram(array, edges, histogram_plot)
-    #     else:
-    #         layout = QtWidgets.QVBoxLayout()
-    #         widgetHistogram = QtWidgets.QWidget()
-    #         widgetHistogram.setLayout(layout)
-    #         view = self.canvasWindow.currentIndex()
-    #         if duplicate:
-    #             self.plot_widget_dict[select_histogram]['widget'].append(widgetHistogram)
-    #             self.plot_widget_dict[select_histogram]['view'].append(view)
-    #         else:
-    #             self.plot_widget_dict[select_histogram] = {'widget': [widgetHistogram], 'info': plot_information, 'view': [view]}
-    #         histogram_plot = pg.PlotWidget(title=select_histogram)
-    #         self.update_histogram(array, edges, histogram_plot)
-    #         layout.addWidget(histogram_plot)
-    #         histogram_plot.setBackground('w')
-
-    # def update_histogram(self, array, edges, histogram_plot):
-    #     # Create a legend
-    #     legend = pg.LegendItem(offset=(70, 30))  # Adjust offset as needed
-    #     legend.setParentItem(histogram_plot.graphicsItem())  # Add legend to the histogram plot
-
-
-    #     if 'algorithm' in self.current_group and self.current_group['algorithm'] in self.cluster_results:
-    #         # Color the histogram based on clusters
-    #         for cluster in self.current_group['clusters']:
-    #             cluster_num = int(cluster.split()[1])  # Assuming cluster name format is "Cluster X"
-    #             cluster_indices = np.where(self.cluster_results[self.current_group['algorithm']] == cluster_num)[0]
-    #             cluster_data = array[cluster_indices]
-    #             hist, _ = np.histogram(cluster_data.flatten(), bins=edges)
-    #             # Adjust color with transparency (alpha)
-    #             color = pg.intColor(cluster_num, alpha=80)  # Adjust alpha value (0-255) for transparency
-    #             bar_graph_item = pg.BarGraphItem(x0=edges[:-1], x1=edges[1:], height=hist, brush=color)
-    #             histogram_plot.addItem(bar_graph_item)
-    #             # Add item to legend
-    #             legend.addItem(bar_graph_item, f'Cluster {cluster_num}')
-    #     else:
-    #         # Regular histogram
-    #         hist, _ = np.histogram(array.flatten(), bins=edges)
-    #         bar_graph_item = pg.BarGraphItem(x0=edges[:-1], x1=edges[1:], height=hist, brush='b')
-    #         histogram_plot.addItem(bar_graph_item)
-    #     histogram_plot.setLabel('left', 'Frequency')
-    #     histogram_plot.setLabel('bottom', 'Value')
-    
     def plot_pca(self):
         pca_dict = {}
-        
+
         df_filtered, isotopes = self.get_processed_data()
-        
+
         # Preprocess the data
         scaler = StandardScaler()
         df_scaled = scaler.fit_transform(df_filtered)
-        
+
         # Perform PCA
         pca = PCA(n_components=min(len(df_filtered.columns), len(df_filtered)))  # Adjust n_components as needed
         pca_results = pca.fit_transform(df_scaled)
-        
+
         # Convert PCA results to DataFrame for easier plotting
         pca_dict['results'] =  pd.DataFrame(pca_results, columns=[f'PC{i+1}' for i in range(pca.n_components_)])
         pca_dict['explained_variance_ratio'] = pca.explained_variance_ratio_
         pca_dict['components_'] = pca.components_
-        
-        
+
+
         # Determine which PCA plot to create based on the combobox selection
         pca_plot_type = self.comboBoxPCAPlotType.currentText()
-    
+
         plot_name = pca_plot_type
         sample_id = self.sample_id
         plot_type = 'pca'  # Assuming all PCA plots fall under a common plot type
-    
+
         plot_exist = plot_name in self.plot_widget_dict[plot_type][sample_id]
         duplicate = plot_exist and len(self.plot_widget_dict[plot_type][sample_id][plot_name]['view']) == 1 and self.plot_widget_dict[plot_type][sample_id][plot_name]['view'][0] != self.canvasWindow.currentIndex()
-    
+
         if plot_exist and not duplicate:
             widgetPCA = self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'][0]
             figure_canvas = widgetPCA.findChild(FigureCanvas)
@@ -1670,41 +1688,41 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #widgetPCA.layout().addWidget(toolbar)
             widgetPCA.layout().addWidget(figure_canvas)
             view = self.canvasWindow.currentIndex()
-            
+
             plot_information = {
                 'plot_name': plot_name,
                 'sample_id': self.sample_id,
                 'plot_type': plot_type,
 
             }
-            
+
             if duplicate:
                 self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'].append(widgetPCA)
                 self.plot_widget_dict[plot_type][sample_id][plot_name]['view'].append(view)
             else:
                 self.plot_widget_dict[plot_type][sample_id][plot_name] = {'widget': [widgetPCA], 'info': plot_information, 'view': [view]}
-    
+
             # Additional steps to add the PCA widget to the appropriate container in the UI
             self.add_plot(plot_information)
             self.update_tree(plot_information['plot_name'], data = plot_information, tree = 'PCA')
-            
-            
+
+
     def update_pca_plot(self, pca_dict, pca_plot_type, ax):
         if pca_plot_type == 'Variance':
-            
+
             # pca_dict contains variance ratios for the principal components
             variances = pca_dict['explained_variance_ratio']
             cumulative_variances = variances.cumsum()  # Calculate cumulative explained variance
-            
+
             # Number of principal components
             n_components = range(1, len(variances) + 1)
-            
+
             # Plotting the explained variance
             ax.plot(n_components, variances, marker='o', linestyle='-', color='b', label='Explained Variance')
-            
+
             # Plotting the cumulative explained variance
             ax.plot(n_components, cumulative_variances, marker='s', linestyle='--', color='r', label='Cumulative Explained Variance')
-            
+
             # Adding labels, title, and legend
             ax.set_xlabel('Principal Component')
             ax.set_ylabel('Variance Ratio')
@@ -1712,35 +1730,35 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             ax.set_xticks(n_components)
             ax.set_xticklabels([f'PC{i}' for i in range(1, len(variances) + 1)], rotation=45)
             ax.legend()
-            
+
             # Adjust the y-axis limit to make sure the plot includes all markers and lines
             ax.set_ylim([0, 1.05])  # Assuming variance ratios are between 0 and 1
         elif pca_plot_type == 'Vectors':
             # pca_dict contains 'components_' from PCA analysis with columns for each variable
             components = pca_dict['components_']  # No need to transpose for heatmap representation
-            
+
             # Number of components and variables
             n_components = components.shape[0]
             n_variables = components.shape[1]
-            
+
             cmap = plt.get_cmap(self.cm)
             cax = ax.imshow(components, cmap=cmap, aspect='auto')
             fig = ax.get_figure()
             # Adding a colorbar at the bottom of the plot
             cbar = fig.colorbar(cax, orientation='horizontal', pad=0.2)
             cbar.set_label('PCA Score')
-            
+
             # Setting the labels for x and y axes
             ax.set_xticks(np.arange(n_components))
             ax.set_yticks(np.arange(n_variables))
-            
+
             ax.set_xticklabels([f'PC{i+1}' for i in range(n_components)])
             ax.set_yticklabels([f'Var{i+1}' for i in range(n_variables)], rotation=45)
-            
+
             ax.set_xlabel('Principal Components')
             ax.set_ylabel('Variables')
             ax.set_title('PCA Components Heatmap')
-            
+
             # Optional: Rotate x-axis labels for better readability
             # plt.xticks(rotation=45)
         elif pca_plot_type == 'PC X vs. PC Y':
@@ -1765,25 +1783,25 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def plot_correlation(self, plot =False):
         correlation_dict = {}
-        
+
         df_filtered, isotopes = self.get_processed_data()
-        
+
         # Calculate the correlation matrix
         correlation_matrix = df_filtered.corr()
-        
+
         # Store the correlation matrix for plotting
         correlation_dict['correlation_matrix'] = correlation_matrix
-        
+
         # Determine which correlation plot to create based on the combobox selection (assuming you have a combobox for different types of correlation plots, if not just set a default plot type)
         correlation_plot_type = 'Heatmap'
-        
+
         plot_name = correlation_plot_type
         sample_id = self.sample_id
         plot_type = 'correlation'  # Assuming all correlation plots fall under a common plot type
-        
+
         plot_exist = plot_name in self.plot_widget_dict[plot_type][sample_id]
         duplicate = plot_exist and len(self.plot_widget_dict[plot_type][sample_id][plot_name]['view']) == 1 and self.plot_widget_dict[plot_type][sample_id][plot_name]['view'][0] != self.canvasWindow.currentIndex()
-        
+
         if plot_exist and not duplicate:
             widgetCorrelation = self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'][0]
             figure_canvas = widgetCorrelation.findChild(FigureCanvas)
@@ -1802,19 +1820,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # widgetCorrelation.layout().addWidget(toolbar)
             widgetCorrelation.layout().addWidget(figure_canvas)
             view = self.canvasWindow.currentIndex()
-            
+
             plot_information = {
                 'plot_name': plot_name,
                 'sample_id': self.sample_id,
                 'plot_type': plot_type,
             }
-            
+
             if duplicate:
                 self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'].append(widgetCorrelation)
                 self.plot_widget_dict[plot_type][sample_id][plot_name]['view'].append(view)
             else:
                 self.plot_widget_dict[plot_type][sample_id][plot_name] = {'widget': [widgetCorrelation], 'info': plot_information, 'view': [view]}
-            
+
             # Additional steps to add the Correlation widget to the appropriate container in the UI
             if plot:
                 self.add_plot(plot_information) #do not plot correlation when directory changes
@@ -1824,19 +1842,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         cmap = plt.get_cmap(self.cm)
         correlation_matrix = correlation_dict['correlation_matrix']
         cax = ax.imshow(correlation_matrix, cmap=cmap, aspect='auto')
-        
+
         fig = ax.get_figure()
         # Add colorbar to the plot
         cbar = fig.colorbar(cax, ax=ax)
         cbar.set_label('Correlation coefficient')
-        
+
         # Set tick labels
         ticks = np.arange(len(correlation_matrix.columns))
         ax.set_xticks(ticks)
         ax.set_yticks(ticks)
         ax.set_xticklabels(correlation_matrix.columns, rotation=45, ha='right')
         ax.set_yticklabels(correlation_matrix.columns)
-        
+
         ax.set_title('Correlation Matrix Heatmap')
 
     def plot_histogram(self, current_plot_df, plot_information, bin_width):
@@ -2001,7 +2019,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # toggle heatmap resolution spinBox when the scatter type comboBox is changed
     def toggle_scatter_style_tab(self, tab_id):
         """Updates and toggles widgets in scatter style tab
-        
+
         Parameter
         ---------
         tab_id: int
@@ -2110,7 +2128,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                 'FontSize': self.doubleSpinBoxFontSize.value(),
                                 'TickDir': self.comboBoxTickDirection.currentText()
                                 }
-    
+
     def set_general_style(self):
         """Sets style properties in Styling>General tab"""
         self.lineEditAnalyteUnits.setText(self.general_style['Concentration'])
@@ -2153,7 +2171,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                     'ScaleDirection': self.comboBoxScaleDirection.currentText(),
                                     'OverlayColor': self.get_hex_color(self.toolButtonOverlayColor.palette().button().color())
                                     }
-    
+
     def set_map_style(self):
         """Sets style properties in Styling>Maps tab"""
         match self.toolBox.currentIndex():
@@ -2163,14 +2181,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case self.scatter_tab_id:
                 tab_id = self.scatter_tab_id
                 self.comboBoxTernaryColormap.setCurrentText(self.map_style[tab_id]['Colormap'])
-                self.TernaryColormapChanged() 
+                self.TernaryColormapChanged()
             case _:
                 tab_id = self.sample_tab_id
                 self.comboBoxMapColormap.setCurrentText(self.map_style[tab_id]['Colormap'])
 
-        self.comboBoxColorbarDirection.setCurrentText(self.map_style[tab_id]['ColorbarDirection']) 
-        self.comboBoxScaleLocation.setCurrentText(self.map_style[tab_id]['ScaleLocation']) 
-        self.comboBoxScaleDirection.setCurrentText(self.map_style[tab_id]['ScaleDirection']) 
+        self.comboBoxColorbarDirection.setCurrentText(self.map_style[tab_id]['ColorbarDirection'])
+        self.comboBoxScaleLocation.setCurrentText(self.map_style[tab_id]['ScaleLocation'])
+        self.comboBoxScaleDirection.setCurrentText(self.map_style[tab_id]['ScaleDirection'])
         self.toolButtonOverlayColor.setStyleSheet("background-color: %s;" % self.map_style[tab_id]['OverlayColor'])
 
     def set_scatter_style(self):
@@ -2183,11 +2201,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.comboBoxLineWidth.setCurrentText(str(self.scatter_style[tab_id]['LineWidth']))
             self.toolButtonMarkerColor.setStyleSheet("background-color: %s;" % self.scatter_style[tab_id]['Color'])
             self.comboBoxColorByField.setCurrentText(self.scatter_style[tab_id]['ColorByField'])
-            self.comboBoxColorField.setCurrentText(self.scatter_style[tab_id]['Field']) 
-            self.comboBoxFieldColormap.setCurrentText(self.scatter_style[tab_id]['Colormap']) 
-            self.horizontalSliderMarkerAlpha.setValue(int(self.scatter_style[tab_id]['Alpha'])) 
+            self.comboBoxColorField.setCurrentText(self.scatter_style[tab_id]['Field'])
+            self.comboBoxFieldColormap.setCurrentText(self.scatter_style[tab_id]['Colormap'])
+            self.horizontalSliderMarkerAlpha.setValue(int(self.scatter_style[tab_id]['Alpha']))
             self.labelMarkerAlpha.setText(str(self.horizontalSliderMarkerAlpha.value()))
-            self.lineEditAspectRatio.setText(str(self.scatter_style[tab_id]['AspectRatio'])) 
+            self.lineEditAspectRatio.setText(str(self.scatter_style[tab_id]['AspectRatio']))
 
             # heatmap
             self.spinBoxHeatmapResolution.setValue(self.heatmap_style[tab_id]['Resolution'])
@@ -2195,7 +2213,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def get_scatter_style(self, tab_id):
         """Updates dictionaries with scatter and heatmap style properties
-        
+
         Parameter
         ---------
         tab_ind: int
@@ -2215,7 +2233,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         'Colormap': self.comboBoxFieldColormap.currentText(),
                         'Alpha': float(self.horizontalSliderMarkerAlpha.value()),
                         'AspectRatio': float(self.lineEditAspectRatio.text())
-                        } 
+                        }
                 case 'heatmap':
                     self.heatmap_style[tab_id] = {'Resolution': self.SpinBoxHeatmapResolution.currentValue(),
                                                     'Colormap': self.comboBoxFieldColormap.currentText()
@@ -2230,7 +2248,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.labelScaleLocation.setEnabled(True)
             self.comboBoxScaleLocation.setEnabled(True)
 
-        
+
 
     #def plot_scatter(self, update=False, values = None, plot_type= None, fig= None, ternary_plot= None):
     #    self.get_general_style()
@@ -2292,8 +2310,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     #        select_scatter = f"{x['elements']}_{y['elements']}_{plot_type}"
 
     #        # add labels
-    #        xlbl = self.comboBoxScatterIsotopeX.currentText() 
-    #        ylbl = self.comboBoxScatterIsotopeY.currentText() 
+    #        xlbl = self.comboBoxScatterIsotopeX.currentText()
+    #        ylbl = self.comboBoxScatterIsotopeY.currentText()
     #        match self.comboBoxScatterSelectX.currentText().lower():
     #            case 'isotope':
     #                xlbl += ' ('+self.lineEditConcentrationUnits.text()+')'
@@ -2359,7 +2377,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 else:
                     # ternary
                     self.ternary_scatter(fig,x,y,z,c,s,save)
-                
+
             # heatmap
             case 'heatmap':
                 # biplot
@@ -2376,7 +2394,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def newplot(self, fig, plot_name, plot_information, save):
         """Creates new figure widget
-        
+
         Parameter
         ---------
         fig: matplotlib.Figure
@@ -2391,7 +2409,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         widgetScatter = QtWidgets.QWidget()
         layout = QtWidgets.QVBoxLayout()
         widgetScatter.setLayout(layout)
-        
+
         # scatter_plot = pg.PlotWidget(title=select_scatter)
         scatter_plot = FigureCanvas(fig)
         view = self.canvasWindow.currentIndex()
@@ -2409,11 +2427,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.update_tree(plot_information['plot_name'], data = plot_information, tree = 'Scatter')
 
             # makes plot viewable
-            self.add_plot(plot_information) 
+            self.add_plot(plot_information)
         else:
             # refresh window
             self.add_temp_plot(plot_information, widgetScatter)
-            
+
     def add_temp_plot(self, plot_information, selected_plot_widget):
         plot_name = plot_information['plot_name']
         sample_id = plot_information['sample_id']
@@ -2459,19 +2477,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def biplot(self, fig, x, y, c, s, save):
         """Creates scatter bi-plots
-        
+
         A general function for creating scatter plots of 2-dimensions.
-        
+
         Parameter
         ---------
         fig: matplotlib.figure
             figure object
         x: dict
-            x-dimension 
+            x-dimension
         y: dict
             y-dimension
         c: dict
-            color dimension            
+            color dimension
         s: dict
             dictionary of plot style parameters
         """
@@ -2520,21 +2538,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def ternary_scatter(self, fig, x, y, z, c, s, save):
         """Creates scatter bi-plots
-        
+
         A general function for creating scatter plots of 2-dimensions.
-        
+
         Parameter
         ---------
         fig: matplotlib.figure
             figure object
         x: dict
-            x-dimension 
+            x-dimension
         y: dict
             y-dimension
         z: dict
             z-dimension
         c: dict
-            color dimension            
+            color dimension
         s: dict
             dictionary of plot style parameters
         """
@@ -2622,7 +2640,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # fig.subplots_adjust(left=0, right=1)
 
             ax = fig.add_subplot(subplot_num)
-            
+
             # Create labels array filled with -1
             labels = np.full(filtered_array.shape[0], -1, dtype=int)
             if name == 'Fuzzy':
@@ -3137,7 +3155,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
     def change_sample(self, index):
- 
+
         file_path = os.path.join(self.selected_directory, self.csv_files[index])
         self.sample_id = os.path.splitext(self.csv_files[index])[0]
 
@@ -3241,7 +3259,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.update_tree(self.selected_isotopes)
 
             self.update_spinboxes_bool = True  # Place this line at end of method
-            
+
             self.plot_correlation()
 
 
@@ -3388,7 +3406,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             ub = parameters['upper_bound']
             d_lb = parameters['d_l_bound']
             d_ub = parameters['d_u_bound']
-            
+
             # if plot is None: #only update x and y for plotting for analysis use original x and y range
             #     x_range = [current_plot_df['X'].min(), current_plot_df['X'].max()]
             #     y_range = [current_plot_df['Y'].min(), current_plot_df['Y'].max()]
@@ -3627,7 +3645,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.n_dim_items = StandardItem('n-Dim', 14, True)
             self.pca_items = StandardItem('PCA', 14, True)
             self.clustering_items = StandardItem('Clustering', 14, True)
-            
+
             rootNode.appendRows([self.isotopes_items,self.norm_isotopes_items,self.ratios_items,self.histogram_items,self.correlation_items, self.scatter_items,
                                  self.n_dim_items, self.pca_items, self.clustering_items])
             treeView.setModel(treeModel)
@@ -3730,7 +3748,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         elif tree == 'n-Dim':
             self.add_tree_item(self.sample_id,self.n_dim_items,leaf,data)
-            
+
         elif tree == 'PCA':
             self.add_tree_item(self.sample_id,self.pca_items,leaf,data)
         elif tree == 'Correlation':
@@ -4104,7 +4122,7 @@ class CustomAxis(AxisItem):
 
 class Table_Fcn:
     """Class for table common operations
-    
+
     Methods
     -------
     move_row_up(table)
@@ -4152,7 +4170,7 @@ class Table_Fcn:
                     self.main_window.comboBoxProfileSort.setCurrentIndex(0) #set dropdown sort to no
 
                     # Update self.profiles here accordingly
-                    for key, profile in self.profiles.items():
+                    for key, profile in self.main_window.profiling.profiles.items():
                         if row >0:
                             profile[row], profile[row -1 ] = profile[row - 1], profile[row]
                     self.plot_profiles(sort_axis = False)
@@ -4191,7 +4209,7 @@ class Table_Fcn:
             match table.accesibleName():
                 case 'Profiling':
                     # update point order of each profile
-                    for key, profile in self.profiles.items():
+                    for key, profile in self.main_window.profiling.profiles.items():
                         if row < len(profile) - 1:
                             profile[row], profile[row + 1] = profile[row + 1], profile[row]
                     self.plot_profiles(sort_axis = False)
@@ -4217,13 +4235,13 @@ class Table_Fcn:
                     # remove point from each profile and its corresponding scatter plot item
 
 
-                    for key, profile in self.profiles.items():
+                    for key, profile in self.main_window.profiling.profiles.items():
                         if row < len(profile):
                             scatter_item = profile[row][3]  # Access the scatter plot item
                             for _, (_, plot, _, _) in self.main_window.lasermaps.items():
                                 plot.removeItem(scatter_item)
                             profile.pop(row) #index starts at 0
-                       
+
                 self.main_window.profiling.plot_profiles(sort_axis = False)
 
                 if self.main_window.toolButtonIPProfile.isChecked(): #reset interpolation if selected
@@ -4331,57 +4349,7 @@ class Profiling:
             self.plot_profiles()
             self.update_table_widget()
 
-                    # move point
-        #elif event.button() == QtCore.Qt.LeftButton and not(self.main_window.toolButtonPlotProfile.isChecked()) and self.main_window.toolButtonPointMove.isChecked():
-        #    if self.point_selected:
-        #        # Create a scatter plot item at the clicked position
-        #        scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
-        #        plot.addItem(scatter)
-        #        # Find all points within the specified radius
-        #        circ_val = []
-        #        circ_cord = []
-        #        for i in range(max(0, y_i - radius), min(self.array_y, y_i + radius + 1)):
-        #            for j in range(max(0, x_i - radius), min(self.array_x , x_i + radius + 1)):
-        #                if np.sqrt((x_i - j)**2 + (y_i - i)**2) <= radius:
-        #                    value = array[i, j]
-        #                    circ_cord.append([i, j])
-        #                    circ_val.append( value)
 
-        #        #add values within circle of radius in self.profiles
-        #        if k in self.profiles:
-        #            self.profiles[k].append((x,y,circ_val,scatter, interpolate))
-        #        else:
-        #            self.profiles[k] = [(x,y, circ_val,scatter, interpolate)]
-
-
-        #        if self.main_window.canvasWindow.currentIndex() == 1:
-        #            # Add the scatter item to all other plots and save points in self.profiles
-        #            for k, (_, p, v, array) in self.main_window.lasermaps.items():
-        #                circ_val = []
-        #                if p != plot and v==1 and self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #only add scatters to other lasermaps of same sample
-        #                    # Create a scatter plot item at the clicked position
-        #                    scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
-        #                    p.addItem(scatter)
-        #                    for c in circ_cord:
-        #                        value = array[c[0], c[1]]
-        #                        circ_val.append( value)
-        #                    if k in self.profiles:
-        #                        self.profiles[k].append((x,y,circ_val, scatter, interpolate))
-        #                    else:
-        #                        self.profiles[k] = [(x,y, circ_val,scatter, interpolate)]
-        #        # find nearest profile point
-        #    else:
-        #        mindist = 10^12
-        #        for k in self.profiles.values():
-        #            dist = min((k[0][0] - x)**2 + (k[0][1] - y)**2)
-        #            if mindist > dist:
-        #                mindist = dist
-        #                self.pind = k
-        #        if not(round(d*self.array_x/self.main_window.x_range) < 10):
-        #            self.pind = -1
-        #        else:
-        #            self.point_selected = True
-          # move point
         elif event.button() == QtCore.Qt.LeftButton and not(self.main_window.toolButtonPlotProfile.isChecked()) and self.main_window.toolButtonPointMove.isChecked():
             if self.point_selected:
                 #remove selected point
@@ -4566,11 +4534,11 @@ class Profiling:
 
                     for group_key, _ in profile_groups.items():
                         if abs(range_value - group_key) <= range_threshold:
-                            profile_groups[group_key].append((k, distances, mean, s_error))
+                            profile_groups[group_key].append((k, distances, mean, s_error, np.min(mean)))
                             similar_group_found = True
                             break
                     if not similar_group_found:
-                        profile_groups[range_value] = [(k, distances, mean, s_error)]
+                        profile_groups[range_value] = [(k, distances, mean, s_error, np.min(mean, np.max(mean)))]
                 else:
 
                     range_value = np.max(medians)- np.min(medians)
@@ -4579,11 +4547,11 @@ class Profiling:
 
                     for group_key, _ in profile_groups.items():
                         if abs(range_value - group_key) <= range_threshold:
-                            profile_groups[group_key].append((k, distances, medians, lowers, uppers))
+                            profile_groups[group_key].append((k, distances, medians, lowers, uppers, np.min(medians), np.max(medians)))
                             similar_group_found = True
                             break
                     if not similar_group_found:
-                        profile_groups[range_value] = [(k, distances, medians, lowers, uppers)]
+                        profile_groups[range_value] = [(k, distances, medians, lowers, uppers, np.min(medians), np.max(medians))]
 
             return profile_groups, colors
 
@@ -4592,7 +4560,7 @@ class Profiling:
             profiles = self.profiles
         else:
             profiles = self.i_profiles
-            
+
         if len(list(profiles.values())[0])>0: #if self.profiles has values
             self.main_window.tabWidget.setCurrentIndex(2) #show profile plot tab
             sort_axis=self.main_window.comboBoxProfileSort.currentText()
@@ -4615,60 +4583,143 @@ class Profiling:
             profile_groups,colors = group_profiles_by_range(sort_axis, range_threshold, interpolate, point_type)
             # Initialize the figure
             self.fig = Figure()
+            #Connect the pick_event signal to a handler that will process the picked points.
+            self.fig.canvas.mpl_connect('pick_event', self.on_pick)
             num_groups = len(profile_groups)
             num_subplots = (num_groups + 1) // 2  # Two groups per subplot, rounding up
             subplot_idx = 1
             #reset existing error_bar list
             self.all_errorbars = []
+            original_range = None
+            original_min = None
+            twinx_min = None
+            original_max = None
+            twinx_max = None
             # Adjust subplot spacing
             # fig.subplots_adjust(hspace=0.1)  # Adjust vertical spacing
             ax = self.fig.add_subplot(num_subplots, 1, subplot_idx)
+
             for idx, (range_value, group_profiles) in enumerate(profile_groups.items()):
+                scale_factor = 0
                 if idx > 1 and idx % 2 == 0:  # Create a new subplot for every 2 groups after the first two
                     subplot_idx += 1
                     ax = self.fig.add_subplot(num_subplots, 1, subplot_idx)
-                elif idx % 2 == 1:  # Create a new subplot for every 2 groups after the first two
-                    ax = ax.twinx()
+                    original_range = range_value
+
+                elif idx % 2 == 1:  # Create a new axis for every second group
+
+                    twinx_range = range_value
+                    scale_factor = original_range/twinx_range
+                    ax2 = ax.twinx()
+                    ax.set_zorder(ax2.get_zorder()+1)
+                    # ax = ax2
+                else:
+                    original_range = range_value
                 el_labels = []
                 # Plot each profile in the group
                 if point_type == 'mean':
-                    for g_idx,(profile_key, distances, means,s_errors) in enumerate(group_profiles):
-                        # Plot markers with ax.scatter
-                        scatter = ax.scatter(distances, means, color=colors[idx+g_idx], s=64, picker=5, zorder=2*g_idx+1)
-                        
-                        # Store additional information needed to identify points upon picking
-                        self.scatter_info = scatter
-                        
-                        self.original_colors[scatter] = colors[idx+g_idx]  # Assuming colors is accessible
-        
-                        #plot errorbars with no marker
-                        self.line, self.caplines, self.barlinecols= ax.errorbar(distances, means, yerr=s_errors, fmt='none', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0, label=f'{profile_key[:-1]}', zorder=2*g_idx)
-                        
+                    for g_idx,(profile_key, distances, means,s_errors, min_val, max_val) in enumerate(group_profiles):
+                        if scale_factor>0: #needs scaling
+                            if g_idx == 0: #the min value of the group is stored in first row of each group_profiles
+                                twinx_min = min_val
+                                twinx_min = max_val
+                                # Scale values and errors
+                                scaled_values = [(value - twinx_min) * scale_factor + original_min for value in means]
+                                scaled_errors = [error * scale_factor for error in s_errors]
 
+                            # Plot markers with ax.scatter
+                            scatter = ax.scatter(distances, scaled_values, color=colors[idx+g_idx], s=64, picker=5, label=f'{profile_key[:-1]}')
+
+                            #plot errorbars with no marker
+                            _, _, barlinecols = ax.errorbar(distances, scaled_errors, yerr=scaled_errors, fmt='none', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0)
+                            # Assuming you have the scaling factors and original data range
+                            scale_factor = (original_max - original_min) / (twinx_max - twinx_min)
+
+                            # Determine positions for custom ticks on ax2
+                            # Choose representative values from the original scale you want as ticks on ax2
+                            original_tick_values = [twinx_min, (twinx_max + twinx_min) / 2, twinx_max]
+
+                            # Calculate the scaled positions of these ticks on ax
+                            scaled_tick_positions = [(value - twinx_min) * scale_factor + original_min for value in original_tick_values]
+
+                        else:
+                            if g_idx == 0:
+                                original_min = min_val
+                                original_max = max_val
+                            # Plot markers with ax.scatter
+                            scatter = ax.scatter(distances, means, color=colors[idx+g_idx], s=64, picker=5, label=f'{profile_key[:-1]}')
+
+                            #plot errorbars with no marker
+                            _, _, barlinecols = ax.errorbar(distances, means, yerr=s_errors, fmt='none', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0)
+
+                        self.all_errorbars.append((scatter,barlinecols[0]))
+                        self.original_colors[profile_key] = colors[idx+g_idx]  # Assuming colors is accessible
+                        self.selected_points[profile_key] = [False] * len(means)
                         el_labels.append(profile_key[:-1].split('_')[-1]) #get element name
                         y_axis_text = ','.join(el_labels)
-                        ax.set_ylabel(f'{y_axis_text}')
+                        if scale_factor>0:
+                            ax2.set_ylabel(f'{y_axis_text}')
+                            ax2.set_yticks(scaled_tick_positions)
+                            ax2.set_yticklabels([f"{value:.2f}" for value in original_tick_values])
+                        else:
+                            ax.set_ylabel(f'{y_axis_text}')
                         # Append the new Line2D objects to the list
                         # self.markers.extend(marker)
                 else:
-                    for g_idx,(profile_key, distances, medians, lowers, uppers) in enumerate(group_profiles):
-
-                        # errors = [upper - lower for upper, lower in zip(uppers, lowers)]
+                    for g_idx,(profile_key, distances, medians, lowers, uppers, min_val, max_val) in enumerate(group_profiles):
                         #asymmetric error bars
                         errors = [[median - lower for median, lower in zip(medians, lowers)],
                             [upper - median for upper, median in zip(uppers, medians)]]
-                        # Plot markers with ax.scatter
-                        scatter = ax.scatter(distances, medians, color=colors[idx+g_idx],s=self.scatter_size, picker=5, gid=profile_key, edgecolors = 'none', zorder=2*g_idx+1)
-                        #plot errorbars with no marker
-                        _, _, barlinecols = ax.errorbar(distances, medians, yerr=errors, fmt='none', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0, label=f'{profile_key[:-1]}', zorder=2*g_idx)
-                        
-                        
+                        if scale_factor>0: #needs scaling
+                            if g_idx == 0: #the min value of the group is stored in first row of each group_profiles
+                                twinx_min = min_val
+                                twinx_max = max_val
+
+
+                            # Scale values and errors
+                            scaled_values = [(value - twinx_min) * scale_factor + original_min for value in medians]
+                            # Assuming errors is structured as [lower_errors, upper_errors]
+                            scaled_lower_errors = [error * scale_factor for error in errors[0]]
+                            scaled_upper_errors = [error * scale_factor for error in errors[1]]
+
+                            # Now, scaled_errors is ready to be used in plotting functions
+                            scaled_errors = [scaled_lower_errors, scaled_upper_errors]
+                            # Plot markers with ax.scatter
+                            scatter = ax.scatter(distances, scaled_values, color=colors[idx+g_idx],s=self.scatter_size, picker=5, gid=profile_key, edgecolors = 'none', label=f'{profile_key[:-1]}')
+                            # ax2.scatter(distances, medians, color=colors[idx+g_idx],s=self.scatter_size, picker=5, gid=profile_key, edgecolors = 'none', label=f'{profile_key[:-1]}')
+                            #plot errorbars with no marker
+                            _, _, barlinecols = ax.errorbar(distances, scaled_values, yerr=scaled_errors, fmt='none', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0)
+
+
+                            # Assuming you have the scaling factors and original data range
+                            scale_factor = (original_max - original_min) / (twinx_max - twinx_min)
+
+                            # Determine positions for custom ticks on ax2
+                            # Choose representative values from the original scale you want as ticks on ax2
+                            original_tick_values = [twinx_min, (twinx_max + twinx_min) / 2, twinx_max]
+
+                            # Calculate the scaled positions of these ticks on ax
+                            scaled_tick_positions = [(value - twinx_min) * scale_factor + original_min for value in original_tick_values]
+                        else:
+                            if g_idx == 0: #the min value of the group is stored in first row of each group_profiles
+                                original_min = min_val
+                                original_max = max_val
+
+                            # Plot markers with ax.scatter
+                            scatter = ax.scatter(distances, medians, color=colors[idx+g_idx],s=self.scatter_size, picker=5, gid=profile_key, edgecolors = 'none', label=f'{profile_key[:-1]}')
+                            #plot errorbars with no marker
+                            _, _, barlinecols = ax.errorbar(distances, medians, yerr=errors, fmt='none', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0)
                         self.all_errorbars.append((scatter,barlinecols[0]))
                         self.original_colors[profile_key] = colors[idx+g_idx]  # Assuming colors is accessible
                         self.selected_points[profile_key] = [False] * len(medians)
                         el_labels.append(profile_key[:-1].split('_')[-1]) #get element name
                         y_axis_text = ','.join(el_labels)
-                        ax.set_ylabel(f'{y_axis_text}')
+                        if scale_factor>0:
+                            ax2.set_ylabel(f'{y_axis_text}')
+                            ax2.set_yticks(scaled_tick_positions)
+                            ax2.set_yticklabels([f"{value:.2f}" for value in original_tick_values])
+                        else:
+                            ax.set_ylabel(f'{y_axis_text}')
 
             # Set labels only for the bottom subplot
                 if subplot_idx == num_subplots:
@@ -4685,8 +4736,7 @@ class Profiling:
             self.fig.tight_layout(pad=3,w_pad=0, h_pad=0)
             self.fig.subplots_adjust(wspace=0, hspace=0)
             self.fig.legend(loc='outside right upper')
-            #Connect the pick_event signal to a handler that will process the picked points.
-            self.fig.canvas.mpl_connect('pick_event', self.on_pick)
+
             # Embed the matplotlib plot in a QWidget
             canvas = FigureCanvas(self.fig)
             widget = QWidget()
@@ -4753,7 +4803,7 @@ class Profiling:
         self.main_window.toolButtonPointDelete.setEnabled(enable)
 
     def on_pick(self, event):
-        print(event.artist)
+
         if self.edit_mode_enabled and isinstance(event.artist, PathCollection):
             # The picked scatter plot
             picked_scatter = event.artist
@@ -4763,59 +4813,58 @@ class Profiling:
             # Determine the color of the picked point
             facecolors = picked_scatter.get_facecolors().copy()
             original_color = matplotlib.colors.to_rgba(self.original_colors[profile_key])  # Assuming you have a way to map indices to original colors
-            
-            print(ind)
+
             # Toggle selection state
             self.selected_points[profile_key][ind] = not self.selected_points[profile_key][ind]
-        
+
             num_points = len(picked_scatter.get_offsets())
             # If initially, there's only one color for all points,
             # we might need to ensure the array is expanded to explicitly cover all points.
             if len(facecolors) == 1 and num_points > 1:
                 facecolors = np.tile(facecolors, (num_points, 1))
-            
-        
-            if not self.selected_points[profile_key][ind]:   
+
+
+            if not self.selected_points[profile_key][ind]:
                 # If already grey (picked)
                 # Set to original color
                 facecolors[ind] = matplotlib.colors.to_rgba(original_color)
             else:
                 # Set to grey
                 facecolors[ind] = (0.75, 0.75, 0.75, 1)
-            
+
             picked_scatter.set_facecolors(facecolors)
             # Update the scatter plot sizes
             picked_scatter.set_sizes(np.full(num_points, self.scatter_size))
             self.fig.canvas.draw_idle()
-    
+
     def toggle_edit_mode(self):
-        
+
         self.edit_mode_enabled = not self.edit_mode_enabled
-        
+
     def toggle_point_visibility(self):
         for profile_key in self.selected_points.keys():
             # Retrieve the scatter object using its profile key
             scatter, barlinecol = self.get_scatter_errorbar_by_gid(profile_key)
             if scatter is None:
                 continue
-    
+
             facecolors = scatter.get_facecolors().copy()
             num_points = len(scatter.get_offsets())
-            
+
             # If initially, there's only one color for all points, expand the colors array
             if len(facecolors) == 1 and num_points > 1:
                 facecolors = np.tile(facecolors, (num_points, 1))
-                
-                
+
+
             # Get the current array of colors (RGBA) for the LineCollection
             line_colors = barlinecol.get_colors().copy()
-        
+
             # Ensure the color array is not a single color by expanding it if necessary
             if len(line_colors) == 1 and len(barlinecol.get_segments()) > 1:
                 line_colors = np.tile(line_colors, (num_points, 1))
-    
 
-    
+
+
             # Iterate through each point to adjust visibility based on selection state
             for idx, selected in enumerate(self.selected_points[profile_key]):
                 if selected:
@@ -4832,7 +4881,7 @@ class Profiling:
 
     def get_scatter_errorbar_by_gid(self, gid):
         #return the correct scatter for corresponding key
-        for (scatter, errorbars) in self.all_errorbars: 
+        for (scatter, errorbars) in self.all_errorbars:
             if scatter.get_gid() == gid:
                 return (scatter, errorbars)
         return None

@@ -334,6 +334,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxScatterType.activated.connect(lambda: self.toggle_scatter_style_tab(self.toolBox.currentIndex()))
         self.comboBoxScatterIsotopeX.activated.connect(lambda: self.plot_scatter(save=False))
         self.comboBoxScatterIsotopeY.activated.connect(lambda: self.plot_scatter(save=False))
+        self.comboBoxScatterIsotopeZ.activated.connect(lambda: self.plot_scatter(save=False))
 
         # N-Dim Tab
         #-------------------------
@@ -2576,30 +2577,44 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         fig: matplotlib.figure
             figure object
         x: dict
-            x-dimension
+            coordinate associated with top vertex
         y: dict
-            y-dimension
+            coordinate associated with left vertex
         z: dict
-            z-dimension
+            coordinate associated with right vertex
         c: dict
             color dimension
         s: dict
             dictionary of plot style parameters
         """
-
-        labels = [x['field'], y['field'], z['field']]
-        if new == None:
-            ternary_plot = ternary(labels, 'scatter', mul_axis=True)
-            fig = ternary_plot.fig
+        if fig == None:
+            new = True
+            labels = [x['field'], y['field'], z['field']]
+            tp = ternary(labels, 'scatter', mul_axis=True)
+            fig = tp.fig
+        else:
+            new = False
 
         if len(c['array']) == 0:
-            _, cb = ternary_plot.ternscatter(x['array'], y['array'], z['array'], categories=c['array'],
-                                            cmap=s['Colormap'],
-                                            orientation='vertical')
+            tp.ternscatter(x['array'], y['array'], z['array'], marker=self.markerdict[s['Marker']], size=s['Size'], color=s['Color'])
+            cb = None
         else:
-            _, cb = ternary_plot.ternscatter(x['array'], y['array'], z['array'], categories=c['array'],
+            _, cb = tp.ternscatter(x['array'], y['array'], z['array'], categories=c['array'],
                                             cmap=s['Colormap'],
                                             orientation='vertical')
+        
+        if new:
+            plot_name = f"{x['field']}_{y['field']}_{z['field']}_{'scatter'}"
+            plot_information = {
+                'plot_name': plot_name,
+                'sample_id': self.sample_id,
+                'plot_type': 'scatter',
+                'values': (x, y, z, c),
+                'fig': fig,
+                'colorbar': cb
+            }
+            self.newplot(fig, plot_name, plot_information, save)
+
 
     def plot_ternarymap(self):
         return
@@ -3263,12 +3278,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.comboBoxScatterIsotopeX.addItems(isotopes['isotopes'])
             self.comboBoxScatterIsotopeY.clear()
             self.comboBoxScatterIsotopeY.addItems(isotopes['isotopes'])
-
-            self.comboBoxNDimIsotope.addItems(isotopes['isotopes'])
-
             self.comboBoxScatterIsotopeZ.clear()
             self.comboBoxScatterIsotopeZ.addItem('')
             self.comboBoxScatterIsotopeZ.addItems(isotopes['isotopes'])
+
+            self.comboBoxNDimIsotope.addItems(isotopes['isotopes'])
+
             self.comboBoxColorField.clear()
             self.comboBoxColorField.addItem('')
             self.comboBoxColorField.addItems(isotopes['isotopes'])
@@ -4260,7 +4275,8 @@ class Profiling:
         self.selected_points = {}  # Track selected points, e.g., {point_index: selected_state}
         self.edit_mode_enabled = False  # Track if edit mode is enabled
         self.original_colors = {}
-        self.scatter_size =64
+        self.scatter_size = 64
+
     def on_plot_clicked(self, event,array,k, plot,radius=5):
 
         # turn off profile (need to suppress context menu on right click)

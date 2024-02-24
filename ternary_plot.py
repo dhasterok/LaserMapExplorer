@@ -42,8 +42,8 @@ class ternary:
     ternary_grid(ax, spacing)
     tern2xy(a,b,c)
     xy2tern(x,y)
-    ternscatter(a, b, c, d=None, size=36, cmap=None, categories=None,labels = False, 
-        alpha=1, symbol='o', ax=None, orientation='horizontal')
+    ternscatter(a, b, c, d=None, size=36, cmap=None, color=None, categories=None, labels = False, 
+        edgecolors='none', alpha=1, marker='o', ax=None, orientation='horizontal')
     ternhex(a, b, c, val=None, n=10, color_map=None, orientation = 'horizontal')
     hexagon(n)
     terncolor(a, b, c, ca=[1, 1, 0], cb=[0.3, 73, 0.1], cc=[0, 0, 0.15], p=[1/3, 1/3, 1/3], cp=[])
@@ -53,7 +53,7 @@ class ternary:
     Parameter
     ---------
     """
-    def __init__(self, labels,plot_type= 'scatter',  n=3, dg =0.1, dt=0.1, mul_axis = False):
+    def __init__(self, labels, plot_type= 'scatter', n=3, dg =0.1, dt=0.1, mul_axis = False):
        
         self.labels = labels
         self.n = n
@@ -261,9 +261,11 @@ class ternary:
                 ax.plot([xc, xa], [-yc, -ya], '-', linewidth=0.25, color=[0.8, 0.8, 0.8])
     
     
-    def ternscatter(self, a, b, c, d=None, size=36, cmap=None, categories=None,labels = False, 
-                    alpha=1, symbol='o', ax=None, orientation ='horizontal'):
+    def ternscatter(self, a, b, c, d=None, size=36, cmap=None, color=None, categories=None, labels = False,
+            alpha=1, marker='o', edgecolors='none', ax=None, orientation ='horizontal'):
         """Scatter plot data on ternary axes.
+
+        Ternary scatter plot, ternscatter() uses man of the same parameters as matplotlib scatter.
         
         Parameter
         ---------
@@ -274,14 +276,20 @@ class ternary:
         size: double
             size of marker
         cmap:
-            colormap
+            colormap default is 'none'
+        color:
+            default is 'none'
+        edgecolors:
+            default is 'none'
+        marker:
+            symbol used for plotting, default is 'o'
         categories:
         labels:
         
         Return
         ------
         t:
-             scatter plot object
+            scatter plot object
         leg:
             legend (if applicable)
         """
@@ -304,7 +312,10 @@ class ternary:
             y[ind] = -y[ind]
         
         if categories is None:
-            t = self.axs[0].scatter(x, y, s=size, color=cmap(0.5), marker=symbol, alpha=alpha)
+            if color is None:
+                t = self.axs[0].scatter(x, y, s=size, color=cmap(0.5), marker=marker, edgecolors=edgecolors, alpha=alpha)
+            else:
+                t = self.axs[0].scatter(x, y, s=size, color=color, marker=marker, edgecolors=edgecolors, alpha=alpha)
             return t
         elif not labels:
             # Handle continuous categories
@@ -312,7 +323,7 @@ class ternary:
             scalarMappable = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
             scalarMappable.set_array(categories)
             cbar = self.fig.colorbar(scalarMappable, ax=self.axs[0], pad=0.1, orientation = orientation)
-            self.axs[0].scatter(x, y, c=scalarMappable.to_rgba(categories), s=size, marker=symbol, alpha=alpha)
+            self.axs[0].scatter(x, y, c=scalarMappable.to_rgba(categories), s=size, marker=marker, edgecolors=edgecolors, alpha=alpha)
         else:
             group_cmap = cmap
             # Assuming clusters and categories are the same
@@ -334,7 +345,7 @@ class ternary:
             norm = BoundaryNorm(bounds, cmap_discrete.N)
             
             # Scatter plot using the discrete colormap and normalization
-            self.axs[0].scatter(x, y, c=color_values, cmap=cmap_discrete, norm=norm, s=size, marker=symbol, alpha=alpha)
+            self.axs[0].scatter(x, y, c=color_values, cmap=cmap_discrete, norm=norm, s=size, marker=marker, edgecolors=edgecolors, alpha=alpha)
             
             # Create a colorbar with discrete colors
             cbar = self.fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap_discrete), ax=self.axs[0], ticks=(bounds[:-1] + bounds[1:]) / 2, pad=0.1, orientation=orientation)
@@ -346,7 +357,7 @@ class ternary:
             # for i, category in enumerate(unique_categories):
             #     # Select data for the current category
             #     indices = np.where(categories == category)
-            #     t = self.axs[0].scatter(x[indices], y[indices], c=colors[i], label=category, s=size, marker=symbol, alpha=alpha)
+            #     t = self.axs[0].scatter(x[indices], y[indices], c=colors[i], label=category, s=size, marker=marker, alpha=alpha)
             # return t
     
     def hexagon(self, n):
@@ -711,8 +722,8 @@ class ternary:
     # ternary_plot.ternscatter(a, b, c, size=100)
     # plt.show(ternary_plot.fig)
 #     # d = sample_data[:,3]
-#     # ternscatter(a, b, c,  size=36, color=None, categories=None,alpha=0.2, symbol='o', ax=ax)
-#     # ternscatter(a, b, c,  size=36, color=None,alpha=0.2, symbol='o', ax=ax)
+#     # ternscatter(a, b, c,  size=36, color=None, categories=None,alpha=0.2, marker='o', ax=ax)
+#     # ternscatter(a, b, c,  size=36, color=None,alpha=0.2, marker='o', ax=ax)
 #     # plt.show()
 
 # main()

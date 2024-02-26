@@ -87,5 +87,6 @@
         <file>resources/icons/icon-histeq-64.png</file>
         <file>resources/icons/icon-spotlight-64.png</file>
         <file>resources/icons/icon-sort-64.png</file>
+        <file>resources/icons/icon-illuminati-64.png</file>
     </qresource>
 </RCC>

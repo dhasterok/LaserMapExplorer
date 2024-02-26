@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QColorDialog, QCheckBox,QComboBox,  QTableWidgetItem, QHBoxLayout,QVBoxLayout, QGridLayout, QFileDialog,QProgressDialog, QWidget, QTabWidget, QDialog, QLabel, QListWidgetItem, QTableWidget, QInputDialog
+from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QHBoxLayout, QVBoxLayout, QGridLayout, QFileDialog, QProgressDialog, QWidget, QTabWidget, QDialog, QLabel, QListWidgetItem, QTableWidget, QInputDialog
 from PyQt5.Qt import QStandardItemModel,QStandardItem
 from pyqtgraph import PlotWidget, ScatterPlotItem, mkPen, AxisItem
 from pyqtgraph.Qt import QtWidgets
@@ -123,14 +123,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.pca_tab_id: {'Colormap':'viridis', 'ColorbarDirection':'vertical', 'ScaleLocation':'southeast', 'ScaleDirection':'horizontal', 'OverlayColor':'#ffffff'},
             self.cluster_tab_id: {'Colormap':'viridis', 'ColorbarDirection':'vertical', 'ScaleLocation':'southeast', 'ScaleDirection':'horizontal', 'OverlayColor':'#ffffff'}}
         self.current_scatter_type = {self.sample_tab_id:'Heatmap', self.scatter_tab_id:'Scatter', self.pca_tab_id:'Scatter', self.profile_tab_id:'Scatter'}
-        self.scatter_style = {self.sample_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'RdBu', 'Alpha':30, 'AspectRatio':1.0},
-            self.scatter_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Alpha':30, 'AspectRatio':1.0},
-            self.pca_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Alpha':30, 'AspectRatio':1.0},
-            self.profile_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Alpha':30, 'AspectRatio':1.0}}
-        self.heatmap_style = {self.sample_tab_id: {'Resolution':1, 'Colormap':'RdBu'},
-            self.scatter_tab_id: {'Resolution':10, 'Colormap':'viridis'},
-            self.pca_tab_id: {'Resolution':10, 'Colormap':'viridis'},
-            self.profile_tab_id: {'Resolution':1, 'Colormap':'viridis'}}
+        self.scatter_style = {self.sample_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'RdBu', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0},
+            self.scatter_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0},
+            self.pca_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0},
+            self.profile_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0}}
+        self.heatmap_style = {self.sample_tab_id: {'Resolution':1, 'Colormap':'RdBu', 'AspectRatio':1.0},
+            self.scatter_tab_id: {'Resolution':10, 'Colormap':'viridis', 'AspectRatio':1.0},
+            self.pca_tab_id: {'Resolution':10, 'Colormap':'viridis', 'AspectRatio':1.0},
+            self.profile_tab_id: {'Resolution':1, 'Colormap':'viridis', 'AspectRatio':1.0}}
         self.profilepoly_style = {}
 
         self.widgetMultiView.setLayout(layout_multi_view)
@@ -169,7 +169,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Select Isotope Tab
         #-------------------------
-        self.ref_data = pd.read_excel('earthref.xlsx')
+        self.ref_data = pd.read_excel('resources/app_data/earthref.xlsx')
         ref_list = self.ref_data['layer']+' ['+self.ref_data['model']+'] '+ self.ref_data['reference']
 
         self.comboBoxRefMaterial.addItems(ref_list.values)          # Select Isotope Tab
@@ -211,7 +211,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Preprocess Tab
         #-------------------------
-
         self.toolButtonSwapXY.clicked.connect(self.swap_xy)
 
         self.doubleSpinBoxUB.setMaximum(100)
@@ -467,7 +466,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.set_map_style()
 
     def slider_alpha_changed(self):
-        """Transparency slider"""
+        """Transparency slider
+        
+        Changes transparency of points on scatter plots.
+        """
         self.labelMarkerAlpha.setText(str(self.horizontalSliderMarkerAlpha.value()))
         match self.toolBox.currentIndex():
             case self.scatter_tab_id:
@@ -765,7 +767,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         ---------
         update: bool
             update current figure, default is False
-            """
+        """
         if self.update_spinboxes_bool: # spinboxes are not being updated
             sample_id = self.current_plot_information['sample_id']
             isotope_1 = self.current_plot_information['isotope_1']
@@ -2259,8 +2261,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         }
                 case 'heatmap':
                     self.heatmap_style[tab_id] = {'Resolution': self.spinBoxHeatmapResolution.value(),
-                                                    'Colormap': self.comboBoxFieldColormap.currentText()
-                                                    }
+                                                    'Colormap': self.comboBoxFieldColormap.currentText(),
+                                                    'AspectRatio': float(self.lineEditAspectRatio.text())}
 
 
     def toggle_scale_direction(self):
@@ -2387,13 +2389,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # get saved scatter values to update plot
             x, y, z, c = values
 
-        s = self.scatter_style[self.toolBox.currentIndex()]
-        if s['ColorByField'] == None:
-            c = {'field': None, 'type': None, 'units': None, 'array': None}
-
         match self.comboBoxScatterType.currentText().lower():
             #scatter
             case 'scatter':
+                s = self.scatter_style[self.toolBox.currentIndex()]
+                if s['ColorByField'] == None:
+                    c = {'field': None, 'type': None, 'units': None, 'array': None}
+
                 if len(z['array']) == 0:
                     # biplot
                     self.biplot(fig,x,y,c,s,save)
@@ -2403,15 +2405,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             # heatmap
             case 'heatmap':
+                s = self.heatmap_style[self.toolBox.currentIndex()]
+
                 # biplot
                 if len(z['array']) == 0:
-                    return
+                    self.hist2dbiplot(fig,x,y,s,save)
                 # ternary
                 else:
-                    ternary_plot.ternhex(x['array'], y['array'], z['array'], val=c['array'],
-                                            n=s['Resolution'],
-                                            cmap=s['Colormap'],
-                                            orientation='vertical')
+                    self.hist2dternplot(fig,x,y,z,s,save,c=c)
 
 
 
@@ -2539,6 +2540,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             norm = plt.Normalize(vmin=np.min(c['array']), vmax=np.max(c['array']))
             scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(s['Colormap']), norm=norm)
             cb = fig.colorbar(scalarMappable, ax=ax, orientation='vertical', location='right', shrink=0.62)
+            cb.set_label(c['label'])
 
         # labels
         font = {'size':self.general_style['FontSize']}
@@ -2586,12 +2588,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             color dimension
         s: dict
             dictionary of plot style parameters
+        save: bool
+            flag indicating whether the plot should be saved to the plot tree
         """
         if fig == None:
             new = True
             labels = [x['field'], y['field'], z['field']]
-            tp = ternary(labels, 'scatter', mul_axis=True)
-            fig = tp.fig
+            fig = Figure(figsize=(6, 4))
+            ax = fig.subplots()
+            tp = ternary(ax, labels, 'scatter')
+            #tp = ternary(labels, 'scatter')
+            #fig = tp.fig
         else:
             new = False
 
@@ -2600,11 +2607,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             cb = None
         else:
             _, cb = tp.ternscatter(x['array'], y['array'], z['array'], categories=c['array'],
+                                            marker=self.markerdict[s['Marker']],
+                                            size=s['Size'],
                                             cmap=s['Colormap'],
                                             orientation='vertical')
+            cb.set_label(c['label'])
         
         if new:
-            plot_name = f"{x['field']}_{y['field']}_{z['field']}_{'scatter'}"
+            plot_name = f"{x['field']}_{y['field']}_{z['field']}_{'ternscatter'}"
             plot_information = {
                 'plot_name': plot_name,
                 'sample_id': self.sample_id,
@@ -2616,13 +2626,135 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.newplot(fig, plot_name, plot_information, save)
 
 
+    def hist2dbiplot(self, fig, x, y, s, save):
+        """Creates scatter bi-plots
+
+        A general function for creating scatter plots of 2-dimensions.
+
+        Parameter
+        ---------
+        fig: matplotlib.figure
+            figure object
+        x: dict
+            x-dimension
+        y: dict
+            y-dimension
+        s: dict
+            dictionary of plot style parameters
+        """
+        if fig == None:
+            new = True
+            fig = Figure()
+        else:
+            new = False
+
+        ax = fig.add_subplot(111)
+
+        # color by field
+        ax.hist2d(x['array'], y['array'], bins=s['Resolution'], norm='log', cmap=plt.get_cmap(s['Colormap']))
+            
+        norm = plt.Normalize(vmin=0, vmax=3)
+        scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(s['Colormap']), norm=norm)
+        cb = fig.colorbar(scalarMappable, ax=ax, orientation='vertical', location='right', shrink=0.62)
+        cb.set_label('log(N)')
+
+        # labels
+        font = {'size':self.general_style['FontSize']}
+        ax.set_xlabel(x['label'], fontdict=font)
+        ax.set_ylabel(y['label'], fontdict=font)
+
+        # tick marks
+        ax.tick_params(direction=self.general_style['TickDir'],
+                        labelsize=self.general_style['FontSize'],
+                        labelbottom=True, labeltop=False, labelleft=True, labelright=False,
+                        bottom=True, top=True, left=True, right=True)
+
+        # aspect ratio
+        ax.set_box_aspect(s['AspectRatio'])
+
+        if new:
+            plot_name = f"{x['field']}_{y['field']}_{'heatmap'}"
+            plot_information = {
+                'plot_name': plot_name,
+                'sample_id': self.sample_id,
+                'plot_type': 'heatmap',
+                'values': (x, y),
+                'fig': fig,
+                'colorbar': cb
+            }
+            self.newplot(fig, plot_name, plot_information, save)
+
+
+    def hist2dternplot(self, fig, x, y, z, s, save, c=None):
+
+        if fig == None:
+            new = True
+            labels = [x['field'], y['field'], z['field']]
+            fig = Figure(figsize=(6, 4))
+            ax = fig.subplots()
+            tp = ternary(ax, labels, 'heatmap')
+        else:
+            new = False
+
+        if len(c['array']) == 0:
+            hexbin_df, cb = tp.ternhex(a=x['array'], b=y['array'], c=np.log10(z['array']),
+                bins=s['Resolution'],
+                plotfield='n',
+                cmap=s['Colormap'],
+                orientation='vertical')
+
+            #norm = plt.Normalize(vmin=0, vmax=3)
+            #scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(s['Colormap']), norm=norm)
+            #cb = fig.colorbar(scalarMappable, ax=, orientation='vertical', location='right', shrink=0.62)
+            #cb.set_label('log(N)')
+        else:
+            hexbin_df = ternary.ternhex(a=x['array'], b=y['array'], c=z['array'], val=c['array'], bins=s['Resolution'])
+
+            cb.set_label(c['label'])
+
+            tp.ternhex(hexbin_df=hexbin_df, plotfield='n', cmap=s['Colormap'], orientation='vertical')
+
+        if new:
+            plot_name = f"{x['field']}_{y['field']}_{z['field']}_{'heatmap'}"
+            plot_information = {
+                'plot_name': plot_name,
+                'sample_id': self.sample_id,
+                'plot_type': 'scatter',
+                'values': (x, y, z),
+                'fig': fig,
+                'colorbar': cb
+            }
+            self.newplot(fig, plot_name, plot_information, save)
+
+
     def plot_ternarymap(self):
-        return
+        """Creates map colored by ternary coordinate positions"""
+        self.get_general_style()
+        self.get_scatter_style(self.toolBox.currentIndex())
+        if fig == None:
+            a, b, c = self.get_scatter_values() #get scatter values from elements chosen
+        else:
+            # get saved scatter values to update plot
+            a, b, c,  = values
+
+        selected_sample = self.sample_data_dict[sample_id]
+
+        df = selected_sample[['X','Y']]
+        
+        if fig == None:
+            new = True
+            labels = [x['field'], y['field'], z['field']]
+            fig = Figure(figsize=(6, 4))
+            axs = [fig.add_subplots(['left' 'center']), fig.add_subplots(['right'])]
+        else:
+            new = False 
+
+        ternary.ternmap(ax, selected_sample['X'],selected_sample['Y'], a,b,c, ca=[1,1,0], cb=[0.3,0.73,0.1], cc=[0,0,0.15], p=[1/3,1/3,1/3], cp = [])
 
 
     def plot_clustering(self):
         df_filtered, isotopes = self.get_processed_data()
-        filtered_array =df_filtered.values
+        filtered_array = df_filtered.values
         # filtered_array = df_filtered.dropna(axis=0, how='any').values
 
 
@@ -3391,13 +3523,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         selected_sample = self.sample_data_dict[sample_id]
 
-
-
         if not isotope_1:
             isotope_1 = self.isotopes_df.loc[self.isotopes_df['sample_id']==sample_id,'isotopes'].iloc[0]
 
-
-        parameters =  self.isotopes_df.loc[(self.isotopes_df['sample_id']==sample_id)
+        parameters = self.isotopes_df.loc[(self.isotopes_df['sample_id']==sample_id)
                               & (self.isotopes_df['isotopes']==isotope_1)].iloc[0]
 
         if not isotope_2:
@@ -3411,7 +3540,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #     x_range = [current_plot_df['X'].min(), current_plot_df['X'].max()]
             #     y_range = [current_plot_df['Y'].min(), current_plot_df['Y'].max()]
             # else:
-            x_range= [parameters['x_min'],parameters['x_max']]
+            x_range = [parameters['x_min'],parameters['x_max']]
             y_range = [parameters['y_min'],parameters['y_max']]
             auto_scale_param = parameters['auto_scale']
             if update: #update clipped isotopes df and processed df
@@ -3433,7 +3562,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             else:
                 current_plot_df = self.processed_isotope_data[sample_id][[isotope_1,'X','Y']].rename(columns = {isotope_1:'array'})
 
-            isotope_str =   isotope_1
+            isotope_str = isotope_1
 
         else:
 

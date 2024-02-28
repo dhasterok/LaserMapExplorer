@@ -1,12 +1,11 @@
 ﻿scheme,top,left,right,center
-yellow-navy-green-white,#FFFF00,#000053,#00FF00,#FFFFFF
 yellow-red-blue,#FFFF00,#FF0000,#0000FF,none
 yellow-red-blue-white,#FFFF00,#FF0000,#0000FF,#FFFFFF
-black-green-yellow-white,#000000,#00FF00,#FFFF00,#FFFFFF
-yellow-green-navy,#FFFF00,#00FF00,#000053,none
-yellow-green-navy-white,#FFFF00,#00FF00,#000053,#FFFFFF
+black-green-yellow-white,#000000,#4CBB17,#FFFF00,#FFFFFF
+yellow-green-navy,#FFFF00,#4CBB17,#000053,none
+yellow-green-navy-white,#FFFF00,#4CBB17,#000053,#FFFFFF
 yellow-cyan-magenta,#FFFF00,#00FFFF,#FF00FF,none
 yellow-cyan-magenta-white,#FFFF00,#00FFFF,#FF00FF,#FFFFFF
-green-red-blue,#00FF00,#FF0000,#0000FF,none
+green-red-blue,#4CBB17,#FF0000,#0000FF,none
 orange-violet-green-white,#FF8000,#8000FF,#00FF80,#FFFFFF
 orange-violet-blue-white,#FF8000,#8000FF,#0080FF,#FFFFFF

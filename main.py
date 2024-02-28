@@ -1,7 +1,7 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QColorDialog, QCheckBox,QComboBox,  QTableWidgetItem, QHBoxLayout,QVBoxLayout, QGridLayout, QFileDialog,QProgressDialog, QWidget, QTabWidget, QDialog, QLabel, QListWidgetItem, QTableWidget, QInputDialog
+from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QHBoxLayout, QVBoxLayout, QGridLayout, QFileDialog, QProgressDialog, QWidget, QTabWidget, QDialog, QLabel, QListWidgetItem, QTableWidget, QInputDialog
 from PyQt5.Qt import QStandardItemModel,QStandardItem
-from pyqtgraph import PlotWidget, ScatterPlotItem, mkPen, AxisItem
+from pyqtgraph import PlotWidget, ScatterPlotItem, mkPen, AxisItem, PlotDataItem
 from pyqtgraph.Qt import QtWidgets
 from pyqtgraph.GraphicsScene import exportDialog
 from PyQt5.QtGui import QIntValidator, QColor, QImage, QPainter, QPixmap
@@ -123,14 +123,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.pca_tab_id: {'Colormap':'viridis', 'ColorbarDirection':'vertical', 'ScaleLocation':'southeast', 'ScaleDirection':'horizontal', 'OverlayColor':'#ffffff'},
             self.cluster_tab_id: {'Colormap':'viridis', 'ColorbarDirection':'vertical', 'ScaleLocation':'southeast', 'ScaleDirection':'horizontal', 'OverlayColor':'#ffffff'}}
         self.current_scatter_type = {self.sample_tab_id:'Heatmap', self.scatter_tab_id:'Scatter', self.pca_tab_id:'Scatter', self.profile_tab_id:'Scatter'}
-        self.scatter_style = {self.sample_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'RdBu', 'Alpha':30, 'AspectRatio':1.0},
-            self.scatter_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Alpha':30, 'AspectRatio':1.0},
-            self.pca_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Alpha':30, 'AspectRatio':1.0},
-            self.profile_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Alpha':30, 'AspectRatio':1.0}}
-        self.heatmap_style = {self.sample_tab_id: {'Resolution':1, 'Colormap':'RdBu'},
-            self.scatter_tab_id: {'Resolution':10, 'Colormap':'viridis'},
-            self.pca_tab_id: {'Resolution':10, 'Colormap':'viridis'},
-            self.profile_tab_id: {'Resolution':1, 'Colormap':'viridis'}}
+        self.scatter_style = {self.sample_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'RdBu', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0},
+            self.scatter_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0},
+            self.pca_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0},
+            self.profile_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0}}
+        self.heatmap_style = {self.sample_tab_id: {'Resolution':1, 'Colormap':'RdBu', 'AspectRatio':1.0},
+            self.scatter_tab_id: {'Resolution':10, 'Colormap':'viridis', 'AspectRatio':1.0},
+            self.pca_tab_id: {'Resolution':10, 'Colormap':'viridis', 'AspectRatio':1.0},
+            self.profile_tab_id: {'Resolution':1, 'Colormap':'viridis', 'AspectRatio':1.0}}
         self.profilepoly_style = {}
 
         self.widgetMultiView.setLayout(layout_multi_view)
@@ -169,7 +169,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Select Isotope Tab
         #-------------------------
-        self.ref_data = pd.read_excel('earthref.xlsx')
+        self.ref_data = pd.read_excel('resources/app_data/earthref.xlsx')
         ref_list = self.ref_data['layer']+' ['+self.ref_data['model']+'] '+ self.ref_data['reference']
 
         self.comboBoxRefMaterial.addItems(ref_list.values)          # Select Isotope Tab
@@ -211,7 +211,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Preprocess Tab
         #-------------------------
-
         self.toolButtonSwapXY.clicked.connect(self.swap_xy)
 
         self.doubleSpinBoxUB.setMaximum(100)
@@ -261,6 +260,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonFilterRemove.clicked.connect(lambda: self.table_fcn.delete_row(self.tableWidgetFilters))
         self.toolButtonFilterSelectAll.clicked.connect(self.tableWidgetFilters.selectAll)
 
+        # initiate Polygon class
+        self.polygon = Polygon(self)
 
         # Scatter and Ternary Tab
         #-------------------------
@@ -334,6 +335,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxScatterType.activated.connect(lambda: self.toggle_scatter_style_tab(self.toolBox.currentIndex()))
         self.comboBoxScatterIsotopeX.activated.connect(lambda: self.plot_scatter(save=False))
         self.comboBoxScatterIsotopeY.activated.connect(lambda: self.plot_scatter(save=False))
+        self.comboBoxScatterIsotopeZ.activated.connect(lambda: self.plot_scatter(save=False))
 
         # N-Dim Tab
         #-------------------------
@@ -466,7 +468,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.set_map_style()
 
     def slider_alpha_changed(self):
-        """Transparency slider"""
+        """Transparency slider
+        
+        Changes transparency of points on scatter plots.
+        """
         self.labelMarkerAlpha.setText(str(self.horizontalSliderMarkerAlpha.value()))
         match self.toolBox.currentIndex():
             case self.scatter_tab_id:
@@ -764,7 +769,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         ---------
         update: bool
             update current figure, default is False
-            """
+        """
         if self.update_spinboxes_bool: # spinboxes are not being updated
             sample_id = self.current_plot_information['sample_id']
             isotope_1 = self.current_plot_information['isotope_1']
@@ -1382,7 +1387,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             target.hide()
 
 
-            p1.scene().sigMouseClicked.connect(lambda event,array=array, k=name, plot=p1: self.profiling.on_plot_clicked(event,array, k, p1, radius= int(self.lineEditPointRadius.text())))
+            p1.scene().sigMouseClicked.connect(lambda event,array=array, k=name, plot=p1: self.on_plot_clicked(event,array, k, p1))
 
             if view == 1:
                 #create label with isotope name
@@ -1450,13 +1455,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 y_i = round(y*array.shape[0]/self.y_range)
 
 
-
+                # if hover within lasermap array 
                 if 0 <= x_i < array.shape[1] and 0 <= y_i < array.shape[0] :
-                    # Update the zoom window based on the current mouse position
-                    # self.update_zoom_window(x, y,array)
-
-
-
                     if not self.cursor:
                         QtWidgets.QApplication.setOverrideCursor(Qt.BlankCursor)
                         self.cursor = True
@@ -1464,9 +1464,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     value = array[y_i, x_i]  # assuming self.array is numpy self.array
 
                     if self.canvasWindow.currentIndex() == 0:
-                        # Update the position of the zoom view
-                        self.update_zoom_view_position(x, y,array)
-
+                        if self.toolButtonPolyCreate.isChecked() or self.toolButtonPolyMovePoint.isChecked():
+                            # Update the position of the zoom view
+                            self.update_zoom_view_position(x, y,array)
+                            self.zoomViewBox.show()
+                            self.polygon.show_polygon_lines(x,y, plot)
+                        else:
+                            # hide zoom view
+                            self.zoomViewBox.hide()
 
                         self.labelInfoX.setText('X: '+str(round(x)))
                         self.labelInfoY.setText('Y: '+str(round(y)))
@@ -1487,7 +1492,33 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.cursor = False
             for target,_, _, _ in self.lasermaps.values():
                 target.hide() # Hide crosshairs if no plot is hovered
+            # hide zoom view
+            self.zoomViewBox.hide()
+    
+    def on_plot_clicked(self, event,array,k, plot,radius=5):
+        
+        # get click location
+        click_pos = plot.vb.mapSceneToView(event.scenePos())
+        x, y = click_pos.x(), click_pos.y()
 
+        # Convert the click position to plot coordinates
+        self.array_x = array.shape[1]
+        self.array_y = array.shape[0]
+        x_i = round(x*self.array_x/self.x_range)
+        y_i = round(y*self.array_y/self.y_range)
+
+                # Ensure indices are within plot bounds
+        if not(0 <= x_i < self.array_x) or not(0 <= y_i < self.array_y):
+            #do nothing
+            return
+
+        # if event.button() == QtCore.Qt.LeftButton and self.main_window.pushButtonStartProfile.isChecked():
+        if self.toolButtonPlotProfile.isChecked() or self.toolButtonPointMove.isChecked():
+            self.profiling.plot_profile_scatter(event, array, k, plot, x, y,x_i, y_i)
+        
+        elif self.toolButtonPolyCreate.isChecked() or self.toolButtonPolyMovePoint.isChecked():
+            self.polygon.plot_polygon_scatter(event, array, k, plot, x, y,x_i, y_i)
+    
 
     def plot_laser_map_cont(self,layout,array,img,p1,cm, view):
         # Single views
@@ -1563,29 +1594,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     #     self.zoomPlot.addItem(self.zoomTarget)
     #     self.zoomTarget.hide()  # Initially hidden
 
-     # def update_zoom_window(self, x, y,array,key):
-     #     zoom_factor = 5  # Magnification factor for the zoom window
-     #     array_shape = array.shape
-     #     x_range, y_range = self.x_range, self.y_range
-
-     #     # Determine the bounds for the zoom window based on the mouse position
-     #     zoom_scale = 0.1  # Adjust based on how much zoom you want
-     #     x_min_zoom = max(x - self.x_range * zoom_scale, 0)
-     #     x_max_zoom = min(x + self.x_range * zoom_scale, self.x_range)
-     #     y_min_zoom = max(y - self.y_range * zoom_scale, 0)
-     #     y_max_zoom = min(y + self.y_range * zoom_scale, self.y_range)
-     #     # print(x_min_zoom,x_max_zoom,y_min_zoom,y_max_zoom)
-     #     # Update the zoom window's view to the region around the cursor
-     #     # self.zoomPlot.setXRange(x_min_zoom, x_max_zoom, padding=0)
-     #     # self.zoomPlot.setYRange(y_min_zoom, y_max_zoom, padding=0)
-
-     #     # Update the image in the zoom window to reflect the new view
-     #     self.zoomImg.setImage(image=array)  # Ensure `self.array` is updated to the current plot data
-     #     self.zoomImg.setRect(0,0,self.x_range,self.y_range)
-     #     self.zoomImg.setColorMap(pg.colormap.get(self.cm, source = 'matplotlib'))
-     #     self.zoomImg.getViewBox().setRange(QtCore.QRectF(x_min_zoom, y_min_zoom, x_max_zoom - x_min_zoom, y_max_zoom - y_min_zoom))
-     #     self.zoomTarget.setPos(x, y)  # Update target position
-     #     self.zoomTarget.show()
 
     def init_zoom_view(self,p,array):
         # Set the initial zoom level
@@ -1608,9 +1616,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.zoomTarget = pg.TargetItem(symbol='+', size = 5)
         self.zoomViewBox.addItem(self.zoomTarget)
         self.zoomTarget.hide()  # Initially hidden
+        self.zoomViewBox.hide()
 
-
-        self.update_zoom_view_position(0, 0, array)  # Initial position
+        # self.update_zoom_view_position(0, 0, array)  # Initial position
 
 
 
@@ -2258,8 +2266,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         }
                 case 'heatmap':
                     self.heatmap_style[tab_id] = {'Resolution': self.spinBoxHeatmapResolution.value(),
-                                                    'Colormap': self.comboBoxFieldColormap.currentText()
-                                                    }
+                                                    'Colormap': self.comboBoxFieldColormap.currentText(),
+                                                    'AspectRatio': float(self.lineEditAspectRatio.text())}
 
 
     def toggle_scale_direction(self):
@@ -2386,13 +2394,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # get saved scatter values to update plot
             x, y, z, c = values
 
-        s = self.scatter_style[self.toolBox.currentIndex()]
-        if s['ColorByField'] == None:
-            c = {'field': None, 'type': None, 'units': None, 'array': None}
-
         match self.comboBoxScatterType.currentText().lower():
             #scatter
             case 'scatter':
+                s = self.scatter_style[self.toolBox.currentIndex()]
+                if s['ColorByField'] == None:
+                    c = {'field': None, 'type': None, 'units': None, 'array': None}
+
                 if len(z['array']) == 0:
                     # biplot
                     self.biplot(fig,x,y,c,s,save)
@@ -2402,15 +2410,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             # heatmap
             case 'heatmap':
+                s = self.heatmap_style[self.toolBox.currentIndex()]
+
                 # biplot
                 if len(z['array']) == 0:
-                    return
+                    self.hist2dbiplot(fig,x,y,s,save)
                 # ternary
                 else:
-                    ternary_plot.ternhex(x['array'], y['array'], z['array'], val=c['array'],
-                                            n=s['Resolution'],
-                                            cmap=s['Colormap'],
-                                            orientation='vertical')
+                    self.hist2dternplot(fig,x,y,z,s,save,c=c)
 
 
 
@@ -2538,6 +2545,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             norm = plt.Normalize(vmin=np.min(c['array']), vmax=np.max(c['array']))
             scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(s['Colormap']), norm=norm)
             cb = fig.colorbar(scalarMappable, ax=ax, orientation='vertical', location='right', shrink=0.62)
+            cb.set_label(c['label'])
 
         # labels
         font = {'size':self.general_style['FontSize']}
@@ -2576,38 +2584,182 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         fig: matplotlib.figure
             figure object
         x: dict
-            x-dimension
+            coordinate associated with top vertex
         y: dict
-            y-dimension
+            coordinate associated with left vertex
         z: dict
-            z-dimension
+            coordinate associated with right vertex
         c: dict
             color dimension
         s: dict
             dictionary of plot style parameters
+        save: bool
+            flag indicating whether the plot should be saved to the plot tree
         """
-
-        labels = [x['field'], y['field'], z['field']]
-        if new == None:
-            ternary_plot = ternary(labels, 'scatter', mul_axis=True)
-            fig = ternary_plot.fig
+        if fig == None:
+            new = True
+            labels = [x['field'], y['field'], z['field']]
+            fig = Figure(figsize=(6, 4))
+            ax = fig.subplots()
+            tp = ternary(ax, labels, 'scatter')
+            #tp = ternary(labels, 'scatter')
+            #fig = tp.fig
+        else:
+            new = False
 
         if len(c['array']) == 0:
-            _, cb = ternary_plot.ternscatter(x['array'], y['array'], z['array'], categories=c['array'],
-                                            cmap=s['Colormap'],
-                                            orientation='vertical')
+            tp.ternscatter(x['array'], y['array'], z['array'], marker=self.markerdict[s['Marker']], size=s['Size'], color=s['Color'])
+            cb = None
         else:
-            _, cb = ternary_plot.ternscatter(x['array'], y['array'], z['array'], categories=c['array'],
+            _, cb = tp.ternscatter(x['array'], y['array'], z['array'], categories=c['array'],
+                                            marker=self.markerdict[s['Marker']],
+                                            size=s['Size'],
                                             cmap=s['Colormap'],
                                             orientation='vertical')
+            cb.set_label(c['label'])
+        
+        if new:
+            plot_name = f"{x['field']}_{y['field']}_{z['field']}_{'ternscatter'}"
+            plot_information = {
+                'plot_name': plot_name,
+                'sample_id': self.sample_id,
+                'plot_type': 'scatter',
+                'values': (x, y, z, c),
+                'fig': fig,
+                'colorbar': cb
+            }
+            self.newplot(fig, plot_name, plot_information, save)
+
+
+    def hist2dbiplot(self, fig, x, y, s, save):
+        """Creates scatter bi-plots
+
+        A general function for creating scatter plots of 2-dimensions.
+
+        Parameter
+        ---------
+        fig: matplotlib.figure
+            figure object
+        x: dict
+            x-dimension
+        y: dict
+            y-dimension
+        s: dict
+            dictionary of plot style parameters
+        """
+        if fig == None:
+            new = True
+            fig = Figure()
+        else:
+            new = False
+
+        ax = fig.add_subplot(111)
+
+        # color by field
+        ax.hist2d(x['array'], y['array'], bins=s['Resolution'], norm='log', cmap=plt.get_cmap(s['Colormap']))
+            
+        norm = plt.Normalize(vmin=0, vmax=3)
+        scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(s['Colormap']), norm=norm)
+        cb = fig.colorbar(scalarMappable, ax=ax, orientation='vertical', location='right', shrink=0.62)
+        cb.set_label('log(N)')
+
+        # labels
+        font = {'size':self.general_style['FontSize']}
+        ax.set_xlabel(x['label'], fontdict=font)
+        ax.set_ylabel(y['label'], fontdict=font)
+
+        # tick marks
+        ax.tick_params(direction=self.general_style['TickDir'],
+                        labelsize=self.general_style['FontSize'],
+                        labelbottom=True, labeltop=False, labelleft=True, labelright=False,
+                        bottom=True, top=True, left=True, right=True)
+
+        # aspect ratio
+        ax.set_box_aspect(s['AspectRatio'])
+
+        if new:
+            plot_name = f"{x['field']}_{y['field']}_{'heatmap'}"
+            plot_information = {
+                'plot_name': plot_name,
+                'sample_id': self.sample_id,
+                'plot_type': 'heatmap',
+                'values': (x, y),
+                'fig': fig,
+                'colorbar': cb
+            }
+            self.newplot(fig, plot_name, plot_information, save)
+
+
+    def hist2dternplot(self, fig, x, y, z, s, save, c=None):
+
+        if fig == None:
+            new = True
+            labels = [x['field'], y['field'], z['field']]
+            fig = Figure(figsize=(6, 4))
+            ax = fig.subplots()
+            tp = ternary(ax, labels, 'heatmap')
+        else:
+            new = False
+
+        if len(c['array']) == 0:
+            hexbin_df, cb = tp.ternhex(a=x['array'], b=y['array'], c=np.log10(z['array']),
+                bins=s['Resolution'],
+                plotfield='n',
+                cmap=s['Colormap'],
+                orientation='vertical')
+
+            #norm = plt.Normalize(vmin=0, vmax=3)
+            #scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(s['Colormap']), norm=norm)
+            #cb = fig.colorbar(scalarMappable, ax=, orientation='vertical', location='right', shrink=0.62)
+            #cb.set_label('log(N)')
+        else:
+            hexbin_df = ternary.ternhex(a=x['array'], b=y['array'], c=z['array'], val=c['array'], bins=s['Resolution'])
+
+            cb.set_label(c['label'])
+
+            tp.ternhex(hexbin_df=hexbin_df, plotfield='n', cmap=s['Colormap'], orientation='vertical')
+
+        if new:
+            plot_name = f"{x['field']}_{y['field']}_{z['field']}_{'heatmap'}"
+            plot_information = {
+                'plot_name': plot_name,
+                'sample_id': self.sample_id,
+                'plot_type': 'scatter',
+                'values': (x, y, z),
+                'fig': fig,
+                'colorbar': cb
+            }
+            self.newplot(fig, plot_name, plot_information, save)
+
 
     def plot_ternarymap(self):
-        return
+        """Creates map colored by ternary coordinate positions"""
+        self.get_general_style()
+        self.get_scatter_style(self.toolBox.currentIndex())
+        if fig == None:
+            a, b, c = self.get_scatter_values() #get scatter values from elements chosen
+        else:
+            # get saved scatter values to update plot
+            a, b, c,  = values
+
+        selected_sample = self.sample_data_dict[sample_id]
+
+        df = selected_sample[['X','Y']]
+        
+        if fig == None:
+            new = True
+            labels = [x['field'], y['field'], z['field']]
+            fig = Figure(figsize=(6, 4))
+            axs = [fig.add_subplots(['left' 'center']), fig.add_subplots(['right'])]
+        else:
+            new = False 
+
+        ternary.ternmap(ax, selected_sample['X'],selected_sample['Y'], a,b,c, ca=[1,1,0], cb=[0.3,0.73,0.1], cc=[0,0,0.15], p=[1/3,1/3,1/3], cp = [])
 
 
     def plot_clustering(self):
         df_filtered, isotopes = self.get_processed_data()
-        filtered_array =df_filtered.values
+        filtered_array = df_filtered.values
         # filtered_array = df_filtered.dropna(axis=0, how='any').values
 
 
@@ -3263,12 +3415,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.comboBoxScatterIsotopeX.addItems(isotopes['isotopes'])
             self.comboBoxScatterIsotopeY.clear()
             self.comboBoxScatterIsotopeY.addItems(isotopes['isotopes'])
-
-            self.comboBoxNDimIsotope.addItems(isotopes['isotopes'])
-
             self.comboBoxScatterIsotopeZ.clear()
             self.comboBoxScatterIsotopeZ.addItem('')
             self.comboBoxScatterIsotopeZ.addItems(isotopes['isotopes'])
+
+            self.comboBoxNDimIsotope.addItems(isotopes['isotopes'])
+
             self.comboBoxColorField.clear()
             self.comboBoxColorField.addItem('')
             self.comboBoxColorField.addItems(isotopes['isotopes'])
@@ -3376,13 +3528,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         selected_sample = self.sample_data_dict[sample_id]
 
-
-
         if not isotope_1:
             isotope_1 = self.isotopes_df.loc[self.isotopes_df['sample_id']==sample_id,'isotopes'].iloc[0]
 
-
-        parameters =  self.isotopes_df.loc[(self.isotopes_df['sample_id']==sample_id)
+        parameters = self.isotopes_df.loc[(self.isotopes_df['sample_id']==sample_id)
                               & (self.isotopes_df['isotopes']==isotope_1)].iloc[0]
 
         if not isotope_2:
@@ -3396,7 +3545,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #     x_range = [current_plot_df['X'].min(), current_plot_df['X'].max()]
             #     y_range = [current_plot_df['Y'].min(), current_plot_df['Y'].max()]
             # else:
-            x_range= [parameters['x_min'],parameters['x_max']]
+            x_range = [parameters['x_min'],parameters['x_max']]
             y_range = [parameters['y_min'],parameters['y_max']]
             auto_scale_param = parameters['auto_scale']
             if update: #update clipped isotopes df and processed df
@@ -3418,7 +3567,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             else:
                 current_plot_df = self.processed_isotope_data[sample_id][[isotope_1,'X','Y']].rename(columns = {isotope_1:'array'})
 
-            isotope_str =   isotope_1
+            isotope_str = isotope_1
 
         else:
 
@@ -4243,6 +4392,158 @@ class Table_Fcn:
                     # Get selected row and delete it
                     table.removeRow(row)
 
+class Polygon:
+    def __init__(self, main_window):
+        self.main_window = main_window
+        self.polygons = {}
+        self.lines ={}
+        self.p_id = 0
+        self.array_x = None
+        self.array_y = None
+    def activate_zoom_window(self):
+        if self.main_window.toolButtonMapPolygon.isChecked:
+            self.main_window.zoomViewBox.show()
+            
+    def plot_polygon_scatter(self, event, array,k, plot, x, y, x_i, y_i):
+        self.array_x = self.main_window.array_x
+        self.array_y = self.main_window.array_x
+        # turn off profile (need to suppress context menu on right click)
+        if event.button() == QtCore.Qt.RightButton and self.main_window.toolButtonPolyCreate.isChecked():
+            self.main_window.toolButtonPolyCreate.setChecked(False)
+            self.main_window.toolButtonPolyMovePoint.setEnabled(True)
+            
+            # Finalize and draw the polygon
+            self.show_polygon_lines(x,y,plot, complete = True)
+            
+            self.p_id +=1 #update p_id for each new plot 
+            return
+        elif event.button() == QtCore.Qt.RightButton and self.main_window.toolButtonPolyMovePoint.isChecked():
+            self.main_window.toolButtonPolyMovePoint.setChecked(False)
+            self.point_selected = False
+            return
+        elif event.button() == QtCore.Qt.RightButton or event.button() == QtCore.Qt.MiddleButton:
+            return
+        
+        if event.button() == QtCore.Qt.LeftButton:
+            # Create a scatter plot item at the clicked position
+            scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
+            plot.addItem(scatter)
+            
+            # add x and y to self.polygons dict
+            if self.p_id not in self.polygons:
+                self.polygons[self.p_id] = [(x,y, scatter)]
+                
+            else:
+                self.polygons[self.p_id].append((x,y, scatter))
+        
+            
+        elif event.button() == QtCore.Qt.LeftButton and not(self.main_window.toolButtonPolyCreate.isChecked()) and self.main_window.toolButtonPolyMovePoint.isChecked():
+            # move point
+            
+            if self.point_selected:
+                #remove selected point
+                prev_scatter = self.polygon[self.p_id][self.pind][2]
+                plot.removeItem(prev_scatter)
+
+
+                # Create a scatter plot item at the clicked position
+                scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
+                plot.addItem(scatter)
+
+
+                #update self.pind index of self.polygonswith new point data
+
+                self.polygons[self.p_id][self.pind] = (x,y, scatter)
+
+
+                #update plot and table widget
+                self.update_table_widget()
+                if self.main_window.toolButtonIPProfile.isChecked(): #reset interpolation if selected
+                    self.clear_interpolation()
+                    self.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
+            else:
+                # find nearest profile point
+                mindist = 10**12
+                for i, (x_p,y_p) in enumerate(self.polygons[self.p_id]):
+                    dist = (x_p - x)**2 + (y_p - y)**2
+                    if mindist > dist:
+                        mindist = dist
+                        self.pind = i
+                        self.point_selected = True
+                if not(round(mindist*self.array_x/self.main_window.x_range) < 10):
+                    self.pind = -1
+                else:
+                    self.point_selected = True
+        
+    def show_polygon_lines(self, x,y, plot, complete = False):
+        if self.p_id in self.polygons:
+            # Remove existing temporary line(s) if any
+            if self.p_id in self.lines:
+                for line in self.lines[self.p_id]:
+                    plot.removeItem(line)
+            self.lines[self.p_id] = []
+
+            points = self.polygons[self.p_id]
+            if len(points) == 1:
+                # Draw line from the first point to cursor
+                line = PlotDataItem([points[0][0], x], [points[0][1], y], pen='r')
+                plot.addItem(line)
+                self.lines[self.p_id].append(line)
+            elif not complete and len(points) > 1:
+                # Draw shaded polygon + lines to cursor
+                x_points = [p[0] for p in points] + [x, points[0][0]]
+                y_points = [p[1] for p in points] + [y, points[0][1]]
+                poly_item = QtWidgets.QGraphicsPolygonItem(QtGui.QPolygonF([QtCore.QPointF(x, y) for x, y in zip(x_points, y_points)]))
+                poly_item.setBrush(QtGui.QColor(100, 100, 150, 100))
+                plot.addItem(poly_item)
+                self.lines[self.p_id].append(poly_item)
+
+                # Draw line from last point to cursor
+                line = PlotDataItem([points[-1][0], x], [points[-1][1], y], pen='r')
+                plot.addItem(line)
+                self.lines[self.p_id].append(line)
+                
+            elif complete and len(points) > 2:
+                points = [QtCore.QPointF(x, y) for x, y, _ in self.polygons[self.p_id]]
+                polygon = QtGui.QPolygonF(points)
+                poly_item = QtWidgets.QGraphicsPolygonItem(polygon)
+                poly_item.setBrush(QtGui.QColor(100, 100, 150, 100))
+                plot.addItem(poly_item)
+                    
+    def update_table_widget(self):
+        self.main_window.tableWidgetPolyPoints.setRowCount(0)  # Clear existing rows
+        
+        for p_id, val in self.polygons.items():
+            row_position = self.main_window.tableWidgetPolyPoints.rowCount()
+            self.main_window.tableWidgetPolyPoints.insertRow(row_position)
+
+            # Fill in the data
+            self.main_window.tableWidgetPolyPoints.setItem(row_position, 0, QTableWidgetItem(str(p_id)))
+            self.main_window.tableWidgetPolyPoints.setItem(row_position, 1, QTableWidgetItem(str('')))
+            self.main_window.tableWidgetPolyPoints.setItem(row_position, 2, QTableWidgetItem(str('')))
+            self.main_window.tableWidgetPolyPoints.setItem(row_position, 3, QTableWidgetItem(str('In')))
+            
+            # Create a QCheckBox for the 'use' column
+            chkBoxItem_use = QtWidgets.QCheckBox()
+            chkBoxItem_use.setCheckState(QtCore.Qt.Checked)
+            chkBoxItem_use.stateChanged.connect(lambda state, row=row_position: on_use_checkbox_state_changed(row, state))
+
+
+            self.main_window.tableWidgetPolyPoints.setItem(row_position, 4, chkBoxItem_use)
+            
+            
+            chkBoxItem_select = QTableWidgetItem()
+            chkBoxItem_select.setFlags(QtCore.Qt.ItemIsUserCheckable |
+                                QtCore.Qt.ItemIsEnabled)
+
+            chkBoxItem_select.setCheckState(QtCore.Qt.Unchecked)
+        
+        def on_use_checkbox_state_changed(row, state):
+            # Update the 'use' value in the filter_df for the given row
+            self.filter_df.at[row, 'use'] = state == QtCore.Qt.Checked
+            
+        # Enable or disable buttons based on the presence of points
+        self.toggle_buttons(self.main_window.tableWidgetPolyPoints.rowCount() > 0)
 
 
 class Profiling:
@@ -4252,17 +4553,20 @@ class Profiling:
         # Initialize variables and states as needed
         self.profiles = {}
         self.i_profiles = {}        #interpolated profiles
-        self.array_x = None
-        self.array_y = None
         self.point_selected = False # move point button selected
         self.pind = -1              # index for move point
         self.all_errorbars = []      #stores points of profiles
         self.selected_points = {}  # Track selected points, e.g., {point_index: selected_state}
         self.edit_mode_enabled = False  # Track if edit mode is enabled
         self.original_colors = {}
-        self.scatter_size =64
-    def on_plot_clicked(self, event,array,k, plot,radius=5):
+        self.scatter_size = 64
 
+    def plot_profile_scatter(self, event, array,k, plot, x, y, x_i, y_i):
+        self.array_x = self.main_window.array_x
+        self.array_y = self.main_window.array_x
+        
+        
+        radius= int(self.main_window.lineEditPointRadius.text())
         # turn off profile (need to suppress context menu on right click)
         if event.button() == QtCore.Qt.RightButton and self.main_window.toolButtonPlotProfile.isChecked():
             self.main_window.toolButtonPlotProfile.setChecked(False)
@@ -4274,27 +4578,13 @@ class Profiling:
             return
         elif event.button() == QtCore.Qt.RightButton or event.button() == QtCore.Qt.MiddleButton:
             return
-
-        # get click location
-        click_pos = plot.vb.mapSceneToView(event.scenePos())
-        x, y = click_pos.x(), click_pos.y()
-
-        # Convert the click position to plot coordinates
-        self.array_x = array.shape[1]
-        self.array_y = array.shape[0]
-        x_i = round(x*self.array_x/self.main_window.x_range)
-        y_i = round(y*self.array_y/self.main_window.y_range)
-        interpolate = False
-
-        # Ensure indices are within plot bounds
-        if not(0 <= x_i < self.array_x) or not(0 <= y_i < self.array_y):
-            #do nothing
-            return
-
-        # if event.button() == QtCore.Qt.LeftButton and self.main_window.pushButtonStartProfile.isChecked():
-        if event.button() == QtCore.Qt.LeftButton and self.main_window.toolButtonPlotProfile.isChecked():
+    
+            interpolate = False
+            
+        if event.button() == QtCore.Qt.LeftButton:
+            #switch to profile tab
             self.main_window.tabWidget.setCurrentIndex(2)
-
+    
             # Create a scatter plot item at the clicked position
             scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
             plot.addItem(scatter)
@@ -4307,14 +4597,14 @@ class Profiling:
                         value = array[i, j]
                         circ_cord.append([i, j])
                         circ_val.append( value)
-
+    
             #add values within circle of radius in self.profiles
             if k in self.profiles:
                 self.profiles[k].append((x,y,circ_val,scatter, interpolate))
             else:
                 self.profiles[k] = [(x,y, circ_val,scatter, interpolate)]
-
-
+    
+    
             if self.main_window.canvasWindow.currentIndex() == 1:
                 # Add the scatter item to all other plots and save points in self.profiles
                 for k, (_, p, v, array) in self.main_window.lasermaps.items():
@@ -4330,18 +4620,20 @@ class Profiling:
                             self.profiles[k].append((x,y,circ_val, scatter, interpolate))
                         else:
                             self.profiles[k] = [(x,y, circ_val,scatter, interpolate)]
-
+    
             self.plot_profiles()
             self.update_table_widget()
-
-
+    
+    
         elif event.button() == QtCore.Qt.LeftButton and not(self.main_window.toolButtonPlotProfile.isChecked()) and self.main_window.toolButtonPointMove.isChecked():
+            # move point
+            
             if self.point_selected:
                 #remove selected point
                 prev_scatter = self.profiles[k][self.pind][3]
                 plot.removeItem(prev_scatter)
-
-
+    
+    
                 # Create a scatter plot item at the clicked position
                 scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
                 plot.addItem(scatter)
@@ -4354,13 +4646,13 @@ class Profiling:
                             value = array[i, j]
                             circ_cord.append([i, j])
                             circ_val.append( value)
-
+    
                 #update self.pind index of self.profiles with new point data
                 if k in self.profiles:
-
+    
                     self.profiles[k][self.pind] = (x,y, circ_val,scatter, interpolate)
-
-
+    
+    
                 if self.main_window.canvasWindow.currentIndex() == 1:
                     # Add the scatter item to all other plots and save points in self.profiles
                     for k, (_, p, v, array) in self.main_window.lasermaps.items():
@@ -4374,7 +4666,7 @@ class Profiling:
                                 circ_val.append( value)
                             if k in self.profiles:
                                 self.profiles[k][self.pind] = (x,y, circ_val,scatter, interpolate)
-
+    
                 #update plot and table widget
                 self.plot_profiles()
                 self.update_table_widget()

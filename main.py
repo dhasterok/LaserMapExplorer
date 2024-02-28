@@ -1,5 +1,6 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QHBoxLayout, QVBoxLayout, QGridLayout, QFileDialog, QProgressDialog, QWidget, QTabWidget, QDialog, QLabel, QListWidgetItem, QTableWidget, QInputDialog
+from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QHBoxLayout, QVBoxLayout, QGridLayout, QMessageBox
+from PyQt5.QtWidgets import QFileDialog, QProgressDialog, QWidget, QTabWidget, QDialog, QLabel, QListWidgetItem, QTableWidget, QInputDialog
 from PyQt5.Qt import QStandardItemModel,QStandardItem
 from pyqtgraph import PlotWidget, ScatterPlotItem, mkPen, AxisItem, PlotDataItem
 from pyqtgraph.Qt import QtWidgets
@@ -44,7 +45,7 @@ from sklearn.decomposition import PCA
 
 pg.setConfigOption('imageAxisOrder', 'row-major') # best performance
 ## !pyrcc5 resources.qrc -o resources_rc.py
-## pyuic5 mainwindow.ui -o MainWindow.py
+## !pyuic5 mainwindow.ui -o MainWindow.py
 ## !pyuic5 -x IsotopeSelectionDialog.ui -o IsotopeSelectionDialog.py
 # pylint: disable=fixme, line-too-long, no-name-in-module, trailing-whitespace
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -100,7 +101,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         layout_multi_view = QtWidgets.QHBoxLayout()
         layout_multi_view.setSpacing(0)# Set margins to 0 if you want to remove margins as well
         layout_multi_view.setContentsMargins(0, 0, 0, 0)
-
+        self.point_selected = False
         self.sample_tab_id = 0
         self.process_tab_id = 1
         self.spot_tab_id = 2
@@ -208,7 +209,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxNorm.clear()
         self.comboBoxNorm.addItems(['linear','log','logit'])
         self.comboBoxNorm.activated.connect(lambda: self.update_norm(self.sample_id, self.comboBoxNorm.currentText(), update = True))
-
+        
+        #init table_fcn
+        self.table_fcn = Table_Fcn(self)
+        
         # Preprocess Tab
         #-------------------------
         self.toolButtonSwapXY.clicked.connect(self.swap_xy)
@@ -262,7 +266,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # initiate Polygon class
         self.polygon = Polygon(self)
-
+        self.toolButtonPolyCreate.clicked.connect(self.polygon.increment_pid)
+        self.toolButtonPolyDelete.clicked.connect(lambda: self.table_fcn.delete_row(self.tableWidgetPolyPoints))
+        
         # Scatter and Ternary Tab
         #-------------------------
         self.toolButtonPlotScatter.clicked.connect(lambda: self.plot_scatter(save=True))
@@ -339,7 +345,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # N-Dim Tab
         #-------------------------
-        self.table_fcn = Table_Fcn(self)
+        
         isotope_set = ['majors', 'full trace', 'REE', 'metals']
         self.comboBoxNDimIsotopeSet.addItems(isotope_set)
         #self.comboBoxNDimRefMaterial.addItems(ref_list.values) This is done with the Set Isotope tab initialization above.
@@ -1464,7 +1470,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     value = array[y_i, x_i]  # assuming self.array is numpy self.array
 
                     if self.canvasWindow.currentIndex() == 0:
-                        if self.toolButtonPolyCreate.isChecked() or self.toolButtonPolyMovePoint.isChecked():
+                        if self.toolButtonPolyCreate.isChecked() or (self.toolButtonPolyMovePoint.isChecked() and self.point_selected):
                             # Update the position of the zoom view
                             self.update_zoom_view_position(x, y,array)
                             self.zoomViewBox.show()
@@ -1516,7 +1522,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.toolButtonPlotProfile.isChecked() or self.toolButtonPointMove.isChecked():
             self.profiling.plot_profile_scatter(event, array, k, plot, x, y,x_i, y_i)
         
-        elif self.toolButtonPolyCreate.isChecked() or self.toolButtonPolyMovePoint.isChecked():
+        elif self.toolButtonPolyCreate.isChecked() or self.toolButtonPolyMovePoint.isChecked() or self.toolButtonPolyAddPoint.isChecked() or self.toolButtonPolyRemovePoint.isChecked():
             self.polygon.plot_polygon_scatter(event, array, k, plot, x, y,x_i, y_i)
     
 
@@ -4268,14 +4274,6 @@ class Table_Fcn:
     """
     def __init__(self,main_window):
         self.main_window = main_window
-        # Initialize other necessary attributes
-        # Initialize variables and states as needed
-        self.profiles = {}
-        #self.i_profiles = {}        #interpolated profiles
-        #self.array_x = None
-        #self.array_y = None
-        #self.point_selected = False # move point button selected
-        #self.pind = -1              # index for move point
 
     def move_row_up(self, table):
         """Moves a row up one position in a table
@@ -4360,7 +4358,7 @@ class Table_Fcn:
         table: QTableWidget
         """
         rows = [index.row() for index in table.selectionModel().selectedRows()][::-1] #sort descending to pop in order
-
+        print(table.accessibleName())
         match table.accessibleName():
             case 'Profiling':
                 for row in rows:
@@ -4391,22 +4389,56 @@ class Table_Fcn:
                 for row in rows:
                     # Get selected row and delete it
                     table.removeRow(row)
+                    
+            case 'Polygon':
+                print('d')
+                for row in rows:
+                    # Get p_id
+                    item = self.main_window.tableWidgetPolyPoints.item(row, 0)
+                    p_id = int(item.text())
+                    # Get selected row and delete it
+                    table.removeRow(row)
+                    
+                    # remove point from each profile and its corresponding scatter plot item
+                    for p in self.main_window.polygon.polygons[p_id]:
+                        scatter_item = p[2]  # Access the scatter plot item
+                        for _, (_, plot, _, _) in self.main_window.lasermaps.items():
+                            plot.removeItem(scatter_item)
+                    # delete polygon from list
+                    del self.main_window.polygon.polygons[p_id]
+                    # Remove existing temporary line(s) if any
+                    if p_id in self.main_window.polygon.lines:
+                        for line in self.main_window.polygon.lines[p_id]:
+                            plot.removeItem(line)
+                        self.main_window.polygon.lines[p_id] = []
+
+                    
+                
 
 class Polygon:
     def __init__(self, main_window):
         self.main_window = main_window
-        self.polygons = {}
-        self.lines ={}
-        self.p_id = 0
-        self.array_x = None
-        self.array_y = None
+        self.polygons = {}          #dict of polygons
+        self.lines ={}              #temp dict for lines in polygon
+        self.point_index = None             # index for move point
+        self.p_id = None           # polygon ID
+        self.p_id_gen = 0 #Polygon_id generator
+    
+    # Method to increment p_id_gen
+    def increment_pid(self):
+        self.main_window.toolButtonPolyCreate.isChecked()
+        self.p_id_gen += 1
+        self.p_id = self.p_id_gen
+        
+    
+    
     def activate_zoom_window(self):
         if self.main_window.toolButtonMapPolygon.isChecked:
             self.main_window.zoomViewBox.show()
             
     def plot_polygon_scatter(self, event, array,k, plot, x, y, x_i, y_i):
-        self.array_x = self.main_window.array_x
-        self.array_y = self.main_window.array_x
+        self.array_x = array.shape[1]
+        self.array_y = array.shape[0]
         # turn off profile (need to suppress context menu on right click)
         if event.button() == QtCore.Qt.RightButton and self.main_window.toolButtonPolyCreate.isChecked():
             self.main_window.toolButtonPolyCreate.setChecked(False)
@@ -4414,17 +4446,138 @@ class Polygon:
             
             # Finalize and draw the polygon
             self.show_polygon_lines(x,y,plot, complete = True)
-            
-            self.p_id +=1 #update p_id for each new plot 
+        
             return
         elif event.button() == QtCore.Qt.RightButton and self.main_window.toolButtonPolyMovePoint.isChecked():
             self.main_window.toolButtonPolyMovePoint.setChecked(False)
-            self.point_selected = False
+            self.main_window.point_selected = False
+            return
+        
+        elif event.button() == QtCore.Qt.RightButton and self.main_window.toolButtonPolyAddPoint.isChecked():
+            self.main_window.toolButtonPolyAddPoint.setChecked(False)
+            return
+        
+        elif event.button() == QtCore.Qt.RightButton and self.main_window.toolButtonPolyRemovePoint.isChecked():
+            self.main_window.toolButtonPolyRemovePoint.setChecked(False)
             return
         elif event.button() == QtCore.Qt.RightButton or event.button() == QtCore.Qt.MiddleButton:
             return
         
-        if event.button() == QtCore.Qt.LeftButton:
+        elif event.button() == QtCore.Qt.LeftButton and not(self.main_window.toolButtonPolyCreate.isChecked()) and self.main_window.toolButtonPolyMovePoint.isChecked():
+            # move point
+            selection_model = self.main_window.tableWidgetPolyPoints.selectionModel()
+
+            # Check if there is any selection
+            if selection_model.hasSelection():
+                selected_rows = selection_model.selectedRows()
+                if selected_rows:
+                    # Assuming you're interested in the first selected row
+                    first_selected_row = selected_rows[0].row()
+                    
+                    # Get the item in the first column of this row
+                    item = self.main_window.tableWidgetPolyPoints.item(first_selected_row, 0)
+                    
+                    # Check if the item is not None
+                    if item is not None:
+                        self.p_id = int(item.text())  # Get polygon id to move point
+                        
+                    else:
+                        QMessageBox.warning(self.main_window, "Selection Error", "No item found in the first column of the selected row.")
+                else:
+                    QMessageBox.warning(self.main_window, "Selection Error", "No row is selected.")
+            else:
+                QMessageBox.warning(self.main_window, "Selection Error", "No selection is made in the table.")
+                
+                
+                
+                
+                
+            if self.main_window.point_selected:
+                #remove selected point
+                prev_scatter = self.polygons[self.p_id][self.point_index][2]
+                plot.removeItem(prev_scatter)
+
+
+                # Create a scatter plot item at the clicked position
+                scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
+                plot.addItem(scatter)
+
+                
+                #update self.point_index index of self.polygonswith new point data
+
+                self.polygons[self.p_id][self.point_index] = (x,y, scatter)
+                
+                # Finalize and draw the polygon
+                self.show_polygon_lines(x,y,plot, complete = True)
+                
+                self.main_window.point_selected = False
+                #update plot and table widget
+                # self.update_table_widget()
+            else:
+                # find nearest profile point
+                mindist = 10**12
+                for i, (x_p,y_p,_) in enumerate(self.polygons[self.p_id]):
+                    dist = (x_p - x)**2 + (y_p - y)**2
+                    if mindist > dist:
+                        mindist = dist
+                        self.point_index = i
+                    print(dist, round(mindist*self.array_x/self.main_window.x_range))
+                if (round(mindist*self.array_x/self.main_window.x_range) < 50):
+                    self.main_window.point_selected = True
+        
+        
+        elif event.button() == QtCore.Qt.LeftButton and not(self.main_window.toolButtonPolyCreate.isChecked()) and self.main_window.toolButtonPolyAddPoint.isChecked():
+            # add point 
+            # user must first choose line of polygon
+            # choose the vertext points to add point based on line 
+            # Find the closest line segment to the click location
+            min_distance = float('inf')
+            insert_after_index = None
+            for i in range(len(self.polygons[self.p_id])):
+                p1 = self.polygons[self.p_id][i]
+                p2 = self.polygons[self.p_id][(i + 1) % len(self.polygons[self.p_id])]  # Loop back to the start for the last segment
+                dist = self.distance_to_line_segment(x, y, p1[0], p1[1], p2[0], p2[1])
+                if dist < min_distance:
+                    min_distance = dist
+                    insert_after_index = i
+            
+            # Insert the new point after the closest line segment
+            if insert_after_index is not None:
+                scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
+                plot.addItem(scatter)
+                self.polygons[self.p_id].insert(insert_after_index + 1, (x, y, scatter))
+        
+            # Redraw the polygon with the new point
+            self.show_polygon_lines(x, y, plot, complete=True)
+            
+           
+        
+        elif event.button() == QtCore.Qt.LeftButton and not(self.main_window.toolButtonPolyCreate.isChecked()) and self.main_window.toolButtonPolyRemovePoint.isChecked():
+            # remove point 
+            # draw polygon without selected point
+            # remove point
+            # Find the closest point to the click location
+            min_distance = float('inf')
+            point_to_remove_index = None
+            for i, (px, py, _) in enumerate(self.polygons[self.p_id]):
+                dist = ((px - x)**2 + (py - y)**2)**0.5
+                if dist < min_distance:
+                    min_distance = dist
+                    point_to_remove_index = i
+            
+            # Remove the closest point
+            if point_to_remove_index is not None:
+                _, _, scatter_item = self.polygons[self.p_id].pop(point_to_remove_index)
+                plot.removeItem(scatter_item)
+        
+            # Redraw the polygon without the removed point
+            self.show_polygon_lines(x, y, plot, complete=True)
+            
+            self.main_window.toolButtonPolyRemovePoint.setChecked(False)
+            
+            
+            
+        elif event.button() == QtCore.Qt.LeftButton:
             # Create a scatter plot item at the clicked position
             scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
             plot.addItem(scatter)
@@ -4435,45 +4588,12 @@ class Polygon:
                 
             else:
                 self.polygons[self.p_id].append((x,y, scatter))
-        
+                
             
-        elif event.button() == QtCore.Qt.LeftButton and not(self.main_window.toolButtonPolyCreate.isChecked()) and self.main_window.toolButtonPolyMovePoint.isChecked():
-            # move point
-            
-            if self.point_selected:
-                #remove selected point
-                prev_scatter = self.polygon[self.p_id][self.pind][2]
-                plot.removeItem(prev_scatter)
-
-
-                # Create a scatter plot item at the clicked position
-                scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
-                plot.addItem(scatter)
-
-
-                #update self.pind index of self.polygonswith new point data
-
-                self.polygons[self.p_id][self.pind] = (x,y, scatter)
-
-
-                #update plot and table widget
-                self.update_table_widget()
-                if self.main_window.toolButtonIPProfile.isChecked(): #reset interpolation if selected
-                    self.clear_interpolation()
-                    self.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
-            else:
-                # find nearest profile point
-                mindist = 10**12
-                for i, (x_p,y_p) in enumerate(self.polygons[self.p_id]):
-                    dist = (x_p - x)**2 + (y_p - y)**2
-                    if mindist > dist:
-                        mindist = dist
-                        self.pind = i
-                        self.point_selected = True
-                if not(round(mindist*self.array_x/self.main_window.x_range) < 10):
-                    self.pind = -1
-                else:
-                    self.point_selected = True
+    def distance_to_line_segment(self, px, py, x1, y1, x2, y2):
+        # Calculate the distance from point (px, py) to the line segment defined by points (x1, y1) and (x2, y2)
+        # This is a simplified version; you might need a more accurate calculation based on your coordinate system
+        return min(((px - x1)**2 + (py - y1)**2)**0.5, ((px - x2)**2 + (py - y2)**2)**0.5)
         
     def show_polygon_lines(self, x,y, plot, complete = False):
         if self.p_id in self.polygons:
@@ -4490,18 +4610,29 @@ class Polygon:
                 plot.addItem(line)
                 self.lines[self.p_id].append(line)
             elif not complete and len(points) > 1:
+               
+                if self.main_window.point_selected:
+                    # self.point_index is the index of the pont that needs to be moved
+                    
+                    # create polygon with moved point
+                    x_points = [p[0] for p in points[:self.point_index]] + [x]+ [p[0] for p in points[(self.point_index+1):]]
+                    y_points = [p[1] for p in points[:self.point_index]] + [y]+ [p[1] for p in points[(self.point_index+1):]]
+                    
+                else:
+                    
+                    # create polygon with new point
+                    x_points = [p[0] for p in points] + [x, points[0][0]]
+                    y_points = [p[1] for p in points] + [y, points[0][1]]
                 # Draw shaded polygon + lines to cursor
-                x_points = [p[0] for p in points] + [x, points[0][0]]
-                y_points = [p[1] for p in points] + [y, points[0][1]]
                 poly_item = QtWidgets.QGraphicsPolygonItem(QtGui.QPolygonF([QtCore.QPointF(x, y) for x, y in zip(x_points, y_points)]))
                 poly_item.setBrush(QtGui.QColor(100, 100, 150, 100))
                 plot.addItem(poly_item)
                 self.lines[self.p_id].append(poly_item)
 
                 # Draw line from last point to cursor
-                line = PlotDataItem([points[-1][0], x], [points[-1][1], y], pen='r')
-                plot.addItem(line)
-                self.lines[self.p_id].append(line)
+                # line = PlotDataItem([points[-1][0], x], [points[-1][1], y], pen='r')
+                # plot.addItem(line)
+                # self.lines[self.p_id].append(line)
                 
             elif complete and len(points) > 2:
                 points = [QtCore.QPointF(x, y) for x, y, _ in self.polygons[self.p_id]]
@@ -4509,6 +4640,15 @@ class Polygon:
                 poly_item = QtWidgets.QGraphicsPolygonItem(polygon)
                 poly_item.setBrush(QtGui.QColor(100, 100, 150, 100))
                 plot.addItem(poly_item)
+                self.lines[self.p_id].append(poly_item)
+                
+                self.update_table_widget()
+                # Find the row where the first column matches self.p_id and select it
+                for row in range(self.main_window.tableWidgetPolyPoints.rowCount()):
+                    item = self.main_window.tableWidgetPolyPoints.item(row, 0)  # Assuming the ID is stored in the first column
+                    if item and int(item.text()) == self.p_id:
+                        self.main_window.tableWidgetPolyPoints.selectRow(row)
+                        break
                     
     def update_table_widget(self):
         self.main_window.tableWidgetPolyPoints.setRowCount(0)  # Clear existing rows
@@ -4523,13 +4663,12 @@ class Polygon:
             self.main_window.tableWidgetPolyPoints.setItem(row_position, 2, QTableWidgetItem(str('')))
             self.main_window.tableWidgetPolyPoints.setItem(row_position, 3, QTableWidgetItem(str('In')))
             
-            # Create a QCheckBox for the 'use' column
-            chkBoxItem_use = QtWidgets.QCheckBox()
-            chkBoxItem_use.setCheckState(QtCore.Qt.Checked)
-            chkBoxItem_use.stateChanged.connect(lambda state, row=row_position: on_use_checkbox_state_changed(row, state))
+            chkBoxItem_select = QTableWidgetItem()
+            chkBoxItem_select.setFlags(QtCore.Qt.ItemIsUserCheckable |
+                               QtCore.Qt.ItemIsEnabled)
 
 
-            self.main_window.tableWidgetPolyPoints.setItem(row_position, 4, chkBoxItem_use)
+            self.main_window.tableWidgetPolyPoints.setItem(row_position, 4, chkBoxItem_select)
             
             
             chkBoxItem_select = QTableWidgetItem()
@@ -4538,12 +4677,12 @@ class Polygon:
 
             chkBoxItem_select.setCheckState(QtCore.Qt.Unchecked)
         
-        def on_use_checkbox_state_changed(row, state):
-            # Update the 'use' value in the filter_df for the given row
-            self.filter_df.at[row, 'use'] = state == QtCore.Qt.Checked
+        # def on_use_checkbox_state_changed(row, state):
+        #     # Update the 'use' value in the filter_df for the given row
+        #     self.filter_df.at[row, 'use'] = state == QtCore.Qt.Checked
             
         # Enable or disable buttons based on the presence of points
-        self.toggle_buttons(self.main_window.tableWidgetPolyPoints.rowCount() > 0)
+        # self.toggle_buttons(self.main_window.tableWidgetPolyPoints.rowCount() > 0)
 
 
 class Profiling:
@@ -4554,7 +4693,7 @@ class Profiling:
         self.profiles = {}
         self.i_profiles = {}        #interpolated profiles
         self.point_selected = False # move point button selected
-        self.pind = -1              # index for move point
+        self.point_index = -1              # index for move point
         self.all_errorbars = []      #stores points of profiles
         self.selected_points = {}  # Track selected points, e.g., {point_index: selected_state}
         self.edit_mode_enabled = False  # Track if edit mode is enabled
@@ -4562,9 +4701,10 @@ class Profiling:
         self.scatter_size = 64
 
     def plot_profile_scatter(self, event, array,k, plot, x, y, x_i, y_i):
-        self.array_x = self.main_window.array_x
-        self.array_y = self.main_window.array_x
+        self.array_x = array.shape[1]
+        self.array_y = array.shape[0]
         
+        interpolate = False
         
         radius= int(self.main_window.lineEditPointRadius.text())
         # turn off profile (need to suppress context menu on right click)
@@ -4579,9 +4719,69 @@ class Profiling:
         elif event.button() == QtCore.Qt.RightButton or event.button() == QtCore.Qt.MiddleButton:
             return
     
-            interpolate = False
             
-        if event.button() == QtCore.Qt.LeftButton:
+            
+        elif event.button() == QtCore.Qt.LeftButton and not(self.main_window.toolButtonPlotProfile.isChecked()) and self.main_window.toolButtonPointMove.isChecked():
+            # move point
+            
+            if self.point_selected:
+                #remove selected point
+                prev_scatter = self.profiles[k][self.point_index][3]
+                plot.removeItem(prev_scatter)
+    
+    
+                # Create a scatter plot item at the clicked position
+                scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
+                plot.addItem(scatter)
+                # Find all points within the specified radius
+                circ_val = []
+                circ_cord = []
+                for i in range(max(0, y_i - radius), min(self.array_y, y_i + radius + 1)):
+                    for j in range(max(0, x_i - radius), min(self.array_x , x_i + radius + 1)):
+                        if np.sqrt((x_i - j)**2 + (y_i - i)**2) <= radius:
+                            value = array[i, j]
+                            circ_cord.append([i, j])
+                            circ_val.append( value)
+    
+                #update self.point_index index of self.profiles with new point data
+                if k in self.profiles:
+    
+                    self.profiles[k][self.point_index] = (x,y, circ_val,scatter, interpolate)
+    
+    
+                if self.main_window.canvasWindow.currentIndex() == 1:
+                    # Add the scatter item to all other plots and save points in self.profiles
+                    for k, (_, p, v, array) in self.main_window.lasermaps.items():
+                        circ_val = []
+                        if p != plot and v==1 and self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #only add scatters to other lasermaps of same sample
+                            # Create a scatter plot item at the clicked position
+                            scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
+                            p.addItem(scatter)
+                            for c in circ_cord:
+                                value = array[c[0], c[1]]
+                                circ_val.append( value)
+                            if k in self.profiles:
+                                self.profiles[k][self.point_index] = (x,y, circ_val,scatter, interpolate)
+    
+                #update plot and table widget
+                self.plot_profiles()
+                self.update_table_widget()
+                if self.main_window.toolButtonIPProfile.isChecked(): #reset interpolation if selected
+                    self.clear_interpolation()
+                    self.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
+            else:
+                # find nearest profile point
+                mindist = 10**12
+                for i, (x_p,y_p,_,_,interpolate) in enumerate(self.profiles[k]):
+                    dist = (x_p - x)**2 + (y_p - y)**2
+                    if mindist > dist:
+                        mindist = dist
+                        self.point_index = i
+                if not(round(mindist*self.array_x/self.main_window.x_range) < 50):
+                    self.point_selected = True
+
+            
+        elif event.button() == QtCore.Qt.LeftButton:
             #switch to profile tab
             self.main_window.tabWidget.setCurrentIndex(2)
     
@@ -4625,68 +4825,7 @@ class Profiling:
             self.update_table_widget()
     
     
-        elif event.button() == QtCore.Qt.LeftButton and not(self.main_window.toolButtonPlotProfile.isChecked()) and self.main_window.toolButtonPointMove.isChecked():
-            # move point
-            
-            if self.point_selected:
-                #remove selected point
-                prev_scatter = self.profiles[k][self.pind][3]
-                plot.removeItem(prev_scatter)
-    
-    
-                # Create a scatter plot item at the clicked position
-                scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
-                plot.addItem(scatter)
-                # Find all points within the specified radius
-                circ_val = []
-                circ_cord = []
-                for i in range(max(0, y_i - radius), min(self.array_y, y_i + radius + 1)):
-                    for j in range(max(0, x_i - radius), min(self.array_x , x_i + radius + 1)):
-                        if np.sqrt((x_i - j)**2 + (y_i - i)**2) <= radius:
-                            value = array[i, j]
-                            circ_cord.append([i, j])
-                            circ_val.append( value)
-    
-                #update self.pind index of self.profiles with new point data
-                if k in self.profiles:
-    
-                    self.profiles[k][self.pind] = (x,y, circ_val,scatter, interpolate)
-    
-    
-                if self.main_window.canvasWindow.currentIndex() == 1:
-                    # Add the scatter item to all other plots and save points in self.profiles
-                    for k, (_, p, v, array) in self.main_window.lasermaps.items():
-                        circ_val = []
-                        if p != plot and v==1 and self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #only add scatters to other lasermaps of same sample
-                            # Create a scatter plot item at the clicked position
-                            scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
-                            p.addItem(scatter)
-                            for c in circ_cord:
-                                value = array[c[0], c[1]]
-                                circ_val.append( value)
-                            if k in self.profiles:
-                                self.profiles[k][self.pind] = (x,y, circ_val,scatter, interpolate)
-    
-                #update plot and table widget
-                self.plot_profiles()
-                self.update_table_widget()
-                if self.main_window.toolButtonIPProfile.isChecked(): #reset interpolation if selected
-                    self.clear_interpolation()
-                    self.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
-            else:
-                # find nearest profile point
-                mindist = 10**12
-                for i, (x_p,y_p,_,_,interpolate) in enumerate(self.profiles[k]):
-                    dist = (x_p - x)**2 + (y_p - y)**2
-                    if mindist > dist:
-                        mindist = dist
-                        self.pind = i
-                        self.point_selected = True
-                if not(round(mindist*self.array_x/self.main_window.x_range) < 10):
-                    self.pind = -1
-                else:
-                    self.point_selected = True
-
+        
 
 
 

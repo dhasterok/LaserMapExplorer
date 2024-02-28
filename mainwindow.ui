@@ -3528,7 +3528,7 @@
        <string/>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="SelectIsotopePage">
        <property name="enabled">
@@ -4924,7 +4924,7 @@
         <property name="title">
          <string>Polygons</string>
         </property>
-        <widget class="QTableWidget" name="tableWidget">
+        <widget class="QTableWidget" name="tableWidgetPolyPoints">
          <property name="geometry">
           <rect>
            <x>10</x>
@@ -4938,6 +4938,12 @@
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
+         </property>
+         <property name="accessibleName">
+          <string>Polygon</string>
+         </property>
+         <property name="selectionBehavior">
+          <enum>QAbstractItemView::SelectRows</enum>
          </property>
          <attribute name="horizontalHeaderDefaultSectionSize">
           <number>53</number>

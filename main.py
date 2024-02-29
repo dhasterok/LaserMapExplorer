@@ -40,8 +40,12 @@ import matplotlib.ticker as ticker
 from radar import Radar
 from calculator import CalWindow
 import scipy.stats
+from scipy import ndimage
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
+from cv2 import Canny, Sobel, CV_64F
+from scipy.signal import convolve2d
+
 
 pg.setConfigOption('imageAxisOrder', 'row-major') # best performance
 ## !pyrcc5 resources.qrc -o resources_rc.py
@@ -112,7 +116,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.cluster_tab_id = 7
         self.profile_tab_id = 8
         self.special_tab_id = 9
-
+        
+        #edge_det_img
+        self.edge_img = None
+        
         # create dictionaries for default plot styles
         self.markerdict = {'circle':'o', 'square':'s', 'diamond':'d', 'triangle (up)':'^', 'triangle (down)':'v', 'hexagon':'h', 'pentagon':'p'}
         self.comboBoxMarker.clear()
@@ -268,7 +275,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.polygon = Polygon(self)
         self.toolButtonPolyCreate.clicked.connect(self.polygon.increment_pid)
         self.toolButtonPolyDelete.clicked.connect(lambda: self.table_fcn.delete_row(self.tableWidgetPolyPoints))
+        # Add edge detection algorithm to aid in creating polygons
+        self.toolButtonEdgeDetection.clicked.connect(self.add_edge_detection)
+        self.comboBoxEdgeDet.activated.connect(self.add_edge_detection)
         
+       
         # Scatter and Ternary Tab
         #-------------------------
         self.toolButtonPlotScatter.clicked.connect(lambda: self.plot_scatter(save=True))
@@ -331,7 +342,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Connect color point radio button signals to a slot
         self.comboBoxColorMethod.currentIndexChanged.connect(self.group_changed)
         # Connect the itemChanged signal to a slot
-        self.tableWidgetViewGroups.itemChanged.connect(self.onClusterLabelChanged)
+        self.tableWidgetViewGroups.itemChanged.connect(self.cluster_label_changed)
 
         self.comboBoxColorMethod.currentText() == 'none'
         # self.tableWidgetViewGroups.selectionModel().selectionChanged.connect(self.update_clusters)
@@ -1302,7 +1313,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         sample_id = plot_information['sample_id']
         plot_type = plot_information['plot_type']
 
-
+        view = self.canvasWindow.currentIndex()
         array = np.reshape(current_plot_df['array'].values,
                                     (current_plot_df['Y'].nunique(),
                                      current_plot_df['X'].nunique()), order=self.order)
@@ -1329,6 +1340,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 cm = pg.colormap.get(self.cm, source = 'matplotlib')
                 img.setColorMap(cm)
                 histogram = widgetLaserMap.findChild(pg.HistogramLUTWidget, 'histogram')
+                if view ==0:
+                    # update variables which stores current plot in SV
+                    self.plot = p1
+                    self.array = array
+                
+                
                 if histogram:
                     histogram.gradient.setColorMap(cm)
                     histogram.setImageItem(img)
@@ -1345,7 +1362,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             layoutLaserMap = QtWidgets.QGridLayout()
             widgetLaserMap.setLayout(layoutLaserMap)
             layoutLaserMap.setSpacing(0)
-            view = self.canvasWindow.currentIndex()
+            
             if duplicate:
                 self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'].append(widgetLaserMap)
                 self.plot_widget_dict[plot_type][sample_id][plot_name]['view'].append(view)
@@ -1380,7 +1397,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
             # ... Inside your plotting function
-            target = pg.TargetItem(symbol = '+')
+            target = pg.TargetItem(symbol = '+', )
+            target.setZValue(1e9)
             p1.addItem(target)
 
             # Optionally, configure the appearance
@@ -1421,9 +1439,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 #remove previous plot in single view
                 if self.prev_plot:
                     del self.lasermaps[self.prev_plot]
+                # update variables which stores current plot in SV
+                self.plot = p1
+                self.array = array
                 self.prev_plot = name
-                self.init_zoom_view(p1,array)
-
+                self.init_zoom_view()
+                # uncheck edge detection
+                self.toolButtonEdgeDetection.setChecked(False)
 
 
             # Create a SignalProxy to handle mouse movement events
@@ -1472,9 +1494,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     if self.canvasWindow.currentIndex() == 0:
                         if self.toolButtonPolyCreate.isChecked() or (self.toolButtonPolyMovePoint.isChecked() and self.point_selected):
                             # Update the position of the zoom view
-                            self.update_zoom_view_position(x, y,array)
+                            self.update_zoom_view_position(x, y)
                             self.zoomViewBox.show()
-                            self.polygon.show_polygon_lines(x,y, plot)
+                            self.polygon.show_polygon_lines(x,y)
                         else:
                             # hide zoom view
                             self.zoomViewBox.hide()
@@ -1523,7 +1545,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.profiling.plot_profile_scatter(event, array, k, plot, x, y,x_i, y_i)
         
         elif self.toolButtonPolyCreate.isChecked() or self.toolButtonPolyMovePoint.isChecked() or self.toolButtonPolyAddPoint.isChecked() or self.toolButtonPolyRemovePoint.isChecked():
-            self.polygon.plot_polygon_scatter(event, array, k, plot, x, y,x_i, y_i)
+            self.polygon.plot_polygon_scatter(event, k, x, y,x_i, y_i)
     
 
     def plot_laser_map_cont(self,layout,array,img,p1,cm, view):
@@ -1601,18 +1623,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     #     self.zoomTarget.hide()  # Initially hidden
 
 
-    def init_zoom_view(self,p,array):
+    def init_zoom_view(self):
         # Set the initial zoom level
         self.zoomLevel = 0.02  # Adjust as needed for initial zoom level
-        self.mainPlot = p
         # Create a ViewBox for the zoomed view
         self.zoomViewBox = pg.ViewBox(border={'color': 'w', 'width': 1})
         self.zoomImg = pg.ImageItem()
         self.zoomViewBox.addItem(self.zoomImg)
         self.zoomViewBox.setAspectLocked(True)
         self.zoomViewBox.invertY(True)
-        # Add the zoom ViewBox as an item to the main plot (self.mainPlot is your primary plot object)
-        self.mainPlot.addItem(self.zoomViewBox, ignoreBounds=True)
+        # Add the zoom ViewBox as an item to the main plot (self.plot is your primary plot object)
+        self.plot.addItem(self.zoomViewBox, ignoreBounds=True)
 
         # Configure initial size and position (you'll update this dynamically later)
         self.zoomViewBox.setFixedWidth(400)  # Width of the zoom box in pixels
@@ -1628,15 +1649,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
 
-    def update_zoom_view_position(self, x, y, array):
+    def update_zoom_view_position(self, x, y):
         # Assuming you have a method like this to update the zoom view
         # Calculate the new position for the zoom view
         xOffset = 50  # Horizontal offset from cursor to avoid overlap
         yOffset = 100  # Vertical offset from cursor to display below it
 
         # Adjust position to ensure the zoom view remains within the plot bounds
-        x_pos = min(max(x + xOffset, 0), self.mainPlot.viewRect().width() - self.zoomViewBox.width())
-        y_pos = min(max(y + yOffset, 0), self.mainPlot.viewRect().height() - self.zoomViewBox.height())
+        x_pos = min(max(x + xOffset, 0), self.plot.viewRect().width() - self.zoomViewBox.width())
+        y_pos = min(max(y + yOffset, 0), self.plot.viewRect().height() - self.zoomViewBox.height())
 
         # Update the position of the zoom view
         self.zoomViewBox.setGeometry(x_pos, y_pos, self.zoomViewBox.width(), self.zoomViewBox.height())
@@ -1646,7 +1667,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Update the zoom view's displayed region
         # self.zoomViewBox.setRange(rect=zoomRect, padding=0)
-        self.zoomImg.setImage(image=array)  # Make sure this uses the current image data
+        if self.toolButtonEdgeDetection.isChecked():
+            self.zoomImg.setImage(image=self.edge_array)  # user edge_array too zoom with edge_det
+        else:
+            self.zoomImg.setImage(image=self.array)  # Make sure this uses the current image data
 
         self.zoomImg.setRect(0,0,self.x_range,self.y_range)
         self.zoomViewBox.setRange(zoomRect) # Set the zoom area in the image
@@ -1654,6 +1678,92 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.zoomTarget.setPos(x, y)  # Update target position
         self.zoomTarget.show()
         self.zoomViewBox.setZValue(1e10)
+        
+        
+    def add_edge_detection(self):
+        """
+        Add edge detection to the current laser map plot.
+        :param algorithm: String specifying the edge detection algorithm ('sobel', 'canny', 'zero_cross')
+        """
+        if self.edge_img:
+            # remove existing filters
+            self.plot.removeItem(self.edge_img)  
+        
+        if self.toolButtonEdgeDetection.isChecked():
+            algorithm = self.comboBoxEdgeDet.currentText().lower()
+            if algorithm == 'sobel':
+                # Apply Sobel edge detection
+                sobelx = Sobel(self.array, CV_64F, 1, 0, ksize=5)
+                sobely = Sobel(self.array, CV_64F, 0, 1, ksize=5)
+                edge_detected_image = np.sqrt(sobelx**2 + sobely**2)
+            elif algorithm == 'canny':
+               
+                # Normalize the array to [0, 1]
+                normalized_array = (self.array - np.min(self.array)) / (np.max(self.array) - np.min(self.array))
+                
+                # Scale to [0, 255] and convert to uint8
+                scaled_array = (normalized_array * 255).astype(np.uint8)
+                
+                # Apply Canny edge detection
+                edge_detected_image = Canny(scaled_array, 100, 200)
+            elif algorithm == 'zero cross':
+                # Apply Zero Crossing edge detection (This is a placeholder as OpenCV does not have a direct function)
+                # You might need to implement a custom function or find a library that supports Zero Crossing
+                edge_detected_image = self.zero_crossing_laplacian(self.array)  # Placeholder, replace with actual Zero Crossing implementation
+            else:
+                raise ValueError("Unsupported algorithm. Choose 'sobel', 'canny', or 'zero cross'.")
+        
+            # Assuming you have a way to display this edge_detected_image on your plot.
+            # This could be an update to an existing ImageItem or creating a new one if necessary.
+            self.edge_array = edge_detected_image
+            self.edge_img = pg.ImageItem(image=self.edge_array)
+            #set aspect ratio of rectangle
+            self.edge_img.setRect(0,0,self.x_range,self.y_range)
+            # edge_img.setAs
+            cm = pg.colormap.get(self.cm, source = 'matplotlib')
+            self.edge_img.setColorMap(cm)
+            
+            self.plot.addItem(self.edge_img)  
+        
+    def zero_crossing_laplacian(self,array):
+        """
+        Apply Zero Crossing on the Laplacian of the image.
+        :param array: 2D numpy array representing the image.
+        :return: Edge-detected image using the Zero Crossing method.
+        """
+        # Normalize the array to [0, 1]
+        normalized_array = (array - np.min(array)) / (np.max(array) - np.min(array))
+        
+        # Scale to [0, 255] and convert to uint8
+        image = (normalized_array * 255).astype(np.uint8)
+        
+        
+        # Apply Gaussian filter for noise reduction
+        blurred_image = ndimage.gaussian_filter(image, sigma=6)
+    
+        # Apply Laplacian operator
+        # laplacian_image = ndimage.laplace(blurred_image)
+    
+        LoG_kernel = np.array([
+                                [0, 0,  1, 0, 0],
+                                [0, 1,  2, 1, 0],
+                                [1, 2,-16, 2, 1],
+                                [0, 1,  2, 1, 0],
+                                [0, 0,  1, 0, 0]
+                            ])
+        
+        
+        laplacian_image = convolve2d(blurred_image,LoG_kernel)
+        
+        # Find zero crossings
+        zero_crossings = np.zeros_like(laplacian_image)
+        # Shift the image by one pixel in all directions
+        for shift in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
+            shifted = np.roll(np.roll(laplacian_image, shift[0], axis=0), shift[1], axis=1)
+            # A zero crossing occurs where the product of the original and the shifted image is less than zero (sign change)
+            zero_mask = (laplacian_image * shifted) < 0
+            zero_crossings[zero_mask] = 1
+        return zero_crossings 
 
     def reset_zoom(self, vb,histogram):
         vb.enableAutoRange()
@@ -3234,7 +3344,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.current_group = {'algorithm':None,'clusters': None}
         self.isUpdatingTable = False
 
-    def onClusterLabelChanged(self, item):
+    def cluster_label_changed(self, item):
         # Initialize the flag
         if not self.isUpdatingTable: #change name only when cluster renamed
             # Get the new name and the row of the changed item
@@ -4436,16 +4546,16 @@ class Polygon:
         if self.main_window.toolButtonMapPolygon.isChecked:
             self.main_window.zoomViewBox.show()
             
-    def plot_polygon_scatter(self, event, array,k, plot, x, y, x_i, y_i):
-        self.array_x = array.shape[1]
-        self.array_y = array.shape[0]
+    def plot_polygon_scatter(self, event,k, x, y, x_i, y_i):
+        self.array_x = self.main_window.array.shape[1]
+        self.array_y = self.main_window.array.shape[0]
         # turn off profile (need to suppress context menu on right click)
         if event.button() == QtCore.Qt.RightButton and self.main_window.toolButtonPolyCreate.isChecked():
             self.main_window.toolButtonPolyCreate.setChecked(False)
             self.main_window.toolButtonPolyMovePoint.setEnabled(True)
             
             # Finalize and draw the polygon
-            self.show_polygon_lines(x,y,plot, complete = True)
+            self.show_polygon_lines(x,y, complete = True)
         
             return
         elif event.button() == QtCore.Qt.RightButton and self.main_window.toolButtonPolyMovePoint.isChecked():
@@ -4495,12 +4605,13 @@ class Polygon:
             if self.main_window.point_selected:
                 #remove selected point
                 prev_scatter = self.polygons[self.p_id][self.point_index][2]
-                plot.removeItem(prev_scatter)
+                self.main_window.plot.removeItem(prev_scatter)
 
 
                 # Create a scatter plot item at the clicked position
                 scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
-                plot.addItem(scatter)
+                scatter.setZValue(1e9)
+                self.main_window.plot.addItem(scatter)
 
                 
                 #update self.point_index index of self.polygonswith new point data
@@ -4508,7 +4619,7 @@ class Polygon:
                 self.polygons[self.p_id][self.point_index] = (x,y, scatter)
                 
                 # Finalize and draw the polygon
-                self.show_polygon_lines(x,y,plot, complete = True)
+                self.show_polygon_lines(x,y, complete = True)
                 
                 self.main_window.point_selected = False
                 #update plot and table widget
@@ -4544,11 +4655,12 @@ class Polygon:
             # Insert the new point after the closest line segment
             if insert_after_index is not None:
                 scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
-                plot.addItem(scatter)
+                scatter.setZValue(1e9)
+                self.main_window.plot.addItem(scatter)
                 self.polygons[self.p_id].insert(insert_after_index + 1, (x, y, scatter))
         
             # Redraw the polygon with the new point
-            self.show_polygon_lines(x, y, plot, complete=True)
+            self.show_polygon_lines(x, y, complete=True)
             
            
         
@@ -4568,19 +4680,20 @@ class Polygon:
             # Remove the closest point
             if point_to_remove_index is not None:
                 _, _, scatter_item = self.polygons[self.p_id].pop(point_to_remove_index)
-                plot.removeItem(scatter_item)
+                self.main_window.plot.removeItem(scatter_item)
         
             # Redraw the polygon without the removed point
-            self.show_polygon_lines(x, y, plot, complete=True)
+            self.show_polygon_lines(x, y, complete=True)
             
             self.main_window.toolButtonPolyRemovePoint.setChecked(False)
             
             
             
         elif event.button() == QtCore.Qt.LeftButton:
-            # Create a scatter plot item at the clicked position
+            # Create a scatter self.main_window.plot item at the clicked position
             scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
-            plot.addItem(scatter)
+            scatter.setZValue(1e9)
+            self.main_window.plot.addItem(scatter)
             
             # add x and y to self.polygons dict
             if self.p_id not in self.polygons:
@@ -4595,19 +4708,19 @@ class Polygon:
         # This is a simplified version; you might need a more accurate calculation based on your coordinate system
         return min(((px - x1)**2 + (py - y1)**2)**0.5, ((px - x2)**2 + (py - y2)**2)**0.5)
         
-    def show_polygon_lines(self, x,y, plot, complete = False):
+    def show_polygon_lines(self, x,y, complete = False):
         if self.p_id in self.polygons:
             # Remove existing temporary line(s) if any
             if self.p_id in self.lines:
                 for line in self.lines[self.p_id]:
-                    plot.removeItem(line)
+                    self.main_window.plot.removeItem(line)
             self.lines[self.p_id] = []
 
             points = self.polygons[self.p_id]
             if len(points) == 1:
                 # Draw line from the first point to cursor
                 line = PlotDataItem([points[0][0], x], [points[0][1], y], pen='r')
-                plot.addItem(line)
+                self.main_window.plot.addItem(line)
                 self.lines[self.p_id].append(line)
             elif not complete and len(points) > 1:
                
@@ -4626,12 +4739,12 @@ class Polygon:
                 # Draw shaded polygon + lines to cursor
                 poly_item = QtWidgets.QGraphicsPolygonItem(QtGui.QPolygonF([QtCore.QPointF(x, y) for x, y in zip(x_points, y_points)]))
                 poly_item.setBrush(QtGui.QColor(100, 100, 150, 100))
-                plot.addItem(poly_item)
+                self.main_window.plot.addItem(poly_item)
                 self.lines[self.p_id].append(poly_item)
 
                 # Draw line from last point to cursor
                 # line = PlotDataItem([points[-1][0], x], [points[-1][1], y], pen='r')
-                # plot.addItem(line)
+                # self.main_window.plot.addItem(line)
                 # self.lines[self.p_id].append(line)
                 
             elif complete and len(points) > 2:
@@ -4639,7 +4752,7 @@ class Polygon:
                 polygon = QtGui.QPolygonF(points)
                 poly_item = QtWidgets.QGraphicsPolygonItem(polygon)
                 poly_item.setBrush(QtGui.QColor(100, 100, 150, 100))
-                plot.addItem(poly_item)
+                self.main_window.plot.addItem(poly_item)
                 self.lines[self.p_id].append(poly_item)
                 
                 self.update_table_widget()
@@ -4732,6 +4845,7 @@ class Profiling:
     
                 # Create a scatter plot item at the clicked position
                 scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
+                scatter.setZValue(1e9)
                 plot.addItem(scatter)
                 # Find all points within the specified radius
                 circ_val = []
@@ -4756,6 +4870,7 @@ class Profiling:
                         if p != plot and v==1 and self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #only add scatters to other lasermaps of same sample
                             # Create a scatter plot item at the clicked position
                             scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
+                            scatter.setZValue(1e9)
                             p.addItem(scatter)
                             for c in circ_cord:
                                 value = array[c[0], c[1]]
@@ -4787,6 +4902,7 @@ class Profiling:
     
             # Create a scatter plot item at the clicked position
             scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
+            scatter.setZValue(1e9)
             plot.addItem(scatter)
             # Find all points within the specified radius
             circ_val = []
@@ -4812,6 +4928,7 @@ class Profiling:
                     if p != plot and v==1 and self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #only add scatters to other lasermaps of same sample
                         # Create a scatter plot item at the clicked position
                         scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
+                        scatter.setZValue(1e9)
                         p.addItem(scatter)
                         for c in circ_cord:
                             value = array[c[0], c[1]]
@@ -4862,6 +4979,7 @@ class Profiling:
                         if v==self.main_window.canvasWindow.currentIndex() and self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #only add scatters to other lasermaps of same sample
                             # Create a scatter plot item at the clicked position
                             scatter = ScatterPlotItem([x], [y], symbol='+', size=5)
+                            scatter.setZValue(1e9)
                             p.addItem(scatter)
                             # Find all points within the specified radius
                             circ_val = []

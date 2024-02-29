@@ -4911,7 +4911,7 @@
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>220</y>
+          <y>280</y>
           <width>301</width>
           <height>231</height>
          </rect>
@@ -5544,6 +5544,56 @@
           </item>
          </layout>
         </widget>
+       </widget>
+       <widget class="QComboBox" name="comboBoxEdgeDet">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>250</y>
+          <width>101</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <property name="toolTip">
+         <string>Choose a second isotope for filtering by ratio</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>Sobel</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Canny</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Zero cross</string>
+         </property>
+        </item>
+       </widget>
+       <widget class="QLabel" name="labelScatterPlotType_2">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>220</y>
+          <width>81</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+          <bold>false</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Edge Detection</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
        </widget>
       </widget>
       <widget class="QWidget" name="ScatterPage">

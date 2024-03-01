@@ -3528,7 +3528,7 @@
        <string/>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="SelectIsotopePage">
        <property name="enabled">
@@ -4388,12 +4388,17 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QComboBox" name="comboBox_2">
+           <widget class="QComboBox" name="comboBoxNRMethod">
             <property name="font">
              <font>
               <pointsize>11</pointsize>
              </font>
             </property>
+            <item>
+             <property name="text">
+              <string>None</string>
+             </property>
+            </item>
             <item>
              <property name="text">
               <string>Median</string>
@@ -4409,10 +4414,15 @@
               <string>Edge-preserving</string>
              </property>
             </item>
+            <item>
+             <property name="text">
+              <string>Bilateral</string>
+             </property>
+            </item>
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="label_36">
+           <widget class="QLabel" name="labelSF">
             <property name="font">
              <font>
               <pointsize>11</pointsize>
@@ -4427,12 +4437,18 @@
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QSpinBox" name="spinBox_2">
+           <widget class="QSpinBox" name="spinBoxSmoothingFactor">
             <property name="toolTip">
              <string>Set smoothing for noise reduction filter</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+            <property name="maximum">
+             <number>200</number>
+            </property>
+            <property name="value">
+             <number>30</number>
             </property>
            </widget>
           </item>

@@ -43,8 +43,9 @@ import scipy.stats
 from scipy import ndimage
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-from cv2 import Canny, Sobel, CV_64F
-from scipy.signal import convolve2d
+from cv2 import Canny, Sobel, CV_64F, bilateralFilter, medianBlur, edgePreservingFilter
+from scipy.signal import convolve2d, wiener
+
 
 
 pg.setConfigOption('imageAxisOrder', 'row-major') # best performance
@@ -119,6 +120,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
         #edge_det_img
         self.edge_img = None
+        #noise red image filter
+        self.noise_red_img= None
         
         # create dictionaries for default plot styles
         self.markerdict = {'circle':'o', 'square':'s', 'diamond':'d', 'triangle (up)':'^', 'triangle (down)':'v', 'hexagon':'h', 'pentagon':'p'}
@@ -250,6 +253,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonAutoScale.clicked.connect(lambda: self.auto_scale(False) )
         self.toolButtonAutoScale.setChecked(True)
         self.toolButtonHistogramReset.clicked.connect(lambda: self.update_plot(reset = True))
+
+        # Noise reduction
+        self.comboBoxNRMethod.activated.connect(self.add_noise_reduction)
+        self.spinBoxSmoothingFactor.valueChanged.connect(self.add_noise_reduction)
+        self.spinBoxSmoothingFactor.setEnabled(False)
+        self.labelSF.setEnabled(False)
 
         # Spot Data Tab
         #-------------------------
@@ -892,7 +901,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             else:
                 self.plot_laser_map(current_plot_df, self.current_plot_information)
             # self.add_plot(isotope_str,clipped_isotope_array)
-
+            self.add_edge_detection()
+            self.add_noise_reduction()
 
     def crop_map(self):
         return
@@ -1764,6 +1774,66 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             zero_mask = (laplacian_image * shifted) < 0
             zero_crossings[zero_mask] = 1
         return zero_crossings 
+    
+    def add_noise_reduction(self):
+        """
+        Add noise reduction to the current laser map plot.
+        """
+        
+        algorithm = self.comboBoxNRMethod.currentText().lower()
+        
+        if self.noise_red_img:
+            # Remove existing filters
+            self.plot.removeItem(self.noise_red_img)
+            # disable smoothing factor until chosen
+            if algorithm is not 'edge-preserving':
+                self.spinBoxSmoothingFactor.setEnabled(False)
+                self.labelSF.setEnabled(False)
+        
+    
+        # Assuming self.array is the current image data
+        if algorithm == 'none':
+            return
+        if algorithm == 'median':
+            # Apply Median filter
+            filtered_image = medianBlur(self.array.astype(np.float32), 5)  # Kernel size is 5
+        elif algorithm == 'bilateral':
+            # Apply Bilateral filter
+            # Parameters are placeholders, you might need to adjust them based on your data
+            filtered_image = bilateralFilter(self.array.astype(np.float32), 9, 75, 75)
+        elif algorithm == 'wiener':
+            # Apply Wiener filter
+            # Wiener filter in scipy expects the image in double precision
+            filtered_image = wiener(self.array.astype(np.float64), (5, 5))  # Myopic deconvolution, kernel size is (5, 5)
+            filtered_image = filtered_image.astype(np.float32)  # Convert back to float32 to maintain consistency
+        elif algorithm == 'edge-preserving':
+            # Apply Edge-Preserving filter (RECURSIVE_FILTER or NORMCONV_FILTER)
+            if not self.spinBoxSmoothingFactor.isEnabled():
+                self.spinBoxSmoothingFactor.setEnabled(True)
+                self.labelSF.setEnabled(True)
+            # Normalize the array to [0, 1]
+            normalized_array = (self.array - np.min(self.array)) / (np.max(self.array) - np.min(self.array))
+            
+            # Scale to [0, 255] and convert to uint8
+            image = (normalized_array * 255).astype(np.uint8)
+            filtered_image = edgePreservingFilter(image, flags=1, sigma_s=int(self.spinBoxSmoothingFactor.value()), sigma_r=0.2)
+            
+        else:
+            raise ValueError("Unsupported algorithm. Choose 'median' or 'bilateral' or 'weiner or 'edge-preserving'.")
+    
+        # Update or create the image item for displaying the filtered image
+        self.noise_red_array = filtered_image
+        self.noise_red_img = pg.ImageItem(image=self.noise_red_array)
+        
+        # Set aspect ratio of rectangle
+        self.noise_red_img.setRect(0, 0, self.x_range, self.y_range)
+    
+        # Optionally, set a color map
+        cm = pg.colormap.get(self.cm, source='matplotlib')
+        self.noise_red_img.setColorMap(cm)
+        
+        # Add the image item to the plot
+        self.plot.addItem(self.noise_red_img)
 
     def reset_zoom(self, vb,histogram):
         vb.enableAutoRange()

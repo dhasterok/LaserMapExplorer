@@ -3528,7 +3528,7 @@
        <string/>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="SelectIsotopePage">
        <property name="enabled">
@@ -4388,12 +4388,17 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QComboBox" name="comboBox_2">
+           <widget class="QComboBox" name="comboBoxNRMethod">
             <property name="font">
              <font>
               <pointsize>11</pointsize>
              </font>
             </property>
+            <item>
+             <property name="text">
+              <string>None</string>
+             </property>
+            </item>
             <item>
              <property name="text">
               <string>Median</string>
@@ -4409,10 +4414,15 @@
               <string>Edge-preserving</string>
              </property>
             </item>
+            <item>
+             <property name="text">
+              <string>Bilateral</string>
+             </property>
+            </item>
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="label_36">
+           <widget class="QLabel" name="labelSF">
             <property name="font">
              <font>
               <pointsize>11</pointsize>
@@ -4427,12 +4437,18 @@
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QSpinBox" name="spinBox_2">
+           <widget class="QSpinBox" name="spinBoxSmoothingFactor">
             <property name="toolTip">
              <string>Set smoothing for noise reduction filter</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+            <property name="maximum">
+             <number>200</number>
+            </property>
+            <property name="value">
+             <number>30</number>
             </property>
            </widget>
           </item>
@@ -4911,7 +4927,7 @@
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>220</y>
+          <y>280</y>
           <width>301</width>
           <height>231</height>
          </rect>
@@ -4924,7 +4940,7 @@
         <property name="title">
          <string>Polygons</string>
         </property>
-        <widget class="QTableWidget" name="tableWidget">
+        <widget class="QTableWidget" name="tableWidgetPolyPoints">
          <property name="geometry">
           <rect>
            <x>10</x>
@@ -4938,6 +4954,12 @@
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
+         </property>
+         <property name="accessibleName">
+          <string>Polygon</string>
+         </property>
+         <property name="selectionBehavior">
+          <enum>QAbstractItemView::SelectRows</enum>
          </property>
          <attribute name="horizontalHeaderDefaultSectionSize">
           <number>53</number>
@@ -5538,6 +5560,56 @@
           </item>
          </layout>
         </widget>
+       </widget>
+       <widget class="QComboBox" name="comboBoxEdgeDet">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>250</y>
+          <width>101</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <property name="toolTip">
+         <string>Choose a second isotope for filtering by ratio</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>Sobel</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Canny</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Zero cross</string>
+         </property>
+        </item>
+       </widget>
+       <widget class="QLabel" name="labelScatterPlotType_2">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>220</y>
+          <width>81</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+          <bold>false</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Edge Detection</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
        </widget>
       </widget>
       <widget class="QWidget" name="ScatterPage">

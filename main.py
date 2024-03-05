@@ -19,6 +19,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.collections import PathCollection
 import matplotlib.pyplot as plt
+from matplotlib.path import Path
 from IsotopeSelectionDialog import Ui_Dialog
 from PyQt5.QtWidgets import QStyledItemDelegate
 from PyQt5.QtCore import Qt
@@ -288,6 +289,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonEdgeDetection.clicked.connect(self.add_edge_detection)
         self.comboBoxEdgeDet.activated.connect(self.add_edge_detection)
         
+        #Apply filters
+        self.toolButtonMapViewable.clicked.connect(lambda: self.apply_filters(fullmap =True))
+        self.toolButtonMapPolygon.clicked.connect(self.apply_filters)
+        
+        self.toolButtonFilterToggle.clicked.connect(self.apply_filters)
+        self.toolButtonMapMask.clicked.connect(self.apply_filters)
        
         # Scatter and Ternary Tab
         #-------------------------
@@ -1112,19 +1119,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         filter_info = {'sample_id': self.sample_id, 'isotope_1': isotope_1, 'isotope_2': isotope_2, 'ratio': ratio,'norm':norm ,'f_min': f_min,'f_max':f_max, 'use':True}
         self.filter_df.loc[len(self.filter_df)]=filter_info
-
-
-        self.update_filter_mask(self.sample_id)
-
-
-    def update_filter_mask(self,sample_id):
-        # Check if rows in self.filter_df exist and filter array in current_plot_df
-        # by creating a mask based on f_min and f_max of the corresponding filter isotopes
-        self.filter_mask = np.ones_like(self.filter_mask, dtype=bool)
-        for index, filter_row in self.filter_df.iterrows():
-            if filter_row['use'] and filter_row['sample_id'] == sample_id:
-                isotope_df = self.get_map_data(sample_id, filter_row['isotope_1'], filter_row['isotope_2'], plot_type = None,plot= False)
-                self.filter_mask = self.filter_mask & (isotope_df['array'].values <= filter_row['f_min']) | (isotope_df['array'].values >= filter_row['f_max'])
+       
 
 
     def remove_selected_rows(self,sample):
@@ -1144,8 +1139,72 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     # Remove corresponding row from filter_df
                     self.filter_df.drop(self.filter_df[(self.filter_df['sample_id'] == sample_id)
                                            & (self.filter_df['isotope_1'] == isotope_1)& (self.filter_df['isotope_2'] == isotope_2)].index, inplace=True)
-        self.update_filter_mask(sample_id)
+        self.apply_filters(sample_id)
 
+
+    def apply_filters(self, fullmap= False):
+        
+        #reset all masks
+        self.polygon_mask = np.ones_like( self.mask, dtype=bool)
+        self.filter_mask = np.ones_like( self.mask, dtype=bool)
+        
+        
+        if fullmap:
+            #user clicked on Map viewable
+            self.toolButtonFilterToggle.setChecked(False)
+            self.toolButtonMapPolygon.setChecked(False)
+            self.toolButtonMapMask.setChecked(False)
+            
+        elif self.toolButtonFilterToggle.isChecked():
+            # Check if rows in self.filter_df exist and filter array in current_plot_df
+            # by creating a mask based on f_min and f_max of the corresponding filter isotopes
+            self.filter_mask = np.ones_like(self.filter_mask, dtype=bool)
+            for index, filter_row in self.filter_df.iterrows():
+                if filter_row['use'] and filter_row['sample_id'] == self.sample_id:
+                    isotope_df = self.get_map_data(self.sample_id, filter_row['isotope_1'], filter_row['isotope_2'], plot_type = None,plot= False)
+                    self.filter_mask = self.filter_mask & (isotope_df['array'].values <= filter_row['f_min']) | (isotope_df['array'].values >= filter_row['f_max'])
+        elif self.toolButtonMapPolygon.isChecked():
+            # apply polygon mask
+            # Iterate through each polygon in self.polygons
+            for row in range(self.tableWidgetPolyPoints.rowCount()):
+                #check if checkbox is checked
+                use = self.tableWidgetPolyPoints.item(row,4)
+                
+                if use.checkState() == Qt.Checked:
+                    p_id = int(self.tableWidgetPolyPoints.item(row,0).text())
+            
+                    polygon_points = self.polygon.polygons[p_id] 
+                    polygon_points = [(x,y) for x,y,_ in polygon_points]
+                    
+                    # Convert the list of (x, y) tuples to a list of points acceptable by Path
+                    path = Path(polygon_points)
+                    
+                    # Create a grid of points covering the entire array
+                    # x, y = np.meshgrid(np.arange(self.array.shape[1]), np.arange(self.array.shape[0]))
+                    
+                    points = np.vstack((self.x.flatten(), self.y.flatten())).T
+                    
+                    # Use the path to determine which points are inside the polygon
+                    inside_polygon = path.contains_points(points)
+                    
+                    # Reshape the result back to the shape of self.array
+                    # inside_polygon_mask = inside_polygon.reshape(self.array.shape)
+                    
+                    # Update the polygon mask - include points that are inside this polygon
+                    self.polygon_mask &= inside_polygon
+                    
+        elif self.toolButtonMapMask.isChecked():
+            # apply map mask
+            pass
+        
+        
+
+            
+            
+        
+        
+        self.mask = self.filter_mask & self.polygon_mask & self.axis_mask
+        self.update_plot()
 
     def dynamic_format(self,value, threshold=1e3):
         if abs(value) > threshold:
@@ -1324,11 +1383,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         plot_type = plot_information['plot_type']
 
         view = self.canvasWindow.currentIndex()
-        array = np.reshape(current_plot_df['array'].values,
-                                    (current_plot_df['Y'].nunique(),
-                                     current_plot_df['X'].nunique()), order=self.order)
+        
         self.x_range = current_plot_df['X'].max() - current_plot_df['X'].min()
         self.y_range = current_plot_df['Y'].max() - current_plot_df['Y'].min()
+        self.x = current_plot_df['X'].values
+        self.y = current_plot_df['Y'].values
+        self.array_size = (current_plot_df['Y'].nunique(),current_plot_df['X'].nunique())
+        
+        array = np.reshape(current_plot_df['array'].values,
+                                    self.array_size, order=self.order)
         duplicate = False
         plot_exist = False
         if plot_name in self.plot_widget_dict[plot_type][sample_id]:
@@ -1340,15 +1403,36 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if plot_exist and not duplicate:
             widget_info = self.plot_widget_dict[plot_type][sample_id][plot_name]
             for widgetLaserMap, view in zip(widget_info['widget'],widget_info['view']):
+                
+                # Step 1: Normalize your data array for colormap application
+                norm = Normalize(vmin=array.min(), vmax=array.max())
+                cmap = plt.get_cmap(self.cm)  # Assuming self.cm is a valid colormap name
+            
+                # Step 2: Apply the colormap to get RGB values, then normalize to [0, 255] for QImage
+                rgb_array = cmap(norm(array))[:, :, :3]  # Drop the alpha channel returned by cmap
+                rgb_array = (rgb_array * 255).astype(np.uint8)
+            
+                # Step 3: Create an RGBA array where the alpha channel is based on self.mask
+                rgba_array = np.zeros((*rgb_array.shape[:2], 4), dtype=np.uint8)
+                rgba_array[:, :, :3] = rgb_array  # Set RGB channels
+                
+                mask_r = np.reshape(self.mask,
+                                    self.array_size, order=self.order)
+                
+                
+                rgba_array[:, :, 3] = np.where(mask_r, 255, 100)  # Set alpha channel based on self.mask
+                            
+                
+                
                 glw = widgetLaserMap.findChild(pg.GraphicsLayoutWidget, 'plotLaserMap')
                 p1 = glw.getItem(0, 0)  # Assuming ImageItem is the first item in the plot
                 img = p1.items[0]
-                img.setImage(image=array)
+                img.setImage(image=rgba_array)
                 p1.invertY(True)   # vertical axis counts top to bottom
                 #set aspect ratio of rectangle
                 img.setRect(0,0,self.x_range,self.y_range)
                 cm = pg.colormap.get(self.cm, source = 'matplotlib')
-                img.setColorMap(cm)
+                # img.setColorMap(cm)
                 histogram = widgetLaserMap.findChild(pg.HistogramLUTWidget, 'histogram')
                 if view ==0:
                     # update variables which stores current plot in SV
@@ -1380,18 +1464,44 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             else:
                 self.plot_widget_dict[plot_type][sample_id][plot_name] = {'widget':[widgetLaserMap],
                                                       'info':plot_information, 'view':[view]}
+            
+            
+            #Change transparency of values outside mask
+            # Step 1: Normalize your data array for colormap application
+            norm = Normalize(vmin=array.min(), vmax=array.max())
+            cmap = plt.get_cmap(self.cm)  # Assuming self.cm is a valid colormap name
+        
+            # Step 2: Apply the colormap to get RGB values, then normalize to [0, 255] for QImage
+            rgb_array = cmap(norm(array))[:, :, :3]  # Drop the alpha channel returned by cmap
+            rgb_array = (rgb_array * 255).astype(np.uint8)
+        
+            # Step 3: Create an RGBA array where the alpha channel is based on self.mask
+            rgba_array = np.zeros((*rgb_array.shape[:2], 4), dtype=np.uint8)
+            rgba_array[:, :, :3] = rgb_array  # Set RGB channels
+            mask_r = np.reshape(self.mask,
+                                self.array_size, order=self.order)
+            
+            
+            rgba_array[:, :, 3] = np.where(mask_r, 255, 100)  # Set alpha channel based on self.mask
+                        
+                
+                
+            
             # self.array = array[:, ::-1]
             layout = widgetLaserMap.layout()
             glw = pg.GraphicsLayoutWidget(show=True)
             glw.setObjectName('plotLaserMap')
             # Create the ImageItem
-            img = pg.ImageItem(image=array)
+            img = pg.ImageItem(image=rgba_array)
 
             #set aspect ratio of rectangle
             img.setRect(0,0,self.x_range,self.y_range)
             # img.setAs
             cm = pg.colormap.get(self.cm, source = 'matplotlib')
-            img.setColorMap(cm)
+            # img.setColorMap(cm)
+
+            
+            
             # img.setLookupTable(cm.getLookupTable())
             #--- add non-interactive image with integrated color ------------------
             p1 = glw.addPlot(0,0,title=plot_name.replace('_',' '))
@@ -1786,7 +1896,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # Remove existing filters
             self.plot.removeItem(self.noise_red_img)
             # disable smoothing factor until chosen
-            if algorithm is not 'edge-preserving':
+            if algorithm != 'edge-preserving':
                 self.spinBoxSmoothingFactor.setEnabled(False)
                 self.labelSF.setEnabled(False)
         
@@ -3182,7 +3292,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         use_isotopes = self.isotopes_df.loc[(self.isotopes_df['use']==True) & (self.isotopes_df['sample_id']==self.sample_id), 'isotopes'].values
         # Combine the two masks to create a final mask
         nan_mask = self.processed_isotope_data[self.sample_id][use_isotopes].notna().all(axis=1)
-        self.mask = self.filter_mask & self.polygon_mask  & nan_mask & self.axis_mask
+        
+        # mask nan values and add to self.mask
+        self.mask = self.mask  & nan_mask.values 
 
         df_filtered = self.processed_isotope_data[self.sample_id][use_isotopes]
 
@@ -3590,8 +3702,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.filter_mask = np.ones_like( self.sample_data_dict[self.sample_id]['X'].values, dtype=bool)
             self.polygon_mask = np.ones_like( self.sample_data_dict[self.sample_id]['X'], dtype=bool)
             self.axis_mask = np.ones_like( self.sample_data_dict[self.sample_id]['X'], dtype=bool)
-
-
+            self.mask = self.filter_mask & self.polygon_mask & self.axis_mask
+            
             self.comboBoxFIsotope.clear()
             self.comboBoxNDimIsotope.clear()
             # self.comboBoxFIsotope_2.clear()
@@ -3856,8 +3968,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             # Return df for analysis
             ## filter current_plot_df based on active filters
-            mask = self.filter_mask & self.polygon_mask & self.axis_mask
-            current_plot_df['array'] = np.where(mask, current_plot_df['array'], np.nan)
+            current_plot_df['array'] = np.where(self.mask, current_plot_df['array'], np.nan)
             return current_plot_df
         if plot:
             self.add_plot(plot_information, current_plot_df)
@@ -4611,11 +4722,6 @@ class Polygon:
         self.p_id = self.p_id_gen
         
     
-    
-    def activate_zoom_window(self):
-        if self.main_window.toolButtonMapPolygon.isChecked:
-            self.main_window.zoomViewBox.show()
-            
     def plot_polygon_scatter(self, event,k, x, y, x_i, y_i):
         self.array_x = self.main_window.array.shape[1]
         self.array_y = self.main_window.array.shape[0]
@@ -4850,15 +4956,12 @@ class Polygon:
             chkBoxItem_select.setFlags(QtCore.Qt.ItemIsUserCheckable |
                                QtCore.Qt.ItemIsEnabled)
 
-
+            chkBoxItem_select.setCheckState(QtCore.Qt.Checked)
+            
             self.main_window.tableWidgetPolyPoints.setItem(row_position, 4, chkBoxItem_select)
             
             
-            chkBoxItem_select = QTableWidgetItem()
-            chkBoxItem_select.setFlags(QtCore.Qt.ItemIsUserCheckable |
-                                QtCore.Qt.ItemIsEnabled)
 
-            chkBoxItem_select.setCheckState(QtCore.Qt.Unchecked)
         
         # def on_use_checkbox_state_changed(row, state):
         #     # Update the 'use' value in the filter_df for the given row

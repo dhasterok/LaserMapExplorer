@@ -183,6 +183,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #-------------------------
         self.ref_data = pd.read_excel('resources/app_data/earthref.xlsx')
         ref_list = self.ref_data['layer']+' ['+self.ref_data['model']+'] '+ self.ref_data['reference']
+        self.comboBoxCorrelationMethod.activated.connect(self.plot_correlation)
 
         self.comboBoxRefMaterial.addItems(ref_list.values)          # Select Isotope Tab
         self.comboBoxNDimRefMaterial.addItems(ref_list.values)      # NDim Tab
@@ -332,6 +333,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # PCA Tab
         #------------------------
+        self.toolButtonPCAPlot.clicked.connect(self.plot_pca)
 
         # Clustering Tab
         #-------------------------
@@ -466,12 +468,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.actionCalculator.triggered.connect(self.open_calculator)
 
-        # PCA components
-        #-------------------------
-
-        self.toolButtonPCAPlot.clicked.connect(self.plot_pca)
-
         self.toolbox_changed()
+
 
     def toolbox_changed(self):
         """Updates styles associated with toolbox page"""
@@ -1330,7 +1328,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # self.selected_directory='/Users/a1904121/LaserMapExplorer/laser_mapping/Alex_garnet_maps/processed data'
         # self.selected_directory='/Users/shavinkalu/Library/CloudStorage/GoogleDrive-a1904121@adelaide.edu.au/.shortcut-targets-by-id/1r_MeSExALnv9lHE58GoG7pbtC8TOwSk4/laser_mapping/Alex_garnet_maps/processed data'
         # self.selected_directory=''
-        file_list = os.listdir(self.selected_directory)
+        try:
+            file_list = os.listdir(self.selected_directory)
+        except:
+            return
         self.csv_files = [file for file in file_list if file.endswith('.csv')]
         self.comboBoxSampleId.clear()
         self.comboBoxSampleId.addItems([os.path.splitext(file)[0] for file in self.csv_files])
@@ -1338,7 +1339,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.canvasWindow.setCurrentIndex(0)
         self.change_sample(0)
 
-        self.toolBox.setCurrentIndex(0)
+        self.toolBox.setCurrentIndex(self.sample_tab_id)
 
         self.SelectIsotopePage.setEnabled(True)
         self.PreprocessPage.setEnabled(True)
@@ -2017,80 +2018,118 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
     def update_pca_plot(self, pca_dict, pca_plot_type, ax):
-        if pca_plot_type == 'Variance':
 
-            # pca_dict contains variance ratios for the principal components
-            variances = pca_dict['explained_variance_ratio']
-            cumulative_variances = variances.cumsum()  # Calculate cumulative explained variance
+        isotopes = self.isotopes_df[self.isotopes_df['sample_id']==self.sample_id]['isotopes']
+        n_components = range(1, len(pca_dict['explained_variance_ratio'])+1)
+        match pca_plot_type:
+            case 'Variance':
+                s = self.scatter_style[self.pca_tab_id]
 
-            # Number of principal components
-            n_components = range(1, len(variances) + 1)
+                # pca_dict contains variance ratios for the principal components
+                variances = pca_dict['explained_variance_ratio']
+                cumulative_variances = variances.cumsum()  # Calculate cumulative explained variance
 
-            # Plotting the explained variance
-            ax.plot(n_components, variances, marker='o', linestyle='-', color='b', label='Explained Variance')
+                # Plotting the explained variance
+                ax.plot(n_components, variances, linestyle='-', linewidth=s['LineWidth'],
+                    marker=self.markerdict[s['Marker']], markeredgecolor=s['Color'], markerfacecolor='none', markersize=s['Size'],
+                    color=s['Color'], label='Explained Variance')
 
-            # Plotting the cumulative explained variance
-            ax.plot(n_components, cumulative_variances, marker='s', linestyle='--', color='r', label='Cumulative Explained Variance')
+                # Plotting the cumulative explained variance
+                ax.plot(n_components, cumulative_variances, linestyle='-', linewidth=s['LineWidth'],
+                    marker=self.markerdict[s['Marker']], markersize=s['Size'],
+                    color=s['Color'], label='Cumulative Variance')
 
-            # Adding labels, title, and legend
-            ax.set_xlabel('Principal Component')
-            ax.set_ylabel('Variance Ratio')
-            ax.set_title('PCA Variance Explained')
-            ax.set_xticks(n_components)
-            ax.set_xticklabels([f'PC{i}' for i in range(1, len(variances) + 1)], rotation=45)
-            ax.legend()
+                # Adding labels, title, and legend
+                xlbl = 'Principal Component'
+                ylbl = 'Variance Ratio'
+                ttxt = 'PCA Variance Explained'
 
-            # Adjust the y-axis limit to make sure the plot includes all markers and lines
-            ax.set_ylim([0, 1.05])  # Assuming variance ratios are between 0 and 1
-        elif pca_plot_type == 'Vectors':
-            # pca_dict contains 'components_' from PCA analysis with columns for each variable
-            components = pca_dict['components_']  # No need to transpose for heatmap representation
+                ax.legend()
 
-            # Number of components and variables
-            n_components = components.shape[0]
-            n_variables = components.shape[1]
+                # Adjust the y-axis limit to make sure the plot includes all markers and lines
+                ax.set_ylim([0, 1.0])  # Assuming variance ratios are between 0 and 1
+            case 'Vectors':
+                s = self.heatmap_style[self.pca_tab_id]
+                # pca_dict contains 'components_' from PCA analysis with columns for each variable
+                components = pca_dict['components_']  # No need to transpose for heatmap representation
 
-            cmap = plt.get_cmap(self.cm)
-            cax = ax.imshow(components, cmap=cmap, aspect='auto')
-            fig = ax.get_figure()
-            # Adding a colorbar at the bottom of the plot
-            cbar = fig.colorbar(cax, orientation='horizontal', pad=0.2)
-            cbar.set_label('PCA Score')
+                # Number of components and variables
+                n_components = components.shape[0]
+                n_variables = components.shape[1]
 
-            # Setting the labels for x and y axes
-            ax.set_xticks(np.arange(n_components))
-            ax.set_yticks(np.arange(n_variables))
+                cmap = plt.get_cmap(self.cm)
+                cax = ax.imshow(components, cmap=plt.get_cmap(s['Colormap']), aspect=1.0)
+                fig = ax.get_figure()
+                # Adding a colorbar at the bottom of the plot
+                cbar = fig.colorbar(cax, orientation='vertical', pad=0.2)
+                cbar.set_label('PCA Score')
 
-            ax.set_xticklabels([f'PC{i+1}' for i in range(n_components)])
-            ax.set_yticklabels([f'Var{i+1}' for i in range(n_variables)], rotation=45)
+                xlbl = 'Principal Components'
+                ylbl = 'Variables'
+                ttxt = 'PCA Components Heatmap'
 
-            ax.set_xlabel('Principal Components')
-            ax.set_ylabel('Variables')
-            ax.set_title('PCA Components Heatmap')
+                # Optional: Rotate x-axis labels for better readability
+                # plt.xticks(rotation=45)
+            case 'PC X vs. PC Y':
+                pc_x = int(self.spinBoxPCX.value())
+                pc_y = int(self.spinBoxPCY.value())
+                pca_df = pca_dict['results']
+                # Assuming pca_df contains scores for the principal components
+                ax.scatter(pca_df[f'PC{pc_x}'], pca_df[f'PC{pc_y}'])
+                ax.set_xlabel(f'PC{pc_x}')
+                ax.set_ylabel(f'PC{pc_y}')
+                ax.set_title(f'PCA Plot: PC{pc_x} vs PC{pc_y}')
+            case 'PC X Score Map':
+                pc_x = int(self.spinBoxPCX.value())
+                pca_df = pca_dict['results']
+                # Assuming pca_df contains scores for the principal components
+                ax.bar(range(len(pca_df)), pca_df[f'PC{pc_x}'])
+                ax.set_xlabel('Sample Index')
+                ax.set_ylabel(f'PC{pc_x} Score')
+                ax.set_title(f'PCA Score Map for PC{pc_x}')
+            case _:
+                print(f"Unknown PCA plot type: {pca_plot_type}")
 
-            # Optional: Rotate x-axis labels for better readability
-            # plt.xticks(rotation=45)
-        elif pca_plot_type == 'PC X vs. PC Y':
-            pc_x = int(self.spinBoxPCX.value())
-            pc_y = int(self.spinBoxPCY.value())
-            pca_df = pca_dict['results']
-            # Assuming pca_df contains scores for the principal components
-            ax.scatter(pca_df[f'PC{pc_x}'], pca_df[f'PC{pc_y}'])
-            ax.set_xlabel(f'PC{pc_x}')
-            ax.set_ylabel(f'PC{pc_y}')
-            ax.set_title(f'PCA Plot: PC{pc_x} vs PC{pc_y}')
-        elif pca_plot_type == 'PC X Score Map':
-            pc_x = int(self.spinBoxPCX.value())
-            pca_df = pca_dict['results']
-            # Assuming pca_df contains scores for the principal components
-            ax.bar(range(len(pca_df)), pca_df[f'PC{pc_x}'])
-            ax.set_xlabel('Sample Index')
-            ax.set_ylabel(f'PC{pc_x} Score')
-            ax.set_title(f'PCA Score Map for PC{pc_x}')
-        else:
-            print(f"Unknown PCA plot type: {pca_plot_type}")
+        # labels
+        font = {'size':self.general_style['FontSize']}
+        ax.set_xlabel(xlbl, fontdict=font)
+        ax.set_ylabel(ylbl, fontdict=font)
+        ax.set_title(ttxt, fontdict=font)
 
-    def plot_correlation(self, plot =False):
+        match pca_plot_type:
+            case 'Variance' | 'PC X vs. PC Y':
+                # tick marks
+                ax.tick_params(direction=self.general_style['TickDir'],
+                    labelsize=self.general_style['FontSize'],
+                    labelbottom=True, labeltop=False, labelleft=True, labelright=False,
+                    bottom=True, top=True, left=True, right=True)
+
+                ax.set_xticks(range(1, len(n_components) + 1, 5))
+                ax.set_xticks(n_components, minor=True)
+
+                # aspect ratio
+                ax.set_box_aspect(s['AspectRatio'])
+            case 'Vectors':
+                ax.tick_params(axis='x', direction=self.general_style['TickDir'],
+                                labelsize=self.general_style['FontSize'],
+                                labelbottom=True, labeltop=False,
+                                bottom=True, top=True)
+
+                ax.tick_params(axis='y', length=0, direction=self.general_style['TickDir'],
+                                labelsize=8,
+                                labelleft=True, labelright=False,
+                                left=True, right=True)
+
+                ax.set_xticks(range(1, n_components+1, 5))
+                ax.set_xticks(range(1, n_components+1, 1), minor=True)
+
+                #ax.set_yticks(n_components, labels=[f'Var{i+1}' for i in range(len(n_components))])
+                ax.set_yticks(range(1, n_variables+1,1), minor=False)
+                ax.set_yticklabels(isotopes)
+            case 'PC X Score Map':
+                ax.tick_params(direction='none', labelbottom=False, labeltop=False, labelright=False, labelleft=False)
+
+    def plot_correlation(self, plot=False):
         correlation_dict = {}
 
         df_filtered, isotopes = self.get_processed_data()
@@ -2148,26 +2187,46 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.update_tree(plot_information['plot_name'], data=plot_information, tree='Correlation')
 
     def update_correlation_plot(self, correlation_dict, ax):
-        cmap = plt.get_cmap(self.cm)
+        if self.comboBoxCorrelationMethod.currentText().lower == 'none':
+            return
+
+        s = self.heatmap_style[self.sample_tab_id]
+        cmap = plt.get_cmap(s['Colormap'])
         correlation_matrix = correlation_dict['correlation_matrix']
-        cax = ax.imshow(correlation_matrix, cmap=cmap, aspect='auto')
+        cax = ax.imshow(correlation_matrix, cmap=plt.get_cmap(s['Colormap']))
 
         fig = ax.get_figure()
         # Add colorbar to the plot
         cbar = fig.colorbar(cax, ax=ax)
-        cbar.set_label('Correlation coefficient')
+        cbar.set_label(['Corr. coeff. ('+self.comboBoxCorrelationMethod.currentText(),')'])
 
         # Set tick labels
         ticks = np.arange(len(correlation_matrix.columns))
-        ax.set_xticks(ticks)
-        ax.set_yticks(ticks)
-        ax.set_xticklabels(correlation_matrix.columns, rotation=45, ha='right')
-        ax.set_yticklabels(correlation_matrix.columns)
+        ax.tick_params(length=0, labelsize=8,
+                        labelbottom=False, labeltop=True, labelleft=False, labelright=True,
+                        bottom=False, top=True, left=False, right=True)
 
-        ax.set_title('Correlation Matrix Heatmap')
+        ax.set_yticks(ticks, minor=False)
+        ax.set_xticks(ticks, minor=False)
+
+        ax.set_xticklabels(correlation_matrix.columns, ha='left')
+        ax.set_yticklabels(correlation_matrix.columns, rotation=90, ha='left')
+
+        ax.set_title('Correlation Matrix')
 
     def plot_histogram(self, current_plot_df, plot_information, bin_width):
-
+        """Displays histogram for current selected isotope.
+        
+        Parameter
+        ---------
+        
+        current_plot_df: pandas.DataFrame
+            current active plot
+        plot_information: dict
+            dictionary with information about plot widget
+        bin_width: double
+            width of histogram bins
+        """
         mask = self.filter_mask & self.polygon_mask & current_plot_df['array'].notna()
 
 
@@ -2978,7 +3037,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             plot_information = {
                 'plot_name': plot_name,
                 'sample_id': self.sample_id,
-                'plot_type': 'heatmap',
+                'plot_type': 'scatter',
                 'values': (x, y),
                 'fig': fig,
                 'colorbar': cb
@@ -2992,13 +3051,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             new = True
             labels = [x['field'], y['field'], z['field']]
             fig = Figure(figsize=(6, 4))
-            ax = fig.subplots()
-            tp = ternary(ax, labels, 'heatmap')
         else:
             new = False
 
         if len(c['array']) == 0:
-            hexbin_df, cb = tp.ternhex(a=x['array'], b=y['array'], c=np.log10(z['array']),
+            ax = fig.subplots()
+            tp = ternary(ax, labels, 'heatmap')
+
+            hexbin_df, cb = tp.ternhex(a=x['array'], b=y['array'], c=z['array'],
                 bins=s['Resolution'],
                 plotfield='n',
                 cmap=s['Colormap'],
@@ -3007,13 +3067,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #norm = plt.Normalize(vmin=0, vmax=3)
             #scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(s['Colormap']), norm=norm)
             #cb = fig.colorbar(scalarMappable, ax=, orientation='vertical', location='right', shrink=0.62)
-            #cb.set_label('log(N)')
+            cb.set_label('log(N)')
         else:
+            axs = fig.subplot_mosaic([['left','upper right'],['left','lower right']], layout='constrained', width_ratios=[1.5, 1])
+
+            for idx, ax in enumerate(axs):
+                tps[idx] = ternary(ax, labels, 'heatmap')
+
             hexbin_df = ternary.ternhex(a=x['array'], b=y['array'], c=z['array'], val=c['array'], bins=s['Resolution'])
 
             cb.set_label(c['label'])
 
-            tp.ternhex(hexbin_df=hexbin_df, plotfield='n', cmap=s['Colormap'], orientation='vertical')
+            #tp.ternhex(hexbin_df=hexbin_df, plotfield='n', cmap=s['Colormap'], orientation='vertical')
 
         if new:
             plot_name = f"{x['field']}_{y['field']}_{z['field']}_{'heatmap'}"
@@ -3038,7 +3103,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # get saved scatter values to update plot
             a, b, c,  = values
 
-        selected_sample = self.sample_data_dict[sample_id]
+        selected_sample = self.sample_data_dict[self.sample_id]
 
         df = selected_sample[['X','Y']]
         
@@ -3635,7 +3700,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
     def change_sample(self, index):
-
+        """Changes sample and plots first map
+        
+        Parameter
+        ---------
+        index: int
+            index of sample name for identifying data.  The values are based on the
+            comboBoxSampleID
+        """
         file_path = os.path.join(self.selected_directory, self.csv_files[index])
         self.sample_id = os.path.splitext(self.csv_files[index])[0]
 
@@ -3740,7 +3812,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             self.update_spinboxes_bool = True  # Place this line at end of method
 
-            self.plot_correlation()
+            if self.comboBoxCorrelationMethod.currentText().lower() != 'none':
+                self.plot_correlation()
 
 
     def update_combo_boxes(self, parentBox, childBox):

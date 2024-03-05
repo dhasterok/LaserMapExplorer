@@ -46,7 +46,9 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from cv2 import Canny, Sobel, CV_64F, bilateralFilter, medianBlur, edgePreservingFilter
 from scipy.signal import convolve2d, wiener
-
+from PyQt5.QtWidgets import QGraphicsRectItem
+from PyQt5.QtCore import QRectF, Qt
+from PyQt5.QtGui import QPen, QColor
 
 
 pg.setConfigOption('imageAxisOrder', 'row-major') # best performance
@@ -183,7 +185,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #-------------------------
         self.ref_data = pd.read_excel('resources/app_data/earthref.xlsx')
         ref_list = self.ref_data['layer']+' ['+self.ref_data['model']+'] '+ self.ref_data['reference']
-        self.comboBoxCorrelationMethod.activated.connect(self.plot_correlation)
+        # self.comboBoxCorrelationMethod.activated.connect(self.plot_correlation)
 
         self.comboBoxRefMaterial.addItems(ref_list.values)          # Select Isotope Tab
         self.comboBoxNDimRefMaterial.addItems(ref_list.values)      # NDim Tab
@@ -262,6 +264,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.spinBoxSmoothingFactor.setEnabled(False)
         self.labelSF.setEnabled(False)
 
+        
+        # Initiate crop tool
+        self.crop_tool = Crop_tool(self)
+        
+        #Should be deleted once cropping works
+        # self.toolButtonCrop.clicked.connect(self.crop_map)
+        self.comboBoxScatterSelectX.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectX, self.comboBoxScatterIsotopeX))
+        self.comboBoxScatterSelectY.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectY, self.comboBoxScatterIsotopeY))
+        self.comboBoxScatterSelectZ.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectZ, self.comboBoxScatterIsotopeZ))
+        self.comboBoxColorByField.activated.connect(lambda: self.update_combo_boxes(self.comboBoxColorByField, self.comboBoxColorField))
+
+
+
+
         # Spot Data Tab
         #-------------------------
 
@@ -292,22 +308,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
         #Apply filters
         self.toolButtonMapViewable.clicked.connect(lambda: self.apply_filters(fullmap =True))
-        self.toolButtonMapPolygon.clicked.connect(self.apply_filters)
+        self.toolButtonMapPolygon.clicked.connect(lambda: self.apply_filters(fullmap =False))
         
-        self.toolButtonFilterToggle.clicked.connect(self.apply_filters)
-        self.toolButtonMapMask.clicked.connect(self.apply_filters)
+        self.toolButtonFilterToggle.clicked.connect(lambda:self.apply_filters(fullmap =False))
+        self.toolButtonMapMask.clicked.connect(lambda:self.apply_filters(fullmap =False))
        
         # Scatter and Ternary Tab
         #-------------------------
         self.toolButtonPlotScatter.clicked.connect(lambda: self.plot_scatter(save=True))
         self.toolButtonTernaryMap.clicked.connect(self.plot_ternarymap)
 
-        #Should be deleted once cropping works
-        self.toolButtonCrop.clicked.connect(self.crop_map)
-        self.comboBoxScatterSelectX.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectX, self.comboBoxScatterIsotopeX))
-        self.comboBoxScatterSelectY.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectY, self.comboBoxScatterIsotopeY))
-        self.comboBoxScatterSelectZ.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectZ, self.comboBoxScatterIsotopeZ))
-        self.comboBoxColorByField.activated.connect(lambda: self.update_combo_boxes(self.comboBoxColorByField, self.comboBoxColorField))
 
         # ternary colormaps
         # create ternary colors dictionary
@@ -909,8 +919,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.add_edge_detection()
             self.add_noise_reduction()
 
-    def crop_map(self):
-        return
+
 
 
 
@@ -1194,13 +1203,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         elif self.toolButtonMapMask.isChecked():
             # apply map mask
             pass
-        
-        
 
-            
-            
-        
-        
         self.mask = self.filter_mask & self.polygon_mask & self.axis_mask
         self.update_plot()
 
@@ -1618,6 +1621,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                             self.update_zoom_view_position(x, y)
                             self.zoomViewBox.show()
                             self.polygon.show_polygon_lines(x,y)
+                        elif self.toolButtonCrop.isChecked() and self.crop_tool.start_pos: 
+                            self.crop_tool.expand_rect(pos_view)
                         else:
                             # hide zoom view
                             self.zoomViewBox.hide()
@@ -1656,13 +1661,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         x_i = round(x*self.array_x/self.x_range)
         y_i = round(y*self.array_y/self.y_range)
 
-                # Ensure indices are within plot bounds
+        # Ensure indices are within plot bounds
         if not(0 <= x_i < self.array_x) or not(0 <= y_i < self.array_y):
             #do nothing
             return
 
+        elif self.toolButtonCrop.isChecked():
+            self.crop_tool.create_rect(event, click_pos)
         # if event.button() == QtCore.Qt.LeftButton and self.main_window.pushButtonStartProfile.isChecked():
-        if self.toolButtonPlotProfile.isChecked() or self.toolButtonPointMove.isChecked():
+        elif self.toolButtonPlotProfile.isChecked() or self.toolButtonPointMove.isChecked():
             self.profiling.plot_profile_scatter(event, array, k, plot, x, y,x_i, y_i)
         
         elif self.toolButtonPolyCreate.isChecked() or self.toolButtonPolyMovePoint.isChecked() or self.toolButtonPolyAddPoint.isChecked() or self.toolButtonPolyRemovePoint.isChecked():
@@ -1722,7 +1729,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             cbar.setObjectName('colorbar')
             cbar.setImageItem(img, insert_in=p1)
             cbar.setLevels([array.min(), array.max()])
-
+    
+        
 
     # def setup_zoom_window(self, layout):
     #     # Create a GraphicsLayoutWidget for the zoom window
@@ -4776,8 +4784,41 @@ class Table_Fcn:
                             plot.removeItem(line)
                         self.main_window.polygon.lines[p_id] = []
 
-                    
-                
+
+class Crop_tool:
+    def __init__(self, main_window):
+       self.crop_rect = None  # To store the cropping rectangle
+       self.start_pos = None  # Starting position of the crop
+       self.end_pos = None  # End position of the crop
+       self.main_window = main_window
+    def create_rect (self, event, click_pos):
+        if event.button() == Qt.LeftButton:
+            # Start cropping
+           if not self.start_pos:
+               self.start_pos = click_pos
+               self.crop_rect = QGraphicsRectItem(QRectF(self.start_pos, self.start_pos))
+               self.crop_rect.setPen(QPen(QColor(255, 255, 255), 2, Qt.DashLine))
+               self.main_window.plot.addItem(self.crop_rect)
+           else:
+               # End cropping
+               self.end_pos = click_pos
+               self.apply_crop()
+        
+    def expand_rect(self, current_pos):
+        if self.start_pos and not self.end_pos:
+            # Update the cropping rectangle while dragging
+            self.crop_rect.setRect(QRectF(self.start_pos, current_pos).normalized())
+            
+            
+    def crop_map(self):
+        # create a rectangle with start point being location user clicked on screen
+        # expand rectangle as user moves mouse 
+        # stop at location where user deselects mouse
+        # change transparency of region outside rectangle 
+        # allow the user to expand/reduce size of rectangle 
+        # by selecting on top left of rectangle or bottom right of rectangle
+        
+        return
 
 class Polygon:
     def __init__(self, main_window):
@@ -5033,7 +5074,7 @@ class Polygon:
             
             self.main_window.tableWidgetPolyPoints.setItem(row_position, 4, chkBoxItem_select)
             
-            
+            chkBoxItem_select.stateChanged.connect(self.main_window.apply_filters(fullmap = False))
 
         
         # def on_use_checkbox_state_changed(row, state):

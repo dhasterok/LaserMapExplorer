@@ -47,8 +47,8 @@ from sklearn.decomposition import PCA
 from cv2 import Canny, Sobel, CV_64F, bilateralFilter, medianBlur, edgePreservingFilter
 from scipy.signal import convolve2d, wiener
 from PyQt5.QtWidgets import QGraphicsRectItem
-from PyQt5.QtCore import QRectF, Qt
-from PyQt5.QtGui import QPen, QColor
+from PyQt5.QtCore import QRectF, Qt, QPointF
+from PyQt5.QtGui import QPen, QColor, QCursor
 
 
 pg.setConfigOption('imageAxisOrder', 'row-major') # best performance
@@ -269,7 +269,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.crop_tool = Crop_tool(self)
         
         #Should be deleted once cropping works
-        # self.toolButtonCrop.clicked.connect(self.crop_map)
+        self.toolButtonCrop.clicked.connect(self.crop_tool.init_crop)
+        self.toolButtonCropApply.clicked.connect(self.crop_tool.apply_crop)
+        self.toolButtonCropApply.setEnabled(False)
+        
         self.comboBoxScatterSelectX.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectX, self.comboBoxScatterIsotopeX))
         self.comboBoxScatterSelectY.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectY, self.comboBoxScatterIsotopeY))
         self.comboBoxScatterSelectZ.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectZ, self.comboBoxScatterIsotopeZ))
@@ -627,10 +630,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def reset_to_full_view(self):
         """Reset the map to full view (i.e., remove crop)"""
-        self.spinBox_X.setValue(self.spinBox_X.minimum())
-        self.spinBoxX.setValue(self.spinBoxX.maximum())
-        self.spinBox_Y.setValue(self.spinBox_Y.minimum())
-        self.spinBoxY.setValue(self.spinBoxY.maximum())
+        # self.spinBox_X.setValue(self.spinBox_X.minimum())
+        # self.spinBoxX.setValue(self.spinBoxX.maximum())
+        # self.spinBox_Y.setValue(self.spinBox_Y.minimum())
+        # self.spinBoxY.setValue(self.spinBoxY.maximum())
 
         self.update_all_plots()
 
@@ -872,8 +875,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             d_lb = self.doubleSpinBoxDLB.value()
             d_ub = self.doubleSpinBoxDUB.value()
 
-            x_range = [self.spinBox_X.value(),self.spinBoxX.value()]
-            y_range = [self.spinBox_Y.value(),self.spinBoxY.value()]
+
             bins = self.spinBoxNBins.value()
             isotope_str = self.current_plot
             isotope_str_list = isotope_str.split('_')
@@ -890,12 +892,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             data_range = current_plot_df['array'].max() - current_plot_df['array'].min()
             #change axis range for all plots in sample
             if axis:
-                self.isotopes_df.loc[(self.isotopes_df['sample_id']==sample_id), ['x_min','x_max','y_min','y_max']] = [x_range[0],x_range[1],y_range[0],y_range[1]]
+                print(self.crop_x_min)
+                self.isotopes_df.loc[(self.isotopes_df['sample_id']==sample_id), ['x_min','x_max','y_min','y_max']] = [self.crop_x_min,self.crop_x_max,self.crop_y_min,self.crop_y_max]
 
-                self.ratios_df.loc[(self.ratios_df['sample_id']==sample_id), ['x_min','x_max','y_min','y_max']] = [x_range[0],x_range[1],y_range[0],y_range[1]]
+                self.ratios_df.loc[(self.ratios_df['sample_id']==sample_id), ['x_min','x_max','y_min','y_max']] = [self.crop_x_min,self.crop_x_max,self.crop_y_min,self.crop_y_max]
                 # Filtering rows based on the conditions on 'X' and 'Y' columns
-                self.axis_mask = ((current_plot_df['X'] >= x_range[0]) & (current_plot_df['X'] <= x_range[1]) &
-                               (current_plot_df['Y'] <= current_plot_df['Y'].max() - y_range[0]) & (current_plot_df['Y'] >= current_plot_df['Y'].max() - y_range[1]))
+                self.axis_mask = ((current_plot_df['X'] >= self.crop_x_min) & (current_plot_df['X'] <= self.crop_x_max) &
+                               (current_plot_df['Y'] <= current_plot_df['Y'].max() - self.crop_y_min) & (current_plot_df['Y'] >= current_plot_df['Y'].max() - self.crop_y_max))
 
 
             self.clipped_isotope_data[sample_id][isotope_1] = current_plot_df['array'].values
@@ -1420,7 +1423,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 rgba_array = np.zeros((*rgb_array.shape[:2], 4), dtype=np.uint8)
                 rgba_array[:, :, :3] = rgb_array  # Set RGB channels
                 
-                mask_r = np.reshape(self.mask,
+                mask_r = np.reshape(self.mask[self.axis_mask],
                                     self.array_size, order=self.order)
                 
                 
@@ -1435,6 +1438,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 p1.invertY(True)   # vertical axis counts top to bottom
                 #set aspect ratio of rectangle
                 img.setRect(0,0,self.x_range,self.y_range)
+                p1.setRange(xRange=[self.x.min(), self.x.max()], yRange=[self.y.min(), self.y.max()])
+                # To further prevent zooming or panning outside the default view, 
+                p1.setLimits( yMin=self.y.min(), yMax = self.y.max())
                 cm = pg.colormap.get(self.cm, source = 'matplotlib')
                 # img.setColorMap(cm)
                 histogram = widgetLaserMap.findChild(pg.HistogramLUTWidget, 'histogram')
@@ -1482,7 +1488,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # Step 3: Create an RGBA array where the alpha channel is based on self.mask
             rgba_array = np.zeros((*rgb_array.shape[:2], 4), dtype=np.uint8)
             rgba_array[:, :, :3] = rgb_array  # Set RGB channels
-            mask_r = np.reshape(self.mask,
+            mask_r = np.reshape(self.mask[self.axis_mask],
                                 self.array_size, order=self.order)
             
             
@@ -1518,7 +1524,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             p1.addItem(img)
             # print(p1.getAspectRatio())
             p1.setAspectLocked()
-
+            p1.setRange(xRange=[self.x.min(), self.x.max()], yRange=[self.y.min(), self.y.max()])
+            # To further prevent zooming or panning outside the default view, 
+            p1.setLimits( yMin=self.y.min(), yMax = self.y.max())
 
             # ... Inside your plotting function
             target = pg.TargetItem(symbol = '+', )
@@ -1535,7 +1543,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             target.hide()
 
 
-            p1.scene().sigMouseClicked.connect(lambda event,array=array, k=name, plot=p1: self.on_plot_clicked(event,array, k, p1))
+            p1.scene().sigMouseClicked.connect(lambda event,array=array, k=name, plot=p1: self.plot_clicked(event,array, k, p1))
 
             if view == 1:
                 #create label with isotope name
@@ -1609,7 +1617,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # if hover within lasermap array 
                 if 0 <= x_i < array.shape[1] and 0 <= y_i < array.shape[0] :
-                    if not self.cursor:
+                    if not self.cursor and not self.toolButtonCrop.isChecked():
                         QtWidgets.QApplication.setOverrideCursor(Qt.BlankCursor)
                         self.cursor = True
                     any_plot_hovered = True
@@ -1621,8 +1629,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                             self.update_zoom_view_position(x, y)
                             self.zoomViewBox.show()
                             self.polygon.show_polygon_lines(x,y)
-                        elif self.toolButtonCrop.isChecked() and self.crop_tool.start_pos: 
-                            self.crop_tool.expand_rect(pos_view)
+                        # elif self.toolButtonCrop.isChecked() and self.crop_tool.start_pos: 
+                        #     self.crop_tool.expand_rect(pos_view)
                         else:
                             # hide zoom view
                             self.zoomViewBox.hide()
@@ -1635,13 +1643,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         self.labelInfoYM.setText('Y: '+str(round(y)))
 
                     for k, (target, _, _,array) in self.lasermaps.items():
-                        target.setPos(mouse_point)
-                        target.show()
-                        value = array[y_i, x_i]
-                        if k in self.multiview_info_label:
-                            self.multiview_info_label[k][1].setText('v: '+str(round(value,2)))
+                        if not self.toolButtonCrop.isChecked():
+                            target.setPos(mouse_point)
+                            target.show()
+                            value = array[y_i, x_i]
+                            if k in self.multiview_info_label:
+                                self.multiview_info_label[k][1].setText('v: '+str(round(value,2)))
                 # break
-        if not any_plot_hovered:
+        if not any_plot_hovered and not self.toolButtonCrop.isChecked():
             QtWidgets.QApplication.restoreOverrideCursor()
             self.cursor = False
             for target,_, _, _ in self.lasermaps.values():
@@ -1649,7 +1658,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # hide zoom view
             self.zoomViewBox.hide()
     
-    def on_plot_clicked(self, event,array,k, plot,radius=5):
+    def plot_clicked(self, event,array,k, plot,radius=5):
         
         # get click location
         click_pos = plot.vb.mapSceneToView(event.scenePos())
@@ -1666,8 +1675,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #do nothing
             return
 
-        elif self.toolButtonCrop.isChecked():
-            self.crop_tool.create_rect(event, click_pos)
+        # elif self.toolButtonCrop.isChecked():
+        #     self.crop_tool.create_rect(event, click_pos)
         # if event.button() == QtCore.Qt.LeftButton and self.main_window.pushButtonStartProfile.isChecked():
         elif self.toolButtonPlotProfile.isChecked() or self.toolButtonPointMove.isChecked():
             self.profiling.plot_profile_scatter(event, array, k, plot, x, y,x_i, y_i)
@@ -3743,14 +3752,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             isotopes['isotopes']=list(self.selected_isotopes)
             isotopes['sample_id'] = self.sample_id
             isotopes['norm'] = 'linear'
-            x_max = self.sample_data_dict[self.sample_id]['X'].max()
-            x_min = self.sample_data_dict[self.sample_id]['X'].min()
-            y_max = self.sample_data_dict[self.sample_id]['Y'].max()
-            y_min = self.sample_data_dict[self.sample_id]['Y'].min()
-            isotopes['x_max'] = x_max
-            isotopes['x_min'] = x_min
-            isotopes['y_max'] = y_max
-            isotopes['y_min'] = y_min
+            self.x_max= self.crop_x_max = self.sample_data_dict[self.sample_id]['X'].max()
+            self.x_min =self.crop_x_min = self.sample_data_dict[self.sample_id]['X'].min()
+            self.y_max = self.crop_y_max = self.sample_data_dict[self.sample_id]['Y'].max()
+            self.y_min = self.crop_y_min = self.sample_data_dict[self.sample_id]['Y'].min()
+            isotopes['x_max'] = self.x_max
+            isotopes['x_min'] = self.x_min
+            isotopes['y_max'] = self.y_max
+            isotopes['y_min'] = self.y_min
             isotopes['upper_bound'] = 99.5
             isotopes['lower_bound'] = 0.05
             isotopes['d_l_bound'] = 99
@@ -3803,14 +3812,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.comboBoxColorField.addItem('')
             self.comboBoxColorField.addItems(isotopes['isotopes'])
 
-            self.spinBoxX.setMaximum(int(x_max))
-            self.spinBoxX.setMinimum(int(x_min))
-            self.spinBox_X.setMaximum(int(x_max))
-            self.spinBox_X.setMinimum(int(x_min))
-            self.spinBoxY.setMaximum(int(y_max))
-            self.spinBoxY.setMinimum(int(y_min))
-            self.spinBox_Y.setMaximum(int(y_max))
-            self.spinBox_Y.setMinimum(int(y_min))
+            # self.spinBoxX.setMaximum(int(x_max))
+            # self.spinBoxX.setMinimum(int(x_min))
+            # self.spinBox_X.setMaximum(int(x_max))
+            # self.spinBox_X.setMinimum(int(x_min))
+            # self.spinBoxY.setMaximum(int(y_max))
+            # self.spinBoxY.setMinimum(int(y_min))
+            # self.spinBox_Y.setMaximum(int(y_max))
+            # self.spinBox_Y.setMinimum(int(y_min))
 
             # self.checkBoxViewRatio.setChecked(False)
             self.get_map_data(self.sample_id,isotope_1=None, isotope_2=None)
@@ -4785,40 +4794,159 @@ class Table_Fcn:
                         self.main_window.polygon.lines[p_id] = []
 
 
+    
+    
 class Crop_tool:
     def __init__(self, main_window):
-       self.crop_rect = None  # To store the cropping rectangle
-       self.start_pos = None  # Starting position of the crop
-       self.end_pos = None  # End position of the crop
-       self.main_window = main_window
-    def create_rect (self, event, click_pos):
-        if event.button() == Qt.LeftButton:
-            # Start cropping
-           if not self.start_pos:
-               self.start_pos = click_pos
-               self.crop_rect = QGraphicsRectItem(QRectF(self.start_pos, self.start_pos))
-               self.crop_rect.setPen(QPen(QColor(255, 255, 255), 2, Qt.DashLine))
-               self.main_window.plot.addItem(self.crop_rect)
-           else:
-               # End cropping
-               self.end_pos = click_pos
-               self.apply_crop()
+        self.main_window = main_window
         
-    def expand_rect(self, current_pos):
-        if self.start_pos and not self.end_pos:
-            # Update the cropping rectangle while dragging
-            self.crop_rect.setRect(QRectF(self.start_pos, current_pos).normalized())
+    def init_crop(self):
+        if self.main_window.toolButtonCrop.isChecked():
+            self.x_range = self.main_window.x_range
+            self.y_range = self.main_window.y_range
+            # Central crop rectangle dimensions (half width and height of the plot)
+            crop_rect_width = self.x_range / 2
+            crop_rect_height =self.y_range / 2
+    
+            # Position the crop_rect at the center of the plot
+            crop_rect_x = (self.x_range - crop_rect_width) / 2
+            crop_rect_y = (self.y_range - crop_rect_height) / 2
+    
+            self.crop_rect = ResizableRectItem(parent=self, rect=QRectF(crop_rect_x, crop_rect_y, crop_rect_width, crop_rect_height))
+            self.crop_rect.setPen(QPen(QColor(255, 255, 255), 4, Qt.DashLine))
             
-            
-    def crop_map(self):
-        # create a rectangle with start point being location user clicked on screen
-        # expand rectangle as user moves mouse 
-        # stop at location where user deselects mouse
-        # change transparency of region outside rectangle 
-        # allow the user to expand/reduce size of rectangle 
-        # by selecting on top left of rectangle or bottom right of rectangle
+            self.main_window.plot.addItem(self.crop_rect)
+
+
+            # Initialize overlay rectangles
+            self.overlays = []
+            for _ in range(4):
+                overlay = QGraphicsRectItem()
+                overlay.setBrush(QColor(0, 0, 0, 120))  # Semi-transparent dark overlay
+                self.main_window.plot.addItem(overlay)
+                self.overlays.append(overlay)
+    
+            self.update_overlay(self.crop_rect.rect())
+            self.main_window.toolButtonCropApply.setEnabled(True)
+        elif len(self.overlays)> 0: #remove crop rect and overlays
+            self.main_window.plot.removeItem(self.crop_rect)
+            for overlay in self.overlays:
+                self.main_window.plot.removeItem(overlay)
+            self.main_window.toolButtonCropApply.setEnabled(False)
+                
+
+    def update_overlay(self, rect):
+        # Adjust the overlay rectangles based on the new crop_rect
+        plot_rect = self.main_window.plot.viewRect()
+
+        # Top overlay
+        self.overlays[0].setRect(QRectF(plot_rect.topLeft(), QPointF(plot_rect.right(), rect.top())))
+        # Bottom overlay
+        self.overlays[1].setRect(QRectF(QPointF(plot_rect.left(), rect.bottom()), plot_rect.bottomRight()))
+        # Left overlay
+        self.overlays[2].setRect(QRectF(QPointF(plot_rect.left(), rect.top()), QPointF(rect.left(), rect.bottom())))
+        # Right overlay
+        self.overlays[3].setRect(QRectF(QPointF(rect.right(), rect.top()), QPointF(plot_rect.right(), rect.bottom())))
         
-        return
+    def apply_crop(self):
+        if self.crop_rect:
+            crop_rect = self.crop_rect.rect()  # self.crop_rect is ResizableRectItem
+            print(crop_rect.left())
+            self.main_window.crop_x_min = crop_rect.left()
+            self.main_window.crop_x_max = crop_rect.right()
+            self.main_window.crop_y_min = crop_rect.top()
+            self.main_window.crop_y_max = crop_rect.bottom()
+            self.main_window.update_plot(axis = True)
+        
+        
+class ResizableRectItem(QGraphicsRectItem):
+    def __init__(self, rect=None, parent=None):
+        super(ResizableRectItem, self).__init__(rect)
+        self.setAcceptHoverEvents(True)
+        self.edgeTolerance = 50  # Adjusted for better precision
+        self.resizing = False
+        self.dragStartPos = None
+        self.dragStartRect = None
+        self.cursorChangeThreshold = 50  # Distance from corner to change cursor
+        self.parent = parent
+        self.pos = None
+    def hoverMoveEvent(self, event):
+        pos = event.pos()
+        rect = self.rect()
+        if (abs(pos.x() - rect.left()) < self.edgeTolerance and abs(pos.y() - rect.top()) < self.edgeTolerance) or \
+           (abs(pos.x() - rect.right()) < self.edgeTolerance and abs(pos.y() - rect.bottom()) < self.edgeTolerance):
+            self.setCursor(QCursor(Qt.SizeFDiagCursor))
+        elif (abs(pos.x() - rect.left()) < self.edgeTolerance and abs(pos.y() - rect.bottom()) < self.edgeTolerance) or \
+           (abs(pos.x() - rect.right()) < self.edgeTolerance and abs(pos.y() - rect.top()) < self.edgeTolerance):
+            self.setCursor(QCursor(Qt.SizeBDiagCursor))
+        else:
+            self.setCursor(QCursor(Qt.ArrowCursor))
+        super(ResizableRectItem, self).hoverMoveEvent(event)
+
+    def mousePressEvent(self, event):
+        if self.onEdge(event.pos()):
+            self.resizing = True
+            self.dragStartPos = event.pos()
+            self.dragStartRect = self.rect()
+        else:
+            super(ResizableRectItem, self).mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        if self.resizing:
+            self.resizeRect(event.pos())
+        else:
+            super(ResizableRectItem, self).mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        self.resizing = False
+        super(ResizableRectItem, self).mouseReleaseEvent(event)
+
+    def onEdge(self, pos):
+        rect = self.rect()
+        if (abs(pos.x() - rect.left()) < self.cursorChangeThreshold and abs(pos.y() - rect.top()) < self.cursorChangeThreshold):
+            self.pos = 'TL'
+            return True
+        elif (abs(pos.x() - rect.right()) < self.cursorChangeThreshold and abs(pos.y() - rect.bottom()) < self.cursorChangeThreshold):
+            self.pos = 'BR'
+            return True
+        elif (abs(pos.x() - rect.left()) < self.cursorChangeThreshold and abs(pos.y() - rect.bottom()) < self.cursorChangeThreshold):
+            self.pos = 'BL'
+            return True
+        elif (abs(pos.x() - rect.right()) < self.cursorChangeThreshold and abs(pos.y() - rect.top()) < self.cursorChangeThreshold):
+            self.pos = 'TR'
+            return True
+        return False
+
+    def resizeRect(self, newPos):
+        rect = self.dragStartRect.normalized()
+        if self.pos:
+            if self.pos =='TL' or self.pos =='BL':
+                rect.setLeft(newPos.x())
+            elif self.pos =='TR' or self.pos =='BR':
+                rect.setRight(newPos.x())
+            if self.pos =='TR' or self.pos =='TL':
+                rect.setTop(newPos.y())
+            elif self.pos =='BR' or self.pos =='BL':
+                rect.setBottom(newPos.y())
+
+        # Ensure the rectangle does not exceed plot boundaries
+        rect = self.validateRect(rect)
+
+        self.setRect(rect)
+        self.parent.update_overlay(rect)
+
+    def validateRect(self, rect):
+        plot_width, plot_height = self.parent.x_range, self.parent.y_range  # Assuming these are the plot dimensions
+        if rect.left() < 0:
+            rect.setLeft(0)
+        if rect.top() < 0:
+            rect.setTop(0)
+        if rect.right() > plot_width:
+            rect.setRight(plot_width)
+        if rect.bottom() > plot_height:
+            rect.setBottom(plot_height)
+        return rect
+
 
 class Polygon:
     def __init__(self, main_window):
@@ -5166,7 +5294,7 @@ class Profiling:
                                 self.profiles[k][self.point_index] = (x,y, circ_val,scatter, interpolate)
     
                 #update plot and table widget
-                self.plot_profiles()
+                self.main_window.plot_profiles()
                 self.update_table_widget()
                 if self.main_window.toolButtonIPProfile.isChecked(): #reset interpolation if selected
                     self.clear_interpolation()

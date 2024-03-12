@@ -245,10 +245,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.doubleSpinBoxDUB.valueChanged.connect(lambda: self.auto_scale(True))
         self.doubleSpinBoxDUB.valueChanged.connect(lambda: self.auto_scale(True))
 
-        self.spinBoxX.valueChanged.connect(lambda:self.update_plot(axis = True))
-        self.spinBoxY.valueChanged.connect(lambda:self.update_plot(axis = True))
-        self.spinBox_X.valueChanged.connect(lambda:self.update_plot(axis = True))
-        self.spinBox_Y.valueChanged.connect(lambda:self.update_plot(axis = True))
+        #self.spinBoxX.valueChanged.connect(lambda:self.update_plot(axis = True))
+        #self.spinBoxY.valueChanged.connect(lambda:self.update_plot(axis = True))
+        #self.spinBox_X.valueChanged.connect(lambda:self.update_plot(axis = True))
+        #self.spinBox_Y.valueChanged.connect(lambda:self.update_plot(axis = True))
         self.toolButtonFullView.clicked.connect(self.reset_to_full_view)
         self.spinBoxNBins.valueChanged.connect(self.update_plot)
         self.spinBoxBinWidth.valueChanged.connect(lambda: self.update_plot(bin_s=False))
@@ -337,10 +337,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonSaveTernaryColormap.clicked.connect(self.input_ternary_name_dlg)
 
         # select new ternary colors
-        self.toolButtonTCmapXColor.clicked.connect(lambda: self.buttonColorSelect(self.toolButtonTCmapXColor))
-        self.toolButtonTCmapYColor.clicked.connect(lambda: self.buttonColorSelect(self.toolButtonTCmapYColor))
-        self.toolButtonTCmapZColor.clicked.connect(lambda: self.buttonColorSelect(self.toolButtonTCmapZColor))
-        self.toolButtonTCmapMColor.clicked.connect(lambda: self.buttonColorSelect(self.toolButtonTCmapMColor))
+        self.toolButtonTCmapXColor.clicked.connect(lambda: self.button_color_select(self.toolButtonTCmapXColor))
+        self.toolButtonTCmapYColor.clicked.connect(lambda: self.button_color_select(self.toolButtonTCmapYColor))
+        self.toolButtonTCmapZColor.clicked.connect(lambda: self.button_color_select(self.toolButtonTCmapZColor))
+        self.toolButtonTCmapMColor.clicked.connect(lambda: self.button_color_select(self.toolButtonTCmapMColor))
         self.comboBoxTernaryColormap.currentIndexChanged.connect(lambda: self.TernaryColormapChanged())
         self.TernaryColormapChanged()
 
@@ -442,8 +442,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolBox.currentChanged.connect(self.toolbox_changed)
 
         # overlay and annotation properties
-        self.toolButtonOverlayColor.clicked.connect(lambda: self.buttonColorSelect(self.toolButtonOverlayColor))
-        self.toolButtonMarkerColor.clicked.connect(lambda: self.buttonColorSelect(self.toolButtonMarkerColor))
+        self.toolButtonOverlayColor.clicked.connect(lambda: self.button_color_select(self.toolButtonOverlayColor))
+        self.toolButtonMarkerColor.clicked.connect(lambda: self.button_color_select(self.toolButtonMarkerColor))
         #self.toolButtonOverlayColor.setStyleSheet("background-color: white;")
 
         setattr(self.comboBoxMarker, "allItems", lambda: [self.comboBoxMarker.itemText(i) for i in range(self.comboBoxMarker.count())])
@@ -579,7 +579,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         df['X'] = xtemp
 
     # toolbar functions
-
     def open_tab(self, tab_name):
         """Opens specified toolBox tab
 
@@ -674,7 +673,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         return set_fields
 
     # color picking functions
-    def buttonColorSelect(self, button):
+    def button_color_select(self, button):
         """Select background color of button
 
         Parameter
@@ -697,15 +696,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         return "#{:02x}{:02x}{:02x}".format(color.red(), color.green(), color.blue())
 
-    def TernaryColormapChanged(self):
-        """Changes toolButton backgrounds associated with ternary colormap"""
+    def ternary_colormap_changed(self):
+        """Changes toolButton backgrounds associated with ternary colormap
+        
+        Updates ternary colormap when swatch colors are changed in the Scatter and Heatmaps >
+        Map from Ternary groupbox.  The ternary colored chemical map is updated.
+        """
         for cmap in self.ternary_colormaps:
             if cmap['scheme'] == self.comboBoxTernaryColormap.currentText():
                 self.toolButtonTCmapXColor.setStyleSheet("background-color: %s;" % cmap['top'])
                 self.toolButtonTCmapYColor.setStyleSheet("background-color: %s;" % cmap['left'])
                 self.toolButtonTCmapZColor.setStyleSheet("background-color: %s;" % cmap['right'])
                 self.toolButtonTCmapMColor.setStyleSheet("background-color: %s;" % cmap['center'])
-                return
 
     def open_calculator(self):
         isotopes_list = self.isotopes_df['isotopes'].values
@@ -725,7 +727,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.current_group['clusters'] = selected_clusters
         else:
             self.current_group['clusters'] = None
-
 
     def update_color_bar_position(self):
         """Updates the color bar position on a figure"""
@@ -754,7 +755,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             # Redraw the figure to update the changes
             fig.canvas.draw_idle()
-
 
     def scale_plot(self, current_plot_df, lq, uq, d_lb, d_ub, norm='linear', outlier=False):
         """Scales data by linear, log, or logit tranform
@@ -798,7 +798,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         current_plot_df.loc[:, 'array'] = self.transform_plots(isotope_array)
 
         return current_plot_df
-
 
     def auto_scale(self,update = False):
         """Auto-scales pixel values in map
@@ -865,7 +864,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             self.update_filter_values()
 
-
     def update_plot(self,bin_s = True, axis = False, reset= False):
         """"Update plot"""
         if self.update_spinboxes_bool:
@@ -921,10 +919,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # self.add_plot(isotope_str,clipped_isotope_array)
             self.add_edge_detection()
             self.add_noise_reduction()
-
-
-
-
 
     def remove_multi_plot(self, selected_plot_name):
         widget_index = self.multi_view_index.index(selected_plot_name)
@@ -1129,8 +1123,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         filter_info = {'sample_id': self.sample_id, 'isotope_1': isotope_1, 'isotope_2': isotope_2, 'ratio': ratio,'norm':norm ,'f_min': f_min,'f_max':f_max, 'use':True}
         self.filter_df.loc[len(self.filter_df)]=filter_info
-       
-
 
     def remove_selected_rows(self,sample):
         # We loop in reverse to avoid issues when removing rows
@@ -1150,7 +1142,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.filter_df.drop(self.filter_df[(self.filter_df['sample_id'] == sample_id)
                                            & (self.filter_df['isotope_1'] == isotope_1)& (self.filter_df['isotope_2'] == isotope_2)].index, inplace=True)
         self.apply_filters(sample_id)
-
 
     def apply_filters(self, fullmap= False):
         
@@ -1247,8 +1238,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.update_all_plots()
         # self.update_plot()
 
-
-
     def update_all_plots(self):
         self.cm = self.comboBoxMapColormap.currentText()
         for plot_type,sample_ids in self.plot_widget_dict.items():
@@ -1312,8 +1301,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                             fig.tight_layout()
                             figure_canvas.draw()
 
-
     def open_directory(self):
+        """Open directory with samples
+        
+        Opens a dialog to select directory filled with samples.  Updates sample list in
+        Samples and Fields tab and loads first sample in list by default.
+        """
         dialog = QFileDialog()
         dialog.setFileMode(QFileDialog.Directory)
         # Set the default directory to the current working directory
@@ -1360,7 +1353,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def remove_widgets_from_layout(self, layout, object_names_to_remove):
         """
-        Remove widgets from the provided layout based on their objectName properties.
+        Remove plot widgets from the provided layout based on their objectName properties.
         """
         for i in reversed(range(layout.count())):  # Reverse to avoid skipping due to layout change
             item = layout.itemAt(i)
@@ -1405,8 +1398,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             plot_exist = True
             duplicate = len(self.plot_widget_dict[plot_type][sample_id][plot_name]['view'])==1 and self.plot_widget_dict[plot_type][sample_id][plot_name]['view'][0] != self.canvasWindow.currentIndex()
 
-
-
         if plot_exist and not duplicate:
             widget_info = self.plot_widget_dict[plot_type][sample_id][plot_name]
             for widgetLaserMap, view in zip(widget_info['widget'],widget_info['view']):
@@ -1426,11 +1417,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 mask_r = np.reshape(self.mask[self.axis_mask],
                                     self.array_size, order=self.order)
                 
-                
                 rgba_array[:, :, 3] = np.where(mask_r, 255, 100)  # Set alpha channel based on self.mask
                             
-                
-                
                 glw = widgetLaserMap.findChild(pg.GraphicsLayoutWidget, 'plotLaserMap')
                 p1 = glw.getItem(0, 0)  # Assuming ImageItem is the first item in the plot
                 img = p1.items[0]
@@ -1449,7 +1437,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.plot = p1
                     self.array = array
                 
-                
                 if histogram:
                     histogram.gradient.setColorMap(cm)
                     histogram.setImageItem(img)
@@ -1461,7 +1448,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 layout = widgetLaserMap.layout()
                 # self.plot_laser_map_cont(layout,array,img,p1,cm,view)
         else:
-
             widgetLaserMap = QtWidgets.QWidget()
             layoutLaserMap = QtWidgets.QGridLayout()
             widgetLaserMap.setLayout(layoutLaserMap)
@@ -1474,7 +1460,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             else:
                 self.plot_widget_dict[plot_type][sample_id][plot_name] = {'widget':[widgetLaserMap],
                                                       'info':plot_information, 'view':[view]}
-            
             
             #Change transparency of values outside mask
             # Step 1: Normalize your data array for colormap application
@@ -1491,12 +1476,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             mask_r = np.reshape(self.mask[self.axis_mask],
                                 self.array_size, order=self.order)
             
-            
             rgba_array[:, :, 3] = np.where(mask_r, 255, 100)  # Set alpha channel based on self.mask
                         
-                
-                
-            
             # self.array = array[:, ::-1]
             layout = widgetLaserMap.layout()
             glw = pg.GraphicsLayoutWidget(show=True)
@@ -1510,8 +1491,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             cm = pg.colormap.get(self.cm, source = 'matplotlib')
             # img.setColorMap(cm)
 
-            
-            
             # img.setLookupTable(cm.getLookupTable())
             #--- add non-interactive image with integrated color ------------------
             p1 = glw.addPlot(0,0,title=plot_name.replace('_',' '))
@@ -1538,10 +1517,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             name = sample_id+plot_name+str(view)
             self.lasermaps[name] = (target, p1, view, array)
 
-
             #hide pointer
             target.hide()
-
 
             p1.scene().sigMouseClicked.connect(lambda event,array=array, k=name, plot=p1: self.plot_clicked(event,array, k, p1))
 
@@ -1578,7 +1555,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.init_zoom_view()
                 # uncheck edge detection
                 self.toolButtonEdgeDetection.setChecked(False)
-
 
             # Create a SignalProxy to handle mouse movement events
             # self.proxy = pg.SignalProxy(p1.scene().sigMouseMoved, rateLimit=60, slot=self.mouseMoved)
@@ -1683,7 +1659,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
         elif self.toolButtonPolyCreate.isChecked() or self.toolButtonPolyMovePoint.isChecked() or self.toolButtonPolyAddPoint.isChecked() or self.toolButtonPolyRemovePoint.isChecked():
             self.polygon.plot_polygon_scatter(event, k, x, y,x_i, y_i)
-    
 
     def plot_laser_map_cont(self,layout,array,img,p1,cm, view):
         # Single views
@@ -1738,8 +1713,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             cbar.setObjectName('colorbar')
             cbar.setImageItem(img, insert_in=p1)
             cbar.setLevels([array.min(), array.max()])
-    
-        
 
     # def setup_zoom_window(self, layout):
     #     # Create a GraphicsLayoutWidget for the zoom window
@@ -1759,7 +1732,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     #     self.zoomTarget = pg.TargetItem(symbol='+')
     #     self.zoomPlot.addItem(self.zoomTarget)
     #     self.zoomTarget.hide()  # Initially hidden
-
 
     def init_zoom_view(self):
         # Set the initial zoom level
@@ -1784,8 +1756,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.zoomViewBox.hide()
 
         # self.update_zoom_view_position(0, 0, array)  # Initial position
-
-
 
     def update_zoom_view_position(self, x, y):
         # Assuming you have a method like this to update the zoom view
@@ -1816,7 +1786,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.zoomTarget.setPos(x, y)  # Update target position
         self.zoomTarget.show()
         self.zoomViewBox.setZValue(1e10)
-        
         
     def add_edge_detection(self):
         """
@@ -1967,7 +1936,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         vb.enableAutoRange()
         histogram.autoHistogramRange()
 
-
     def plot_pca(self):
         pca_dict = {}
 
@@ -2032,7 +2000,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # Additional steps to add the PCA widget to the appropriate container in the UI
             self.add_plot(plot_information)
             self.update_tree(plot_information['plot_name'], data = plot_information, tree = 'PCA')
-
 
     def update_pca_plot(self, pca_dict, pca_plot_type, ax):
 
@@ -2417,7 +2384,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.toolButtonMarkerColor.setEnabled(False)
                 self.toolButtonMarkerColor.setStyleSheet("background-color: none;")
 
-
     # toggle heatmap resolution spinBox when the scatter type comboBox is changed
     def toggle_scatter_style_tab(self, tab_id):
         """Updates and toggles widgets in scatter style tab
@@ -2541,7 +2507,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.doubleSpinBoxFontSize.setValue(self.general_style['FontSize'])
         self.comboBoxTickDirection.setCurrentText(self.general_style['TickDir'])
 
-
     def get_map_style(self, tab_id):
         """Updates dictionary with map style properties
 
@@ -2640,7 +2605,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.heatmap_style[tab_id] = {'Resolution': self.spinBoxHeatmapResolution.value(),
                                                     'Colormap': self.comboBoxFieldColormap.currentText(),
                                                     'AspectRatio': float(self.lineEditAspectRatio.text())}
-
 
     def toggle_scale_direction(self):
         if self.map_style['ScaleDirection'] == 'none':
@@ -3741,6 +3705,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.aspect_ratio = 0.873
 
 
+        # add sample to sample dictionary
         if self.sample_id not in self.sample_data_dict:
             self.update_spinboxes_bool = False #prevent update plot from runing
             sample_df = pd.read_csv(file_path, engine='c')
@@ -3830,6 +3795,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.update_spinboxes_bool = True  # Place this line at end of method
 
             if self.comboBoxCorrelationMethod.currentText().lower() != 'none':
+                print('plot correlation')
                 self.plot_correlation()
 
 
@@ -3856,7 +3822,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.canvasWindow.currentIndex()==0:
             self.update_spinboxes_bool = False
 
-            self.spinBoxX.setValue(int(parameters['x_max']))
+            #self.spinBoxX.setValue(int(parameters['x_max']))
 
             self.toolButtonAutoScale.setChecked(auto_scale)
             if auto_scale:
@@ -3867,16 +3833,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.doubleSpinBoxDLB.setEnabled(False)
             # self.spinBox_X.setMinimum(int(parameters['x_max']))
             # self.spinBox_X.setMaximum(int(parameters['x_min']))
-            self.spinBox_X.setValue(int(parameters['x_min']))
+            # self.spinBox_X.setValue(int(parameters['x_min']))
 
             # self.spinBoxY.setMaximum(int(parameters['y_max']))
             # self.spinBoxY.setMinimum(int(parameters['y_min']))
-            self.spinBoxY.setValue(int(parameters['y_max']))
+            # self.spinBoxY.setValue(int(parameters['y_max']))
 
 
             # self.spinBox_Y.setMaximum(int(parameters['y_max']))
             # self.spinBox_Y.setMinimum(int(parameters['y_min']))
-            self.spinBox_Y.setValue(int(parameters['y_min']))
+            # self.spinBox_Y.setValue(int(parameters['y_min']))
 
             self.doubleSpinBoxUB.setValue(parameters['upper_bound'])
             self.doubleSpinBoxLB.setValue(parameters['lower_bound'])
@@ -4626,6 +4592,8 @@ class IsotopeSelectionWindow(QDialog, Ui_Dialog):
             combo.setCurrentText(norm)
             self.tableWidgetSelected.setCellWidget(newRow, 1, combo)
             combo.currentIndexChanged.connect(self.update_scale)
+
+
 class CustomAxis(AxisItem):
     def __init__(self, *args, **kwargs):
         AxisItem.__init__(self, *args, **kwargs)
@@ -4641,8 +4609,11 @@ class CustomAxis(AxisItem):
         # Format the tick strings as you want them to appear
         return ['{:.2f}'.format(v) for v in scaled_values]
 
+
 class Table_Fcn:
-    """Class for table common operations
+    """Common table operations class
+
+    For moving and deleting rows in QTableWidgets
 
     Methods
     -------
@@ -4730,7 +4701,6 @@ class Table_Fcn:
                         self.clear_interpolation()
                         self.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
 
-
     def delete_row(self,table):
         """Deletes selected rows in a table
 
@@ -4793,8 +4763,6 @@ class Table_Fcn:
                             plot.removeItem(line)
                         self.main_window.polygon.lines[p_id] = []
 
-
-    
     
 class Crop_tool:
     def __init__(self, main_window):
@@ -4949,6 +4917,20 @@ class ResizableRectItem(QGraphicsRectItem):
 
 
 class Polygon:
+    """Operations related to polygon generation and manipulation
+    
+    Polygons can be used to select or exclude regions of maps for analysis.
+    
+    Methods
+    -------
+    increment_pid()
+        creates a new polygon pid for addressing polygon when toolButtonPolyCreate is checked
+    plot_polygon_scatter:
+
+    distance_to_line_segment:
+    show_polygon_lines:
+    update_table_widget:
+    """
     def __init__(self, main_window):
         self.main_window = main_window
         self.polygons = {}          #dict of polygons
@@ -4959,11 +4941,14 @@ class Polygon:
     
     # Method to increment p_id_gen
     def increment_pid(self):
+        """Creates new polygon pid
+        
+        When toolButtonPolyCreate is checked, a new polygon pid is created.
+        """
         self.main_window.toolButtonPolyCreate.isChecked()
         self.p_id_gen += 1
         self.p_id = self.p_id_gen
         
-    
     def plot_polygon_scatter(self, event,k, x, y, x_i, y_i):
         self.array_x = self.main_window.array.shape[1]
         self.array_y = self.main_window.array.shape[0]
@@ -5015,9 +5000,6 @@ class Polygon:
                     QMessageBox.warning(self.main_window, "Selection Error", "No row is selected.")
             else:
                 QMessageBox.warning(self.main_window, "Selection Error", "No selection is made in the table.")
-                
-                
-                
                 
                 
             if self.main_window.point_selected:
@@ -5120,7 +5102,6 @@ class Polygon:
             else:
                 self.polygons[self.p_id].append((x,y, scatter))
                 
-            
     def distance_to_line_segment(self, px, py, x1, y1, x2, y2):
         # Calculate the distance from point (px, py) to the line segment defined by points (x1, y1) and (x2, y2)
         # This is a simplified version; you might need a more accurate calculation based on your coordinate system

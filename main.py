@@ -268,11 +268,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Initiate crop tool
         self.crop_tool = Crop_tool(self)
         
-        #Should be deleted once cropping works
+        
         self.toolButtonCrop.clicked.connect(self.crop_tool.init_crop)
         self.toolButtonCropApply.clicked.connect(self.crop_tool.apply_crop)
         self.toolButtonCropApply.setEnabled(False)
         
+        #Should be deleted once cropping works
         self.comboBoxScatterSelectX.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectX, self.comboBoxScatterIsotopeX))
         self.comboBoxScatterSelectY.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectY, self.comboBoxScatterIsotopeY))
         self.comboBoxScatterSelectZ.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectZ, self.comboBoxScatterIsotopeZ))
@@ -630,12 +631,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def reset_to_full_view(self):
         """Reset the map to full view (i.e., remove crop)"""
-        # self.spinBox_X.setValue(self.spinBox_X.minimum())
-        # self.spinBoxX.setValue(self.spinBoxX.maximum())
-        # self.spinBox_Y.setValue(self.spinBox_Y.minimum())
-        # self.spinBoxY.setValue(self.spinBoxY.maximum())
-
-        self.update_all_plots()
+        #set original bounds
+        self.crop_x_max = self.x_max
+        self.crop_x_min = self.x_min
+        self.crop_y_max = self.y_max
+        self.crop_y_min = self.y_min
+        # reset current plot df and mask to original
+        self.current_plot_df = self.current_plot_df_copy.copy()
+        self.mask = self.mask.copy()
+        self.cluster_results = self.cluster_results_copy
+        self.update_plot(axis = True)
+        self.toolButtonCrop.setChecked(False)
+        self.crop_tool.remove_overlays()
+        self.plot.autoRange()
 
     # get a named list of current fields for sample
     def get_field_list(self, set_name='isotope'):
@@ -903,7 +911,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             self.clipped_isotope_data[sample_id][isotope_1] = current_plot_df['array'].values
             self.update_norm(sample_id, isotope = isotope_1)
-            current_plot_df = current_plot_df[self.axis_mask].reset_index(drop=True)
+            
+            # make copy of current_plot_df and crop of
+            self.current_plot_df_copy = self.current_plot_df.copy()
+            self.mask_copy = self.mask.copy()
+            self.cluster_results_copy = self.cluster_results.copy()
+            self.current_plot_df = current_plot_df[self.axis_mask].reset_index(drop=True)
+            self.cluster_results = self.cluster_results[self.axis_mask].reset_index(drop=True)
+            self.mask = self.mask[self.axis_mask]
+            
             if plot_type=='histogram':
                 if reset:
                     bins  = self.default_bins
@@ -915,9 +931,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     bin_width = self.spinBoxBinWidth.value()
                     bins = int(np.floor(data_range / bin_width))
                     self.spinBoxNBins.setValue(bins)
-                self.plot_histogram(current_plot_df,self.current_plot_information, bin_width )
+                self.plot_histogram(self.current_plot_df,self.current_plot_information, bin_width )
             else:
-                self.plot_laser_map(current_plot_df, self.current_plot_information)
+                self.plot_laser_map(self.current_plot_df, self.current_plot_information)
             # self.add_plot(isotope_str,clipped_isotope_array)
             self.add_edge_detection()
             self.add_noise_reduction()
@@ -1208,7 +1224,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             pass
 
         self.mask = self.filter_mask & self.polygon_mask & self.axis_mask
-        self.update_plot()
+        self.update_all_plots()
 
     def dynamic_format(self,value, threshold=1e3):
         if abs(value) > threshold:
@@ -1423,7 +1439,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 rgba_array = np.zeros((*rgb_array.shape[:2], 4), dtype=np.uint8)
                 rgba_array[:, :, :3] = rgb_array  # Set RGB channels
                 
-                mask_r = np.reshape(self.mask[self.axis_mask],
+                mask_r = np.reshape(self.mask,
                                     self.array_size, order=self.order)
                 
                 
@@ -1437,7 +1453,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 img.setImage(image=rgba_array)
                 p1.invertY(True)   # vertical axis counts top to bottom
                 #set aspect ratio of rectangle
-                img.setRect(0,0,self.x_range,self.y_range)
+                img.setRect(self.x.min(),self.y.min(),self.x_range,self.y_range)
                 p1.setRange(xRange=[self.x.min(), self.x.max()], yRange=[self.y.min(), self.y.max()])
                 # To further prevent zooming or panning outside the default view, 
                 p1.setLimits( yMin=self.y.min(), yMax = self.y.max())
@@ -1488,7 +1504,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # Step 3: Create an RGBA array where the alpha channel is based on self.mask
             rgba_array = np.zeros((*rgb_array.shape[:2], 4), dtype=np.uint8)
             rgba_array[:, :, :3] = rgb_array  # Set RGB channels
-            mask_r = np.reshape(self.mask[self.axis_mask],
+            mask_r = np.reshape(self.mask,
                                 self.array_size, order=self.order)
             
             
@@ -1505,7 +1521,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             img = pg.ImageItem(image=rgba_array)
 
             #set aspect ratio of rectangle
-            img.setRect(0,0,self.x_range,self.y_range)
+            img.setRect(self.x.min(),self.y.min(),self.x_range,self.y_range)
             # img.setAs
             cm = pg.colormap.get(self.cm, source = 'matplotlib')
             # img.setColorMap(cm)
@@ -1592,7 +1608,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # p1.autoRange()
             layout.addWidget(glw, 0, 0, 3, 2)
             glw.setBackground('w')
-
+            p1.autoRange()
             #add zoom window
             # self.setup_zoom_window(layout)
 
@@ -3226,7 +3242,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
     def plot_clustering_result(self, ax, labels, method_name, fuzzy_cluster_number):
-        reshaped_array = np.reshape(labels, (self.clipped_isotope_data[self.sample_id]['Y'].nunique(), self.clipped_isotope_data[self.sample_id]['X'].nunique()), order=self.order)
+        reshaped_array = np.reshape(labels, self.array_size, order=self.order)
 
         x_range = self.clipped_isotope_data[self.sample_id]['X'].max() -  self.clipped_isotope_data[self.sample_id]['X'].min()
         y_range = self.clipped_isotope_data[self.sample_id]['Y'].max() -  self.clipped_isotope_data[self.sample_id]['Y'].min()
@@ -3376,9 +3392,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         nan_mask = self.processed_isotope_data[self.sample_id][use_isotopes].notna().all(axis=1)
         
         # mask nan values and add to self.mask
-        self.mask = self.mask  & nan_mask.values 
+        self.mask = self.mask  & nan_mask[self.axis_mask].values 
 
-        df_filtered = self.processed_isotope_data[self.sample_id][use_isotopes]
+        df_filtered = self.processed_isotope_data[self.sample_id][use_isotopes][self.axis_mask]
 
         return df_filtered, use_isotopes
 
@@ -4028,8 +4044,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         bins =self.default_bins
 
         bin_width = (np.nanmax(current_plot_df['array']) - np.nanmin(current_plot_df['array'])) / bins
-
-        # current_plot_df = current_plot_df[self.axis_mask].reset_index(drop=True)
+        
+        # crop plot if filter applied
+        current_plot_df = current_plot_df[self.axis_mask].reset_index(drop=True)
         if plot_type=='lasermap':
             plot_information={'plot_name':isotope_str,'sample_id':sample_id,
                               'isotope_1':isotope_1, 'isotope_2':isotope_2,
@@ -4799,7 +4816,8 @@ class Table_Fcn:
 class Crop_tool:
     def __init__(self, main_window):
         self.main_window = main_window
-        
+        # Initialize overlay rectangles
+        self.overlays = []
     def init_crop(self):
         if self.main_window.toolButtonCrop.isChecked():
             self.x_range = self.main_window.x_range
@@ -4818,8 +4836,7 @@ class Crop_tool:
             self.main_window.plot.addItem(self.crop_rect)
 
 
-            # Initialize overlay rectangles
-            self.overlays = []
+           
             for _ in range(4):
                 overlay = QGraphicsRectItem()
                 overlay.setBrush(QColor(0, 0, 0, 120))  # Semi-transparent dark overlay
@@ -4828,12 +4845,17 @@ class Crop_tool:
     
             self.update_overlay(self.crop_rect.rect())
             self.main_window.toolButtonCropApply.setEnabled(True)
-        elif len(self.overlays)> 0: #remove crop rect and overlays
+        else:
+            # reset to fill vie and remove overlays if user unselects crop tool
+            self.main_window.reset_to_full_view()
+            
+    def remove_overlays(self):
+        if len(self.overlays)> 0: #remove crop rect and overlays
             self.main_window.plot.removeItem(self.crop_rect)
             for overlay in self.overlays:
                 self.main_window.plot.removeItem(overlay)
             self.main_window.toolButtonCropApply.setEnabled(False)
-                
+            self.overlays = []
 
     def update_overlay(self, rect):
         # Adjust the overlay rectangles based on the new crop_rect
@@ -4856,6 +4878,12 @@ class Crop_tool:
             self.main_window.crop_x_max = crop_rect.right()
             self.main_window.crop_y_min = crop_rect.top()
             self.main_window.crop_y_max = crop_rect.bottom()
+            if len(self.overlays)> 0: #remove crop rect and overlays
+                self.main_window.plot.removeItem(self.crop_rect)
+                for overlay in self.overlays:
+                    self.main_window.plot.removeItem(overlay)
+                self.main_window.toolButtonCropApply.setEnabled(False)
+            #update plot with crop
             self.main_window.update_plot(axis = True)
         
         

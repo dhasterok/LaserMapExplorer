@@ -1240,8 +1240,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 isotope_array = np.log10(isotope_array / (10**6 - isotope_array), where=~np.isnan(isotope_array))
                 self.processed_isotope_data[sample_id].loc[:,isotopes] = isotope_array
         else:
+            print('h')
             # set to clipped data with original values if linear normalisation
-            self.processed_isotope_data = self.clipped_isotope_data.copy()
+            self.processed_isotope_data[sample_id].loc[:,isotopes] = self.clipped_isotope_data[sample_id].loc[:,isotopes].copy()
         if update:
             self.update_all_plots()
         # self.update_plot()
@@ -1308,6 +1309,28 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                             self.plot_scatter(values=plot_info['values'], fig=plot_info['fig'], save=True)
                             fig.tight_layout()
                             figure_canvas.draw()
+                            
+                            
+    def prep_data(self):
+        """Prepares data to be used in analysis
+        
+        1. Obtains raw DataFrame
+        2. shifts isotope values so that all values are postive
+        3. Autoscales data if choosen by user
+    
+        """
+        
+        # shifts isotope values so that all values are postive
+        adj_data = self.transform_plots(self.isotope_data.values)
+        # perform autoscaling on the adj dataframe
+        clipped_data = self.outlier_detection(adj_data)
+
+        self.clipped_isotope_data[self.sample_id] = pd.DataFrame(clipped_data, columns = self.selected_isotopes).apply(self.transform_plots)
+        self.clipped_isotope_data[self.sample_id]['X'] = self.sample_data_dict[self.sample_id]['X']
+        self.clipped_isotope_data[self.sample_id]['Y'] = self.sample_data_dict[self.sample_id]['Y']
+        
+        self.processed_isotope_data = self.clipped_isotope_data.copy()
+        
 
     def open_directory(self):
         """Open directory with samples
@@ -3657,14 +3680,33 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         return clipped_data
 
     def transform_plots(self, array):
-        min_val = np.nanmin(array)-0.0001
-        max_val = np.nanmax(array)
-
-        if min_val < 0:
-            t_array = (max_val * (array - min_val)) / (max_val - min_val)
-        else:
-            t_array = np.copy(array)
-        return t_array
+            if array.ndim == 2:
+                # Calculate min and max values for each column and adjust their shapes for broadcasting
+                min_val = np.nanmin(array, axis=0, keepdims=True) - 0.0001
+                max_val = np.nanmax(array, axis=0, keepdims=True)
+    
+                # Adjust the shape of min_val and max_val for broadcasting
+                adjusted_min_val = min_val
+                adjusted_max_val = max_val
+    
+                # Check if min values are less than 0
+                min_less_than_zero = adjusted_min_val < 0
+    
+                # Perform transformation with broadcasting
+                t_array = np.where(
+                    min_less_than_zero,
+                    (adjusted_max_val * (array - adjusted_min_val)) / (adjusted_max_val - adjusted_min_val),
+                    np.copy(array)
+                )
+            else:
+                # 1D array case, similar to original logic
+                min_val = np.nanmin(array) - 0.0001
+                max_val = np.nanmax(array)
+                if min_val < 0:
+                    t_array = (max_val * (array - min_val)) / (max_val - min_val)
+                else:
+                    t_array = np.copy(array)
+            return t_array
 
 
     def add_ree(self, sample_df):
@@ -3725,6 +3767,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             isotopes['isotopes']=list(self.selected_isotopes)
             isotopes['sample_id'] = self.sample_id
             isotopes['norm'] = 'linear'
+            #obtain axis bounds for plotting and cropping
             self.x_max= self.crop_x_max = self.sample_data_dict[self.sample_id]['X'].max()
             self.x_min =self.crop_x_min = self.sample_data_dict[self.sample_id]['X'].min()
             self.y_max = self.crop_y_max = self.sample_data_dict[self.sample_id]['Y'].max()
@@ -3737,25 +3780,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             isotopes['lower_bound'] = 0.05
             isotopes['d_l_bound'] = 99
             isotopes['d_u_bound'] = 99
-            isotope_data = self.sample_data_dict[self.sample_id][self.selected_isotopes].values
-            clipped_data = self.outlier_detection(isotope_data)
-
-            self.clipped_isotope_data[self.sample_id] = pd.DataFrame(clipped_data, columns = self.selected_isotopes).apply(self.transform_plots)
-            self.clipped_isotope_data[self.sample_id]['X'] = self.sample_data_dict[self.sample_id]['X']
-            self.clipped_isotope_data[self.sample_id]['Y'] = self.sample_data_dict[self.sample_id]['Y']
+            self.isotope_data = self.sample_data_dict[self.sample_id][self.selected_isotopes]
+            self.prep_data()
+            isotopes['v_min'] = np.min(self.clipped_isotope_data[self.sample_id], axis=0)
+            isotopes['v_max'] = np.max(self.clipped_isotope_data[self.sample_id], axis=0)
+            isotopes['auto_scale'] = True
+            isotopes['use'] = True
+            self.isotopes_df = pd.concat([self.isotopes_df, isotopes])
+            # add sample_id to self.plot_widget_dict
+            
             self.cluster_results=pd.DataFrame(columns = ['Fuzzy', 'KMeans', 'KMediods'])
             self.cluster_results['X'] = self.sample_data_dict[self.sample_id]['X']
             self.cluster_results['Y'] = self.sample_data_dict[self.sample_id]['Y']
-            self.processed_isotope_data = self.clipped_isotope_data.copy()
-            isotopes['v_min'] = np.min(clipped_data, axis=0)
-            isotopes['v_max'] = np.max(clipped_data, axis=0)
-            isotopes['auto_scale'] = True
-            isotopes['use'] = True
-            # print(isotopes)
-            # isotopes = add_ree(isotopes)
-            self.isotopes_df = pd.concat([self.isotopes_df, isotopes])
-
-            # add sample_id to self.plot_widget_dict
+            
             for plot_type in self.plot_widget_dict.keys():
                 if self.sample_id not in self.plot_widget_dict[plot_type]:
                     self.plot_widget_dict[plot_type][self.sample_id]={}
@@ -3915,7 +3952,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 current_plot_df = selected_sample[[isotope_1,'X','Y']].rename(columns = {isotope_1:'array'})
 
 
-                #perform autoscaling only if scaling is performed if not get array
+                #perform autoscaling only if scaling is selected if not get array
                 if auto_scale_param:
 
                     current_plot_df = self.scale_plot(current_plot_df, lq= lb, uq=ub,d_lb=d_lb, d_ub=d_ub, norm=norm, outlier=auto_scale_param)

@@ -1,11 +1,10 @@
 {
     "files": [
-        "mainwindow.py",
-        "form.ui",
-        "resources.qrc",
-        "mainwindow.ui",
-        "IsotopeSelectionDialog.ui",
-        "IsotopeSelectionDialog.py",
-        "CalculatorWindow.ui"
+        "designer/CalculatorWindow.ui",
+        "designer/IsotopeSelectionDialog.ui",
+        "designer/form.ui",
+        "designer/mainwindow.ui",
+        "designer/preferences.ui",
+        "resources.qrc"
     ]
 }

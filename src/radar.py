@@ -50,19 +50,28 @@ class Radar:
         self.radius = 1+ self.normalized_axis_increment
 
     def radar_factory(num_vars, frame='polygon'):
+        """Create a radar chart with `num_vars` axes.
+
+        :param num_vars: number of variables for radar chart
+        :type frame: shape of frame surrounding axes, options include {'circle', 'polygon'}, defaults to 'polygon'
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
         """
-        Create a radar chart with `num_vars` axes.
-    
-        This function creates a RadarAxes projection and registers it.
-    
-        Parameters
-        ----------
-        num_vars : int
-            Number of variables for radar chart.
-        frame : {'circle', 'polygon'}
-            Shape of frame surrounding axes.
-    
-        """
+#        """
+#    
+#        This function creates a RadarAxes projection and registers it.
+#    
+#        Parameters
+#        ----------
+#        num_vars : int
+#            Number of variables for radar chart.
+#        frame : {'circle', 'polygon'}
+#            Shape of frame surrounding axes.
+#    
+#        """
         # calculate evenly-spaced axis angles
         theta = np.linspace(0, 2*np.pi, num_vars, endpoint=False)
     

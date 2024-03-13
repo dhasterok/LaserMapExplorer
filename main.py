@@ -11,7 +11,7 @@ import sys  # We need sys so that we can pass argv to QApplication
 import os
 import numpy as np
 import pandas as pd
-from MainWindow import Ui_MainWindow
+from src.ui.MainWindow import Ui_MainWindow
 from PyQt5.QtGui import QTransform, QFont
 import matplotlib
 matplotlib.use('Qt5Agg')
@@ -20,14 +20,14 @@ from matplotlib.figure import Figure
 from matplotlib.collections import PathCollection
 import matplotlib.pyplot as plt
 from matplotlib.path import Path
-from IsotopeSelectionDialog import Ui_Dialog
+from src.ui.IsotopeSelectionDialog import Ui_Dialog
 from PyQt5.QtWidgets import QStyledItemDelegate
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPainter, QBrush, QColor
 from PyQt5.QtCore import pyqtSignal
-from rotated import RotatedHeaderView
+from src.rotated import RotatedHeaderView
 import cmcrameri.cm as cmc
-from ternary_plot import ternary
+from src.ternary_plot import ternary
 from sklearn.cluster import KMeans
 from sklearn_extra.cluster import KMedoids
 import skfuzzy as fuzz
@@ -35,11 +35,11 @@ from matplotlib.colors import Normalize
 import matplotlib.patches as mpatches
 from matplotlib.colors import BoundaryNorm
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from plot_spider import plot_spider_norm
+from src.plot_spider import plot_spider_norm
 import re
 import matplotlib.ticker as ticker
-from radar import Radar
-from calculator import CalWindow
+from src.radar import Radar
+from src.calculator import CalWindow
 import scipy.stats
 from scipy import ndimage
 from sklearn.preprocessing import StandardScaler
@@ -52,9 +52,9 @@ from PyQt5.QtGui import QPen, QColor, QCursor
 
 
 pg.setConfigOption('imageAxisOrder', 'row-major') # best performance
-## !pyrcc5 resources.qrc -o resources_rc.py
-## !pyuic5 mainwindow.ui -o MainWindow.py
-## !pyuic5 -x IsotopeSelectionDialog.ui -o IsotopeSelectionDialog.py
+## !pyrcc5 resources.qrc -o src/ui/resources_rc.py
+## !pyuic5 designer/mainwindow.ui -o src/ui/MainWindow.py
+## !pyuic5 -x designer/IsotopeSelectionDialog.ui -o src/ui/IsotopeSelectionDialog.py
 # pylint: disable=fixme, line-too-long, no-name-in-module, trailing-whitespace
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
@@ -264,23 +264,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.spinBoxSmoothingFactor.setEnabled(False)
         self.labelSF.setEnabled(False)
 
-        
         # Initiate crop tool
         self.crop_tool = Crop_tool(self)
-        
-        
         self.toolButtonCrop.clicked.connect(self.crop_tool.init_crop)
         self.toolButtonCropApply.clicked.connect(self.crop_tool.apply_crop)
         self.toolButtonCropApply.setEnabled(False)
-        
-        #Should be deleted once cropping works
-        self.comboBoxScatterSelectX.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectX, self.comboBoxScatterIsotopeX))
-        self.comboBoxScatterSelectY.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectY, self.comboBoxScatterIsotopeY))
-        self.comboBoxScatterSelectZ.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectZ, self.comboBoxScatterIsotopeZ))
-        self.comboBoxColorByField.activated.connect(lambda: self.update_combo_boxes(self.comboBoxColorByField, self.comboBoxColorField))
-
-
-
 
         # Spot Data Tab
         #-------------------------
@@ -322,6 +310,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonPlotScatter.clicked.connect(lambda: self.plot_scatter(save=True))
         self.toolButtonTernaryMap.clicked.connect(self.plot_ternarymap)
 
+        self.comboBoxScatterSelectX.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectX, self.comboBoxScatterIsotopeX))
+        self.comboBoxScatterSelectY.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectY, self.comboBoxScatterIsotopeY))
+        self.comboBoxScatterSelectZ.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectZ, self.comboBoxScatterIsotopeZ))
 
         # ternary colormaps
         # create ternary colors dictionary
@@ -342,8 +333,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonTCmapYColor.clicked.connect(lambda: self.button_color_select(self.toolButtonTCmapYColor))
         self.toolButtonTCmapZColor.clicked.connect(lambda: self.button_color_select(self.toolButtonTCmapZColor))
         self.toolButtonTCmapMColor.clicked.connect(lambda: self.button_color_select(self.toolButtonTCmapMColor))
-        self.comboBoxTernaryColormap.currentIndexChanged.connect(lambda: self.TernaryColormapChanged())
-        self.TernaryColormapChanged()
+        self.comboBoxTernaryColormap.currentIndexChanged.connect(lambda: self.ternary_colormap_changed())
+        self.ternary_colormap_changed()
 
         # PCA Tab
         #------------------------
@@ -365,7 +356,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.horizontalSliderClusterExponent.setMaximum(30)  # Represents 3.0 (since 30/10 = 3.0)
         self.horizontalSliderClusterExponent.setSingleStep(1)  # Represents 0.1 (since 1/10 = 0.1)
         self.horizontalSliderClusterExponent.setTickInterval(1)
-
 
         self.horizontalSliderClusterExponent.valueChanged.connect(lambda value: self.labelClusterExponent.setText(str(value/10)))
         self.comboBoxClusterMethod.activated.connect(self.update_cluster_ui)
@@ -454,9 +444,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.comboBoxMarker.activated.connect(lambda: self.plot_scatter(save=False))
         self.doubleSpinBoxMarkerSize.valueChanged.connect(lambda: self.plot_scatter(save=False))
+        #self.comboBoxColorByField.activated.connect(lambda: self.update_combo_boxes(self.comboBoxColorByField, self.comboBoxColorField))
         self.comboBoxColorByField.activated.connect(lambda: self.toggle_color_by_field(self.toolBox.currentIndex()))
         self.comboBoxColorField.activated.connect(lambda: self.plot_scatter(save=False))
-
         self.horizontalSliderMarkerAlpha.valueChanged.connect(self.slider_alpha_changed)
 
         # Plot toolbar
@@ -959,7 +949,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxPlots.addItems(self.multi_view_index)
 
     def add_plot(self, plot_information, current_plot_df = None):
-
+        """Adds plot to plot widget dictionary and displays in selected view tab"""
         plot_name = plot_information['plot_name']
         sample_id = plot_information['sample_id']
         plot_type = plot_information['plot_type']
@@ -1079,6 +1069,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.lineEditFMax.setText(str(self.dynamic_format(f_val['v_max'])))
 
     def update_filter_table(self):
+        """Update data for analysis when fiter table is updated."""
         # open tabFilterList
         self.tabWidget.setCurrentIndex(1)
 
@@ -1141,6 +1132,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.filter_df.loc[len(self.filter_df)]=filter_info
 
     def remove_selected_rows(self,sample):
+        """Remove selected rows from filter table."""
         # We loop in reverse to avoid issues when removing rows
         for row in range(self.tableWidgetFilters.rowCount()-1, -1, -1):
             chkBoxItem = self.tableWidgetFilters.item(row, 7)
@@ -2480,7 +2472,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.spinBoxHeatmapResolution.setEnabled(True)
                 self.labelFieldColormap.setEnabled(True)
                 self.comboBoxFieldColormap.setEnabled(True)
-                if tab_id == self.sample_tab_id or self.scatter_tab_id or tab_id == self.pca_tab_id or tab_id == self.profile_tab_id:
+                if tab_id == self.sample_tab_id or tab_id == self.scatter_tab_id or tab_id == self.pca_tab_id or tab_id == self.profile_tab_id:
                     val = self.comboBoxFieldColormap.allItems()
                     self.comboBoxFieldColormap.setCurrentIndex(val.index(self.heatmap_style[tab_id]['Colormap']))
 
@@ -4782,14 +4774,38 @@ class Table_Fcn:
 
     
 class Crop_tool:
+    """Crop maps
+
+    Cropping maps sets the maximum extent of the map for analysis.
+
+    Attributes
+    ----------
+    overlays: QGraphicsRectItem()
+        contains data for the figure overlay showing crop region
+
+    Methods
+    -------
+    init_crop()
+        sets intial crop region as full map extent
+    remove_overlays()
+        removes darkened overlay following completion of crop
+    update_overlay(rect)
+        updates the overlay after user moves a boundary
+    apply_crop()
+        uses selected crop extent to set viewable area and map region for analysis
+    """
     def __init__(self, main_window):
         self.main_window = main_window
         # Initialize overlay rectangles
         self.overlays = []
+
     def init_crop(self):
+        """Sets intial crop region as full map extent."""
         if self.main_window.toolButtonCrop.isChecked():
+            # Original extent of map
             self.x_range = self.main_window.x_range
             self.y_range = self.main_window.y_range
+
             # Central crop rectangle dimensions (half width and height of the plot)
             crop_rect_width = self.x_range / 2
             crop_rect_height =self.y_range / 2
@@ -4803,8 +4819,6 @@ class Crop_tool:
             
             self.main_window.plot.addItem(self.crop_rect)
 
-
-           
             for _ in range(4):
                 overlay = QGraphicsRectItem()
                 overlay.setBrush(QColor(0, 0, 0, 120))  # Semi-transparent dark overlay
@@ -4814,10 +4828,11 @@ class Crop_tool:
             self.update_overlay(self.crop_rect.rect())
             self.main_window.toolButtonCropApply.setEnabled(True)
         else:
-            # reset to fill vie and remove overlays if user unselects crop tool
+            # reset to full view and remove overlays if user unselects crop tool
             self.main_window.reset_to_full_view()
             
     def remove_overlays(self):
+        """Removes darkened overlay following completion of crop."""
         if len(self.overlays)> 0: #remove crop rect and overlays
             self.main_window.plot.removeItem(self.crop_rect)
             for overlay in self.overlays:
@@ -4826,6 +4841,12 @@ class Crop_tool:
             self.overlays = []
 
     def update_overlay(self, rect):
+        """Updates the overlay after user moves a boundary.
+        
+        Parameter
+        ---------
+        rect: 
+        """
         # Adjust the overlay rectangles based on the new crop_rect
         plot_rect = self.main_window.plot.viewRect()
 
@@ -4839,6 +4860,7 @@ class Crop_tool:
         self.overlays[3].setRect(QRectF(QPointF(rect.right(), rect.top()), QPointF(plot_rect.right(), rect.bottom())))
         
     def apply_crop(self):
+        """Uses selected crop extent to set viewable area and map region for analysis."""
         if self.crop_rect:
             crop_rect = self.crop_rect.rect()  # self.crop_rect is ResizableRectItem
             print(crop_rect.left())

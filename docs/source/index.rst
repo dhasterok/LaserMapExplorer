@@ -14,7 +14,6 @@ It allows for a range of plot types, filtering and data analysis.
    :caption: Contents:
 
 
-
 Indices and tables
 ==================
 

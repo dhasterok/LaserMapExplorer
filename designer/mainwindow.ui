@@ -20,7 +20,7 @@
    <string>LaME: Laser Map Explorer</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="resources.qrc">
+   <iconset resource="../resources.qrc">
     <normaloff>:/icons/resources/icons/LaME-64.png</normaloff>:/icons/resources/icons/LaME-64.png</iconset>
   </property>
   <property name="unifiedTitleAndToolBarOnMac">
@@ -93,7 +93,7 @@
               <string>Shift plot</string>
              </property>
              <property name="icon">
-              <iconset resource="resources.qrc">
+              <iconset resource="../resources.qrc">
                <normaloff>:/icons/move</normaloff>:/icons/move</iconset>
              </property>
              <property name="checkable">
@@ -107,7 +107,7 @@
               <string>Return to home view</string>
              </property>
              <property name="icon">
-              <iconset resource="resources.qrc">
+              <iconset resource="../resources.qrc">
                <normaloff>:/icons/home</normaloff>:/icons/home</iconset>
              </property>
             </widget>
@@ -118,7 +118,7 @@
               <string>Measure distance</string>
              </property>
              <property name="icon">
-              <iconset resource="resources.qrc">
+              <iconset resource="../resources.qrc">
                <normaloff>:/icons/resources/icons/icons8-ruler-50.png</normaloff>:/icons/resources/icons/icons8-ruler-50.png</iconset>
              </property>
              <property name="iconSize">
@@ -138,7 +138,7 @@
               <string>Save plot</string>
              </property>
              <property name="icon">
-              <iconset resource="resources.qrc">
+              <iconset resource="../resources.qrc">
                <normaloff>:/icons/save</normaloff>:/icons/save</iconset>
              </property>
             </widget>
@@ -217,7 +217,7 @@
               <string>Axes tool</string>
              </property>
              <property name="icon">
-              <iconset resource="resources.qrc">
+              <iconset resource="../resources.qrc">
                <normaloff>:/icons/axis</normaloff>:/icons/axis</iconset>
              </property>
             </widget>
@@ -228,7 +228,7 @@
               <string>Add annotation</string>
              </property>
              <property name="icon">
-              <iconset resource="resources.qrc">
+              <iconset resource="../resources.qrc">
                <normaloff>:/icons/resources/icons/icons8-add-text-50.png</normaloff>:/icons/resources/icons/icons8-add-text-50.png</iconset>
              </property>
              <property name="iconSize">
@@ -248,7 +248,7 @@
               <string>Change colormap</string>
              </property>
              <property name="icon">
-              <iconset resource="resources.qrc">
+              <iconset resource="../resources.qrc">
                <normaloff>:/icons/preferences</normaloff>:/icons/preferences</iconset>
              </property>
             </widget>
@@ -259,7 +259,7 @@
               <string>Zoom In/Out</string>
              </property>
              <property name="icon">
-              <iconset resource="resources.qrc">
+              <iconset resource="../resources.qrc">
                <normaloff>:/icons/zoom</normaloff>:/icons/zoom</iconset>
              </property>
              <property name="checkable">
@@ -377,7 +377,7 @@
               <string>Pan figure</string>
              </property>
              <property name="icon">
-              <iconset resource="resources.qrc">
+              <iconset resource="../resources.qrc">
                <normaloff>:/icons/move</normaloff>:/icons/move</iconset>
              </property>
              <property name="iconSize">
@@ -394,7 +394,7 @@
               <string>Axis borders and spacing</string>
              </property>
              <property name="icon">
-              <iconset resource="resources.qrc">
+              <iconset resource="../resources.qrc">
                <normaloff>:/icons/axis</normaloff>:/icons/axis</iconset>
              </property>
              <property name="iconSize">
@@ -411,7 +411,7 @@
               <string>Figure options</string>
              </property>
              <property name="icon">
-              <iconset resource="resources.qrc">
+              <iconset resource="../resources.qrc">
                <normaloff>:/icons/preferences</normaloff>:/icons/preferences</iconset>
              </property>
              <property name="iconSize">
@@ -428,7 +428,7 @@
               <string>Save image or data</string>
              </property>
              <property name="icon">
-              <iconset resource="resources.qrc">
+              <iconset resource="../resources.qrc">
                <normaloff>:/icons/save</normaloff>:/icons/save</iconset>
              </property>
              <property name="iconSize">
@@ -445,7 +445,7 @@
               <string>Zoom in/out</string>
              </property>
              <property name="icon">
-              <iconset resource="resources.qrc">
+              <iconset resource="../resources.qrc">
                <normaloff>:/icons/zoom</normaloff>:/icons/zoom</iconset>
              </property>
              <property name="iconSize">
@@ -469,7 +469,7 @@
               <string>Original view</string>
              </property>
              <property name="icon">
-              <iconset resource="resources.qrc">
+              <iconset resource="../resources.qrc">
                <normaloff>:/icons/home</normaloff>:/icons/home</iconset>
              </property>
              <property name="iconSize">
@@ -765,7 +765,7 @@
               <string>Select All</string>
              </property>
              <property name="icon">
-              <iconset resource="resources.qrc">
+              <iconset resource="../resources.qrc">
                <normaloff>:/icons/resources/icons/icons8-select-all-50.png</normaloff>:/icons/resources/icons/icons8-select-all-50.png</iconset>
              </property>
              <property name="iconSize">
@@ -788,7 +788,7 @@
               <string>...</string>
              </property>
              <property name="icon">
-              <iconset resource="resources.qrc">
+              <iconset resource="../resources.qrc">
                <normaloff>:/icons/up</normaloff>:/icons/up</iconset>
              </property>
              <property name="iconSize">
@@ -856,7 +856,7 @@
               <string>Remove </string>
              </property>
              <property name="icon">
-              <iconset resource="resources.qrc">
+              <iconset resource="../resources.qrc">
                <normaloff>:/icons/delete</normaloff>:/icons/delete</iconset>
              </property>
              <property name="iconSize">
@@ -915,7 +915,7 @@
                <string>...</string>
               </property>
               <property name="icon">
-               <iconset resource="resources.qrc">
+               <iconset resource="../resources.qrc">
                 <normaloff>:/icons/resources/icons/icons8-ball-point-pen-64.png</normaloff>:/icons/resources/icons/icons8-ball-point-pen-64.png</iconset>
               </property>
               <property name="iconSize">
@@ -944,7 +944,7 @@
                <string>...</string>
               </property>
               <property name="icon">
-               <iconset resource="resources.qrc">
+               <iconset resource="../resources.qrc">
                 <normaloff>:/icons/resources/icons/icons8-hide-64.png</normaloff>:/icons/resources/icons/icons8-hide-64.png</iconset>
               </property>
               <property name="iconSize">
@@ -973,7 +973,7 @@
                <string>...</string>
               </property>
               <property name="icon">
-               <iconset resource="resources.qrc">
+               <iconset resource="../resources.qrc">
                 <normaloff>:/icons/save</normaloff>:/icons/save</iconset>
               </property>
               <property name="iconSize">
@@ -1085,7 +1085,7 @@
             <string>...</string>
            </property>
            <property name="icon">
-            <iconset resource="resources.qrc">
+            <iconset resource="../resources.qrc">
              <normaloff>:/icons/resources/icons/icon-sort-64.png</normaloff>:/icons/resources/icons/icon-sort-64.png</iconset>
            </property>
            <property name="iconSize">
@@ -1130,7 +1130,7 @@
             <string>...</string>
            </property>
            <property name="icon">
-            <iconset resource="resources.qrc">
+            <iconset resource="../resources.qrc">
              <normaloff>:/icons/delete</normaloff>:/icons/delete</iconset>
            </property>
            <property name="iconSize">
@@ -1181,7 +1181,7 @@
          <enum>QFrame::Raised</enum>
         </property>
         <property name="currentIndex">
-         <number>2</number>
+         <number>3</number>
         </property>
         <widget class="QWidget" name="StyleGeneral">
          <property name="geometry">
@@ -1193,7 +1193,7 @@
           </rect>
          </property>
          <attribute name="icon">
-          <iconset resource="resources.qrc">
+          <iconset resource="../resources.qrc">
            <normaloff>:/icons/resources/icons/icons8-gear-48.png</normaloff>:/icons/resources/icons/icons8-gear-48.png</iconset>
          </attribute>
          <attribute name="label">
@@ -1425,7 +1425,7 @@
           </rect>
          </property>
          <attribute name="icon">
-          <iconset resource="resources.qrc">
+          <iconset resource="../resources.qrc">
            <normaloff>:/icons/resources/icons/icons8-heat-map-100.png</normaloff>:/icons/resources/icons/icons8-heat-map-100.png</iconset>
          </attribute>
          <attribute name="label">
@@ -1647,12 +1647,12 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>219</width>
-           <height>484</height>
+           <width>98</width>
+           <height>28</height>
           </rect>
          </property>
          <attribute name="icon">
-          <iconset resource="resources.qrc">
+          <iconset resource="../resources.qrc">
            <normaloff>:/icons/resources/icons/icons8-scatter-plot-80.png</normaloff>:/icons/resources/icons/icons8-scatter-plot-80.png</iconset>
          </attribute>
          <attribute name="label">
@@ -2262,12 +2262,12 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>98</width>
-           <height>28</height>
+           <width>219</width>
+           <height>484</height>
           </rect>
          </property>
          <attribute name="icon">
-          <iconset resource="resources.qrc">
+          <iconset resource="../resources.qrc">
            <normaloff>:/icons/resources/icons/icons8-mind-map-filled-50.png</normaloff>:/icons/resources/icons/icons8-mind-map-filled-50.png</iconset>
          </attribute>
          <attribute name="label">
@@ -2288,14 +2288,27 @@
             <bold>false</bold>
            </font>
           </property>
+          <attribute name="horizontalHeaderDefaultSectionSize">
+           <number>53</number>
+          </attribute>
           <column>
            <property name="text">
-            <string>View Group</string>
+            <string>ID</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Name</string>
            </property>
            <property name="font">
             <font>
              <pointsize>11</pointsize>
             </font>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Link</string>
            </property>
           </column>
           <column>
@@ -2434,7 +2447,7 @@
               <string>...</string>
              </property>
              <property name="icon">
-              <iconset resource="resources.qrc">
+              <iconset resource="../resources.qrc">
                <normaloff>:/icons/resources/icons/icons8-link-50.png</normaloff>:/icons/resources/icons/icons8-link-50.png</iconset>
              </property>
              <property name="iconSize">
@@ -2466,7 +2479,7 @@
               <string>...</string>
              </property>
              <property name="icon">
-              <iconset resource="resources.qrc">
+              <iconset resource="../resources.qrc">
                <normaloff>:/icons/resources/icons/icons8-delete-link-50.png</normaloff>:/icons/resources/icons/icons8-delete-link-50.png</iconset>
              </property>
              <property name="iconSize">
@@ -2511,7 +2524,7 @@
               <string>On</string>
              </property>
              <property name="icon">
-              <iconset resource="resources.qrc">
+              <iconset resource="../resources.qrc">
                <normaloff>:/icons/resources/icons/icons8-anonymous-mask-dark-50.png</normaloff>:/icons/resources/icons/icons8-anonymous-mask-dark-50.png</iconset>
              </property>
              <property name="iconSize">
@@ -2546,7 +2559,7 @@
               <string>Off</string>
              </property>
              <property name="icon">
-              <iconset resource="resources.qrc">
+              <iconset resource="../resources.qrc">
                <normaloff>:/icons/resources/icons/icons8-anonymous-mask-light-50.png</normaloff>:/icons/resources/icons/icons8-anonymous-mask-light-50.png</iconset>
              </property>
              <property name="iconSize">
@@ -2573,7 +2586,7 @@
           </rect>
          </property>
          <attribute name="icon">
-          <iconset resource="resources.qrc">
+          <iconset resource="../resources.qrc">
            <normaloff>:/icons/resources/icons/icons8-polyline-40.png</normaloff>:/icons/resources/icons/icons8-polyline-40.png</iconset>
          </attribute>
          <attribute name="label">
@@ -3373,7 +3386,7 @@
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset resource="resources.qrc">
+         <iconset resource="../resources.qrc">
           <normaloff>:/icons/save</normaloff>:/icons/save</iconset>
         </property>
         <property name="iconSize">
@@ -3396,7 +3409,7 @@
          <string>Add</string>
         </property>
         <property name="icon">
-         <iconset resource="resources.qrc">
+         <iconset resource="../resources.qrc">
           <normaloff>:/icons/resources/icons/icons8-add-50.png</normaloff>:/icons/resources/icons/icons8-add-50.png</iconset>
         </property>
         <property name="iconSize">
@@ -3419,7 +3432,7 @@
          <string>Remove</string>
         </property>
         <property name="icon">
-         <iconset resource="resources.qrc">
+         <iconset resource="../resources.qrc">
           <normaloff>:/icons/resources/icons/icons8-minus-64.png</normaloff>:/icons/resources/icons/icons8-minus-64.png</iconset>
         </property>
         <property name="iconSize">
@@ -3525,10 +3538,10 @@
        </font>
       </property>
       <property name="toolTip">
-       <string/>
+       <string>Activates the crop tool</string>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="SelectIsotopePage">
        <property name="enabled">
@@ -3538,8 +3551,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>300</width>
-         <height>534</height>
+         <width>98</width>
+         <height>28</height>
         </rect>
        </property>
        <attribute name="label">
@@ -3698,7 +3711,7 @@
              <string>Select Tool</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/icons/resources/icons/icons8-atom-64.png</normaloff>:/icons/resources/icons/icons8-atom-64.png</iconset>
             </property>
             <property name="iconSize">
@@ -3780,8 +3793,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>300</width>
-         <height>534</height>
+         <width>98</width>
+         <height>28</height>
         </rect>
        </property>
        <attribute name="label">
@@ -3834,7 +3847,7 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/icons/resources/icons/icons8-fit-to-width-64.png</normaloff>:/icons/resources/icons/icons8-fit-to-width-64.png</iconset>
             </property>
             <property name="iconSize">
@@ -3854,7 +3867,7 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/icons/resources/icons/icon-swap-64.png</normaloff>:/icons/resources/icons/icon-swap-64.png</iconset>
             </property>
             <property name="iconSize">
@@ -3871,13 +3884,13 @@
           <item>
            <widget class="QToolButton" name="toolButtonCrop">
             <property name="toolTip">
-             <string>Crop map</string>
+             <string>Activates the crop tool</string>
             </property>
             <property name="text">
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/icons/resources/icons/icons8-crop-64.png</normaloff>:/icons/resources/icons/icons8-crop-64.png</iconset>
             </property>
             <property name="iconSize">
@@ -3900,7 +3913,7 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/icons/resources/icons/icons8-crop-64.png</normaloff>:/icons/resources/icons/icons8-crop-64.png</iconset>
             </property>
             <property name="iconSize">
@@ -3941,7 +3954,7 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/icons/resources/icons/icon-gradient-32.png</normaloff>:/icons/resources/icons/icon-gradient-32.png</iconset>
             </property>
             <property name="iconSize">
@@ -4043,7 +4056,7 @@
           <string>...</string>
          </property>
          <property name="icon">
-          <iconset resource="resources.qrc">
+          <iconset resource="../resources.qrc">
            <normaloff>:/icons/resources/icons/icon-histeq-64.png</normaloff>:/icons/resources/icons/icon-histeq-64.png</iconset>
          </property>
          <property name="iconSize">
@@ -4083,7 +4096,7 @@
           <string>Reset</string>
          </property>
          <property name="icon">
-          <iconset resource="resources.qrc">
+          <iconset resource="../resources.qrc">
            <normaloff>:/icons/resources/icons/icons8-reset-64.png</normaloff>:/icons/resources/icons/icons8-reset-64.png</iconset>
          </property>
          <property name="iconSize">
@@ -4118,7 +4131,7 @@
           <string>...</string>
          </property>
          <property name="icon">
-          <iconset resource="resources.qrc">
+          <iconset resource="../resources.qrc">
            <normaloff>:/icons/resources/icons/icon-KDE-64.png</normaloff>:/icons/resources/icons/icon-KDE-64.png</iconset>
          </property>
          <property name="iconSize">
@@ -4144,7 +4157,7 @@
           <string>...</string>
          </property>
          <property name="icon">
-          <iconset resource="resources.qrc">
+          <iconset resource="../resources.qrc">
            <normaloff>:/icons/resources/icons/icons8-histogram-32.png</normaloff>
            <activeoff>:/icons/resources/icons/icons8-histogram-32.png</activeoff>:/icons/resources/icons/icons8-histogram-32.png</iconset>
          </property>
@@ -4463,7 +4476,7 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/icons/resources/icons/icons8-add-file-64.png</normaloff>:/icons/resources/icons/icons8-add-file-64.png</iconset>
             </property>
             <property name="iconSize">
@@ -4496,7 +4509,7 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/icons/resources/icons/icons8-location-marker-48.png</normaloff>:/icons/resources/icons/icons8-location-marker-48.png</iconset>
             </property>
             <property name="iconSize">
@@ -4519,7 +4532,7 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/icons/resources/icons/icons8-move-49.png</normaloff>:/icons/resources/icons/icons8-move-49.png</iconset>
             </property>
             <property name="iconSize">
@@ -4542,7 +4555,7 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/icons/resources/icons/icons8-hide-64.png</normaloff>:/icons/resources/icons/icons8-hide-64.png</iconset>
             </property>
             <property name="iconSize">
@@ -4562,7 +4575,7 @@
              <string>Select All</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/icons/resources/icons/icons8-select-all-50.png</normaloff>:/icons/resources/icons/icons8-select-all-50.png</iconset>
             </property>
             <property name="iconSize">
@@ -4595,7 +4608,7 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/icons/delete</normaloff>:/icons/delete</iconset>
             </property>
             <property name="iconSize">
@@ -4624,7 +4637,7 @@
           <string>...</string>
          </property>
          <property name="icon">
-          <iconset resource="resources.qrc">
+          <iconset resource="../resources.qrc">
            <normaloff>:/icons/resources/icons/icons8-analysis-50.png</normaloff>:/icons/resources/icons/icons8-analysis-50.png</iconset>
          </property>
          <property name="iconSize">
@@ -4644,8 +4657,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>98</width>
-         <height>28</height>
+         <width>300</width>
+         <height>534</height>
         </rect>
        </property>
        <attribute name="label">
@@ -4687,7 +4700,7 @@
           <string>Add filter</string>
          </property>
          <property name="icon">
-          <iconset resource="resources.qrc">
+          <iconset resource="../resources.qrc">
            <normaloff>:/icons/resources/icons/icons8-filter-50.png</normaloff>:/icons/resources/icons/icons8-filter-50.png</iconset>
          </property>
          <property name="iconSize">
@@ -4953,7 +4966,7 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/icons/resources/icons/icons8-add-file-64.png</normaloff>:/icons/resources/icons/icons8-add-file-64.png</iconset>
             </property>
             <property name="iconSize">
@@ -4997,7 +5010,7 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/icons/resources/icons/icons8-radar-plot-80.png</normaloff>:/icons/resources/icons/icons8-radar-plot-80.png</iconset>
             </property>
             <property name="iconSize">
@@ -5031,7 +5044,7 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/icons/resources/icons/icons8-move-49.png</normaloff>:/icons/resources/icons/icons8-move-49.png</iconset>
             </property>
             <property name="iconSize">
@@ -5065,7 +5078,7 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/icons/resources/icons/icons8-add-48.png</normaloff>:/icons/resources/icons/icons8-add-48.png</iconset>
             </property>
             <property name="iconSize">
@@ -5099,7 +5112,7 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/icons/resources/icons/icons8-edit-48.png</normaloff>:/icons/resources/icons/icons8-edit-48.png</iconset>
             </property>
             <property name="iconSize">
@@ -5146,7 +5159,7 @@
              <string>Edge Detection</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/icons/resources/icons/icon-spotlight-64.png</normaloff>:/icons/resources/icons/icon-spotlight-64.png</iconset>
             </property>
             <property name="iconSize">
@@ -5192,7 +5205,7 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/icons/resources/icons/icons8-link-50.png</normaloff>:/icons/resources/icons/icons8-link-50.png</iconset>
             </property>
             <property name="iconSize">
@@ -5223,7 +5236,7 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/icons/resources/icons/icons8-delete-link-50.png</normaloff>:/icons/resources/icons/icons8-delete-link-50.png</iconset>
             </property>
             <property name="iconSize">
@@ -5267,7 +5280,7 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/icons/save</normaloff>:/icons/save</iconset>
             </property>
             <property name="iconSize">
@@ -5298,7 +5311,7 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/icons/delete</normaloff>:/icons/delete</iconset>
             </property>
             <property name="iconSize">
@@ -5352,7 +5365,7 @@
              <string>Fullmap</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/icons/resources/icons/icons8-map-50.png</normaloff>:/icons/resources/icons/icons8-map-50.png</iconset>
             </property>
             <property name="iconSize">
@@ -5397,7 +5410,7 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/icons/resources/icons/icons8-filter-50-2.png</normaloff>
               <activeon>:/icons/resources/icons/icons8-filter-50.png</activeon>
               <selectedon>:/icons/resources/icons/icons8-filter-50.png</selectedon>:/icons/resources/icons/icons8-filter-50-2.png</iconset>
@@ -5428,7 +5441,7 @@
              <string>Polygon</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/icons/resources/icons/icons8-radar-plot-80.png</normaloff>:/icons/resources/icons/icons8-radar-plot-80.png</iconset>
             </property>
             <property name="iconSize">
@@ -5457,7 +5470,7 @@
              <string>Polygon</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/icons/resources/icons/icons8-anonymous-mask-light-50.png</normaloff>
               <activeon>:/icons/resources/icons/icons8-anonymous-mask-dark-50.png</activeon>
               <selectedon>:/icons/resources/icons/icons8-anonymous-mask-dark-50.png</selectedon>:/icons/resources/icons/icons8-anonymous-mask-light-50.png</iconset>
@@ -5817,7 +5830,7 @@
              <string>Plot</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/icons/resources/icons/icons8-rocket-48.png</normaloff>:/icons/resources/icons/icons8-rocket-48.png</iconset>
             </property>
             <property name="iconSize">
@@ -6030,7 +6043,7 @@
                <string>...</string>
               </property>
               <property name="icon">
-               <iconset resource="resources.qrc">
+               <iconset resource="../resources.qrc">
                 <normaloff>:/icons/save</normaloff>:/icons/save</iconset>
               </property>
               <property name="iconSize">
@@ -6066,7 +6079,7 @@
                <string>...</string>
               </property>
               <property name="icon">
-               <iconset resource="resources.qrc">
+               <iconset resource="../resources.qrc">
                 <normaloff>:/icons/resources/icons/icon-illuminati-64.png</normaloff>:/icons/resources/icons/icon-illuminati-64.png</iconset>
               </property>
               <property name="iconSize">
@@ -6433,7 +6446,7 @@
                  <string>Select All</string>
                 </property>
                 <property name="icon">
-                 <iconset resource="resources.qrc">
+                 <iconset resource="../resources.qrc">
                   <normaloff>:/icons/resources/icons/icons8-select-all-50.png</normaloff>:/icons/resources/icons/icons8-select-all-50.png</iconset>
                 </property>
                 <property name="iconSize">
@@ -6456,7 +6469,7 @@
                  <string>...</string>
                 </property>
                 <property name="icon">
-                 <iconset resource="resources.qrc">
+                 <iconset resource="../resources.qrc">
                   <normaloff>:/icons/up</normaloff>:/icons/up</iconset>
                 </property>
                 <property name="iconSize">
@@ -6505,7 +6518,7 @@
                  <string>Remove</string>
                 </property>
                 <property name="icon">
-                 <iconset resource="resources.qrc">
+                 <iconset resource="../resources.qrc">
                   <normaloff>:/icons/delete</normaloff>:/icons/delete</iconset>
                 </property>
                 <property name="iconSize">
@@ -6531,7 +6544,7 @@
                  <string>Save</string>
                 </property>
                 <property name="icon">
-                 <iconset resource="resources.qrc">
+                 <iconset resource="../resources.qrc">
                   <normaloff>:/icons/save</normaloff>:/icons/save</iconset>
                 </property>
                 <property name="iconSize">
@@ -6561,7 +6574,7 @@
                  <string>Add</string>
                 </property>
                 <property name="icon">
-                 <iconset resource="resources.qrc">
+                 <iconset resource="../resources.qrc">
                   <normaloff>:/icons/resources/icons/icons8-add-50.png</normaloff>:/icons/resources/icons/icons8-add-50.png</iconset>
                 </property>
                 <property name="iconSize">
@@ -6587,7 +6600,7 @@
                  <string>Add</string>
                 </property>
                 <property name="icon">
-                 <iconset resource="resources.qrc">
+                 <iconset resource="../resources.qrc">
                   <normaloff>:/icons/resources/icons/icons8-add-list-50.png</normaloff>:/icons/resources/icons/icons8-add-list-50.png</iconset>
                 </property>
                 <property name="iconSize">
@@ -6626,7 +6639,7 @@
                  <string>Plot</string>
                 </property>
                 <property name="icon">
-                 <iconset resource="resources.qrc">
+                 <iconset resource="../resources.qrc">
                   <normaloff>:/icons/resources/icons/icons8-rocket-48.png</normaloff>:/icons/resources/icons/icons8-rocket-48.png</iconset>
                 </property>
                 <property name="iconSize">
@@ -6917,7 +6930,7 @@
                <string>Plot</string>
               </property>
               <property name="icon">
-               <iconset resource="resources.qrc">
+               <iconset resource="../resources.qrc">
                 <normaloff>:/icons/resources/icons/icons8-rocket-48.png</normaloff>:/icons/resources/icons/icons8-rocket-48.png</iconset>
               </property>
               <property name="iconSize">
@@ -7277,7 +7290,7 @@
                  <string>Run Selected</string>
                 </property>
                 <property name="icon">
-                 <iconset resource="resources.qrc">
+                 <iconset resource="../resources.qrc">
                   <normaloff>:/icons/resources/icons/icons8-rocket-48.png</normaloff>:/icons/resources/icons/icons8-rocket-48.png</iconset>
                 </property>
                 <property name="iconSize">
@@ -7743,7 +7756,7 @@
                <string>Toggle profiling</string>
               </property>
               <property name="icon">
-               <iconset resource="resources.qrc">
+               <iconset resource="../resources.qrc">
                 <normaloff>:/icons/resources/icons/icons8-polyline-40.png</normaloff>:/icons/resources/icons/icons8-polyline-40.png</iconset>
               </property>
               <property name="iconSize">
@@ -7777,7 +7790,7 @@
                <string>Interpolate profile</string>
               </property>
               <property name="icon">
-               <iconset resource="resources.qrc">
+               <iconset resource="../resources.qrc">
                 <normaloff>:/icons/resources/icons/icons8-dashed-line-50.png</normaloff>:/icons/resources/icons/icons8-dashed-line-50.png</iconset>
               </property>
               <property name="iconSize">
@@ -7809,7 +7822,7 @@
                <string>...</string>
               </property>
               <property name="icon">
-               <iconset resource="resources.qrc">
+               <iconset resource="../resources.qrc">
                 <normaloff>:/icons/resources/icons/icons8-move-49.png</normaloff>:/icons/resources/icons/icons8-move-49.png</iconset>
               </property>
               <property name="iconSize">
@@ -7859,7 +7872,7 @@
                <string>Delete profiile</string>
               </property>
               <property name="icon">
-               <iconset resource="resources.qrc">
+               <iconset resource="../resources.qrc">
                 <normaloff>:/icons/delete</normaloff>:/icons/delete</iconset>
               </property>
               <property name="iconSize">
@@ -7973,7 +7986,7 @@
                <string>Select All</string>
               </property>
               <property name="icon">
-               <iconset resource="resources.qrc">
+               <iconset resource="../resources.qrc">
                 <normaloff>:/icons/resources/icons/icons8-select-all-50.png</normaloff>:/icons/resources/icons/icons8-select-all-50.png</iconset>
               </property>
               <property name="iconSize">
@@ -8004,7 +8017,7 @@
                <string>Move up</string>
               </property>
               <property name="icon">
-               <iconset resource="resources.qrc">
+               <iconset resource="../resources.qrc">
                 <normaloff>:/icons/up</normaloff>:/icons/up</iconset>
               </property>
               <property name="iconSize">
@@ -8079,7 +8092,7 @@
                <string>Delete points</string>
               </property>
               <property name="icon">
-               <iconset resource="resources.qrc">
+               <iconset resource="../resources.qrc">
                 <normaloff>:/icons/delete</normaloff>:/icons/delete</iconset>
               </property>
               <property name="iconSize">
@@ -8123,7 +8136,7 @@
                <string>Save profile</string>
               </property>
               <property name="icon">
-               <iconset resource="resources.qrc">
+               <iconset resource="../resources.qrc">
                 <normaloff>:/icons/save</normaloff>:/icons/save</iconset>
               </property>
               <property name="iconSize">
@@ -8424,7 +8437,7 @@
                 <string>...</string>
                </property>
                <property name="icon">
-                <iconset resource="resources.qrc">
+                <iconset resource="../resources.qrc">
                  <normaloff>:/icons/resources/icons/icons8-add-file-64.png</normaloff>:/icons/resources/icons/icons8-add-file-64.png</iconset>
                </property>
               </widget>
@@ -8573,7 +8586,7 @@
   </widget>
   <action name="actionOpen">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/resources/icons/icons8-add-folder-40.png</normaloff>:/icons/resources/icons/icons8-add-folder-40.png</iconset>
    </property>
    <property name="text">
@@ -8644,7 +8657,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/resources/icons/icons8-atom-64.png</normaloff>:/icons/resources/icons/icons8-atom-64.png</iconset>
    </property>
    <property name="text">
@@ -8690,7 +8703,7 @@
   </action>
   <action name="actionBiPlot">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/resources/icons/icons8-scatter-plot-80.png</normaloff>:/icons/resources/icons/icons8-scatter-plot-80.png</iconset>
    </property>
    <property name="text">
@@ -8714,7 +8727,7 @@
   </action>
   <action name="actionCluster">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/resources/icons/icons8-mind-map-50.png</normaloff>:/icons/resources/icons/icons8-mind-map-50.png</iconset>
    </property>
    <property name="text">
@@ -8728,7 +8741,7 @@
   </action>
   <action name="actionTEC">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/resources/icons/icons8-graph-60.png</normaloff>:/icons/resources/icons/icons8-graph-60.png</iconset>
    </property>
    <property name="text">
@@ -8793,7 +8806,7 @@
   </action>
   <action name="actionSpotData">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/resources/icons/icons8-country-80.png</normaloff>:/icons/resources/icons/icons8-country-80.png</iconset>
    </property>
    <property name="text">
@@ -8813,7 +8826,7 @@
   </action>
   <action name="actionFilter_Tools">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/resources/icons/icons8-filter-50.png</normaloff>:/icons/resources/icons/icons8-filter-50.png</iconset>
    </property>
    <property name="text">
@@ -8831,7 +8844,7 @@
   </action>
   <action name="actionProfiles">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/resources/icons/icons8-polyline-40.png</normaloff>:/icons/resources/icons/icons8-polyline-40.png</iconset>
    </property>
    <property name="text">
@@ -8846,7 +8859,7 @@
   </action>
   <action name="actionPolygon">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/resources/icons/icons8-radar-plot-80.png</normaloff>:/icons/resources/icons/icons8-radar-plot-80.png</iconset>
    </property>
    <property name="text">
@@ -8861,7 +8874,7 @@
   </action>
  </widget>
  <resources>
-  <include location="resources.qrc"/>
+  <include location="../resources.qrc"/>
  </resources>
  <connections/>
 </ui>

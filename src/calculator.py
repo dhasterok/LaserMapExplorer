@@ -7,7 +7,7 @@ Created on Wed Jan 24 14:24:35 2024
 """
 
 from pyqtgraph.Qt import QtWidgets
-from CalculatorWindow import Ui_CalWindow
+from src.ui.CalculatorWindow import Ui_CalWindow
 import numexpr as ne
 from PyQt5.Qt import QStandardItemModel,QStandardItem
 ## !pyuic5 CalculatorWindow.ui -o CalculatorWindow.py

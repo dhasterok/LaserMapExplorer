@@ -3,7 +3,7 @@
 """
 Created on Thu Nov 30 16:29:10 2023
 
-@author: a1904121
+@author: Shavin Kaluthantri
 """
 
 import numpy as np
@@ -14,6 +14,19 @@ from scipy.special import erfinv,erf
 from gausscensor import gausscensor
 
 def adjby_quantile2(x_v, y_v, xref=None, x=None, y=None):
+    """
+    
+    :param x_v:
+    :type x_v:
+    :param y_v:
+    :type y_v:
+    :param xref: Defaults to None
+    :type xref: optional
+    :param x: Defaults to None
+    :type y: optional
+    :param y: Defaults to None
+    :type x: optional
+    """
     # Step 1 - create x bins
     min_x = np.min(x_v)
     max_x = np.max(x_v)

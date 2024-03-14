@@ -3,12 +3,8 @@
 """
 Created on Wed Nov 22 16:56:39 2023
 
-@author: a1904121
+@author: Shavin Kaluthantri
 """
-
-
-
-
 
 import numpy as np
 import pandas as pd
@@ -23,7 +19,6 @@ from src.MolecularWeightCalculator import MolecularWeightCalculator
 from src.gausscensor import gausscensor
 from matplotlib.figure import Figure
 import re
-
 
 def plot_spider_norm(data, ref_data, norm_ref_data, layer,el_list=None, style='Quanta', quantiles=[ 0.25, 0.5, 0.75], ax=None, c = 'b', label = None):
     

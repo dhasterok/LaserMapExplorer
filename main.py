@@ -865,7 +865,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.update_filter_values()
 
     def update_plot(self,bin_s = True, axis = False, reset= False):
-        """"Update plot"""
+        """"Update plot
+        
+        :param bin_s: Defaults to True
+        :type bin_s: bool, optional
+        :param axis: Defaults to False
+        :type axis: bool, optional
+        :param reset: Defaults to False
+        :type reset: bool, optional"""
         if self.update_spinboxes_bool:
             self.canvasWindow.setCurrentIndex(0)
             lb = self.doubleSpinBoxLB.value()
@@ -929,6 +936,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.add_noise_reduction()
 
     def remove_multi_plot(self, selected_plot_name):
+        """Removes selected plot from MulitView
+        
+        :param selected_plot_name:
+        :type selected_plot_name:
+        """
         widget_index = self.multi_view_index.index(selected_plot_name)
         layout = self.widgetMultiView.layout()
         item = layout.itemAt(widget_index)  # Get the item at the specified index
@@ -951,7 +963,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxPlots.addItems(self.multi_view_index)
 
     def add_plot(self, plot_information, current_plot_df = None):
-        """Adds plot to plot widget dictionary and displays in selected view tab"""
+        """Adds plot to plot widget dictionary and displays in selected view tab
+        
+        :param plot_information:
+        :type plot_information: dict
+        :param current_plot_df: Defaults to None
+        :param type: dict, optional
+        """
         plot_name = plot_information['plot_name']
         sample_id = plot_information['sample_id']
         plot_type = plot_information['plot_type']
@@ -1034,9 +1052,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         Activate ratios by selecting them in the Isotope Select dialog.
 
-        Parameter
-        ---------
-        state: bool
+        :param state: 
+        :type state: bool
 
         """
         if state == 2:  # Qt.Checked
@@ -1134,7 +1151,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.filter_df.loc[len(self.filter_df)]=filter_info
 
     def remove_selected_rows(self,sample):
-        """Remove selected rows from filter table."""
+        """Remove selected rows from filter table.
+        
+        :param sample:
+        :type sample:
+        """
         # We loop in reverse to avoid issues when removing rows
         for row in range(self.tableWidgetFilters.rowCount()-1, -1, -1):
             chkBoxItem = self.tableWidgetFilters.item(row, 7)
@@ -1153,8 +1174,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                            & (self.filter_df['isotope_1'] == isotope_1)& (self.filter_df['isotope_2'] == isotope_2)].index, inplace=True)
         self.apply_filters(sample_id)
 
-    def apply_filters(self, fullmap= False):
+    def apply_filters(self, fullmap=False):
+        """Applies filter to map data
         
+        Applies user specified data filters to mask data for analysis
+
+        :param fullmap: If True, filters are ignored, otherwise filter maps, Defaults to False
+        :type fullmap: bool, optional"""
         #reset all masks
         self.polygon_mask = np.ones_like( self.mask, dtype=bool)
         self.filter_mask = np.ones_like( self.mask, dtype=bool)
@@ -1212,12 +1238,31 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_all_plots()
 
     def dynamic_format(self,value, threshold=1e3):
+        """Prepares number for display
+        
+        :param threshold: order of magnitude for determining display as floating point or expressing in engineering nootation, Defaults to 1e3
+        :type threshold: double
+        
+        :return: number formatted as string
+        :rtype: str
+        """
         if abs(value) > threshold:
             return "{:.4e}".format(value)  # Scientific notation with 2 decimal places
         else:
             return "{:.4f}".format(value)
 
     def update_norm(self,sample_id, norm = None, isotope=None, update = False):
+        """
+        
+        :param sample_id:
+        :type sample_id: int
+        :param norm: Defaults to None
+        :type norm: optional
+        :param isotope:
+        :type isotope:
+        :param update:
+        :type update:
+        """
         if not norm:
             norm = self.isotopes_df.loc[(self.isotopes_df['sample_id']==sample_id)
                                  & (self.isotopes_df['isotopes']==isotope),'norm'].values[0]
@@ -1250,6 +1295,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # self.update_plot()
 
     def update_all_plots(self):
+        """Updates all plots in plot widget dictionary"""
         self.cm = self.comboBoxMapColormap.currentText()
         for plot_type,sample_ids in self.plot_widget_dict.items():
             if plot_type == 'histogram' or plot_type == 'lasermap' or plot_type == 'lasernorm':
@@ -1317,9 +1363,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """Prepares data to be used in analysis
         
         1. Obtains raw DataFrame
-        2. shifts isotope values so that all values are postive
+        2. Shifts isotope values so that all values are postive
         3. Autoscales data if choosen by user
-    
         """
         
         # shifts isotope values so that all values are postive
@@ -1337,8 +1382,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def open_directory(self):
         """Open directory with samples
         
+        Executes on self.toolBar.actionOpen and self.menuFile.action.Open_Directory.  self.toolBox
+        pages are enabled upon successful load.
+
         Opens a dialog to select directory filled with samples.  Updates sample list in
-        Samples and Fields tab and loads first sample in list by default.
+        self.comboBoxSampleID and comboBoxes associated with isotope lists.  The first sample
+        in list is loaded by default.
         """
         dialog = QFileDialog()
         dialog.setFileMode(QFileDialog.Directory)
@@ -1387,6 +1436,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def remove_widgets_from_layout(self, layout, object_names_to_remove):
         """
         Remove plot widgets from the provided layout based on their objectName properties.
+
+        :param layout:
+        :type layout:
+        :param object_names_to_remove:
+        :type object_names_to_remove:
         """
         for i in reversed(range(layout.count())):  # Reverse to avoid skipping due to layout change
             item = layout.itemAt(i)
@@ -2340,7 +2394,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def get_scatter_values(self):
         """Creates a dictionary of values for plotting
 
-        :return: four possible return variables, x, y, z, c, as dict with locations for bi- and
+        :return: four return variables, x, y, z, and c, each as a dict with locations for bi- and
             ternary plots.  Each contain a 'field', 'type', 'label', and 'array'.  x, y and z
             contain coordinates and c contains the colors
         :rtype: dict
@@ -2546,8 +2600,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def get_map_style(self, tab_id):
         """Updates dictionary with map style properties
 
-        Parameter
-        ---------
+        Updates self.map_style with widget status under Styling > Maps
+
         :param tab_ind: tab_ind should be set by toolBox.currentIndex(), which determines styles to
             update
         :type tab_ind: int
@@ -2755,6 +2809,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     #        self.add_plot(plot_information)
 
     def plot_scatter(self, values=None, fig=None, save=False):
+        """Creates a plots from self.toolBox Scatter page.
+        
+        Creates both scatter and heatmaps (spatial histograms) for bi- and ternary plots.
+
+        :param values: Defaults to None
+        :type values:
+        :param fig: Defaults to None
+        :type fig:
+        :param save: Flag for saving widget to self.toolBoxTreeView Plot Selector page, Defaults to False
+        :type save: bool, optional"""
         # update plot style parameters
         self.get_general_style()
         self.get_scatter_style(self.toolBox.currentIndex())
@@ -2765,7 +2829,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             x, y, z, c = values
 
         match self.comboBoxScatterType.currentText().lower():
-            #scatter
+            # scatter
             case 'scatter':
                 s = self.scatter_style[self.toolBox.currentIndex()]
                 if s['ColorByField'] == None:
@@ -2880,11 +2944,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         :param fig: figure object
         :type fig: matplotlib.figure
-        :param x: x-dimension
+        :param x: data associated with field self.comboBoxScatterIsotopeX.currentText() as x coordinate
         :type x: dict
-        :param y: y-dimension
+        :param y: data associated with field self.comboBoxScatterIsotopeX.currentText() as y coordinate
         :type y: dict
-        :param c: color dimension
+        :param c: data associated with field self.comboBoxColorField.currentText() as marker colors
         :type c: dict
         :param s: style parameters
         :type s: dict
@@ -2942,9 +3006,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
     def ternary_scatter(self, fig, x, y, z, c, s, save):
-        """Creates scatter bi-plots
+        """Creates ternary scatter plots
 
-        A general function for creating scatter plots of 2-dimensions.
+        A general function for creating ternary scatter plots.
 
         :param fig: figure object
         :type fig: matplotlib.figure

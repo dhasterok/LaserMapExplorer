@@ -247,18 +247,18 @@ class ternary:
         Ternary scatter plot, ternscatter() uses many of the same parameters as
         matplotlib scatter.
         
-        :param a: 
+        :param a: coordinate associated with top vertex
         :type a: np.array
-        :param b: 
+        :param b: coordinate associated with left vertex
         :type b: np.array
-        :param c: 
+        :param c: coordinate associated with right vertex
         :type c: np.array
-        :param d:
+        :param d: coordinate associated with bottom vertex (diamond plot)
         :type d: np.array, optional
         :param size: Marker size (in points), Defaults to 36
         :type size: double, optional
         :param cmap: Colormap, Defaults to None
-        :type cmap:
+        :type cmap: matplotlib.Colormap
         :param color: Defaults to None
         :type color: optional
         :param edgecolors: Defaults to None

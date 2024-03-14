@@ -561,10 +561,11 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 <span class="sig-name descname"><span class="pre">activate_ratios</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.activate_ratios" title="Link to this definition">#</a></dt>
 <dd><p>Adds ratios selection as options to certain comboBoxes and plot tree</p>
 <p>Activate ratios by selecting them in the Isotope Select dialog.</p>
-<section id="id3">
-<h2>Parameter<a class="headerlink" href="#id3" title="Link to this heading">#</a></h2>
-<p>state: bool</p>
-</section>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>state</strong> (<em>bool</em>) – </p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -600,6 +601,15 @@ comboBoxNRMethod.  Options include:
 <dt class="sig sig-object py" id="main.MainWindow.add_plot">
 <span class="sig-name descname"><span class="pre">add_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot_information</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">current_plot_df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.add_plot" title="Link to this definition">#</a></dt>
 <dd><p>Adds plot to plot widget dictionary and displays in selected view tab</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>plot_information</strong> (<em>dict</em>) – </p></li>
+<li><p><strong>current_plot_df</strong> – Defaults to None</p></li>
+<li><p><strong>type</strong> – dict, optional</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -620,7 +630,14 @@ comboBoxNRMethod.  Options include:
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.apply_filters">
 <span class="sig-name descname"><span class="pre">apply_filters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fullmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.apply_filters" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Applies filter to map data</p>
+<p>Applies user specified data filters to mask data for analysis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fullmap</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, filters are ignored, otherwise filter maps, Defaults to False</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.auto_scale">
@@ -648,9 +665,9 @@ high or low (even negative) values.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>fig</strong> (<em>matplotlib.figure</em>) – figure object</p></li>
-<li><p><strong>x</strong> (<em>dict</em>) – x-dimension</p></li>
-<li><p><strong>y</strong> (<em>dict</em>) – y-dimension</p></li>
-<li><p><strong>c</strong> (<em>dict</em>) – color dimension</p></li>
+<li><p><strong>x</strong> (<em>dict</em>) – data associated with field self.comboBoxScatterIsotopeX.currentText() as x coordinate</p></li>
+<li><p><strong>y</strong> (<em>dict</em>) – data associated with field self.comboBoxScatterIsotopeX.currentText() as y coordinate</p></li>
+<li><p><strong>c</strong> (<em>dict</em>) – data associated with field self.comboBoxColorField.currentText() as marker colors</p></li>
 <li><p><strong>s</strong> (<em>dict</em>) – style parameters</p></li>
 </ul>
 </dd>
@@ -687,8 +704,8 @@ high or low (even negative) values.</p>
 <dt class="sig sig-object py" id="main.MainWindow.change_sample">
 <span class="sig-name descname"><span class="pre">change_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.change_sample" title="Link to this definition">#</a></dt>
 <dd><p>Changes sample and plots first map</p>
-<section id="id4">
-<h2>Parameter<a class="headerlink" href="#id4" title="Link to this heading">#</a></h2>
+<section id="id3">
+<h2>Parameter<a class="headerlink" href="#id3" title="Link to this heading">#</a></h2>
 <dl class="simple">
 <dt>index: int</dt><dd><p>index of sample name for identifying data.  The values are based on the
 comboBoxSampleID</p>
@@ -715,7 +732,19 @@ comboBoxSampleID</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.dynamic_format">
 <span class="sig-name descname"><span class="pre">dynamic_format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.dynamic_format" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Prepares number for display</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>threshold</strong> (<em>double</em>) – order of magnitude for determining display as floating point or expressing in engineering nootation, Defaults to 1e3</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>number formatted as string</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.find_leaf">
@@ -783,18 +812,13 @@ comboBoxSampleID</p>
 <dt class="sig sig-object py" id="main.MainWindow.get_map_style">
 <span class="sig-name descname"><span class="pre">get_map_style</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tab_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.get_map_style" title="Link to this definition">#</a></dt>
 <dd><p>Updates dictionary with map style properties</p>
-<section id="id5">
-<h2>Parameter<a class="headerlink" href="#id5" title="Link to this heading">#</a></h2>
+<p>Updates self.map_style with widget status under Styling &gt; Maps</p>
 <dl class="field-list simple">
-<dt class="field-odd">param tab_ind<span class="colon">:</span></dt>
-<dd class="field-odd"><p>tab_ind should be set by toolBox.currentIndex(), which determines styles to
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tab_ind</strong> (<em>int</em>) – tab_ind should be set by toolBox.currentIndex(), which determines styles to
 update</p>
 </dd>
-<dt class="field-even">type tab_ind<span class="colon">:</span></dt>
-<dd class="field-even"><p>int</p>
-</dd>
 </dl>
-</section>
 </dd></dl>
 
 <dl class="py method">
@@ -820,7 +844,7 @@ update</p>
 <dd><p>Creates a dictionary of values for plotting</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>four possible return variables, x, y, z, c, as dict with locations for bi- and
+<dd class="field-odd"><p>four return variables, x, y, z, and c, each as a dict with locations for bi- and
 ternary plots.  Each contain a ‘field’, ‘type’, ‘label’, and ‘array’.  x, y and z
 contain coordinates and c contains the colors</p>
 </dd>
@@ -933,8 +957,11 @@ tick_label_rotation (float): Angle of text rotation, default is 0.</p>
 <dt class="sig sig-object py" id="main.MainWindow.open_directory">
 <span class="sig-name descname"><span class="pre">open_directory</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.open_directory" title="Link to this definition">#</a></dt>
 <dd><p>Open directory with samples</p>
+<p>Executes on self.toolBar.actionOpen and self.menuFile.action.Open_Directory.  self.toolBox
+pages are enabled upon successful load.</p>
 <p>Opens a dialog to select directory filled with samples.  Updates sample list in
-Samples and Fields tab and loads first sample in list by default.</p>
+self.comboBoxSampleID and comboBoxes associated with isotope lists.  The first sample
+in list is loaded by default.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -983,8 +1010,8 @@ Samples and Fields tab and loads first sample in list by default.</p>
 <dt class="sig sig-object py" id="main.MainWindow.plot_histogram">
 <span class="sig-name descname"><span class="pre">plot_histogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_plot_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_information</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_width</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.plot_histogram" title="Link to this definition">#</a></dt>
 <dd><p>Displays histogram for current selected isotope.</p>
-<section id="id6">
-<h2>Parameter<a class="headerlink" href="#id6" title="Link to this heading">#</a></h2>
+<section id="id4">
+<h2>Parameter<a class="headerlink" href="#id4" title="Link to this heading">#</a></h2>
 <dl class="simple">
 <dt>current_plot_df: pandas.DataFrame</dt><dd><p>current active plot</p>
 </dd>
@@ -1025,7 +1052,18 @@ Samples and Fields tab and loads first sample in list by default.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.plot_scatter">
 <span class="sig-name descname"><span class="pre">plot_scatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.plot_scatter" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Creates a plots from self.toolBox Scatter page.</p>
+<p>Creates both scatter and heatmaps (spatial histograms) for bi- and ternary plots.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>values</strong> – Defaults to None</p></li>
+<li><p><strong>fig</strong> – Defaults to None</p></li>
+<li><p><strong>save</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag for saving widget to self.toolBoxTreeView Plot Selector page, Defaults to False</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.plot_ternarymap">
@@ -1039,7 +1077,7 @@ Samples and Fields tab and loads first sample in list by default.</p>
 <dd><p>Prepares data to be used in analysis</p>
 <ol class="arabic simple">
 <li><p>Obtains raw DataFrame</p></li>
-<li><p>shifts isotope values so that all values are postive</p></li>
+<li><p>Shifts isotope values so that all values are postive</p></li>
 <li><p>Autoscales data if choosen by user</p></li>
 </ol>
 </dd></dl>
@@ -1052,18 +1090,37 @@ Samples and Fields tab and loads first sample in list by default.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.remove_multi_plot">
 <span class="sig-name descname"><span class="pre">remove_multi_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selected_plot_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.remove_multi_plot" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Removes selected plot from MulitView</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>selected_plot_name</strong> – </p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.remove_selected_rows">
 <span class="sig-name descname"><span class="pre">remove_selected_rows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.remove_selected_rows" title="Link to this definition">#</a></dt>
 <dd><p>Remove selected rows from filter table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sample</strong> – </p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.remove_widgets_from_layout">
 <span class="sig-name descname"><span class="pre">remove_widgets_from_layout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">object_names_to_remove</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.remove_widgets_from_layout" title="Link to this definition">#</a></dt>
 <dd><p>Remove plot widgets from the provided layout based on their objectName properties.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>layout</strong> – </p></li>
+<li><p><strong>object_names_to_remove</strong> – </p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -1157,8 +1214,8 @@ Map from Ternary groupbox.  The ternary colored chemical map is updated.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.ternary_scatter">
 <span class="sig-name descname"><span class="pre">ternary_scatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.ternary_scatter" title="Link to this definition">#</a></dt>
-<dd><p>Creates scatter bi-plots</p>
-<p>A general function for creating scatter plots of 2-dimensions.</p>
+<dd><p>Creates ternary scatter plots</p>
+<p>A general function for creating ternary scatter plots.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1227,7 +1284,8 @@ widgets</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.update_all_plots">
 <span class="sig-name descname"><span class="pre">update_all_plots</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.update_all_plots" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Updates all plots in plot widget dictionary</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.update_cluster_ui">
@@ -1251,8 +1309,8 @@ widgets</p>
 <dd><p>Updates comboBoxes with fields for plots or analysis</p>
 <p>Updates lists of fields in comboBoxes that are used to generate plots or used for analysis.
 Calls :get_field_list(): to construct the list.</p>
-<section id="id7">
-<h2>Parameter<a class="headerlink" href="#id7" title="Link to this heading">#</a></h2>
+<section id="id5">
+<h2>Parameter<a class="headerlink" href="#id5" title="Link to this heading">#</a></h2>
 <dl class="simple">
 <dt>parentBox: QComboBox</dt><dd><p>comboBox used to select field type (‘isotope’, ‘isotope (norm)’, ‘ratio’, etc.)</p>
 </dd>
@@ -1291,7 +1349,17 @@ Calls :get_field_list(): to construct the list.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.update_norm">
 <span class="sig-name descname"><span class="pre">update_norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isotope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.update_norm" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sample_id</strong> (<em>int</em>) – </p></li>
+<li><p><strong>norm</strong> (<em>optional</em>) – Defaults to None</p></li>
+<li><p><strong>isotope</strong> – </p></li>
+<li><p><strong>update</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.update_pca_plot">
@@ -1302,6 +1370,15 @@ Calls :get_field_list(): to construct the list.</p>
 <dt class="sig sig-object py" id="main.MainWindow.update_plot">
 <span class="sig-name descname"><span class="pre">update_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bin_s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.update_plot" title="Link to this definition">#</a></dt>
 <dd><p>“Update plot</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bin_s</strong> (<em>bool</em><em>, </em><em>optional</em>) – Defaults to True</p></li>
+<li><p><strong>axis</strong> (<em>bool</em><em>, </em><em>optional</em>) – Defaults to False</p></li>
+<li><p><strong>reset</strong> (<em>bool</em><em>, </em><em>optional</em>) – Defaults to False</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -1345,8 +1422,8 @@ Calls :get_field_list(): to construct the list.</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Operations related to polygon generation and manipulation</p>
 <p>Polygons can be used to select or exclude regions of maps for analysis.</p>
-<section id="id8">
-<h2>Methods<a class="headerlink" href="#id8" title="Link to this heading">#</a></h2>
+<section id="id6">
+<h2>Methods<a class="headerlink" href="#id6" title="Link to this heading">#</a></h2>
 <dl class="simple">
 <dt>increment_pid()</dt><dd><p>creates a new polygon pid for addressing polygon when toolButtonPolyCreate is checked</p>
 </dd>
@@ -1551,8 +1628,8 @@ update_table_widget:</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Common table operations class</p>
 <p>For moving and deleting rows in QTableWidgets</p>
-<section id="id9">
-<h2>Methods<a class="headerlink" href="#id9" title="Link to this heading">#</a></h2>
+<section id="id7">
+<h2>Methods<a class="headerlink" href="#id7" title="Link to this heading">#</a></h2>
 <dl class="simple">
 <dt>move_row_up(table)</dt><dd><p>moves a single row of table up one position</p>
 </dd>
@@ -1565,8 +1642,8 @@ update_table_widget:</p>
 <dt class="sig sig-object py" id="main.Table_Fcn.delete_row">
 <span class="sig-name descname"><span class="pre">delete_row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.Table_Fcn.delete_row" title="Link to this definition">#</a></dt>
 <dd><p>Deletes selected rows in a table</p>
-<section id="id10">
-<h3>Parameter<a class="headerlink" href="#id10" title="Link to this heading">#</a></h3>
+<section id="id8">
+<h3>Parameter<a class="headerlink" href="#id8" title="Link to this heading">#</a></h3>
 <p>table: QTableWidget</p>
 </section>
 </dd></dl>
@@ -1575,8 +1652,8 @@ update_table_widget:</p>
 <dt class="sig sig-object py" id="main.Table_Fcn.move_row_down">
 <span class="sig-name descname"><span class="pre">move_row_down</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.Table_Fcn.move_row_down" title="Link to this definition">#</a></dt>
 <dd><p>Moves a row down one position in a table</p>
-<section id="id11">
-<h3>Parameter<a class="headerlink" href="#id11" title="Link to this heading">#</a></h3>
+<section id="id9">
+<h3>Parameter<a class="headerlink" href="#id9" title="Link to this heading">#</a></h3>
 <dl class="simple">
 <dt>table: QTableWidget</dt><dd><p>Moves the selected row in a table down one position. If multiple are selected
 only the top row is moved.</p>
@@ -1589,8 +1666,8 @@ only the top row is moved.</p>
 <dt class="sig sig-object py" id="main.Table_Fcn.move_row_up">
 <span class="sig-name descname"><span class="pre">move_row_up</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.Table_Fcn.move_row_up" title="Link to this definition">#</a></dt>
 <dd><p>Moves a row up one position in a table</p>
-<section id="id12">
-<h3>Parameter<a class="headerlink" href="#id12" title="Link to this heading">#</a></h3>
+<section id="id10">
+<h3>Parameter<a class="headerlink" href="#id10" title="Link to this heading">#</a></h3>
 <dl class="simple">
 <dt>table: QTableWidget</dt><dd><p>Moves the selected row in a table up one position. If multiple are selected
 only the top row is moved.</p>
@@ -1612,11 +1689,11 @@ only the top row is moved.</p>
 .   bilateralFilter can reduce unwanted noise very well while keeping edges fairly sharp. However, it is
 .   very slow compared to most filters.
 .   
-.   _Sigma <a href="#id13"><span class="problematic" id="id14">values_</span></a>: For simplicity, you can set the 2 sigma values to be the same. If they are small (&lt;
+.   _Sigma <a href="#id11"><span class="problematic" id="id12">values_</span></a>: For simplicity, you can set the 2 sigma values to be the same. If they are small (&lt;
 .   10), the filter will not have much effect, whereas if they are large (&gt; 150), they will have a very
 .   strong effect, making the image look “cartoonish”.
 .   
-.   _Filter <a href="#id15"><span class="problematic" id="id16">size_</span></a>: Large filters (d &gt; 5) are very slow, so it is recommended to use d=5 for real-time
+.   _Filter <a href="#id13"><span class="problematic" id="id14">size_</span></a>: Large filters (d &gt; 5) are very slow, so it is recommended to use d=5 for real-time
 .   applications, and perhaps d=9 for offline applications that need heavy noise filtering.
 .   
 .   This filter does not work inplace.

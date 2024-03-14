@@ -23,5 +23,3 @@ LaserMapExplorer
    ternary_heatmap
    ternary_plot
    terncmap_test
-   untitled0
-   untitled8

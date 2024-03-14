@@ -476,7 +476,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
     def toolbox_changed(self):
-        """Updates styles associated with toolbox page"""
+        """Updates styles associated with toolbox page
+        
+        Executes on change of self.toolBox.currentIndex().  Updates style related widgets.
+        """
         match self.toolBox.currentIndex():
             case self.sample_tab_id:
                 self.comboBoxScatterType.setCurrentText(self.current_scatter_type[self.sample_tab_id])
@@ -503,9 +506,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.set_map_style()
 
     def slider_alpha_changed(self):
-        """Transparency slider
+        """Updates transparency on scatter plots.
         
-        Changes transparency of points on scatter plots.
+        Executes on change of self.horizontalSliderMarkerAlpha.value().
         """
         self.labelMarkerAlpha.setText(str(self.horizontalSliderMarkerAlpha.value()))
         match self.toolBox.currentIndex():
@@ -519,7 +522,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.plot_scatter(save=False)
 
     def input_ternary_name_dlg(self):
-        """Opens a dialog to save new colormap"""
+        """Opens a dialog to save new colormap
+        
+        Executes on self.toolButtonSaveTernaryColormap.clicked.
+        """
         name, ok = QInputDialog.getText(self, 'Custom ternary colormap', 'Enter new colormap name:')
         if ok:
             # update colormap structure
@@ -539,7 +545,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return
 
     def swap_xy(self):
-        """Swaps X and Y coordinates of sample map"""
+        """Swaps X and Y coordinates of sample map
+        
+        Executes on self.toolButtonSwapXY.clicked.
+        """
         self.swap_xy_val = not self.swap_xy_val
 
         if self.swap_xy_val:
@@ -561,9 +570,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def swap_xy_data(self, df):
         """Swaps X and Y of a dataframe
 
-        Parameter
-        ---------
-        df: pandas.DataFrame
+        Swaps coordinates for all maps in sample dataframe.
+
+        :param df: 
+        :type df: pandas.DataFrame
         """
         xtemp = df['Y']
         df['Y'] = df['X']
@@ -573,11 +583,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def open_tab(self, tab_name):
         """Opens specified toolBox tab
 
-        Parameter
-        ---------
-        tab_name: str
-            opens tab, values: 'samples', 'preprocess', 'spot data', 'filter',
+        :param tab_name: opens tab, values: 'samples', 'preprocess', 'spot data', 'filter',
               'scatter', 'ndim', pca', 'clustering', 'profiles', 'special'
+        :type tab_name: str
         """
         match tab_name.lower():
             case 'samples':
@@ -608,23 +616,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         Sets all QComboBox to a common normalizing reference.
 
-        Parameters
-        -----------
-        comboBox1 : QComboBox
-            user changed QComboBox
-        comboBox2 : QComboBox
-            QComboBox to update
+        :param comboBox1: user changed QComboBox
+        :type comboBox1: QComboBox
+        :param comboBox2: QComboBox to update
+        :type comboBox2: QComboBox
         """
         comboBox2.setCurrentIndex(comboBox1.currentIndex())
         self.update_all_plots()
 
     def reset_to_full_view(self):
-        """Reset the map to full view (i.e., remove crop)"""
+        """Reset the map to full view (i.e., remove crop)
+        
+        Executes on self.toolButtonFullView.clicked."""
         #set original bounds
         self.crop_x_max = self.x_max
         self.crop_x_min = self.x_min
         self.crop_y_max = self.y_max
         self.crop_y_min = self.y_min
+
         # reset current plot df and mask to original
         self.current_plot_df = self.current_plot_df_copy.copy()
         self.mask = self.mask.copy()
@@ -640,18 +649,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         Set names are consistent with QComboBox.
 
-        Parameters
-        ----------
-        set_name : str, optional
-            name of set list (default is 'isotope')
+        :param set_name: name of set list, options include 'isotope', 'isotope (normalized)', 'calcualated field',
+            'pca_score', 'cluster', 'cluster score', 'special', Defaults to 'isotope'
+        :type set_name: str, optional
 
-            set names include: 'isotope', 'isotope (normalized)', 'calcualated field',
-            'pca_score', 'cluster', 'cluster score', 'special'
-
-        Returns
-        -------
-        set_fields : list
-            a list of fields within the input set
+        :return: set_fields, a list of fields within the input set
+        :rtype: list
         """
         match set_name:
             case 'isotope' | 'isotope (normalized)':
@@ -674,9 +677,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def button_color_select(self, button):
         """Select background color of button
 
-        Parameter
-        ---------
-        button: QPushbutton | QToolButton
+        :param button: button clicked
+        :type button: QPushbutton | QToolButton
         """
         color = QColorDialog.getColor()
 
@@ -688,9 +690,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def get_hex_color(self, color):
         """Converts QColor to hex-rgb format
 
-        Parameter
-        ---------
-        color: QColor
+        :param color: rgb formatted color
+        :type color: QColor
+
+        :return: hex-rgb color 
         """
         return "#{:02x}{:02x}{:02x}".format(color.red(), color.green(), color.blue())
 
@@ -757,21 +760,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def scale_plot(self, current_plot_df, lq, uq, d_lb, d_ub, norm='linear', outlier=False):
         """Scales data by linear, log, or logit tranform
 
-        Parameter
-        ---------
-        current_plot_df:
-        lq: double
-            lower quantile
-        uq: double
-            upper quantile
-        d_lb: double
-            difference lower quantile
-        d_ub: double
-            difference upper quantile
-        norm: str, optional
-            norm to use for data, options include 'linear' (default), 'log', and 'logit'
-        outlier: bool, optional
-            runs outlier detection, default is False
+        :param current_plot_df: data and properties of current plot
+        :type current_plot_df: dict
+        :param lq: lower quantile
+        :type lq: double
+        :param uq: upper quantile
+        :type uq: double
+        :param d_lb: difference lower quantile
+        :type d_lb: double
+        :param d_ub: difference upper quantile
+        :type d_ub: double
+        :param norm: norm to use for data, options include 'linear', 'log', and 'logit', defaults to 'linear'
+        :type norm: str, optional
+        :param outlier: runs outlier detection, defaults to False
+        :type outlier: bool, optional
         """
         # remove outliers, autoscale plots
         isotope_array = current_plot_df['array'].values
@@ -800,16 +802,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def auto_scale(self,update = False):
         """Auto-scales pixel values in map
 
+        Executes on self.toolButtonAutoScale.clicked.
+        
         Outliers can make it difficult to view the variations of values within a map.
         This is a larger problem for linear scales, but can happen when log-scaled. Auto-
         scaling the data clips the values at a lower and upper bound.  Auto-scaling may be
         acceptable as minerals that were not specifically calibrated can have erroneously
         high or low (even negative) values.
 
-        Parameter
-        ---------
-        update: bool
-            update current figure, default is False
+        :param update: update current figure, default is False
+        :type update: bool
         """
         if self.update_spinboxes_bool: # spinboxes are not being updated
             sample_id = self.current_plot_information['sample_id']
@@ -1906,8 +1908,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def add_noise_reduction(self):
         """
         Add noise reduction to the current laser map plot.
+
+        Executes on change of comboBoxNRMethod and spinBoxSmoothingFactor. Updates map.
+         
+        Reduces noise by smoothing via one of several algorithms chosen from
+        comboBoxNRMethod.  Options include:
+        'none' - no smoothing
+        'median' - simple filter that computes each pixel from the median of a window including
+            surrounding points
+        'bilateral' - an edge-preserving Gaussian weighted filter
+        'wernier' - a Fourier domain filtering method that low pass filters to smooth the map
+        'edge-preserving' - filter that does an excellent job of preserving edges when smoothing
         """
-        
         algorithm = self.comboBoxNRMethod.currentText().lower()
         
         if self.noise_red_img:
@@ -1968,6 +1980,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         histogram.autoHistogramRange()
 
     def plot_pca(self):
+        """Plot PCA"""
         pca_dict = {}
 
         df_filtered, isotopes = self.get_processed_data()
@@ -1981,7 +1994,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         pca_results = pca.fit_transform(df_scaled)
 
         # Convert PCA results to DataFrame for easier plotting
-        pca_dict['results'] =  pd.DataFrame(pca_results, columns=[f'PC{i+1}' for i in range(pca.n_components_)])
+        pca_dict['results'] = pd.DataFrame(pca_results, columns=[f'PC{i+1}' for i in range(pca.n_components_)])
         pca_dict['explained_variance_ratio'] = pca.explained_variance_ratio_
         pca_dict['components_'] = pca.components_
 
@@ -2326,17 +2339,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # extracts data for scatter plot
     def get_scatter_values(self):
         """Creates a dictionary of values for plotting
-        
-        Returns
-        -------
-        x, y, z: dict
-            locations for bi- and ternary plots
-            ['field'] : field name
-            ['type'] : type of field
-            ['label'] : incorporates units with field to create axis or color label
-            ['array'] : values to plot
-        c: dict
-            colors, same fields of x, y, and z, but values are used to plot color
+
+        :return: four possible return variables, x, y, z, c, as dict with locations for bi- and
+            ternary plots.  Each contain a 'field', 'type', 'label', and 'array'.  x, y and z
+            contain coordinates and c contains the colors
+        :rtype: dict
         """
         value_dict = {
             'x': {'field': None, 'type': None, 'label': None, 'array': None},
@@ -2419,11 +2426,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def toggle_scatter_style_tab(self, tab_id):
         """Updates and toggles widgets in scatter style tab
 
-        Parameter
-        ---------
-        tab_id: int
-            tab_ind should be set by toolBox.currentIndex(), which determines the active
+        :param tab_id: tab_ind should be set by toolBox.currentIndex(), which determines the active
             widgets
+        :type tab_id: int
         """
         if tab_id == self.sample_tab_id:
             self.comboBoxScatterType.setCurrentText('Heatmap')
@@ -2543,9 +2548,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         Parameter
         ---------
-        tab_ind: int
-            tab_ind should be set by toolBox.currentIndex(), which determines styles to
+        :param tab_ind: tab_ind should be set by toolBox.currentIndex(), which determines styles to
             update
+        :type tab_ind: int
         """
         match tab_id:
             case self.sample_tab_id | self.pca_tab_id | self.cluster_tab_id:
@@ -2612,11 +2617,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def get_scatter_style(self, tab_id):
         """Updates dictionaries with scatter and heatmap style properties
 
-        Parameter
-        ---------
-        tab_ind: int
-            tab_ind should be set by toolBox.currentIndex(), which determines styles to
+        :param tab_ind: tab_ind should be set by toolBox.currentIndex(), which determines styles to
             update
+        :type tab_ind: int
         """
         if tab_id == self.sample_tab_id or tab_id == self.scatter_tab_id or tab_id == self.pca_tab_id or tab_id == self.profile_tab_id:
             match self.comboBoxScatterType.currentText().lower():
@@ -2791,15 +2794,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def newplot(self, fig, plot_name, plot_information, save):
         """Creates new figure widget
 
-        Parameter
-        ---------
-        fig: matplotlib.Figure
-            figure object
-        plot_name: str
-            used to name the plot in the tree
-        plot_information:
-        save: bool
-            if the new plot should be saved to be recalled later
+        :param fig: figure object
+        :type fig: matplotlib.Figure
+        :param plot_name: used to name the plot in the tree
+        :type plot_name: str
+        :param plot_information: plot dictionary
+        :type plot_information: dict
+        :param save: if the new plot should be saved to be recalled later
+        :type save: bool
         """
         # Create a Matplotlib figure and axis
         widgetScatter = QtWidgets.QWidget()
@@ -2876,18 +2878,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         A general function for creating scatter plots of 2-dimensions.
 
-        Parameter
-        ---------
-        fig: matplotlib.figure
-            figure object
-        x: dict
-            x-dimension
-        y: dict
-            y-dimension
-        c: dict
-            color dimension
-        s: dict
-            dictionary of plot style parameters
+        :param fig: figure object
+        :type fig: matplotlib.figure
+        :param x: x-dimension
+        :type x: dict
+        :param y: y-dimension
+        :type y: dict
+        :param c: color dimension
+        :type c: dict
+        :param s: style parameters
+        :type s: dict
         """
         if fig == None:
             new = True
@@ -2946,22 +2946,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         A general function for creating scatter plots of 2-dimensions.
 
-        Parameter
-        ---------
-        fig: matplotlib.figure
-            figure object
-        x: dict
-            coordinate associated with top vertex
-        y: dict
-            coordinate associated with left vertex
-        z: dict
-            coordinate associated with right vertex
-        c: dict
-            color dimension
-        s: dict
-            dictionary of plot style parameters
-        save: bool
-            flag indicating whether the plot should be saved to the plot tree
+        :param fig: figure object
+        :type fig: matplotlib.figure
+        :param x: coordinate associated with top vertex
+        :type x: dict
+        :param y: coordinate associated with left vertex
+        :type y: dict
+        :param z: coordinate associated with right vertex
+        :type z: dict
+        :param c: color dimension
+        :type c: dict
+        :param s: style parameters
+        :type s: dict
+        :param save: flag indicating whether the plot should be saved to the plot tree
+        :type save: bool
         """
         if fig == None:
             new = True
@@ -2999,20 +2997,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
     def hist2dbiplot(self, fig, x, y, s, save):
-        """Creates scatter bi-plots
+        """Creates 2D histogram figure
 
-        A general function for creating scatter plots of 2-dimensions.
+        A general function for creating 2D histograms.
 
-        Parameter
-        ---------
-        fig: matplotlib.figure
-            figure object
-        x: dict
-            x-dimension
-        y: dict
-            y-dimension
-        s: dict
-            dictionary of plot style parameters
+        :param fig: figure object
+        :type fig: matplotlib.figure
+        :param x: x-dimension
+        :type x: dict
+        :param y: y-dimension
+        :type y: dict
+        :param s: style parameters
+        :type s: dict
+        :param save: saves figure widget to plot tree
+        :type save: bool
         """
         if fig == None:
             new = True
@@ -3058,7 +3056,26 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
     def hist2dternplot(self, fig, x, y, z, s, save, c=None):
+        """Creates a ternary histogram figure
 
+        A general function for creating scatter plots of 2-dimensions.
+
+        :param fig: figure object
+        :type fig: matplotlib.figure
+        :param x: coordinate associated with top vertex
+        :type x: dict
+        :param y: coordinate associated with left vertex
+        :type y: dict
+        :param z: coordinate associated with right vertex
+        :type z: dict
+        :param s: style parameters
+        :type s: dict
+        :param save: saves figure widget to plot tree
+        :type save: bool
+        :param c: display, mean, median, standard deviation plots for a fourth dimension in
+            addition to histogram map. Default is None, which produces a histogram.
+        :type c: str
+        """
         if fig == None:
             new = True
             labels = [x['field'], y['field'], z['field']]
@@ -4479,6 +4496,7 @@ class IsotopeSelectionWindow(QDialog, Ui_Dialog):
         self.create_colorbar()  # Call this to create and display the colorbar
 
     def color_cell(self, row, column, correlation):
+        """Colors cells in """
         color = self.get_color_for_correlation(correlation)
         item = self.tableWidgetIsotopes.item(row, column)
         if not item:
@@ -5425,10 +5443,6 @@ class Profiling:
             self.update_table_widget()
     
     
-        
-
-
-
     def interpolate_points(self, interpolation_distance,radius):
         """
         Interpolate linear points between each pair of points in the profiles.

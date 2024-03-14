@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Thu Nov  2 20:43:59 2023
+Created on Thu Nov 2 20:43:59 2023
 
-@author: a1904121
+@author: Shavin Kaluthantri and Derrick Hasterok
 """
 
 import numpy as np
@@ -21,34 +21,18 @@ from matplotlib.colors import BoundaryNorm, ListedColormap
 class ternary:
     """Initialize the ternary plotting class.
 
-    Attributes
-    ----------
-    labels:
-    plot_type: str
-    style: str
-        ternary plot style, ternary (triangle) or quaternary (diamond)
-    dg: double
-        grid spacing (0,1), default is 0.1
-    dt: double
-        tick spacing (0,1), default is 0.1
-        
-    Methods
-    -------
-    ternaxes(labels)
-    ternticks(ax, spacing)
-    terngrid(ax, spacing)
-    tern2xy(a,b,c)
-    xy2tern(x,y)
-    ternscatter(a, b, c, d=None, size=36, cmap=None, color=None, categories=None, labels = False, 
-        edgecolors='none', alpha=1, marker='o', ax=None, orientation='horizontal')
-    ternhex(a, b, c, val=None, bins=10, color_map=None, orientation = 'horizontal')
-    hexagon(bins)
-    terncolor(a, b, c, ca=[1, 1, 0], cb=[0.3, 73, 0.1], cc=[0, 0, 0.15], p=[1/3, 1/3, 1/3], cp=[])
-    cplane(a,b,c,ca,cb,cc,p,cp)
-    cplanexy(xd,yd, xp,yp,cp, x1,y1,cv1, x2,y2,cv2)
-
-    Parameter
-    ---------
+    :param ax: Axes object for displaying ternary diagram
+    :type ax: matplotlib.axes
+    :param labels: vertex labels
+    :type labels: list of str
+    :param plot_type: Defaults to 'scatter'
+    :type plot_type: str, optional
+    :param style: ternary plot style, ternary (triangle) or quaternary (diamond)
+    :type style: str, optional
+    :param dg: grid spacing (0,1), Defaults to None
+    :type dg: double, optional
+    :param dt: tick spacing (0,1), Defaults to None
+    :type dt: double, optional
     """
     def __init__(self, ax, labels, plot_type='scatter', style='ternary', grid_spacing=None, tick_spacing=None):
        
@@ -68,10 +52,10 @@ class ternary:
     def ternticks(self, spacing=0.1):
         """Adds ternary tick marks to ternary axes.
         
-        Parameter
-        ---------
-        spacing: double
-            Distance between tick marks.
+        Updates current ternary axes with tick marks.
+
+        :param spacing: Distance between tick marks.
+        :type spacing: double
         """
 
         if self.style not in [3, 4]:
@@ -107,18 +91,10 @@ class ternary:
 
 
     def ternaxes(self,labels):
-        """
-        Set up ternary plot axes with optional labeling for a quaternary plot.
+        """Set up ternary plot axes with optional labeling for a quaternary plot.
         
-        Parameter
-        ---------
-        labels: list(str)
-            List of strings for the labels of the axes.
-        
-        Return
-        ------
-        fig: matplotlib.figure
-        ax: list(matplotlib.axes)
+        :param labels: List of strings for the labels of the axes.
+        :type labels: list(str)
         """
         if self.style not in ['ternary', 'quaternary']:
             raise ValueError("style must be 'ternary' or 'quaternary'.")
@@ -174,17 +150,17 @@ class ternary:
             
             
     def tern2xy(self,a, b, c):
-        """
-        Converts ternary (a,b,c) points to cartesian (x,y) coordinates. 
+        """Converts ternary (a,b,c) points to cartesian (x,y) coordinates. 
 
         The order of the axes are a (top), b (left), and c (right), where
-        the cartesian origin is defined at the midpoint between b and c.
+        the Cartesian origin is defined at the midpoint between b and c.
         
-        Parameter
-        ---------
-        a: np.array
-        b: np.array
-        c: np.array
+        :param a: top vertex coordinates
+        :type a: np.array
+        :param b: left vertex coordinates
+        :type b: np.array
+        :param c: right vertex coordinates
+        :type c: np.array
         """
         w = 0.5
         h = 0.5 / np.tan(np.pi/6)
@@ -204,18 +180,16 @@ class ternary:
         return x, y
         
     def xy2tern(self,x, y):
-        """
-        Converts cartesian (x,y) points to ternary (a,b,c) coordinates. 
+        """Converts cartesian (x,y) points to ternary (a,b,c) coordinates. 
 
         The order of the axes are a (top), b (left), and c (right), where
-        the cartesian origin is defined at the midpoint between b and c.
+        the Cartesian origin is defined at the midpoint between b and c.
 
-        Parameter
-        ---------
-        x: np.array
-        y: np.array
+        :param x: x coordinates
+        :type x: np.array
+        :param y: y coordinates
+        :type y: np.array
         """
-        
         # half-width
         w = 0.5
     
@@ -230,18 +204,15 @@ class ternary:
         return a, b, c
     
     
-    def terngrid(self, ax=None,spacing=0.1):
-        """
-        Adds ternary grid lines to ternary axes.
+    def terngrid(self, spacing=0.1):
+        """Adds ternary grid lines to ternary axes.
+
+        Updates current ternary axes with tick marks.
     
-        Parameter
-        ---------
-        spacing: float
-            Grid spacing. Default is 0.1 units.
-        nvertices: int
-            Number of vertices, either 3 or 4.
-        ax: matplotlib.axes
-            Axes object for plotting. If None, the current axes is used.
+        :param spacing: Grid spacing. Default is 0.1 units.
+        :type spacing: double
+        :param nvertices: Number of vertices, either 3 or 4.
+        :type nvertices: int
         """
         if self.style not in ['ternary', 'quaternary']:
             raise ValueError('nvertices can be 3 or 4.')
@@ -276,31 +247,30 @@ class ternary:
         Ternary scatter plot, ternscatter() uses many of the same parameters as
         matplotlib scatter.
         
-        Parameter
-        ---------
-        a: np.array
-        b: np.array
-        c: np.array
-        d: np.array
-        size: double
-            size of marker
-        cmap:
-            colormap default is 'none'
-        color:
-            default is 'none'
-        edgecolors:
-            default is 'none'
-        marker:
-            symbol used for plotting, default is 'o'
-        categories:
-        labels:
+        :param a: 
+        :type a: np.array
+        :param b: 
+        :type b: np.array
+        :param c: 
+        :type c: np.array
+        :param d:
+        :type d: np.array, optional
+        :param size: Marker size (in points), Defaults to 36
+        :type size: double, optional
+        :param cmap: Colormap, Defaults to None
+        :type cmap:
+        :param color: Defaults to None
+        :type color: optional
+        :param edgecolors: Defaults to None
+        :type edgecolors: optional
+        :param marker: Symbol used for plotting, Defaults to 'o'
+        :type marker: str, optional
+        :param categories: Defaults to None
+        :type categories: optional
+        :param labels:
+        :type labels: bool, optional
         
-        Return
-        ------
-        t:
-            scatter plot object
-        leg:
-            legend (if applicable)
+        :return: t, scatter plot object, legend (if applicable)
         """
         if cmap is None:
             cmap = plt.cm.get_cmap('plasma')
@@ -374,17 +344,13 @@ class ternary:
     def hexagon(self, bins):
         """Creates hexagonal bins within a ternary
         
-        Parameter
-        ---------
-        n: int
-            Hexagonal cell resolution, equivalent to n+1 cells across the bottom
+        :param n: Hexagonal cell resolution, equivalent to n+1 cells across the bottom
             ternary axis            
+        :type n: int
 
-        Return
-        ------
-        hexbin: dict
-            Dictionary of hexagonal bins, including verticies, in cartesian
+        :return: hexbin, Dictionary of hexagonal bins, including verticies, in Cartesian
             coordinates and the center of each cell
+        :rtype: dict
         """
         # Check if 'n' is a positive integer. If not, raise an error.
         if bins <= 0 or int(bins) != bins:
@@ -479,26 +445,30 @@ class ternary:
     def ternhex(self, a=None, b=None, c=None, val=None, hexbin_df=None, plotfield=None, bins=10, cmap=None, orientation='horizontal'):
         """Creates a heatmap from a set of hexgonal bins
         
-        Parameter
-        ---------
-        a, b, c: np.array
-            locations of points within a ternary system, not needed if hexbin_df is provided.
-            default is None
-        val: np.array
-            a fourth-dimension, compute statistics of val within each hexbin,
-            not supplied if hexbin_df is provided, default is None
-        hexbin_df: pandas.DataFrame
-            a data frame containing statistics from a previously call to ternhex, in this case,
-            do not supply a, b, c, or val, default is None
-        plotfield: str
-            field in hexbin_df to plot, values may include ['n', 'mean', 'median', 'std']
-            default is 'n', if none, no plot is produced, but hexbin_df is returned
-        bins: int
-            resolution factor (bins+1 hexagons across bottom axis)
-        color_map:
-            colormap, default is None
-        orientation: str
-            orientation of colormap, 'horizontal' (default) or vertical
+        :param a: locations of points within a ternary system, not needed if hexbin_df is provided,
+            Defaults to None
+        :type a: np.array
+        :param b: locations of points within a ternary system, not needed if hexbin_df is provided,
+            Defaults to None
+        :type b: np.array
+        :param c: locations of points within a ternary system, not needed if hexbin_df is provided,
+            Defaults to None
+        :type c: np.array
+        :param val: a fourth-dimension, compute statistics of val within each hexbin,
+            not supplied if hexbin_df is provided, Defaults to None
+        :type val: np.array
+        :param hexbin_df: a data frame containing statistics from a previously call to ternhex, in this case,
+            do not supply a, b, c, or val, Defaults to None
+        :type hexbin_df: pandas.DataFrame
+        :param plotfield: field in hexbin_df to plot, values may include ['n', 'mean', 'median', 'std']
+            if None, no plot is produced, but hexbin_df is returned, Defaults to None
+        :type plotfield: str
+        :param bins: resolution factor (bins+1 hexagons across bottom axis)
+        :type bins: int
+        :param cmap: colormap, Defaults to None
+        :type cmap: 
+        :param orientation: orientation of colormap, 'horizontal' (default) or vertical
+        :type orientation: str
         """
 
         if hexbin_df is None:
@@ -556,25 +526,30 @@ class ternary:
 
     def terncolor(self, a, b, c, ca=[1,1,0], cb=[0.3,0.73,0.1], cc=[0,0,0.15], p=[1/3,1/3,1/3], cp = []):
         """Computes colors using a ternary colormap
+
         Given four colors, one for each vertex of a ternary and a fourth at an arbitrary
         location within the triangle, the function computes a gradient for any set of points
-        within the triangle.
+        within the triangle.  Default color scheme is yellow-green-navy.
         
-        Parameter
-        ---------
-        a, b, c: (Nx1) np.array
-            points where color is computed
-        ca, cb, cc: (1x3) np.array (optional)
-            color at each vertex, default color scheme is yellow-green-navy
-        p: (1x3) np.array (optional)
-            location of point within ternary associated with cp
-        cp: (1x3) np.array (optional)
-            color at p, default is [], which will use average of colors
+        :param a: a coordinate of data points where color is computed
+        :type a: np.array
+        :param b: b coordinate of data points where color is computed
+        :type b: np.array
+        :param c: c coordinate of data points where color is computed
+        :type c: np.array
+        :param ca: color at top vertex, Defaults to [0.3,0.73,0.1]
+        :type ca: np.array, optional
+        :param cb: color at left vertex, Defaults to [0,0,0.15]
+        :type cb: np.array, optional
+        :param cc: color at right vertex, Defaults to [1/3,1/3,1/3]
+        :type cc: np.array, optional
+        :param p: location of point within ternary associated with cp
+        :type p: np.array, optional
+        :param cp: color at p, default is [], which will use average of colors
+        :type cp: np.array, optional
 
-        Return
-        ------
-        cval: (Nx3) np.array
-            colors at (a,b,c) 
+        :return: cval, colors at (a,b,c)
+        :rtype: np.array
         """
         # normalize ternary coordinates
     
@@ -605,21 +580,25 @@ class ternary:
         location within the triangle, the function computes a gradient for any set of points
         within the triangle.
         
-        Parameter
-        ---------
-        a, b, c: (Nx1) np.array
-            points where color is computed
-        ca, cb, cc: (1x3) np.array
-            color at each vertex
-        p: (1x3) np.array
-            location of point within ternary associated with cp
-        cp: (1x3) np.array
-            color at p
+        :param a: a coordinate of data points where color is computed
+        :type a: np.array
+        :param b: b coordinate of data points where color is computed
+        :type b: np.array
+        :param c: c coordinate of data points where color is computed
+        :type c: np.array
+        :param ca: color at each vertex a
+        :type ca: np.array
+        :param cb: color at each vertex b
+        :type cb: np.array
+        :param cc: color at each vertex c
+        :type cc: np.array
+        :param p: location of point within ternary
+        :type p: np.array
+        :param cp: color at p
+        :type cp: np.array
 
-        Return
-        ------
-        cval: (Nx3) np.array
-            colors at (a,b,c)
+        :return: cval, colors at (a,b,c)
+        :rtype: np.array
         """
         [xp,yp] = self.tern2xy(p[0],p[1],p[2])
 
@@ -666,22 +645,31 @@ class ternary:
         Fits a plane using three points in (x,y,color) space and then interpolates the
         color of know points.
 
-        Parameter
-        ---------
-        xd, yd: np.array
-            coordinates of data points to interpolate color
-        xp,yp: double
-            location of point within ternary
-        cp: (1x3) np.array
-            color of point within ternary
-        x1,y1: double
-            location of one ternary vertex
-        cv1: (1x3) np.array
-            color at one vertex
-        x2,y2: double
-            location of second ternary vertex
-        cv2: (1x3) np.array
-            color at second vertex
+        :param xd: x Cartesian coordinates for data within ternary
+        :type xd: np.array
+        :param yd: y Cartesian coordinates for data within ternary
+        :type yd: np.array
+        :param xp: x coordinate of point within ternary
+        :type xp: double
+        :param yp: y coordinate of point within ternary
+        :type yp: double
+        :param cp: color at point within ternary
+        :type cp: np.array
+        :param x1: x coordinate at ternary vertex 1
+        :type x1: double
+        :param y1: y coordinate at ternary vertex 1
+        :type y1: double
+        :param cv1: color at vertex 1
+        :type cv1: np.array
+        :param x2: x coordinate at ternary vertex 2
+        :type x2: double
+        :param y2: y coordinate at ternary vertex 2
+        :type y2: double
+        :param cv2: color at vertex 2
+        :type cv2: np.array
+
+        :return: cval, colors at (a,b,c)
+        :rtype: np.array
         """
         cval = np.zeros([len(xd),3])
         for i in range(0,3):
@@ -695,7 +683,9 @@ class ternary:
         return cval
 
     def ternmap(self, x,y, a,b,c, ca=[1,1,0], cb=[0.3,0.73,0.1], cc=[0,0,0.15], p=[1/3,1/3,1/3], cp = []):
-
+        """Generates a raster map colored by position within a ternary plot.
+        
+        """
 
         return cb
 

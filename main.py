@@ -11,7 +11,6 @@ import sys  # We need sys so that we can pass argv to QApplication
 import os
 import numpy as np
 import pandas as pd
-from src.ui.MainWindow import Ui_MainWindow
 from PyQt5.QtGui import QTransform, QFont
 import matplotlib
 matplotlib.use('Qt5Agg')
@@ -20,7 +19,6 @@ from matplotlib.figure import Figure
 from matplotlib.collections import PathCollection
 import matplotlib.pyplot as plt
 from matplotlib.path import Path
-from src.ui.IsotopeSelectionDialog import Ui_Dialog
 from PyQt5.QtWidgets import QStyledItemDelegate
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPainter, QBrush, QColor
@@ -40,6 +38,8 @@ import re
 import matplotlib.ticker as ticker
 from src.radar import Radar
 from src.calculator import CalWindow
+from src.ui.MainWindow import Ui_MainWindow
+from src.ui.IsotopeSelectionDialog import Ui_Dialog
 import scipy.stats
 from scipy import ndimage
 from sklearn.preprocessing import StandardScaler
@@ -49,7 +49,7 @@ from scipy.signal import convolve2d, wiener
 from PyQt5.QtWidgets import QGraphicsRectItem
 from PyQt5.QtCore import QRectF, Qt, QPointF
 from PyQt5.QtGui import QPen, QColor, QCursor
-
+import copy
 
 pg.setConfigOption('imageAxisOrder', 'row-major') # best performance
 ## !pyrcc5 resources.qrc -o src/ui/resources_rc.py
@@ -69,6 +69,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.filter_df = pd.DataFrame(columns = ['sample_id', 'isotope_1', 'isotope_2', 'ratio','norm','f_min','f_max', 'use'])
         self.cluster_results=pd.DataFrame(columns = ['Fuzzy', 'KMeans', 'KMediods'])
         self.clipped_ratio_data = pd.DataFrame()
+        self.isotope_data = {}
         self.clipped_isotope_data = {}
         self.sample_data_dict = {}
         self.plot_widget_dict ={'lasermap':{},'histogram':{},'lasermap_norm':{},'clustering':{},'scatter':{},'n-dim':{},'correlation':{}, 'pca':{}}
@@ -79,6 +80,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.n_dim_list = []
         self.group_cmap = {}
         self.lasermaps = {}
+        self.norm_dict = {}
         self.proxies = []
         self.prev_plot = ''
         self.pop_plot = ''
@@ -1274,22 +1276,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else: #if normalising all isotopes in sample
             self.isotopes_df.loc[(self.isotopes_df['sample_id']==sample_id),'norm'] = norm
             isotopes = self.isotopes_df[self.isotopes_df['sample_id']==sample_id]['isotopes']
-
-
-
-        isotope_array =  self.clipped_isotope_data[sample_id][isotopes].values
-        if norm == 'log':
-            # np.nanlog handles NaN value
-            self.processed_isotope_data[sample_id].loc[:,isotopes] = np.log10(isotope_array, where=~np.isnan(isotope_array))
-        elif norm == 'logit':
-            # Handle division by zero and NaN values
-            with np.errstate(divide='ignore', invalid='ignore'):
-                isotope_array = np.log10(isotope_array / (10**6 - isotope_array), where=~np.isnan(isotope_array))
-                self.processed_isotope_data[sample_id].loc[:,isotopes] = isotope_array
-        else:
-            print('h')
-            # set to clipped data with original values if linear normalisation
-            self.processed_isotope_data[sample_id].loc[:,isotopes] = self.clipped_isotope_data[sample_id].loc[:,isotopes].copy()
+            
+        
+        self.prep_data(sample_id, isotope)
+        
+        #update self.norm_dict
+        for isotope in isotopes:
+            self.norm_dict[isotope] = norm
+        
         if update:
             self.update_all_plots()
         # self.update_plot()
@@ -1359,24 +1353,64 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                             figure_canvas.draw()
                             
                             
-    def prep_data(self):
-        """Prepares data to be used in analysis
+    def prep_data(self, sample_id= None, isotope= None):
+        """Prepares data to be used in analysisq
         
         1. Obtains raw DataFrame
         2. Shifts isotope values so that all values are postive
         3. Autoscales data if choosen by user
         """
         
-        # shifts isotope values so that all values are postive
-        adj_data = self.transform_plots(self.isotope_data.values)
-        # perform autoscaling on the adj dataframe
-        clipped_data = self.outlier_detection(adj_data)
-
-        self.clipped_isotope_data[self.sample_id] = pd.DataFrame(clipped_data, columns = self.selected_isotopes).apply(self.transform_plots)
-        self.clipped_isotope_data[self.sample_id]['X'] = self.sample_data_dict[self.sample_id]['X']
-        self.clipped_isotope_data[self.sample_id]['Y'] = self.sample_data_dict[self.sample_id]['Y']
+        if sample_id is None:
+            sample_id = self.sample_id
         
-        self.processed_isotope_data = self.clipped_isotope_data.copy()
+        if isotope: #if single isotope
+            isotopes = [isotope]
+        else:
+            isotopes = self.isotopes_df[self.isotopes_df['sample_id']==sample_id]['isotopes']
+            
+        isotope_info = self.isotopes_df[(self.isotopes_df['sample_id'] == sample_id) & 
+                                 (self.isotopes_df['isotopes'].isin(isotopes))]
+        
+        
+        # shifts isotope values so that all values are postive
+        adj_data = pd.DataFrame(self.transform_plots(self.isotope_data[sample_id][isotopes].values), columns= isotopes)
+        
+        
+        for norm in isotope_info['norm'].unique():
+            filtered_isotopes = isotope_info[(isotope_info['norm'] == norm)]['isotopes']
+            filtered_data = adj_data[filtered_isotopes].values
+            if norm == 'log':
+                
+                # np.nanlog handles NaN value
+                self.clipped_isotope_data[sample_id].loc[:,filtered_isotopes] = np.log10(filtered_data, where=~np.isnan(filtered_data))
+                # print(self.processed_isotope_data[sample_id].loc[:10,isotopes])
+                # print(self.clipped_isotope_data[sample_id].loc[:10,isotopes])
+            elif norm == 'logit':
+                # Handle division by zero and NaN values
+                with np.errstate(divide='ignore', invalid='ignore'):
+                    isotope_array = np.log10(filtered_data / (10**6 - filtered_data), where=~np.isnan(filtered_data))
+                    self.clipped_isotope_data[sample_id].loc[:,filtered_isotopes] = isotope_array
+            else:
+                # set to clipped data with original values if linear normalisation
+                self.clipped_isotope_data[sample_id].loc[:,filtered_isotopes] = filtered_data
+        
+        
+        # perform autoscaling on columns where auto_scale is set to true
+        for auto_scale in isotope_info['auto_scale'].unique():
+            filtered_isotopes = isotope_info[isotope_info['auto_scale'] == auto_scale]['isotopes']
+            filtered_data = self.clipped_isotope_data[sample_id][filtered_isotopes].values
+        
+            if auto_scale:
+                self.clipped_isotope_data[sample_id].loc[:,filtered_isotopes] = self.outlier_detection(filtered_data)
+            else:
+                self.clipped_isotope_data[sample_id].loc[:,filtered_isotopes] = filtered_data
+        
+        self.clipped_isotope_data[sample_id]['X'] = self.sample_data_dict[sample_id]['X']
+        self.clipped_isotope_data[sample_id]['Y'] = self.sample_data_dict[sample_id]['Y']
+        
+        # create deep copy of clipped isotope data to apply scaling
+        self.processed_isotope_data = copy.deepcopy(self.clipped_isotope_data)
         
 
     def open_directory(self):
@@ -1492,7 +1526,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # Step 1: Normalize your data array for colormap application
                 norm = Normalize(vmin=array.min(), vmax=array.max())
                 cmap = plt.get_cmap(self.cm)  # Assuming self.cm is a valid colormap name
-            
+                
                 # Step 2: Apply the colormap to get RGB values, then normalize to [0, 255] for QImage
                 rgb_array = cmap(norm(array))[:, :, :3]  # Drop the alpha channel returned by cmap
                 rgb_array = (rgb_array * 255).astype(np.uint8)
@@ -1658,7 +1692,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             p1.autoRange()
             #add zoom window
             # self.setup_zoom_window(layout)
-
+            print(self.cm)
             self.plot_laser_map_cont(layout,array,img,p1,cm,view)
 
     def mouse_moved(self,event,plot):
@@ -3844,10 +3878,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # self.sample_data_dict[self.sample_id] = pd.read_csv(file_path, engine='c')
             self.sample_data_dict[self.sample_id] = self.add_ree(sample_df)
             self.selected_isotopes = list(self.sample_data_dict[self.sample_id].columns[5:])
+            
             isotopes = pd.DataFrame()
             isotopes['isotopes']=list(self.selected_isotopes)
             isotopes['sample_id'] = self.sample_id
             isotopes['norm'] = 'linear'
+            
+            #update self.norm_dict
+            self.norm_dict = {}
+            for isotope in self.selected_isotopes:
+                self.norm_dict[isotope] = 'linear'
             #obtain axis bounds for plotting and cropping
             self.x_max= self.crop_x_max = self.sample_data_dict[self.sample_id]['X'].max()
             self.x_min =self.crop_x_min = self.sample_data_dict[self.sample_id]['X'].min()
@@ -3861,13 +3901,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             isotopes['lower_bound'] = 0.05
             isotopes['d_l_bound'] = 99
             isotopes['d_u_bound'] = 99
-            self.isotope_data = self.sample_data_dict[self.sample_id][self.selected_isotopes]
-            self.prep_data()
+            self.isotope_data[self.sample_id] = self.sample_data_dict[self.sample_id][self.selected_isotopes]
+            self.clipped_isotope_data = copy.deepcopy(self.isotope_data)
             isotopes['v_min'] = np.min(self.clipped_isotope_data[self.sample_id], axis=0)
             isotopes['v_max'] = np.max(self.clipped_isotope_data[self.sample_id], axis=0)
             isotopes['auto_scale'] = True
             isotopes['use'] = True
             self.isotopes_df = pd.concat([self.isotopes_df, isotopes])
+            self.prep_data()
             # add sample_id to self.plot_widget_dict
             
             self.cluster_results=pd.DataFrame(columns = ['Fuzzy', 'KMeans', 'KMediods'])
@@ -3916,7 +3957,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.get_map_data(self.sample_id,isotope_1=None, isotope_2=None)
             self.create_tree(self.sample_id)
             self.clear_views()
-            self.update_tree(self.selected_isotopes)
+            self.update_tree(self.norm_dict)
 
             self.update_spinboxes_bool = True  # Place this line at end of method
 
@@ -4308,32 +4349,28 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def open_select_isotope_dialog(self):
         isotopes_list = self.isotopes_df['isotopes'].values
 
-        self.isotopeDialog = IsotopeSelectionWindow(isotopes_list,self.selected_isotopes, self.clipped_isotope_data[self.sample_id], self)
+        self.isotopeDialog = IsotopeSelectionWindow(isotopes_list,self.norm_dict, self.clipped_isotope_data[self.sample_id], self)
         self.isotopeDialog.show()
-        self.isotopeDialog.listUpdated.connect(lambda: self.update_tree(self.isotopeDialog.selected_pairs))
+        self.isotopeDialog.listUpdated.connect(lambda: self.update_tree(self.isotopeDialog.norm_dict, norm_update = True))
         result = self.isotopeDialog.exec_()  # Store the result here
         if result == QDialog.Accepted:
-            self.selected_isotopes = self.isotopeDialog.selected_pairs
+            self.norm_dict = self.isotopeDialog.norm_dict
+            
         if result == QDialog.Rejected:
-            self.update_tree(self.selected_isotopes)
+            self.update_tree(self.norm_dict, norm_update = True)
 
 
 
 
-    def update_tree(self,leaf,data = None,tree= 'Isotope'):
+    def update_tree(self,leaf,data = None,tree= 'Isotope', norm_update = False):
         if tree == 'Isotope':
             # Highlight isotopes in treeView
             # Un-highlight all leaf in the trees
             self.unhighlight_tree(self.ratios_items)
             self.unhighlight_tree(self.isotopes_items)
             self.isotopes_df.loc[self.isotopes_df['sample_id']==self.sample_id,'use'] = False
-            if len(leaf)>0:
-                for line in leaf:
-                    if ',' in line:
-                        isotope_pair, norm = line.strip().split(',') #get norm returned from load isotope
-                    else:
-                        isotope_pair = line.strip()
-                        norm = 'linear'
+            if len(leaf.keys())>0:
+                for isotope_pair, norm in leaf.items():
                     if '/' in isotope_pair:
                         isotope_1, isotope_2 = isotope_pair.split(' / ')
                         self.update_ratio_df(self.sample_id,isotope_1, isotope_2, norm)
@@ -4348,10 +4385,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         else:
                             item.setBackground(QBrush(QColor(255, 255, 200)))
                     else: #single isotope
+                        
                         item,check = self.find_leaf(tree = self.isotopes_items, branch = self.sample_id, leaf = isotope_pair)
                         item.setBackground(QBrush(QColor(255, 255, 200)))
                         self.isotopes_df.loc[(self.isotopes_df['sample_id']==self.sample_id) & (self.isotopes_df['isotopes']==isotope_pair),'use'] = True
-                        self.update_norm(self.sample_id,norm,isotope_pair)
+                        if norm_update: #update if isotopes are returned from Isotope selection window
+                            self.update_norm(self.sample_id,norm,isotope_pair)
 
         elif tree=='Scatter':
 
@@ -4450,12 +4489,12 @@ class StandardItem(QStandardItem):
 
 class IsotopeSelectionWindow(QDialog, Ui_Dialog):
     listUpdated = pyqtSignal()
-    def __init__(self, isotopes,selected_pairs, clipped_data, parent=None):
+    def __init__(self, isotopes,norm_dict, clipped_data, parent=None):
         super().__init__(parent)
         self.setupUi(self)
 
         self.isotopes = list(isotopes)
-        self.selected_pairs = selected_pairs
+        self.norm_dict = norm_dict
         self.clipped_data = clipped_data
         self.correlation_matrix = None
         self.tableWidgetIsotopes.setRowCount(len(isotopes))
@@ -4488,14 +4527,14 @@ class IsotopeSelectionWindow(QDialog, Ui_Dialog):
 
         self.pushButtonLoadSelection.clicked.connect(self.load_selection)
 
-        self.pushButtonDone.clicked.connect(self.accept)
+        self.pushButtonDone.clicked.connect(self.done_selection)
 
         self.pushButtonCancel.clicked.connect(self.reject)
         self.comboBoxCorrelation.activated.connect(self.calculate_correlation)
         self.tableWidgetIsotopes.setStyleSheet("QTableWidget::item:selected {background-color: yellow;}")
-        if len(self.selected_pairs)>0:
-            for line in self.selected_pairs:
-                self.populate_isotope_list(line)
+        if len(self.norm_dict.keys())>0:
+            for isotope,norm in self.norm_dict.items():
+                self.populate_isotope_list(isotope,norm)
         else:
             # Select diagonal pairs by default
             for i in range(len(self.isotopes)):
@@ -4514,6 +4553,9 @@ class IsotopeSelectionWindow(QDialog, Ui_Dialog):
                 else:
                     item.setSelected(False)
                     self.remove_isotope_from_list(row, column)
+    def done_selection(self):
+        self.update_list()
+        self.accept()
 
     def update_all_combos(self):
         # Get the currently selected value in comboBoxScale
@@ -4682,20 +4724,15 @@ class IsotopeSelectionWindow(QDialog, Ui_Dialog):
             self.activateWindow()
 
     def update_list(self):
-        self.selected_pairs=[]
+        self.norm_dict={}
         for i in range(self.tableWidgetSelected.rowCount()):
             isotope_pair = self.tableWidgetSelected.item(i, 0).text()
             combo = self.tableWidgetSelected.cellWidget(i, 1)
             selection = combo.currentText()
-            self.selected_pairs.append(f"{isotope_pair},{selection}")
+            self.norm_dict[isotope_pair] = selection
         self.listUpdated.emit()
 
-    def populate_isotope_list(self,line):
-        if ',' in line:
-            isotope_pair, norm = line.strip().split(',') #get norm returned from load isotope
-        else:
-            isotope_pair = line
-            norm = 'linear'
+    def populate_isotope_list(self, isotope_pair, norm):
         if '/' in isotope_pair:
             row_header, col_header = isotope_pair.split(' / ')
         else:
@@ -4716,7 +4753,7 @@ class IsotopeSelectionWindow(QDialog, Ui_Dialog):
             self.tableWidgetSelected.insertRow(newRow)
             self.tableWidgetSelected.setItem(newRow, 0, QTableWidgetItem(isotope_pair))
             combo = QComboBox()
-            combo.addItems(['linear', 'log', 'logit'])
+            combo.addItems(['linear', 'log'])
             combo.setCurrentText(norm)
             self.tableWidgetSelected.setCellWidget(newRow, 1, combo)
             combo.currentIndexChanged.connect(self.update_scale)

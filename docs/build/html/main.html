@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>main module &#8212; Laser Map Explorer  documentation</title>
+    <title>main module &#8212; LaME</title>
   
   
   
@@ -112,8 +112,14 @@
   
   
   
+    
+    
+      
+    
+    
+    <img src="_static/LaME_logo-64.png" class="logo__image only-light" alt="LaME - Home"/>
+    <script>document.write(`<img src="_static/LaME_logo-64.png" class="logo__image only-dark" alt="LaME - Home"/>`);</script>
   
-    <p class="title logo__title">Laser Map Explorer  documentation</p>
   
 </a></div>
     
@@ -127,6 +133,26 @@
 <nav class="navbar-nav">
   <ul class="bd-navbar-elements navbar-nav">
     
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="userguide.html">
+                        Users Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="documentation.html">
+                        Documentation
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="contact.html">
+                        Contact
+                      </a>
+                    </li>
+                
   </ul>
 </nav></div>
       
@@ -161,6 +187,33 @@ document.write(`
   </button>
 `);
 </script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/shavinkalu23/LaserMapExplorer" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
+        </li>
+</ul></div>
       
     </div>
     
@@ -209,6 +262,26 @@ document.write(`
 <nav class="navbar-nav">
   <ul class="bd-navbar-elements navbar-nav">
     
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="userguide.html">
+                        Users Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="documentation.html">
+                        Documentation
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="contact.html">
+                        Contact
+                      </a>
+                    </li>
+                
   </ul>
 </nav></div>
         
@@ -229,6 +302,33 @@ document.write(`
   </button>
 `);
 </script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/shavinkalu23/LaserMapExplorer" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
+        </li>
+</ul></div>
         
       </div>
     
@@ -1138,7 +1238,8 @@ in list is loaded by default.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.scale_plot">
 <span class="sig-name descname"><span class="pre">scale_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_plot_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_lb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_ub</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outlier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.scale_plot" title="Link to this definition">#</a></dt>
-<dd><p>Scales data by linear, log, or logit tranform</p>
+<dd><p>Clips data to defined bounds.</p>
+<p>Reference by <a class="reference internal" href="#main.MainWindow.update_plot" title="main.MainWindow.update_plot"><code class="xref py py-func docutils literal notranslate"><span class="pre">update_plot()</span></code></a> and <a class="reference internal" href="#main.MainWindow.get_map_data" title="main.MainWindow.get_map_data"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_map_data()</span></code></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1183,7 +1284,7 @@ in list is loaded by default.</p>
 <dt class="sig sig-object py" id="main.MainWindow.swap_xy">
 <span class="sig-name descname"><span class="pre">swap_xy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.swap_xy" title="Link to this definition">#</a></dt>
 <dd><p>Swaps X and Y coordinates of sample map</p>
-<p>Executes on self.toolButtonSwapXY.clicked.</p>
+<p>Executes on self.toolButtonSwapXY.clicked.  Updates data dictionary and other map related derived results.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1193,7 +1294,7 @@ in list is loaded by default.</p>
 <p>Swaps coordinates for all maps in sample dataframe.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>df</strong> (<em>pandas.DataFrame</em>) – </p>
+<dd class="field-odd"><p><strong>df</strong> (<em>pandas.DataFrame</em>) – data frme to swap X and Y coordinates.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1301,6 +1402,7 @@ widgets</p>
 <dt class="sig sig-object py" id="main.MainWindow.update_color_bar_position">
 <span class="sig-name descname"><span class="pre">update_color_bar_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.update_color_bar_position" title="Link to this definition">#</a></dt>
 <dd><p>Updates the color bar position on a figure</p>
+<p>Currently unused</p>
 </dd></dl>
 
 <dl class="py method">

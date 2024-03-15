@@ -4,19 +4,18 @@
    contain the root `toctree` directive.
 
 Welcome to Laser Map Explorer (LaME) documentation!
-===================================================
+***************************************************
 
-LaME is a graphical user interface for rapidly diplaying and analyzing data generated from LA-ICP-MS.
-It allows for a range of plot types, filtering and data analysis.
+LaME is a graphical user interface for rapidly diplaying and analyzing data generated from LA-ICP-MS.  The app allows users to simply and quickly filter data, produce standard geochemical plots, perform multi-dimensional analyses, and more sophistocated computations relevant to geoscientific interpretation.
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
+   userguide
+   tutorials
+   documentation
+   contact
 
-Indices and tables
-==================
+Funding for this app has been provided by the `MinEx CRC <https://minexcrc.com.au/>`_.
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

@@ -547,7 +547,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def swap_xy(self):
         """Swaps X and Y coordinates of sample map
         
-        Executes on self.toolButtonSwapXY.clicked.
+        Executes on self.toolButtonSwapXY.clicked.  Updates data dictionary and other map related derived results.
         """
         self.swap_xy_val = not self.swap_xy_val
 
@@ -572,7 +572,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         Swaps coordinates for all maps in sample dataframe.
 
-        :param df: 
+        :param df: data frme to swap X and Y coordinates.
         :type df: pandas.DataFrame
         """
         xtemp = df['Y']
@@ -627,7 +627,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def reset_to_full_view(self):
         """Reset the map to full view (i.e., remove crop)
         
-        Executes on self.toolButtonFullView.clicked."""
+        Executes on self.toolButtonFullView.clicked.
+        """
         #set original bounds
         self.crop_x_max = self.x_max
         self.crop_x_min = self.x_min
@@ -730,7 +731,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.current_group['clusters'] = None
 
     def update_color_bar_position(self):
-        """Updates the color bar position on a figure"""
+        """Updates the color bar position on a figure
+        
+        Currently unused
+        """
         # Get the selected color bar position
         color_bar_position = self.comboBoxColorbarDirection.currentText().lower()
 
@@ -758,7 +762,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             fig.canvas.draw_idle()
 
     def scale_plot(self, current_plot_df, lq, uq, d_lb, d_ub, norm='linear', outlier=False):
-        """Scales data by linear, log, or logit tranform
+        """Clips data to defined bounds.
+
+        Reference by :func:`update_plot` and :func:`get_map_data`
 
         :param current_plot_df: data and properties of current plot
         :type current_plot_df: dict

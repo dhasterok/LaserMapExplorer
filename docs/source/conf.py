@@ -31,6 +31,34 @@ exclude_patterns = []
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'pydata_sphinx_theme'
+html_theme_options = {"navbar_start": ["navbar-logo"],
+                      "navbar_center": ["navbar-nav"],
+                      "navbar_end": ["navbar-icon-links"]}
+
 html_static_path = ['_static']
+
+html_logo = "_static/LaME_logo-64.png"
+html_title = "LaME"
+
+html_theme_options = {
+    "icon_links": [
+        {
+            # Label for this link
+            "name": "GitHub",
+            # URL where the link will redirect
+            "url": "https://github.com/shavinkalu23/LaserMapExplorer",  # required
+            # Icon class (if "type": "fontawesome"), or path to local image (if "type": "local")
+            "icon": "fa-brands fa-square-github",
+            # The type of image to be used (see below for details)
+            "type": "fontawesome",
+        },
+        {
+            "name": "MinEx CRC",
+            "url": "https://minexcrc.com.au/",
+            "icon": "_static/minex_crc_logo.svg",
+            "type": "local"
+        }
+   ]
+}
 
 autoclass_content = 'both'

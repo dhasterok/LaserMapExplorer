@@ -13,6 +13,7 @@ LaME is a graphical user interface for rapidly diplaying and analyzing data gene
    :caption: Contents:
 
    userguide
+      import
    tutorials
    documentation
    contact

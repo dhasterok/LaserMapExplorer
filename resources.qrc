@@ -26,7 +26,6 @@
         <file>resources/icons/icons8-heat-map-100.png</file>
         <file>resources/icons/icons8-honeycomb-48.png</file>
         <file>resources/icons/icons8-radar-plot-50.png</file>
-        <file>resources/icons/icons8-radar-plot-80.png</file>
         <file>resources/icons/icons8-run-80.png</file>
         <file>resources/icons/icons8-scatter-plot-80.png</file>
         <file>resources/icons/icons8-select-all-50.png</file>
@@ -40,7 +39,6 @@
         <file>resources/icons/icons8-hide-64.png</file>
         <file>resources/icons/icons8-show-50.png</file>
         <file>resources/icons/icons8-add-file-64.png</file>
-        <file>resources/icons/icons8-fit-to-width-64.png</file>
         <file>resources/icons/icons8-rotate-180-50.png</file>
         <file>resources/icons/icons8-swap-64.png</file>
         <file>resources/icons/icons8-location-marker-48.png</file>
@@ -48,7 +46,6 @@
         <file>resources/icons/icons8-rocket-48.png</file>
         <file>resources/icons/icons8-add-48.png</file>
         <file>resources/icons/icons8-edit-48.png</file>
-        <file>resources/icons/icons8-crop-64.png</file>
         <file>resources/icons/icons8-ruler-50.png</file>
         <file>resources/icons/icons8-graph-60.png</file>
         <file>resources/icons/icons8-polyline-40.png</file>
@@ -61,18 +58,12 @@
         <file>resources/icons/icons8-add-folder-40.png</file>
         <file>resources/icons/icons8-bar-chart-50.png</file>
         <file>resources/icons/icons8-histogram-32.png</file>
-        <file>resources/icons/icons8-filter-50-2.png</file>
-        <file>resources/icons/icons8-filter-50.png</file>
         <file>resources/icons/icons8-reset-64-2.png</file>
         <file>resources/icons/icons8-reset-64.png</file>
-        <file>resources/icons/icons8-map-50.png</file>
-        <file>resources/icons/icons8-mask-64.png</file>
         <file>resources/icons/icon-gradient-32.png</file>
         <file>resources/icons/icon-swap-64.png</file>
         <file>resources/icons/icons8-histogram-64.png</file>
         <file>resources/icons/icons8-delete-link-50.png</file>
-        <file>resources/icons/icons8-anonymous-mask-dark-50.png</file>
-        <file>resources/icons/icons8-anonymous-mask-light-50.png</file>
         <file>resources/icons/icons8-minus-64.png</file>
         <file>resources/icons/icons8-country-80.png</file>
         <file>resources/icons/icons8-mind-map-50.png</file>
@@ -88,5 +79,16 @@
         <file>resources/icons/icon-spotlight-64.png</file>
         <file>resources/icons/icon-sort-64.png</file>
         <file>resources/icons/icon-illuminati-64.png</file>
+        <file>resources/icons/icon-autoscale-64.png</file>
+        <file>resources/icons/icon-crop-64.png</file>
+        <file>resources/icons/icon-filter-64.png</file>
+        <file>resources/icons/icon-filter2-64.png</file>
+        <file>resources/icons/icon-fit-to-width-64.png</file>
+        <file>resources/icons/icon-map-64.png</file>
+        <file>resources/icons/icon-mask-dark-64.png</file>
+        <file>resources/icons/icon-mask-light-64.png</file>
+        <file>resources/icons/icon-polygon-new-64.png</file>
+        <file>resources/icons/icon-polygon-off-64.png</file>
+        <file>resources/icons/icon-add-directory-64.png</file>
     </qresource>
 </RCC>

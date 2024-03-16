@@ -1,32 +1,49 @@
-Users Guide
+User Guide
 ***********
 
-Stucture of stored data
-=======================
+.. toctree::
+    :maxdepth: 2
 
-It is useful to know how data are stored within the program as some operations will clear analyses and associated figures when the underlying data are changed.  The figure below shows the progression of different data structures from the input data to the data used for analyses.
+    getting_started
+    import
+    toolbox
+    plotting
+    profiles
+    multidimensional
+    special_functions
 
-.. figure:: _static/LaME_data_progression.png
-:align: center
-The method of data stored within the program
-
-Raw data frame
---------------
-
-The *raw data frame* refers to the data read from a file.  The raw data may be uncalibrated (e.g., cps) or calibrated (e.g., ppm).  LaME does not calibrate LA-ICP-MS data at present, so the any calibrated data should be calibrated in Iolite or XMapTools first.
-
-.. |icon-crop| image:: _static/icon-crop-64.png
+.. |icon-add-directory| image:: _static/icons/icon-add-directory-64.png
     :height: 2ex
 
-.. |icon-fit-to-width| image:: _static/icon-fit-to-width-64.png
+.. |icon-atom| image:: _static/icons/icon-atom-64.png
     :height: 2ex
 
-Cropping ( |icon-crop| ) is applied to the *raw data frame*, reducing the area analyzed by the code.  The original extent can be restored by clicking |icon-fit-to-width|.  The *clipped data frame* and *analysis data frame* must be recomputed from *raw data frame* if the *raw data frame* is cropped or restored to the original extent.
+.. |icon-crop| image:: _static/icons/icon-crop-64.png
+    :height: 2ex
 
-Clipped data frame
-------------------
+.. |icon-fit-to-width| image:: _static/icons/icon-fit-to-width-64.png
+    :height: 2ex
 
-The *clipped data frame* refers to data that are preprocessed.  The preprocessing steps include several potential operations meant to reduce issues with analyses.  While it may alter the values of some data points, 
+.. |icon-autoscale| image:: _static/icons/icon-autoscale-64.png
+    :height: 2ex
 
-Analysis data frame
--------------------
+.. |icon-map| image:: _static/icons/icon-map-64.png
+    :height: 2ex
+
+.. |icon-filter| image:: _static/icons/icon-filter-64.png
+    :height: 2ex
+
+.. |icon-filter2| image:: _static/icons/icon-filter2-64.png
+    :height: 2ex
+
+.. |icon-mask-light| image:: _static/icons/icon-mask-light-64.png
+    :height: 2ex
+
+.. |icon-mask-dark| image:: _static/icons/icon-mask-dark-64.png
+    :height: 2ex
+
+.. |icon-polygon-new| image:: _static/icons/icon-polygon-new-64.png
+    :height: 2ex
+
+.. |icon-polygon-off| image:: _static/icons/icon-polygon-off-64.png
+    :height: 2ex

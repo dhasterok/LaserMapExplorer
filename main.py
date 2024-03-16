@@ -764,7 +764,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def scale_plot(self, current_plot_df, lq, uq, d_lb, d_ub, norm='linear', outlier=False):
         """Clips data to defined bounds.
 
-        Reference by :func:`update_plot` and :func:`get_map_data`
+        Referenced by :func:`update_plot` and :func:`get_map_data`
 
         :param current_plot_df: data and properties of current plot
         :type current_plot_df: dict

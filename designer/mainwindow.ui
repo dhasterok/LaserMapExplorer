@@ -1181,7 +1181,7 @@
          <enum>QFrame::Raised</enum>
         </property>
         <property name="currentIndex">
-         <number>3</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="StyleGeneral">
          <property name="geometry">
@@ -1647,8 +1647,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>98</width>
-           <height>28</height>
+           <width>219</width>
+           <height>484</height>
           </rect>
          </property>
          <attribute name="icon">
@@ -2262,8 +2262,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>219</width>
-           <height>484</height>
+           <width>98</width>
+           <height>28</height>
           </rect>
          </property>
          <attribute name="icon">
@@ -2524,7 +2524,7 @@
               <string>On</string>
              </property>
              <property name="icon">
-              <iconset resource="../resources.qrc">
+              <iconset>
                <normaloff>:/icons/resources/icons/icons8-anonymous-mask-dark-50.png</normaloff>:/icons/resources/icons/icons8-anonymous-mask-dark-50.png</iconset>
              </property>
              <property name="iconSize">
@@ -2559,7 +2559,7 @@
               <string>Off</string>
              </property>
              <property name="icon">
-              <iconset resource="../resources.qrc">
+              <iconset>
                <normaloff>:/icons/resources/icons/icons8-anonymous-mask-light-50.png</normaloff>:/icons/resources/icons/icons8-anonymous-mask-light-50.png</iconset>
              </property>
              <property name="iconSize">
@@ -3541,7 +3541,7 @@
        <string>Activates the crop tool</string>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="SelectIsotopePage">
        <property name="enabled">
@@ -3793,8 +3793,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>98</width>
-         <height>28</height>
+         <width>300</width>
+         <height>534</height>
         </rect>
        </property>
        <attribute name="label">
@@ -3848,7 +3848,7 @@
             </property>
             <property name="icon">
              <iconset resource="../resources.qrc">
-              <normaloff>:/icons/resources/icons/icons8-fit-to-width-64.png</normaloff>:/icons/resources/icons/icons8-fit-to-width-64.png</iconset>
+              <normaloff>:/icons/resources/icons/icon-fit-to-width-64.png</normaloff>:/icons/resources/icons/icon-fit-to-width-64.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -3891,7 +3891,7 @@
             </property>
             <property name="icon">
              <iconset resource="../resources.qrc">
-              <normaloff>:/icons/resources/icons/icons8-crop-64.png</normaloff>:/icons/resources/icons/icons8-crop-64.png</iconset>
+              <normaloff>:/icons/resources/icons/icon-crop-64.png</normaloff>:/icons/resources/icons/icon-crop-64.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -3914,7 +3914,7 @@
             </property>
             <property name="icon">
              <iconset resource="../resources.qrc">
-              <normaloff>:/icons/resources/icons/icons8-crop-64.png</normaloff>:/icons/resources/icons/icons8-crop-64.png</iconset>
+              <normaloff>:/icons/resources/icons/icon-crop-64.png</normaloff>:/icons/resources/icons/icon-crop-64.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -4700,8 +4700,9 @@
           <string>Add filter</string>
          </property>
          <property name="icon">
-          <iconset resource="../resources.qrc">
-           <normaloff>:/icons/resources/icons/icons8-filter-50.png</normaloff>:/icons/resources/icons/icons8-filter-50.png</iconset>
+          <iconset>
+           <normaloff>:/icons/resources/icons/icons8-filter-50.png</normaloff>
+           <normalon>:/icons/resources/icons/icon-filter2-64.png</normalon>:/icons/resources/icons/icons8-filter-50.png</iconset>
          </property>
          <property name="iconSize">
           <size>
@@ -5011,7 +5012,7 @@
             </property>
             <property name="icon">
              <iconset resource="../resources.qrc">
-              <normaloff>:/icons/resources/icons/icons8-radar-plot-80.png</normaloff>:/icons/resources/icons/icons8-radar-plot-80.png</iconset>
+              <normaloff>:/icons/resources/icons/icon-polygon-new-64.png</normaloff>:/icons/resources/icons/icon-polygon-new-64.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -5366,7 +5367,7 @@
             </property>
             <property name="icon">
              <iconset resource="../resources.qrc">
-              <normaloff>:/icons/resources/icons/icons8-map-50.png</normaloff>:/icons/resources/icons/icons8-map-50.png</iconset>
+              <normaloff>:/icons/resources/icons/icon-map-64.png</normaloff>:/icons/resources/icons/icon-map-64.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -5410,10 +5411,9 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="../resources.qrc">
-              <normaloff>:/icons/resources/icons/icons8-filter-50-2.png</normaloff>
-              <activeon>:/icons/resources/icons/icons8-filter-50.png</activeon>
-              <selectedon>:/icons/resources/icons/icons8-filter-50.png</selectedon>:/icons/resources/icons/icons8-filter-50-2.png</iconset>
+             <iconset>
+              <normaloff>../resources/icons/icon-filter-64.png</normaloff>
+              <normalon>:/icons/resources/icons/icon-filter2-64.png</normalon>../resources/icons/icon-filter-64.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -5442,7 +5442,8 @@
             </property>
             <property name="icon">
              <iconset resource="../resources.qrc">
-              <normaloff>:/icons/resources/icons/icons8-radar-plot-80.png</normaloff>:/icons/resources/icons/icons8-radar-plot-80.png</iconset>
+              <normaloff>:/icons/resources/icons/icon-polygon-off-64.png</normaloff>
+              <normalon>:/icons/resources/icons/icon-polygon-new-64.png</normalon>:/icons/resources/icons/icon-polygon-off-64.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -5470,10 +5471,9 @@
              <string>Polygon</string>
             </property>
             <property name="icon">
-             <iconset resource="../resources.qrc">
-              <normaloff>:/icons/resources/icons/icons8-anonymous-mask-light-50.png</normaloff>
-              <activeon>:/icons/resources/icons/icons8-anonymous-mask-dark-50.png</activeon>
-              <selectedon>:/icons/resources/icons/icons8-anonymous-mask-dark-50.png</selectedon>:/icons/resources/icons/icons8-anonymous-mask-light-50.png</iconset>
+             <iconset>
+              <normaloff>../resources/icons/icon-mask-light-64.png</normaloff>
+              <normalon>:/icons/resources/icons/icon-mask-dark-64.png</normalon>../resources/icons/icon-mask-light-64.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -8826,7 +8826,7 @@
   </action>
   <action name="actionFilter_Tools">
    <property name="icon">
-    <iconset resource="../resources.qrc">
+    <iconset>
      <normaloff>:/icons/resources/icons/icons8-filter-50.png</normaloff>:/icons/resources/icons/icons8-filter-50.png</iconset>
    </property>
    <property name="text">
@@ -8859,7 +8859,7 @@
   </action>
   <action name="actionPolygon">
    <property name="icon">
-    <iconset resource="../resources.qrc">
+    <iconset>
      <normaloff>:/icons/resources/icons/icons8-radar-plot-80.png</normaloff>:/icons/resources/icons/icons8-radar-plot-80.png</iconset>
    </property>
    <property name="text">

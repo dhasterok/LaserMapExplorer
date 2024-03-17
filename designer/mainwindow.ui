@@ -555,7 +555,7 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tabNotes">
        <property name="toolTip">
@@ -811,8 +811,8 @@
               <string>...</string>
              </property>
              <property name="icon">
-              <iconset>
-               <normaloff>resources/icons/down.png</normaloff>resources/icons/down.png</iconset>
+              <iconset resource="../resources.qrc">
+               <normaloff>:/icons/down</normaloff>:/icons/down</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -1025,15 +1025,15 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="TreeView">
        <property name="geometry">
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>98</width>
-         <height>28</height>
+         <width>221</width>
+         <height>765</height>
         </rect>
        </property>
        <attribute name="label">
@@ -1188,8 +1188,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>98</width>
-           <height>28</height>
+           <width>100</width>
+           <height>30</height>
           </rect>
          </property>
          <attribute name="icon">
@@ -1420,8 +1420,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>98</width>
-           <height>28</height>
+           <width>100</width>
+           <height>30</height>
           </rect>
          </property>
          <attribute name="icon">
@@ -2262,8 +2262,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>98</width>
-           <height>28</height>
+           <width>100</width>
+           <height>30</height>
           </rect>
          </property>
          <attribute name="icon">
@@ -2581,8 +2581,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>98</width>
-           <height>28</height>
+           <width>100</width>
+           <height>30</height>
           </rect>
          </property>
          <attribute name="icon">
@@ -2600,8 +2600,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>98</width>
-         <height>28</height>
+         <width>221</width>
+         <height>765</height>
         </rect>
        </property>
        <attribute name="label">
@@ -3541,7 +3541,7 @@
        <string>Activates the crop tool</string>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>7</number>
       </property>
       <widget class="QWidget" name="SelectIsotopePage">
        <property name="enabled">
@@ -3551,8 +3551,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>98</width>
-         <height>28</height>
+         <width>300</width>
+         <height>534</height>
         </rect>
        </property>
        <attribute name="label">
@@ -4389,8 +4389,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>98</width>
-         <height>28</height>
+         <width>300</width>
+         <height>534</height>
         </rect>
        </property>
        <attribute name="label">
@@ -5548,8 +5548,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>98</width>
-         <height>28</height>
+         <width>300</width>
+         <height>534</height>
         </rect>
        </property>
        <attribute name="label">
@@ -5831,7 +5831,7 @@
             </property>
             <property name="icon">
              <iconset resource="../resources.qrc">
-              <normaloff>:/icons/resources/icons/icons8-rocket-48.png</normaloff>:/icons/resources/icons/icons8-rocket-48.png</iconset>
+              <normaloff>:/icons/resources/icons/icon-launch-64.png</normaloff>:/icons/resources/icons/icon-launch-64.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -6104,8 +6104,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>98</width>
-         <height>28</height>
+         <width>300</width>
+         <height>534</height>
         </rect>
        </property>
        <attribute name="label">
@@ -6492,8 +6492,8 @@
                  <string>...</string>
                 </property>
                 <property name="icon">
-                 <iconset>
-                  <normaloff>resources/icons/down.png</normaloff>resources/icons/down.png</iconset>
+                 <iconset resource="../resources.qrc">
+                  <normaloff>:/icons/down</normaloff>:/icons/down</iconset>
                 </property>
                 <property name="iconSize">
                  <size>
@@ -6640,7 +6640,7 @@
                 </property>
                 <property name="icon">
                  <iconset resource="../resources.qrc">
-                  <normaloff>:/icons/resources/icons/icons8-rocket-48.png</normaloff>:/icons/resources/icons/icons8-rocket-48.png</iconset>
+                  <normaloff>:/icons/resources/icons/icon-launch-64.png</normaloff>:/icons/resources/icons/icon-launch-64.png</iconset>
                 </property>
                 <property name="iconSize">
                  <size>
@@ -6666,8 +6666,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>98</width>
-         <height>28</height>
+         <width>300</width>
+         <height>534</height>
         </rect>
        </property>
        <attribute name="label">
@@ -6931,7 +6931,7 @@
               </property>
               <property name="icon">
                <iconset resource="../resources.qrc">
-                <normaloff>:/icons/resources/icons/icons8-rocket-48.png</normaloff>:/icons/resources/icons/icons8-rocket-48.png</iconset>
+                <normaloff>:/icons/resources/icons/icon-launch-64.png</normaloff>:/icons/resources/icons/icon-launch-64.png</iconset>
               </property>
               <property name="iconSize">
                <size>
@@ -6955,8 +6955,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>98</width>
-         <height>28</height>
+         <width>300</width>
+         <height>534</height>
         </rect>
        </property>
        <attribute name="label">
@@ -7021,11 +7021,6 @@
                 <item>
                  <property name="text">
                   <string>k-means</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>k-medoids</string>
                  </property>
                 </item>
                 <item>
@@ -7291,7 +7286,7 @@
                 </property>
                 <property name="icon">
                  <iconset resource="../resources.qrc">
-                  <normaloff>:/icons/resources/icons/icons8-rocket-48.png</normaloff>:/icons/resources/icons/icons8-rocket-48.png</iconset>
+                  <normaloff>:/icons/resources/icons/icon-launch-64.png</normaloff>:/icons/resources/icons/icon-launch-64.png</iconset>
                 </property>
                 <property name="iconSize">
                  <size>
@@ -7534,8 +7529,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>98</width>
-         <height>28</height>
+         <width>300</width>
+         <height>534</height>
         </rect>
        </property>
        <attribute name="label">
@@ -8158,8 +8153,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>98</width>
-         <height>28</height>
+         <width>300</width>
+         <height>534</height>
         </rect>
        </property>
        <attribute name="label">
@@ -8587,7 +8582,7 @@
   <action name="actionOpen">
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/icons/resources/icons/icons8-add-folder-40.png</normaloff>:/icons/resources/icons/icons8-add-folder-40.png</iconset>
+     <normaloff>:/icons/resources/icons/icon-add-directory-64.png</normaloff>:/icons/resources/icons/icon-add-directory-64.png</iconset>
    </property>
    <property name="text">
     <string>Open</string>

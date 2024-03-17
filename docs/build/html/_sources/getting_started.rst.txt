@@ -1,12 +1,9 @@
-Getting Started
-===============
-
 Installation
-------------
+============
 
 
 User interface
---------------
+==============
 LaME is organized into four panels:
 - left, toolbox with functions for plotting and analysis
 - right, toolbox with a plot selection tree, plot styles, and a calculator for creating custom fields
@@ -45,9 +42,47 @@ Cropping ( |icon-crop| ) is applied to the *raw data*, reducing the area analyze
 Clipped data
 ------------
 
-The *clipped data* refers to data that are preprocessed.  The preprocessing steps include several potential operations meant to reduce issues with analyses.  While it may alter the values of some data points, it does so by improving stability of some processing methods (e.g., PCA and clustering) that are otherwise skewed by extreme outliers or cannot handle negative values.  These outliers often result from point measurement errors or incorrect calibrations related to differences in mineral ablation properties.  These preprocessing data steps are described in greater detail in the preprocessing_ subsection.
+The *clipped data* refers to data that are preprocessed.  The preprocessing steps include several potential operations meant to reduce issues with analyses including autoscaling ( |icon-autoscale| ) and rescaling to remove negative values.  While it may alter the values of some data points, it does so by improving stability of some processing methods (e.g., PCA and clustering) that are otherwise skewed by extreme outliers or cannot handle negative values.  These outliers often result from point measurement errors or incorrect calibrations related to differences in mineral ablation properties.  These preprocessing data steps are described in greater detail in the preprocessing_ subsection.
 
 Analysis data
 -------------
 
-There are three types of filters than can be applied to exclude data from analyses and geochemical plots.  These include elemental filters ( |icon-filter2| ), polygon masking ( |icon-polygon-new| ), and cluster masking ( |icon-mask-dark| ).  It is possible to use any combination of these and turn them on or off as required.  Each are implemented as a simple pixel by pixel mask.  They can be turned on or off by clicking the icon found in the *Filter tab* on the left and grouped in *Data for analysis*.  All filters/masks can be turned off by clicking the |icon-map| button.
+There are three types of filters than can be applied to exclude data from analyses and geochemical plots.  These include elemental filters (on = |icon-filter2|, off = |icon-filter|), polygon masking (on = |icon-polygon-new|, off = |icon-polygon-off| ), and cluster masking (on = |icon-mask-dark|, off = |icon-mask-light| ).  It is possible to use any combination of these and turn them on or off as required.  Each are implemented as a simple pixel by pixel mask.  They can be turned on or off by clicking the icon found in the *Filter tab* on the left and grouped in *Data for analysis*.  All filters/masks can be turned off by clicking the |icon-map| button.  Note, the filters will automatically be turned on when they are first created.
+
+The *analysis data* are used to produce plots and compute analyses; turning filters and masks on or off results in their recomputation. 
+
+.. |icon-add-directory| image:: _static/icons/icon-add-directory-64.png
+    :height: 2ex
+
+.. |icon-atom| image:: _static/icons/icon-atom-64.png
+    :height: 2ex
+
+.. |icon-crop| image:: _static/icons/icon-crop-64.png
+    :height: 2ex
+
+.. |icon-fit-to-width| image:: _static/icons/icon-fit-to-width-64.png
+    :height: 2ex
+
+.. |icon-autoscale| image:: _static/icons/icon-autoscale-64.png
+    :height: 2ex
+
+.. |icon-map| image:: _static/icons/icon-map-64.png
+    :height: 2ex
+
+.. |icon-filter| image:: _static/icons/icon-filter-64.png
+    :height: 2ex
+
+.. |icon-filter2| image:: _static/icons/icon-filter2-64.png
+    :height: 2ex
+
+.. |icon-mask-light| image:: _static/icons/icon-mask-light-64.png
+    :height: 2ex
+
+.. |icon-mask-dark| image:: _static/icons/icon-mask-dark-64.png
+    :height: 2ex
+
+.. |icon-polygon-new| image:: _static/icons/icon-polygon-new-64.png
+    :height: 2ex
+
+.. |icon-polygon-off| image:: _static/icons/icon-polygon-off-64.png
+    :height: 2ex

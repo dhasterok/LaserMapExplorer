@@ -43,7 +43,6 @@
         <file>resources/icons/icons8-swap-64.png</file>
         <file>resources/icons/icons8-location-marker-48.png</file>
         <file>resources/icons/icons8-move-49.png</file>
-        <file>resources/icons/icons8-rocket-48.png</file>
         <file>resources/icons/icons8-add-48.png</file>
         <file>resources/icons/icons8-edit-48.png</file>
         <file>resources/icons/icons8-ruler-50.png</file>
@@ -90,5 +89,6 @@
         <file>resources/icons/icon-polygon-new-64.png</file>
         <file>resources/icons/icon-polygon-off-64.png</file>
         <file>resources/icons/icon-add-directory-64.png</file>
+        <file>resources/icons/icon-launch-64.png</file>
     </qresource>
 </RCC>

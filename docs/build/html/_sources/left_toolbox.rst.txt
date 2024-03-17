@@ -1,0 +1,107 @@
+Left Toolbox
+************
+
+The left toolbox controls the functions for changing and processing samples, producing plots, and performing analyses.  Plots can be produced from *Samples and Fields*, *Scatter and Heatmaps*, *n-Dim*, *PCA*, *Clustering*, and *Profiling*.
+
+Samples and Fields
+==================
+
+.. _preprocessing
+Preprocessing
+=============
+
+Autoscaling |icon-autoscale|
+----------------------------
+
+One common calibration issue is the conversion of low counts to negative concentrations after calibration.  These are almost certainly due to difference between the ablation properties of the mineral used to calibrate the map applied and another mineral.  Negative values are particularly an issue when the data are log-scaled.  To reduce the effect of negatives, we rescale the data by bringing applying a linear compression of the data, fixing the upper end and moving the lower end to a small positive value.  While this does change the concentration, it has a small affect on large concentrations.  We also perform an autoscaling, performed by default, to clip the high and low ends of the concentrations.  These values are not removed, rather set to the top or bottom of the scale.  Autoscaling can skew statistics as a result; however, it generally improves estimates of the mean as values that are several orders of magnitude higher than reasonable no longer have a massive effect.  Autoscaling can be toggled on or off by pressing the |icon-autoscale| button. 
+
+Spot Data
+=========
+
+
+Filter
+======
+
+There are three types of filters than can be applied to exclude data from analyses and geochemical plots.  These include elemental filters ( |icon-filter2| ), polygon masking ( |icon-polygon-new| ), and cluster masking ( |icon-mask-dark| ).  Elemental filters and polygon masking are both It is possible to use any combination of these and turn them on or off as required.
+
+Elemental Filters |icon-filter2|
+--------------------------------
+
+One can filter by element/isotope values, ratios of elements/isotopes, principal component score, or cluster score.  Multiple filters may be combined to produce more complex filters.  The filters include a boolean operations (*and* and *or*) to assist with precisely defining filters to capture the desired regions for analysis and plotting.  In many cases, the overlap between values may make it difficult to separate phases.  In these cases, we suggest targeting specific regions with a polygon or cluster mask.
+
+Polygon Masking |icon-polygon-new|
+----------------------------------
+
+Cluster Masking |icon-mask-dark|
+--------------------------------
+
+Cluster masks 
+
+Scatter and Heatmaps
+====================
+
+n-Dim
+=====
+
+This tab is used to produce trace element compatibility diagrams (spider plots) with data normalized to a set of reference concentrations.  This tab is also used to produce radar plots (that look more like spider webs).
+
+Principal Component Analysis (PCA)
+==================================
+
+Select from a range of plots relevant to principal component analyses using the *Plot type* dropdown, including: 
+
+* variance - individual and cumulative explained variance for the principal components
+* vectors - a heatmap showing vector components, useful for observing the influence of input fields on the variance (spread) in the data along each principal component axis
+* 2-D score plots - shows both the scores of individal data points along two principal component axes (*PC X* and *PC Y*) and the field components along each axis
+* score maps - produces a score map for a single principal component, change the map by changing the value of *PC X* field.
+
+2-D score plots can also be displayed as a scatter or heatmap by selecting the corresponding from the *Plot type* dropdown.  
+
+To save to the plot tree by clicking the |icon-launch| button.
+
+Clustering
+==========
+
+
+Profiling Tab
+=============
+
+Special Functions Tab
+=====================
+
+
+.. |icon-atom| image:: _static/icons/icon-atom-64.png
+    :height: 2ex
+
+.. |icon-crop| image:: _static/icons/icon-crop-64.png
+    :height: 2ex
+
+.. |icon-fit-to-width| image:: _static/icons/icon-fit-to-width-64.png
+    :height: 2ex
+
+.. |icon-autoscale| image:: _static/icons/icon-autoscale-64.png
+    :height: 2ex
+
+.. |icon-map| image:: _static/icons/icon-map-64.png
+    :height: 2ex
+
+.. |icon-filter| image:: _static/icons/icon-filter-64.png
+    :height: 2ex
+
+.. |icon-filter2| image:: _static/icons/icon-filter2-64.png
+    :height: 2ex
+
+.. |icon-mask-light| image:: _static/icons/icon-mask-light-64.png
+    :height: 2ex
+
+.. |icon-mask-dark| image:: _static/icons/icon-mask-dark-64.png
+    :height: 2ex
+
+.. |icon-polygon-new| image:: _static/icons/icon-polygon-new-64.png
+    :height: 2ex
+
+.. |icon-polygon-off| image:: _static/icons/icon-polygon-off-64.png
+    :height: 2ex
+
+.. |icon-launch| image:: _static/icons/icon-launch-64.png
+    :height: 2ex

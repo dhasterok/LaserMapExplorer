@@ -23,8 +23,7 @@ print(sys.executable)
 extensions = ['sphinx.ext.autodoc']
 
 templates_path = ['_templates']
-exclude_patterns = []
-
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints"]
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -38,9 +37,12 @@ html_theme_options = {"navbar_start": ["navbar-logo"],
 html_static_path = ['_static']
 
 html_logo = "_static/LaME_logo-64.png"
-html_title = "LaME"
 
 html_theme_options = {
+    "logo": {
+        "text": "LaME v.0.0 beta",
+        "image_dark": "_static/LaME_logo-64.png",
+    },
     "icon_links": [
         {
             # Label for this link
@@ -48,7 +50,7 @@ html_theme_options = {
             # URL where the link will redirect
             "url": "https://github.com/shavinkalu23/LaserMapExplorer",  # required
             # Icon class (if "type": "fontawesome"), or path to local image (if "type": "local")
-            "icon": "fa-brands fa-square-github",
+            "icon": "fa-brands fa-github",
             # The type of image to be used (see below for details)
             "type": "fontawesome",
         },
@@ -56,7 +58,7 @@ html_theme_options = {
             "name": "MinEx CRC",
             "url": "https://minexcrc.com.au/",
             "icon": "_static/minex_crc_logo.svg",
-            "type": "local"
+            "type": "local",
         }
    ]
 }

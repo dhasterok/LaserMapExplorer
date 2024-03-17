@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>main module &#8212; LaME</title>
+    <title>main module &#8212; Laser Map Explorer  documentation</title>
   
   
   
@@ -117,9 +117,11 @@
       
     
     
-    <img src="_static/LaME_logo-64.png" class="logo__image only-light" alt="LaME - Home"/>
-    <script>document.write(`<img src="_static/LaME_logo-64.png" class="logo__image only-dark" alt="LaME - Home"/>`);</script>
+    <img src="_static/LaME_logo-64.png" class="logo__image only-light" alt=""/>
+    <script>document.write(`<img src="_static/LaME_logo-64.png" class="logo__image only-dark" alt=""/>`);</script>
   
+  
+    <p class="title logo__title">LaME v.0.0 beta</p>
   
 </a></div>
     
@@ -206,7 +208,7 @@ document.write(`
           
           
           
-          <a href="https://github.com/shavinkalu23/LaserMapExplorer" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+          <a href="https://github.com/shavinkalu23/LaserMapExplorer" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i></span>
             <span class="sr-only">GitHub</span></a>
         </li>
         <li class="nav-item">
@@ -328,7 +330,7 @@ document.write(`
           
           
           
-          <a href="https://github.com/shavinkalu23/LaserMapExplorer" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+          <a href="https://github.com/shavinkalu23/LaserMapExplorer" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i></span>
             <span class="sr-only">GitHub</span></a>
         </li>
         <li class="nav-item">
@@ -571,7 +573,7 @@ thus the tick should display 0.001 * 1000 = 1.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="main.IsotopeSelectionWindow">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">IsotopeSelectionWindow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">isotopes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_pairs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clipped_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.IsotopeSelectionWindow" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">IsotopeSelectionWindow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">isotopes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clipped_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.IsotopeSelectionWindow" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QDialog</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Ui_Dialog</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="main.IsotopeSelectionWindow.add_isotope_to_list">
@@ -592,6 +594,11 @@ thus the tick should display 0.001 * 1000 = 1.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="main.IsotopeSelectionWindow.create_colorbar">
 <span class="sig-name descname"><span class="pre">create_colorbar</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.IsotopeSelectionWindow.create_colorbar" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.IsotopeSelectionWindow.done_selection">
+<span class="sig-name descname"><span class="pre">done_selection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.IsotopeSelectionWindow.done_selection" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -631,7 +638,7 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.IsotopeSelectionWindow.populate_isotope_list">
-<span class="sig-name descname"><span class="pre">populate_isotope_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">line</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.IsotopeSelectionWindow.populate_isotope_list" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">populate_isotope_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">isotope_pair</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.IsotopeSelectionWindow.populate_isotope_list" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1187,8 +1194,8 @@ in list is loaded by default.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.prep_data">
-<span class="sig-name descname"><span class="pre">prep_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.prep_data" title="Link to this definition">#</a></dt>
-<dd><p>Prepares data to be used in analysis</p>
+<span class="sig-name descname"><span class="pre">prep_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isotope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.prep_data" title="Link to this definition">#</a></dt>
+<dd><p>Prepares data to be used in analysisq</p>
 <ol class="arabic simple">
 <li><p>Obtains raw DataFrame</p></li>
 <li><p>Shifts isotope values so that all values are postive</p></li>
@@ -1514,7 +1521,7 @@ Calls :get_field_list(): to construct the list.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.update_tree">
-<span class="sig-name descname"><span class="pre">update_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">leaf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Isotope'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.update_tree" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">update_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">leaf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Isotope'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.update_tree" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1911,6 +1918,7 @@ only the top row is moved.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.calculate_correlation"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.calculate_correlation()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.color_cell"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.color_cell()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.create_colorbar"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.create_colorbar()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.done_selection"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.done_selection()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.generate_colorbar_image"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.generate_colorbar_image()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.get_color_for_correlation"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.get_color_for_correlation()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.get_selected_data"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.get_selected_data()</span></code></a></li>

@@ -15,6 +15,15 @@ Autoscaling |icon-autoscale|
 
 One common calibration issue is the conversion of low counts to negative concentrations after calibration.  These are almost certainly due to difference between the ablation properties of the mineral used to calibrate the map applied and another mineral.  Negative values are particularly an issue when the data are log-scaled.  To reduce the effect of negatives, we rescale the data by bringing applying a linear compression of the data, fixing the upper end and moving the lower end to a small positive value.  While this does change the concentration, it has a small affect on large concentrations.  We also perform an autoscaling, performed by default, to clip the high and low ends of the concentrations.  These values are not removed, rather set to the top or bottom of the scale.  Autoscaling can skew statistics as a result; however, it generally improves estimates of the mean as values that are several orders of magnitude higher than reasonable no longer have a massive effect.  Autoscaling can be toggled on or off by pressing the |icon-autoscale| button. 
 
+Histogram Equalization
+----------------------
+
+Histograms
+----------
+
+Noise Reduction
+---------------
+
 Spot Data
 =========
 
@@ -22,20 +31,50 @@ Spot Data
 Filter
 ======
 
-There are three types of filters than can be applied to exclude data from analyses and geochemical plots.  These include elemental filters ( |icon-filter2| ), polygon masking ( |icon-polygon-new| ), and cluster masking ( |icon-mask-dark| ).  Elemental filters and polygon masking are both It is possible to use any combination of these and turn them on or off as required.
+There are three types of filters than can be applied to exclude data from analyses and geochemical plots.  These include filters by value ( |icon-filter2| ), polygon masking ( |icon-polygon-new| ), and cluster masking ( |icon-mask-dark| ).  Filter by value and polygon masking are both created from the *Filter* tab whereas the cluster mask is set from *Styling>Clusters* in the right toolbox.  It is possible to use any combination of these filters and masks and turn them on or off as required.  All filters and masks can be turned off by clicking the |icon-map| button.
 
-Elemental Filters |icon-filter2|
+.. figure:: _static/screenshots/LaME_filters_toggles.png
+    :align: center
+    :alt: data for analysis control buttons
+
+    Filter and mask toggle buttons.
+    
+
+Filter by value |icon-filter2|
 --------------------------------
 
-One can filter by element/isotope values, ratios of elements/isotopes, principal component score, or cluster score.  Multiple filters may be combined to produce more complex filters.  The filters include a boolean operations (*and* and *or*) to assist with precisely defining filters to capture the desired regions for analysis and plotting.  In many cases, the overlap between values may make it difficult to separate phases.  In these cases, we suggest targeting specific regions with a polygon or cluster mask.
+To set a filter, use the two drop down menus to select the type of field (lower) and the desired field (upper).  It is possible to filter by value using element/isotopes, ratios, custom fields, principal component score, or cluster score.  Once selected, the ranges for the field will be automatically displayed in the min and max boxes.  Change the values to set the bounds explicitly using the (left boxes) or implicitly by setting the quantile bounds (right boxes).  Once the bounds are set, click the |icon-filter2| button to add the filter to the list.
+
+.. figure:: _static/screenshots/LaME_filters.png
+    :align: center
+    :alt: filter by value controls
+
+    Controls used to define filters.
+
+Multiple filters may be combined to produce more complex filters.  The filters include a boolean operations (*and* and *or*, set in the *Filter Table* in the `lower pane`_) to assist with precisely defining filters to capture the desired regions for analysis and plotting.  In many cases, the overlap between values may make it difficult to separate phases.  In these cases, we suggest targeting specific regions with a polygon or cluster mask.
 
 Polygon Masking |icon-polygon-new|
 ----------------------------------
 
+to create a polygon for filtering, select a map from the plot selector and then click the |icon-polygon-new| button.  Move the mouse over the map and left-click to add vertices.  You will notice a zoom tool appears that shows a small region of the map where the mouse is located.  Once you have added enough points, right-click on the map to end digitizing.  A polygon will appear in the *polygon table*, where a name can be added.  Once created, polygons can be edited.  Move a point by clicking the |icon-move-point| button, then left-click on the map near the point to be moved and then left-click again for the new location.  Add a vertex by clicking the button |icon-add-point| and selecting the line segment where you wish to add a point.  Then click where you would like the new point.  To remove points, click the button |icon-remove-point| and then click the point you wish to remove.
+
+It is possible to create multiple polygons.  These polygons can be analyzed as separate regions or linked by selecting multiple polygons in the *Polygon Table* and clicking the |icon-link| button.  To delink the polygons, select the polygon in the table and then click the |icon-unlink| button.  The use of individual polygons in analyses can be toggled by clicking the associated checkbox in the *Polygon Table*.
+
+The polygons within the table can be stored by clicking the |icon-save| button and recolled using the |icon-open-file| button.  See a description of `file specifications`_ for more information.
+
 Cluster Masking |icon-mask-dark|
 --------------------------------
 
-Cluster masks 
+Cluster masks can be turned on or off from the *Filter* tab, but cannot be set here.  To set a cluster mask, you will need to 
+
+#. compute clusters first from the *Cluster* pane in the left toolbox
+#. from the *Styling* tab on the right pane, select the *Clusters* sub-tab and choose the type of clustering from the point grouping drop down
+#. select the cluster(s) that you wish to mask and click the |icon-mask-dark| button to set the cluster mask or
+#. alternatively, select the clusters you wish to use for analysis and click the |icon-mask-light| button to set the other groups as the mask.
+
+Edge-detection
+--------------
+To aid with the identification of mineral boundaries, you can turn on edge detection by clicking the |icon-edge-detection| button. There are multiple edge detection methods available which you can select using the dropdown menu.
 
 Scatter and Heatmaps
 ====================
@@ -62,12 +101,17 @@ To save to the plot tree by clicking the |icon-launch| button.
 Clustering
 ==========
 
+Clustering uses unsupervised machine learning techniques to classify the data into a specified number of clusters.  Two methods are currently implmented, k-means and fuzzy c-means, which are chosen from the *Method* dropdown.
 
 Profiling Tab
 =============
 
+
+
 Special Functions Tab
 =====================
+
+These are not yet implemented, but will include methods to compute thermometry, barometry, dating using various isotopic systems, and multicomponent diffusion.  If you have interest in applying a specific methods please contact us and we'll see what we can do.
 
 
 .. |icon-atom| image:: _static/icons/icon-atom-64.png
@@ -85,10 +129,28 @@ Special Functions Tab
 .. |icon-map| image:: _static/icons/icon-map-64.png
     :height: 2ex
 
+.. |icon-edge-detection| image:: _static/icons/icon-spotlight-64.png
+    :height: 2ex
+
+.. |icon-move-point| image:: _static/icons/icon-move-point-64.png
+    :height: 2ex
+
+.. |icon-add-point| image:: _static/icons/icon-add-point-64.png
+    :height: 2ex
+
+.. |icon-remove-point| image:: _static/icons/icon-remove-point-64.png
+    :height: 2ex
+
 .. |icon-filter| image:: _static/icons/icon-filter-64.png
     :height: 2ex
 
 .. |icon-filter2| image:: _static/icons/icon-filter2-64.png
+    :height: 2ex
+
+.. |icon-link| image:: _static/icons/icon-link-64.png
+    :height: 2ex
+
+.. |icon-unlink| image:: _static/icons/icon-unlink-64.png
     :height: 2ex
 
 .. |icon-mask-light| image:: _static/icons/icon-mask-light-64.png

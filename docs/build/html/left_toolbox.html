@@ -119,8 +119,8 @@
       
     
     
-    <img src="_static/LaME_logo-64.png" class="logo__image only-light" alt=""/>
-    <script>document.write(`<img src="_static/LaME_logo-64.png" class="logo__image only-dark" alt=""/>`);</script>
+    <img src="_static/LaME-logo-64.png" class="logo__image only-light" alt=""/>
+    <script>document.write(`<img src="_static/LaME-logo-64.png" class="logo__image only-dark" alt=""/>`);</script>
   
   
     <p class="title logo__title">LaME v.0.0 beta</p>
@@ -438,23 +438,58 @@ document.write(`
 <h3>Autoscaling <a class="reference internal" href="_images/icon-autoscale-64.png"><img alt="icon-autoscale" src="_images/icon-autoscale-64.png" style="height: 2ex;" /></a><a class="headerlink" href="#autoscaling-icon-autoscale" title="Link to this heading">#</a></h3>
 <p>One common calibration issue is the conversion of low counts to negative concentrations after calibration.  These are almost certainly due to difference between the ablation properties of the mineral used to calibrate the map applied and another mineral.  Negative values are particularly an issue when the data are log-scaled.  To reduce the effect of negatives, we rescale the data by bringing applying a linear compression of the data, fixing the upper end and moving the lower end to a small positive value.  While this does change the concentration, it has a small affect on large concentrations.  We also perform an autoscaling, performed by default, to clip the high and low ends of the concentrations.  These values are not removed, rather set to the top or bottom of the scale.  Autoscaling can skew statistics as a result; however, it generally improves estimates of the mean as values that are several orders of magnitude higher than reasonable no longer have a massive effect.  Autoscaling can be toggled on or off by pressing the <a class="reference internal" href="_images/icon-autoscale-64.png"><img alt="icon-autoscale" src="_images/icon-autoscale-64.png" style="height: 2ex;" /></a> button.</p>
 </section>
+<section id="histogram-equalization">
+<h3>Histogram Equalization<a class="headerlink" href="#histogram-equalization" title="Link to this heading">#</a></h3>
+</section>
+<section id="histograms">
+<h3>Histograms<a class="headerlink" href="#histograms" title="Link to this heading">#</a></h3>
+</section>
+<section id="noise-reduction">
+<h3>Noise Reduction<a class="headerlink" href="#noise-reduction" title="Link to this heading">#</a></h3>
+</section>
 </section>
 <section id="spot-data">
 <h2>Spot Data<a class="headerlink" href="#spot-data" title="Link to this heading">#</a></h2>
 </section>
 <section id="filter">
 <h2>Filter<a class="headerlink" href="#filter" title="Link to this heading">#</a></h2>
-<p>There are three types of filters than can be applied to exclude data from analyses and geochemical plots.  These include elemental filters ( <a class="reference internal" href="_images/icon-filter2-64.png"><img alt="icon-filter2" src="_images/icon-filter2-64.png" style="height: 2ex;" /></a> ), polygon masking ( <a class="reference internal" href="_images/icon-polygon-new-64.png"><img alt="icon-polygon-new" src="_images/icon-polygon-new-64.png" style="height: 2ex;" /></a> ), and cluster masking ( <a class="reference internal" href="_images/icon-mask-dark-64.png"><img alt="icon-mask-dark" src="_images/icon-mask-dark-64.png" style="height: 2ex;" /></a> ).  Elemental filters and polygon masking are both It is possible to use any combination of these and turn them on or off as required.</p>
-<section id="elemental-filters-icon-filter2">
-<h3>Elemental Filters <a class="reference internal" href="_images/icon-filter2-64.png"><img alt="icon-filter2" src="_images/icon-filter2-64.png" style="height: 2ex;" /></a><a class="headerlink" href="#elemental-filters-icon-filter2" title="Link to this heading">#</a></h3>
-<p>One can filter by element/isotope values, ratios of elements/isotopes, principal component score, or cluster score.  Multiple filters may be combined to produce more complex filters.  The filters include a boolean operations (<em>and</em> and <em>or</em>) to assist with precisely defining filters to capture the desired regions for analysis and plotting.  In many cases, the overlap between values may make it difficult to separate phases.  In these cases, we suggest targeting specific regions with a polygon or cluster mask.</p>
+<p>There are three types of filters than can be applied to exclude data from analyses and geochemical plots.  These include filters by value ( <a class="reference internal" href="_images/icon-filter2-64.png"><img alt="icon-filter2" src="_images/icon-filter2-64.png" style="height: 2ex;" /></a> ), polygon masking ( <a class="reference internal" href="_images/icon-polygon-new-64.png"><img alt="icon-polygon-new" src="_images/icon-polygon-new-64.png" style="height: 2ex;" /></a> ), and cluster masking ( <a class="reference internal" href="_images/icon-mask-dark-64.png"><img alt="icon-mask-dark" src="_images/icon-mask-dark-64.png" style="height: 2ex;" /></a> ).  Filter by value and polygon masking are both created from the <em>Filter</em> tab whereas the cluster mask is set from <em>Styling&gt;Clusters</em> in the right toolbox.  It is possible to use any combination of these filters and masks and turn them on or off as required.  All filters and masks can be turned off by clicking the <a class="reference internal" href="_images/icon-map-64.png"><img alt="icon-map" src="_images/icon-map-64.png" style="height: 2ex;" /></a> button.</p>
+<figure class="align-center" id="id1">
+<img alt="data for analysis control buttons" src="_static/screenshots/LaME_filters_toggles.png" />
+<figcaption>
+<p><span class="caption-text">Filter and mask toggle buttons.</span><a class="headerlink" href="#id1" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<section id="filter-by-value-icon-filter2">
+<h3>Filter by value <a class="reference internal" href="_images/icon-filter2-64.png"><img alt="icon-filter2" src="_images/icon-filter2-64.png" style="height: 2ex;" /></a><a class="headerlink" href="#filter-by-value-icon-filter2" title="Link to this heading">#</a></h3>
+<p>To set a filter, use the two drop down menus to select the type of field (lower) and the desired field (upper).  It is possible to filter by value using element/isotopes, ratios, custom fields, principal component score, or cluster score.  Once selected, the ranges for the field will be automatically displayed in the min and max boxes.  Change the values to set the bounds explicitly using the (left boxes) or implicitly by setting the quantile bounds (right boxes).  Once the bounds are set, click the <a class="reference internal" href="_images/icon-filter2-64.png"><img alt="icon-filter2" src="_images/icon-filter2-64.png" style="height: 2ex;" /></a> button to add the filter to the list.</p>
+<figure class="align-center" id="id2">
+<img alt="filter by value controls" src="_static/screenshots/LaME_filters.png" />
+<figcaption>
+<p><span class="caption-text">Controls used to define filters.</span><a class="headerlink" href="#id2" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<p>Multiple filters may be combined to produce more complex filters.  The filters include a boolean operations (<em>and</em> and <em>or</em>, set in the <em>Filter Table</em> in the <a href="#id7"><span class="problematic" id="id8">`lower pane`_</span></a>) to assist with precisely defining filters to capture the desired regions for analysis and plotting.  In many cases, the overlap between values may make it difficult to separate phases.  In these cases, we suggest targeting specific regions with a polygon or cluster mask.</p>
 </section>
 <section id="polygon-masking-icon-polygon-new">
 <h3>Polygon Masking <a class="reference internal" href="_images/icon-polygon-new-64.png"><img alt="icon-polygon-new" src="_images/icon-polygon-new-64.png" style="height: 2ex;" /></a><a class="headerlink" href="#polygon-masking-icon-polygon-new" title="Link to this heading">#</a></h3>
+<p>to create a polygon for filtering, select a map from the plot selector and then click the <a class="reference internal" href="_images/icon-polygon-new-64.png"><img alt="icon-polygon-new" src="_images/icon-polygon-new-64.png" style="height: 2ex;" /></a> button.  Move the mouse over the map and left-click to add vertices.  You will notice a zoom tool appears that shows a small region of the map where the mouse is located.  Once you have added enough points, right-click on the map to end digitizing.  A polygon will appear in the <em>polygon table</em>, where a name can be added.  Once created, polygons can be edited.  Move a point by clicking the <a class="reference internal" href="_images/icon-move-point-64.png"><img alt="icon-move-point" src="_images/icon-move-point-64.png" style="height: 2ex;" /></a> button, then left-click on the map near the point to be moved and then left-click again for the new location.  Add a vertex by clicking the button <a class="reference internal" href="_images/icon-add-point-64.png"><img alt="icon-add-point" src="_images/icon-add-point-64.png" style="height: 2ex;" /></a> and selecting the line segment where you wish to add a point.  Then click where you would like the new point.  To remove points, click the button <a class="reference internal" href="_images/icon-remove-point-64.png"><img alt="icon-remove-point" src="_images/icon-remove-point-64.png" style="height: 2ex;" /></a> and then click the point you wish to remove.</p>
+<p>It is possible to create multiple polygons.  These polygons can be analyzed as separate regions or linked by selecting multiple polygons in the <em>Polygon Table</em> and clicking the <a class="reference internal" href="_images/icon-link-64.png"><img alt="icon-link" src="_images/icon-link-64.png" style="height: 2ex;" /></a> button.  To delink the polygons, select the polygon in the table and then click the <a class="reference internal" href="_images/icon-unlink-64.png"><img alt="icon-unlink" src="_images/icon-unlink-64.png" style="height: 2ex;" /></a> button.  The use of individual polygons in analyses can be toggled by clicking the associated checkbox in the <em>Polygon Table</em>.</p>
+<p>The polygons within the table can be stored by clicking the <a href="#id3"><span class="problematic" id="id4">|icon-save|</span></a> button and recolled using the <a href="#id5"><span class="problematic" id="id6">|icon-open-file|</span></a> button.  See a description of <a href="#id9"><span class="problematic" id="id10">`file specifications`_</span></a> for more information.</p>
 </section>
 <section id="cluster-masking-icon-mask-dark">
 <h3>Cluster Masking <a class="reference internal" href="_images/icon-mask-dark-64.png"><img alt="icon-mask-dark" src="_images/icon-mask-dark-64.png" style="height: 2ex;" /></a><a class="headerlink" href="#cluster-masking-icon-mask-dark" title="Link to this heading">#</a></h3>
-<p>Cluster masks</p>
+<p>Cluster masks can be turned on or off from the <em>Filter</em> tab, but cannot be set here.  To set a cluster mask, you will need to</p>
+<ol class="arabic simple">
+<li><p>compute clusters first from the <em>Cluster</em> pane in the left toolbox</p></li>
+<li><p>from the <em>Styling</em> tab on the right pane, select the <em>Clusters</em> sub-tab and choose the type of clustering from the point grouping drop down</p></li>
+<li><p>select the cluster(s) that you wish to mask and click the <a class="reference internal" href="_images/icon-mask-dark-64.png"><img alt="icon-mask-dark" src="_images/icon-mask-dark-64.png" style="height: 2ex;" /></a> button to set the cluster mask or</p></li>
+<li><p>alternatively, select the clusters you wish to use for analysis and click the <a class="reference internal" href="_images/icon-mask-light-64.png"><img alt="icon-mask-light" src="_images/icon-mask-light-64.png" style="height: 2ex;" /></a> button to set the other groups as the mask.</p></li>
+</ol>
+</section>
+<section id="edge-detection">
+<h3>Edge-detection<a class="headerlink" href="#edge-detection" title="Link to this heading">#</a></h3>
+<p>To aid with the identification of mineral boundaries, you can turn on edge detection by clicking the <a class="reference internal" href="_images/icon-spotlight-64.png"><img alt="icon-edge-detection" src="_images/icon-spotlight-64.png" style="height: 2ex;" /></a> button. There are multiple edge detection methods available which you can select using the dropdown menu.</p>
 </section>
 </section>
 <section id="scatter-and-heatmaps">
@@ -478,12 +513,14 @@ document.write(`
 </section>
 <section id="clustering">
 <h2>Clustering<a class="headerlink" href="#clustering" title="Link to this heading">#</a></h2>
+<p>Clustering uses unsupervised machine learning techniques to classify the data into a specified number of clusters.  Two methods are currently implmented, k-means and fuzzy c-means, which are chosen from the <em>Method</em> dropdown.</p>
 </section>
 <section id="profiling-tab">
 <h2>Profiling Tab<a class="headerlink" href="#profiling-tab" title="Link to this heading">#</a></h2>
 </section>
 <section id="special-functions-tab">
 <h2>Special Functions Tab<a class="headerlink" href="#special-functions-tab" title="Link to this heading">#</a></h2>
+<p>These are not yet implemented, but will include methods to compute thermometry, barometry, dating using various isotopic systems, and multicomponent diffusion.  If you have interest in applying a specific methods please contact us and we’ll see what we can do.</p>
 </section>
 </section>
 
@@ -536,13 +573,17 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#samples-and-fields">Samples and Fields</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preprocessing">Preprocessing</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#autoscaling-icon-autoscale">Autoscaling </a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#histogram-equalization">Histogram Equalization</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#histograms">Histograms</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#noise-reduction">Noise Reduction</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#spot-data">Spot Data</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#filter">Filter</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#elemental-filters-icon-filter2">Elemental Filters </a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#filter-by-value-icon-filter2">Filter by value </a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#polygon-masking-icon-polygon-new">Polygon Masking </a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cluster-masking-icon-mask-dark">Cluster Masking </a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#edge-detection">Edge-detection</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scatter-and-heatmaps">Scatter and Heatmaps</a></li>

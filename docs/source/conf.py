@@ -36,12 +36,12 @@ html_theme_options = {"navbar_start": ["navbar-logo"],
 
 html_static_path = ['_static']
 
-html_logo = "_static/LaME_logo-64.png"
+html_logo = "_static/LaME-logo-64.png"
 
 html_theme_options = {
     "logo": {
         "text": "LaME v.0.0 beta",
-        "image_dark": "_static/LaME_logo-64.png",
+        "image_dark": "_static/LaME-logo-64.png",
     },
     "icon_links": [
         {

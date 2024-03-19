@@ -89,12 +89,30 @@
            </property>
            <item row="0" column="1">
             <widget class="QToolButton" name="toolButtonPanSV">
+             <property name="minimumSize">
+              <size>
+               <width>28</width>
+               <height>28</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>28</width>
+               <height>28</height>
+              </size>
+             </property>
              <property name="toolTip">
               <string>Shift plot</string>
              </property>
              <property name="icon">
-              <iconset>
-               <normaloff>:/icons/move</normaloff>:/icons/move</iconset>
+              <iconset resource="../resources.qrc">
+               <normaloff>:/icons/resources/icons/icon-move-64.png</normaloff>:/icons/resources/icons/icon-move-64.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
              </property>
              <property name="checkable">
               <bool>true</bool>
@@ -103,28 +121,58 @@
            </item>
            <item row="0" column="0">
             <widget class="QToolButton" name="toolButtonHomeSV">
+             <property name="minimumSize">
+              <size>
+               <width>28</width>
+               <height>28</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>28</width>
+               <height>28</height>
+              </size>
+             </property>
              <property name="toolTip">
               <string>Return to home view</string>
              </property>
              <property name="icon">
               <iconset resource="../resources.qrc">
-               <normaloff>:/icons/home</normaloff>:/icons/home</iconset>
+               <normaloff>:/icons/resources/icons/icon-home-64.png</normaloff>:/icons/resources/icons/icon-home-64.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
              </property>
             </widget>
            </item>
            <item row="0" column="8">
             <widget class="QToolButton" name="toolButtonDistanceSV">
+             <property name="minimumSize">
+              <size>
+               <width>28</width>
+               <height>28</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>28</width>
+               <height>28</height>
+              </size>
+             </property>
              <property name="toolTip">
               <string>Measure distance</string>
              </property>
              <property name="icon">
               <iconset resource="../resources.qrc">
-               <normaloff>:/icons/resources/icons/icons8-ruler-50.png</normaloff>:/icons/resources/icons/icons8-ruler-50.png</iconset>
+               <normaloff>:/icons/resources/icons/icon-distance-64.png</normaloff>:/icons/resources/icons/icon-distance-64.png</iconset>
              </property>
              <property name="iconSize">
               <size>
-               <width>18</width>
-               <height>18</height>
+               <width>20</width>
+               <height>20</height>
               </size>
              </property>
              <property name="checkable">
@@ -134,12 +182,30 @@
            </item>
            <item row="0" column="9">
             <widget class="QToolButton" name="toolButtonSaveSV">
+             <property name="minimumSize">
+              <size>
+               <width>28</width>
+               <height>28</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>28</width>
+               <height>28</height>
+              </size>
+             </property>
              <property name="toolTip">
               <string>Save plot</string>
              </property>
              <property name="icon">
               <iconset resource="../resources.qrc">
-               <normaloff>:/icons/save</normaloff>:/icons/save</iconset>
+               <normaloff>:/icons/resources/icons/icon-save-file-64.png</normaloff>:/icons/resources/icons/icon-save-file-64.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
              </property>
             </widget>
            </item>
@@ -213,28 +279,58 @@
            </item>
            <item row="0" column="6">
             <widget class="QToolButton" name="toolButtonAxesSV">
+             <property name="minimumSize">
+              <size>
+               <width>28</width>
+               <height>28</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>28</width>
+               <height>28</height>
+              </size>
+             </property>
              <property name="toolTip">
               <string>Axes tool</string>
              </property>
              <property name="icon">
               <iconset resource="../resources.qrc">
-               <normaloff>:/icons/axis</normaloff>:/icons/axis</iconset>
+               <normaloff>:/icons/resources/icons/icon-rgb-64.png</normaloff>:/icons/resources/icons/icon-rgb-64.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
              </property>
             </widget>
            </item>
            <item row="0" column="7">
             <widget class="QToolButton" name="toolButtonAnnotateSV">
+             <property name="minimumSize">
+              <size>
+               <width>28</width>
+               <height>28</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>28</width>
+               <height>28</height>
+              </size>
+             </property>
              <property name="toolTip">
               <string>Add annotation</string>
              </property>
              <property name="icon">
               <iconset resource="../resources.qrc">
-               <normaloff>:/icons/resources/icons/icons8-add-text-50.png</normaloff>:/icons/resources/icons/icons8-add-text-50.png</iconset>
+               <normaloff>:/icons/resources/icons/icon-annotate-64.png</normaloff>:/icons/resources/icons/icon-annotate-64.png</iconset>
              </property>
              <property name="iconSize">
               <size>
-               <width>18</width>
-               <height>18</height>
+               <width>20</width>
+               <height>20</height>
               </size>
              </property>
              <property name="checkable">
@@ -244,23 +340,59 @@
            </item>
            <item row="0" column="3">
             <widget class="QToolButton" name="toolButtonPreferencesSV">
+             <property name="minimumSize">
+              <size>
+               <width>28</width>
+               <height>28</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>28</width>
+               <height>28</height>
+              </size>
+             </property>
              <property name="toolTip">
               <string>Change colormap</string>
              </property>
              <property name="icon">
               <iconset resource="../resources.qrc">
-               <normaloff>:/icons/preferences</normaloff>:/icons/preferences</iconset>
+               <normaloff>:/icons/resources/icons/icon-axes-64.png</normaloff>:/icons/resources/icons/icon-axes-64.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
              </property>
             </widget>
            </item>
            <item row="0" column="2">
             <widget class="QToolButton" name="toolButtonZoomSV">
+             <property name="minimumSize">
+              <size>
+               <width>28</width>
+               <height>28</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>28</width>
+               <height>28</height>
+              </size>
+             </property>
              <property name="toolTip">
               <string>Zoom In/Out</string>
              </property>
              <property name="icon">
               <iconset resource="../resources.qrc">
-               <normaloff>:/icons/zoom</normaloff>:/icons/zoom</iconset>
+               <normaloff>:/icons/resources/icons/icon-zoom-64.png</normaloff>:/icons/resources/icons/icon-zoom-64.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
              </property>
              <property name="checkable">
               <bool>true</bool>
@@ -428,7 +560,7 @@
               <string>Save image or data</string>
              </property>
              <property name="icon">
-              <iconset resource="../resources.qrc">
+              <iconset>
                <normaloff>:/icons/save</normaloff>:/icons/save</iconset>
              </property>
              <property name="iconSize">
@@ -445,7 +577,7 @@
               <string>Zoom in/out</string>
              </property>
              <property name="icon">
-              <iconset resource="../resources.qrc">
+              <iconset>
                <normaloff>:/icons/zoom</normaloff>:/icons/zoom</iconset>
              </property>
              <property name="iconSize">
@@ -469,7 +601,7 @@
               <string>Original view</string>
              </property>
              <property name="icon">
-              <iconset resource="../resources.qrc">
+              <iconset>
                <normaloff>:/icons/home</normaloff>:/icons/home</iconset>
              </property>
              <property name="iconSize">
@@ -555,7 +687,7 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tabNotes">
        <property name="toolTip">
@@ -751,8 +883,8 @@
             <widget class="QToolButton" name="toolButtonFilterSelectAll">
              <property name="minimumSize">
               <size>
-               <width>0</width>
-               <height>30</height>
+               <width>32</width>
+               <height>32</height>
               </size>
              </property>
              <property name="maximumSize">
@@ -766,18 +898,24 @@
              </property>
              <property name="icon">
               <iconset resource="../resources.qrc">
-               <normaloff>:/icons/resources/icons/icons8-select-all-50.png</normaloff>:/icons/resources/icons/icons8-select-all-50.png</iconset>
+               <normaloff>:/icons/resources/icons/icon-select-all-64.png</normaloff>:/icons/resources/icons/icon-select-all-64.png</iconset>
              </property>
              <property name="iconSize">
               <size>
-               <width>18</width>
-               <height>18</height>
+               <width>24</width>
+               <height>24</height>
               </size>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QToolButton" name="toolButtonFilterUp">
+             <property name="minimumSize">
+              <size>
+               <width>32</width>
+               <height>32</height>
+              </size>
+             </property>
              <property name="maximumSize">
               <size>
                <width>32</width>
@@ -789,7 +927,7 @@
              </property>
              <property name="icon">
               <iconset resource="../resources.qrc">
-               <normaloff>:/icons/up</normaloff>:/icons/up</iconset>
+               <normaloff>:/icons/resources/icons/icon-up-arrow-64.png</normaloff>:/icons/resources/icons/icon-up-arrow-64.png</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -801,6 +939,12 @@
            </item>
            <item>
             <widget class="QToolButton" name="toolButtonFilterDown">
+             <property name="minimumSize">
+              <size>
+               <width>32</width>
+               <height>32</height>
+              </size>
+             </property>
              <property name="maximumSize">
               <size>
                <width>32</width>
@@ -812,7 +956,7 @@
              </property>
              <property name="icon">
               <iconset resource="../resources.qrc">
-               <normaloff>:/icons/down</normaloff>:/icons/down</iconset>
+               <normaloff>:/icons/resources/icons/icon-down-64.png</normaloff>:/icons/resources/icons/icon-down-64.png</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -842,8 +986,8 @@
              </property>
              <property name="minimumSize">
               <size>
-               <width>0</width>
-               <height>30</height>
+               <width>32</width>
+               <height>32</height>
               </size>
              </property>
              <property name="maximumSize">
@@ -857,7 +1001,7 @@
              </property>
              <property name="icon">
               <iconset resource="../resources.qrc">
-               <normaloff>:/icons/delete</normaloff>:/icons/delete</iconset>
+               <normaloff>:/icons/resources/icons/icon-delete-64.png</normaloff>:/icons/resources/icons/icon-delete-64.png</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -1043,7 +1187,7 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="TreeView">
        <property name="geometry">
@@ -1149,7 +1293,7 @@
            </property>
            <property name="icon">
             <iconset resource="../resources.qrc">
-             <normaloff>:/icons/delete</normaloff>:/icons/delete</iconset>
+             <normaloff>:/icons/resources/icons/icon-delete-64.png</normaloff>:/icons/resources/icons/icon-delete-64.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -1199,20 +1343,20 @@
          <enum>QFrame::Raised</enum>
         </property>
         <property name="currentIndex">
-         <number>3</number>
+         <number>4</number>
         </property>
         <widget class="QWidget" name="StyleGeneral">
          <property name="geometry">
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>100</width>
-           <height>30</height>
+           <width>219</width>
+           <height>484</height>
           </rect>
          </property>
          <attribute name="icon">
           <iconset resource="../resources.qrc">
-           <normaloff>:/icons/resources/icons/icons8-gear-48.png</normaloff>:/icons/resources/icons/icons8-gear-48.png</iconset>
+           <normaloff>:/icons/resources/icons/icon-gear-64.png</normaloff>:/icons/resources/icons/icon-gear-64.png</iconset>
          </attribute>
          <attribute name="label">
           <string>General</string>
@@ -1438,13 +1582,13 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>100</width>
-           <height>30</height>
+           <width>219</width>
+           <height>484</height>
           </rect>
          </property>
          <attribute name="icon">
           <iconset resource="../resources.qrc">
-           <normaloff>:/icons/resources/icons/icons8-heat-map-100.png</normaloff>:/icons/resources/icons/icons8-heat-map-100.png</iconset>
+           <normaloff>:/icons/resources/icons/icon-heatmap-64.png</normaloff>:/icons/resources/icons/icon-heatmap-64.png</iconset>
          </attribute>
          <attribute name="label">
           <string>Maps</string>
@@ -2537,8 +2681,8 @@
               <string>On</string>
              </property>
              <property name="icon">
-              <iconset>
-               <normaloff>:/icons/resources/icons/icons8-anonymous-mask-dark-50.png</normaloff>:/icons/resources/icons/icons8-anonymous-mask-dark-50.png</iconset>
+              <iconset resource="../resources.qrc">
+               <normaloff>:/icons/resources/icons/icon-mask-dark-64.png</normaloff>:/icons/resources/icons/icon-mask-dark-64.png</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -2572,8 +2716,8 @@
               <string>Off</string>
              </property>
              <property name="icon">
-              <iconset>
-               <normaloff>:/icons/resources/icons/icons8-anonymous-mask-light-50.png</normaloff>:/icons/resources/icons/icons8-anonymous-mask-light-50.png</iconset>
+              <iconset resource="../resources.qrc">
+               <normaloff>:/icons/resources/icons/icon-mask-light-64.png</normaloff>:/icons/resources/icons/icon-mask-light-64.png</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -2594,13 +2738,13 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>100</width>
-           <height>30</height>
+           <width>219</width>
+           <height>484</height>
           </rect>
          </property>
          <attribute name="icon">
-          <iconset>
-           <normaloff>:/icons/resources/icons/icons8-polyline-40.png</normaloff>:/icons/resources/icons/icons8-polyline-40.png</iconset>
+          <iconset resource="../resources.qrc">
+           <normaloff>:/icons/resources/icons/icon-profile-64.png</normaloff>:/icons/resources/icons/icon-profile-64.png</iconset>
          </attribute>
          <attribute name="label">
           <string>Profiles and Polygons</string>
@@ -3399,7 +3543,7 @@
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset resource="../resources.qrc">
+         <iconset>
           <normaloff>:/icons/save</normaloff>:/icons/save</iconset>
         </property>
         <property name="iconSize">
@@ -3422,7 +3566,7 @@
          <string>Add</string>
         </property>
         <property name="icon">
-         <iconset resource="../resources.qrc">
+         <iconset>
           <normaloff>:/icons/resources/icons/icons8-add-50.png</normaloff>:/icons/resources/icons/icons8-add-50.png</iconset>
         </property>
         <property name="iconSize">
@@ -3445,7 +3589,7 @@
          <string>Remove</string>
         </property>
         <property name="icon">
-         <iconset resource="../resources.qrc">
+         <iconset>
           <normaloff>:/icons/resources/icons/icons8-minus-64.png</normaloff>:/icons/resources/icons/icons8-minus-64.png</iconset>
         </property>
         <property name="iconSize">
@@ -3554,7 +3698,7 @@
        <string>Activates the crop tool</string>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="SelectIsotopePage">
        <property name="enabled">
@@ -3711,6 +3855,12 @@
           </item>
           <item row="4" column="1">
            <widget class="QToolButton" name="toolButtonLoadIsotopes">
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="maximumSize">
              <size>
               <width>32</width>
@@ -3824,6 +3974,18 @@
          <layout class="QHBoxLayout" name="horizontalLayout_16">
           <item>
            <widget class="QToolButton" name="toolButtonFullView">
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="toolTip">
              <string>Restore original extent</string>
             </property>
@@ -3844,6 +4006,18 @@
           </item>
           <item>
            <widget class="QToolButton" name="toolButtonCrop">
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="toolTip">
              <string>Activates the crop tool</string>
             </property>
@@ -3867,6 +4041,18 @@
           </item>
           <item>
            <widget class="QToolButton" name="toolButtonCropApply">
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="toolTip">
              <string>Crop map</string>
             </property>
@@ -3903,6 +4089,18 @@
           </item>
           <item>
            <widget class="QToolButton" name="toolButtonSwapXY">
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="toolTip">
              <string>Swap X/Y</string>
             </property>
@@ -4055,6 +4253,12 @@
           </item>
           <item>
            <widget class="QToolButton" name="toolButtonHistogramReset">
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="maximumSize">
              <size>
               <width>32</width>
@@ -4074,7 +4278,7 @@
             </property>
             <property name="icon">
              <iconset resource="../resources.qrc">
-              <normaloff>:/icons/resources/icons/icons8-reset-64.png</normaloff>:/icons/resources/icons/icons8-reset-64.png</iconset>
+              <normaloff>:/icons/resources/icons/icon-reset-64.png</normaloff>:/icons/resources/icons/icon-reset-64.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -4319,6 +4523,12 @@
          <layout class="QHBoxLayout" name="horizontalLayout_21">
           <item>
            <widget class="QToolButton" name="toolButtonAutoScale">
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="maximumSize">
              <size>
               <width>32</width>
@@ -4332,9 +4542,8 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset>
-              <normaloff>:/icons/resources/icons/icons8-histogram-32.png</normaloff>
-              <activeoff>:/icons/resources/icons/icons8-histogram-32.png</activeoff>:/icons/resources/icons/icons8-histogram-32.png</iconset>
+             <iconset resource="../resources.qrc">
+              <normaloff>:/icons/resources/icons/icon-autoscale-64.png</normaloff>:/icons/resources/icons/icon-autoscale-64.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -4365,6 +4574,12 @@
           </item>
           <item>
            <widget class="QToolButton" name="toolButtonScaleEqualize">
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="maximumSize">
              <size>
               <width>32</width>
@@ -4405,9 +4620,21 @@
          <rect>
           <x>5</x>
           <y>315</y>
-          <width>34</width>
-          <height>34</height>
+          <width>32</width>
+          <height>32</height>
          </rect>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
         </property>
         <property name="font">
          <font>
@@ -4520,6 +4747,18 @@
          <layout class="QHBoxLayout" name="horizontalLayout_15">
           <item>
            <widget class="QToolButton" name="toolButtonSpotLoad">
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="toolTip">
              <string>Load spot file</string>
             </property>
@@ -4553,6 +4792,18 @@
           </item>
           <item>
            <widget class="QToolButton" name="toolButtonSpotLocate">
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="toolTip">
              <string>Place spot on map</string>
             </property>
@@ -4561,7 +4812,7 @@
             </property>
             <property name="icon">
              <iconset resource="../resources.qrc">
-              <normaloff>:/icons/resources/icons/icons8-location-marker-48.png</normaloff>:/icons/resources/icons/icons8-location-marker-48.png</iconset>
+              <normaloff>:/icons/resources/icons/icon-spot-64.png</normaloff>:/icons/resources/icons/icon-spot-64.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -4576,6 +4827,18 @@
           </item>
           <item>
            <widget class="QToolButton" name="toolButtonSpotMove">
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="toolTip">
              <string>Adjust spot location</string>
             </property>
@@ -4599,6 +4862,18 @@
           </item>
           <item>
            <widget class="QToolButton" name="toolButtonSpotToggleView">
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="toolTip">
              <string>Show hide/spots</string>
             </property>
@@ -4615,10 +4890,25 @@
               <height>24</height>
              </size>
             </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
            </widget>
           </item>
           <item>
            <widget class="QToolButton" name="toolButtonSpotSelectAll">
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="toolTip">
              <string>Select all spots</string>
             </property>
@@ -4627,7 +4917,7 @@
             </property>
             <property name="icon">
              <iconset resource="../resources.qrc">
-              <normaloff>:/icons/resources/icons/icons8-select-all-50.png</normaloff>:/icons/resources/icons/icons8-select-all-50.png</iconset>
+              <normaloff>:/icons/resources/icons/icon-select-all-64.png</normaloff>:/icons/resources/icons/icon-select-all-64.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -4652,6 +4942,18 @@
           </item>
           <item>
            <widget class="QToolButton" name="toolButtonSpotRemove">
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="toolTip">
              <string>Remove selected spot(s)</string>
             </property>
@@ -4660,7 +4962,7 @@
             </property>
             <property name="icon">
              <iconset resource="../resources.qrc">
-              <normaloff>:/icons/delete</normaloff>:/icons/delete</iconset>
+              <normaloff>:/icons/resources/icons/icon-delete-64.png</normaloff>:/icons/resources/icons/icon-delete-64.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -4681,6 +4983,18 @@
            <height>32</height>
           </rect>
          </property>
+         <property name="minimumSize">
+          <size>
+           <width>32</width>
+           <height>32</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>32</width>
+           <height>32</height>
+          </size>
+         </property>
          <property name="toolTip">
           <string>Compare spots with map data</string>
          </property>
@@ -4689,7 +5003,7 @@
          </property>
          <property name="icon">
           <iconset resource="../resources.qrc">
-           <normaloff>:/icons/resources/icons/icons8-analysis-50.png</normaloff>:/icons/resources/icons/icons8-analysis-50.png</iconset>
+           <normaloff>:/icons/resources/icons/icon-analysis-64.png</normaloff>:/icons/resources/icons/icon-analysis-64.png</iconset>
          </property>
          <property name="iconSize">
           <size>
@@ -4743,6 +5057,18 @@
            <width>32</width>
            <height>32</height>
           </rect>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>32</width>
+           <height>32</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>32</width>
+           <height>32</height>
+          </size>
          </property>
          <property name="toolTip">
           <string>Add filter</string>
@@ -4990,6 +5316,12 @@
          <layout class="QHBoxLayout" name="horizontalLayout_9">
           <item>
            <widget class="QToolButton" name="toolButtonPolyLoad">
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="maximumSize">
              <size>
               <width>32</width>
@@ -5034,6 +5366,12 @@
           </item>
           <item>
            <widget class="QToolButton" name="toolButtonPolyCreate">
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="maximumSize">
              <size>
               <width>32</width>
@@ -5068,6 +5406,12 @@
           </item>
           <item>
            <widget class="QToolButton" name="toolButtonPolyMovePoint">
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="maximumSize">
              <size>
               <width>32</width>
@@ -5136,6 +5480,12 @@
           </item>
           <item>
            <widget class="QToolButton" name="toolButtonPolyRemovePoint">
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="maximumSize">
              <size>
               <width>32</width>
@@ -5182,6 +5532,12 @@
          <layout class="QHBoxLayout" name="horizontalLayout_4">
           <item>
            <widget class="QToolButton" name="toolButtonPolyLink">
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="maximumSize">
              <size>
               <width>32</width>
@@ -5213,6 +5569,12 @@
           </item>
           <item>
            <widget class="QToolButton" name="toolButtonPolyDelink">
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="maximumSize">
              <size>
               <width>32</width>
@@ -5257,6 +5619,12 @@
           </item>
           <item>
            <widget class="QToolButton" name="toolButtonPolySave">
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="maximumSize">
              <size>
               <width>32</width>
@@ -5288,6 +5656,12 @@
           </item>
           <item>
            <widget class="QToolButton" name="toolButtonPolyDelete">
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="maximumSize">
              <size>
               <width>32</width>
@@ -5307,7 +5681,7 @@
             </property>
             <property name="icon">
              <iconset resource="../resources.qrc">
-              <normaloff>:/icons/delete</normaloff>:/icons/delete</iconset>
+              <normaloff>:/icons/resources/icons/icon-delete-64.png</normaloff>:/icons/resources/icons/icon-delete-64.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -5347,6 +5721,12 @@
          <layout class="QHBoxLayout" name="horizontalLayout_10">
           <item>
            <widget class="QToolButton" name="toolButtonMapViewable">
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="maximumSize">
              <size>
               <width>32</width>
@@ -5392,6 +5772,12 @@
           </item>
           <item>
            <widget class="QToolButton" name="toolButtonFilterToggle">
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="maximumSize">
              <size>
               <width>32</width>
@@ -5422,6 +5808,12 @@
           </item>
           <item>
            <widget class="QToolButton" name="toolButtonMapPolygon">
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="maximumSize">
              <size>
               <width>32</width>
@@ -5452,6 +5844,12 @@
           </item>
           <item>
            <widget class="QToolButton" name="toolButtonMapMask">
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="maximumSize">
              <size>
               <width>32</width>
@@ -5542,6 +5940,12 @@
           </item>
           <item>
            <widget class="QToolButton" name="toolButtonEdgeDetection">
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="maximumSize">
              <size>
               <width>32</width>
@@ -6071,6 +6475,12 @@
            <layout class="QVBoxLayout" name="verticalLayout_11">
             <item>
              <widget class="QToolButton" name="toolButtonSaveTernaryColormap">
+              <property name="minimumSize">
+               <size>
+                <width>32</width>
+                <height>32</height>
+               </size>
+              </property>
               <property name="maximumSize">
                <size>
                 <width>32</width>
@@ -6107,6 +6517,12 @@
             </item>
             <item>
              <widget class="QToolButton" name="toolButtonTernaryMap">
+              <property name="minimumSize">
+               <size>
+                <width>32</width>
+                <height>32</height>
+               </size>
+              </property>
               <property name="maximumSize">
                <size>
                 <width>32</width>
@@ -6471,6 +6887,12 @@
              <layout class="QVBoxLayout" name="verticalLayout">
               <item>
                <widget class="QToolButton" name="toolButtonNDimSelectAll">
+                <property name="minimumSize">
+                 <size>
+                  <width>32</width>
+                  <height>32</height>
+                 </size>
+                </property>
                 <property name="maximumSize">
                  <size>
                   <width>32</width>
@@ -6485,7 +6907,7 @@
                 </property>
                 <property name="icon">
                  <iconset resource="../resources.qrc">
-                  <normaloff>:/icons/resources/icons/icons8-select-all-50.png</normaloff>:/icons/resources/icons/icons8-select-all-50.png</iconset>
+                  <normaloff>:/icons/resources/icons/icon-select-all-64.png</normaloff>:/icons/resources/icons/icon-select-all-64.png</iconset>
                 </property>
                 <property name="iconSize">
                  <size>
@@ -6497,6 +6919,12 @@
               </item>
               <item>
                <widget class="QToolButton" name="toolButtonNDimUp">
+                <property name="minimumSize">
+                 <size>
+                  <width>32</width>
+                  <height>32</height>
+                 </size>
+                </property>
                 <property name="maximumSize">
                  <size>
                   <width>32</width>
@@ -6508,7 +6936,7 @@
                 </property>
                 <property name="icon">
                  <iconset resource="../resources.qrc">
-                  <normaloff>:/icons/up</normaloff>:/icons/up</iconset>
+                  <normaloff>:/icons/resources/icons/icon-up-arrow-64.png</normaloff>:/icons/resources/icons/icon-up-arrow-64.png</iconset>
                 </property>
                 <property name="iconSize">
                  <size>
@@ -6520,6 +6948,12 @@
               </item>
               <item>
                <widget class="QToolButton" name="toolButtonNDimDown">
+                <property name="minimumSize">
+                 <size>
+                  <width>32</width>
+                  <height>32</height>
+                 </size>
+                </property>
                 <property name="maximumSize">
                  <size>
                   <width>32</width>
@@ -6531,7 +6965,7 @@
                 </property>
                 <property name="icon">
                  <iconset resource="../resources.qrc">
-                  <normaloff>:/icons/down</normaloff>:/icons/down</iconset>
+                  <normaloff>:/icons/resources/icons/icon-down-64.png</normaloff>:/icons/resources/icons/icon-down-64.png</iconset>
                 </property>
                 <property name="iconSize">
                  <size>
@@ -6543,6 +6977,12 @@
               </item>
               <item>
                <widget class="QToolButton" name="toolButtonNDimRemove">
+                <property name="minimumSize">
+                 <size>
+                  <width>32</width>
+                  <height>32</height>
+                 </size>
+                </property>
                 <property name="maximumSize">
                  <size>
                   <width>32</width>
@@ -6557,7 +6997,7 @@
                 </property>
                 <property name="icon">
                  <iconset resource="../resources.qrc">
-                  <normaloff>:/icons/delete</normaloff>:/icons/delete</iconset>
+                  <normaloff>:/icons/resources/icons/icon-delete-64.png</normaloff>:/icons/resources/icons/icon-delete-64.png</iconset>
                 </property>
                 <property name="iconSize">
                  <size>
@@ -6569,6 +7009,12 @@
               </item>
               <item>
                <widget class="QToolButton" name="toolButtonNDimSaveList">
+                <property name="minimumSize">
+                 <size>
+                  <width>32</width>
+                  <height>32</height>
+                 </size>
+                </property>
                 <property name="maximumSize">
                  <size>
                   <width>32</width>
@@ -6599,6 +7045,12 @@
              <layout class="QVBoxLayout" name="verticalLayout_4">
               <item>
                <widget class="QToolButton" name="toolButtonNDimIsotopeAdd">
+                <property name="minimumSize">
+                 <size>
+                  <width>32</width>
+                  <height>32</height>
+                 </size>
+                </property>
                 <property name="maximumSize">
                  <size>
                   <width>32</width>
@@ -6625,6 +7077,12 @@
               </item>
               <item>
                <widget class="QToolButton" name="toolButtonNDimIsotopeSetAdd">
+                <property name="minimumSize">
+                 <size>
+                  <width>32</width>
+                  <height>32</height>
+                 </size>
+                </property>
                 <property name="maximumSize">
                  <size>
                   <width>32</width>
@@ -6664,6 +7122,12 @@
               </item>
               <item>
                <widget class="QToolButton" name="toolButtonNDimPlot">
+                <property name="minimumSize">
+                 <size>
+                  <width>32</width>
+                  <height>32</height>
+                 </size>
+                </property>
                 <property name="maximumSize">
                  <size>
                   <width>32</width>
@@ -6955,6 +7419,12 @@
             </item>
             <item>
              <widget class="QToolButton" name="toolButtonPCAPlot">
+              <property name="minimumSize">
+               <size>
+                <width>32</width>
+                <height>32</height>
+               </size>
+              </property>
               <property name="maximumSize">
                <size>
                 <width>32</width>
@@ -7308,6 +7778,12 @@
               </item>
               <item>
                <widget class="QToolButton" name="toolButtonRunClustering">
+                <property name="minimumSize">
+                 <size>
+                  <width>32</width>
+                  <height>32</height>
+                 </size>
+                </property>
                 <property name="maximumSize">
                  <size>
                   <width>32</width>
@@ -7811,6 +8287,9 @@
             </item>
             <item>
              <widget class="QToolButton" name="toolButtonIPProfile">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -7948,7 +8427,7 @@
               </property>
               <property name="icon">
                <iconset resource="../resources.qrc">
-                <normaloff>:/icons/delete</normaloff>:/icons/delete</iconset>
+                <normaloff>:/icons/resources/icons/icon-delete-64.png</normaloff>:/icons/resources/icons/icon-delete-64.png</iconset>
               </property>
               <property name="iconSize">
                <size>
@@ -7981,7 +8460,7 @@
            <x>10</x>
            <y>30</y>
            <width>281</width>
-           <height>221</height>
+           <height>222</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_6">
@@ -8074,7 +8553,7 @@
               </property>
               <property name="icon">
                <iconset resource="../resources.qrc">
-                <normaloff>:/icons/resources/icons/icons8-select-all-50.png</normaloff>:/icons/resources/icons/icons8-select-all-50.png</iconset>
+                <normaloff>:/icons/resources/icons/icon-select-all-64.png</normaloff>:/icons/resources/icons/icon-select-all-64.png</iconset>
               </property>
               <property name="iconSize">
                <size>
@@ -8111,7 +8590,7 @@
               </property>
               <property name="icon">
                <iconset resource="../resources.qrc">
-                <normaloff>:/icons/up</normaloff>:/icons/up</iconset>
+                <normaloff>:/icons/resources/icons/icon-up-arrow-64.png</normaloff>:/icons/resources/icons/icon-up-arrow-64.png</iconset>
               </property>
               <property name="iconSize">
                <size>
@@ -8147,8 +8626,8 @@
                <string>Move down</string>
               </property>
               <property name="icon">
-               <iconset>
-                <normaloff>../resources/icons/down.png</normaloff>../resources/icons/down.png</iconset>
+               <iconset resource="../resources.qrc">
+                <normaloff>:/icons/resources/icons/icon-down-64.png</normaloff>:/icons/resources/icons/icon-down-64.png</iconset>
               </property>
               <property name="iconSize">
                <size>
@@ -8198,7 +8677,7 @@
               </property>
               <property name="icon">
                <iconset resource="../resources.qrc">
-                <normaloff>:/icons/delete</normaloff>:/icons/delete</iconset>
+                <normaloff>:/icons/resources/icons/icon-delete-64.png</normaloff>:/icons/resources/icons/icon-delete-64.png</iconset>
               </property>
               <property name="iconSize">
                <size>
@@ -8563,6 +9042,12 @@
                 <iconset resource="../resources.qrc">
                  <normaloff>:/icons/resources/icons/icon-open-file-64.png</normaloff>:/icons/resources/icons/icon-open-file-64.png</iconset>
                </property>
+               <property name="iconSize">
+                <size>
+                 <width>24</width>
+                 <height>24</height>
+                </size>
+               </property>
               </widget>
              </item>
              <item>
@@ -8756,9 +9241,9 @@
   </action>
   <action name="actionCalculator">
    <property name="icon">
-    <iconset>
-     <normalon>:/icons/resources/icons/icons8-calculator-48.png</normalon>
-    </iconset>
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/resources/icons/icon-calculator-64.png</normaloff>
+     <normalon>:/icons/resources/icons/icons8-calculator-48.png</normalon>:/icons/resources/icons/icon-calculator-64.png</iconset>
    </property>
    <property name="text">
     <string>Calculator</string>
@@ -8851,7 +9336,7 @@
   <action name="actionCluster">
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/icons/resources/icons/icon-profile-64.png</normaloff>:/icons/resources/icons/icon-profile-64.png</iconset>
+     <normaloff>:/icons/resources/icons/icon-cluster-64.png</normaloff>:/icons/resources/icons/icon-cluster-64.png</iconset>
    </property>
    <property name="text">
     <string>Cluster</string>
@@ -8930,7 +9415,7 @@
   <action name="actionSpotData">
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/icons/resources/icons/icons8-country-80.png</normaloff>:/icons/resources/icons/icons8-country-80.png</iconset>
+     <normaloff>:/icons/resources/icons/icon-spot-data-64.png</normaloff>:/icons/resources/icons/icon-spot-data-64.png</iconset>
    </property>
    <property name="text">
     <string>Spot Data</string>
@@ -8967,8 +9452,8 @@
   </action>
   <action name="actionProfiles">
    <property name="icon">
-    <iconset>
-     <normaloff>:/icons/resources/icons/icons8-polyline-40.png</normaloff>:/icons/resources/icons/icons8-polyline-40.png</iconset>
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/resources/icons/icon-profile-64.png</normaloff>:/icons/resources/icons/icon-profile-64.png</iconset>
    </property>
    <property name="text">
     <string>Profiles</string>

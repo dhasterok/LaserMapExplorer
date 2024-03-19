@@ -1,39 +1,13 @@
 <RCC>
     <qresource prefix="/icons">
-        <file alias="zoom">resources/icons/icons8-zoom-50.png</file>
         <file alias="axis">resources/icons/icons8-axis-24.png</file>
-        <file alias="home">resources/icons/icons8-home-50.png</file>
         <file alias="preferences">resources/icons/icons8-preferences-50.png</file>
-        <file alias="save">resources/icons/icons8-save-50.png</file>
-        <file alias="down">resources/icons/down.png</file>
-        <file alias="up">resources/icons/up.png</file>
-        <file alias="delete">resources/icons/delete.png</file>
-        <file>resources/icons/icons8-analysis-50.png</file>
         <file>resources/icons/icons8-cells-48.png</file>
-        <file>resources/icons/icons8-cluster-64.png</file>
         <file>resources/icons/icons8-explosion-64.png</file>
-        <file>resources/icons/icons8-heat-map-100.png</file>
         <file>resources/icons/icons8-honeycomb-48.png</file>
-        <file>resources/icons/icons8-select-all-50.png</file>
-        <file>resources/icons/icons8-spiderweb-64.png</file>
-        <file>resources/icons/icons8-trash-50.png</file>
-        <file>resources/icons/icons8-add-50.png</file>
-        <file>resources/icons/icons8-add-80.png</file>
         <file>resources/icons/icons8-add-image-64.png</file>
-        <file>resources/icons/icons8-ball-point-pen-64.png</file>
-        <file>resources/icons/icons8-rotate-180-50.png</file>
-        <file>resources/icons/icons8-location-marker-48.png</file>
-        <file>resources/icons/icons8-ruler-50.png</file>
-        <file>resources/icons/icons8-graph-60.png</file>
-        <file>resources/icons/icons8-add-text-50.png</file>
-        <file>resources/icons/icons8-calculator-48.png</file>
-        <file>resources/icons/icons8-bar-chart-50.png</file>
-        <file>resources/icons/icons8-reset-64-2.png</file>
-        <file>resources/icons/icons8-reset-64.png</file>
         <file>resources/icons/icon-gradient-32.png</file>
         <file>resources/icons/icon-swap-64.png</file>
-        <file>resources/icons/icons8-minus-64.png</file>
-        <file>resources/icons/icons8-country-80.png</file>
         <file>resources/icons/icons8-mind-map-50.png</file>
         <file>resources/icons/icons8-mind-map-filled-50.png</file>
         <file>resources/icons/icons8-add-bookmark-50.png</file>
@@ -67,7 +41,6 @@
         <file>resources/icons/icon-open-file-64.png</file>
         <file>resources/icons/icon-save-file-64.png</file>
         <file>resources/icons/icon-show-hide-64.png</file>
-        <file>resources/icons/icon-edit-64.ai</file>
         <file>resources/icons/icon-add-list-64.png</file>
         <file>resources/icons/icon-accept-64.png</file>
         <file>resources/icons/icon-reject-64.png</file>
@@ -75,5 +48,23 @@
         <file>resources/icons/icon-scatter-64.png</file>
         <file>resources/icons/icon-TEC-64.png</file>
         <file>resources/icons/icon-edit-64.png</file>
+        <file>resources/icons/icon-spot-data-64.png</file>
+        <file>resources/icons/icon-spot-64.png</file>
+        <file>resources/icons/icon-select-all-64.png</file>
+        <file>resources/icons/icon-up-arrow-64.png</file>
+        <file>resources/icons/icon-down-64.png</file>
+        <file>resources/icons/icon-delete-64.png</file>
+        <file>resources/icons/icon-move-64.png</file>
+        <file>resources/icons/icon-annotate-64.png</file>
+        <file>resources/icons/icon-analysis-64.png</file>
+        <file>resources/icons/icon-zoom-64.png</file>
+        <file>resources/icons/icon-reset-64.png</file>
+        <file>resources/icons/icon-home-64.png</file>
+        <file>resources/icons/icon-axes-64.png</file>
+        <file>resources/icons/icon-distance-64.png</file>
+        <file>resources/icons/icon-heatmap-64.png</file>
+        <file>resources/icons/icon-gear-64.png</file>
+        <file>resources/icons/icon-calculator-64.png</file>
+        <file>resources/icons/icon-rgb-64.png</file>
     </qresource>
 </RCC>

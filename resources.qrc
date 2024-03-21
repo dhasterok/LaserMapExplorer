@@ -1,7 +1,5 @@
 <RCC>
     <qresource prefix="/icons">
-        <file alias="axis">resources/icons/icons8-axis-24.png</file>
-        <file alias="preferences">resources/icons/icons8-preferences-50.png</file>
         <file>resources/icons/icons8-cells-48.png</file>
         <file>resources/icons/icons8-explosion-64.png</file>
         <file>resources/icons/icons8-honeycomb-48.png</file>
@@ -11,7 +9,6 @@
         <file>resources/icons/icons8-mind-map-50.png</file>
         <file>resources/icons/icons8-mind-map-filled-50.png</file>
         <file>resources/icons/icons8-add-bookmark-50.png</file>
-        <file>resources/icons/icons8-gear-48.png</file>
         <file>resources/icons/LaME-64.png</file>
         <file>resources/icons/icon-KDE-64.png</file>
         <file>resources/icons/icon-histeq-64.png</file>
@@ -66,5 +63,8 @@
         <file>resources/icons/icon-gear-64.png</file>
         <file>resources/icons/icon-calculator-64.png</file>
         <file>resources/icons/icon-rgb-64.png</file>
+        <file>resources/icons/icon-correlation-64.png</file>
+        <file>resources/icons/icon-histogram-64.png</file>
+        <file>resources/icons/icon-ternary-64.png</file>
     </qresource>
 </RCC>

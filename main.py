@@ -219,7 +219,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #create plot tree
 
         self.create_tree()
-        self.open_directory()
+        #self.open_directory()
 
         #normalising
         self.comboBoxNorm.clear()

@@ -6,9 +6,23 @@ The left toolbox controls the functions for changing and processing samples, pro
 Samples and Fields
 ==================
 
+.. figure:: _static/screenshots/LaME_Samples_and_Fields.png
+    :align: center
+    :alt: LaME interface: left toolbox, samples and fields tab
+    :width: 315
+
+    The *Samples and Fields* tab contains tools for choosing analytes and plotting correlations.
+
 .. _preprocessing
 Preprocessing
 =============
+
+.. figure:: _static/screenshots/LaME_Preprocessing.png
+    :align: center
+    :alt: LaME interface: left toolbox, preprocessing tab
+    :width: 315
+
+    The *Preprocessing* tab contains tools for autoscaling histograms, equalization, and noise reduction.
 
 Autoscaling |icon-autoscale|
 ----------------------------
@@ -27,29 +41,31 @@ Noise Reduction
 Spot Data
 =========
 
+Spot data is not currently available.
+
+.. figure:: _static/screenshots/LaME_Spot_Data.png
+    :align: center
+    :alt: LaME interface: left toolbox, preprocessing tab
+    :width: 315
+
+    The *Spot Data* tab contains tools for loading and displaying and analyzing spot data.
 
 Filter
 ======
 
 There are three types of filters than can be applied to exclude data from analyses and geochemical plots.  These include filters by value ( |icon-filter2| ), polygon masking ( |icon-polygon-new| ), and cluster masking ( |icon-mask-dark| ).  Filter by value and polygon masking are both created from the *Filter* tab whereas the cluster mask is set from *Styling>Clusters* in the right toolbox.  It is possible to use any combination of these filters and masks and turn them on or off as required.  All filters and masks can be turned off by clicking the |icon-map| button.
 
-.. figure:: _static/screenshots/LaME_filters_toggles.png
+.. figure:: _static/screenshots/LaME_Filter.png
     :align: center
-    :alt: data for analysis control buttons
+    :alt: LaME interface: left toolbox, filter tab
+    :width: 315
 
-    Filter and mask toggle buttons.
-    
+    The *Filter* tab contains tools for filtering by value creating polygons.  It also contains an edge detection algorithm, useful for creating polygons.
 
 Filter by value |icon-filter2|
 --------------------------------
 
 To set a filter, use the two drop down menus to select the type of field (lower) and the desired field (upper).  It is possible to filter by value using element/isotopes, ratios, custom fields, principal component score, or cluster score.  Once selected, the ranges for the field will be automatically displayed in the min and max boxes.  Change the values to set the bounds explicitly using the (left boxes) or implicitly by setting the quantile bounds (right boxes).  Once the bounds are set, click the |icon-filter2| button to add the filter to the list.
-
-.. figure:: _static/screenshots/LaME_filters.png
-    :align: center
-    :alt: filter by value controls
-
-    Controls used to define filters.
 
 Multiple filters may be combined to produce more complex filters.  The filters include a boolean operations (*and* and *or*, set in the *Filter Table* in the `lower pane`_) to assist with precisely defining filters to capture the desired regions for analysis and plotting.  In many cases, the overlap between values may make it difficult to separate phases.  In these cases, we suggest targeting specific regions with a polygon or cluster mask.
 
@@ -79,13 +95,34 @@ To aid with the identification of mineral boundaries, you can turn on edge detec
 Scatter and Heatmaps
 ====================
 
+.. figure:: _static/screenshots/LaME_Scatter_and_Heatmaps.png
+    :align: center
+    :alt: LaME interface: left toolbox, scatter and heatmaps tab
+    :width: 315
+
+    The *Scatter and Heatmaps* tab contains tools for plotting scatter maps and heat maps in 2 (biplots) and 3 (ternary) dimensions.  Scatter data may be colored by a field set in the *Styling* tab.  A map may also be produced with color defined by pixel position within a ternary diagram.
+
 n-Dim
 =====
+
+.. figure:: _static/screenshots/LaME_n-Dim.png
+    :align: center
+    :alt: LaME interface: left toolbox, n-Dim tab
+    :width: 315
+
+    The *n-Dim* tab contains tools for plotting multidimensional data as either radar plots or trace element compatibility diagrams (a.k.a. spider diagrams).
 
 This tab is used to produce trace element compatibility diagrams (spider plots) with data normalized to a set of reference concentrations.  This tab is also used to produce radar plots (that look more like spider webs).
 
 Principal Component Analysis (PCA)
 ==================================
+
+.. figure:: _static/screenshots/LaME_PCA.png
+    :align: center
+    :alt: LaME interface: left toolbox, pca tab
+    :width: 315
+
+    The *PCA* tab contains tools for displaying a variety of plots relevant to principal component analysis, inclucing maps of PCA dimension scores.
 
 Select from a range of plots relevant to principal component analyses using the *Plot type* dropdown, including: 
 
@@ -101,15 +138,28 @@ To save to the plot tree by clicking the |icon-launch| button.
 Clustering
 ==========
 
+.. figure:: _static/screenshots/LaME_Clustering.png
+    :align: center
+    :alt: LaME interface: left toolbox, clustering tab
+    :width: 315
+
+    The *Clustering* tab contains tools for calculating and displaying multianalyte data classified into clusters based on similarities in properties.  Clustering needs to be performed prior to creating a cluster mask.
+
 Clustering uses unsupervised machine learning techniques to classify the data into a specified number of clusters.  Two methods are currently implmented, k-means and fuzzy c-means, which are chosen from the *Method* dropdown.
 
-Profiling Tab
-=============
+Profiling
+=========
+
+.. figure:: _static/screenshots/LaME_Profiling.png
+    :align: center
+    :alt: LaME interface: left toolbox, profiling tab
+    :width: 315
+
+    The *Profiling* tab contains tools for creating cross sections of analytes across the maps.
 
 
-
-Special Functions Tab
-=====================
+Special Functions
+=================
 
 These are not yet implemented, but will include methods to compute thermometry, barometry, dating using various isotopic systems, and multicomponent diffusion.  If you have interest in applying a specific methods please contact us and we'll see what we can do.
 

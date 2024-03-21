@@ -639,10 +639,29 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.crop_y_min = self.y_min
 
         # reset current plot df and mask to original
-        self.current_plot_df = self.current_plot_df_copy.copy()
-        self.mask = self.mask.copy()
-        self.cluster_results = self.cluster_results_copy
-        self.update_plot(axis = True)
+        # self.current_plot_df = self.current_plot_df_copy.copy()
+        # self.mask = self.mask.copy()
+        # self.cluster_results = self.cluster_results_copy
+        
+        # reset clipped_isotope_data and self.computed_isotope_data and current_plot_df
+        sample_id = self.current_plot_information['sample_id']
+        self.clipped_isotope_data[self.sample_id] = copy.deepcopy(self.isotope_data[self.sample_id])
+        self.cropped_original_data = copy.deepcopy(self.isotope_data[self.sample_id])
+        self.computed_isotope_data[self.sample_id] = {
+            'ratio':None,
+            'calculated':None,
+            'special':None,
+            'PCA score':None,
+            'cluster':None,
+            'cluster score':None
+            }
+        
+        #reset axis mask
+        self.axis_mask = np.ones_like( self.sample_data_dict[self.sample_id]['X'], dtype=bool)
+        self.mask = self.filter_mask & self.polygon_mask & self.axis_mask
+        self.prep_data()
+        self.update_all_plots()
+        
         self.toolButtonCrop.setChecked(False)
         self.crop_tool.remove_overlays()
         self.plot.autoRange()
@@ -873,6 +892,32 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.prep_data(sample_id, isotope_1,isotope_2)
             self.update_filter_values()
 
+    def apply_crop(self):
+        current_plot_df = self.current_plot_df
+        sample_id = self.current_plot_information['sample_id']
+        
+        
+        self.axis_mask = ((current_plot_df['X'] >= self.crop_x_min) & (current_plot_df['X'] <= self.crop_x_max) &
+                       (current_plot_df['Y'] <= current_plot_df['Y'].max() - self.crop_y_min) & (current_plot_df['Y'] >= current_plot_df['Y'].max() - self.crop_y_max))
+        
+        
+        #crop original_data based on self.axis_mask
+        self.cropped_original_data[sample_id] = self.isotope_data[sample_id][self.axis_mask].reset_index(drop=True) 
+                        
+        
+        #crop clipped_isotope_data based on self.axis_mask
+        self.clipped_isotope_data[sample_id] = self.clipped_isotope_data[sample_id][self.axis_mask].reset_index(drop=True)
+        
+        #crop each df of computed_isotope_data based on self.axis_mask
+        for analysis_type, df in self.computed_isotope_data[sample_id].items():
+            if isinstance(df, pd.DataFrame):
+                df = df[self.axis_mask].reset_index(drop=True)
+        
+        self.mask = self.mask[self.axis_mask]
+        self.prep_data(sample_id)
+        self.update_all_plots()
+
+
     def update_plot(self,bin_s = True, axis = False, reset= False):
         """"Update plot
         
@@ -914,18 +959,34 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # Filtering rows based on the conditions on 'X' and 'Y' columns
                 self.axis_mask = ((current_plot_df['X'] >= self.crop_x_min) & (current_plot_df['X'] <= self.crop_x_max) &
                                (current_plot_df['Y'] <= current_plot_df['Y'].max() - self.crop_y_min) & (current_plot_df['Y'] >= current_plot_df['Y'].max() - self.crop_y_max))
-
-
-            self.clipped_isotope_data[sample_id][isotope_1] = current_plot_df['array'].values
-            self.update_norm(sample_id, isotope = isotope_1)
+                
+                
+                #crop original_data based on self.axis_mask
+                self.cropped_original_data[sample_id] = self.isotope_data[sample_id][self.axis_mask].reset_index(drop=True) 
+                                
+                
+                #crop clipped_isotope_data based on self.axis_mask
+                self.clipped_isotope_data[sample_id] = self.clipped_isotope_data[sample_id][self.axis_mask].reset_index(drop=True)
+                
+                #crop each df of computed_isotope_data based on self.axis_mask
+                for analysis_type, df in self.computed_isotope_data[sample_id].items():
+                    if isinstance(df, pd.DataFrame):
+                        df = df[self.axis_mask].reset_index(drop=True)
+                
+                
+                self.prep_data(sample_id)
+                
+            # self.clipped_isotope_data[sample_id][isotope_1] = current_plot_df['array'].values
+            # self.update_norm(sample_id, isotope = isotope_1)
             
             # make copy of current_plot_df and crop of
-            self.current_plot_df_copy = self.current_plot_df.copy()
-            self.mask_copy = self.mask.copy()
-            self.cluster_results_copy = self.cluster_results.copy()
-            self.current_plot_df = current_plot_df[self.axis_mask].reset_index(drop=True)
-            self.cluster_results = self.cluster_results[self.axis_mask].reset_index(drop=True)
-            self.mask = self.mask[self.axis_mask]
+            # self.isotope_data['sample_id']
+            # self.current_plot_df_copy = self.current_plot_df.copy()
+            # self.mask_copy = self.mask.copy()
+            # self.cluster_results_copy = self.cluster_results.copy()
+            # self.current_plot_df = current_plot_df[self.axis_mask].reset_index(drop=True)
+            # self.cluster_results = self.cluster_results[self.axis_mask].reset_index(drop=True)
+            # self.mask = self.mask[self.axis_mask]
             
             if plot_type=='histogram':
                 if reset:
@@ -1304,7 +1365,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """Updates all plots in plot widget dictionary"""
         self.cm = self.comboBoxMapColormap.currentText()
         for plot_type,sample_ids in self.plot_widget_dict.items():
-            if plot_type == 'lasermap':
+            if plot_type == 'lasermap' or 'histogram' or 'lasermap_norm':
                 for sample_id, plots in sample_ids.items():
                     for plot_name, plot in plots.items():
                         info = plot['info']
@@ -1314,29 +1375,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                             current_plot_df = self.get_map_data(sample_id=info['sample_id'], name =  info['isotope_1']+'/'+info['isotope_2'],analysis_type = 'ratio', plot =False )
                         
                         # self.plot_laser_map(current_plot_df,info)
-                        self.create_plot(current_plot_df, 'lasermap')
-            elif plot_type == 'histogram':
-                for sample_id, plots in sample_ids.items():
-                    for plot_name, plot in plots.items():
-                        # bins =self.default_bins
-        
-                        # bin_width = (np.nanmax(current_plot_df['array']) - np.nanmin(current_plot_df['array'])) / bins
-                        # self.plot_histogram(current_plot_df,plot_information,bin_width = bin_width)
-                        self.create_plot(current_plot_df, 'histogram')
-                
-            elif plot_type == 'lasermap_norm' :
-                for sample_id, plots in sample_ids.items():
-                    for plot_name, plot in plots.items():
-                        info = plot['info']
-                        if not info['isotope_2']:
-                            current_plot_df = self.get_map_data(sample_id=info['sample_id'], name = info['isotope_1'],analysis_type = 'isotope', plot =False )
-                        else: #if ratio    
-                            current_plot_df = self.get_map_data(sample_id=info['sample_id'], name =  info['isotope_1']+'/'+info['isotope_2'],analysis_type = 'ratio', plot =False )
-                        # ref_data_chem = self.ref_data.iloc[self.comboBoxRefMaterial.currentIndex()]
-                        # ref_data_chem.index = [col.replace('_ppm', '') for col in ref_data_chem.index]
-                        # ref_series =  ref_data_chem[re.sub(r'\d', '', isotope_1).lower()]
-                        # current_plot_df['array']= current_plot_df['array'] / ref_series
-                        self.create_plot(current_plot_df, 'lasermap_norm')
+                            
+                        self.create_plot(current_plot_df, info['sample_id'], plot_type = plot_type, isotope_1=info['isotope_1'], isotope_2 = info['isotope_2'], plot= False)
             else:
                 for sample_id, plots in sample_ids.items():
                     for plot_name, plot in plots.items():
@@ -1415,9 +1455,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         isotope_info = self.isotopes_df.loc[(self.isotopes_df['sample_id'] == sample_id) & 
                                  (self.isotopes_df['isotopes'].isin(isotopes))]
         
+        
         if not isotope_2: #not a ratio
             # shifts isotope values so that all values are postive
-            adj_data = pd.DataFrame(self.transform_plots(self.isotope_data[sample_id][isotopes].values), columns= isotopes)
+            adj_data = pd.DataFrame(self.transform_plots(self.cropped_original_data[sample_id][isotopes].values), columns= isotopes)
             
             
             #perform scaling for groups of isotopes with same norm parameter
@@ -1464,10 +1505,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     
                     
                     # update v_min and v_max in self.isotope_df
-                    self.isotopes_df[(self.isotopes_df['sample_id'] == sample_id) & 
-                                             (self.isotopes_df['isotopes']==isotope_1)]['v_max'][0] = filtered_data.min()
-                    self.isotopes_df[(self.isotopes_df['sample_id'] == sample_id) & 
-                                             (self.isotopes_df['isotopes']==isotope_1)]['v_min'][0] = filtered_data.min()
+                    self.isotopes_df.loc[(self.isotopes_df['sample_id'] == sample_id) & 
+                                             (self.isotopes_df['isotopes']==isotope_1),'v_max'][0] = filtered_data.min()
+                    self.isotopes_df.loc[(self.isotopes_df['sample_id'] == sample_id) & 
+                                             (self.isotopes_df['isotopes']==isotope_1), 'v_min'][0] = filtered_data.min()
             
             self.clipped_isotope_data[sample_id]['X'] = self.sample_data_dict[sample_id]['X']
             self.clipped_isotope_data[sample_id]['Y'] = self.sample_data_dict[sample_id]['Y']
@@ -1519,7 +1560,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     
                     parameters = isotope_info.loc[(self.isotopes_df['sample_id']==sample_id)
                                           & (self.isotopes_df['isotopes']==isotope_1)].iloc[0]
-                    ratio_array = current_plot_df['array'].values
+                    # ratio_array = current_plot_df['array'].values
                     lb = parameters['lower_bound']
                     ub = parameters['upper_bound']
                     d_lb = parameters['d_l_bound']
@@ -4047,12 +4088,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             isotopes['d_u_bound'] = 99
             self.isotope_data[self.sample_id] = self.sample_data_dict[self.sample_id][self.selected_isotopes]
             self.clipped_isotope_data = copy.deepcopy(self.isotope_data)
+            self.cropped_original_data = copy.deepcopy(self.isotope_data)
             isotopes['v_min'] = np.min(self.clipped_isotope_data[self.sample_id], axis=0)
             isotopes['v_max'] = np.max(self.clipped_isotope_data[self.sample_id], axis=0)
             isotopes['auto_scale'] = True
             isotopes['use'] = True
             self.isotopes_df = pd.concat([self.isotopes_df, isotopes])
-            self.prep_data()
+            
             # add sample_id to self.plot_widget_dict
             
             self.cluster_results=pd.DataFrame(columns = ['Fuzzy', 'KMeans', 'KMediods'])
@@ -4069,6 +4111,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.axis_mask = np.ones_like( self.sample_data_dict[self.sample_id]['X'], dtype=bool)
             self.mask = self.filter_mask & self.polygon_mask & self.axis_mask
             
+            self.prep_data()
             self.comboBoxFIsotope.clear()
             self.comboBoxNDimIsotope.clear()
             # self.comboBoxFIsotope_2.clear()
@@ -4206,15 +4249,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         - The method also updates certain parameters in the isotope data frame related to scaling.
         - Based on the plot type, this method internally calls the appropriate plotting functions.
         """
-        current_plot_df = self.sample_data_dict[self.sample_id][['X','Y']]
+        #crop plot if filter applied
+        current_plot_df = self.sample_data_dict[self.sample_id][['X','Y']][self.axis_mask].reset_index(drop=True)
         
         match analysis_type:
             
             case 'isotope':
-                current_plot_df['array'] = self.clipped_isotope_data[sample_id][name].values
+                current_plot_df['array'] = self.clipped_isotope_data[sample_id].loc[:,name].values
                         
             case 'ratio':
-                current_plot_df['array'] = self.computed_isotope_data[sample_id][analysis_type][name].values
+                current_plot_df['array'] = self.computed_isotope_data[sample_id][analysis_type].loc[:,name].values
             
             case 'pca':
                 current_plot_df['array'] = self.computed_isotope_data[sample_id][analysis_type].values
@@ -4231,7 +4275,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 current_plot_df['array'] = self.computed_isotope_data[sample_id][analysis_type].values
         
         # crop plot if filter applied
-        current_plot_df = current_plot_df[self.axis_mask].reset_index(drop=True)
+        # current_plot_df = current_plot_df[self.axis_mask].reset_index(drop=True)
 
 
         return current_plot_df
@@ -4241,6 +4285,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # adds plot to canvas if specified by user
         if not sample_id:
             sample_id = self.sample_id
+        
         
         parameters = self.isotopes_df.loc[(self.isotopes_df['sample_id']==sample_id)
                           & (self.isotopes_df['isotopes']==isotope_1)].iloc[0]
@@ -5140,7 +5185,7 @@ class Crop_tool:
                     self.main_window.plot.removeItem(overlay)
                 self.main_window.toolButtonCropApply.setEnabled(False)
             #update plot with crop
-            self.main_window.update_plot(axis = True)
+            self.main_window.apply_crop()
         
         
 class ResizableRectItem(QGraphicsRectItem):

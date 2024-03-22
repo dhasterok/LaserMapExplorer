@@ -637,7 +637,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.crop_x_min = self.x_min
         self.crop_y_max = self.y_max
         self.crop_y_min = self.y_min
-
+        #remove crop overlays
+        self.crop_tool.remove_overlays()
         # reset current plot df and mask to original
         # self.current_plot_df = self.current_plot_df_copy.copy()
         # self.mask = self.mask.copy()
@@ -646,7 +647,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # reset clipped_isotope_data and self.computed_isotope_data and current_plot_df
         sample_id = self.current_plot_information['sample_id']
         self.clipped_isotope_data[self.sample_id] = copy.deepcopy(self.isotope_data[self.sample_id])
-        self.cropped_original_data = copy.deepcopy(self.isotope_data[self.sample_id])
+        self.cropped_original_data[self.sample_id] = copy.deepcopy(self.isotope_data[self.sample_id])
         self.computed_isotope_data[self.sample_id] = {
             'ratio':None,
             'calculated':None,
@@ -663,8 +664,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_all_plots()
         
         self.toolButtonCrop.setChecked(False)
-        self.crop_tool.remove_overlays()
-        self.plot.autoRange()
+        
+        self.plot.getViewBox().autoRange()
 
     # get a named list of current fields for sample
     def get_field_list(self, set_name='isotope'):
@@ -1729,7 +1730,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 p1.invertY(True)   # vertical axis counts top to bottom
                 #set aspect ratio of rectangle
                 img.setRect(self.x.min(),self.y.min(),self.x_range,self.y_range)
-                p1.setRange(xRange=[self.x.min(), self.x.max()], yRange=[self.y.min(), self.y.max()])
+                p1.setRange( yRange=[self.y.min(), self.y.max()])
                 # To further prevent zooming or panning outside the default view, 
                 p1.setLimits( yMin=self.y.min(), yMax = self.y.max())
                 cm = pg.colormap.get(self.cm, source = 'matplotlib')
@@ -1806,7 +1807,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             p1.addItem(img)
             # print(p1.getAspectRatio())
             p1.setAspectLocked()
-            p1.setRange(xRange=[self.x.min(), self.x.max()], yRange=[self.y.min(), self.y.max()])
+            p1.setRange( yRange=[self.y.min(), self.y.max()])
             # To further prevent zooming or panning outside the default view, 
             p1.setLimits( yMin=self.y.min(), yMax = self.y.max())
 

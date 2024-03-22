@@ -59,7 +59,7 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="TreeView">
        <property name="geometry">
@@ -870,7 +870,7 @@
               <double>1.000000000000000</double>
              </property>
              <property name="maximum">
-              <double>48.000000000000000</double>
+              <double>64.000000000000000</double>
              </property>
              <property name="singleStep">
               <double>1.000000000000000</double>
@@ -2867,7 +2867,7 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tabNotes">
        <property name="toolTip">
@@ -4010,7 +4010,7 @@
        <string>Activates the crop tool</string>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>8</number>
       </property>
       <widget class="QWidget" name="SelectIsotopePage">
        <property name="enabled">
@@ -4457,7 +4457,7 @@
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>130</y>
+          <y>255</y>
           <width>301</width>
           <height>81</height>
          </rect>
@@ -4594,7 +4594,7 @@
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>215</y>
+          <y>130</y>
           <width>301</width>
           <height>121</height>
          </rect>

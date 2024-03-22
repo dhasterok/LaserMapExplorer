@@ -143,7 +143,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.scatter_style = {self.sample_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'RdBu', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0},
             self.scatter_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0},
             self.pca_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0},
-            self.profile_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0}}
+            self.profile_tab_id: {'Marker':'circle', 'Size':12, 'LineWidth':1, 'Color':'#d3d3d3', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0}}
         self.heatmap_style = {self.sample_tab_id: {'Resolution':1, 'Colormap':'RdBu', 'AspectRatio':1.0},
             self.scatter_tab_id: {'Resolution':10, 'Colormap':'viridis', 'AspectRatio':1.0},
             self.pca_tab_id: {'Resolution':10, 'Colormap':'viridis', 'AspectRatio':1.0},
@@ -262,7 +262,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonHistogramReset.clicked.connect(lambda: self.update_plot(reset = True))
 
         # Noise reduction
-        self.comboBoxNRMethod.activated.connect(self.add_noise_reduction)
+        self.comboBoxNoiseReductionMethod.activated.connect(self.add_noise_reduction)
         self.spinBoxSmoothingFactor.valueChanged.connect(self.add_noise_reduction)
         self.spinBoxSmoothingFactor.setEnabled(False)
         self.labelSmoothingFactor.setEnabled(False)
@@ -2218,18 +2218,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         Add noise reduction to the current laser map plot.
 
-        Executes on change of comboBoxNRMethod and spinBoxSmoothingFactor. Updates map.
+        Executes on change of comboBoxNoiseReductionMethod and spinBoxSmoothingFactor. Updates map.
          
         Reduces noise by smoothing via one of several algorithms chosen from
-        comboBoxNRMethod.  Options include:
-        'none' - no smoothing
-        'median' - simple filter that computes each pixel from the median of a window including
+        comboBoxNoiseReductionMethod.  Options include:
+        'None' - no smoothing
+        'Median' - simple filter that computes each pixel from the median of a window including
             surrounding points
-        'bilateral' - an edge-preserving Gaussian weighted filter
-        'wernier' - a Fourier domain filtering method that low pass filters to smooth the map
-        'edge-preserving' - filter that does an excellent job of preserving edges when smoothing
+        'Weiner' - a Fourier domain filtering method that low pass filters to smooth the map
+        'Edge-preserving' - filter that does an excellent job of preserving edges when smoothing
+        'Bilateral' - an edge-preserving Gaussian weighted filter
         """
-        algorithm = self.comboBoxNRMethod.currentText().lower()
+        algorithm = self.comboBoxNoiseReductionMethod.currentText().lower()
         
         if self.noise_red_img:
             # Remove existing filters
@@ -2237,38 +2237,37 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # disable smoothing factor until chosen
             if algorithm != 'edge-preserving':
                 self.spinBoxSmoothingFactor.setEnabled(False)
-                self.labelSF.setEnabled(False)
+                self.labelSmoothingFactor.setEnabled(False)
         
-    
         # Assuming self.array is the current image data
-        if algorithm == 'none':
-            return
-        if algorithm == 'median':
-            # Apply Median filter
-            filtered_image = medianBlur(self.array.astype(np.float32), 5)  # Kernel size is 5
-        elif algorithm == 'bilateral':
-            # Apply Bilateral filter
-            # Parameters are placeholders, you might need to adjust them based on your data
-            filtered_image = bilateralFilter(self.array.astype(np.float32), 9, 75, 75)
-        elif algorithm == 'wiener':
-            # Apply Wiener filter
-            # Wiener filter in scipy expects the image in double precision
-            filtered_image = wiener(self.array.astype(np.float64), (5, 5))  # Myopic deconvolution, kernel size is (5, 5)
-            filtered_image = filtered_image.astype(np.float32)  # Convert back to float32 to maintain consistency
-        elif algorithm == 'edge-preserving':
-            # Apply Edge-Preserving filter (RECURSIVE_FILTER or NORMCONV_FILTER)
-            if not self.spinBoxSmoothingFactor.isEnabled():
-                self.spinBoxSmoothingFactor.setEnabled(True)
-                self.labelSF.setEnabled(True)
-            # Normalize the array to [0, 1]
-            normalized_array = (self.array - np.min(self.array)) / (np.max(self.array) - np.min(self.array))
-            
-            # Scale to [0, 255] and convert to uint8
-            image = (normalized_array * 255).astype(np.uint8)
-            filtered_image = edgePreservingFilter(image, flags=1, sigma_s=int(self.spinBoxSmoothingFactor.value()), sigma_r=0.2)
-            
-        else:
-            raise ValueError("Unsupported algorithm. Choose 'median' or 'bilateral' or 'weiner or 'edge-preserving'.")
+        match algorithm:
+            case 'none':
+                return
+            case 'median':
+                # Apply Median filter
+                filtered_image = medianBlur(self.array.astype(np.float32), 5)  # Kernel size is 5
+            case 'bilateral':
+                # Apply Bilateral filter
+                # Parameters are placeholders, you might need to adjust them based on your data
+                filtered_image = bilateralFilter(self.array.astype(np.float32), 9, 75, 75)
+            case 'wiener':
+                # Apply Wiener filter
+                # Wiener filter in scipy expects the image in double precision
+                filtered_image = wiener(self.array.astype(np.float64), (5, 5))  # Myopic deconvolution, kernel size is (5, 5)
+                filtered_image = filtered_image.astype(np.float32)  # Convert back to float32 to maintain consistency
+            case 'edge-preserving':
+                # Apply Edge-Preserving filter (RECURSIVE_FILTER or NORMCONV_FILTER)
+                if not self.spinBoxSmoothingFactor.isEnabled():
+                    self.spinBoxSmoothingFactor.setEnabled(True)
+                    self.labelSmoothingFactor.setEnabled(True)
+                # Normalize the array to [0, 1]
+                normalized_array = (self.array - np.min(self.array)) / (np.max(self.array) - np.min(self.array))
+                
+                # Scale to [0, 255] and convert to uint8
+                image = (normalized_array * 255).astype(np.uint8)
+                filtered_image = edgePreservingFilter(image, flags=1, sigma_s=int(self.spinBoxSmoothingFactor.value()), sigma_r=0.2)
+            case _:
+                raise ValueError("Unsupported algorithm. Choose 'median' or 'bilateral' or 'weiner or 'edge-preserving'.")
     
         # Update or create the image item for displaying the filtered image
         self.noise_red_array = filtered_image
@@ -5631,7 +5630,6 @@ class Profiling:
         self.selected_points = {}  # Track selected points, e.g., {point_index: selected_state}
         self.edit_mode_enabled = False  # Track if edit mode is enabled
         self.original_colors = {}
-        self.scatter_size = 64
 
     def plot_profile_scatter(self, event, array,k, plot, x, y, x_i, y_i):
         self.array_x = array.shape[1]
@@ -5911,6 +5909,8 @@ class Profiling:
         else:
             profiles = self.i_profiles
 
+        style = self.main_window.scatter_style[self.main_window.profile_tab_id]
+
         if len(list(profiles.values())[0])>0: #if self.profiles has values
             self.main_window.tabWidget.setCurrentIndex(2) #show profile plot tab
             sort_axis=self.main_window.comboBoxProfileSort.currentText()
@@ -5978,10 +5978,25 @@ class Profiling:
                                 scaled_errors = [error * scale_factor for error in s_errors]
 
                             # Plot markers with ax.scatter
-                            scatter = ax.scatter(distances, scaled_values, color=colors[idx+g_idx], s=64, picker=5, label=f'{profile_key[:-1]}')
+                            scatter = ax.scatter(distances, scaled_values,
+                                                  color=colors[idx+g_idx],
+                                                  s=style['Size'],
+                                                  marker=self.main_window.markerdict[style['Marker']],
+                                                  edgecolors='none',
+                                                  picker=5,
+                                                  label=f'{profile_key[:-1]}',
+                                                  zorder=2*g_idx+1)
 
                             #plot errorbars with no marker
-                            _, _, barlinecols = ax.errorbar(distances, scaled_errors, yerr=scaled_errors, fmt='none', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0)
+                            _, _, barlinecols = ax.errorbar(distances, scaled_errors,
+                                                            yerr=scaled_errors,
+                                                            fmt='none',
+                                                            color=colors[idx+g_idx],
+                                                            ecolor=style['Color'],
+                                                            elinewidth=style['LineWidth'],
+                                                            capsize=0,
+                                                            zorder=2*g_idx)
+                            
                             # Assuming you have the scaling factors and original data range
                             scale_factor = (original_max - original_min) / (twinx_max - twinx_min)
 
@@ -5997,10 +6012,23 @@ class Profiling:
                                 original_min = min_val
                                 original_max = max_val
                             # Plot markers with ax.scatter
-                            scatter = ax.scatter(distances, means, color=colors[idx+g_idx], s=64, picker=5, label=f'{profile_key[:-1]}')
+                            scatter = ax.scatter(distances, means,
+                                                color=colors[idx+g_idx],
+                                                s=style['Size'],
+                                                marker=self.main_window.markerdict[style['Marker']],
+                                                edgecolors='none',
+                                                picker=5,
+                                                label=f'{profile_key[:-1]}',
+                                                zorder = 2*g_idx+1)
 
                             #plot errorbars with no marker
-                            _, _, barlinecols = ax.errorbar(distances, means, yerr=s_errors, fmt='none', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0)
+                            _, _, barlinecols = ax.errorbar(distances, means,
+                                                            yerr=s_errors,
+                                                            fmt='none',
+                                                            color=colors[idx+g_idx],
+                                                            ecolor=style['Color'],
+                                                            elinewidth=style['LineWidth'],
+                                                            capsize=0, zorder=2*g_idx)
 
                         self.all_errorbars.append((scatter,barlinecols[0]))
                         self.original_colors[profile_key] = colors[idx+g_idx]  # Assuming colors is accessible
@@ -6035,10 +6063,25 @@ class Profiling:
                             # Now, scaled_errors is ready to be used in plotting functions
                             scaled_errors = [scaled_lower_errors, scaled_upper_errors]
                             # Plot markers with ax.scatter
-                            scatter = ax.scatter(distances, scaled_values, color=colors[idx+g_idx],s=self.scatter_size, picker=5, gid=profile_key, edgecolors = 'none', label=f'{profile_key[:-1]}')
+                            scatter = ax.scatter(distances, scaled_values,
+                                                color=colors[idx+g_idx],
+                                                s=style['Size'],
+                                                marker=self.main_window.markerdict[style['Marker']],
+                                                edgecolors='none',
+                                                picker=5,
+                                                gid=profile_key,
+                                                label=f'{profile_key[:-1]}',
+                                                zorder=2*g_idx+1)
                             # ax2.scatter(distances, medians, color=colors[idx+g_idx],s=self.scatter_size, picker=5, gid=profile_key, edgecolors = 'none', label=f'{profile_key[:-1]}')
                             #plot errorbars with no marker
-                            _, _, barlinecols = ax.errorbar(distances, scaled_values, yerr=scaled_errors, fmt='none', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0)
+                            _, _, barlinecols = ax.errorbar(distances, scaled_values,
+                                                            yerr=scaled_errors,
+                                                            fmt='none',
+                                                            color=colors[idx+g_idx],
+                                                            ecolor=style['Color'],
+                                                            elinewidth=style['LineWidth'],
+                                                            capsize=0,
+                                                            zorder=2*g_idx)
 
 
                             # Assuming you have the scaling factors and original data range
@@ -6056,9 +6099,26 @@ class Profiling:
                                 original_max = max_val
 
                             # Plot markers with ax.scatter
-                            scatter = ax.scatter(distances, medians, color=colors[idx+g_idx],s=self.scatter_size, picker=5, gid=profile_key, edgecolors = 'none', label=f'{profile_key[:-1]}')
+                            scatter = ax.scatter(distances, medians,
+                                                 color=colors[idx+g_idx],
+                                                 s=style['Size'],
+                                                 marker=self.main_window.markerdict[style['Marker']],
+                                                 edgecolors='none',
+                                                 picker=5,
+                                                 gid=profile_key,
+                                                 label=f'{profile_key[:-1]}',
+                                                 zorder=2*g_idx+1)
+                            
                             #plot errorbars with no marker
-                            _, _, barlinecols = ax.errorbar(distances, medians, yerr=errors, fmt='none', color=colors[idx+g_idx], ecolor='lightgray', elinewidth=3, capsize=0)
+                            _, _, barlinecols = ax.errorbar(distances, medians,
+                                                            yerr=errors,
+                                                            fmt='none',
+                                                            color=colors[idx+g_idx],
+                                                            ecolor=style['Color'],
+                                                            elinewidth=style['LineWidth'],
+                                                            capsize=0,
+                                                            zorder=2*g_idx)
+                            
                         self.all_errorbars.append((scatter,barlinecols[0]))
                         self.original_colors[profile_key] = colors[idx+g_idx]  # Assuming colors is accessible
                         self.selected_points[profile_key] = [False] * len(medians)
@@ -6184,11 +6244,14 @@ class Profiling:
 
             picked_scatter.set_facecolors(facecolors)
             # Update the scatter plot sizes
-            picked_scatter.set_sizes(np.full(num_points, self.scatter_size))
+            picked_scatter.set_sizes(np.full(num_points, self.main_window.scatter_style[self.main_window.profile_tab_id]['Size']))
             self.fig.canvas.draw_idle()
 
     def toggle_edit_mode(self):
-
+        """Toggles profile editing mode.
+        
+        State determined by toolButtonProfileEditMode checked.
+        """
         self.edit_mode_enabled = not self.edit_mode_enabled
 
     def toggle_point_visibility(self):

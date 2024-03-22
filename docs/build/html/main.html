@@ -693,17 +693,17 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 <dt class="sig sig-object py" id="main.MainWindow.add_noise_reduction">
 <span class="sig-name descname"><span class="pre">add_noise_reduction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.add_noise_reduction" title="Link to this definition">#</a></dt>
 <dd><p>Add noise reduction to the current laser map plot.</p>
-<p>Executes on change of comboBoxNRMethod and spinBoxSmoothingFactor. Updates map.</p>
+<p>Executes on change of comboBoxNoiseReductionMethod and spinBoxSmoothingFactor. Updates map.</p>
 <p>Reduces noise by smoothing via one of several algorithms chosen from
-comboBoxNRMethod.  Options include:
-‘none’ - no smoothing
-‘median’ - simple filter that computes each pixel from the median of a window including</p>
+comboBoxNoiseReductionMethod.  Options include:
+‘None’ - no smoothing
+‘Median’ - simple filter that computes each pixel from the median of a window including</p>
 <blockquote>
 <div><p>surrounding points</p>
 </div></blockquote>
-<p>‘bilateral’ - an edge-preserving Gaussian weighted filter
-‘wernier’ - a Fourier domain filtering method that low pass filters to smooth the map
-‘edge-preserving’ - filter that does an excellent job of preserving edges when smoothing</p>
+<p>‘Weiner’ - a Fourier domain filtering method that low pass filters to smooth the map
+‘Edge-preserving’ - filter that does an excellent job of preserving edges when smoothing
+‘Bilateral’ - an edge-preserving Gaussian weighted filter</p>
 </dd></dl>
 
 <dl class="py method">
@@ -829,8 +829,8 @@ comboBoxSampleID</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="main.MainWindow.clear_views">
-<span class="sig-name descname"><span class="pre">clear_views</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.clear_views" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="main.MainWindow.clear_analysis">
+<span class="sig-name descname"><span class="pre">clear_analysis</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.clear_analysis" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1245,6 +1245,11 @@ in list is loaded by default.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.reset_analysis">
+<span class="sig-name descname"><span class="pre">reset_analysis</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.reset_analysis" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.reset_to_full_view">
 <span class="sig-name descname"><span class="pre">reset_to_full_view</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.reset_to_full_view" title="Link to this definition">#</a></dt>
 <dd><p>Reset the map to full view (i.e., remove crop)</p>
@@ -1254,6 +1259,11 @@ in list is loaded by default.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.reset_zoom">
 <span class="sig-name descname"><span class="pre">reset_zoom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">histogram</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.reset_zoom" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.save_analysis">
+<span class="sig-name descname"><span class="pre">save_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">location</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.save_analysis" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1618,7 +1628,9 @@ update_table_widget:</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="main.Profiling.toggle_edit_mode">
 <span class="sig-name descname"><span class="pre">toggle_edit_mode</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.Profiling.toggle_edit_mode" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Toggles profile editing mode.</p>
+<p>State determined by toolButtonProfileEditMode checked.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.Profiling.toggle_point_visibility">
@@ -1928,7 +1940,7 @@ only the top row is moved.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.button_color_select"><code class="docutils literal notranslate"><span class="pre">MainWindow.button_color_select()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.change_ref_material"><code class="docutils literal notranslate"><span class="pre">MainWindow.change_ref_material()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.change_sample"><code class="docutils literal notranslate"><span class="pre">MainWindow.change_sample()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.clear_views"><code class="docutils literal notranslate"><span class="pre">MainWindow.clear_views()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.clear_analysis"><code class="docutils literal notranslate"><span class="pre">MainWindow.clear_analysis()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.cluster_label_changed"><code class="docutils literal notranslate"><span class="pre">MainWindow.cluster_label_changed()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.create_plot"><code class="docutils literal notranslate"><span class="pre">MainWindow.create_plot()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.create_tree"><code class="docutils literal notranslate"><span class="pre">MainWindow.create_tree()</span></code></a></li>
@@ -1973,8 +1985,10 @@ only the top row is moved.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.remove_multi_plot"><code class="docutils literal notranslate"><span class="pre">MainWindow.remove_multi_plot()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.remove_selected_rows"><code class="docutils literal notranslate"><span class="pre">MainWindow.remove_selected_rows()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.remove_widgets_from_layout"><code class="docutils literal notranslate"><span class="pre">MainWindow.remove_widgets_from_layout()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.reset_analysis"><code class="docutils literal notranslate"><span class="pre">MainWindow.reset_analysis()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.reset_to_full_view"><code class="docutils literal notranslate"><span class="pre">MainWindow.reset_to_full_view()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.reset_zoom"><code class="docutils literal notranslate"><span class="pre">MainWindow.reset_zoom()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.save_analysis"><code class="docutils literal notranslate"><span class="pre">MainWindow.save_analysis()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.set_general_style"><code class="docutils literal notranslate"><span class="pre">MainWindow.set_general_style()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.set_map_style"><code class="docutils literal notranslate"><span class="pre">MainWindow.set_map_style()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.set_scatter_style"><code class="docutils literal notranslate"><span class="pre">MainWindow.set_scatter_style()</span></code></a></li>

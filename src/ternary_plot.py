@@ -34,7 +34,7 @@ class ternary:
     :param dt: tick spacing (0,1), Defaults to None
     :type dt: double, optional
     """
-    def __init__(self, ax, labels, plot_type='scatter', style='ternary', grid_spacing=None, tick_spacing=None):
+    def __init__(self, ax, labels=None, plot_type='scatter', style='ternary', grid_spacing=None, tick_spacing=None):
        
         self.labels = labels
         self.style = style 
@@ -90,7 +90,7 @@ class ternary:
             self.ax.plot(xc, -yc, 'k-', linewidth=1)
 
 
-    def ternaxes(self,labels):
+    def ternaxes(self,labels=None):
         """Set up ternary plot axes with optional labeling for a quaternary plot.
         
         :param labels: List of strings for the labels of the axes.
@@ -121,12 +121,13 @@ class ternary:
         if self.style == 'quaternary':
             self.ax.plot([-w, 0, w, -w], [0, -h, 0, 0], '-k', linewidth=1)
     
-        # Set labels
-        self.ax.text(0, h, labels[0], ha='center', va='bottom', fontsize=11)
-        self.ax.text(-w*0.85, -h*0.05, labels[1], ha='right', va='center', fontsize=11)
-        self.ax.text(w*0.85, -h*0.05, labels[2], ha='left', va='center', fontsize=11)
-        if self.style == 'quaternary':
-            self.ax.text(0, -h, labels[3], ha='center', va='top', fontsize=11)
+        if labels is not None:
+            # Set labels
+            self.ax.text(0, h, labels[0], ha='center', va='bottom', fontsize=11)
+            self.ax.text(-w*0.85, -h*0.05, labels[1], ha='right', va='center', fontsize=11)
+            self.ax.text(w*0.85, -h*0.05, labels[2], ha='left', va='center', fontsize=11)
+            if self.style == 'quaternary':
+                self.ax.text(0, -h, labels[3], ha='center', va='top', fontsize=11)
         
 #        for ax in axs:    
 #            ax.axis("off")

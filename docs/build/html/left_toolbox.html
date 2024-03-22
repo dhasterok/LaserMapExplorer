@@ -437,9 +437,48 @@ document.write(`
 <p><span class="caption-text">The <em>Samples and Fields</em> tab contains tools for choosing analytes and plotting correlations.</span><a class="headerlink" href="#id1" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
+<p>Change sample:</p>
+<ul class="simple">
+<li><p>prompt to save analysis - saves to disk</p></li>
+<li><p>clears polygons, profiles, delete filters in table</p></li>
+</ul>
+<p>Crop or reset map extent:</p>
+<ul class="simple">
+<li><p>resets data</p></li>
+<li><p>recompute clipped and analysis data</p></li>
+<li><p>deletes all figures</p></li>
+<li><p>clears masks, polygons, profiles and special function calculations</p></li>
+<li><p>refilters the data based on existing filters</p></li>
+<li><p>recomputes calculated fields</p></li>
+</ul>
+<p>Swap X-Y:</p>
+<ul class="simple">
+<li><p>swaps x-y coordinates on maps, polygons and profiles</p></li>
+<li><p>recomputes maps</p></li>
+</ul>
+<p>Change Analytes:</p>
+<ul class="simple">
+<li><p>updates <em>Plot Selector</em></p></li>
+<li><p>clear clusters, pca, removes masks</p></li>
+<li><p>recompute correlations</p></li>
+</ul>
+<p>Change ref value:</p>
+<ul class="simple">
+<li><p>update anything with norm data (plots, calculated fields, n-Dim plots, clustering?, filters?)</p></li>
+</ul>
+<p>Change data scaling:</p>
+<ul class="simple">
+<li><p>same as crop and clears filters</p></li>
+</ul>
+<p>Change Correlation Method:</p>
+<ul class="simple">
+<li><p>update correlation plots</p></li>
+</ul>
 </section>
-<section id="preprocessing">
-<h2>Preprocessing<a class="headerlink" href="#preprocessing" title="Link to this heading">#</a></h2>
+<section id="preprocess">
+<h2>Preprocess<a class="headerlink" href="#preprocess" title="Link to this heading">#</a></h2>
+<p>Preprocessing, alters the data to improve performance, stability and visual characteristics.</p>
+<p>These changes can have an impact on certain statistical calculations, such as mean values and standard deviations.</p>
 <figure class="align-center" id="id2">
 <a class="reference internal image-reference" href="_images/LaME_Preprocessing.png"><img alt="LaME interface: left toolbox, preprocessing tab" src="_images/LaME_Preprocessing.png" style="width: 315px;" /></a>
 <figcaption>
@@ -452,12 +491,20 @@ document.write(`
 </section>
 <section id="histogram-equalization">
 <h3>Histogram Equalization<a class="headerlink" href="#histogram-equalization" title="Link to this heading">#</a></h3>
+<p>An alternative to auto scaling that does not alter the data, histogram equalization ( <a class="reference internal" href="_images/icon-histeq-64.png"><img alt="icon-histeq" src="_images/icon-histeq-64.png" style="height: 2ex;" /></a> ) ensures that colors are assigned by equal quantiles.  This method is particularly useful when the histogram covers a relatively large range of values often bi- or multi-modal with large regions of few data between.  A potential disadvantage is an amplification of noise at the expense of real features.</p>
 </section>
 <section id="histograms">
 <h3>Histograms<a class="headerlink" href="#histograms" title="Link to this heading">#</a></h3>
 </section>
 <section id="noise-reduction">
 <h3>Noise Reduction<a class="headerlink" href="#noise-reduction" title="Link to this heading">#</a></h3>
+<p>Noise reduction ( <a href="#id9"><span class="problematic" id="id10">|icon-noise-reduction|</span></a> ) involves the smoothing of data.  It may be applied to maps only for viewing, or can be applied to <em>Analysis Data</em> before producing other plots and analyses (set from the <em>Apply to analysis</em> drop down).  There are four noise reduction methods available:</p>
+<ul class="simple">
+<li><p>median, smooths the data by computing the median value over a specified window, assigning the result to the center pixel. The results smooth across the entire image;</p></li>
+<li><p>Wiener, smooths the data using a Fourier domain low-pass filter;</p></li>
+<li><p>edge-preserving, smooths the data while preserving sharp edges, this is the suggested option for most cases, though it may oversmooth inside grains; and</p></li>
+<li><p>bilateral, Gaussian smoothing and edge-preserving, this filter difference from edge-preserving as it does not as strongly smooth the data.</p></li>
+</ul>
 </section>
 </section>
 <section id="spot-data">
@@ -482,13 +529,13 @@ document.write(`
 <section id="filter-by-value-icon-filter2">
 <h3>Filter by value <a class="reference internal" href="_images/icon-filter2-64.png"><img alt="icon-filter2" src="_images/icon-filter2-64.png" style="height: 2ex;" /></a><a class="headerlink" href="#filter-by-value-icon-filter2" title="Link to this heading">#</a></h3>
 <p>To set a filter, use the two drop down menus to select the type of field (lower) and the desired field (upper).  It is possible to filter by value using element/isotopes, ratios, custom fields, principal component score, or cluster score.  Once selected, the ranges for the field will be automatically displayed in the min and max boxes.  Change the values to set the bounds explicitly using the (left boxes) or implicitly by setting the quantile bounds (right boxes).  Once the bounds are set, click the <a class="reference internal" href="_images/icon-filter2-64.png"><img alt="icon-filter2" src="_images/icon-filter2-64.png" style="height: 2ex;" /></a> button to add the filter to the list.</p>
-<p>Multiple filters may be combined to produce more complex filters.  The filters include a boolean operations (<em>and</em> and <em>or</em>, set in the <em>Filter Table</em> in the <a href="#id14"><span class="problematic" id="id15">`lower pane`_</span></a>) to assist with precisely defining filters to capture the desired regions for analysis and plotting.  In many cases, the overlap between values may make it difficult to separate phases.  In these cases, we suggest targeting specific regions with a polygon or cluster mask.</p>
+<p>Multiple filters may be combined to produce more complex filters.  The filters include a boolean operations (<em>and</em> and <em>or</em>, set in the <em>Filter Table</em> in the <a href="#id15"><span class="problematic" id="id16">`lower pane`_</span></a>) to assist with precisely defining filters to capture the desired regions for analysis and plotting.  In many cases, the overlap between values may make it difficult to separate phases.  In these cases, we suggest targeting specific regions with a polygon or cluster mask.</p>
 </section>
 <section id="polygon-masking-icon-polygon-new">
 <h3>Polygon Masking <a class="reference internal" href="_images/icon-polygon-new-64.png"><img alt="icon-polygon-new" src="_images/icon-polygon-new-64.png" style="height: 2ex;" /></a><a class="headerlink" href="#polygon-masking-icon-polygon-new" title="Link to this heading">#</a></h3>
 <p>to create a polygon for filtering, select a map from the plot selector and then click the <a class="reference internal" href="_images/icon-polygon-new-64.png"><img alt="icon-polygon-new" src="_images/icon-polygon-new-64.png" style="height: 2ex;" /></a> button.  Move the mouse over the map and left-click to add vertices.  You will notice a zoom tool appears that shows a small region of the map where the mouse is located.  Once you have added enough points, right-click on the map to end digitizing.  A polygon will appear in the <em>polygon table</em>, where a name can be added.  Once created, polygons can be edited.  Move a point by clicking the <a class="reference internal" href="_images/icon-move-point-64.png"><img alt="icon-move-point" src="_images/icon-move-point-64.png" style="height: 2ex;" /></a> button, then left-click on the map near the point to be moved and then left-click again for the new location.  Add a vertex by clicking the button <a class="reference internal" href="_images/icon-add-point-64.png"><img alt="icon-add-point" src="_images/icon-add-point-64.png" style="height: 2ex;" /></a> and selecting the line segment where you wish to add a point.  Then click where you would like the new point.  To remove points, click the button <a class="reference internal" href="_images/icon-remove-point-64.png"><img alt="icon-remove-point" src="_images/icon-remove-point-64.png" style="height: 2ex;" /></a> and then click the point you wish to remove.</p>
 <p>It is possible to create multiple polygons.  These polygons can be analyzed as separate regions or linked by selecting multiple polygons in the <em>Polygon Table</em> and clicking the <a class="reference internal" href="_images/icon-link-64.png"><img alt="icon-link" src="_images/icon-link-64.png" style="height: 2ex;" /></a> button.  To delink the polygons, select the polygon in the table and then click the <a class="reference internal" href="_images/icon-unlink-64.png"><img alt="icon-unlink" src="_images/icon-unlink-64.png" style="height: 2ex;" /></a> button.  The use of individual polygons in analyses can be toggled by clicking the associated checkbox in the <em>Polygon Table</em>.</p>
-<p>The polygons within the table can be stored by clicking the <a href="#id10"><span class="problematic" id="id11">|icon-save|</span></a> button and recolled using the <a href="#id12"><span class="problematic" id="id13">|icon-open-file|</span></a> button.  See a description of <a href="#id16"><span class="problematic" id="id17">`file specifications`_</span></a> for more information.</p>
+<p>The polygons within the table can be stored by clicking the <a href="#id11"><span class="problematic" id="id12">|icon-save|</span></a> button and recolled using the <a href="#id13"><span class="problematic" id="id14">|icon-open-file|</span></a> button.  See a description of <a href="#id17"><span class="problematic" id="id18">`file specifications`_</span></a> for more information.</p>
 </section>
 <section id="cluster-masking-icon-mask-dark">
 <h3>Cluster Masking <a class="reference internal" href="_images/icon-mask-dark-64.png"><img alt="icon-mask-dark" src="_images/icon-mask-dark-64.png" style="height: 2ex;" /></a><a class="headerlink" href="#cluster-masking-icon-mask-dark" title="Link to this heading">#</a></h3>
@@ -544,22 +591,32 @@ document.write(`
 </section>
 <section id="clustering">
 <h2>Clustering<a class="headerlink" href="#clustering" title="Link to this heading">#</a></h2>
+<p>Clustering employs unsupervised machine learning to identify subsets of the data that contain similar characteristics in multidimensional space (i.e., similar geochemical characteristics).  It is often a more efficient way to filter data when the goal is to isolate or exclude specific minerals from analyses.  Two methods are currently implmented, k-means and fuzzy c-means, which are chosen from the <em>Method</em> dropdown.  The simpler of the two algorithm is k-means, which optimizes the centroids of clusters by minimizing the distance of points nearest to each respective centroid.  Fuzzy c-means differs in that it assumes that the clusters can overlap allowing for an additional score to be provided for each cluster in addition to map assigning each point to the cluster with the highest score.</p>
 <figure class="align-center" id="id8">
 <a class="reference internal image-reference" href="_images/LaME_Clustering.png"><img alt="LaME interface: left toolbox, clustering tab" src="_images/LaME_Clustering.png" style="width: 315px;" /></a>
 <figcaption>
 <p><span class="caption-text">The <em>Clustering</em> tab contains tools for calculating and displaying multianalyte data classified into clusters based on similarities in properties.  Clustering needs to be performed prior to creating a cluster mask.</span><a class="headerlink" href="#id8" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
-<p>Clustering uses unsupervised machine learning techniques to classify the data into a specified number of clusters.  Two methods are currently implmented, k-means and fuzzy c-means, which are chosen from the <em>Method</em> dropdown.</p>
 </section>
 <section id="profiling">
 <h2>Profiling<a class="headerlink" href="#profiling" title="Link to this heading">#</a></h2>
-<figure class="align-center" id="id9">
-<a class="reference internal image-reference" href="_images/LaME_Profiling.png"><img alt="LaME interface: left toolbox, profiling tab" src="_images/LaME_Profiling.png" style="width: 315px;" /></a>
-<figcaption>
-<p><span class="caption-text">The <em>Profiling</em> tab contains tools for creating cross sections of analytes across the maps.</span><a class="headerlink" href="#id9" title="Link to this image">#</a></p>
-</figcaption>
-</figure>
+<p>Create profiles across the across the map.
+.. figure:: _static/screenshots/LaME_Profiling.png</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">align<span class="colon">:</span></dt>
+<dd class="field-odd"><p>center</p>
+</dd>
+<dt class="field-even">alt<span class="colon">:</span></dt>
+<dd class="field-even"><p>LaME interface: left toolbox, profiling tab</p>
+</dd>
+<dt class="field-odd">width<span class="colon">:</span></dt>
+<dd class="field-odd"><p>315</p>
+</dd>
+</dl>
+<p>The <em>Profiling</em> tab contains tools for creating cross sections of analytes across the maps.</p>
+</div></blockquote>
 </section>
 <section id="special-functions">
 <h2>Special Functions<a class="headerlink" href="#special-functions" title="Link to this heading">#</a></h2>
@@ -614,7 +671,7 @@ document.write(`
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#samples-and-fields">Samples and Fields</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preprocessing">Preprocessing</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preprocess">Preprocess</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#autoscaling-icon-autoscale">Autoscaling </a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#histogram-equalization">Histogram Equalization</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#histograms">Histograms</a></li>

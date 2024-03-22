@@ -13,9 +13,51 @@ Samples and Fields
 
     The *Samples and Fields* tab contains tools for choosing analytes and plotting correlations.
 
+Change sample:
+
+* prompt to save analysis - saves to disk
+* clears polygons, profiles, delete filters in table
+
+Crop or reset map extent:
+
+* resets data
+* recompute clipped and analysis data
+* deletes all figures
+* clears masks, polygons, profiles and special function calculations
+* refilters the data based on existing filters
+* recomputes calculated fields
+
+Swap X-Y:
+
+* swaps x-y coordinates on maps, polygons and profiles
+* recomputes maps
+
+Change Analytes:
+
+* updates *Plot Selector*
+* clear clusters, pca, removes masks
+* recompute correlations
+
+Change ref value:
+
+* update anything with norm data (plots, calculated fields, n-Dim plots, clustering?, filters?)
+
+Change data scaling:
+
+* same as crop and clears filters
+
+Change Correlation Method:
+
+* update correlation plots
+
+
 .. _preprocessing
-Preprocessing
-=============
+Preprocess
+==========
+
+Preprocessing, alters the data to improve performance, stability and visual characteristics.  
+
+These changes can have an impact on certain statistical calculations, such as mean values and standard deviations.  
 
 .. figure:: _static/screenshots/LaME_Preprocessing.png
     :align: center
@@ -32,11 +74,20 @@ One common calibration issue is the conversion of low counts to negative concent
 Histogram Equalization
 ----------------------
 
+An alternative to auto scaling that does not alter the data, histogram equalization ( |icon-histeq| ) ensures that colors are assigned by equal quantiles.  This method is particularly useful when the histogram covers a relatively large range of values often bi- or multi-modal with large regions of few data between.  A potential disadvantage is an amplification of noise at the expense of real features.
+
 Histograms
 ----------
 
 Noise Reduction
 ---------------
+
+Noise reduction ( |icon-noise-reduction| ) involves the smoothing of data.  It may be applied to maps only for viewing, or can be applied to *Analysis Data* before producing other plots and analyses (set from the *Apply to analysis* drop down).  There are four noise reduction methods available:
+
+* median, smooths the data by computing the median value over a specified window, assigning the result to the center pixel. The results smooth across the entire image;
+* Wiener, smooths the data using a Fourier domain low-pass filter;
+* edge-preserving, smooths the data while preserving sharp edges, this is the suggested option for most cases, though it may oversmooth inside grains; and
+* bilateral, Gaussian smoothing and edge-preserving, this filter difference from edge-preserving as it does not as strongly smooth the data.
 
 Spot Data
 =========
@@ -138,6 +189,8 @@ To save to the plot tree by clicking the |icon-launch| button.
 Clustering
 ==========
 
+Clustering employs unsupervised machine learning to identify subsets of the data that contain similar characteristics in multidimensional space (i.e., similar geochemical characteristics).  It is often a more efficient way to filter data when the goal is to isolate or exclude specific minerals from analyses.  Two methods are currently implmented, k-means and fuzzy c-means, which are chosen from the *Method* dropdown.  The simpler of the two algorithm is k-means, which optimizes the centroids of clusters by minimizing the distance of points nearest to each respective centroid.  Fuzzy c-means differs in that it assumes that the clusters can overlap allowing for an additional score to be provided for each cluster in addition to map assigning each point to the cluster with the highest score.
+
 .. figure:: _static/screenshots/LaME_Clustering.png
     :align: center
     :alt: LaME interface: left toolbox, clustering tab
@@ -145,11 +198,11 @@ Clustering
 
     The *Clustering* tab contains tools for calculating and displaying multianalyte data classified into clusters based on similarities in properties.  Clustering needs to be performed prior to creating a cluster mask.
 
-Clustering uses unsupervised machine learning techniques to classify the data into a specified number of clusters.  Two methods are currently implmented, k-means and fuzzy c-means, which are chosen from the *Method* dropdown.
 
 Profiling
 =========
 
+Create profiles across the across the map.
 .. figure:: _static/screenshots/LaME_Profiling.png
     :align: center
     :alt: LaME interface: left toolbox, profiling tab
@@ -174,6 +227,9 @@ These are not yet implemented, but will include methods to compute thermometry, 
     :height: 2ex
 
 .. |icon-autoscale| image:: _static/icons/icon-autoscale-64.png
+    :height: 2ex
+
+.. |icon-histeq| image:: _static/icons/icon-histeq-64.png
     :height: 2ex
 
 .. |icon-map| image:: _static/icons/icon-map-64.png

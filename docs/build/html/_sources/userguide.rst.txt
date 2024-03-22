@@ -15,7 +15,7 @@ User Guide
 
     left_toolbox
     right_toolbox
-    central_
+    center_pane
     lower_tabs
 
 .. toctree::

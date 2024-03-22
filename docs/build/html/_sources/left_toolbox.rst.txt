@@ -1,7 +1,54 @@
 Left Toolbox
 ************
 
-The left toolbox controls the functions for changing and processing samples, producing plots, and performing analyses.  Plots can be produced from *Samples and Fields*, *Scatter and Heatmaps*, *n-Dim*, *PCA*, *Clustering*, and *Profiling*.
+The left toolbox includes the controls for changing and processing samples, producing plots, and performing analyses.  A list of plot types and where they are generated is given below.
+
++---------------------------+---------------------------+
+| Plot type                 | Tab                       |
++===========================+===========================+
+| map                       | *Plot selector*           |
++---------------------------+                           |
+| - linear                  |                           |
+| - log                     |                           |
+| - normalized              |                           |
++---------------------------+---------------------------+
+| correlation               | *Samples and Fields*      |
++---------------------------+                           |
+| - Pearson                 |                           |
+| - Spearmann               |                           |
+| - Kendall                 |                           |
++---------------------------+---------------------------+
+| histogram                 | *Preprocessing*           |
++---------------------------+                           |
+| - normal                  |                           |
+| - KDE                     |                           |
++---------------------------+---------------------------+
+| biplot                    | *Scatter and Heatmaps*    |
++---------------------------+                           |
+| - scatter                 |                           |
+| - 2-D histogram (heatmap) |                           |
++---------------------------+---------------------------+
+| ternary                   | *Scatter and Heatmaps*    |
++---------------------------+                           |
+| - scatter                 |                           |
+| - heatmap                 |                           |
++---------------------------+---------------------------+
+| multidimensional          | *n-Dim*                   |
++---------------------------+                           |
+| - TEC (spider)            |                           |
+| - radar                   |                           |
++---------------------------+---------------------------+
+| PCA                       | *PCA*                     |
++---------------------------+                           |
+| - explained variance      |                           |
+| - vector heatmap          |                           |
+| - score X vs. score Y     |                           |
+| - score map               |                           |
++---------------------------+---------------------------+
+| cluster map               | *Clustering*              |
++---------------------------+---------------------------+
+| geochemistry profile      | *Profiling*               |
++---------------------------+---------------------------+
 
 Samples and Fields
 ==================

@@ -265,7 +265,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxNRMethod.activated.connect(self.add_noise_reduction)
         self.spinBoxSmoothingFactor.valueChanged.connect(self.add_noise_reduction)
         self.spinBoxSmoothingFactor.setEnabled(False)
-        self.labelSF.setEnabled(False)
+        self.labelSmoothingFactor.setEnabled(False)
 
         # Initiate crop tool
         self.crop_tool = Crop_tool(self)

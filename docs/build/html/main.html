@@ -678,18 +678,6 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">MainWindow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QMainWindow</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Ui_MainWindow</span></code></p>
 <dl class="py method">
-<dt class="sig sig-object py" id="main.MainWindow.activate_ratios">
-<span class="sig-name descname"><span class="pre">activate_ratios</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.activate_ratios" title="Link to this definition">#</a></dt>
-<dd><p>Adds ratios selection as options to certain comboBoxes and plot tree</p>
-<p>Activate ratios by selecting them in the Isotope Select dialog.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>state</strong> (<em>bool</em>) – </p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.add_clustering_widget_to_layout">
 <span class="sig-name descname"><span class="pre">add_clustering_widget_to_layout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.add_clustering_widget_to_layout" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
@@ -749,6 +737,11 @@ comboBoxNRMethod.  Options include:
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.apply_crop">
+<span class="sig-name descname"><span class="pre">apply_crop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.apply_crop" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.apply_filters">
 <span class="sig-name descname"><span class="pre">apply_filters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fullmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.apply_filters" title="Link to this definition">#</a></dt>
 <dd><p>Applies filter to map data</p>
@@ -772,7 +765,7 @@ acceptable as minerals that were not specifically calibrated can have erroneousl
 high or low (even negative) values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>update</strong> (<em>bool</em>) – update current figure, default is False</p>
+<dd class="field-odd"><p><strong>update</strong> (<em>bool</em>) – update, auto scale parameters updates</p>
 </dd>
 </dl>
 </dd></dl>
@@ -846,6 +839,11 @@ comboBoxSampleID</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.create_plot">
+<span class="sig-name descname"><span class="pre">create_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_plot_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'lasermap'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isotope_1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isotope_2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.create_plot" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.create_tree">
 <span class="sig-name descname"><span class="pre">create_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.create_tree" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
@@ -913,17 +911,17 @@ comboBoxSampleID</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.get_map_data">
-<span class="sig-name descname"><span class="pre">get_map_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isotope_1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isotope_2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'lasermap'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.get_map_data" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_map_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analysis_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'isotope'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.get_map_data" title="Link to this definition">#</a></dt>
 <dd><p>Retrieves and processes the mapping data for the given sample and isotopes, then plots the result if required.</p>
 <p>Parameters:
 - self.sample_id (str): Identifier for the sample to be processed.
 - isotope_1 (str, optional): Primary isotope for plotting. If not provided, it’s inferred from the isotope data frame.
 - isotope_2 (str, optional): Secondary isotope for ratio plotting. If not provided, only the primary isotope will be plotted.
-- plot_type (str, default=’laser’): Specifies the type of plot. Accepts ‘laser’ or ‘hist’.
+- analysis_type (str, default=’laser’): Specifies the type of analysis. Accepts ‘isotope’ , ‘ratio’, ‘pca’, ‘cluster’, ‘cluster score’, ‘special’, ‘computed’
 - plot (bool, default=True): Determines if the plot should be shown after processing.
 - auto_scale (bool, default=False): Determines if auto-scaling should be re-applied to the plot. if False use fmin and fmax and clip array</p>
 <p>Returns:
-- DataFrame: Processed data for plotting. This is only returned if plot_type is not ‘laser’ or ‘hist’.</p>
+- DataFrame: Processed data for plotting. This is only returned if analysis_type is not ‘laser’ or ‘hist’.</p>
 <p>Note:
 - The method also updates certain parameters in the isotope data frame related to scaling.
 - Based on the plot type, this method internally calls the appropriate plotting functions.</p>
@@ -1194,13 +1192,15 @@ in list is loaded by default.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.prep_data">
-<span class="sig-name descname"><span class="pre">prep_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isotope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.prep_data" title="Link to this definition">#</a></dt>
-<dd><p>Prepares data to be used in analysisq</p>
+<span class="sig-name descname"><span class="pre">prep_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isotope_1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isotope_2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.prep_data" title="Link to this definition">#</a></dt>
+<dd><p>Prepares data to be used in analysis</p>
 <ol class="arabic simple">
 <li><p>Obtains raw DataFrame</p></li>
 <li><p>Shifts isotope values so that all values are postive</p></li>
+<li><p>Scale data  (linear,log, loggit)</p></li>
 <li><p>Autoscales data if choosen by user</p></li>
 </ol>
+<p>The prepped data is stored in one of 2 Dataframes: analysis_isotope_data or computed_isotope_data</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1255,26 +1255,6 @@ in list is loaded by default.</p>
 <dt class="sig sig-object py" id="main.MainWindow.reset_zoom">
 <span class="sig-name descname"><span class="pre">reset_zoom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">histogram</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.reset_zoom" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="main.MainWindow.scale_plot">
-<span class="sig-name descname"><span class="pre">scale_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_plot_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_lb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_ub</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outlier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.scale_plot" title="Link to this definition">#</a></dt>
-<dd><p>Clips data to defined bounds.</p>
-<p>Referenced by <a class="reference internal" href="#main.MainWindow.update_plot" title="main.MainWindow.update_plot"><code class="xref py py-func docutils literal notranslate"><span class="pre">update_plot()</span></code></a> and <a class="reference internal" href="#main.MainWindow.get_map_data" title="main.MainWindow.get_map_data"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_map_data()</span></code></a></p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>current_plot_df</strong> (<em>dict</em>) – data and properties of current plot</p></li>
-<li><p><strong>lq</strong> (<em>double</em>) – lower quantile</p></li>
-<li><p><strong>uq</strong> (<em>double</em>) – upper quantile</p></li>
-<li><p><strong>d_lb</strong> (<em>double</em>) – difference lower quantile</p></li>
-<li><p><strong>d_ub</strong> (<em>double</em>) – difference upper quantile</p></li>
-<li><p><strong>norm</strong> (<em>str</em><em>, </em><em>optional</em>) – norm to use for data, options include ‘linear’, ‘log’, and ‘logit’, defaults to ‘linear’</p></li>
-<li><p><strong>outlier</strong> (<em>bool</em><em>, </em><em>optional</em>) – runs outlier detection, defaults to False</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.set_general_style">
@@ -1516,7 +1496,7 @@ Calls :get_field_list(): to construct the list.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.update_spinboxes">
-<span class="sig-name descname"><span class="pre">update_spinboxes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_scale</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.update_spinboxes" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">update_spinboxes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.update_spinboxes" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1934,7 +1914,6 @@ only the top row is moved.</p>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow"><code class="docutils literal notranslate"><span class="pre">MainWindow</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.activate_ratios"><code class="docutils literal notranslate"><span class="pre">MainWindow.activate_ratios()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.add_clustering_widget_to_layout"><code class="docutils literal notranslate"><span class="pre">MainWindow.add_clustering_widget_to_layout()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.add_edge_detection"><code class="docutils literal notranslate"><span class="pre">MainWindow.add_edge_detection()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.add_noise_reduction"><code class="docutils literal notranslate"><span class="pre">MainWindow.add_noise_reduction()</span></code></a></li>
@@ -1942,6 +1921,7 @@ only the top row is moved.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.add_ree"><code class="docutils literal notranslate"><span class="pre">MainWindow.add_ree()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.add_temp_plot"><code class="docutils literal notranslate"><span class="pre">MainWindow.add_temp_plot()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.add_tree_item"><code class="docutils literal notranslate"><span class="pre">MainWindow.add_tree_item()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.apply_crop"><code class="docutils literal notranslate"><span class="pre">MainWindow.apply_crop()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.apply_filters"><code class="docutils literal notranslate"><span class="pre">MainWindow.apply_filters()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.auto_scale"><code class="docutils literal notranslate"><span class="pre">MainWindow.auto_scale()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.biplot"><code class="docutils literal notranslate"><span class="pre">MainWindow.biplot()</span></code></a></li>
@@ -1950,6 +1930,7 @@ only the top row is moved.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.change_sample"><code class="docutils literal notranslate"><span class="pre">MainWindow.change_sample()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.clear_views"><code class="docutils literal notranslate"><span class="pre">MainWindow.clear_views()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.cluster_label_changed"><code class="docutils literal notranslate"><span class="pre">MainWindow.cluster_label_changed()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.create_plot"><code class="docutils literal notranslate"><span class="pre">MainWindow.create_plot()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.create_tree"><code class="docutils literal notranslate"><span class="pre">MainWindow.create_tree()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.dynamic_format"><code class="docutils literal notranslate"><span class="pre">MainWindow.dynamic_format()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.find_leaf"><code class="docutils literal notranslate"><span class="pre">MainWindow.find_leaf()</span></code></a></li>
@@ -1994,7 +1975,6 @@ only the top row is moved.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.remove_widgets_from_layout"><code class="docutils literal notranslate"><span class="pre">MainWindow.remove_widgets_from_layout()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.reset_to_full_view"><code class="docutils literal notranslate"><span class="pre">MainWindow.reset_to_full_view()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.reset_zoom"><code class="docutils literal notranslate"><span class="pre">MainWindow.reset_zoom()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.scale_plot"><code class="docutils literal notranslate"><span class="pre">MainWindow.scale_plot()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.set_general_style"><code class="docutils literal notranslate"><span class="pre">MainWindow.set_general_style()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.set_map_style"><code class="docutils literal notranslate"><span class="pre">MainWindow.set_map_style()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.set_scatter_style"><code class="docutils literal notranslate"><span class="pre">MainWindow.set_scatter_style()</span></code></a></li>

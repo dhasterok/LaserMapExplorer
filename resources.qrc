@@ -1,10 +1,8 @@
 <RCC>
     <qresource prefix="/icons">
         <file>resources/icons/icons8-cells-48.png</file>
-        <file>resources/icons/icons8-explosion-64.png</file>
         <file>resources/icons/icons8-honeycomb-48.png</file>
         <file>resources/icons/icons8-add-image-64.png</file>
-        <file>resources/icons/icon-gradient-32.png</file>
         <file>resources/icons/icon-swap-64.png</file>
         <file>resources/icons/icons8-mind-map-50.png</file>
         <file>resources/icons/icons8-mind-map-filled-50.png</file>
@@ -66,5 +64,12 @@
         <file>resources/icons/icon-correlation-64.png</file>
         <file>resources/icons/icon-histogram-64.png</file>
         <file>resources/icons/icon-ternary-64.png</file>
+        <file>resources/icons/icon-noise-reduction-64.png</file>
+        <file>resources/icons/icon-noise-reduction-off-64.png</file>
+        <file>resources/icons/icon-noise-reduction-on-64.png</file>
+        <file>resources/icons/icon-nuke-64.png</file>
+        <file>resources/icons/icon-gradient-64.png</file>
+        <file>resources/icons/icon-recipe-64.png</file>
+        <file>resources/icons/icon-batch-64.png</file>
     </qresource>
 </RCC>

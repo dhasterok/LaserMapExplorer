@@ -183,7 +183,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionPolygon.triggered.connect(lambda: self.open_tab('filter'))
         self.actionProfiles.triggered.connect(lambda: self.open_tab('profiles'))
         self.actionCluster.triggered.connect(lambda: self.open_tab('clustering'))
-
+        self.actionReset.triggered.connect(lambda: self.reset_analysis())
         # Select Isotope Tab
         #-------------------------
         self.ref_data = pd.read_excel('resources/app_data/earthref.xlsx')
@@ -450,7 +450,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #self.comboBoxColorByField.activated.connect(lambda: self.update_combo_boxes(self.comboBoxColorByField, self.comboBoxColorField))
         self.comboBoxColorByField.activated.connect(lambda: self.toggle_color_by_field(self.toolBox.currentIndex()))
         self.comboBoxColorField.activated.connect(lambda: self.plot_scatter(save=False))
-        self.horizontalSliderMarkerAlpha.valueChanged.connect(self.slider_alpha_changed)
+        self.horizontalSliderMarkerAlpha.sliderReleased.connect(self.slider_alpha_changed)
 
         # Plot toolbar
         #-------------------------
@@ -637,7 +637,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.crop_x_min = self.x_min
         self.crop_y_max = self.y_max
         self.crop_y_min = self.y_min
-
+        #remove crop overlays
+        self.crop_tool.remove_overlays()
         # reset current plot df and mask to original
         # self.current_plot_df = self.current_plot_df_copy.copy()
         # self.mask = self.mask.copy()
@@ -646,7 +647,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # reset clipped_isotope_data and self.computed_isotope_data and current_plot_df
         sample_id = self.current_plot_information['sample_id']
         self.clipped_isotope_data[self.sample_id] = copy.deepcopy(self.isotope_data[self.sample_id])
-        self.cropped_original_data = copy.deepcopy(self.isotope_data[self.sample_id])
+        self.cropped_original_data[self.sample_id] = copy.deepcopy(self.isotope_data[self.sample_id])
         self.computed_isotope_data[self.sample_id] = {
             'ratio':None,
             'calculated':None,
@@ -663,8 +664,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_all_plots()
         
         self.toolButtonCrop.setChecked(False)
-        self.crop_tool.remove_overlays()
-        self.plot.autoRange()
+        
+        self.plot.getViewBox().autoRange()
 
     # get a named list of current fields for sample
     def get_field_list(self, set_name='isotope'):
@@ -1114,8 +1115,46 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # After adding the plots, refresh windows to fix toggle button issue
         self.hide()
         self.show()
-
-    def clear_views(self):
+    
+    def save_analysis(self, location):
+        
+        
+        
+        pass
+    
+    
+    def reset_analysis(self):
+        self.isotopes_df = pd.DataFrame(columns = ['sample_id', 'isotopes', 'norm','upper_bound','lower_bound','d_l_bound','d_u_bound', 'use'])
+        self.ratios_df = pd.DataFrame(columns = ['sample_id', 'isotope_1','isotope_2', 'norm','upper_bound','lower_bound','d_l_bound','d_u_bound', 'use', 'auto_scale'])
+        self.filter_df = pd.DataFrame(columns = ['sample_id', 'isotope_1', 'isotope_2', 'ratio','norm','f_min','f_max', 'use'])
+        self.cluster_results=pd.DataFrame(columns = ['Fuzzy', 'KMeans', 'KMediods'])
+        self.clipped_ratio_data = pd.DataFrame()
+        self.isotope_data = {}  #stores orginal isotope data
+        self.clipped_isotope_data = {} # stores processed isotoped data
+        self.computed_isotope_data = {} # stores computed isotoped data (ratios, custom fields)
+        self.sample_data_dict = {}
+        self.plot_widget_dict ={'lasermap':{},'histogram':{},'lasermap_norm':{},'clustering':{},'scatter':{},'n-dim':{},'correlation':{}, 'pca':{}}
+        self.multi_view_index = []
+        self.laser_map_dict = {}
+        self.multiview_info_label = {}
+        self.selected_isotopes = []
+        self.n_dim_list = []
+        self.group_cmap = {}
+        self.lasermaps = {}
+        self.norm_dict = {} #holds values (log, logit, linear) of all isotopes
+        self.proxies = []
+        self.treeModel.clear()
+        
+        self.create_tree()
+        self.change_sample(self.comboBoxSampleId.currentIndex())
+        
+        
+        
+        pass
+    
+    def clear_analysis(self):
+        # clears analysis 
+        
         pass
 
     # def activate_ratios(self, state):
@@ -1633,8 +1672,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxSampleId.clear()
         self.comboBoxSampleId.addItems([os.path.splitext(file)[0] for file in self.csv_files])
         # Populate the sampleidcomboBox with the file names
-        self.canvasWindow.setCurrentIndex(0)
-        self.change_sample(0)
+        # self.canvasWindow.setCurrentIndex(0)
+        # self.change_sample(0)
 
         self.toolBox.setCurrentIndex(self.sample_tab_id)
 
@@ -1729,7 +1768,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 p1.invertY(True)   # vertical axis counts top to bottom
                 #set aspect ratio of rectangle
                 img.setRect(self.x.min(),self.y.min(),self.x_range,self.y_range)
-                p1.setRange(xRange=[self.x.min(), self.x.max()], yRange=[self.y.min(), self.y.max()])
+                p1.setRange( yRange=[self.y.min(), self.y.max()])
                 # To further prevent zooming or panning outside the default view, 
                 p1.setLimits( yMin=self.y.min(), yMax = self.y.max())
                 cm = pg.colormap.get(self.cm, source = 'matplotlib')
@@ -1806,7 +1845,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             p1.addItem(img)
             # print(p1.getAspectRatio())
             p1.setAspectLocked()
-            p1.setRange(xRange=[self.x.min(), self.x.max()], yRange=[self.y.min(), self.y.max()])
+            p1.setRange( yRange=[self.y.min(), self.y.max()])
             # To further prevent zooming or panning outside the default view, 
             p1.setLimits( yMin=self.y.min(), yMax = self.y.max())
 
@@ -4036,6 +4075,30 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             index of sample name for identifying data.  The values are based on the
             comboBoxSampleID
         """
+        if self.sample_data_dict:
+            # Create and configure the QMessageBox
+            messageBoxChangeSample = QMessageBox()
+            iconWarning = QtGui.QIcon()
+            iconWarning.addPixmap(QtGui.QPixmap(":/icons/resources/icons/icon-warning-64.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            
+            messageBoxChangeSample.setWindowIcon(iconWarning)  # Set custom icon
+            messageBoxChangeSample.setText("Do you want to save current analysis")
+            messageBoxChangeSample.setWindowTitle("Save analysis")
+            messageBoxChangeSample.setStandardButtons(QMessageBox.Discard | QMessageBox.Cancel | QMessageBox.Save)
+            
+            # Display the dialog and wait for user action
+            response = messageBoxChangeSample.exec_()
+            
+            
+            if response == QMessageBox.Save:
+                self.save_analysis()
+            elif response == QMessageBox.Discard:
+                self.reset_analysis()
+            else:
+                return
+                
+        
+        
         file_path = os.path.join(self.selected_directory, self.csv_files[index])
         self.sample_id = os.path.splitext(self.csv_files[index])[0]
 
@@ -4158,7 +4221,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # self.add_plot(plot_information, current_plot_df)
             
             self.create_tree(self.sample_id)
-            self.clear_views()
+            self.clear_analysis()
             self.update_tree(self.norm_dict[self.sample_id])
 
             self.update_spinboxes_bool = True  # Place this line at end of method
@@ -4434,8 +4497,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.isotopes_df.empty:
             treeView  = self.treeView
             treeView.setHeaderHidden(True)
-            treeModel = QStandardItemModel()
-            rootNode = treeModel.invisibleRootItem()
+            self.treeModel = QStandardItemModel()
+            rootNode = self.treeModel.invisibleRootItem()
             self.isotopes_items = StandardItem('Isotope', 14, True)
             self.norm_isotopes_items = StandardItem('Normalised Isotope', 14, True)
             self.ratios_items = StandardItem('Ratio', 14, True)
@@ -4448,7 +4511,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             rootNode.appendRows([self.isotopes_items,self.norm_isotopes_items,self.ratios_items,self.histogram_items,self.correlation_items, self.scatter_items,
                                  self.n_dim_items, self.pca_items, self.clustering_items])
-            treeView.setModel(treeModel)
+            treeView.setModel(self.treeModel)
             treeView.expandAll()
             treeView.doubleClicked.connect(self.tree_double_click)
         elif sample_id:

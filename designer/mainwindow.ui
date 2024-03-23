@@ -4010,7 +4010,7 @@
        <string>Activates the crop tool</string>
       </property>
       <property name="currentIndex">
-       <number>8</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="SelectIsotopePage">
        <property name="enabled">
@@ -4457,7 +4457,7 @@
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>255</y>
+          <y>295</y>
           <width>301</width>
           <height>81</height>
          </rect>
@@ -4477,6 +4477,11 @@
          <layout class="QFormLayout" name="formLayout_8">
           <item row="0" column="0">
            <widget class="QLabel" name="labelBinWidth">
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+             </font>
+            </property>
             <property name="text">
              <string>Bin width</string>
             </property>
@@ -4487,6 +4492,11 @@
           </item>
           <item row="0" column="1">
            <widget class="QSpinBox" name="spinBoxBinWidth">
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+             </font>
+            </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
@@ -4494,6 +4504,11 @@
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="labelNoBins">
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+             </font>
+            </property>
             <property name="text">
              <string>No. bins</string>
             </property>
@@ -4504,6 +4519,11 @@
           </item>
           <item row="1" column="1">
            <widget class="QSpinBox" name="spinBoxNBins">
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+             </font>
+            </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
@@ -4596,7 +4616,7 @@
           <x>0</x>
           <y>130</y>
           <width>301</width>
-          <height>121</height>
+          <height>156</height>
          </rect>
         </property>
         <property name="title">
@@ -4608,7 +4628,7 @@
            <x>5</x>
            <y>20</y>
            <width>291</width>
-           <height>101</height>
+           <height>126</height>
           </rect>
          </property>
          <layout class="QFormLayout" name="formLayout_9">
@@ -4625,7 +4645,7 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QComboBox" name="comboBoxNRMethod">
+           <widget class="QComboBox" name="comboBoxNoiseReductionMethod">
             <property name="maximumSize">
              <size>
               <width>150</width>
@@ -4639,12 +4659,17 @@
             </property>
             <item>
              <property name="text">
-              <string>None</string>
+              <string>none</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Median</string>
+              <string>median</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Gaussian</string>
              </property>
             </item>
             <item>
@@ -4654,25 +4679,25 @@
             </item>
             <item>
              <property name="text">
-              <string>Edge-preserving</string>
+              <string>edge-preserving</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Bilateral</string>
+              <string>bilateral</string>
              </property>
             </item>
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="labelSmoothingFactor">
+           <widget class="QLabel" name="labelNoiseOption1">
             <property name="font">
              <font>
               <pointsize>11</pointsize>
              </font>
             </property>
             <property name="text">
-             <string>Smoothing factor</string>
+             <string>Option 1</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -4680,12 +4705,17 @@
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QSpinBox" name="spinBoxSmoothingFactor">
+           <widget class="QSpinBox" name="spinBoxNoiseOption1">
             <property name="maximumSize">
              <size>
               <width>150</width>
               <height>16777215</height>
              </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+             </font>
             </property>
             <property name="toolTip">
              <string>Set smoothing for noise reduction filter</string>
@@ -4701,20 +4731,30 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
+          <item row="3" column="0">
            <widget class="QLabel" name="labelApplySmoothing">
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+             </font>
+            </property>
             <property name="text">
              <string>Apply to analysis</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
+          <item row="3" column="1">
            <widget class="QComboBox" name="comboBox_2">
             <property name="maximumSize">
              <size>
               <width>150</width>
               <height>16777215</height>
              </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+             </font>
             </property>
             <item>
              <property name="text">
@@ -4726,6 +4766,45 @@
               <string>Yes</string>
              </property>
             </item>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="labelNoiseOption2">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string> Option 2</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QDoubleSpinBox" name="doubleSpinBoxNoiseOption2">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>150</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+             </font>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+            <property name="decimals">
+             <number>1</number>
+            </property>
            </widget>
           </item>
          </layout>

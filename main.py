@@ -44,7 +44,7 @@ import scipy.stats
 from scipy import ndimage
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-from cv2 import Canny, Sobel, CV_64F, bilateralFilter, medianBlur, edgePreservingFilter
+from cv2 import Canny, Sobel, CV_64F, bilateralFilter, medianBlur, GaussianBlur, edgePreservingFilter
 from scipy.signal import convolve2d, wiener
 from PyQt5.QtWidgets import QGraphicsRectItem
 from PyQt5.QtCore import QRectF, Qt, QPointF
@@ -126,9 +126,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
         #edge_det_img
         self.edge_img = None
-        #noise red image filter
-        self.noise_red_img= None
-        
+
         # create dictionaries for default plot styles
         self.markerdict = {'circle':'o', 'square':'s', 'diamond':'d', 'triangle (up)':'^', 'triangle (down)':'v', 'hexagon':'h', 'pentagon':'p'}
         self.comboBoxMarker.clear()
@@ -220,7 +218,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #create plot tree
 
         self.create_tree()
-        #self.open_directory()
+        self.open_directory()
 
         #normalising
         self.comboBoxNorm.clear()
@@ -262,10 +260,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonHistogramReset.clicked.connect(lambda: self.update_plot(reset = True))
 
         # Noise reduction
-        self.comboBoxNoiseReductionMethod.activated.connect(self.add_noise_reduction)
-        self.spinBoxSmoothingFactor.valueChanged.connect(self.add_noise_reduction)
-        self.spinBoxSmoothingFactor.setEnabled(False)
-        self.labelSmoothingFactor.setEnabled(False)
+        self.noise_method_changed = False
+        self.noise_red_img = None
+        self.noise_red_options = {'median':{'label1':'Kernel size', 'value1':5, 'label2':None},
+                                'gaussian':{'label1':'Kernel size', 'value1':5, 'label2':'Sigma', 'value2':self.gaussian_sigma(5)},
+                                'wiener':{'label1':'Kernel size', 'value1':5, 'label2':None},
+                                'edge-preserving':{'label1':'Sigma S', 'value1':25, 'label2':'Sigma R', 'value2': 0.2},
+                                'bilateral':{'label1':'Diameter', 'value1':9, 'label2':'Sigma', 'value2':75}}
+
+        self.comboBoxNoiseReductionMethod.activated.connect(self.noise_reduction_method_callback)
+        self.spinBoxNoiseOption1.valueChanged.connect(self.noise_reduction_option1_callback)
+        self.spinBoxNoiseOption1.setEnabled(False)
+        self.labelNoiseOption1.setEnabled(False)
+        self.doubleSpinBoxNoiseOption2.valueChanged.connect(self.noise_reduction_option2_callback)
+        self.doubleSpinBoxNoiseOption2.setEnabled(False)
+        self.labelNoiseOption2.setEnabled(False)
 
         # Initiate crop tool
         self.crop_tool = Crop_tool(self)
@@ -2214,60 +2223,172 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             zero_crossings[zero_mask] = 1
         return zero_crossings 
     
-    def add_noise_reduction(self):
+    def noise_reduction_method_callback(self):
+        """Noise reduction method callback
+        
+        Runs when comboBoxNoiseReductionMethod is changed."""
+        self.noise_method_changed = True
+        algorithm = self.comboBoxNoiseReductionMethod.currentText().lower()
+
+        match algorithm:
+            case 'none':
+                # turn options off
+                self.labelNoiseOption1.setEnabled(False)
+                self.labelNoiseOption1.setText('')
+                self.spinBoxNoiseOption1.setEnabled(False)
+                self.labelNoiseOption2.setEnabled(False)
+                self.labelNoiseOption2.setText('')
+                self.doubleSpinBoxNoiseOption2.setEnabled(False)
+
+                self.noise_method_changed = False
+                self.add_noise_reduction(algorithm)
+            case _:
+                # set option 1
+                self.labelNoiseOption1.setEnabled(True)
+                self.labelNoiseOption1.setText(self.noise_red_options[algorithm]['label1'])
+                self.spinBoxNoiseOption1.setEnabled(True)
+                match algorithm:
+                    case 'median':
+                        self.spinBoxNoiseOption1.setRange(1,5)
+                        self.spinBoxNoiseOption1.setSingleStep(2)
+                    case 'gaussian' | 'wiener':
+                        self.spinBoxNoiseOption1.setRange(1,199)
+                        self.spinBoxNoiseOption1.setSingleStep(2)
+                    case 'edge-preserving':
+                        self.spinBoxNoiseOption1.setRange(0,200)
+                        self.spinBoxNoiseOption1.setSingleStep(5)
+                    case _:
+                        self.spinBoxNoiseOption1.setRange(0,200)
+                        self.spinBoxNoiseOption1.setSingleStep(5)
+                self.spinBoxNoiseOption1.setValue(int(self.noise_red_options[algorithm]['value1']))
+
+                val1 = self.spinBoxNoiseOption1.value()
+
+                # set option 2
+                if self.noise_red_options[algorithm]['label2'] is None:
+                    # no option 2
+                    self.labelNoiseOption2.setEnabled(False)
+                    self.labelNoiseOption2.setText('')
+                    self.doubleSpinBoxNoiseOption2.setEnabled(False)
+
+                    self.noise_method_changed = False
+                    self.add_noise_reduction(algorithm, val1)
+                else:
+                    # option 2
+                    self.labelNoiseOption2.setEnabled(True)
+                    self.labelNoiseOption2.setText(self.noise_red_options[algorithm]['label2'])
+                    self.doubleSpinBoxNoiseOption2.setEnabled(True)
+                    match algorithm:
+                        case 'edge-preserving':
+                            self.doubleSpinBoxNoiseOption2.setRange(0,1)
+                        case 'bilateral':
+                            self.doubleSpinBoxNoiseOption2.setRange(0,200)
+                    self.doubleSpinBoxNoiseOption2.setValue(self.noise_red_options[algorithm]['value2'])
+
+                    val2 = self.doubleSpinBoxNoiseOption2.value()
+                    self.noise_method_changed = False
+                    self.add_noise_reduction(algorithm, val1, val2)
+    
+    def gaussian_sigma(self, ksize):
+        """Sets default Gaussian sigma.
+        
+        Same as default in OpenCV, i.e., 0.3*((ksize-1)*0.5 - 1) + 0.8."""
+        return 0.3*((ksize-1)*0.5 - 1) + 0.8
+
+    def noise_reduction_option1_callback(self):
+        """Callback executed when the first noise reduction option is changed"""
+        algorithm = self.comboBoxNoiseReductionMethod.currentText().lower()
+
+        val1 = self.spinBoxNoiseOption1.value()
+        match algorithm:
+            case 'median' | 'gaussian' | 'wiener':
+                # val1 must be odd
+                if val1 % 2 != 1:
+                    val1 = val1 + 1
+        self.noise_red_options[algorithm]['value1'] = val1
+        if self.noise_red_options[algorithm]['label2'] is None:
+            self.add_noise_reduction(algorithm,val1)
+        else:
+            if algorithm == 'gaussian':
+                self.doubleSpinBoxNoiseOption2.setValue(self.gaussian_sigma(val1))
+            val2 = self.doubleSpinBoxNoiseOption2.value()
+            self.add_noise_reduction(algorithm,val1,val2)
+
+    def noise_reduction_option2_callback(self):
+        """Callback executed when the second noise reduction option is changed"""
+        algorithm = self.comboBoxNoiseReductionMethod.currentText().lower()
+
+        val1 = self.spinBoxNoiseOption1.value()
+        val2 = self.doubleSpinBoxNoiseOption2.value()
+        self.noise_red_options[algorithm]['value1'] = val2
+        self.add_noise_reduction(algorithm,val1,val2)
+
+    def add_noise_reduction(self, algorithm, val1=None, val2=None):
         """
         Add noise reduction to the current laser map plot.
 
-        Executes on change of comboBoxNoiseReductionMethod and spinBoxSmoothingFactor. Updates map.
+        Executes on change of comboBoxNoiseReductionMethod, spinBoxNoiseOption1 and
+        doubleSpinBoxOption2. Updates map.
          
         Reduces noise by smoothing via one of several algorithms chosen from
-        comboBoxNoiseReductionMethod.  Options include:
-        'None' - no smoothing
-        'Median' - simple filter that computes each pixel from the median of a window including
-            surrounding points
-        'Weiner' - a Fourier domain filtering method that low pass filters to smooth the map
-        'Edge-preserving' - filter that does an excellent job of preserving edges when smoothing
-        'Bilateral' - an edge-preserving Gaussian weighted filter
+        comboBoxNoiseReductionMethod.
+        :param algorithm:  Options include:
+            'None' - no smoothing
+            'Median' - simple blur that computes each pixel from the median of a window including
+                surrounding points
+            'Gaussian' - a simple Gaussian blur
+            'Weiner' - a Fourier domain filtering method that low pass filters to smooth the map
+            'Edge-preserving' - filter that does an excellent job of preserving edges when smoothing
+            'Bilateral' - an edge-preserving Gaussian weighted filter
+        :type algorithm: str
+        :param val1: first filter argument, required for all filters
+        :type val1: int, optional
+        :param val2: second filter argument, required for Gaussian, Edge-preserving, and Bilateral methods
+        :type val2: double, optional
         """
-        algorithm = self.comboBoxNoiseReductionMethod.currentText().lower()
-        
+        if self.noise_method_changed:
+            return
+
         if self.noise_red_img:
             # Remove existing filters
             self.plot.removeItem(self.noise_red_img)
-            # disable smoothing factor until chosen
-            if algorithm != 'edge-preserving':
-                self.spinBoxSmoothingFactor.setEnabled(False)
-                self.labelSmoothingFactor.setEnabled(False)
-        
+
         # Assuming self.array is the current image data
         match algorithm:
             case 'none':
                 return
             case 'median':
                 # Apply Median filter
-                filtered_image = medianBlur(self.array.astype(np.float32), 5)  # Kernel size is 5
-            case 'bilateral':
-                # Apply Bilateral filter
-                # Parameters are placeholders, you might need to adjust them based on your data
-                filtered_image = bilateralFilter(self.array.astype(np.float32), 9, 75, 75)
+                filtered_image = medianBlur(self.array.astype(np.float32),
+                                                int(val1))  # Kernel size is 5
+            case 'gaussian':
+                # Apply Median filter
+                filtered_image = GaussianBlur(self.array.astype(np.float32),
+                                                int(val1), sigmaX=float(val2), sigmaY=float(val2))  # Kernel size is 5
             case 'wiener':
                 # Apply Wiener filter
                 # Wiener filter in scipy expects the image in double precision
-                filtered_image = wiener(self.array.astype(np.float64), (5, 5))  # Myopic deconvolution, kernel size is (5, 5)
+                # Myopic deconvolution, kernel size set by spinBoxNoiseOption1
+                filtered_image = wiener(self.array.astype(np.float64),
+                                                (int(val1), int(val1)))
                 filtered_image = filtered_image.astype(np.float32)  # Convert back to float32 to maintain consistency
             case 'edge-preserving':
                 # Apply Edge-Preserving filter (RECURSIVE_FILTER or NORMCONV_FILTER)
-                if not self.spinBoxSmoothingFactor.isEnabled():
-                    self.spinBoxSmoothingFactor.setEnabled(True)
-                    self.labelSmoothingFactor.setEnabled(True)
                 # Normalize the array to [0, 1]
                 normalized_array = (self.array - np.min(self.array)) / (np.max(self.array) - np.min(self.array))
                 
                 # Scale to [0, 255] and convert to uint8
                 image = (normalized_array * 255).astype(np.uint8)
-                filtered_image = edgePreservingFilter(image, flags=1, sigma_s=int(self.spinBoxSmoothingFactor.value()), sigma_r=0.2)
-            case _:
-                raise ValueError("Unsupported algorithm. Choose 'median' or 'bilateral' or 'weiner or 'edge-preserving'.")
+                filtered_image = edgePreservingFilter(image,
+                                                    flags=1,
+                                                    sigma_s=float(val1),
+                                                    sigma_r=float(val2))
+            case 'bilateral':
+                print('bilateral')
+                # Apply Bilateral filter
+                # Parameters are placeholders, you might need to adjust them based on your data
+                filtered_image = bilateralFilter(self.array.astype(np.float32),
+                                                int(val1), float(val2), float(val2))
     
         # Update or create the image item for displaying the filtered image
         self.noise_red_array = filtered_image

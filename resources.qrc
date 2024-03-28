@@ -71,5 +71,6 @@
         <file>resources/icons/icon-gradient-64.png</file>
         <file>resources/icons/icon-recipe-64.png</file>
         <file>resources/icons/icon-batch-64.png</file>
+        <file>resources/icons/icon-style-pallette-64.png</file>
     </qresource>
 </RCC>

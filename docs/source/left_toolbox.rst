@@ -6,41 +6,45 @@ The left toolbox includes the controls for changing and processing samples, prod
 +---------------------------+---------------------------+
 | Plot type                 | Tab                       |
 +===========================+===========================+
-| map                       | *Plot selector*           |
-+---------------------------+                           |
-| - linear                  |                           |
+| map                       |                           |
++---------------------------+---------------------------+
+| - linear                  | *Plot selector*           |
 | - log                     |                           |
 | - normalized              |                           |
+| - ternary colored map     | *Scatter and Heatmaps*    |
+| - PCA score map           | *PCA*                     |
+| - Cluster map             | *Clustering*              |
+| - Cluster score map       |                           |
 +---------------------------+---------------------------+
-| correlation               | *Samples and Fields*      |
-+---------------------------+                           |
-| - Pearson                 |                           |
+| correlation               |                           |
++---------------------------+---------------------------+
+| - Pearson                 | *Samples and Fields*      |
 | - Spearmann               |                           |
 | - Kendall                 |                           |
 +---------------------------+---------------------------+
-| histogram                 | *Preprocessing*           |
-+---------------------------+                           |
-| - normal                  |                           |
+| histogram                 |                           |
++---------------------------+---------------------------+
+| - normal                  | *Preprocessing*           |
 | - KDE                     |                           |
 +---------------------------+---------------------------+
-| biplot                    | *Scatter and Heatmaps*    |
-+---------------------------+                           |
-| - scatter                 |                           |
+| biplot                    |                           |
++---------------------------+---------------------------+
+| - scatter                 | *Scatter and Heatmaps*    |
 | - 2-D histogram (heatmap) |                           |
 +---------------------------+---------------------------+
-| ternary                   | *Scatter and Heatmaps*    |
-+---------------------------+                           |
-| - scatter                 |                           |
+| ternary                   |                           |
++---------------------------+---------------------------+
+| - scatter                 | *Scatter and Heatmaps*    |
 | - heatmap                 |                           |
 +---------------------------+---------------------------+
-| multidimensional          | *n-Dim*                   |
-+---------------------------+                           |
-| - TEC (spider)            |                           |
+| multidimensional          |                           |
++---------------------------+---------------------------+
+| - TEC (spider)            | *n-Dim*                   |
 | - radar                   |                           |
 +---------------------------+---------------------------+
-| PCA                       | *PCA*                     |
-+---------------------------+                           |
-| - explained variance      |                           |
+| PCA                       |                           |
++---------------------------+---------------------------+
+| - explained variance      | *PCA*                     |
 | - vector heatmap          |                           |
 | - score X vs. score Y     |                           |
 | - score map               |                           |
@@ -131,10 +135,11 @@ Noise Reduction
 
 Noise reduction ( |icon-noise-reduction| ) involves the smoothing of data.  It may be applied to maps only for viewing, or can be applied to *Analysis Data* before producing other plots and analyses (set from the *Apply to analysis* drop down).  There are four noise reduction methods available:
 
-* median, smooths the data by computing the median value over a specified window, assigning the result to the center pixel. The results smooth across the entire image;
+* median, smooths the data by computing the median value over a specified kernel (window) size, assigning the result to the center pixel. The results smooth across the entire image;
+* Gaussian, smooths the data using a Gaussian weighting with a specified sigma computed over a specified kernel size, assigning the result to the center pixel. The results smooth across the entire image;
 * Wiener, smooths the data using a Fourier domain low-pass filter;
 * edge-preserving, smooths the data while preserving sharp edges, this is the suggested option for most cases, though it may oversmooth inside grains; and
-* bilateral, Gaussian smoothing and edge-preserving, this filter difference from edge-preserving as it does not as strongly smooth the data.
+* bilateral, Gaussian smoothing and edge-preserving, this filter differs from edge-preserving as it does not as strongly smooth the data.
 
 Spot Data
 =========
@@ -151,7 +156,7 @@ Spot data is not currently available.
 Filter
 ======
 
-There are three types of filters than can be applied to exclude data from analyses and geochemical plots.  These include filters by value ( |icon-filter2| ), polygon masking ( |icon-polygon-new| ), and cluster masking ( |icon-mask-dark| ).  Filter by value and polygon masking are both created from the *Filter* tab whereas the cluster mask is set from *Styling>Clusters* in the right toolbox.  It is possible to use any combination of these filters and masks and turn them on or off as required.  All filters and masks can be turned off by clicking the |icon-map| button.
+There are three types of filters than can be applied to exclude data from analyses and geochemical plots.  These include filters by value ( |icon-filter2| ), polygon masking ( |icon-polygon-new| ), and cluster masking ( |icon-mask-dark| ).  Filter by value and polygon masking are both created from the *Filter* tab whereas the cluster mask is set from *Styling\>Clusters* in the right toolbox.  It is possible to use any combination of these filters and masks and turn them on or off as required.  All filters and masks can be turned off by clicking the |icon-map| button.
 
 .. figure:: _static/screenshots/LaME_Filter.png
     :align: center
@@ -188,10 +193,12 @@ Cluster masks can be turned on or off from the *Filter* tab, but cannot be set h
 
 Edge-detection
 --------------
-To aid with the identification of mineral boundaries, you can turn on edge detection by clicking the |icon-edge-detection| button. There are multiple edge detection methods available which you can select using the dropdown menu.
+To aid with the identification of mineral boundaries, you can turn on edge detection by clicking the |icon-edge-detection| button. There are multiple edge detection methods available (Sobel, Canny, zero-cross) which you can select using the dropdown menu.  Edge-detection is useful for locating the boundaries of polygons.  The use of edge detection does not affect analyses.
 
 Scatter and Heatmaps
 ====================
+
+The creation of 
 
 .. figure:: _static/screenshots/LaME_Scatter_and_Heatmaps.png
     :align: center
@@ -199,6 +206,7 @@ Scatter and Heatmaps
     :width: 315
 
     The *Scatter and Heatmaps* tab contains tools for plotting scatter maps and heat maps in 2 (biplots) and 3 (ternary) dimensions.  Scatter data may be colored by a field set in the *Styling* tab.  A map may also be produced with color defined by pixel position within a ternary diagram.
+
 
 n-Dim
 =====
@@ -277,6 +285,9 @@ These are not yet implemented, but will include methods to compute thermometry, 
     :height: 2ex
 
 .. |icon-histeq| image:: _static/icons/icon-histeq-64.png
+    :height: 2ex
+
+.. |icon-noise-reduction| image:: _static/icons/icon-noise-reduction-64.png
     :height: 2ex
 
 .. |icon-map| image:: _static/icons/icon-map-64.png

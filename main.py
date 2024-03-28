@@ -123,6 +123,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.cluster_tab_id = 7
         self.profile_tab_id = 8
         self.special_tab_id = 9
+        self.plottree_tab_id = 0
+        self.style_tab_id = 1
+        self.calculator_tab_id = 2
         
         #edge_det_img
         self.edge_img = None
@@ -139,7 +142,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.cluster_tab_id: {'Colormap':'viridis', 'ColorbarDirection':'vertical', 'ScaleLocation':'southeast', 'ScaleDirection':'horizontal', 'OverlayColor':'#ffffff'}}
         self.current_scatter_type = {self.sample_tab_id:'Heatmap', self.scatter_tab_id:'Scatter', self.pca_tab_id:'Scatter', self.profile_tab_id:'Scatter'}
         self.scatter_style = {self.sample_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'RdBu', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0},
+            self.process_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.62},
+            self.spot_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.62},
             self.scatter_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0},
+            self.ndim_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0},
             self.pca_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0},
             self.profile_tab_id: {'Marker':'circle', 'Size':12, 'LineWidth':1, 'Color':'#d3d3d3', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0}}
         self.heatmap_style = {self.sample_tab_id: {'Resolution':1, 'Colormap':'RdBu', 'AspectRatio':1.0},
@@ -176,6 +182,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionSelectAnalytes.triggered.connect(self.open_select_isotope_dialog)
         self.actionSpotData.triggered.connect(lambda: self.open_tab('spot data'))
         self.actionFilter_Tools.triggered.connect(lambda: self.open_tab('filter'))
+        self.actionCorrelation.triggered.connect(lambda: self.open_tab('samples'))
+        self.actionHistograms.triggered.connect(lambda: self.open_tab('preprocess'))
         self.actionBiPlot.triggered.connect(lambda: self.open_tab('scatter'))
         self.actionTEC.triggered.connect(lambda: self.open_tab('ndim'))
         self.actionPolygon.triggered.connect(lambda: self.open_tab('filter'))
@@ -307,8 +315,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonPolyCreate.clicked.connect(self.polygon.increment_pid)
         self.toolButtonPolyDelete.clicked.connect(lambda: self.table_fcn.delete_row(self.tableWidgetPolyPoints))
         # Add edge detection algorithm to aid in creating polygons
-        self.toolButtonEdgeDetection.clicked.connect(self.add_edge_detection)
-        self.comboBoxEdgeDet.activated.connect(self.add_edge_detection)
+        self.toolButtonEdgeDetect.clicked.connect(self.add_edge_detection)
+        self.comboBoxEdgeDetectMethod.activated.connect(self.add_edge_detection)
         
         #Apply filters
         self.toolButtonMapViewable.clicked.connect(lambda: self.apply_filters(fullmap =True))
@@ -461,6 +469,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxColorField.activated.connect(lambda: self.plot_scatter(save=False))
         self.horizontalSliderMarkerAlpha.sliderReleased.connect(self.slider_alpha_changed)
 
+        self.toolButtonStyleMaps.clicked.connect(lambda: self.open_style_callback(self.sample_tab_id))
+        self.toolButtonStyleHistograms.clicked.connect(lambda: self.open_style_callback(self.process_tab_id))
+        self.toolButtonStyleSpots.clicked.connect(lambda: self.open_style_callback(self.spot_tab_id))
+        self.toolButtonStyleScatter.clicked.connect(lambda: self.open_style_callback(self.scatter_tab_id))
+        self.toolButtonStyleNDim.clicked.connect(lambda: self.open_style_callback(self.ndim_tab_id))
+        self.toolButtonStylePCA.clicked.connect(lambda: self.open_style_callback(self.pca_tab_id))
+        self.toolButtonStyleClusters.clicked.connect(lambda: self.open_style_callback(self.cluster_tab_id))
+        self.toolButtonStyleProfiles.clicked.connect(lambda: self.open_style_callback(self.profile_tab_id))
+
         # Plot toolbar
         #-------------------------
 
@@ -490,7 +507,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def toolbox_changed(self):
         """Updates styles associated with toolbox page
         
-        Executes on change of self.toolBox.currentIndex().  Updates style related widgets.
+        Executes on change of ``MainWindow.toolBox.currentIndex()``.  Updates style related widgets.
         """
         match self.toolBox.currentIndex():
             case self.sample_tab_id:
@@ -500,6 +517,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.toggle_scatter_style_tab(self.sample_tab_id)
             case self.process_tab_id:
                 self.set_map_style()
+                self.set_scatter_style()
+                self.toggle_scatter_style_tab(self.process_tab_id)
+            case self.spot_tab_id:
+                self.set_scatter_style()
+                self.toggle_scatter_style_tab(self.spot_tab_id)
             case self.scatter_tab_id:
                 self.comboBoxScatterType.setCurrentText(self.current_scatter_type[self.scatter_tab_id])
                 self.set_scatter_style()
@@ -520,7 +542,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def slider_alpha_changed(self):
         """Updates transparency on scatter plots.
         
-        Executes on change of self.horizontalSliderMarkerAlpha.value().
+        Executes on change of ``MainWindow.horizontalSliderMarkerAlpha.value()``.
         """
         self.labelMarkerAlpha.setText(str(self.horizontalSliderMarkerAlpha.value()))
         match self.toolBox.currentIndex():
@@ -536,7 +558,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def input_ternary_name_dlg(self):
         """Opens a dialog to save new colormap
         
-        Executes on self.toolButtonSaveTernaryColormap.clicked.
+        Executes on ``MainWindow.toolButtonSaveTernaryColormap`` is clicked
         """
         name, ok = QInputDialog.getText(self, 'Custom ternary colormap', 'Enter new colormap name:')
         if ok:
@@ -595,6 +617,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def open_tab(self, tab_name):
         """Opens specified toolBox tab
 
+        Opens the specified tab in ``MainWindow.toolbox``
+
         :param tab_name: opens tab, values: 'samples', 'preprocess', 'spot data', 'filter',
               'scatter', 'ndim', pca', 'clustering', 'profiles', 'special'
         :type tab_name: str
@@ -639,7 +663,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def reset_to_full_view(self):
         """Reset the map to full view (i.e., remove crop)
         
-        Executes on self.toolButtonFullView.clicked.
+        Executes on ``MainWindow.toolButtonFullView`` is clicked.
         """
         #set original bounds
         self.crop_x_max = self.x_max
@@ -1013,8 +1037,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             else:
                 self.plot_laser_map(self.current_plot_df, self.current_plot_information)
             # self.add_plot(isotope_str,clipped_isotope_array)
+            self.run_noise_reduction()
             self.add_edge_detection()
-            self.add_noise_reduction()
 
     def remove_multi_plot(self, selected_plot_name):
         """Removes selected plot from MulitView
@@ -1729,6 +1753,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         layout.update()
 
     def plot_laser_map(self, current_plot_df, plot_information):
+        """Plots laser map
+        
+        :param current_plot_df: Current dataframe
+        :type current_plot_df: pandas.DataFrame
+        :param plot_information: contains plot name, sample id and plot type
+        :type plot_information: dict
+        """
         plot_name = plot_information['plot_name']
         sample_id = plot_information['sample_id']
         plot_type = plot_information['plot_type']
@@ -1905,7 +1936,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.prev_plot = name
                 self.init_zoom_view()
                 # uncheck edge detection
-                self.toolButtonEdgeDetection.setChecked(False)
+                self.toolButtonEdgeDetect.setChecked(False)
 
             # Create a SignalProxy to handle mouse movement events
             # self.proxy = pg.SignalProxy(p1.scene().sigMouseMoved, rateLimit=60, slot=self.mouseMoved)
@@ -2126,7 +2157,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Update the zoom view's displayed region
         # self.zoomViewBox.setRange(rect=zoomRect, padding=0)
-        if self.toolButtonEdgeDetection.isChecked():
+        if self.toolButtonEdgeDetect.isChecked():
             self.zoomImg.setImage(image=self.edge_array)  # user edge_array too zoom with edge_det
         else:
             self.zoomImg.setImage(image=self.array)  # Make sure this uses the current image data
@@ -2139,16 +2170,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.zoomViewBox.setZValue(1e10)
         
     def add_edge_detection(self):
-        """
-        Add edge detection to the current laser map plot.
-        :param algorithm: String specifying the edge detection algorithm ('sobel', 'canny', 'zero_cross')
+        """ Add edge detection to the current laser map plot.
+
+        Executes on change of ``MainWindow.comboBoxEdgeDetectMethod`` when ``MainWindow.toolButtonEdgeDetect`` is checked.
+        Options include 'sobel', 'canny', and 'zero_cross'.
         """
         if self.edge_img:
             # remove existing filters
             self.plot.removeItem(self.edge_img)  
         
-        if self.toolButtonEdgeDetection.isChecked():
-            algorithm = self.comboBoxEdgeDet.currentText().lower()
+        if self.toolButtonEdgeDetect.isChecked():
+            algorithm = self.comboBoxEdgeDetectMethod.currentText().lower()
             if algorithm == 'sobel':
                 # Apply Sobel edge detection
                 sobelx = Sobel(self.array, CV_64F, 1, 0, ksize=5)
@@ -2184,10 +2216,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.plot.addItem(self.edge_img)  
         
     def zero_crossing_laplacian(self,array):
-        """
-        Apply Zero Crossing on the Laplacian of the image.
-        :param array: 2D numpy array representing the image.
-        :return: Edge-detected image using the Zero Crossing method.
+        """Apply Zero Crossing on the Laplacian of the image.
+
+        :param array: array representing the image.
+        :type array: np.array(2D)
+
+        :return: Edge-detected image using the zero crossing method.
         """
         # Normalize the array to [0, 1]
         normalized_array = (array - np.min(array)) / (np.max(array) - np.min(array))
@@ -2226,7 +2260,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def noise_reduction_method_callback(self):
         """Noise reduction method callback
         
-        Runs when comboBoxNoiseReductionMethod is changed."""
+        Executes when ``MainWindow.comboBoxNoiseReductionMethod.currentText()`` is changed.
+        Enables ``MainWindow.spinBoxNoiseOption1`` and ``MainWindow.doubleSpinBoxNoiseOption2`` (if applicable)
+        and associated labels.  Constraints on the ranges are added to the spin boxes.
+        
+        After enabling options, it runs ``noise_reduction``.
+        """
         self.noise_method_changed = True
         algorithm = self.comboBoxNoiseReductionMethod.currentText().lower()
 
@@ -2241,7 +2280,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.doubleSpinBoxNoiseOption2.setEnabled(False)
 
                 self.noise_method_changed = False
-                self.add_noise_reduction(algorithm)
+                self.noise_reduction(algorithm)
             case _:
                 # set option 1
                 self.labelNoiseOption1.setEnabled(True)
@@ -2272,7 +2311,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.doubleSpinBoxNoiseOption2.setEnabled(False)
 
                     self.noise_method_changed = False
-                    self.add_noise_reduction(algorithm, val1)
+                    self.noise_reduction(algorithm, val1)
                 else:
                     # option 2
                     self.labelNoiseOption2.setEnabled(True)
@@ -2287,16 +2326,37 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                     val2 = self.doubleSpinBoxNoiseOption2.value()
                     self.noise_method_changed = False
-                    self.add_noise_reduction(algorithm, val1, val2)
+                    self.noise_reduction(algorithm, val1, val2)
     
     def gaussian_sigma(self, ksize):
         """Sets default Gaussian sigma.
         
-        Same as default in OpenCV, i.e., 0.3*((ksize-1)*0.5 - 1) + 0.8."""
+        Same as default in OpenCV, i.e., 0.3*((ksize-1)*0.5 - 1) + 0.8. This functions sets the sigma
+        value for ``cv2.GaussianBlur`` only when ``MainWindow.comboBoxNoiseReductionMethod`` is 'Gaussian' and new kernel
+        value is set by the user via ``MainWindow.spinBoxNoiseReductionOption1.value()``.
+        """
         return 0.3*((ksize-1)*0.5 - 1) + 0.8
 
+    def run_noise_reduction(self):
+        """Gets parameters and runs noise reduction"""
+
+        algorithm = self.comboBoxNoiseReductionMethod.currentText().lower()
+        if algorithm == 'none':
+            return
+
+        val1 = self.noise_red_options[algorithm]['value1']
+        if self.noise_red_options[algorithm]['label2'] is None:
+            self.noise_reduction(algorithm,val1)
+        else:
+            val2 = self.noise_red_options[algorithm]['value2']
+            self.noise_reduction(algorithm,val1,val2)
+
+
     def noise_reduction_option1_callback(self):
-        """Callback executed when the first noise reduction option is changed"""
+        """Callback executed when the first noise reduction option is changed
+        
+        Updates noise reduction applied to map(s) when ``MainWindow.spinBoxNoiseOption1.value()`` is changed by 
+        the user."""
         algorithm = self.comboBoxNoiseReductionMethod.currentText().lower()
 
         val1 = self.spinBoxNoiseOption1.value()
@@ -2307,31 +2367,35 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     val1 = val1 + 1
         self.noise_red_options[algorithm]['value1'] = val1
         if self.noise_red_options[algorithm]['label2'] is None:
-            self.add_noise_reduction(algorithm,val1)
+            self.noise_reduction(algorithm,val1)
         else:
             if algorithm == 'gaussian':
                 self.doubleSpinBoxNoiseOption2.setValue(self.gaussian_sigma(val1))
             val2 = self.doubleSpinBoxNoiseOption2.value()
-            self.add_noise_reduction(algorithm,val1,val2)
+            self.noise_reduction(algorithm,val1,val2)
 
     def noise_reduction_option2_callback(self):
-        """Callback executed when the second noise reduction option is changed"""
+        """Callback executed when the second noise reduction option is changed
+        
+        Updates noise reduction applied to map(s) when ``MainWindow.spinBoxNoiseOption2.value()`` is changed by 
+        the user.  Note, not all noise reduction methods have a second option."""
         algorithm = self.comboBoxNoiseReductionMethod.currentText().lower()
 
         val1 = self.spinBoxNoiseOption1.value()
         val2 = self.doubleSpinBoxNoiseOption2.value()
         self.noise_red_options[algorithm]['value1'] = val2
-        self.add_noise_reduction(algorithm,val1,val2)
+        self.noise_reduction(algorithm,val1,val2)
 
-    def add_noise_reduction(self, algorithm, val1=None, val2=None):
+    def noise_reduction(self, algorithm, val1=None, val2=None):
         """
         Add noise reduction to the current laser map plot.
 
-        Executes on change of comboBoxNoiseReductionMethod, spinBoxNoiseOption1 and
-        doubleSpinBoxOption2. Updates map.
+        Executes on change of ``MainWindow.comboBoxNoiseReductionMethod``, ``MainWindow.spinBoxNoiseOption1`` and
+        ``MainWindow.doubleSpinBoxOption2``. Updates map(s).
          
         Reduces noise by smoothing via one of several algorithms chosen from
-        comboBoxNoiseReductionMethod.
+        ``MainWindow.comboBoxNoiseReductionMethod``.
+
         :param algorithm:  Options include:
             'None' - no smoothing
             'Median' - simple blur that computes each pixel from the median of a window including
@@ -2851,13 +2915,43 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.toolButtonMarkerColor.setEnabled(False)
                 self.toolButtonMarkerColor.setStyleSheet("background-color: none;")
 
-    # toggle heatmap resolution spinBox when the scatter type comboBox is changed
-    def toggle_scatter_style_tab(self, tab_id):
-        """Updates and toggles widgets in scatter style tab
+    def open_style_callback(self, tab_id):
+        """Opens and style properties for a given tab_id
 
-        :param tab_id: tab_ind should be set by toolBox.currentIndex(), which determines the active
+        :param tab_id: tab_ind should be set by ``MainWindow.toolBox.currentIndex()``, which determines the active
             widgets
         :type tab_id: int
+        """
+
+        # open styling page associated with toolbox page.
+        self.toolBoxTreeView.setCurrentIndex(self.style_tab_id)
+        if tab_id == self.sample_tab_id:
+            if self.comboBoxCorrelationMethod.currentText().lower() == 'none':
+                self.toolBoxStyle.setCurrentIndex(1)
+                self.set_map_style(tab_id, False)
+            else:
+                self.toolBoxStyle.setCurrentIndex(2)
+                self.toggle_scatter_style_tab(tab_id, False)
+        else:
+            self.toolBoxStyle.setCurrentIndex(2)
+            self.toggle_scatter_style_tab(tab_id, False)
+
+        # style button for profiles is found in the lower pane, profile tab, so open profile pane in left toolbox.
+        if tab_id == self.profile_tab_id:
+            self.toolBox.setCurrentIndex(self.profile_tab_id)
+
+
+    # toggle heatmap resolution spinBox when the scatter type comboBox is changed
+    def toggle_scatter_style_tab(self, tab_id, update_plot=False):
+        """Updates and toggles widgets in scatter style tab
+
+        Updates the widgets in ``MainWindow.toolBoxStyle`` and enables/disables widgets as necessary.
+
+        :param tab_id: tab_ind should be set by ``MainWindow.toolBox.currentIndex()``, which determines the active plot
+            widget to update
+        :type tab_id: int
+        :param update_plot: flag indicating whether to update plot after change (True = yes, False = No), Defaults to False
+        :type update_plot: bool, optional
         """
         if tab_id == self.sample_tab_id:
             self.comboBoxScatterType.setCurrentText('Heatmap')
@@ -3070,7 +3164,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                                     'AspectRatio': float(self.lineEditAspectRatio.text())}
 
     def toggle_scale_direction(self):
-        if self.map_style['ScaleDirection'] == 'none':
+        if self.map_style['ScaleDirection'].lower() == 'none':
             self.labelScaleLocation.setEnabled(False)
             self.comboBoxScaleLocation.setEnabled(False)
         else:
@@ -3438,7 +3532,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def hist2dbiplot(self, fig, x, y, s, save):
         """Creates 2D histogram figure
 
-        A general function for creating 2D histograms.
+        A general function for creating 2D histograms (heatmaps).
 
         :param fig: figure object
         :type fig: matplotlib.figure
@@ -3583,10 +3677,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             new = False 
 
+        a['array'] = self.clipped_isotope_data[self.sample_id][x['field']].values
+        b['array'] = self.clipped_isotope_data[self.sample_id][y['field']].values
+        c['array'] = self.clipped_isotope_data[self.sample_id][z['field']].values
+
         ternary.ternmap(ax, selected_sample['X'],selected_sample['Y'], a,b,c, ca=[1,1,0], cb=[0.3,0.73,0.1], cc=[0,0,0.15], p=[1/3,1/3,1/3], cp = [])
 
-
     def plot_clustering(self):
+        """Plot cluster map"""
         df_filtered, isotopes = self.get_processed_data()
         filtered_array = df_filtered.values
         # filtered_array = df_filtered.dropna(axis=0, how='any').values
@@ -4031,7 +4129,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.tableWidgetViewGroups.setHorizontalHeaderLabels(['Groups'])
         algorithm = ''
         # Check which radio button is checked and update the list widget
-        if self.comboBoxColorMethod.currentText() == 'none':
+        if self.comboBoxColorMethod.currentText().lower() == 'none':
             pass  # No clusters to display for 'None'
         elif self.comboBoxColorMethod.currentText() == 'fuzzy c-means':
             algorithm = 'Fuzzy'

@@ -26,4 +26,3 @@ User Guide
     profiles
     multidimensional
     special_functions
-    export

@@ -571,30 +571,6 @@ thus the tick should display 0.001 * 1000 = 1.</p>
 
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="main.GaussianBlur">
-<span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">GaussianBlur</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ksize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmaX</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">dst</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">sigmaY</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">borderType</span></span></em><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dst</span></span></span><a class="headerlink" href="#main.GaussianBlur" title="Link to this definition">#</a></dt>
-<dd><p>.   &#64;brief Blurs an image using a Gaussian filter.
-.   
-.   The function convolves the source image with the specified Gaussian kernel. In-place filtering is
-.   supported.
-.   
-.   &#64;param src input image; the image can have any number of channels, which are processed
-.   independently, but the depth should be CV_8U, CV_16U, CV_16S, CV_32F or CV_64F.
-.   &#64;param dst output image of the same size and type as src.
-.   &#64;param ksize Gaussian kernel size. ksize.width and ksize.height can differ but they both must be
-.   positive and odd. Or, they can be zero’s and then they are computed from sigma.
-.   &#64;param sigmaX Gaussian kernel standard deviation in X direction.
-.   &#64;param sigmaY Gaussian kernel standard deviation in Y direction; if sigmaY is zero, it is set to be
-.   equal to sigmaX, if both sigmas are zeros, they are computed from ksize.width and ksize.height,
-.   respectively (see #getGaussianKernel for details); to fully control the result regardless of
-.   possible future modifications of all this semantics, it is recommended to specify all of ksize,
-.   sigmaX, and sigmaY.
-.   &#64;param borderType pixel extrapolation method, see #BorderTypes. #BORDER_WRAP is not supported.
-.   
-.   &#64;sa  sepFilter2D, filter2D, blur, boxFilter, bilateralFilter, medianBlur</p>
-</dd></dl>
-
 <dl class="py class">
 <dt class="sig sig-object py" id="main.IsotopeSelectionWindow">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">IsotopeSelectionWindow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">isotopes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clipped_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.IsotopeSelectionWindow" title="Link to this definition">#</a></dt>
@@ -709,38 +685,25 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.add_edge_detection">
 <span class="sig-name descname"><span class="pre">add_edge_detection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.add_edge_detection" title="Link to this definition">#</a></dt>
-<dd><p>Add edge detection to the current laser map plot.</p>
-<p>Executes on change of <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxEdgeDetectMethod</span></code> when <code class="docutils literal notranslate"><span class="pre">MainWindow.toolButtonEdgeDetect</span></code> is checked.
-Options include ‘sobel’, ‘canny’, and ‘zero_cross’.</p>
+<dd><p>Add edge detection to the current laser map plot.
+:param algorithm: String specifying the edge detection algorithm (‘sobel’, ‘canny’, ‘zero_cross’)</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.add_noise_reduction">
-<span class="sig-name descname"><span class="pre">add_noise_reduction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.add_noise_reduction" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">add_noise_reduction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.add_noise_reduction" title="Link to this definition">#</a></dt>
 <dd><p>Add noise reduction to the current laser map plot.</p>
-<p>Executes on change of <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxNoiseReductionMethod</span></code>, <code class="docutils literal notranslate"><span class="pre">MainWindow.spinBoxNoiseOption1</span></code> and
-<code class="docutils literal notranslate"><span class="pre">MainWindow.doubleSpinBoxOption2</span></code>. Updates map(s).</p>
+<p>Executes on change of comboBoxNoiseReductionMethod and spinBoxSmoothingFactor. Updates map.</p>
 <p>Reduces noise by smoothing via one of several algorithms chosen from
-<code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxNoiseReductionMethod</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>algorithm</strong> (<em>str</em>) – <p>Options include:
+comboBoxNoiseReductionMethod.  Options include:
 ‘None’ - no smoothing
-‘Median’ - simple blur that computes each pixel from the median of a window including</p>
+‘Median’ - simple filter that computes each pixel from the median of a window including</p>
 <blockquote>
 <div><p>surrounding points</p>
 </div></blockquote>
-<p>’Gaussian’ - a simple Gaussian blur
-‘Weiner’ - a Fourier domain filtering method that low pass filters to smooth the map
+<p>‘Weiner’ - a Fourier domain filtering method that low pass filters to smooth the map
 ‘Edge-preserving’ - filter that does an excellent job of preserving edges when smoothing
 ‘Bilateral’ - an edge-preserving Gaussian weighted filter</p>
-</p></li>
-<li><p><strong>val1</strong> (<em>int</em><em>, </em><em>optional</em>) – first filter argument, required for all filters</p></li>
-<li><p><strong>val2</strong> (<em>double</em><em>, </em><em>optional</em>) – second filter argument, required for Gaussian, Edge-preserving, and Bilateral methods</p></li>
-</ul>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -906,15 +869,6 @@ comboBoxSampleID</p>
 <dt class="sig sig-object py" id="main.MainWindow.find_leaf">
 <span class="sig-name descname"><span class="pre">find_leaf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">leaf</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.find_leaf" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="main.MainWindow.gaussian_sigma">
-<span class="sig-name descname"><span class="pre">gaussian_sigma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ksize</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.gaussian_sigma" title="Link to this definition">#</a></dt>
-<dd><p>Sets default Gaussian sigma.</p>
-<p>Same as default in OpenCV, i.e., 0.3*((ksize-1)*0.5 - 1) + 0.8. This functions sets the sigma
-value for <code class="docutils literal notranslate"><span class="pre">cv2.GaussianBlur</span></code> only when <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxNoiseReductionMethod</span></code> is ‘Gaussian’ and new kernel
-value is set by the user via <code class="docutils literal notranslate"><span class="pre">MainWindow.spinBoxNoiseReductionOption1.value()</span></code>.</p>
-</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.get_field_list">
@@ -1111,32 +1065,6 @@ tick_label_rotation (float): Angle of text rotation, default is 0.</p>
 </ul>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="main.MainWindow.noise_reduction_method_callback">
-<span class="sig-name descname"><span class="pre">noise_reduction_method_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.noise_reduction_method_callback" title="Link to this definition">#</a></dt>
-<dd><p>Noise reduction method callback</p>
-<p>Executes when <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxNoiseReductionMethod.currentText()</span></code> is changed.
-Enables <code class="docutils literal notranslate"><span class="pre">MainWindow.spinBoxNoiseOption1</span></code> and <code class="docutils literal notranslate"><span class="pre">MainWindow.doubleSpinBoxNoiseOption2</span></code> (if applicable)
-and associated labels.  Constraints on the ranges are added to the spin boxes.</p>
-<p>After enabling options, it runs <code class="docutils literal notranslate"><span class="pre">add_noise_reduction</span></code>.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="main.MainWindow.noise_reduction_option1_callback">
-<span class="sig-name descname"><span class="pre">noise_reduction_option1_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.noise_reduction_option1_callback" title="Link to this definition">#</a></dt>
-<dd><p>Callback executed when the first noise reduction option is changed</p>
-<p>Updates noise reduction applied to map(s) when <code class="docutils literal notranslate"><span class="pre">MainWindow.spinBoxNoiseOption1.value()</span></code> is changed by 
-the user.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="main.MainWindow.noise_reduction_option2_callback">
-<span class="sig-name descname"><span class="pre">noise_reduction_option2_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.noise_reduction_option2_callback" title="Link to this definition">#</a></dt>
-<dd><p>Callback executed when the second noise reduction option is changed</p>
-<p>Updates noise reduction applied to map(s) when <code class="docutils literal notranslate"><span class="pre">MainWindow.spinBoxNoiseOption2.value()</span></code> is changed by 
-the user.  Note, not all noise reduction methods have a second option.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1594,15 +1522,9 @@ Calls :get_field_list(): to construct the list.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.zero_crossing_laplacian">
 <span class="sig-name descname"><span class="pre">zero_crossing_laplacian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.zero_crossing_laplacian" title="Link to this definition">#</a></dt>
-<dd><p>Apply Zero Crossing on the Laplacian of the image.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>array</strong> (<em>np.array</em><em>(</em><em>2D</em><em>)</em>) – array representing the image.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Edge-detected image using the zero crossing method.</p>
-</dd>
-</dl>
+<dd><p>Apply Zero Crossing on the Laplacian of the image.
+:param array: 2D numpy array representing the image.
+:return: Edge-detected image using the Zero Crossing method.</p>
 </dd></dl>
 
 </dd></dl>
@@ -1983,7 +1905,6 @@ only the top row is moved.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.CustomAxis.tickStrings"><code class="docutils literal notranslate"><span class="pre">CustomAxis.tickStrings()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#main.GaussianBlur"><code class="docutils literal notranslate"><span class="pre">GaussianBlur()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.add_isotope_to_list"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.add_isotope_to_list()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.calculate_correlation"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.calculate_correlation()</span></code></a></li>
@@ -2025,7 +1946,6 @@ only the top row is moved.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.create_tree"><code class="docutils literal notranslate"><span class="pre">MainWindow.create_tree()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.dynamic_format"><code class="docutils literal notranslate"><span class="pre">MainWindow.dynamic_format()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.find_leaf"><code class="docutils literal notranslate"><span class="pre">MainWindow.find_leaf()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.gaussian_sigma"><code class="docutils literal notranslate"><span class="pre">MainWindow.gaussian_sigma()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_field_list"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_field_list()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_general_style"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_general_style()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_hex_color"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_hex_color()</span></code></a></li>
@@ -2043,9 +1963,6 @@ only the top row is moved.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.logax"><code class="docutils literal notranslate"><span class="pre">MainWindow.logax()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.mouse_moved"><code class="docutils literal notranslate"><span class="pre">MainWindow.mouse_moved()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.newplot"><code class="docutils literal notranslate"><span class="pre">MainWindow.newplot()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.noise_reduction_method_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.noise_reduction_method_callback()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.noise_reduction_option1_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.noise_reduction_option1_callback()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.noise_reduction_option2_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.noise_reduction_option2_callback()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.open_calculator"><code class="docutils literal notranslate"><span class="pre">MainWindow.open_calculator()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.open_directory"><code class="docutils literal notranslate"><span class="pre">MainWindow.open_directory()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.open_select_isotope_dialog"><code class="docutils literal notranslate"><span class="pre">MainWindow.open_select_isotope_dialog()</span></code></a></li>

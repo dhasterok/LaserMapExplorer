@@ -222,8 +222,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>219</width>
-           <height>484</height>
+           <width>98</width>
+           <height>28</height>
           </rect>
          </property>
          <attribute name="icon">
@@ -454,8 +454,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>219</width>
-           <height>484</height>
+           <width>98</width>
+           <height>28</height>
           </rect>
          </property>
          <attribute name="icon">
@@ -1296,8 +1296,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>219</width>
-           <height>484</height>
+           <width>98</width>
+           <height>28</height>
           </rect>
          </property>
          <attribute name="icon">
@@ -1610,8 +1610,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>219</width>
-           <height>484</height>
+           <width>98</width>
+           <height>28</height>
           </rect>
          </property>
          <attribute name="icon">
@@ -4010,9 +4010,9 @@
        <string>Activates the crop tool</string>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>4</number>
       </property>
-      <widget class="QWidget" name="SelectIsotopePage">
+      <widget class="QWidget" name="SelectAnalytePage">
        <property name="enabled">
         <bool>true</bool>
        </property>
@@ -4166,7 +4166,7 @@
            </widget>
           </item>
           <item row="4" column="1">
-           <widget class="QToolButton" name="toolButtonLoadIsotopes">
+           <widget class="QToolButton" name="toolButtonLoadAnalytes">
             <property name="minimumSize">
              <size>
               <width>32</width>
@@ -5464,7 +5464,7 @@
           </size>
          </property>
         </widget>
-        <widget class="QComboBox" name="comboBoxFIsotope">
+        <widget class="QComboBox" name="comboBoxFAnalyte">
          <property name="geometry">
           <rect>
            <x>5</x>
@@ -6401,7 +6401,7 @@
          </property>
          <layout class="QGridLayout" name="gridLayoutAxes">
           <item row="1" column="2">
-           <widget class="QComboBox" name="comboBoxScatterIsotopeY">
+           <widget class="QComboBox" name="comboBoxScatterAnalyteY">
             <property name="font">
              <font>
               <pointsize>11</pointsize>
@@ -6418,7 +6418,7 @@
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="labelYIsotope">
+           <widget class="QLabel" name="labelYAnalyte">
             <property name="font">
              <font>
               <pointsize>11</pointsize>
@@ -6452,7 +6452,7 @@
            </widget>
           </item>
           <item row="0" column="2">
-           <widget class="QComboBox" name="comboBoxScatterIsotopeX">
+           <widget class="QComboBox" name="comboBoxScatterAnalyteX">
             <property name="font">
              <font>
               <pointsize>11</pointsize>
@@ -6488,7 +6488,7 @@
            </widget>
           </item>
           <item row="0" column="0">
-           <widget class="QLabel" name="labelXIsotope">
+           <widget class="QLabel" name="labelXAnalyte">
             <property name="font">
              <font>
               <pointsize>11</pointsize>
@@ -6503,7 +6503,7 @@
            </widget>
           </item>
           <item row="2" column="0">
-           <widget class="QLabel" name="labelZIsotope">
+           <widget class="QLabel" name="labelZAnalyte">
             <property name="font">
              <font>
               <pointsize>11</pointsize>
@@ -6540,7 +6540,7 @@
            </widget>
           </item>
           <item row="2" column="2">
-           <widget class="QComboBox" name="comboBoxScatterIsotopeZ">
+           <widget class="QComboBox" name="comboBoxScatterAnalyteZ">
             <property name="font">
              <font>
               <pointsize>11</pointsize>
@@ -7125,7 +7125,7 @@
             <item row="2" column="0">
              <layout class="QFormLayout" name="formLayout_2">
               <item row="0" column="0">
-               <widget class="QLabel" name="labelNDimIsotope">
+               <widget class="QLabel" name="labelNDimAnalyte">
                 <property name="font">
                  <font>
                   <pointsize>11</pointsize>
@@ -7140,7 +7140,7 @@
                </widget>
               </item>
               <item row="0" column="1">
-               <widget class="QComboBox" name="comboBoxNDimIsotope">
+               <widget class="QComboBox" name="comboBoxNDimAnalyte">
                 <property name="maximumSize">
                  <size>
                   <width>150</width>
@@ -7178,7 +7178,7 @@
                </widget>
               </item>
               <item row="1" column="1">
-               <widget class="QComboBox" name="comboBoxNDimIsotopeSet">
+               <widget class="QComboBox" name="comboBoxNDimAnalyteSet">
                 <property name="maximumSize">
                  <size>
                   <width>150</width>
@@ -7416,7 +7416,7 @@
             <item row="2" column="1">
              <layout class="QVBoxLayout" name="verticalLayout_4">
               <item>
-               <widget class="QToolButton" name="toolButtonNDimIsotopeAdd">
+               <widget class="QToolButton" name="toolButtonNDimAnalyteAdd">
                 <property name="minimumSize">
                  <size>
                   <width>32</width>
@@ -7448,7 +7448,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QToolButton" name="toolButtonNDimIsotopeSetAdd">
+               <widget class="QToolButton" name="toolButtonNDimAnalyteSetAdd">
                 <property name="minimumSize">
                  <size>
                   <width>32</width>

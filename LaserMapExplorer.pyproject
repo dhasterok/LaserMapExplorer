@@ -1,7 +1,7 @@
 {
     "files": [
         "designer/CalculatorWindow.ui",
-        "designer/IsotopeSelectionDialog.ui",
+        "designer/AnalyteSelectionDialog.ui",
         "designer/form.ui",
         "designer/mainwindow.ui",
         "designer/preferences.ui",

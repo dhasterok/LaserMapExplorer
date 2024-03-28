@@ -39,7 +39,7 @@ import matplotlib.ticker as ticker
 from src.radar import Radar
 from src.calculator import CalWindow
 from src.ui.MainWindow import Ui_MainWindow
-from src.ui.analyteSelectionDialog import Ui_Dialog
+from src.ui.IsotopeSelectionDialog import Ui_Dialog
 import scipy.stats
 from scipy import ndimage
 from sklearn.preprocessing import StandardScaler
@@ -54,7 +54,7 @@ import copy
 pg.setConfigOption('imageAxisOrder', 'row-major') # best performance
 ## !pyrcc5 resources.qrc -o src/ui/resources_rc.py
 ## !pyuic5 designer/mainwindow.ui -o src/ui/MainWindow.py
-## !pyuic5 -x designer/AnalyteSelectionDialog.ui -o src/ui/AnalyteSelectionDialog.py
+## !pyuic5 -x designer/IsotopeSelectionDialog.ui -o src/ui/IsotopeSelectionDialog.py
 # pylint: disable=fixme, line-too-long, no-name-in-module, trailing-whitespace
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
@@ -639,21 +639,25 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def reset_to_full_view(self):
         """Reset the map to full view (i.e., remove crop)
         
-        Executes on self.toolButtonFullView.clicked.
+        Executes on ``MainWindow.toolButtonFullView`` is clicked.
         """
-        
-        sample_id = self.current_plot_information['sample_id']
         #set original bounds
-        self.data[sample_id]['crop_x_max'] = self.data[sample_id]['x_max']
-        self.data[sample_id]['crop_x_min'] = self.data[sample_id]['x_min']
-        self.data[sample_id]['crop_y_max'] = self.data[sample_id]['y_max']
-        self.data[sample_id]['crop_y_min'] = self.data[sample_id]['y_min']
+        self.crop_x_max = self.x_max
+        self.crop_x_min = self.x_min
+        self.crop_y_max = self.y_max
+        self.crop_y_min = self.y_min
         #remove crop overlays
         self.crop_tool.remove_overlays()
+        # reset current plot df and mask to original
+        # self.current_plot_df = self.current_plot_df_copy.copy()
+        # self.mask = self.mask.copy()
+        # self.cluster_results = self.cluster_results_copy
         
-        self.data[sample_id]['processed_data'] = copy.deepcopy(self.data[sample_id]['raw_data'])
-        self.data[sample_id]['cropped_raw_data'] = copy.deepcopy(self.data[sample_id]['raw_data'])
-        self.data[sample_id]['computed_data'] = {
+        # reset clipped_isotope_data and self.computed_isotope_data and current_plot_df
+        sample_id = self.current_plot_information['sample_id']
+        self.clipped_isotope_data[sample_id] = copy.deepcopy(self.isotope_data[sample_id])
+        self.cropped_original_data[sample_id] = copy.deepcopy(self.isotope_data[sample_id])
+        self.computed_isotope_data[sample_id] = {
             'ratio':None,
             'calculated':None,
             'special':None,
@@ -4446,75 +4450,77 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         - DataFrame: Processed data for plotting. This is only returned if analysis_type is not 'laser' or 'hist'.
 
         Note:
-        - The method also updates certain parameters in the analyte data frame related to scaling.
+        - The method also updates certain parameters in the isotope data frame related to scaling.
         - Based on the plot type, this method internally calls the appropriate plotting functions.
         """
         
         if sample_id != self.sample_id:
             #axis mask is not used when plot analytes of a different sample
-            axis_mask  = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
+            axis_mask  = np.ones_like( self.sample_data_dict[sample_id]['X'], dtype=bool)
         else:
-            axis_mask = self.data[self.sample_id]['axis_mask']
+            axis_mask = self.axis_mask
         
         print(sample_id)
         #crop plot if filter applied
-        current_plot_df = self.data[sample_id]['raw_data'][['X','Y']][axis_mask].reset_index(drop=True)
+        current_plot_df = self.sample_data_dict[sample_id][['X','Y']][axis_mask].reset_index(drop=True)
         
         match analysis_type:
             
-            case 'analyte':
-                current_plot_df['array'] = self.data[sample_id]['processed_data'].loc[:,name].values
+            case 'isotope':
+                current_plot_df['array'] = self.clipped_isotope_data[sample_id].loc[:,name].values
                         
             case 'ratio':
-                current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].loc[:,name].values
+                current_plot_df['array'] = self.computed_isotope_data[sample_id][analysis_type].loc[:,name].values
             
             case 'pca':
-                current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].values
+                current_plot_df['array'] = self.computed_isotope_data[sample_id][analysis_type].values
                 
             case 'cluster':
-                current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].values
+                current_plot_df['array'] = self.computed_isotope_data[sample_id][analysis_type].values
                 
             case 'cluster score':
-                current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].values
+                current_plot_df['array'] = self.computed_isotope_data[sample_id][analysis_type].values
                 
             case 'special':
-                current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].values
+                current_plot_df['array'] = self.computed_isotope_data[sample_id][analysis_type].values
             case 'computed':
-                current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].values
+                current_plot_df['array'] = self.computed_isotope_data[sample_id][analysis_type].values
         
         # crop plot if filter applied
-        # current_plot_df = current_plot_df[self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
+        # current_plot_df = current_plot_df[self.axis_mask].reset_index(drop=True)
 
 
         return current_plot_df
         
-    def create_plot(self,current_plot_df, sample_id = None, plot_type = 'lasermap', analyte_1 = None, analyte_2 = None, plot = True):
+    def create_plot(self,current_plot_df, sample_id = None, plot_type = 'lasermap', isotope_1 = None, isotope_2 = None, plot = True):
         # creates plot information and send to relevant plotting method
         # adds plot to canvas if specified by user
         if not sample_id:
             sample_id = self.sample_id
         
         
-        parameters = self.data[sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['analytes']==analyte_1)].iloc[0]
+        parameters = self.isotopes_df.loc[(self.isotopes_df['sample_id']==sample_id)
+                          & (self.isotopes_df['isotopes']==isotope_1)].iloc[0]
         
-        if not analyte_2: #not a ratio
-            current_plot_df['array'] = self.data[sample_id]['processed_data'][analyte_1].values
-            analyte_str = analyte_1
+        if not isotope_2: #not a ratio
+            current_plot_df['array'] = self.clipped_isotope_data[sample_id][isotope_1].values
+            isotope_str = isotope_1
         else:
             # Get the index of the row that matches the criteria
-            index_to_update = self.data[sample_id]['ratios_info'].loc[
-                (self.data[sample_id]['ratios_info']['analyte_1'] == analyte_1) &
-                (self.data[sample_id]['ratios_info']['analyte_2'] == analyte_2)
+            index_to_update = self.ratios_df.loc[
+                (self.ratios_df['sample_id'] == sample_id) &
+                (self.ratios_df['isotope_1'] == isotope_1) &
+                (self.ratios_df['isotope_2'] == isotope_2)
             ].index
             idx = index_to_update[0]
-            parameters  = self.data[sample_id]['ratios_info'].iloc[idx]
-            current_plot_df['array'] = self.data[sample_id]['computed_data']['ratio'][analyte_1].values
-            analyte_str = analyte_1 +' / '+ analyte_2
+            parameters  = self.ratios_df.iloc[idx]
+            current_plot_df['array'] = self.computed_isotope_data[sample_id]['ratio'][isotope_1].values
+            isotope_str = isotope_1 +' / '+ isotope_2
         if plot_type=='lasermap':
             
             
-            plot_information={'plot_name':analyte_str,'sample_id':sample_id,
-                              'analyte_1':analyte_1, 'analyte_2':analyte_2,
+            plot_information={'plot_name':isotope_str,'sample_id':sample_id,
+                              'isotope_1':isotope_1, 'isotope_2':isotope_2,
                               'plot_type':plot_type}
             self.plot_laser_map(current_plot_df,plot_information)
             self.update_spinboxes(parameters)
@@ -5089,32 +5095,32 @@ class analyteSelectionWindow(QDialog, Ui_Dialog):
     def update_list(self):
         self.norm_dict={}
         for i in range(self.tableWidgetSelected.rowCount()):
-            analyte_pair = self.tableWidgetSelected.item(i, 0).text()
+            isotope_pair = self.tableWidgetSelected.item(i, 0).text()
             combo = self.tableWidgetSelected.cellWidget(i, 1)
             selection = combo.currentText()
-            self.norm_dict[analyte_pair] = selection
+            self.norm_dict[isotope_pair] = selection
         self.listUpdated.emit()
 
-    def populate_analyte_list(self, analyte_pair, norm):
-        if '/' in analyte_pair:
-            row_header, col_header = analyte_pair.split(' / ')
+    def populate_isotope_list(self, isotope_pair, norm):
+        if '/' in isotope_pair:
+            row_header, col_header = isotope_pair.split(' / ')
         else:
-            row_header = col_header = analyte_pair
-        # Select the cell in tableWidgetanalyte
-        if row_header in self.analytes:
-            row_index = self.analytes.index(row_header)
-            col_index = self.analytes.index(col_header)
+            row_header = col_header = isotope_pair
+        # Select the cell in tableWidgetIsotope
+        if row_header in self.isotopes:
+            row_index = self.isotopes.index(row_header)
+            col_index = self.isotopes.index(col_header)
 
-            item = self.tableWidgetAnalytes.item(row_index, col_index)
+            item = self.tableWidgetIsotopes.item(row_index, col_index)
             if not item:
                 item = QTableWidgetItem()
-                self.tableWidgetAnalytes.setItem(row_index, col_index, item)
+                self.tableWidgetIsotopes.setItem(row_index, col_index, item)
             item.setSelected(True)
 
             # Add the loaded data to tableWidgetSelected
             newRow = self.tableWidgetSelected.rowCount()
             self.tableWidgetSelected.insertRow(newRow)
-            self.tableWidgetSelected.setItem(newRow, 0, QTableWidgetItem(analyte_pair))
+            self.tableWidgetSelected.setItem(newRow, 0, QTableWidgetItem(isotope_pair))
             combo = QComboBox()
             combo.addItems(['linear', 'log'])
             combo.setCurrentText(norm)

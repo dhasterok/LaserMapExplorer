@@ -39,7 +39,7 @@ import matplotlib.ticker as ticker
 from src.radar import Radar
 from src.calculator import CalWindow
 from src.ui.MainWindow import Ui_MainWindow
-from src.ui.analyteSelectionDialog import Ui_Dialog
+from src.ui.AnalyteSelectionDialog import Ui_Dialog
 import scipy.stats
 from scipy import ndimage
 from sklearn.preprocessing import StandardScaler
@@ -1220,7 +1220,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         analyte_2 = None
         analyte_select = self.comboBoxFSelect.currentText()
 
-        if analyte_select == 'Isotope':
+        if analyte_select == 'Analyte':
             f_val =  self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes'] == analyte_1)].iloc[0][['v_min', 'v_max']]
         else:
             if '/' in analyte_1:

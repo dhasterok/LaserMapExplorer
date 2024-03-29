@@ -1278,7 +1278,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                  QtWidgets.QTableWidgetItem(analyte_1))
         self.tableWidgetFilters.setItem(row, 2,
                                  QtWidgets.QTableWidgetItem(analyte_2))
-
         self.tableWidgetFilters.setItem(row, 3,
                                  QtWidgets.QTableWidgetItem(ratio))
 
@@ -1294,7 +1293,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         filter_info = { 'analyte_1': analyte_1, 'analyte_2': analyte_2, 'ratio': ratio,'norm':norm ,'f_min': f_min,'f_max':f_max, 'use':True}
         self.data[self.sample_id]['filter_info'].loc[len(self.data[self.sample_id]['filter_info'])]=filter_info
-
     def remove_selected_rows(self,sample):
         """Remove selected rows from filter table.
         
@@ -1375,6 +1373,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     
                     # Update the polygon mask - include points that are inside this polygon
                     self.data[self.sample_id]['polygon_mask'] &= inside_polygon
+                    
+                    #clear existing polygon lines
+                    self.polygon.clear_lines()
                     
                     #clear existing polygon lines
                     self.polygon.clear_lines()
@@ -4403,7 +4404,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.data[sample_id]['computed_data']['cluster']=pd.DataFrame(columns = ['Fuzzy', 'KMeans', 'KMediods'])
             self.data[sample_id]['computed_data']['cluster']['X'] = self.data[sample_id]['raw_data']['X']
             self.data[sample_id]['computed_data']['cluster']['Y'] = self.data[sample_id]['raw_data']['Y']
-            
+
             for plot_type in self.plot_widget_dict.keys():
                 if sample_id not in self.plot_widget_dict[plot_type]:
                     self.plot_widget_dict[plot_type][sample_id]={}
@@ -4787,11 +4788,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if level_1_data == 'Analyte' :
             current_plot_df = self.get_map_data(sample_id = level_2_data,name = level_3_data, analysis_type = 'analyte')
             self.create_plot(current_plot_df,sample_id = level_2_data,plot_type='lasermap', analyte_1=level_3_data)
-            
+
         if level_1_data == 'Normalised analyte' :
             current_plot_df = self.get_map_data(sample_id = level_2_data,name = level_3_data)
             self.create_plot(current_plot_df,sample_id = level_2_data,plot_type='lasermap_norm', analyte_1=level_3_data)
-            
         elif level_1_data == 'Histogram' :
             current_plot_df = self.get_map_data(sample_id = level_2_data,name = level_3_data)
             
@@ -4824,7 +4824,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #update self.data['norm'] with selection
             self.data[self.sample_id]['norm'] = self.analyteDialog.norm_dict
             self.update_tree(self.data[self.sample_id]['norm'], norm_update = True)
-        
         if result == QDialog.Rejected:
             pass
 

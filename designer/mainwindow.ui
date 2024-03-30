@@ -1536,7 +1536,7 @@
      <property name="currentIndex">
       <number>8</number>
      </property>
-     <widget class="QWidget" name="SelectIsotopePage">
+     <widget class="QWidget" name="SelectAnalytePage">
       <property name="enabled">
        <bool>true</bool>
       </property>
@@ -3154,7 +3154,7 @@
          </size>
         </property>
        </widget>
-       <widget class="QComboBox" name="comboBoxFIsotope">
+       <widget class="QComboBox" name="comboBoxFAnalyte">
         <property name="geometry">
          <rect>
           <x>5</x>
@@ -3181,7 +3181,7 @@
         </property>
         <item>
          <property name="text">
-          <string>Isotope</string>
+          <string>Analyte</string>
          </property>
         </item>
         <item>
@@ -4113,7 +4113,7 @@
         </property>
         <layout class="QGridLayout" name="gridLayoutAxes">
          <item row="1" column="2">
-          <widget class="QComboBox" name="comboBoxScatterIsotopeY">
+          <widget class="QComboBox" name="comboBoxScatterAnalyteY">
            <property name="font">
             <font>
              <pointsize>11</pointsize>
@@ -4130,14 +4130,14 @@
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QLabel" name="labelYIsotope">
+          <widget class="QLabel" name="labelYAnalyte">
            <property name="font">
             <font>
              <pointsize>11</pointsize>
             </font>
            </property>
            <property name="text">
-            <string>Isotope Y</string>
+            <string>Analyte Y</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -4156,7 +4156,7 @@
            </property>
            <item>
             <property name="text">
-             <string>Isotope</string>
+             <string>Analyte</string>
             </property>
            </item>
            <item>
@@ -4167,7 +4167,7 @@
           </widget>
          </item>
          <item row="0" column="2">
-          <widget class="QComboBox" name="comboBoxScatterIsotopeX">
+          <widget class="QComboBox" name="comboBoxScatterAnalyteX">
            <property name="font">
             <font>
              <pointsize>11</pointsize>
@@ -4195,7 +4195,7 @@
            </property>
            <item>
             <property name="text">
-             <string>Isotope</string>
+             <string>Analyte</string>
             </property>
            </item>
            <item>
@@ -4206,14 +4206,14 @@
           </widget>
          </item>
          <item row="0" column="0">
-          <widget class="QLabel" name="labelXIsotope">
+          <widget class="QLabel" name="labelXAnalyte">
            <property name="font">
             <font>
              <pointsize>11</pointsize>
             </font>
            </property>
            <property name="text">
-            <string>Isotope X</string>
+            <string>Analyte X</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -4221,14 +4221,14 @@
           </widget>
          </item>
          <item row="2" column="0">
-          <widget class="QLabel" name="labelZIsotope">
+          <widget class="QLabel" name="labelZAnalyte">
            <property name="font">
             <font>
              <pointsize>11</pointsize>
             </font>
            </property>
            <property name="text">
-            <string>Isotope Z</string>
+            <string>Analyte Z</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -4247,7 +4247,7 @@
            </property>
            <item>
             <property name="text">
-             <string>Isotope</string>
+             <string>Analyte</string>
             </property>
            </item>
            <item>
@@ -4258,7 +4258,7 @@
           </widget>
          </item>
          <item row="2" column="2">
-          <widget class="QComboBox" name="comboBoxScatterIsotopeZ">
+          <widget class="QComboBox" name="comboBoxScatterAnalyteZ">
            <property name="font">
             <font>
              <pointsize>11</pointsize>
@@ -4734,7 +4734,7 @@
         </font>
        </property>
        <property name="title">
-        <string>Select Isotope</string>
+        <string>Select Analyte</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -4845,7 +4845,7 @@
               </font>
              </property>
              <property name="toolTip">
-              <string>Add isotopes or select set below</string>
+              <string>Add analytes or select set below</string>
              </property>
              <property name="accessibleName">
               <string>NDim</string>
@@ -4881,7 +4881,7 @@
              </column>
              <column>
               <property name="text">
-               <string>Isotope</string>
+               <string>Analyte</string>
               </property>
               <property name="font">
                <font>
@@ -4894,14 +4894,14 @@
            <item row="2" column="0">
             <layout class="QFormLayout" name="formLayout_2">
              <item row="0" column="0">
-              <widget class="QLabel" name="labelNDimIsotope">
+              <widget class="QLabel" name="labelNDimAnalyte">
                <property name="font">
                 <font>
                  <pointsize>11</pointsize>
                 </font>
                </property>
                <property name="text">
-                <string>Isotope</string>
+                <string>Analyte</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -4909,7 +4909,7 @@
               </widget>
              </item>
              <item row="0" column="1">
-              <widget class="QComboBox" name="comboBoxNDimIsotope">
+              <widget class="QComboBox" name="comboBoxNDimAnalyte">
                <property name="maximumSize">
                 <size>
                  <width>150</width>
@@ -4922,7 +4922,7 @@
                 </font>
                </property>
                <property name="toolTip">
-                <string>Select isotope to add</string>
+                <string>Select analyte to add</string>
                </property>
                <item>
                 <property name="text">
@@ -4947,7 +4947,7 @@
               </widget>
              </item>
              <item row="1" column="1">
-              <widget class="QComboBox" name="comboBoxNDimIsotopeSet">
+              <widget class="QComboBox" name="comboBoxNDimAnalyteSet">
                <property name="maximumSize">
                 <size>
                  <width>150</width>
@@ -5041,7 +5041,7 @@
                 </size>
                </property>
                <property name="toolTip">
-                <string>Select all isotopes</string>
+                <string>Select all analytes</string>
                </property>
                <property name="text">
                 <string>Select All</string>
@@ -5131,7 +5131,7 @@
                 </size>
                </property>
                <property name="toolTip">
-                <string>Delete selected isotope(s)</string>
+                <string>Delete selected analyte(s)</string>
                </property>
                <property name="text">
                 <string>Remove</string>
@@ -5185,7 +5185,7 @@
            <item row="2" column="1">
             <layout class="QVBoxLayout" name="verticalLayout_4">
              <item>
-              <widget class="QToolButton" name="toolButtonNDimIsotopeAdd">
+              <widget class="QToolButton" name="toolButtonNDimAnalyteAdd">
                <property name="minimumSize">
                 <size>
                  <width>32</width>
@@ -5199,7 +5199,7 @@
                 </size>
                </property>
                <property name="toolTip">
-                <string>Add isotope to series</string>
+                <string>Add analyte to series</string>
                </property>
                <property name="text">
                 <string>Add</string>
@@ -5217,7 +5217,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QToolButton" name="toolButtonNDimIsotopeSetAdd">
+              <widget class="QToolButton" name="toolButtonNDimAnalyteSetAdd">
                <property name="minimumSize">
                 <size>
                  <width>32</width>
@@ -5231,7 +5231,7 @@
                 </size>
                </property>
                <property name="toolTip">
-                <string>Add predefined isotope series</string>
+                <string>Add predefined analyte series</string>
                </property>
                <property name="text">
                 <string>Add</string>
@@ -8384,12 +8384,12 @@
             </item>
             <item>
              <property name="text">
-              <string>Isotope</string>
+              <string>Analyte</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Isotope (normalized)</string>
+              <string>Analyte (normalized)</string>
              </property>
             </item>
             <item>

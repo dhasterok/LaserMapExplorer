@@ -39,7 +39,7 @@ import matplotlib.ticker as ticker
 from src.radar import Radar
 from src.calculator import CalWindow
 from src.ui.MainWindow import Ui_MainWindow
-from src.ui.analyteSelectionDialog import Ui_Dialog
+from src.ui.AnalyteSelectionDialog import Ui_Dialog
 import scipy.stats
 from scipy import ndimage
 from sklearn.preprocessing import StandardScaler
@@ -64,26 +64,25 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Add this line to set the size policy
         self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         self.buttons_layout = None  # create a reference to your layout
-        self.isotopes_df = pd.DataFrame(columns = ['sample_id', 'isotopes', 'norm','upper_bound','lower_bound','d_l_bound','d_u_bound', 'use'])
-        self.ratios_df = pd.DataFrame(columns = ['sample_id', 'isotope_1','isotope_2', 'norm','upper_bound','lower_bound','d_l_bound','d_u_bound', 'use', 'auto_scale'])
-        self.filter_df = pd.DataFrame(columns = ['sample_id', 'isotope_1', 'isotope_2', 'ratio','norm','f_min','f_max', 'use'])
-        # self.computed_isotope_data[self.sample_id]['cluster']=pd.DataFrame(columns = ['Fuzzy', 'KMeans', 'KMediods'])
+
+        #Initialise nested data which will hold the main sets of data for analysis
+        self.data= {}
+
         self.clipped_ratio_data = pd.DataFrame()
-        self.isotope_data = {}  #stores orginal isotope data
-        self.clipped_isotope_data = {} # stores processed isotoped data
-        self.computed_isotope_data = {} # stores computed isotoped data (ratios, custom fields)
-        
-        
-        self.sample_data_dict = {}
+        self.analyte_data = {}  #stores orginal analyte data
+        self.clipped_analyte_data = {} # stores processed analyted data
+        # self.data['computed_data'] = {} # stores computed analyted data (ratios, custom fields)
+
+
+        #self.data = {}
         self.plot_widget_dict ={'lasermap':{},'histogram':{},'lasermap_norm':{},'clustering':{},'scatter':{},'n-dim':{},'correlation':{}, 'pca':{}}
         self.multi_view_index = []
         self.laser_map_dict = {}
         self.multiview_info_label = {}
-        self.selected_isotopes = []
+        self.selected_analytes = []
         self.n_dim_list = []
         self.group_cmap = {}
         self.lasermaps = {}
-        self.norm_dict = {} #holds values (log, logit, linear) of all isotopes
         self.proxies = []
         self.prev_plot = ''
         self.pop_plot = ''
@@ -127,7 +126,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.plottree_tab_id = 0
         self.style_tab_id = 1
         self.calculator_tab_id = 2
-        
+
         #edge_det_img
         self.edge_img = None
 
@@ -168,7 +167,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Connect the "Open" action to a function
         self.actionOpen.triggered.connect(self.open_directory)
         # Intialize Tabs as not enabled
-        self.SelectIsotopePage.setEnabled(False)
+        self.SelectAnalytePage.setEnabled(False)
         self.PreprocessPage.setEnabled(False)
         self.SpotDataPage.setEnabled(False)
         self.FilterPage.setEnabled(False)
@@ -190,18 +189,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionProfiles.triggered.connect(lambda: self.open_tab('profiles'))
         self.actionCluster.triggered.connect(lambda: self.open_tab('clustering'))
         self.actionReset.triggered.connect(lambda: self.reset_analysis())
-        # Select Isotope Tab
+        # Select analyte Tab
         #-------------------------
         self.ref_data = pd.read_excel('resources/app_data/earthref.xlsx')
         ref_list = self.ref_data['layer']+' ['+self.ref_data['model']+'] '+ self.ref_data['reference']
         # self.comboBoxCorrelationMethod.activated.connect(self.plot_correlation)
 
-        self.comboBoxRefMaterial.addItems(ref_list.values)          # Select Isotope Tab
+        self.comboBoxRefMaterial.addItems(ref_list.values)          # Select analyte Tab
         self.comboBoxNDimRefMaterial.addItems(ref_list.values)      # NDim Tab
         self.comboBoxRefMaterial.activated.connect(lambda: self.change_ref_material(self.comboBoxRefMaterial, self.comboBoxNDimRefMaterial))
         self.comboBoxNDimRefMaterial.activated.connect(lambda: self.change_ref_material(self.comboBoxNDimRefMaterial, self.comboBoxRefMaterial))
 
-        # Selecting isotopes
+        # Selecting analytes
         #-------------------------
         # Connect the currentIndexChanged signal of comboBoxSampleId to load_data method
         self.comboBoxSampleId.activated.connect(
@@ -210,9 +209,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # self.toolButtonAddRatio.clicked.connect(lambda: self.ratios_items.appendRow(StandardItem(self.ratio_name)))
 
 
-        # self.comboBoxFIsotope.activated.connect(
-        #     lambda: self.get_map_data(self.sample_id,isotope_1=self.comboBoxFIsotope_1.currentText(),
-        #                           isotope_2=self.comboBoxFIsotope_2.currentText(),view = 1))
+        # self.comboBoxFAnalyte.activated.connect(
+        #     lambda: self.get_map_data(self.sample_id,analyte_1=self.comboBoxFAnalyte_1.currentText(),
+        #                           analyte_2=self.comboBoxFAnalyte_2.currentText(),view = 1))
         #
 
         #self.comboBoxPlots.activated.connect(lambda: self.add_remove(self.comboBoxPlots.currentText()))
@@ -226,16 +225,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #create plot tree
 
         self.create_tree()
-        self.open_directory()
+        # self.open_directory()
 
         #normalising
         self.comboBoxNorm.clear()
         self.comboBoxNorm.addItems(['linear','log','logit'])
         self.comboBoxNorm.activated.connect(lambda: self.update_norm(self.sample_id, self.comboBoxNorm.currentText(), update = True))
-        
+
         #init table_fcn
         self.table_fcn = Table_Fcn(self)
-        
+
         # Preprocess Tab
         #-------------------------
         self.toolButtonSwapXY.clicked.connect(self.swap_xy)
@@ -297,10 +296,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #-------------------------
         # left pane
         self.toolButtonAddFilter.clicked.connect(self.update_filter_table)
-        self.comboBoxFSelect.activated.connect(lambda: self.update_combo_boxes(self.comboBoxFSelect, self.comboBoxFIsotope))
-        self.comboBoxFIsotope.activated.connect(self.update_filter_values)
-        #     lambda: self.get_map_data(self.sample_id,isotope_1=self.comboBoxFIsotope_1.currentText(),
-        #                           isotope_2=self.comboBoxFIsotope_2.currentText(),view = 1))
+        self.comboBoxFSelect.activated.connect(lambda: self.update_combo_boxes(self.comboBoxFSelect, self.comboBoxFAnalyte))
+        self.comboBoxFAnalyte.activated.connect(self.update_filter_values)
+        #     lambda: self.get_map_data(self.sample_id,analyte_1=self.comboBoxFAnalyte_1.currentText(),
+        #                           analyte_2=self.comboBoxFAnalyte_2.currentText(),view = 1))
 
         # central-bottom pane
         self.toolButtonFilterUp.clicked.connect(lambda: self.table_fcn.move_row_up(self.tableWidgetFilters))
@@ -317,22 +316,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Add edge detection algorithm to aid in creating polygons
         self.toolButtonEdgeDetect.clicked.connect(self.add_edge_detection)
         self.comboBoxEdgeDetectMethod.activated.connect(self.add_edge_detection)
-        
+
         #Apply filters
         self.toolButtonMapViewable.clicked.connect(lambda: self.apply_filters(fullmap =True))
         self.toolButtonMapPolygon.clicked.connect(lambda: self.apply_filters(fullmap =False))
-        
+
         self.toolButtonFilterToggle.clicked.connect(lambda:self.apply_filters(fullmap =False))
         self.toolButtonMapMask.clicked.connect(lambda:self.apply_filters(fullmap =False))
-       
+
         # Scatter and Ternary Tab
         #-------------------------
         self.toolButtonPlotScatter.clicked.connect(lambda: self.plot_scatter(save=True))
         self.toolButtonTernaryMap.clicked.connect(self.plot_ternarymap)
 
-        self.comboBoxScatterSelectX.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectX, self.comboBoxScatterIsotopeX))
-        self.comboBoxScatterSelectY.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectY, self.comboBoxScatterIsotopeY))
-        self.comboBoxScatterSelectZ.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectZ, self.comboBoxScatterIsotopeZ))
+        self.comboBoxScatterSelectX.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectX, self.comboBoxScatteranalyteX))
+        self.comboBoxScatterSelectY.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectY, self.comboBoxScatteranalyteY))
+        self.comboBoxScatterSelectZ.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectZ, self.comboBoxScatteranalyteZ))
 
         # ternary colormaps
         # create ternary colors dictionary
@@ -392,18 +391,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Scatter and Ternary Tab
         #-------------------------
         self.comboBoxScatterType.activated.connect(lambda: self.toggle_scatter_style_tab(self.toolBox.currentIndex()))
-        self.comboBoxScatterIsotopeX.activated.connect(lambda: self.plot_scatter(save=False))
-        self.comboBoxScatterIsotopeY.activated.connect(lambda: self.plot_scatter(save=False))
-        self.comboBoxScatterIsotopeZ.activated.connect(lambda: self.plot_scatter(save=False))
+        self.comboBoxScatterAnalyteX.activated.connect(lambda: self.plot_scatter(save=False))
+        self.comboBoxScatterAnalyteY.activated.connect(lambda: self.plot_scatter(save=False))
+        self.comboBoxScatterAnalyteZ.activated.connect(lambda: self.plot_scatter(save=False))
 
         # N-Dim Tab
         #-------------------------
-        
-        isotope_set = ['majors', 'full trace', 'REE', 'metals']
-        self.comboBoxNDimIsotopeSet.addItems(isotope_set)
-        #self.comboBoxNDimRefMaterial.addItems(ref_list.values) This is done with the Set Isotope tab initialization above.
-        self.toolButtonNDimIsotopeAdd.clicked.connect(lambda: self.update_n_dim_table('IsotopeAdd'))
-        self.toolButtonNDimIsotopeSetAdd.clicked.connect(lambda: self.update_n_dim_table('IsotopeSetAdd'))
+
+        analyte_set = ['majors', 'full trace', 'REE', 'metals']
+        self.comboBoxNDimAnalyteSet.addItems(analyte_set)
+        #self.comboBoxNDimRefMaterial.addItems(ref_list.values) This is done with the Set analyte tab initialization above.
+        self.toolButtonNDimAnalyteAdd.clicked.connect(lambda: self.update_n_dim_table('analyteAdd'))
+        self.toolButtonNDimAnalyteSetAdd.clicked.connect(lambda: self.update_n_dim_table('analytesetAdd'))
         self.toolButtonNDimPlot.clicked.connect(self.plot_n_dim)
         self.toolButtonNDimUp.clicked.connect(lambda: self.table_fcn.move_row_up(self.tableWidgetNDim))
         self.toolButtonNDimDown.clicked.connect(lambda: self.table_fcn.move_row_down(self.tableWidgetNDim))
@@ -506,7 +505,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def toolbox_changed(self):
         """Updates styles associated with toolbox page
-        
+
         Executes on change of ``MainWindow.toolBox.currentIndex()``.  Updates style related widgets.
         """
         match self.toolBox.currentIndex():
@@ -541,7 +540,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def slider_alpha_changed(self):
         """Updates transparency on scatter plots.
-        
+
         Executes on change of ``MainWindow.horizontalSliderMarkerAlpha.value()``.
         """
         self.labelMarkerAlpha.setText(str(self.horizontalSliderMarkerAlpha.value()))
@@ -552,12 +551,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.scatter_style[self.pca_tab_id]['Alpha'] = float(self.horizontalSliderMarkerAlpha.value())
             case self.profile_tab_id:
                 self.scatter_style[self.profile_tab_id]['Alpha'] = float(self.horizontalSliderMarkerAlpha.value())
-        
+
         self.plot_scatter(save=False)
 
     def input_ternary_name_dlg(self):
         """Opens a dialog to save new colormap
-        
+
         Executes on ``MainWindow.toolButtonSaveTernaryColormap`` is clicked
         """
         name, ok = QInputDialog.getText(self, 'Custom ternary colormap', 'Enter new colormap name:')
@@ -580,7 +579,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def swap_xy(self):
         """Swaps X and Y coordinates of sample map
-        
+
         Executes on self.toolButtonSwapXY.clicked.  Updates data dictionary and other map related derived results.
         """
         self.swap_xy_val = not self.swap_xy_val
@@ -591,12 +590,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             self.order = 'F'
         # swap x and y
-        # print(self.sample_data_dict[self.sample_id][['X','Y']])
-        self.swap_xy_data(self.sample_data_dict[self.sample_id])
+        # print(self.data[self.sample_id][['X','Y']])
+        self.swap_xy_data(self.data[self.sample_id])
 
-        self.swap_xy_data(self.clipped_isotope_data[self.sample_id]) #this rotates processed data as well
+        self.swap_xy_data(self.data[self.sample_id]['processed_data']) #this rotates processed data as well
 
-        self.swap_xy_data(self.computed_isotope_data[self.sample_id]['cluster'])
+        self.swap_xy_data(self.data[self.sample_id]['computed_data']['cluster'])
 
         # update plots
         self.update_all_plots()
@@ -648,7 +647,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.toolBox.setCurrentIndex(self.special_tab_id)
 
     def change_ref_material(self, comboBox1, comboBox2):
-        """Changes reference computing normalized isotopes
+        """Changes reference computing normalized analytes
 
         Sets all QComboBox to a common normalizing reference.
 
@@ -662,10 +661,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def reset_to_full_view(self):
         """Reset the map to full view (i.e., remove crop)
-        
-        Executes on self.toolButtonFullView.clicked.
+
+        Executes on ``MainWindow.toolButtonFullView`` is clicked.
         """
-        
+
         sample_id = self.current_plot_information['sample_id']
         #set original bounds
         self.data[sample_id]['crop_x_max'] = self.data[sample_id]['x_max']
@@ -674,7 +673,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.data[sample_id]['crop_y_min'] = self.data[sample_id]['y_min']
         #remove crop overlays
         self.crop_tool.remove_overlays()
-        
+
         self.data[sample_id]['processed_data'] = copy.deepcopy(self.data[sample_id]['raw_data'])
         self.data[sample_id]['cropped_raw_data'] = copy.deepcopy(self.data[sample_id]['raw_data'])
         self.data[sample_id]['computed_data'] = {
@@ -685,35 +684,35 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'cluster':None,
             'cluster score':None
             }
-        
+
         #reset axis mask
-        self.axis_mask = np.ones_like( self.sample_data_dict[sample_id]['X'], dtype=bool)
-        self.mask = self.filter_mask & self.polygon_mask & self.axis_mask
+        self.data[self.sample_id]['axis_mask'] = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
+        self.data[self.sample_id]['mask'] = self.data[self.sample_id]['filter_mask'] & self.data[self.sample_id]['polygon_mask'] & self.data[self.sample_id]['axis_mask']
         self.prep_data()
         self.update_all_plots()
-        
+
         self.toolButtonCrop.setChecked(False)
-        
+
         self.plot.getViewBox().autoRange()
 
     # get a named list of current fields for sample
-    def get_field_list(self, set_name='isotope'):
+    def get_field_list(self, set_name='analyte'):
         """Gets the fields associated with a defined set
 
         Set names are consistent with QComboBox.
 
-        :param set_name: name of set list, options include 'isotope', 'isotope (normalized)', 'calcualated field',
-            'pca_score', 'cluster', 'cluster score', 'special', Defaults to 'isotope'
+        :param set_name: name of set list, options include 'analyte', 'analyte (normalized)', 'calcualated field',
+            'pca_score', 'cluster', 'cluster score', 'special', Defaults to 'analyte'
         :type set_name: str, optional
 
         :return: set_fields, a list of fields within the input set
         :rtype: list
         """
         match set_name:
-            case 'isotope' | 'isotope (normalized)':
-                set_fields = self.isotopes_df.loc[self.isotopes_df['sample_id']==self.sample_id,'isotopes']
+            case 'analyte' | 'analyte (normalized)':
+                set_fields = self.data[self.sample_id]['analyte_info'].loc[:,'analytes']
             case 'ratio':
-                set_fields = self.ratios_df.loc[self.isotopes_df['sample_id']==self.sample_id,'isotope_1'] + ' / ' + self.ratios_df.loc[self.isotopes_df['sample_id']==self.sample_id,'isotope_2']
+                set_fields = self.data[self.sample_id]['ratios_info'].loc[:,'analyte_1'] + ' / ' + self.data[self.sample_id]['ratios_info'].loc[:,'analyte_2']
             case 'calculated field':
                 set_fields = None
             case 'pca score':
@@ -746,13 +745,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :param color: rgb formatted color
         :type color: QColor
 
-        :return: hex-rgb color 
+        :return: hex-rgb color
         """
         return "#{:02x}{:02x}{:02x}".format(color.red(), color.green(), color.blue())
 
     def ternary_colormap_changed(self):
         """Changes toolButton backgrounds associated with ternary colormap
-        
+
         Updates ternary colormap when swatch colors are changed in the Scatter and Heatmaps >
         Map from Ternary groupbox.  The ternary colored chemical map is updated.
         """
@@ -764,8 +763,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.toolButtonTCmapMColor.setStyleSheet("background-color: %s;" % cmap['center'])
 
     def open_calculator(self):
-        isotopes_list = self.isotopes_df['isotopes'].values
-        self.calWindow = CalWindow(isotopes_list,self.sample_data_dict[self.sample_id] )
+        analytes_list = self.data[self.sample_id]['analyte_info']['analytes'].values
+        self.calWindow = CalWindow(analytes_list,self.data[self.sample_id] )
         self.calWindow.show()
 
     def plot_profile_and_table(self):
@@ -784,7 +783,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def update_color_bar_position(self):
         """Updates the color bar position on a figure
-        
+
         Currently unused
         """
         # Get the selected color bar position
@@ -833,27 +832,27 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     #     :param outlier: runs outlier detection, defaults to False
     #     :type outlier: bool, optional
     #     """
-        
-        
-        
+
+
+
     #     if outlier: #run outlier detection algorithm
-    #         isotope_array = self.outlier_detection(, lq, uq, d_lb,d_ub)
+    #         analyte_array = self.outlier_detection(, lq, uq, d_lb,d_ub)
     #     else:
-    #         lq_val = np.nanpercentile(isotope_array, lq, axis=0)
-    #         uq_val = np.nanpercentile(isotope_array, uq, axis=0)
-    #         isotope_array = np.clip(isotope_array, lq_val, uq_val)
-    #     isotope_array = self.transform_plots(isotope_array)
+    #         lq_val = np.nanpercentile(analyte_array, lq, axis=0)
+    #         uq_val = np.nanpercentile(analyte_array, uq, axis=0)
+    #         analyte_array = np.clip(analyte_array, lq_val, uq_val)
+    #     analyte_array = self.transform_plots(analyte_array)
 
 
     #     if norm == 'log':
     #         # np.nanlog handles NaN values
-    #         isotope_array = np.log10(isotope_array, where=~np.isnan(isotope_array))
+    #         analyte_array = np.log10(analyte_array, where=~np.isnan(analyte_array))
     #     elif norm == 'logit':
     #         # Handle division by zero and NaN values
     #         with np.errstate(divide='ignore', invalid='ignore'):
-    #             isotope_array = np.log10(isotope_array / (10**6 - isotope_array), where=~np.isnan(isotope_array))
+    #             analyte_array = np.log10(analyte_array / (10**6 - analyte_array), where=~np.isnan(analyte_array))
 
-    #     current_plot_df.loc[:, 'array'] = self.transform_plots(isotope_array)
+    #     current_plot_df.loc[:, 'array'] = self.transform_plots(analyte_array)
 
     #     return current_plot_df
 
@@ -861,7 +860,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """Auto-scales pixel values in map
 
         Executes on self.toolButtonAutoScale.clicked.
-        
+
         Outliers can make it difficult to view the variations of values within a map.
         This is a larger problem for linear scales, but can happen when log-scaled. Auto-
         scaling the data clips the values at a lower and upper bound.  Auto-scaling may be
@@ -873,21 +872,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         if self.update_spinboxes_bool: # spinboxes are not being updated
             sample_id = self.current_plot_information['sample_id']
-            isotope_1 = self.current_plot_information['isotope_1']
-            isotope_2 = self.current_plot_information['isotope_2']
+            analyte_1 = self.current_plot_information['analyte_1']
+            analyte_2 = self.current_plot_information['analyte_2']
             plot_type = self.current_plot_information['plot_type']
             lb = self.doubleSpinBoxLB.value()
             ub = self.doubleSpinBoxUB.value()
             d_lb = self.doubleSpinBoxDLB.value()
             d_ub = self.doubleSpinBoxDUB.value()
             auto_scale = self.toolButtonAutoScale.isChecked()
-            # if isotope_1 and not isotope_2:
-            #     auto_scale_value = self.isotopes_df.loc[(self.isotopes_df['sample_id']==self.sample_id)
-            #                      & (self.isotopes_df['isotopes']==isotope_1),'auto_scale'].values[0]
+            # if analyte_1 and not analyte_2:
+            #     auto_scale_value = self.data[sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['sample_id']==self.sample_id)
+            #                      & (self.data[sample_id]['analyte_info']['analytes']==analyte_1),'auto_scale'].values[0]
             # else:
-            #     auto_scale_value = self.ratios_df.loc[(self.ratios_df['sample_id']==self.sample_id)
-            #                              & (self.ratios_df['isotope_1']==isotope_1)
-            #                              & (self.ratios_df['isotope_2']==isotope_2),'auto_scale'].values[0]
+            #     auto_scale_value = self.data[self.sample_id]['ratios_info'].loc[(self.data[self.sample_id]['ratios_info']['sample_id']==self.sample_id)
+            #                              & (self.data[self.sample_id]['ratios_info']['analyte_1']==analyte_1)
+            #                              & (self.data[self.sample_id]['ratios_info']['analyte_2']==analyte_2),'auto_scale'].values[0]
 
             print(auto_scale)
             if auto_scale and not update:
@@ -902,55 +901,53 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 lb = 0
                 ub = 100
 
-            if isotope_1 and not isotope_2:
+            if analyte_1 and not analyte_2:
 
-                self.isotopes_df.loc[(self.isotopes_df['sample_id']==self.sample_id)
-                                  & (self.isotopes_df['isotopes']==isotope_1),'auto_scale']  = auto_scale
-                self.isotopes_df.loc[(self.isotopes_df['sample_id']==self.sample_id)
-                                         & (self.isotopes_df['isotopes']==isotope_1),
+                self.data[sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['sample_id']==self.sample_id)
+                                  & (self.data[sample_id]['analyte_info']['analytes']==analyte_1),'auto_scale']  = auto_scale
+                self.data[sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['sample_id']==self.sample_id)
+                                         & (self.data[sample_id]['analyte_info']['analytes']==analyte_1),
                                          ['upper_bound','lower_bound','d_l_bound', 'd_u_bound']] = [ub,lb,d_lb, d_ub]
 
             else:
-                self.ratios_df.loc[(self.ratios_df['sample_id']==self.sample_id)
-                                         & (self.ratios_df['isotope_1']==isotope_1)
-                                         & (self.ratios_df['isotope_2']==isotope_2),'auto_scale']  = auto_scale
-                self.ratios_df.loc[(self.ratios_df['sample_id']==self.sample_id)
-                                          & (self.ratios_df['isotope_1']==isotope_1)
-                                          & (self.ratios_df['isotope_2']==isotope_2),
+                self.data[sample_id]['ratios_info'].loc[ (self.data[sample_id]['ratios_info']['analyte_1']==analyte_1)
+                                         & (self.data[sample_id]['ratios_info']['analyte_2']==analyte_2),'auto_scale']  = auto_scale
+                self.data[sample_id]['ratios_info'].loc[ (self.data[sample_id]['ratios_info']['analyte_1']==analyte_1)
+                                          & (self.data[sample_id]['ratios_info']['analyte_2']==analyte_2),
                                           ['upper_bound','lower_bound','d_l_bound', 'd_u_bound']] = [ub,lb,d_lb, d_ub]
-            #self.get_map_data(self.sample_id, isotope_1 = isotope_1, isotope_2 = isotope_2, plot_type = plot_type, update = True)
-            self.prep_data(sample_id, isotope_1,isotope_2)
+            #self.get_map_data(self.sample_id, analyte_1 = analyte_1, analyte_2 = analyte_2, plot_type = plot_type, update = True)
+            self.prep_data(sample_id, analyte_1,analyte_2)
             self.update_filter_values()
 
     def apply_crop(self):
         current_plot_df = self.current_plot_df
         sample_id = self.current_plot_information['sample_id']
-        
-        
-        self.axis_mask = ((current_plot_df['X'] >= self.crop_x_min) & (current_plot_df['X'] <= self.crop_x_max) &
-                       (current_plot_df['Y'] <= current_plot_df['Y'].max() - self.crop_y_min) & (current_plot_df['Y'] >= current_plot_df['Y'].max() - self.crop_y_max))
-        
-        
-        #crop original_data based on self.axis_mask
-        self.cropped_original_data[sample_id] = self.isotope_data[sample_id][self.axis_mask].reset_index(drop=True) 
-                        
-        
-        #crop clipped_isotope_data based on self.axis_mask
-        self.clipped_isotope_data[sample_id] = self.clipped_isotope_data[sample_id][self.axis_mask].reset_index(drop=True)
-        
-        #crop each df of computed_isotope_data based on self.axis_mask
-        for analysis_type, df in self.computed_isotope_data[sample_id].items():
+
+
+        self.data[self.sample_id]['axis_mask'] = ((current_plot_df['X'] >= self.data[sample_id]['crop_x_min']) & (current_plot_df['X'] <= self.data[sample_id]['crop_x_max']) &
+                       (current_plot_df['Y'] <= current_plot_df['Y'].max() - self.data[sample_id]['crop_y_min']) & (current_plot_df['Y'] >= current_plot_df['Y'].max() - self.data[sample_id]['crop_y_max']))
+
+
+        #crop original_data based on self.data[self.sample_id]['axis_mask']
+        self.data[sample_id]['cropped_raw_data'] = self.data[sample_id]['raw_data'][self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
+
+
+        #crop clipped_analyte_data based on self.data[self.sample_id]['axis_mask']
+        self.data[sample_id]['processed_data'] = self.data[sample_id]['processed_data'][self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
+
+        #crop each df of computed_analyte_data based on self.data[self.sample_id]['axis_mask']
+        for analysis_type, df in self.data[sample_id]['computed_data'].items():
             if isinstance(df, pd.DataFrame):
-                df = df[self.axis_mask].reset_index(drop=True)
-        
-        self.mask = self.mask[self.axis_mask]
+                df = df[self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
+
+        self.data[self.sample_id]['mask'] = self.data[self.sample_id]['mask'][self.data[self.sample_id]['axis_mask']]
         self.prep_data(sample_id)
         self.update_all_plots()
 
 
     def update_plot(self,bin_s = True, axis = False, reset= False):
         """"Update plot
-        
+
         :param bin_s: Defaults to True
         :type bin_s: bool, optional
         :param axis: Defaults to False
@@ -966,58 +963,55 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
             bins = self.spinBoxNBins.value()
-            isotope_str = self.current_plot
-            isotope_str_list = isotope_str.split('_')
+            analyte_str = self.current_plot
+            analyte_str_list = analyte_str.split('_')
             auto_scale = self.toolButtonAutoScale.isChecked()
             sample_id = self.current_plot_information['sample_id']
-            isotope_1 = self.current_plot_information['isotope_1']
-            isotope_2 = self.current_plot_information['isotope_2']
+            analyte_1 = self.current_plot_information['analyte_1']
+            analyte_2 = self.current_plot_information['analyte_2']
             plot_type = self.current_plot_information['plot_type']
             plot_name = self.current_plot_information['plot_name']
             current_plot_df = self.current_plot_df
-            
+
             # current_plot_df = self.scale_plot(current_plot_df, lq= lb, uq=ub,d_lb=d_lb, d_ub=d_ub)
 
             # Computing data range using the 'array' column
             data_range = current_plot_df['array'].max() - current_plot_df['array'].min()
             #change axis range for all plots in sample
             if axis:
-                print(self.crop_x_min)
-                # self.isotopes_df.loc[(self.isotopes_df['sample_id']==sample_id), ['x_min','x_max','y_min','y_max']] = [self.crop_x_min,self.crop_x_max,self.crop_y_min,self.crop_y_max]
-
-                # self.ratios_df.loc[(self.ratios_df['sample_id']==sample_id), ['x_min','x_max','y_min','y_max']] = [self.crop_x_min,self.crop_x_max,self.crop_y_min,self.crop_y_max]
+                print(self.data[sample_id]['crop_x_min'])
                 # Filtering rows based on the conditions on 'X' and 'Y' columns
-                self.axis_mask = ((current_plot_df['X'] >= self.crop_x_min) & (current_plot_df['X'] <= self.crop_x_max) &
-                               (current_plot_df['Y'] <= current_plot_df['Y'].max() - self.crop_y_min) & (current_plot_df['Y'] >= current_plot_df['Y'].max() - self.crop_y_max))
-                
-                
-                #crop original_data based on self.axis_mask
-                self.cropped_original_data[sample_id] = self.isotope_data[sample_id][self.axis_mask].reset_index(drop=True) 
-                                
-                
-                #crop clipped_isotope_data based on self.axis_mask
-                self.clipped_isotope_data[sample_id] = self.clipped_isotope_data[sample_id][self.axis_mask].reset_index(drop=True)
-                
-                #crop each df of computed_isotope_data based on self.axis_mask
-                for analysis_type, df in self.computed_isotope_data[sample_id].items():
+                self.data[self.sample_id]['axis_mask'] = ((current_plot_df['X'] >= self.data[sample_id]['crop_x_min']) & (current_plot_df['X'] <= self.data[sample_id]['crop_x_max']) &
+                               (current_plot_df['Y'] <= current_plot_df['Y'].max() - self.data[sample_id]['crop_y_min']) & (current_plot_df['Y'] >= current_plot_df['Y'].max() - self.data[sample_id]['crop_y_max']))
+
+
+                #crop original_data based on self.data[self.sample_id]['axis_mask']
+                self.data[sample_id]['cropped_raw_data'] = self.data[sample_id]['raw_data'][self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
+
+
+                #crop clipped_analyte_data based on self.data[self.sample_id]['axis_mask']
+                self.data[sample_id]['processed_data'] = self.data[sample_id]['processed_data'][self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
+
+                #crop each df of computed_analyte_data based on self.data[self.sample_id]['axis_mask']
+                for analysis_type, df in self.data[sample_id]['computed_data'].items():
                     if isinstance(df, pd.DataFrame):
-                        df = df[self.axis_mask].reset_index(drop=True)
-                
-                
+                        df = df[self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
+
+
                 self.prep_data(sample_id)
-                
-            # self.clipped_isotope_data[sample_id][isotope_1] = current_plot_df['array'].values
-            # self.update_norm(sample_id, isotope = isotope_1)
-            
+
+            # self.data[sample_id]['processed_data'][analyte_1] = current_plot_df['array'].values
+            # self.update_norm(sample_id, analyte = analyte_1)
+
             # make copy of current_plot_df and crop of
-            # self.isotope_data['sample_id']
+            # self.analyte_data['sample_id']
             # self.current_plot_df_copy = self.current_plot_df.copy()
-            # self.mask_copy = self.mask.copy()
+            # self.data[self.sample_id]['mask']_copy = self.data[self.sample_id]['mask'].copy()
             # self.cluster_results_copy = self.cluster_results.copy()
-            # self.current_plot_df = current_plot_df[self.axis_mask].reset_index(drop=True)
-            # self.cluster_results = self.cluster_results[self.axis_mask].reset_index(drop=True)
-            # self.mask = self.mask[self.axis_mask]
-            
+            # self.current_plot_df = current_plot_df[self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
+            # self.cluster_results = self.cluster_results[self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
+            # self.data[self.sample_id]['mask'] = self.data[self.sample_id]['mask'][self.data[self.sample_id]['axis_mask']]
+
             if plot_type=='histogram':
                 if reset:
                     bins  = self.default_bins
@@ -1038,7 +1032,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def remove_multi_plot(self, selected_plot_name):
         """Removes selected plot from MulitView
-        
+
         :param selected_plot_name:
         :type selected_plot_name:
         """
@@ -1065,7 +1059,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def add_plot(self, plot_information, current_plot_df = None):
         """Adds plot to plot widget dictionary and displays in selected view tab
-        
+
         :param plot_information:
         :type plot_information: dict
         :param current_plot_df: Defaults to None
@@ -1144,94 +1138,93 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # After adding the plots, refresh windows to fix toggle button issue
         self.hide()
         self.show()
-    
+
     def save_analysis(self):
-        
-        
-        
+
+
+
         pass
-    
-    
+
+
     def reset_analysis(self, selection='full'):
         if selection =='full':
-            self.isotopes_df = pd.DataFrame(columns = ['sample_id', 'isotopes', 'norm','upper_bound','lower_bound','d_l_bound','d_u_bound', 'use'])
-            self.ratios_df = pd.DataFrame(columns = ['sample_id', 'isotope_1','isotope_2', 'norm','upper_bound','lower_bound','d_l_bound','d_u_bound', 'use', 'auto_scale'])
-            self.filter_df = pd.DataFrame(columns = ['sample_id', 'isotope_1', 'isotope_2', 'ratio','norm','f_min','f_max', 'use'])
-            self.computed_isotope_data[self.sample_id]['cluster']=pd.DataFrame(columns = ['Fuzzy', 'KMeans', 'KMediods'])
+            for sample_id in self.data.keys():
+                self.data[sample_id]['analyte_info'] = pd.DataFrame(columns = self.data[sample_id]['analyte_info'].columns)
+            self.data[sample_id]['ratios_info'] = pd.DataFrame(columns = ['sample_id', 'analyte_1','analyte_2', 'norm','upper_bound','lower_bound','d_l_bound','d_u_bound', 'use', 'auto_scale'])
+            self.data[self.sample_id]['filter_info'] = pd.DataFrame(columns = ['sample_id', 'analyte_1', 'analyte_2', 'ratio','norm','f_min','f_max', 'use'])
+            self.data[self.sample_id]['computed_data']['cluster']=pd.DataFrame(columns = ['Fuzzy', 'KMeans', 'KMediods'])
             self.clipped_ratio_data = pd.DataFrame()
-            self.isotope_data = {}  #stores orginal isotope data
-            self.clipped_isotope_data = {} # stores processed isotoped data
-            self.computed_isotope_data = {} # stores computed isotoped data (ratios, custom fields)
-            self.sample_data_dict = {}
+            self.analyte_data = {}  #stores orginal analyte data
+            self.clipped_analyte_data = {} # stores processed analyted data
+            self.data['computed_data'] = {} # stores computed analyted data (ratios, custom fields)
+            self.data = {}
             self.plot_widget_dict ={'lasermap':{},'histogram':{},'lasermap_norm':{},'clustering':{},'scatter':{},'n-dim':{},'correlation':{}, 'pca':{}}
             self.multi_view_index = []
             self.laser_map_dict = {}
             self.multiview_info_label = {}
-            self.selected_isotopes = []
+            self.selected_analytes = []
             self.n_dim_list = []
             self.group_cmap = {}
             self.lasermaps = {}
-            self.norm_dict = {} #holds values (log, logit, linear) of all isotopes
+            self.data['norm'] = {} #holds values (log, logit, linear) of all analytes
             self.proxies = []
             self.treeModel.clear()
             self.prev_plot = ''
             self.create_tree()
             self.change_sample(self.comboBoxSampleId.currentIndex())
         elif selection == 'sample': #sample is changed
-            
+
             #clear filter table
-            self.filter_df = pd.DataFrame(columns = [ 'isotope_1', 'isotope_2', 'ratio','norm','f_min','f_max', 'use'])
+            self.data[self.sample_id]['filter_info'] = pd.DataFrame(columns = [ 'analyte_1', 'analyte_2', 'ratio','norm','f_min','f_max', 'use'])
             self.tableWidgetFilters.clear()
-            
+
             #clear profiling
             self.profiling.clear_profiles()
-            
+
             #clear polygons
             self.polygon.clear_polygons()
-        
+
         pass
-    
+
     def clear_analysis(self):
-        # clears analysis 
-        
+        # clears analysis
+
         pass
 
     # def activate_ratios(self, state):
     #     """Adds ratios selection as options to certain comboBoxes and plot tree
 
-    #     Activate ratios by selecting them in the Isotope Select dialog.
+    #     Activate ratios by selecting them in the analyte Select dialog.
 
-    #     :param state: 
+    #     :param state:
     #     :type state: bool
 
     #     """
     #     if state == 2:  # Qt.Checked
     #         # Call your method here when the comboBox is checked
-    #         self.labelIsotope_2.setEnabled(True)
-    #         self.comboBoxIsotope_2.setEnabled(True)
+    #         self.labelanalyte_2.setEnabled(True)
+    #         self.comboBoxanalyte_2.setEnabled(True)
     #         self.get_map_data(self.sample_id,
-    #                           isotope_1=self.comboBoxIsotope_1.currentText(),
-    #                           isotope_2=self.comboBoxIsotope_2.currentText(),view = 1)
+    #                           analyte_1=self.comboBoxanalyte_1.currentText(),
+    #                           analyte_2=self.comboBoxanalyte_2.currentText(),view = 1)
     #         self.toolButtonAddRatio.setEnabled(True)
     #     else:
-    #         self.labelIsotope_2.setEnabled(False)
-    #         self.comboBoxIsotope_2.setEnabled(False)
-    #         self.get_map_data(self.sample_id,isotope_1=self.comboBoxIsotope_1.currentText())
+    #         self.labelanalyte_2.setEnabled(False)
+    #         self.comboBoxanalyte_2.setEnabled(False)
+    #         self.get_map_data(self.sample_id,analyte_1=self.comboBoxanalyte_1.currentText())
     #         self.toolButtonAddRatio.setEnabled(False)
 
     def update_filter_values(self):
-        isotope_1 = self.comboBoxFIsotope.currentText()
-        isotope_2 = None
-        isotope_select = self.comboBoxFSelect.currentText()
+        analyte_1 = self.comboBoxFAnalyte.currentText()
+        analyte_2 = None
+        analyte_select = self.comboBoxFSelect.currentText()
 
-        if isotope_select == 'Isotope':
-            f_val = self.isotopes_df.loc[(self.isotopes_df['sample_id'] == self.sample_id)
-                                        & (self.isotopes_df['isotopes'] == isotope_1)].iloc[0][['v_min', 'v_max']]
+        if analyte_select == 'Analyte':
+            f_val =  self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes'] == analyte_1)].iloc[0][['v_min', 'v_max']]
         else:
-            if '/' in isotope_1:
-                isotope_1, isotope_2 = isotope_1.split(' / ')
-                f_val = self.ratios_df.loc[(self.ratios_df['sample_id'] == self.sample_id)
-                                            & (self.ratios_df['isotope_1'] == isotope_1)& (self.ratios_df['isotope_2'] == isotope_2)].iloc[0][['v_min', 'v_max']]
+            if '/' in analyte_1:
+                analyte_1, analyte_2 = analyte_1.split(' / ')
+                f_val = self.data[self.sample_id]['ratios_info'].loc[(self.data[self.sample_id]['ratios_info']['analyte_1'] == analyte_1)& (self.data[self.sample_id]['ratios_info']['analyte_2'] == analyte_2)].iloc[0][['v_min', 'v_max']]
 
         self.lineEditFMin.setText(str(self.dynamic_format(f_val['v_min'])))
         self.lineEditFMax.setText(str(self.dynamic_format(f_val['v_max'])))
@@ -1243,12 +1236,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         def on_use_checkbox_state_changed(row, state):
             # Update the 'use' value in the filter_df for the given row
-            self.filter_df.at[row, 'use'] = state == QtCore.Qt.Checked
+            self.data[self.sample_id]['filter_info'].at[row, 'use'] = state == QtCore.Qt.Checked
 
 
-        isotope_1 = self.comboBoxFIsotope.currentText()
-        isotope_2 = None
-        isotope_select = self.comboBoxFSelect.currentText()
+        analyte_1 = self.comboBoxFAnalyte.currentText()
+        analyte_2 = None
+        analyte_select = self.comboBoxFSelect.currentText()
         f_min = float(self.lineEditFMin.text())
         f_max = float(self.lineEditFMax.text())
         # Add a new row at the end of the table
@@ -1264,23 +1257,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         chkBoxItem_select.setFlags(QtCore.Qt.ItemIsUserCheckable |
                             QtCore.Qt.ItemIsEnabled)
         ratio = False
-        if isotope_select == 'Isotope':
+        if analyte_select.lower() == 'analyte':
             chkBoxItem_select.setCheckState(QtCore.Qt.Unchecked)
-            norm = self.isotopes_df.loc[(self.isotopes_df['sample_id'] == self.sample_id)
-                                        & (self.isotopes_df['isotopes'] == isotope_1)].iloc[0]['norm']
+            norm = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes'] == analyte_1)].iloc[0]['norm']
         else:
-            if '/' in isotope_1:
+            if '/' in analyte_1:
                 ratio = True
-                isotope_1, isotope_2 = isotope_1.split(' / ')
-                norm = self.ratios_df.loc[(self.ratios_df['sample_id'] == self.sample_id)
-                                          & (self.ratios_df['isotope_1'] == isotope_1) & (self.ratios_df['isotope_2'] == isotope_2)].iloc[0]['norm']
+                analyte_1, analyte_2 = analyte_1.split(' / ')
+                norm = self.data[self.sample_id]['ratios_info'].loc[(self.data[self.sample_id]['ratios_info']['analyte_1'] == analyte_1)
+                                                                    & (self.data[self.sample_id]['ratios_info']['analyte_2'] == analyte_2)].iloc[0]['norm']
 
         self.tableWidgetFilters.setCellWidget(row, 0, chkBoxItem_use)
         self.tableWidgetFilters.setItem(row, 1,
-                                 QtWidgets.QTableWidgetItem(isotope_1))
+                                 QtWidgets.QTableWidgetItem(analyte_1))
         self.tableWidgetFilters.setItem(row, 2,
-                                 QtWidgets.QTableWidgetItem(isotope_2))
-
+                                 QtWidgets.QTableWidgetItem(analyte_2))
         self.tableWidgetFilters.setItem(row, 3,
                                  QtWidgets.QTableWidgetItem(ratio))
 
@@ -1294,12 +1285,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                  chkBoxItem_select)
 
 
-        filter_info = { 'isotope_1': isotope_1, 'isotope_2': isotope_2, 'ratio': ratio,'norm':norm ,'f_min': f_min,'f_max':f_max, 'use':True}
-        self.filter_df.loc[len(self.filter_df)]=filter_info
-
+        filter_info = { 'analyte_1': analyte_1, 'analyte_2': analyte_2, 'ratio': ratio,'norm':norm ,'f_min': f_min,'f_max':f_max, 'use':True}
+        self.data[self.sample_id]['filter_info'].loc[len(self.data[self.sample_id]['filter_info'])]=filter_info
     def remove_selected_rows(self,sample):
         """Remove selected rows from filter table.
-        
+
         :param sample:
         :type sample:
         """
@@ -1307,93 +1297,93 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         for row in range(self.tableWidgetFilters.rowCount()-1, -1, -1):
             chkBoxItem = self.tableWidgetFilters.item(row, 7)
             sample_id = self.tableWidgetFilters.item(row, 1).text()
-            isotope_1 = self.tableWidgetFilters.item(row, 2).text()
-            isotope_2 = self.tableWidgetFilters.item(row, 3).text()
+            analyte_1 = self.tableWidgetFilters.item(row, 2).text()
+            analyte_2 = self.tableWidgetFilters.item(row, 3).text()
             ratio = bool(self.tableWidgetFilters.item(row, 4).text())
             if chkBoxItem.checkState() == QtCore.Qt.Checked:
                 self.tableWidgetFilters.removeRow(row)
                 if not ratio:
-                    self.filter_df.drop(self.filter_df[(self.filter_df['isotope_1'] == isotope_1)& (self.filter_df['ratio'] == ratio)].index, inplace=True)
+                    self.data[self.sample_id]['filter_info'].drop(self.data[self.sample_id]['filter_info'][(self.data[self.sample_id]['filter_info']['analyte_1'] == analyte_1)& (self.data[self.sample_id]['filter_info']['ratio'] == ratio)].index, inplace=True)
                 else:
                     # Remove corresponding row from filter_df
-                    self.filter_df.drop(self.filter_df[(self.filter_df['isotope_1'] == isotope_1)& (self.filter_df['isotope_2'] == isotope_2)].index, inplace=True)
+                    self.data[self.sample_id]['filter_info'].drop(self.data[self.sample_id]['filter_info'][(self.data[self.sample_id]['filter_info']['analyte_1'] == analyte_1)& (self.data[self.sample_id]['filter_info']['analyte_2'] == analyte_2)].index, inplace=True)
         self.apply_filters(sample_id)
 
     def apply_filters(self, fullmap=False):
         """Applies filter to map data
-        
+
         Applies user specified data filters to mask data for analysis
 
         :param fullmap: If True, filters are ignored, otherwise filter maps, Defaults to False
         :type fullmap: bool, optional"""
         #reset all masks in current sample id
-        self.polygon_mask = np.ones_like( self.mask, dtype=bool)
-        self.filter_mask = np.ones_like( self.mask, dtype=bool)
-        
-        
+        self.data[self.sample_id]['polygon_mask'] = np.ones_like( self.data[self.sample_id]['mask'], dtype=bool)
+        self.data[self.sample_id]['filter_mask'] = np.ones_like( self.data[self.sample_id]['mask'], dtype=bool)
+
+
         if fullmap:
             #user clicked on Map viewable
             self.toolButtonFilterToggle.setChecked(False)
             self.toolButtonMapPolygon.setChecked(False)
             self.toolButtonMapMask.setChecked(False)
-            
+
         elif self.toolButtonFilterToggle.isChecked():
-            # Check if rows in self.filter_df exist and filter array in current_plot_df
-            # by creating a mask based on f_min and f_max of the corresponding filter isotopes
-            for index, filter_row in self.filter_df.iterrows():
+            # Check if rows in self.data[self.sample_id]['filter_info'] exist and filter array in current_plot_df
+            # by creating a mask based on f_min and f_max of the corresponding filter analytes
+            for index, filter_row in self.data[self.sample_id]['filter_info'].iterrows():
                 if filter_row['use']:
-                    if not filter_row['isotope_2']:
-                        isotope_df = self.get_map_data(sample_id=self.sample_id, name = filter_row['isotope_1'],analysis_type = 'isotope', plot =False )
-                    else: #if ratio    
-                        isotope_df = self.get_map_data(sample_id=self.sample_id, name =  filter_row['isotope_1']+'/'+filter_row['isotope_2'],analysis_type = 'ratio', plot =False )
-                
-                    self.filter_mask = self.filter_mask & (isotope_df['array'].values <= filter_row['f_min']) | (isotope_df['array'].values >= filter_row['f_max'])
+                    if not filter_row['analyte_2']:
+                        analyte_df = self.get_map_data(sample_id=self.sample_id, name = filter_row['analyte_1'],analysis_type = 'analyte', plot =False )
+                    else: #if ratio
+                        analyte_df = self.get_map_data(sample_id=self.sample_id, name =  filter_row['analyte_1']+'/'+filter_row['analyte_2'],analysis_type = 'ratio', plot =False )
+
+                    self.data[self.sample_id]['filter_mask'] = self.data[self.sample_id]['filter_mask'] & (analyte_df['array'].values <= filter_row['f_min']) | (analyte_df['array'].values >= filter_row['f_max'])
         elif self.toolButtonMapPolygon.isChecked():
             # apply polygon mask
             # Iterate through each polygon in self.polygons
             for row in range(self.tableWidgetPolyPoints.rowCount()):
                 #check if checkbox is checked
                 checkBox = self.tableWidgetPolyPoints.cellWidget(row, 4)
-                
+
                 if checkBox.isChecked():
                     p_id = int(self.tableWidgetPolyPoints.item(row,0).text())
-            
-                    polygon_points = self.polygon.polygons[p_id] 
+
+                    polygon_points = self.polygon.polygons[p_id]
                     polygon_points = [(x,y) for x,y,_ in polygon_points]
-                    
+
                     # Convert the list of (x, y) tuples to a list of points acceptable by Path
                     path = Path(polygon_points)
-                    
+
                     # Create a grid of points covering the entire array
                     # x, y = np.meshgrid(np.arange(self.array.shape[1]), np.arange(self.array.shape[0]))
-                    
+
                     points = np.vstack((self.x.flatten(), self.y.flatten())).T
-                    
+
                     # Use the path to determine which points are inside the polygon
                     inside_polygon = path.contains_points(points)
-                    
+
                     # Reshape the result back to the shape of self.array
                     # inside_polygon_mask = inside_polygon.reshape(self.array.shape)
-                    
+
                     # Update the polygon mask - include points that are inside this polygon
-                    self.polygon_mask &= inside_polygon
-                    
+                    self.data[self.sample_id]['polygon_mask'] &= inside_polygon
+
                     #clear existing polygon lines
                     self.polygon.clear_lines()
-                    
+
         elif self.toolButtonMapMask.isChecked():
             # apply map mask
             pass
 
-        self.mask = self.filter_mask & self.polygon_mask & self.axis_mask
+        self.data[self.sample_id]['mask'] = self.data[self.sample_id]['filter_mask'] & self.data[self.sample_id]['polygon_mask'] & self.data[self.sample_id]['axis_mask']
         self.update_all_plots()
 
     def dynamic_format(self,value, threshold=1e3):
         """Prepares number for display
-        
+
         :param threshold: order of magnitude for determining display as floating point or expressing in engineering nootation, Defaults to 1e3
         :type threshold: double
-        
+
         :return: number formatted as string
         :rtype: str
         """
@@ -1402,37 +1392,37 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             return "{:.4f}".format(value)
 
-    def update_norm(self,sample_id, norm = None, isotope=None, update = False):
+    def update_norm(self,sample_id, norm = None, analyte=None, update = False):
         """
-        
+
         :param sample_id:
         :type sample_id: int
         :param norm: Defaults to None
         :type norm: optional
-        :param isotope:
-        :type isotope:
+        :param analyte:
+        :type analyte:
         :param update:
         :type update:
         """
         if not norm:
-            norm = self.isotopes_df.loc[(self.isotopes_df['sample_id']==sample_id)
-                                 & (self.isotopes_df['isotopes']==isotope),'norm'].values[0]
-        if isotope: #if normalising single isotope
-            isotopes = [isotope]
-            self.isotopes_df.loc[(self.isotopes_df['sample_id']==sample_id)
-                                 & (self.isotopes_df['isotopes']==isotope),'norm'] = norm
+            norm = self.data[sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['sample_id']==sample_id)
+                                 & (self.data[sample_id]['analyte_info']['analytes']==analyte),'norm'].values[0]
+        if analyte: #if normalising single analyte
+            analytes = [analyte]
+            self.data[sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['sample_id']==sample_id)
+                                 & (self.data[sample_id]['analyte_info']['analytes']==analyte),'norm'] = norm
 
-        else: #if normalising all isotopes in sample
-            self.isotopes_df.loc[(self.isotopes_df['sample_id']==sample_id),'norm'] = norm
-            isotopes = self.isotopes_df[self.isotopes_df['sample_id']==sample_id]['isotopes']
-            
-        
-        self.prep_data(sample_id, isotope)
-        
-        #update self.norm_dict
-        for isotope in isotopes:
-            self.norm_dict[sample_id][isotope] = norm
-        
+        else: #if normalising all analytes in sample
+            self.data[sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['sample_id']==sample_id),'norm'] = norm
+            analytes = self.data[sample_id]['analyte_info'][self.data[sample_id]['analyte_info']['sample_id']==sample_id]['analytes']
+
+
+        self.prep_data(sample_id, analyte)
+
+        #update self.data['norm']
+        for analyte in analytes:
+            self.data[sample_id]['norm'][analyte] = norm
+
         if update:
             self.update_all_plots()
         # self.update_plot()
@@ -1445,14 +1435,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 for sample_id, plots in sample_ids.items():
                     for plot_name, plot in plots.items():
                         info = plot['info']
-                        if not info['isotope_2']:
-                            current_plot_df = self.get_map_data(sample_id=info['sample_id'], name = info['isotope_1'],analysis_type = 'isotope', plot =False )
-                        else: #if ratio    
-                            current_plot_df = self.get_map_data(sample_id=info['sample_id'], name =  info['isotope_1']+'/'+info['isotope_2'],analysis_type = 'ratio', plot =False )
-                        
+                        if not info['analyte_2']:
+                            current_plot_df = self.get_map_data(sample_id=info['sample_id'], name = info['analyte_1'],analysis_type = 'analyte', plot =False )
+                        else: #if ratio
+                            current_plot_df = self.get_map_data(sample_id=info['sample_id'], name =  info['analyte_1']+'/'+info['analyte_2'],analysis_type = 'ratio', plot =False )
+
                         # self.plot_laser_map(current_plot_df,info)
-                            
-                        self.create_plot(current_plot_df, info['sample_id'], plot_type = plot_type, isotope_1=info['isotope_1'], isotope_2 = info['isotope_2'], plot= False)
+
+                        self.create_plot(current_plot_df, info['sample_id'], plot_type = plot_type, analyte_1=info['analyte_1'], analyte_2 = info['analyte_2'], plot= False)
             else:
                 for sample_id, plots in sample_ids.items():
                     for plot_name, plot in plots.items():
@@ -1507,146 +1497,143 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                             self.plot_scatter(values=plot_info['values'], fig=plot_info['fig'], save=True)
                             fig.tight_layout()
                             figure_canvas.draw()
-                            
-                            
-    def prep_data(self, sample_id= None, isotope_1= None, isotope_2 = None):
+
+
+    def prep_data(self, sample_id= None, analyte_1= None, analyte_2 = None):
         """Prepares data to be used in analysis
-        
+
         1. Obtains raw DataFrame
-        2. Shifts isotope values so that all values are postive
+        2. Shifts analyte values so that all values are postive
         3. Scale data  (linear,log, loggit)
         4. Autoscales data if choosen by user
-        
-        The prepped data is stored in one of 2 Dataframes: analysis_isotope_data or computed_isotope_data
+
+        The prepped data is stored in one of 2 Dataframes: analysis_analyte_data or computed_analyte_data
         """
-        
+
         if sample_id is None:
             sample_id = self.sample_id #set to default sample_id
-        
-        if isotope_1: #if single isotope
-            isotopes = [isotope_1]
-        else: #if isotope is not provided update all isotopes in isotopes_df
-            isotopes = self.isotopes_df[self.isotopes_df['sample_id']==sample_id]['isotopes']
-            
-        isotope_info = self.isotopes_df.loc[(self.isotopes_df['sample_id'] == sample_id) & 
-                                 (self.isotopes_df['isotopes'].isin(isotopes))]
-        
-        if not isotope_2: #not a ratio
-            # shifts isotope values so that all values are postive
-            adj_data = pd.DataFrame(self.transform_plots(self.cropped_original_data[sample_id][isotopes].values), columns= isotopes)
-            
-            
-            #perform scaling for groups of isotopes with same norm parameter
-            for norm in isotope_info['norm'].unique():
-                filtered_isotopes = isotope_info[(isotope_info['norm'] == norm)]['isotopes']
-                filtered_data = adj_data[filtered_isotopes].values
+
+        if analyte_1: #if single analyte
+            analytes = [analyte_1]
+        else: #if analyte is not provided update all analytes in analytes_df
+            analytes = self.data[sample_id]['analyte_info'][self.data[sample_id]['analyte_info']['sample_id']==sample_id]['analytes']
+
+        analyte_info = self.data[sample_id]['analyte_info'].loc[
+                                 (self.data[sample_id]['analyte_info']['analytes'].isin(analytes))]
+
+        if not analyte_2: #not a ratio
+            # shifts analyte values so that all values are postive
+            adj_data = pd.DataFrame(self.transform_plots(self.data[sample_id]['cropped_raw_data'][analytes].values), columns= analytes)
+
+
+            #perform scaling for groups of analytes with same norm parameter
+            for norm in analyte_info['norm'].unique():
+                filtered_analytes = analyte_info[(analyte_info['norm'] == norm)]['analytes']
+                filtered_data = adj_data[filtered_analytes].values
                 if norm == 'log':
-                    
+
                     # np.nanlog handles NaN value
-                    self.clipped_isotope_data[sample_id].loc[:,filtered_isotopes] = np.log10(filtered_data, where=~np.isnan(filtered_data))
-                    # print(self.processed_isotope_data[sample_id].loc[:10,isotopes])
-                    # print(self.clipped_isotope_data[sample_id].loc[:10,isotopes])
+                    self.data[sample_id]['processed_data'].loc[:,filtered_analytes] = np.log10(filtered_data, where=~np.isnan(filtered_data))
+                    # print(self.processed_analyte_data[sample_id].loc[:10,analytes])
+                    # print(self.data[sample_id]['processed_data'].loc[:10,analytes])
                 elif norm == 'logit':
                     # Handle division by zero and NaN values
                     with np.errstate(divide='ignore', invalid='ignore'):
-                        isotope_array = np.log10(filtered_data / (10**6 - filtered_data), where=~np.isnan(filtered_data))
-                        self.clipped_isotope_data[sample_id].loc[:,filtered_isotopes] = isotope_array
+                        analyte_array = np.log10(filtered_data / (10**6 - filtered_data), where=~np.isnan(filtered_data))
+                        self.data[sample_id]['processed_data'].loc[:,filtered_analytes] = analyte_array
                 else:
                     # set to clipped data with original values if linear normalisation
-                    self.clipped_isotope_data[sample_id].loc[:,filtered_isotopes] = filtered_data
-            
-            
+                    self.data[sample_id]['processed_data'].loc[:,filtered_analytes] = filtered_data
+
+
             # perform autoscaling on columns where auto_scale is set to true
-            for auto_scale in isotope_info['auto_scale'].unique():
-                filtered_isotopes = isotope_info[isotope_info['auto_scale'] == auto_scale]['isotopes']
-                
-                for isotope_1 in filtered_isotopes:
-                    parameters = isotope_info.loc[(isotope_info['sample_id']==sample_id)
-                                          & (isotope_info['isotopes']==isotope_1)].iloc[0]
-                    filtered_data = self.clipped_isotope_data[sample_id][isotope_1].values
+            for auto_scale in analyte_info['auto_scale'].unique():
+                filtered_analytes = analyte_info[analyte_info['auto_scale'] == auto_scale]['analytes']
+
+                for analyte_1 in filtered_analytes:
+                    parameters = analyte_info.loc[(analyte_info['sample_id']==sample_id)
+                                          & (analyte_info['analytes']==analyte_1)].iloc[0]
+                    filtered_data = self.data[sample_id]['processed_data'][analyte_1].values
                     lq = parameters['lower_bound']
                     uq = parameters['upper_bound']
                     d_lb = parameters['d_l_bound']
                     d_ub = parameters['d_u_bound']
                     if auto_scale:
 
-                        self.clipped_isotope_data[sample_id].loc[:,isotope_1] = self.outlier_detection(filtered_data.reshape(-1, 1),lq, uq, d_lb,d_ub)
+                        self.data[sample_id]['processed_data'].loc[:,analyte_1] = self.outlier_detection(filtered_data.reshape(-1, 1),lq, uq, d_lb,d_ub)
                     else:
                         #clip data using ub and lb
                         lq_val = np.nanpercentile(filtered_data, lq, axis=0)
                         uq_val = np.nanpercentile(filtered_data, uq, axis=0)
                         filtered_data = np.clip(filtered_data, lq_val, uq_val)
-                        self.clipped_isotope_data[sample_id].loc[:,isotope_1] = filtered_data
-                    
-                    
-                    # update v_min and v_max in self.isotope_df
-                    self.isotopes_df.loc[(self.isotopes_df['sample_id'] == sample_id) & 
-                                             (self.isotopes_df['isotopes']==isotope_1),'v_max'][0] = filtered_data.min()
-                    self.isotopes_df.loc[(self.isotopes_df['sample_id'] == sample_id) & 
-                                             (self.isotopes_df['isotopes']==isotope_1), 'v_min'][0] = filtered_data.min()
-            
-            self.clipped_isotope_data[sample_id]['X'] = self.sample_data_dict[sample_id]['X']
-            self.clipped_isotope_data[sample_id]['Y'] = self.sample_data_dict[sample_id]['Y']
-            
-            # create deep copy of clipped isotope data for analalysis
-            self.analysis_isotope_data = copy.deepcopy(self.clipped_isotope_data)
-            
+                        self.data[sample_id]['processed_data'].loc[:,analyte_1] = filtered_data
+
+
+                    # update v_min and v_max in self.data[sample_id]['analyte_info']
+                    self.data[sample_id]['analyte_info'].loc[
+                                             (self.data[sample_id]['analyte_info']['analytes']==analyte_1),'v_max'][0] = filtered_data.min()
+                    self.data[sample_id]['analyte_info'].loc[
+                                             (self.data[sample_id]['analyte_info']['analytes']==analyte_1), 'v_min'][0] = filtered_data.min()
+
+            self.data[sample_id]['processed_data']['X'] = self.data[sample_id]['raw_data']['X']
+            self.data[sample_id]['processed_data']['Y'] = self.data[sample_id]['raw_data']['Y']
+
+            # create deep copy of clipped analyte data for analalysis
+            self.analysis_analyte_data = copy.deepcopy(self.clipped_analyte_data)
+
         else:  #if ratio
-            ratio_df = self.isotope_data[sample_id][[isotope_1,isotope_2]] #consider original data for ratio
-            
-            ratio_name = isotope_1+' / '+isotope_2
-            
+            ratio_df = self.data[sample_id]['raw_data'][[analyte_1,analyte_2]] #consider original data for ratio
 
-            
-            # shifts isotope values so that all values are postive
+            ratio_name = analyte_1+' / '+analyte_2
+
+
+
+            # shifts analyte values so that all values are postive
             ratio_array = self.transform_plots(ratio_df.values)
-            ratio_df = pd.DataFrame(ratio_array, columns= [isotope_1,isotope_2])
+            ratio_df = pd.DataFrame(ratio_array, columns= [analyte_1,analyte_2])
 
-            mask = (ratio_df[isotope_1] > 0) & (ratio_df[isotope_2] > 0)
+            mask = (ratio_df[analyte_1] > 0) & (ratio_df[analyte_2] > 0)
 
             ratio_array = np.where(mask, ratio_array[:,0] / ratio_array[:,0], np.nan)
 
             # Get the index of the row that matches the criteria
-            index_to_update = self.ratios_df.loc[
-                (self.ratios_df['sample_id'] == sample_id) &
-                (self.ratios_df['isotope_1'] == isotope_1) &
-                (self.ratios_df['isotope_2'] == isotope_2)
+            index_to_update = self.data[sample_id]['ratios_info'].loc[
+                (self.data[sample_id]['ratios_info']['analyte_1'] == analyte_1) &
+                (self.data[sample_id]['ratios_info']['analyte_2'] == analyte_2)
             ].index
 
             # Check if we found such a row
             if len(index_to_update) > 0:
                 idx = index_to_update[0]
 
-                if pd.isna(self.ratios_df.at[idx, 'lower_bound']): #if bounds are not updated in dataframe
-                    norm = self.ratios_df.at[idx, 'norm']
-                    self.ratios_df.at[idx, 'lower_bound'] = 0.05
-                    self.ratios_df.at[idx, 'upper_bound'] = 99.5
-                    self.ratios_df.at[idx, 'd_l_bound'] = 99
-                    self.ratios_df.at[idx, 'd_u_bound'] = 99
-                    
-                else: #if bounds exist in ratios_df
-                    norm = self.ratios_df.at[idx, 'norm']
-                    lb = self.ratios_df.at[idx, 'lower_bound']
-                    ub = self.ratios_df.at[idx, 'upper_bound']
-                    d_lb = self.ratios_df.at[idx, 'd_l_bound']
-                    d_ub = self.ratios_df.at[idx, 'd_u_bound']
-                    auto_scale = self.ratios_df.at[idx, 'auto_scale']
+                if pd.isna(self.data[sample_id]['ratios_info'].at[idx, 'lower_bound']): #if bounds are not updated in dataframe
+                    #sets auto scale to true by default with default values for lb,db, d_lb and d_ub
+                    auto_scale = True
+                    norm = self.data[sample_id]['ratios_info'].at[idx, 'norm']
+                    lb = 0.05
+                    ub = 99.5
+                    d_lb = 99
+                    d_ub = 99
+                    self.data[sample_id]['ratios_info'].at[idx, 'lower_bound'] = lb
+                    self.data[sample_id]['ratios_info'].at[idx, 'upper_bound'] = ub
+                    self.data[sample_id]['ratios_info'].at[idx, 'd_l_bound'] = d_lb
+                    self.data[sample_id]['ratios_info'].at[idx, 'd_u_bound'] = d_ub
+                    self.data[sample_id]['ratios_info'].at[idx, 'auto_scale'] = auto_scale
 
-                    
-                    parameters = isotope_info.loc[(self.isotopes_df['sample_id']==sample_id)
-                                          & (self.isotopes_df['isotopes']==isotope_1)].iloc[0]
-                    # ratio_array = current_plot_df['array'].values
-                    lb = parameters['lower_bound']
-                    ub = parameters['upper_bound']
-                    d_lb = parameters['d_l_bound']
-                    d_ub = parameters['d_u_bound']
-                
+                else: #if bounds exist in ratios_df
+                    norm = self.data[sample_id]['ratios_info'].at[idx, 'norm']
+                    lb = self.data[sample_id]['ratios_info'].at[idx, 'lower_bound']
+                    ub = self.data[sample_id]['ratios_info'].at[idx, 'upper_bound']
+                    d_lb = self.data[sample_id]['ratios_info'].at[idx, 'd_l_bound']
+                    d_ub = self.data[sample_id]['ratios_info'].at[idx, 'd_u_bound']
+                    auto_scale = self.data[sample_id]['ratios_info'].at[idx, 'auto_scale']
+
                 if norm == 'log':
-                    
+
                     # np.nanlog handles NaN value
                     ratio_array = np.log10(ratio_array, where=~np.isnan(ratio_array))
-                    # print(self.processed_isotope_data[sample_id].loc[:10,isotopes])
-                    # print(self.clipped_isotope_data[sample_id].loc[:10,isotopes])
+                    # print(self.processed_analyte_data[sample_id].loc[:10,analytes])
+                    # print(self.data[sample_id]['processed_data'].loc[:10,analytes])
                 elif norm == 'logit':
                     # Handle division by zero and NaN values
                     with np.errstate(divide='ignore', invalid='ignore'):
@@ -1654,30 +1641,30 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 else:
                     # set to clipped data with original values if linear normalisation
                     pass
-                    
+
                 if auto_scale:
 
-                    ratio_array = self.outlier_detection(ratio_array,lq, uq, d_lb,d_ub)
+                    ratio_array = self.outlier_detection(ratio_array.reshape(-1, 1),lb, ub, d_lb,d_ub)
                 else:
                     #clip data using ub and lb
                     lq_val = np.nanpercentile(ratio_array, lq, axis=0)
                     uq_val = np.nanpercentile(ratio_array, uq, axis=0)
                     ratio_array = np.clip(ratio_array, lq_val, uq_val)
-                self.computed_isotope_data[sample_id]['ratio'][ratio_name] = ratio_array
+                self.data[sample_id]['computed_data']['ratio'][ratio_name] = ratio_array
 
-                self.ratios_df.at[idx, 'v_min'] = ratio_array.min()
-                self.ratios_df.at[idx, 'v_max'] = ratio_array.max()
-    
-        
+                self.data[sample_id]['ratios_info'].at[idx, 'v_min'] = ratio_array.min()
+                self.data[sample_id]['ratios_info'].at[idx, 'v_max'] = ratio_array.max()
+
+
 
     def open_directory(self):
         """Open directory with samples
-        
+
         Executes on self.toolBar.actionOpen and self.menuFile.action.Open_Directory.  self.toolBox
         pages are enabled upon successful load.
 
         Opens a dialog to select directory filled with samples.  Updates sample list in
-        self.comboBoxSampleID and comboBoxes associated with isotope lists.  The first sample
+        self.comboBoxSampleID and comboBoxes associated with analyte lists.  The first sample
         in list is loaded by default.
         """
         dialog = QFileDialog()
@@ -1713,7 +1700,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.toolBox.setCurrentIndex(self.sample_tab_id)
 
-        self.SelectIsotopePage.setEnabled(True)
+        self.SelectAnalytePage.setEnabled(True)
         self.PreprocessPage.setEnabled(True)
         self.SpotDataPage.setEnabled(True)
         self.FilterPage.setEnabled(True)
@@ -1757,7 +1744,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def plot_laser_map(self, current_plot_df, plot_information):
         """Plots laser map
-        
+
         :param current_plot_df: Current dataframe
         :type current_plot_df: pandas.DataFrame
         :param plot_information: contains plot name, sample id and plot type
@@ -1768,18 +1755,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         plot_type = plot_information['plot_type']
 
         view = self.canvasWindow.currentIndex()
-        
+
         self.x_range = current_plot_df['X'].max() - current_plot_df['X'].min()
         self.y_range = current_plot_df['Y'].max() - current_plot_df['Y'].min()
         self.x = current_plot_df['X'].values
         self.y = current_plot_df['Y'].values
         self.array_size = (current_plot_df['Y'].nunique(),current_plot_df['X'].nunique())
-        
-        if sample_id != self.sample_id:    
-            mask = mask = np.ones_like( self.sample_data_dict[sample_id]['X'], dtype=bool) #do not use mask if plotting analyte which isnt from default sample
+
+        if sample_id != self.sample_id:
+            mask = mask = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool) #do not use mask if plotting analyte which isnt from default sample
         else:
-            mask = self.mask
-        
+            mask = self.data[self.sample_id]['mask']
+
         array = np.reshape(current_plot_df['array'].values,
                                     self.array_size, order=self.order)
         duplicate = False
@@ -1791,24 +1778,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if plot_exist and not duplicate:
             widget_info = self.plot_widget_dict[plot_type][sample_id][plot_name]
             for widgetLaserMap, view in zip(widget_info['widget'],widget_info['view']):
-                
+
                 # Step 1: Normalize your data array for colormap application
                 norm = Normalize(vmin=array.min(), vmax=array.max())
                 cmap = plt.get_cmap(self.cm)  # Assuming self.cm is a valid colormap name
-                
+
                 # Step 2: Apply the colormap to get RGB values, then normalize to [0, 255] for QImage
                 rgb_array = cmap(norm(array))[:, :, :3]  # Drop the alpha channel returned by cmap
                 rgb_array = (rgb_array * 255).astype(np.uint8)
-            
-                # Step 3: Create an RGBA array where the alpha channel is based on self.mask
+
+                # Step 3: Create an RGBA array where the alpha channel is based on self.data[self.sample_id]['mask']
                 rgba_array = np.zeros((*rgb_array.shape[:2], 4), dtype=np.uint8)
                 rgba_array[:, :, :3] = rgb_array  # Set RGB channels
-                
+
                 mask_r = np.reshape(mask,
                                     self.array_size, order=self.order)
-                
-                rgba_array[:, :, 3] = np.where(mask_r, 255, 100)  # Set alpha channel based on self.mask
-                            
+
+                rgba_array[:, :, 3] = np.where(mask_r, 255, 100)  # Set alpha channel based on self.data[self.sample_id]['mask']
+
                 glw = widgetLaserMap.findChild(pg.GraphicsLayoutWidget, 'plotLaserMap')
                 p1 = glw.getItem(0, 0)  # Assuming ImageItem is the first item in the plot
                 img = p1.items[0]
@@ -1817,7 +1804,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 #set aspect ratio of rectangle
                 img.setRect(self.x.min(),self.y.min(),self.x_range,self.y_range)
                 p1.setRange( yRange=[self.y.min(), self.y.max()])
-                # To further prevent zooming or panning outside the default view, 
+                # To further prevent zooming or panning outside the default view,
                 p1.setLimits( yMin=self.y.min(), yMax = self.y.max())
                 cm = pg.colormap.get(self.cm, source = 'matplotlib')
                 # img.setColorMap(cm)
@@ -1826,7 +1813,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     # update variables which stores current plot in SV
                     self.plot = p1
                     self.array = array
-                
+
                 if histogram:
                     histogram.gradient.setColorMap(cm)
                     histogram.setImageItem(img)
@@ -1842,7 +1829,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             layoutLaserMap = QtWidgets.QGridLayout()
             widgetLaserMap.setLayout(layoutLaserMap)
             layoutLaserMap.setSpacing(0)
-            
+
             if duplicate:
                 self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'].append(widgetLaserMap)
                 self.plot_widget_dict[plot_type][sample_id][plot_name]['view'].append(view)
@@ -1850,24 +1837,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             else:
                 self.plot_widget_dict[plot_type][sample_id][plot_name] = {'widget':[widgetLaserMap],
                                                       'info':plot_information, 'view':[view]}
-            
+
             #Change transparency of values outside mask
             # Step 1: Normalize your data array for colormap application
             norm = Normalize(vmin=array.min(), vmax=array.max())
             cmap = plt.get_cmap(self.cm)  # Assuming self.cm is a valid colormap name
-        
+
             # Step 2: Apply the colormap to get RGB values, then normalize to [0, 255] for QImage
             rgb_array = cmap(norm(array))[:, :, :3]  # Drop the alpha channel returned by cmap
             rgb_array = (rgb_array * 255).astype(np.uint8)
-        
-            # Step 3: Create an RGBA array where the alpha channel is based on self.mask
+
+            # Step 3: Create an RGBA array where the alpha channel is based on self.data[self.sample_id]['mask']
             rgba_array = np.zeros((*rgb_array.shape[:2], 4), dtype=np.uint8)
             rgba_array[:, :, :3] = rgb_array  # Set RGB channels
             mask_r = np.reshape(mask,
                                 self.array_size, order=self.order)
-            
-            rgba_array[:, :, 3] = np.where(mask_r, 255, 100)  # Set alpha channel based on self.mask
-                        
+
+            rgba_array[:, :, 3] = np.where(mask_r, 255, 100)  # Set alpha channel based on self.data[self.sample_id]['mask']
+
             # self.array = array[:, ::-1]
             layout = widgetLaserMap.layout()
             glw = pg.GraphicsLayoutWidget(show=True)
@@ -1894,7 +1881,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # print(p1.getAspectRatio())
             p1.setAspectLocked()
             p1.setRange( yRange=[self.y.min(), self.y.max()])
-            # To further prevent zooming or panning outside the default view, 
+            # To further prevent zooming or panning outside the default view,
             p1.setLimits( yMin=self.y.min(), yMax = self.y.max())
 
             # ... Inside your plotting function
@@ -1913,7 +1900,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             p1.scene().sigMouseClicked.connect(lambda event,array=array, k=name, plot=p1: self.plot_clicked(event,array, k, p1))
 
             if view == 1:
-                #create label with isotope name
+                #create label with analyte name
                 #create another label for value of the corresponding plot
                 labelInfoVL = QtWidgets.QLabel(self.groupBoxInfoM)
                 # labelInfoVL.setMaximumSize(QtCore.QSize(20, 16777215))
@@ -1981,7 +1968,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 y_i = round(y*array.shape[0]/self.y_range)
 
 
-                # if hover within lasermap array 
+                # if hover within lasermap array
                 if 0 <= x_i < array.shape[1] and 0 <= y_i < array.shape[0] :
                     if not self.cursor and not self.toolButtonCrop.isChecked():
                         QtWidgets.QApplication.setOverrideCursor(Qt.BlankCursor)
@@ -1995,7 +1982,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                             self.update_zoom_view_position(x, y)
                             self.zoomViewBox.show()
                             self.polygon.show_polygon_lines(x,y)
-                        # elif self.toolButtonCrop.isChecked() and self.crop_tool.start_pos: 
+                        # elif self.toolButtonCrop.isChecked() and self.crop_tool.start_pos:
                         #     self.crop_tool.expand_rect(pos_view)
                         else:
                             # hide zoom view
@@ -2023,9 +2010,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 target.hide() # Hide crosshairs if no plot is hovered
             # hide zoom view
             self.zoomViewBox.hide()
-    
+
     def plot_clicked(self, event,array,k, plot,radius=5):
-        
+
         # get click location
         click_pos = plot.vb.mapSceneToView(event.scenePos())
         x, y = click_pos.x(), click_pos.y()
@@ -2046,7 +2033,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # if event.button() == QtCore.Qt.LeftButton and self.main_window.pushButtonStartProfile.isChecked():
         elif self.toolButtonPlotProfile.isChecked() or self.toolButtonPointMove.isChecked():
             self.profiling.plot_profile_scatter(event, array, k, plot, x, y,x_i, y_i)
-        
+
         elif self.toolButtonPolyCreate.isChecked() or self.toolButtonPolyMovePoint.isChecked() or self.toolButtonPolyAddPoint.isChecked() or self.toolButtonPolyRemovePoint.isChecked():
             self.polygon.plot_polygon_scatter(event, k, x, y,x_i, y_i)
 
@@ -2176,7 +2163,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.zoomTarget.setPos(x, y)  # Update target position
         self.zoomTarget.show()
         self.zoomViewBox.setZValue(1e10)
-        
+
     def add_edge_detection(self):
         """ Add edge detection to the current laser map plot.
 
@@ -2185,8 +2172,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         if self.edge_img:
             # remove existing filters
-            self.plot.removeItem(self.edge_img)  
-        
+            self.plot.removeItem(self.edge_img)
+
         if self.toolButtonEdgeDetect.isChecked():
             algorithm = self.comboBoxEdgeDetectMethod.currentText().lower()
             if algorithm == 'sobel':
@@ -2195,13 +2182,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 sobely = Sobel(self.array, CV_64F, 0, 1, ksize=5)
                 edge_detected_image = np.sqrt(sobelx**2 + sobely**2)
             elif algorithm == 'canny':
-               
+
                 # Normalize the array to [0, 1]
                 normalized_array = (self.array - np.min(self.array)) / (np.max(self.array) - np.min(self.array))
-                
+
                 # Scale to [0, 255] and convert to uint8
                 scaled_array = (normalized_array * 255).astype(np.uint8)
-                
+
                 # Apply Canny edge detection
                 edge_detected_image = Canny(scaled_array, 100, 200)
             elif algorithm == 'zero cross':
@@ -2210,7 +2197,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 edge_detected_image = self.zero_crossing_laplacian(self.array)  # Placeholder, replace with actual Zero Crossing implementation
             else:
                 raise ValueError("Unsupported algorithm. Choose 'sobel', 'canny', or 'zero cross'.")
-        
+
             # Assuming you have a way to display this edge_detected_image on your plot.
             # This could be an update to an existing ImageItem or creating a new one if necessary.
             self.edge_array = edge_detected_image
@@ -2220,9 +2207,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # edge_img.setAs
             cm = pg.colormap.get(self.cm, source = 'matplotlib')
             self.edge_img.setColorMap(cm)
-            
-            self.plot.addItem(self.edge_img)  
-        
+
+            self.plot.addItem(self.edge_img)
+
     def zero_crossing_laplacian(self,array):
         """Apply Zero Crossing on the Laplacian of the image.
 
@@ -2233,17 +2220,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         # Normalize the array to [0, 1]
         normalized_array = (array - np.min(array)) / (np.max(array) - np.min(array))
-        
+
         # Scale to [0, 255] and convert to uint8
         image = (normalized_array * 255).astype(np.uint8)
-        
-        
+
+
         # Apply Gaussian filter for noise reduction
         blurred_image = ndimage.gaussian_filter(image, sigma=6)
-    
+
         # Apply Laplacian operator
         # laplacian_image = ndimage.laplace(blurred_image)
-    
+
         LoG_kernel = np.array([
                                 [0, 0,  1, 0, 0],
                                 [0, 1,  2, 1, 0],
@@ -2251,10 +2238,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                 [0, 1,  2, 1, 0],
                                 [0, 0,  1, 0, 0]
                             ])
-        
-        
+
+
         laplacian_image = convolve2d(blurred_image,LoG_kernel)
-        
+
         # Find zero crossings
         zero_crossings = np.zeros_like(laplacian_image)
         # Shift the image by one pixel in all directions
@@ -2263,15 +2250,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # A zero crossing occurs where the product of the original and the shifted image is less than zero (sign change)
             zero_mask = (laplacian_image * shifted) < 0
             zero_crossings[zero_mask] = 1
-        return zero_crossings 
-    
+        return zero_crossings
+
     def noise_reduction_method_callback(self):
         """Noise reduction method callback
-        
+
         Executes when ``MainWindow.comboBoxNoiseReductionMethod.currentText()`` is changed.
         Enables ``MainWindow.spinBoxNoiseOption1`` and ``MainWindow.doubleSpinBoxNoiseOption2`` (if applicable)
         and associated labels.  Constraints on the ranges are added to the spin boxes.
-        
+
         After enabling options, it runs ``noise_reduction``.
         """
         self.noise_method_changed = True
@@ -2335,10 +2322,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     val2 = self.doubleSpinBoxNoiseOption2.value()
                     self.noise_method_changed = False
                     self.noise_reduction(algorithm, val1, val2)
-    
+
     def gaussian_sigma(self, ksize):
         """Sets default Gaussian sigma.
-        
+
         Same as default in OpenCV, i.e., 0.3*((ksize-1)*0.5 - 1) + 0.8. This functions sets the sigma
         value for ``cv2.GaussianBlur`` only when ``MainWindow.comboBoxNoiseReductionMethod`` is 'Gaussian' and new kernel
         value is set by the user via ``MainWindow.spinBoxNoiseReductionOption1.value()``.
@@ -2362,8 +2349,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def noise_reduction_option1_callback(self):
         """Callback executed when the first noise reduction option is changed
-        
-        Updates noise reduction applied to map(s) when ``MainWindow.spinBoxNoiseOption1.value()`` is changed by 
+
+        Updates noise reduction applied to map(s) when ``MainWindow.spinBoxNoiseOption1.value()`` is changed by
         the user."""
         algorithm = self.comboBoxNoiseReductionMethod.currentText().lower()
 
@@ -2384,8 +2371,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def noise_reduction_option2_callback(self):
         """Callback executed when the second noise reduction option is changed
-        
-        Updates noise reduction applied to map(s) when ``MainWindow.spinBoxNoiseOption2.value()`` is changed by 
+
+        Updates noise reduction applied to map(s) when ``MainWindow.spinBoxNoiseOption2.value()`` is changed by
         the user.  Note, not all noise reduction methods have a second option."""
         algorithm = self.comboBoxNoiseReductionMethod.currentText().lower()
 
@@ -2400,7 +2387,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         Executes on change of ``MainWindow.comboBoxNoiseReductionMethod``, ``MainWindow.spinBoxNoiseOption1`` and
         ``MainWindow.doubleSpinBoxOption2``. Updates map(s).
-         
+
         Reduces noise by smoothing via one of several algorithms chosen from
         ``MainWindow.comboBoxNoiseReductionMethod``.
 
@@ -2448,7 +2435,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # Apply Edge-Preserving filter (RECURSIVE_FILTER or NORMCONV_FILTER)
                 # Normalize the array to [0, 1]
                 normalized_array = (self.array - np.min(self.array)) / (np.max(self.array) - np.min(self.array))
-                
+
                 # Scale to [0, 255] and convert to uint8
                 image = (normalized_array * 255).astype(np.uint8)
                 filtered_image = edgePreservingFilter(image,
@@ -2461,18 +2448,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # Parameters are placeholders, you might need to adjust them based on your data
                 filtered_image = bilateralFilter(self.array.astype(np.float32),
                                                 int(val1), float(val2), float(val2))
-    
+
         # Update or create the image item for displaying the filtered image
         self.noise_red_array = filtered_image
         self.noise_red_img = pg.ImageItem(image=self.noise_red_array)
-        
+
         # Set aspect ratio of rectangle
         self.noise_red_img.setRect(0, 0, self.x_range, self.y_range)
-    
+
         # Optionally, set a color map
         cm = pg.colormap.get(self.cm, source='matplotlib')
         self.noise_red_img.setColorMap(cm)
-        
+
         # Add the image item to the plot
         self.plot.addItem(self.noise_red_img)
 
@@ -2484,7 +2471,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """Plot PCA"""
         pca_dict = {}
 
-        df_filtered, isotopes = self.get_processed_data()
+        df_filtered, analytes = self.get_processed_data()
 
         # Preprocess the data
         scaler = StandardScaler()
@@ -2548,7 +2535,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def update_pca_plot(self, pca_dict, pca_plot_type, ax):
 
-        isotopes = self.isotopes_df[self.isotopes_df['sample_id']==self.sample_id]['isotopes']
+        analytes = self.data[self.sample_id]['analyte_info'].loc[:,'analytes']
         n_components = range(1, len(pca_dict['explained_variance_ratio'])+1)
         match pca_plot_type:
             case 'Variance':
@@ -2654,14 +2641,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 #ax.set_yticks(n_components, labels=[f'Var{i+1}' for i in range(len(n_components))])
                 ax.set_yticks(range(1, n_variables+1,1), minor=False)
-                ax.set_yticklabels(isotopes)
+                ax.set_yticklabels(analytes)
             case 'PC X Score Map':
                 ax.tick_params(direction='none', labelbottom=False, labeltop=False, labelright=False, labelleft=False)
 
     def plot_correlation(self, plot=False):
         correlation_dict = {}
 
-        df_filtered, isotopes = self.get_processed_data()
+        df_filtered, analytes = self.get_processed_data()
 
         # Calculate the correlation matrix
         correlation_matrix = df_filtered.corr()
@@ -2744,11 +2731,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         ax.set_title('Correlation Matrix')
 
     def plot_histogram(self, current_plot_df, plot_information, bin_width):
-        """Displays histogram for current selected isotope.
-        
+        """Displays histogram for current selected analyte.
+
         Parameter
         ---------
-        
+
         current_plot_df: pandas.DataFrame
             current active plot
         plot_information: dict
@@ -2759,15 +2746,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         plot_name = plot_information['plot_name']
         sample_id = plot_information['sample_id']
         plot_type = plot_information['plot_type']
-        
-        if sample_id != self.sample_id:    
-            mask = mask = np.ones_like( self.sample_data_dict[sample_id]['X'], dtype=bool) #do not use mask if plotting analyte which isnt from default sample
+
+        if sample_id != self.sample_id:
+            mask = mask = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool) #do not use mask if plotting analyte which isnt from default sample
         else:
-            mask = self.mask
-        
+            mask = self.data[self.sample_id]['mask']
+
         #remove by mask and drop rows with n
         mask = mask & current_plot_df['array'].notna()
-        
+
         array = current_plot_df['array'][mask].values
         edges = np.arange(array.min(), array.max() + bin_width, bin_width)
 
@@ -2810,9 +2797,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Clear previous histogram
         ax.clear()
         # Check if the algorithm is in the current group and if results are available
-        if 'algorithm' in self.current_group and self.current_group['algorithm'] in self.computed_isotope_data[self.sample_id]['cluster']:
+        if 'algorithm' in self.current_group and self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['cluster']:
             # Get the cluster labels for the data
-            cluster_labels = self.computed_isotope_data[self.sample_id]['cluster'][self.current_group['algorithm']]
+            cluster_labels = self.data[self.sample_id]['computed_data']['cluster'][self.current_group['algorithm']]
             clusters = cluster_labels.dropna().unique()
 
 
@@ -2859,22 +2846,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'z': {'field': None, 'type': None, 'label': None, 'array': None},
             'c': {'field': None, 'type': None, 'label': None, 'array': None}
         }
-        value_dict['x']['field'] = self.comboBoxScatterIsotopeX.currentText()
+        value_dict['x']['field'] = self.comboBoxScatteranalyteX.currentText()
         value_dict['x']['type'] = self.comboBoxScatterSelectX.currentText().lower()
-        value_dict['y']['field'] = self.comboBoxScatterIsotopeY.currentText()
+        value_dict['y']['field'] = self.comboBoxScatteranalyteY.currentText()
         value_dict['y']['type'] = self.comboBoxScatterSelectY.currentText().lower()
-        value_dict['z']['field'] = self.comboBoxScatterIsotopeZ.currentText()
+        value_dict['z']['field'] = self.comboBoxScatteranalyteZ.currentText()
         value_dict['z']['type'] = self.comboBoxScatterSelectZ.currentText().lower()
         value_dict['c']['field'] = self.comboBoxColorField.currentText()
         value_dict['c']['type'] = self.comboBoxColorByField.currentText().lower()
 
         for k, v in value_dict.items():
-            if v['type'] == 'isotope' and v['field']:
+            if v['type'] == 'analyte' and v['field']:
                 df = self.get_map_data(self.sample_id, v['field'], analysis_type=v['type'], plot=False)
                 v['label'] = v['field'] + ' (' + self.general_style['Concentration'] + ')'
             elif v['type'] == 'ratio' and '/' in v['field']:
-                isotope_1, isotope_2 = v['field'].split('/')
-                df = self.get_map_data(self.sample_id, isotope_1, isotope_2, analysis_type=v['type'], plot=False)
+                analyte_1, analyte_2 = v['field'].split('/')
+                df = self.get_map_data(self.sample_id, analyte_1, analyte_2, analysis_type=v['type'], plot=False)
                 v['label'] = v['field']
             elif v['type'] == 'pca':
                 #df = self.get_map_data(self.sample_id, v['field'], plot_type=None, plot=False)
@@ -2890,7 +2877,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             else:
                 df = pd.DataFrame({'array': []})  # Or however you want to handle this case
 
-            value_dict[k]['array'] = df['array'][self.mask].values if not df.empty else []
+            value_dict[k]['array'] = df['array'][self.data[self.sample_id]['mask']].values if not df.empty else []
 
         return value_dict['x'], value_dict['y'], value_dict['z'], value_dict['c']
 
@@ -3122,7 +3109,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case self.scatter_tab_id:
                 tab_id = self.scatter_tab_id
                 self.comboBoxTernaryColormap.setCurrentText(self.map_style[tab_id]['Colormap'])
-                self.TernaryColormapChanged()
+                self.ternary_colormap_changed()
             case _:
                 tab_id = self.sample_tab_id
                 self.comboBoxMapColormap.setCurrentText(self.map_style[tab_id]['Colormap'])
@@ -3248,13 +3235,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     #        select_scatter = f"{x['elements']}_{y['elements']}_{plot_type}"
 
     #        # add labels
-    #        xlbl = self.comboBoxScatterIsotopeX.currentText()
-    #        ylbl = self.comboBoxScatterIsotopeY.currentText()
+    #        xlbl = self.comboBoxScatteranalyteX.currentText()
+    #        ylbl = self.comboBoxScatteranalyteY.currentText()
     #        match self.comboBoxScatterSelectX.currentText().lower():
-    #            case 'isotope':
+    #            case 'analyte':
     #                xlbl += ' ('+self.lineEditConcentrationUnits.text()+')'
     #        match self.comboBoxScatterSelectX.currentText().lower():
-    #            case 'isotope':
+    #            case 'analyte':
     #                ylbl += ' ('+self.lineEditConcentrationUnits.text()+')'
     #        ax.set_xlabel(xlbl)
     #        ax.set_ylabel(ylbl)
@@ -3294,7 +3281,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def plot_scatter(self, values=None, fig=None, save=False):
         """Creates a plots from self.toolBox Scatter page.
-        
+
         Creates both scatter and heatmaps (spatial histograms) for bi- and ternary plots.
 
         :param values: Defaults to None
@@ -3428,9 +3415,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         :param fig: figure object
         :type fig: matplotlib.figure
-        :param x: data associated with field self.comboBoxScatterIsotopeX.currentText() as x coordinate
+        :param x: data associated with field self.comboBoxScatteranalyteX.currentText() as x coordinate
         :type x: dict
-        :param y: data associated with field self.comboBoxScatterIsotopeX.currentText() as y coordinate
+        :param y: data associated with field self.comboBoxScatteranalyteX.currentText() as y coordinate
         :type y: dict
         :param c: data associated with field self.comboBoxColorField.currentText() as marker colors
         :type c: dict
@@ -3456,7 +3443,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 edgecolors='none',
                 cmap=plt.get_cmap(s['Colormap']),
                 alpha=s['Alpha']/100)
-            
+
             norm = plt.Normalize(vmin=np.min(c['array']), vmax=np.max(c['array']))
             scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(s['Colormap']), norm=norm)
             cb = fig.colorbar(scalarMappable, ax=ax, orientation='vertical', location='right', shrink=0.62)
@@ -3530,7 +3517,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                             cmap=s['Colormap'],
                                             orientation='vertical')
             cb.set_label(c['label'])
-        
+
         if new:
             plot_name = f"{x['field']}_{y['field']}_{z['field']}_{'ternscatter'}"
             plot_information = {
@@ -3570,7 +3557,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # color by field
         ax.hist2d(x['array'], y['array'], bins=s['Resolution'], norm='log', cmap=plt.get_cmap(s['Colormap']))
-            
+
         norm = plt.Normalize(vmin=0, vmax=3)
         scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(s['Colormap']), norm=norm)
         cb = fig.colorbar(scalarMappable, ax=ax, orientation='vertical', location='right', shrink=0.62)
@@ -3680,17 +3667,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # get saved scatter values to update plot
             a, b, c,  = values
 
-        selected_sample = self.sample_data_dict[self.sample_id]
+        selected_sample = self.data[self.sample_id]
 
         df = selected_sample[['X','Y']]
-        
+
         if fig == None:
             new = True
             labels = [x['field'], y['field'], z['field']]
             fig = Figure(figsize=(6, 4))
             axs = [fig.add_subplots(['left' 'center']), fig.add_subplots(['right'])]
         else:
-            new = False 
+            new = False
 
         a['array'] = self.clipped_isotope_data[self.sample_id][x['field']].values
         b['array'] = self.clipped_isotope_data[self.sample_id][y['field']].values
@@ -3771,16 +3758,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(filtered_array.T, n_clusters, exponent, error=0.00001, maxiter=1000,seed =23)
                 # cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(array.T, n_clusters, exponent, error=0.005, maxiter=1000,seed =23)
                 for n in range(n_clusters):
-                    self.computed_isotope_data[self.sample_id]['cluster scores'][n][self.mask] = u[n-1,:]
+                    self.data[self.sample_id]['computed_data']['cluster scores'][n][self.data[self.sample_id]['mask']] = u[n-1,:]
                     if fuzzy_cluster_number>0:
-                        labels[self.mask] = self.computed_isotope_data[self.sample_id]['cluster scores'][fuzzy_cluster_number][self.mask]
+                        labels[self.data[self.sample_id]['mask']] = self.data[self.sample_id]['computed_data']['cluster scores'][fuzzy_cluster_number][self.data[self.sample_id]['mask']]
                     else:
-                        labels[self.mask] = np.argmax(u, axis=0)[self.mask]
-                        self.computed_isotope_data[self.sample_id]['cluster'][name][self.mask] = ['Cluster '+str(c) for c in labels]
+                        labels[self.data[self.sample_id]['mask']] = np.argmax(u, axis=0)[self.data[self.sample_id]['mask']]
+                        self.data[self.sample_id]['computed_data']['cluster'][name][self.data[self.sample_id]['mask']] = ['Cluster '+str(c) for c in labels]
             else:
                 model = clustering.fit(filtered_array)
-                labels[self.mask] = model.predict(filtered_array[self.mask])
-                self.computed_isotope_data[self.sample_id]['cluster'][name][self.mask] = ['Cluster '+str(c) for c in labels]
+                labels[self.data[self.sample_id]['mask']] = model.predict(filtered_array[self.data[self.sample_id]['mask']])
+                self.data[self.sample_id]['computed_data']['cluster'][name][self.data[self.sample_id]['mask']] = ['Cluster '+str(c) for c in labels]
             # Plot each clustering result
             self.plot_clustering_result(ax, labels, name, fuzzy_cluster_number)
 
@@ -3792,9 +3779,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def plot_clustering_result(self, ax, labels, method_name, fuzzy_cluster_number):
         reshaped_array = np.reshape(labels, self.array_size, order=self.order)
 
-        x_range = self.clipped_isotope_data[self.sample_id]['X'].max() -  self.clipped_isotope_data[self.sample_id]['X'].min()
-        y_range = self.clipped_isotope_data[self.sample_id]['Y'].max() -  self.clipped_isotope_data[self.sample_id]['Y'].min()
-        aspect_ratio =  (y_range/self.clipped_isotope_data[self.sample_id]['Y'].nunique())/ (x_range/self.clipped_isotope_data[self.sample_id]['X'].nunique())
+        x_range = self.data[self.sample_id]['processed_data']['X'].max() -  self.data[self.sample_id]['processed_data']['X'].min()
+        y_range = self.data[self.sample_id]['processed_data']['Y'].max() -  self.data[self.sample_id]['processed_data']['Y'].min()
+        aspect_ratio =  (y_range/self.clipped_analyte_data[self.sample_id]['Y'].nunique())/ (x_range/self.clipped_analyte_data[self.sample_id]['X'].nunique())
         # aspect_ratio  = 1
         # aspect_ratio = 0.617
         fig = ax.figure
@@ -3935,22 +3922,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def get_processed_data(self):
         # return normalised, filtered data with that will be used for analysis
-        use_isotopes = self.isotopes_df.loc[(self.isotopes_df['use']==True) & (self.isotopes_df['sample_id']==self.sample_id), 'isotopes'].values
+        use_analytes = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['use']==True), 'analytes'].values
         # Combine the two masks to create a final mask
-        nan_mask = self.processed_isotope_data[self.sample_id][use_isotopes].notna().all(axis=1)
-        
-        # mask nan values and add to self.mask
-        self.mask = self.mask  & nan_mask[self.axis_mask].values 
+        nan_mask = self.processed_analyte_data[self.sample_id][use_analytes].notna().all(axis=1)
 
-        df_filtered = self.processed_isotope_data[self.sample_id][use_isotopes][self.axis_mask]
+        # mask nan values and add to self.data[self.sample_id]['mask']
+        self.data[self.sample_id]['mask'] = self.data[self.sample_id]['mask']  & nan_mask[self.data[self.sample_id]['axis_mask']].values
 
-        return df_filtered, use_isotopes
+        df_filtered = self.processed_analyte_data[self.sample_id][use_analytes][self.data[self.sample_id]['axis_mask']]
+
+        return df_filtered, use_analytes
 
 
     def plot_n_dim(self):
 
         df_filtered, _  = self.get_processed_data()
-        df_filtered = df_filtered[self.mask]
+        df_filtered = df_filtered[self.data[self.sample_id]['mask']]
 
         ref_i = self.comboBoxNDimRefMaterial.currentIndex()
 
@@ -3968,10 +3955,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         plot_name = self.comboBoxNDimPlotType.currentText()
         if plot_name == 'Radar':
             axes_interval = 5
-            if self.current_group['algorithm'] in self.computed_isotope_data[self.sample_id]['cluster']:
+            if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['cluster']:
                 # Get the cluster labels for the data
 
-                cluster_labels = self.computed_isotope_data[self.sample_id]['cluster'][self.current_group['algorithm']][self.mask]
+                cluster_labels = self.data[self.sample_id]['computed_data']['cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']]
                 df_filtered['clusters'] = cluster_labels
 
                 radar = Radar(df_filtered, fields = self.n_dim_list, quantiles=quantiles, axes_interval = axes_interval, group_field ='clusters', groups = np.unique(cluster_labels.dropna()))
@@ -3986,9 +3973,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             fig = Figure(figsize=(8, 6))
             ax = fig.add_subplot(111)
             yl = [np.inf, -np.inf]
-            if self.current_group['algorithm'] in self.computed_isotope_data[self.sample_id]['cluster']:
+            if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['cluster']:
                 # Get the cluster labels for the data
-                cluster_labels = self.computed_isotope_data[self.sample_id]['cluster'][self.current_group['algorithm']][self.mask]
+                cluster_labels = self.data[self.sample_id]['computed_data']['cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']]
                 df_filtered['clusters'] = cluster_labels
                 clusters = np.unique(cluster_labels)
 
@@ -4044,33 +4031,33 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         def on_use_checkbox_state_changed(row, state):
             # Update the 'use' value in the filter_df for the given row
-            self.filter_df.at[row, 'use'] = state == QtCore.Qt.Checked
+            self.data[self.sample_id]['filter_info'].at[row, 'use'] = state == QtCore.Qt.Checked
 
-        if calling_widget == 'IsotopeAdd':
-            el_list = [self.comboBoxNDimIsotope.currentText().lower()]
-            self.comboBoxNDimIsotopeSet.setCurrentText = 'user defined'
-        elif calling_widget == 'IsotopeSetAdd':
-            isotope_set = self.comboBoxNDimIsotopeSet.currentText().lower()
+        if calling_widget == 'analyteAdd':
+            el_list = [self.comboBoxNDimanalyte.currentText().lower()]
+            self.comboBoxNDimanalyteset.setCurrentText = 'user defined'
+        elif calling_widget == 'analytesetAdd':
+            analyte_set = self.comboBoxNDimanalyteset.currentText().lower()
 
             ####
             #### This needs to be set up more generic so that a user defined sets can be added to the list
             ####
-            if isotope_set == 'majors':
+            if analyte_set == 'majors':
                 el_list = ['Si','Ti','Al','Fe','Mn','Mg','Ca','Na','K','P']
-            elif isotope_set == 'full trace':
+            elif analyte_set == 'full trace':
                 el_list = ['Cs','Rb','Ba','Th','U','K','Nb','Ta','La','Ce','Pb','Mo','Pr','Sr','P','Ga','Zr','Hf','Nd','Sm','Eu','Li','Ti','Gd','Dy','Ho','Y','Er','Yb','Lu']
-            elif isotope_set == 'ree':
+            elif analyte_set == 'ree':
                 el_list = ['La','Ce','Pr','Nd','Pm','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb','Lu']
-            elif isotope_set == 'metals':
+            elif analyte_set == 'metals':
                 el_list = ['Na','Al','Ca','Zn','Sc','Cu','Fe','Mn','V','Co','Mg','Ni','Cr']
 
-        isotopes_list = self.isotopes_df.loc[(self.isotopes_df['sample_id']==self.sample_id), 'isotopes'].values
+        analytes_list = self.data[self.sample_id]['analyte_info'].loc[:, 'analytes'].values
 
-        isotopes = [col for iso in el_list for col in isotopes_list if re.sub(r'\d', '', col).lower() == re.sub(r'\d', '',iso).lower()]
+        analytes = [col for iso in el_list for col in analytes_list if re.sub(r'\d', '', col).lower() == re.sub(r'\d', '',iso).lower()]
 
-        self.n_dim_list.extend(isotopes)
+        self.n_dim_list.extend(analytes)
 
-        for isotope in isotopes:
+        for analyte in analytes:
             # Add a new row at the end of the table
             row = self.tableWidgetNDim.rowCount()
             self.tableWidgetNDim.insertRow(row)
@@ -4085,8 +4072,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                 QtCore.Qt.ItemIsEnabled)
 
             chkBoxItem_select.setCheckState(QtCore.Qt.Unchecked)
-            norm = self.isotopes_df.loc[(self.isotopes_df['sample_id'] == self.sample_id)
-                                        & (self.isotopes_df['isotopes'] == isotope)].iloc[0]['norm']
+            norm = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes'] == analyte)].iloc[0]['norm']
 
 
 
@@ -4094,7 +4080,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.tableWidgetNDim.setItem(row, 1,
                                      QtWidgets.QTableWidgetItem(self.sample_id))
             self.tableWidgetNDim.setItem(row, 2,
-                                     QtWidgets.QTableWidgetItem(isotope))
+                                     QtWidgets.QTableWidgetItem(analyte))
 
             self.tableWidgetNDim.setItem(row, 3,
                                      QtWidgets.QTableWidgetItem(norm))
@@ -4153,9 +4139,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         elif self.comboBoxColorMethod.currentText() == 'k-means':
             algorithm = 'KMeans'
 
-        if algorithm in self.computed_isotope_data[self.sample_id]['cluster']:
-            if not self.computed_isotope_data[self.sample_id]['cluster'][algorithm].empty:
-                clusters = self.computed_isotope_data[self.sample_id]['cluster'][algorithm].dropna().unique()
+        if algorithm in self.data[self.sample_id]['computed_data']['cluster']:
+            if not self.data[self.sample_id]['computed_data']['cluster'][algorithm].empty:
+                clusters = self.data[self.sample_id]['computed_data']['cluster'][algorithm].dropna().unique()
                 clusters.sort()
                 self.tableWidgetViewGroups.setRowCount(len(clusters))
 
@@ -4190,13 +4176,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     print("Duplicate name not allowed.")
                     return
 
-            # Update self.computed_isotope_data[self.sample_id]['cluster'] with the new name
-            if self.current_group['algorithm'] in self.computed_isotope_data[self.sample_id]['cluster']:
+            # Update self.data[self.sample_id]['computed_data']['cluster'] with the new name
+            if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['cluster']:
                 # Find the rows where the value matches cluster_id
-                rows_to_update = self.computed_isotope_data[self.sample_id]['cluster'][self.current_group['algorithm']] == cluster_id
+                rows_to_update = self.data[self.sample_id]['computed_data']['cluster'][self.current_group['algorithm']] == cluster_id
 
                 # Update these rows with the new name
-                self.computed_isotope_data[self.sample_id]['cluster'].loc[rows_to_update, self.current_group['algorithm']] = new_name
+                self.data[self.sample_id]['computed_data']['cluster'].loc[rows_to_update, self.current_group['algorithm']] = new_name
                 self.group_cmap[new_name] = self.group_cmap[cluster_id]
                 del self.group_cmap[cluster_id]
             # Optionally, update current_group to reflect the new cluster name
@@ -4253,14 +4239,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # Calculate min and max values for each column and adjust their shapes for broadcasting
                 min_val = np.nanmin(array, axis=0, keepdims=True) - 0.0001
                 max_val = np.nanmax(array, axis=0, keepdims=True)
-    
+
                 # Adjust the shape of min_val and max_val for broadcasting
                 adjusted_min_val = min_val
                 adjusted_max_val = max_val
-    
+
                 # Check if min values are less than 0
                 min_less_than_zero = adjusted_min_val < 0
-    
+
                 # Perform transformation with broadcasting
                 t_array = np.where(
                     min_less_than_zero,
@@ -4301,28 +4287,29 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def change_sample(self, index):
         """Changes sample and plots first map
-        
+
         Parameter
         ---------
         index: int
             index of sample name for identifying data.  The values are based on the
             comboBoxSampleID
         """
-        if self.sample_data_dict:
+        if self.data:
+            print(self.data)
             # Create and configure the QMessageBox
             messageBoxChangeSample = QMessageBox()
             iconWarning = QtGui.QIcon()
             iconWarning.addPixmap(QtGui.QPixmap(":/icons/resources/icons/icon-warning-64.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-            
+
             messageBoxChangeSample.setWindowIcon(iconWarning)  # Set custom icon
             messageBoxChangeSample.setText("Do you want to save current analysis")
             messageBoxChangeSample.setWindowTitle("Save analysis")
             messageBoxChangeSample.setStandardButtons(QMessageBox.Discard | QMessageBox.Cancel | QMessageBox.Save)
-            
+
             # Display the dialog and wait for user action
             response = messageBoxChangeSample.exec_()
-            
-            
+
+
             if response == QMessageBox.Save:
                 self.save_analysis()
                 self.reset_analysis('sample')
@@ -4331,9 +4318,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             else: #user pressed cancel
                 self.comboBoxSampleId.setCurrentText(self.sample_id)
                 return
-                
-        
-        
+
+
+
         file_path = os.path.join(self.selected_directory, self.csv_files[index])
         self.sample_id = os.path.splitext(self.csv_files[index])[0]
 
@@ -4351,83 +4338,90 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
         # add sample to sample dictionary
-        if self.sample_id not in self.sample_data_dict:
+        if self.sample_id not in self.data:
+            sample_id = self.sample_id
+            #initialise nested dict for each sample
+            self.data[self.sample_id] = {}
+            #set info dataframes for each sample
+            self.data[self.sample_id]['analyte_info'] = pd.DataFrame(columns = ['analytes', 'norm','upper_bound','lower_bound','d_l_bound','d_u_bound', 'use'])
+            self.data[self.sample_id]['ratios_info'] = pd.DataFrame(columns = [ 'analyte_1','analyte_2', 'norm','upper_bound','lower_bound','d_l_bound','d_u_bound', 'use', 'auto_scale'])
+            self.data[self.sample_id]['filter_info'] = pd.DataFrame(columns = [ 'analyte_1', 'analyte_2', 'ratio','norm','f_min','f_max', 'use'])
+
+
             self.update_spinboxes_bool = False #prevent update plot from runing
             sample_df = pd.read_csv(file_path, engine='c')
             sample_df  = sample_df.loc[:, ~sample_df .columns.str.contains('^Unnamed')]
-            # self.sample_data_dict[self.sample_id] = pd.read_csv(file_path, engine='c')
-            self.sample_data_dict[self.sample_id] = self.add_ree(sample_df)
-            self.selected_isotopes = list(self.sample_data_dict[self.sample_id].columns[5:])
-            self.computed_isotope_data[self.sample_id] = {
-                'ratio':None,
-                'calculated':None,
+            # self.data[sample_id] = pd.read_csv(file_path, engine='c')
+            self.data[sample_id]['raw_data'] = self.add_ree(sample_df)
+            self.selected_analytes = list(self.data[sample_id]['raw_data'].columns[5:])
+            self.data[sample_id]['computed_data'] = {
+                'ratio':self.data[sample_id]['raw_data'][['X','Y']],
+                'calculated':self.data[sample_id]['raw_data'][['X','Y']],
                 'special':None,
                 'PCA score':None,
-                'cluster':None,
+                'cluster':pd.DataFrame(columns = ['Fuzzy', 'KMeans', 'KMediods']),
                 'cluster score':None
                 }
-            isotopes = pd.DataFrame()
-            isotopes['isotopes']=list(self.selected_isotopes)
-            isotopes['sample_id'] = self.sample_id
-            isotopes['norm'] = 'linear'
-            
-            #update self.norm_dict
-            self.norm_dict[self.sample_id] = {}
-            for isotope in self.selected_isotopes:
-                self.norm_dict[self.sample_id][isotope] = 'linear'
+            analytes = pd.DataFrame()
+            analytes['analytes']=list(self.selected_analytes)
+            analytes['sample_id'] = sample_id
+            analytes['norm'] = 'linear'
+
+            #update self.data['norm']
+            self.data[sample_id]['norm'] = {}
+
+            for analyte in self.selected_analytes:
+                self.data[sample_id]['norm'][analyte] = 'linear'
             #obtain axis bounds for plotting and cropping
-            self.x_max= self.crop_x_max = self.sample_data_dict[self.sample_id]['X'].max()
-            self.x_min =self.crop_x_min = self.sample_data_dict[self.sample_id]['X'].min()
-            self.y_max = self.crop_y_max = self.sample_data_dict[self.sample_id]['Y'].max()
-            self.y_min = self.crop_y_min = self.sample_data_dict[self.sample_id]['Y'].min()
-            isotopes['upper_bound'] = 99.5
-            isotopes['lower_bound'] = 0.05
-            isotopes['d_l_bound'] = 99
-            isotopes['d_u_bound'] = 99
-            self.isotope_data[self.sample_id] = self.sample_data_dict[self.sample_id][self.selected_isotopes]
-            self.clipped_isotope_data = copy.deepcopy(self.isotope_data)
-            self.cropped_original_data = copy.deepcopy(self.isotope_data)
-            isotopes['v_min'] = np.min(self.clipped_isotope_data[self.sample_id], axis=0)
-            isotopes['v_max'] = np.max(self.clipped_isotope_data[self.sample_id], axis=0)
-            isotopes['auto_scale'] = True
-            isotopes['use'] = True
-            self.isotopes_df = pd.concat([self.isotopes_df, isotopes])
-            
-            # add sample_id to self.plot_widget_dict
-            
-            self.computed_isotope_data[self.sample_id]['cluster']=pd.DataFrame(columns = ['Fuzzy', 'KMeans', 'KMediods'])
-            self.computed_isotope_data[self.sample_id]['cluster']['X'] = self.sample_data_dict[self.sample_id]['X']
-            self.computed_isotope_data[self.sample_id]['cluster']['Y'] = self.sample_data_dict[self.sample_id]['Y']
-            
+            self.data[sample_id]['x_max']= self.data[sample_id]['crop_x_max'] = self.data[sample_id]['raw_data']['X'].max()
+            self.data[sample_id]['x_min'] = self.data[sample_id]['crop_x_min'] = self.data[sample_id]['raw_data']['X'].min()
+            self.data[sample_id]['y_max'] = self.data[sample_id]['crop_y_max'] = self.data[sample_id]['raw_data']['Y'].max()
+            self.data[sample_id]['y_min'] = self.data[sample_id]['crop_y_min'] = self.data[sample_id]['raw_data']['Y'].min()
+            analytes['upper_bound'] = 99.5
+            analytes['lower_bound'] = 0.05
+            analytes['d_l_bound'] = 99
+            analytes['d_u_bound'] = 99
+            self.data[self.sample_id]['processed_data'] = copy.deepcopy(self.data[self.sample_id]['raw_data'])
+            self.data[self.sample_id]['cropped_raw_data'] = copy.deepcopy(self.data[self.sample_id]['raw_data'])
+            analytes['v_min'] = np.min(self.data[sample_id]['processed_data'], axis=0)
+            analytes['v_max'] = np.max(self.data[sample_id]['processed_data'], axis=0)
+            analytes['auto_scale'] = True
+            analytes['use'] = True
+            self.data[sample_id]['analyte_info'] = analytes
+
+            self.data[sample_id]['computed_data']['cluster']=pd.DataFrame(columns = ['Fuzzy', 'KMeans', 'KMediods'])
+            self.data[sample_id]['computed_data']['cluster']['X'] = self.data[sample_id]['raw_data']['X']
+            self.data[sample_id]['computed_data']['cluster']['Y'] = self.data[sample_id]['raw_data']['Y']
+
             for plot_type in self.plot_widget_dict.keys():
-                if self.sample_id not in self.plot_widget_dict[plot_type]:
-                    self.plot_widget_dict[plot_type][self.sample_id]={}
+                if sample_id not in self.plot_widget_dict[plot_type]:
+                    self.plot_widget_dict[plot_type][sample_id]={}
 
-            # set mask of size of isotope array
-            self.filter_mask = np.ones_like( self.sample_data_dict[self.sample_id]['X'].values, dtype=bool)
-            self.polygon_mask = np.ones_like( self.sample_data_dict[self.sample_id]['X'], dtype=bool)
-            self.axis_mask = np.ones_like( self.sample_data_dict[self.sample_id]['X'], dtype=bool)
-            self.mask = self.filter_mask & self.polygon_mask & self.axis_mask
-            
+            # set mask of size of analyte array
+            self.data[self.sample_id]['filter_mask'] = np.ones_like( self.data[sample_id]['raw_data']['X'].values, dtype=bool)
+            self.data[self.sample_id]['polygon_mask'] = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
+            self.data[self.sample_id]['axis_mask'] = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
+            self.data[self.sample_id]['mask'] = self.data[self.sample_id]['filter_mask'] & self.data[self.sample_id]['polygon_mask'] & self.data[self.sample_id]['axis_mask']
+
             self.prep_data()
-            self.comboBoxFIsotope.clear()
-            self.comboBoxNDimIsotope.clear()
-            # self.comboBoxFIsotope_2.clear()
-            self.comboBoxFIsotope.addItems(isotopes['isotopes'])
+            self.comboBoxFAnalyte.clear()
+            self.comboBoxNDimAnalyte.clear()
+            # self.comboBoxFAnalyte_2.clear()
+            self.comboBoxFAnalyte.addItems(analytes['analytes'])
             self.update_filter_values()
-            self.comboBoxScatterIsotopeX.clear()
-            self.comboBoxScatterIsotopeX.addItems(isotopes['isotopes'])
-            self.comboBoxScatterIsotopeY.clear()
-            self.comboBoxScatterIsotopeY.addItems(isotopes['isotopes'])
-            self.comboBoxScatterIsotopeZ.clear()
-            self.comboBoxScatterIsotopeZ.addItem('')
-            self.comboBoxScatterIsotopeZ.addItems(isotopes['isotopes'])
+            self.comboBoxScatterAnalyteX.clear()
+            self.comboBoxScatterAnalyteX.addItems(analytes['analytes'])
+            self.comboBoxScatterAnalyteY.clear()
+            self.comboBoxScatterAnalyteY.addItems(analytes['analytes'])
+            self.comboBoxScatterAnalyteZ.clear()
+            self.comboBoxScatterAnalyteZ.addItem('')
+            self.comboBoxScatterAnalyteZ.addItems(analytes['analytes'])
 
-            self.comboBoxNDimIsotope.addItems(isotopes['isotopes'])
+            self.comboBoxNDimAnalyte.addItems(analytes['analytes'])
 
             self.comboBoxColorField.clear()
             self.comboBoxColorField.addItem('')
-            self.comboBoxColorField.addItems(isotopes['isotopes'])
+            self.comboBoxColorField.addItems(analytes['analytes'])
 
             # self.spinBoxX.setMaximum(int(x_max))
             # self.spinBoxX.setMinimum(int(x_min))
@@ -4439,25 +4433,25 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # self.spinBox_Y.setMinimum(int(y_min))
 
             # self.checkBoxViewRatio.setChecked(False)
-            
-            # plot first isotope as lasermap
-            
+
+            # plot first analyte as lasermap
+
             #get plot array
-            current_plot_df = self.get_map_data(sample_id=self.sample_id, name = self.selected_isotopes[0],analysis_type = 'isotope', plot =False )
-            print(self.selected_isotopes[0])
+            current_plot_df = self.get_map_data(sample_id=sample_id, name = self.selected_analytes[0],analysis_type = 'analyte', plot =False )
+            print(self.selected_analytes[0])
             #create plot
-            self.create_plot(current_plot_df,sample_id=self.sample_id, plot_type = 'lasermap', isotope_1= self.selected_isotopes[0])
-            
-            
-            
-            
+            self.create_plot(current_plot_df,sample_id=sample_id, plot_type = 'lasermap', analyte_1= self.selected_analytes[0])
+
+
+
+
             # self.plot_laser_map(current_plot_df,plot_information)
             # self.update_spinboxes(parameters, auto_scale_param)
             # self.add_plot(plot_information, current_plot_df)
-            
-            self.create_tree(self.sample_id)
-            self.clear_analysis()
-            self.update_tree(self.norm_dict[self.sample_id])
+
+            self.create_tree(sample_id)
+            # self.clear_analysis()
+            self.update_tree(self.data[sample_id]['norm'])
 
             self.update_spinboxes_bool = True  # Place this line at end of method
 
@@ -4468,14 +4462,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def update_combo_boxes(self, parentBox, childBox):
         """Updates comboBoxes with fields for plots or analysis
-        
+
         Updates lists of fields in comboBoxes that are used to generate plots or used for analysis.
         Calls :get_field_list(): to construct the list.
 
         Parameter
         ---------
         parentBox: QComboBox
-            comboBox used to select field type ('isotope', 'isotope (norm)', 'ratio', etc.)
+            comboBox used to select field type ('analyte', 'analyte (norm)', 'ratio', etc.)
         childBox: QComboBox
             comboBox with list of field values
         """
@@ -4515,8 +4509,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.doubleSpinBoxLB.setValue(parameters['lower_bound'])
             self.doubleSpinBoxDLB.setValue(parameters['d_l_bound'])
             self.doubleSpinBoxDUB.setValue(parameters['d_u_bound'])
-            # self.spinBoxNBins.setMaximum(int(max(isotope_array)))
-            # self.spinBoxBinWidth.setMaximum(int(max(isotope_array)))
+            # self.spinBoxNBins.setMaximum(int(max(analyte_array)))
+            # self.spinBoxBinWidth.setMaximum(int(max(analyte_array)))
             if bins: #update these spinboxes if value returned from histogram
                 self.spinBoxNBins.setValue(int(bins))
                 self.spinBoxBinWidth.setValue(int(bin_width))
@@ -4527,12 +4521,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.update_spinboxes_bool = True
 
 
-    def get_map_data(self,sample_id, name = None, analysis_type = 'isotope', plot= True, update = False):
+    def get_map_data(self,sample_id, name = None, analysis_type = 'analyte', plot= True, update = False):
 
         """
-        Retrieves and processes the mapping data for the given sample and isotopes, then plots the result if required.
+        Retrieves and processes the mapping data for the given sample and analytes, then plots the result if required.
 
-        The method also updates certain parameters in the analyte data frame related to scaling. 
+        The method also updates certain parameters in the analyte data frame related to scaling.
         Based on the plot type, this method internally calls the appropriate plotting functions.
 
         :param sample_id: Identifier for the sample to be processed
@@ -4553,54 +4547,54 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :return DataFrame: Processed data for plotting. This is only returned if analysis_type is not 'laser' or 'hist'.
 
         """
-        
+
         if sample_id != self.sample_id:
             #axis mask is not used when plot analytes of a different sample
             axis_mask  = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
         else:
             axis_mask = self.data[self.sample_id]['axis_mask']
-        
+
         print(sample_id)
         #crop plot if filter applied
         current_plot_df = self.data[sample_id]['raw_data'][['X','Y']][axis_mask].reset_index(drop=True)
-        
+
         match analysis_type:
-            
+
             case 'analyte':
                 current_plot_df['array'] = self.data[sample_id]['processed_data'].loc[:,name].values
-                        
+
             case 'ratio':
                 current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].loc[:,name].values
-            
+
             case 'pca':
                 current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].values
-                
+
             case 'cluster':
                 current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].values
-                
+
             case 'cluster score':
                 current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].values
-                
+
             case 'special':
                 current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].values
             case 'computed':
                 current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].values
-        
+
         # crop plot if filter applied
         # current_plot_df = current_plot_df[self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
 
 
         return current_plot_df
-        
+
     def create_plot(self,current_plot_df, sample_id = None, plot_type = 'lasermap', analyte_1 = None, analyte_2 = None, plot = True):
         # creates plot information and send to relevant plotting method
         # adds plot to canvas if specified by user
         if not sample_id:
             sample_id = self.sample_id
-        
-        
+
+
         parameters = self.data[sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['analytes']==analyte_1)].iloc[0]
-        
+
         if not analyte_2: #not a ratio
             current_plot_df['array'] = self.data[sample_id]['processed_data'][analyte_1].values
             analyte_str = analyte_1
@@ -4615,8 +4609,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             current_plot_df['array'] = self.data[sample_id]['computed_data']['ratio'][analyte_1].values
             analyte_str = analyte_1 +' / '+ analyte_2
         if plot_type=='lasermap':
-            
-            
+
+
             plot_information={'plot_name':analyte_str,'sample_id':sample_id,
                               'analyte_1':analyte_1, 'analyte_2':analyte_2,
                               'plot_type':plot_type}
@@ -4628,26 +4622,26 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             bins =self.default_bins
 
             bin_width = (np.nanmax(current_plot_df['array']) - np.nanmin(current_plot_df['array'])) / bins
-            
-            plot_information={'plot_name':isotope_str,'sample_id':sample_id,
-                              'isotope_1':isotope_1, 'isotope_2':isotope_2,
+
+            plot_information={'plot_name':analyte_str,'sample_id':sample_id,
+                              'analyte_1':analyte_1, 'analyte_2':analyte_2,
                               'plot_type':plot_type}
             self.plot_histogram(current_plot_df,plot_information,bin_width = bin_width)
             self.update_spinboxes(parameters,bins, bin_width)
         elif plot_type == 'lasermap_norm':
             ref_data_chem = self.ref_data.iloc[self.comboBoxRefMaterial.currentIndex()]
             ref_data_chem.index = [col.replace('_ppm', '') for col in ref_data_chem.index]
-            ref_series =  ref_data_chem[re.sub(r'\d', '', isotope_1).lower()]
+            ref_series =  ref_data_chem[re.sub(r'\d', '', analyte_1).lower()]
             current_plot_df['array']= current_plot_df['array'] / ref_series
-            plot_information={'plot_name':isotope_str,'sample_id':sample_id,
-                              'isotope_1':isotope_1, 'isotope_2':isotope_2,
+            plot_information={'plot_name':analyte_str,'sample_id':sample_id,
+                              'analyte_1':analyte_1, 'analyte_2':analyte_2,
                               'plot_type':plot_type}
             self.plot_laser_map(current_plot_df,plot_information)
             self.update_spinboxes(parameters)
         else:
             # Return df for analysis
             ## filter current_plot_df based on active filters
-            current_plot_df['array'] = np.where(self.mask, current_plot_df['array'], np.nan)
+            current_plot_df['array'] = np.where(self.data[self.sample_id]['mask'], current_plot_df['array'], np.nan)
             return current_plot_df
         if plot:
             self.add_plot(plot_information, current_plot_df)
@@ -4741,13 +4735,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         return data_dict
 
     def create_tree(self,sample_id = None):
-        if self.isotopes_df.empty:
+        if not self.data:
             treeView  = self.treeView
             treeView.setHeaderHidden(True)
             self.treeModel = QStandardItemModel()
             rootNode = self.treeModel.invisibleRootItem()
-            self.isotopes_items = StandardItem('Isotope', 14, True)
-            self.norm_isotopes_items = StandardItem('Normalised Isotope', 14, True)
+            self.analytes_items = StandardItem('Analyte', 14, True)
+            self.norm_analytes_items = StandardItem('Normalised analyte', 14, True)
             self.ratios_items = StandardItem('Ratio', 14, True)
             self.histogram_items = StandardItem('Histogram', 14, True)
             self.correlation_items = StandardItem('Correlation', 14, True)
@@ -4756,54 +4750,55 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.pca_items = StandardItem('PCA', 14, True)
             self.clustering_items = StandardItem('Clustering', 14, True)
 
-            rootNode.appendRows([self.isotopes_items,self.norm_isotopes_items,self.ratios_items,self.histogram_items,self.correlation_items, self.scatter_items,
+            rootNode.appendRows([self.analytes_items,self.norm_analytes_items,self.ratios_items,self.histogram_items,self.correlation_items, self.scatter_items,
                                  self.n_dim_items, self.pca_items, self.clustering_items])
             treeView.setModel(self.treeModel)
             treeView.expandAll()
             treeView.doubleClicked.connect(self.tree_double_click)
         elif sample_id:
-            #self.isotopes_items.setRowCount(0)
+            #self.analytes_items.setRowCount(0)
             sample_id_item = StandardItem(sample_id, 13)
             histogram_sample_id_item = StandardItem(sample_id, 13)
             ratio_sampe_id_item = StandardItem(sample_id, 13)
             norm_sample_id_item = StandardItem(sample_id, 13)
-            for isotope in self.isotopes_df.loc[self.isotopes_df['sample_id']==sample_id,'isotopes']:
-                isotope_item = StandardItem(isotope)
-                sample_id_item.appendRow(isotope_item)
-                histogram_item = StandardItem(isotope)
+            for analyte in self.data[sample_id]['analyte_info'].loc[:,'analytes']:
+                analyte_item = StandardItem(analyte)
+                sample_id_item.appendRow(analyte_item)
+                histogram_item = StandardItem(analyte)
                 histogram_sample_id_item.appendRow(histogram_item)
-                norm_item = StandardItem(isotope)
+                norm_item = StandardItem(analyte)
                 norm_sample_id_item.appendRow(norm_item)
-            self.isotopes_items.appendRow(sample_id_item)
+            self.analytes_items.appendRow(sample_id_item)
             self.histogram_items.appendRow(histogram_sample_id_item)
             self.ratios_items.appendRow(ratio_sampe_id_item)
-            self.norm_isotopes_items.appendRow(norm_sample_id_item)
+            self.norm_analytes_items.appendRow(norm_sample_id_item)
     def tree_double_click(self,val):
         level_1_data = val.parent().parent().data()
         level_2_data =val.parent().data()
         level_3_data = val.data()
         # self.checkBoxViewRatio.setChecked(False)
-        if level_1_data == 'Isotope' :
-            current_plot_df = self.get_map_data(sample_id = level_2_data,name = level_3_data, analysis_type = 'isotope')
-            self.create_plot(current_plot_df,sample_id = level_2_data,plot_type='lasermap', isotope_1=level_3_data)
-            
-        if level_1_data == 'Normalised Isotope' :
+        if level_1_data == 'Analyte' :
+            current_plot_df = self.get_map_data(sample_id = level_2_data,name = level_3_data, analysis_type = 'analyte')
+            self.create_plot(current_plot_df,sample_id = level_2_data,plot_type='lasermap', analyte_1=level_3_data)
+
+
+        if level_1_data == 'Normalised analyte' :
             current_plot_df = self.get_map_data(sample_id = level_2_data,name = level_3_data)
-            self.create_plot(current_plot_df,sample_id = level_2_data,plot_type='lasermap_norm', isotope_1=level_3_data)
-            
+            self.create_plot(current_plot_df,sample_id = level_2_data,plot_type='lasermap_norm', analyte_1=level_3_data)
+
         elif level_1_data == 'Histogram' :
             current_plot_df = self.get_map_data(sample_id = level_2_data,name = level_3_data)
-            
-            self.create_plot(current_plot_df,sample_id = level_2_data,plot_type='histogram', isotope_1=level_3_data)
-            
+
+            self.create_plot(current_plot_df,sample_id = level_2_data,plot_type='histogram', analyte_1=level_3_data)
+
         # self.add_plot(val.data())
         elif level_1_data == 'Ratio' :
-            isotopes= level_3_data.split(' / ')
-            
+            analytes= level_3_data.split(' / ')
+
             current_plot_df = self.get_map_data(sample_id = level_2_data,name = level_3_data, analysis_type = 'ratio')
-            
-            self.create_plot(current_plot_df,sample_id = level_2_data, plot_type='lasermap', isotope_1= isotopes[0],isotope_2=isotopes[1])
-            
+
+            self.create_plot(current_plot_df,sample_id = level_2_data, plot_type='lasermap', analyte_1= analytes[0],analyte_2=analytes[1])
+
 
         elif ((level_1_data == 'Clustering') or (level_1_data=='Scatter') or (level_1_data=='n-dim') or (level_1_data=='PCA')or (level_1_data=='Correlation')):
             plot_info ={'plot_name':level_3_data, 'plot_type':level_1_data.lower(),'sample_id':level_2_data }
@@ -4812,37 +4807,36 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
 
-    def open_select_isotope_dialog(self):
-        isotopes_list = self.isotopes_df['isotopes'].values
+    def open_select_analyte_dialog(self):
+        analytes_list = self.data[self.sample_id]['analyte_info']['analytes'].values
 
-        self.isotopeDialog = IsotopeSelectionWindow(isotopes_list,self.norm_dict[self.sample_id], self.clipped_isotope_data[self.sample_id], self)
-        self.isotopeDialog.show()
-        # self.isotopeDialog.listUpdated.connect(lambda: self.update_tree(self.isotopeDialog.norm_dict, norm_update = True))
-        result = self.isotopeDialog.exec_()  # Store the result here
+        self.analyteDialog = analyteSelectionWindow(analytes_list,self.data[self.sample_id]['norm'], self.data[self.sample_id]['processed_data'], self)
+        self.analyteDialog.show()
+        # self.analyteDialog.listUpdated.connect(lambda: self.update_tree(self.analyteDialog.norm_dict, norm_update = True))
+        result = self.analyteDialog.exec_()  # Store the result here
         if result == QDialog.Accepted:
-            #update self.norm_dict with selection
-            self.norm_dict[self.sample_id] = self.isotopeDialog.norm_dict
-            self.update_tree(self.norm_dict[self.sample_id], norm_update = True)
-        
+            #update self.data['norm'] with selection
+            self.data[self.sample_id]['norm'] = self.analyteDialog.norm_dict
+            self.update_tree(self.data[self.sample_id]['norm'], norm_update = True)
         if result == QDialog.Rejected:
             pass
 
 
 
 
-    def update_tree(self,leaf,data = None,tree= 'Isotope', norm_update = False):
-        if tree == 'Isotope':
-            # Highlight isotopes in treeView
+    def update_tree(self,leaf,data = None,tree= 'analyte', norm_update = False):
+        if tree.lower() == 'analyte':
+            # Highlight analytes in treeView
             # Un-highlight all leaf in the trees
             self.unhighlight_tree(self.ratios_items)
-            self.unhighlight_tree(self.isotopes_items)
-            self.isotopes_df.loc[self.isotopes_df['sample_id']==self.sample_id,'use'] = False
+            self.unhighlight_tree(self.analytes_items)
+            self.data[self.sample_id]['analyte_info'].loc[:,'use'] = False
             if len(leaf.keys())>0:
-                for isotope_pair, norm in leaf.items():
-                    if '/' in isotope_pair:
-                        isotope_1, isotope_2 = isotope_pair.split(' / ')
-                        self.update_ratio_df(self.sample_id,isotope_1, isotope_2, norm)
-                        ratio_name = f"{isotope_1} / {isotope_2}"
+                for analyte_pair, norm in leaf.items():
+                    if '/' in analyte_pair:
+                        analyte_1, analyte_2 = analyte_pair.split(' / ')
+                        self.update_ratio_df(self.sample_id,analyte_1, analyte_2, norm)
+                        ratio_name = f"{analyte_1} / {analyte_2}"
                         # Populate ratios_items if the pair doesn't already exist
                         item,check = self.find_leaf(tree = self.ratios_items, branch = self.sample_id, leaf = ratio_name)
 
@@ -4852,13 +4846,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                             item.appendRow(child_item)
                         else:
                             item.setBackground(QBrush(QColor(255, 255, 200)))
-                    else: #single isotope
-                        
-                        item,check = self.find_leaf(tree = self.isotopes_items, branch = self.sample_id, leaf = isotope_pair)
+                    else: #single analyte
+
+                        item,check = self.find_leaf(tree = self.analytes_items, branch = self.sample_id, leaf = analyte_pair)
                         item.setBackground(QBrush(QColor(255, 255, 200)))
-                        self.isotopes_df.loc[(self.isotopes_df['sample_id']==self.sample_id) & (self.isotopes_df['isotopes']==isotope_pair),'use'] = True
-                    if norm_update: #update if isotopes are returned from Isotope selection window
-                        self.update_norm(self.sample_id,norm,isotope_pair)
+                        self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes']==analyte_pair),'use'] = True
+                    if norm_update: #update if analytes are returned from analyte selection window
+                        self.update_norm(self.sample_id,norm,analyte_pair)
 
         elif tree=='Scatter':
 
@@ -4929,17 +4923,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
 
-    def update_ratio_df(self,sample_id,isotope_1, isotope_2,norm):
+    def update_ratio_df(self,sample_id,analyte_1, analyte_2,norm):
 
-        parameter= self.ratios_df.loc[(self.ratios_df['sample_id'] == sample_id) & (self.ratios_df['isotope_1'] == isotope_1) & (self.ratios_df['isotope_2'] == isotope_2)]
+        parameter= self.data[sample_id]['ratios_info'].loc[(self.data[sample_id]['ratios_info']['analyte_1'] == analyte_1) & (self.data[sample_id]['ratios_info']['analyte_2'] == analyte_2)]
         if parameter.empty:
-            ratio_info= {'sample_id': self.sample_id, 'isotope_1':isotope_1, 'isotope_2':isotope_2, 'norm': norm,
+            ratio_info= {'sample_id': self.sample_id, 'analyte_1':analyte_1, 'analyte_2':analyte_2, 'norm': norm,
                             'upper_bound':np.nan,'lower_bound':np.nan,'d_bound':np.nan,'use': True,'auto_scale': True}
-            self.ratios_df.loc[len(self.ratios_df)] = ratio_info
+            self.data[sample_id]['ratios_info'].loc[len(self.data[sample_id]['ratios_info'])] = ratio_info
 
 
 
-            self.prep_data(sample_id, isotope_1=isotope_1, isotope_2 = isotope_2)
+            self.prep_data(sample_id, analyte_1=analyte_1, analyte_2 = analyte_2)
 
 
 
@@ -4954,25 +4948,25 @@ class StandardItem(QStandardItem):
         self.setFont(fnt)
 
 
-class IsotopeSelectionWindow(QDialog, Ui_Dialog):
+class analyteSelectionWindow(QDialog, Ui_Dialog):
     listUpdated = pyqtSignal()
-    def __init__(self, isotopes,norm_dict, clipped_data, parent=None):
+    def __init__(self, analytes,norm_dict, clipped_data, parent=None):
         super().__init__(parent)
         self.setupUi(self)
 
-        self.isotopes = list(isotopes)
+        self.analytes = list(analytes)
         self.norm_dict = norm_dict
         self.clipped_data = clipped_data
         self.correlation_matrix = None
-        self.tableWidgetIsotopes.setRowCount(len(isotopes))
-        self.tableWidgetIsotopes.setColumnCount(len(isotopes))
-        self.tableWidgetIsotopes.setHorizontalHeaderLabels(list(isotopes))
-        self.tableWidgetIsotopes.setHorizontalHeader(RotatedHeaderView(self.tableWidgetIsotopes))
-        self.tableWidgetIsotopes.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
-        self.tableWidgetIsotopes.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
+        self.tableWidgetAnalytes.setRowCount(len(analytes))
+        self.tableWidgetAnalytes.setColumnCount(len(analytes))
+        self.tableWidgetAnalytes.setHorizontalHeaderLabels(list(analytes))
+        self.tableWidgetAnalytes.setHorizontalHeader(RotatedHeaderView(self.tableWidgetAnalytes))
+        self.tableWidgetAnalytes.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
+        self.tableWidgetAnalytes.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
         self.comboBoxScale.currentIndexChanged.connect(self.update_all_combos)
 
-        self.tableWidgetIsotopes.setVerticalHeaderLabels(isotopes)
+        self.tableWidgetAnalytes.setVerticalHeaderLabels(analytes)
         self.correlation_methods = [
             "Pearson",
             "Spearman",
@@ -4985,10 +4979,10 @@ class IsotopeSelectionWindow(QDialog, Ui_Dialog):
 
 
 
-        self.tableWidgetIsotopes.cellClicked.connect(self.toggle_cell_selection)
+        self.tableWidgetAnalytes.cellClicked.connect(self.toggle_cell_selection)
 
         self.tableWidgetSelected.setColumnCount(2)
-        self.tableWidgetSelected.setHorizontalHeaderLabels(['Isotope Pair', 'normalisation'])
+        self.tableWidgetSelected.setHorizontalHeaderLabels(['analyte Pair', 'normalisation'])
 
         self.pushButtonSaveSelection.clicked.connect(self.save_selection)
 
@@ -4998,28 +4992,28 @@ class IsotopeSelectionWindow(QDialog, Ui_Dialog):
 
         self.pushButtonCancel.clicked.connect(self.reject)
         self.comboBoxCorrelation.activated.connect(self.calculate_correlation)
-        self.tableWidgetIsotopes.setStyleSheet("QTableWidget::item:selected {background-color: yellow;}")
+        self.tableWidgetAnalytes.setStyleSheet("QTableWidget::item:selected {background-color: yellow;}")
         if len(self.norm_dict.keys())>0:
-            for isotope,norm in self.norm_dict.items():
-                self.populate_isotope_list(isotope,norm)
+            for analyte,norm in self.norm_dict.items():
+                self.populate_analyte_list(analyte,norm)
         else:
             # Select diagonal pairs by default
-            for i in range(len(self.isotopes)):
+            for i in range(len(self.analytes)):
                 row=column = i
-                item = self.tableWidgetIsotopes.item(row, column)
+                item = self.tableWidgetAnalytes.item(row, column)
 
                 # If the item doesn't exist, create it
                 if not item:
                     item = QTableWidgetItem()
-                    self.tableWidgetIsotopes.setItem(row, column, item)
-                    self.add_isotope_to_list(row, column)
+                    self.tableWidgetAnalytes.setItem(row, column, item)
+                    self.add_analyte_to_list(row, column)
                 # If the cell is already selected, deselect it
                 elif not item.isSelected():
                     item.setSelected(True)
-                    self.add_isotope_to_list(row, column)
+                    self.add_analyte_to_list(row, column)
                 else:
                     item.setSelected(False)
-                    self.remove_isotope_from_list(row, column)
+                    self.remove_analyte_from_list(row, column)
     def done_selection(self):
         self.update_list()
         self.accept()
@@ -5061,20 +5055,20 @@ class IsotopeSelectionWindow(QDialog, Ui_Dialog):
         selected_method = self.comboBoxCorrelation.currentText().lower()
         # Compute the correlation matrix
         self.correlation_matrix = self.clipped_data.corr(method=selected_method)
-        for i, row_isotope in enumerate(self.isotopes):
-            for j, col_isotope in enumerate(self.isotopes):
+        for i, row_analyte in enumerate(self.analytes):
+            for j, col_analyte in enumerate(self.analytes):
 
-                correlation = self.correlation_matrix.loc[row_isotope, col_isotope]
+                correlation = self.correlation_matrix.loc[row_analyte, col_analyte]
                 self.color_cell(i, j, correlation)
         self.create_colorbar()  # Call this to create and display the colorbar
 
     def color_cell(self, row, column, correlation):
         """Colors cells in """
         color = self.get_color_for_correlation(correlation)
-        item = self.tableWidgetIsotopes.item(row, column)
+        item = self.tableWidgetAnalytes.item(row, column)
         if not item:
             item = QTableWidgetItem()
-            self.tableWidgetIsotopes.setItem(row, column, item)
+            self.tableWidgetAnalytes.setItem(row, column, item)
         item.setBackground(color)
 
     def get_color_for_correlation(self, correlation):
@@ -5111,31 +5105,31 @@ class IsotopeSelectionWindow(QDialog, Ui_Dialog):
         painter.end()
         return image
     def toggle_cell_selection(self, row, column):
-        item = self.tableWidgetIsotopes.item(row, column)
+        item = self.tableWidgetAnalytes.item(row, column)
 
         # If the item doesn't exist, create it
         if not item:
             item = QTableWidgetItem()
-            self.tableWidgetIsotopes.setItem(row, column, item)
-            self.add_isotope_to_list(row, column)
+            self.tableWidgetAnalytes.setItem(row, column, item)
+            self.add_analyte_to_list(row, column)
         # If the cell is already selected, deselect it
         elif item.isSelected():
             item.setSelected(True)
-            self.add_isotope_to_list(row, column)
+            self.add_analyte_to_list(row, column)
         else:
             item.setSelected(False)
-            self.remove_isotope_from_list(row, column)
+            self.remove_analyte_from_list(row, column)
 
-    def add_isotope_to_list(self, row, column):
-        row_header = self.tableWidgetIsotopes.verticalHeaderItem(row).text()
-        col_header = self.tableWidgetIsotopes.horizontalHeaderItem(column).text()
+    def add_analyte_to_list(self, row, column):
+        row_header = self.tableWidgetAnalytes.verticalHeaderItem(row).text()
+        col_header = self.tableWidgetAnalytes.horizontalHeaderItem(column).text()
 
         newRow = self.tableWidgetSelected.rowCount()
         self.tableWidgetSelected.insertRow(newRow)
         if row == column:
             self.tableWidgetSelected.setItem(newRow, 0, QTableWidgetItem(f"{row_header}"))
         else:
-            # Add isotope pair to the first column
+            # Add analyte pair to the first column
             self.tableWidgetSelected.setItem(newRow, 0, QTableWidgetItem(f"{row_header} / {col_header}"))
 
         # Add dropdown to the second column
@@ -5144,9 +5138,9 @@ class IsotopeSelectionWindow(QDialog, Ui_Dialog):
         self.tableWidgetSelected.setCellWidget(newRow, 1, combo)
         self.update_list()
 
-    def remove_isotope_from_list(self, row, column):
-        row_header = self.tableWidgetIsotopes.verticalHeaderItem(row).text()
-        col_header = self.tableWidgetIsotopes.horizontalHeaderItem(column).text()
+    def remove_analyte_from_list(self, row, column):
+        row_header = self.tableWidgetAnalytes.verticalHeaderItem(row).text()
+        col_header = self.tableWidgetAnalytes.horizontalHeaderItem(column).text()
         if row == column:
             item_text = f"{row_header}"
         else:
@@ -5163,10 +5157,10 @@ class IsotopeSelectionWindow(QDialog, Ui_Dialog):
     def get_selected_data(self):
         data = []
         for i in range(self.tableWidgetSelected.rowCount()):
-            isotope_pair = self.tableWidgetSelected.item(i, 0).text()
+            analyte_pair = self.tableWidgetSelected.item(i, 0).text()
             combo = self.tableWidgetSelected.cellWidget(i, 1)
             selection = combo.currentText()
-            data.append((isotope_pair, selection))
+            data.append((analyte_pair, selection))
         return data
 
 
@@ -5175,17 +5169,17 @@ class IsotopeSelectionWindow(QDialog, Ui_Dialog):
         if file_name:
             with open(file_name, 'w') as f:
                 for i in range(self.tableWidgetSelected.rowCount()):
-                    isotope_pair = self.tableWidgetSelected.item(i, 0).text()
+                    analyte_pair = self.tableWidgetSelected.item(i, 0).text()
                     combo = self.tableWidgetSelected.cellWidget(i, 1)
                     selection = combo.currentText()
-                    f.write(f"{isotope_pair},{selection}\n")
+                    f.write(f"{analyte_pair},{selection}\n")
 
     def load_selection(self):
         file_name, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Text Files (*.txt);;All Files (*)")
         if file_name:
             with open(file_name, 'r') as f:
                 for line in f.readlines():
-                    self.populate_isotope_list(line)
+                    self.populate_analyte_list(line)
             self.update_list()
             self.raise_()
             self.activateWindow()
@@ -5372,7 +5366,7 @@ class Table_Fcn:
                 for row in rows:
                     # Get selected row and delete it
                     table.removeRow(row)
-                    
+
             case 'Polygon':
                 print('d')
                 for row in rows:
@@ -5381,7 +5375,7 @@ class Table_Fcn:
                     p_id = int(item.text())
                     # Get selected row and delete it
                     table.removeRow(row)
-                    
+
                     # remove point from each profile and its corresponding scatter plot item
                     for p in self.main_window.polygon.polygons[p_id]:
                         scatter_item = p[2]  # Access the scatter plot item
@@ -5395,7 +5389,7 @@ class Table_Fcn:
                             plot.removeItem(line)
                         self.main_window.polygon.lines[p_id] = []
 
-    
+
 class Crop_tool:
     """Crop maps
 
@@ -5432,14 +5426,14 @@ class Crop_tool:
             # Central crop rectangle dimensions (half width and height of the plot)
             crop_rect_width = self.x_range / 2
             crop_rect_height =self.y_range / 2
-    
+
             # Position the crop_rect at the center of the plot
             crop_rect_x = (self.x_range - crop_rect_width) / 2
             crop_rect_y = (self.y_range - crop_rect_height) / 2
-    
+
             self.crop_rect = ResizableRectItem(parent=self, rect=QRectF(crop_rect_x, crop_rect_y, crop_rect_width, crop_rect_height))
             self.crop_rect.setPen(QPen(QColor(255, 255, 255), 4, Qt.DashLine))
-            
+
             self.main_window.plot.addItem(self.crop_rect)
 
             for _ in range(4):
@@ -5447,13 +5441,13 @@ class Crop_tool:
                 overlay.setBrush(QColor(0, 0, 0, 120))  # Semi-transparent dark overlay
                 self.main_window.plot.addItem(overlay)
                 self.overlays.append(overlay)
-    
+
             self.update_overlay(self.crop_rect.rect())
             self.main_window.toolButtonCropApply.setEnabled(True)
         else:
             # reset to full view and remove overlays if user unselects crop tool
             self.main_window.reset_to_full_view()
-            
+
     def remove_overlays(self):
         """Removes darkened overlay following completion of crop."""
         if len(self.overlays)> 0: #remove crop rect and overlays
@@ -5465,10 +5459,10 @@ class Crop_tool:
 
     def update_overlay(self, rect):
         """Updates the overlay after user moves a boundary.
-        
+
         Parameter
         ---------
-        rect: 
+        rect:
         """
         # Adjust the overlay rectangles based on the new crop_rect
         plot_rect = self.main_window.plot.viewRect()
@@ -5481,7 +5475,7 @@ class Crop_tool:
         self.overlays[2].setRect(QRectF(QPointF(plot_rect.left(), rect.top()), QPointF(rect.left(), rect.bottom())))
         # Right overlay
         self.overlays[3].setRect(QRectF(QPointF(rect.right(), rect.top()), QPointF(plot_rect.right(), rect.bottom())))
-        
+
     def apply_crop(self):
         """Uses selected crop extent to set viewable area and map region for analysis."""
         if self.crop_rect:
@@ -5498,8 +5492,8 @@ class Crop_tool:
                 self.main_window.toolButtonCropApply.setEnabled(False)
             #update plot with crop
             self.main_window.apply_crop()
-        
-        
+
+
 class ResizableRectItem(QGraphicsRectItem):
     def __init__(self, rect=None, parent=None):
         super(ResizableRectItem, self).__init__(rect)
@@ -5591,9 +5585,9 @@ class ResizableRectItem(QGraphicsRectItem):
 
 class Polygon:
     """Operations related to polygon generation and manipulation
-    
+
     Polygons can be used to select or exclude regions of maps for analysis.
-    
+
     Methods
     -------
     increment_pid()
@@ -5611,17 +5605,17 @@ class Polygon:
         self.point_index = None             # index for move point
         self.p_id = None           # polygon ID
         self.p_id_gen = 0 #Polygon_id generator
-    
+
     # Method to increment p_id_gen
     def increment_pid(self):
         """Creates new polygon pid
-        
+
         When toolButtonPolyCreate is checked, a new polygon pid is created.
         """
         self.main_window.toolButtonPolyCreate.isChecked()
         self.p_id_gen += 1
         self.p_id = self.p_id_gen
-        
+
     def plot_polygon_scatter(self, event,k, x, y, x_i, y_i):
         self.array_x = self.main_window.array.shape[1]
         self.array_y = self.main_window.array.shape[0]
@@ -5629,26 +5623,26 @@ class Polygon:
         if event.button() == QtCore.Qt.RightButton and self.main_window.toolButtonPolyCreate.isChecked():
             self.main_window.toolButtonPolyCreate.setChecked(False)
             self.main_window.toolButtonPolyMovePoint.setEnabled(True)
-            
+
             # Finalize and draw the polygon
             self.show_polygon_lines(x,y, complete = True)
-        
+
             return
         elif event.button() == QtCore.Qt.RightButton and self.main_window.toolButtonPolyMovePoint.isChecked():
             self.main_window.toolButtonPolyMovePoint.setChecked(False)
             self.main_window.point_selected = False
             return
-        
+
         elif event.button() == QtCore.Qt.RightButton and self.main_window.toolButtonPolyAddPoint.isChecked():
             self.main_window.toolButtonPolyAddPoint.setChecked(False)
             return
-        
+
         elif event.button() == QtCore.Qt.RightButton and self.main_window.toolButtonPolyRemovePoint.isChecked():
             self.main_window.toolButtonPolyRemovePoint.setChecked(False)
             return
         elif event.button() == QtCore.Qt.RightButton or event.button() == QtCore.Qt.MiddleButton:
             return
-        
+
         elif event.button() == QtCore.Qt.LeftButton and not(self.main_window.toolButtonPolyCreate.isChecked()) and self.main_window.toolButtonPolyMovePoint.isChecked():
             # move point
             selection_model = self.main_window.tableWidgetPolyPoints.selectionModel()
@@ -5659,22 +5653,22 @@ class Polygon:
                 if selected_rows:
                     # Assuming you're interested in the first selected row
                     first_selected_row = selected_rows[0].row()
-                    
+
                     # Get the item in the first column of this row
                     item = self.main_window.tableWidgetPolyPoints.item(first_selected_row, 0)
-                    
+
                     # Check if the item is not None
                     if item is not None:
                         self.p_id = int(item.text())  # Get polygon id to move point
-                        
+
                     else:
                         QMessageBox.warning(self.main_window, "Selection Error", "No item found in the first column of the selected row.")
                 else:
                     QMessageBox.warning(self.main_window, "Selection Error", "No row is selected.")
             else:
                 QMessageBox.warning(self.main_window, "Selection Error", "No selection is made in the table.")
-                
-                
+
+
             if self.main_window.point_selected:
                 #remove selected point
                 prev_scatter = self.polygons[self.p_id][self.point_index][2]
@@ -5686,14 +5680,14 @@ class Polygon:
                 scatter.setZValue(1e9)
                 self.main_window.plot.addItem(scatter)
 
-                
+
                 #update self.point_index index of self.polygonswith new point data
 
                 self.polygons[self.p_id][self.point_index] = (x,y, scatter)
-                
+
                 # Finalize and draw the polygon
                 self.show_polygon_lines(x,y, complete = True)
-                
+
                 self.main_window.point_selected = False
                 #update plot and table widget
                 # self.update_table_widget()
@@ -5708,12 +5702,12 @@ class Polygon:
                     print(dist, round(mindist*self.array_x/self.main_window.x_range))
                 if (round(mindist*self.array_x/self.main_window.x_range) < 50):
                     self.main_window.point_selected = True
-        
-        
+
+
         elif event.button() == QtCore.Qt.LeftButton and not(self.main_window.toolButtonPolyCreate.isChecked()) and self.main_window.toolButtonPolyAddPoint.isChecked():
-            # add point 
+            # add point
             # user must first choose line of polygon
-            # choose the vertext points to add point based on line 
+            # choose the vertext points to add point based on line
             # Find the closest line segment to the click location
             min_distance = float('inf')
             insert_after_index = None
@@ -5724,21 +5718,21 @@ class Polygon:
                 if dist < min_distance:
                     min_distance = dist
                     insert_after_index = i
-            
+
             # Insert the new point after the closest line segment
             if insert_after_index is not None:
                 scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
                 scatter.setZValue(1e9)
                 self.main_window.plot.addItem(scatter)
                 self.polygons[self.p_id].insert(insert_after_index + 1, (x, y, scatter))
-        
+
             # Redraw the polygon with the new point
             self.show_polygon_lines(x, y, complete=True)
-            
-           
-        
+
+
+
         elif event.button() == QtCore.Qt.LeftButton and not(self.main_window.toolButtonPolyCreate.isChecked()) and self.main_window.toolButtonPolyRemovePoint.isChecked():
-            # remove point 
+            # remove point
             # draw polygon without selected point
             # remove point
             # Find the closest point to the click location
@@ -5749,37 +5743,37 @@ class Polygon:
                 if dist < min_distance:
                     min_distance = dist
                     point_to_remove_index = i
-            
+
             # Remove the closest point
             if point_to_remove_index is not None:
                 _, _, scatter_item = self.polygons[self.p_id].pop(point_to_remove_index)
                 self.main_window.plot.removeItem(scatter_item)
-        
+
             # Redraw the polygon without the removed point
             self.show_polygon_lines(x, y, complete=True)
-            
+
             self.main_window.toolButtonPolyRemovePoint.setChecked(False)
-            
-            
-            
+
+
+
         elif event.button() == QtCore.Qt.LeftButton:
             # Create a scatter self.main_window.plot item at the clicked position
             scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
             scatter.setZValue(1e9)
             self.main_window.plot.addItem(scatter)
-            
+
             # add x and y to self.polygons dict
             if self.p_id not in self.polygons:
                 self.polygons[self.p_id] = [(x,y, scatter)]
-                
+
             else:
                 self.polygons[self.p_id].append((x,y, scatter))
-                
+
     def distance_to_line_segment(self, px, py, x1, y1, x2, y2):
         # Calculate the distance from point (px, py) to the line segment defined by points (x1, y1) and (x2, y2)
         # This is a simplified version; you might need a more accurate calculation based on your coordinate system
         return min(((px - x1)**2 + (py - y1)**2)**0.5, ((px - x2)**2 + (py - y2)**2)**0.5)
-        
+
     def show_polygon_lines(self, x,y, complete = False):
         if self.p_id in self.polygons:
             # Remove existing temporary line(s) if any
@@ -5795,16 +5789,16 @@ class Polygon:
                 self.main_window.plot.addItem(line)
                 self.lines[self.p_id].append(line)
             elif not complete and len(points) > 1:
-               
+
                 if self.main_window.point_selected:
                     # self.point_index is the index of the pont that needs to be moved
-                    
+
                     # create polygon with moved point
                     x_points = [p[0] for p in points[:self.point_index]] + [x]+ [p[0] for p in points[(self.point_index+1):]]
                     y_points = [p[1] for p in points[:self.point_index]] + [y]+ [p[1] for p in points[(self.point_index+1):]]
-                    
+
                 else:
-                    
+
                     # create polygon with new point
                     x_points = [p[0] for p in points] + [x, points[0][0]]
                     y_points = [p[1] for p in points] + [y, points[0][1]]
@@ -5818,7 +5812,7 @@ class Polygon:
                 # line = PlotDataItem([points[-1][0], x], [points[-1][1], y], pen='r')
                 # self.main_window.plot.addItem(line)
                 # self.lines[self.p_id].append(line)
-                
+
             elif complete and len(points) > 2:
                 points = [QtCore.QPointF(x, y) for x, y, _ in self.polygons[self.p_id]]
                 polygon = QtGui.QPolygonF(points)
@@ -5826,7 +5820,7 @@ class Polygon:
                 poly_item.setBrush(QtGui.QColor(100, 100, 150, 100))
                 self.main_window.plot.addItem(poly_item)
                 self.lines[self.p_id].append(poly_item)
-                
+
                 self.update_table_widget()
                 # Find the row where the first column matches self.p_id and select it
                 for row in range(self.main_window.tableWidgetPolyPoints.rowCount()):
@@ -5834,10 +5828,10 @@ class Polygon:
                     if item and int(item.text()) == self.p_id:
                         self.main_window.tableWidgetPolyPoints.selectRow(row)
                         break
-                    
+
     def update_table_widget(self):
         self.main_window.tableWidgetPolyPoints.setRowCount(0)  # Clear existing rows
-        
+
         for p_id, val in self.polygons.items():
             row_position = self.main_window.tableWidgetPolyPoints.rowCount()
             self.main_window.tableWidgetPolyPoints.insertRow(row_position)
@@ -5847,19 +5841,19 @@ class Polygon:
             self.main_window.tableWidgetPolyPoints.setItem(row_position, 1, QTableWidgetItem(str('')))
             self.main_window.tableWidgetPolyPoints.setItem(row_position, 2, QTableWidgetItem(str('')))
             self.main_window.tableWidgetPolyPoints.setItem(row_position, 3, QTableWidgetItem(str('In')))
-            
+
             # Create a QCheckBox
             checkBox = QCheckBox()
-            
+
             # Set its checked state
-            checkBox.setChecked(True)  
-            
+            checkBox.setChecked(True)
+
             # Connect the stateChanged signal
             checkBox.stateChanged.connect(lambda state: self.main_window.apply_filters(fullmap=False))
-            
+
             # Add the checkbox to the table
             self.main_window.tableWidgetPolyPoints.setCellWidget(row_position, 4, checkBox)
-    
+
     def clear_lines(self):
         if self.p_id in self.polygons:
             # Remove existing temporary line(s) if any
@@ -5867,7 +5861,7 @@ class Polygon:
                 for line in self.lines[self.p_id]:
                     self.main_window.plot.removeItem(line)
             self.lines[self.p_id] = []
-        
+
     def clear_polygons(self):
         self.main_window.tableWidgetPolyPoints.clear()
         self.clear_lines()
@@ -5895,9 +5889,9 @@ class Profiling:
     def plot_profile_scatter(self, event, array,k, plot, x, y, x_i, y_i):
         self.array_x = array.shape[1]
         self.array_y = array.shape[0]
-        
+
         interpolate = False
-        
+
         radius= int(self.main_window.lineEditPointRadius.text())
         # turn off profile (need to suppress context menu on right click)
         if event.button() == QtCore.Qt.RightButton and self.main_window.toolButtonPlotProfile.isChecked():
@@ -5910,18 +5904,18 @@ class Profiling:
             return
         elif event.button() == QtCore.Qt.RightButton or event.button() == QtCore.Qt.MiddleButton:
             return
-    
-            
-            
+
+
+
         elif event.button() == QtCore.Qt.LeftButton and not(self.main_window.toolButtonPlotProfile.isChecked()) and self.main_window.toolButtonPointMove.isChecked():
             # move point
-            
+
             if self.point_selected:
                 #remove selected point
                 prev_scatter = self.profiles[k][self.point_index][3]
                 plot.removeItem(prev_scatter)
-    
-    
+
+
                 # Create a scatter plot item at the clicked position
                 scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
                 scatter.setZValue(1e9)
@@ -5935,13 +5929,13 @@ class Profiling:
                             value = array[i, j]
                             circ_cord.append([i, j])
                             circ_val.append( value)
-    
+
                 #update self.point_index index of self.profiles with new point data
                 if k in self.profiles:
-    
+
                     self.profiles[k][self.point_index] = (x,y, circ_val,scatter, interpolate)
-    
-    
+
+
                 if self.main_window.canvasWindow.currentIndex() == 1:
                     # Add the scatter item to all other plots and save points in self.profiles
                     for k, (_, p, v, array) in self.main_window.lasermaps.items():
@@ -5956,7 +5950,7 @@ class Profiling:
                                 circ_val.append( value)
                             if k in self.profiles:
                                 self.profiles[k][self.point_index] = (x,y, circ_val,scatter, interpolate)
-    
+
                 #update plot and table widget
                 self.main_window.plot_profiles()
                 self.update_table_widget()
@@ -5974,11 +5968,11 @@ class Profiling:
                 if not(round(mindist*self.array_x/self.main_window.x_range) < 50):
                     self.point_selected = True
 
-            
+
         elif event.button() == QtCore.Qt.LeftButton:
             #switch to profile tab
             self.main_window.tabWidget.setCurrentIndex(2)
-    
+
             # Create a scatter plot item at the clicked position
             scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
             scatter.setZValue(1e9)
@@ -5992,14 +5986,14 @@ class Profiling:
                         value = array[i, j]
                         circ_cord.append([i, j])
                         circ_val.append( value)
-    
+
             #add values within circle of radius in self.profiles
             if k in self.profiles:
                 self.profiles[k].append((x,y,circ_val,scatter, interpolate))
             else:
                 self.profiles[k] = [(x,y, circ_val,scatter, interpolate)]
-    
-    
+
+
             if self.main_window.canvasWindow.currentIndex() == 1:
                 # Add the scatter item to all other plots and save points in self.profiles
                 for k, (_, p, v, array) in self.main_window.lasermaps.items():
@@ -6016,11 +6010,11 @@ class Profiling:
                             self.profiles[k].append((x,y,circ_val, scatter, interpolate))
                         else:
                             self.profiles[k] = [(x,y, circ_val,scatter, interpolate)]
-    
+
             self.plot_profiles()
             self.update_table_widget()
-    
-    
+
+
     def interpolate_points(self, interpolation_distance,radius):
         """
         Interpolate linear points between each pair of points in the profiles.
@@ -6257,7 +6251,7 @@ class Profiling:
                                                             elinewidth=style['LineWidth'],
                                                             capsize=0,
                                                             zorder=2*g_idx)
-                            
+
                             # Assuming you have the scaling factors and original data range
                             scale_factor = (original_max - original_min) / (twinx_max - twinx_min)
 
@@ -6369,7 +6363,7 @@ class Profiling:
                                                  gid=profile_key,
                                                  label=f'{profile_key[:-1]}',
                                                  zorder=2*g_idx+1)
-                            
+
                             #plot errorbars with no marker
                             _, _, barlinecols = ax.errorbar(distances, medians,
                                                             yerr=errors,
@@ -6379,7 +6373,7 @@ class Profiling:
                                                             elinewidth=style['LineWidth'],
                                                             capsize=0,
                                                             zorder=2*g_idx)
-                            
+
                         self.all_errorbars.append((scatter,barlinecols[0]))
                         self.original_colors[profile_key] = colors[idx+g_idx]  # Assuming colors is accessible
                         self.selected_points[profile_key] = [False] * len(medians)
@@ -6510,7 +6504,7 @@ class Profiling:
 
     def toggle_edit_mode(self):
         """Toggles profile editing mode.
-        
+
         State determined by toolButtonProfileEditMode checked.
         """
         self.edit_mode_enabled = not self.edit_mode_enabled

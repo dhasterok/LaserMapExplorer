@@ -179,7 +179,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ProfilingPage.setEnabled(False)
         self.SpecialFunctionPage.setEnabled(False)
 
-        self.toolButtonLoadIsotopes.clicked.connect(self.open_select_isotope_dialog)
         self.actionSelectAnalytes.triggered.connect(self.open_select_isotope_dialog)
         self.actionSpotData.triggered.connect(lambda: self.open_tab('spot data'))
         self.actionFilter_Tools.triggered.connect(lambda: self.open_tab('filter'))
@@ -4533,20 +4532,26 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         Retrieves and processes the mapping data for the given sample and isotopes, then plots the result if required.
 
-        Parameters:
-        - self.sample_id (str): Identifier for the sample to be processed.
-        - isotope_1 (str, optional): Primary isotope for plotting. If not provided, it's inferred from the isotope data frame.
-        - isotope_2 (str, optional): Secondary isotope for ratio plotting. If not provided, only the primary isotope will be plotted.
-        - analysis_type (str, default='laser'): Specifies the type of analysis. Accepts 'isotope' , 'ratio', 'pca', 'cluster', 'cluster score', 'special', 'computed'
-        - plot (bool, default=True): Determines if the plot should be shown after processing.
-        - auto_scale (bool, default=False): Determines if auto-scaling should be re-applied to the plot. if False use fmin and fmax and clip array
+        The method also updates certain parameters in the analyte data frame related to scaling. 
+        Based on the plot type, this method internally calls the appropriate plotting functions.
 
-        Returns:
-        - DataFrame: Processed data for plotting. This is only returned if analysis_type is not 'laser' or 'hist'.
+        :param sample_id: Identifier for the sample to be processed
+        :type sample_id: str
+        :param isotope_1: Primary isotope for plotting. If not provided, it's inferred from the isotope data frame
+        :type isotope_1: str, optional
+        :param isotope_2: Secondary isotope for ratio plotting. If not provided, only the primary isotope will be plotted
+        :type isotope_2: str, optional
+        :param analysis_type: Specifies the type of analysis. Accepts 'isotope' , 'ratio', 'pca', 'cluster',
+          'cluster score', 'special', 'computed', Defaults to 'laser'
+        :type analysis_type: str, optional
+        :param plot: Determines if the plot should be shown after processing, Defaults to True
+        :type plot: bool, optional
+        :param auto_scale: Determines if auto-scaling should be re-applied to the plot. if False use fmin
+          and fmax and clip array, Defaults to False
+        :type auto_scale: bool, optional
 
-        Note:
-        - The method also updates certain parameters in the analyte data frame related to scaling.
-        - Based on the plot type, this method internally calls the appropriate plotting functions.
+        :return DataFrame: Processed data for plotting. This is only returned if analysis_type is not 'laser' or 'hist'.
+
         """
         
         if sample_id != self.sample_id:

@@ -41,7 +41,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'multidimensional';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Tutorials" href="tutorials.html" />
+    <link rel="next" title="Special Functions" href="special_functions.html" />
     <link rel="prev" title="Lower Tabs" href="lower_tabs.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -375,6 +375,8 @@ document.write(`
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Figures &amp; Analyses</span></p>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Multidimensional Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="special_functions.html">Special Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="export.html">Export Formats</a></li>
 </ul>
 </div>
 </nav></div>
@@ -434,6 +436,20 @@ document.write(`
                   
   <section id="multidimensional-methods">
 <h1>Multidimensional Methods<a class="headerlink" href="#multidimensional-methods" title="Link to this heading">#</a></h1>
+<section id="principal-component-analysis">
+<h2>Principal Component Analysis<a class="headerlink" href="#principal-component-analysis" title="Link to this heading">#</a></h2>
+</section>
+<section id="clustering">
+<h2>Clustering<a class="headerlink" href="#clustering" title="Link to this heading">#</a></h2>
+<p>Clustering is an unsupervised machine-learning technique that divides a multidimensional dataset into a user specified number of clusters by minimizing the distance between points assigned to clusters and their respective centroids.  The process is iterative, generally improving the location of centroids and the set of points assigned to each with step.  The process concludes when the improvement is below some tolerance or a maximum number of iterations are reached.  As it is unsupervised, clustering does not require the user to train the data.  This provides two advantages: unsupervised methods faster are to train and require less user knowledge and experience to perform.</p>
+<section id="k-means">
+<h3>k-Means<a class="headerlink" href="#k-means" title="Link to this heading">#</a></h3>
+<p>One of the simplist clustering algorithms is k-means, though it is well suited to the task of identifying minerals or zones within minerals.</p>
+</section>
+<section id="fuzzy-c-means">
+<h3>Fuzzy c-means<a class="headerlink" href="#fuzzy-c-means" title="Link to this heading">#</a></h3>
+</section>
+</section>
 </section>
 
 
@@ -456,11 +472,11 @@ document.write(`
       </div>
     </a>
     <a class="right-next"
-       href="tutorials.html"
+       href="special_functions.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Tutorials</p>
+        <p class="prev-next-title">Special Functions</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -473,6 +489,23 @@ document.write(`
               
                 <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#principal-component-analysis">Principal Component Analysis</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#clustering">Clustering</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#k-means">k-Means</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fuzzy-c-means">Fuzzy c-means</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
 
   <div class="sidebar-secondary-item">
 

@@ -661,8 +661,8 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="main.IsotopeSelectionWindow.populate_isotope_list">
-<span class="sig-name descname"><span class="pre">populate_isotope_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">isotope_pair</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.IsotopeSelectionWindow.populate_isotope_list" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="main.IsotopeSelectionWindow.populate_analyte_list">
+<span class="sig-name descname"><span class="pre">populate_analyte_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analyte_pair</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.IsotopeSelectionWindow.populate_analyte_list" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -712,35 +712,6 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 <dd><p>Add edge detection to the current laser map plot.</p>
 <p>Executes on change of <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxEdgeDetectMethod</span></code> when <code class="docutils literal notranslate"><span class="pre">MainWindow.toolButtonEdgeDetect</span></code> is checked.
 Options include ‘sobel’, ‘canny’, and ‘zero_cross’.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="main.MainWindow.add_noise_reduction">
-<span class="sig-name descname"><span class="pre">add_noise_reduction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.add_noise_reduction" title="Link to this definition">#</a></dt>
-<dd><p>Add noise reduction to the current laser map plot.</p>
-<p>Executes on change of <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxNoiseReductionMethod</span></code>, <code class="docutils literal notranslate"><span class="pre">MainWindow.spinBoxNoiseOption1</span></code> and
-<code class="docutils literal notranslate"><span class="pre">MainWindow.doubleSpinBoxOption2</span></code>. Updates map(s).</p>
-<p>Reduces noise by smoothing via one of several algorithms chosen from
-<code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxNoiseReductionMethod</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>algorithm</strong> (<em>str</em>) – <p>Options include:
-‘None’ - no smoothing
-‘Median’ - simple blur that computes each pixel from the median of a window including</p>
-<blockquote>
-<div><p>surrounding points</p>
-</div></blockquote>
-<p>’Gaussian’ - a simple Gaussian blur
-‘Weiner’ - a Fourier domain filtering method that low pass filters to smooth the map
-‘Edge-preserving’ - filter that does an excellent job of preserving edges when smoothing
-‘Bilateral’ - an edge-preserving Gaussian weighted filter</p>
-</p></li>
-<li><p><strong>val1</strong> (<em>int</em><em>, </em><em>optional</em>) – first filter argument, required for all filters</p></li>
-<li><p><strong>val2</strong> (<em>double</em><em>, </em><em>optional</em>) – second filter argument, required for Gaussian, Edge-preserving, and Bilateral methods</p></li>
-</ul>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -877,7 +848,7 @@ comboBoxSampleID</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.create_plot">
-<span class="sig-name descname"><span class="pre">create_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_plot_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'lasermap'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isotope_1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isotope_2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.create_plot" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">create_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_plot_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'lasermap'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analyte_1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analyte_2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.create_plot" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -959,18 +930,25 @@ value is set by the user via <code class="docutils literal notranslate"><span cl
 <dt class="sig sig-object py" id="main.MainWindow.get_map_data">
 <span class="sig-name descname"><span class="pre">get_map_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analysis_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'isotope'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.get_map_data" title="Link to this definition">#</a></dt>
 <dd><p>Retrieves and processes the mapping data for the given sample and isotopes, then plots the result if required.</p>
-<p>Parameters:
-- self.sample_id (str): Identifier for the sample to be processed.
-- isotope_1 (str, optional): Primary isotope for plotting. If not provided, it’s inferred from the isotope data frame.
-- isotope_2 (str, optional): Secondary isotope for ratio plotting. If not provided, only the primary isotope will be plotted.
-- analysis_type (str, default=’laser’): Specifies the type of analysis. Accepts ‘isotope’ , ‘ratio’, ‘pca’, ‘cluster’, ‘cluster score’, ‘special’, ‘computed’
-- plot (bool, default=True): Determines if the plot should be shown after processing.
-- auto_scale (bool, default=False): Determines if auto-scaling should be re-applied to the plot. if False use fmin and fmax and clip array</p>
-<p>Returns:
-- DataFrame: Processed data for plotting. This is only returned if analysis_type is not ‘laser’ or ‘hist’.</p>
-<p>Note:
-- The method also updates certain parameters in the isotope data frame related to scaling.
-- Based on the plot type, this method internally calls the appropriate plotting functions.</p>
+<p>The method also updates certain parameters in the analyte data frame related to scaling. 
+Based on the plot type, this method internally calls the appropriate plotting functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sample_id</strong> (<em>str</em>) – Identifier for the sample to be processed</p></li>
+<li><p><strong>isotope_1</strong> (<em>str</em><em>, </em><em>optional</em>) – Primary isotope for plotting. If not provided, it’s inferred from the isotope data frame</p></li>
+<li><p><strong>isotope_2</strong> (<em>str</em><em>, </em><em>optional</em>) – Secondary isotope for ratio plotting. If not provided, only the primary isotope will be plotted</p></li>
+<li><p><strong>analysis_type</strong> (<em>str</em><em>, </em><em>optional</em>) – Specifies the type of analysis. Accepts ‘isotope’ , ‘ratio’, ‘pca’, ‘cluster’,
+‘cluster score’, ‘special’, ‘computed’, Defaults to ‘laser’</p></li>
+<li><p><strong>plot</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines if the plot should be shown after processing, Defaults to True</p></li>
+<li><p><strong>auto_scale</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines if auto-scaling should be re-applied to the plot. if False use fmin
+and fmax and clip array, Defaults to False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return DataFrame<span class="colon">:</span></dt>
+<dd class="field-even"><p>Processed data for plotting. This is only returned if analysis_type is not ‘laser’ or ‘hist’.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -1028,7 +1006,7 @@ contain coordinates and c contains the colors</p>
 <dt class="sig sig-object py" id="main.MainWindow.hist2dbiplot">
 <span class="sig-name descname"><span class="pre">hist2dbiplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.hist2dbiplot" title="Link to this definition">#</a></dt>
 <dd><p>Creates 2D histogram figure</p>
-<p>A general function for creating 2D histograms.</p>
+<p>A general function for creating 2D histograms (heatmaps).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1077,7 +1055,7 @@ addition to histogram map. Default is None, which produces a histogram.</p></li>
 <dt class="sig sig-object py" id="main.MainWindow.input_ternary_name_dlg">
 <span class="sig-name descname"><span class="pre">input_ternary_name_dlg</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.input_ternary_name_dlg" title="Link to this definition">#</a></dt>
 <dd><p>Opens a dialog to save new colormap</p>
-<p>Executes on self.toolButtonSaveTernaryColormap.clicked.</p>
+<p>Executes on <code class="docutils literal notranslate"><span class="pre">MainWindow.toolButtonSaveTernaryColormap</span></code> is clicked</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1114,13 +1092,42 @@ tick_label_rotation (float): Angle of text rotation, default is 0.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.noise_reduction">
+<span class="sig-name descname"><span class="pre">noise_reduction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.noise_reduction" title="Link to this definition">#</a></dt>
+<dd><p>Add noise reduction to the current laser map plot.</p>
+<p>Executes on change of <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxNoiseReductionMethod</span></code>, <code class="docutils literal notranslate"><span class="pre">MainWindow.spinBoxNoiseOption1</span></code> and
+<code class="docutils literal notranslate"><span class="pre">MainWindow.doubleSpinBoxOption2</span></code>. Updates map(s).</p>
+<p>Reduces noise by smoothing via one of several algorithms chosen from
+<code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxNoiseReductionMethod</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>algorithm</strong> (<em>str</em>) – <p>Options include:
+‘None’ - no smoothing
+‘Median’ - simple blur that computes each pixel from the median of a window including</p>
+<blockquote>
+<div><p>surrounding points</p>
+</div></blockquote>
+<p>’Gaussian’ - a simple Gaussian blur
+‘Weiner’ - a Fourier domain filtering method that low pass filters to smooth the map
+‘Edge-preserving’ - filter that does an excellent job of preserving edges when smoothing
+‘Bilateral’ - an edge-preserving Gaussian weighted filter</p>
+</p></li>
+<li><p><strong>val1</strong> (<em>int</em><em>, </em><em>optional</em>) – first filter argument, required for all filters</p></li>
+<li><p><strong>val2</strong> (<em>double</em><em>, </em><em>optional</em>) – second filter argument, required for Gaussian, Edge-preserving, and Bilateral methods</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.noise_reduction_method_callback">
 <span class="sig-name descname"><span class="pre">noise_reduction_method_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.noise_reduction_method_callback" title="Link to this definition">#</a></dt>
 <dd><p>Noise reduction method callback</p>
 <p>Executes when <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxNoiseReductionMethod.currentText()</span></code> is changed.
 Enables <code class="docutils literal notranslate"><span class="pre">MainWindow.spinBoxNoiseOption1</span></code> and <code class="docutils literal notranslate"><span class="pre">MainWindow.doubleSpinBoxNoiseOption2</span></code> (if applicable)
 and associated labels.  Constraints on the ranges are added to the spin boxes.</p>
-<p>After enabling options, it runs <code class="docutils literal notranslate"><span class="pre">add_noise_reduction</span></code>.</p>
+<p>After enabling options, it runs <code class="docutils literal notranslate"><span class="pre">noise_reduction</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1161,9 +1168,22 @@ in list is loaded by default.</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.open_style_callback">
+<span class="sig-name descname"><span class="pre">open_style_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tab_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.open_style_callback" title="Link to this definition">#</a></dt>
+<dd><p>Opens and style properties for a given tab_id</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tab_id</strong> (<em>int</em>) – tab_ind should be set by <code class="docutils literal notranslate"><span class="pre">MainWindow.toolBox.currentIndex()</span></code>, which determines the active
+widgets</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.open_tab">
 <span class="sig-name descname"><span class="pre">open_tab</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tab_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.open_tab" title="Link to this definition">#</a></dt>
 <dd><p>Opens specified toolBox tab</p>
+<p>Opens the specified tab in <code class="docutils literal notranslate"><span class="pre">MainWindow.toolbox</span></code></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>tab_name</strong> (<em>str</em>) – opens tab, values: ‘samples’, ‘preprocess’, ‘spot data’, ‘filter’,
@@ -1185,7 +1205,8 @@ in list is loaded by default.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.plot_clustering">
 <span class="sig-name descname"><span class="pre">plot_clustering</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.plot_clustering" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Plot cluster map</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.plot_clustering_result">
@@ -1217,7 +1238,16 @@ in list is loaded by default.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.plot_laser_map">
 <span class="sig-name descname"><span class="pre">plot_laser_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_plot_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_information</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.plot_laser_map" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Plots laser map</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>current_plot_df</strong> (<em>pandas.DataFrame</em>) – Current dataframe</p></li>
+<li><p><strong>plot_information</strong> (<em>dict</em>) – contains plot name, sample id and plot type</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.plot_laser_map_cont">
@@ -1318,7 +1348,7 @@ in list is loaded by default.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.reset_analysis">
-<span class="sig-name descname"><span class="pre">reset_analysis</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.reset_analysis" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">reset_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'full'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.reset_analysis" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1334,8 +1364,14 @@ in list is loaded by default.</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.run_noise_reduction">
+<span class="sig-name descname"><span class="pre">run_noise_reduction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.run_noise_reduction" title="Link to this definition">#</a></dt>
+<dd><p>Gets parameters and runs noise reduction</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.save_analysis">
-<span class="sig-name descname"><span class="pre">save_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">location</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.save_analysis" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">save_analysis</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.save_analysis" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1360,7 +1396,7 @@ in list is loaded by default.</p>
 <dt class="sig sig-object py" id="main.MainWindow.slider_alpha_changed">
 <span class="sig-name descname"><span class="pre">slider_alpha_changed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.slider_alpha_changed" title="Link to this definition">#</a></dt>
 <dd><p>Updates transparency on scatter plots.</p>
-<p>Executes on change of self.horizontalSliderMarkerAlpha.value().</p>
+<p>Executes on change of <code class="docutils literal notranslate"><span class="pre">MainWindow.horizontalSliderMarkerAlpha.value()</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1427,12 +1463,16 @@ Map from Ternary groupbox.  The ternary colored chemical map is updated.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.toggle_scatter_style_tab">
-<span class="sig-name descname"><span class="pre">toggle_scatter_style_tab</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tab_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.toggle_scatter_style_tab" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">toggle_scatter_style_tab</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tab_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.toggle_scatter_style_tab" title="Link to this definition">#</a></dt>
 <dd><p>Updates and toggles widgets in scatter style tab</p>
+<p>Updates the widgets in <code class="docutils literal notranslate"><span class="pre">MainWindow.toolBoxStyle</span></code> and enables/disables widgets as necessary.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>tab_id</strong> (<em>int</em>) – tab_ind should be set by toolBox.currentIndex(), which determines the active
-widgets</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tab_id</strong> (<em>int</em>) – tab_ind should be set by <code class="docutils literal notranslate"><span class="pre">MainWindow.toolBox.currentIndex()</span></code>, which determines the active plot
+widget to update</p></li>
+<li><p><strong>update_plot</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag indicating whether to update plot after change (True = yes, False = No), Defaults to False</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -1446,7 +1486,7 @@ widgets</p>
 <dt class="sig sig-object py" id="main.MainWindow.toolbox_changed">
 <span class="sig-name descname"><span class="pre">toolbox_changed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.toolbox_changed" title="Link to this definition">#</a></dt>
 <dd><p>Updates styles associated with toolbox page</p>
-<p>Executes on change of self.toolBox.currentIndex().  Updates style related widgets.</p>
+<p>Executes on change of <code class="docutils literal notranslate"><span class="pre">MainWindow.toolBox.currentIndex()</span></code>.  Updates style related widgets.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1624,6 +1664,16 @@ Calls :get_field_list(): to construct the list.</p>
 show_polygon_lines:
 update_table_widget:</p>
 <dl class="py method">
+<dt class="sig sig-object py" id="main.Polygon.clear_lines">
+<span class="sig-name descname"><span class="pre">clear_lines</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.Polygon.clear_lines" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.Polygon.clear_polygons">
+<span class="sig-name descname"><span class="pre">clear_polygons</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.Polygon.clear_polygons" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="main.Polygon.distance_to_line_segment">
 <span class="sig-name descname"><span class="pre">distance_to_line_segment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">px</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">py</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.Polygon.distance_to_line_segment" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
@@ -1668,6 +1718,11 @@ update_table_widget:</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="main.Profiling.clear_profiles">
+<span class="sig-name descname"><span class="pre">clear_profiles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.Profiling.clear_profiles" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="main.Profiling.get_scatter_errorbar_by_gid">
 <span class="sig-name descname"><span class="pre">get_scatter_errorbar_by_gid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gid</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.Profiling.get_scatter_errorbar_by_gid" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
@@ -1677,11 +1732,6 @@ update_table_widget:</p>
 <span class="sig-name descname"><span class="pre">interpolate_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interpolation_distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.Profiling.interpolate_points" title="Link to this definition">#</a></dt>
 <dd><p>Interpolate linear points between each pair of points in the profiles.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="main.Profiling.on_clear_profile_clicked">
-<span class="sig-name descname"><span class="pre">on_clear_profile_clicked</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.Profiling.on_clear_profile_clicked" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.Profiling.on_pick">
@@ -1995,7 +2045,7 @@ only the top row is moved.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.get_selected_data"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.get_selected_data()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.listUpdated"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.listUpdated</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.load_selection"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.load_selection()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.populate_isotope_list"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.populate_isotope_list()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.populate_analyte_list"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.populate_analyte_list()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.remove_isotope_from_list"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.remove_isotope_from_list()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.save_selection"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.save_selection()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.toggle_cell_selection"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.toggle_cell_selection()</span></code></a></li>
@@ -2007,7 +2057,6 @@ only the top row is moved.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow"><code class="docutils literal notranslate"><span class="pre">MainWindow</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.add_clustering_widget_to_layout"><code class="docutils literal notranslate"><span class="pre">MainWindow.add_clustering_widget_to_layout()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.add_edge_detection"><code class="docutils literal notranslate"><span class="pre">MainWindow.add_edge_detection()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.add_noise_reduction"><code class="docutils literal notranslate"><span class="pre">MainWindow.add_noise_reduction()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.add_plot"><code class="docutils literal notranslate"><span class="pre">MainWindow.add_plot()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.add_ree"><code class="docutils literal notranslate"><span class="pre">MainWindow.add_ree()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.add_temp_plot"><code class="docutils literal notranslate"><span class="pre">MainWindow.add_temp_plot()</span></code></a></li>
@@ -2043,12 +2092,14 @@ only the top row is moved.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.logax"><code class="docutils literal notranslate"><span class="pre">MainWindow.logax()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.mouse_moved"><code class="docutils literal notranslate"><span class="pre">MainWindow.mouse_moved()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.newplot"><code class="docutils literal notranslate"><span class="pre">MainWindow.newplot()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.noise_reduction"><code class="docutils literal notranslate"><span class="pre">MainWindow.noise_reduction()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.noise_reduction_method_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.noise_reduction_method_callback()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.noise_reduction_option1_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.noise_reduction_option1_callback()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.noise_reduction_option2_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.noise_reduction_option2_callback()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.open_calculator"><code class="docutils literal notranslate"><span class="pre">MainWindow.open_calculator()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.open_directory"><code class="docutils literal notranslate"><span class="pre">MainWindow.open_directory()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.open_select_isotope_dialog"><code class="docutils literal notranslate"><span class="pre">MainWindow.open_select_isotope_dialog()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.open_style_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.open_style_callback()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.open_tab"><code class="docutils literal notranslate"><span class="pre">MainWindow.open_tab()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.outlier_detection"><code class="docutils literal notranslate"><span class="pre">MainWindow.outlier_detection()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.plot_clicked"><code class="docutils literal notranslate"><span class="pre">MainWindow.plot_clicked()</span></code></a></li>
@@ -2071,6 +2122,7 @@ only the top row is moved.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.reset_analysis"><code class="docutils literal notranslate"><span class="pre">MainWindow.reset_analysis()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.reset_to_full_view"><code class="docutils literal notranslate"><span class="pre">MainWindow.reset_to_full_view()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.reset_zoom"><code class="docutils literal notranslate"><span class="pre">MainWindow.reset_zoom()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.run_noise_reduction"><code class="docutils literal notranslate"><span class="pre">MainWindow.run_noise_reduction()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.save_analysis"><code class="docutils literal notranslate"><span class="pre">MainWindow.save_analysis()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.set_general_style"><code class="docutils literal notranslate"><span class="pre">MainWindow.set_general_style()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.set_map_style"><code class="docutils literal notranslate"><span class="pre">MainWindow.set_map_style()</span></code></a></li>
@@ -2111,6 +2163,8 @@ only the top row is moved.</p>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#main.Polygon"><code class="docutils literal notranslate"><span class="pre">Polygon</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.Polygon.clear_lines"><code class="docutils literal notranslate"><span class="pre">Polygon.clear_lines()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.Polygon.clear_polygons"><code class="docutils literal notranslate"><span class="pre">Polygon.clear_polygons()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.Polygon.distance_to_line_segment"><code class="docutils literal notranslate"><span class="pre">Polygon.distance_to_line_segment()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.Polygon.increment_pid"><code class="docutils literal notranslate"><span class="pre">Polygon.increment_pid()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.Polygon.plot_polygon_scatter"><code class="docutils literal notranslate"><span class="pre">Polygon.plot_polygon_scatter()</span></code></a></li>
@@ -2121,9 +2175,9 @@ only the top row is moved.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#main.Profiling"><code class="docutils literal notranslate"><span class="pre">Profiling</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.Profiling.calculate_distance"><code class="docutils literal notranslate"><span class="pre">Profiling.calculate_distance()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.Profiling.clear_interpolation"><code class="docutils literal notranslate"><span class="pre">Profiling.clear_interpolation()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.Profiling.clear_profiles"><code class="docutils literal notranslate"><span class="pre">Profiling.clear_profiles()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.Profiling.get_scatter_errorbar_by_gid"><code class="docutils literal notranslate"><span class="pre">Profiling.get_scatter_errorbar_by_gid()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.Profiling.interpolate_points"><code class="docutils literal notranslate"><span class="pre">Profiling.interpolate_points()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.Profiling.on_clear_profile_clicked"><code class="docutils literal notranslate"><span class="pre">Profiling.on_clear_profile_clicked()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.Profiling.on_pick"><code class="docutils literal notranslate"><span class="pre">Profiling.on_pick()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.Profiling.plot_profile_scatter"><code class="docutils literal notranslate"><span class="pre">Profiling.plot_profile_scatter()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.Profiling.plot_profiles"><code class="docutils literal notranslate"><span class="pre">Profiling.plot_profiles()</span></code></a></li>

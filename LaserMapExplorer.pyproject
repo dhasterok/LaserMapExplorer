@@ -5,6 +5,8 @@
         "designer/form.ui",
         "designer/mainwindow.ui",
         "designer/preferences.ui",
-        "resources.qrc"
+        "resources.qrc",
+        "designer/toggleswitch.cpp",
+        "designer/toggleswitch.h"
     ]
 }

@@ -521,7 +521,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         setattr(self.comboBoxFieldColormap, "allItems", lambda: [self.comboBoxFieldColormap.itemText(i) for i in range(self.comboBoxFieldColormap.count())])
 
         self.comboBoxMarker.activated.connect(lambda: self.plot_scatter(save=False))
-        self.doubleSpinBoxMarkerSize.valueChanged.connect(lambda: self.plot_scatter(save=False))
+        # self.doubleSpinBoxMarkerSize.valueChanged.connect(lambda: self.plot_scatter(save=False))
         #self.comboBoxColorByField.activated.connect(lambda: self.update_combo_boxes(self.comboBoxColorByField, self.comboBoxColorField))
         self.comboBoxColorByField.activated.connect(lambda: self.toggle_color_by_field(self.toolBox.currentIndex()))
         self.comboBoxColorField.activated.connect(lambda: self.plot_scatter(save=False))
@@ -644,7 +644,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.order = 'F'
         # swap x and y
         # print(self.data[self.sample_id][['X','Y']])
-        self.swap_xy_data(self.data[self.sample_id])
+        self.swap_xy_data(self.data[self.sample_id]['raw_data'])
 
         self.swap_xy_data(self.data[self.sample_id]['processed_data']) #this rotates processed data as well
 
@@ -1198,19 +1198,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
         pass
-
+    
+    
+    def update_tables(self):
+        self.update_filter_table()
+        self.profiling.update_table_widget()
+        self.polygon.update_table_widget()
+        pass
 
     def reset_analysis(self, selection='full'):
         if selection =='full':
-            for sample_id in self.data.keys():
-                self.data[sample_id]['analyte_info'] = pd.DataFrame(columns = self.data[sample_id]['analyte_info'].columns)
-            self.data[sample_id]['ratios_info'] = pd.DataFrame(columns = ['sample_id', 'analyte_1','analyte_2', 'norm','upper_bound','lower_bound','d_l_bound','d_u_bound', 'use', 'auto_scale'])
-            self.data[self.sample_id]['filter_info'] = pd.DataFrame(columns = ['sample_id', 'analyte_1', 'analyte_2', 'ratio','norm','f_min','f_max', 'use'])
-            self.data[self.sample_id]['computed_data']['cluster']=pd.DataFrame(columns = ['Fuzzy', 'KMeans', 'KMediods'])
-            self.clipped_ratio_data = pd.DataFrame()
-            self.analyte_data = {}  #stores orginal analyte data
-            self.clipped_analyte_data = {} # stores processed analyted data
-            self.data['computed_data'] = {} # stores computed analyted data (ratios, custom fields)
+            #reset self.data
             self.data = {}
             self.plot_widget_dict ={'lasermap':{},'histogram':{},'lasermap_norm':{},'clustering':{},'scatter':{},'n-dim':{},'correlation':{}, 'pca':{}}
             self.multi_view_index = []
@@ -1220,7 +1218,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.n_dim_list = []
             self.group_cmap = {}
             self.lasermaps = {}
-            self.data['norm'] = {} #holds values (log, logit, linear) of all analytes
             self.proxies = []
             self.treeModel.clear()
             self.prev_plot = ''
@@ -1229,7 +1226,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         elif selection == 'sample': #sample is changed
 
             #clear filter table
-            self.data[self.sample_id]['filter_info'] = pd.DataFrame(columns = [ 'analyte_1', 'analyte_2', 'ratio','norm','f_min','f_max', 'use'])
             self.tableWidgetFilters.clear()
 
             #clear profiling
@@ -4326,7 +4322,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             comboBoxSampleID
         """
         if self.data:
-            print(self.data)
             # Create and configure the QMessageBox
             messageBoxChangeSample = QMessageBox()
             iconWarning = QtGui.QIcon()
@@ -4344,6 +4339,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if response == QMessageBox.Save:
                 self.save_analysis()
                 self.reset_analysis('sample')
+                
+                
             elif response == QMessageBox.Discard:
                 self.reset_analysis('sample')
             else: #user pressed cancel
@@ -4354,7 +4351,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         file_path = os.path.join(self.selected_directory, self.csv_files[index])
         self.sample_id = os.path.splitext(self.csv_files[index])[0]
-
+        
+        #update filters, polygon, profiles with existing data 
+        self.update_tables()
+        
         # print(self.self.sample_id)
         ####
         #### Need to fix this so that it calculates the size appropriately when they load

@@ -4,7 +4,7 @@
         "designer/AnalyteSelectionDialog.ui",
         "designer/form.ui",
         "designer/mainwindow.ui",
-        "designer/preferences.ui",
+        "designer/PreferencesWindow.ui",
         "resources.qrc",
         "designer/toggleswitch.cpp",
         "designer/toggleswitch.h"

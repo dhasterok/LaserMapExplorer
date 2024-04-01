@@ -40,6 +40,7 @@ from src.radar import Radar
 from src.calculator import CalWindow
 from src.ui.MainWindow import Ui_MainWindow
 from src.ui.AnalyteSelectionDialog import Ui_Dialog
+from src.ui.PreferencesWindow import Ui_PreferencesWindow
 import scipy.stats
 from scipy import ndimage
 from sklearn.preprocessing import StandardScaler
@@ -55,6 +56,7 @@ pg.setConfigOption('imageAxisOrder', 'row-major') # best performance
 ## !pyrcc5 resources.qrc -o src/ui/resources_rc.py
 ## !pyuic5 designer/mainwindow.ui -o src/ui/MainWindow.py
 ## !pyuic5 -x designer/AnalyteSelectionDialog.ui -o src/ui/AnalyteSelectionDialog.py
+## !pyuic5 -x designer/PreferencesWindow.ui -o src/ui/PreferencesWindow.py
 # pylint: disable=fixme, line-too-long, no-name-in-module, trailing-whitespace
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
@@ -96,15 +98,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.pyqtgraph_widget = None
         self.isUpdatingTable = False
         colormaps = pg.colormap.listMaps('matplotlib')
-        self.comboBoxMapColormap.clear()
-        self.comboBoxMapColormap.addItems(colormaps)
         self.comboBoxFieldColormap.clear()
         self.comboBoxFieldColormap.addItems(colormaps)
-        self.comboBoxClusterColormap.clear()
-        self.comboBoxClusterColormap.addItems(colormaps)
-        self.cm = self.comboBoxMapColormap.currentText()
+        self.cm = self.comboBoxFieldColormap.currentText()
         self.cursor = False
-        self.comboBoxMapColormap.activated.connect(self.update_all_plots)
+        self.comboBoxFieldColormap.activated.connect(self.update_all_plots)
         layout_single_view = QtWidgets.QVBoxLayout()
         layout_single_view.setSpacing(0)
         self.widgetSingleView.setLayout(layout_single_view)
@@ -113,28 +111,87 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         layout_multi_view.setSpacing(0)# Set margins to 0 if you want to remove margins as well
         layout_multi_view.setContentsMargins(0, 0, 0, 0)
         self.point_selected = False
-        self.sample_tab_id = 0
-        self.process_tab_id = 1
-        self.spot_tab_id = 2
-        self.filter_tab_id = 3
-        self.scatter_tab_id = 4
-        self.ndim_tab_id = 5
-        self.pca_tab_id = 6
-        self.cluster_tab_id = 7
-        self.profile_tab_id = 8
-        self.special_tab_id = 9
-        self.plottree_tab_id = 0
-        self.style_tab_id = 1
-        self.calculator_tab_id = 2
 
-        #edge_det_img
-        self.edge_img = None
+        # preferences
+        self.default_preferences = {'Units':{'Concentration': 'ppm', 'Distance': 'um', 'Temperature':'°C', 'Pressure':'MPa', 'Date':'Ma', 'FontSize':11, 'TickDir':'out'}}
+        # in future will be set from preference ui
+        self.preferences = self.default_preferences
+
+        # code is more resilient if toolbox indices for each page is not hard coded
+        # will need to change case text if the page text is changed
+        # left toolbox
+        for tid in range(0,self.toolBox.count()):
+            match self.toolBox.itemText(tid).lower():
+                case 'samples and fields':
+                    self.sample_tab_id = tid
+                case 'preprocess':
+                    self.process_tab_id = tid
+                case 'spot data':
+                    self.spot_tab_id = tid
+                case 'filter':
+                    self.filter_tab_id = tid
+                case 'scatter and heatmaps':
+                    self.scatter_tab_id = tid
+                case 'n-dim':
+                    self.ndim_tab_id = tid
+                case 'pca':
+                    self.pca_tab_id = tid
+                case 'clustering':
+                    self.cluster_tab_id = tid
+                case 'profiling':
+                    self.profile_tab_id = tid
+                case 'special functions':
+                    self.special_tab_id = tid
+
+        # right toolbox
+        for tid in range(0,self.toolBoxTreeView.count()):
+            match self.toolBoxTreeView.itemText(tid).lower():
+                case 'plot selector':
+                    self.plottree_tab_id = tid
+                case 'styling':
+                    self.style_tab_id = tid 
+                case 'calculator':
+                    self.calculator_tab_id = tid 
 
         # create dictionaries for default plot styles
         self.markerdict = {'circle':'o', 'square':'s', 'diamond':'d', 'triangle (up)':'^', 'triangle (down)':'v', 'hexagon':'h', 'pentagon':'p'}
         self.comboBoxMarker.clear()
         self.comboBoxMarker.addItems(self.markerdict.keys())
-        self.general_style = {'Concentration':'ppm', 'Distance':'um', 'Temperature':'°C', 'Pressure':'MPa', 'Date':'Ma', 'FontSize':11, 'TickDir':'out'}
+
+        self.default_styles = {'Axes': {'XLimAuto': True, 'XLim':[0,0], 'XLabel':'', 'YLimAuto': True, 'YLim': [0,0], 'YLabel':'', 'AspectRatio': '1.0', 'TickDir': 'out'},
+                               'Annotations': {'Font': self.fontComboBox.currentFont(), 'FontSize': 11.0},
+                               'Scales': {'Location': 'northeast', 'Direction': 'none', 'OverlayColor': '#ffffff'},
+                               'Markers': {'Symbol': 'circle', 'Size': 6, 'Alpha': 30},
+                               'Lines': {'LineWidth': 1.5},
+                               'Colors': {'Color': '#1c75bc', 'ColorByField': 'None', 'Field': None, 'Colormap': 'viridis', 'CLim':[0,0], 'Direction': 'none', 'CLabel': None, 'Resolution': 10}
+                               }
+
+        self.plot_types = {self.sample_tab_id: ['analyte map','correlation'],
+                           self.process_tab_id: ['analyte map','histogram','gradient map'],
+                           self.filter_tab_id: ['analyte map'],
+                           self.scatter_tab_id: ['scatter', 'heatmap', 'ternary map'],
+                           self.ndim_tab_id: ['TEC/radar'],
+                           self.pca_tab_id: ['variance','vectors','x vs. y scatter','x vs. y heatmap','pca score map'],
+                           self.cluster_tab_id: ['cluster map', 'cluster score map'],
+                           self.profile_tab_id: ['profile']}
+
+        self.styles = {'analyte map': self.default_styles,
+                        'correlation': self.default_styles,
+                        'histogram': self.default_styles,
+                        'gradient map': self.default_styles, 
+                        'scatter': self.default_styles, 
+                        'heatmap': self.default_styles, 
+                        'ternary map': self.default_styles, 
+                        'TEC/radar': self.default_styles, 
+                        'variance': self.default_styles, 
+                        'vectors': self.default_styles, 
+                        'x vs. y scatter': self.default_styles, 
+                        'x vs. y heatmap': self.default_styles, 
+                        'pca score map': self.default_styles,
+                        'cluster map': self.default_styles,
+                        'cluster score map': self.default_styles,
+                        'profile': self.default_styles}
+
         self.set_general_style()
         self.map_style = {self.sample_tab_id: {'Colormap':'plasma', 'ColorbarDirection':'vertical', 'ScaleLocation':'southeast', 'ScaleDirection':'horizontal', 'OverlayColor':'#ffffff'},
             self.scatter_tab_id: {'Colormap':'orange-violet-blue-white', 'ColorbarDirection':'vertical', 'ScaleLocation':'southeast', 'ScaleDirection':'horizontal', 'OverlayColor':'#ffffff'},
@@ -178,7 +235,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ProfilingPage.setEnabled(False)
         self.SpecialFunctionPage.setEnabled(False)
 
-        self.actionSelectAnalytes.triggered.connect(self.open_select_isotope_dialog)
+        self.actionSelectAnalytes.triggered.connect(self.open_select_analyte_dialog)
         self.actionSpotData.triggered.connect(lambda: self.open_tab('spot data'))
         self.actionFilter_Tools.triggered.connect(lambda: self.open_tab('filter'))
         self.actionCorrelation.triggered.connect(lambda: self.open_tab('samples'))
@@ -313,11 +370,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.polygon = Polygon(self)
         self.toolButtonPolyCreate.clicked.connect(self.polygon.increment_pid)
         self.toolButtonPolyDelete.clicked.connect(lambda: self.table_fcn.delete_row(self.tableWidgetPolyPoints))
-        # Add edge detection algorithm to aid in creating polygons
+
+        # add edge detection algorithm to aid in creating polygons
+        self.edge_img = None
         self.toolButtonEdgeDetect.clicked.connect(self.add_edge_detection)
         self.comboBoxEdgeDetectMethod.activated.connect(self.add_edge_detection)
 
-        #Apply filters
+        #apply filters
         self.toolButtonMapViewable.clicked.connect(lambda: self.apply_filters(fullmap =True))
         self.toolButtonMapPolygon.clicked.connect(lambda: self.apply_filters(fullmap =False))
 
@@ -329,9 +388,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonPlotScatter.clicked.connect(lambda: self.plot_scatter(save=True))
         self.toolButtonTernaryMap.clicked.connect(self.plot_ternarymap)
 
-        self.comboBoxScatterSelectX.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectX, self.comboBoxScatteranalyteX))
-        self.comboBoxScatterSelectY.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectY, self.comboBoxScatteranalyteY))
-        self.comboBoxScatterSelectZ.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectZ, self.comboBoxScatteranalyteZ))
+        self.comboBoxScatterSelectX.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectX, self.comboBoxScatterAnalyteX))
+        self.comboBoxScatterSelectY.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectY, self.comboBoxScatterAnalyteY))
+        self.comboBoxScatterSelectZ.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectZ, self.comboBoxScatterAnalyteZ))
 
         # ternary colormaps
         # create ternary colors dictionary
@@ -381,11 +440,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_cluster_ui()
 
         # Connect color point radio button signals to a slot
-        self.comboBoxColorMethod.currentIndexChanged.connect(self.group_changed)
+        self.comboBoxColorField.currentIndexChanged.connect(self.group_changed)
         # Connect the itemChanged signal to a slot
         self.tableWidgetViewGroups.itemChanged.connect(self.cluster_label_changed)
 
-        self.comboBoxColorMethod.currentText() == 'none'
+        self.comboBoxColorField.currentText() == 'none'
         # self.tableWidgetViewGroups.selectionModel().selectionChanged.connect(self.update_clusters)
 
         # Scatter and Ternary Tab
@@ -508,35 +567,29 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         Executes on change of ``MainWindow.toolBox.currentIndex()``.  Updates style related widgets.
         """
+        self.comboBoxStylePlotType.clear()
+        self.comboBoxStylePlotType.addItems(self.plot_types[self.toolBox.currentIndex()])
+
         match self.toolBox.currentIndex():
             case self.sample_tab_id:
                 self.comboBoxScatterType.setCurrentText(self.current_scatter_type[self.sample_tab_id])
-                self.set_map_style()
-                self.set_scatter_style()
                 self.toggle_scatter_style_tab(self.sample_tab_id)
             case self.process_tab_id:
-                self.set_map_style()
-                self.set_scatter_style()
                 self.toggle_scatter_style_tab(self.process_tab_id)
             case self.spot_tab_id:
-                self.set_scatter_style()
                 self.toggle_scatter_style_tab(self.spot_tab_id)
             case self.scatter_tab_id:
                 self.comboBoxScatterType.setCurrentText(self.current_scatter_type[self.scatter_tab_id])
-                self.set_scatter_style()
-                self.set_map_style()
                 self.toggle_scatter_style_tab(self.scatter_tab_id)
             case self.pca_tab_id:
                 self.comboBoxScatterType.setCurrentText(self.current_scatter_type[self.pca_tab_id])
-                self.set_scatter_style()
-                self.set_map_style()
                 self.toggle_scatter_style_tab(self.pca_tab_id)
             case self.profile_tab_id:
                 self.comboBoxScatterType.setCurrentText(self.current_scatter_type[self.profile_tab_id])
-                self.set_scatter_style()
                 self.toggle_scatter_style_tab(self.profile_tab_id)
             case self.cluster_tab_id:
-                self.set_map_style()
+
+        self.set_style()
 
     def slider_alpha_changed(self):
         """Updates transparency on scatter plots.
@@ -736,6 +789,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         if color.isValid():
             button.setStyleSheet("background-color: %s;" % color.name())
+            QColorDialog.setCustomColor(int(1),color)
             if button.accessibleName().startswith('Ternary'):
                 button.setCurrentText('user defined')
 
@@ -1429,7 +1483,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def update_all_plots(self):
         """Updates all plots in plot widget dictionary"""
-        self.cm = self.comboBoxMapColormap.currentText()
+        self.cm = self.comboBoxFieldColormap.currentText()
         for plot_type,sample_ids in self.plot_widget_dict.items():
             if plot_type == 'lasermap' or 'histogram' or 'lasermap_norm':
                 for sample_id, plots in sample_ids.items():
@@ -2846,11 +2900,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'z': {'field': None, 'type': None, 'label': None, 'array': None},
             'c': {'field': None, 'type': None, 'label': None, 'array': None}
         }
-        value_dict['x']['field'] = self.comboBoxScatteranalyteX.currentText()
+        value_dict['x']['field'] = self.comboBoxScatterAnalyteX.currentText()
         value_dict['x']['type'] = self.comboBoxScatterSelectX.currentText().lower()
-        value_dict['y']['field'] = self.comboBoxScatteranalyteY.currentText()
+        value_dict['y']['field'] = self.comboBoxScatterAnalyteY.currentText()
         value_dict['y']['type'] = self.comboBoxScatterSelectY.currentText().lower()
-        value_dict['z']['field'] = self.comboBoxScatteranalyteZ.currentText()
+        value_dict['z']['field'] = self.comboBoxScatterAnalyteZ.currentText()
         value_dict['z']['type'] = self.comboBoxScatterSelectZ.currentText().lower()
         value_dict['c']['field'] = self.comboBoxColorField.currentText()
         value_dict['c']['type'] = self.comboBoxColorByField.currentText().lower()
@@ -2858,7 +2912,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         for k, v in value_dict.items():
             if v['type'] == 'analyte' and v['field']:
                 df = self.get_map_data(self.sample_id, v['field'], analysis_type=v['type'], plot=False)
-                v['label'] = v['field'] + ' (' + self.general_style['Concentration'] + ')'
+                v['label'] = v['field'] + ' (' + self.preferences['Units']['Concentration'] + ')'
             elif v['type'] == 'ratio' and '/' in v['field']:
                 analyte_1, analyte_2 = v['field'].split('/')
                 df = self.get_map_data(self.sample_id, analyte_1, analyte_2, analysis_type=v['type'], plot=False)
@@ -3079,7 +3133,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         match tab_id:
             case self.sample_tab_id | self.pca_tab_id | self.cluster_tab_id:
-                self.map_style[tab_id] = {'Colormap': self.comboBoxMapColormap.currentText(),
+                self.map_style[tab_id] = {'Colormap': self.comboBoxFieldColormap.currentText(),
                                     'ColorbarDirection': self.comboBoxColorbarDirection.currentText(),
                                     'ScaleLocation': self.comboBoxScaleLocation.currentText(),
                                     'ScaleDirection': self.comboBoxScaleDirection.currentText(),
@@ -3093,7 +3147,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                     'OverlayColor': self.get_hex_color(self.toolButtonOverlayColor.palette().button().color())
                                     }
             case _:
-                self.map_style[self.sample_tab_id] = {'Colormap': self.comboBoxMapColormap.currentText(),
+                self.map_style[self.sample_tab_id] = {'Colormap': self.comboBoxFieldColormap.currentText(),
                                     'ColorbarDirection': self.comboBoxColorbarDirection.currentText(),
                                     'ScaleLocation': self.comboBoxScaleLocation.currentText(),
                                     'ScaleDirection': self.comboBoxScaleDirection.currentText(),
@@ -3105,14 +3159,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         match self.toolBox.currentIndex():
             case self.pca_tab_id | self.cluster_tab_id:
                 tab_id = self.toolBox.currentIndex()
-                self.comboBoxMapColormap.setCurrentText(self.map_style[tab_id]['Colormap'])
+                self.comboBoxFieldColormap.setCurrentText(self.map_style[tab_id]['Colormap'])
             case self.scatter_tab_id:
                 tab_id = self.scatter_tab_id
                 self.comboBoxTernaryColormap.setCurrentText(self.map_style[tab_id]['Colormap'])
                 self.ternary_colormap_changed()
             case _:
                 tab_id = self.sample_tab_id
-                self.comboBoxMapColormap.setCurrentText(self.map_style[tab_id]['Colormap'])
+                self.comboBoxFieldColormap.setCurrentText(self.map_style[tab_id]['Colormap'])
 
         self.comboBoxColorbarDirection.setCurrentText(self.map_style[tab_id]['ColorbarDirection'])
         self.comboBoxScaleLocation.setCurrentText(self.map_style[tab_id]['ScaleLocation'])
@@ -3124,16 +3178,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         tab_id = self.toolBox.currentIndex()
         if tab_id == self.sample_tab_id or tab_id == self.scatter_tab_id or tab_id == self.pca_tab_id or tab_id == self.profile_tab_id:
             # scatter
-            self.comboBoxMarker.setCurrentText(self.scatter_style[tab_id]['Marker'])
-            self.doubleSpinBoxMarkerSize.setValue(self.scatter_style[tab_id]['Size'])
-            self.comboBoxLineWidth.setCurrentText(str(self.scatter_style[tab_id]['LineWidth']))
-            self.toolButtonMarkerColor.setStyleSheet("background-color: %s;" % self.scatter_style[tab_id]['Color'])
-            self.comboBoxColorByField.setCurrentText(self.scatter_style[tab_id]['ColorByField'])
-            self.comboBoxColorField.setCurrentText(self.scatter_style[tab_id]['Field'])
-            self.comboBoxFieldColormap.setCurrentText(self.scatter_style[tab_id]['Colormap'])
-            self.horizontalSliderMarkerAlpha.setValue(int(self.scatter_style[tab_id]['Alpha']))
+            self.comboBoxMarker.setCurrentText(self.styles[tab_id]['Marker'])
+            self.doubleSpinBoxMarkerSize.setValue(self.styles[tab_id]['Size'])
+            self.comboBoxLineWidth.setCurrentText(str(self.styles[tab_id]['LineWidth']))
+            self.toolButtonMarkerColor.setStyleSheet("background-color: %s;" % self.styles[tab_id]['Color'])
+            self.comboBoxColorByField.setCurrentText(self.styles[tab_id]['ColorByField'])
+            self.comboBoxColorField.setCurrentText(self.styles[tab_id]['Field'])
+            self.comboBoxFieldColormap.setCurrentText(self.styles[tab_id]['Colormap'])
+            self.horizontalSliderMarkerAlpha.setValue(int(self.styles[tab_id]['Alpha']))
             self.labelMarkerAlpha.setText(str(self.horizontalSliderMarkerAlpha.value()))
-            self.lineEditAspectRatio.setText(str(self.scatter_style[tab_id]['AspectRatio']))
+            self.lineEditAspectRatio.setText(str(self.styles[tab_id]['AspectRatio']))
 
             # heatmap
             self.spinBoxHeatmapResolution.setValue(self.heatmap_style[tab_id]['Resolution'])
@@ -3235,8 +3289,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     #        select_scatter = f"{x['elements']}_{y['elements']}_{plot_type}"
 
     #        # add labels
-    #        xlbl = self.comboBoxScatteranalyteX.currentText()
-    #        ylbl = self.comboBoxScatteranalyteY.currentText()
+    #        xlbl = self.comboBoxScatterAnalyteX.currentText()
+    #        ylbl = self.comboBoxScatterAnalyteY.currentText()
     #        match self.comboBoxScatterSelectX.currentText().lower():
     #            case 'analyte':
     #                xlbl += ' ('+self.lineEditConcentrationUnits.text()+')'
@@ -3415,11 +3469,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         :param fig: figure object
         :type fig: matplotlib.figure
-        :param x: data associated with field self.comboBoxScatteranalyteX.currentText() as x coordinate
+        :param x: data associated with field ``MainWindow.comboBoxScatterAnalyteX.currentText()`` as x coordinate
         :type x: dict
-        :param y: data associated with field self.comboBoxScatteranalyteX.currentText() as y coordinate
+        :param y: data associated with field ``MainWindow.comboBoxScatterAnalyteX.currentText()`` as y coordinate
         :type y: dict
-        :param c: data associated with field self.comboBoxColorField.currentText() as marker colors
+        :param c: data associated with field ``MainWindow.comboBoxColorField.currentText()`` as marker colors
         :type c: dict
         :param s: style parameters
         :type s: dict
@@ -3715,10 +3769,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             clustering_algorithms = {
                 'KMeans': KMeans(n_clusters=n_clusters, init='k-means++')
                 }
-        elif self.comboBoxClusterMethod.currentText() == 'k-medoids':
-            clustering_algorithms = {
-                'KMedoids': KMedoids(n_clusters=n_clusters, metric=distance_type)  # Placeholder for fuzzy
-            }
 
         elif self.comboBoxClusterMethod.currentText() == 'fuzzy c-means':
             clustering_algorithms = {
@@ -3814,8 +3864,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def add_clustering_widget_to_layout(self, fig,plot_name, plot_type):
 
-
-
         widgetClusterMap = QtWidgets.QWidget()
         widgetClusterMap.setLayout(QtWidgets.QVBoxLayout())
         figure_canvas = FigureCanvas(fig)
@@ -3868,21 +3916,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # Distance
             self.labelClusterDistance.setEnabled(False)
             self.comboBoxClusterDistance.setEnabled(False)
-
-            # FC View
-            self.labelFCView.setEnabled(False)
-            self.spinBoxFCView.setEnabled(False)
-
-        elif self.comboBoxClusterMethod.currentText() == 'k-medoids':
-            # Enable parameters relevant to KMedoids
-            # Exponent
-            self.labelExponent.setEnabled(False)
-            self.labelClusterExponent.setEnabled(False)
-            self.horizontalSliderClusterExponent.setEnabled(False)
-
-            # Distance
-            self.labelClusterDistance.setEnabled(True)
-            self.comboBoxClusterDistance.setEnabled(True)
 
             # FC View
             self.labelFCView.setEnabled(False)
@@ -4130,13 +4163,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.tableWidgetViewGroups.setHorizontalHeaderLabels(['Groups'])
         algorithm = ''
         # Check which radio button is checked and update the list widget
-        if self.comboBoxColorMethod.currentText().lower() == 'none':
+        if self.comboBoxColorField.currentText().lower() == 'none':
             pass  # No clusters to display for 'None'
-        elif self.comboBoxColorMethod.currentText() == 'fuzzy c-means':
+        elif self.comboBoxColorField.currentText() == 'fuzzy c-means':
             algorithm = 'Fuzzy'
-        elif self.comboBoxColorMethod.currentText() == 'k-medoids':
-            algorithm = 'KMediods'
-        elif self.comboBoxColorMethod.currentText() == 'k-means':
+        elif self.comboBoxColorField.currentText() == 'k-means':
             algorithm = 'KMeans'
 
         if algorithm in self.data[self.sample_id]['computed_data']['cluster']:
@@ -4805,6 +4836,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.add_plot(plot_info)
 
 
+    def open_preferences_dialog(self):
+        pass
 
 
     def open_select_analyte_dialog(self):
@@ -6178,7 +6211,7 @@ class Profiling:
                     child.widget().deleteLater()
 
             # Get the colormap specified by the user
-            cmap = matplotlib.colormaps.get_cmap(self.main_window.comboBoxMapColormap.currentText())
+            cmap = matplotlib.colormaps.get_cmap(self.main_window.comboBoxFieldColormap.currentText())
             # Determine point type from the pushButtonProfileType text
             if self.main_window.comboBoxPointType.currentText() == 'median + IQR':
                 point_type = 'median'

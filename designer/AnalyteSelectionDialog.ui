@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Select Isotopes</string>
+   <string>LaME: Select Analytes and Ratios</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="5" column="3" colspan="2">

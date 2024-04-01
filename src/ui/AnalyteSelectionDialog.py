@@ -68,7 +68,7 @@ class Ui_Dialog(object):
 
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("Dialog", "Select Isotopes"))
+        Dialog.setWindowTitle(_translate("Dialog", "LaME: Select Analytes and Ratios"))
         self.pushButtonCancel.setText(_translate("Dialog", "Cancel"))
         self.label_2.setText(_translate("Dialog", "Correlation Type"))
         self.pushButtonLoadSelection.setText(_translate("Dialog", "Load Selection"))

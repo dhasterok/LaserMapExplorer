@@ -159,7 +159,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxMarker.addItems(self.markerdict.keys())
 
         self.default_styles = {'Axes': {'XLimAuto': True, 'XLim':[0,0], 'XLabel':'', 'YLimAuto': True, 'YLim': [0,0], 'YLabel':'', 'AspectRatio': '1.0', 'TickDir': 'out'},
-                               'Annotations': {'Font': self.fontComboBox.currentFont(), 'FontSize': 11.0},
+                               'Text': {'Font': self.fontComboBox.currentFont(), 'FontSize': 11.0},
                                'Scales': {'Location': 'northeast', 'Direction': 'none', 'OverlayColor': '#ffffff'},
                                'Markers': {'Symbol': 'circle', 'Size': 6, 'Alpha': 30},
                                'Lines': {'LineWidth': 1.5},
@@ -178,21 +178,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.styles = {'analyte map': self.default_styles,
                         'correlation': self.default_styles,
                         'histogram': self.default_styles,
-                        'gradient map': self.default_styles, 
-                        'scatter': self.default_styles, 
-                        'heatmap': self.default_styles, 
-                        'ternary map': self.default_styles, 
-                        'TEC/radar': self.default_styles, 
-                        'variance': self.default_styles, 
-                        'vectors': self.default_styles, 
-                        'x vs. y scatter': self.default_styles, 
-                        'x vs. y heatmap': self.default_styles, 
+                        'gradient map': self.default_styles,
+                        'scatter': self.default_styles,
+                        'heatmap': self.default_styles,
+                        'ternary map': self.default_styles,
+                        'TEC/radar': self.default_styles,
+                        'variance': self.default_styles,
+                        'vectors': self.default_styles,
+                        'x vs. y scatter': self.default_styles,
+                        'x vs. y heatmap': self.default_styles,
                         'pca score map': self.default_styles,
                         'cluster map': self.default_styles,
                         'cluster score map': self.default_styles,
                         'profile': self.default_styles}
 
-        self.set_general_style()
         self.map_style = {self.sample_tab_id: {'Colormap':'plasma', 'ColorbarDirection':'vertical', 'ScaleLocation':'southeast', 'ScaleDirection':'horizontal', 'OverlayColor':'#ffffff'},
             self.scatter_tab_id: {'Colormap':'orange-violet-blue-white', 'ColorbarDirection':'vertical', 'ScaleLocation':'southeast', 'ScaleDirection':'horizontal', 'OverlayColor':'#ffffff'},
             self.pca_tab_id: {'Colormap':'viridis', 'ColorbarDirection':'vertical', 'ScaleLocation':'southeast', 'ScaleDirection':'horizontal', 'OverlayColor':'#ffffff'},
@@ -449,7 +448,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Scatter and Ternary Tab
         #-------------------------
-        self.comboBoxScatterType.activated.connect(lambda: self.toggle_scatter_style_tab(self.toolBox.currentIndex()))
+        self.comboBoxStylePlotType.activated.connect(lambda: self.toggle_scatter_style_tab(self.toolBox.currentIndex()))
         self.comboBoxScatterAnalyteX.activated.connect(lambda: self.plot_scatter(save=False))
         self.comboBoxScatterAnalyteY.activated.connect(lambda: self.plot_scatter(save=False))
         self.comboBoxScatterAnalyteZ.activated.connect(lambda: self.plot_scatter(save=False))
@@ -527,15 +526,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxColorField.activated.connect(lambda: self.plot_scatter(save=False))
         self.horizontalSliderMarkerAlpha.sliderReleased.connect(self.slider_alpha_changed)
 
-        self.toolButtonStyleMaps.clicked.connect(lambda: self.open_style_callback(self.sample_tab_id))
-        self.toolButtonStyleHistograms.clicked.connect(lambda: self.open_style_callback(self.process_tab_id))
-        self.toolButtonStyleSpots.clicked.connect(lambda: self.open_style_callback(self.spot_tab_id))
-        self.toolButtonStyleScatter.clicked.connect(lambda: self.open_style_callback(self.scatter_tab_id))
-        self.toolButtonStyleNDim.clicked.connect(lambda: self.open_style_callback(self.ndim_tab_id))
-        self.toolButtonStylePCA.clicked.connect(lambda: self.open_style_callback(self.pca_tab_id))
-        self.toolButtonStyleClusters.clicked.connect(lambda: self.open_style_callback(self.cluster_tab_id))
-        self.toolButtonStyleProfiles.clicked.connect(lambda: self.open_style_callback(self.profile_tab_id))
-
         # Plot toolbar
         #-------------------------
 
@@ -572,24 +562,25 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         match self.toolBox.currentIndex():
             case self.sample_tab_id:
-                self.comboBoxScatterType.setCurrentText(self.current_scatter_type[self.sample_tab_id])
+                self.comboBoxStylePlotType.setCurrentText(self.current_scatter_type[self.sample_tab_id])
                 self.toggle_scatter_style_tab(self.sample_tab_id)
             case self.process_tab_id:
                 self.toggle_scatter_style_tab(self.process_tab_id)
             case self.spot_tab_id:
                 self.toggle_scatter_style_tab(self.spot_tab_id)
             case self.scatter_tab_id:
-                self.comboBoxScatterType.setCurrentText(self.current_scatter_type[self.scatter_tab_id])
+                self.comboBoxStylePlotType.setCurrentText(self.current_scatter_type[self.scatter_tab_id])
                 self.toggle_scatter_style_tab(self.scatter_tab_id)
             case self.pca_tab_id:
-                self.comboBoxScatterType.setCurrentText(self.current_scatter_type[self.pca_tab_id])
+                self.comboBoxStylePlotType.setCurrentText(self.current_scatter_type[self.pca_tab_id])
                 self.toggle_scatter_style_tab(self.pca_tab_id)
             case self.profile_tab_id:
-                self.comboBoxScatterType.setCurrentText(self.current_scatter_type[self.profile_tab_id])
+                self.comboBoxStylePlotType.setCurrentText(self.current_scatter_type[self.profile_tab_id])
                 self.toggle_scatter_style_tab(self.profile_tab_id)
             case self.cluster_tab_id:
+                pass
 
-        self.set_style()
+        self.set_style_widgets()
 
     def slider_alpha_changed(self):
         """Updates transparency on scatter plots.
@@ -2657,7 +2648,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 print(f"Unknown PCA plot type: {pca_plot_type}")
 
         # labels
-        font = {'size':self.general_style['FontSize']}
+        font = {'size':self.styles['PCA']['Text']['FontSize']}
         ax.set_xlabel(xlbl, fontdict=font)
         ax.set_ylabel(ylbl, fontdict=font)
         ax.set_title(ttxt, fontdict=font)
@@ -3006,11 +2997,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :type update_plot: bool, optional
         """
         if tab_id == self.sample_tab_id:
-            self.comboBoxScatterType.setCurrentText('Heatmap')
+            self.comboBoxStylePlotType.setCurrentText('Heatmap')
         elif tab_id == self.profile_tab_id:
-            self.comboBoxScatterType.setCurrentText('Scatter')
+            self.comboBoxStylePlotType.setCurrentText('Scatter')
 
-        match self.comboBoxScatterType.currentText().lower():
+        match self.comboBoxStylePlotType.currentText().lower():
             case 'scatter':
                 self.current_scatter_type[tab_id] = 'Scatter'
                 # turn off heatmap related properties
@@ -3097,27 +3088,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.labelMarkerAlpha.setEnabled(False)
                 self.horizontalSliderMarkerAlpha.setEnabled(False)
 
-    def get_general_style(self):
-        """Updates dictionary with general style properties"""
-        self.general_style = {'Concentration': self.lineEditAnalyteUnits.text(),
-                                'Distance': self.lineEditScaleUnits.text(),
-                                'Temperature': self.comboBoxTUnits.currentText(),
-                                'Pressure': self.comboBoxPUnits.currentText(),
-                                'Date': self.comboBoxDateUnits.currentText(),
-                                'FontSize': self.doubleSpinBoxFontSize.value(),
-                                'TickDir': self.comboBoxTickDirection.currentText()
-                                }
-
-    def set_general_style(self):
-        """Sets style properties in Styling>General tab"""
-        self.lineEditAnalyteUnits.setText(self.general_style['Concentration'])
-        self.lineEditScaleUnits.setText(self.general_style['Distance'])
-        self.comboBoxTUnits.setCurrentText(self.general_style['Temperature'])
-        self.comboBoxPUnits.setCurrentText(self.general_style['Pressure'])
-        self.comboBoxDateUnits.setCurrentText(self.general_style['Date'])
-        self.doubleSpinBoxFontSize.setValue(self.general_style['FontSize'])
-        self.comboBoxTickDirection.setCurrentText(self.general_style['TickDir'])
-
     def get_map_style(self, tab_id):
         """Updates dictionary with map style properties
 
@@ -3169,6 +3139,61 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxScaleDirection.setCurrentText(self.map_style[tab_id]['ScaleDirection'])
         self.toolButtonOverlayColor.setStyleSheet("background-color: %s;" % self.map_style[tab_id]['OverlayColor'])
 
+    def set_style_widgets(self, plot_type=None):
+
+        tab_id = self.toolBox.currentIndex()
+
+        if plot_type is None:
+            self.comboBoxStylePlotType.clear()
+            self.comboBoxStylePlotType.addItems(self.plot_types[tab_id])
+
+            plot_type = self.plot_types[tab_id][0]
+
+        # axes properties
+        self.doubleSpinBoxXLB.setValue(self.styles[plot_type]['Axes']['XLim'][0])
+        self.doubleSpinBoxXUB.setValue(self.styles[plot_type]['Axes']['XLim'][1])
+        self.lineEditXLabel.setText(self.styles[plot_type]['Axes']['XLabel'])
+        self.doubleSpinBoxYLB.setValue(self.styles[plot_type]['Axes']['YLim'][0])
+        self.doubleSpinBoxYUB.setValue(self.styles[plot_type]['Axes']['YLim'][1])
+        self.lineEditYLabel.setText(self.styles[plot_type]['Axes']['YLabel'])
+        self.lineEditAspectRatio.setText(str(self.styles[plot_type]['Axes']['AspectRatio']))
+
+        # annotation properties
+        self.fontComboBox.setFont(self.styles[plot_type]['Text']['Font'])
+        self.doubleSpinBoxFontSize.setValue(self.styles[plot_type]['Text']['FontSize'])
+
+        # scalebar properties
+        self.comboBoxScaleLocation.setCurrentText(self.styles[plot_type]['Scales']['Location'])
+        self.comboBoxScaleDirection.setCurrentText(self.styles[plot_type]['Scales']['Direction'])
+        self.toolButtonOverlayColor.setStyleSheet("background-color: %s;" % self.styles[plot_type]['Scales']['OverlayColor'])
+
+        # marker properties
+        self.comboBoxMarker.setCurrentText(self.styles[plot_type]['Markers']['Symbol'])
+        self.doubleSpinBoxMarkerSize.setValue(self.styles[plot_type]['Markers']['Size'])
+        self.horizontalSliderMarkerAlpha.setValue(int(self.styles[plot_type]['Markers']['Alpha']))
+        self.labelMarkerAlpha.setText(str(self.horizontalSliderMarkerAlpha.value()))
+
+        # line properties
+        self.comboBoxLineWidth.setCurrentText(str(self.styles[plot_type]['Lines']['LineWidth']))
+
+        # color properties
+        self.toolButtonMarkerColor.setStyleSheet("background-color: %s;" % self.styles[plot_type]['Colors']['Color'])
+        self.comboBoxColorByField.setCurrentText(self.styles[plot_type]['Colors']['ColorByField'])
+        self.comboBoxColorField.setCurrentText(self.styles[plot_type]['Colors']['Field'])
+        self.comboBoxFieldColormap.setCurrentText(self.styles[plot_type]['Colors']['Colormap'])
+        self.doubleSpinBoxColorLB.setValue(self.styles[plot_type]['Colors']['CLim'][0])
+        self.doubleSpinBoxColorUB.setValue(self.styles[plot_type]['Colors']['CLim'][1])
+        self.comboBoxColorbarDirection.setCurrentText(self.styles[plot_type]['Colors']['Direction'])
+        self.lineEditCbarLabel.setText(self.styles[plot_type]['Colors']['CLabel'])
+        self.spinBoxHeatmapResolution.setValue(self.styles[plot_type]['Colors']['Resolution'])
+
+        # turn properties on/off based on plot type and style settings
+        #self.toggle_style()
+
+        # update plot
+        #self.update_plot()
+
+
     def set_scatter_style(self):
         """Sets style properties in Styling>Scatter and Heatmap tab"""
         tab_id = self.toolBox.currentIndex()
@@ -3197,7 +3222,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :type tab_ind: int
         """
         if tab_id == self.sample_tab_id or tab_id == self.scatter_tab_id or tab_id == self.pca_tab_id or tab_id == self.profile_tab_id:
-            match self.comboBoxScatterType.currentText().lower():
+            match self.comboBoxStylePlotType.currentText().lower():
                 case 'scatter':
                     self.scatter_style[tab_id] = {
                         'Marker': self.comboBoxMarker.currentText(),
@@ -3230,7 +3255,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     #    self.get_scatter_style(self.toolBox.currentIndex())
     #    if not update:
     #        x, y, z, c = self.get_scatter_values() #get scatter values from elements chosen
-    #        plot_type =  self.comboBoxScatterType.currentText().lower()
+    #        plot_type =  self.comboBoxStylePlotType.currentText().lower()
     #    else:
     #        # get saved scatter values to update plot
     #        x, y, z, c  = values
@@ -3341,19 +3366,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :param save: Flag for saving widget to self.toolBoxTreeView Plot Selector page, Defaults to False
         :type save: bool, optional"""
         # update plot style parameters
-        self.get_general_style()
-        self.get_scatter_style(self.toolBox.currentIndex())
         if fig == None:
             x, y, z, c = self.get_scatter_values() #get scatter values from elements chosen
         else:
             # get saved scatter values to update plot
             x, y, z, c = values
 
-        match self.comboBoxScatterType.currentText().lower():
+        plot_type = self.comboBoxStylePlotType.currentText().lower()
+        match plot_type:
             # scatter
             case 'scatter':
-                s = self.scatter_style[self.toolBox.currentIndex()]
-                if s['ColorByField'] == None:
+                s = self.style[plot_type]
+                if s['Colors']['ColorByField'] == None:
                     c = {'field': None, 'type': None, 'units': None, 'array': None}
 
                 if len(z['array']) == 0:
@@ -3483,35 +3507,35 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         ax = fig.add_subplot(111)
         if len(c['array']) == 0:
             # single color
-            ax.scatter(x['array'], y['array'], c=s['Color'], s=s['Size'], marker=self.markerdict[s['Marker']], edgecolors='none', alpha=s['Alpha']/100)
+            ax.scatter(x['array'], y['array'], c=s['Colors']['Color'], s=s['Marker']['Size'], marker=self.markerdict[s['Marker']['Symbol']], edgecolors='none', alpha=s['Marker']['Alpha']/100)
             cb = None
         else:
             # color by field
             ax.scatter(x['array'], y['array'], c=c['array'],
                 s=s['Size'],
-                marker=self.markerdict[s['Marker']],
+                marker=self.markerdict[s['Marker']['Symbol']],
                 edgecolors='none',
-                cmap=plt.get_cmap(s['Colormap']),
-                alpha=s['Alpha']/100)
+                cmap=plt.get_cmap(s['Colors']['Colormap']),
+                alpha=s['Marker']['Alpha']/100)
 
             norm = plt.Normalize(vmin=np.min(c['array']), vmax=np.max(c['array']))
-            scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(s['Colormap']), norm=norm)
+            scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(s['Colors']['Colormap']), norm=norm)
             cb = fig.colorbar(scalarMappable, ax=ax, orientation='vertical', location='right', shrink=0.62)
             cb.set_label(c['label'])
 
         # labels
-        font = {'size':self.general_style['FontSize']}
+        font = {'size':s['Text']['FontSize']}
         ax.set_xlabel(x['label'], fontdict=font)
         ax.set_ylabel(y['label'], fontdict=font)
 
         # tick marks
-        ax.tick_params(direction=self.general_style['TickDir'],
-                        labelsize=self.general_style['FontSize'],
+        ax.tick_params(direction=s['Axes']['TickDir'],
+                        labelsize=s['Text']['FontSize'],
                         labelbottom=True, labeltop=False, labelleft=True, labelright=False,
                         bottom=True, top=True, left=True, right=True)
 
         # aspect ratio
-        ax.set_box_aspect(s['AspectRatio'])
+        ax.set_box_aspect(s['Axes']['AspectRatio'])
 
         if new:
             plot_name = f"{x['field']}_{y['field']}_{'scatter'}"
@@ -3521,7 +3545,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 'plot_type': 'scatter',
                 'values': (x, y, c),
                 'fig': fig,
-                'colorbar': cb
+                'colorbar': cb,
+                'style': s
             }
             self.newplot(fig, plot_name, plot_information, save)
 
@@ -4355,7 +4380,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #update filters, polygon, profiles with existing data 
         self.update_tables()
         
-        # print(self.self.sample_id)
+        # print(self.sample_id)
         ####
         #### Need to fix this so that it calculates the size appropriately when they load
         #### Also need a program that correctly converts a iolite file to one that is read in hear.

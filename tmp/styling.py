@@ -8,11 +8,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setupUi(self)
 
         self.default_styles = {'Axes': {'XLimAuto': True, 'XLim':[0,0], 'XLabel':'', 'YLimCustom': True, 'YLim': [0,0], 'YLabel':'', 'AspectRatio': '1.0', 'TickDir': 'out'},
-                               'Annotations': {'Font': self.fontComboBox.currentFont(), 'FontSize': 11.0},
+                               'Text': {'Font': self.fontComboBox.currentFont(), 'FontSize': 11.0},
                                'Scales': {'Location': 'northeast', 'Direction': 'none', 'OverlayColor': '#ffffff'},
                                'Markers': {'Symbol': 'circle', 'Size': 6, 'Alpha': 30},
                                'Lines': {'LineWidth': 1.5},
-                               'Colors': {'Color': '#1c75bc', 'ColorByField': 'None', 'Field': None, 'Colormap': 'viridis', 'CLim':[0,0], 'Direction': 'none', 'CLabel': None, 'Resolution': 10}
+                               'Colors': {'Color': '#1c75bc', 'ColorByField': 'None', 'Field': None, 'Colormap': 'viridis', 'CLimAuto': True, 'CLim':[0,0], 'Direction': 'none', 'CLabel': None, 'Resolution': 10}
                                }
 
         self.plot_types = {self.sample_tab_id: ['analyte map','correlation'],
@@ -41,7 +41,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         'cluster score map': self.default_styles,
                         'profile': self.default_styles}
 
-    def toggle_style(self):
+    def toggle_style_widgets(self):
         plot_type = self.comboBoxStylePlotType.currentText()
 
         match plot_type:
@@ -70,14 +70,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # marker properties
                 if len(self.spotdata.spots[self.sample_id]) != 0:
                     self.comboBoxMarker.setEnabled(True)
-                    self.self.doubleSpinBoxMarkerSize.setEnabled(True)
+                    self.doubleSpinBoxMarkerSize.setEnabled(True)
                     self.horizontalSliderMarkerAlpha.setEnabled(True)
                     self.labelMarkerAlpha.setEnabled(True)
 
                     self.toolButtonMarkerColor.setEnabled(True)
                 else:
                     self.comboBoxMarker.setEnabled(False)
-                    self.self.doubleSpinBoxMarkerSize.setEnabled(False)
+                    self.doubleSpinBoxMarkerSize.setEnabled(False)
                     self.horizontalSliderMarkerAlpha.setEnabled(False)
                     self.labelMarkerAlpha.setEnabled(False)
 
@@ -120,7 +120,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # marker properties
                 self.comboBoxMarker.setEnabled(False)
-                self.self.doubleSpinBoxMarkerSize.setEnabled(False)
+                self.doubleSpinBoxMarkerSize.setEnabled(False)
                 self.horizontalSliderMarkerAlpha.setEnabled(False)
                 self.labelMarkerAlpha.setEnabled(False)
 
@@ -159,7 +159,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # marker properties
                 self.comboBoxMarker.setEnabled(False)
-                self.self.doubleSpinBoxMarkerSize.setEnabled(False)
+                self.doubleSpinBoxMarkerSize.setEnabled(False)
                 self.horizontalSliderMarkerAlpha.setEnabled(False)
                 self.labelMarkerAlpha.setEnabled(False)
 
@@ -187,13 +187,62 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 self.spinBoxHeatmapResolution.setEnabled(False)
             case 'scatter':
+                # axes properties
+                self.doubleSpinBoxXLB.setEnabled(True)
+                self.doubleSpinBoxXUB.setEnabled(True)
+                self.lineEditXLabel.setEnabled(True)
+                self.doubleSpinBoxYLB.setEnabled(True)
+                self.doubleSpinBoxYUB.setEnabled(True)
+                self.lineEditYLabel.setEnabled(True)
+                self.lineEditAspectRatio.setEnabled(True)
+
+                # annotation properties
+                self.fontComboBox.setEnabled(True)
+                self.doubleSpinBoxFontSize.setEnabled(True)
+
+                # scalebar properties
+                self.comboBoxScaleDirection.setEnabled(False)
+                self.toolButtonOverlayColor.setEnabled(False)
+                self.comboBoxScaleLocation.setEnabled(False)
+
+                # marker properties
+                self.comboBoxMarker.setEnabled(True)
+                self.doubleSpinBoxMarkerSize.setEnabled(True)
+                self.horizontalSliderMarkerAlpha.setEnabled(True)
+                self.labelMarkerAlpha.setEnabled(True)
+
+                # line properties
+                self.comboBoxLineWidth.setEnabled(True)
+
+                # color properties
+                self.comboBoxColorByField.setEnabled(True)
+                if self.comboBoxColorByField.currentText() != 'none':
+                    self.toolButtonMarkerColor.setEnabled(False)
+
+                    self.comboBoxColorField.setEnabled(True)
+                    self.comboBoxFieldColormap.setEnabled(True)
+                    self.doubleSpinBoxColorLB.setEnabled(True)
+                    self.doubleSpinBoxColorUB.setEnabled(True)
+                    self.comboBoxColorbarDirection.setEnabled(True)
+                    self.lineEditCbarLabel.setEnabled(True)
+                else:
+                    self.toolButtonMarkerColor.setEnabled(True)
+
+                    self.comboBoxColorField.setEnabled(False)
+                    self.comboBoxFieldColormap.setEnabled(False)
+                    self.doubleSpinBoxColorLB.setEnabled(False)
+                    self.doubleSpinBoxColorUB.setEnabled(False)
+                    self.comboBoxColorbarDirection.setEnabled(False)
+                    self.lineEditCbarLabel.setEnabled(False)
+
+                self.spinBoxHeatmapResolution.setEnabled(False)
             case 'heatmap':
             case 'ternary map':
             case 'TEC/radar':
                 # axes properties
                 self.doubleSpinBoxXLB.setEnabled(False)
                 self.doubleSpinBoxXUB.setEnabled(False)
-                self.lineEditXLabel.setEnabled(True)
+                self.lineEditXLabel.setEnabled(False)
                 self.doubleSpinBoxYLB.setEnabled(False)
                 self.doubleSpinBoxYUB.setEnabled(False)
                 self.lineEditYLabel.setEnabled(True)
@@ -210,7 +259,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # marker properties
                 self.comboBoxMarker.setEnabled(False)
-                self.self.doubleSpinBoxMarkerSize.setEnabled(False)
+                self.doubleSpinBoxMarkerSize.setEnabled(False)
                 self.horizontalSliderMarkerAlpha.setEnabled(False)
                 self.labelMarkerAlpha.setEnabled(False)
 
@@ -218,13 +267,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxLineWidth.setEnabled(True)
 
                 # color properties
-                self.toolButtonMarkerColor.setEnabled(False)
-                self.comboBoxColorByField.setEnabled(False)
-                self.comboBoxColorField.setEnabled(False)
-                self.comboBoxFieldColormap.setEnabled(True)
-                self.doubleSpinBoxColorLB.setEnabled(True)
-                self.doubleSpinBoxColorUB.setEnabled(True)
-                self.comboBoxColorbarDirection.setEnabled(True)
+                self.comboBoxColorByField.setEnabled(True)
+                if self.comboBoxColorByField.currentText() == 'Clusters':
+                    self.toolButtonMarkerColor.setEnabled(False)
+
+                    self.comboBoxFieldColormap.setEnabled(True)
+                    self.doubleSpinBoxColorLB.setEnabled(True)
+                    self.doubleSpinBoxColorUB.setEnabled(True)
+                    self.comboBoxColorbarDirection.setEnabled(True)
+                else:
+                    self.toolButtonMarkerColor.setEnabled(True)
+
+                    self.comboBoxFieldColormap.setEnabled(False)
+                    self.doubleSpinBoxColorLB.setEnabled(False)
+                    self.doubleSpinBoxColorUB.setEnabled(False)
+                    self.comboBoxColorbarDirection.setEnabled(False)
                 self.lineEditCbarLabel.setEnabled(False)
 
                 self.spinBoxHeatmapResolution.setEnabled(False)
@@ -237,7 +294,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case 'cluster score map':
             case 'profile':
 
-    def set_style(self, plot_type=None):
+    def set_style_widgets(self, plot_type=None):
 
         tab_id = self.toolBox.currentIndex()
 
@@ -257,8 +314,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.lineEditAspectRatio.setText(str(self.styles[plot_type]['Axes']['AspectRatio']))
 
         # annotation properties
-        self.fontComboBox.setFont(self.styles[plot_type]['Annotations']['Font'])
-        self.doubleSpinBoxFontSize.setValue(self.styles[plot_type]['Annotations']['FontSize'])
+        self.fontComboBox.setFont(self.styles[plot_type]['Text']['Font'])
+        self.doubleSpinBoxFontSize.setValue(self.styles[plot_type]['Text']['FontSize'])
 
         # scalebar properties
         self.comboBoxScaleLocation.setCurrentText(self.styles[plot_type]['Scales']['Location'])
@@ -267,7 +324,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # marker properties
         self.comboBoxMarker.setCurrentText(self.styles[plot_type]['Markers']['Symbol'])
-        self.self.doubleSpinBoxMarkerSize.setValue(self.styles[plot_type]['Markers']['Size'])
+        self.doubleSpinBoxMarkerSize.setValue(self.styles[plot_type]['Markers']['Size'])
         self.horizontalSliderMarkerAlpha.setValue(int(self.styles[plot_type]['Markers']['Alpha']))
         self.labelMarkerAlpha.setText(str(self.horizontalSliderMarkerAlpha.value()))
 
@@ -282,16 +339,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.doubleSpinBoxColorLB.setValue(self.styles[plot_type]['Colors']['CLim'](0))
         self.doubleSpinBoxColorUB.setValue(self.styles[plot_type]['Colors']['CLim'](1))
         self.comboBoxColorbarDirection.setCurrentText(self.styles[plot_type]['Colors']['Direction'])
-        self.lineEditCbarLabel.setCurrentText(self.styles[plot_type]['Colors']['CLabel'])
+        self.lineEditCbarLabel.setText(self.styles[plot_type]['Colors']['CLabel'])
         self.spinBoxHeatmapResolution.setValue(self.styles[plot_type]['Colors']['Resolution'])
 
         # turn properties on/off based on plot type and style settings
         self.toggle_style()
 
         # update plot
-        self.update_plot()
+        #self.update_plot()
 
-    def get_style(self):
+    def get_style_dict(self):
         plot_type = self.comboBoxStylePlotType.currentText()
 
         # update axes properties
@@ -303,7 +360,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     'TickDir': self.comboBoxTickDirection.currentText()}
 
         # update annotation properties
-        self.styles[plot_type]['Annotations'] = {'Font': self.fontComboBox.currentFont(),
+        self.styles[plot_type]['Text'] = {'Font': self.fontComboBox.currentFont(),
                     'FontSize': self.doubleSpinBoxFontSize.value()}
 
         # update scale properties
@@ -313,7 +370,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # update marker properties
         self.styles[plot_type]['Markers'] = {'Symbol': self.comboBoxMarker.currentText(),
-                    'Size': self.self.doubleSpinBoxMarkerSize.value(),
+                    'Size': self.doubleSpinBoxMarkerSize.value(),
                     'Alpha': float(self.horizontalSliderMarkerAlpha.value())}
 
         # update line properties
@@ -328,3 +385,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     'Direction': self.comboBoxColorbarDirection.currentText(),
                     'CLabel': self.lineEditCbarLabel.currentText(),
                     'Resolution': self.spinBoxHeatmapResolution.value()}
+
+
+    style = self.styles['scatter']
+    plot( s=style['Marker']['Symbol'])

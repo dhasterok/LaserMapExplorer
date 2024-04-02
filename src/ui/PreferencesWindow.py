@@ -220,7 +220,7 @@ class Ui_PreferencesWindow(object):
         self.pushButton_3.setText(_translate("PreferencesWindow", "Startup"))
         self.pushButton_2.setText(_translate("PreferencesWindow", "Files"))
         self.pushButton.setText(_translate("PreferencesWindow", "Defaults"))
-import resources_rc
+import src.ui.resources_rc
 
 
 if __name__ == "__main__":

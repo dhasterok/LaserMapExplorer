@@ -20,7 +20,7 @@ from matplotlib.collections import PathCollection
 import matplotlib.pyplot as plt
 from matplotlib.path import Path
 from PyQt5.QtWidgets import QStyledItemDelegate
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QObject
 from PyQt5.QtGui import QPainter, QBrush, QColor
 from PyQt5.QtCore import pyqtSignal
 from src.rotated import RotatedHeaderView
@@ -1192,7 +1192,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     
     
     def update_tables(self):
-        self.update_filter_table()
+        self.update_filter_table(reload = True)
         self.profiling.update_table_widget()
         self.polygon.update_table_widget()
         pass
@@ -1217,7 +1217,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         elif selection == 'sample': #sample is changed
 
             #clear filter table
-            self.tableWidgetFilters.clear()
+            self.tableWidgetFilters.clearContents()
+            self.tableWidgetFilters.setRowCount(0)
 
             #clear profiling
             self.profiling.clear_profiles()
@@ -1266,68 +1267,97 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if '/' in analyte_1:
                 analyte_1, analyte_2 = analyte_1.split(' / ')
                 f_val = self.data[self.sample_id]['ratios_info'].loc[(self.data[self.sample_id]['ratios_info']['analyte_1'] == analyte_1)& (self.data[self.sample_id]['ratios_info']['analyte_2'] == analyte_2)].iloc[0][['v_min', 'v_max']]
-
+        print(self.dynamic_format(f_val['v_min']))
         self.lineEditFMin.setText(str(self.dynamic_format(f_val['v_min'])))
         self.lineEditFMax.setText(str(self.dynamic_format(f_val['v_max'])))
 
-    def update_filter_table(self):
+    def update_filter_table(self, reload = False):
         """Update data for analysis when fiter table is updated."""
-        # open tabFilterList
-        self.tabWidget.setCurrentIndex(1)
-
-        def on_use_checkbox_state_changed(row, state):
-            # Update the 'use' value in the filter_df for the given row
-            self.data[self.sample_id]['filter_info'].at[row, 'use'] = state == QtCore.Qt.Checked
-
-
-        analyte_1 = self.comboBoxFAnalyte.currentText()
-        analyte_2 = None
-        analyte_select = self.comboBoxFSelect.currentText()
-        f_min = float(self.lineEditFMin.text())
-        f_max = float(self.lineEditFMax.text())
-        # Add a new row at the end of the table
-        row = self.tableWidgetFilters.rowCount()
-        self.tableWidgetFilters.insertRow(row)
-
-        # Create a QCheckBox for the 'use' column
-        chkBoxItem_use = QtWidgets.QCheckBox()
-        chkBoxItem_use.setCheckState(QtCore.Qt.Checked)
-        chkBoxItem_use.stateChanged.connect(lambda state, row=row: on_use_checkbox_state_changed(row, state))
-
-        chkBoxItem_select = QTableWidgetItem()
-        chkBoxItem_select.setFlags(QtCore.Qt.ItemIsUserCheckable |
-                            QtCore.Qt.ItemIsEnabled)
-        ratio = False
-        if analyte_select.lower() == 'analyte':
-            chkBoxItem_select.setCheckState(QtCore.Qt.Unchecked)
-            norm = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes'] == analyte_1)].iloc[0]['norm']
+        # If reload is True, clear the table and repopulate it from 'filter_info'
+        if reload:
+            # Clear the table
+            self.tableWidgetFilters.setRowCount(0)
+            
+            # Repopulate the table from 'filter_info'
+            for index, row in self.data[self.sample_id]['filter_info'].iterrows():
+                current_row = self.tableWidgetFilters.rowCount()
+                self.tableWidgetFilters.insertRow(current_row)
+                
+                # Create and set the checkbox for 'use'
+                chkBoxItem_use = QtWidgets.QCheckBox()
+                chkBoxItem_use.setCheckState(QtCore.Qt.Checked if row['use'] else QtCore.Qt.Unchecked)
+                chkBoxItem_use.stateChanged.connect(lambda state, row=current_row: on_use_checkbox_state_changed(row, state))
+                self.tableWidgetFilters.setCellWidget(current_row, 0, chkBoxItem_use)
+                
+                # Add other items from the row
+                self.tableWidgetFilters.setItem(current_row, 1, QtWidgets.QTableWidgetItem(row['analyte_1']))
+                self.tableWidgetFilters.setItem(current_row, 2, QtWidgets.QTableWidgetItem(row.get('analyte_2', '')))  # 'analyte_2' might be None
+                self.tableWidgetFilters.setItem(current_row, 3, QtWidgets.QTableWidgetItem(str(row['ratio'])))
+                self.tableWidgetFilters.setItem(current_row, 4, QtWidgets.QTableWidgetItem(self.dynamic_format(row['f_min'])))
+                self.tableWidgetFilters.setItem(current_row, 5, QtWidgets.QTableWidgetItem(self.dynamic_format(row['f_max'])))
+                
+                # Create and set the checkbox for selection (assuming this is a checkbox similar to 'use')
+                chkBoxItem_select = QtWidgets.QCheckBox()
+                chkBoxItem_select.setCheckState(QtCore.Qt.Checked if row.get('select', False) else QtCore.Qt.Unchecked)
+                self.tableWidgetFilters.setCellWidget(current_row, 6, chkBoxItem_select)
+    
         else:
-            if '/' in analyte_1:
-                ratio = True
-                analyte_1, analyte_2 = analyte_1.split(' / ')
-                norm = self.data[self.sample_id]['ratios_info'].loc[(self.data[self.sample_id]['ratios_info']['analyte_1'] == analyte_1)
-                                                                    & (self.data[self.sample_id]['ratios_info']['analyte_2'] == analyte_2)].iloc[0]['norm']
-
-        self.tableWidgetFilters.setCellWidget(row, 0, chkBoxItem_use)
-        self.tableWidgetFilters.setItem(row, 1,
-                                 QtWidgets.QTableWidgetItem(analyte_1))
-        self.tableWidgetFilters.setItem(row, 2,
-                                 QtWidgets.QTableWidgetItem(analyte_2))
-        self.tableWidgetFilters.setItem(row, 3,
-                                 QtWidgets.QTableWidgetItem(ratio))
-
-        self.tableWidgetFilters.setItem(row, 4,
-                                 QtWidgets.QTableWidgetItem(self.dynamic_format(f_min)))
-        self.tableWidgetFilters.setItem(row, 5,
-                                 QtWidgets.QTableWidgetItem(self.dynamic_format(f_max)))
-
-
-        self.tableWidgetFilters.setItem(row, 6,
-                                 chkBoxItem_select)
-
-
-        filter_info = { 'analyte_1': analyte_1, 'analyte_2': analyte_2, 'ratio': ratio,'norm':norm ,'f_min': f_min,'f_max':f_max, 'use':True}
-        self.data[self.sample_id]['filter_info'].loc[len(self.data[self.sample_id]['filter_info'])]=filter_info
+            # open tabFilterList
+            self.tabWidget.setCurrentIndex(1)
+    
+            def on_use_checkbox_state_changed(row, state):
+                # Update the 'use' value in the filter_df for the given row
+                self.data[self.sample_id]['filter_info'].at[row, 'use'] = state == QtCore.Qt.Checked
+    
+    
+            analyte_1 = self.comboBoxFAnalyte.currentText()
+            analyte_2 = None
+            analyte_select = self.comboBoxFSelect.currentText()
+            f_min = float(self.lineEditFMin.text())
+            f_max = float(self.lineEditFMax.text())
+            # Add a new row at the end of the table
+            row = self.tableWidgetFilters.rowCount()
+            self.tableWidgetFilters.insertRow(row)
+    
+            # Create a QCheckBox for the 'use' column
+            chkBoxItem_use = QtWidgets.QCheckBox()
+            chkBoxItem_use.setCheckState(QtCore.Qt.Checked)
+            chkBoxItem_use.stateChanged.connect(lambda state, row=row: on_use_checkbox_state_changed(row, state))
+    
+            chkBoxItem_select = QTableWidgetItem()
+            chkBoxItem_select.setFlags(QtCore.Qt.ItemIsUserCheckable |
+                                QtCore.Qt.ItemIsEnabled)
+            ratio = False
+            if analyte_select.lower() == 'analyte':
+                chkBoxItem_select.setCheckState(QtCore.Qt.Unchecked)
+                norm = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes'] == analyte_1)].iloc[0]['norm']
+            else:
+                if '/' in analyte_1:
+                    ratio = True
+                    analyte_1, analyte_2 = analyte_1.split(' / ')
+                    norm = self.data[self.sample_id]['ratios_info'].loc[(self.data[self.sample_id]['ratios_info']['analyte_1'] == analyte_1)
+                                                                        & (self.data[self.sample_id]['ratios_info']['analyte_2'] == analyte_2)].iloc[0]['norm']
+    
+            self.tableWidgetFilters.setCellWidget(row, 0, chkBoxItem_use)
+            self.tableWidgetFilters.setItem(row, 1,
+                                     QtWidgets.QTableWidgetItem(analyte_1))
+            self.tableWidgetFilters.setItem(row, 2,
+                                     QtWidgets.QTableWidgetItem(analyte_2))
+            self.tableWidgetFilters.setItem(row, 3,
+                                     QtWidgets.QTableWidgetItem(ratio))
+    
+            self.tableWidgetFilters.setItem(row, 4,
+                                     QtWidgets.QTableWidgetItem(self.dynamic_format(f_min)))
+            self.tableWidgetFilters.setItem(row, 5,
+                                     QtWidgets.QTableWidgetItem(self.dynamic_format(f_max)))
+    
+    
+            self.tableWidgetFilters.setItem(row, 6,
+                                     chkBoxItem_select)
+    
+    
+            filter_info = { 'analyte_1': analyte_1, 'analyte_2': analyte_2, 'ratio': ratio,'norm':norm ,'f_min': f_min,'f_max':f_max, 'use':True}
+            self.data[self.sample_id]['filter_info'].loc[len(self.data[self.sample_id]['filter_info'])]=filter_info
     def remove_selected_rows(self,sample):
         """Remove selected rows from filter table.
 
@@ -1381,7 +1411,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.data[self.sample_id]['filter_mask'] = self.data[self.sample_id]['filter_mask'] & (analyte_df['array'].values <= filter_row['f_min']) | (analyte_df['array'].values >= filter_row['f_max'])
         elif self.toolButtonMapPolygon.isChecked():
             # apply polygon mask
-            # Iterate through each polygon in self.polygons
+            # Iterate through each polygon in self.polygons[self.main_window.sample_id]
             for row in range(self.tableWidgetPolyPoints.rowCount()):
                 #check if checkbox is checked
                 checkBox = self.tableWidgetPolyPoints.cellWidget(row, 4)
@@ -1612,12 +1642,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                     # update v_min and v_max in self.data[sample_id]['analyte_info']
                     self.data[sample_id]['analyte_info'].loc[
-                                             (self.data[sample_id]['analyte_info']['analytes']==analyte_1),'v_max'][0] = filtered_data.min()
+                                             (self.data[sample_id]['analyte_info']['analytes']==analyte_1),'v_max'] = filtered_data.max()
                     self.data[sample_id]['analyte_info'].loc[
-                                             (self.data[sample_id]['analyte_info']['analytes']==analyte_1), 'v_min'][0] = filtered_data.min()
-
+                                             (self.data[sample_id]['analyte_info']['analytes']==analyte_1), 'v_min'] = filtered_data.min()
+            
+            
+            
+            
+            #add x and y columns from raw data
             self.data[sample_id]['processed_data']['X'] = self.data[sample_id]['raw_data']['X']
             self.data[sample_id]['processed_data']['Y'] = self.data[sample_id]['raw_data']['Y']
+
 
             # create deep copy of clipped analyte data for analalysis
             self.analysis_analyte_data = copy.deepcopy(self.clipped_analyte_data)
@@ -4377,8 +4412,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         file_path = os.path.join(self.selected_directory, self.csv_files[index])
         self.sample_id = os.path.splitext(self.csv_files[index])[0]
         
-        #update filters, polygon, profiles with existing data 
-        self.update_tables()
+        
         
         # print(self.sample_id)
         ####
@@ -4409,7 +4443,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             sample_df  = sample_df.loc[:, ~sample_df .columns.str.contains('^Unnamed')]
             # self.data[sample_id] = pd.read_csv(file_path, engine='c')
             self.data[sample_id]['raw_data'] = self.add_ree(sample_df)
-            self.selected_analytes = list(self.data[sample_id]['raw_data'].columns[5:])
+            self.selected_analytes = self.data[sample_id]['raw_data'].columns[5:].tolist()
             self.data[sample_id]['computed_data'] = {
                 'ratio':self.data[sample_id]['raw_data'][['X','Y']],
                 'calculated':self.data[sample_id]['raw_data'][['X','Y']],
@@ -4419,7 +4453,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 'cluster score':None
                 }
             analytes = pd.DataFrame()
-            analytes['analytes']=list(self.selected_analytes)
+            analytes['analytes']=self.selected_analytes
             analytes['sample_id'] = sample_id
             analytes['norm'] = 'linear'
 
@@ -4437,10 +4471,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             analytes['lower_bound'] = 0.05
             analytes['d_l_bound'] = 99
             analytes['d_u_bound'] = 99
-            self.data[self.sample_id]['processed_data'] = copy.deepcopy(self.data[self.sample_id]['raw_data'])
-            self.data[self.sample_id]['cropped_raw_data'] = copy.deepcopy(self.data[self.sample_id]['raw_data'])
-            analytes['v_min'] = np.min(self.data[sample_id]['processed_data'], axis=0)
-            analytes['v_max'] = np.max(self.data[sample_id]['processed_data'], axis=0)
+            self.data[self.sample_id]['processed_data'] = copy.deepcopy(self.data[self.sample_id]['raw_data'][self.selected_analytes])
+            self.data[self.sample_id]['cropped_raw_data'] = copy.deepcopy(self.data[self.sample_id]['processed_data'])
+            analytes['v_min'] = None
+            analytes['v_max'] = None
             analytes['auto_scale'] = True
             analytes['use'] = True
             self.data[sample_id]['analyte_info'] = analytes
@@ -4514,8 +4548,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if self.comboBoxCorrelationMethod.currentText().lower() != 'none':
                 print('plot correlation')
                 self.plot_correlation()
-
-
+                
+        else:
+            #update filters, polygon, profiles with existing data 
+            self.update_tables()
+            #get plot array
+            current_plot_df = self.get_map_data(sample_id=self.sample_id, name = self.selected_analytes[0],analysis_type = 'analyte', plot =False )
+            #create plot
+            self.create_plot(current_plot_df,sample_id=self.sample_id, plot_type = 'lasermap', analyte_1= self.selected_analytes[0])
     def update_combo_boxes(self, parentBox, childBox):
         """Updates comboBoxes with fields for plots or analysis
 
@@ -4541,7 +4581,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             auto_scale = parameters['auto_scale']
             #self.spinBoxX.setValue(int(parameters['x_max']))
 
-            self.toolButtonAutoScale.setChecked(auto_scale)
+            self.toolButtonAutoScale.setChecked(bool(auto_scale))
             if auto_scale:
                 self.doubleSpinBoxDUB.setEnabled(True)
                 self.doubleSpinBoxDLB.setEnabled(True)
@@ -5337,7 +5377,7 @@ class Table_Fcn:
                 case 'Profiling':
                     self.main_window.comboBoxProfileSort.setCurrentIndex(0) #set dropdown sort to no
 
-                    # Update self.profiles here accordingly
+                    # Update self.profiles[self.main_window.sample_id] here accordingly
                     for key, profile in self.main_window.profiling.profiles.items():
                         if row >0:
                             profile[row], profile[row -1 ] = profile[row - 1], profile[row]
@@ -5490,6 +5530,7 @@ class Crop_tool:
             crop_rect_y = (self.y_range - crop_rect_height) / 2
 
             self.crop_rect = ResizableRectItem(parent=self, rect=QRectF(crop_rect_x, crop_rect_y, crop_rect_width, crop_rect_height))
+            self.crop_rect.signalEmitter.rightClicked.connect(self.apply_crop)
             self.crop_rect.setPen(QPen(QColor(255, 255, 255), 4, Qt.DashLine))
 
             self.main_window.plot.addItem(self.crop_rect)
@@ -5539,10 +5580,10 @@ class Crop_tool:
         if self.crop_rect:
             crop_rect = self.crop_rect.rect()  # self.crop_rect is ResizableRectItem
             print(crop_rect.left())
-            self.main_window.crop_x_min = crop_rect.left()
-            self.main_window.crop_x_max = crop_rect.right()
-            self.main_window.crop_y_min = crop_rect.top()
-            self.main_window.crop_y_max = crop_rect.bottom()
+            self.main_window.data[self.main_window.sample_id]['crop_x_min'] = crop_rect.left()
+            self.main_window.data[self.main_window.sample_id]['crop_x_max'] = crop_rect.right()
+            self.main_window.data[self.main_window.sample_id]['crop_y_max'] = crop_rect.top()
+            self.main_window.data[self.main_window.sample_id]['crop_y_min'] = crop_rect.bottom()
             if len(self.overlays)> 0: #remove crop rect and overlays
                 self.main_window.plot.removeItem(self.crop_rect)
                 for overlay in self.overlays:
@@ -5555,6 +5596,7 @@ class Crop_tool:
 class ResizableRectItem(QGraphicsRectItem):
     def __init__(self, rect=None, parent=None):
         super(ResizableRectItem, self).__init__(rect)
+        self.signalEmitter = SignalEmitter()  # Create an instance of the emitter
         self.setAcceptHoverEvents(True)
         self.edgeTolerance = 50  # Adjusted for better precision
         self.resizing = False
@@ -5563,6 +5605,7 @@ class ResizableRectItem(QGraphicsRectItem):
         self.cursorChangeThreshold = 50  # Distance from corner to change cursor
         self.parent = parent
         self.pos = None
+    
     def hoverMoveEvent(self, event):
         pos = event.pos()
         rect = self.rect()
@@ -5581,6 +5624,9 @@ class ResizableRectItem(QGraphicsRectItem):
             self.resizing = True
             self.dragStartPos = event.pos()
             self.dragStartRect = self.rect()
+        elif event.button() == Qt.RightButton:
+            # Emit the rightClicked signal through the signalEmitter object
+            self.signalEmitter.rightClicked.emit()
         else:
             super(ResizableRectItem, self).mousePressEvent(event)
 
@@ -5675,6 +5721,10 @@ class Polygon:
         self.p_id = self.p_id_gen
 
     def plot_polygon_scatter(self, event,k, x, y, x_i, y_i):
+        #create profile dict particular sample if it doesnt exisist
+        if self.main_window.sample_id not in self.polygons:
+            self.polygons[self.main_window.sample_id] = {}
+        
         self.array_x = self.main_window.array.shape[1]
         self.array_y = self.main_window.array.shape[0]
         # turn off profile (need to suppress context menu on right click)
@@ -5729,7 +5779,7 @@ class Polygon:
 
             if self.main_window.point_selected:
                 #remove selected point
-                prev_scatter = self.polygons[self.p_id][self.point_index][2]
+                prev_scatter = self.polygons[self.main_window.sample_id][self.p_id][self.point_index][2]
                 self.main_window.plot.removeItem(prev_scatter)
 
 
@@ -5739,9 +5789,9 @@ class Polygon:
                 self.main_window.plot.addItem(scatter)
 
 
-                #update self.point_index index of self.polygonswith new point data
+                #update self.point_index index of self.polygons[self.main_window.sample_id]with new point data
 
-                self.polygons[self.p_id][self.point_index] = (x,y, scatter)
+                self.polygons[self.main_window.sample_id][self.p_id][self.point_index] = (x,y, scatter)
 
                 # Finalize and draw the polygon
                 self.show_polygon_lines(x,y, complete = True)
@@ -5752,7 +5802,7 @@ class Polygon:
             else:
                 # find nearest profile point
                 mindist = 10**12
-                for i, (x_p,y_p,_) in enumerate(self.polygons[self.p_id]):
+                for i, (x_p,y_p,_) in enumerate(self.polygons[self.main_window.sample_id][self.p_id]):
                     dist = (x_p - x)**2 + (y_p - y)**2
                     if mindist > dist:
                         mindist = dist
@@ -5769,9 +5819,9 @@ class Polygon:
             # Find the closest line segment to the click location
             min_distance = float('inf')
             insert_after_index = None
-            for i in range(len(self.polygons[self.p_id])):
-                p1 = self.polygons[self.p_id][i]
-                p2 = self.polygons[self.p_id][(i + 1) % len(self.polygons[self.p_id])]  # Loop back to the start for the last segment
+            for i in range(len(self.polygons[self.main_window.sample_id][self.p_id])):
+                p1 = self.polygons[self.main_window.sample_id][self.p_id][i]
+                p2 = self.polygons[self.main_window.sample_id][self.p_id][(i + 1) % len(self.polygons[self.main_window.sample_id][self.p_id])]  # Loop back to the start for the last segment
                 dist = self.distance_to_line_segment(x, y, p1[0], p1[1], p2[0], p2[1])
                 if dist < min_distance:
                     min_distance = dist
@@ -5782,7 +5832,7 @@ class Polygon:
                 scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
                 scatter.setZValue(1e9)
                 self.main_window.plot.addItem(scatter)
-                self.polygons[self.p_id].insert(insert_after_index + 1, (x, y, scatter))
+                self.polygons[self.main_window.sample_id][self.p_id].insert(insert_after_index + 1, (x, y, scatter))
 
             # Redraw the polygon with the new point
             self.show_polygon_lines(x, y, complete=True)
@@ -5796,7 +5846,7 @@ class Polygon:
             # Find the closest point to the click location
             min_distance = float('inf')
             point_to_remove_index = None
-            for i, (px, py, _) in enumerate(self.polygons[self.p_id]):
+            for i, (px, py, _) in enumerate(self.polygons[self.main_window.sample_id][self.p_id]):
                 dist = ((px - x)**2 + (py - y)**2)**0.5
                 if dist < min_distance:
                     min_distance = dist
@@ -5804,7 +5854,7 @@ class Polygon:
 
             # Remove the closest point
             if point_to_remove_index is not None:
-                _, _, scatter_item = self.polygons[self.p_id].pop(point_to_remove_index)
+                _, _, scatter_item = self.polygons[self.main_window.sample_id][self.p_id].pop(point_to_remove_index)
                 self.main_window.plot.removeItem(scatter_item)
 
             # Redraw the polygon without the removed point
@@ -5820,12 +5870,12 @@ class Polygon:
             scatter.setZValue(1e9)
             self.main_window.plot.addItem(scatter)
 
-            # add x and y to self.polygons dict
-            if self.p_id not in self.polygons:
-                self.polygons[self.p_id] = [(x,y, scatter)]
+            # add x and y to self.polygons[self.main_window.sample_id] dict
+            if self.p_id not in self.polygons[self.main_window.sample_id]:
+                self.polygons[self.main_window.sample_id][self.p_id] = [(x,y, scatter)]
 
             else:
-                self.polygons[self.p_id].append((x,y, scatter))
+                self.polygons[self.main_window.sample_id][self.p_id].append((x,y, scatter))
 
     def distance_to_line_segment(self, px, py, x1, y1, x2, y2):
         # Calculate the distance from point (px, py) to the line segment defined by points (x1, y1) and (x2, y2)
@@ -5833,14 +5883,14 @@ class Polygon:
         return min(((px - x1)**2 + (py - y1)**2)**0.5, ((px - x2)**2 + (py - y2)**2)**0.5)
 
     def show_polygon_lines(self, x,y, complete = False):
-        if self.p_id in self.polygons:
+        if self.p_id in self.polygons[self.main_window.sample_id]:
             # Remove existing temporary line(s) if any
             if self.p_id in self.lines:
                 for line in self.lines[self.p_id]:
                     self.main_window.plot.removeItem(line)
             self.lines[self.p_id] = []
 
-            points = self.polygons[self.p_id]
+            points = self.polygons[self.main_window.sample_id][self.p_id]
             if len(points) == 1:
                 # Draw line from the first point to cursor
                 line = PlotDataItem([points[0][0], x], [points[0][1], y], pen='r')
@@ -5872,7 +5922,7 @@ class Polygon:
                 # self.lines[self.p_id].append(line)
 
             elif complete and len(points) > 2:
-                points = [QtCore.QPointF(x, y) for x, y, _ in self.polygons[self.p_id]]
+                points = [QtCore.QPointF(x, y) for x, y, _ in self.polygons[self.main_window.sample_id][self.p_id]]
                 polygon = QtGui.QPolygonF(points)
                 poly_item = QtWidgets.QGraphicsPolygonItem(polygon)
                 poly_item.setBrush(QtGui.QColor(100, 100, 150, 100))
@@ -5888,32 +5938,34 @@ class Polygon:
                         break
 
     def update_table_widget(self):
-        self.main_window.tableWidgetPolyPoints.setRowCount(0)  # Clear existing rows
-
-        for p_id, val in self.polygons.items():
-            row_position = self.main_window.tableWidgetPolyPoints.rowCount()
-            self.main_window.tableWidgetPolyPoints.insertRow(row_position)
-
-            # Fill in the data
-            self.main_window.tableWidgetPolyPoints.setItem(row_position, 0, QTableWidgetItem(str(p_id)))
-            self.main_window.tableWidgetPolyPoints.setItem(row_position, 1, QTableWidgetItem(str('')))
-            self.main_window.tableWidgetPolyPoints.setItem(row_position, 2, QTableWidgetItem(str('')))
-            self.main_window.tableWidgetPolyPoints.setItem(row_position, 3, QTableWidgetItem(str('In')))
-
-            # Create a QCheckBox
-            checkBox = QCheckBox()
-
-            # Set its checked state
-            checkBox.setChecked(True)
-
-            # Connect the stateChanged signal
-            checkBox.stateChanged.connect(lambda state: self.main_window.apply_filters(fullmap=False))
-
-            # Add the checkbox to the table
-            self.main_window.tableWidgetPolyPoints.setCellWidget(row_position, 4, checkBox)
+        if self.main_window.sample_id in self.polygons: #if profiles for that sample if exists
+            
+            self.main_window.tableWidgetPolyPoints.setRowCount(0)  # Clear existing rows
+    
+            for p_id, val in self.polygons[self.main_window.sample_id].items():
+                row_position = self.main_window.tableWidgetPolyPoints.rowCount()
+                self.main_window.tableWidgetPolyPoints.insertRow(row_position)
+    
+                # Fill in the data
+                self.main_window.tableWidgetPolyPoints.setItem(row_position, 0, QTableWidgetItem(str(p_id)))
+                self.main_window.tableWidgetPolyPoints.setItem(row_position, 1, QTableWidgetItem(str('')))
+                self.main_window.tableWidgetPolyPoints.setItem(row_position, 2, QTableWidgetItem(str('')))
+                self.main_window.tableWidgetPolyPoints.setItem(row_position, 3, QTableWidgetItem(str('In')))
+    
+                # Create a QCheckBox
+                checkBox = QCheckBox()
+    
+                # Set its checked state
+                checkBox.setChecked(True)
+    
+                # Connect the stateChanged signal
+                checkBox.stateChanged.connect(lambda state: self.main_window.apply_filters(fullmap=False))
+    
+                # Add the checkbox to the table
+                self.main_window.tableWidgetPolyPoints.setCellWidget(row_position, 4, checkBox)
 
     def clear_lines(self):
-        if self.p_id in self.polygons:
+        if self.p_id in self.polygons[self.main_window.sample_id]:
             # Remove existing temporary line(s) if any
             if self.p_id in self.lines:
                 for line in self.lines[self.p_id]:
@@ -5921,14 +5973,14 @@ class Polygon:
             self.lines[self.p_id] = []
 
     def clear_polygons(self):
-        self.main_window.tableWidgetPolyPoints.clear()
-        self.clear_lines()
-        self.polygons ={}
-        self.polygons = {}          #dict of polygons
-        self.lines ={}              #temp dict for lines in polygon
-        self.point_index = None             # index for move point
-        self.p_id = None           # polygon ID
-        self.p_id_gen = 0 #Polygon_id generator
+        if self.main_window.sample_id in self.polygons:
+            self.main_window.tableWidgetPolyPoints.clearContents()
+            self.main_window.tableWidgetPolyPoints.setRowCount(0)
+            self.clear_lines()
+            self.lines ={}              #temp dict for lines in polygon
+            self.point_index = None             # index for move point
+            self.p_id = None           # polygon ID
+            self.p_id_gen = 0 #Polygon_id generator
 
 class Profiling:
     def __init__(self,main_window):
@@ -5937,7 +5989,7 @@ class Profiling:
         # Initialize variables and states as needed
         self.profiles = {}
         self.i_profiles = {}        #interpolated profiles
-        self.point_selected = False # move point button selected
+        self.point_selected = False  # move point button selected
         self.point_index = -1              # index for move point
         self.all_errorbars = []      #stores points of profiles
         self.selected_points = {}  # Track selected points, e.g., {point_index: selected_state}
@@ -5945,6 +5997,11 @@ class Profiling:
         self.original_colors = {}
 
     def plot_profile_scatter(self, event, array,k, plot, x, y, x_i, y_i):
+        #create profile dict particular sample if it doesnt exisist
+        if self.main_window.sample_id not in self.profiles:
+            self.profiles[self.main_window.sample_id] = {}
+            self.i_profiles[self.main_window.sample_id] = {}
+        
         self.array_x = array.shape[1]
         self.array_y = array.shape[0]
 
@@ -5966,11 +6023,11 @@ class Profiling:
 
 
         elif event.button() == QtCore.Qt.LeftButton and not(self.main_window.toolButtonPlotProfile.isChecked()) and self.main_window.toolButtonPointMove.isChecked():
+            
             # move point
-
             if self.point_selected:
                 #remove selected point
-                prev_scatter = self.profiles[k][self.point_index][3]
+                prev_scatter = self.profiles[self.main_window.sample_id][k][self.point_index][3]
                 plot.removeItem(prev_scatter)
 
 
@@ -5988,14 +6045,14 @@ class Profiling:
                             circ_cord.append([i, j])
                             circ_val.append( value)
 
-                #update self.point_index index of self.profiles with new point data
-                if k in self.profiles:
+                #update self.point_index index of self.profiles[self.main_window.sample_id] with new point data
+                if k in self.profiles[self.main_window.sample_id]:
 
-                    self.profiles[k][self.point_index] = (x,y, circ_val,scatter, interpolate)
+                    self.profiles[self.main_window.sample_id][k][self.point_index] = (x,y, circ_val,scatter, interpolate)
 
 
                 if self.main_window.canvasWindow.currentIndex() == 1:
-                    # Add the scatter item to all other plots and save points in self.profiles
+                    # Add the scatter item to all other plots and save points in self.profiles[self.main_window.sample_id]
                     for k, (_, p, v, array) in self.main_window.lasermaps.items():
                         circ_val = []
                         if p != plot and v==1 and self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #only add scatters to other lasermaps of same sample
@@ -6006,8 +6063,8 @@ class Profiling:
                             for c in circ_cord:
                                 value = array[c[0], c[1]]
                                 circ_val.append( value)
-                            if k in self.profiles:
-                                self.profiles[k][self.point_index] = (x,y, circ_val,scatter, interpolate)
+                            if k in self.profiles[self.main_window.sample_id]:
+                                self.profiles[self.main_window.sample_id][k][self.point_index] = (x,y, circ_val,scatter, interpolate)
 
                 #update plot and table widget
                 self.main_window.plot_profiles()
@@ -6018,7 +6075,7 @@ class Profiling:
             else:
                 # find nearest profile point
                 mindist = 10**12
-                for i, (x_p,y_p,_,_,interpolate) in enumerate(self.profiles[k]):
+                for i, (x_p,y_p,_,_,interpolate) in enumerate(self.profiles[self.main_window.sample_id][k]):
                     dist = (x_p - x)**2 + (y_p - y)**2
                     if mindist > dist:
                         mindist = dist
@@ -6045,15 +6102,15 @@ class Profiling:
                         circ_cord.append([i, j])
                         circ_val.append( value)
 
-            #add values within circle of radius in self.profiles
-            if k in self.profiles:
-                self.profiles[k].append((x,y,circ_val,scatter, interpolate))
+            #add values within circle of radius in self.profiles[self.main_window.sample_id]
+            if k in self.profiles[self.main_window.sample_id]:
+                self.profiles[self.main_window.sample_id][k].append((x,y,circ_val,scatter, interpolate))
             else:
-                self.profiles[k] = [(x,y, circ_val,scatter, interpolate)]
+                self.profiles[self.main_window.sample_id][k] = [(x,y, circ_val,scatter, interpolate)]
 
 
             if self.main_window.canvasWindow.currentIndex() == 1:
-                # Add the scatter item to all other plots and save points in self.profiles
+                # Add the scatter item to all other plots and save points in self.profiles[self.main_window.sample_id]
                 for k, (_, p, v, array) in self.main_window.lasermaps.items():
                     circ_val = []
                     if p != plot and v==1 and self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #only add scatters to other lasermaps of same sample
@@ -6064,10 +6121,10 @@ class Profiling:
                         for c in circ_cord:
                             value = array[c[0], c[1]]
                             circ_val.append( value)
-                        if k in self.profiles:
-                            self.profiles[k].append((x,y,circ_val, scatter, interpolate))
+                        if k in self.profiles[self.main_window.sample_id]:
+                            self.profiles[self.main_window.sample_id][k].append((x,y,circ_val, scatter, interpolate))
                         else:
-                            self.profiles[k] = [(x,y, circ_val,scatter, interpolate)]
+                            self.profiles[self.main_window.sample_id][k] = [(x,y, circ_val,scatter, interpolate)]
 
             self.plot_profiles()
             self.update_table_widget()
@@ -6079,14 +6136,14 @@ class Profiling:
         """
         if self.main_window.toolButtonIPProfile.isChecked():
             interpolate = True
-            for k, points in self.profiles.items():
+            for k, points in self.profiles[self.main_window.sample_id].items():
                 for i in range(len(points) - 1):
                     start_point = points[i]
                     end_point = points[i + 1]
                     if i==0:
-                        self.i_profiles[k] = [start_point]
+                        self.i_profiles[self.main_window.sample_id][k] = [start_point]
                     else:
-                        self.i_profiles[k].append(start_point)
+                        self.i_profiles[self.main_window.sample_id][k].append(start_point)
 
                     # Calculate the distance between start and end points
                     dist = self.calculate_distance(start_point, end_point)
@@ -6101,7 +6158,7 @@ class Profiling:
 
                         x_i = round(x*self.array_x /self.main_window.x_range) #index points
                         y_i = round(y*self.array_y/self.main_window.y_range)
-                        # Add the scatter item to all other plots and save points in self.profiles
+                        # Add the scatter item to all other plots and save points in self.profiles[self.main_window.sample_id]
                         _, p, v, array= self.main_window.lasermaps[k]
                         if v==self.main_window.canvasWindow.currentIndex() and self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #only add scatters to other lasermaps of same sample
                             # Create a scatter plot item at the clicked position
@@ -6115,10 +6172,10 @@ class Profiling:
                                     if np.sqrt((x_i - j)**2 + (y_i - i)**2) <= radius:
                                         value = array[i, j]
                                         circ_val.append(value)
-                            if k in self.i_profiles:
-                                self.i_profiles[k].append((x,y,circ_val, scatter, interpolate))
+                            if k in self.i_profiles[self.main_window.sample_id]:
+                                self.i_profiles[self.main_window.sample_id][k].append((x,y,circ_val, scatter, interpolate))
 
-                    self.i_profiles[k].append(end_point)
+                    self.i_profiles[self.main_window.sample_id][k].append(end_point)
             # After interpolation, update the plot and table widget
             self.plot_profiles(interpolate= interpolate)
         else:
@@ -6129,8 +6186,8 @@ class Profiling:
 
     def clear_interpolation(self):
             # remove interpolation
-            if len(self.i_profiles)>0:
-                for key, profile in self.i_profiles.items():
+            if len(self.i_profiles[self.main_window.sample_id])>0:
+                for key, profile in self.i_profiles[self.main_window.sample_id].items():
                     for point in profile:
                         scatter_item = point[3]  # Access the scatter plot item
                         interpolate =point[4]
@@ -6169,9 +6226,9 @@ class Profiling:
 
         def group_profiles_by_range(sort_axis, range_threshold,interpolate,point_type):
             if not interpolate:
-                profiles = self.profiles
+                profiles = self.profiles[self.main_window.sample_id]
             else:
-                profiles = self.i_profiles
+                profiles = self.i_profiles[self.main_window.sample_id]
             # Group profiles based on range similarity
             profile_groups = {}
             keys = []
@@ -6218,13 +6275,13 @@ class Profiling:
 
 
         if not interpolate:
-            profiles = self.profiles
+            profiles = self.profiles[self.main_window.sample_id]
         else:
-            profiles = self.i_profiles
+            profiles = self.i_profiles[self.main_window.sample_id]
 
         style = self.main_window.scatter_style[self.main_window.profile_tab_id]
 
-        if len(list(profiles.values())[0])>0: #if self.profiles has values
+        if len(list(profiles.values())[0])>0: #if self.profiles[self.main_window.sample_id] has values
             self.main_window.tabWidget.setCurrentIndex(2) #show profile plot tab
             sort_axis=self.main_window.comboBoxProfileSort.currentText()
             range_threshold=int(self.main_window.lineEditYThresh.text())
@@ -6474,49 +6531,53 @@ class Profiling:
             self.clear_profiles()
 
     def clear_profiles(self):
-        # Clear all scatter plot items from the lasermaps
-        for _, (_, plot, _, _) in self.main_window.lasermaps.items():
-            items_to_remove = [item for item in plot.listDataItems() if isinstance(item, ScatterPlotItem)]
-            for item in items_to_remove:
-                plot.removeItem(item)
-
-        # Clear the profiles data
-        self.profiles.clear()
-
-        # Clear all data from the table
-        self.main_window.tableWidgetProfilePoints.clearContents()
-
-        # Remove all rows
-        self.main_window.tableWidgetProfilePoints.setRowCount(0)
-
-        # Clear the profile plot widget
-        layout = self.main_window.widgetProfilePlot.layout()
-        while layout.count():
-            child = layout.takeAt(0)
-            if child.widget():
-                child.widget().deleteLater()
+        
+        if self.main_window.sample_id in self.profiles: #if profiles for that sample if exists
+            # Clear all scatter plot items from the lasermaps
+            for _, (_, plot, _, _) in self.main_window.lasermaps.items():
+                items_to_remove = [item for item in plot.listDataItems() if isinstance(item, ScatterPlotItem)]
+                for item in items_to_remove:
+                    plot.removeItem(item)
+    
+            # Clear the profiles data
+            # self.profiles[self.main_window.sample_id].clear()
+    
+            # Clear all data from the table
+            self.main_window.tableWidgetProfilePoints.clearContents()
+    
+            # Remove all rows
+            self.main_window.tableWidgetProfilePoints.setRowCount(0)
+    
+            # Clear the profile plot widget
+            layout = self.main_window.widgetProfilePlot.layout()
+            while layout.count():
+                child = layout.takeAt(0)
+                if child.widget():
+                    child.widget().deleteLater()
 
     def calculate_distance(self, point1, point2):
         # Simple Euclidean distance
         return np.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
 
-    def update_table_widget(self):
-        self.main_window.tableWidgetProfilePoints.setRowCount(0)  # Clear existing rows
-        point_number = 0
-        first_data_point = list(self.profiles.values())[0]
-        for data_point in first_data_point:
-            x, y, _,_,_ = data_point  # Assuming data_point structure
-            row_position = self.main_window.tableWidgetProfilePoints.rowCount()
-            self.main_window.tableWidgetProfilePoints.insertRow(row_position)
-
-            # Fill in the data
-            self.main_window.tableWidgetProfilePoints.setItem(row_position, 0, QTableWidgetItem(str(point_number)))
-            self.main_window.tableWidgetProfilePoints.setItem(row_position, 1, QTableWidgetItem(str(round(x))))
-            self.main_window.tableWidgetProfilePoints.setItem(row_position, 2, QTableWidgetItem(str(round(y))))
-            point_number += 1
-
-        # Enable or disable buttons based on the presence of points
-        self.toggle_buttons(self.main_window.tableWidgetProfilePoints.rowCount() > 0)
+    def update_table_widget(self, update = False):
+        
+        if self.main_window.sample_id in self.profiles: #if profiles for that sample if exists
+            self.main_window.tableWidgetProfilePoints.setRowCount(0)  # Clear existing rows
+            point_number = 0
+            first_data_point = list(self.profiles[self.main_window.sample_id].values())[0]
+            for data_point in first_data_point:
+                x, y, _,_,_ = data_point  # Assuming data_point structure
+                row_position = self.main_window.tableWidgetProfilePoints.rowCount()
+                self.main_window.tableWidgetProfilePoints.insertRow(row_position)
+    
+                # Fill in the data
+                self.main_window.tableWidgetProfilePoints.setItem(row_position, 0, QTableWidgetItem(str(point_number)))
+                self.main_window.tableWidgetProfilePoints.setItem(row_position, 1, QTableWidgetItem(str(round(x))))
+                self.main_window.tableWidgetProfilePoints.setItem(row_position, 2, QTableWidgetItem(str(round(y))))
+                point_number += 1
+    
+            # Enable or disable buttons based on the presence of points
+            self.toggle_buttons(self.main_window.tableWidgetProfilePoints.rowCount() > 0)
 
 
 
@@ -6612,7 +6673,8 @@ class Profiling:
                 return (scatter, errorbars)
         return None
 
-
+class SignalEmitter(QObject):
+    rightClicked = pyqtSignal()
 
 
 

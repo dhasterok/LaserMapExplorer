@@ -521,9 +521,11 @@ class ternary:
 
         self.ax.set_aspect('equal', 'box')
         self.ax.set_title(plotfield)
-        cbar = plt.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), ax=self.ax, fraction=0.046, pad=0.04, orientation=orientation)
-
-        return hexbin_df, cbar
+        if orientation != 'none':
+            cbar = plt.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), ax=self.ax, fraction=0.046, pad=0.04, orientation=orientation)
+            return hexbin_df, cbar
+        else:
+            return hexbin_df, None
 
     def terncolor(self, a, b, c, ca=[1,1,0], cb=[0.3,0.73,0.1], cc=[0,0,0.15], p=[1/3,1/3,1/3], cp = []):
         """Computes colors using a ternary colormap

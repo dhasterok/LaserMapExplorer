@@ -205,8 +205,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.styles['heatmap']['Axes']['Aspect Ratio'] = 1.62
         self.styles['TEC']['Axes']['Aspect Ratio'] = 1.62
         self.styles['vectors']['Axes']['Aspect Ratio'] = 1.0
+        self.styles['variance']['Axes']['Aspect Ratio'] = 1.62
         self.styles['PCx vs. PCy scatter']['Axes']['Aspect Ratio'] = 1.62
         self.styles['PCx vs. PCy heatmap']['Axes']['Aspect Ratio'] = 1.62
+
+        self.styles['correlation']['Text']['FontSize'] = 8
+        self.styles['variance']['Text']['FontSize'] = 8
+
+        self.styles['profile']['Lines']['LineWidth'] = 1.0
+        self.styles['profile']['Markers']['Size'] = 12
+        self.styles['profile']['Colors']['Color'] = '#d3d3d3'
 
 
         self.map_style = {self.sample_tab_id: {'Colormap':'plasma', 'ColorbarDirection':'vertical', 'ScaleLocation':'southeast', 'ScaleDirection':'horizontal', 'OverlayColor':'#ffffff'},
@@ -1832,7 +1840,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         sample_id = plot_information['sample_id']
         plot_type = plot_information['plot_type']
 
-        style = self.styles[self.comboBoxStylePlotType.currentText()]['Colors']['Colormap']
+        style = self.styles[self.comboBoxStylePlotType.currentText()]
 
         view = self.canvasWindow.currentIndex()
 
@@ -2541,7 +2549,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.noise_red_img.setRect(0, 0, self.x_range, self.y_range)
 
         # Optionally, set a color map
-        cm = pg.colormap.get(style['Colors']['Colormap'], source='matplotlib')
+        self.comboBoxStylePlotType.currentText('analyte map')
+        cm = pg.colormap.get(self.style['analyte map']['Colors']['Colormap'], source='matplotlib')
         self.noise_red_img.setColorMap(cm)
 
         # Add the image item to the plot
@@ -2572,7 +2581,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
         # Determine which PCA plot to create based on the combobox selection
-        pca_plot_type = self.comboBoxPCAPlotType.currentText()
+        pca_plot_type = self.comboBoxStylePlotType.currentText()
 
         plot_name = pca_plot_type
         sample_id = self.sample_id
@@ -2604,7 +2613,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 'plot_name': plot_name,
                 'sample_id': self.sample_id,
                 'plot_type': plot_type,
-
+                'style': self.styles[pca_plot_type]
             }
 
             if duplicate:
@@ -2619,27 +2628,25 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def update_pca_plot(self, pca_dict, pca_plot_type, ax):
 
-        style = self.styles[self.comboBoxStylePlotType.currentText()]
+        style = self.styles[pca_plot_type]
 
         analytes = self.data[self.sample_id]['analyte_info'].loc[:,'analytes']
         n_components = range(1, len(pca_dict['explained_variance_ratio'])+1)
-        match pca_plot_type:
-            case 'Variance':
-                s = self.scatter_style[self.pca_tab_id]
-
+        match pca_plot_type.lower():
+            case 'variance':
                 # pca_dict contains variance ratios for the principal components
                 variances = pca_dict['explained_variance_ratio']
                 cumulative_variances = variances.cumsum()  # Calculate cumulative explained variance
 
                 # Plotting the explained variance
-                ax.plot(n_components, variances, linestyle='-', linewidth=s['LineWidth'],
-                    marker=self.markerdict[s['Marker']], markeredgecolor=s['Color'], markerfacecolor='none', markersize=s['Size'],
-                    color=s['Color'], label='Explained Variance')
+                ax.plot(n_components, variances, linestyle='-', linewidth=style['Lines']['LineWidth'],
+                    marker=self.markerdict[style['Marker']['Symbol']], markeredgecolor=style['Colors']['Color'], markerfacecolor='none', markersize=style['Marker']['Size'],
+                    color=style['Colors']['Color'], label='Explained Variance')
 
                 # Plotting the cumulative explained variance
-                ax.plot(n_components, cumulative_variances, linestyle='-', linewidth=s['LineWidth'],
-                    marker=self.markerdict[s['Marker']], markersize=s['Size'],
-                    color=s['Color'], label='Cumulative Variance')
+                ax.plot(n_components, cumulative_variances, linestyle='-', linewidth=style['Lines']['LineWidth'],
+                    marker=self.markerdict[style['Marker']['Symbol']], markersize=style['Marker']['Size'],
+                    color=style['Colors']['Color'], label='Cumulative Variance')
 
                 # Adding labels, title, and legend
                 xlbl = 'Principal Component'
@@ -2650,8 +2657,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # Adjust the y-axis limit to make sure the plot includes all markers and lines
                 ax.set_ylim([0, 1.0])  # Assuming variance ratios are between 0 and 1
-            case 'Vectors':
-                s = self.heatmap_style[self.pca_tab_id]
+            case 'vectors':
                 # pca_dict contains 'components_' from PCA analysis with columns for each variable
                 components = pca_dict['components_']  # No need to transpose for heatmap representation
 
@@ -2660,7 +2666,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 n_variables = components.shape[1]
 
                 cmap = plt.get_cmap(style['Colors']['Colormap'])
-                cax = ax.imshow(components, cmap=plt.get_cmap(s['Colormap']), aspect=1.0)
+                cax = ax.imshow(components, cmap=plt.get_cmap(style['Colors']['Colormap']), aspect=1.0)
                 fig = ax.get_figure()
                 # Adding a colorbar at the bottom of the plot
                 cbar = fig.colorbar(cax, orientation='vertical', pad=0.2)
@@ -2672,7 +2678,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # Optional: Rotate x-axis labels for better readability
                 # plt.xticks(rotation=45)
-            case 'PC X vs. PC Y':
+            case 'pcx vs. pcy scatter':
                 pc_x = int(self.spinBoxPCX.value())
                 pc_y = int(self.spinBoxPCY.value())
                 pca_df = pca_dict['results']
@@ -2681,7 +2687,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 ax.set_xlabel(f'PC{pc_x}')
                 ax.set_ylabel(f'PC{pc_y}')
                 ax.set_title(f'PCA Plot: PC{pc_x} vs PC{pc_y}')
-            case 'PC X Score Map':
+            case 'pca score':
                 pc_x = int(self.spinBoxPCX.value())
                 pca_df = pca_dict['results']
                 # Assuming pca_df contains scores for the principal components
@@ -2693,16 +2699,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 print(f"Unknown PCA plot type: {pca_plot_type}")
 
         # labels
-        font = {'size':self.styles['PCA']['Text']['FontSize']}
+        font = {'size':style['Text']['FontSize']}
         ax.set_xlabel(xlbl, fontdict=font)
         ax.set_ylabel(ylbl, fontdict=font)
         ax.set_title(ttxt, fontdict=font)
 
         match pca_plot_type:
-            case 'Variance' | 'PC X vs. PC Y':
+            case 'variance' | 'pcx vs. pcy scatter':
                 # tick marks
-                ax.tick_params(direction=self.general_style['TickDir'],
-                    labelsize=self.general_style['FontSize'],
+                ax.tick_params(direction=style['Axes']['TickDir'],
+                    labelsize=style['Text']['FontSize'],
                     labelbottom=True, labeltop=False, labelleft=True, labelright=False,
                     bottom=True, top=True, left=True, right=True)
 
@@ -2710,15 +2716,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 ax.set_xticks(n_components, minor=True)
 
                 # aspect ratio
-                ax.set_box_aspect(s['AspectRatio'])
-            case 'Vectors':
-                ax.tick_params(axis='x', direction=self.general_style['TickDir'],
-                                labelsize=self.general_style['FontSize'],
+                ax.set_box_aspect(style['Axes']['AspectRatio'])
+            case 'vectors':
+                ax.tick_params(axis='x', direction=style['Axes']['TickDir'],
+                                labelsize=style['Text']['FontSize'],
                                 labelbottom=True, labeltop=False,
                                 bottom=True, top=True)
 
-                ax.tick_params(axis='y', length=0, direction=self.general_style['TickDir'],
-                                labelsize=8,
+                ax.tick_params(axis='y', length=0, direction=style['Axes']['TickDir'],
+                                labelsize=style['Text']['FontSize'],
                                 labelleft=True, labelright=False,
                                 left=True, right=True)
 
@@ -2728,7 +2734,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 #ax.set_yticks(n_components, labels=[f'Var{i+1}' for i in range(len(n_components))])
                 ax.set_yticks(range(1, n_variables+1,1), minor=False)
                 ax.set_yticklabels(analytes)
-            case 'PC X Score Map':
+            case 'pca score':
                 ax.tick_params(direction='none', labelbottom=False, labeltop=False, labelright=False, labelleft=False)
 
     def plot_correlation(self, plot=False):
@@ -3278,8 +3284,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.spinBoxHeatmapResolution.setEnabled(False)
             case 'histogram':
                 # axes properties
-                self.doubleSpinBoxXLB.setEnabled(False)
-                self.doubleSpinBoxXUB.setEnabled(False)
+                self.doubleSpinBoxXLB.setEnabled(True)
+                self.doubleSpinBoxXUB.setEnabled(True)
                 self.lineEditXLabel.setEnabled(True)
                 self.doubleSpinBoxYLB.setEnabled(False)
                 self.doubleSpinBoxYUB.setEnabled(False)
@@ -3464,11 +3470,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.doubleSpinBoxXLB.setEnabled(False)
                 self.doubleSpinBoxXUB.setEnabled(False)
                 self.lineEditXLabel.setEnabled(False)
-                self.doubleSpinBoxYLB.setEnabled(False)
-                self.doubleSpinBoxYUB.setEnabled(False)
                 if plot_type == 'tec':
+                    self.doubleSpinBoxYLB.setEnabled(True)
+                    self.doubleSpinBoxYUB.setEnabled(True)
                     self.lineEditYLabel.setEnabled(True)
                 else:
+                    self.doubleSpinBoxYLB.setEnabled(False)
+                    self.doubleSpinBoxYUB.setEnabled(False)
                     self.lineEditYLabel.setEnabled(False)
                 self.lineEditZLabel.setEnabled(False)
                 self.lineEditAspectRatio.setEnabled(True)
@@ -3613,7 +3621,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.spinBoxHeatmapResolution.setEnabled(False)
 
     def set_style_widgets(self, plot_type=None):
-
+        """Sets values in right toolbox style page
+        
+        :param plot_type: dictionary key into ``MainWindow.style``
+        :type plot_type: str, optional
+        """
         tab_id = self.toolBox.currentIndex()
 
         if plot_type is None:
@@ -3718,52 +3730,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def field_colormap_callback(self):
         self.styles[self.comboBoxStylePlotType.currentText()]['Colors']['Colormap'] = self.comboBoxFieldColormap.currentText()
 
-    def set_scatter_style(self):
-        """Sets style properties in Styling>Scatter and Heatmap tab"""
-        tab_id = self.toolBox.currentIndex()
-        if tab_id == self.sample_tab_id or tab_id == self.scatter_tab_id or tab_id == self.pca_tab_id or tab_id == self.profile_tab_id:
-            # scatter
-            self.comboBoxMarker.setCurrentText(self.styles[tab_id]['Marker'])
-            self.doubleSpinBoxMarkerSize.setValue(self.styles[tab_id]['Size'])
-            self.comboBoxLineWidth.setCurrentText(str(self.styles[tab_id]['LineWidth']))
-            self.toolButtonMarkerColor.setStyleSheet("background-color: %s;" % self.styles[tab_id]['Color'])
-            self.comboBoxColorByField.setCurrentText(self.styles[tab_id]['ColorByField'])
-            self.comboBoxColorField.setCurrentText(self.styles[tab_id]['Field'])
-            self.comboBoxFieldColormap.setCurrentText(self.styles[tab_id]['Colormap'])
-            self.horizontalSliderMarkerAlpha.setValue(int(self.styles[tab_id]['Alpha']))
-            self.labelMarkerAlpha.setText(str(self.horizontalSliderMarkerAlpha.value()))
-            self.lineEditAspectRatio.setText(str(self.styles[tab_id]['AspectRatio']))
-
-            # heatmap
-            self.spinBoxHeatmapResolution.setValue(self.heatmap_style[tab_id]['Resolution'])
-            self.comboBoxFieldColormap.setCurrentText(self.heatmap_style[tab_id]['Colormap'])
-
-    def get_scatter_style(self, tab_id):
-        """Updates dictionaries with scatter and heatmap style properties
-
-        :param tab_ind: tab_ind should be set by toolBox.currentIndex(), which determines styles to
-            update
-        :type tab_ind: int
-        """
-        if tab_id == self.sample_tab_id or tab_id == self.scatter_tab_id or tab_id == self.pca_tab_id or tab_id == self.profile_tab_id:
-            match self.comboBoxStylePlotType.currentText().lower():
-                case 'scatter':
-                    self.scatter_style[tab_id] = {
-                        'Marker': self.comboBoxMarker.currentText(),
-                        'Size': self.doubleSpinBoxMarkerSize.value(),
-                        'LineWidth': float(self.comboBoxLineWidth.currentText()),
-                        'Color': self.get_hex_color(self.toolButtonMarkerColor.palette().button().color()),
-                        'ColorByField': self.comboBoxColorByField.currentText(),
-                        'Field': self.comboBoxColorField.currentText(),
-                        'Colormap': self.comboBoxFieldColormap.currentText(),
-                        'Alpha': float(self.horizontalSliderMarkerAlpha.value()),
-                        'AspectRatio': float(self.lineEditAspectRatio.text())
-                        }
-                case 'heatmap':
-                    self.heatmap_style[tab_id] = {'Resolution': self.spinBoxHeatmapResolution.value(),
-                                                    'Colormap': self.comboBoxFieldColormap.currentText(),
-                                                    'AspectRatio': float(self.lineEditAspectRatio.text())}
-
     def toggle_scale_direction(self):
         if self.map_style['ScaleDirection'].lower() == 'none':
             self.labelScaleLocation.setEnabled(False)
@@ -3771,112 +3737,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             self.labelScaleLocation.setEnabled(True)
             self.comboBoxScaleLocation.setEnabled(True)
-
-
-
-    #def plot_scatter(self, update=False, values = None, plot_type= None, fig= None, ternary_plot= None):
-    #    self.get_general_style()
-    #    self.get_scatter_style(self.toolBox.currentIndex())
-    #    if not update:
-    #        x, y, z, c = self.get_scatter_values() #get scatter values from elements chosen
-    #        plot_type =  self.comboBoxStylePlotType.currentText().lower()
-    #    else:
-    #        # get saved scatter values to update plot
-    #        x, y, z, c  = values
-
-    #    # df = df.dropna(axis = 0).astype('int64')
-
-    #    # x['array'], y['array'], z['array'] = df.iloc[:, 0].values, df.iloc[:, 1].values, df.iloc[:, 2].values
-
-
-    #    cmap = matplotlib.colormaps.get_cmap(self.cm)
-
-    #    if len(z['array'])>0 and len(c['array'])>0:  # 3d scatter plot with color
-
-    #        labels = [x['elements'], y['elements'], z['elements']]
-
-    #        if not update:
-    #            ternary_plot = ternary(labels,plot_type,mul_axis=True )
-    #            fig = ternary_plot.fig
-
-
-
-    #        if plot_type =='scatter':
-    #            _, cb = ternary_plot.ternscatter(x['array'], y['array'], z['array'], categories=  c['array'], cmap=cmap, orientation = self.comboBoxColorbarDirection.currentText().lower())
-
-    #        else:
-    #            ternary_plot.ternhex(x['array'], y['array'], z['array'], val= c['array'],n=int(self.spinBoxHeatmapResolution.value()), cmap = cmap, orientation = self.comboBoxColorbarDirection.currentText().lower())
-
-
-    #        select_scatter = f"{x['elements']}_{y['elements']}_{z['elements']}_{c['elements']}_{plot_type}"
-    #    elif len(z['array'])>0:  # Ternary plot
-
-    #        labels = [x['elements'], y['elements'], z['elements']]
-    #        if not update:
-    #            ternary_plot = ternary(labels,plot_type)
-    #            fig = ternary_plot.fig
-    #        if plot_type =='scatter':
-    #            if self.current_group['algorithm'] in self.cluster_results:
-    #                cluster_labels = self.cluster_results[self.current_group['algorithm']]
-    #                ternary_plot.ternscatter(x['array'], y['array'], z['array'], categories=cluster_labels, cmap=self.group_cmap, labels = True, orientation = self.comboBoxColorbarDirection.currentText().lower())
-    #            else:
-    #                ternary_plot.ternscatter(x['array'], y['array'], z['array'],cmap= cmap)
-    #        else:
-    #            ternary_plot.ternhex(x['array'], y['array'], z['array'],n=int(self.spinBoxHeatmapResolution.value()), color_map = cmap, orientation = self.comboBoxColorbarDirection.currentText().lower())
-    #        fig.subplots_adjust(left=0.05, right=1)
-    #        select_scatter = f"{x['elements']}_{y['elements']}_{z['elements']}_{plot_type}"
-    #        # fig.tight_layout()
-    #    else:  # 2d scatter plot
-    #        if not update:
-    #            fig = Figure()
-    #        ax = fig.add_subplot(111)
-    #        ax.scatter(x['array'], y['array'], alpha=0.5)
-    #        select_scatter = f"{x['elements']}_{y['elements']}_{plot_type}"
-
-    #        # add labels
-    #        xlbl = self.comboBoxScatterAnalyteX.currentText()
-    #        ylbl = self.comboBoxScatterAnalyteY.currentText()
-    #        match self.comboBoxScatterSelectX.currentText().lower():
-    #            case 'analyte':
-    #                xlbl += ' ('+self.lineEditConcentrationUnits.text()+')'
-    #        match self.comboBoxScatterSelectX.currentText().lower():
-    #            case 'analyte':
-    #                ylbl += ' ('+self.lineEditConcentrationUnits.text()+')'
-    #        ax.set_xlabel(xlbl)
-    #        ax.set_ylabel(ylbl)
-    #        ax.tick_params(labelbottom=True, labeltop=False, labelleft=True, labelright=False, bottom=True, top=True, left=True, right=True)
-
-    #        ax.set_box_aspect(float(self.lineEditAspectRatio.text()))
-
-    #    if not update:
-    #        plot_information = {
-    #            'plot_name': select_scatter,
-    #            'sample_id': self.sample_id,
-    #            'plot_type': plot_type,
-    #            'values': (x, y, c),
-    #            'fig': fig,
-    #            'ternary_plot': ternary_plot,
-    #            'colorbar': cb
-    #        }
-
-    #        # Create a Matplotlib figure and axis
-
-    #        widgetScatter = QtWidgets.QWidget()
-    #        layout = QtWidgets.QVBoxLayout()
-    #        widgetScatter.setLayout(layout)
-    #        # scatter_plot = pg.PlotWidget(title=select_scatter)
-    #        scatter_plot = FigureCanvas(fig)
-    #        view = self.canvasWindow.currentIndex()
-    #        # Add the plot widget to your layout
-    #        layout.insertWidget(0,scatter_plot)
-    #        toolbar = NavigationToolbar(scatter_plot)  # Create the toolbar for the canvas
-    #        # widgetScatter.layout().addWidget(toolbar)
-
-    #        self.plot_widget_dict['scatter'][self.sample_id][select_scatter] = {'widget':[widgetScatter],
-
-    #                                               'info':plot_information, 'view':[view]}
-    #        self.update_tree(plot_information['plot_name'], data = plot_information, tree = 'Scatter')
-    #        self.add_plot(plot_information)
 
     def plot_scatter(self, values=None, fig=None, save=False):
         """Creates a plots from self.toolBox Scatter page.
@@ -3888,7 +3748,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :param fig: Defaults to None
         :type fig:
         :param save: Flag for saving widget to self.toolBoxTreeView Plot Selector page, Defaults to False
-        :type save: bool, optional"""
+        :type save: bool, optional
+        """
         # update plot style parameters
         if fig == None:
             x, y, z, c = self.get_scatter_values() #get scatter values from elements chosen
@@ -3897,30 +3758,28 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             x, y, z, c = values
 
         plot_type = self.comboBoxStylePlotType.currentText().lower()
+        style = self.styles[plot_type]
         match plot_type:
             # scatter
             case 'scatter':
-                s = self.style[plot_type]
-                if s['Colors']['ColorByField'] == None:
+                if style['Colors']['ColorByField'] == None:
                     c = {'field': None, 'type': None, 'units': None, 'array': None}
 
                 if len(z['array']) == 0:
                     # biplot
-                    self.biplot(fig,x,y,c,s,save)
+                    self.biplot(fig,x,y,c,style,save)
                 else:
                     # ternary
-                    self.ternary_scatter(fig,x,y,z,c,s,save)
+                    self.ternary_scatter(fig,x,y,z,c,style,save)
 
             # heatmap
             case 'heatmap':
-                s = self.heatmap_style[self.toolBox.currentIndex()]
-
                 # biplot
                 if len(z['array']) == 0:
-                    self.hist2dbiplot(fig,x,y,s,save)
+                    self.hist2dbiplot(fig,x,y,style,save)
                 # ternary
                 else:
-                    self.hist2dternplot(fig,x,y,z,s,save,c=c)
+                    self.hist2dternplot(fig,x,y,z,style,save,c=c)
 
 
 
@@ -4006,7 +3865,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.hide()
         self.show()
 
-    def biplot(self, fig, x, y, c, s, save):
+    def biplot(self, fig, x, y, c, style, save):
         """Creates scatter bi-plots
 
         A general function for creating scatter plots of 2-dimensions.
@@ -4019,8 +3878,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :type y: dict
         :param c: data associated with field ``MainWindow.comboBoxColorField.currentText()`` as marker colors
         :type c: dict
-        :param s: style parameters
-        :type s: dict
+        :param style: style parameters
+        :type style: dict
         """
         if fig == None:
             new = True
@@ -4031,35 +3890,45 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         ax = fig.add_subplot(111)
         if len(c['array']) == 0:
             # single color
-            ax.scatter(x['array'], y['array'], c=s['Colors']['Color'], s=s['Marker']['Size'], marker=self.markerdict[s['Marker']['Symbol']], edgecolors='none', alpha=s['Marker']['Alpha']/100)
+            ax.scatter(x['array'], y['array'], c=style['Colors']['Color'],
+                        s=style['Markers']['Size'],
+                        marker=self.markerdict[style['Markers']['Symbol']],
+                        edgecolors='none',
+                        alpha=style['Markers']['Alpha']/100)
             cb = None
         else:
             # color by field
             ax.scatter(x['array'], y['array'], c=c['array'],
-                s=s['Size'],
-                marker=self.markerdict[s['Marker']['Symbol']],
+                s=style['Markers']['Size'],
+                marker=self.markerdict[style['Markers']['Symbol']],
                 edgecolors='none',
-                cmap=plt.get_cmap(s['Colors']['Colormap']),
-                alpha=s['Marker']['Alpha']/100)
+                cmap=plt.get_cmap(style['Colors']['Colormap']),
+                alpha=style['Markers']['Alpha']/100)
 
             norm = plt.Normalize(vmin=np.min(c['array']), vmax=np.max(c['array']))
-            scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(s['Colors']['Colormap']), norm=norm)
-            cb = fig.colorbar(scalarMappable, ax=ax, orientation='vertical', location='right', shrink=0.62)
-            cb.set_label(c['label'])
+            scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(style['Colors']['Colormap']), norm=norm)
+            if style['Colors']['Direction'] == 'vertical':
+                cb = fig.colorbar(scalarMappable, ax=ax, orientation=style['Colors']['Direction'], location='right', shrink=0.62)
+                cb.set_label(c['label'])
+            elif style['Colors']['Direction'] == 'horizontal':
+                cb = fig.colorbar(scalarMappable, ax=ax, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62)
+                cb.set_label(c['label'])
+            else:
+                cb = None
 
         # labels
-        font = {'size':s['Text']['FontSize']}
+        font = {'size':style['Text']['FontSize']}
         ax.set_xlabel(x['label'], fontdict=font)
         ax.set_ylabel(y['label'], fontdict=font)
 
         # tick marks
-        ax.tick_params(direction=s['Axes']['TickDir'],
-                        labelsize=s['Text']['FontSize'],
+        ax.tick_params(direction=style['Axes']['TickDir'],
+                        labelsize=style['Text']['FontSize'],
                         labelbottom=True, labeltop=False, labelleft=True, labelright=False,
                         bottom=True, top=True, left=True, right=True)
 
         # aspect ratio
-        ax.set_box_aspect(s['Axes']['AspectRatio'])
+        ax.set_box_aspect(style['Axes']['AspectRatio'])
 
         if new:
             plot_name = f"{x['field']}_{y['field']}_{'scatter'}"
@@ -4070,12 +3939,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 'values': (x, y, c),
                 'fig': fig,
                 'colorbar': cb,
-                'style': s
+                'style': style
             }
             self.newplot(fig, plot_name, plot_information, save)
 
 
-    def ternary_scatter(self, fig, x, y, z, c, s, save):
+    def ternary_scatter(self, fig, x, y, z, c, style, save):
         """Creates ternary scatter plots
 
         A general function for creating ternary scatter plots.
@@ -4090,8 +3959,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :type z: dict
         :param c: color dimension
         :type c: dict
-        :param s: style parameters
-        :type s: dict
+        :param style: style parameters
+        :type style: dict
         :param save: flag indicating whether the plot should be saved to the plot tree
         :type save: bool
         """
@@ -4107,14 +3976,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             new = False
 
         if len(c['array']) == 0:
-            tp.ternscatter(x['array'], y['array'], z['array'], marker=self.markerdict[s['Marker']], size=s['Size'], color=s['Color'])
+            tp.ternscatter(x['array'], y['array'], z['array'],
+                            marker=self.markerdict[style['Markers']['Symbol']],
+                            size=style['Markers']['Size'],
+                            color=style['Colors']['Color'])
             cb = None
         else:
             _, cb = tp.ternscatter(x['array'], y['array'], z['array'], categories=c['array'],
-                                            marker=self.markerdict[s['Marker']],
-                                            size=s['Size'],
-                                            cmap=s['Colormap'],
-                                            orientation='vertical')
+                                            marker=self.markerdict[style['Markers']['Symbol']],
+                                            size=style['Markers']['Size'],
+                                            cmap=style['Colors']['Colormap'],
+                                            orientation=style['Colors']['Direction'])
             cb.set_label(c['label'])
 
         if new:
@@ -4125,12 +3997,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 'plot_type': 'scatter',
                 'values': (x, y, z, c),
                 'fig': fig,
-                'colorbar': cb
+                'colorbar': cb,
+                'style': style
             }
             self.newplot(fig, plot_name, plot_information, save)
 
 
-    def hist2dbiplot(self, fig, x, y, s, save):
+    def hist2dbiplot(self, fig, x, y, style, save):
         """Creates 2D histogram figure
 
         A general function for creating 2D histograms (heatmaps).
@@ -4141,8 +4014,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :type x: dict
         :param y: y-dimension
         :type y: dict
-        :param s: style parameters
-        :type s: dict
+        :param style: style parameters
+        :type style: dict
         :param save: saves figure widget to plot tree
         :type save: bool
         """
@@ -4155,26 +4028,32 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         ax = fig.add_subplot(111)
 
         # color by field
-        ax.hist2d(x['array'], y['array'], bins=s['Resolution'], norm='log', cmap=plt.get_cmap(s['Colormap']))
+        ax.hist2d(x['array'], y['array'], bins=style['Colors']['Resolution'], norm='log', cmap=plt.get_cmap(style['Colors']['Colormap']))
 
         norm = plt.Normalize(vmin=0, vmax=3)
-        scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(s['Colormap']), norm=norm)
-        cb = fig.colorbar(scalarMappable, ax=ax, orientation='vertical', location='right', shrink=0.62)
-        cb.set_label('log(N)')
+        scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(style['Colors']['Colormap']), norm=norm)
+        if style['Colors']['Direction'] == 'vertical':
+            cb = fig.colorbar(scalarMappable, ax=ax, orientation=style['Colors']['Direction'], location='right', shrink=0.62)
+            cb.set_label('log(N)')
+        elif style['Colors']['Direction'] == 'horizontal':
+            cb = fig.colorbar(scalarMappable, ax=ax, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62)
+            cb.set_label('log(N)')
+        else:
+            cb = None
 
         # labels
-        font = {'size':self.general_style['FontSize']}
+        font = {'size':style['Text']['FontSize']}
         ax.set_xlabel(x['label'], fontdict=font)
         ax.set_ylabel(y['label'], fontdict=font)
 
         # tick marks
-        ax.tick_params(direction=self.general_style['TickDir'],
-                        labelsize=self.general_style['FontSize'],
+        ax.tick_params(direction=style['Axes']['TickDir'],
+                        labelsize=style['Text']['FontSize'],
                         labelbottom=True, labeltop=False, labelleft=True, labelright=False,
                         bottom=True, top=True, left=True, right=True)
 
         # aspect ratio
-        ax.set_box_aspect(s['AspectRatio'])
+        ax.set_box_aspect(style['Axes']['AspectRatio'])
 
         if new:
             plot_name = f"{x['field']}_{y['field']}_{'heatmap'}"
@@ -4184,12 +4063,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 'plot_type': 'scatter',
                 'values': (x, y),
                 'fig': fig,
-                'colorbar': cb
+                'colorbar': cb,
+                'style': style
             }
             self.newplot(fig, plot_name, plot_information, save)
 
 
-    def hist2dternplot(self, fig, x, y, z, s, save, c=None):
+    def hist2dternplot(self, fig, x, y, z, style, save, c=None):
         """Creates a ternary histogram figure
 
         A general function for creating scatter plots of 2-dimensions.
@@ -4202,8 +4082,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :type y: dict
         :param z: coordinate associated with right vertex
         :type z: dict
-        :param s: style parameters
-        :type s: dict
+        :param style: style parameters
+        :type style: dict
         :param save: saves figure widget to plot tree
         :type save: bool
         :param c: display, mean, median, standard deviation plots for a fourth dimension in
@@ -4222,26 +4102,27 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             tp = ternary(ax, labels, 'heatmap')
 
             hexbin_df, cb = tp.ternhex(a=x['array'], b=y['array'], c=z['array'],
-                bins=s['Resolution'],
+                bins=style['Colors']['Resolution'],
                 plotfield='n',
-                cmap=s['Colormap'],
-                orientation='vertical')
+                cmap=style['Colors']['Colormap'],
+                orientation=style['Colors']['Direction'])
 
             #norm = plt.Normalize(vmin=0, vmax=3)
-            #scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(s['Colormap']), norm=norm)
+            #scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(style['Colors']['Colormap']), norm=norm)
             #cb = fig.colorbar(scalarMappable, ax=, orientation='vertical', location='right', shrink=0.62)
-            cb.set_label('log(N)')
+            if cb is not None:
+                cb.set_label('log(N)')
         else:
             axs = fig.subplot_mosaic([['left','upper right'],['left','lower right']], layout='constrained', width_ratios=[1.5, 1])
 
             for idx, ax in enumerate(axs):
                 tps[idx] = ternary(ax, labels, 'heatmap')
 
-            hexbin_df = ternary.ternhex(a=x['array'], b=y['array'], c=z['array'], val=c['array'], bins=s['Resolution'])
+            hexbin_df = ternary.ternhex(a=x['array'], b=y['array'], c=z['array'], val=c['array'], bins=style['Colors']['Resolution'])
 
             cb.set_label(c['label'])
 
-            #tp.ternhex(hexbin_df=hexbin_df, plotfield='n', cmap=s['Colormap'], orientation='vertical')
+            #tp.ternhex(hexbin_df=hexbin_df, plotfield='n', cmap=style['Colors']['Colormap'], orientation='vertical')
 
         if new:
             plot_name = f"{x['field']}_{y['field']}_{z['field']}_{'heatmap'}"
@@ -4251,15 +4132,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 'plot_type': 'scatter',
                 'values': (x, y, z),
                 'fig': fig,
-                'colorbar': cb
+                'colorbar': cb,
+                'style': style
             }
             self.newplot(fig, plot_name, plot_information, save)
 
 
     def plot_ternarymap(self):
         """Creates map colored by ternary coordinate positions"""
-        self.get_general_style()
-        self.get_scatter_style(self.toolBox.currentIndex())
+        style = self.styles['ternary map']
+
         if fig == None:
             a, b, c = self.get_scatter_values() #get scatter values from elements chosen
         else:
@@ -6770,7 +6652,7 @@ class Profiling:
         else:
             profiles = self.i_profiles[self.main_window.sample_id]
 
-        style = self.main_window.scatter_style[self.main_window.profile_tab_id]
+        style = self.main_window.styles['profile']
 
         if len(list(profiles.values())[0])>0: #if self.profiles[self.main_window.sample_id] has values
             self.main_window.tabWidget.setCurrentIndex(2) #show profile plot tab
@@ -6841,8 +6723,8 @@ class Profiling:
                             # Plot markers with ax.scatter
                             scatter = ax.scatter(distances, scaled_values,
                                                   color=colors[idx+g_idx],
-                                                  s=style['Size'],
-                                                  marker=self.main_window.markerdict[style['Marker']],
+                                                  s=style['Markers']['Size'],
+                                                  marker=self.main_window.markerdict[style['Markers']['Symbol']],
                                                   edgecolors='none',
                                                   picker=5,
                                                   label=f'{profile_key[:-1]}',
@@ -6853,8 +6735,8 @@ class Profiling:
                                                             yerr=scaled_errors,
                                                             fmt='none',
                                                             color=colors[idx+g_idx],
-                                                            ecolor=style['Color'],
-                                                            elinewidth=style['LineWidth'],
+                                                            ecolor=style['Colors']['Color'],
+                                                            elinewidth=style['Lines']['LineWidth'],
                                                             capsize=0,
                                                             zorder=2*g_idx)
 
@@ -6875,8 +6757,8 @@ class Profiling:
                             # Plot markers with ax.scatter
                             scatter = ax.scatter(distances, means,
                                                 color=colors[idx+g_idx],
-                                                s=style['Size'],
-                                                marker=self.main_window.markerdict[style['Marker']],
+                                                s=style['Markers']['Size'],
+                                                marker=self.main_window.markerdict[style['Markers']['Symbol']],
                                                 edgecolors='none',
                                                 picker=5,
                                                 label=f'{profile_key[:-1]}',
@@ -6887,8 +6769,8 @@ class Profiling:
                                                             yerr=s_errors,
                                                             fmt='none',
                                                             color=colors[idx+g_idx],
-                                                            ecolor=style['Color'],
-                                                            elinewidth=style['LineWidth'],
+                                                            ecolor=style['Colors']['Color'],
+                                                            elinewidth=style['Lines']['LineWidth'],
                                                             capsize=0, zorder=2*g_idx)
 
                         self.all_errorbars.append((scatter,barlinecols[0]))
@@ -6926,8 +6808,8 @@ class Profiling:
                             # Plot markers with ax.scatter
                             scatter = ax.scatter(distances, scaled_values,
                                                 color=colors[idx+g_idx],
-                                                s=style['Size'],
-                                                marker=self.main_window.markerdict[style['Marker']],
+                                                s=style['Markers']['Size'],
+                                                marker=self.main_window.markerdict[style['Markers']['Symbol']],
                                                 edgecolors='none',
                                                 picker=5,
                                                 gid=profile_key,
@@ -6939,8 +6821,8 @@ class Profiling:
                                                             yerr=scaled_errors,
                                                             fmt='none',
                                                             color=colors[idx+g_idx],
-                                                            ecolor=style['Color'],
-                                                            elinewidth=style['LineWidth'],
+                                                            ecolor=style['Colors']['Color'],
+                                                            elinewidth=style['Lines']['LineWidth'],
                                                             capsize=0,
                                                             zorder=2*g_idx)
 
@@ -6962,8 +6844,8 @@ class Profiling:
                             # Plot markers with ax.scatter
                             scatter = ax.scatter(distances, medians,
                                                  color=colors[idx+g_idx],
-                                                 s=style['Size'],
-                                                 marker=self.main_window.markerdict[style['Marker']],
+                                                 s=style['Markers']['Size'],
+                                                 marker=self.main_window.markerdict[style['Markers']['Symbol']],
                                                  edgecolors='none',
                                                  picker=5,
                                                  gid=profile_key,
@@ -6975,8 +6857,8 @@ class Profiling:
                                                             yerr=errors,
                                                             fmt='none',
                                                             color=colors[idx+g_idx],
-                                                            ecolor=style['Color'],
-                                                            elinewidth=style['LineWidth'],
+                                                            ecolor=style['Colors']['Color'],
+                                                            elinewidth=style['Lines']['LineWidth'],
                                                             capsize=0,
                                                             zorder=2*g_idx)
 
@@ -7109,7 +6991,7 @@ class Profiling:
 
             picked_scatter.set_facecolors(facecolors)
             # Update the scatter plot sizes
-            picked_scatter.set_sizes(np.full(num_points, self.main_window.scatter_style[self.main_window.profile_tab_id]['Size']))
+            picked_scatter.set_sizes(np.full(num_points, self.main_window.styles['profile']['Markers']['Size']))
             self.fig.canvas.draw_idle()
 
     def toggle_edit_mode(self):

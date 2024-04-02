@@ -482,7 +482,7 @@ document.write(`
 <th class="head" colspan="2"><p>Samples</p></th>
 <th class="head" colspan="2"><p>Preprocess</p></th>
 <th class="head" colspan="3"><p>Scatter &amp; Heatmap</p></th>
-<th class="head"><p>n-Dim</p></th>
+<th class="head" colspan="2"><p>n-Dim</p></th>
 <th class="head" colspan="5"><p>PCA</p></th>
 <th class="head"><p>Clusters</p></th>
 <th class="head"><p>Profiles</p></th>
@@ -494,7 +494,7 @@ document.write(`
 <th class="head"><p>gradient</p></th>
 <th class="head" colspan="2"><p>biplot &amp; ternary</p></th>
 <th class="head"><p>ternary</p></th>
-<th class="head"><p>TEC/radar</p></th>
+<th class="head" colspan="2"><p>TEC    radar</p></th>
 <th class="head"><p>variance</p></th>
 <th class="head"><p>vectors</p></th>
 <th class="head"><p>x vs. y</p></th>
@@ -505,75 +505,262 @@ document.write(`
 </tr>
 </thead>
 <tbody>
-<tr class="row-odd"><td><p>style dropdown</p></td>
-<td><p>map</p></td>
-<td><p>heatmap</p></td>
-<td><p>scatter</p></td>
-<td><p>map</p></td>
-<td><p>scatter</p></td>
-<td><p>heatmap</p></td>
-<td><p>map</p></td>
-<td><p>scatter</p></td>
-<td><p>scatter</p></td>
-<td><p>heatmap</p></td>
-<td><p>scatter</p></td>
-<td><p>heatmap</p></td>
-<td><p>map</p></td>
-<td><p>map</p></td>
-<td><p>scatter</p></td>
+<tr class="row-odd"><td><p>axes &amp; labels</p></td>
+<td colspan="16"></td>
 </tr>
-<tr class="row-even"><td><p>resolution</p></td>
+<tr class="row-even"><td><p>x limits</p></td>
+<td><p>Y</p></td>
 <td><p>N</p></td>
-<td><p>N</p></td>
-<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td colspan="2"><p>N</p></td>
 <td><p>N</p></td>
 <td><p>N</p></td>
 <td><p>Y</p></td>
-<td><p>N</p></td>
-<td><p>N</p></td>
-<td><p>N</p></td>
-<td><p>N</p></td>
-<td><p>N</p></td>
 <td><p>Y</p></td>
-<td><p>N</p></td>
-<td><p>N</p></td>
-<td><p>N</p></td>
-</tr>
-<tr class="row-odd"><td><p>symbol</p></td>
-<td><p>N</p></td>
-<td><p>N</p></td>
-<td><p>N</p></td>
-<td><p>N</p></td>
 <td><p>Y</p></td>
-<td><p>N</p></td>
-<td><p>N</p></td>
 <td><p>Y</p></td>
-<td><p>N</p></td>
-<td><p>N</p></td>
-<td><p>Y</p></td>
-<td><p>N</p></td>
-<td><p>N</p></td>
-<td><p>N</p></td>
 <td><p>Y</p></td>
 </tr>
-<tr class="row-even"><td><p>size</p></td>
-<td><p>N</p></td>
-<td><p>N</p></td>
-<td><p>N</p></td>
-<td><p>N</p></td>
+<tr class="row-odd"><td><p>y limits</p></td>
 <td><p>Y</p></td>
 <td><p>N</p></td>
 <td><p>N</p></td>
 <td><p>Y</p></td>
 <td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+</tr>
+<tr class="row-even"><td><p>x label</p></td>
+<td><p>N</p></td>
 <td><p>N</p></td>
 <td><p>Y</p></td>
 <td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td colspan="2"><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
 <td><p>N</p></td>
 <td><p>N</p></td>
 <td><p>Y</p></td>
 </tr>
-<tr class="row-odd"><td><p>line width</p></td>
+<tr class="row-odd"><td><p>y label</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+</tr>
+<tr class="row-even"><td><p>z label</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td colspan="2"><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+</tr>
+<tr class="row-odd"><td><p>aspect ratio</p></td>
+<td><p>N</p></td>
+<td><p>1 (fixed)</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td colspan="2"><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>1 (fixed)</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+</tr>
+<tr class="row-even"><td><p>annotations</p></td>
+<td colspan="16"></td>
+</tr>
+<tr class="row-odd"><td><p>font</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td colspan="2"><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+</tr>
+<tr class="row-even"><td><p>font size</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td colspan="2"><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+</tr>
+<tr class="row-odd"><td><p>scales</p></td>
+<td colspan="16"></td>
+</tr>
+<tr class="row-even"><td><p>scale direct.</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td colspan="2"><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+</tr>
+<tr class="row-odd"><td><p>scale location</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td colspan="2"><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+</tr>
+<tr class="row-even"><td><p>overlay color</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td colspan="2"><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+</tr>
+<tr class="row-odd"><td><p>markers</p></td>
+<td colspan="16"></td>
+</tr>
+<tr class="row-even"><td><p>symbol</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td colspan="2"><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+</tr>
+<tr class="row-odd"><td><p>size</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td colspan="2"><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+</tr>
+<tr class="row-even"><td><p>transparency</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td colspan="2"><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+</tr>
+<tr class="row-odd"><td><p>lines</p></td>
+<td colspan="16"></td>
+</tr>
+<tr class="row-even"><td><p>line width</p></td>
 <td><p>Y (polygon)</p></td>
 <td><p>N</p></td>
 <td><p>N</p></td>
@@ -581,7 +768,7 @@ document.write(`
 <td><p>Y (fit)</p></td>
 <td><p>N</p></td>
 <td><p>N</p></td>
-<td><p>N</p></td>
+<td colspan="2"><p>N</p></td>
 <td><p>Y</p></td>
 <td><p>N</p></td>
 <td><p>Y</p></td>
@@ -589,6 +776,9 @@ document.write(`
 <td><p>N</p></td>
 <td><p>N</p></td>
 <td><p>Y</p></td>
+</tr>
+<tr class="row-odd"><td><p>colors</p></td>
+<td colspan="16"></td>
 </tr>
 <tr class="row-even"><td><p>color</p></td>
 <td><p>Y (spots)</p></td>
@@ -598,7 +788,7 @@ document.write(`
 <td><p>Y</p></td>
 <td><p>N</p></td>
 <td><p>N</p></td>
-<td><p>Y (1)</p></td>
+<td colspan="2"><p>Y (1)</p></td>
 <td><p>Y</p></td>
 <td><p>N</p></td>
 <td><p>Y</p></td>
@@ -615,7 +805,7 @@ document.write(`
 <td><p>Y</p></td>
 <td><p>N</p></td>
 <td><p>N</p></td>
-<td><p>N</p></td>
+<td colspan="2"><p>N</p></td>
 <td><p>N</p></td>
 <td><p>N</p></td>
 <td><p>Y</p></td>
@@ -632,7 +822,7 @@ document.write(`
 <td><p>Y</p></td>
 <td><p>N</p></td>
 <td><p>N</p></td>
-<td><p>N</p></td>
+<td colspan="2"><p>N</p></td>
 <td><p>N</p></td>
 <td><p>N</p></td>
 <td><p>Y</p></td>
@@ -649,7 +839,7 @@ document.write(`
 <td><p>Y</p></td>
 <td><p>Y</p></td>
 <td><p>custom</p></td>
-<td><p>Y (clusters)</p></td>
+<td colspan="2"><p>Y (clusters)</p></td>
 <td><p>N</p></td>
 <td><p>Y</p></td>
 <td><p>Y</p></td>
@@ -666,7 +856,7 @@ document.write(`
 <td><p>Y</p></td>
 <td><p>Y</p></td>
 <td><p>Y</p></td>
-<td><p>N</p></td>
+<td colspan="2"><p>N</p></td>
 <td><p>N</p></td>
 <td><p>Y</p></td>
 <td><p>Y</p></td>
@@ -675,39 +865,22 @@ document.write(`
 <td><p>N</p></td>
 <td><p>Y?</p></td>
 </tr>
-<tr class="row-odd"><td><p>transparency</p></td>
+<tr class="row-odd"><td><p>resolution</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
 <td><p>N</p></td>
 <td><p>N</p></td>
 <td><p>Y</p></td>
 <td><p>N</p></td>
-<td><p>Y</p></td>
+<td colspan="2"><p>N</p></td>
 <td><p>N</p></td>
-<td><p>N</p></td>
-<td><p>Y</p></td>
 <td><p>N</p></td>
 <td><p>N</p></td>
 <td><p>Y</p></td>
 <td><p>N</p></td>
 <td><p>N</p></td>
 <td><p>N</p></td>
-<td><p>Y</p></td>
-</tr>
-<tr class="row-even"><td><p>aspect ratio</p></td>
-<td><p>N</p></td>
-<td><p>1</p></td>
-<td><p>Y</p></td>
-<td><p>N</p></td>
-<td><p>Y</p></td>
-<td><p>Y</p></td>
-<td><p>N</p></td>
-<td><p>Y</p></td>
-<td><p>Y</p></td>
-<td><p>Y</p></td>
-<td><p>Y</p></td>
-<td><p>Y</p></td>
-<td><p>N</p></td>
-<td><p>N</p></td>
-<td><p>Y/N</p></td>
 </tr>
 </tbody>
 </table>

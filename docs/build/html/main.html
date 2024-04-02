@@ -596,108 +596,6 @@ thus the tick should display 0.001 * 1000 = 1.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="main.IsotopeSelectionWindow">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">IsotopeSelectionWindow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">isotopes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clipped_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.IsotopeSelectionWindow" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QDialog</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Ui_Dialog</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="main.IsotopeSelectionWindow.add_isotope_to_list">
-<span class="sig-name descname"><span class="pre">add_isotope_to_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.IsotopeSelectionWindow.add_isotope_to_list" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="main.IsotopeSelectionWindow.calculate_correlation">
-<span class="sig-name descname"><span class="pre">calculate_correlation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.IsotopeSelectionWindow.calculate_correlation" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="main.IsotopeSelectionWindow.color_cell">
-<span class="sig-name descname"><span class="pre">color_cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correlation</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.IsotopeSelectionWindow.color_cell" title="Link to this definition">#</a></dt>
-<dd><p>Colors cells in</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="main.IsotopeSelectionWindow.create_colorbar">
-<span class="sig-name descname"><span class="pre">create_colorbar</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.IsotopeSelectionWindow.create_colorbar" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="main.IsotopeSelectionWindow.done_selection">
-<span class="sig-name descname"><span class="pre">done_selection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.IsotopeSelectionWindow.done_selection" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="main.IsotopeSelectionWindow.generate_colorbar_image">
-<span class="sig-name descname"><span class="pre">generate_colorbar_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.IsotopeSelectionWindow.generate_colorbar_image" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="main.IsotopeSelectionWindow.get_color_for_correlation">
-<span class="sig-name descname"><span class="pre">get_color_for_correlation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">correlation</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.IsotopeSelectionWindow.get_color_for_correlation" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="main.IsotopeSelectionWindow.get_selected_data">
-<span class="sig-name descname"><span class="pre">get_selected_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.IsotopeSelectionWindow.get_selected_data" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="main.IsotopeSelectionWindow.listUpdated">
-<span class="sig-name descname"><span class="pre">listUpdated</span></span><a class="headerlink" href="#main.IsotopeSelectionWindow.listUpdated" title="Link to this definition">#</a></dt>
-<dd><p>pyqtSignal(<a href="#id1"><span class="problematic" id="id2">*</span></a>types, name: str = …, revision: int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
-<p>types is normally a sequence of individual types.  Each type is either a
-type object or a string that is the name of a C++ type.  Alternatively
-each type could itself be a sequence of types each describing a different
-overloaded signal.
-name is the optional C++ name of the signal.  If it is not specified then
-the name of the class attribute that is bound to the signal is used.
-revision is the optional revision of the signal that is exported to QML.
-If it is not specified then 0 is used.
-arguments is the optional sequence of the names of the signal’s arguments.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="main.IsotopeSelectionWindow.load_selection">
-<span class="sig-name descname"><span class="pre">load_selection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.IsotopeSelectionWindow.load_selection" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="main.IsotopeSelectionWindow.populate_analyte_list">
-<span class="sig-name descname"><span class="pre">populate_analyte_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analyte_pair</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.IsotopeSelectionWindow.populate_analyte_list" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="main.IsotopeSelectionWindow.remove_isotope_from_list">
-<span class="sig-name descname"><span class="pre">remove_isotope_from_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.IsotopeSelectionWindow.remove_isotope_from_list" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="main.IsotopeSelectionWindow.save_selection">
-<span class="sig-name descname"><span class="pre">save_selection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.IsotopeSelectionWindow.save_selection" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="main.IsotopeSelectionWindow.toggle_cell_selection">
-<span class="sig-name descname"><span class="pre">toggle_cell_selection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.IsotopeSelectionWindow.toggle_cell_selection" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="main.IsotopeSelectionWindow.update_all_combos">
-<span class="sig-name descname"><span class="pre">update_all_combos</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.IsotopeSelectionWindow.update_all_combos" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="main.IsotopeSelectionWindow.update_list">
-<span class="sig-name descname"><span class="pre">update_list</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.IsotopeSelectionWindow.update_list" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="main.IsotopeSelectionWindow.update_scale">
-<span class="sig-name descname"><span class="pre">update_scale</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.IsotopeSelectionWindow.update_scale" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="main.MainWindow">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">MainWindow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QMainWindow</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Ui_MainWindow</span></code></p>
@@ -780,17 +678,17 @@ high or low (even negative) values.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.biplot">
-<span class="sig-name descname"><span class="pre">biplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.biplot" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">biplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.biplot" title="Link to this definition">#</a></dt>
 <dd><p>Creates scatter bi-plots</p>
 <p>A general function for creating scatter plots of 2-dimensions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>fig</strong> (<em>matplotlib.figure</em>) – figure object</p></li>
-<li><p><strong>x</strong> (<em>dict</em>) – data associated with field self.comboBoxScatterIsotopeX.currentText() as x coordinate</p></li>
-<li><p><strong>y</strong> (<em>dict</em>) – data associated with field self.comboBoxScatterIsotopeX.currentText() as y coordinate</p></li>
-<li><p><strong>c</strong> (<em>dict</em>) – data associated with field self.comboBoxColorField.currentText() as marker colors</p></li>
-<li><p><strong>s</strong> (<em>dict</em>) – style parameters</p></li>
+<li><p><strong>x</strong> (<em>dict</em>) – data associated with field <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxScatterAnalyteX.currentText()</span></code> as x coordinate</p></li>
+<li><p><strong>y</strong> (<em>dict</em>) – data associated with field <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxScatterAnalyteX.currentText()</span></code> as y coordinate</p></li>
+<li><p><strong>c</strong> (<em>dict</em>) – data associated with field <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxColorField.currentText()</span></code> as marker colors</p></li>
+<li><p><strong>style</strong> (<em>dict</em>) – style parameters</p></li>
 </ul>
 </dd>
 </dl>
@@ -810,7 +708,7 @@ high or low (even negative) values.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.change_ref_material">
 <span class="sig-name descname"><span class="pre">change_ref_material</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comboBox1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comboBox2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.change_ref_material" title="Link to this definition">#</a></dt>
-<dd><p>Changes reference computing normalized isotopes</p>
+<dd><p>Changes reference computing normalized analytes</p>
 <p>Sets all QComboBox to a common normalizing reference.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -826,8 +724,8 @@ high or low (even negative) values.</p>
 <dt class="sig sig-object py" id="main.MainWindow.change_sample">
 <span class="sig-name descname"><span class="pre">change_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.change_sample" title="Link to this definition">#</a></dt>
 <dd><p>Changes sample and plots first map</p>
-<section id="id3">
-<h2>Parameter<a class="headerlink" href="#id3" title="Link to this heading">#</a></h2>
+<section id="id1">
+<h2>Parameter<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
 <dl class="simple">
 <dt>index: int</dt><dd><p>index of sample name for identifying data.  The values are based on the
 comboBoxSampleID</p>
@@ -874,6 +772,11 @@ comboBoxSampleID</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.field_colormap_callback">
+<span class="sig-name descname"><span class="pre">field_colormap_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.field_colormap_callback" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.find_leaf">
 <span class="sig-name descname"><span class="pre">find_leaf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">leaf</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.find_leaf" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
@@ -889,13 +792,13 @@ value is set by the user via <code class="docutils literal notranslate"><span cl
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.get_field_list">
-<span class="sig-name descname"><span class="pre">get_field_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">set_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'isotope'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.get_field_list" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_field_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">set_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analyte'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.get_field_list" title="Link to this definition">#</a></dt>
 <dd><p>Gets the fields associated with a defined set</p>
 <p>Set names are consistent with QComboBox.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>set_name</strong> (<em>str</em><em>, </em><em>optional</em>) – name of set list, options include ‘isotope’, ‘isotope (normalized)’, ‘calcualated field’,
-‘pca_score’, ‘cluster’, ‘cluster score’, ‘special’, Defaults to ‘isotope’</p>
+<dd class="field-odd"><p><strong>set_name</strong> (<em>str</em><em>, </em><em>optional</em>) – name of set list, options include ‘analyte’, ‘analyte (normalized)’, ‘calcualated field’,
+‘pca_score’, ‘cluster’, ‘cluster score’, ‘special’, Defaults to ‘analyte’</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>set_fields, a list of fields within the input set</p>
@@ -904,12 +807,6 @@ value is set by the user via <code class="docutils literal notranslate"><span cl
 <dd class="field-odd"><p>list</p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="main.MainWindow.get_general_style">
-<span class="sig-name descname"><span class="pre">get_general_style</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.get_general_style" title="Link to this definition">#</a></dt>
-<dd><p>Updates dictionary with general style properties</p>
 </dd></dl>
 
 <dl class="py method">
@@ -928,9 +825,9 @@ value is set by the user via <code class="docutils literal notranslate"><span cl
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.get_map_data">
-<span class="sig-name descname"><span class="pre">get_map_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analysis_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'isotope'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.get_map_data" title="Link to this definition">#</a></dt>
-<dd><p>Retrieves and processes the mapping data for the given sample and isotopes, then plots the result if required.</p>
-<p>The method also updates certain parameters in the analyte data frame related to scaling. 
+<span class="sig-name descname"><span class="pre">get_map_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analysis_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analyte'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.get_map_data" title="Link to this definition">#</a></dt>
+<dd><p>Retrieves and processes the mapping data for the given sample and analytes, then plots the result if required.</p>
+<p>The method also updates certain parameters in the analyte data frame related to scaling.
 Based on the plot type, this method internally calls the appropriate plotting functions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -970,18 +867,6 @@ update</p>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="main.MainWindow.get_scatter_style">
-<span class="sig-name descname"><span class="pre">get_scatter_style</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tab_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.get_scatter_style" title="Link to this definition">#</a></dt>
-<dd><p>Updates dictionaries with scatter and heatmap style properties</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>tab_ind</strong> (<em>int</em>) – tab_ind should be set by toolBox.currentIndex(), which determines styles to
-update</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.get_scatter_values">
 <span class="sig-name descname"><span class="pre">get_scatter_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.get_scatter_values" title="Link to this definition">#</a></dt>
 <dd><p>Creates a dictionary of values for plotting</p>
@@ -998,13 +883,18 @@ contain coordinates and c contains the colors</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.get_style_dict">
+<span class="sig-name descname"><span class="pre">get_style_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.get_style_dict" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.group_changed">
 <span class="sig-name descname"><span class="pre">group_changed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.group_changed" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.hist2dbiplot">
-<span class="sig-name descname"><span class="pre">hist2dbiplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.hist2dbiplot" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">hist2dbiplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.hist2dbiplot" title="Link to this definition">#</a></dt>
 <dd><p>Creates 2D histogram figure</p>
 <p>A general function for creating 2D histograms (heatmaps).</p>
 <dl class="field-list simple">
@@ -1013,7 +903,7 @@ contain coordinates and c contains the colors</p>
 <li><p><strong>fig</strong> (<em>matplotlib.figure</em>) – figure object</p></li>
 <li><p><strong>x</strong> (<em>dict</em>) – x-dimension</p></li>
 <li><p><strong>y</strong> (<em>dict</em>) – y-dimension</p></li>
-<li><p><strong>s</strong> (<em>dict</em>) – style parameters</p></li>
+<li><p><strong>style</strong> (<em>dict</em>) – style parameters</p></li>
 <li><p><strong>save</strong> (<em>bool</em>) – saves figure widget to plot tree</p></li>
 </ul>
 </dd>
@@ -1022,7 +912,7 @@ contain coordinates and c contains the colors</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.hist2dternplot">
-<span class="sig-name descname"><span class="pre">hist2dternplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.hist2dternplot" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">hist2dternplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.hist2dternplot" title="Link to this definition">#</a></dt>
 <dd><p>Creates a ternary histogram figure</p>
 <p>A general function for creating scatter plots of 2-dimensions.</p>
 <dl class="field-list simple">
@@ -1032,7 +922,7 @@ contain coordinates and c contains the colors</p>
 <li><p><strong>x</strong> (<em>dict</em>) – coordinate associated with top vertex</p></li>
 <li><p><strong>y</strong> (<em>dict</em>) – coordinate associated with left vertex</p></li>
 <li><p><strong>z</strong> (<em>dict</em>) – coordinate associated with right vertex</p></li>
-<li><p><strong>s</strong> (<em>dict</em>) – style parameters</p></li>
+<li><p><strong>style</strong> (<em>dict</em>) – style parameters</p></li>
 <li><p><strong>save</strong> (<em>bool</em>) – saves figure widget to plot tree</p></li>
 <li><p><strong>c</strong> (<em>str</em>) – display, mean, median, standard deviation plots for a fourth dimension in
 addition to histogram map. Default is None, which produces a histogram.</p></li>
@@ -1134,7 +1024,7 @@ and associated labels.  Constraints on the ranges are added to the spin boxes.</
 <dt class="sig sig-object py" id="main.MainWindow.noise_reduction_option1_callback">
 <span class="sig-name descname"><span class="pre">noise_reduction_option1_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.noise_reduction_option1_callback" title="Link to this definition">#</a></dt>
 <dd><p>Callback executed when the first noise reduction option is changed</p>
-<p>Updates noise reduction applied to map(s) when <code class="docutils literal notranslate"><span class="pre">MainWindow.spinBoxNoiseOption1.value()</span></code> is changed by 
+<p>Updates noise reduction applied to map(s) when <code class="docutils literal notranslate"><span class="pre">MainWindow.spinBoxNoiseOption1.value()</span></code> is changed by
 the user.</p>
 </dd></dl>
 
@@ -1142,7 +1032,7 @@ the user.</p>
 <dt class="sig sig-object py" id="main.MainWindow.noise_reduction_option2_callback">
 <span class="sig-name descname"><span class="pre">noise_reduction_option2_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.noise_reduction_option2_callback" title="Link to this definition">#</a></dt>
 <dd><p>Callback executed when the second noise reduction option is changed</p>
-<p>Updates noise reduction applied to map(s) when <code class="docutils literal notranslate"><span class="pre">MainWindow.spinBoxNoiseOption2.value()</span></code> is changed by 
+<p>Updates noise reduction applied to map(s) when <code class="docutils literal notranslate"><span class="pre">MainWindow.spinBoxNoiseOption2.value()</span></code> is changed by
 the user.  Note, not all noise reduction methods have a second option.</p>
 </dd></dl>
 
@@ -1158,13 +1048,18 @@ the user.  Note, not all noise reduction methods have a second option.</p>
 <p>Executes on self.toolBar.actionOpen and self.menuFile.action.Open_Directory.  self.toolBox
 pages are enabled upon successful load.</p>
 <p>Opens a dialog to select directory filled with samples.  Updates sample list in
-self.comboBoxSampleID and comboBoxes associated with isotope lists.  The first sample
+self.comboBoxSampleID and comboBoxes associated with analyte lists.  The first sample
 in list is loaded by default.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="main.MainWindow.open_select_isotope_dialog">
-<span class="sig-name descname"><span class="pre">open_select_isotope_dialog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.open_select_isotope_dialog" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="main.MainWindow.open_preferences_dialog">
+<span class="sig-name descname"><span class="pre">open_preferences_dialog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.open_preferences_dialog" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.open_select_analyte_dialog">
+<span class="sig-name descname"><span class="pre">open_select_analyte_dialog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.open_select_analyte_dialog" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1221,9 +1116,9 @@ widgets</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.plot_histogram">
 <span class="sig-name descname"><span class="pre">plot_histogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_plot_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_information</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_width</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.plot_histogram" title="Link to this definition">#</a></dt>
-<dd><p>Displays histogram for current selected isotope.</p>
-<section id="id4">
-<h2>Parameter<a class="headerlink" href="#id4" title="Link to this heading">#</a></h2>
+<dd><p>Displays histogram for current selected analyte.</p>
+<section id="id2">
+<h2>Parameter<a class="headerlink" href="#id2" title="Link to this heading">#</a></h2>
 <dl class="simple">
 <dt>current_plot_df: pandas.DataFrame</dt><dd><p>current active plot</p>
 </dd>
@@ -1294,15 +1189,15 @@ widgets</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.prep_data">
-<span class="sig-name descname"><span class="pre">prep_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isotope_1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isotope_2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.prep_data" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">prep_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analyte_1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analyte_2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.prep_data" title="Link to this definition">#</a></dt>
 <dd><p>Prepares data to be used in analysis</p>
 <ol class="arabic simple">
 <li><p>Obtains raw DataFrame</p></li>
-<li><p>Shifts isotope values so that all values are postive</p></li>
+<li><p>Shifts analyte values so that all values are postive</p></li>
 <li><p>Scale data  (linear,log, loggit)</p></li>
 <li><p>Autoscales data if choosen by user</p></li>
 </ol>
-<p>The prepped data is stored in one of 2 Dataframes: analysis_isotope_data or computed_isotope_data</p>
+<p>The prepped data is stored in one of 2 Dataframes: analysis_analyte_data or computed_analyte_data</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1355,7 +1250,7 @@ widgets</p>
 <dt class="sig sig-object py" id="main.MainWindow.reset_to_full_view">
 <span class="sig-name descname"><span class="pre">reset_to_full_view</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.reset_to_full_view" title="Link to this definition">#</a></dt>
 <dd><p>Reset the map to full view (i.e., remove crop)</p>
-<p>Executes on self.toolButtonFullView.clicked.</p>
+<p>Executes on <code class="docutils literal notranslate"><span class="pre">MainWindow.toolButtonFullView</span></code> is clicked.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1375,21 +1270,20 @@ widgets</p>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="main.MainWindow.set_general_style">
-<span class="sig-name descname"><span class="pre">set_general_style</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.set_general_style" title="Link to this definition">#</a></dt>
-<dd><p>Sets style properties in Styling&gt;General tab</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.set_map_style">
 <span class="sig-name descname"><span class="pre">set_map_style</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.set_map_style" title="Link to this definition">#</a></dt>
 <dd><p>Sets style properties in Styling&gt;Maps tab</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="main.MainWindow.set_scatter_style">
-<span class="sig-name descname"><span class="pre">set_scatter_style</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.set_scatter_style" title="Link to this definition">#</a></dt>
-<dd><p>Sets style properties in Styling&gt;Scatter and Heatmap tab</p>
+<dt class="sig sig-object py" id="main.MainWindow.set_style_widgets">
+<span class="sig-name descname"><span class="pre">set_style_widgets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.set_style_widgets" title="Link to this definition">#</a></dt>
+<dd><p>Sets values in right toolbox style page</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>plot_type</strong> (<em>str</em><em>, </em><em>optional</em>) – dictionary key into <code class="docutils literal notranslate"><span class="pre">MainWindow.style</span></code></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -1398,6 +1292,11 @@ widgets</p>
 <dd><p>Updates transparency on scatter plots.</p>
 <p>Executes on change of <code class="docutils literal notranslate"><span class="pre">MainWindow.horizontalSliderMarkerAlpha.value()</span></code>.</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.style_plot_type_callback">
+<span class="sig-name descname"><span class="pre">style_plot_type_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.style_plot_type_callback" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.swap_xy">
@@ -1433,7 +1332,7 @@ Map from Ternary groupbox.  The ternary colored chemical map is updated.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.ternary_scatter">
-<span class="sig-name descname"><span class="pre">ternary_scatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.ternary_scatter" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">ternary_scatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.ternary_scatter" title="Link to this definition">#</a></dt>
 <dd><p>Creates ternary scatter plots</p>
 <p>A general function for creating ternary scatter plots.</p>
 <dl class="field-list simple">
@@ -1444,7 +1343,7 @@ Map from Ternary groupbox.  The ternary colored chemical map is updated.</p>
 <li><p><strong>y</strong> (<em>dict</em>) – coordinate associated with left vertex</p></li>
 <li><p><strong>z</strong> (<em>dict</em>) – coordinate associated with right vertex</p></li>
 <li><p><strong>c</strong> (<em>dict</em>) – color dimension</p></li>
-<li><p><strong>s</strong> (<em>dict</em>) – style parameters</p></li>
+<li><p><strong>style</strong> (<em>dict</em>) – style parameters</p></li>
 <li><p><strong>save</strong> (<em>bool</em>) – flag indicating whether the plot should be saved to the plot tree</p></li>
 </ul>
 </dd>
@@ -1476,6 +1375,11 @@ widget to update</p></li>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.toggle_style_widgets">
+<span class="sig-name descname"><span class="pre">toggle_style_widgets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.toggle_style_widgets" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.toolbar_plotting">
@@ -1534,10 +1438,10 @@ widget to update</p></li>
 <dd><p>Updates comboBoxes with fields for plots or analysis</p>
 <p>Updates lists of fields in comboBoxes that are used to generate plots or used for analysis.
 Calls :get_field_list(): to construct the list.</p>
-<section id="id5">
-<h2>Parameter<a class="headerlink" href="#id5" title="Link to this heading">#</a></h2>
+<section id="id3">
+<h2>Parameter<a class="headerlink" href="#id3" title="Link to this heading">#</a></h2>
 <dl class="simple">
-<dt>parentBox: QComboBox</dt><dd><p>comboBox used to select field type (‘isotope’, ‘isotope (norm)’, ‘ratio’, etc.)</p>
+<dt>parentBox: QComboBox</dt><dd><p>comboBox used to select field type (‘analyte’, ‘analyte (norm)’, ‘ratio’, etc.)</p>
 </dd>
 <dt>childBox: QComboBox</dt><dd><p>comboBox with list of field values</p>
 </dd>
@@ -1552,7 +1456,7 @@ Calls :get_field_list(): to construct the list.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.update_filter_table">
-<span class="sig-name descname"><span class="pre">update_filter_table</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.update_filter_table" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">update_filter_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.update_filter_table" title="Link to this definition">#</a></dt>
 <dd><p>Update data for analysis when fiter table is updated.</p>
 </dd></dl>
 
@@ -1573,13 +1477,13 @@ Calls :get_field_list(): to construct the list.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.update_norm">
-<span class="sig-name descname"><span class="pre">update_norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isotope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.update_norm" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">update_norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analyte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.update_norm" title="Link to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>sample_id</strong> (<em>int</em>) – </p></li>
 <li><p><strong>norm</strong> (<em>optional</em>) – Defaults to None</p></li>
-<li><p><strong>isotope</strong> – </p></li>
+<li><p><strong>analyte</strong> – </p></li>
 <li><p><strong>update</strong> – </p></li>
 </ul>
 </dd>
@@ -1613,7 +1517,7 @@ Calls :get_field_list(): to construct the list.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.update_ratio_df">
-<span class="sig-name descname"><span class="pre">update_ratio_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isotope_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isotope_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.update_ratio_df" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">update_ratio_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analyte_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analyte_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.update_ratio_df" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1622,8 +1526,13 @@ Calls :get_field_list(): to construct the list.</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.update_tables">
+<span class="sig-name descname"><span class="pre">update_tables</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.update_tables" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.update_tree">
-<span class="sig-name descname"><span class="pre">update_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">leaf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Isotope'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.update_tree" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">update_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">leaf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analyte'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.update_tree" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1653,8 +1562,8 @@ Calls :get_field_list(): to construct the list.</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Operations related to polygon generation and manipulation</p>
 <p>Polygons can be used to select or exclude regions of maps for analysis.</p>
-<section id="id6">
-<h2>Methods<a class="headerlink" href="#id6" title="Link to this heading">#</a></h2>
+<section id="id4">
+<h2>Methods<a class="headerlink" href="#id4" title="Link to this heading">#</a></h2>
 <dl class="simple">
 <dt>increment_pid()</dt><dd><p>creates a new polygon pid for addressing polygon when toolButtonPolyCreate is checked</p>
 </dd>
@@ -1767,7 +1676,7 @@ update_table_widget:</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.Profiling.update_table_widget">
-<span class="sig-name descname"><span class="pre">update_table_widget</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.Profiling.update_table_widget" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">update_table_widget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.Profiling.update_table_widget" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1810,6 +1719,27 @@ update_table_widget:</p>
 <dt class="sig sig-object py" id="main.ResizableRectItem.validateRect">
 <span class="sig-name descname"><span class="pre">validateRect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rect</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.ResizableRectItem.validateRect" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="main.SignalEmitter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">SignalEmitter</span></span><a class="headerlink" href="#main.SignalEmitter" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QObject</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="main.SignalEmitter.rightClicked">
+<span class="sig-name descname"><span class="pre">rightClicked</span></span><a class="headerlink" href="#main.SignalEmitter.rightClicked" title="Link to this definition">#</a></dt>
+<dd><p>pyqtSignal(<a href="#id5"><span class="problematic" id="id6">*</span></a>types, name: str = …, revision: int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -1922,6 +1852,108 @@ only the top row is moved.</p>
 </section>
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="main.analyteSelectionWindow">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">analyteSelectionWindow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analytes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clipped_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.analyteSelectionWindow" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QDialog</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Ui_Dialog</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="main.analyteSelectionWindow.add_analyte_to_list">
+<span class="sig-name descname"><span class="pre">add_analyte_to_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.analyteSelectionWindow.add_analyte_to_list" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.analyteSelectionWindow.calculate_correlation">
+<span class="sig-name descname"><span class="pre">calculate_correlation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.analyteSelectionWindow.calculate_correlation" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.analyteSelectionWindow.color_cell">
+<span class="sig-name descname"><span class="pre">color_cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correlation</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.analyteSelectionWindow.color_cell" title="Link to this definition">#</a></dt>
+<dd><p>Colors cells in</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.analyteSelectionWindow.create_colorbar">
+<span class="sig-name descname"><span class="pre">create_colorbar</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.analyteSelectionWindow.create_colorbar" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.analyteSelectionWindow.done_selection">
+<span class="sig-name descname"><span class="pre">done_selection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.analyteSelectionWindow.done_selection" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.analyteSelectionWindow.generate_colorbar_image">
+<span class="sig-name descname"><span class="pre">generate_colorbar_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.analyteSelectionWindow.generate_colorbar_image" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.analyteSelectionWindow.get_color_for_correlation">
+<span class="sig-name descname"><span class="pre">get_color_for_correlation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">correlation</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.analyteSelectionWindow.get_color_for_correlation" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.analyteSelectionWindow.get_selected_data">
+<span class="sig-name descname"><span class="pre">get_selected_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.analyteSelectionWindow.get_selected_data" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="main.analyteSelectionWindow.listUpdated">
+<span class="sig-name descname"><span class="pre">listUpdated</span></span><a class="headerlink" href="#main.analyteSelectionWindow.listUpdated" title="Link to this definition">#</a></dt>
+<dd><p>pyqtSignal(<a href="#id11"><span class="problematic" id="id12">*</span></a>types, name: str = …, revision: int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.analyteSelectionWindow.load_selection">
+<span class="sig-name descname"><span class="pre">load_selection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.analyteSelectionWindow.load_selection" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.analyteSelectionWindow.populate_analyte_list">
+<span class="sig-name descname"><span class="pre">populate_analyte_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analyte_pair</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.analyteSelectionWindow.populate_analyte_list" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.analyteSelectionWindow.remove_analyte_from_list">
+<span class="sig-name descname"><span class="pre">remove_analyte_from_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.analyteSelectionWindow.remove_analyte_from_list" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.analyteSelectionWindow.save_selection">
+<span class="sig-name descname"><span class="pre">save_selection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.analyteSelectionWindow.save_selection" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.analyteSelectionWindow.toggle_cell_selection">
+<span class="sig-name descname"><span class="pre">toggle_cell_selection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.analyteSelectionWindow.toggle_cell_selection" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.analyteSelectionWindow.update_all_combos">
+<span class="sig-name descname"><span class="pre">update_all_combos</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.analyteSelectionWindow.update_all_combos" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.analyteSelectionWindow.update_list">
+<span class="sig-name descname"><span class="pre">update_list</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.analyteSelectionWindow.update_list" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.analyteSelectionWindow.update_scale">
+<span class="sig-name descname"><span class="pre">update_scale</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.analyteSelectionWindow.update_scale" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="main.bilateralFilter">
 <span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">bilateralFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmaColor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmaSpace</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">dst</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">borderType</span></span></em><span class="optional">]</span><span class="optional">]</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dst</span></span></span><a class="headerlink" href="#main.bilateralFilter" title="Link to this definition">#</a></dt>
@@ -1932,11 +1964,11 @@ only the top row is moved.</p>
 .   bilateralFilter can reduce unwanted noise very well while keeping edges fairly sharp. However, it is
 .   very slow compared to most filters.
 .   
-.   _Sigma <a href="#id11"><span class="problematic" id="id12">values_</span></a>: For simplicity, you can set the 2 sigma values to be the same. If they are small (&lt;
+.   _Sigma <a href="#id13"><span class="problematic" id="id14">values_</span></a>: For simplicity, you can set the 2 sigma values to be the same. If they are small (&lt;
 .   10), the filter will not have much effect, whereas if they are large (&gt; 150), they will have a very
 .   strong effect, making the image look “cartoonish”.
 .   
-.   _Filter <a href="#id13"><span class="problematic" id="id14">size_</span></a>: Large filters (d &gt; 5) are very slow, so it is recommended to use d=5 for real-time
+.   _Filter <a href="#id15"><span class="problematic" id="id16">size_</span></a>: Large filters (d &gt; 5) are very slow, so it is recommended to use d=5 for real-time
 .   applications, and perhaps d=9 for offline applications that need heavy noise filtering.
 .   
 .   This filter does not work inplace.
@@ -2034,26 +2066,6 @@ only the top row is moved.</p>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#main.GaussianBlur"><code class="docutils literal notranslate"><span class="pre">GaussianBlur()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.add_isotope_to_list"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.add_isotope_to_list()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.calculate_correlation"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.calculate_correlation()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.color_cell"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.color_cell()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.create_colorbar"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.create_colorbar()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.done_selection"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.done_selection()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.generate_colorbar_image"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.generate_colorbar_image()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.get_color_for_correlation"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.get_color_for_correlation()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.get_selected_data"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.get_selected_data()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.listUpdated"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.listUpdated</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.load_selection"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.load_selection()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.populate_analyte_list"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.populate_analyte_list()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.remove_isotope_from_list"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.remove_isotope_from_list()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.save_selection"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.save_selection()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.toggle_cell_selection"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.toggle_cell_selection()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.update_all_combos"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.update_all_combos()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.update_list"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.update_list()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.IsotopeSelectionWindow.update_scale"><code class="docutils literal notranslate"><span class="pre">IsotopeSelectionWindow.update_scale()</span></code></a></li>
-</ul>
-</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow"><code class="docutils literal notranslate"><span class="pre">MainWindow</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.add_clustering_widget_to_layout"><code class="docutils literal notranslate"><span class="pre">MainWindow.add_clustering_widget_to_layout()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.add_edge_detection"><code class="docutils literal notranslate"><span class="pre">MainWindow.add_edge_detection()</span></code></a></li>
@@ -2073,16 +2085,16 @@ only the top row is moved.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.create_plot"><code class="docutils literal notranslate"><span class="pre">MainWindow.create_plot()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.create_tree"><code class="docutils literal notranslate"><span class="pre">MainWindow.create_tree()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.dynamic_format"><code class="docutils literal notranslate"><span class="pre">MainWindow.dynamic_format()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.field_colormap_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.field_colormap_callback()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.find_leaf"><code class="docutils literal notranslate"><span class="pre">MainWindow.find_leaf()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.gaussian_sigma"><code class="docutils literal notranslate"><span class="pre">MainWindow.gaussian_sigma()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_field_list"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_field_list()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_general_style"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_general_style()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_hex_color"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_hex_color()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_map_data"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_map_data()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_map_style"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_map_style()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_processed_data"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_processed_data()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_scatter_style"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_scatter_style()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_scatter_values"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_scatter_values()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_style_dict"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_style_dict()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.group_changed"><code class="docutils literal notranslate"><span class="pre">MainWindow.group_changed()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.hist2dbiplot"><code class="docutils literal notranslate"><span class="pre">MainWindow.hist2dbiplot()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.hist2dternplot"><code class="docutils literal notranslate"><span class="pre">MainWindow.hist2dternplot()</span></code></a></li>
@@ -2098,7 +2110,8 @@ only the top row is moved.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.noise_reduction_option2_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.noise_reduction_option2_callback()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.open_calculator"><code class="docutils literal notranslate"><span class="pre">MainWindow.open_calculator()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.open_directory"><code class="docutils literal notranslate"><span class="pre">MainWindow.open_directory()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.open_select_isotope_dialog"><code class="docutils literal notranslate"><span class="pre">MainWindow.open_select_isotope_dialog()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.open_preferences_dialog"><code class="docutils literal notranslate"><span class="pre">MainWindow.open_preferences_dialog()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.open_select_analyte_dialog"><code class="docutils literal notranslate"><span class="pre">MainWindow.open_select_analyte_dialog()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.open_style_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.open_style_callback()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.open_tab"><code class="docutils literal notranslate"><span class="pre">MainWindow.open_tab()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.outlier_detection"><code class="docutils literal notranslate"><span class="pre">MainWindow.outlier_detection()</span></code></a></li>
@@ -2124,10 +2137,10 @@ only the top row is moved.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.reset_zoom"><code class="docutils literal notranslate"><span class="pre">MainWindow.reset_zoom()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.run_noise_reduction"><code class="docutils literal notranslate"><span class="pre">MainWindow.run_noise_reduction()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.save_analysis"><code class="docutils literal notranslate"><span class="pre">MainWindow.save_analysis()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.set_general_style"><code class="docutils literal notranslate"><span class="pre">MainWindow.set_general_style()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.set_map_style"><code class="docutils literal notranslate"><span class="pre">MainWindow.set_map_style()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.set_scatter_style"><code class="docutils literal notranslate"><span class="pre">MainWindow.set_scatter_style()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.set_style_widgets"><code class="docutils literal notranslate"><span class="pre">MainWindow.set_style_widgets()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.slider_alpha_changed"><code class="docutils literal notranslate"><span class="pre">MainWindow.slider_alpha_changed()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.style_plot_type_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.style_plot_type_callback()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.swap_xy"><code class="docutils literal notranslate"><span class="pre">MainWindow.swap_xy()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.swap_xy_data"><code class="docutils literal notranslate"><span class="pre">MainWindow.swap_xy_data()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.tern2xy"><code class="docutils literal notranslate"><span class="pre">MainWindow.tern2xy()</span></code></a></li>
@@ -2136,6 +2149,7 @@ only the top row is moved.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.toggle_color_by_field"><code class="docutils literal notranslate"><span class="pre">MainWindow.toggle_color_by_field()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.toggle_scale_direction"><code class="docutils literal notranslate"><span class="pre">MainWindow.toggle_scale_direction()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.toggle_scatter_style_tab"><code class="docutils literal notranslate"><span class="pre">MainWindow.toggle_scatter_style_tab()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.toggle_style_widgets"><code class="docutils literal notranslate"><span class="pre">MainWindow.toggle_style_widgets()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.toolbar_plotting"><code class="docutils literal notranslate"><span class="pre">MainWindow.toolbar_plotting()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.toolbox_changed"><code class="docutils literal notranslate"><span class="pre">MainWindow.toolbox_changed()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.transform_plots"><code class="docutils literal notranslate"><span class="pre">MainWindow.transform_plots()</span></code></a></li>
@@ -2157,6 +2171,7 @@ only the top row is moved.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.update_plot_with_new_colormap"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_plot_with_new_colormap()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.update_ratio_df"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_ratio_df()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.update_spinboxes"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_spinboxes()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.update_tables"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_tables()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.update_tree"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_tree()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.update_zoom_view_position"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_zoom_view_position()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.zero_crossing_laplacian"><code class="docutils literal notranslate"><span class="pre">MainWindow.zero_crossing_laplacian()</span></code></a></li>
@@ -2197,12 +2212,36 @@ only the top row is moved.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.ResizableRectItem.validateRect"><code class="docutils literal notranslate"><span class="pre">ResizableRectItem.validateRect()</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#main.SignalEmitter"><code class="docutils literal notranslate"><span class="pre">SignalEmitter</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.SignalEmitter.rightClicked"><code class="docutils literal notranslate"><span class="pre">SignalEmitter.rightClicked</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#main.Sobel"><code class="docutils literal notranslate"><span class="pre">Sobel()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#main.StandardItem"><code class="docutils literal notranslate"><span class="pre">StandardItem</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#main.Table_Fcn"><code class="docutils literal notranslate"><span class="pre">Table_Fcn</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.Table_Fcn.delete_row"><code class="docutils literal notranslate"><span class="pre">Table_Fcn.delete_row()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.Table_Fcn.move_row_down"><code class="docutils literal notranslate"><span class="pre">Table_Fcn.move_row_down()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.Table_Fcn.move_row_up"><code class="docutils literal notranslate"><span class="pre">Table_Fcn.move_row_up()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#main.analyteSelectionWindow"><code class="docutils literal notranslate"><span class="pre">analyteSelectionWindow</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.analyteSelectionWindow.add_analyte_to_list"><code class="docutils literal notranslate"><span class="pre">analyteSelectionWindow.add_analyte_to_list()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.analyteSelectionWindow.calculate_correlation"><code class="docutils literal notranslate"><span class="pre">analyteSelectionWindow.calculate_correlation()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.analyteSelectionWindow.color_cell"><code class="docutils literal notranslate"><span class="pre">analyteSelectionWindow.color_cell()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.analyteSelectionWindow.create_colorbar"><code class="docutils literal notranslate"><span class="pre">analyteSelectionWindow.create_colorbar()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.analyteSelectionWindow.done_selection"><code class="docutils literal notranslate"><span class="pre">analyteSelectionWindow.done_selection()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.analyteSelectionWindow.generate_colorbar_image"><code class="docutils literal notranslate"><span class="pre">analyteSelectionWindow.generate_colorbar_image()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.analyteSelectionWindow.get_color_for_correlation"><code class="docutils literal notranslate"><span class="pre">analyteSelectionWindow.get_color_for_correlation()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.analyteSelectionWindow.get_selected_data"><code class="docutils literal notranslate"><span class="pre">analyteSelectionWindow.get_selected_data()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.analyteSelectionWindow.listUpdated"><code class="docutils literal notranslate"><span class="pre">analyteSelectionWindow.listUpdated</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.analyteSelectionWindow.load_selection"><code class="docutils literal notranslate"><span class="pre">analyteSelectionWindow.load_selection()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.analyteSelectionWindow.populate_analyte_list"><code class="docutils literal notranslate"><span class="pre">analyteSelectionWindow.populate_analyte_list()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.analyteSelectionWindow.remove_analyte_from_list"><code class="docutils literal notranslate"><span class="pre">analyteSelectionWindow.remove_analyte_from_list()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.analyteSelectionWindow.save_selection"><code class="docutils literal notranslate"><span class="pre">analyteSelectionWindow.save_selection()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.analyteSelectionWindow.toggle_cell_selection"><code class="docutils literal notranslate"><span class="pre">analyteSelectionWindow.toggle_cell_selection()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.analyteSelectionWindow.update_all_combos"><code class="docutils literal notranslate"><span class="pre">analyteSelectionWindow.update_all_combos()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.analyteSelectionWindow.update_list"><code class="docutils literal notranslate"><span class="pre">analyteSelectionWindow.update_list()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.analyteSelectionWindow.update_scale"><code class="docutils literal notranslate"><span class="pre">analyteSelectionWindow.update_scale()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#main.bilateralFilter"><code class="docutils literal notranslate"><span class="pre">bilateralFilter()</span></code></a></li>

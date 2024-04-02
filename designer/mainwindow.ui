@@ -7171,7 +7171,7 @@
         <enum>QFrame::Raised</enum>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>5</number>
        </property>
        <widget class="QWidget" name="StyleAxes">
         <property name="geometry">
@@ -7990,8 +7990,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>219</width>
+          <height>505</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -8608,21 +8608,6 @@
             <property name="toolTip">
              <string>Select plot type, options depend on open tabs in control toolbox</string>
             </property>
-            <item>
-             <property name="text">
-              <string>Map</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Scatter</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Heatmap</string>
-             </property>
-            </item>
            </widget>
           </item>
           <item>

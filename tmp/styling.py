@@ -478,14 +478,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.comboBoxStylePlotType.clear()
             self.comboBoxStylePlotType.addItems(self.plot_types[tab_id])
 
-            plot_type = self.plot_types[tab_id](0)
+            plot_type = self.plot_types[tab_id][0]
 
         # axes properties
-        self.doubleSpinBoxXLB.setValue(self.styles[plot_type]['Axes']['XLim'](0))
-        self.doubleSpinBoxXUB.setValue(self.styles[plot_type]['Axes']['XLim'](1))
+        self.doubleSpinBoxXLB.setValue(self.styles[plot_type]['Axes']['XLim'][0])
+        self.doubleSpinBoxXUB.setValue(self.styles[plot_type]['Axes']['XLim'][1])
         self.lineEditXLabel.setText(self.styles[plot_type]['Axes']['XLabel'])
-        self.doubleSpinBoxYLB.setValue(self.styles[plot_type]['Axes']['YLim'](0))
-        self.doubleSpinBoxYUB.setValue(self.styles[plot_type]['Axes']['YLim'](1))
+        self.doubleSpinBoxYLB.setValue(self.styles[plot_type]['Axes']['YLim'][0])
+        self.doubleSpinBoxYUB.setValue(self.styles[plot_type]['Axes']['YLim'][1])
         self.lineEditYLabel.setText(self.styles[plot_type]['Axes']['YLabel'])
         self.lineEditZLabel.setText(self.styles[plot_type]['Axes']['ZLabel'])
         self.lineEditAspectRatio.setText(str(self.styles[plot_type]['Axes']['AspectRatio']))
@@ -513,8 +513,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxColorByField.setCurrentText(self.styles[plot_type]['Colors']['ColorByField'])
         self.comboBoxColorField.setCurrentText(self.styles[plot_type]['Colors']['Field'])
         self.comboBoxFieldColormap.setCurrentText(self.styles[plot_type]['Colors']['Colormap'])
-        self.doubleSpinBoxColorLB.setValue(self.styles[plot_type]['Colors']['CLim'](0))
-        self.doubleSpinBoxColorUB.setValue(self.styles[plot_type]['Colors']['CLim'](1))
+        self.doubleSpinBoxColorLB.setValue(self.styles[plot_type]['Colors']['CLim'][0])
+        self.doubleSpinBoxColorUB.setValue(self.styles[plot_type]['Colors']['CLim'][1])
         self.comboBoxColorbarDirection.setCurrentText(self.styles[plot_type]['Colors']['Direction'])
         self.lineEditCbarLabel.setText(self.styles[plot_type]['Colors']['CLabel'])
         self.spinBoxHeatmapResolution.setValue(self.styles[plot_type]['Colors']['Resolution'])

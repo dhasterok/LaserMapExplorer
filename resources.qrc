@@ -75,5 +75,6 @@
         <file>resources/icons/icon-lines-64.png</file>
         <file>resources/icons/icon-marker-64.png</file>
         <file>resources/icons/icon-text-64.png</file>
+        <file>resources/icons/icon-tree-64.png</file>
     </qresource>
 </RCC>

@@ -99,7 +99,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         colormaps = pg.colormap.listMaps('matplotlib')
         self.comboBoxFieldColormap.clear()
         self.comboBoxFieldColormap.addItems(colormaps)
-        self.cm = self.comboBoxFieldColormap.currentText()
         self.cursor = False
         self.comboBoxFieldColormap.activated.connect(self.update_all_plots)
         layout_single_view = QtWidgets.QVBoxLayout()
@@ -157,22 +156,25 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxMarker.clear()
         self.comboBoxMarker.addItems(self.markerdict.keys())
 
-        self.default_styles = {'Axes': {'XLimAuto': True, 'XLim': [0,0], 'XLabel': '', 'YLimCustom': True, 'YLim': [0,0], 'YLabel': '', 'ZLabel': '', 'AspectRatio': '1.0', 'TickDir': 'out'},
+        self.default_styles = {'Axes': {'XLimAuto': True, 'XLim': [0,1], 'XLabel': '', 'YLimCustom': True, 'YLim': [0,1], 'YLabel': '', 'ZLabel': '', 'AspectRatio': '1.0', 'TickDir': 'out'},
                                'Text': {'Font': self.fontComboBox.currentFont(), 'FontSize': 11.0},
-                               'Scales': {'Location': 'northeast', 'Direction': 'none', 'OverlayColor': '#ffffff'},
+                               'Scales': {'Direction': 'none', 'Location': 'northeast', 'OverlayColor': '#ffffff'},
                                'Markers': {'Symbol': 'circle', 'Size': 6, 'Alpha': 30},
                                'Lines': {'LineWidth': 1.5},
-                               'Colors': {'Color': '#1c75bc', 'ColorByField': 'None', 'Field': None, 'Colormap': 'viridis', 'CLimAuto': True, 'CLim':[0,0], 'Direction': 'none', 'CLabel': None, 'Resolution': 10}
+                               'Colors': {'Color': '#1c75bc', 'ColorByField': 'None', 'Field': None, 'Colormap': 'viridis', 'CLimAuto': True, 'CLim':[0,1], 'Direction': 'none', 'CLabel': None, 'Resolution': 10}
                                }
 
-        self.plot_types = {self.sample_tab_id: ['analyte map','correlation'],
-                           self.process_tab_id: ['analyte map','histogram','gradient map'],
-                           self.filter_tab_id: ['analyte map'],
-                           self.scatter_tab_id: ['scatter', 'heatmap', 'ternary map'],
-                           self.ndim_tab_id: ['TEC', 'radar'],
-                           self.pca_tab_id: ['variance','vectors','PCx vs. PCy scatter','PCx vs. PCy heatmap','pca score'],
-                           self.cluster_tab_id: ['cluster', 'cluster score'],
-                           self.profile_tab_id: ['profile']}
+        self.plot_types = {self.sample_tab_id: [0, 'analyte map', 'correlation'],
+                            self.spot_tab_id: [0, 'analyte map', 'gradient map'],
+                            self.process_tab_id: [0, 'analyte map', 'gradient map', 'histogram'],
+                            self.filter_tab_id: [0, 'analyte map', 'gradient map'],
+                            self.scatter_tab_id: [0, 'scatter', 'heatmap', 'ternary map'],
+                            self.ndim_tab_id: [0, 'TEC', 'radar'],
+                            self.pca_tab_id: [0, 'variance','vectors','PCx vs. PCy scatter','PCx vs. PCy heatmap','pca score'],
+                            self.cluster_tab_id: [0, 'cluster', 'cluster score'],
+                            self.profile_tab_id: [0, 'profile', 'analyte map', 'gradient map', 'cluster score', 'pca score'],
+                            self.special_tab_id: [0, 'profile', 'analyte map', 'gradient map', 'cluster score', 'pca score']}
+
 
         self.styles = {'analyte map': self.default_styles,
                         'correlation': self.default_styles,
@@ -191,6 +193,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         'cluster': self.default_styles,
                         'cluster score': self.default_styles,
                         'profile': self.default_styles}
+
+        self.styles['analyte map']['Colors']['Colormap'] = 'plasma'
+        self.styles['correlation']['Colors']['Colormap'] = 'RdBu'
+        self.styles['vectors']['Colors']['Colormap'] = 'RdBu'
+        self.styles['gradient map']['Colors']['Colormap'] = 'RdYlBu'
+        self.styles['cluster score']['Colors']['Colormap'] = 'plasma'
+
+        self.styles['correlation']['Axes']['Aspect Ratio'] = 1.0
+        self.styles['scatter']['Axes']['Aspect Ratio'] = 1.62
+        self.styles['heatmap']['Axes']['Aspect Ratio'] = 1.62
+        self.styles['TEC']['Axes']['Aspect Ratio'] = 1.62
+        self.styles['vectors']['Axes']['Aspect Ratio'] = 1.0
+        self.styles['PCx vs. PCy scatter']['Axes']['Aspect Ratio'] = 1.62
+        self.styles['PCx vs. PCy heatmap']['Axes']['Aspect Ratio'] = 1.62
+
 
         self.map_style = {self.sample_tab_id: {'Colormap':'plasma', 'ColorbarDirection':'vertical', 'ScaleLocation':'southeast', 'ScaleDirection':'horizontal', 'OverlayColor':'#ffffff'},
             self.scatter_tab_id: {'Colormap':'orange-violet-blue-white', 'ColorbarDirection':'vertical', 'ScaleLocation':'southeast', 'ScaleDirection':'horizontal', 'OverlayColor':'#ffffff'},
@@ -448,7 +465,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Scatter and Ternary Tab
         #-------------------------
-        self.comboBoxStylePlotType.activated.connect(lambda: self.toggle_scatter_style_tab(self.toolBox.currentIndex()))
         self.comboBoxScatterAnalyteX.activated.connect(lambda: self.plot_scatter(save=False))
         self.comboBoxScatterAnalyteY.activated.connect(lambda: self.plot_scatter(save=False))
         self.comboBoxScatterAnalyteZ.activated.connect(lambda: self.plot_scatter(save=False))
@@ -507,6 +523,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Styling Tab
         #-------------------------
+        # comboBox with plot type
+        #self.comboBoxStylePlotType.activated.connect(lambda: self.toggle_scatter_style_tab(self.toolBox.currentIndex()))
+        self.comboBoxStylePlotType.activated.connect(self.style_plot_type_callback)
+        self.comboBoxFieldColormap.activated.connect(self.field_colormap_callback)
+
         self.toolBox.currentChanged.connect(self.toolbox_changed)
 
         # overlay and annotation properties
@@ -558,28 +579,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Executes on change of ``MainWindow.toolBox.currentIndex()``.  Updates style related widgets.
         """
         self.comboBoxStylePlotType.clear()
-        self.comboBoxStylePlotType.addItems(self.plot_types[self.toolBox.currentIndex()])
-
-        match self.toolBox.currentIndex():
-            case self.sample_tab_id:
-                self.comboBoxStylePlotType.setCurrentText(self.current_scatter_type[self.sample_tab_id])
-                self.toggle_scatter_style_tab(self.sample_tab_id)
-            case self.process_tab_id:
-                self.toggle_scatter_style_tab(self.process_tab_id)
-            case self.spot_tab_id:
-                self.toggle_scatter_style_tab(self.spot_tab_id)
-            case self.scatter_tab_id:
-                self.comboBoxStylePlotType.setCurrentText(self.current_scatter_type[self.scatter_tab_id])
-                self.toggle_scatter_style_tab(self.scatter_tab_id)
-            case self.pca_tab_id:
-                self.comboBoxStylePlotType.setCurrentText(self.current_scatter_type[self.pca_tab_id])
-                self.toggle_scatter_style_tab(self.pca_tab_id)
-            case self.profile_tab_id:
-                self.comboBoxStylePlotType.setCurrentText(self.current_scatter_type[self.profile_tab_id])
-                self.toggle_scatter_style_tab(self.profile_tab_id)
-            case self.cluster_tab_id:
-                pass
-
+        self.comboBoxStylePlotType.addItems(self.plot_types[self.toolBox.currentIndex()][1:])
+        self.comboBoxStylePlotType.setCurrentIndex(self.plot_types[self.toolBox.currentIndex()][0])
+        self.toggle_style_widgets()
         self.set_style_widgets()
 
     def slider_alpha_changed(self):
@@ -1279,7 +1281,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # Update the 'use' value in the filter_df for the given row
             self.data[self.sample_id]['filter_info'].at[row, 'use'] = state == QtCore.Qt.Checked
 
-
         analyte_1 = self.comboBoxFAnalyte.currentText()
         analyte_2 = None
         analyte_select = self.comboBoxFSelect.currentText()
@@ -1470,7 +1471,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def update_all_plots(self):
         """Updates all plots in plot widget dictionary"""
-        self.cm = self.comboBoxFieldColormap.currentText()
+        style = self.styles[self.comboBoxStylePlotType.currentText()]
         for plot_type,sample_ids in self.plot_widget_dict.items():
             if plot_type == 'lasermap' or 'histogram' or 'lasermap_norm':
                 for sample_id, plots in sample_ids.items():
@@ -1494,7 +1495,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         if plot_type == 'clustering':
                                     n_clusters = int(plot['info']['n_clusters'])
                                     # Get the new colormap from the comboBox
-                                    new_cmap = plt.get_cmap(self.cm,5)
+                                    new_cmap = plt.get_cmap(style['Colors']['Colormap'],5)
                                     img = []
                                     for ax in fig.get_axes():
                                         # Retrieve the image object from the axes
@@ -1795,6 +1796,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         sample_id = plot_information['sample_id']
         plot_type = plot_information['plot_type']
 
+        style = self.styles[self.comboBoxStylePlotType.currentText()]['Colors']['Colormap']
+
         view = self.canvasWindow.currentIndex()
 
         self.x_range = current_plot_df['X'].max() - current_plot_df['X'].min()
@@ -1822,7 +1825,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # Step 1: Normalize your data array for colormap application
                 norm = Normalize(vmin=array.min(), vmax=array.max())
-                cmap = plt.get_cmap(self.cm)  # Assuming self.cm is a valid colormap name
+                cmap = plt.get_cmap(style['Colors']['Colormap'])  # Assuming a valid colormap name
 
                 # Step 2: Apply the colormap to get RGB values, then normalize to [0, 255] for QImage
                 rgb_array = cmap(norm(array))[:, :, :3]  # Drop the alpha channel returned by cmap
@@ -1847,7 +1850,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 p1.setRange( yRange=[self.y.min(), self.y.max()])
                 # To further prevent zooming or panning outside the default view,
                 p1.setLimits( yMin=self.y.min(), yMax = self.y.max())
-                cm = pg.colormap.get(self.cm, source = 'matplotlib')
+                cm = pg.colormap.get(style['Colors']['Colormap'], source = 'matplotlib')
                 # img.setColorMap(cm)
                 histogram = widgetLaserMap.findChild(pg.HistogramLUTWidget, 'histogram')
                 if view ==0:
@@ -1882,7 +1885,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #Change transparency of values outside mask
             # Step 1: Normalize your data array for colormap application
             norm = Normalize(vmin=array.min(), vmax=array.max())
-            cmap = plt.get_cmap(self.cm)  # Assuming self.cm is a valid colormap name
+            cmap = plt.get_cmap(style['Colors']['Colormap'])  # Assuming a valid colormap name
 
             # Step 2: Apply the colormap to get RGB values, then normalize to [0, 255] for QImage
             rgb_array = cmap(norm(array))[:, :, :3]  # Drop the alpha channel returned by cmap
@@ -1906,7 +1909,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #set aspect ratio of rectangle
             img.setRect(self.x.min(),self.y.min(),self.x_range,self.y_range)
             # img.setAs
-            cm = pg.colormap.get(self.cm, source = 'matplotlib')
+            cm = pg.colormap.get(style['Colors']['Colormap'], source = 'matplotlib')
             # img.setColorMap(cm)
 
             # img.setLookupTable(cm.getLookupTable())
@@ -1989,7 +1992,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             p1.autoRange()
             #add zoom window
             # self.setup_zoom_window(layout)
-            print(self.cm)
+            print(style['Colors']['Colormap'])
             self.plot_laser_map_cont(layout,array,img,p1,cm,view)
 
     def mouse_moved(self,event,plot):
@@ -2176,6 +2179,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # self.update_zoom_view_position(0, 0, array)  # Initial position
 
     def update_zoom_view_position(self, x, y):
+
+        style = self.styles[self.comboBoxStylePlotType.currentText()]
+
         # Assuming you have a method like this to update the zoom view
         # Calculate the new position for the zoom view
         xOffset = 50  # Horizontal offset from cursor to avoid overlap
@@ -2200,7 +2206,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.zoomImg.setRect(0,0,self.x_range,self.y_range)
         self.zoomViewBox.setRange(zoomRect) # Set the zoom area in the image
-        self.zoomImg.setColorMap(pg.colormap.get(self.cm, source = 'matplotlib'))
+        self.zoomImg.setColorMap(pg.colormap.get(style['Colors']['Colormap'], source = 'matplotlib'))
         self.zoomTarget.setPos(x, y)  # Update target position
         self.zoomTarget.show()
         self.zoomViewBox.setZValue(1e10)
@@ -2211,6 +2217,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Executes on change of ``MainWindow.comboBoxEdgeDetectMethod`` when ``MainWindow.toolButtonEdgeDetect`` is checked.
         Options include 'sobel', 'canny', and 'zero_cross'.
         """
+        style = self.styles[self.comboBoxStylePlotType.currentText()]
         if self.edge_img:
             # remove existing filters
             self.plot.removeItem(self.edge_img)
@@ -2246,7 +2253,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #set aspect ratio of rectangle
             self.edge_img.setRect(0,0,self.x_range,self.y_range)
             # edge_img.setAs
-            cm = pg.colormap.get(self.cm, source = 'matplotlib')
+            cm = pg.colormap.get(style['Colors']['Colormap'], source = 'matplotlib')
             self.edge_img.setColorMap(cm)
 
             self.plot.addItem(self.edge_img)
@@ -2498,7 +2505,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.noise_red_img.setRect(0, 0, self.x_range, self.y_range)
 
         # Optionally, set a color map
-        cm = pg.colormap.get(self.cm, source='matplotlib')
+        cm = pg.colormap.get(style['Colors']['Colormap'], source='matplotlib')
         self.noise_red_img.setColorMap(cm)
 
         # Add the image item to the plot
@@ -2576,6 +2583,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def update_pca_plot(self, pca_dict, pca_plot_type, ax):
 
+        style = self.styles[self.comboBoxStylePlotType.currentText()]
+
         analytes = self.data[self.sample_id]['analyte_info'].loc[:,'analytes']
         n_components = range(1, len(pca_dict['explained_variance_ratio'])+1)
         match pca_plot_type:
@@ -2614,7 +2623,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 n_components = components.shape[0]
                 n_variables = components.shape[1]
 
-                cmap = plt.get_cmap(self.cm)
+                cmap = plt.get_cmap(style['Colors']['Colormap'])
                 cax = ax.imshow(components, cmap=plt.get_cmap(s['Colormap']), aspect=1.0)
                 fig = ax.get_figure()
                 # Adding a colorbar at the bottom of the plot
@@ -3386,7 +3395,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxScaleLocation.setEnabled(False)
 
                 # marker properties
-                if len(self.spotdata.spots[self.sample_id]) != 0:
+                if len(self.spotdata.spots) != 0:
                     self.comboBoxMarker.setEnabled(True)
                     self.doubleSpinBoxMarkerSize.setEnabled(True)
                     self.horizontalSliderMarkerAlpha.setEnabled(True)
@@ -3573,9 +3582,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         if plot_type is None:
             self.comboBoxStylePlotType.clear()
-            self.comboBoxStylePlotType.addItems(self.plot_types[tab_id])
+            self.comboBoxStylePlotType.addItems(self.plot_types[tab_id][1:])
 
-            plot_type = self.plot_types[tab_id][0]
+            plot_type = self.plot_types[tab_id][self.plot_types[tab_id][0]+1]
+            self.comboBoxStylePlotType.setCurrentText(plot_type)
 
         # axes properties
         self.doubleSpinBoxXLB.setValue(self.styles[plot_type]['Axes']['XLim'][0])
@@ -3623,7 +3633,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #self.update_plot()
 
     def get_style_dict(self):
+
         plot_type = self.comboBoxStylePlotType.currentText()
+        self.plot_types[self.toolBox.currentIndex()][0] = self.comboBoxStylePlotType.currentIndex()
 
         # update axes properties
         self.styles[plot_type]['Axes'] = {'XLim': [self.doubleSpinBoxXLB.value(), self.doubleSpinBoxXUB.value()],
@@ -3661,6 +3673,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     'CLabel': self.lineEditCbarLabel.currentText(),
                     'Resolution': self.spinBoxHeatmapResolution.value()} 
 
+    def style_plot_type_callback(self):
+        self.plot_types[self.toolBox.currentIndex()][0] = self.comboBoxStylePlotType.currentIndex()
+
+        self.set_style_widgets(self.comboBoxStylePlotType.currentText())
+        print(self.plot_types)
+
+    def field_colormap_callback(self):
+        self.styles[self.comboBoxStylePlotType.currentText()]['Colors']['Colormap'] = self.comboBoxFieldColormap.currentText()
 
     def set_scatter_style(self):
         """Sets style properties in Styling>Scatter and Heatmap tab"""
@@ -4318,6 +4338,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def plot_clustering_result(self, ax, labels, method_name, fuzzy_cluster_number):
         reshaped_array = np.reshape(labels, self.array_size, order=self.order)
 
+        style = self.styles[self.comboBoxStylePlotType.currentText()]
+
         x_range = self.data[self.sample_id]['processed_data']['X'].max() -  self.data[self.sample_id]['processed_data']['X'].min()
         y_range = self.data[self.sample_id]['processed_data']['Y'].max() -  self.data[self.sample_id]['processed_data']['Y'].min()
         aspect_ratio =  (y_range/self.clipped_analyte_data[self.sample_id]['Y'].nunique())/ (x_range/self.clipped_analyte_data[self.sample_id]['X'].nunique())
@@ -4325,7 +4347,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # aspect_ratio = 0.617
         fig = ax.figure
         if method_name == 'Fuzzy' and fuzzy_cluster_number>0:
-            cmap = plt.get_cmap(self.cm)
+            cmap = plt.get_cmap(style['Colors']['Colormap'])
             # img = ax.imshow(reshaped_array.T, cmap=cmap,  aspect=aspect_ratio)
             img = ax.imshow(reshaped_array, cmap=cmap,  aspect=aspect_ratio)
             fig.colorbar(img, ax=ax, orientation = self.comboBoxColorbarDirection.currentText().lower())
@@ -4333,7 +4355,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             unique_labels = np.unique(['Cluster '+str(c) for c in labels])
             unique_labels.sort()
             n_clusters = len(unique_labels)
-            cmap = plt.get_cmap(self.cm, n_clusters)
+            cmap = plt.get_cmap(style['Colors']['Colormap'], n_clusters)
             # Extract colors from the colormap
             colors = [cmap(i) for i in range(cmap.N)]
             # Assign these colors to self.group_cmap

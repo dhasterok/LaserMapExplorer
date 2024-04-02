@@ -1462,6 +1462,7 @@
    <addaction name="actionOpen"/>
    <addaction name="actionSelectAnalytes"/>
    <addaction name="actionBatch_Process"/>
+   <addaction name="actionSavePlotToTree"/>
    <addaction name="separator"/>
    <addaction name="actionSpotData"/>
    <addaction name="actionFilter_Tools"/>
@@ -1508,6 +1509,9 @@
    </attribute>
    <widget class="QWidget" name="dockWidgetContents">
     <widget class="QToolBox" name="toolBox">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>0</x>
@@ -1537,7 +1541,7 @@
       <string>Activates the crop tool</string>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="SelectAnalytePage">
       <property name="enabled">
@@ -4226,7 +4230,7 @@
            </property>
            <property name="icon">
             <iconset resource="../resources.qrc">
-             <normaloff>:/icons/resources/icons/icon-launch-64.png</normaloff>:/icons/resources/icons/icon-launch-64.png</iconset>
+             <normaloff>:/icons/resources/icons/icon-tree-64.png</normaloff>:/icons/resources/icons/icon-tree-64.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -4257,7 +4261,7 @@
           <x>10</x>
           <y>25</y>
           <width>286</width>
-          <height>90</height>
+          <height>91</height>
          </rect>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_7">
@@ -7426,8 +7430,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>219</width>
-          <height>505</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7522,8 +7526,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>219</width>
-          <height>505</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7676,8 +7680,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>219</width>
-          <height>505</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7882,8 +7886,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>219</width>
-          <height>505</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7986,8 +7990,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>219</width>
-          <height>505</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -9964,9 +9968,12 @@
     <string>Cut</string>
    </property>
   </action>
-  <action name="actionCop">
+  <action name="actionCopy">
    <property name="text">
-    <string>Cop</string>
+    <string>Copy</string>
+   </property>
+   <property name="toolTip">
+    <string>Copy</string>
    </property>
   </action>
   <action name="actionShortcuts">
@@ -10161,6 +10168,12 @@
   <action name="actionQuit_LaME">
    <property name="text">
     <string>Quit LaME</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::QuitRole</enum>
    </property>
   </action>
   <action name="actionBatch_Process">
@@ -10395,6 +10408,24 @@
     <font>
      <pointsize>12</pointsize>
     </font>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionSavePlotToTree">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/resources/icons/icon-tree-64.png</normaloff>:/icons/resources/icons/icon-tree-64.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save Plot to Tree</string>
+   </property>
+   <property name="toolTip">
+    <string>Save the current plot to the plot selector</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+T</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>

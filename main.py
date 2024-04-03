@@ -338,6 +338,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #self.spinBox_X.valueChanged.connect(lambda:self.update_plot(axis = True))
         #self.spinBox_Y.valueChanged.connect(lambda:self.update_plot(axis = True))
         self.toolButtonFullView.clicked.connect(self.reset_to_full_view)
+        #uncheck crop is checked
+        self.toolButtonFullView.clicked.connect(lambda: self.toolButtonCrop.setChecked(False))
         self.spinBoxNBins.valueChanged.connect(self.update_plot)
         self.spinBoxBinWidth.valueChanged.connect(lambda: self.update_plot(bin_s=False))
         self.toolBox.currentChanged.connect(lambda: self.canvasWindow.setCurrentIndex(0))
@@ -366,8 +368,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Initiate crop tool
         self.crop_tool = Crop_tool(self)
         self.toolButtonCrop.clicked.connect(self.crop_tool.init_crop)
-        self.toolButtonCropApply.clicked.connect(self.crop_tool.apply_crop)
-        self.toolButtonCropApply.setEnabled(False)
 
         # Spot Data Tab
         #-------------------------
@@ -607,6 +607,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionCalculator.triggered.connect(self.open_calculator)
 
         self.toolbox_changed()
+        
+        #reset check boxes to prevent incorrect behaviour during plot click
+        self.toolButtonCrop.clicked.connect(lambda: self.reset_checked_items('crop'))
+        self.toolButtonPlotProfile.clicked.connect(lambda: self.reset_checked_items('profiling'))
+        self.toolButtonPointMove.clicked.connect(lambda: self.reset_checked_items('profiling'))
+        self.toolButtonPolyCreate.clicked.connect(lambda: self.reset_checked_items('polygon'))
+        self.toolButtonPolyMovePoint.clicked.connect(lambda: self.reset_checked_items('polygon'))
+        self.toolButtonPolyAddPoint.clicked.connect(lambda: self.reset_checked_items('polygon'))
+        self.toolButtonPolyRemovePoint.clicked.connect(lambda: self.reset_checked_items('polygon'))
 
 
     def toolbox_changed(self):
@@ -662,7 +671,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.swap_xy_data(self.data[self.sample_id]['processed_data']) #this rotates processed data as well
 
-        self.swap_xy_data(self.data[self.sample_id]['computed_data']['cluster'])
+        # self.swap_xy_data(self.data[self.sample_id]['computed_data']['cluster'])
 
         # update plots
         self.update_all_plots()
@@ -758,9 +767,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.prep_data()
         self.update_all_plots()
 
-        self.toolButtonCrop.setChecked(False)
+        self.data[self.sample_id]['crop'] = False
 
-        self.plot.getViewBox().autoRange()
+        
 
     # get a named list of current fields for sample
     def get_field_list(self, set_name='analyte'):
@@ -994,7 +1003,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.data[self.sample_id]['axis_mask'] = ((current_plot_df['X'] >= self.data[sample_id]['crop_x_min']) & (current_plot_df['X'] <= self.data[sample_id]['crop_x_max']) &
                        (current_plot_df['Y'] <= current_plot_df['Y'].max() - self.data[sample_id]['crop_y_min']) & (current_plot_df['Y'] >= current_plot_df['Y'].max() - self.data[sample_id]['crop_y_max']))
-
+        
 
         #crop original_data based on self.data[self.sample_id]['axis_mask']
         self.data[sample_id]['cropped_raw_data'] = self.data[sample_id]['raw_data'][self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
@@ -1011,7 +1020,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.data[self.sample_id]['mask'] = self.data[self.sample_id]['mask'][self.data[self.sample_id]['axis_mask']]
         self.prep_data(sample_id)
         self.update_all_plots()
-
+        self.toolButtonCrop.setChecked(False)
+        self.data[self.sample_id]['crop'] = True
 
     def update_plot(self,bin_s = True, axis = False, reset= False):
         """"Update plot
@@ -2046,11 +2056,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # p1.autoRange()
             layout.addWidget(glw, 0, 0, 3, 2)
             glw.setBackground('w')
-            p1.autoRange()
             #add zoom window
             # self.setup_zoom_window(layout)
             print(style['Colors']['Colormap'])
             self.plot_laser_map_cont(layout,array,img,p1,cm,view)
+        p1.getViewBox().autoRange()
 
     def mouse_moved(self,event,plot):
         pos_view = plot.vb.mapSceneToView(event)  # This is in view coordinates
@@ -2132,11 +2142,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # elif self.toolButtonCrop.isChecked():
         #     self.crop_tool.create_rect(event, click_pos)
         # if event.button() == QtCore.Qt.LeftButton and self.main_window.pushButtonStartProfile.isChecked():
+       #apply profiles
         elif self.toolButtonPlotProfile.isChecked() or self.toolButtonPointMove.isChecked():
             self.profiling.plot_profile_scatter(event, array, k, plot, x, y,x_i, y_i)
-
+        #create polygons
         elif self.toolButtonPolyCreate.isChecked() or self.toolButtonPolyMovePoint.isChecked() or self.toolButtonPolyAddPoint.isChecked() or self.toolButtonPolyRemovePoint.isChecked():
             self.polygon.plot_polygon_scatter(event, k, x, y,x_i, y_i)
+        
+        #apply crop
+        elif self.toolButtonCrop.isChecked() and event.button() == QtCore.Qt.RightButton:
+            self.crop_tool.apply_crop()
 
     def plot_laser_map_cont(self,layout,array,img,p1,cm, view):
         # Single views
@@ -4860,7 +4875,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.data[self.sample_id]['analyte_info'] = pd.DataFrame(columns = ['analytes', 'norm','upper_bound','lower_bound','d_l_bound','d_u_bound', 'use'])
             self.data[self.sample_id]['ratios_info'] = pd.DataFrame(columns = [ 'analyte_1','analyte_2', 'norm','upper_bound','lower_bound','d_l_bound','d_u_bound', 'use', 'auto_scale'])
             self.data[self.sample_id]['filter_info'] = pd.DataFrame(columns = [ 'analyte_1', 'analyte_2', 'ratio','norm','f_min','f_max', 'use'])
-
+            
+            #Set crop to false
+            self.data[self.sample_id]['crop'] = False
 
             self.update_spinboxes_bool = False #prevent update plot from runing
             sample_df = pd.read_csv(file_path, engine='c')
@@ -5456,9 +5473,29 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
             self.prep_data(sample_id, analyte_1=analyte_1, analyte_2 = analyte_2)
-
-
-
+            
+    def reset_checked_items(self,item):
+        #unchecks tool buttons to prevent incorrect behaviour during plot click
+        match item:
+            case 'crop':
+                self.toolButtonPlotProfile.setChecked(False)
+                self.toolButtonPointMove.setChecked(False)
+                self.toolButtonPolyCreate.setChecked(False)
+                self.toolButtonPolyMovePoint.setChecked(False)
+                self.toolButtonPolyAddPoint.setChecked(False)
+                self.toolButtonPolyRemovePoint.setChecked(False)
+            case 'profiling':
+                self.toolButtonCrop.setChecked(False)
+                self.toolButtonPolyCreate.setChecked(False)
+                self.toolButtonPolyMovePoint.setChecked(False)
+                self.toolButtonPolyAddPoint.setChecked(False)
+                self.toolButtonPolyRemovePoint.setChecked(False)
+            case 'polygon':
+                self.toolButtonCrop.setChecked(False)
+                self.toolButtonPlotProfile.setChecked(False)
+                self.toolButtonPointMove.setChecked(False)
+                
+                
 class StandardItem(QStandardItem):
     def __init__(self, txt = '', font_size = 12, set_bold= False):
         super().__init__()
@@ -5937,10 +5974,14 @@ class Crop_tool:
         self.main_window = main_window
         # Initialize overlay rectangles
         self.overlays = []
-
     def init_crop(self):
         """Sets intial crop region as full map extent."""
+        
+        
         if self.main_window.toolButtonCrop.isChecked():
+            if self.main_window.data[self.main_window.sample_id]['crop']:
+                # reset to full view and remove overlays if user unselects crop tool
+                self.main_window.reset_to_full_view()
             # Original extent of map
             self.x_range = self.main_window.x_range
             self.y_range = self.main_window.y_range
@@ -5954,22 +5995,23 @@ class Crop_tool:
             crop_rect_y = (self.y_range - crop_rect_height) / 2
 
             self.crop_rect = ResizableRectItem(parent=self, rect=QRectF(crop_rect_x, crop_rect_y, crop_rect_width, crop_rect_height))
-            self.crop_rect.signalEmitter.rightClicked.connect(self.apply_crop)
             self.crop_rect.setPen(QPen(QColor(255, 255, 255), 4, Qt.DashLine))
-
+            self.crop_rect.setZValue(1e9)
             self.main_window.plot.addItem(self.crop_rect)
 
             for _ in range(4):
                 overlay = QGraphicsRectItem()
                 overlay.setBrush(QColor(0, 0, 0, 120))  # Semi-transparent dark overlay
+                self.crop_rect.setZValue(1e9)
                 self.main_window.plot.addItem(overlay)
                 self.overlays.append(overlay)
 
             self.update_overlay(self.crop_rect.rect())
-            self.main_window.toolButtonCropApply.setEnabled(True)
+            
         else:
             # reset to full view and remove overlays if user unselects crop tool
             self.main_window.reset_to_full_view()
+            self.toolButtonCrop.setChecked(False)
 
     def remove_overlays(self):
         """Removes darkened overlay following completion of crop."""
@@ -5977,7 +6019,6 @@ class Crop_tool:
             self.main_window.plot.removeItem(self.crop_rect)
             for overlay in self.overlays:
                 self.main_window.plot.removeItem(overlay)
-            self.main_window.toolButtonCropApply.setEnabled(False)
             self.overlays = []
 
     def update_overlay(self, rect):
@@ -6002,17 +6043,16 @@ class Crop_tool:
     def apply_crop(self):
         """Uses selected crop extent to set viewable area and map region for analysis."""
         if self.crop_rect:
+            print('c')
             crop_rect = self.crop_rect.rect()  # self.crop_rect is ResizableRectItem
-            print(crop_rect.left())
             self.main_window.data[self.main_window.sample_id]['crop_x_min'] = crop_rect.left()
             self.main_window.data[self.main_window.sample_id]['crop_x_max'] = crop_rect.right()
-            self.main_window.data[self.main_window.sample_id]['crop_y_max'] = crop_rect.top()
-            self.main_window.data[self.main_window.sample_id]['crop_y_min'] = crop_rect.bottom()
+            self.main_window.data[self.main_window.sample_id]['crop_y_min'] = crop_rect.top()
+            self.main_window.data[self.main_window.sample_id]['crop_y_max'] = crop_rect.bottom()
             if len(self.overlays)> 0: #remove crop rect and overlays
                 self.main_window.plot.removeItem(self.crop_rect)
                 for overlay in self.overlays:
                     self.main_window.plot.removeItem(overlay)
-                self.main_window.toolButtonCropApply.setEnabled(False)
             #update plot with crop
             self.main_window.apply_crop()
 
@@ -6020,7 +6060,6 @@ class Crop_tool:
 class ResizableRectItem(QGraphicsRectItem):
     def __init__(self, rect=None, parent=None):
         super(ResizableRectItem, self).__init__(rect)
-        self.signalEmitter = SignalEmitter()  # Create an instance of the emitter
         self.setAcceptHoverEvents(True)
         self.edgeTolerance = 50  # Adjusted for better precision
         self.resizing = False
@@ -6048,9 +6087,6 @@ class ResizableRectItem(QGraphicsRectItem):
             self.resizing = True
             self.dragStartPos = event.pos()
             self.dragStartRect = self.rect()
-        elif event.button() == Qt.RightButton:
-            # Emit the rightClicked signal through the signalEmitter object
-            self.signalEmitter.rightClicked.emit()
         else:
             super(ResizableRectItem, self).mousePressEvent(event)
 
@@ -6430,7 +6466,8 @@ class Profiling:
         self.array_y = array.shape[0]
 
         interpolate = False
-
+        
+        
         radius= int(self.main_window.lineEditPointRadius.text())
         # turn off profile (need to suppress context menu on right click)
         if event.button() == QtCore.Qt.RightButton and self.main_window.toolButtonPlotProfile.isChecked():
@@ -7096,9 +7133,6 @@ class Profiling:
             if scatter.get_gid() == gid:
                 return (scatter, errorbars)
         return None
-
-class SignalEmitter(QObject):
-    rightClicked = pyqtSignal()
 
 
 

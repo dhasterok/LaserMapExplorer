@@ -1541,7 +1541,7 @@
       <string>Activates the crop tool</string>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>6</number>
      </property>
      <widget class="QWidget" name="SelectAnalytePage">
       <property name="enabled">
@@ -5093,7 +5093,7 @@
          <x>0</x>
          <y>0</y>
          <width>300</width>
-         <height>181</height>
+         <height>106</height>
         </rect>
        </property>
        <property name="title">
@@ -5105,7 +5105,7 @@
           <x>5</x>
           <y>10</y>
           <width>286</width>
-          <height>166</height>
+          <height>91</height>
          </rect>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_12">
@@ -5217,99 +5217,6 @@
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
-            </widget>
-           </item>
-           <item row="3" column="0">
-            <widget class="QLabel" name="labelPCAPlotType">
-             <property name="font">
-              <font>
-               <pointsize>11</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Plot type</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="1">
-            <widget class="QComboBox" name="comboBoxPCAPlotType">
-             <property name="maximumSize">
-              <size>
-               <width>150</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>11</pointsize>
-              </font>
-             </property>
-             <property name="toolTip">
-              <string>Method for displaying PCA plot</string>
-             </property>
-             <item>
-              <property name="text">
-               <string>Variance</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Vectors</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>PC X vs. PC Y</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>PC X Score Map</string>
-              </property>
-             </item>
-            </widget>
-           </item>
-           <item row="4" column="0">
-            <widget class="QLabel" name="labelPCAStyle">
-             <property name="font">
-              <font>
-               <pointsize>11</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Plot style</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="1">
-            <widget class="QComboBox" name="comboBoxPCAStyle">
-             <property name="maximumSize">
-              <size>
-               <width>150</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>11</pointsize>
-              </font>
-             </property>
-             <property name="toolTip">
-              <string>Style for scatter plots</string>
-             </property>
-             <item>
-              <property name="text">
-               <string>Scatter</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Heatmap</string>
-              </property>
-             </item>
             </widget>
            </item>
           </layout>
@@ -7143,8 +7050,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>98</width>
+          <height>28</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7395,8 +7302,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>98</width>
+          <height>28</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7491,8 +7398,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>98</width>
+          <height>28</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7645,8 +7552,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>98</width>
+          <height>28</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7851,8 +7758,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>98</width>
+          <height>28</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -8258,7 +8165,7 @@
            </widget>
           </item>
           <item row="5" column="0">
-           <widget class="QLabel" name="labelColorbarOrientation">
+           <widget class="QLabel" name="labelCbarDirection">
             <property name="font">
              <font>
               <pointsize>11</pointsize>
@@ -8274,7 +8181,7 @@
            </widget>
           </item>
           <item row="5" column="1">
-           <widget class="QComboBox" name="comboBoxColorbarDirection">
+           <widget class="QComboBox" name="comboBoxCbarDirection">
             <property name="maximumSize">
              <size>
               <width>115</width>

@@ -217,18 +217,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.styles['profile']['Colors']['Color'] = '#d3d3d3'
 
 
-        self.map_style = {self.sample_tab_id: {'Colormap':'plasma', 'ColorbarDirection':'vertical', 'ScaleLocation':'southeast', 'ScaleDirection':'horizontal', 'OverlayColor':'#ffffff'},
-            self.scatter_tab_id: {'Colormap':'orange-violet-blue-white', 'ColorbarDirection':'vertical', 'ScaleLocation':'southeast', 'ScaleDirection':'horizontal', 'OverlayColor':'#ffffff'},
-            self.pca_tab_id: {'Colormap':'viridis', 'ColorbarDirection':'vertical', 'ScaleLocation':'southeast', 'ScaleDirection':'horizontal', 'OverlayColor':'#ffffff'},
-            self.cluster_tab_id: {'Colormap':'viridis', 'ColorbarDirection':'vertical', 'ScaleLocation':'southeast', 'ScaleDirection':'horizontal', 'OverlayColor':'#ffffff'}}
+        self.map_style = {self.sample_tab_id: {'Colormap':'plasma', 'CbarDirection':'vertical', 'ScaleLocation':'southeast', 'ScaleDirection':'horizontal', 'OverlayColor':'#ffffff'},
+            self.scatter_tab_id: {'Colormap':'orange-violet-blue-white', 'CbarDirection':'vertical', 'ScaleLocation':'southeast', 'ScaleDirection':'horizontal', 'OverlayColor':'#ffffff'},
+            self.pca_tab_id: {'Colormap':'viridis', 'CbarDirection':'vertical', 'ScaleLocation':'southeast', 'ScaleDirection':'horizontal', 'OverlayColor':'#ffffff'},
+            self.cluster_tab_id: {'Colormap':'viridis', 'CbarDirection':'vertical', 'ScaleLocation':'southeast', 'ScaleDirection':'horizontal', 'OverlayColor':'#ffffff'}}
         self.current_scatter_type = {self.sample_tab_id:'Heatmap', self.scatter_tab_id:'Scatter', self.pca_tab_id:'Scatter', self.profile_tab_id:'Scatter'}
-        self.scatter_style = {self.sample_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'RdBu', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0},
-            self.process_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.62},
-            self.spot_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.62},
-            self.scatter_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0},
-            self.ndim_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0},
-            self.pca_tab_id: {'Marker':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0},
-            self.profile_tab_id: {'Marker':'circle', 'Size':12, 'LineWidth':1, 'Color':'#d3d3d3', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0}}
+        self.scatter_style = {self.sample_tab_id: {'Markers':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'RdBu', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0},
+            self.process_tab_id: {'Markers':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.62},
+            self.spot_tab_id: {'Markers':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.62},
+            self.scatter_tab_id: {'Markers':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0},
+            self.ndim_tab_id: {'Markers':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0},
+            self.pca_tab_id: {'Markers':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0},
+            self.profile_tab_id: {'Markers':'circle', 'Size':12, 'LineWidth':1, 'Color':'#d3d3d3', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0}}
         self.heatmap_style = {self.sample_tab_id: {'Resolution':1, 'Colormap':'RdBu', 'AspectRatio':1.0},
             self.scatter_tab_id: {'Resolution':10, 'Colormap':'viridis', 'AspectRatio':1.0},
             self.pca_tab_id: {'Resolution':10, 'Colormap':'viridis', 'AspectRatio':1.0},
@@ -864,7 +864,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Currently unused
         """
         # Get the selected color bar position
-        color_bar_position = self.comboBoxColorbarDirection.currentText().lower()
+        color_bar_position = self.comboBoxCbarDirection.currentText().lower()
 
         # Iterate over your plots to update the color bar position
         for key, value in self.plot_widget_dict.items():
@@ -1581,7 +1581,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                         cb.remove()
                                         # Redraw the canvas to reflect the updates
                                         #plot new colorbar
-                                        fig.colorbar(im, ax=ax, boundaries=boundaries[:-1], ticks=np.arange(n_clusters), orientation=self.comboBoxColorbarDirection.currentText().lower())
+                                        fig.colorbar(im, ax=ax, boundaries=boundaries[:-1], ticks=np.arange(n_clusters), orientation=self.comboBoxCbarDirection.currentText().lower())
                                         figure_canvas.draw()
                                     # Redraw the figure layout to adjust for any changes
                                     fig.tight_layout()
@@ -2668,12 +2668,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # Plotting the explained variance
                 ax.plot(n_components, variances, linestyle='-', linewidth=style['Lines']['LineWidth'],
-                    marker=self.markerdict[style['Marker']['Symbol']], markeredgecolor=style['Colors']['Color'], markerfacecolor='none', markersize=style['Marker']['Size'],
+                    marker=self.markerdict[style['Markers']['Symbol']], markeredgecolor=style['Colors']['Color'], markerfacecolor='none', markersize=style['Markers']['Size'],
                     color=style['Colors']['Color'], label='Explained Variance')
 
                 # Plotting the cumulative explained variance
                 ax.plot(n_components, cumulative_variances, linestyle='-', linewidth=style['Lines']['LineWidth'],
-                    marker=self.markerdict[style['Marker']['Symbol']], markersize=style['Marker']['Size'],
+                    marker=self.markerdict[style['Markers']['Symbol']], markersize=style['Markers']['Size'],
                     color=style['Colors']['Color'], label='Cumulative Variance')
 
                 # Adding labels, title, and legend
@@ -3069,7 +3069,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 #set properties
                 if tab_id == self.scatter_tab_id or tab_id == self.pca_tab_id or tab_id == self.profile_tab_id:
                     val = self.comboBoxMarker.allItems()
-                    self.comboBoxMarker.setCurrentIndex(val.index(self.scatter_style[tab_id]['Marker']))
+                    self.comboBoxMarker.setCurrentIndex(val.index(self.scatter_style[tab_id]['Markers']))
                     self.doubleSpinBoxMarkerSize.setValue(self.scatter_style[tab_id]['Size'])
                     val = self.comboBoxLineWidth.allItems()
                     self.comboBoxLineWidth.setCurrentIndex(val.index(str(self.scatter_style[tab_id]['LineWidth'])))
@@ -3183,7 +3183,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxFieldColormap.setEnabled(True)
                 self.doubleSpinBoxColorLB.setEnabled(True)
                 self.doubleSpinBoxColorUB.setEnabled(True)
-                self.comboBoxColorbarDirection.setEnabled(True)
+                self.comboBoxCbarDirection.setEnabled(True)
                 self.lineEditCbarLabel.setEnabled(True)
 
                 self.spinBoxHeatmapResolution.setEnabled(False)
@@ -3223,7 +3223,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxFieldColormap.setEnabled(True)
                 self.doubleSpinBoxColorLB.setEnabled(True)
                 self.doubleSpinBoxColorUB.setEnabled(True)
-                self.comboBoxColorbarDirection.setEnabled(True)
+                self.comboBoxCbarDirection.setEnabled(True)
                 self.lineEditCbarLabel.setEnabled(False)
 
                 self.spinBoxHeatmapResolution.setEnabled(False)
@@ -3263,14 +3263,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.comboBoxFieldColormap.setEnabled(True)
                     self.doubleSpinBoxColorLB.setEnabled(True)
                     self.doubleSpinBoxColorUB.setEnabled(True)
-                    self.comboBoxColorbarDirection.setEnabled(True)
+                    self.comboBoxCbarDirection.setEnabled(True)
                 else:
                     self.toolButtonMarkerColor.setEnabled(True)
 
                     self.comboBoxFieldColormap.setEnabled(False)
                     self.doubleSpinBoxColorLB.setEnabled(False)
                     self.doubleSpinBoxColorUB.setEnabled(False)
-                    self.comboBoxColorbarDirection.setEnabled(False)
+                    self.comboBoxCbarDirection.setEnabled(False)
                 self.lineEditCbarLabel.setEnabled(False)
 
                 self.spinBoxHeatmapResolution.setEnabled(False)
@@ -3313,7 +3313,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.comboBoxFieldColormap.setEnabled(False)
                     self.doubleSpinBoxColorLB.setEnabled(False)
                     self.doubleSpinBoxColorUB.setEnabled(False)
-                    self.comboBoxColorbarDirection.setEnabled(False)
+                    self.comboBoxCbarDirection.setEnabled(False)
                     self.lineEditCbarLabel.setEnabled(False)
                 else:
                     self.toolButtonMarkerColor.setEnabled(False)
@@ -3322,7 +3322,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.comboBoxFieldColormap.setEnabled(True)
                     self.doubleSpinBoxColorLB.setEnabled(True)
                     self.doubleSpinBoxColorUB.setEnabled(True)
-                    self.comboBoxColorbarDirection.setEnabled(True)
+                    self.comboBoxCbarDirection.setEnabled(True)
                     self.lineEditCbarLabel.setEnabled(True)
 
                 self.spinBoxHeatmapResolution.setEnabled(False)
@@ -3361,7 +3361,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxFieldColormap.setEnabled(True)
                 self.doubleSpinBoxColorLB.setEnabled(True)
                 self.doubleSpinBoxColorUB.setEnabled(True)
-                self.comboBoxColorbarDirection.setEnabled(True)
+                self.comboBoxCbarDirection.setEnabled(True)
                 self.lineEditCbarLabel.setEnabled(True)
 
                 self.spinBoxHeatmapResolution.setEnabled(True)
@@ -3406,7 +3406,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxFieldColormap.setEnabled(False)
                 self.doubleSpinBoxColorLB.setEnabled(False)
                 self.doubleSpinBoxColorUB.setEnabled(False)
-                self.comboBoxColorbarDirection.setEnabled(False)
+                self.comboBoxCbarDirection.setEnabled(False)
                 self.lineEditCbarLabel.setEnabled(False)
 
                 self.spinBoxHeatmapResolution.setEnabled(False)
@@ -3446,7 +3446,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxFieldColormap.setEnabled(False)
                 self.doubleSpinBoxColorLB.setEnabled(False)
                 self.doubleSpinBoxColorUB.setEnabled(False)
-                self.comboBoxColorbarDirection.setEnabled(False)
+                self.comboBoxCbarDirection.setEnabled(False)
                 self.lineEditCbarLabel.setEnabled(False)
                 self.spinBoxHeatmapResolution.setEnabled(False)
             case 'variance':
@@ -3480,7 +3480,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxFieldColormap.setEnabled(False)
                 self.doubleSpinBoxColorLB.setEnabled(False)
                 self.doubleSpinBoxColorUB.setEnabled(False)
-                self.comboBoxColorbarDirection.setEnabled(False)
+                self.comboBoxCbarDirection.setEnabled(False)
                 self.lineEditCbarLabel.setEnabled(False)
                 self.spinBoxHeatmapResolution.setEnabled(False)
             case 'pca score' | 'cluster score' | 'clusters':
@@ -3527,7 +3527,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 else:
                     self.doubleSpinBoxColorLB.setEnabled(True)
                     self.doubleSpinBoxColorUB.setEnabled(True)
-                self.comboBoxColorbarDirection.setEnabled(True)
+                self.comboBoxCbarDirection.setEnabled(True)
                 self.lineEditCbarLabel.setEnabled(True)
                 self.spinBoxHeatmapResolution.setEnabled(False)
             case 'profile':
@@ -3561,7 +3561,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxFieldColormap.setEnabled(True)
                 self.doubleSpinBoxColorLB.setEnabled(True)
                 self.doubleSpinBoxColorUB.setEnabled(True)
-                self.comboBoxColorbarDirection.setEnabled(True)
+                self.comboBoxCbarDirection.setEnabled(True)
                 self.lineEditCbarLabel.setEnabled(True)
                 self.spinBoxHeatmapResolution.setEnabled(False)
 
@@ -3615,7 +3615,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxFieldColormap.setCurrentText(self.styles[plot_type]['Colors']['Colormap'])
         self.doubleSpinBoxColorLB.setValue(self.styles[plot_type]['Colors']['CLim'][0])
         self.doubleSpinBoxColorUB.setValue(self.styles[plot_type]['Colors']['CLim'][1])
-        self.comboBoxColorbarDirection.setCurrentText(self.styles[plot_type]['Colors']['Direction'])
+        self.comboBoxCbarDirection.setCurrentText(self.styles[plot_type]['Colors']['Direction'])
         self.lineEditCbarLabel.setText(self.styles[plot_type]['Colors']['CLabel'])
         self.spinBoxHeatmapResolution.setValue(self.styles[plot_type]['Colors']['Resolution'])
 
@@ -3662,7 +3662,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     'Field': self.comboBoxColorField.currentText(),
                     'Colormap': self.comboBoxFieldColormap.currentText(),
                     'CLim': [self.doubleSpinBoxColorLB.value(), self.doubleSpinBoxColorUB.value()],
-                    'Direction': self.comboBoxColorbarDirection.currentText(),
+                    'Direction': self.comboBoxCbarDirection.currentText(),
                     'CLabel': self.lineEditCbarLabel.currentText(),
                     'Resolution': self.spinBoxHeatmapResolution.value()}
 
@@ -3716,10 +3716,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # markers
     def marker_symbol_callback(self):
-        self.styles[self.comboBoxStylePlotType.currentText()]['Marker']['Symbol'] = self.comboBoxMarker.currentText()
+        self.styles[self.comboBoxStylePlotType.currentText()]['Markers']['Symbol'] = self.comboBoxMarker.currentText()
 
     def marker_size_callback(self):
-        self.styles[self.comboBoxStylePlotType.currentText()]['Marker']['Size'] = self.doubleSpinBoxMarkerSize.value()
+        self.styles[self.comboBoxStylePlotType.currentText()]['Markers']['Size'] = self.doubleSpinBoxMarkerSize.value()
 
     def slider_alpha_changed(self):
         """Updates transparency on scatter plots.
@@ -3791,7 +3791,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.styles[self.comboBoxStylePlotType.currentText()]['Colors']['CLim'] = [self.doubleSpinBoxColorLB.value(), self.doubleSpinBoxColorUB.value()]
 
     def cbar_direction_callback(self):
-        self.styles[self.comboBoxStylePlotType.currentText()]['Colors']['Direction'] = self.comboBoxColorbarDirection.currentText()
+        self.styles[self.comboBoxStylePlotType.currentText()]['Colors']['Direction'] = self.comboBoxCbarDirection.currentText()
 
     def cbar_label_callback(self):
         self.styles[self.comboBoxStylePlotType.currentText()]['Colors']['CLabel'] = self.lineEditCbarLabel.text()
@@ -4334,7 +4334,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             cmap = plt.get_cmap(style['Colors']['Colormap'])
             # img = ax.imshow(reshaped_array.T, cmap=cmap,  aspect=aspect_ratio)
             img = ax.imshow(reshaped_array, cmap=cmap,  aspect=aspect_ratio)
-            fig.colorbar(img, ax=ax, orientation = self.comboBoxColorbarDirection.currentText().lower())
+            fig.colorbar(img, ax=ax, orientation = self.comboBoxCbarDirection.currentText().lower())
         else:
             unique_labels = np.unique(['Cluster '+str(c) for c in labels])
             unique_labels.sort()
@@ -4349,7 +4349,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             boundaries = np.arange(-0.5, n_clusters, 1)
             norm = BoundaryNorm(boundaries, cmap.N, clip=True)
             img = ax.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect = aspect_ratio)
-            fig.colorbar(img, ax=ax, ticks=np.arange(0, n_clusters), orientation = self.comboBoxColorbarDirection.currentText().lower())
+            fig.colorbar(img, ax=ax, ticks=np.arange(0, n_clusters), orientation = self.comboBoxCbarDirection.currentText().lower())
 
         fig.subplots_adjust(left=0.05, right=1)  # Adjust these values as needed
         fig.tight_layout()

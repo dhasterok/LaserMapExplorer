@@ -532,9 +532,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Styling Tab
         #-------------------------
         # comboBox with plot type
-        #self.comboBoxStylePlotType.activated.connect(lambda: self.toggle_scatter_style_tab(self.toolBox.currentIndex()))
-        self.comboBoxStylePlotType.activated.connect(self.style_plot_type_callback)
-        self.comboBoxFieldColormap.activated.connect(self.field_colormap_callback)
 
         self.toolBox.currentChanged.connect(self.toolbox_changed)
 
@@ -548,12 +545,43 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         setattr(self.comboBoxColorByField, "allItems", lambda: [self.comboBoxColorByField.itemText(i) for i in range(self.comboBoxColorByField.count())])
         setattr(self.comboBoxFieldColormap, "allItems", lambda: [self.comboBoxFieldColormap.itemText(i) for i in range(self.comboBoxFieldColormap.count())])
 
-        self.comboBoxMarker.activated.connect(lambda: self.plot_scatter(save=False))
         # self.doubleSpinBoxMarkerSize.valueChanged.connect(lambda: self.plot_scatter(save=False))
         #self.comboBoxColorByField.activated.connect(lambda: self.update_combo_boxes(self.comboBoxColorByField, self.comboBoxColorField))
-        self.comboBoxColorByField.activated.connect(lambda: self.toggle_color_by_field(self.toolBox.currentIndex()))
-        self.comboBoxColorField.activated.connect(lambda: self.plot_scatter(save=False))
+
+        # callback functions
+        self.comboBoxStylePlotType.activated.connect(self.style_plot_type_callback)
+        # axes
+        self.lineEditXLabel.editingFinished.connect(self.xlabel_callback)
+        self.lineEditYLabel.editingFinished.connect(self.ylabel_callback)
+        self.lineEditZLabel.editingFinished.connect(self.zlabel_callback)
+        self.doubleSpinBoxXLB.valueChanged.connect(self.xlim_callback)
+        self.doubleSpinBoxXUB.valueChanged.connect(self.xlim_callback)
+        self.doubleSpinBoxYLB.valueChanged.connect(self.ylim_callback)
+        self.doubleSpinBoxYUB.valueChanged.connect(self.ylim_callback)
+        self.lineEditAspectRatio.editingFinished.connect(self.aspect_ratio_callback)
+        self.comboBoxTickDirection.currentIndexChanged.connect(self.tickdir_callback)
+        # annotations
+        self.fontComboBox.currentIndexChanged.connect(self.font_callback)
+        self.doubleSpinBoxFontSize.valueChanged.connect(self.font_size_callback)
+        # scales
+        self.comboBoxScaleDirection.currentIndexChanged.connect(self.scale_direction_callback)
+        self.comboBoxScaleLocation.currentIndexChanged.connect(self.scale_location_callback)
+        #overlay color
+        self.comboBoxMarker.currentIndexChanged.connect(self.marker_symbol_callback)
+        self.doubleSpinBoxMarkerSize.valueChanged.connect(self.marker_size_callback)
         self.horizontalSliderMarkerAlpha.sliderReleased.connect(self.slider_alpha_changed)
+        # lines
+        self.comboBoxLineWidth.currentIndexChanged.connect(self.line_width_callback)
+        # colors
+        #marker color
+        self.comboBoxColorByField.activated.connect(self.color_by_field_callback)
+        self.comboBoxColorField.currentIndexChanged.connect(self.color_field_callback)
+        self.comboBoxFieldColormap.activated.connect(self.field_colormap_callback)
+        self.doubleSpinBoxColorLB.valueChanged.connect(self.clim_callback)
+        self.doubleSpinBoxColorUB.valueChanged.connect(self.clim_callback)
+        self.comboBoxCbarDirection.currentIndexChanged.connect(self.cbar_direction_callback)
+        self.lineEditCbarLabel.editingFinished.connect(self.cbar_label_callback)
+
 
         # Plot toolbar
         #-------------------------
@@ -592,21 +620,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toggle_style_widgets()
         self.set_style_widgets()
 
-    def slider_alpha_changed(self):
-        """Updates transparency on scatter plots.
-
-        Executes on change of ``MainWindow.horizontalSliderMarkerAlpha.value()``.
-        """
-        self.labelMarkerAlpha.setText(str(self.horizontalSliderMarkerAlpha.value()))
-        match self.toolBox.currentIndex():
-            case self.scatter_tab_id:
-                self.scatter_style[self.scatter_tab_id]['Alpha'] = float(self.horizontalSliderMarkerAlpha.value())
-            case self.pca_tab_id:
-                self.scatter_style[self.pca_tab_id]['Alpha'] = float(self.horizontalSliderMarkerAlpha.value())
-            case self.profile_tab_id:
-                self.scatter_style[self.profile_tab_id]['Alpha'] = float(self.horizontalSliderMarkerAlpha.value())
-
-        self.plot_scatter(save=False)
 
     def input_ternary_name_dlg(self):
         """Opens a dialog to save new colormap
@@ -2973,42 +2986,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         return value_dict['x'], value_dict['y'], value_dict['z'], value_dict['c']
 
-    # updates scatter styles when ColorByField comboBox is changed
-    def toggle_color_by_field(self, tab_id):
-        if tab_id == self.scatter_tab_id or tab_id == self.pca_tab_id or tab_id == self.profile_tab_id:
-            if self.comboBoxColorByField.currentText().lower() == 'none':
-                # turn off ColorByField and enable Color
-                self.labelMarkerColor.setEnabled(True)
-                self.toolButtonMarkerColor.setEnabled(True)
-                self.toolButtonMarkerColor.setStyleSheet("background-color: %s;" % self.scatter_style[tab_id]['Color'])
 
-                self.labelColorField.setEnabled(False)
-                self.comboBoxColorField.setEnabled(False)
-
-                self.labelFieldColormap.setEnabled(False)
-                self.comboBoxFieldColormap.setEnabled(False)
-
-                self.scatter_style[tab_id]['ColorByField'] = self.comboBoxColorByField.currentText()
-                self.scatter_style[tab_id]['Field'] = self.comboBoxColorField.currentText()
-                self.plot_scatter(save=False)
-            else:
-                # turn off single color and enable ColorByField
-                self.labelColorField.setEnabled(True)
-                self.comboBoxColorField.setEnabled(True)
-
-                # fill ColorField comboBox
-                fields = self.get_field_list(self.comboBoxColorByField.currentText().lower())
-                self.comboBoxColorField.clear()
-                if not (len(fields) == 0):
-                    self.comboBoxColorField.addItems(fields)
-
-                self.labelFieldColormap.setEnabled(True)
-                self.comboBoxFieldColormap.setEnabled(True)
-
-                self.labelMarkerColor.setEnabled(False)
-                self.toolButtonMarkerColor.setEnabled(False)
-                self.toolButtonMarkerColor.setStyleSheet("background-color: none;")
-
+    # -------------------------------------
+    # Plot style related fuctions/callbacks
+    # -------------------------------------
     def open_style_callback(self, tab_id):
         """Opens and style properties for a given tab_id
 
@@ -3138,57 +3119,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.labelTransparency.setEnabled(False)
                 self.labelMarkerAlpha.setEnabled(False)
                 self.horizontalSliderMarkerAlpha.setEnabled(False)
-
-    def get_map_style(self, tab_id):
-        """Updates dictionary with map style properties
-
-        Updates self.map_style with widget status under Styling > Maps
-
-        :param tab_ind: tab_ind should be set by toolBox.currentIndex(), which determines styles to
-            update
-        :type tab_ind: int
-        """
-        match tab_id:
-            case self.sample_tab_id | self.pca_tab_id | self.cluster_tab_id:
-                self.map_style[tab_id] = {'Colormap': self.comboBoxFieldColormap.currentText(),
-                                    'ColorbarDirection': self.comboBoxColorbarDirection.currentText(),
-                                    'ScaleLocation': self.comboBoxScaleLocation.currentText(),
-                                    'ScaleDirection': self.comboBoxScaleDirection.currentText(),
-                                    'OverlayColor': self.get_hex_color(self.toolButtonOverlayColor.palette().button().color())
-                                    }
-            case self.scatter_tab_id:
-                self.map_style[tab_id] = {'Colormap': self.comboBoxTernaryColormap.currentText(),
-                                    'ColorbarDirection': self.comboBoxColorbarDirection.currentText(),
-                                    'ScaleLocation': self.comboBoxScaleLocation.currentText(),
-                                    'ScaleDirection': self.comboBoxScaleDirection.currentText(),
-                                    'OverlayColor': self.get_hex_color(self.toolButtonOverlayColor.palette().button().color())
-                                    }
-            case _:
-                self.map_style[self.sample_tab_id] = {'Colormap': self.comboBoxFieldColormap.currentText(),
-                                    'ColorbarDirection': self.comboBoxColorbarDirection.currentText(),
-                                    'ScaleLocation': self.comboBoxScaleLocation.currentText(),
-                                    'ScaleDirection': self.comboBoxScaleDirection.currentText(),
-                                    'OverlayColor': self.get_hex_color(self.toolButtonOverlayColor.palette().button().color())
-                                    }
-
-    def set_map_style(self):
-        """Sets style properties in Styling>Maps tab"""
-        match self.toolBox.currentIndex():
-            case self.pca_tab_id | self.cluster_tab_id:
-                tab_id = self.toolBox.currentIndex()
-                self.comboBoxFieldColormap.setCurrentText(self.map_style[tab_id]['Colormap'])
-            case self.scatter_tab_id:
-                tab_id = self.scatter_tab_id
-                self.comboBoxTernaryColormap.setCurrentText(self.map_style[tab_id]['Colormap'])
-                self.ternary_colormap_changed()
-            case _:
-                tab_id = self.sample_tab_id
-                self.comboBoxFieldColormap.setCurrentText(self.map_style[tab_id]['Colormap'])
-
-        self.comboBoxColorbarDirection.setCurrentText(self.map_style[tab_id]['ColorbarDirection'])
-        self.comboBoxScaleLocation.setCurrentText(self.map_style[tab_id]['ScaleLocation'])
-        self.comboBoxScaleDirection.setCurrentText(self.map_style[tab_id]['ScaleDirection'])
-        self.toolButtonOverlayColor.setStyleSheet("background-color: %s;" % self.map_style[tab_id]['OverlayColor'])
 
     def toggle_style_widgets(self):
         plot_type = self.comboBoxStylePlotType.currentText().lower()
@@ -3727,8 +3657,129 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.set_style_widgets(self.comboBoxStylePlotType.currentText())
         print(self.plot_types)
 
+    # axes
+    def xlabel_callback(self):
+        self.styles[self.comboBoxStylePlotType.currentText()]['Axes']['XLabel'] = self.lineEditXLabel.text()
+
+    def ylabel_callback(self):
+        self.styles[self.comboBoxStylePlotType.currentText()]['Axes']['YLabel'] = self.lineEditYLabel.text()
+
+    def zlabel_callback(self):
+        self.styles[self.comboBoxStylePlotType.currentText()]['Axes']['ZLabel'] = self.lineEditZLabel.text()
+
+    def xlim_callback(self):
+        self.styles[self.comboBoxStylePlotType.currentText()]['Axes']['XLim'] = [self.doubleSpinBoxXLB.value(), self.doubleSpinBoxXUB.value()]
+
+    def ylim_callback(self):
+        self.styles[self.comboBoxStylePlotType.currentText()]['Axes']['YLim'] = [self.doubleSpinBoxYLB.value(), self.doubleSpinBoxYUB.value()]
+
+    def aspect_ratio_callback(self):
+        self.styles[self.comboBoxStylePlotType.currentText()]['Axes']['AspectRatio'] = self.lineEditAspectRatio.text()
+
+    def tickdir_callback(self):
+        self.styles[self.comboBoxStylePlotType.currentText()]['Axes']['TickDir'] = self.comboBoxTickDirection.currentText()
+
+    def axes_reset_callback(self):
+        pass
+
+    # text
+    def font_callback(self):
+        self.styles[self.comboBoxStylePlotType.currentText()]['Text']['Font'] = self.fontComboBox.currentText()
+
+    def font_size_callback(self):
+        self.styles[self.comboBoxStylePlotType.currentText()]['Text']['FontSize'] = self.doubleSpinBoxFontSize.value()
+
+    # scales
+    def scale_direction_callback(self):
+        self.styles[self.comboBoxStylePlotType.currentText()]['Scales']['Direction'] = self.comboBoxScaleDirection.currentText()
+
+    def scale_location_callback(self):
+        self.styles[self.comboBoxStylePlotType.currentText()]['Scale']['Location'] = self.comboBoxScaleLocation.currentText()
+    
+    def overlay_color_callback(self):
+        self.styles[self.comboBoxStylePlotType.currentText()]['Scale']['OverlayColor'] = self.get_hex_color(self.toolButtonOverlayColor.palette().button().color())
+
+    # markers
+    def marker_symbol_callback(self):
+        self.styles[self.comboBoxStylePlotType.currentText()]['Marker']['Symbol'] = self.comboBoxMarker.currentText()
+
+    def marker_size_callback(self):
+        self.styles[self.comboBoxStylePlotType.currentText()]['Marker']['Size'] = self.doubleSpinBoxMarkerSize.value()
+
+    def slider_alpha_changed(self):
+        """Updates transparency on scatter plots.
+
+        Executes on change of ``MainWindow.horizontalSliderMarkerAlpha.value()``.
+        """
+        self.labelMarkerAlpha.setText(str(self.horizontalSliderMarkerAlpha.value()))
+        match self.toolBox.currentIndex():
+            case self.scatter_tab_id:
+                self.scatter_style[self.scatter_tab_id]['Alpha'] = float(self.horizontalSliderMarkerAlpha.value())
+            case self.pca_tab_id:
+                self.scatter_style[self.pca_tab_id]['Alpha'] = float(self.horizontalSliderMarkerAlpha.value())
+            case self.profile_tab_id:
+                self.scatter_style[self.profile_tab_id]['Alpha'] = float(self.horizontalSliderMarkerAlpha.value())
+
+        self.plot_scatter(save=False)
+
+    # lines
+    def line_width_callback(self):
+        self.styles[self.comboBoxStylePlotType.currentText()]['Lines']['LineWidth'] = float(self.comboBoxScaleDirection.currentText())
+
+    # colors
+    def marker_color_callback(self):
+        self.styles[self.comboBoxStylePlotType.currentText()]['Colors']['Color'] = self.get_hex_color(self.toolButtonMarkerColor.palette().button().color())
+
+    # updates scatter styles when ColorByField comboBox is changed
+    def color_by_field_callback(self, tab_id):
+        if tab_id == self.scatter_tab_id or tab_id == self.pca_tab_id or tab_id == self.profile_tab_id:
+            if self.comboBoxColorByField.currentText().lower() == 'none':
+                # turn off ColorByField and enable Color
+                self.labelMarkerColor.setEnabled(True)
+                self.toolButtonMarkerColor.setEnabled(True)
+                self.toolButtonMarkerColor.setStyleSheet("background-color: %s;" % self.scatter_style[tab_id]['Color'])
+
+                self.labelColorField.setEnabled(False)
+                self.comboBoxColorField.setEnabled(False)
+
+                self.labelFieldColormap.setEnabled(False)
+                self.comboBoxFieldColormap.setEnabled(False)
+
+                self.scatter_style[tab_id]['ColorByField'] = self.comboBoxColorByField.currentText()
+                self.scatter_style[tab_id]['Field'] = self.comboBoxColorField.currentText()
+                self.plot_scatter(save=False)
+            else:
+                # turn off single color and enable ColorByField
+                self.labelColorField.setEnabled(True)
+                self.comboBoxColorField.setEnabled(True)
+
+                # fill ColorField comboBox
+                fields = self.get_field_list(self.comboBoxColorByField.currentText().lower())
+                self.comboBoxColorField.clear()
+                if not (len(fields) == 0):
+                    self.comboBoxColorField.addItems(fields)
+
+                self.labelFieldColormap.setEnabled(True)
+                self.comboBoxFieldColormap.setEnabled(True)
+
+                self.labelMarkerColor.setEnabled(False)
+                self.toolButtonMarkerColor.setEnabled(False)
+                self.toolButtonMarkerColor.setStyleSheet("background-color: none;")
+
+    def color_field_callback(self):
+        self.styles[self.comboBoxStylePlotType.currentText()]['Colors']['Field'] = self.comboBoxColorField.currentText()
+
     def field_colormap_callback(self):
         self.styles[self.comboBoxStylePlotType.currentText()]['Colors']['Colormap'] = self.comboBoxFieldColormap.currentText()
+
+    def clim_callback(self):
+        self.styles[self.comboBoxStylePlotType.currentText()]['Colors']['CLim'] = [self.doubleSpinBoxColorLB.value(), self.doubleSpinBoxColorUB.value()]
+
+    def cbar_direction_callback(self):
+        self.styles[self.comboBoxStylePlotType.currentText()]['Colors']['Direction'] = self.comboBoxColorbarDirection.currentText()
+
+    def cbar_label_callback(self):
+        self.styles[self.comboBoxStylePlotType.currentText()]['Colors']['CLabel'] = self.lineEditCbarLabel.text()
 
     def toggle_scale_direction(self):
         if self.map_style['ScaleDirection'].lower() == 'none':

@@ -157,7 +157,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxMarker.addItems(self.markerdict.keys())
 
         self.default_styles = {'Axes': {'XLimAuto': True, 'XLim': [0,1], 'XLabel': '', 'YLimCustom': True, 'YLim': [0,1], 'YLabel': '', 'ZLabel': '', 'AspectRatio': '1.0', 'TickDir': 'out'},
-                               'Text': {'Font': self.fontComboBox.currentFont(), 'FontSize': 11.0},
+                               'Text': {'Font': '', 'FontSize': 11.0},
                                'Scales': {'Direction': 'none', 'Location': 'northeast', 'OverlayColor': '#ffffff'},
                                'Markers': {'Symbol': 'circle', 'Size': 6, 'Alpha': 30},
                                'Lines': {'LineWidth': 1.5},
@@ -175,24 +175,27 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                             self.profile_tab_id: [0, 'profile', 'analyte map', 'gradient map', 'cluster score', 'pca score'],
                             self.special_tab_id: [0, 'profile', 'analyte map', 'gradient map', 'cluster score', 'pca score']}
 
+        self.styles = {'analyte map': copy.deepcopy(self.default_styles),
+                        'correlation': copy.deepcopy(self.default_styles),
+                        'histogram': copy.deepcopy(self.default_styles),
+                        'gradient map': copy.deepcopy(self.default_styles),
+                        'scatter': copy.deepcopy(self.default_styles),
+                        'heatmap': copy.deepcopy(self.default_styles),
+                        'ternary map': copy.deepcopy(self.default_styles),
+                        'TEC': copy.deepcopy(self.default_styles),
+                        'radar': copy.deepcopy(self.default_styles),
+                        'variance': copy.deepcopy(self.default_styles),
+                        'vectors': copy.deepcopy(self.default_styles),
+                        'PCx vs. PCy scatter': copy.deepcopy(self.default_styles),
+                        'PCx vs. PCy heatmap': copy.deepcopy(self.default_styles),
+                        'PCA score': copy.deepcopy(self.default_styles),
+                        'cluster': copy.deepcopy(self.default_styles),
+                        'cluster score': copy.deepcopy(self.default_styles),
+                        'profile': copy.deepcopy(self.default_styles)}
 
-        self.styles = {'analyte map': self.default_styles,
-                        'correlation': self.default_styles,
-                        'histogram': self.default_styles,
-                        'gradient map': self.default_styles,
-                        'scatter': self.default_styles,
-                        'heatmap': self.default_styles,
-                        'ternary map': self.default_styles,
-                        'TEC': self.default_styles,
-                        'radar': self.default_styles,
-                        'variance': self.default_styles,
-                        'vectors': self.default_styles,
-                        'PCx vs. PCy scatter': self.default_styles,
-                        'PCx vs. PCy heatmap': self.default_styles,
-                        'PCA score': self.default_styles,
-                        'cluster': self.default_styles,
-                        'cluster score': self.default_styles,
-                        'profile': self.default_styles}
+        # update default styles
+        for k in self.styles.keys():
+            self.styles[k]['Text']['Font'] = self.fontComboBox.currentFont()
 
         self.styles['analyte map']['Colors']['Colormap'] = 'plasma'
         self.styles['correlation']['Colors']['Colormap'] = 'RdBu'
@@ -215,24 +218,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.styles['profile']['Lines']['LineWidth'] = 1.0
         self.styles['profile']['Markers']['Size'] = 12
         self.styles['profile']['Colors']['Color'] = '#d3d3d3'
-
-
-        self.map_style = {self.sample_tab_id: {'Colormap':'plasma', 'CbarDirection':'vertical', 'ScaleLocation':'southeast', 'ScaleDirection':'horizontal', 'OverlayColor':'#ffffff'},
-            self.scatter_tab_id: {'Colormap':'orange-violet-blue-white', 'CbarDirection':'vertical', 'ScaleLocation':'southeast', 'ScaleDirection':'horizontal', 'OverlayColor':'#ffffff'},
-            self.pca_tab_id: {'Colormap':'viridis', 'CbarDirection':'vertical', 'ScaleLocation':'southeast', 'ScaleDirection':'horizontal', 'OverlayColor':'#ffffff'},
-            self.cluster_tab_id: {'Colormap':'viridis', 'CbarDirection':'vertical', 'ScaleLocation':'southeast', 'ScaleDirection':'horizontal', 'OverlayColor':'#ffffff'}}
-        self.current_scatter_type = {self.sample_tab_id:'Heatmap', self.scatter_tab_id:'Scatter', self.pca_tab_id:'Scatter', self.profile_tab_id:'Scatter'}
-        self.scatter_style = {self.sample_tab_id: {'Markers':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'RdBu', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0},
-            self.process_tab_id: {'Markers':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.62},
-            self.spot_tab_id: {'Markers':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.62},
-            self.scatter_tab_id: {'Markers':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0},
-            self.ndim_tab_id: {'Markers':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0},
-            self.pca_tab_id: {'Markers':'circle', 'Size':6, 'LineWidth':1.5, 'Color':'#1c75bc', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0},
-            self.profile_tab_id: {'Markers':'circle', 'Size':12, 'LineWidth':1, 'Color':'#d3d3d3', 'ColorByField':'None', 'Field':None, 'Colormap':'viridis', 'Cmin':0, 'Cmax':0, 'Alpha':30, 'AspectRatio':1.0}}
-        self.heatmap_style = {self.sample_tab_id: {'Resolution':1, 'Colormap':'RdBu', 'AspectRatio':1.0},
-            self.scatter_tab_id: {'Resolution':10, 'Colormap':'viridis', 'AspectRatio':1.0},
-            self.pca_tab_id: {'Resolution':10, 'Colormap':'viridis', 'AspectRatio':1.0},
-            self.profile_tab_id: {'Resolution':1, 'Colormap':'viridis', 'AspectRatio':1.0}}
 
         self.widgetMultiView.setLayout(layout_multi_view)
         self.widgetMultiView.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
@@ -549,7 +534,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #self.comboBoxColorByField.activated.connect(lambda: self.update_combo_boxes(self.comboBoxColorByField, self.comboBoxColorField))
 
         # callback functions
-        self.comboBoxStylePlotType.activated.connect(self.style_plot_type_callback)
+        self.comboBoxStylePlotType.currentIndexChanged.connect(self.style_plot_type_callback)
         self.toolButtonSaveTheme.clicked.connect(self.input_theme_name_dlg)
         # axes
         self.lineEditXLabel.editingFinished.connect(self.xlabel_callback)
@@ -3471,45 +3456,48 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             plot_type = self.plot_types[tab_id][self.plot_types[tab_id][0]+1]
             self.comboBoxStylePlotType.setCurrentText(plot_type)
+        
+        print(plot_type)
+        style = self.styles[plot_type]
 
         # axes properties
-        self.doubleSpinBoxXLB.setValue(self.styles[plot_type]['Axes']['XLim'][0])
-        self.doubleSpinBoxXUB.setValue(self.styles[plot_type]['Axes']['XLim'][1])
-        self.lineEditXLabel.setText(self.styles[plot_type]['Axes']['XLabel'])
-        self.doubleSpinBoxYLB.setValue(self.styles[plot_type]['Axes']['YLim'][0])
-        self.doubleSpinBoxYUB.setValue(self.styles[plot_type]['Axes']['YLim'][1])
-        self.lineEditYLabel.setText(self.styles[plot_type]['Axes']['YLabel'])
-        self.lineEditZLabel.setText(self.styles[plot_type]['Axes']['ZLabel'])
-        self.lineEditAspectRatio.setText(str(self.styles[plot_type]['Axes']['AspectRatio']))
+        self.doubleSpinBoxXLB.setValue(style['Axes']['XLim'][0])
+        self.doubleSpinBoxXUB.setValue(style['Axes']['XLim'][1])
+        self.lineEditXLabel.setText(style['Axes']['XLabel'])
+        self.doubleSpinBoxYLB.setValue(style['Axes']['YLim'][0])
+        self.doubleSpinBoxYUB.setValue(style['Axes']['YLim'][1])
+        self.lineEditYLabel.setText(style['Axes']['YLabel'])
+        self.lineEditZLabel.setText(style['Axes']['ZLabel'])
+        self.lineEditAspectRatio.setText(str(style['Axes']['AspectRatio']))
 
         # annotation properties
-        self.fontComboBox.setFont(self.styles[plot_type]['Text']['Font'])
-        self.doubleSpinBoxFontSize.setValue(self.styles[plot_type]['Text']['FontSize'])
+        self.fontComboBox.setFont(style['Text']['Font'])
+        self.doubleSpinBoxFontSize.setValue(style['Text']['FontSize'])
 
         # scalebar properties
-        self.comboBoxScaleLocation.setCurrentText(self.styles[plot_type]['Scales']['Location'])
-        self.comboBoxScaleDirection.setCurrentText(self.styles[plot_type]['Scales']['Direction'])
-        self.toolButtonOverlayColor.setStyleSheet("background-color: %s;" % self.styles[plot_type]['Scales']['OverlayColor'])
+        self.comboBoxScaleLocation.setCurrentText(style['Scales']['Location'])
+        self.comboBoxScaleDirection.setCurrentText(style['Scales']['Direction'])
+        self.toolButtonOverlayColor.setStyleSheet("background-color: %s;" % style['Scales']['OverlayColor'])
 
         # marker properties
-        self.comboBoxMarker.setCurrentText(self.styles[plot_type]['Markers']['Symbol'])
-        self.doubleSpinBoxMarkerSize.setValue(self.styles[plot_type]['Markers']['Size'])
-        self.horizontalSliderMarkerAlpha.setValue(int(self.styles[plot_type]['Markers']['Alpha']))
+        self.comboBoxMarker.setCurrentText(style['Markers']['Symbol'])
+        self.doubleSpinBoxMarkerSize.setValue(style['Markers']['Size'])
+        self.horizontalSliderMarkerAlpha.setValue(int(style['Markers']['Alpha']))
         self.labelMarkerAlpha.setText(str(self.horizontalSliderMarkerAlpha.value()))
 
         # line properties
-        self.comboBoxLineWidth.setCurrentText(str(self.styles[plot_type]['Lines']['LineWidth']))
+        self.comboBoxLineWidth.setCurrentText(str(style['Lines']['LineWidth']))
 
         # color properties
-        self.toolButtonMarkerColor.setStyleSheet("background-color: %s;" % self.styles[plot_type]['Colors']['Color'])
-        self.comboBoxColorByField.setCurrentText(self.styles[plot_type]['Colors']['ColorByField'])
-        self.comboBoxColorField.setCurrentText(self.styles[plot_type]['Colors']['Field'])
-        self.comboBoxFieldColormap.setCurrentText(self.styles[plot_type]['Colors']['Colormap'])
-        self.doubleSpinBoxColorLB.setValue(self.styles[plot_type]['Colors']['CLim'][0])
-        self.doubleSpinBoxColorUB.setValue(self.styles[plot_type]['Colors']['CLim'][1])
-        self.comboBoxCbarDirection.setCurrentText(self.styles[plot_type]['Colors']['Direction'])
-        self.lineEditCbarLabel.setText(self.styles[plot_type]['Colors']['CLabel'])
-        self.spinBoxHeatmapResolution.setValue(self.styles[plot_type]['Colors']['Resolution'])
+        self.toolButtonMarkerColor.setStyleSheet("background-color: %s;" % style['Colors']['Color'])
+        self.comboBoxColorByField.setCurrentText(style['Colors']['ColorByField'])
+        self.comboBoxColorField.setCurrentText(style['Colors']['Field'])
+        self.comboBoxFieldColormap.setCurrentText(style['Colors']['Colormap'])
+        self.doubleSpinBoxColorLB.setValue(style['Colors']['CLim'][0])
+        self.doubleSpinBoxColorUB.setValue(style['Colors']['CLim'][1])
+        self.comboBoxCbarDirection.setCurrentText(style['Colors']['Direction'])
+        self.lineEditCbarLabel.setText(style['Colors']['CLabel'])
+        self.spinBoxHeatmapResolution.setValue(style['Colors']['Resolution'])
 
         # turn properties on/off based on plot type and style settings
         self.toggle_style_widgets()
@@ -3561,8 +3549,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def style_plot_type_callback(self):
         self.plot_types[self.toolBox.currentIndex()][0] = self.comboBoxStylePlotType.currentIndex()
 
-        self.set_style_widgets(self.comboBoxStylePlotType.currentText())
-        print(self.plot_types)
+        self.set_style_widgets(plot_type=self.comboBoxStylePlotType.currentText())
 
     # axes
     def xlabel_callback(self):
@@ -3598,7 +3585,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # scales
     def scale_direction_callback(self):
-        self.styles[self.comboBoxStylePlotType.currentText()]['Scales']['Direction'] = self.comboBoxScaleDirection.currentText()
+        direction = self.comboBoxScaleDirection.currentText()
+        self.styles[self.comboBoxStylePlotType.currentText()]['Scales']['Direction'] = direction
+
+        if direction == 'none':
+            self.labelScaleLocation.setEnabled(False)
+            self.comboBoxScaleLocation.setEnabled(False)
+        else:
+            self.labelScaleLocation.setEnabled(True)
+            self.comboBoxScaleLocation.setEnabled(True)
 
     def scale_location_callback(self):
         self.styles[self.comboBoxStylePlotType.currentText()]['Scale']['Location'] = self.comboBoxScaleLocation.currentText()
@@ -3687,14 +3682,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def cbar_label_callback(self):
         self.styles[self.comboBoxStylePlotType.currentText()]['Colors']['CLabel'] = self.lineEditCbarLabel.text()
-
-    def toggle_scale_direction(self):
-        if self.map_style['ScaleDirection'].lower() == 'none':
-            self.labelScaleLocation.setEnabled(False)
-            self.comboBoxScaleLocation.setEnabled(False)
-        else:
-            self.labelScaleLocation.setEnabled(True)
-            self.comboBoxScaleLocation.setEnabled(True)
 
     def plot_scatter(self, values=None, fig=None, save=False):
         """Creates a plots from self.toolBox Scatter page.
@@ -5048,7 +5035,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         elif plot_type=='histogram':
 
-            bins =self.default_bins
+            bins = self.default_bins
 
             bin_width = (np.nanmax(current_plot_df['array']) - np.nanmin(current_plot_df['array'])) / bins
 

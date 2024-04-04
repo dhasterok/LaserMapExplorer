@@ -1541,7 +1541,7 @@
       <string>Activates the crop tool</string>
      </property>
      <property name="currentIndex">
-      <number>6</number>
+      <number>5</number>
      </property>
      <widget class="QWidget" name="SelectAnalytePage">
       <property name="enabled">
@@ -7022,9 +7022,9 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>40</y>
+         <y>85</y>
          <width>221</width>
-         <height>711</height>
+         <height>666</height>
         </rect>
        </property>
        <property name="font">
@@ -7043,15 +7043,15 @@
         <enum>QFrame::Raised</enum>
        </property>
        <property name="currentIndex">
-        <number>5</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="StyleAxes">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>219</width>
+          <height>426</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7067,7 +7067,7 @@
            <x>5</x>
            <y>0</y>
            <width>211</width>
-           <height>218</height>
+           <height>260</height>
           </rect>
          </property>
          <layout class="QFormLayout" name="formLayout_11">
@@ -7250,51 +7250,52 @@
             </property>
            </widget>
           </item>
+          <item row="7" column="0">
+           <widget class="QLabel" name="labelResetAxes">
+            <property name="text">
+             <string>Reset Axes</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="1">
+           <widget class="QToolButton" name="toolButtonAxesReset">
+            <property name="minimumSize">
+             <size>
+              <width>28</width>
+              <height>28</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>28</width>
+              <height>28</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>Reset histogram axes</string>
+            </property>
+            <property name="text">
+             <string>Reset</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../resources.qrc">
+              <normaloff>:/icons/resources/icons/icon-reset-64.png</normaloff>:/icons/resources/icons/icon-reset-64.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+           </widget>
+          </item>
          </layout>
-        </widget>
-        <widget class="QToolButton" name="toolButtonAxesReset">
-         <property name="geometry">
-          <rect>
-           <x>180</x>
-           <y>220</y>
-           <width>32</width>
-           <height>32</height>
-          </rect>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>32</width>
-           <height>32</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>32</width>
-           <height>32</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>11</pointsize>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="toolTip">
-          <string>Reset histogram axes</string>
-         </property>
-         <property name="text">
-          <string>Reset</string>
-         </property>
-         <property name="icon">
-          <iconset resource="../resources.qrc">
-           <normaloff>:/icons/resources/icons/icon-reset-64.png</normaloff>:/icons/resources/icons/icon-reset-64.png</iconset>
-         </property>
-         <property name="iconSize">
-          <size>
-           <width>24</width>
-           <height>24</height>
-          </size>
-         </property>
         </widget>
        </widget>
        <widget class="QWidget" name="StyleAnnotations">
@@ -7302,8 +7303,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>219</width>
+          <height>426</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7398,8 +7399,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>219</width>
+          <height>426</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7552,8 +7553,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>219</width>
+          <height>426</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7758,8 +7759,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>219</width>
+          <height>426</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7863,7 +7864,7 @@
           <x>0</x>
           <y>0</y>
           <width>219</width>
-          <height>505</height>
+          <height>426</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -8133,7 +8134,7 @@
           <item row="7" column="1">
            <widget class="QSpinBox" name="spinBoxHeatmapResolution">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="maximumSize">
              <size>
@@ -8230,11 +8231,20 @@
           </item>
          </layout>
         </widget>
+       </widget>
+       <widget class="QWidget" name="StyleClusters">
+        <attribute name="icon">
+         <iconset resource="../resources.qrc">
+          <normaloff>:/icons/resources/icons/icon-cluster-64.png</normaloff>:/icons/resources/icons/icon-cluster-64.png</iconset>
+        </attribute>
+        <attribute name="label">
+         <string>Clusters</string>
+        </attribute>
         <widget class="QTableWidget" name="tableWidgetViewGroups">
          <property name="geometry">
           <rect>
            <x>5</x>
-           <y>265</y>
+           <y>0</y>
            <width>211</width>
            <height>181</height>
           </rect>
@@ -8278,9 +8288,9 @@
          <property name="geometry">
           <rect>
            <x>5</x>
-           <y>450</y>
+           <y>185</y>
            <width>211</width>
-           <height>36</height>
+           <height>46</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_14">
@@ -8435,16 +8445,44 @@
         </widget>
        </widget>
       </widget>
-      <widget class="QWidget" name="formLayoutWidget_15">
+      <widget class="QWidget" name="gridLayoutWidget_2">
        <property name="geometry">
         <rect>
          <x>5</x>
          <y>0</y>
          <width>211</width>
-         <height>41</height>
+         <height>80</height>
         </rect>
        </property>
-       <layout class="QFormLayout" name="formLayout_13">
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="1" column="1">
+         <widget class="QComboBox" name="comboBoxStyleTheme">
+          <item>
+           <property name="text">
+            <string>default</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QComboBox" name="comboBoxStylePlotType">
+          <property name="maximumSize">
+           <size>
+            <width>125</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>11</pointsize>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>Select plot type, options depend on open tabs in control toolbox</string>
+          </property>
+         </widget>
+        </item>
         <item row="0" column="0">
          <widget class="QLabel" name="labelScatterPlotType">
           <property name="font">
@@ -8461,60 +8499,79 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="1">
-         <layout class="QHBoxLayout" name="horizontalLayout_26">
-          <item>
-           <widget class="QComboBox" name="comboBoxStylePlotType">
-            <property name="maximumSize">
-             <size>
-              <width>125</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>11</pointsize>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string>Select plot type, options depend on open tabs in control toolbox</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="toolButtonUpdatePlot">
-            <property name="minimumSize">
-             <size>
-              <width>32</width>
-              <height>32</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>32</width>
-              <height>32</height>
-             </size>
-            </property>
-            <property name="toolTip">
-             <string>Update plot</string>
-            </property>
-            <property name="text">
-             <string>Plot</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../resources.qrc">
-              <normaloff>:/icons/resources/icons/icon-launch-64.png</normaloff>:/icons/resources/icons/icon-launch-64.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>24</width>
-              <height>24</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-         </layout>
+        <item row="1" column="0">
+         <widget class="QLabel" name="labelStyleTheme">
+          <property name="text">
+           <string>Theme</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QToolButton" name="toolButtonUpdatePlot">
+          <property name="minimumSize">
+           <size>
+            <width>28</width>
+            <height>28</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>28</width>
+            <height>28</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Update plot</string>
+          </property>
+          <property name="text">
+           <string>Plot</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../resources.qrc">
+            <normaloff>:/icons/resources/icons/icon-launch-64.png</normaloff>:/icons/resources/icons/icon-launch-64.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>20</width>
+            <height>20</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QToolButton" name="toolButtonSaveTheme">
+          <property name="minimumSize">
+           <size>
+            <width>28</width>
+            <height>28</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>28</width>
+            <height>28</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Save series</string>
+          </property>
+          <property name="text">
+           <string>Save</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../resources.qrc">
+            <normaloff>:/icons/resources/icons/icon-save-file-64.png</normaloff>:/icons/resources/icons/icon-save-file-64.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>20</width>
+            <height>20</height>
+           </size>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>

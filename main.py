@@ -87,7 +87,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.proxies = []
         self.prev_plot = ''
         self.pop_plot = ''
-        self.order= 'F'
+        self.order = 'F'
         self.update_spinboxes_bool = False
         self.default_bins = 100
         self.swap_xy_val = False
@@ -550,6 +550,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # callback functions
         self.comboBoxStylePlotType.activated.connect(self.style_plot_type_callback)
+        self.toolButtonSaveTheme.clicked.connect(self.input_theme_name_dlg)
         # axes
         self.lineEditXLabel.editingFinished.connect(self.xlabel_callback)
         self.lineEditYLabel.editingFinished.connect(self.ylabel_callback)
@@ -721,6 +722,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.toolBox.setCurrentIndex(self.profile_tab_id)
             case 'special':
                 self.toolBox.setCurrentIndex(self.special_tab_id)
+
+        # update_plot()
 
     def change_ref_material(self, comboBox1, comboBox2):
         """Changes reference computing normalized analytes
@@ -3005,135 +3008,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------
     # Plot style related fuctions/callbacks
     # -------------------------------------
-    def open_style_callback(self, tab_id):
-        """Opens and style properties for a given tab_id
+    def input_theme_name_dlg(self):
+        """Opens a dialog to save style theme
 
-        :param tab_id: tab_ind should be set by ``MainWindow.toolBox.currentIndex()``, which determines the active
-            widgets
-        :type tab_id: int
+        Executes on ``MainWindow.toolButtonSaveTheme`` is clicked
         """
+        name, ok = QInputDialog.getText(self, 'Save custom theme', 'Enter theme name:')
+        if ok:
 
-        # open styling page associated with toolbox page.
-        self.toolBoxTreeView.setCurrentIndex(self.style_tab_id)
-        if tab_id == self.sample_tab_id:
-            if self.comboBoxCorrelationMethod.currentText().lower() == 'none':
-                self.toolBoxStyle.setCurrentIndex(1)
-                self.set_map_style(tab_id, False)
-            else:
-                self.toolBoxStyle.setCurrentIndex(2)
-                self.toggle_scatter_style_tab(tab_id, False)
+            # update comboBox
+            self.comboBoxStyleTheme.addItem(name)
+            self.comboBoxStyleTheme.setCurrentText(name)
+
+            # append theme to file of saved themes
+            pass
         else:
-            self.toolBoxStyle.setCurrentIndex(2)
-            self.toggle_scatter_style_tab(tab_id, False)
+            # throw a warning that name is not saved
+            return
 
-        # style button for profiles is found in the lower pane, profile tab, so open profile pane in left toolbox.
-        if tab_id == self.profile_tab_id:
-            self.toolBox.setCurrentIndex(self.profile_tab_id)
-
-
-    # toggle heatmap resolution spinBox when the scatter type comboBox is changed
-    def toggle_scatter_style_tab(self, tab_id, update_plot=False):
-        """Updates and toggles widgets in scatter style tab
-
-        Updates the widgets in ``MainWindow.toolBoxStyle`` and enables/disables widgets as necessary.
-
-        :param tab_id: tab_ind should be set by ``MainWindow.toolBox.currentIndex()``, which determines the active plot
-            widget to update
-        :type tab_id: int
-        :param update_plot: flag indicating whether to update plot after change (True = yes, False = No), Defaults to False
-        :type update_plot: bool, optional
-        """
-        if tab_id == self.sample_tab_id:
-            self.comboBoxStylePlotType.setCurrentText('Heatmap')
-        elif tab_id == self.profile_tab_id:
-            self.comboBoxStylePlotType.setCurrentText('Scatter')
-
-        match self.comboBoxStylePlotType.currentText().lower():
-            case 'scatter':
-                self.current_scatter_type[tab_id] = 'Scatter'
-                # turn off heatmap related properties
-                self.labelHeatmapResolution.setEnabled(False)
-                self.spinBoxHeatmapResolution.setEnabled(False)
-
-                # turn on Scatter related properties
-                self.labelMarker.setEnabled(True)
-                self.comboBoxMarker.setEnabled(True)
-                self.labelMarkerSize.setEnabled(True)
-                self.doubleSpinBoxMarkerSize.setEnabled(True)
-                self.labelLineWidth.setEnabled(True)
-                self.comboBoxLineWidth.setEnabled(True)
-                self.labelMarkerAlpha.setEnabled(True)
-                self.horizontalSliderMarkerAlpha.setEnabled(True)
-                self.labelColorByField.setEnabled(True)
-                self.comboBoxColorByField.setEnabled(True)
-                #set properties
-                if tab_id == self.scatter_tab_id or tab_id == self.pca_tab_id or tab_id == self.profile_tab_id:
-                    val = self.comboBoxMarker.allItems()
-                    self.comboBoxMarker.setCurrentIndex(val.index(self.scatter_style[tab_id]['Markers']))
-                    self.doubleSpinBoxMarkerSize.setValue(self.scatter_style[tab_id]['Size'])
-                    val = self.comboBoxLineWidth.allItems()
-                    self.comboBoxLineWidth.setCurrentIndex(val.index(str(self.scatter_style[tab_id]['LineWidth'])))
-                    val = self.comboBoxColorByField.allItems()
-                    self.comboBoxColorByField.setCurrentIndex(val.index(self.scatter_style[tab_id]['ColorByField']))
-                    self.horizontalSliderMarkerAlpha.setValue(int((self.scatter_style[tab_id]['Alpha'])))
-                    self.labelMarkerAlpha.setText(str(self.horizontalSliderMarkerAlpha.value()))
-                    self.labelMarkerAlpha.setText(str(self.scatter_style[tab_id]['Alpha']))
-
-                # ColorByField
-                if self.comboBoxColorByField.currentText().lower() == 'none':
-                    # turn off ColorByField related properties
-                    self.labelColorField.setEnabled(False)
-                    self.comboBoxColorField.setEnabled(False)
-                    self.labelFieldColormap.setEnabled(False)
-                    self.comboBoxFieldColormap.setEnabled(False)
-
-                    # turn on ColorByField=None related properties
-                    self.labelMarkerColor.setEnabled(True)
-                    self.toolButtonMarkerColor.setEnabled(True)
-                    if tab_id == self.scatter_tab_id or tab_id == self.pca_tab_id or tab_id == self.profile_tab_id:
-                        self.toolButtonMarkerColor.setStyleSheet("background-color: %s;" % self.scatter_style[tab_id]['Color'])
-                else:
-                    # turn off ColorByField related properties
-                    self.labelColorField.setEnabled(True)
-                    self.comboBoxColorField.setEnabled(True)
-                    self.labelFieldColormap.setEnabled(True)
-                    self.comboBoxFieldColormap.setEnabled(True)
-                    if tab_id == self.sample_tab_id or self.scatter_tab_id or tab_id == self.pca_tab_id or tab_id == self.profile_tab_id:
-                        val = self.comboBoxFieldColormap.allItems()
-                        self.comboBoxFieldColormap.setCurrentIndex(val.index(self.scatter_style[tab_id]['Colormap']))
-
-                    # turn off ColorByField=None related fields
-                    self.labelMarkerColor.setEnabled(False)
-                    self.toolButtonMarkerColor.setEnabled(False)
-
-            case 'heatmap':
-                self.current_scatter_type[tab_id] = 'Heatmap'
-                # turn on heatmap related fields
-                self.labelHeatmapResolution.setEnabled(True)
-                self.spinBoxHeatmapResolution.setEnabled(True)
-                self.labelFieldColormap.setEnabled(True)
-                self.comboBoxFieldColormap.setEnabled(True)
-                if tab_id == self.sample_tab_id or tab_id == self.scatter_tab_id or tab_id == self.pca_tab_id or tab_id == self.profile_tab_id:
-                    val = self.comboBoxFieldColormap.allItems()
-                    self.comboBoxFieldColormap.setCurrentIndex(val.index(self.heatmap_style[tab_id]['Colormap']))
-
-                # turn off Marker related fields
-                self.labelMarker.setEnabled(False)
-                self.comboBoxMarker.setEnabled(False)
-                self.labelMarkerSize.setEnabled(False)
-                self.doubleSpinBoxMarkerSize.setEnabled(False)
-                self.labelLineWidth.setEnabled(False)
-                self.comboBoxLineWidth.setEnabled(False)
-                self.labelMarkerColor.setEnabled(False)
-                self.toolButtonMarkerColor.setEnabled(False)
-                self.toolButtonMarkerColor.setStyleSheet("background-color: none;")
-                self.labelColorByField.setEnabled(False)
-                self.comboBoxColorByField.setEnabled(False)
-                self.labelColorField.setEnabled(False)
-                self.comboBoxColorField.setEnabled(False)
-                self.labelTransparency.setEnabled(False)
-                self.labelMarkerAlpha.setEnabled(False)
-                self.horizontalSliderMarkerAlpha.setEnabled(False)
 
     def toggle_style_widgets(self):
         plot_type = self.comboBoxStylePlotType.currentText().lower()

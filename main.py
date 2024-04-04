@@ -518,8 +518,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #-------------------------
         # comboBox with plot type
 
-        self.toolBox.currentChanged.connect(self.toolbox_changed)
-
         # overlay and annotation properties
         self.toolButtonOverlayColor.clicked.connect(lambda: self.button_color_select(self.toolButtonOverlayColor))
         self.toolButtonMarkerColor.clicked.connect(lambda: self.button_color_select(self.toolButtonMarkerColor))
@@ -568,6 +566,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxCbarDirection.currentIndexChanged.connect(self.cbar_direction_callback)
         self.lineEditCbarLabel.editingFinished.connect(self.cbar_label_callback)
 
+        self.toolBox.currentChanged.connect(self.toolbox_changed)
 
         # Plot toolbar
         #-------------------------
@@ -612,7 +611,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxStylePlotType.clear()
         self.comboBoxStylePlotType.addItems(self.plot_types[self.toolBox.currentIndex()][1:])
         self.comboBoxStylePlotType.setCurrentIndex(self.plot_types[self.toolBox.currentIndex()][0])
-        self.toggle_style_widgets()
         self.set_style_widgets()
 
 
@@ -3013,6 +3011,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
     def toggle_style_widgets(self):
+        """Enables/disables all style widgets
+        
+        Toggling of enabled states are based on ``MainWindow.toolBox`` page and the current plot type
+        selected in ``MainWindow.comboBoxStylePlotType."""
         plot_type = self.comboBoxStylePlotType.currentText().lower()
 
         # annotation properties
@@ -3023,17 +3025,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # axes properties
                 self.doubleSpinBoxXLB.setEnabled(True)
                 self.doubleSpinBoxXUB.setEnabled(True)
-                self.lineEditXLabel.setEnabled(False)
                 self.doubleSpinBoxYLB.setEnabled(True)
                 self.doubleSpinBoxYUB.setEnabled(True)
+                self.lineEditXLabel.setEnabled(False)
                 self.lineEditYLabel.setEnabled(False)
                 self.lineEditZLabel.setEnabled(False)
                 self.lineEditAspectRatio.setEnabled(False)
 
                 # scalebar properties
                 self.comboBoxScaleDirection.setEnabled(True)
-                self.toolButtonOverlayColor.setEnabled(True)
                 self.comboBoxScaleLocation.setEnabled(True)
+                self.toolButtonOverlayColor.setEnabled(True)
 
                 # marker properties
                 if len(self.spotdata) != 0:
@@ -3183,7 +3185,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxColorByField.setEnabled(True)
                 # if color by field is none, then use marker color,
                 # otherwise turn off marker color and turn all field and colormap properties to on
-                if self.comboBoxColorByField.currentText() == 'none':
+                if self.comboBoxColorByField.currentText().lower() == 'none':
                     self.toolButtonMarkerColor.setEnabled(True)
 
                     self.comboBoxColorField.setEnabled(False)
@@ -3441,6 +3443,119 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxCbarDirection.setEnabled(True)
                 self.lineEditCbarLabel.setEnabled(True)
                 self.spinBoxHeatmapResolution.setEnabled(False)
+    
+        # enable/disable labels
+        # axes properties
+        if self.doubleSpinBoxXLB.isEnabled():
+            self.labelXLim.setEnabled(True)
+        else:
+            self.labelXLim.setEnabled(False)
+
+        if self.doubleSpinBoxYLB.isEnabled():
+            self.labelYLim.setEnabled(True)
+        else:
+            self.labelYLim.setEnabled(False)
+
+        if self.lineEditXLabel.isEnabled():
+            self.labelXLabel.setEnabled(True)
+        else:
+            self.labelXLabel.setEnabled(False)
+
+        if self.lineEditYLabel.isEnabled():
+            self.labelYLabel.setEnabled(True)
+        else:
+            self.labelYLabel.setEnabled(False)
+
+        if self.lineEditZLabel.isEnabled():
+            self.labelZLabel.setEnabled(True)
+        else:
+            self.labelZLabel.setEnabled(False)
+
+        if self.lineEditAspectRatio.isEnabled():
+            self.labelAspectRatio.setEnabled(True)
+        else:
+            self.labelAspectRatio.setEnabled(False)
+
+        # scalebar properties
+        if self.comboBoxScaleDirection.isEnabled():
+            self.labelScaleDirection.setEnabled(True)
+        else:
+            self.labelScaleDirection.setEnabled(False)
+
+        if self.toolButtonOverlayColor.isEnabled():
+            self.labelOverlayColor.setEnabled(True)
+        else:
+            self.toolButtonOverlayColor.setStyleSheet("background-color: %s;" % '#e6e6e6')
+            self.labelOverlayColor.setEnabled(False)
+
+        if self.comboBoxScaleLocation.isEnabled():
+            self.labelScaleLocation.setEnabled(True)
+        else:
+            self.labelScaleLocation.setEnabled(False)
+
+        # marker properties
+        if self.comboBoxMarker.isEnabled():
+            self.labelMarker.setEnabled(True)
+        else:
+            self.labelMarker.setEnabled(False)
+
+        if self.doubleSpinBoxMarkerSize.isEnabled():
+            self.labelMarkerSize.setEnabled(True)
+        else:
+            self.labelMarkerSize.setEnabled(False)
+
+        if self.horizontalSliderMarkerAlpha.isEnabled():
+            self.labelTransparency.setEnabled(True)
+        else:
+            self.labelTransparency.setEnabled(False)
+
+        # line properties
+        if self.comboBoxLineWidth.isEnabled():
+            self.labelLineWidth.setEnabled(True)
+        else:
+            self.labelLineWidth.setEnabled(False)
+
+        # color properties
+        if self.toolButtonMarkerColor.isEnabled():
+            self.labelMarkerColor.setEnabled(True)
+        else:
+            self.toolButtonMarkerColor.setStyleSheet("background-color: %s;" % '#e6e6e6')
+            self.labelMarkerColor.setEnabled(False)
+
+        if self.comboBoxColorByField.isEnabled():
+            self.labelColorByField.setEnabled(True)
+        else:
+            self.labelColorByField.setEnabled(False)
+
+        if self.comboBoxColorField.isEnabled():
+            self.labelColorField.setEnabled(True)
+        else:
+            self.labelColorField.setEnabled(False)
+
+        if self.comboBoxFieldColormap.isEnabled():
+            self.labelFieldColormap.setEnabled(True)
+        else:
+            self.labelFieldColormap.setEnabled(False)
+
+        if self.doubleSpinBoxColorLB.isEnabled():
+            self.labelColorBounds.setEnabled(True)
+        else:
+            self.labelColorBounds.setEnabled(False)
+
+        if self.comboBoxCbarDirection.isEnabled():
+            self.labelCbarDirection.setEnabled(True)
+        else:
+            self.labelCbarDirection.setEnabled(False)
+
+        if self.lineEditCbarLabel.isEnabled():
+            self.labelCbarLabel.setEnabled(True)
+        else:
+            self.labelCbarLabel.setEnabled(False)
+
+        if self.spinBoxHeatmapResolution.isEnabled():
+            self.labelHeatmapResolution.setEnabled(True)
+        else:
+            self.labelHeatmapResolution.setEnabled(False)
 
     def set_style_widgets(self, plot_type=None):
         """Sets values in right toolbox style page
@@ -3456,8 +3571,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             plot_type = self.plot_types[tab_id][self.plot_types[tab_id][0]+1]
             self.comboBoxStylePlotType.setCurrentText(plot_type)
+        elif plot_type == '':
+            return
         
-        print(plot_type)
         style = self.styles[plot_type]
 
         # axes properties
@@ -3626,7 +3742,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # lines
     def line_width_callback(self):
-        self.styles[self.comboBoxStylePlotType.currentText()]['Lines']['LineWidth'] = float(self.comboBoxScaleDirection.currentText())
+        self.styles[self.comboBoxStylePlotType.currentText()]['Lines']['LineWidth'] = float(self.comboBoxLineWidth.currentText())
 
     # colors
     def marker_color_callback(self):

@@ -69,12 +69,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         #Initialise nested data which will hold the main sets of data for analysis
         self.data= {}
-
+        
         self.clipped_ratio_data = pd.DataFrame()
         self.analyte_data = {}  #stores orginal analyte data
         self.clipped_analyte_data = {} # stores processed analyted data
         # self.data['computed_data'] = {} # stores computed analyted data (ratios, custom fields)
-
+        self.sample_id = ''
         #self.data = {}
         self.plot_widget_dict ={'lasermap':{},'histogram':{},'lasermap_norm':{},'clustering':{},'scatter':{},'n-dim':{},'correlation':{}, 'pca':{}}
         self.multi_view_index = []
@@ -109,6 +109,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         layout_multi_view.setSpacing(0)# Set margins to 0 if you want to remove margins as well
         layout_multi_view.setContentsMargins(0, 0, 0, 0)
         self.point_selected = False
+
+        #Flags to prevent plotting when widgets change
+        self.check_analysis = True
+
 
         # preferences
         self.default_preferences = {'Units':{'Concentration': 'ppm', 'Distance': 'um', 'Temperature':'°C', 'Pressure':'MPa', 'Date':'Ma', 'FontSize':11, 'TickDir':'out'}}
@@ -170,10 +174,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                             self.filter_tab_id: [0, 'analyte map', 'gradient map'],
                             self.scatter_tab_id: [0, 'scatter', 'heatmap', 'ternary map'],
                             self.ndim_tab_id: [0, 'TEC', 'Radar'],
-                            self.pca_tab_id: [0, 'variance','vectors','PCx vs. PCy scatter','PCx vs. PCy heatmap','pca score'],
-                            self.cluster_tab_id: [0, 'cluster', 'cluster score'],
-                            self.profile_tab_id: [0, 'profile', 'analyte map', 'gradient map', 'cluster score', 'pca score'],
-                            self.special_tab_id: [0, 'profile', 'analyte map', 'gradient map', 'cluster score', 'pca score']}
+                            self.pca_tab_id: [0, 'variance','vectors','PCx vs. PCy scatter','PCx vs. PCy heatmap','PCA Score'],
+                            self.cluster_tab_id: [0, 'Cluster', 'Cluster Score'],
+                            self.profile_tab_id: [0, 'profile', 'analyte map', 'gradient map', 'Cluster Score', 'PCA Score'],
+                            self.special_tab_id: [0, 'profile', 'analyte map', 'gradient map', 'Cluster Score', 'PCA Score']}
 
         self.styles = {'analyte map': copy.deepcopy(self.default_styles),
                         'correlation': copy.deepcopy(self.default_styles),
@@ -188,9 +192,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         'vectors': copy.deepcopy(self.default_styles),
                         'PCx vs. PCy scatter': copy.deepcopy(self.default_styles),
                         'PCx vs. PCy heatmap': copy.deepcopy(self.default_styles),
-                        'PCA score': copy.deepcopy(self.default_styles),
-                        'cluster': copy.deepcopy(self.default_styles),
-                        'cluster score': copy.deepcopy(self.default_styles),
+                        'PCA Score': copy.deepcopy(self.default_styles),
+                        'Cluster': copy.deepcopy(self.default_styles),
+                        'Cluster Score': copy.deepcopy(self.default_styles),
                         'profile': copy.deepcopy(self.default_styles)}
 
         # update default styles
@@ -198,10 +202,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.styles[k]['Text']['Font'] = self.fontComboBox.currentFont()
 
         self.styles['analyte map']['Colors']['Colormap'] = 'plasma'
+        self.styles['analyte map']['Colors']['ColorByField'] = 'Analyte'
         self.styles['correlation']['Colors']['Colormap'] = 'RdBu'
         self.styles['vectors']['Colors']['Colormap'] = 'RdBu'
         self.styles['gradient map']['Colors']['Colormap'] = 'RdYlBu'
-        self.styles['cluster score']['Colors']['Colormap'] = 'plasma'
+        self.styles['Cluster Score']['Colors']['Colormap'] = 'plasma'
 
         self.styles['correlation']['Axes']['Aspect Ratio'] = 1.0
         self.styles['scatter']['Axes']['Aspect Ratio'] = 1.62
@@ -559,7 +564,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # colors
         #marker color
         self.comboBoxColorByField.activated.connect(self.color_by_field_callback)
-        self.comboBoxColorField.currentIndexChanged.connect(self.color_field_callback)
+        self.comboBoxColorField.activated.connect(self.color_field_callback)
         self.comboBoxFieldColormap.activated.connect(self.field_colormap_callback)
         self.doubleSpinBoxColorLB.valueChanged.connect(self.clim_callback)
         self.doubleSpinBoxColorUB.valueChanged.connect(self.clim_callback)
@@ -654,7 +659,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.swap_xy_data(self.data[self.sample_id]['processed_data']) #this rotates processed data as well
 
-        # self.swap_xy_data(self.data[self.sample_id]['computed_data']['cluster'])
+        # self.swap_xy_data(self.data[self.sample_id]['computed_data']['Cluster'])
 
         # update plots
         self.update_all_plots()
@@ -678,7 +683,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Opens the specified tab in ``MainWindow.toolbox``
 
         :param tab_name: opens tab, values: 'samples', 'preprocess', 'spot data', 'filter',
-              'scatter', 'ndim', pca', 'clustering', 'profiles', 'special'
+              'scatter', 'ndim', pca', 'clustering', 'profiles', 'Special'
         :type tab_name: str
         """
         match tab_name.lower():
@@ -738,12 +743,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.data[sample_id]['processed_data'] = copy.deepcopy(self.data[sample_id]['raw_data'])
         self.data[sample_id]['cropped_raw_data'] = copy.deepcopy(self.data[sample_id]['raw_data'])
         self.data[sample_id]['computed_data'] = {
-            'ratio':None,
-            'calculated':None,
-            'special':None,
-            'PCA score':None,
-            'cluster':None,
-            'cluster score':None
+            'Ratio':None,
+            'Calculated Field':None,
+            'Special':None,
+            'PCA Score':None,
+            'Cluster':None,
+            'Cluster Score':None
             }
 
         #reset axis mask
@@ -757,32 +762,32 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
 
     # get a named list of current fields for sample
-    def get_field_list(self, set_name='analyte'):
+    def get_field_list(self, set_name='Analyte'):
         """Gets the fields associated with a defined set
 
         Set names are consistent with QComboBox.
 
-        :param set_name: name of set list, options include 'analyte', 'analyte (normalized)', 'calcualated field',
-            'pca_score', 'cluster', 'cluster score', 'special', Defaults to 'analyte'
+        :param set_name: name of set list, options include 'Analyte', 'analyte (normalized)', 'calcualated field',
+            'pca_score', 'Cluster', 'Cluster Score', 'Special', Defaults to 'Analyte'
         :type set_name: str, optional
 
         :return: set_fields, a list of fields within the input set
         :rtype: list
         """
         match set_name:
-            case 'analyte' | 'analyte (normalized)':
+            case 'Analyte' | 'Analyte (normalized)':
                 set_fields = self.data[self.sample_id]['analyte_info'].loc[:,'analytes']
-            case 'ratio':
+            case 'Ratio':
                 set_fields = self.data[self.sample_id]['ratios_info'].loc[:,'analyte_1'] + ' / ' + self.data[self.sample_id]['ratios_info'].loc[:,'analyte_2']
             case 'calculated field':
                 set_fields = None
-            case 'pca score':
+            case 'PCA Score':
                 set_fields = None
-            case 'cluster':
+            case 'Cluster':
                 set_fields = None
-            case 'cluster score':
+            case 'Cluster Score':
                 set_fields = None
-            case 'special':
+            case 'Special':
                 set_fields = None
         return set_fields
 
@@ -1310,7 +1315,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # Add other items from the row
                 self.tableWidgetFilters.setItem(current_row, 1, QtWidgets.QTableWidgetItem(row['analyte_1']))
                 self.tableWidgetFilters.setItem(current_row, 2, QtWidgets.QTableWidgetItem(row.get('analyte_2', '')))  # 'analyte_2' might be None
-                self.tableWidgetFilters.setItem(current_row, 3, QtWidgets.QTableWidgetItem(str(row['ratio'])))
+                self.tableWidgetFilters.setItem(current_row, 3, QtWidgets.QTableWidgetItem(str(row['Ratio'])))
                 self.tableWidgetFilters.setItem(current_row, 4, QtWidgets.QTableWidgetItem(self.dynamic_format(row['f_min'])))
                 self.tableWidgetFilters.setItem(current_row, 5, QtWidgets.QTableWidgetItem(self.dynamic_format(row['f_max'])))
 
@@ -1346,7 +1351,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             chkBoxItem_select.setFlags(QtCore.Qt.ItemIsUserCheckable |
                                 QtCore.Qt.ItemIsEnabled)
             ratio = False
-            if analyte_select.lower() == 'analyte':
+            if analyte_select.lower() == 'Analyte':
                 chkBoxItem_select.setCheckState(QtCore.Qt.Unchecked)
                 norm = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes'] == analyte_1)].iloc[0]['norm']
             else:
@@ -1374,7 +1379,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                      chkBoxItem_select)
 
 
-            filter_info = { 'analyte_1': analyte_1, 'analyte_2': analyte_2, 'ratio': ratio,'norm':norm ,'f_min': f_min,'f_max':f_max, 'use':True}
+            filter_info = { 'analyte_1': analyte_1, 'analyte_2': analyte_2, 'Ratio': ratio,'norm':norm ,'f_min': f_min,'f_max':f_max, 'use':True}
             self.data[self.sample_id]['filter_info'].loc[len(self.data[self.sample_id]['filter_info'])]=filter_info
     def remove_selected_rows(self,sample):
         """Remove selected rows from filter table.
@@ -1392,7 +1397,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if chkBoxItem.checkState() == QtCore.Qt.Checked:
                 self.tableWidgetFilters.removeRow(row)
                 if not ratio:
-                    self.data[self.sample_id]['filter_info'].drop(self.data[self.sample_id]['filter_info'][(self.data[self.sample_id]['filter_info']['analyte_1'] == analyte_1)& (self.data[self.sample_id]['filter_info']['ratio'] == ratio)].index, inplace=True)
+                    self.data[self.sample_id]['filter_info'].drop(self.data[self.sample_id]['filter_info'][(self.data[self.sample_id]['filter_info']['analyte_1'] == analyte_1)& (self.data[self.sample_id]['filter_info']['Ratio'] == ratio)].index, inplace=True)
                 else:
                     # Remove corresponding row from filter_df
                     self.data[self.sample_id]['filter_info'].drop(self.data[self.sample_id]['filter_info'][(self.data[self.sample_id]['filter_info']['analyte_1'] == analyte_1)& (self.data[self.sample_id]['filter_info']['analyte_2'] == analyte_2)].index, inplace=True)
@@ -1422,9 +1427,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             for index, filter_row in self.data[self.sample_id]['filter_info'].iterrows():
                 if filter_row['use']:
                     if not filter_row['analyte_2']:
-                        analyte_df = self.get_map_data(sample_id=self.sample_id, name = filter_row['analyte_1'],analysis_type = 'analyte', plot =False )
+                        analyte_df = self.get_map_data(sample_id=self.sample_id, name = filter_row['analyte_1'],analysis_type = 'Analyte', plot =False )
                     else: #if ratio
-                        analyte_df = self.get_map_data(sample_id=self.sample_id, name =  filter_row['analyte_1']+'/'+filter_row['analyte_2'],analysis_type = 'ratio', plot =False )
+                        analyte_df = self.get_map_data(sample_id=self.sample_id, name =  filter_row['analyte_1']+'/'+filter_row['analyte_2'],analysis_type = 'Ratio', plot =False )
 
                     self.data[self.sample_id]['filter_mask'] = self.data[self.sample_id]['filter_mask'] & (analyte_df['array'].values <= filter_row['f_min']) | (analyte_df['array'].values >= filter_row['f_max'])
         elif self.toolButtonMapPolygon.isChecked():
@@ -1481,7 +1486,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             return "{:.4f}".format(value)
 
-    def update_norm(self,sample_id, norm = None, analyte=None, update = False):
+    def update_norm(self,sample_id, norm = None, analyte_1=None,analyte_2=None, update = False):
         """
 
         :param sample_id:
@@ -1493,20 +1498,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :param update:
         :type update:
         """
-        if not norm:
-            norm = self.data[sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['sample_id']==sample_id)
-                                 & (self.data[sample_id]['analyte_info']['analytes']==analyte),'norm'].values[0]
-        if analyte: #if normalising single analyte
-            analytes = [analyte]
-            self.data[sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['sample_id']==sample_id)
-                                 & (self.data[sample_id]['analyte_info']['analytes']==analyte),'norm'] = norm
+        
+        if analyte_1: #if normalising single analyte
+            if not analyte_2: #not a ratio
+                self.data[sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['sample_id']==sample_id)
+                                 & (self.data[sample_id]['analyte_info']['analytes']==analyte_1),'norm'] = norm
+                analytes = [analyte_1]
+            else:
+               self.data[sample_id]['ratios_info'].loc[
+                   (self.data[sample_id]['ratios_info']['analyte_1'] == analyte_1) &
+                   (self.data[sample_id]['ratios_info']['analyte_2'] == analyte_2),'norm'] = norm
+               analytes = [analyte_1+' / '+analyte_2]
 
         else: #if normalising all analytes in sample
             self.data[sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['sample_id']==sample_id),'norm'] = norm
             analytes = self.data[sample_id]['analyte_info'][self.data[sample_id]['analyte_info']['sample_id']==sample_id]['analytes']
 
 
-        self.prep_data(sample_id, analyte)
+        self.prep_data(sample_id, analyte_1, analyte_2)
 
         #update self.data['norm']
         for analyte in analytes:
@@ -1525,9 +1534,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     for plot_name, plot in plots.items():
                         info = plot['info']
                         if not info['analyte_2']:
-                            current_plot_df = self.get_map_data(sample_id=info['sample_id'], name = info['analyte_1'],analysis_type = 'analyte', plot =False )
+                            current_plot_df = self.get_map_data(sample_id=info['sample_id'], name = info['analyte_1'],analysis_type = 'Analyte', plot =False )
                         else: #if ratio
-                            current_plot_df = self.get_map_data(sample_id=info['sample_id'], name =  info['analyte_1']+'/'+info['analyte_2'],analysis_type = 'ratio', plot =False )
+                            current_plot_df = self.get_map_data(sample_id=info['sample_id'], name =  info['analyte_1']+'/'+info['analyte_2'],analysis_type = 'Ratio', plot =False )
 
                         # self.plot_laser_map(current_plot_df,info)
 
@@ -1676,7 +1685,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.analysis_analyte_data = copy.deepcopy(self.clipped_analyte_data)
 
         else:  #if ratio
-            ratio_df = self.data[sample_id]['raw_data'][[analyte_1,analyte_2]] #consider original data for ratio
+            ratio_df = self.data[sample_id]['cropped_raw_data'][[analyte_1,analyte_2]] #consider original data for ratio
 
             ratio_name = analyte_1+' / '+analyte_2
 
@@ -1744,7 +1753,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     lq_val = np.nanpercentile(ratio_array, lq, axis=0)
                     uq_val = np.nanpercentile(ratio_array, uq, axis=0)
                     ratio_array = np.clip(ratio_array, lq_val, uq_val)
-                self.data[sample_id]['computed_data']['ratio'][ratio_name] = ratio_array
+                
+                if self.data[sample_id]['computed_data']['Ratio'].empty:
+                    self.data[sample_id]['computed_data']['Ratio']= self.data[sample_id]['cropped_raw_data'][['X','Y']]
+                self.data[sample_id]['computed_data']['Ratio'][ratio_name] = ratio_array
 
                 self.data[sample_id]['ratios_info'].at[idx, 'v_min'] = ratio_array.min()
                 self.data[sample_id]['ratios_info'].at[idx, 'v_max'] = ratio_array.max()
@@ -1848,7 +1860,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         sample_id = plot_information['sample_id']
         plot_type = plot_information['plot_type']
 
-        style = self.styles[self.comboBoxStylePlotType.currentText()]
+        style = plot_information['style']
 
         view = self.canvasWindow.currentIndex()
 
@@ -2700,7 +2712,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 ax.set_xlabel(f'PC{pc_x}')
                 ax.set_ylabel(f'PC{pc_y}')
                 ax.set_title(f'PCA Plot: PC{pc_x} vs PC{pc_y}')
-            case 'pca score':
+            case 'PCA Score':
                 pc_x = int(self.spinBoxPCX.value())
                 pca_df = pca_dict['results']
                 # Assuming pca_df contains scores for the principal components
@@ -2747,7 +2759,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 #ax.set_yticks(n_components, labels=[f'Var{i+1}' for i in range(len(n_components))])
                 ax.set_yticks(range(1, n_variables+1,1), minor=False)
                 ax.set_yticklabels(analytes)
-            case 'pca score':
+            case 'PCA Score':
                 ax.tick_params(direction='none', labelbottom=False, labeltop=False, labelright=False, labelleft=False)
 
     def plot_correlation(self, plot=False):
@@ -2902,9 +2914,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Clear previous histogram
         ax.clear()
         # Check if the algorithm is in the current group and if results are available
-        if 'algorithm' in self.current_group and self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['cluster']:
+        if 'algorithm' in self.current_group and self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['Cluster']:
             # Get the cluster labels for the data
-            cluster_labels = self.data[self.sample_id]['computed_data']['cluster'][self.current_group['algorithm']]
+            cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']]
             clusters = cluster_labels.dropna().unique()
 
 
@@ -2961,23 +2973,23 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         value_dict['c']['type'] = self.comboBoxColorByField.currentText().lower()
 
         for k, v in value_dict.items():
-            if v['type'] == 'analyte' and v['field']:
+            if v['type'] == 'Analyte' and v['field']:
                 df = self.get_map_data(self.sample_id, v['field'], analysis_type=v['type'], plot=False)
                 v['label'] = v['field'] + ' (' + self.preferences['Units']['Concentration'] + ')'
-            elif v['type'] == 'ratio' and '/' in v['field']:
+            elif v['type'] == 'Ratio' and '/' in v['field']:
                 analyte_1, analyte_2 = v['field'].split('/')
                 df = self.get_map_data(self.sample_id, analyte_1, analyte_2, analysis_type=v['type'], plot=False)
                 v['label'] = v['field']
             elif v['type'] == 'pca':
                 #df = self.get_map_data(self.sample_id, v['field'], plot_type=None, plot=False)
                 v['label'] = v['field']
-            elif v['type'] == 'cluster':
+            elif v['type'] == 'Cluster':
                 #df = self.get_map_data(self.sample_id, v['field'], plot_type=None, plot=False)
                 v['label'] = v['field']
-            elif v['type'] == 'cluster score':
+            elif v['type'] == 'Cluster Score':
                 #df = self.get_map_data(self.sample_id, v['field'], plot_type=None, plot=False)
                 v['label'] = v['field']
-            elif v['type'] == 'special':
+            elif v['type'] == 'Special':
                 return
             else:
                 df = pd.DataFrame({'array': []})  # Or however you want to handle this case
@@ -3376,7 +3388,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxCbarDirection.setEnabled(False)
                 self.lineEditCbarLabel.setEnabled(False)
                 self.spinBoxHeatmapResolution.setEnabled(False)
-            case 'pca score' | 'cluster score' | 'clusters':
+            case 'PCA Score' | 'Cluster Score' | 'clusters':
                 # axes properties
                 self.doubleSpinBoxXLB.setEnabled(True)
                 self.doubleSpinBoxXUB.setEnabled(True)
@@ -3681,10 +3693,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     'Resolution': self.spinBoxHeatmapResolution.value()}
 
     def style_plot_type_callback(self):
-        self.plot_types[self.toolBox.currentIndex()][0] = self.comboBoxStylePlotType.currentIndex()
-
-        self.set_style_widgets(plot_type=self.comboBoxStylePlotType.currentText())
-
+        if not self.check_analysis:
+            self.plot_types[self.toolBox.currentIndex()][0] = self.comboBoxStylePlotType.currentIndex()
+    
+            self.set_style_widgets(plot_type=self.comboBoxStylePlotType.currentText())
+            self.check_analysis_type()
+            self.update_current_plot(save=False)
+        
     # axes
     def xlabel_callback(self):
         self.styles[self.comboBoxStylePlotType.currentText()]['Axes']['XLabel'] = self.lineEditXLabel.text()
@@ -3811,13 +3826,28 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # updates scatter styles when ColorByField comboBox is changed
     def color_by_field_callback(self):
         plot_type = self.comboBoxStylePlotType.currentText()
-        if self.comboBoxStylePlotType.isEnabled() == False:
+        itemlist = []
+        if self.comboBoxStylePlotType.isEnabled() == False | self.comboBoxColorByField.isEnabled() == False:
             return
         
         # if color by field changes, update field lists
-        #if plot_type in ['scatter']:
-        #else:
-
+        cbf = self.comboBoxColorByField.currentText()
+        self.comboBoxColorField.clear()
+        if cbf == 'None':
+            pass
+        else:
+            match cbf:
+                case 'Analyte' | 'Analyte (normalized)':
+                    itemlist = self.data[self.sample_id]['analyte_info'].loc[self.data[self.sample_id]['analyte_info']['use']== True,'analytes'].values.tolist()
+                case 'Ratio':
+                    analytes_1 = self.data[self.sample_id]['ratios_info'].loc[self.data[self.sample_id]['ratios_info']['use']== True,'analyte_1']
+                    analytes_2 =  self.data[self.sample_id]['ratios_info'].loc[self.data[self.sample_id]['ratios_info']['use']== True,'analyte_2']
+                    ratios = analytes_1 +' / '+ analytes_2
+                    itemlist = ratios.values.tolist()
+                case _:
+                    itemlist = self.data[self.sample_id]['computed_data'][cbf].columns.tolist()
+                    
+            self.comboBoxColorField.addItems(itemlist)
 #        if tab_id == self.scatter_tab_id or tab_id == self.pca_tab_id or tab_id == self.profile_tab_id:
 #            if self.comboBoxColorByField.currentText().lower() == 'none':
 #                # turn off ColorByField and enable Color
@@ -3855,7 +3885,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def color_field_callback(self):
         self.styles[self.comboBoxStylePlotType.currentText()]['Colors']['Field'] = self.comboBoxColorField.currentText()
         if self.comboBoxColorField.isEnabled():
-            self.lineEditCbarLabel.text(None)
+            self.lineEditCbarLabel.setText('')
             self.update_current_plot(save=False)
 
     def field_colormap_callback(self):
@@ -3886,13 +3916,47 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :param save: save plot to plot selector, Defaults to False.
         :type save: bool, optional
         """
+        if self.sample_id=='' or not self.comboBoxStylePlotType.currentText() or not self.comboBoxColorField.currentText():
+            return
         plot_type = self.comboBoxStylePlotType.currentText()
-
+        sample_id = self.sample_id
+        c_field = self.comboBoxColorByField.currentText()
+        field = self.comboBoxColorField.currentText()
+        print(c_field)
+        style = self.styles[plot_type]
+        
         match plot_type:
+            case 'analyte map':
+                if c_field == 'Analyte' or c_field == 'Ratio':
+                    current_plot_df = self.get_map_data(sample_id=sample_id, name = field,analysis_type = c_field, plot =False )
+                    if c_field == 'Ratio':
+                        analyte_1 = field.split(' / ')[0]
+                        analyte_2 = field.split(' / ')[1]
+                        self.create_plot(current_plot_df, sample_id, plot_type = 'lasermap', analyte_1=analyte_1, analyte_2=analyte_2, plot= True)
+                    else: #Not a ratio
+                        self.create_plot(current_plot_df, sample_id, plot_type = 'lasermap', analyte_1=field, plot= True)
             case 'scatter' | 'heatmap':
                 self.plot_scatter(save) 
-        pass
-
+            # case
+        
+    
+        # self.styles = {'analyte map': copy.deepcopy(self.default_styles),
+        #                 'correlation': copy.deepcopy(self.default_styles),
+        #                 'histogram': copy.deepcopy(self.default_styles),
+        #                 'gradient map': copy.deepcopy(self.default_styles),
+        #                 'scatter': copy.deepcopy(self.default_styles),
+        #                 'heatmap': copy.deepcopy(self.default_styles),
+        #                 'ternary map': copy.deepcopy(self.default_styles),
+        #                 'TEC': copy.deepcopy(self.default_styles),
+        #                 'Radar': copy.deepcopy(self.default_styles),
+        #                 'variance': copy.deepcopy(self.default_styles),
+        #                 'vectors': copy.deepcopy(self.default_styles),
+        #                 'PCx vs. PCy scatter': copy.deepcopy(self.default_styles),
+        #                 'PCx vs. PCy heatmap': copy.deepcopy(self.default_styles),
+        #                 'PCA Score': copy.deepcopy(self.default_styles),
+        #                 'Cluster': copy.deepcopy(self.default_styles),
+        #                 'Cluster Score': copy.deepcopy(self.default_styles),
+        #                 'profile': copy.deepcopy(self.default_styles)}
 
     # -------------------------------------
     # Scatter/Heatmap functions
@@ -4391,7 +4455,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # fig.subplots_adjust(left=0, right=1)
 
             ax = fig.add_subplot(subplot_num)
-
+            
+            # add x y from raw data if empty dataframe
+            if self.data[self.ample_id]['computed_data']['Cluster'].empty:
+                self.data[self.sample_id]['computed_data']['Cluster']= self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
+            
             # Create labels array filled with -1
             labels = np.full(filtered_array.shape[0], -1, dtype=int)
             if name == 'Fuzzy':
@@ -4400,14 +4468,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 for n in range(n_clusters):
                     self.data[self.sample_id]['computed_data']['cluster scores'][n][self.data[self.sample_id]['mask']] = u[n-1,:]
                     if fuzzy_cluster_number>0:
+                        #add cluster results to self.data
                         labels[self.data[self.sample_id]['mask']] = self.data[self.sample_id]['computed_data']['cluster scores'][fuzzy_cluster_number][self.data[self.sample_id]['mask']]
                     else:
                         labels[self.data[self.sample_id]['mask']] = np.argmax(u, axis=0)[self.data[self.sample_id]['mask']]
-                        self.data[self.sample_id]['computed_data']['cluster'][name][self.data[self.sample_id]['mask']] = ['Cluster '+str(c) for c in labels]
+                        #add cluster results to self.data
+                        self.data[self.sample_id]['computed_data']['Cluster'][name][self.data[self.sample_id]['mask']] = ['Cluster '+str(c) for c in labels]
             else:
                 model = clustering.fit(filtered_array)
                 labels[self.data[self.sample_id]['mask']] = model.predict(filtered_array[self.data[self.sample_id]['mask']])
-                self.data[self.sample_id]['computed_data']['cluster'][name][self.data[self.sample_id]['mask']] = ['Cluster '+str(c) for c in labels]
+                
+                #add cluster results to self.data
+                self.data[self.sample_id]['computed_data']['Cluster'][name][self.data[self.sample_id]['mask']] = ['Cluster '+str(c) for c in labels]
+            
+            
             # Plot each clustering result
             self.plot_clustering_result(ax, labels, name, fuzzy_cluster_number)
 
@@ -4585,10 +4659,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         if plot_name == 'Radar':
             axes_interval = 5
-            if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['cluster']:
+            if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['Cluster']:
                 # Get the cluster labels for the data
 
-                cluster_labels = self.data[self.sample_id]['computed_data']['cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']]
+                cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']]
                 df_filtered['clusters'] = cluster_labels
 
                 radar = Radar(df_filtered, fields = self.n_dim_list, quantiles=quantiles, axes_interval = axes_interval, group_field ='clusters', groups = np.unique(cluster_labels.dropna()))
@@ -4603,9 +4677,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             fig = Figure(figsize=(8, 6))
             ax = fig.add_subplot(111)
             yl = [np.inf, -np.inf]
-            if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['cluster']:
+            if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['Cluster']:
                 # Get the cluster labels for the data
-                cluster_labels = self.data[self.sample_id]['computed_data']['cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']]
+                cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']]
                 df_filtered['clusters'] = cluster_labels
                 clusters = np.unique(cluster_labels)
 
@@ -4768,9 +4842,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         elif self.comboBoxColorField.currentText() == 'k-means':
             algorithm = 'KMeans'
 
-        if algorithm in self.data[self.sample_id]['computed_data']['cluster']:
-            if not self.data[self.sample_id]['computed_data']['cluster'][algorithm].empty:
-                clusters = self.data[self.sample_id]['computed_data']['cluster'][algorithm].dropna().unique()
+        if algorithm in self.data[self.sample_id]['computed_data']['Cluster']:
+            if not self.data[self.sample_id]['computed_data']['Cluster'][algorithm].empty:
+                clusters = self.data[self.sample_id]['computed_data']['Cluster'][algorithm].dropna().unique()
                 clusters.sort()
                 self.tableWidgetViewGroups.setRowCount(len(clusters))
 
@@ -4805,13 +4879,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     print("Duplicate name not allowed.")
                     return
 
-            # Update self.data[self.sample_id]['computed_data']['cluster'] with the new name
-            if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['cluster']:
+            # Update self.data[self.sample_id]['computed_data']['Cluster'] with the new name
+            if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['Cluster']:
                 # Find the rows where the value matches cluster_id
-                rows_to_update = self.data[self.sample_id]['computed_data']['cluster'][self.current_group['algorithm']] == cluster_id
+                rows_to_update = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']] == cluster_id
 
                 # Update these rows with the new name
-                self.data[self.sample_id]['computed_data']['cluster'].loc[rows_to_update, self.current_group['algorithm']] = new_name
+                self.data[self.sample_id]['computed_data']['Cluster'].loc[rows_to_update, self.current_group['algorithm']] = new_name
                 self.group_cmap[new_name] = self.group_cmap[cluster_id]
                 del self.group_cmap[cluster_id]
             # Optionally, update current_group to reflect the new cluster name
@@ -4977,7 +5051,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #set info dataframes for each sample
             self.data[self.sample_id]['analyte_info'] = pd.DataFrame(columns = ['analytes', 'norm','upper_bound','lower_bound','d_l_bound','d_u_bound', 'use'])
             self.data[self.sample_id]['ratios_info'] = pd.DataFrame(columns = [ 'analyte_1','analyte_2', 'norm','upper_bound','lower_bound','d_l_bound','d_u_bound', 'use', 'auto_scale'])
-            self.data[self.sample_id]['filter_info'] = pd.DataFrame(columns = [ 'analyte_1', 'analyte_2', 'ratio','norm','f_min','f_max', 'use'])
+            self.data[self.sample_id]['filter_info'] = pd.DataFrame(columns = [ 'analyte_1', 'analyte_2', 'Ratio','norm','f_min','f_max', 'use'])
             
             #Set crop to false
             self.data[self.sample_id]['crop'] = False
@@ -4989,12 +5063,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.data[sample_id]['raw_data'] = self.add_ree(sample_df)
             self.selected_analytes = self.data[sample_id]['raw_data'].columns[5:].tolist()
             self.data[sample_id]['computed_data'] = {
-                'ratio':self.data[sample_id]['raw_data'][['X','Y']],
-                'calculated':self.data[sample_id]['raw_data'][['X','Y']],
-                'special':None,
-                'PCA score':None,
-                'cluster':pd.DataFrame(columns = ['Fuzzy', 'KMeans', 'KMediods']),
-                'cluster score':None
+                'Ratio':pd.DataFrame(),
+                'Calculated Field':pd.DataFrame(),
+                
+                'PCA Score':pd.DataFrame(),
+                'Cluster':pd.DataFrame(columns = ['Fuzzy', 'KMeans', 'KMediods']),
+                'Cluster Score':pd.DataFrame(),
+                'Special':pd.DataFrame(),
                 }
             analytes = pd.DataFrame()
             analytes['analytes']=self.selected_analytes
@@ -5016,16 +5091,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             analytes['d_l_bound'] = 99
             analytes['d_u_bound'] = 99
             self.data[self.sample_id]['processed_data'] = copy.deepcopy(self.data[self.sample_id]['raw_data'][self.selected_analytes])
-            self.data[self.sample_id]['cropped_raw_data'] = copy.deepcopy(self.data[self.sample_id]['processed_data'])
+            self.data[self.sample_id]['cropped_raw_data'] = copy.deepcopy(self.data[self.sample_id]['raw_data'])
             analytes['v_min'] = None
             analytes['v_max'] = None
             analytes['auto_scale'] = True
             analytes['use'] = True
             self.data[sample_id]['analyte_info'] = analytes
-
-            self.data[sample_id]['computed_data']['cluster']=pd.DataFrame(columns = ['Fuzzy', 'KMeans', 'KMediods'])
-            self.data[sample_id]['computed_data']['cluster']['X'] = self.data[sample_id]['raw_data']['X']
-            self.data[sample_id]['computed_data']['cluster']['Y'] = self.data[sample_id]['raw_data']['Y']
 
             for plot_type in self.plot_widget_dict.keys():
                 if sample_id not in self.plot_widget_dict[plot_type]:
@@ -5071,8 +5142,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # plot first analyte as lasermap
 
             #get plot array
-            current_plot_df = self.get_map_data(sample_id=sample_id, name = self.selected_analytes[0],analysis_type = 'analyte', plot =False )
-            print(self.selected_analytes[0])
+            current_plot_df = self.get_map_data(sample_id=sample_id, name = self.selected_analytes[0],analysis_type = 'Analyte', plot =False )
+            #set 
+            self.comboBoxColorField.setCurrentText(self.selected_analytes[0])
+            self.styles['analyte map']['Colors']['Field'] = self.selected_analytes[0]
+            
             #create plot
             self.create_plot(current_plot_df,sample_id=sample_id, plot_type = 'lasermap', analyte_1= self.selected_analytes[0])
 
@@ -5097,9 +5171,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #update filters, polygon, profiles with existing data
             self.update_tables()
             #get plot array
-            current_plot_df = self.get_map_data(sample_id=self.sample_id, name = self.selected_analytes[0],analysis_type = 'analyte', plot =False )
+            current_plot_df = self.get_map_data(sample_id=self.sample_id, name = self.selected_analytes[0],analysis_type = 'Analyte', plot =False )
             #create plot
             self.create_plot(current_plot_df,sample_id=self.sample_id, plot_type = 'lasermap', analyte_1= self.selected_analytes[0])
+        self.check_analysis = False
+            
+    
     def update_combo_boxes(self, parentBox, childBox):
         """Updates comboBoxes with fields for plots or analysis
 
@@ -5109,7 +5186,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Parameter
         ---------
         parentBox: QComboBox
-            comboBox used to select field type ('analyte', 'analyte (norm)', 'ratio', etc.)
+            comboBox used to select field type ('Analyte', 'analyte (norm)', 'Ratio', etc.)
         childBox: QComboBox
             comboBox with list of field values
         """
@@ -5161,7 +5238,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.update_spinboxes_bool = True
 
 
-    def get_map_data(self,sample_id, name = None, analysis_type = 'analyte', plot= True, update = False):
+    def get_map_data(self,sample_id, name = None, analysis_type = 'Analyte', plot= True, update = False):
 
         """
         Retrieves and processes the mapping data for the given sample and analytes, then plots the result if required.
@@ -5175,8 +5252,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :type isotope_1: str, optional
         :param isotope_2: Secondary isotope for ratio plotting. If not provided, only the primary isotope will be plotted
         :type isotope_2: str, optional
-        :param analysis_type: Specifies the type of analysis. Accepts 'isotope' , 'ratio', 'pca', 'cluster',
-          'cluster score', 'special', 'computed', Defaults to 'laser'
+        :param analysis_type: Specifies the type of analysis. Accepts 'isotope' , 'Ratio', 'pca', 'Cluster',
+          'Cluster Score', 'Special', 'computed', Defaults to 'laser'
         :type analysis_type: str, optional
         :param plot: Determines if the plot should be shown after processing, Defaults to True
         :type plot: bool, optional
@@ -5200,31 +5277,60 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         match analysis_type:
 
-            case 'analyte':
+            case 'Analyte':
                 current_plot_df['array'] = self.data[sample_id]['processed_data'].loc[:,name].values
 
-            case 'ratio':
+            case 'Ratio':
                 current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].loc[:,name].values
 
             case 'pca':
                 current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].values
 
-            case 'cluster':
+            case 'Cluster':
                 current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].values
 
-            case 'cluster score':
+            case 'Cluster Score':
                 current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].values
 
-            case 'special':
+            case 'Special':
                 current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].values
             case 'computed':
                 current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].values
 
         # crop plot if filter applied
         # current_plot_df = current_plot_df[self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
-
+        
 
         return current_plot_df
+    
+    def check_analysis_type(self):
+        self.check_analysis = True
+        plot_type = self.comboBoxStylePlotType.currentText()
+        self.comboBoxColorByField.clear()
+        match plot_type.lower():
+            case 'histogram' | 'tec':
+                if self.data[self.sample_id]['computed_data']['Cluster'].empty:
+                   self.comboBoxColorByField.addItems(['None'])
+                else:
+                   self.comboBoxColorByField.addItems(['None','Cluster'])
+            case 'cluster score':
+                if self.data[self.sample_id]['computed_data']['Cluster Score'].empty:
+                   self.comboBoxColorByField.addItems(['None'])
+                else:
+                   self.comboBoxColorByField.addItems(['None','Cluster Score'])
+            case 'pca score':
+                if self.data[self.sample_id]['computed_data']['PCA Score'].empty:
+                   self.comboBoxColorByField.addItems(['None'])
+                else:
+                   self.comboBoxColorByField.addItems(['None','PCA Score'])
+            case _:
+                field_list = [None,'Analyte', 'Analyte (normalized)']
+                for field in self.data[self.sample_id]['computed_data']:
+                    if not (self.data[self.sample_id]['computed_data'][field].empty):
+                        field_list.append(field)
+                self.comboBoxColorByField.addItems(field_list)
+                
+        self.check_analysis = False
 
     def create_plot(self,current_plot_df, sample_id = None, plot_type = 'lasermap', analyte_1 = None, analyte_2 = None, plot = True):
         # creates plot information and send to relevant plotting method
@@ -5233,10 +5339,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             sample_id = self.sample_id
 
 
-        parameters = self.data[sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['analytes']==analyte_1)].iloc[0]
+        
 
         if not analyte_2: #not a ratio
             current_plot_df['array'] = self.data[sample_id]['processed_data'][analyte_1].values
+            parameters = self.data[sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['analytes']==analyte_1)].iloc[0]
             analyte_str = analyte_1
         else:
             # Get the index of the row that matches the criteria
@@ -5246,14 +5353,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             ].index
             idx = index_to_update[0]
             parameters  = self.data[sample_id]['ratios_info'].iloc[idx]
-            current_plot_df['array'] = self.data[sample_id]['computed_data']['ratio'][analyte_1].values
             analyte_str = analyte_1 +' / '+ analyte_2
+            current_plot_df['array'] = self.data[sample_id]['computed_data']['Ratio'][analyte_str].values
+            
         if plot_type=='lasermap':
 
 
             plot_information={'plot_name':analyte_str,'sample_id':sample_id,
                               'analyte_1':analyte_1, 'analyte_2':analyte_2,
-                              'plot_type':plot_type}
+                              'plot_type':plot_type,
+                              'style': self.styles['analyte map']}
+            
             self.plot_laser_map(current_plot_df,plot_information)
             self.update_spinboxes(parameters)
 
@@ -5418,7 +5528,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         level_3_data = val.data()
         # self.checkBoxViewRatio.setChecked(False)
         if level_1_data == 'Analyte' :
-            current_plot_df = self.get_map_data(sample_id = level_2_data,name = level_3_data, analysis_type = 'analyte')
+            current_plot_df = self.get_map_data(sample_id = level_2_data,name = level_3_data, analysis_type = 'Analyte')
             self.create_plot(current_plot_df,sample_id = level_2_data,plot_type='lasermap', analyte_1=level_3_data)
 
 
@@ -5435,7 +5545,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         elif level_1_data == 'Ratio' :
             analytes= level_3_data.split(' / ')
 
-            current_plot_df = self.get_map_data(sample_id = level_2_data,name = level_3_data, analysis_type = 'ratio')
+            current_plot_df = self.get_map_data(sample_id = level_2_data,name = level_3_data, analysis_type = 'Ratio')
 
             self.create_plot(current_plot_df,sample_id = level_2_data, plot_type='lasermap', analyte_1= analytes[0],analyte_2=analytes[1])
 
@@ -5460,13 +5570,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #update self.data['norm'] with selection
             self.data[self.sample_id]['norm'] = self.analyteDialog.norm_dict
             self.update_tree(self.data[self.sample_id]['norm'], norm_update = True)
+            #update analysis type combo in styles
+            self.check_analysis_type()
         if result == QDialog.Rejected:
             pass
 
 
 
 
-    def update_tree(self,leaf,data = None,tree= 'analyte', norm_update = False):
+    def update_tree(self,leaf,data = None,tree= 'Analyte', norm_update = False):
         if tree.lower() == 'analyte':
             # Highlight analytes in treeView
             # Un-highlight all leaf in the trees
@@ -5489,13 +5601,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         else:
                             item.setBackground(QBrush(QColor(255, 255, 200)))
                     else: #single analyte
-
+                        analyte_1 = analyte_pair
+                        analyte_2 = None
                         item,check = self.find_leaf(tree = self.analytes_items, branch = self.sample_id, leaf = analyte_pair)
                         item.setBackground(QBrush(QColor(255, 255, 200)))
                         self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes']==analyte_pair),'use'] = True
                     if norm_update: #update if analytes are returned from analyte selection window
-                        self.update_norm(self.sample_id,norm,analyte_pair)
-
+                        self.update_norm(self.sample_id,norm,analyte_1 = analyte_1, analyte_2 = analyte_2)
+                self.update_all_plots()
         elif tree=='Scatter':
 
             self.add_tree_item(self.sample_id,self.scatter_items,leaf,data)

@@ -1679,7 +1679,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.analysis_analyte_data = copy.deepcopy(self.clipped_analyte_data)
 
         else:  #if ratio
-            ratio_df = self.data[sample_id]['raw_data'][[analyte_1,analyte_2]] #consider original data for ratio
+            ratio_df = self.data[sample_id]['cropped_raw_data'][[analyte_1,analyte_2]] #consider original data for ratio
 
             ratio_name = analyte_1+' / '+analyte_2
 
@@ -4182,14 +4182,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 for n in range(n_clusters):
                     self.data[self.sample_id]['computed_data']['cluster scores'][n][self.data[self.sample_id]['mask']] = u[n-1,:]
                     if fuzzy_cluster_number>0:
+                        #add cluster results to self.data
                         labels[self.data[self.sample_id]['mask']] = self.data[self.sample_id]['computed_data']['cluster scores'][fuzzy_cluster_number][self.data[self.sample_id]['mask']]
                     else:
                         labels[self.data[self.sample_id]['mask']] = np.argmax(u, axis=0)[self.data[self.sample_id]['mask']]
+                        #add cluster results to self.data
                         self.data[self.sample_id]['computed_data']['cluster'][name][self.data[self.sample_id]['mask']] = ['Cluster '+str(c) for c in labels]
             else:
                 model = clustering.fit(filtered_array)
                 labels[self.data[self.sample_id]['mask']] = model.predict(filtered_array[self.data[self.sample_id]['mask']])
+                
+                #add cluster results to self.data
                 self.data[self.sample_id]['computed_data']['cluster'][name][self.data[self.sample_id]['mask']] = ['Cluster '+str(c) for c in labels]
+            
+            
             # Plot each clustering result
             self.plot_clustering_result(ax, labels, name, fuzzy_cluster_number)
 

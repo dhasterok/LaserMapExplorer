@@ -3077,12 +3077,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.doubleSpinBoxXUB.setEnabled(False)
                 self.doubleSpinBoxYLB.setEnabled(False)
                 self.doubleSpinBoxYUB.setEnabled(False)
-                if plot_type == 'vectors':
-                    self.lineEditXLabel.setEnabled(True)
-                    self.lineEditYLabel.setEnabled(True)
-                else:
-                    self.lineEditXLabel.setEnabled(False)
-                    self.lineEditYLabel.setEnabled(False)
+                self.lineEditXLabel.setEnabled(False)
+                self.lineEditYLabel.setEnabled(False)
                 self.lineEditZLabel.setEnabled(False)
                 self.lineEditAspectRatio.setEnabled(False)
                 self.comboBoxTickDirection.setEnabled(True)
@@ -3172,6 +3168,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 else:
                     self.lineEditZLabel.setEnabled(True)
                 self.lineEditAspectRatio.setEnabled(True)
+                self.comboBoxTickDirection.setEnabled(True)
 
                 # scalebar properties
                 self.comboBoxScaleDirection.setEnabled(False)
@@ -3185,7 +3182,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.labelMarkerAlpha.setEnabled(True)
 
                 # line properties
-                self.comboBoxLineWidth.setEnabled(True)
+                if self.comboBoxScatterAnalyteZ.currentText() == '':
+                    self.comboBoxLineWidth.setEnabled(True)
+                else:
+                    self.comboBoxLineWidth.setEnabled(False)
 
                 # color properties
                 self.comboBoxColorByField.setEnabled(True)
@@ -3224,7 +3224,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 else:
                     self.lineEditZLabel.setEnabled(True)
                 self.lineEditAspectRatio.setEnabled(True)
-
+                self.comboBoxTickDirection(True)
+                
                 # scalebar properties
                 self.comboBoxScaleDirection.setEnabled(False)
                 self.toolButtonOverlayColor.setEnabled(False)
@@ -3237,7 +3238,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.labelMarkerAlpha.setEnabled(False)
 
                 # line properties
-                self.comboBoxLineWidth.setEnabled(True)
+                if self.comboBoxScatterAnalyteZ.currentText() == '':
+                    self.comboBoxLineWidth.setEnabled(True)
+                else:
+                    self.comboBoxLineWidth.setEnabled(False)
 
                 # color properties
                 self.toolButtonMarkerColor.setEnabled(False)
@@ -3252,19 +3256,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.spinBoxHeatmapResolution.setEnabled(True)
             case 'ternary map':
                 # axes properties
-                self.doubleSpinBoxXLB.setEnabled(False)
-                self.doubleSpinBoxXUB.setEnabled(False)
-                self.lineEditXLabel.setEnabled(False)
-                self.doubleSpinBoxYLB.setEnabled(False)
-                self.doubleSpinBoxYUB.setEnabled(False)
-                self.lineEditYLabel.setEnabled(False)
-                self.lineEditZLabel.setEnabled(False)
+                self.doubleSpinBoxXLB.setEnabled(True)
+                self.doubleSpinBoxXUB.setEnabled(True)
+                self.doubleSpinBoxYLB.setEnabled(True)
+                self.doubleSpinBoxYUB.setEnabled(True)
+                self.lineEditXLabel.setEnabled(True)
+                self.lineEditYLabel.setEnabled(True)
+                self.lineEditZLabel.setEnabled(True)
                 self.lineEditAspectRatio.setEnabled(False)
+                self.comboBoxTickDirection(False)
 
                 # scalebar properties
-                self.comboBoxScaleDirection.setEnabled(False)
-                self.toolButtonOverlayColor.setEnabled(False)
-                self.comboBoxScaleLocation.setEnabled(False)
+                self.comboBoxScaleDirection.setEnabled(True)
+                self.toolButtonOverlayColor.setEnabled(True)
+                self.comboBoxScaleLocation.setEnabled(True)
 
                 # marker properties
                 if len(self.spotdata.spots) != 0:
@@ -3310,6 +3315,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.lineEditYLabel.setEnabled(False)
                 self.lineEditZLabel.setEnabled(False)
                 self.lineEditAspectRatio.setEnabled(True)
+                self.comboBoxTickDirection.setEnabled(True)
 
                 # scalebar properties
                 self.comboBoxScaleDirection.setEnabled(False)
@@ -3320,15 +3326,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxMarker.setEnabled(False)
                 self.doubleSpinBoxMarkerSize.setEnabled(False)
                 self.horizontalSliderMarkerAlpha.setEnabled(False)
-                self.labelMarkerAlpha.setEnabled(False)
+                self.labelMarkerAlpha.setEnabled(True)
 
                 # line properties
                 self.comboBoxLineWidth.setEnabled(True)
 
                 # color properties
-                self.toolButtonMarkerColor.setEnabled(False)
-                self.comboBoxColorByField.setEnabled(False)
-                self.comboBoxFieldColormap.setEnabled(False)
+                self.toolButtonMarkerColor.setEnabled(True)
+                self.comboBoxColorByField.setEnabled(True)
+                self.comboBoxColorField.setEnabled(False)
+                self.comboBoxFieldColormap.setEnabled(True)
                 self.doubleSpinBoxColorLB.setEnabled(False)
                 self.doubleSpinBoxColorUB.setEnabled(False)
                 self.comboBoxCbarDirection.setEnabled(False)
@@ -3344,6 +3351,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.lineEditYLabel.setEnabled(False)
                 self.lineEditZLabel.setEnabled(False)
                 self.lineEditAspectRatio.setEnabled(True)
+                self.comboBoxTickDirection.setEnabeled(True)
 
                 # scalebar properties
                 self.comboBoxScaleDirection.setEnabled(False)
@@ -3372,12 +3380,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # axes properties
                 self.doubleSpinBoxXLB.setEnabled(True)
                 self.doubleSpinBoxXUB.setEnabled(True)
-                self.lineEditXLabel.setEnabled(False)
                 self.doubleSpinBoxYLB.setEnabled(True)
                 self.doubleSpinBoxYUB.setEnabled(True)
+                self.lineEditXLabel.setEnabled(False)
                 self.lineEditYLabel.setEnabled(False)
                 self.lineEditZLabel.setEnabled(False)
                 self.lineEditAspectRatio.setEnabled(False)
+                self.comboBoxTickDirection.setEnabled(False)
 
                 # scalebar properties
                 self.comboBoxScaleDirection.setEnabled(True)
@@ -3409,11 +3418,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 if plot_type == 'cluster map':
                     self.doubleSpinBoxColorLB.setEnabled(False)
                     self.doubleSpinBoxColorUB.setEnabled(False)
+                    self.comboBoxCbarDirection.setEnabled(False)
+                    self.lineEditCbarLabel.setEnabled(False)
                 else:
                     self.doubleSpinBoxColorLB.setEnabled(True)
                     self.doubleSpinBoxColorUB.setEnabled(True)
-                self.comboBoxCbarDirection.setEnabled(True)
-                self.lineEditCbarLabel.setEnabled(True)
+                    self.comboBoxCbarDirection.setEnabled(True)
+                    self.lineEditCbarLabel.setEnabled(True)
                 self.spinBoxHeatmapResolution.setEnabled(False)
             case 'profile':
                 # axes properties
@@ -3425,6 +3436,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.lineEditYLabel.setEnabled(False)
                 self.lineEditZLabel.setEnabled(False)
                 self.lineEditAspectRatio.setEnabled(True)
+                self.comboBoxTickDirection.setEnabled(True)
 
                 # scalebar properties
                 self.comboBoxScaleDirection.setEnabled(False)
@@ -3442,12 +3454,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # color properties
                 self.toolButtonMarkerColor.setEnabled(True)
-                self.comboBoxColorByField.setEnabled(True)
+                self.comboBoxColorByField.setEnabled(False)
                 self.comboBoxFieldColormap.setEnabled(True)
-                self.doubleSpinBoxColorLB.setEnabled(True)
-                self.doubleSpinBoxColorUB.setEnabled(True)
-                self.comboBoxCbarDirection.setEnabled(True)
-                self.lineEditCbarLabel.setEnabled(True)
+                self.doubleSpinBoxColorLB.setEnabled(False)
+                self.doubleSpinBoxColorUB.setEnabled(False)
+                self.comboBoxCbarDirection.setEnabled(False)
+                self.lineEditCbarLabel.setEnabled(False)
                 self.spinBoxHeatmapResolution.setEnabled(False)
     
         # enable/disable labels

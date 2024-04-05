@@ -116,6 +116,42 @@ Scatter and Heatmap
 | resolution     | N           | N           | N          | N        | N       | Y       | N       | N    | N     | N        | N         | N       | Y       | N     | N        | N     | N        |
 +----------------+-------------+-------------+------------+----------+---------+---------+---------+------+-------+----------+-----------+---------+---------+-------+----------+-------+----------+
 
+| tab            | Samples and Fields        | Preprocessing                | Scatter & Heatmap |  |  | n-Dim |  | PCA |  |  |  |  | Clustering |  | Propfiling |
+|                | analyte     | correlation | histogram      | gradient    | scatter       | heatmap | ternary | TEC | radar | variance | vectors | PCx vs PCy | PCx vs PCy | PCA | clusters | cluster | profiles |
+| plot type      | map         |             |                |             |               |  | map |  |  |  |  | scatter | heatmap | score |  | score |  |
+| axes & labels  |                                                                   |
+| x label        | N           | N           | Y              | N           | Y             | Y | N | N | N | N | N | Y | Y | N | N | N | Y |
+| y label        | N           | N           | Y              | N           | Y             | Y | N | Y | N | N | N | Y | Y | N | N | N | N |
+| z label        | N           | N           | N              | N           | N/Y (ternary) | N/Y (ternary) | N | N | N | N | N | N | N | N | N | N | N |
+| x limits       | Y           | N           | Y              | Y           | Y             | Y | Y | N | N | N | N | Y | Y | Y | Y | Y | Y |
+| y limits       | Y           | N           | Y              | Y           | Y             | Y | Y | Y | N | N | N | Y | Y | Y | Y | Y | N |
+| aspect ratio   | N           | N 1 (fixed) | Y              | N           | Y             | Y | N | Y | N | Y | N 1 (fixed) | Y | Y | N | N | N | Y |
+| tick direction | N           | Y           | Y              | N           | Y             | Y | N | Y | N | Y | Y | Y | Y | N | N | N | Y |
+| annotations    |    |
+| font           | Y           | Y           | Y              | Y           | Y             | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
+| font size      | Y           | Y           | Y              | Y           | Y             | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
+| scales         |  |
+| scale direct.  | Y           | N           | N              | Y           | N             | N | Y | N | N | N | N | N | N | Y | Y | Y | Y |
+| scale location | Y           | N           | N              | Y           | N             | N | Y | N | N | N | N | N | N | Y | Y | Y | Y |
+| overlay color  | Y           | N           | N              | Y           | N             | N | Y | N | N | N | N | N | N | Y | Y | Y | Y |
+| markers        |  |
+| symbol         | N/Y (spots) | N           | N              | N/Y (spots) | Y             | N | N | N | N | Y | N | Y | N | N/Y (spots) | N/Y (spots) | N/Y (spots) | Y |
+| size           | N/Y (spots) | N           | N              | N/Y (spots) | Y             | N | N | N | N | Y | N | Y | N | N/Y (spots) | N/Y (spots) | N/Y (spots) | Y |
+| transparency   | N/Y (spots) | N           | Y              | N/Y (spots) | Y             | N | N | Y | Y | N | N | Y | N | N/Y (spots) | N/Y (spots) | N/Y (spots) | N |
+| lines          |  |
+| line width     | N/Y (poly)  | N           | N              | N/Y (poly)  | Y (fit)/ N (tern) | Y (fit)/ N (ternary) | N | Y | Y | Y | N | Y (vectors) | Y | N/Y (poly) | N/Y (poly) | N/Y (poly) | Y (error bars) |
+| colors         |  |
+| color          | N           | N           | Y/N (clusters) | N           | Y/N (not none) | N | N | Y (1)/N (clusters) | Y (1)/N (clusters) | Y | N | Y/N (not none) | N | N | N | N | Y |
+| color by field | Y           | N           | Y              | Y           | Y             | N | N | Y | Y | N | N | N/Y (not none) | N | N | N | N | N |
+| field          | Y           | N           | Y              | Y           | Y             | N | N | N | N | N | N | Y | N | Y (score) | N | Y (score) | N |
+| colormap       | Y           | Y           | N/Y (clusters) | Y           | N/Y (not none) | Y | custom | Y (clusters) | Y (clusters) | N | Y | N/Y (not none) | Y | Y | Y | Y | Y |
+| color limits   | Y           | Y [-1, 1]   | N/Y (clusters) | Y           | N/Y (not none) | Y | N | N | N | N | Y | N/Y (not none) | Y | Y | N | Y | N |
+| c.bar direct.  | Y           | Y           | N              | Y           | N/Y (not none) | Y | N | N | N | N | Y | N/Y (not none) | Y | Y | N | Y | N |
+| c.bar label    | Y           | N           | N              | Y           | N/Y (not none) | Y | N | N | N | N | N | N/Y (not none) | Y | Y | N | Y | N |
+| resolution     | N           | N           | N              | N           | N             | Y | N | N | N | N | N | N | Y | N | N | N | N |
+
+spots use overlay color for outline and color by field, field value for fill color
+
 Clusters
 ++++++++
 

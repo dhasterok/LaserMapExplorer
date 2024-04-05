@@ -1482,7 +1482,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             return "{:.4f}".format(value)
 
-    def update_norm(self,sample_id, norm = None, analyte=None, update = False):
+    def update_norm(self,sample_id, norm = None, analyte_1=None,analyte_2=None, update = False):
         """
 
         :param sample_id:
@@ -1494,20 +1494,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :param update:
         :type update:
         """
-        if not norm:
-            norm = self.data[sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['sample_id']==sample_id)
-                                 & (self.data[sample_id]['analyte_info']['analytes']==analyte),'norm'].values[0]
-        if analyte: #if normalising single analyte
-            analytes = [analyte]
-            self.data[sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['sample_id']==sample_id)
-                                 & (self.data[sample_id]['analyte_info']['analytes']==analyte),'norm'] = norm
+        
+        if analyte_1: #if normalising single analyte
+            if not analyte_2: #not a ratio
+                self.data[sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['sample_id']==sample_id)
+                                 & (self.data[sample_id]['analyte_info']['analytes']==analyte_1),'norm'] = norm
+                analytes = [analyte_1]
+            else:
+               self.data[sample_id]['ratios_info'].loc[
+                   (self.data[sample_id]['ratios_info']['analyte_1'] == analyte_1) &
+                   (self.data[sample_id]['ratios_info']['analyte_2'] == analyte_2),'norm'] = norm
+               analytes = [analyte_1+' / '+analyte_2]
 
         else: #if normalising all analytes in sample
             self.data[sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['sample_id']==sample_id),'norm'] = norm
             analytes = self.data[sample_id]['analyte_info'][self.data[sample_id]['analyte_info']['sample_id']==sample_id]['analytes']
 
 
-        self.prep_data(sample_id, analyte)
+        self.prep_data(sample_id, analyte_1, analyte_2)
 
         #update self.data['norm']
         for analyte in analytes:
@@ -5387,13 +5391,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         else:
                             item.setBackground(QBrush(QColor(255, 255, 200)))
                     else: #single analyte
-
+                        analyte_1 = analyte_pair
+                        amalyte_2 = None
                         item,check = self.find_leaf(tree = self.analytes_items, branch = self.sample_id, leaf = analyte_pair)
                         item.setBackground(QBrush(QColor(255, 255, 200)))
                         self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes']==analyte_pair),'use'] = True
                     if norm_update: #update if analytes are returned from analyte selection window
-                        self.update_norm(self.sample_id,norm,analyte_pair)
-
+                        self.update_norm(self.sample_id,norm,analyte_1 = analyte_1, analyte_2 = analyte_2)
+                self.update_all_plots()
         elif tree=='Scatter':
 
             self.add_tree_item(self.sample_id,self.scatter_items,leaf,data)

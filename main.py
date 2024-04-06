@@ -407,6 +407,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #-------------------------
         self.toolButtonTernaryMap.clicked.connect(self.plot_ternarymap)
 
+        self.update_field_type_combobox(self.comboBoxScatterSelectX)
+        self.update_field_type_combobox(self.comboBoxScatterSelectY)
+        self.update_field_type_combobox(self.comboBoxScatterSelectZ)
         self.comboBoxScatterSelectX.activated.connect(lambda: self.update_field_combobox(self.comboBoxScatterSelectX, self.comboBoxScatterAnalyteX))
         self.comboBoxScatterSelectY.activated.connect(lambda: self.update_field_combobox(self.comboBoxScatterSelectY, self.comboBoxScatterAnalyteY))
         self.comboBoxScatterSelectZ.activated.connect(lambda: self.update_field_combobox(self.comboBoxScatterSelectZ, self.comboBoxScatterAnalyteZ))
@@ -436,6 +439,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # PCA Tab
         #------------------------
         self.toolButtonPCAPlot.clicked.connect(self.plot_pca)
+        self.spinBoxPCX.valueChanged.connect(self.plot_pca)
+        self.spinBoxPCY.valueChanged.connect(self.plot_pca)
 
         # Clustering Tab
         #-------------------------
@@ -882,6 +887,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxStylePlotType.addItems(self.plot_types[self.toolBox.currentIndex()][1:])
         self.comboBoxStylePlotType.setCurrentIndex(self.plot_types[self.toolBox.currentIndex()][0])
         self.set_style_widgets()
+
 
 
     def input_ternary_name_dlg(self):
@@ -3540,7 +3546,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.lineEditYLabel.setEnabled(False)
                 self.lineEditZLabel.setEnabled(False)
                 self.lineEditAspectRatio.setEnabled(True)
-                self.comboBoxTickDirection.setEnabeled(True)
+                self.comboBoxTickDirection.setEnabled(True)
 
                 # scalebar properties
                 self.comboBoxScaleDirection.setEnabled(False)
@@ -4078,7 +4084,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         self.create_plot(current_plot_df, sample_id, plot_type = 'lasermap', analyte_1=field, plot= True)
             case 'scatter' | 'heatmap':
                 self.plot_scatter(save) 
-            # case
+            case 'variance' | 'vectors' | 'PCx vs PCy scatter' | 'PCx vs PCy heatmap' | 'PCA Score':
+                self.plot_pca()
         
     
         # self.styles = {'analyte map': copy.deepcopy(self.default_styles),
@@ -5122,8 +5129,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.check_analysis = False
    
     # updates field type comboboxes for analyses and plotting
-    def update_field_type_combobox(self, comboBox, addNone=False, plot_type=None):
+    def update_field_type_combobox(self, comboBox, addNone=False, plot_type=''):
         
+        if self.sample_id == '':
+            return
+
         match plot_type.lower():
             case 'histogram' | 'tec':
                 if self.data[self.sample_id]['computed_data']['Cluster'].empty:

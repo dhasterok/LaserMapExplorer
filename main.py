@@ -309,6 +309,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Preprocess Tab
         #-------------------------
+        self.update_field_type_combobox(self.comboBoxHistogramFieldType)
         self.comboBoxHistogramFieldType.activated.connect(lambda: self.update_field_combobox(self.comboBoxHistogramFieldType, self.comboBoxHistogramField))
         self.comboBoxHistogramField.activated.connect(self.histogram_field_callback)
 
@@ -471,9 +472,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxScatterAnalyteY.activated.connect(lambda: self.plot_scatter(save=False))
         self.comboBoxScatterAnalyteZ.activated.connect(lambda: self.plot_scatter(save=False))
 
+
         # N-Dim Tab
         #-------------------------
-
         analyte_set = ['majors', 'full trace', 'REE', 'metals']
         self.comboBoxNDimAnalyteSet.addItems(analyte_set)
         #self.comboBoxNDimRefMaterial.addItems(ref_list.values) This is done with the Set analyte tab initialization above.
@@ -5121,7 +5122,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.check_analysis = False
    
     # updates field type comboboxes for analyses and plotting
-    def update_analysis_combobox(self, comboBox, addNone=False, plot_type=None):
+    def update_field_type_combobox(self, comboBox, addNone=False, plot_type=None):
         
         match plot_type.lower():
             case 'histogram' | 'tec':
@@ -5176,7 +5177,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     
     def check_analysis_type(self):
         self.check_analysis = True
-        self.update_analysis_combobox(self.comboBoxColorByField, addNone=True, plot_type=self.comboBoxStylePlotType.currentText())
+        self.update_field_type_combobox(self.comboBoxColorByField, addNone=True, plot_type=self.comboBoxStylePlotType.currentText())
         self.check_analysis = False
 
     def update_spinboxes(self,parameters,bins = None ,bin_width = None):

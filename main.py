@@ -248,6 +248,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ProfilingPage.setEnabled(False)
         self.SpecialFunctionPage.setEnabled(False)
 
+        self.actionSavePlotToTree.triggered.connect(lambda: self.update_current_plot(save=True))
         self.actionSelectAnalytes.triggered.connect(self.open_select_analyte_dialog)
         self.actionSpotData.triggered.connect(lambda: self.open_tab('spot data'))
         self.actionFilter_Tools.triggered.connect(lambda: self.open_tab('filter'))
@@ -259,6 +260,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionProfiles.triggered.connect(lambda: self.open_tab('profiles'))
         self.actionCluster.triggered.connect(lambda: self.open_tab('clustering'))
         self.actionReset.triggered.connect(lambda: self.reset_analysis())
+
         # Select analyte Tab
         #-------------------------
         self.ref_data = pd.read_excel('resources/app_data/earthref.xlsx')
@@ -307,6 +309,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Preprocess Tab
         #-------------------------
+        self.comboBoxHistogramFieldType.activated.connect(lambda: self.update_field_combobox(self.comboBoxHistogramFieldType, self.comboBoxHistogramField))
+        self.comboBoxHistogramField.activated.connect(self.histogram_field_callback)
+
         self.toolButtonSwapXY.clicked.connect(self.swap_xy)
 
         self.doubleSpinBoxUB.setMaximum(100)
@@ -367,7 +372,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #-------------------------
         # left pane
         self.toolButtonAddFilter.clicked.connect(self.update_filter_table)
-        self.comboBoxFSelect.activated.connect(lambda: self.update_combo_boxes(self.comboBoxFSelect, self.comboBoxFAnalyte))
+        self.comboBoxFSelect.activated.connect(lambda: self.update_field_combobox(self.comboBoxFSelect, self.comboBoxFAnalyte))
         self.comboBoxFAnalyte.activated.connect(self.update_filter_values)
         #     lambda: self.get_map_data(self.sample_id,analyte_1=self.comboBoxFAnalyte_1.currentText(),
         #                           analyte_2=self.comboBoxFAnalyte_2.currentText(),view = 1))
@@ -399,12 +404,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Scatter and Ternary Tab
         #-------------------------
-        self.toolButtonPlotScatter.clicked.connect(lambda: self.plot_scatter(save=True))
         self.toolButtonTernaryMap.clicked.connect(self.plot_ternarymap)
 
-        self.comboBoxScatterSelectX.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectX, self.comboBoxScatterAnalyteX))
-        self.comboBoxScatterSelectY.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectY, self.comboBoxScatterAnalyteY))
-        self.comboBoxScatterSelectZ.activated.connect(lambda: self.update_combo_boxes(self.comboBoxScatterSelectZ, self.comboBoxScatterAnalyteZ))
+        self.comboBoxScatterSelectX.activated.connect(lambda: self.update_field_combobox(self.comboBoxScatterSelectX, self.comboBoxScatterAnalyteX))
+        self.comboBoxScatterSelectY.activated.connect(lambda: self.update_field_combobox(self.comboBoxScatterSelectY, self.comboBoxScatterAnalyteY))
+        self.comboBoxScatterSelectZ.activated.connect(lambda: self.update_field_combobox(self.comboBoxScatterSelectZ, self.comboBoxScatterAnalyteZ))
 
         # ternary colormaps
         # create ternary colors dictionary
@@ -534,10 +538,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         setattr(self.comboBoxFieldColormap, "allItems", lambda: [self.comboBoxFieldColormap.itemText(i) for i in range(self.comboBoxFieldColormap.count())])
 
         # self.doubleSpinBoxMarkerSize.valueChanged.connect(lambda: self.plot_scatter(save=False))
-        #self.comboBoxColorByField.activated.connect(lambda: self.update_combo_boxes(self.comboBoxColorByField, self.comboBoxColorField))
+        #self.comboBoxColorByField.activated.connect(lambda: self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField))
 
         # callback functions
         self.comboBoxStylePlotType.currentIndexChanged.connect(self.style_plot_type_callback)
+        self.toolButtonUpdatePlot.clicked.connect(self.update_current_plot)
         self.toolButtonSaveTheme.clicked.connect(self.input_theme_name_dlg)
         # axes
         self.lineEditXLabel.editingFinished.connect(self.xlabel_callback)
@@ -577,22 +582,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #-------------------------
 
         self.toolButtonHomeSV.clicked.connect(lambda: self.toolbar_plotting('home', 'SV', self.toolButtonHomeSV.isChecked()))
-        # self.toolButtonHomeMV.clicked.connect
-
         self.toolButtonPanSV.clicked.connect(lambda: self.toolbar_plotting('pan', 'SV', self.toolButtonPanSV.isChecked()))
-        # self.toolButtonPanMV.clicked.connect
-
         self.toolButtonZoomSV.clicked.connect(lambda: self.toolbar_plotting('zoom', 'SV', self.toolButtonZoomSV.isChecked()))
-        # self.toolButtonZoomMV.clicked.connect
-
         self.toolButtonPreferencesSV.clicked.connect(lambda: self.toolbar_plotting('preference', 'SV', self.toolButtonPreferencesSV.isChecked()))
-        # self.toolButtonPreferencesMV.clicked.connect
-
         self.toolButtonAxesSV.clicked.connect(lambda: self.toolbar_plotting('axes', 'SV', self.toolButtonAxesSV.isChecked()))
-        # self.toolButtonAxesMV.clicked.connect
-
         self.toolButtonSaveSV.clicked.connect(lambda: self.toolbar_plotting('save', 'SV', self.toolButtonSaveSV.isChecked()))
-        # self.toolButtonSaveMV.clicked.connect
 
         self.actionCalculator.triggered.connect(self.open_calculator)
 
@@ -759,16 +753,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.data[self.sample_id]['crop'] = False
 
-        
-
     # get a named list of current fields for sample
     def get_field_list(self, set_name='Analyte'):
         """Gets the fields associated with a defined set
 
         Set names are consistent with QComboBox.
 
-        :param set_name: name of set list, options include 'Analyte', 'analyte (normalized)', 'calcualated field',
-            'pca_score', 'Cluster', 'Cluster Score', 'Special', Defaults to 'Analyte'
+        :param set_name: name of set list, options include 'Analyte', 'Analyte (normalized)', 'Ratio', 'Calcualated Field',
+            'PCA Score', 'Cluster', 'Cluster Score', 'Special', Defaults to 'Analyte'
         :type set_name: str, optional
 
         :return: set_fields, a list of fields within the input set
@@ -776,19 +768,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         match set_name:
             case 'Analyte' | 'Analyte (normalized)':
-                set_fields = self.data[self.sample_id]['analyte_info'].loc[:,'analytes']
+                set_fields = self.data[self.sample_id]['analyte_info'].loc[self.data[self.sample_id]['analyte_info']['use']== True,'analytes'].values.tolist()
             case 'Ratio':
-                set_fields = self.data[self.sample_id]['ratios_info'].loc[:,'analyte_1'] + ' / ' + self.data[self.sample_id]['ratios_info'].loc[:,'analyte_2']
-            case 'calculated field':
-                set_fields = None
-            case 'PCA Score':
-                set_fields = None
-            case 'Cluster':
-                set_fields = None
-            case 'Cluster Score':
-                set_fields = None
-            case 'Special':
-                set_fields = None
+                analytes_1 = self.data[self.sample_id]['ratios_info'].loc[self.data[self.sample_id]['ratios_info']['use']== True,'analyte_1']
+                analytes_2 =  self.data[self.sample_id]['ratios_info'].loc[self.data[self.sample_id]['ratios_info']['use']== True,'analyte_2']
+                ratios = analytes_1 +' / '+ analytes_2
+                set_fields = ratios.values.tolist() 
+            case _:
+                set_fields = self.data[self.sample_id]['computed_data'][set_name].columns.tolist()
         return set_fields
 
     # color picking functions
@@ -1213,7 +1200,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         pass
 
-
     def update_tables(self):
         self.update_filter_table(reload = True)
         self.profiling.update_table_widget()
@@ -1381,6 +1367,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             filter_info = { 'analyte_1': analyte_1, 'analyte_2': analyte_2, 'Ratio': ratio,'norm':norm ,'f_min': f_min,'f_max':f_max, 'use':True}
             self.data[self.sample_id]['filter_info'].loc[len(self.data[self.sample_id]['filter_info'])]=filter_info
+
     def remove_selected_rows(self,sample):
         """Remove selected rows from filter table.
 
@@ -1596,7 +1583,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                             fig.tight_layout()
                             figure_canvas.draw()
 
-
     def prep_data(self, sample_id= None, analyte_1= None, analyte_2 = None):
         """Prepares data to be used in analysis
 
@@ -1760,8 +1746,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 self.data[sample_id]['ratios_info'].at[idx, 'v_min'] = ratio_array.min()
                 self.data[sample_id]['ratios_info'].at[idx, 'v_max'] = ratio_array.max()
-
-
 
     def open_directory(self):
         """Open directory with samples
@@ -2463,7 +2447,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             val2 = self.noise_red_options[algorithm]['value2']
             self.noise_reduction(algorithm,val1,val2)
 
-
     def noise_reduction_option1_callback(self):
         """Callback executed when the first noise reduction option is changed
 
@@ -2847,6 +2830,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         ax.set_title('Correlation Matrix')
 
+    # -------------------------------------
+    # Histogram functions and plotting
+    # -------------------------------------
+    def histogram_field_callback(self):
+        self.update_field_combobox(self.comboBoxHistogramFieldType, self.comboBoxHistogramField)
+        print('updated histogram fields')
+
+
     def plot_histogram(self, current_plot_df, plot_information, bin_width):
         """Displays histogram for current selected analyte.
 
@@ -2948,59 +2939,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         x = (1 - b) * h / np.cos(np.pi/6) - y * np.tan(np.pi/6) - w
         return x, y
 
-    # extracts data for scatter plot
-    def get_scatter_values(self):
-        """Creates a dictionary of values for plotting
-
-        :return: four return variables, x, y, z, and c, each as a dict with locations for bi- and
-            ternary plots.  Each contain a 'field', 'type', 'label', and 'array'.  x, y and z
-            contain coordinates and c contains the colors
-        :rtype: dict
-        """
-        value_dict = {
-            'x': {'field': None, 'type': None, 'label': None, 'array': None},
-            'y': {'field': None, 'type': None, 'label': None, 'array': None},
-            'z': {'field': None, 'type': None, 'label': None, 'array': None},
-            'c': {'field': None, 'type': None, 'label': None, 'array': None}
-        }
-        value_dict['x']['field'] = self.comboBoxScatterAnalyteX.currentText()
-        value_dict['x']['type'] = self.comboBoxScatterSelectX.currentText().lower()
-        value_dict['y']['field'] = self.comboBoxScatterAnalyteY.currentText()
-        value_dict['y']['type'] = self.comboBoxScatterSelectY.currentText().lower()
-        value_dict['z']['field'] = self.comboBoxScatterAnalyteZ.currentText()
-        value_dict['z']['type'] = self.comboBoxScatterSelectZ.currentText().lower()
-        value_dict['c']['field'] = self.comboBoxColorField.currentText()
-        value_dict['c']['type'] = self.comboBoxColorByField.currentText().lower()
-
-        for k, v in value_dict.items():
-            if v['type'] == 'Analyte' and v['field']:
-                df = self.get_map_data(self.sample_id, v['field'], analysis_type=v['type'], plot=False)
-                v['label'] = v['field'] + ' (' + self.preferences['Units']['Concentration'] + ')'
-            elif v['type'] == 'Ratio' and '/' in v['field']:
-                analyte_1, analyte_2 = v['field'].split('/')
-                df = self.get_map_data(self.sample_id, analyte_1, analyte_2, analysis_type=v['type'], plot=False)
-                v['label'] = v['field']
-            elif v['type'] == 'pca':
-                #df = self.get_map_data(self.sample_id, v['field'], plot_type=None, plot=False)
-                v['label'] = v['field']
-            elif v['type'] == 'Cluster':
-                #df = self.get_map_data(self.sample_id, v['field'], plot_type=None, plot=False)
-                v['label'] = v['field']
-            elif v['type'] == 'Cluster Score':
-                #df = self.get_map_data(self.sample_id, v['field'], plot_type=None, plot=False)
-                v['label'] = v['field']
-            elif v['type'] == 'Special':
-                return
-            else:
-                df = pd.DataFrame({'array': []})  # Or however you want to handle this case
-
-            value_dict[k]['array'] = df['array'][self.data[self.sample_id]['mask']].values if not df.empty else []
-
-        return value_dict['x'], value_dict['y'], value_dict['z'], value_dict['c']
-
+   
 
     # -------------------------------------
-    # Plot style related fuctions/callbacks
+    # Style related fuctions/callbacks
     # -------------------------------------
     def input_theme_name_dlg(self):
         """Opens a dialog to save style theme
@@ -3236,7 +3178,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 else:
                     self.lineEditZLabel.setEnabled(True)
                 self.lineEditAspectRatio.setEnabled(True)
-                self.comboBoxTickDirection(True)
+                self.comboBoxTickDirection.setEnabled(True)
                 
                 # scalebar properties
                 self.comboBoxScaleDirection.setEnabled(False)
@@ -3825,63 +3767,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # updates scatter styles when ColorByField comboBox is changed
     def color_by_field_callback(self):
+        # write a general version to fill two related comboboxes
         plot_type = self.comboBoxStylePlotType.currentText()
         itemlist = []
         if self.comboBoxStylePlotType.isEnabled() == False | self.comboBoxColorByField.isEnabled() == False:
             return
         
-        # if color by field changes, update field lists
-        cbf = self.comboBoxColorByField.currentText()
-        self.comboBoxColorField.clear()
-        if cbf == 'None':
+        if self.comboBoxColorByField.currentText() == 'None':
             pass
         else:
-            match cbf:
-                case 'Analyte' | 'Analyte (normalized)':
-                    itemlist = self.data[self.sample_id]['analyte_info'].loc[self.data[self.sample_id]['analyte_info']['use']== True,'analytes'].values.tolist()
-                case 'Ratio':
-                    analytes_1 = self.data[self.sample_id]['ratios_info'].loc[self.data[self.sample_id]['ratios_info']['use']== True,'analyte_1']
-                    analytes_2 =  self.data[self.sample_id]['ratios_info'].loc[self.data[self.sample_id]['ratios_info']['use']== True,'analyte_2']
-                    ratios = analytes_1 +' / '+ analytes_2
-                    itemlist = ratios.values.tolist()
-                case _:
-                    itemlist = self.data[self.sample_id]['computed_data'][cbf].columns.tolist()
-                    
-            self.comboBoxColorField.addItems(itemlist)
-#        if tab_id == self.scatter_tab_id or tab_id == self.pca_tab_id or tab_id == self.profile_tab_id:
-#            if self.comboBoxColorByField.currentText().lower() == 'none':
-#                # turn off ColorByField and enable Color
-#                self.labelMarkerColor.setEnabled(True)
-#                self.toolButtonMarkerColor.setEnabled(True)
-#                self.toolButtonMarkerColor.setStyleSheet("background-color: %s;" % self.scatter_style[tab_id]['Color'])
-#
-#                self.labelColorField.setEnabled(False)
-#                self.comboBoxColorField.setEnabled(False)
-#
-#                self.labelFieldColormap.setEnabled(False)
-#                self.comboBoxFieldColormap.setEnabled(False)
-#
-#                self.scatter_style[tab_id]['ColorByField'] = self.comboBoxColorByField.currentText()
-#                self.scatter_style[tab_id]['Field'] = self.comboBoxColorField.currentText()
-#                self.update_current_plot(save=False)
-#            else:
-#                # turn off single color and enable ColorByField
-#                self.labelColorField.setEnabled(True)
-#                self.comboBoxColorField.setEnabled(True)
-#
-#                # fill ColorField comboBox
-#                fields = self.get_field_list(self.comboBoxColorByField.currentText().lower())
-#                self.comboBoxColorField.clear()
-#                if not (len(fields) == 0):
-#                    self.comboBoxColorField.addItems(fields)
-#
-#                self.labelFieldColormap.setEnabled(True)
-#                self.comboBoxFieldColormap.setEnabled(True)
-#
-#                self.labelMarkerColor.setEnabled(False)
-#                self.toolButtonMarkerColor.setEnabled(False)
-#                self.toolButtonMarkerColor.setStyleSheet("background-color: none;")
+            self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
 
+        self.update_current_plot(save=False)
+        
     def color_field_callback(self):
         self.styles[self.comboBoxStylePlotType.currentText()]['Colors']['Field'] = self.comboBoxColorField.currentText()
         if self.comboBoxColorField.isEnabled():
@@ -4003,8 +3901,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # ternary
                 else:
                     self.hist2dternplot(fig,x,y,z,style,save,c=c)
-
-
 
     def newplot(self, fig, plot_name, plot_information, save):
         """Creates new figure widget
@@ -4166,7 +4062,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             }
             self.newplot(fig, plot_name, plot_information, save)
 
-
     def ternary_scatter(self, fig, x, y, z, c, style, save):
         """Creates ternary scatter plots
 
@@ -4224,7 +4119,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 'style': style
             }
             self.newplot(fig, plot_name, plot_information, save)
-
 
     def hist2dbiplot(self, fig, x, y, style, save):
         """Creates 2D histogram figure
@@ -4290,7 +4184,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 'style': style
             }
             self.newplot(fig, plot_name, plot_information, save)
-
 
     def hist2dternplot(self, fig, x, y, z, style, save, c=None):
         """Creates a ternary histogram figure
@@ -4359,7 +4252,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 'style': style
             }
             self.newplot(fig, plot_name, plot_information, save)
-
 
     def plot_ternarymap(self):
         """Creates map colored by ternary coordinate positions"""
@@ -4432,7 +4324,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.process_clustering_methods( n_clusters, exponent, distance_type,fuzzy_cluster_number,  filtered_array,clustering_algorithms )
 
-
     def process_clustering_methods(self, n_clusters, exponent, distance_type, fuzzy_cluster_number, filtered_array, clustering_algorithms):
         #create unique id if new plot
         plot_type = 'clustering'
@@ -4488,7 +4379,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Create and add the widget to layout
         self.add_clustering_widget_to_layout(fig,plot_name, plot_type)
-
 
     def plot_clustering_result(self, ax, labels, method_name, fuzzy_cluster_number):
         reshaped_array = np.reshape(labels, self.array_size, order=self.order)
@@ -4563,7 +4453,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             # Redraw the figure canvas to reflect the updates
             self.fig.canvas.draw_idle()
-
 
     def update_cluster_ui(self):
         # update_clusters_ui - Enables/disables tools associated with clusters
@@ -4828,7 +4717,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             print('Incorrect axis argument. Please use "x" or "y".')
 
 
-
     def group_changed(self):
         # Clear the list widget
         self.tableWidgetViewGroups.clear()
@@ -4966,7 +4854,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     t_array = np.copy(array)
             return t_array
 
-
     def add_ree(self, sample_df):
 
         lree = ['la', 'ce', 'pr', 'nd', 'sm', 'eu', 'gd']
@@ -4986,7 +4873,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         sample_df['REE'] = sample_df[ree_cols].sum(axis=1)
 
         return sample_df
-
 
     def change_sample(self, index):
         """Changes sample and plots first map
@@ -5175,9 +5061,44 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #create plot
             self.create_plot(current_plot_df,sample_id=self.sample_id, plot_type = 'lasermap', analyte_1= self.selected_analytes[0])
         self.check_analysis = False
-            
-    
-    def update_combo_boxes(self, parentBox, childBox):
+   
+    # updates field type comboboxes for analyses and plotting
+    def update_analysis_combobox(self, comboBox, addNone=False, plot_type=None):
+        
+        match plot_type.lower():
+            case 'histogram' | 'tec':
+                if self.data[self.sample_id]['computed_data']['Cluster'].empty:
+                   field_list = []
+                else:
+                    field_list = ['Cluster']
+            case 'cluster score':
+                if self.data[self.sample_id]['computed_data']['Cluster Score'].empty:
+                   field_list = []
+                else:
+                   field_list = ['Cluster Score']
+            case 'pca score':
+                if self.data[self.sample_id]['computed_data']['PCA Score'].empty:
+                    fieldlist = []
+                else:
+                    fieldlist = ['PCA Score']
+            case _:
+                field_list = ['Analyte', 'Analyte (normalized)']
+                for field in self.data[self.sample_id]['computed_data']:
+                    if not (self.data[self.sample_id]['computed_data'][field].empty):
+                        field_list.append(field)
+
+        # add None to list?
+        if addNone:
+            field_list = 'None' + field_list
+
+        print(field_list)
+        # clear comboBox items
+        comboBox.clear()
+        # add new items
+        comboBox.addItems(field_list)
+ 
+    # updates field comboboxes for analysis and plotting
+    def update_field_combobox(self, parentBox, childBox):
         """Updates comboBoxes with fields for plots or analysis
 
         Updates lists of fields in comboBoxes that are used to generate plots or used for analysis.
@@ -5186,15 +5107,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Parameter
         ---------
         parentBox: QComboBox
-            comboBox used to select field type ('Analyte', 'analyte (norm)', 'Ratio', etc.)
+            comboBox used to select field type ('Analyte', 'Analyte (normalized)', 'Ratio', etc.)
         childBox: QComboBox
             comboBox with list of field values
         """
 
-        fields = self.get_field_list(set_name=parentBox.currentText().lower())
+        fields = self.get_field_list(set_name=parentBox.currentText())
         childBox.clear()
         childBox.addItems(fields)
-
+    
+    def check_analysis_type(self):
+        self.check_analysis = True
+        self.update_analysis_combobox(self.comboBoxColorByField, addNone=True, plot_type=self.comboBoxStylePlotType.currentText())
+        self.check_analysis = False
 
     def update_spinboxes(self,parameters,bins = None ,bin_width = None):
         if self.canvasWindow.currentIndex()==0:
@@ -5237,7 +5162,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             self.update_spinboxes_bool = True
 
-
+    # -------------------------------------
+    # Data functions functions
+    # -------------------------------------
     def get_map_data(self,sample_id, name = None, analysis_type = 'Analyte', plot= True, update = False):
 
         """
@@ -5302,35 +5229,57 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
 
         return current_plot_df
-    
-    def check_analysis_type(self):
-        self.check_analysis = True
-        plot_type = self.comboBoxStylePlotType.currentText()
-        self.comboBoxColorByField.clear()
-        match plot_type.lower():
-            case 'histogram' | 'tec':
-                if self.data[self.sample_id]['computed_data']['Cluster'].empty:
-                   self.comboBoxColorByField.addItems(['None'])
-                else:
-                   self.comboBoxColorByField.addItems(['None','Cluster'])
-            case 'cluster score':
-                if self.data[self.sample_id]['computed_data']['Cluster Score'].empty:
-                   self.comboBoxColorByField.addItems(['None'])
-                else:
-                   self.comboBoxColorByField.addItems(['None','Cluster Score'])
-            case 'pca score':
-                if self.data[self.sample_id]['computed_data']['PCA Score'].empty:
-                   self.comboBoxColorByField.addItems(['None'])
-                else:
-                   self.comboBoxColorByField.addItems(['None','PCA Score'])
-            case _:
-                field_list = [None,'Analyte', 'Analyte (normalized)']
-                for field in self.data[self.sample_id]['computed_data']:
-                    if not (self.data[self.sample_id]['computed_data'][field].empty):
-                        field_list.append(field)
-                self.comboBoxColorByField.addItems(field_list)
-                
-        self.check_analysis = False
+
+    # extracts data for scatter plot
+    def get_scatter_values(self):
+        """Creates a dictionary of values for plotting
+
+        :return: four return variables, x, y, z, and c, each as a dict with locations for bi- and
+            ternary plots.  Each contain a 'field', 'type', 'label', and 'array'.  x, y and z
+            contain coordinates and c contains the colors
+        :rtype: dict
+        """
+        value_dict = {
+            'x': {'field': None, 'type': None, 'label': None, 'array': None},
+            'y': {'field': None, 'type': None, 'label': None, 'array': None},
+            'z': {'field': None, 'type': None, 'label': None, 'array': None},
+            'c': {'field': None, 'type': None, 'label': None, 'array': None}
+        }
+        value_dict['x']['field'] = self.comboBoxScatterAnalyteX.currentText()
+        value_dict['x']['type'] = self.comboBoxScatterSelectX.currentText().lower()
+        value_dict['y']['field'] = self.comboBoxScatterAnalyteY.currentText()
+        value_dict['y']['type'] = self.comboBoxScatterSelectY.currentText().lower()
+        value_dict['z']['field'] = self.comboBoxScatterAnalyteZ.currentText()
+        value_dict['z']['type'] = self.comboBoxScatterSelectZ.currentText().lower()
+        value_dict['c']['field'] = self.comboBoxColorField.currentText()
+        value_dict['c']['type'] = self.comboBoxColorByField.currentText().lower()
+
+        for k, v in value_dict.items():
+            if v['type'] == 'Analyte' and v['field']:
+                df = self.get_map_data(self.sample_id, v['field'], analysis_type=v['type'], plot=False)
+                v['label'] = v['field'] + ' (' + self.preferences['Units']['Concentration'] + ')'
+            elif v['type'] == 'Ratio' and '/' in v['field']:
+                analyte_1, analyte_2 = v['field'].split('/')
+                df = self.get_map_data(self.sample_id, analyte_1, analyte_2, analysis_type=v['type'], plot=False)
+                v['label'] = v['field']
+            elif v['type'] == 'pca':
+                #df = self.get_map_data(self.sample_id, v['field'], plot_type=None, plot=False)
+                v['label'] = v['field']
+            elif v['type'] == 'Cluster':
+                #df = self.get_map_data(self.sample_id, v['field'], plot_type=None, plot=False)
+                v['label'] = v['field']
+            elif v['type'] == 'Cluster Score':
+                #df = self.get_map_data(self.sample_id, v['field'], plot_type=None, plot=False)
+                v['label'] = v['field']
+            elif v['type'] == 'Special':
+                return
+            else:
+                df = pd.DataFrame({'array': []})  # Or however you want to handle this case
+
+            value_dict[k]['array'] = df['array'][self.data[self.sample_id]['mask']].values if not df.empty else []
+
+        return value_dict['x'], value_dict['y'], value_dict['z'], value_dict['c']
+
 
     def create_plot(self,current_plot_df, sample_id = None, plot_type = 'lasermap', analyte_1 = None, analyte_2 = None, plot = True):
         # creates plot information and send to relevant plotting method
@@ -5396,7 +5345,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if plot:
             self.add_plot(plot_information, current_plot_df)
 
-
     def toolbar_plotting(self,function,view,enable):
         if function == 'home':
             self.toolButtonPanSV.setChecked(False)
@@ -5460,6 +5408,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 export = exportDialog.ExportDialog(self.pyqtgraph_widget.getItem(0, 0).scene())
                 export.show(self.pyqtgraph_widget.getItem(0, 0).getViewBox())
                 export.exec_()
+
     def import_data(self, path):
         # Get a list of all files in the directory
         file_list = os.listdir(path)
@@ -5484,6 +5433,33 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # progressBar.setValue(i)
         return data_dict
 
+
+# -------------------------------
+# dialog functions
+# -------------------------------                
+    def open_preferences_dialog(self):
+        pass
+
+    def open_select_analyte_dialog(self):
+        analytes_list = self.data[self.sample_id]['analyte_info']['analytes'].values
+
+        self.analyteDialog = analyteSelectionWindow(analytes_list,self.data[self.sample_id]['norm'], self.data[self.sample_id]['processed_data'], self)
+        self.analyteDialog.show()
+        # self.analyteDialog.listUpdated.connect(lambda: self.update_tree(self.analyteDialog.norm_dict, norm_update = True))
+        result = self.analyteDialog.exec_()  # Store the result here
+        if result == QDialog.Accepted:
+            #update self.data['norm'] with selection
+            self.data[self.sample_id]['norm'] = self.analyteDialog.norm_dict
+            self.update_tree(self.data[self.sample_id]['norm'], norm_update = True)
+            #update analysis type combo in styles
+            self.check_analysis_type()
+        if result == QDialog.Rejected:
+            pass
+
+
+# -------------------------------
+# plot selector (tree) functions
+# -------------------------------                
     def create_tree(self,sample_id = None):
         if not self.data:
             treeView  = self.treeView
@@ -5522,6 +5498,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.histogram_items.appendRow(histogram_sample_id_item)
             self.ratios_items.appendRow(ratio_sampe_id_item)
             self.norm_analytes_items.appendRow(norm_sample_id_item)
+            
     def tree_double_click(self,val):
         level_1_data = val.parent().parent().data()
         level_2_data =val.parent().data()
@@ -5553,30 +5530,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         elif ((level_1_data == 'Clustering') or (level_1_data=='Scatter') or (level_1_data=='n-dim') or (level_1_data=='PCA')or (level_1_data=='Correlation')):
             plot_info ={'plot_name':level_3_data, 'plot_type':level_1_data.lower(),'sample_id':level_2_data }
             self.add_plot(plot_info)
-
-
-    def open_preferences_dialog(self):
-        pass
-
-
-    def open_select_analyte_dialog(self):
-        analytes_list = self.data[self.sample_id]['analyte_info']['analytes'].values
-
-        self.analyteDialog = analyteSelectionWindow(analytes_list,self.data[self.sample_id]['norm'], self.data[self.sample_id]['processed_data'], self)
-        self.analyteDialog.show()
-        # self.analyteDialog.listUpdated.connect(lambda: self.update_tree(self.analyteDialog.norm_dict, norm_update = True))
-        result = self.analyteDialog.exec_()  # Store the result here
-        if result == QDialog.Accepted:
-            #update self.data['norm'] with selection
-            self.data[self.sample_id]['norm'] = self.analyteDialog.norm_dict
-            self.update_tree(self.data[self.sample_id]['norm'], norm_update = True)
-            #update analysis type combo in styles
-            self.check_analysis_type()
-        if result == QDialog.Rejected:
-            pass
-
-
-
 
     def update_tree(self,leaf,data = None,tree= 'Analyte', norm_update = False):
         if tree.lower() == 'analyte':
@@ -5624,8 +5577,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         elif tree == 'Correlation':
             self.add_tree_item(self.sample_id,self.correlation_items,leaf,data)
 
-
-
     def add_tree_item(self,sample_id,tree, leaf, data):
         #check if leaf is in tree
         item,check = self.find_leaf(tree = tree, branch = sample_id, leaf = leaf)
@@ -5652,8 +5603,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #item is sample id item (branch)
             item.appendRow(plot_item)
 
-
-
     def unhighlight_tree(self, tree):
         """Reset the highlight of all items in the tree."""
         for i in range(tree.rowCount()):
@@ -5662,7 +5611,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             for j in range(branch_item.rowCount()):
                 leaf_item = branch_item.child(j)
                 leaf_item.setBackground(QBrush(QColor(255, 255, 255)))  # white or any default background color
-
 
     def find_leaf(self,tree, branch, leaf):
         #Returns leaf item,True  if leaf exists else returns branch item, False
@@ -5676,8 +5624,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     return (branch_item,False)
             return (None,None)
 
-
-
     def update_ratio_df(self,sample_id,analyte_1, analyte_2,norm):
 
         parameter= self.data[sample_id]['ratios_info'].loc[(self.data[sample_id]['ratios_info']['analyte_1'] == analyte_1) & (self.data[sample_id]['ratios_info']['analyte_2'] == analyte_2)]
@@ -5689,7 +5635,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
             self.prep_data(sample_id, analyte_1=analyte_1, analyte_2 = analyte_2)
-            
+
+
+# -------------------------------
+# unclassified functions 
+# -------------------------------            
     def reset_checked_items(self,item):
         #unchecks tool buttons to prevent incorrect behaviour during plot click
         match item:
@@ -5710,8 +5660,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.toolButtonCrop.setChecked(False)
                 self.toolButtonPlotProfile.setChecked(False)
                 self.toolButtonPointMove.setChecked(False)
-                
-                
+
+
+# -------------------------------
+# new classes
+# -------------------------------                
 class StandardItem(QStandardItem):
     def __init__(self, txt = '', font_size = 12, set_bold= False):
         super().__init__()
@@ -6657,6 +6610,7 @@ class Polygon:
             self.point_index = None             # index for move point
             self.p_id = None           # polygon ID
             self.p_id_gen = 0 #Polygon_id generator
+
 
 class Profiling:
     def __init__(self,main_window):

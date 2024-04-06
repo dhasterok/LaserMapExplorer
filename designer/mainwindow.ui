@@ -1541,7 +1541,7 @@
       <string>Activates the crop tool</string>
      </property>
      <property name="currentIndex">
-      <number>5</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="SelectAnalytePage">
       <property name="enabled">
@@ -2083,7 +2083,7 @@
           </widget>
          </item>
          <item row="0" column="0">
-          <widget class="QComboBox" name="comboBoxScatterHistogramFieldType">
+          <widget class="QComboBox" name="comboBoxHistogramFieldType">
            <property name="font">
             <font>
              <pointsize>11</pointsize>
@@ -4168,43 +4168,6 @@
            </property>
           </spacer>
          </item>
-         <item>
-          <widget class="QToolButton" name="toolButtonPlotScatter">
-           <property name="minimumSize">
-            <size>
-             <width>32</width>
-             <height>32</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>32</width>
-             <height>32</height>
-            </size>
-           </property>
-           <property name="font">
-            <font>
-             <pointsize>11</pointsize>
-            </font>
-           </property>
-           <property name="toolTip">
-            <string>Create plot, add to tree</string>
-           </property>
-           <property name="text">
-            <string>Plot</string>
-           </property>
-           <property name="icon">
-            <iconset resource="../resources.qrc">
-             <normaloff>:/icons/resources/icons/icon-tree-64.png</normaloff>:/icons/resources/icons/icon-tree-64.png</iconset>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>24</width>
-             <height>24</height>
-            </size>
-           </property>
-          </widget>
-         </item>
         </layout>
        </widget>
       </widget>
@@ -4389,41 +4352,41 @@
                </property>
               </widget>
              </item>
+             <item>
+              <widget class="QToolButton" name="toolButtonSaveTernaryColormap">
+               <property name="minimumSize">
+                <size>
+                 <width>32</width>
+                 <height>32</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>32</width>
+                 <height>32</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>...</string>
+               </property>
+               <property name="icon">
+                <iconset resource="../resources.qrc">
+                 <normaloff>:/icons/resources/icons/icon-save-file-64.png</normaloff>:/icons/resources/icons/icon-save-file-64.png</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>24</width>
+                 <height>24</height>
+                </size>
+               </property>
+              </widget>
+             </item>
             </layout>
            </item>
           </layout>
          </item>
          <item>
           <layout class="QVBoxLayout" name="verticalLayout_11">
-           <item>
-            <widget class="QToolButton" name="toolButtonSaveTernaryColormap">
-             <property name="minimumSize">
-              <size>
-               <width>32</width>
-               <height>32</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>32</width>
-               <height>32</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>...</string>
-             </property>
-             <property name="icon">
-              <iconset resource="../resources.qrc">
-               <normaloff>:/icons/resources/icons/icon-save-file-64.png</normaloff>:/icons/resources/icons/icon-save-file-64.png</iconset>
-             </property>
-             <property name="iconSize">
-              <size>
-               <width>24</width>
-               <height>24</height>
-              </size>
-             </property>
-            </widget>
-           </item>
            <item>
             <widget class="QToolButton" name="toolButtonTernaryMap">
              <property name="enabled">
@@ -4496,7 +4459,7 @@
          <x>0</x>
          <y>0</y>
          <width>300</width>
-         <height>441</height>
+         <height>416</height>
         </rect>
        </property>
        <property name="font">
@@ -4516,56 +4479,13 @@
           <x>10</x>
           <y>25</y>
           <width>281</width>
-          <height>411</height>
+          <height>381</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_5">
          <item>
           <layout class="QFormLayout" name="formLayout_4">
            <item row="0" column="0">
-            <widget class="QLabel" name="labelNDimPlotType">
-             <property name="font">
-              <font>
-               <pointsize>11</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Plot type</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QComboBox" name="comboBoxNDimPlotType">
-             <property name="maximumSize">
-              <size>
-               <width>200</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>11</pointsize>
-              </font>
-             </property>
-             <property name="toolTip">
-              <string>Select plot type for N-dimensional series</string>
-             </property>
-             <item>
-              <property name="text">
-               <string>TEC</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Radar</string>
-              </property>
-             </item>
-            </widget>
-           </item>
-           <item row="1" column="0">
             <widget class="QLabel" name="labelNDimRefValues">
              <property name="font">
               <font>
@@ -4580,7 +4500,7 @@
              </property>
             </widget>
            </item>
-           <item row="1" column="1">
+           <item row="0" column="1">
             <widget class="QComboBox" name="comboBoxNDimRefMaterial">
              <property name="maximumSize">
               <size>
@@ -5093,7 +5013,7 @@
          <x>0</x>
          <y>0</y>
          <width>300</width>
-         <height>106</height>
+         <height>101</height>
         </rect>
        </property>
        <property name="title">
@@ -5103,7 +5023,7 @@
         <property name="geometry">
          <rect>
           <x>5</x>
-          <y>10</y>
+          <y>5</y>
           <width>286</width>
           <height>91</height>
          </rect>
@@ -5311,7 +5231,7 @@
            <x>0</x>
            <y>20</y>
            <width>300</width>
-           <height>236</height>
+           <height>181</height>
           </rect>
          </property>
          <property name="title">
@@ -5324,14 +5244,26 @@
           <property name="geometry">
            <rect>
             <x>10</x>
-            <y>10</y>
+            <y>5</y>
             <width>281</width>
-            <height>220</height>
+            <height>171</height>
            </rect>
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_11">
            <item>
             <layout class="QFormLayout" name="formLayoutClusterSettings">
+             <item row="0" column="0">
+              <widget class="QLabel" name="labelClusterMethod">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Method</string>
+               </property>
+              </widget>
+             </item>
              <item row="0" column="1">
               <widget class="QComboBox" name="comboBoxClusterMethod">
                <property name="maximumSize">
@@ -5501,39 +5433,6 @@
               </widget>
              </item>
              <item row="4" column="0">
-              <widget class="QLabel" name="labelFCView">
-               <property name="font">
-                <font>
-                 <pointsize>11</pointsize>
-                </font>
-               </property>
-               <property name="text">
-                <string>FC view</string>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="1">
-              <widget class="QSpinBox" name="spinBoxFCView">
-               <property name="maximumSize">
-                <size>
-                 <width>150</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="font">
-                <font>
-                 <pointsize>11</pointsize>
-                </font>
-               </property>
-               <property name="toolTip">
-                <string>Fuzzy clustering only, choose map or individual cluster scores</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="5" column="0">
               <widget class="QLabel" name="labelClusterStartingSeed">
                <property name="font">
                 <font>
@@ -5545,7 +5444,7 @@
                </property>
               </widget>
              </item>
-             <item row="5" column="1">
+             <item row="4" column="1">
               <widget class="QLineEdit" name="lineEditSeed">
                <property name="maximumSize">
                 <size>
@@ -5566,18 +5465,6 @@
                </property>
                <property name="alignment">
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="0">
-              <widget class="QLabel" name="labelClusterMethod">
-               <property name="font">
-                <font>
-                 <pointsize>11</pointsize>
-                </font>
-               </property>
-               <property name="text">
-                <string>Method</string>
                </property>
               </widget>
              </item>
@@ -5636,6 +5523,51 @@
            </item>
           </layout>
          </widget>
+        </widget>
+        <widget class="QSpinBox" name="spinBoxFCView">
+         <property name="geometry">
+          <rect>
+           <x>100</x>
+           <y>290</y>
+           <width>150</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>150</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
+         <property name="toolTip">
+          <string>Fuzzy clustering only, choose map or individual cluster scores</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="labelFCView">
+         <property name="geometry">
+          <rect>
+           <x>50</x>
+           <y>290</y>
+           <width>42</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>FC view</string>
+         </property>
         </widget>
        </widget>
        <widget class="QWidget" name="pagetSNE">
@@ -7043,15 +6975,15 @@
         <enum>QFrame::Raised</enum>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="StyleAxes">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>219</width>
-          <height>426</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7303,8 +7235,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>219</width>
-          <height>426</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7553,8 +7485,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>219</width>
-          <height>426</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7759,8 +7691,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>219</width>
-          <height>426</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7863,8 +7795,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>219</width>
-          <height>426</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -8233,6 +8165,14 @@
         </widget>
        </widget>
        <widget class="QWidget" name="StyleClusters">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>100</width>
+          <height>30</height>
+         </rect>
+        </property>
         <attribute name="icon">
          <iconset resource="../resources.qrc">
           <normaloff>:/icons/resources/icons/icon-cluster-64.png</normaloff>:/icons/resources/icons/icon-cluster-64.png</iconset>

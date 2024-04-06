@@ -601,6 +601,277 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.toolbox_changed()
 
+    # -------------------------------------
+    # File I/O related functions
+    # -------------------------------------
+    def open_directory(self):
+        """Open directory with samples
+
+        Executes on self.toolBar.actionOpen and self.menuFile.action.Open_Directory.  self.toolBox
+        pages are enabled upon successful load.
+
+        Opens a dialog to select directory filled with samples.  Updates sample list in
+        self.comboBoxSampleID and comboBoxes associated with analyte lists.  The first sample
+        in list is loaded by default.
+        """
+        dialog = QFileDialog()
+        dialog.setFileMode(QFileDialog.Directory)
+        # Set the default directory to the current working directory
+        # dialog.setDirectory(os.getcwd())
+        dialog.setDirectory('/Users/shavinkalu/Library/CloudStorage/GoogleDrive-a1904121@adelaide.edu.au/.shortcut-targets-by-id/1r_MeSExALnv9lHE58GoG7pbtC8TOwSk4/laser_mapping/Alex_garnet_maps/')
+        if dialog.exec_():
+            self.selected_directory = dialog.selectedFiles()[0]
+            file_list = os.listdir(self.selected_directory)
+            self.csv_files = [file for file in file_list if file.endswith('.csv')]
+            if self.csv_files == []:
+                # warning dialog
+                return
+            self.comboBoxSampleId.clear()
+            self.comboBoxSampleId.addItems([os.path.splitext(file)[0] for file in self.csv_files])
+            # Populate the sampleidcomboBox with the file names
+            self.canvasWindow.setCurrentIndex(0)
+            self.change_sample(0)
+        # self.selected_directory='/Users/a1904121/LaserMapExplorer/laser_mapping/Alex_garnet_maps/processed data'
+        # self.selected_directory='/Users/shavinkalu/Library/CloudStorage/GoogleDrive-a1904121@adelaide.edu.au/.shortcut-targets-by-id/1r_MeSExALnv9lHE58GoG7pbtC8TOwSk4/laser_mapping/Alex_garnet_maps/processed data'
+        # self.selected_directory=''
+        try:
+            file_list = os.listdir(self.selected_directory)
+        except:
+            return
+        self.csv_files = [file for file in file_list if file.endswith('.csv')]
+        self.comboBoxSampleId.clear()
+        self.comboBoxSampleId.addItems([os.path.splitext(file)[0] for file in self.csv_files])
+        # Populate the sampleidcomboBox with the file names
+        # self.canvasWindow.setCurrentIndex(0)
+        # self.change_sample(0)
+
+        self.toolBox.setCurrentIndex(self.sample_tab_id)
+
+        self.SelectAnalytePage.setEnabled(True)
+        self.PreprocessPage.setEnabled(True)
+        self.SpotDataPage.setEnabled(True)
+        self.FilterPage.setEnabled(True)
+        self.ScatterPage.setEnabled(True)
+        self.NDIMPage.setEnabled(True)
+        self.PCAPage.setEnabled(True)
+        self.ClusteringPage.setEnabled(True)
+        self.ProfilingPage.setEnabled(True)
+        self.SpecialFunctionPage.setEnabled(True)
+        
+    def change_sample(self, index):
+        """Changes sample and plots first map
+
+        Parameter
+        ---------
+        index: int
+            index of sample name for identifying data.  The values are based on the
+            comboBoxSampleID
+        """
+        if self.data:
+            # Create and configure the QMessageBox
+            messageBoxChangeSample = QMessageBox()
+            iconWarning = QtGui.QIcon()
+            iconWarning.addPixmap(QtGui.QPixmap(":/icons/resources/icons/icon-warning-64.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+
+            messageBoxChangeSample.setWindowIcon(iconWarning)  # Set custom icon
+            messageBoxChangeSample.setText("Do you want to save current analysis")
+            messageBoxChangeSample.setWindowTitle("Save analysis")
+            messageBoxChangeSample.setStandardButtons(QMessageBox.Discard | QMessageBox.Cancel | QMessageBox.Save)
+
+            # Display the dialog and wait for user action
+            response = messageBoxChangeSample.exec_()
+
+
+            if response == QMessageBox.Save:
+                self.save_analysis()
+                self.reset_analysis('sample')
+
+
+            elif response == QMessageBox.Discard:
+                self.reset_analysis('sample')
+            else: #user pressed cancel
+                self.comboBoxSampleId.setCurrentText(self.sample_id)
+                return
+
+
+
+        file_path = os.path.join(self.selected_directory, self.csv_files[index])
+        self.sample_id = os.path.splitext(self.csv_files[index])[0]
+
+
+
+        # print(self.sample_id)
+        ####
+        #### Need to fix this so that it calculates the size appropriately when they load
+        #### Also need a program that correctly converts a iolite file to one that is read in hear.
+        ####
+        if self.sample_id == 'TR1-07':
+            self.aspect_ratio = 0.976
+        elif self.sample_id == 'TR3-06':
+            self.aspect_ratio = 0.874
+        elif self.sample_id == 'WOS-02':
+            self.aspect_ratio = 0.873
+
+
+        # add sample to sample dictionary
+        if self.sample_id not in self.data:
+            sample_id = self.sample_id
+            #initialise nested dict for each sample
+            self.data[self.sample_id] = {}
+            #set info dataframes for each sample
+            self.data[self.sample_id]['analyte_info'] = pd.DataFrame(columns = ['analytes', 'norm','upper_bound','lower_bound','d_l_bound','d_u_bound', 'use'])
+            self.data[self.sample_id]['ratios_info'] = pd.DataFrame(columns = [ 'analyte_1','analyte_2', 'norm','upper_bound','lower_bound','d_l_bound','d_u_bound', 'use', 'auto_scale'])
+            self.data[self.sample_id]['filter_info'] = pd.DataFrame(columns = [ 'analyte_1', 'analyte_2', 'Ratio','norm','f_min','f_max', 'use'])
+            
+            #Set crop to false
+            self.data[self.sample_id]['crop'] = False
+
+            self.update_spinboxes_bool = False #prevent update plot from runing
+            sample_df = pd.read_csv(file_path, engine='c')
+            sample_df  = sample_df.loc[:, ~sample_df .columns.str.contains('^Unnamed')]
+            # self.data[sample_id] = pd.read_csv(file_path, engine='c')
+            self.data[sample_id]['raw_data'] = self.add_ree(sample_df)
+            self.selected_analytes = self.data[sample_id]['raw_data'].columns[5:].tolist()
+            self.data[sample_id]['computed_data'] = {
+                'Ratio':pd.DataFrame(),
+                'Calculated Field':pd.DataFrame(),
+                
+                'PCA Score':pd.DataFrame(),
+                'Cluster':pd.DataFrame(columns = ['Fuzzy', 'KMeans', 'KMediods']),
+                'Cluster Score':pd.DataFrame(),
+                'Special':pd.DataFrame(),
+                }
+            analytes = pd.DataFrame()
+            analytes['analytes']=self.selected_analytes
+            analytes['sample_id'] = sample_id
+            analytes['norm'] = 'linear'
+
+            #update self.data['norm']
+            self.data[sample_id]['norm'] = {}
+
+            for analyte in self.selected_analytes:
+                self.data[sample_id]['norm'][analyte] = 'linear'
+            #obtain axis bounds for plotting and cropping
+            self.data[sample_id]['x_max']= self.data[sample_id]['crop_x_max'] = self.data[sample_id]['raw_data']['X'].max()
+            self.data[sample_id]['x_min'] = self.data[sample_id]['crop_x_min'] = self.data[sample_id]['raw_data']['X'].min()
+            self.data[sample_id]['y_max'] = self.data[sample_id]['crop_y_max'] = self.data[sample_id]['raw_data']['Y'].max()
+            self.data[sample_id]['y_min'] = self.data[sample_id]['crop_y_min'] = self.data[sample_id]['raw_data']['Y'].min()
+            analytes['upper_bound'] = 99.5
+            analytes['lower_bound'] = 0.05
+            analytes['d_l_bound'] = 99
+            analytes['d_u_bound'] = 99
+            self.data[self.sample_id]['processed_data'] = copy.deepcopy(self.data[self.sample_id]['raw_data'][self.selected_analytes])
+            self.data[self.sample_id]['cropped_raw_data'] = copy.deepcopy(self.data[self.sample_id]['raw_data'])
+            analytes['v_min'] = None
+            analytes['v_max'] = None
+            analytes['auto_scale'] = True
+            analytes['use'] = True
+            self.data[sample_id]['analyte_info'] = analytes
+
+            for plot_type in self.plot_widget_dict.keys():
+                if sample_id not in self.plot_widget_dict[plot_type]:
+                    self.plot_widget_dict[plot_type][sample_id]={}
+
+            # set mask of size of analyte array
+            self.data[self.sample_id]['filter_mask'] = np.ones_like( self.data[sample_id]['raw_data']['X'].values, dtype=bool)
+            self.data[self.sample_id]['polygon_mask'] = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
+            self.data[self.sample_id]['axis_mask'] = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
+            self.data[self.sample_id]['mask'] = self.data[self.sample_id]['filter_mask'] & self.data[self.sample_id]['polygon_mask'] & self.data[self.sample_id]['axis_mask']
+
+            self.prep_data()
+            self.comboBoxFAnalyte.clear()
+            self.comboBoxNDimAnalyte.clear()
+            # self.comboBoxFAnalyte_2.clear()
+            self.comboBoxFAnalyte.addItems(analytes['analytes'])
+            self.update_filter_values()
+            self.comboBoxScatterAnalyteX.clear()
+            self.comboBoxScatterAnalyteX.addItems(analytes['analytes'])
+            self.comboBoxScatterAnalyteY.clear()
+            self.comboBoxScatterAnalyteY.addItems(analytes['analytes'])
+            self.comboBoxScatterAnalyteZ.clear()
+            self.comboBoxScatterAnalyteZ.addItem('')
+            self.comboBoxScatterAnalyteZ.addItems(analytes['analytes'])
+
+            self.comboBoxNDimAnalyte.addItems(analytes['analytes'])
+
+            self.comboBoxColorField.clear()
+            self.comboBoxColorField.addItem('')
+            self.comboBoxColorField.addItems(analytes['analytes'])
+
+            # self.spinBoxX.setMaximum(int(x_max))
+            # self.spinBoxX.setMinimum(int(x_min))
+            # self.spinBox_X.setMaximum(int(x_max))
+            # self.spinBox_X.setMinimum(int(x_min))
+            # self.spinBoxY.setMaximum(int(y_max))
+            # self.spinBoxY.setMinimum(int(y_min))
+            # self.spinBox_Y.setMaximum(int(y_max))
+            # self.spinBox_Y.setMinimum(int(y_min))
+
+            # self.checkBoxViewRatio.setChecked(False)
+
+            # plot first analyte as lasermap
+
+            #get plot array
+            current_plot_df = self.get_map_data(sample_id=sample_id, name = self.selected_analytes[0],analysis_type = 'Analyte', plot =False )
+            #set 
+            self.comboBoxColorField.setCurrentText(self.selected_analytes[0])
+            self.styles['analyte map']['Colors']['Field'] = self.selected_analytes[0]
+            
+            #create plot
+            self.create_plot(current_plot_df,sample_id=sample_id, plot_type = 'lasermap', analyte_1= self.selected_analytes[0])
+
+
+
+
+            # self.plot_laser_map(current_plot_df,plot_information)
+            # self.update_spinboxes(parameters, auto_scale_param)
+            # self.add_plot(plot_information, current_plot_df)
+
+            self.create_tree(sample_id)
+            # self.clear_analysis()
+            self.update_tree(self.data[sample_id]['norm'])
+
+            self.update_spinboxes_bool = True  # Place this line at end of method
+
+            if self.comboBoxCorrelationMethod.currentText().lower() != 'none':
+                print('plot correlation')
+                self.plot_correlation()
+
+        else:
+            #update filters, polygon, profiles with existing data
+            self.update_tables()
+            #get plot array
+            current_plot_df = self.get_map_data(sample_id=self.sample_id, name = self.selected_analytes[0],analysis_type = 'Analyte', plot =False )
+            #create plot
+            self.create_plot(current_plot_df,sample_id=self.sample_id, plot_type = 'lasermap', analyte_1= self.selected_analytes[0])
+
+    def open_preferences_dialog(self):
+        pass
+
+
+    # Other windows/dialogs
+    # -------------------------------------
+    def open_select_analyte_dialog(self):
+        analytes_list = self.data[self.sample_id]['analyte_info']['analytes'].values
+
+        self.analyteDialog = analyteSelectionWindow(analytes_list,self.data[self.sample_id]['norm'], self.data[self.sample_id]['processed_data'], self)
+        self.analyteDialog.show()
+        # self.analyteDialog.listUpdated.connect(lambda: self.update_tree(self.analyteDialog.norm_dict, norm_update = True))
+        result = self.analyteDialog.exec_()  # Store the result here
+        if result == QDialog.Accepted:
+            #update self.data['norm'] with selection
+            self.data[self.sample_id]['norm'] = self.analyteDialog.norm_dict
+            self.update_tree(self.data[self.sample_id]['norm'], norm_update = True)
+            #update analysis type combo in styles
+            self.check_analysis_type()
+        if result == QDialog.Rejected:
+            pass
+
+
+
+    # -------------------------------
+    # User interface functions
+    # -------------------------------                
     def toolbox_changed(self):
         """Updates styles associated with toolbox page
 
@@ -1747,59 +2018,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.data[sample_id]['ratios_info'].at[idx, 'v_min'] = ratio_array.min()
                 self.data[sample_id]['ratios_info'].at[idx, 'v_max'] = ratio_array.max()
 
-    def open_directory(self):
-        """Open directory with samples
 
-        Executes on self.toolBar.actionOpen and self.menuFile.action.Open_Directory.  self.toolBox
-        pages are enabled upon successful load.
-
-        Opens a dialog to select directory filled with samples.  Updates sample list in
-        self.comboBoxSampleID and comboBoxes associated with analyte lists.  The first sample
-        in list is loaded by default.
-        """
-        dialog = QFileDialog()
-        dialog.setFileMode(QFileDialog.Directory)
-        # Set the default directory to the current working directory
-        # dialog.setDirectory(os.getcwd())
-        dialog.setDirectory('/Users/shavinkalu/Library/CloudStorage/GoogleDrive-a1904121@adelaide.edu.au/.shortcut-targets-by-id/1r_MeSExALnv9lHE58GoG7pbtC8TOwSk4/laser_mapping/Alex_garnet_maps/')
-        if dialog.exec_():
-            self.selected_directory = dialog.selectedFiles()[0]
-            file_list = os.listdir(self.selected_directory)
-            self.csv_files = [file for file in file_list if file.endswith('.csv')]
-            if self.csv_files == []:
-                # warning dialog
-                return
-            self.comboBoxSampleId.clear()
-            self.comboBoxSampleId.addItems([os.path.splitext(file)[0] for file in self.csv_files])
-            # Populate the sampleidcomboBox with the file names
-            self.canvasWindow.setCurrentIndex(0)
-            self.change_sample(0)
-        # self.selected_directory='/Users/a1904121/LaserMapExplorer/laser_mapping/Alex_garnet_maps/processed data'
-        # self.selected_directory='/Users/shavinkalu/Library/CloudStorage/GoogleDrive-a1904121@adelaide.edu.au/.shortcut-targets-by-id/1r_MeSExALnv9lHE58GoG7pbtC8TOwSk4/laser_mapping/Alex_garnet_maps/processed data'
-        # self.selected_directory=''
-        try:
-            file_list = os.listdir(self.selected_directory)
-        except:
-            return
-        self.csv_files = [file for file in file_list if file.endswith('.csv')]
-        self.comboBoxSampleId.clear()
-        self.comboBoxSampleId.addItems([os.path.splitext(file)[0] for file in self.csv_files])
-        # Populate the sampleidcomboBox with the file names
-        # self.canvasWindow.setCurrentIndex(0)
-        # self.change_sample(0)
-
-        self.toolBox.setCurrentIndex(self.sample_tab_id)
-
-        self.SelectAnalytePage.setEnabled(True)
-        self.PreprocessPage.setEnabled(True)
-        self.SpotDataPage.setEnabled(True)
-        self.FilterPage.setEnabled(True)
-        self.ScatterPage.setEnabled(True)
-        self.NDIMPage.setEnabled(True)
-        self.PCAPage.setEnabled(True)
-        self.ClusteringPage.setEnabled(True)
-        self.ProfilingPage.setEnabled(True)
-        self.SpecialFunctionPage.setEnabled(True)
 
     def remove_widgets_from_layout(self, layout, object_names_to_remove):
         """
@@ -2264,6 +2483,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.zoomTarget.show()
         self.zoomViewBox.setZValue(1e10)
 
+
+    # -------------------------------------
+    # Image processing functions
+    # -------------------------------------
     def add_edge_detection(self):
         """ Add edge detection to the current laser map plot.
 
@@ -2568,6 +2791,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         vb.enableAutoRange()
         histogram.autoHistogramRange()
 
+
+    # -------------------------------------
+    # PCA functions and plotting
+    # -------------------------------------
     def plot_pca(self):
         """Plot PCA"""
         pca_dict = {}
@@ -2744,7 +2971,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 ax.set_yticklabels(analytes)
             case 'PCA Score':
                 ax.tick_params(direction='none', labelbottom=False, labeltop=False, labelright=False, labelleft=False)
+    
 
+    # -------------------------------------
+    # Correlation functions and plotting
+    # -------------------------------------
     def plot_correlation(self, plot=False):
         correlation_dict = {}
 
@@ -2829,6 +3060,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         ax.set_yticklabels(correlation_matrix.columns, rotation=90, ha='left')
 
         ax.set_title('Correlation Matrix')
+
 
     # -------------------------------------
     # Histogram functions and plotting
@@ -2928,21 +3160,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         ax.set_xlabel('Value')
         ax.set_ylabel('Frequency')
 
-    def tern2xy(self, a, b, c):
-        w = 0.5
-        h = 0.5 / np.tan(np.pi/6)
-        s = a + b + c
-        a = a / s
-        b = b / s
-        c = c / s
-        y = a * h
-        x = (1 - b) * h / np.cos(np.pi/6) - y * np.tan(np.pi/6) - w
-        return x, y
-
-   
+#    def tern2xy(self, a, b, c):
+#        w = 0.5
+#        h = 0.5 / np.tan(np.pi/6)
+#        s = a + b + c
+#        a = a / s
+#        b = b / s
+#        c = c / s
+#        y = a * h
+#        x = (1 - b) * h / np.cos(np.pi/6) - y * np.tan(np.pi/6) - w
+#        return x, y
 
     # -------------------------------------
     # Style related fuctions/callbacks
+    # -------------------------------------
+
+    # Themes
     # -------------------------------------
     def input_theme_name_dlg(self):
         """Opens a dialog to save style theme
@@ -2962,7 +3195,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # throw a warning that name is not saved
             return
 
-
+    # general style functions
+    # -------------------------------------
     def toggle_style_widgets(self):
         """Enables/disables all style widgets
         
@@ -3634,6 +3868,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     'CLabel': self.lineEditCbarLabel.currentText(),
                     'Resolution': self.spinBoxHeatmapResolution.value()}
 
+    # style widget callbacks
+    # -------------------------------------
     def style_plot_type_callback(self):
         if not self.check_analysis:
             self.plot_types[self.toolBox.currentIndex()][0] = self.comboBoxStylePlotType.currentIndex()
@@ -3643,6 +3879,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.update_current_plot(save=False)
         
     # axes
+    # -------------------------------------
     def xlabel_callback(self):
         self.styles[self.comboBoxStylePlotType.currentText()]['Axes']['XLabel'] = self.lineEditXLabel.text()
 
@@ -3668,6 +3905,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         pass
 
     # text
+    # -------------------------------------
     def font_callback(self):
         self.styles[self.comboBoxStylePlotType.currentText()]['Text']['Font'] = self.fontComboBox.currentText()
 
@@ -3675,6 +3913,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.styles[self.comboBoxStylePlotType.currentText()]['Text']['FontSize'] = self.doubleSpinBoxFontSize.value()
 
     # scales
+    # -------------------------------------
     def scale_direction_callback(self):
         direction = self.comboBoxScaleDirection.currentText()
         self.styles[self.comboBoxStylePlotType.currentText()]['Scales']['Direction'] = direction
@@ -3705,6 +3944,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.styles[self.comboBoxStylePlotType.currentText()]['Scale']['OverlayColor'] = self.get_hex_color(self.toolButtonOverlayColor.palette().button().color())
 
     # markers
+    # -------------------------------------
     def marker_symbol_callback(self):
         """Updates marker symbol
         
@@ -3741,6 +3981,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.update_current_plot(save=False)
 
     # lines
+    # -------------------------------------
     def line_width_callback(self):
         """Updates line width
         
@@ -3750,6 +3991,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.update_current_plot(save=False)
 
     # colors
+    # -------------------------------------
     def marker_color_callback(self):
         """Updates color of plot markers
         
@@ -3855,6 +4097,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #                 'Cluster': copy.deepcopy(self.default_styles),
         #                 'Cluster Score': copy.deepcopy(self.default_styles),
         #                 'profile': copy.deepcopy(self.default_styles)}
+
 
     # -------------------------------------
     # Scatter/Heatmap functions
@@ -4874,192 +5117,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         return sample_df
 
-    def change_sample(self, index):
-        """Changes sample and plots first map
 
-        Parameter
-        ---------
-        index: int
-            index of sample name for identifying data.  The values are based on the
-            comboBoxSampleID
-        """
-        if self.data:
-            # Create and configure the QMessageBox
-            messageBoxChangeSample = QMessageBox()
-            iconWarning = QtGui.QIcon()
-            iconWarning.addPixmap(QtGui.QPixmap(":/icons/resources/icons/icon-warning-64.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-
-            messageBoxChangeSample.setWindowIcon(iconWarning)  # Set custom icon
-            messageBoxChangeSample.setText("Do you want to save current analysis")
-            messageBoxChangeSample.setWindowTitle("Save analysis")
-            messageBoxChangeSample.setStandardButtons(QMessageBox.Discard | QMessageBox.Cancel | QMessageBox.Save)
-
-            # Display the dialog and wait for user action
-            response = messageBoxChangeSample.exec_()
-
-
-            if response == QMessageBox.Save:
-                self.save_analysis()
-                self.reset_analysis('sample')
-
-
-            elif response == QMessageBox.Discard:
-                self.reset_analysis('sample')
-            else: #user pressed cancel
-                self.comboBoxSampleId.setCurrentText(self.sample_id)
-                return
-
-
-
-        file_path = os.path.join(self.selected_directory, self.csv_files[index])
-        self.sample_id = os.path.splitext(self.csv_files[index])[0]
-
-
-
-        # print(self.sample_id)
-        ####
-        #### Need to fix this so that it calculates the size appropriately when they load
-        #### Also need a program that correctly converts a iolite file to one that is read in hear.
-        ####
-        if self.sample_id == 'TR1-07':
-            self.aspect_ratio = 0.976
-        elif self.sample_id == 'TR3-06':
-            self.aspect_ratio = 0.874
-        elif self.sample_id == 'WOS-02':
-            self.aspect_ratio = 0.873
-
-
-        # add sample to sample dictionary
-        if self.sample_id not in self.data:
-            sample_id = self.sample_id
-            #initialise nested dict for each sample
-            self.data[self.sample_id] = {}
-            #set info dataframes for each sample
-            self.data[self.sample_id]['analyte_info'] = pd.DataFrame(columns = ['analytes', 'norm','upper_bound','lower_bound','d_l_bound','d_u_bound', 'use'])
-            self.data[self.sample_id]['ratios_info'] = pd.DataFrame(columns = [ 'analyte_1','analyte_2', 'norm','upper_bound','lower_bound','d_l_bound','d_u_bound', 'use', 'auto_scale'])
-            self.data[self.sample_id]['filter_info'] = pd.DataFrame(columns = [ 'analyte_1', 'analyte_2', 'Ratio','norm','f_min','f_max', 'use'])
-            
-            #Set crop to false
-            self.data[self.sample_id]['crop'] = False
-
-            self.update_spinboxes_bool = False #prevent update plot from runing
-            sample_df = pd.read_csv(file_path, engine='c')
-            sample_df  = sample_df.loc[:, ~sample_df .columns.str.contains('^Unnamed')]
-            # self.data[sample_id] = pd.read_csv(file_path, engine='c')
-            self.data[sample_id]['raw_data'] = self.add_ree(sample_df)
-            self.selected_analytes = self.data[sample_id]['raw_data'].columns[5:].tolist()
-            self.data[sample_id]['computed_data'] = {
-                'Ratio':pd.DataFrame(),
-                'Calculated Field':pd.DataFrame(),
-                
-                'PCA Score':pd.DataFrame(),
-                'Cluster':pd.DataFrame(columns = ['Fuzzy', 'KMeans', 'KMediods']),
-                'Cluster Score':pd.DataFrame(),
-                'Special':pd.DataFrame(),
-                }
-            analytes = pd.DataFrame()
-            analytes['analytes']=self.selected_analytes
-            analytes['sample_id'] = sample_id
-            analytes['norm'] = 'linear'
-
-            #update self.data['norm']
-            self.data[sample_id]['norm'] = {}
-
-            for analyte in self.selected_analytes:
-                self.data[sample_id]['norm'][analyte] = 'linear'
-            #obtain axis bounds for plotting and cropping
-            self.data[sample_id]['x_max']= self.data[sample_id]['crop_x_max'] = self.data[sample_id]['raw_data']['X'].max()
-            self.data[sample_id]['x_min'] = self.data[sample_id]['crop_x_min'] = self.data[sample_id]['raw_data']['X'].min()
-            self.data[sample_id]['y_max'] = self.data[sample_id]['crop_y_max'] = self.data[sample_id]['raw_data']['Y'].max()
-            self.data[sample_id]['y_min'] = self.data[sample_id]['crop_y_min'] = self.data[sample_id]['raw_data']['Y'].min()
-            analytes['upper_bound'] = 99.5
-            analytes['lower_bound'] = 0.05
-            analytes['d_l_bound'] = 99
-            analytes['d_u_bound'] = 99
-            self.data[self.sample_id]['processed_data'] = copy.deepcopy(self.data[self.sample_id]['raw_data'][self.selected_analytes])
-            self.data[self.sample_id]['cropped_raw_data'] = copy.deepcopy(self.data[self.sample_id]['raw_data'])
-            analytes['v_min'] = None
-            analytes['v_max'] = None
-            analytes['auto_scale'] = True
-            analytes['use'] = True
-            self.data[sample_id]['analyte_info'] = analytes
-
-            for plot_type in self.plot_widget_dict.keys():
-                if sample_id not in self.plot_widget_dict[plot_type]:
-                    self.plot_widget_dict[plot_type][sample_id]={}
-
-            # set mask of size of analyte array
-            self.data[self.sample_id]['filter_mask'] = np.ones_like( self.data[sample_id]['raw_data']['X'].values, dtype=bool)
-            self.data[self.sample_id]['polygon_mask'] = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
-            self.data[self.sample_id]['axis_mask'] = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
-            self.data[self.sample_id]['mask'] = self.data[self.sample_id]['filter_mask'] & self.data[self.sample_id]['polygon_mask'] & self.data[self.sample_id]['axis_mask']
-
-            self.prep_data()
-            self.comboBoxFAnalyte.clear()
-            self.comboBoxNDimAnalyte.clear()
-            # self.comboBoxFAnalyte_2.clear()
-            self.comboBoxFAnalyte.addItems(analytes['analytes'])
-            self.update_filter_values()
-            self.comboBoxScatterAnalyteX.clear()
-            self.comboBoxScatterAnalyteX.addItems(analytes['analytes'])
-            self.comboBoxScatterAnalyteY.clear()
-            self.comboBoxScatterAnalyteY.addItems(analytes['analytes'])
-            self.comboBoxScatterAnalyteZ.clear()
-            self.comboBoxScatterAnalyteZ.addItem('')
-            self.comboBoxScatterAnalyteZ.addItems(analytes['analytes'])
-
-            self.comboBoxNDimAnalyte.addItems(analytes['analytes'])
-
-            self.comboBoxColorField.clear()
-            self.comboBoxColorField.addItem('')
-            self.comboBoxColorField.addItems(analytes['analytes'])
-
-            # self.spinBoxX.setMaximum(int(x_max))
-            # self.spinBoxX.setMinimum(int(x_min))
-            # self.spinBox_X.setMaximum(int(x_max))
-            # self.spinBox_X.setMinimum(int(x_min))
-            # self.spinBoxY.setMaximum(int(y_max))
-            # self.spinBoxY.setMinimum(int(y_min))
-            # self.spinBox_Y.setMaximum(int(y_max))
-            # self.spinBox_Y.setMinimum(int(y_min))
-
-            # self.checkBoxViewRatio.setChecked(False)
-
-            # plot first analyte as lasermap
-
-            #get plot array
-            current_plot_df = self.get_map_data(sample_id=sample_id, name = self.selected_analytes[0],analysis_type = 'Analyte', plot =False )
-            #set 
-            self.comboBoxColorField.setCurrentText(self.selected_analytes[0])
-            self.styles['analyte map']['Colors']['Field'] = self.selected_analytes[0]
-            
-            #create plot
-            self.create_plot(current_plot_df,sample_id=sample_id, plot_type = 'lasermap', analyte_1= self.selected_analytes[0])
-
-
-
-
-            # self.plot_laser_map(current_plot_df,plot_information)
-            # self.update_spinboxes(parameters, auto_scale_param)
-            # self.add_plot(plot_information, current_plot_df)
-
-            self.create_tree(sample_id)
-            # self.clear_analysis()
-            self.update_tree(self.data[sample_id]['norm'])
-
-            self.update_spinboxes_bool = True  # Place this line at end of method
-
-            if self.comboBoxCorrelationMethod.currentText().lower() != 'none':
-                print('plot correlation')
-                self.plot_correlation()
-
-        else:
-            #update filters, polygon, profiles with existing data
-            self.update_tables()
-            #get plot array
-            current_plot_df = self.get_map_data(sample_id=self.sample_id, name = self.selected_analytes[0],analysis_type = 'Analyte', plot =False )
-            #create plot
-            self.create_plot(current_plot_df,sample_id=self.sample_id, plot_type = 'lasermap', analyte_1= self.selected_analytes[0])
         self.check_analysis = False
    
     # updates field type comboboxes for analyses and plotting
@@ -5434,31 +5492,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         return data_dict
 
 
-# -------------------------------
-# dialog functions
-# -------------------------------                
-    def open_preferences_dialog(self):
-        pass
-
-    def open_select_analyte_dialog(self):
-        analytes_list = self.data[self.sample_id]['analyte_info']['analytes'].values
-
-        self.analyteDialog = analyteSelectionWindow(analytes_list,self.data[self.sample_id]['norm'], self.data[self.sample_id]['processed_data'], self)
-        self.analyteDialog.show()
-        # self.analyteDialog.listUpdated.connect(lambda: self.update_tree(self.analyteDialog.norm_dict, norm_update = True))
-        result = self.analyteDialog.exec_()  # Store the result here
-        if result == QDialog.Accepted:
-            #update self.data['norm'] with selection
-            self.data[self.sample_id]['norm'] = self.analyteDialog.norm_dict
-            self.update_tree(self.data[self.sample_id]['norm'], norm_update = True)
-            #update analysis type combo in styles
-            self.check_analysis_type()
-        if result == QDialog.Rejected:
-            pass
-
 
 # -------------------------------
-# plot selector (tree) functions
+# Plot Selector (tree) functions
 # -------------------------------                
     def create_tree(self,sample_id = None):
         if not self.data:
@@ -5638,7 +5674,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
 # -------------------------------
-# unclassified functions 
+# Unclassified functions 
 # -------------------------------            
     def reset_checked_items(self,item):
         #unchecks tool buttons to prevent incorrect behaviour during plot click
@@ -5663,7 +5699,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
 # -------------------------------
-# new classes
+# Classes
 # -------------------------------                
 class StandardItem(QStandardItem):
     def __init__(self, txt = '', font_size = 12, set_bold= False):

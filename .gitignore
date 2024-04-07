@@ -61,6 +61,7 @@ CMakeLists.txt.user*
 *vcxproj.*
 
 *.qtcreator*
+env*
 
 # MinGW generated files
 *.Debug

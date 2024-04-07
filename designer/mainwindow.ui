@@ -1549,7 +1549,7 @@
       <string>Activates the crop tool</string>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>4</number>
      </property>
      <widget class="QWidget" name="SelectAnalytePage">
       <property name="enabled">
@@ -2077,6 +2077,19 @@
               <bool>true</bool>
              </property>
             </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_7">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
            </item>
            <item>
             <widget class="QToolButton" name="toolButtonHistogramReset">
@@ -3012,14 +3025,14 @@
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QComboBox" name="comboBoxFAnalyte">
+          <widget class="QComboBox" name="comboBoxFilterField">
            <property name="toolTip">
             <string>Select field for filtering</string>
            </property>
           </widget>
          </item>
          <item row="0" column="0">
-          <widget class="QComboBox" name="comboBoxFSelect">
+          <widget class="QComboBox" name="comboBoxFilterFieldType">
            <property name="toolTip">
             <string>Choose a field type for filtering</string>
            </property>
@@ -3901,7 +3914,7 @@
         </property>
         <layout class="QGridLayout" name="gridLayoutAxes">
          <item row="1" column="2">
-          <widget class="QComboBox" name="comboBoxScatterAnalyteY">
+          <widget class="QComboBox" name="comboBoxFieldY">
            <property name="font">
             <font>
              <pointsize>11</pointsize>
@@ -3933,7 +3946,7 @@
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QComboBox" name="comboBoxScatterSelectY">
+          <widget class="QComboBox" name="comboBoxFieldTypeY">
            <property name="font">
             <font>
              <pointsize>11</pointsize>
@@ -3955,7 +3968,7 @@
           </widget>
          </item>
          <item row="0" column="2">
-          <widget class="QComboBox" name="comboBoxScatterAnalyteX">
+          <widget class="QComboBox" name="comboBoxFieldX">
            <property name="font">
             <font>
              <pointsize>11</pointsize>
@@ -3972,7 +3985,7 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QComboBox" name="comboBoxScatterSelectX">
+          <widget class="QComboBox" name="comboBoxFieldTypeX">
            <property name="font">
             <font>
              <pointsize>11</pointsize>
@@ -4024,7 +4037,7 @@
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="QComboBox" name="comboBoxScatterSelectZ">
+          <widget class="QComboBox" name="comboBoxFieldTypeZ">
            <property name="font">
             <font>
              <pointsize>11</pointsize>
@@ -4046,7 +4059,7 @@
           </widget>
          </item>
          <item row="2" column="2">
-          <widget class="QComboBox" name="comboBoxScatterAnalyteZ">
+          <widget class="QComboBox" name="comboBoxFieldZ">
            <property name="font">
             <font>
              <pointsize>11</pointsize>
@@ -6738,7 +6751,7 @@
       </font>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="TreeView">
       <property name="geometry">
@@ -6755,9 +6768,9 @@
       <widget class="QTreeView" name="treeView">
        <property name="geometry">
         <rect>
-         <x>0</x>
+         <x>5</x>
          <y>0</y>
-         <width>221</width>
+         <width>211</width>
          <height>651</height>
         </rect>
        </property>
@@ -7159,8 +7172,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>219</width>
-          <height>426</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7255,8 +7268,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>219</width>
-          <height>426</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7409,8 +7422,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>219</width>
-          <height>426</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7615,8 +7628,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>219</width>
-          <height>426</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7719,8 +7732,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>219</width>
-          <height>426</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -8093,8 +8106,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>219</width>
-          <height>426</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -8329,7 +8342,7 @@
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QComboBox" name="comboBoxStylePlotType">
+         <widget class="QComboBox" name="comboBoxPlotType">
           <property name="maximumSize">
            <size>
             <width>125</width>
@@ -8348,7 +8361,7 @@
          </widget>
         </item>
         <item row="0" column="0">
-         <widget class="QLabel" name="labelScatterPlotType">
+         <widget class="QLabel" name="labelPlotType">
           <property name="font">
            <font>
             <pointsize>11</pointsize>

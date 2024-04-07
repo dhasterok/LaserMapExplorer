@@ -266,7 +266,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #-------------------------
         self.ref_data = pd.read_excel('resources/app_data/earthref.xlsx')
         ref_list = self.ref_data['layer']+' ['+self.ref_data['model']+'] '+ self.ref_data['reference']
-        # self.comboBoxCorrelationMethod.activated.connect(self.plot_correlation)
+        self.comboBoxCorrelationMethod.activated.connect(self.plot_correlation)
 
         self.comboBoxRefMaterial.addItems(ref_list.values)          # Select analyte Tab
         self.comboBoxNDimRefMaterial.addItems(ref_list.values)      # NDim Tab
@@ -278,14 +278,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Connect the currentIndexChanged signal of comboBoxSampleId to load_data method
         self.comboBoxSampleId.activated.connect(
             lambda: self.change_sample(self.comboBoxSampleId.currentIndex()))
-
-        # self.toolButtonAddRatio.clicked.connect(lambda: self.ratios_items.appendRow(StandardItem(self.ratio_name)))
-
-
-        # self.comboBoxFAnalyte.activated.connect(
-        #     lambda: self.get_map_data(self.sample_id,analyte_1=self.comboBoxFAnalyte_1.currentText(),
-        #                           analyte_2=self.comboBoxFAnalyte_2.currentText(),view = 1))
-        #
 
         #self.comboBoxPlots.activated.connect(lambda: self.add_remove(self.comboBoxPlots.currentText()))
         #self.toolButtonAddPlots.clicked.connect(lambda: self.add_multi_plot(self.comboBoxPlots.currentText()))
@@ -335,10 +327,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.doubleSpinBoxDUB.valueChanged.connect(lambda: self.auto_scale(True))
         self.doubleSpinBoxDUB.valueChanged.connect(lambda: self.auto_scale(True))
 
-        #self.spinBoxX.valueChanged.connect(lambda:self.update_plot(axis = True))
-        #self.spinBoxY.valueChanged.connect(lambda:self.update_plot(axis = True))
-        #self.spinBox_X.valueChanged.connect(lambda:self.update_plot(axis = True))
-        #self.spinBox_Y.valueChanged.connect(lambda:self.update_plot(axis = True))
         self.toolButtonFullView.clicked.connect(self.reset_to_full_view)
         #uncheck crop is checked
         self.toolButtonFullView.clicked.connect(lambda: self.toolButtonCrop.setChecked(False))
@@ -377,10 +365,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #-------------------------
         # left pane
         self.toolButtonAddFilter.clicked.connect(self.update_filter_table)
-        self.comboBoxFSelect.activated.connect(lambda: self.update_field_combobox(self.comboBoxFSelect, self.comboBoxFAnalyte))
-        self.comboBoxFAnalyte.activated.connect(self.update_filter_values)
-        #     lambda: self.get_map_data(self.sample_id,analyte_1=self.comboBoxFAnalyte_1.currentText(),
-        #                           analyte_2=self.comboBoxFAnalyte_2.currentText(),view = 1))
+        self.comboBoxFilterFieldType.activated.connect(lambda: self.update_field_combobox(self.comboBoxFilterFieldType, self.comboBoxFilterField))
+        self.comboBoxFilterField.activated.connect(self.update_filter_values)
+        #     lambda: self.get_map_data(self.sample_id,analyte_1=self.comboBoxFilterField_1.currentText(),
+        #                           analyte_2=self.comboBoxFilterField_2.currentText(),view = 1))
 
         # central-bottom pane
         self.toolButtonFilterUp.clicked.connect(lambda: self.table_fcn.move_row_up(self.tableWidgetFilters))
@@ -411,12 +399,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #-------------------------
         self.toolButtonTernaryMap.clicked.connect(self.plot_ternarymap)
 
-        self.update_field_type_combobox(self.comboBoxScatterSelectX)
-        self.update_field_type_combobox(self.comboBoxScatterSelectY)
-        self.update_field_type_combobox(self.comboBoxScatterSelectZ)
-        self.comboBoxScatterSelectX.activated.connect(lambda: self.update_field_combobox(self.comboBoxScatterSelectX, self.comboBoxScatterAnalyteX))
-        self.comboBoxScatterSelectY.activated.connect(lambda: self.update_field_combobox(self.comboBoxScatterSelectY, self.comboBoxScatterAnalyteY))
-        self.comboBoxScatterSelectZ.activated.connect(lambda: self.update_field_combobox(self.comboBoxScatterSelectZ, self.comboBoxScatterAnalyteZ))
+        self.update_field_type_combobox(self.comboBoxFieldTypeX)
+        self.update_field_type_combobox(self.comboBoxFieldTypeY)
+        self.update_field_type_combobox(self.comboBoxFieldTypeZ)
+        self.comboBoxFieldTypeX.activated.connect(lambda: self.update_field_combobox(self.comboBoxFieldTypeX, self.comboBoxFieldX))
+        self.comboBoxFieldTypeY.activated.connect(lambda: self.update_field_combobox(self.comboBoxFieldTypeY, self.comboBoxFieldY))
+        self.comboBoxFieldTypeZ.activated.connect(lambda: self.update_field_combobox(self.comboBoxFieldTypeZ, self.comboBoxFieldZ))
 
         # ternary colormaps
         # create ternary colors dictionary
@@ -474,9 +462,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Scatter and Ternary Tab
         #-------------------------
-        self.comboBoxScatterAnalyteX.activated.connect(lambda: self.plot_scatter(save=False))
-        self.comboBoxScatterAnalyteY.activated.connect(lambda: self.plot_scatter(save=False))
-        self.comboBoxScatterAnalyteZ.activated.connect(lambda: self.plot_scatter(save=False))
+        self.comboBoxFieldX.activated.connect(lambda: self.plot_scatter(save=False))
+        self.comboBoxFieldY.activated.connect(lambda: self.plot_scatter(save=False))
+        self.comboBoxFieldZ.activated.connect(lambda: self.plot_scatter(save=False))
 
 
         # N-Dim Tab
@@ -548,7 +536,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #self.comboBoxColorByField.activated.connect(lambda: self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField))
 
         # callback functions
-        self.comboBoxStylePlotType.currentIndexChanged.connect(self.style_plot_type_callback)
+        self.comboBoxPlotType.currentIndexChanged.connect(self.style_plot_type_callback)
         self.toolButtonUpdatePlot.clicked.connect(self.update_current_plot)
         self.toolButtonSaveTheme.clicked.connect(self.input_theme_name_dlg)
         # axes
@@ -785,24 +773,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.data[self.sample_id]['mask'] = self.data[self.sample_id]['filter_mask'] & self.data[self.sample_id]['polygon_mask'] & self.data[self.sample_id]['axis_mask']
 
             self.prep_data()
-            self.comboBoxFAnalyte.clear()
-            self.comboBoxNDimAnalyte.clear()
-            # self.comboBoxFAnalyte_2.clear()
-            self.comboBoxFAnalyte.addItems(analytes['analytes'])
+            self.update_all_field_comboboxes()
             self.update_filter_values()
-            self.comboBoxScatterAnalyteX.clear()
-            self.comboBoxScatterAnalyteX.addItems(analytes['analytes'])
-            self.comboBoxScatterAnalyteY.clear()
-            self.comboBoxScatterAnalyteY.addItems(analytes['analytes'])
-            self.comboBoxScatterAnalyteZ.clear()
-            self.comboBoxScatterAnalyteZ.addItem('')
-            self.comboBoxScatterAnalyteZ.addItems(analytes['analytes'])
-
-            self.comboBoxNDimAnalyte.addItems(analytes['analytes'])
-
-            self.comboBoxColorField.clear()
-            self.comboBoxColorField.addItem('')
-            self.comboBoxColorField.addItems(analytes['analytes'])
 
             # self.spinBoxX.setMaximum(int(x_max))
             # self.spinBoxX.setMinimum(int(x_min))
@@ -858,6 +830,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # Other windows/dialogs
     # -------------------------------------
     def open_select_analyte_dialog(self):
+        """Opens Select Analyte dialog
+        
+        Opens a dialog to select analytes for analysis either graphically or in a table.  Selection updates the list of analytes, and ratios in plot selector and comboBoxes.
+        """
         analytes_list = self.data[self.sample_id]['analyte_info']['analytes'].values
 
         self.analyteDialog = analyteSelectionWindow(analytes_list,self.data[self.sample_id]['norm'], self.data[self.sample_id]['processed_data'], self)
@@ -870,9 +846,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.update_tree(self.data[self.sample_id]['norm'], norm_update = True)
             #update analysis type combo in styles
             self.check_analysis_type()
+
+            self.update.all_field_comboboxes()
         if result == QDialog.Rejected:
             pass
-
 
 
     # -------------------------------
@@ -918,9 +895,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         Executes on change of ``MainWindow.toolBox.currentIndex()``.  Updates style related widgets.
         """
-        self.comboBoxStylePlotType.clear()
-        self.comboBoxStylePlotType.addItems(self.plot_types[self.toolBox.currentIndex()][1:])
-        self.comboBoxStylePlotType.setCurrentIndex(self.plot_types[self.toolBox.currentIndex()][0])
+        self.comboBoxPlotType.clear()
+        self.comboBoxPlotType.addItems(self.plot_types[self.toolBox.currentIndex()][1:])
+        self.comboBoxPlotType.setCurrentIndex(self.plot_types[self.toolBox.currentIndex()][0])
         self.set_style_widgets()
 
 
@@ -950,7 +927,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def swap_xy(self):
         """Swaps X and Y coordinates of sample map
 
-        Executes on self.toolButtonSwapXY.clicked.  Updates data dictionary and other map related derived results.
+        Executes on ``MainWindow.toolButtonSwapXY.clicked``.  Updates data dictionary and other map related derived results.
         """
         self.swap_xy_val = not self.swap_xy_val
 
@@ -1496,33 +1473,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         pass
 
-    # def activate_ratios(self, state):
-    #     """Adds ratios selection as options to certain comboBoxes and plot tree
-
-    #     Activate ratios by selecting them in the analyte Select dialog.
-
-    #     :param state:
-    #     :type state: bool
-
-    #     """
-    #     if state == 2:  # Qt.Checked
-    #         # Call your method here when the comboBox is checked
-    #         self.labelanalyte_2.setEnabled(True)
-    #         self.comboBoxanalyte_2.setEnabled(True)
-    #         self.get_map_data(self.sample_id,
-    #                           analyte_1=self.comboBoxanalyte_1.currentText(),
-    #                           analyte_2=self.comboBoxanalyte_2.currentText(),view = 1)
-    #         self.toolButtonAddRatio.setEnabled(True)
-    #     else:
-    #         self.labelanalyte_2.setEnabled(False)
-    #         self.comboBoxanalyte_2.setEnabled(False)
-    #         self.get_map_data(self.sample_id,analyte_1=self.comboBoxanalyte_1.currentText())
-    #         self.toolButtonAddRatio.setEnabled(False)
-
     def update_filter_values(self):
-        analyte_1 = self.comboBoxFAnalyte.currentText()
+        analyte_1 = self.comboBoxFilterField.currentText()
         analyte_2 = None
-        analyte_select = self.comboBoxFSelect.currentText()
+        analyte_select = self.comboBoxFilterFieldType.currentText()
 
         if analyte_select == 'Analyte':
             f_val =  self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes'] == analyte_1)].iloc[0][['v_min', 'v_max']]
@@ -1573,9 +1527,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.data[self.sample_id]['filter_info'].at[row, 'use'] = state == QtCore.Qt.Checked
 
 
-            analyte_1 = self.comboBoxFAnalyte.currentText()
+            analyte_1 = self.comboBoxFilterField.currentText()
             analyte_2 = None
-            analyte_select = self.comboBoxFSelect.currentText()
+            analyte_select = self.comboBoxFilterFieldType.currentText()
             f_min = float(self.lineEditFMin.text())
             f_max = float(self.lineEditFMax.text())
             # Add a new row at the end of the table
@@ -1727,7 +1681,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             return "{:.4f}".format(value)
 
-    def update_norm(self,sample_id, norm = None, analyte_1=None,analyte_2=None, update = False):
+    def update_norm(self,sample_id, norm=None, analyte_1=None, analyte_2=None, update=False):
         """
 
         :param sample_id:
@@ -1767,7 +1721,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # self.update_plot()
 
 
-    def prep_data(self, sample_id= None, analyte_1= None, analyte_2 = None):
+    def prep_data(self, sample_id=None, analyte_1=None, analyte_2=None):
         """Prepares data to be used in analysis
 
         1. Obtains raw DataFrame
@@ -2365,7 +2319,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def update_zoom_view_position(self, x, y):
 
-        style = self.styles[self.comboBoxStylePlotType.currentText()]
+        style = self.styles[self.comboBoxPlotType.currentText()]
 
         # Assuming you have a method like this to update the zoom view
         # Calculate the new position for the zoom view
@@ -2406,7 +2360,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Executes on change of ``MainWindow.comboBoxEdgeDetectMethod`` when ``MainWindow.toolButtonEdgeDetect`` is checked.
         Options include 'sobel', 'canny', and 'zero_cross'.
         """
-        style = self.styles[self.comboBoxStylePlotType.currentText()]
+        style = self.styles[self.comboBoxPlotType.currentText()]
         if self.edge_img:
             # remove existing filters
             self.plot.removeItem(self.edge_img)
@@ -2693,7 +2647,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.noise_red_img.setRect(0, 0, self.x_range, self.y_range)
 
         # Optionally, set a color map
-        self.comboBoxStylePlotType.currentText('analyte map')
+        self.comboBoxPlotType.currentText('analyte map')
         cm = pg.colormap.get(self.style['analyte map']['Colors']['Colormap'], source='matplotlib')
         self.noise_red_img.setColorMap(cm)
 
@@ -2746,8 +2700,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """Enables/disables all style widgets
         
         Toggling of enabled states are based on ``MainWindow.toolBox`` page and the current plot type
-        selected in ``MainWindow.comboBoxStylePlotType."""
-        plot_type = self.comboBoxStylePlotType.currentText().lower()
+        selected in ``MainWindow.comboBoxPlotType."""
+        plot_type = self.comboBoxPlotType.currentText().lower()
 
         # annotation properties
         self.fontComboBox.setEnabled(True)
@@ -2896,7 +2850,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.doubleSpinBoxYLB.setEnabled(True)
                 self.doubleSpinBoxYUB.setEnabled(True)
                 self.lineEditYLabel.setEnabled(True)
-                if self.comboBoxScatterAnalyteZ.currentText() == '':
+                if self.comboBoxFieldZ.currentText() == '':
                     self.lineEditZLabel.setEnabled(False)
                 else:
                     self.lineEditZLabel.setEnabled(True)
@@ -2915,7 +2869,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.labelMarkerAlpha.setEnabled(True)
 
                 # line properties
-                if self.comboBoxScatterAnalyteZ.currentText() == '':
+                if self.comboBoxFieldZ.currentText() == '':
                     self.comboBoxLineWidth.setEnabled(True)
                 else:
                     self.comboBoxLineWidth.setEnabled(False)
@@ -2952,7 +2906,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.doubleSpinBoxYLB.setEnabled(True)
                 self.doubleSpinBoxYUB.setEnabled(True)
                 self.lineEditYLabel.setEnabled(True)
-                if self.comboBoxScatterAnalyteZ.currentText() == '':
+                if self.comboBoxFieldZ.currentText() == '':
                     self.lineEditZLabel.setEnabled(False)
                 else:
                     self.lineEditZLabel.setEnabled(True)
@@ -2971,7 +2925,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.labelMarkerAlpha.setEnabled(False)
 
                 # line properties
-                if self.comboBoxScatterAnalyteZ.currentText() == '':
+                if self.comboBoxFieldZ.currentText() == '':
                     self.comboBoxLineWidth.setEnabled(True)
                 else:
                     self.comboBoxLineWidth.setEnabled(False)
@@ -3317,11 +3271,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         tab_id = self.toolBox.currentIndex()
 
         if plot_type is None:
-            self.comboBoxStylePlotType.clear()
-            self.comboBoxStylePlotType.addItems(self.plot_types[tab_id][1:])
+            self.comboBoxPlotType.clear()
+            self.comboBoxPlotType.addItems(self.plot_types[tab_id][1:])
 
             plot_type = self.plot_types[tab_id][self.plot_types[tab_id][0]+1]
-            self.comboBoxStylePlotType.setCurrentText(plot_type)
+            self.comboBoxPlotType.setCurrentText(plot_type)
         elif plot_type == '':
             return
         
@@ -3374,8 +3328,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def get_style_dict(self):
 
-        plot_type = self.comboBoxStylePlotType.currentText()
-        self.plot_types[self.toolBox.currentIndex()][0] = self.comboBoxStylePlotType.currentIndex()
+        plot_type = self.comboBoxPlotType.currentText()
+        self.plot_types[self.toolBox.currentIndex()][0] = self.comboBoxPlotType.currentIndex()
 
         # update axes properties
         self.styles[plot_type]['Axes'] = {'XLim': [self.doubleSpinBoxXLB.value(), self.doubleSpinBoxXUB.value()],
@@ -3417,34 +3371,34 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------
     def style_plot_type_callback(self):
         if not self.check_analysis:
-            self.plot_types[self.toolBox.currentIndex()][0] = self.comboBoxStylePlotType.currentIndex()
+            self.plot_types[self.toolBox.currentIndex()][0] = self.comboBoxPlotType.currentIndex()
     
-            self.set_style_widgets(plot_type=self.comboBoxStylePlotType.currentText())
+            self.set_style_widgets(plot_type=self.comboBoxPlotType.currentText())
             self.check_analysis_type()
             self.update_current_plot(save=False)
         
     # axes
     # -------------------------------------
     def xlabel_callback(self):
-        self.styles[self.comboBoxStylePlotType.currentText()]['Axes']['XLabel'] = self.lineEditXLabel.text()
+        self.styles[self.comboBoxPlotType.currentText()]['Axes']['XLabel'] = self.lineEditXLabel.text()
 
     def ylabel_callback(self):
-        self.styles[self.comboBoxStylePlotType.currentText()]['Axes']['YLabel'] = self.lineEditYLabel.text()
+        self.styles[self.comboBoxPlotType.currentText()]['Axes']['YLabel'] = self.lineEditYLabel.text()
 
     def zlabel_callback(self):
-        self.styles[self.comboBoxStylePlotType.currentText()]['Axes']['ZLabel'] = self.lineEditZLabel.text()
+        self.styles[self.comboBoxPlotType.currentText()]['Axes']['ZLabel'] = self.lineEditZLabel.text()
 
     def xlim_callback(self):
-        self.styles[self.comboBoxStylePlotType.currentText()]['Axes']['XLim'] = [self.doubleSpinBoxXLB.value(), self.doubleSpinBoxXUB.value()]
+        self.styles[self.comboBoxPlotType.currentText()]['Axes']['XLim'] = [self.doubleSpinBoxXLB.value(), self.doubleSpinBoxXUB.value()]
 
     def ylim_callback(self):
-        self.styles[self.comboBoxStylePlotType.currentText()]['Axes']['YLim'] = [self.doubleSpinBoxYLB.value(), self.doubleSpinBoxYUB.value()]
+        self.styles[self.comboBoxPlotType.currentText()]['Axes']['YLim'] = [self.doubleSpinBoxYLB.value(), self.doubleSpinBoxYUB.value()]
 
     def aspect_ratio_callback(self):
-        self.styles[self.comboBoxStylePlotType.currentText()]['Axes']['AspectRatio'] = self.lineEditAspectRatio.text()
+        self.styles[self.comboBoxPlotType.currentText()]['Axes']['AspectRatio'] = self.lineEditAspectRatio.text()
 
     def tickdir_callback(self):
-        self.styles[self.comboBoxStylePlotType.currentText()]['Axes']['TickDir'] = self.comboBoxTickDirection.currentText()
+        self.styles[self.comboBoxPlotType.currentText()]['Axes']['TickDir'] = self.comboBoxTickDirection.currentText()
 
     def axes_reset_callback(self):
         pass
@@ -3452,16 +3406,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # text
     # -------------------------------------
     def font_callback(self):
-        self.styles[self.comboBoxStylePlotType.currentText()]['Text']['Font'] = self.fontComboBox.currentText()
+        self.styles[self.comboBoxPlotType.currentText()]['Text']['Font'] = self.fontComboBox.currentText()
 
     def font_size_callback(self):
-        self.styles[self.comboBoxStylePlotType.currentText()]['Text']['FontSize'] = self.doubleSpinBoxFontSize.value()
+        self.styles[self.comboBoxPlotType.currentText()]['Text']['FontSize'] = self.doubleSpinBoxFontSize.value()
 
     # scales
     # -------------------------------------
     def scale_direction_callback(self):
         direction = self.comboBoxScaleDirection.currentText()
-        self.styles[self.comboBoxStylePlotType.currentText()]['Scales']['Direction'] = direction
+        self.styles[self.comboBoxPlotType.currentText()]['Scales']['Direction'] = direction
 
         if direction == 'none':
             self.labelScaleLocation.setEnabled(False)
@@ -3471,7 +3425,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.comboBoxScaleLocation.setEnabled(True)
 
     def scale_location_callback(self):
-        self.styles[self.comboBoxStylePlotType.currentText()]['Scale']['Location'] = self.comboBoxScaleLocation.currentText()
+        self.styles[self.comboBoxPlotType.currentText()]['Scale']['Location'] = self.comboBoxScaleLocation.currentText()
     
     def overlay_color_callback(self):
         """Updates color of overlay markers
@@ -3482,11 +3436,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # change color
             self.button_color_select(self.toolButtonOverlayColor)
             # update style
-            self.styles[self.comboBoxStylePlotType.currentText()]['Scale']['OverlayColor'] = self.get_hex_color(self.toolButtonOverlayColor.palette().button().color())
+            self.styles[self.comboBoxPlotType.currentText()]['Scale']['OverlayColor'] = self.get_hex_color(self.toolButtonOverlayColor.palette().button().color())
             # update plot
             self.update_current_plot(save=False)
         else:
-            self.styles[self.comboBoxStylePlotType.currentText()]['Scale']['OverlayColor'] = self.get_hex_color(self.toolButtonOverlayColor.palette().button().color())
+            self.styles[self.comboBoxPlotType.currentText()]['Scale']['OverlayColor'] = self.get_hex_color(self.toolButtonOverlayColor.palette().button().color())
 
     # markers
     # -------------------------------------
@@ -3495,7 +3449,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
         Updates marker symbols on current plot on change of ``MainWindow.comboBoxMarker.currentText()``.
         """
-        self.styles[self.comboBoxStylePlotType.currentText()]['Markers']['Symbol'] = self.comboBoxMarker.currentText()
+        self.styles[self.comboBoxPlotType.currentText()]['Markers']['Symbol'] = self.comboBoxMarker.currentText()
         if self.comboBoxMarker.isEnabled():
             self.update_current_plot(save=False)
 
@@ -3504,7 +3458,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         Updates marker size on current plot on change of ``MainWindow.doubleSpinBoxMarkerSize.value()``.
         """
-        self.styles[self.comboBoxStylePlotType.currentText()]['Markers']['Size'] = self.doubleSpinBoxMarkerSize.value()
+        self.styles[self.comboBoxPlotType.currentText()]['Markers']['Size'] = self.doubleSpinBoxMarkerSize.value()
         if self.doubleSpinBoxMarkerSize.isEnabled():
             self.update_current_plot(save=False)
 
@@ -3516,11 +3470,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.labelMarkerAlpha.setText(str(self.horizontalSliderMarkerAlpha.value()))
         match self.toolBox.currentIndex():
             case self.scatter_tab_id:
-                self.styles[self.comboBoxStylePlotType.currentText()]['Markers']['Alpha'] = float(self.horizontalSliderMarkerAlpha.value())
+                self.styles[self.comboBoxPlotType.currentText()]['Markers']['Alpha'] = float(self.horizontalSliderMarkerAlpha.value())
             case self.pca_tab_id:
-                self.styles[self.comboBoxStylePlotType.currentText()]['Markers']['Alpha'] = float(self.horizontalSliderMarkerAlpha.value())
+                self.styles[self.comboBoxPlotType.currentText()]['Markers']['Alpha'] = float(self.horizontalSliderMarkerAlpha.value())
             case self.profile_tab_id:
-                self.styles[self.comboBoxStylePlotType.currentText()]['Markers']['Alpha'] = float(self.horizontalSliderMarkerAlpha.value())
+                self.styles[self.comboBoxPlotType.currentText()]['Markers']['Alpha'] = float(self.horizontalSliderMarkerAlpha.value())
 
         if self.horizontalSliderMarkerAlpha.isEnabled():
             self.update_current_plot(save=False)
@@ -3531,7 +3485,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """Updates line width
         
         Updates line width on current plot on change of ``MainWindow.comboBoxLineWidth.currentText()."""
-        self.styles[self.comboBoxStylePlotType.currentText()]['Lines']['LineWidth'] = float(self.comboBoxLineWidth.currentText())
+        self.styles[self.comboBoxPlotType.currentText()]['Lines']['LineWidth'] = float(self.comboBoxLineWidth.currentText())
         if self.comboBoxLineWidth.isEnabled():
             self.update_current_plot(save=False)
 
@@ -3546,18 +3500,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # change color
             self.button_color_select(self.toolButtonMarkerColor)
             # update style
-            self.styles[self.comboBoxStylePlotType.currentText()]['Colors']['Color'] = self.get_hex_color(self.toolButtonMarkerColor.palette().button().color())
+            self.styles[self.comboBoxPlotType.currentText()]['Colors']['Color'] = self.get_hex_color(self.toolButtonMarkerColor.palette().button().color())
             # update plot
             self.update_current_plot(save=False)
         else:
-            self.styles[self.comboBoxStylePlotType.currentText()]['Colors']['Color'] = self.get_hex_color(self.toolButtonMarkerColor.palette().button().color())
+            self.styles[self.comboBoxPlotType.currentText()]['Colors']['Color'] = self.get_hex_color(self.toolButtonMarkerColor.palette().button().color())
 
     # updates scatter styles when ColorByField comboBox is changed
     def color_by_field_callback(self):
         # write a general version to fill two related comboboxes
-        plot_type = self.comboBoxStylePlotType.currentText()
+        plot_type = self.comboBoxPlotType.currentText()
         itemlist = []
-        if self.comboBoxStylePlotType.isEnabled() == False | self.comboBoxColorByField.isEnabled() == False:
+        if self.comboBoxPlotType.isEnabled() == False | self.comboBoxColorByField.isEnabled() == False:
             return
         
         if self.comboBoxColorByField.currentText() == 'None':
@@ -3568,24 +3522,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_current_plot(save=False)
         
     def color_field_callback(self):
-        self.styles[self.comboBoxStylePlotType.currentText()]['Colors']['Field'] = self.comboBoxColorField.currentText()
+        self.styles[self.comboBoxPlotType.currentText()]['Colors']['Field'] = self.comboBoxColorField.currentText()
         if self.comboBoxColorField.isEnabled():
             self.lineEditCbarLabel.setText('')
             self.update_current_plot(save=False)
 
     def field_colormap_callback(self):
-        self.styles[self.comboBoxStylePlotType.currentText()]['Colors']['Colormap'] = self.comboBoxFieldColormap.currentText()
+        self.styles[self.comboBoxPlotType.currentText()]['Colors']['Colormap'] = self.comboBoxFieldColormap.currentText()
 
     def clim_callback(self):
-        self.styles[self.comboBoxStylePlotType.currentText()]['Colors']['CLim'] = [self.doubleSpinBoxColorLB.value(), self.doubleSpinBoxColorUB.value()]
+        self.styles[self.comboBoxPlotType.currentText()]['Colors']['CLim'] = [self.doubleSpinBoxColorLB.value(), self.doubleSpinBoxColorUB.value()]
 
     def cbar_direction_callback(self):
-        self.styles[self.comboBoxStylePlotType.currentText()]['Colors']['Direction'] = self.comboBoxCbarDirection.currentText()
+        self.styles[self.comboBoxPlotType.currentText()]['Colors']['Direction'] = self.comboBoxCbarDirection.currentText()
         if self.comboBoxCbarDirection.isEnabled():
             self.update_current_plot(save=False)
 
     def cbar_label_callback(self):
-        self.styles[self.comboBoxStylePlotType.currentText()]['Colors']['CLabel'] = self.lineEditCbarLabel.text()
+        self.styles[self.comboBoxPlotType.currentText()]['Colors']['CLabel'] = self.lineEditCbarLabel.text()
         if self.comboBoxCbarLabel.isEnabled():
             self.update_current_plot(save=False)
 
@@ -3595,7 +3549,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------
     def update_all_plots(self):
         """Updates all plots in plot widget dictionary"""
-        style = self.styles[self.comboBoxStylePlotType.currentText()]
+        style = self.styles[self.comboBoxPlotType.currentText()]
         for plot_type,sample_ids in self.plot_widget_dict.items():
             if plot_type == 'lasermap' or 'histogram' or 'lasermap_norm':
                 for sample_id, plots in sample_ids.items():
@@ -3667,14 +3621,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def update_current_plot(self, save=False):
         """Updates current plot (not saved to plot selector)
         
-        Updates the current plot (as determined by ``MainWindow.comboBoxStylePlotType.currentText()`` and options in ``MainWindow.toolBox.selectedIndex()``.
+        Updates the current plot (as determined by ``MainWindow.comboBoxPlotType.currentText()`` and options in ``MainWindow.toolBox.selectedIndex()``.
 
         :param save: save plot to plot selector, Defaults to False.
         :type save: bool, optional
         """
-        if self.sample_id=='' or not self.comboBoxStylePlotType.currentText() or not self.comboBoxColorField.currentText():
+        if self.sample_id=='' or not self.comboBoxPlotType.currentText() or not self.comboBoxColorField.currentText():
             return
-        plot_type = self.comboBoxStylePlotType.currentText()
+        plot_type = self.comboBoxPlotType.currentText()
         sample_id = self.sample_id
         analysis = self.comboBoxColorByField.currentText()
         field = self.comboBoxColorField.currentText()
@@ -4061,7 +4015,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_bins = False
 
         # update histogram
-        if self.comboBoxStylePlotType.currentText() == 'histogram':
+        if self.comboBoxPlotType.currentText() == 'histogram':
             self.update_current_plot(save=False)
 
     def histogram_update_n_bins(self):
@@ -4082,7 +4036,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_bins = False
 
         # update histogram
-        if self.comboBoxStylePlotType.currentText() == 'histogram':
+        if self.comboBoxPlotType.currentText() == 'histogram':
             self.update_current_plot(save=False)
 
     def histogram_reset_bins(self):
@@ -4097,7 +4051,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # update bin width
         #self.histogram_update_bin_width()
 
-        if self.comboBoxStylePlotType.currentText() == 'histogram':
+        if self.comboBoxPlotType.currentText() == 'histogram':
             self.update_current_plot(save=False)
 
     def plot_histogram(self, current_plot_df, plot_information, bin_width):
@@ -4212,7 +4166,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # get saved scatter values to update plot
             x, y, z, c = values
 
-        plot_type = self.comboBoxStylePlotType.currentText().lower()
+        plot_type = self.comboBoxPlotType.currentText().lower()
         style = self.styles[plot_type]
         match plot_type:
             # scatter
@@ -4243,9 +4197,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         :param fig: figure object
         :type fig: matplotlib.figure
-        :param x: data associated with field ``MainWindow.comboBoxScatterAnalyteX.currentText()`` as x coordinate
+        :param x: data associated with field ``MainWindow.comboBoxFieldX.currentText()`` as x coordinate
         :type x: dict
-        :param y: data associated with field ``MainWindow.comboBoxScatterAnalyteX.currentText()`` as y coordinate
+        :param y: data associated with field ``MainWindow.comboBoxFieldX.currentText()`` as y coordinate
         :type y: dict
         :param c: data associated with field ``MainWindow.comboBoxColorField.currentText()`` as marker colors
         :type c: dict
@@ -4558,7 +4512,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
         # Determine which PCA plot to create based on the combobox selection
-        pca_plot_type = self.comboBoxStylePlotType.currentText()
+        pca_plot_type = self.comboBoxPlotType.currentText()
 
         plot_name = pca_plot_type
         sample_id = self.sample_id
@@ -4815,7 +4769,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def plot_clustering_result(self, ax, labels, method_name, fuzzy_cluster_number):
         reshaped_array = np.reshape(labels, self.array_size, order=self.order)
 
-        style = self.styles[self.comboBoxStylePlotType.currentText()]
+        style = self.styles[self.comboBoxPlotType.currentText()]
 
         x_range = self.data[self.sample_id]['processed_data']['X'].max() -  self.data[self.sample_id]['processed_data']['X'].min()
         y_range = self.data[self.sample_id]['processed_data']['Y'].max() -  self.data[self.sample_id]['processed_data']['Y'].min()
@@ -4937,7 +4891,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         ref_i = self.comboBoxNDimRefMaterial.currentIndex()
 
-        plot_name = self.comboBoxStylePlotType.currentText()
+        plot_name = self.comboBoxPlotType.currentText()
         style = self.styles[plot_name]
 
         # Get quantile for plotting TEC & radar plots
@@ -5327,20 +5281,50 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Updates lists of fields in comboBoxes that are used to generate plots or used for analysis.
         Calls :get_field_list(): to construct the list.
 
-        Parameter
-        ---------
-        parentBox: QComboBox
-            comboBox used to select field type ('Analyte', 'Analyte (normalized)', 'Ratio', etc.)
-        childBox: QComboBox
-            comboBox with list of field values
+        :param parentBox: comboBox used to select field type ('Analyte', 'Analyte (normalized)', 'Ratio', etc.), if None, then 'Analyte'
+        :type parentBox: QComboBox, None
+            
+        :param childBox: comboBox with list of field values
+        :type childBox: QComboBox
         """
+        if parentBox is None:
+            fields = self.get_field_list('Analyte')
+        else:
+            fields = self.get_field_list(set_name=parentBox.currentText())
 
-        fields = self.get_field_list(set_name=parentBox.currentText())
         childBox.clear()
         childBox.addItems(fields)
     
         # get a named list of current fields for sample
- 
+
+    # updates all field type and field comboboxes
+    def update_all_field_comboboxes(self):
+        """Updates all field type and field comboBoxes"""
+        # histograms
+        self.update_field_type_combobox(self.comboBoxHistogramFieldType)
+        self.update_field_combobox(self.comboBoxHistogramFieldType, self.comboBoxHistogramField)
+
+        # filters
+        self.update_field_type_combobox(self.comboBoxFilterFieldType)
+        self.update_field_combobox(self.comboBoxFilterFieldType, self.comboBoxFilterField)
+
+        # scatter and heatmaps
+        self.update_field_type_combobox(self.comboBoxFieldX)
+        self.update_field_combobox(self.comboBoxFieldX, self.comboBoxFieldTypeX)
+
+        self.update_field_type_combobox(self.comboBoxFieldY)
+        self.update_field_combobox(self.comboBoxFieldY, self.comboBoxFieldTypeY)
+
+        self.update_field_type_combobox(self.comboBoxFieldZ, addNone=True)
+        self.update_field_combobox(self.comboBoxFieldZ, self.comboBoxFieldTypeZ)
+
+        # n-Dim
+        self.update_field_combobox(None, self.comboBoxNDimAnalyte)
+
+        # colors
+        self.update_field_type_combobox(self.comboBoxColorByField, addNone=True, plot_type=self.comboBoxPlotType.currentText())
+        self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
+
     # gets the set of fields
     def get_field_list(self, set_name='Analyte'):
         """Gets the fields associated with a defined set
@@ -5368,7 +5352,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def check_analysis_type(self):
         self.check_analysis = True
-        self.update_field_type_combobox(self.comboBoxColorByField, addNone=True, plot_type=self.comboBoxStylePlotType.currentText())
+        self.update_field_type_combobox(self.comboBoxColorByField, addNone=True, plot_type=self.comboBoxPlotType.currentText())
         self.check_analysis = False
 
     def update_spinboxes(self, parameters):
@@ -5479,12 +5463,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'z': {'field': None, 'type': None, 'label': None, 'array': None},
             'c': {'field': None, 'type': None, 'label': None, 'array': None}
         }
-        value_dict['x']['field'] = self.comboBoxScatterAnalyteX.currentText()
-        value_dict['x']['type'] = self.comboBoxScatterSelectX.currentText().lower()
-        value_dict['y']['field'] = self.comboBoxScatterAnalyteY.currentText()
-        value_dict['y']['type'] = self.comboBoxScatterSelectY.currentText().lower()
-        value_dict['z']['field'] = self.comboBoxScatterAnalyteZ.currentText()
-        value_dict['z']['type'] = self.comboBoxScatterSelectZ.currentText().lower()
+        value_dict['x']['field'] = self.comboBoxFieldX.currentText()
+        value_dict['x']['type'] = self.comboBoxFieldTypeX.currentText().lower()
+        value_dict['y']['field'] = self.comboBoxFieldY.currentText()
+        value_dict['y']['type'] = self.comboBoxFieldTypeY.currentText().lower()
+        value_dict['z']['field'] = self.comboBoxFieldZ.currentText()
+        value_dict['z']['type'] = self.comboBoxFieldTypeZ.currentText().lower()
         value_dict['c']['field'] = self.comboBoxColorField.currentText()
         value_dict['c']['type'] = self.comboBoxColorByField.currentText().lower()
 

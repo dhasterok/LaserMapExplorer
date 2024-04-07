@@ -1,7 +1,7 @@
-Left Toolbox
-************
+Control (Left) Toolbox
+**********************
 
-The left toolbox includes the controls for changing and processing samples, producing plots, and performing analyses.  A list of plot types and where they are generated is given below.
+The control toolbox includes the controls for changing and processing samples, producing plots, and performing analyses.  A list of plot types and where they are generated is given below.
 
 +---------------------------+---------------------------+
 | Plot type                 | Tab                       |
@@ -186,7 +186,7 @@ Cluster Masking |icon-mask-dark|
 
 Cluster masks can be turned on or off from the *Filter* tab, but cannot be set here.  To set a cluster mask, you will need to 
 
-#. compute clusters first from the *Cluster* pane in the left toolbox
+#. compute clusters first from the *Cluster* pane in the *Control Toolbox*
 #. from the *Styling* tab on the right pane, select the *Clusters* sub-tab and choose the type of clustering from the point grouping drop down
 #. select the cluster(s) that you wish to mask and click the |icon-mask-dark| button to set the cluster mask or
 #. alternatively, select the clusters you wish to use for analysis and click the |icon-mask-light| button to set the other groups as the mask.

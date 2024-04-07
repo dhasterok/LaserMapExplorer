@@ -1,8 +1,12 @@
-Right Toolbox
-=============
+Plot and Property (Right) Toolbox
+=================================
+
+The *Plot and Property Toolbox* consists of three major tabs: a tree containing saved plots (*Plot Selector*); a styling pane with plot options; and a calculator for creating custom fields.
 
 Plot Selector
 -------------
+
+The *Plot Selector* lists the available plots for display.  The default list includes all analytes and their normalized versions.  Ratios can be added by selecting them from *Analyte Selector*.  All other plots in the list are generated once they have been created and/or explicitly stored.
 
 .. figure:: _static/screenshots/LaME_Plot_Selector.png
     :align: center
@@ -11,45 +15,14 @@ Plot Selector
 
     The *Plot Selector* is similar to a file tree.  It lists types of fields, samples and the plots available beneath each.
 
-The *Plot Selector* lists the available plots for display.  The default list includes all isotopes and their normalized versions.  Ratios can be added by selecting them from *Isotope Selector*.  All other plots in the list are generated once they have been created and/or explicitly stored.
-
-Isotopes and their normalized equivalents can be sorted alphabetically, by mass, or compatibility.  To change the sorting method, click the |icon-sort| button.
+Analytes and their normalized equivalents can be sorted alphabetically, by mass, or compatibility.  To change the sorting method, click the |icon-sort| button.  Remove plots using the |icon-trash| button.  Clicking the save button will bring up a dialog.  Input the name for the new theme and click ok after entering a name.  If the name is the same as an existing theme, the original will be overwritten.
 
 Styling Pane
 ------------
 
-The properties in the styling pane control the look and feel of plots generated from functions in the left toolbox.  In some cases they also control the type of plot that is generated (e.g., scatter plot or heatmap).
+The properties in the styling pane control the look and feel of plots generated from functions in the *Control (Right) Toolbox*.  In also controls the type of plot that is generated (e.g., analyte map, scatter plot or heatmap, etc.).  A complete list is given in the table below along with each of the properties that can be changed.  Not all properties are available for each type of plot.
 
-General
-+++++++
-
-.. figure:: _static/screenshots/LaME_Styling_General.png
-    :align: center
-    :alt: LaME interface: right toolbox, styling-general tab
-    :width: 232
-
-    The *Styling \> General* contains general settings applied to all plots.
-
-Maps
-++++
-
-.. figure:: _static/screenshots/LaME_Styling_Maps.png
-    :align: center
-    :alt: LaME interface: right toolbox, styling-maps tab
-    :width: 232
-
-    The *Styling \> Maps* contains settings exclusive to maps.
-
-Scatter and Heatmap
-+++++++++++++++++++
-
-.. figure:: _static/screenshots/LaME_Styling_Scatter_and_Heatmap.png
-    :align: center
-    :alt: LaME interface: right toolbox, styling-scatter-and-heatmaps tab
-    :width: 232
-
-    The *Styling \> Scatter and Heatmap* contains settings for scatter plots and heatmaps including correlations.
-
+Four controls sit above the styling pages.  The plot selector updates the types of plots available to each of the *Control Toolbox* tabs.  In case the plot does not update, click the |icon-launch| button.  Styles can be customized and saved using the save ( |icon-save| ) button.  These themes can be recalled in future sessions.
 
 +----------------+---------------------------+----------------------+-----------------------------------------------+----------+----------+--------------------------------------------------------------------------+--------------------------+------------+
 | tab            | Samples and Fields        | Preprocessing        | Scatter & Heatmap                             | n-Dim               | PCA                                                                      | Clustering               | Propfiling |
@@ -127,7 +100,47 @@ Scatter and Heatmap
 .. [8] for scores only
 .. [9] error bars
 
-spots use overlay color for outline and color by field, field value for fill color
+
+Axes and Labels
++++++++++++++++
+
+The axes and labels are filled initially with default values, but can be edited to update the plot.
+
+.. figure:: _static/screenshots/LaME_Styling_General.png
+    :align: center
+    :alt: LaME interface: right toolbox, styling-general tab
+    :width: 232
+
+    The *Styling \> General* contains general settings applied to all plots.
+
+Annotations
++++++++++++
+
+.. figure:: _static/screenshots/LaME_Styling_Maps.png
+    :align: center
+    :alt: LaME interface: right toolbox, styling-maps tab
+    :width: 232
+
+    The *Styling \> Maps* contains settings exclusive to maps.
+
+Scales
+++++++
+
+.. figure:: _static/screenshots/LaME_Styling_Scales.png
+    :align: center
+    :alt: LaME interface: right toolbox, Styling-scales tab
+    :width: 232
+
+    The *Styling \> Scatter and Heatmap* contains settings for scatter plots and heatmaps including correlations.
+
+Markers
++++++++
+
+Lines
++++++
+
+Colors
+++++++
 
 Clusters
 ++++++++
@@ -152,6 +165,15 @@ Calculator
 Use the calculator ( |icon-calculator| ) to create custom fields.  These custom fields can be used to as dimensions on plots or to set marker color values.  Once created, custom fields will be added to associated drop downs.
 
 .. |icon-sort| image:: _static/icons/icon-sort-64.png
+    :height: 2ex
+
+.. |icon-launch| image:: _static/icons/icon-launch-64.png
+    :height: 2ex
+
+.. |icon-save| image:: _static/icons/icon-save-64.png
+    :height: 2ex
+
+.. |icon-trash| image:: _static/icons/icon-delete-64.png
     :height: 2ex
 
 .. |icon-calculator| image:: _static/icons/icon-calculator-64.png

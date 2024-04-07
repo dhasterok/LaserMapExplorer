@@ -548,7 +548,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #self.comboBoxColorByField.activated.connect(lambda: self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField))
 
         # callback functions
-        self.comboBoxStylePlotType.currentIndexChanged.connect(self.style_plot_type_callback)
+        self.comboBoxStylePlotType.activated.connect(self.style_plot_type_callback)
         self.toolButtonUpdatePlot.clicked.connect(self.update_current_plot)
         self.toolButtonSaveTheme.clicked.connect(self.input_theme_name_dlg)
         # axes
@@ -560,19 +560,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.doubleSpinBoxYLB.valueChanged.connect(self.ylim_callback)
         self.doubleSpinBoxYUB.valueChanged.connect(self.ylim_callback)
         self.lineEditAspectRatio.editingFinished.connect(self.aspect_ratio_callback)
-        self.comboBoxTickDirection.currentIndexChanged.connect(self.tickdir_callback)
+        self.comboBoxTickDirection.activated.connect(self.tickdir_callback)
         # annotations
-        self.fontComboBox.currentIndexChanged.connect(self.font_callback)
+        self.fontComboBox.activated.connect(self.font_callback)
         self.doubleSpinBoxFontSize.valueChanged.connect(self.font_size_callback)
         # scales
-        self.comboBoxScaleDirection.currentIndexChanged.connect(self.scale_direction_callback)
-        self.comboBoxScaleLocation.currentIndexChanged.connect(self.scale_location_callback)
+        self.comboBoxScaleDirection.activated.connect(self.scale_direction_callback)
+        self.comboBoxScaleLocation.activated.connect(self.scale_location_callback)
         #overlay color
-        self.comboBoxMarker.currentIndexChanged.connect(self.marker_symbol_callback)
+        self.comboBoxMarker.activated.connect(self.marker_symbol_callback)
         self.doubleSpinBoxMarkerSize.valueChanged.connect(self.marker_size_callback)
         self.horizontalSliderMarkerAlpha.sliderReleased.connect(self.slider_alpha_changed)
         # lines
-        self.comboBoxLineWidth.currentIndexChanged.connect(self.line_width_callback)
+        self.comboBoxLineWidth.activated.connect(self.line_width_callback)
         # colors
         #marker color
         self.comboBoxColorByField.activated.connect(self.color_by_field_callback)
@@ -580,7 +580,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxFieldColormap.activated.connect(self.field_colormap_callback)
         self.doubleSpinBoxColorLB.valueChanged.connect(self.clim_callback)
         self.doubleSpinBoxColorUB.valueChanged.connect(self.clim_callback)
-        self.comboBoxCbarDirection.currentIndexChanged.connect(self.cbar_direction_callback)
+        self.comboBoxCbarDirection.activated.connect(self.cbar_direction_callback)
         self.lineEditCbarLabel.editingFinished.connect(self.cbar_label_callback)
 
         self.toolBox.currentChanged.connect(self.toolbox_changed)
@@ -804,15 +804,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.comboBoxColorField.addItem('')
             self.comboBoxColorField.addItems(analytes['analytes'])
 
-            # self.spinBoxX.setMaximum(int(x_max))
-            # self.spinBoxX.setMinimum(int(x_min))
-            # self.spinBox_X.setMaximum(int(x_max))
-            # self.spinBox_X.setMinimum(int(x_min))
-            # self.spinBoxY.setMaximum(int(y_max))
-            # self.spinBoxY.setMinimum(int(y_min))
-            # self.spinBox_Y.setMaximum(int(y_max))
-            # self.spinBox_Y.setMinimum(int(y_min))
-
             # self.checkBoxViewRatio.setChecked(False)
 
             # plot first analyte as lasermap
@@ -824,14 +815,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.styles['analyte map']['Colors']['Field'] = self.selected_analytes[0]
             
             #create plot
-            self.create_plot(current_plot_df,sample_id=sample_id, plot_type = 'lasermap', analyte_1= self.selected_analytes[0])
+            self.create_plot(current_plot_df,sample_id=sample_id, plot_type='lasermap', analyte_1=self.selected_analytes[0])
 
-
-
-
-            # self.plot_laser_map(current_plot_df,plot_information)
-            # self.update_spinboxes(parameters, auto_scale_param)
-            # self.add_plot(plot_information, current_plot_df)
 
             self.create_tree(sample_id)
             # self.clear_analysis()
@@ -872,7 +857,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.check_analysis_type()
         if result == QDialog.Rejected:
             pass
-
 
 
     # -------------------------------
@@ -3426,25 +3410,60 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # axes
     # -------------------------------------
     def xlabel_callback(self):
-        self.styles[self.comboBoxStylePlotType.currentText()]['Axes']['XLabel'] = self.lineEditXLabel.text()
+        plot_type = self.comboBoxStylePlotType.currentText()
+        if self.styles[plot_type]['Axes']['XLabel'] == self.lineEditXLabel.text():
+            return
+
+        self.styles[plot_type]['Axes']['XLabel'] = self.lineEditXLabel.text()
+        self.update_current_plot(save=False)
 
     def ylabel_callback(self):
-        self.styles[self.comboBoxStylePlotType.currentText()]['Axes']['YLabel'] = self.lineEditYLabel.text()
+        plot_type = self.comboBoxStylePlotType.currentText()
+        if self.styles[plot_type]['Axes']['YLabel'] == self.lineEditYLabel.text():
+            return
+
+        self.styles[plot_type]['Axes']['YLabel'] = self.lineEditYLabel.text()
+        self.update_current_plot(save=False)
 
     def zlabel_callback(self):
-        self.styles[self.comboBoxStylePlotType.currentText()]['Axes']['ZLabel'] = self.lineEditZLabel.text()
+        plot_type = self.comboBoxStylePlotType.currentText()
+        if self.styles[plot_type]['Axes']['ZLabel'] == self.lineEditZLabel.text():
+            return
+
+        self.styles[plot_type]['Axes']['ZLabel'] = self.lineEditZLabel.text()
+        self.update_current_plot(save=False)
 
     def xlim_callback(self):
-        self.styles[self.comboBoxStylePlotType.currentText()]['Axes']['XLim'] = [self.doubleSpinBoxXLB.value(), self.doubleSpinBoxXUB.value()]
+        plot_type = self.comboBoxStylePlotType.currentText()
+        if self.styles[plot_type]['Axes']['XLim'][0] == self.doubleSpinBoxXLB.value() and self.styles[plot_type]['Axes']['XLim'][1] == self.doubleSpinBoxXUB.value():
+            return
+
+        self.styles[plot_type]['Axes']['XLim'] = [self.doubleSpinBoxXLB.value(), self.doubleSpinBoxXUB.value()]
+        self.update_current_plot(save=False)
 
     def ylim_callback(self):
-        self.styles[self.comboBoxStylePlotType.currentText()]['Axes']['YLim'] = [self.doubleSpinBoxYLB.value(), self.doubleSpinBoxYUB.value()]
+        plot_type = self.comboBoxStylePlotType.currentText()
+        if self.styles[plot_type]['Axes']['YLim'][0] == self.doubleSpinBoxYLB.value() and self.styles[plot_type]['Axes']['YLim'][1] == self.doubleSpinBoxYUB.value():
+            return
+
+        self.styles[plot_type]['Axes']['YLim'] = [self.doubleSpinBoxYLB.value(), self.doubleSpinBoxYUB.value()]
+        self.update_current_plot(save=False)
 
     def aspect_ratio_callback(self):
-        self.styles[self.comboBoxStylePlotType.currentText()]['Axes']['AspectRatio'] = self.lineEditAspectRatio.text()
+        plot_type = self.comboBoxStylePlotType.currentText()
+        if self.styles[plot_type]['Axes']['AspectRatio'] == self.lineEditAspectRatio.text():
+            return
+
+        self.styles[plot_type]['Axes']['AspectRatio'] = self.lineEditAspectRatio.text()
+        self.update_current_plot(save=False)
 
     def tickdir_callback(self):
-        self.styles[self.comboBoxStylePlotType.currentText()]['Axes']['TickDir'] = self.comboBoxTickDirection.currentText()
+        plot_type = self.comboBoxStylePlotType.currentText()
+        if self.styles[plot_type]['Axes']['TickDir'] == self.comboBoxTickDirection.currentText():
+            return
+
+        self.styles[plot_type]['Axes']['TickDir'] = self.comboBoxTickDirection.currentText()
+        self.update_current_plot(save=False)
 
     def axes_reset_callback(self):
         pass

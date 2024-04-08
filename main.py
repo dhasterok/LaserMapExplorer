@@ -115,8 +115,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_bins = True
 
         # set locations of doc widgets
-        self.setCorner(0x00002,0x1)
-        self.setCorner(0x00003,0x2)
+        self.setCorner(0x00002,0x1) # sets left toolbox to bottom left corner
+        self.setCorner(0x00003,0x2) # sets right toolbox to bottom right corner
 
         # preferences
         self.default_preferences = {'Units':{'Concentration': 'ppm', 'Distance': 'um', 'Temperature':'°C', 'Pressure':'MPa', 'Date':'Ma', 'FontSize':11, 'TickDir':'out'}}
@@ -306,7 +306,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Preprocess Tab
         #-------------------------
         # histogram
-        self.update_field_type_combobox(self.comboBoxHistogramFieldType)
         self.comboBoxHistogramFieldType.activated.connect(self.histogram_field_type_callback)
         self.comboBoxHistogramField.activated.connect(self.histogram_field_callback)
         self.spinBoxNBins.setValue(self.default_bins)
@@ -402,12 +401,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #-------------------------
         self.toolButtonTernaryMap.clicked.connect(self.plot_ternarymap)
 
-        self.update_field_type_combobox(self.comboBoxFieldTypeX)
-        self.update_field_type_combobox(self.comboBoxFieldTypeY)
-        self.update_field_type_combobox(self.comboBoxFieldTypeZ)
         self.comboBoxFieldTypeX.activated.connect(lambda: self.update_field_combobox(self.comboBoxFieldTypeX, self.comboBoxFieldX))
         self.comboBoxFieldTypeY.activated.connect(lambda: self.update_field_combobox(self.comboBoxFieldTypeY, self.comboBoxFieldY))
         self.comboBoxFieldTypeZ.activated.connect(lambda: self.update_field_combobox(self.comboBoxFieldTypeZ, self.comboBoxFieldZ))
+        self.comboBoxFieldX.activated.connect(self.update_current_plot)
+        self.comboBoxFieldY.activated.connect(self.update_current_plot)
+        self.comboBoxFieldZ.activated.connect(self.update_current_plot)
 
         # ternary colormaps
         # create ternary colors dictionary
@@ -776,8 +775,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.data[self.sample_id]['mask'] = self.data[self.sample_id]['filter_mask'] & self.data[self.sample_id]['polygon_mask'] & self.data[self.sample_id]['axis_mask']
 
             self.prep_data()
-            self.update_all_field_comboboxes()
-            self.update_filter_values()
 
             # self.checkBoxViewRatio.setChecked(False)
 
@@ -810,6 +807,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             current_plot_df = self.get_map_data(sample_id=self.sample_id, field=self.selected_analytes[0], analysis_type='Analyte')
             #create plot
             self.create_plot(current_plot_df, sample_id=self.sample_id, plot_type='lasermap', analyte_1=self.selected_analytes[0])
+
+        self.update_all_field_comboboxes()
+        self.update_filter_values()
+
+        self.histogram_update_bin_width()
 
     def open_preferences_dialog(self):
         pass
@@ -3312,7 +3314,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toggle_style_widgets()
 
         # update plot
-        #self.update_plot()
+        self.update_current_plot()
 
     def get_style_dict(self):
 
@@ -3358,12 +3360,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # style widget callbacks
     # -------------------------------------
     def style_plot_type_callback(self):
-        if not self.check_analysis:
-            self.plot_types[self.toolBox.currentIndex()][0] = self.comboBoxPlotType.currentIndex()
-    
-            self.set_style_widgets(plot_type=self.comboBoxPlotType.currentText())
-            self.check_analysis_type()
-            self.update_current_plot(save=False)
+        self.plot_types[self.toolBox.currentIndex()][0] = self.comboBoxPlotType.currentIndex()
+        print(self.comboBoxPlotType.currentText())
+        self.set_style_widgets(plot_type=self.comboBoxPlotType.currentText())
+        print('styles set')
+        self.check_analysis_type()
+        print('check analysis complete')
+        self.update_current_plot(save=False)
         
     # axes
     # -------------------------------------
@@ -3491,15 +3494,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Executes on change of ``MainWindow.horizontalSliderMarkerAlpha.value()``.
         """
         self.labelMarkerAlpha.setText(str(self.horizontalSliderMarkerAlpha.value()))
-        match self.toolBox.currentIndex():
-            case self.scatter_tab_id:
-                self.styles[self.comboBoxPlotType.currentText()]['Markers']['Alpha'] = float(self.horizontalSliderMarkerAlpha.value())
-            case self.pca_tab_id:
-                self.styles[self.comboBoxPlotType.currentText()]['Markers']['Alpha'] = float(self.horizontalSliderMarkerAlpha.value())
-            case self.profile_tab_id:
-                self.styles[self.comboBoxPlotType.currentText()]['Markers']['Alpha'] = float(self.horizontalSliderMarkerAlpha.value())
 
         if self.horizontalSliderMarkerAlpha.isEnabled():
+            self.styles[self.comboBoxPlotType.currentText()]['Markers']['Alpha'] = float(self.horizontalSliderMarkerAlpha.value())
             self.update_current_plot(save=False)
 
     # lines
@@ -3538,9 +3535,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return
         
         if self.comboBoxColorByField.currentText() == 'None':
+            self.comboBoxColorField.setEnabled(False)
             pass
         else:
             self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
+            if self.comboBoxColorByField.currentText() in ['Clusters']:
+                self.comboBoxColorField.setEnabled(False)
+            else:
+                self.comboBoxColorField.setEnabled(True)
 
         self.update_current_plot(save=False)
         
@@ -3649,41 +3651,44 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :param save: save plot to plot selector, Defaults to False.
         :type save: bool, optional
         """
-        if self.sample_id=='' or not self.comboBoxPlotType.currentText() or not self.comboBoxColorField.currentText():
+        if self.sample_id=='' or not self.comboBoxPlotType.currentText():
             return
         plot_type = self.comboBoxPlotType.currentText()
         sample_id = self.sample_id
         analysis = self.comboBoxColorByField.currentText()
         field = self.comboBoxColorField.currentText()
         print(analysis)
+        print(plot_type)
         style = self.styles[plot_type]
         
         match plot_type:
             case 'analyte map':
-                if analysis in ['Analyte', 'Ratio']:
-                    current_plot_df = self.get_map_data(sample_id=sample_id, field=field, analysis_type=analysis)
-                    if analysis == 'Ratio':
-                        analyte_1 = field.split(' / ')[0]
-                        analyte_2 = field.split(' / ')[1]
-                        self.create_plot(current_plot_df, sample_id, plot_type = 'lasermap', analyte_1=analyte_1, analyte_2=analyte_2, plot=True)
-                    else: #Not a ratio
-                        self.create_plot(current_plot_df, sample_id, plot_type = 'lasermap', analyte_1=field, plot=True)
-            case 'histogram':
-                nbins = self.spinBoxNBins.value()
-                bin_width = self.spinBoxBinWidth.value()
-                if analysis == 'Ratio':
-                    analytes=field.split(' / ')
-                    plot_information={'plot_name': field,'sample_id': sample_id,
-                                    'analyte_1': analytes[0], 'analyte_2': analytes[1],
-                                    'plot_type': plot_type,
-                                    'style': self.styles['histogram']}
-                else:
-                    plot_information={'plot_name': field,'sample_id': sample_id,
-                                    'analyte_1': field,
-                                    'plot_type': plot_type,
-                                    'style': self.styles['histogram']}
+                if not self.comboBoxColorField.currentText():
+                    return
 
-                self.plot_histogram(current_plot_df, plot_information, bin_width=bin_width)
+                if analysis in ['Analyte', 'Ratio']:
+                    map_type = 'lasermap'
+                elif analysis == 'Analyte (normalized)':
+                    map_type = 'lasermap_norm'
+                else:
+                    return
+
+                current_plot_df = self.get_map_data(sample_id=sample_id, field=field, analysis_type=analysis)
+                if analysis == 'Ratio':
+                    analyte_1 = field.split(' / ')[0]
+                    analyte_2 = field.split(' / ')[1]
+                    self.create_plot(current_plot_df, sample_id, plot_type = map_type, analyte_1=analyte_1, analyte_2=analyte_2, plot=True)
+                else: #Not a ratio
+                    self.create_plot(current_plot_df, sample_id, plot_type = map_type, analyte_1=field, plot=True)
+            case 'histogram':
+                print('plot histogram')
+                current_plot_df = self.get_map_data(sample_id=sample_id, field=field, analysis_type=analysis)
+                if analysis == 'Ratio':
+                    analyte_1 = field.split(' / ')[0]
+                    analyte_2 = field.split(' / ')[1]
+                    self.create_plot(current_plot_df, sample_id, plot_type = 'histogram', analyte_1=analyte_1, analyte_2=analyte_2, plot=True)
+                else: #Not a ratio
+                    self.create_plot(current_plot_df, sample_id, plot_type = 'histogram', analyte_1=self.comboBoxHistogramField.currentText(), plot=True)
             case 'scatter' | 'heatmap':
                 self.plot_scatter(save) 
             case 'variance' | 'vectors' | 'PCx vs PCy scatter' | 'PCx vs PCy heatmap' | 'PCA Score':
@@ -3824,13 +3829,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         elif plot_type=='histogram':
 
-            nbins = self.default_bins
-
-            bin_width = (np.nanmax(current_plot_df['array']) - np.nanmin(current_plot_df['array'])) / nbins
+            bin_width = int(self.spinBoxBinWidth.value())
 
             plot_information={'plot_name':analyte_str,'sample_id':sample_id,
                               'analyte_1':analyte_1, 'analyte_2':analyte_2,
-                              'plot_type':plot_type}
+                              'plot_type':plot_type, 'bin_width':bin_width, 
+                              'style': self.styles['histogram']}
             self.plot_histogram(current_plot_df, plot_information, bin_width=bin_width)
         elif plot_type == 'lasermap_norm':
             ref_data_chem = self.ref_data.iloc[self.comboBoxRefMaterial.currentIndex()]
@@ -4022,10 +4026,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
         Generally called when the number of bins is changed by the user.  Updates the plot.
         """
-        print('update_bin_width')
         if not self.update_bins:
-            self.update_bins = True
             return
+        print('update_bin_width')
+        self.update_bins = False
 
         # get currently selected data
         current_plot_df = self.get_map_data(self.sample_id, field=self.comboBoxHistogramField.currentText(), analysis_type=self.comboBoxHistogramFieldType.currentText())
@@ -4035,7 +4039,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.spinBoxBinWidth.setMinimum(int(range / self.spinBoxNBins.maximum()))
         self.spinBoxBinWidth.setMaximum(int(range / self.spinBoxNBins.minimum()))
         self.spinBoxBinWidth.setValue( int(range / self.spinBoxNBins.value()) )
-        self.update_bins = False
+        self.update_bins = True
 
         # update histogram
         if self.comboBoxPlotType.currentText() == 'histogram':
@@ -4046,17 +4050,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
         Generally called when the bin width is changed by the user.  Updates the plot.
         """
-        print('update_n_bins')
         if not self.update_bins:
-            self.update_bins = True
             return
+        print('update_n_bins')
+        self.update_bins = False
 
         # get currently selected data
         current_plot_df = self.get_map_data(self.sample_id, field=self.comboBoxHistogramField.currentText(), analysis_type=self.comboBoxHistogramFieldType.currentText())
         
         # update n bins
         self.spinBoxBinWidth.setValue( int((np.nanmax(current_plot_df['array']) - np.nanmin(current_plot_df['array'])) / self.spinBoxBinWidth.value()) )
-        self.update_bins = False
+        self.update_bins = True
 
         # update histogram
         if self.comboBoxPlotType.currentText() == 'histogram':
@@ -4140,6 +4144,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # self.add_histogram_tab(widgetHistogram, plot_name)
 
     def update_histogram(self, array, edges, ax):
+        style = self.styles['histogram']
+
         # Clear previous histogram
         ax.clear()
         # Check if the algorithm is in the current group and if results are available
@@ -4153,12 +4159,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             for i in clusters:
                 cluster_data = array[cluster_labels == i]
                 # Create RGBA color with transparency by directly indexing the colormap
-                # color = cmap(i)[:-1]  # Create a new RGBA tuple with alpha value
-                color = self.goup_cmap[i][:-1] + (0.6,)
-                ax.hist(cluster_data, bins=edges, color=color,edgecolor='black', linewidth=1.5, label=f'Cluster {i}', alpha=0.6)
+                color = self.group_cmap(i)[:-1]  # Create a new RGBA tuple with alpha value
+                #color = self.group_cmap[i][:-1] + (0.6,)
+                ax.hist(cluster_data, bins=edges, color=color, edgecolor=None, linewidth=style['Lines']['LineWidth'], label=f'Cluster {i}', alpha=style['Markers']['Alpha']/100)
         else:
             # Regular histogram
-            ax.hist(array, bins=edges, color='blue', edgecolor='black', linewidth=1.5, label='Data')
+            ax.hist(array, bins=edges, color=style['Colors']['Color'], edgecolor=None, linewidth=style['Lines']['LineWidth'], label='Data', alpha=style['Markers']['Alpha']/100)
         # Add a legend
         ax.legend()
 
@@ -4188,7 +4194,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             # get saved scatter values to update plot
             x, y, z, c = values
-
+        
         plot_type = self.comboBoxPlotType.currentText().lower()
         style = self.styles[plot_type]
         match plot_type:
@@ -4334,7 +4340,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                             size=style['Markers']['Size'],
                                             cmap=style['Colors']['Colormap'],
                                             orientation=style['Colors']['Direction'])
-            cb.set_label(c['label'])
+            if cb:
+                cb.set_label(c['label'])
 
         if new:
             plot_name = f"{x['field']}_{y['field']}_{z['field']}_{'ternscatter'}"
@@ -4792,7 +4799,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def plot_clustering_result(self, ax, labels, method_name, fuzzy_cluster_number):
         reshaped_array = np.reshape(labels, self.array_size, order=self.order)
 
-        style = self.styles[self.comboBoxPlotType.currentText()]
+        style = self.styles['Clusters']
 
         x_range = self.data[self.sample_id]['processed_data']['X'].max() -  self.data[self.sample_id]['processed_data']['X'].min()
         y_range = self.data[self.sample_id]['processed_data']['Y'].max() -  self.data[self.sample_id]['processed_data']['Y'].min()
@@ -5268,28 +5275,35 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         match plot_type.lower():
             case 'histogram' | 'tec':
                 if self.data[self.sample_id]['computed_data']['Cluster'].empty:
-                   field_list = []
+                    field_list = []
+                    self.comboBoxColorField.setEnabled(False)
                 else:
                     field_list = ['Cluster']
+                    self.comboBoxColorField.setEnabled(True)
             case 'cluster score':
                 if self.data[self.sample_id]['computed_data']['Cluster Score'].empty:
-                   field_list = []
+                    field_list = []
+                    self.comboBoxColorField.setEnabled(False)
                 else:
-                   field_list = ['Cluster Score']
+                    field_list = ['Cluster Score']
+                    self.comboBoxColorField.setEnabled(True)
             case 'pca score':
                 if self.data[self.sample_id]['computed_data']['PCA Score'].empty:
                     fieldlist = []
+                    self.comboBoxColorField.setEnabled(False)
                 else:
                     fieldlist = ['PCA Score']
+                    self.comboBoxColorField.setEnabled(True)
             case _:
                 field_list = ['Analyte', 'Analyte (normalized)']
                 for field in self.data[self.sample_id]['computed_data']:
                     if not (self.data[self.sample_id]['computed_data'][field].empty):
                         field_list.append(field)
+                self.comboBoxColorField.setEnabled(True)
 
         # add None to list?
         if addNone:
-            field_list = 'None' + field_list
+            field_list.insert(0, 'None')
 
         print(field_list)
         # clear comboBox items
@@ -5332,14 +5346,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_field_combobox(self.comboBoxFilterFieldType, self.comboBoxFilterField)
 
         # scatter and heatmaps
-        self.update_field_type_combobox(self.comboBoxFieldX)
-        self.update_field_combobox(self.comboBoxFieldX, self.comboBoxFieldTypeX)
+        self.update_field_type_combobox(self.comboBoxFieldTypeX)
+        self.update_field_combobox(self.comboBoxFieldTypeX, self.comboBoxFieldX)
 
-        self.update_field_type_combobox(self.comboBoxFieldY)
-        self.update_field_combobox(self.comboBoxFieldY, self.comboBoxFieldTypeY)
+        self.update_field_type_combobox(self.comboBoxFieldTypeY)
+        self.update_field_combobox(self.comboBoxFieldTypeY, self.comboBoxFieldY)
 
-        self.update_field_type_combobox(self.comboBoxFieldZ, addNone=True)
-        self.update_field_combobox(self.comboBoxFieldZ, self.comboBoxFieldTypeZ)
+        self.update_field_type_combobox(self.comboBoxFieldTypeZ, addNone=True)
+        self.update_field_combobox(self.comboBoxFieldTypeZ, self.comboBoxFieldZ)
 
         # n-Dim
         self.update_field_combobox(None, self.comboBoxNDimAnalyte)
@@ -5369,6 +5383,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 analytes_2 =  self.data[self.sample_id]['ratios_info'].loc[self.data[self.sample_id]['ratios_info']['use']== True,'analyte_2']
                 ratios = analytes_1 +' / '+ analytes_2
                 set_fields = ratios.values.tolist() 
+            case 'None':
+                return []
             case _:
                 set_fields = self.data[self.sample_id]['computed_data'][set_name].columns.tolist()
         return set_fields
@@ -5450,6 +5466,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case 'Analyte':
                 current_plot_df['array'] = self.data[sample_id]['processed_data'].loc[:,field].values
 
+            case 'Analyte (normalized)':
+                current_plot_df['array'] = self.data[sample_id]['processed_data'].loc[:,field].values
+
             case 'Ratio':
                 current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].loc[:,field].values
 
@@ -5487,13 +5506,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'c': {'field': None, 'type': None, 'label': None, 'array': None}
         }
         value_dict['x']['field'] = self.comboBoxFieldX.currentText()
-        value_dict['x']['type'] = self.comboBoxFieldTypeX.currentText().lower()
+        value_dict['x']['type'] = self.comboBoxFieldTypeX.currentText()
         value_dict['y']['field'] = self.comboBoxFieldY.currentText()
-        value_dict['y']['type'] = self.comboBoxFieldTypeY.currentText().lower()
+        value_dict['y']['type'] = self.comboBoxFieldTypeY.currentText()
         value_dict['z']['field'] = self.comboBoxFieldZ.currentText()
-        value_dict['z']['type'] = self.comboBoxFieldTypeZ.currentText().lower()
+        value_dict['z']['type'] = self.comboBoxFieldTypeZ.currentText()
         value_dict['c']['field'] = self.comboBoxColorField.currentText()
-        value_dict['c']['type'] = self.comboBoxColorByField.currentText().lower()
+        value_dict['c']['type'] = self.comboBoxColorByField.currentText()
 
         for k, v in value_dict.items():
             if v['type'] == 'Analyte' and v['field']:
@@ -5518,6 +5537,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 df = pd.DataFrame({'array': []})  # Or however you want to handle this case
 
             value_dict[k]['array'] = df['array'][self.data[self.sample_id]['mask']].values if not df.empty else []
+
+            self.lineEditXLabel.setText(value_dict['x']['label'])
+            self.lineEditYLabel.setText(value_dict['y']['label'])
+            self.lineEditZLabel.setText(value_dict['z']['label'])
+            self.lineEditCbarLabel.setText(value_dict['c']['label'])
 
         return value_dict['x'], value_dict['y'], value_dict['z'], value_dict['c']
 

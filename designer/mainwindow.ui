@@ -32,8 +32,8 @@
      <pointsize>13</pointsize>
     </font>
    </property>
-   <layout class="QGridLayout" name="gridLayout_3">
-    <item row="0" column="0">
+   <layout class="QHBoxLayout" name="horizontalLayout_29">
+    <item>
      <widget class="QTabWidget" name="canvasWindow">
       <property name="font">
        <font>
@@ -972,7 +972,7 @@
        <x>0</x>
        <y>0</y>
        <width>300</width>
-       <height>856</height>
+       <height>861</height>
       </rect>
      </property>
      <property name="minimumSize">
@@ -996,7 +996,7 @@
       <string>Activates the crop tool</string>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>4</number>
      </property>
      <widget class="QWidget" name="SelectAnalytePage">
       <property name="enabled">
@@ -1007,7 +1007,7 @@
         <x>0</x>
         <y>0</y>
         <width>300</width>
-        <height>526</height>
+        <height>531</height>
        </rect>
       </property>
       <attribute name="label">
@@ -1357,7 +1357,7 @@
         <x>0</x>
         <y>0</y>
         <width>300</width>
-        <height>526</height>
+        <height>531</height>
        </rect>
       </property>
       <attribute name="label">
@@ -1451,6 +1451,9 @@
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
+             <property name="keyboardTracking">
+              <bool>false</bool>
+             </property>
             </widget>
            </item>
            <item row="2" column="0">
@@ -1477,6 +1480,9 @@
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+             <property name="keyboardTracking">
+              <bool>false</bool>
              </property>
              <property name="minimum">
               <number>1</number>
@@ -1693,6 +1699,9 @@
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
            <property name="maximum">
             <number>200</number>
            </property>
@@ -1864,6 +1873,9 @@
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
           </widget>
          </item>
          <item row="1" column="1">
@@ -1876,6 +1888,9 @@
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
           </widget>
          </item>
          <item row="2" column="1">
@@ -1887,6 +1902,9 @@
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -1914,6 +1932,9 @@
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -2045,7 +2066,7 @@
         <x>0</x>
         <y>0</y>
         <width>300</width>
-        <height>526</height>
+        <height>531</height>
        </rect>
       </property>
       <attribute name="label">
@@ -2368,7 +2389,7 @@
         <x>0</x>
         <y>0</y>
         <width>300</width>
-        <height>526</height>
+        <height>531</height>
        </rect>
       </property>
       <attribute name="label">
@@ -2454,6 +2475,9 @@
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
           </widget>
          </item>
          <item row="0" column="3">
@@ -2468,6 +2492,9 @@
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -3327,7 +3354,7 @@
         <x>0</x>
         <y>0</y>
         <width>300</width>
-        <height>526</height>
+        <height>531</height>
        </rect>
       </property>
       <attribute name="label">
@@ -3863,7 +3890,7 @@
         <x>0</x>
         <y>0</y>
         <width>300</width>
-        <height>526</height>
+        <height>531</height>
        </rect>
       </property>
       <attribute name="label">
@@ -4430,7 +4457,7 @@
         <x>0</x>
         <y>0</y>
         <width>300</width>
-        <height>526</height>
+        <height>531</height>
        </rect>
       </property>
       <attribute name="label">
@@ -4494,6 +4521,9 @@
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
+             <property name="keyboardTracking">
+              <bool>false</bool>
+             </property>
             </widget>
            </item>
            <item row="1" column="0">
@@ -4530,6 +4560,9 @@
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
+             <property name="keyboardTracking">
+              <bool>false</bool>
+             </property>
             </widget>
            </item>
            <item row="2" column="0">
@@ -4565,6 +4598,9 @@
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+             <property name="keyboardTracking">
+              <bool>false</bool>
              </property>
             </widget>
            </item>
@@ -4632,7 +4668,7 @@
         <x>0</x>
         <y>0</y>
         <width>300</width>
-        <height>526</height>
+        <height>531</height>
        </rect>
       </property>
       <attribute name="label">
@@ -4651,7 +4687,7 @@
         <string>Open profile style options</string>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="pageClustering">
         <widget class="QGroupBox" name="groupBoxClustering">
@@ -4756,6 +4792,9 @@
                </property>
                <property name="alignment">
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+               <property name="keyboardTracking">
+                <bool>false</bool>
                </property>
                <property name="minimum">
                 <number>1</number>
@@ -5056,7 +5095,11 @@
             </widget>
            </item>
            <item row="4" column="1">
-            <widget class="QSpinBox" name="spinBoxtSNEThreshold"/>
+            <widget class="QSpinBox" name="spinBoxtSNEThreshold">
+             <property name="keyboardTracking">
+              <bool>false</bool>
+             </property>
+            </widget>
            </item>
            <item row="5" column="0">
             <widget class="QLabel" name="labelGridSize">
@@ -5069,7 +5112,11 @@
             </widget>
            </item>
            <item row="5" column="1">
-            <widget class="QSpinBox" name="spinBoxtSNEGridSize"/>
+            <widget class="QSpinBox" name="spinBoxtSNEGridSize">
+             <property name="keyboardTracking">
+              <bool>false</bool>
+             </property>
+            </widget>
            </item>
            <item row="0" column="0">
             <widget class="QLabel" name="labelTSNEPlotType">
@@ -5162,7 +5209,7 @@
         <x>0</x>
         <y>0</y>
         <width>300</width>
-        <height>526</height>
+        <height>531</height>
        </rect>
       </property>
       <attribute name="label">
@@ -5817,7 +5864,7 @@
         <x>0</x>
         <y>0</y>
         <width>300</width>
-        <height>526</height>
+        <height>531</height>
        </rect>
       </property>
       <attribute name="label">
@@ -6198,7 +6245,7 @@
       </font>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="TreeView">
       <property name="geometry">
@@ -6340,7 +6387,7 @@
          <x>0</x>
          <y>85</y>
          <width>221</width>
-         <height>666</height>
+         <height>661</height>
         </rect>
        </property>
        <property name="font">
@@ -6367,7 +6414,7 @@
           <x>0</x>
           <y>0</y>
           <width>219</width>
-          <height>426</height>
+          <height>421</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6504,12 +6551,18 @@
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
+              <property name="keyboardTracking">
+               <bool>false</bool>
+              </property>
              </widget>
             </item>
             <item>
              <widget class="QDoubleSpinBox" name="doubleSpinBoxYUB">
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="keyboardTracking">
+               <bool>false</bool>
               </property>
              </widget>
             </item>
@@ -6522,12 +6575,18 @@
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
+              <property name="keyboardTracking">
+               <bool>false</bool>
+              </property>
              </widget>
             </item>
             <item>
              <widget class="QDoubleSpinBox" name="doubleSpinBoxXUB">
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="keyboardTracking">
+               <bool>false</bool>
               </property>
              </widget>
             </item>
@@ -6619,8 +6678,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>219</width>
+          <height>471</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6690,6 +6749,9 @@
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
+            <property name="keyboardTracking">
+             <bool>false</bool>
+            </property>
             <property name="decimals">
              <number>1</number>
             </property>
@@ -6715,8 +6777,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>219</width>
+          <height>471</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6869,8 +6931,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>219</width>
+          <height>471</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6958,6 +7020,9 @@
               <width>125</width>
               <height>16777215</height>
              </size>
+            </property>
+            <property name="keyboardTracking">
+             <bool>false</bool>
             </property>
             <property name="minimum">
              <double>1.000000000000000</double>
@@ -7075,8 +7140,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>219</width>
+          <height>471</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7179,8 +7244,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>219</width>
+          <height>471</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7417,6 +7482,9 @@
                 <height>16777215</height>
                </size>
               </property>
+              <property name="keyboardTracking">
+               <bool>false</bool>
+              </property>
              </widget>
             </item>
             <item>
@@ -7426,6 +7494,9 @@
                 <width>100</width>
                 <height>16777215</height>
                </size>
+              </property>
+              <property name="keyboardTracking">
+               <bool>false</bool>
               </property>
              </widget>
             </item>
@@ -7469,6 +7540,9 @@
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+            <property name="keyboardTracking">
+             <bool>false</bool>
             </property>
             <property name="minimum">
              <number>1</number>
@@ -7553,8 +7627,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>219</width>
+          <height>471</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -9165,7 +9239,7 @@
     </widget>
    </widget>
   </widget>
-  <widget class="QDockWidget" name="dockWidget">
+  <widget class="QDockWidget" name="dockWidgetBottomTabs">
    <property name="sizePolicy">
     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
      <horstretch>0</horstretch>
@@ -9174,7 +9248,7 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>62</width>
+     <width>0</width>
      <height>260</height>
     </size>
    </property>
@@ -9192,9 +9266,9 @@
      <property name="geometry">
       <rect>
        <x>5</x>
-       <y>10</y>
-       <width>1111</width>
-       <height>226</height>
+       <y>5</y>
+       <width>592</width>
+       <height>231</height>
       </rect>
      </property>
      <property name="minimumSize">
@@ -9215,7 +9289,7 @@
       </font>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tabNotes">
       <property name="toolTip">
@@ -9227,10 +9301,10 @@
       <widget class="QTextEdit" name="textEditNotes">
        <property name="geometry">
         <rect>
-         <x>10</x>
-         <y>10</y>
-         <width>1086</width>
-         <height>181</height>
+         <x>5</x>
+         <y>5</y>
+         <width>580</width>
+         <height>191</height>
         </rect>
        </property>
        <property name="maximumSize">
@@ -9373,7 +9447,7 @@
             </property>
             <property name="maximumSize">
              <size>
-              <width>16777215</width>
+              <width>524287</width>
               <height>18</height>
              </size>
             </property>

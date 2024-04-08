@@ -114,6 +114,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.check_analysis = True
         self.update_bins = True
 
+        # set locations of doc widgets
+        self.setCorner(0x00002,0x1)
+        self.setCorner(0x00003,0x2)
 
         # preferences
         self.default_preferences = {'Units':{'Concentration': 'ppm', 'Distance': 'um', 'Temperature':'°C', 'Pressure':'MPa', 'Date':'Ma', 'FontSize':11, 'TickDir':'out'}}

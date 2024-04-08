@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1123</width>
-    <height>975</height>
+    <height>976</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -996,7 +996,7 @@
       <string>Activates the crop tool</string>
      </property>
      <property name="currentIndex">
-      <number>4</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="SelectAnalytePage">
       <property name="enabled">
@@ -6619,8 +6619,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>98</width>
+          <height>28</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6715,8 +6715,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>98</width>
+          <height>28</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6869,8 +6869,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>98</width>
+          <height>28</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7075,8 +7075,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>98</width>
+          <height>28</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7179,8 +7179,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>98</width>
+          <height>28</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7553,8 +7553,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>98</width>
+          <height>28</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -9203,6 +9203,12 @@
        <height>0</height>
       </size>
      </property>
+     <property name="maximumSize">
+      <size>
+       <width>524287</width>
+       <height>524287</height>
+      </size>
+     </property>
      <property name="font">
       <font>
        <pointsize>11</pointsize>
@@ -9226,6 +9232,12 @@
          <width>1086</width>
          <height>181</height>
         </rect>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>524287</width>
+         <height>524287</height>
+        </size>
        </property>
        <property name="cursor" stdset="0">
         <cursorShape>IBeamCursor</cursorShape>
@@ -9273,8 +9285,8 @@
             </property>
             <property name="maximumSize">
              <size>
-              <width>480</width>
-              <height>16777215</height>
+              <width>524287</width>
+              <height>524287</height>
              </size>
             </property>
             <property name="accessibleName">
@@ -9590,6 +9602,12 @@
             <size>
              <width>0</width>
              <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>524287</width>
+             <height>524287</height>
             </size>
            </property>
           </widget>

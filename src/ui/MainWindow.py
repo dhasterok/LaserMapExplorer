@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1123, 975)
+        MainWindow.resize(1123, 976)
         MainWindow.setMaximumSize(QtCore.QSize(16777215, 16777215))
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/icons/resources/icons/LaME-64.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -559,8 +559,8 @@ class Ui_MainWindow(object):
         self.toolButtonKDE.setCheckable(True)
         self.toolButtonKDE.setObjectName("toolButtonKDE")
         self.verticalLayout_8.addWidget(self.toolButtonKDE)
-        spacerItem4 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayout_8.addItem(spacerItem4)
+        spacerItem2 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.verticalLayout_8.addItem(spacerItem2)
         self.toolButtonHistogramReset = QtWidgets.QToolButton(self.horizontalLayoutWidget_17)
         self.toolButtonHistogramReset.setMinimumSize(QtCore.QSize(32, 32))
         self.toolButtonHistogramReset.setMaximumSize(QtCore.QSize(32, 32))
@@ -751,13 +751,8 @@ class Ui_MainWindow(object):
         self.toolButtonScaleEqualize.setCheckable(True)
         self.toolButtonScaleEqualize.setObjectName("toolButtonScaleEqualize")
         self.horizontalLayout_21.addWidget(self.toolButtonScaleEqualize)
-<<<<<<< Updated upstream
-        spacerItem5 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_21.addItem(spacerItem5)
-=======
-        spacerItem2 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_21.addItem(spacerItem2)
->>>>>>> Stashed changes
+        spacerItem3 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_21.addItem(spacerItem3)
         self.toolBox.addItem(self.PreprocessPage, "")
         self.SpotDataPage = QtWidgets.QWidget()
         self.SpotDataPage.setGeometry(QtCore.QRect(0, 0, 300, 526))
@@ -917,13 +912,8 @@ class Ui_MainWindow(object):
         self.gridLayout_4.addWidget(self.labelFMaxVal, 1, 1, 1, 1)
         self.horizontalLayout_25 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_25.setObjectName("horizontalLayout_25")
-<<<<<<< Updated upstream
-        spacerItem6 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_25.addItem(spacerItem6)
-=======
-        spacerItem3 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_25.addItem(spacerItem3)
->>>>>>> Stashed changes
+        spacerItem4 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_25.addItem(spacerItem4)
         self.toolButtonAddFilter = QtWidgets.QToolButton(self.gridLayoutWidget_3)
         self.toolButtonAddFilter.setMinimumSize(QtCore.QSize(32, 32))
         self.toolButtonAddFilter.setMaximumSize(QtCore.QSize(32, 32))
@@ -989,13 +979,8 @@ class Ui_MainWindow(object):
         self.toolButtonPolyLoad.setIconSize(QtCore.QSize(24, 24))
         self.toolButtonPolyLoad.setObjectName("toolButtonPolyLoad")
         self.horizontalLayout_9.addWidget(self.toolButtonPolyLoad)
-<<<<<<< Updated upstream
-        spacerItem7 = QtWidgets.QSpacerItem(10, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_9.addItem(spacerItem7)
-=======
-        spacerItem4 = QtWidgets.QSpacerItem(10, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_9.addItem(spacerItem4)
->>>>>>> Stashed changes
+        spacerItem5 = QtWidgets.QSpacerItem(10, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_9.addItem(spacerItem5)
         self.toolButtonPolyCreate = QtWidgets.QToolButton(self.horizontalLayoutWidget_5)
         self.toolButtonPolyCreate.setMinimumSize(QtCore.QSize(32, 32))
         self.toolButtonPolyCreate.setMaximumSize(QtCore.QSize(32, 32))
@@ -1075,13 +1060,8 @@ class Ui_MainWindow(object):
         self.toolButtonPolyDelink.setIconSize(QtCore.QSize(24, 24))
         self.toolButtonPolyDelink.setObjectName("toolButtonPolyDelink")
         self.horizontalLayout_4.addWidget(self.toolButtonPolyDelink)
-<<<<<<< Updated upstream
-        spacerItem8 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_4.addItem(spacerItem8)
-=======
-        spacerItem5 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_4.addItem(spacerItem5)
->>>>>>> Stashed changes
+        spacerItem6 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_4.addItem(spacerItem6)
         self.toolButtonPolySave = QtWidgets.QToolButton(self.horizontalLayoutWidget_6)
         self.toolButtonPolySave.setMinimumSize(QtCore.QSize(32, 32))
         self.toolButtonPolySave.setMaximumSize(QtCore.QSize(32, 32))
@@ -1123,13 +1103,8 @@ class Ui_MainWindow(object):
         self.toolButtonMapViewable.setChecked(False)
         self.toolButtonMapViewable.setObjectName("toolButtonMapViewable")
         self.horizontalLayout_10.addWidget(self.toolButtonMapViewable)
-<<<<<<< Updated upstream
-        spacerItem9 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_10.addItem(spacerItem9)
-=======
-        spacerItem6 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_10.addItem(spacerItem6)
->>>>>>> Stashed changes
+        spacerItem7 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_10.addItem(spacerItem7)
         self.toolButtonFilterToggle = QtWidgets.QToolButton(self.horizontalLayoutWidget_7)
         self.toolButtonFilterToggle.setMinimumSize(QtCore.QSize(32, 32))
         self.toolButtonFilterToggle.setMaximumSize(QtCore.QSize(32, 32))
@@ -1178,13 +1153,8 @@ class Ui_MainWindow(object):
         self.comboBoxEdgeDetectMethod.addItem("")
         self.comboBoxEdgeDetectMethod.addItem("")
         self.horizontalLayout_20.addWidget(self.comboBoxEdgeDetectMethod)
-<<<<<<< Updated upstream
-        spacerItem10 = QtWidgets.QSpacerItem(10, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_20.addItem(spacerItem10)
-=======
-        spacerItem7 = QtWidgets.QSpacerItem(10, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_20.addItem(spacerItem7)
->>>>>>> Stashed changes
+        spacerItem8 = QtWidgets.QSpacerItem(10, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_20.addItem(spacerItem8)
         self.toolButtonEdgeDetect = QtWidgets.QToolButton(self.horizontalLayoutWidget_15)
         self.toolButtonEdgeDetect.setMinimumSize(QtCore.QSize(32, 32))
         self.toolButtonEdgeDetect.setMaximumSize(QtCore.QSize(32, 32))
@@ -1303,13 +1273,8 @@ class Ui_MainWindow(object):
         self.comboBoxHeatmaps.addItem("")
         self.formLayout.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.comboBoxHeatmaps)
         self.horizontalLayout_19.addLayout(self.formLayout)
-<<<<<<< Updated upstream
-        spacerItem11 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_19.addItem(spacerItem11)
-=======
-        spacerItem8 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_19.addItem(spacerItem8)
->>>>>>> Stashed changes
+        spacerItem9 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_19.addItem(spacerItem9)
         self.groupBoxTernaryMap = QtWidgets.QGroupBox(self.ScatterPage)
         self.groupBoxTernaryMap.setGeometry(QtCore.QRect(4, 175, 291, 121))
         self.groupBoxTernaryMap.setObjectName("groupBoxTernaryMap")
@@ -1564,13 +1529,8 @@ class Ui_MainWindow(object):
         self.toolButtonNDimAnalyteSetAdd.setIconSize(QtCore.QSize(24, 24))
         self.toolButtonNDimAnalyteSetAdd.setObjectName("toolButtonNDimAnalyteSetAdd")
         self.verticalLayout_4.addWidget(self.toolButtonNDimAnalyteSetAdd)
-<<<<<<< Updated upstream
-        spacerItem12 = QtWidgets.QSpacerItem(20, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayout_4.addItem(spacerItem12)
-=======
-        spacerItem9 = QtWidgets.QSpacerItem(20, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayout_4.addItem(spacerItem9)
->>>>>>> Stashed changes
+        spacerItem10 = QtWidgets.QSpacerItem(20, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.verticalLayout_4.addItem(spacerItem10)
         self.toolButtonNDimPlot = QtWidgets.QToolButton(self.verticalLayoutWidget_3)
         self.toolButtonNDimPlot.setMinimumSize(QtCore.QSize(32, 32))
         self.toolButtonNDimPlot.setMaximumSize(QtCore.QSize(32, 32))
@@ -1647,13 +1607,8 @@ class Ui_MainWindow(object):
         self.horizontalLayout_12.addLayout(self.formLayout_5)
         self.verticalLayout_3 = QtWidgets.QVBoxLayout()
         self.verticalLayout_3.setObjectName("verticalLayout_3")
-<<<<<<< Updated upstream
-        spacerItem13 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayout_3.addItem(spacerItem13)
-=======
-        spacerItem10 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayout_3.addItem(spacerItem10)
->>>>>>> Stashed changes
+        spacerItem11 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.verticalLayout_3.addItem(spacerItem11)
         self.toolButtonPCAPlot = QtWidgets.QToolButton(self.horizontalLayoutWidget_9)
         self.toolButtonPCAPlot.setMinimumSize(QtCore.QSize(32, 32))
         self.toolButtonPCAPlot.setMaximumSize(QtCore.QSize(32, 32))
@@ -1776,13 +1731,8 @@ class Ui_MainWindow(object):
         self.horizontalLayout_11.addLayout(self.formLayoutClusterSettings)
         self.verticalLayoutClusterTools = QtWidgets.QVBoxLayout()
         self.verticalLayoutClusterTools.setObjectName("verticalLayoutClusterTools")
-<<<<<<< Updated upstream
-        spacerItem14 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayoutClusterTools.addItem(spacerItem14)
-=======
-        spacerItem11 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayoutClusterTools.addItem(spacerItem11)
->>>>>>> Stashed changes
+        spacerItem12 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.verticalLayoutClusterTools.addItem(spacerItem12)
         self.toolButtonRunClustering = QtWidgets.QToolButton(self.horizontalLayoutWidget_8)
         self.toolButtonRunClustering.setMinimumSize(QtCore.QSize(32, 32))
         self.toolButtonRunClustering.setMaximumSize(QtCore.QSize(32, 32))
@@ -1993,13 +1943,8 @@ class Ui_MainWindow(object):
         self.toolButtonPointMove.setChecked(False)
         self.toolButtonPointMove.setObjectName("toolButtonPointMove")
         self.verticalLayoutProfileTools.addWidget(self.toolButtonPointMove)
-<<<<<<< Updated upstream
-        spacerItem15 = QtWidgets.QSpacerItem(32, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayoutProfileTools.addItem(spacerItem15)
-=======
-        spacerItem12 = QtWidgets.QSpacerItem(32, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayoutProfileTools.addItem(spacerItem12)
->>>>>>> Stashed changes
+        spacerItem13 = QtWidgets.QSpacerItem(32, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.verticalLayoutProfileTools.addItem(spacerItem13)
         self.toolButtonClearProfile = QtWidgets.QToolButton(self.horizontalLayoutWidget_3)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -2088,13 +2033,8 @@ class Ui_MainWindow(object):
         self.toolButtonPointDown.setIconSize(QtCore.QSize(24, 24))
         self.toolButtonPointDown.setObjectName("toolButtonPointDown")
         self.verticalLayoutPointTools.addWidget(self.toolButtonPointDown)
-<<<<<<< Updated upstream
-        spacerItem16 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayoutPointTools.addItem(spacerItem16)
-=======
-        spacerItem13 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayoutPointTools.addItem(spacerItem13)
->>>>>>> Stashed changes
+        spacerItem14 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.verticalLayoutPointTools.addItem(spacerItem14)
         self.toolButtonPointDelete = QtWidgets.QToolButton(self.horizontalLayoutWidget)
         self.toolButtonPointDelete.setMinimumSize(QtCore.QSize(32, 32))
         self.toolButtonPointDelete.setMaximumSize(QtCore.QSize(32, 32))
@@ -2234,13 +2174,8 @@ class Ui_MainWindow(object):
         self.toolButtonDiffusionLoad.setIconSize(QtCore.QSize(24, 24))
         self.toolButtonDiffusionLoad.setObjectName("toolButtonDiffusionLoad")
         self.verticalLayout_10.addWidget(self.toolButtonDiffusionLoad)
-<<<<<<< Updated upstream
-        spacerItem17 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayout_10.addItem(spacerItem17)
-=======
-        spacerItem14 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayout_10.addItem(spacerItem14)
->>>>>>> Stashed changes
+        spacerItem15 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.verticalLayout_10.addItem(spacerItem15)
         self.horizontalLayout_8.addLayout(self.verticalLayout_10)
         self.tabWidgetSpecialFcn.addTab(self.tabDiffusion, "")
         self.toolBox.addItem(self.SpecialFunctionPage, "")
@@ -2297,13 +2232,8 @@ class Ui_MainWindow(object):
         self.toolButtonSortAnalyte.setIconSize(QtCore.QSize(28, 28))
         self.toolButtonSortAnalyte.setObjectName("toolButtonSortAnalyte")
         self.horizontalLayout_17.addWidget(self.toolButtonSortAnalyte)
-<<<<<<< Updated upstream
-        spacerItem18 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_17.addItem(spacerItem18)
-=======
-        spacerItem15 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_17.addItem(spacerItem15)
->>>>>>> Stashed changes
+        spacerItem16 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_17.addItem(spacerItem16)
         self.toolButtonRemovePlot = QtWidgets.QToolButton(self.horizontalLayoutWidget_13)
         self.toolButtonRemovePlot.setMinimumSize(QtCore.QSize(32, 32))
         self.toolButtonRemovePlot.setMaximumSize(QtCore.QSize(32, 32))
@@ -2424,7 +2354,7 @@ class Ui_MainWindow(object):
         self.formLayout_11.setWidget(7, QtWidgets.QFormLayout.FieldRole, self.toolButtonAxesReset)
         self.toolBoxStyle.addItem(self.StyleAxes, icon7, "")
         self.StyleAnnotations = QtWidgets.QWidget()
-        self.StyleAnnotations.setGeometry(QtCore.QRect(0, 0, 100, 30))
+        self.StyleAnnotations.setGeometry(QtCore.QRect(0, 0, 98, 28))
         self.StyleAnnotations.setObjectName("StyleAnnotations")
         self.formLayoutWidget_13 = QtWidgets.QWidget(self.StyleAnnotations)
         self.formLayoutWidget_13.setGeometry(QtCore.QRect(5, 0, 211, 66))
@@ -2461,7 +2391,7 @@ class Ui_MainWindow(object):
         icon44.addPixmap(QtGui.QPixmap(":/icons/resources/icons/icon-text-64.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.toolBoxStyle.addItem(self.StyleAnnotations, icon44, "")
         self.StyleScales = QtWidgets.QWidget()
-        self.StyleScales.setGeometry(QtCore.QRect(0, 0, 100, 30))
+        self.StyleScales.setGeometry(QtCore.QRect(0, 0, 98, 28))
         self.StyleScales.setObjectName("StyleScales")
         self.formLayoutWidget_12 = QtWidgets.QWidget(self.StyleScales)
         self.formLayoutWidget_12.setGeometry(QtCore.QRect(5, 0, 219, 106))
@@ -2517,7 +2447,7 @@ class Ui_MainWindow(object):
         self.formLayoutStyleMaps.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.comboBoxScaleDirection)
         self.toolBoxStyle.addItem(self.StyleScales, icon3, "")
         self.StyleMarkers = QtWidgets.QWidget()
-        self.StyleMarkers.setGeometry(QtCore.QRect(0, 0, 100, 30))
+        self.StyleMarkers.setGeometry(QtCore.QRect(0, 0, 98, 28))
         self.StyleMarkers.setObjectName("StyleMarkers")
         self.formLayoutWidget_10 = QtWidgets.QWidget(self.StyleMarkers)
         self.formLayoutWidget_10.setGeometry(QtCore.QRect(5, 0, 212, 97))
@@ -2602,7 +2532,7 @@ class Ui_MainWindow(object):
         icon45.addPixmap(QtGui.QPixmap(":/icons/resources/icons/icon-marker-64.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.toolBoxStyle.addItem(self.StyleMarkers, icon45, "")
         self.StyleLines = QtWidgets.QWidget()
-        self.StyleLines.setGeometry(QtCore.QRect(0, 0, 100, 30))
+        self.StyleLines.setGeometry(QtCore.QRect(0, 0, 98, 28))
         self.StyleLines.setObjectName("StyleLines")
         self.formLayoutWidget_2 = QtWidgets.QWidget(self.StyleLines)
         self.formLayoutWidget_2.setGeometry(QtCore.QRect(5, 0, 211, 80))
@@ -2632,7 +2562,7 @@ class Ui_MainWindow(object):
         icon46.addPixmap(QtGui.QPixmap(":/icons/resources/icons/icon-lines-64.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.toolBoxStyle.addItem(self.StyleLines, icon46, "")
         self.StyleColors = QtWidgets.QWidget()
-        self.StyleColors.setGeometry(QtCore.QRect(0, 0, 100, 30))
+        self.StyleColors.setGeometry(QtCore.QRect(0, 0, 98, 28))
         self.StyleColors.setObjectName("StyleColors")
         self.formLayoutWidget_14 = QtWidgets.QWidget(self.StyleColors)
         self.formLayoutWidget_14.setGeometry(QtCore.QRect(5, 0, 212, 259))
@@ -2781,7 +2711,7 @@ class Ui_MainWindow(object):
         self.formLayoutScatter.setWidget(6, QtWidgets.QFormLayout.FieldRole, self.lineEditCbarLabel)
         self.toolBoxStyle.addItem(self.StyleColors, icon6, "")
         self.StyleClusters = QtWidgets.QWidget()
-        self.StyleClusters.setGeometry(QtCore.QRect(0, 0, 100, 30))
+        self.StyleClusters.setGeometry(QtCore.QRect(0, 0, 98, 28))
         self.StyleClusters.setObjectName("StyleClusters")
         self.tableWidgetViewGroups = QtWidgets.QTableWidget(self.StyleClusters)
         self.tableWidgetViewGroups.setGeometry(QtCore.QRect(5, 0, 211, 181))
@@ -2830,13 +2760,8 @@ class Ui_MainWindow(object):
         self.toolButtonPolyDelink_2.setIconSize(QtCore.QSize(24, 24))
         self.toolButtonPolyDelink_2.setObjectName("toolButtonPolyDelink_2")
         self.horizontalLayout_14.addWidget(self.toolButtonPolyDelink_2)
-<<<<<<< Updated upstream
-        spacerItem19 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_14.addItem(spacerItem19)
-=======
-        spacerItem16 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_14.addItem(spacerItem16)
->>>>>>> Stashed changes
+        spacerItem17 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_14.addItem(spacerItem17)
         self.toolButtonGroupMask = QtWidgets.QToolButton(self.horizontalLayoutWidget_10)
         self.toolButtonGroupMask.setMaximumSize(QtCore.QSize(32, 32))
         font = QtGui.QFont()
@@ -3389,6 +3314,7 @@ class Ui_MainWindow(object):
         self.tabWidget = QtWidgets.QTabWidget(self.dockWidgetContents_4)
         self.tabWidget.setGeometry(QtCore.QRect(5, 10, 1111, 226))
         self.tabWidget.setMinimumSize(QtCore.QSize(0, 0))
+        self.tabWidget.setMaximumSize(QtCore.QSize(524287, 524287))
         font = QtGui.QFont()
         font.setPointSize(11)
         self.tabWidget.setFont(font)
@@ -3398,6 +3324,7 @@ class Ui_MainWindow(object):
         self.tabNotes.setObjectName("tabNotes")
         self.textEditNotes = QtWidgets.QTextEdit(self.tabNotes)
         self.textEditNotes.setGeometry(QtCore.QRect(10, 10, 1086, 181))
+        self.textEditNotes.setMaximumSize(QtCore.QSize(524287, 524287))
         self.textEditNotes.viewport().setProperty("cursor", QtGui.QCursor(QtCore.Qt.IBeamCursor))
         self.textEditNotes.setObjectName("textEditNotes")
         self.tabWidget.addTab(self.tabNotes, "")
@@ -3414,7 +3341,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_9.setObjectName("verticalLayout_9")
         self.tableWidgetFilters = QtWidgets.QTableWidget(self.layoutWidget)
         self.tableWidgetFilters.setMinimumSize(QtCore.QSize(0, 0))
-        self.tableWidgetFilters.setMaximumSize(QtCore.QSize(480, 16777215))
+        self.tableWidgetFilters.setMaximumSize(QtCore.QSize(524287, 524287))
         self.tableWidgetFilters.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.tableWidgetFilters.setObjectName("tableWidgetFilters")
         self.tableWidgetFilters.setColumnCount(6)
@@ -3498,8 +3425,8 @@ class Ui_MainWindow(object):
         self.toolButtonFilterSave.setIconSize(QtCore.QSize(24, 24))
         self.toolButtonFilterSave.setObjectName("toolButtonFilterSave")
         self.verticalLayoutFilterTools.addWidget(self.toolButtonFilterSave)
-        spacerItem17 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayoutFilterTools.addItem(spacerItem17)
+        spacerItem18 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.verticalLayoutFilterTools.addItem(spacerItem18)
         self.toolButtonFilterRemove = QtWidgets.QToolButton(self.layoutWidget)
         self.toolButtonFilterRemove.setEnabled(True)
         self.toolButtonFilterRemove.setMinimumSize(QtCore.QSize(32, 32))
@@ -3524,6 +3451,7 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.widgetProfilePlot.sizePolicy().hasHeightForWidth())
         self.widgetProfilePlot.setSizePolicy(sizePolicy)
         self.widgetProfilePlot.setMinimumSize(QtCore.QSize(0, 0))
+        self.widgetProfilePlot.setMaximumSize(QtCore.QSize(524287, 524287))
         self.widgetProfilePlot.setObjectName("widgetProfilePlot")
         self.horizontalLayout_2.addWidget(self.widgetProfilePlot)
         self.verticalLayout_2 = QtWidgets.QVBoxLayout()
@@ -3554,8 +3482,8 @@ class Ui_MainWindow(object):
         self.toolButtonProfileExport.setIconSize(QtCore.QSize(24, 24))
         self.toolButtonProfileExport.setObjectName("toolButtonProfileExport")
         self.verticalLayout_2.addWidget(self.toolButtonProfileExport)
-        spacerItem18 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayout_2.addItem(spacerItem18)
+        spacerItem19 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.verticalLayout_2.addItem(spacerItem19)
         self.toolButtonStyleProfiles = QtWidgets.QToolButton(self.tabProfileView)
         self.toolButtonStyleProfiles.setMinimumSize(QtCore.QSize(32, 32))
         self.toolButtonStyleProfiles.setMaximumSize(QtCore.QSize(32, 32))
@@ -3825,12 +3753,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         self.canvasWindow.setCurrentIndex(0)
-<<<<<<< Updated upstream
-        self.tabWidget.setCurrentIndex(0)
-        self.toolBox.setCurrentIndex(4)
-=======
-        self.toolBox.setCurrentIndex(0)
->>>>>>> Stashed changes
+        self.toolBox.setCurrentIndex(2)
         self.stackedWidget.setCurrentIndex(0)
         self.tabWidgetSpecialFcn.setCurrentIndex(3)
         self.toolBoxTreeView.setCurrentIndex(1)

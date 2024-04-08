@@ -539,7 +539,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #self.comboBoxColorByField.activated.connect(lambda: self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField))
 
         # callback functions
-        self.comboBoxStylePlotType.activated.connect(self.style_plot_type_callback)
+        self.comboBoxPlotType.activated.connect(self.style_plot_type_callback)
         self.toolButtonUpdatePlot.clicked.connect(self.update_current_plot)
         self.toolButtonSaveTheme.clicked.connect(self.input_theme_name_dlg)
         # axes
@@ -3368,7 +3368,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # axes
     # -------------------------------------
     def xlabel_callback(self):
-        plot_type = self.comboBoxStylePlotType.currentText()
+        plot_type = self.comboBoxPlotType.currentText()
         if self.styles[plot_type]['Axes']['XLabel'] == self.lineEditXLabel.text():
             return
 
@@ -3376,7 +3376,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_current_plot(save=False)
 
     def ylabel_callback(self):
-        plot_type = self.comboBoxStylePlotType.currentText()
+        plot_type = self.comboBoxPlotType.currentText()
         if self.styles[plot_type]['Axes']['YLabel'] == self.lineEditYLabel.text():
             return
 
@@ -3384,7 +3384,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_current_plot(save=False)
 
     def zlabel_callback(self):
-        plot_type = self.comboBoxStylePlotType.currentText()
+        plot_type = self.comboBoxPlotType.currentText()
         if self.styles[plot_type]['Axes']['ZLabel'] == self.lineEditZLabel.text():
             return
 
@@ -3392,7 +3392,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_current_plot(save=False)
 
     def xlim_callback(self):
-        plot_type = self.comboBoxStylePlotType.currentText()
+        plot_type = self.comboBoxPlotType.currentText()
         if self.styles[plot_type]['Axes']['XLim'][0] == self.doubleSpinBoxXLB.value() and self.styles[plot_type]['Axes']['XLim'][1] == self.doubleSpinBoxXUB.value():
             return
 
@@ -3400,7 +3400,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_current_plot(save=False)
 
     def ylim_callback(self):
-        plot_type = self.comboBoxStylePlotType.currentText()
+        plot_type = self.comboBoxPlotType.currentText()
         if self.styles[plot_type]['Axes']['YLim'][0] == self.doubleSpinBoxYLB.value() and self.styles[plot_type]['Axes']['YLim'][1] == self.doubleSpinBoxYUB.value():
             return
 
@@ -3408,7 +3408,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_current_plot(save=False)
 
     def aspect_ratio_callback(self):
-        plot_type = self.comboBoxStylePlotType.currentText()
+        plot_type = self.comboBoxPlotType.currentText()
         if self.styles[plot_type]['Axes']['AspectRatio'] == self.lineEditAspectRatio.text():
             return
 
@@ -3416,7 +3416,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_current_plot(save=False)
 
     def tickdir_callback(self):
-        plot_type = self.comboBoxStylePlotType.currentText()
+        plot_type = self.comboBoxPlotType.currentText()
         if self.styles[plot_type]['Axes']['TickDir'] == self.comboBoxTickDirection.currentText():
             return
 

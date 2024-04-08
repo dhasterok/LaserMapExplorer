@@ -212,6 +212,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.styles['gradient map']['Colors']['Colormap'] = 'RdYlBu'
         self.styles['Cluster Score']['Colors']['Colormap'] = 'plasma'
 
+        self.styles['PCA Score']['Colors']['ColorByField'] = 'PCA Score'
+        self.styles['Cluster Score']['Colors']['ColorByField'] = 'Cluster Score'
+
         self.styles['correlation']['Axes']['Aspect Ratio'] = 1.0
         self.styles['scatter']['Axes']['Aspect Ratio'] = 1.62
         self.styles['heatmap']['Axes']['Aspect Ratio'] = 1.62
@@ -3088,14 +3091,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxLineWidth.setEnabled(False)
 
                 # color properties
-                self.comboBoxColorByField.setEnabled(False)
                 self.comboBoxFieldColormap.setEnabled(True)
-                if plot_type == 'cluster map':
+                if plot_type == 'clusters':
+                    self.comboBoxColorByField.setEnabled(False)
+                    self.comboBoxFieldColor.setEnabled(False)
                     self.doubleSpinBoxColorLB.setEnabled(False)
                     self.doubleSpinBoxColorUB.setEnabled(False)
                     self.comboBoxCbarDirection.setEnabled(False)
                     self.lineEditCbarLabel.setEnabled(False)
                 else:
+                    self.comboBoxColorByField.setEnabled(True)
+                    self.comboBoxColorField.setEnabled(True)
                     self.doubleSpinBoxColorLB.setEnabled(True)
                     self.doubleSpinBoxColorUB.setEnabled(True)
                     self.comboBoxCbarDirection.setEnabled(True)
@@ -3300,6 +3306,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # color properties
         self.toolButtonMarkerColor.setStyleSheet("background-color: %s;" % style['Colors']['Color'])
         self.comboBoxColorByField.setCurrentText(style['Colors']['ColorByField'])
+        self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
         self.comboBoxColorField.setCurrentText(style['Colors']['Field'])
         self.comboBoxFieldColormap.setCurrentText(style['Colors']['Colormap'])
         self.doubleSpinBoxColorLB.setValue(style['Colors']['CLim'][0])

@@ -1795,8 +1795,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.data[sample_id]['processed_data']['Y'] = self.data[sample_id]['raw_data']['Y']
 
 
-            # create deep copy of clipped analyte data for analalysis
-            self.analysis_analyte_data = copy.deepcopy(self.clipped_analyte_data)
 
         else:  #if ratio
             ratio_df = self.data[sample_id]['cropped_raw_data'][[analyte_1,analyte_2]] #consider original data for ratio
@@ -3693,6 +3691,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.plot_scatter(save) 
             case 'variance' | 'vectors' | 'PCx vs PCy scatter' | 'PCx vs PCy heatmap' | 'PCA Score':
                 self.plot_pca()
+            case 'Cluster' | 'Cluster Score':
+                self.plot_clustering()
         
     
         # self.styles = {'analyte map': copy.deepcopy(self.default_styles),
@@ -4526,7 +4526,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         pca_dict = {}
 
         df_filtered, analytes = self.get_processed_data()
-
+         
         # Preprocess the data
         scaler = StandardScaler()
         df_scaled = scaler.fit_transform(df_filtered)
@@ -4539,8 +4539,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         pca_dict['results'] = pd.DataFrame(pca_results, columns=[f'PC{i+1}' for i in range(pca.n_components_)])
         pca_dict['explained_variance_ratio'] = pca.explained_variance_ratio_
         pca_dict['components_'] = pca.components_
-
-
+        if self.data[self.sample_id]['computed_data']['PCA Score'].empty:
+            self.data[self.sample_id]['computed_data']['PCA Score']= self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
+        self.data[self.sample_id]['computed_data']['PCA Score'].loc[self.data[self.sample_id]['mask'],pca_dict['results'].columns ] = pca_dict['results'].values
+        print(self.data[self.sample_id]['computed_data']['PCA Score'].head())
         # Determine which PCA plot to create based on the combobox selection
         pca_plot_type = self.comboBoxPlotType.currentText()
 
@@ -4648,16 +4650,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 ax.set_xlabel(f'PC{pc_x}')
                 ax.set_ylabel(f'PC{pc_y}')
                 ax.set_title(f'PCA Plot: PC{pc_x} vs PC{pc_y}')
-            case 'PCA Score':
-                pc_x = int(self.spinBoxPCX.value())
+            case 'pca score':
+                pc_x = int(self.comboBoxColorField.currentIndex()) + 1
+                print(pc_x)
                 pca_df = pca_dict['results']
                 # Assuming pca_df contains scores for the principal components
-                ax.bar(range(len(pca_df)), pca_df[f'PC{pc_x}'])
-                ax.set_xlabel('Sample Index')
-                ax.set_ylabel(f'PC{pc_x} Score')
+                self.plot_clustering_result(ax,pca_df[f'PC{pc_x}'],'PCA')
+                xlbl ='Sample Index'
+                ylbl = f'PC{pc_x} Score'
                 ax.set_title(f'PCA Score Map for PC{pc_x}')
             case _:
                 print(f"Unknown PCA plot type: {pca_plot_type}")
+                return
 
         # labels
         font = {'size':style['Text']['FontSize']}
@@ -4768,7 +4772,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.data[self.sample_id]['computed_data']['Cluster']= self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
             
             # Create labels array filled with -1
-            labels = np.full(filtered_array.shape[0], -1, dtype=int)
+            groups = np.full(filtered_array.shape[0], -1, dtype=int)
             if name == 'Fuzzy':
                 cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(filtered_array.T, n_clusters, exponent, error=0.00001, maxiter=1000,seed =23)
                 # cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(array.T, n_clusters, exponent, error=0.005, maxiter=1000,seed =23)
@@ -4776,28 +4780,28 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.data[self.sample_id]['computed_data']['cluster scores'][n][self.data[self.sample_id]['mask']] = u[n-1,:]
                     if fuzzy_cluster_number>0:
                         #add cluster results to self.data
-                        labels[self.data[self.sample_id]['mask']] = self.data[self.sample_id]['computed_data']['cluster scores'][fuzzy_cluster_number][self.data[self.sample_id]['mask']]
+                        groups[self.data[self.sample_id]['mask']] = self.data[self.sample_id]['computed_data']['cluster scores'][fuzzy_cluster_number][self.data[self.sample_id]['mask']]
                     else:
-                        labels[self.data[self.sample_id]['mask']] = np.argmax(u, axis=0)[self.data[self.sample_id]['mask']]
+                        groups[self.data[self.sample_id]['mask']] = np.argmax(u, axis=0)[self.data[self.sample_id]['mask']]
                         #add cluster results to self.data
-                        self.data[self.sample_id]['computed_data']['Cluster'][name][self.data[self.sample_id]['mask']] = ['Cluster '+str(c) for c in labels]
+                        self.data[self.sample_id]['computed_data']['Cluster'][name][self.data[self.sample_id]['mask']] = ['Cluster '+str(c) for c in groups]
             else:
                 model = clustering.fit(filtered_array)
-                labels[self.data[self.sample_id]['mask']] = model.predict(filtered_array[self.data[self.sample_id]['mask']])
+                groups[self.data[self.sample_id]['mask']] = model.predict(filtered_array[self.data[self.sample_id]['mask']])
                 
                 #add cluster results to self.data
-                self.data[self.sample_id]['computed_data']['Cluster'][name][self.data[self.sample_id]['mask']] = ['Cluster '+str(c) for c in labels]
+                self.data[self.sample_id]['computed_data']['Cluster'][name][self.data[self.sample_id]['mask']] = ['Cluster '+str(c) for c in groups]
             
             
             # Plot each clustering result
-            self.plot_clustering_result(ax, labels, name, fuzzy_cluster_number)
+            self.plot_clustering_result(ax, groups, name, fuzzy_cluster_number)
 
 
         # Create and add the widget to layout
         self.add_clustering_widget_to_layout(fig,plot_name, plot_type)
 
-    def plot_clustering_result(self, ax, labels, method_name, fuzzy_cluster_number):
-        reshaped_array = np.reshape(labels, self.array_size, order=self.order)
+    def plot_clustering_result(self, ax, groups, method_name, fuzzy_cluster_number=None):
+        reshaped_array = np.reshape(groups, self.array_size, order=self.order)
 
         style = self.styles['Clusters']
 
@@ -4807,25 +4811,36 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # aspect_ratio  = 1
         # aspect_ratio = 0.617
         fig = ax.figure
-        if method_name == 'Fuzzy' and fuzzy_cluster_number>0:
+        if method_name == 'Fuzzy' and int(self.comboBoxColorField.currentText())>0:
+            style = self.styles['Cluster Score']
+
             cmap = plt.get_cmap(style['Colors']['Colormap'])
             # img = ax.imshow(reshaped_array.T, cmap=cmap,  aspect=aspect_ratio)
-            img = ax.imshow(reshaped_array, cmap=cmap,  aspect=aspect_ratio)
+            img = ax.imshow(reshaped_array, cmap=cmap,  aspect='equal')
+            fig.colorbar(img, ax=ax, orientation = self.comboBoxCbarDirection.currentText().lower())
+        elif method_name == 'PCA':
+            style = self.styles['PCA Score']
+            
+            cmap = plt.get_cmap(style['Colors']['Colormap'])
+            # img = ax.imshow(reshaped_array.T, cmap=cmap,  aspect=aspect_ratio)
+            img = ax.imshow(reshaped_array, cmap=cmap,  aspect='equal')
             fig.colorbar(img, ax=ax, orientation = self.comboBoxCbarDirection.currentText().lower())
         else:
-            unique_labels = np.unique(['Cluster '+str(c) for c in labels])
-            unique_labels.sort()
-            n_clusters = len(unique_labels)
+            style = self.styles['Cluster']
+
+            unique_groups = np.unique(['Cluster '+str(c) for c in groups])
+            unique_groups.sort()
+            n_clusters = len(unique_groups)
             cmap = plt.get_cmap(style['Colors']['Colormap'], n_clusters)
             # Extract colors from the colormap
             colors = [cmap(i) for i in range(cmap.N)]
             # Assign these colors to self.group_cmap
-            for label, color in zip(unique_labels, colors):
+            for label, color in zip(unique_groups, colors):
                 self.group_cmap[label] = color
 
             boundaries = np.arange(-0.5, n_clusters, 1)
             norm = BoundaryNorm(boundaries, cmap.N, clip=True)
-            img = ax.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect = aspect_ratio)
+            img = ax.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect = 'equal')
             fig.colorbar(img, ax=ax, ticks=np.arange(0, n_clusters), orientation = self.comboBoxCbarDirection.currentText().lower())
 
         fig.subplots_adjust(left=0.05, right=1)  # Adjust these values as needed
@@ -4858,14 +4873,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def update_plot_with_new_colormap(self):
         if self.fig and self.clustering_results:
             for name, results in self.clustering_results.items():
-                labels = results['labels']
+                groups = results['groups']
                 method_name = results['method_name']
                 fuzzy_cluster_number = results['fuzzy_cluster_number']
                 # Find the corresponding axis to update
                 ax_index = list(self.clustering_results.keys()).index(name)
                 ax = self.axs[ax_index]
                 # Redraw the plot with the new colormap on the existing axis
-                self.plot_clustering_result(ax, labels, method_name, fuzzy_cluster_number)
+                self.plot_clustering_result(ax, groups, method_name, fuzzy_cluster_number)
 
             # Redraw the figure canvas to reflect the updates
             self.fig.canvas.draw_idle()
@@ -5549,12 +5564,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # return normalised, filtered data with that will be used for analysis
         use_analytes = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['use']==True), 'analytes'].values
         # Combine the two masks to create a final mask
-        nan_mask = self.processed_analyte_data[self.sample_id][use_analytes].notna().all(axis=1)
+        nan_mask = self.data[self.sample_id]['processed_data'][use_analytes].notna().all(axis=1)
 
         # mask nan values and add to self.data[self.sample_id]['mask']
         self.data[self.sample_id]['mask'] = self.data[self.sample_id]['mask']  & nan_mask[self.data[self.sample_id]['axis_mask']].values
 
-        df_filtered = self.processed_analyte_data[self.sample_id][use_analytes][self.data[self.sample_id]['axis_mask']]
+        df_filtered = self.data[self.sample_id]['processed_data'][use_analytes][self.data[self.sample_id]['mask']]
 
         return df_filtered, use_analytes
 

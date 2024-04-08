@@ -1,10 +1,10 @@
 Plot and Property (Right) Toolbox
-=================================
+*********************************
 
 The *Plot and Property Toolbox* consists of three major tabs: a tree containing saved plots (*Plot Selector*); a styling pane with plot options; and a calculator for creating custom fields.
 
 Plot Selector
--------------
+=============
 
 The *Plot Selector* lists the available plots for display.  The default list includes all analytes and their normalized versions.  Ratios can be added by selecting them from *Analyte Selector*.  All other plots in the list are generated once they have been created and/or explicitly stored.
 
@@ -22,7 +22,7 @@ Styling Pane
 
 The properties in the styling pane control the look and feel of plots generated from functions in the *Control (Right) Toolbox*.  In also controls the type of plot that is generated (e.g., analyte map, scatter plot or heatmap, etc.).  A complete list is given in the table below along with each of the properties that can be changed.  Not all properties are available for each type of plot.
 
-Four controls sit above the styling pages.  The plot selector updates the types of plots available to each of the *Control Toolbox* tabs.  In case the plot does not update, click the |icon-launch| button.  Styles can be customized and saved using the save ( |icon-save| ) button.  These themes can be recalled in future sessions.
+Four controls sit above the styling pages.  The plot selector updates the types of plots available to each of the *Control Toolbox* tabs.  In case the plot does not update, click the |icon-launch| button.  Styles can be customized and saved using the save ( |icon-save| ) button.  Saved themes can be recalled in future sessions.
 
 +----------------+---------------------------+----------------------+-----------------------------------------------+----------+----------+--------------------------------------------------------------------------+--------------------------+------------+
 | tab            | Samples and Fields        | Preprocessing        | Scatter & Heatmap                             | n-Dim               | PCA                                                                      | Clustering               | Propfiling |
@@ -106,22 +106,22 @@ Axes and Labels
 
 The axes and labels are filled initially with default values, but can be edited to update the plot.
 
-.. figure:: _static/screenshots/LaME_Styling_General.png
+.. figure:: _static/screenshots/LaME_Styles_Axes_Labels.png
     :align: center
-    :alt: LaME interface: right toolbox, styling-general tab
+    :alt: LaME interface: right toolbox, styling-axes-and-labels tab
     :width: 232
 
-    The *Styling \> General* contains general settings applied to all plots.
+    The *Styling \> Axes and Labels* contains general settings applied to all plots.
 
 Annotations
 +++++++++++
 
-.. figure:: _static/screenshots/LaME_Styling_Maps.png
+.. figure:: _static/screenshots/LaME_Styling_Annotations.png
     :align: center
-    :alt: LaME interface: right toolbox, styling-maps tab
+    :alt: LaME interface: right toolbox, styling-annotations tab
     :width: 232
 
-    The *Styling \> Maps* contains settings exclusive to maps.
+    The *Styling \> Annotations* contains font type and font size settings.
 
 Scales
 ++++++
@@ -136,11 +136,51 @@ Scales
 Markers
 +++++++
 
+.. figure:: _static/screenshots/LaME_Styling_Markers.png
+    :align: center
+    :alt: LaME interface: right toolbox, Styling-markers tab
+    :width: 232
+
+    The *Styling \> Markers* contains settings for markers used in scatter, ternary, and PCA plots. 
+    
+For other plot types text is greyed out, indicating these settings can not be modified. Symbol options, symbol size, and transperency are modified in this tab. 
+
 Lines
 +++++
 
+.. figure:: _static/screenshots/LaME_Styling_Lines.png
+    :align: center
+    :alt: LaME interface: right toolbox, Styling-lines tab
+    :width: 232
+
+    The *Styling \> Lines* contains settings for line width used in TEC, radar, variance, and PCx plots. 
+
+Line widths range from 0.25 to 6 pt. 
+
 Colors
 ++++++
+
+.. figure:: _static/screenshots/LaME_Styling_Colors.png
+    :align: center
+    :alt: LaME interface: right toolbox, Styling-colors tab
+    :width: 232
+
+    The *Styling |> Colors* contains settings for changing color options.
+
+Use the Color tab to choose and modify the colors applied to plots. The *Colors \> Color* tick box brings up a color picker, the use of which is described below. If the box is left unticked, preset color maps are available under the *Colors \> Colormap* dropdown menu. The *Colors \> Color Limits* setting allows selection of a subset of the color range from a chosen colormap. 
+
+The *Colors \> Cbar* direction allows user to choose horizontal or vertical placement of the Color Bar legend. The *Colors \> Cbar* label allows user to specify legend label.
+
+Color picker
+------------
+.. figure:: _static/screenshots/LaME_Styling_Colors_Colorpicker.png
+    :align: center
+    :alt: LaME interface: right toolbox, styling-colors tab
+    :width: 232
+
+    The *Styling \> Colors \> Color* opens a color picker window
+
+The *Colors \> Color* color picker allows users to pick colors from a color wheel. The color is chosen by positioning the pointer over the desired location on the color wheel. Color intensity can be modified by the greyscale slider located under the color wheel. Colors are added to the available color choices only after the *OK* button is pushed.
 
 Clusters
 ++++++++
@@ -150,7 +190,9 @@ Clusters
     :alt: LaME interface: right toolbox, styling-clustering tab
     :width: 232
 
-    The *Styling \> Clustering* contains settings for scatter plots and heatmaps including correlations.
+    The *Styling \> Clustering* contains options for working with clustered data
+
+Clustering is available if the *Styling \> Colors \> Color by field* is set to *Clusters*. Clustered data can be assigned a name and color. Clusters can be linked ( |icon-link| ) or unlinked ( |icon-unlink| ). A selected cluster or clusters can be used to mask ( |icon-mask-dark| ) or reverse mask ( |icon-mask-light| ) data in a plot or on a map.
 
 Calculator
 ----------

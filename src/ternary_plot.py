@@ -279,6 +279,7 @@ class ternary:
             
         # if self.ax is None:
         #     self.ax = plt.gca()
+        cbar = None
         
         if d is None:
             x, y = self.tern2xy(a, b, c)
@@ -303,7 +304,8 @@ class ternary:
             scalarMappable = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
             scalarMappable.set_array(categories)
             fig = plt.gcf()
-            cbar = fig.colorbar(scalarMappable, ax=self.ax, pad=0, shrink=0.50, orientation = orientation)
+            if orientation.lower() != 'none':
+                cbar = fig.colorbar(scalarMappable, ax=self.ax, pad=0, shrink=0.50, orientation = orientation.lower())
             self.ax.scatter(x, y, c=scalarMappable.to_rgba(categories), s=size, marker=marker, edgecolors=edgecolors, alpha=alpha)
         else:
             group_cmap = cmap
@@ -330,10 +332,10 @@ class ternary:
             
             fig = plt.gcf()
             # Create a colorbar with discrete colors
-            cbar = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap_discrete), ax=self.ax, ticks=(bounds[:-1] + bounds[1:]) / 2, pad=0.1, orientation=orientation)
-            cbar.ax.set_xticklabels(unique_categories)  #
+            if orientation.lower() != 'none':
+                cbar = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap_discrete), ax=self.ax, ticks=(bounds[:-1] + bounds[1:]) / 2, pad=0.1, orientation=orientation.lower())
+                cbar.ax.set_xticklabels(unique_categories)  #
             
-
         return self.ax, cbar
             # # Scatter plot for each category
             # for i, category in enumerate(unique_categories):

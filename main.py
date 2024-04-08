@@ -169,7 +169,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                'Scales': {'Direction': 'none', 'Location': 'northeast', 'OverlayColor': '#ffffff'},
                                'Markers': {'Symbol': 'circle', 'Size': 6, 'Alpha': 30},
                                'Lines': {'LineWidth': 1.5},
-                               'Colors': {'Color': '#1c75bc', 'ColorByField': 'None', 'Field': None, 'Colormap': 'viridis', 'CLimAuto': True, 'CLim':[0,1], 'Direction': 'none', 'CLabel': None, 'Resolution': 10}
+                               'Colors': {'Color': '#1c75bc', 'ColorByField': 'None', 'Field': None, 'Colormap': 'viridis', 'CLimAuto': True, 'CLim':[0,1], 'Direction': None, 'CLabel': None, 'Resolution': 10}
                                }
 
         self.plot_types = {self.sample_tab_id: [0, 'analyte map', 'correlation'],
@@ -3094,7 +3094,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxFieldColormap.setEnabled(True)
                 if plot_type == 'clusters':
                     self.comboBoxColorByField.setEnabled(False)
-                    self.comboBoxFieldColor.setEnabled(False)
+                    self.comboBoxColorField.setEnabled(False)
                     self.doubleSpinBoxColorLB.setEnabled(False)
                     self.doubleSpinBoxColorUB.setEnabled(False)
                     self.comboBoxCbarDirection.setEnabled(False)
@@ -4654,9 +4654,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 pca_df = pca_dict['results']
                 # Assuming pca_df contains scores for the principal components
                 ax.scatter(pca_df[f'PC{pc_x}'], pca_df[f'PC{pc_y}'])
-                ax.set_xlabel(f'PC{pc_x}')
-                ax.set_ylabel(f'PC{pc_y}')
-                ax.set_title(f'PCA Plot: PC{pc_x} vs PC{pc_y}')
+                xlbl = f'PC{pc_x}'
+                ylbl = f'PC{pc_y}'
+                ttxt = f'PCA Plot: PC{pc_x} vs PC{pc_y}'
             case 'pca score':
                 pc_x = int(self.comboBoxColorField.currentIndex()) + 1
                 print(pc_x)
@@ -4665,7 +4665,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.plot_clustering_result(ax,pca_df[f'PC{pc_x}'],'PCA')
                 xlbl ='Sample Index'
                 ylbl = f'PC{pc_x} Score'
-                ax.set_title(f'PCA Score Map for PC{pc_x}')
+                ttxt = f'PCA Score Map for PC{pc_x}'
             case _:
                 print(f"Unknown PCA plot type: {pca_plot_type}")
                 return
@@ -4707,7 +4707,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 ax.set_yticks(range(1, n_variables+1,1), minor=False)
                 ax.set_yticklabels(analytes)
             case 'PCA Score':
-                ax.tick_params(direction='none', labelbottom=False, labeltop=False, labelright=False, labelleft=False)
+                ax.tick_params(direction=None, labelbottom=False, labeltop=False, labelright=False, labelleft=False)
     
 
     # -------------------------------------
@@ -4725,7 +4725,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if exponent == 1:
             exponent = 1.0001
         distance_type = self.comboBoxClusterDistance.currentText()
-        fuzzy_cluster_number = self.comboBoxFieldColor.currentIndex()+1
+        fuzzy_cluster_number = self.comboBoxColorField.currentIndex()+1
 
         if self.comboBoxClusterMethod.currentText() == 'all':
             # clustering_algorithms = {
@@ -4810,11 +4810,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def plot_clustering_result(self, ax, groups, method_name, fuzzy_cluster_number=None):
         reshaped_array = np.reshape(groups, self.array_size, order=self.order)
 
-        style = self.styles['Clusters']
-
         x_range = self.data[self.sample_id]['processed_data']['X'].max() -  self.data[self.sample_id]['processed_data']['X'].min()
         y_range = self.data[self.sample_id]['processed_data']['Y'].max() -  self.data[self.sample_id]['processed_data']['Y'].min()
-        aspect_ratio =  (y_range/self.clipped_analyte_data[self.sample_id]['Y'].nunique())/ (x_range/self.clipped_analyte_data[self.sample_id]['X'].nunique())
+        #aspect_ratio =  (y_range/self.clipped_analyte_data[self.sample_id]['Y'].nunique())/ (x_range/self.clipped_analyte_data[self.sample_id]['X'].nunique())
         # aspect_ratio  = 1
         # aspect_ratio = 0.617
         fig = ax.figure
@@ -4824,14 +4822,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             cmap = plt.get_cmap(style['Colors']['Colormap'])
             # img = ax.imshow(reshaped_array.T, cmap=cmap,  aspect=aspect_ratio)
             img = ax.imshow(reshaped_array, cmap=cmap,  aspect='equal')
-            fig.colorbar(img, ax=ax, orientation = self.comboBoxCbarDirection.currentText().lower())
+            fig.colorbar(img, ax=ax, orientation=style['Colors']['Direction'])
         elif method_name == 'PCA':
             style = self.styles['PCA Score']
             
             cmap = plt.get_cmap(style['Colors']['Colormap'])
             # img = ax.imshow(reshaped_array.T, cmap=cmap,  aspect=aspect_ratio)
             img = ax.imshow(reshaped_array, cmap=cmap,  aspect='equal')
-            fig.colorbar(img, ax=ax, orientation = self.comboBoxCbarDirection.currentText().lower())
+            fig.colorbar(img, ax=ax, orientation=style['Colors']['Direction'])
         else:
             style = self.styles['Cluster']
 
@@ -4848,7 +4846,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             boundaries = np.arange(-0.5, n_clusters, 1)
             norm = BoundaryNorm(boundaries, cmap.N, clip=True)
             img = ax.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect = 'equal')
-            fig.colorbar(img, ax=ax, ticks=np.arange(0, n_clusters), orientation = self.comboBoxCbarDirection.currentText().lower())
+            fig.colorbar(img, ax=ax, ticks=np.arange(0, n_clusters), orientation=style['Colors']['Direction'])
 
         fig.subplots_adjust(left=0.05, right=1)  # Adjust these values as needed
         fig.tight_layout()
@@ -5311,10 +5309,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.comboBoxColorField.setEnabled(True)
             case 'pca score':
                 if self.data[self.sample_id]['computed_data']['PCA Score'].empty:
-                    fieldlist = []
+                    field_list = []
                     self.comboBoxColorField.setEnabled(False)
                 else:
-                    fieldlist = ['PCA Score']
+                    field_list = ['PCA Score']
                     self.comboBoxColorField.setEnabled(True)
             case _:
                 field_list = ['Analyte', 'Analyte (normalized)']

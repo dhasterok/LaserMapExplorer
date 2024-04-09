@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QHBoxLayout, QVBoxLayout, QGridLayout, QMessageBox
-from PyQt5.QtWidgets import QFileDialog, QProgressDialog, QWidget, QTabWidget, QDialog, QLabel, QListWidgetItem, QTableWidget, QInputDialog
+from PyQt5.QtWidgets import QFileDialog, QProgressDialog, QWidget, QTabWidget, QDialog, QLabel, QListWidgetItem, QTableWidget, QInputDialog, QAbstractItemView
 from PyQt5.Qt import QStandardItemModel,QStandardItem
 from pyqtgraph import PlotWidget, ScatterPlotItem, mkPen, AxisItem, PlotDataItem
 from pyqtgraph.Qt import QtWidgets
@@ -466,11 +466,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Connect color point radio button signals to a slot
         self.comboBoxClusterMethod.currentIndexChanged.connect(self.group_changed)
+        
         # Connect the itemChanged signal to a slot
+        self.tableWidgetViewGroups.setSelectionMode(QAbstractItemView.MultiSelection)
         self.tableWidgetViewGroups.itemChanged.connect(self.cluster_label_changed)
 
         self.comboBoxColorField.currentText() == 'none'
-        # self.tableWidgetViewGroups.selectionModel().selectionChanged.connect(self.update_clusters)
+        self.tableWidgetViewGroups.selectionModel().selectionChanged.connect(self.update_clusters)
 
         # Scatter and Ternary Tab
         #-------------------------
@@ -1056,15 +1058,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.profiling.update_table_widget()
 
     def update_clusters(self):
-        selected_clusters = []
-        for idx in self.tableWidgetViewGroups.selectionModel().selectedRows():
-            selected_clusters.append(self.tableWidgetViewGroups.item(idx.row(), 0).text())
-
-        if selected_clusters:
-            self.current_group['clusters'] = selected_clusters
-        else:
-            self.current_group['clusters'] = None
-
+        if not self.isUpdatingTable:
+            selected_clusters = []
+            for idx in self.tableWidgetViewGroups.selectionModel().selectedRows():
+                selected_clusters.append(self.tableWidgetViewGroups.item(idx.row(), 0).text())
+    
+            if selected_clusters:
+                self.current_group['selected_clusters'] = selected_clusters
+            else:
+                self.current_group['selected_clusters'] = None
+            self.update_current_plot()
     def update_color_bar_position(self):
         """Updates the color bar position on a figure
 
@@ -1221,7 +1224,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #crop each df of computed_analyte_data based on self.data[self.sample_id]['axis_mask']
         for analysis_type, df in self.data[sample_id]['computed_data'].items():
             if isinstance(df, pd.DataFrame):
-                df = df[self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
+                self.data[sample_id]['computed_data'][analysis_type] = df[self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
 
         self.data[self.sample_id]['mask'] = self.data[self.sample_id]['mask'][self.data[self.sample_id]['axis_mask']]
         self.data[self.sample_id]['polygon_mask'] = self.data[self.sample_id]['polygon_mask'][self.data[self.sample_id]['axis_mask']]
@@ -3694,6 +3697,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 for sample_id, plots in sample_ids.items():
                     for plot_name, plot in plots.items():
                         info = plot['info']
+                        print(info)
                         if not info['analyte_2']:
                             current_plot_df = self.get_map_data(sample_id=info['sample_id'], field=info['analyte_1'],analysis_type = 'Analyte')
                         else: #if ratio
@@ -4295,8 +4299,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Check if the algorithm is in the current group and if results are available
         if 'algorithm' in self.current_group and self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['Cluster']:
             # Get the cluster labels for the data
-            cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']]
-            clusters = cluster_labels.dropna().unique()
+            
+            cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'].loc[:,self.current_group['algorithm']]
+            clusters = [int(c) for c in self.current_group['selected_clusters']]
 
 
             # Plot histogram for all clusters
@@ -4305,7 +4310,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # Create RGBA color with transparency by directly indexing the colormap
                 # color = self.group_cmap(i)[:-1]  # Create a new RGBA tuple with a
                 color = self.group_cmap[f'Cluster {i}'][:-1] + (0.6,)
-                ax.hist(cluster_data, bins=edges, color=color, edgecolor=None, linewidth=style['Lines']['LineWidth'], label=f'Cluster {i}', alpha=style['Markers']['Alpha']/100)
+                ax.hist(cluster_data, bins=edges, color=color, edgecolor=None, linewidth=style['Lines']['LineWidth'], label=self.current_group['clusters'][i], alpha=style['Markers']['Alpha']/100)
         else:
             # Regular histogram
             ax.hist(array, bins=edges, color=style['Colors']['Color'], edgecolor=None, linewidth=style['Lines']['LineWidth'], label='Data', alpha=style['Markers']['Alpha']/100)
@@ -5144,11 +5149,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             axes_interval = 5
             if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['Cluster']:
                 # Get the cluster labels for the data
-                cluster_labels = self.n_dim_labels(self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']])
+                # cluster_labels = self.n_dim_labels(self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']])
+                cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']]
 
                 df_filtered['clusters'] = cluster_labels
-
-                radar = Radar(df_filtered, fields = self.n_dim_list, quantiles=quantiles, axes_interval = axes_interval, group_field ='clusters', groups = np.unique(cluster_labels.dropna()))
+                clusters = [int(c) for c in self.current_group['selected_clusters']]
+                df_filtered = df_filtered[df_filtered['clusters'].isin(clusters)]
+                radar = Radar(df_filtered, fields = self.n_dim_list, quantiles=quantiles, axes_interval = axes_interval, group_field ='clusters', groups =clusters)
 
                 fig,ax = radar.plot(cmap = self.group_cmap)
                 ax.legend()
@@ -5162,19 +5169,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             yl = [np.inf, -np.inf]
             if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['Cluster']:
                 # Get the cluster labels for the data
-                self.n_dim_labels(cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']])
+                cluster_labels =self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']]
 
                 df_filtered['clusters'] = cluster_labels
-                clusters = np.unique(cluster_labels)
+                clusters = [int(c) for c in self.current_group['selected_clusters']]
 
                 # Plot tec for all clusters
                 for i in clusters:
                     # Create RGBA color
-                    color = self.group_cmap[i][:-1]
+                    color = self.group_cmap[f'Cluster {i}'][:-1]
                     ax,yl_tmp = plot_spider_norm(data = df_filtered.loc[df_filtered['clusters']==i,:],
                             ref_data = self.ref_data, norm_ref_data =  self.ref_data['model'][ref_i],
                             layer = self.ref_data['layer'][ref_i], el_list = self.n_dim_list ,
-                            style = 'Quanta',quantiles = quantiles, ax = ax, c = color, label=f'{i}')
+                            style = 'Quanta',quantiles = quantiles, ax = ax, c = color, label=self.current_group['clusters'][i])
                     #store max y limit to convert the set y limit of axis
                     yl = [np.floor(np.nanmin([yl[0] , yl_tmp[0]])), np.ceil(np.nanmax([yl[1] , yl_tmp[1]]))]
 
@@ -5337,21 +5344,27 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if algorithm in self.data[self.sample_id]['computed_data']['Cluster']:
             if not self.data[self.sample_id]['computed_data']['Cluster'][algorithm].empty:
                 clusters = self.data[self.sample_id]['computed_data']['Cluster'][algorithm].dropna().unique()
-                clusters = [f'Cluster {c}' for c in clusters]
                 clusters.sort()
+                cluster_dict = {}
+                for c in clusters:
+                    cluster_dict[c] = f'Cluster {c}'
+                
                 self.tableWidgetViewGroups.setRowCount(len(clusters))
 
                 for i, c in enumerate(clusters):
                     # item = QTableWidgetItem(str(c))
                     # Initialize the flag
                     self.isUpdatingTable = True
-                    self.tableWidgetViewGroups.setItem(i, 0, QTableWidgetItem(c))
-                    self.tableWidgetViewGroups.item(i, 0).setSelected(True)
-                self.current_group = {'algorithm':algorithm,'clusters': clusters}
+                    self.tableWidgetViewGroups.setItem(i, 0, QTableWidgetItem(str(c)))
+                    self.tableWidgetViewGroups.setItem(i, 1, QTableWidgetItem(cluster_dict[c]))
+                    self.tableWidgetViewGroups.selectRow(i)
+                    
+                
+                self.current_group = {'algorithm':algorithm,'clusters': cluster_dict, 'selected_clusters':clusters}
 
 
         else:
-            self.current_group = {'algorithm':None,'clusters': None}
+            self.current_group = {'algorithm':None,'clusters': None, 'selected_clusters':None}
         self.isUpdatingTable = False
 
     def cluster_label_changed(self, item):
@@ -5359,30 +5372,35 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if not self.isUpdatingTable: #change name only when cluster renamed
             # Get the new name and the row of the changed item
             new_name = item.text()
-            row = item.row()
-            # Extract the cluster id (assuming it's stored in the table)
-            cluster_id = self.current_group['clusters'][row]
 
+            row = item.row()
+
+            # Extract the cluster id (assuming it's stored in the table)
+            cluster_id = int(self.tableWidgetViewGroups.item(row,0).text())
+            
+            
+        
+            old_name = self.current_group['clusters'][cluster_id]
             # Check for duplicate names
             for i in range(self.tableWidgetViewGroups.rowCount()):
-                if i != row and self.tableWidgetViewGroups.item(i, 0).text() == new_name:
+                if i != row and self.tableWidgetViewGroups.item(i, 1).text() == new_name:
                     # Duplicate name found, revert to the original name and show a warning
-                    item.setText(cluster_id)
+                    item.setText(old_name)
                     print("Duplicate name not allowed.")
                     return
 
             # Update self.data[self.sample_id]['computed_data']['Cluster'] with the new name
-            if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['Cluster']:
+            # if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['Cluster']:
                 # Find the rows where the value matches cluster_id
-                rows_to_update = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']] == cluster_id
+                # rows_to_update = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']] == cluster_id
 
                 # Update these rows with the new name
-                self.data[self.sample_id]['computed_data']['Cluster'].loc[rows_to_update, self.current_group['algorithm']] = new_name
-                self.group_cmap[new_name] = self.group_cmap[cluster_id]
-                del self.group_cmap[cluster_id]
-            # Optionally, update current_group to reflect the new cluster name
-            self.current_group['clusters'][row] = new_name
-
+                # self.data[self.sample_id]['computed_data']['Cluster'].loc[rows_to_update, self.current_group['algorithm']] = new_name
+                # self.group_cmap[new_name] = self.group_cmap[cluster_id]
+                # del self.group_cmap[cluster_id]
+            # update current_group to reflect the new cluster name
+            self.current_group['clusters'][cluster_id] = new_name
+            
     def outlier_detection(self, data ,lq=0.0005, uq=99.5, d_lq=9.95 , d_uq=99):
         # Ensure data is a numpy array
         data = np.array(data)

@@ -465,7 +465,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_cluster_ui()
 
         # Connect color point radio button signals to a slot
-        self.comboBoxColorField.currentIndexChanged.connect(self.group_changed)
+        self.comboBoxClusterMethod.currentIndexChanged.connect(self.group_changed)
         # Connect the itemChanged signal to a slot
         self.tableWidgetViewGroups.itemChanged.connect(self.cluster_label_changed)
 
@@ -3817,6 +3817,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     name = 'Fuzzy'
                 if self.update_cluster_flag or self.data[self.sample_id]['computed_data']['Cluster'].empty:
                     self.plot_clustering()
+                    self.group_changed()
                 else:
                     fig = Figure(figsize=(6, 4))
                     ax = fig.add_subplot(111)
@@ -4302,8 +4303,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             for i in clusters:
                 cluster_data = array[cluster_labels == i]
                 # Create RGBA color with transparency by directly indexing the colormap
-                color = self.group_cmap(i)[:-1]  # Create a new RGBA tuple with alpha value
-                #color = self.group_cmap[i][:-1] + (0.6,)
+                # color = self.group_cmap(i)[:-1]  # Create a new RGBA tuple with a
+                color = self.group_cmap[f'Cluster {i}'][:-1] + (0.6,)
                 ax.hist(cluster_data, bins=edges, color=color, edgecolor=None, linewidth=style['Lines']['LineWidth'], label=f'Cluster {i}', alpha=style['Markers']['Alpha']/100)
         else:
             # Regular histogram
@@ -4882,6 +4883,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         n_clusters = self.spinBoxNClusters.value()
         exponent = float(self.horizontalSliderClusterExponent.value()) / 10
+        
         if exponent == 1:
             exponent = 1.0001
         distance_type = self.comboBoxClusterDistance.currentText()
@@ -4945,7 +4947,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 
                 fuzzy_cluster_number = self.comboBoxColorField.currentText()
                 
-                cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(filtered_array[self.data[self.sample_id]['mask']].T, n_clusters, exponent, error=0.00001, maxiter=1000,seed =23)
+                cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(filtered_array.T, n_clusters, exponent, error=0.00001, maxiter=1000,seed =23)
                 # cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(array.T, n_clusters, exponent, error=0.005, maxiter=1000,seed =23)
                 for n in range(n_clusters):
                     self.data[self.sample_id]['computed_data']['Cluster Score'].loc[:,str(n)] = pd.NA
@@ -5325,16 +5327,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.tableWidgetViewGroups.setHorizontalHeaderLabels(['ID','Name','Link','Color'])
         algorithm = ''
         # Check which radio button is checked and update the list widget
-        if self.comboBoxColorField.currentText().lower() == 'none':
+        if self.comboBoxClusterMethod.currentText().lower() == 'none':
             pass  # No clusters to display for 'None'
-        elif self.comboBoxColorField.currentText() == 'fuzzy c-means':
+        elif self.comboBoxClusterMethod.currentText() == 'fuzzy c-means':
             algorithm = 'Fuzzy'
-        elif self.comboBoxColorField.currentText() == 'k-means':
+        elif self.comboBoxClusterMethod.currentText() == 'k-means':
             algorithm = 'KMeans'
 
         if algorithm in self.data[self.sample_id]['computed_data']['Cluster']:
             if not self.data[self.sample_id]['computed_data']['Cluster'][algorithm].empty:
                 clusters = self.data[self.sample_id]['computed_data']['Cluster'][algorithm].dropna().unique()
+                clusters = [f'Cluster {c}' for c in clusters]
                 clusters.sort()
                 self.tableWidgetViewGroups.setRowCount(len(clusters))
 

@@ -4705,7 +4705,7 @@
          <property name="alignment">
           <set>Qt::AlignCenter</set>
          </property>
-         <widget class="QWidget" name="">
+         <widget class="QWidget" name="layoutWidget">
           <property name="geometry">
            <rect>
             <x>10</x>
@@ -6346,15 +6346,15 @@
         <enum>QFrame::Raised</enum>
        </property>
        <property name="currentIndex">
-        <number>3</number>
+        <number>6</number>
        </property>
        <widget class="QWidget" name="StyleAxes">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>219</width>
-          <height>421</height>
+          <width>98</width>
+          <height>28</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6618,8 +6618,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>98</width>
+          <height>28</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6717,8 +6717,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>98</width>
+          <height>28</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7080,8 +7080,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>98</width>
+          <height>28</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7184,8 +7184,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>98</width>
+          <height>28</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7567,8 +7567,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>219</width>
+          <height>421</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7592,6 +7592,9 @@
            <pointsize>11</pointsize>
            <bold>false</bold>
           </font>
+         </property>
+         <property name="selectionBehavior">
+          <enum>QAbstractItemView::SelectRows</enum>
          </property>
          <attribute name="horizontalHeaderDefaultSectionSize">
           <number>53</number>

@@ -1204,6 +1204,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #self.get_map_data(self.sample_id, analyte_1 = analyte_1, analyte_2 = analyte_2, plot_type = plot_type, update = True)
             self.prep_data(sample_id, analyte_1,analyte_2)
             self.update_filter_values()
+            self.update_current_plot()
 
     def apply_crop(self):
         current_plot_df = self.current_plot_df
@@ -1637,7 +1638,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 if checkBox.isChecked():
                     p_id = int(self.tableWidgetPolyPoints.item(row,0).text())
 
-                    polygon_points = self.polygon.polygons[p_id]
+                    polygon_points = self.polygon.polygons[self.sample_id][p_id]
                     polygon_points = [(x,y) for x,y,_ in polygon_points]
 
                     # Convert the list of (x, y) tuples to a list of points acceptable by Path
@@ -3697,7 +3698,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 for sample_id, plots in sample_ids.items():
                     for plot_name, plot in plots.items():
                         info = plot['info']
-                        print(info)
                         if not info['analyte_2']:
                             current_plot_df = self.get_map_data(sample_id=info['sample_id'], field=info['analyte_1'],analysis_type = 'Analyte')
                         else: #if ratio
@@ -4952,24 +4952,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 
                 fuzzy_cluster_number = self.comboBoxColorField.currentText()
                 
-                cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(filtered_array.T, n_clusters, exponent, error=0.00001, maxiter=1000,seed =23)
+                cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(filtered_array[self.data[self.sample_id]['mask']].T, n_clusters, exponent, error=0.00001, maxiter=1000,seed =23)
                 # cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(array.T, n_clusters, exponent, error=0.005, maxiter=1000,seed =23)
                 for n in range(n_clusters):
                     self.data[self.sample_id]['computed_data']['Cluster Score'].loc[:,str(n)] = pd.NA
                     self.data[self.sample_id]['computed_data']['Cluster Score'].loc[self.data[self.sample_id]['mask'],str(n)] = u[n-1,:]
                     if fuzzy_cluster_number:
                         #add cluster results to self.data
-                        groups = self.data[self.sample_id]['computed_data']['cluster scores'].loc[self.data[self.sample_id]['mask'],fuzzy_cluster_number]
+                        groups[self.data[self.sample_id]['mask']] = self.data[self.sample_id]['computed_data']['cluster scores'].loc[self.data[self.sample_id]['mask'],fuzzy_cluster_number]
                     else:
-                        groups = np.argmax(u, axis=0)
+                        groups[self.data[self.sample_id]['mask']] = np.argmax(u, axis=0)
                         #add cluster results to self.data
-                        self.data[self.sample_id]['computed_data']['Cluster'].loc[self.data[self.sample_id]['mask'],name] = groups
+                        self.data[self.sample_id]['computed_data']['Cluster'].loc[self.data[self.sample_id]['mask'],name] = groups[self.data[self.sample_id]['mask']]
             else:
                 model = clustering.fit(filtered_array[self.data[self.sample_id]['mask']])
-                groups = model.predict(filtered_array[self.data[self.sample_id]['mask']])
+                groups[self.data[self.sample_id]['mask']] = model.predict(filtered_array[self.data[self.sample_id]['mask']])
                 
                 #add cluster results to self.data
-                self.data[self.sample_id]['computed_data']['Cluster'].loc[self.data[self.sample_id]['mask'],name] = groups
+                self.data[self.sample_id]['computed_data']['Cluster'].loc[self.data[self.sample_id]['mask'],name] = groups[self.data[self.sample_id]['mask']]
                 
                 
             
@@ -6895,59 +6895,60 @@ class Polygon:
         return min(((px - x1)**2 + (py - y1)**2)**0.5, ((px - x2)**2 + (py - y2)**2)**0.5)
 
     def show_polygon_lines(self, x,y, complete = False):
-        if self.p_id in self.polygons[self.main_window.sample_id]:
-            # Remove existing temporary line(s) if any
-            if self.p_id in self.lines:
-                for line in self.lines[self.p_id]:
-                    self.main_window.plot.removeItem(line)
-            self.lines[self.p_id] = []
-
-            points = self.polygons[self.main_window.sample_id][self.p_id]
-            if len(points) == 1:
-                # Draw line from the first point to cursor
-                line = PlotDataItem([points[0][0], x], [points[0][1], y], pen='r')
-                self.main_window.plot.addItem(line)
-                self.lines[self.p_id].append(line)
-            elif not complete and len(points) > 1:
-
-                if self.main_window.point_selected:
-                    # self.point_index is the index of the pont that needs to be moved
-
-                    # create polygon with moved point
-                    x_points = [p[0] for p in points[:self.point_index]] + [x]+ [p[0] for p in points[(self.point_index+1):]]
-                    y_points = [p[1] for p in points[:self.point_index]] + [y]+ [p[1] for p in points[(self.point_index+1):]]
-
-                else:
-
-                    # create polygon with new point
-                    x_points = [p[0] for p in points] + [x, points[0][0]]
-                    y_points = [p[1] for p in points] + [y, points[0][1]]
-                # Draw shaded polygon + lines to cursor
-                poly_item = QtWidgets.QGraphicsPolygonItem(QtGui.QPolygonF([QtCore.QPointF(x, y) for x, y in zip(x_points, y_points)]))
-                poly_item.setBrush(QtGui.QColor(100, 100, 150, 100))
-                self.main_window.plot.addItem(poly_item)
-                self.lines[self.p_id].append(poly_item)
-
-                # Draw line from last point to cursor
-                # line = PlotDataItem([points[-1][0], x], [points[-1][1], y], pen='r')
-                # self.main_window.plot.addItem(line)
-                # self.lines[self.p_id].append(line)
-
-            elif complete and len(points) > 2:
-                points = [QtCore.QPointF(x, y) for x, y, _ in self.polygons[self.main_window.sample_id][self.p_id]]
-                polygon = QtGui.QPolygonF(points)
-                poly_item = QtWidgets.QGraphicsPolygonItem(polygon)
-                poly_item.setBrush(QtGui.QColor(100, 100, 150, 100))
-                self.main_window.plot.addItem(poly_item)
-                self.lines[self.p_id].append(poly_item)
-
-                self.update_table_widget()
-                # Find the row where the first column matches self.p_id and select it
-                for row in range(self.main_window.tableWidgetPolyPoints.rowCount()):
-                    item = self.main_window.tableWidgetPolyPoints.item(row, 0)  # Assuming the ID is stored in the first column
-                    if item and int(item.text()) == self.p_id:
-                        self.main_window.tableWidgetPolyPoints.selectRow(row)
-                        break
+        if self.main_window.sample_id in self.polygons:
+            if self.p_id in self.polygons[self.main_window.sample_id]:
+                # Remove existing temporary line(s) if any
+                if self.p_id in self.lines:
+                    for line in self.lines[self.p_id]:
+                        self.main_window.plot.removeItem(line)
+                self.lines[self.p_id] = []
+    
+                points = self.polygons[self.main_window.sample_id][self.p_id]
+                if len(points) == 1:
+                    # Draw line from the first point to cursor
+                    line = PlotDataItem([points[0][0], x], [points[0][1], y], pen='r')
+                    self.main_window.plot.addItem(line)
+                    self.lines[self.p_id].append(line)
+                elif not complete and len(points) > 1:
+    
+                    if self.main_window.point_selected:
+                        # self.point_index is the index of the pont that needs to be moved
+    
+                        # create polygon with moved point
+                        x_points = [p[0] for p in points[:self.point_index]] + [x]+ [p[0] for p in points[(self.point_index+1):]]
+                        y_points = [p[1] for p in points[:self.point_index]] + [y]+ [p[1] for p in points[(self.point_index+1):]]
+    
+                    else:
+    
+                        # create polygon with new point
+                        x_points = [p[0] for p in points] + [x, points[0][0]]
+                        y_points = [p[1] for p in points] + [y, points[0][1]]
+                    # Draw shaded polygon + lines to cursor
+                    poly_item = QtWidgets.QGraphicsPolygonItem(QtGui.QPolygonF([QtCore.QPointF(x, y) for x, y in zip(x_points, y_points)]))
+                    poly_item.setBrush(QtGui.QColor(100, 100, 150, 100))
+                    self.main_window.plot.addItem(poly_item)
+                    self.lines[self.p_id].append(poly_item)
+    
+                    # Draw line from last point to cursor
+                    # line = PlotDataItem([points[-1][0], x], [points[-1][1], y], pen='r')
+                    # self.main_window.plot.addItem(line)
+                    # self.lines[self.p_id].append(line)
+    
+                elif complete and len(points) > 2:
+                    points = [QtCore.QPointF(x, y) for x, y, _ in self.polygons[self.main_window.sample_id][self.p_id]]
+                    polygon = QtGui.QPolygonF(points)
+                    poly_item = QtWidgets.QGraphicsPolygonItem(polygon)
+                    poly_item.setBrush(QtGui.QColor(100, 100, 150, 100))
+                    self.main_window.plot.addItem(poly_item)
+                    self.lines[self.p_id].append(poly_item)
+    
+                    self.update_table_widget()
+                    # Find the row where the first column matches self.p_id and select it
+                    for row in range(self.main_window.tableWidgetPolyPoints.rowCount()):
+                        item = self.main_window.tableWidgetPolyPoints.item(row, 0)  # Assuming the ID is stored in the first column
+                        if item and int(item.text()) == self.p_id:
+                            self.main_window.tableWidgetPolyPoints.selectRow(row)
+                            break
 
     def update_table_widget(self):
         if self.main_window.sample_id in self.polygons: #if profiles for that sample if exists

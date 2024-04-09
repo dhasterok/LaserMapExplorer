@@ -169,7 +169,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                'Scales': {'Direction': 'none', 'Location': 'northeast', 'OverlayColor': '#ffffff'},
                                'Markers': {'Symbol': 'circle', 'Size': 6, 'Alpha': 30},
                                'Lines': {'LineWidth': 1.5},
-                               'Colors': {'Color': '#1c75bc', 'ColorByField': 'None', 'Field': None, 'Colormap': 'viridis', 'CLimAuto': True, 'CLim':[0,1], 'Direction': 'none', 'CLabel': None, 'Resolution': 10}
+                               'Colors': {'Color': '#1c75bc', 'ColorByField': 'None', 'Field': None, 'Colormap': 'viridis', 'CLimAuto': True, 'CLim':[0,1], 'Direction': None, 'CLabel': None, 'Resolution': 10}
                                }
 
         self.plot_types = {self.sample_tab_id: [0, 'analyte map', 'correlation'],
@@ -3437,17 +3437,31 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # text
     # -------------------------------------
     def font_callback(self):
-        self.styles[self.comboBoxPlotType.currentText()]['Text']['Font'] = self.fontComboBox.currentText()
+        plot_type = self.comboBoxPlotType.currentText()
+        if self.styles[plot_type]['Text']['Font'] == self.fontComboBox.currentText():
+            return
+
+        self.styles[plot_type]['Text']['Font'] = self.fontComboBox.currentText()
+        self.update_current_plot(save=False)
+
 
     def font_size_callback(self):
-        self.styles[self.comboBoxPlotType.currentText()]['Text']['FontSize'] = self.doubleSpinBoxFontSize.value()
+        plot_type = self.comboBoxPlotType.currentText()
+        if self.styles[plot_type]['Text']['FontSize'] == self.doubleSpinBoxFontSize.value():
+            return
+            
+        self.styles[plot_type]['Text']['FontSize'] = self.doubleSpinBoxFontSize.value()
+        self.update_current_plot(save=False)
 
     # scales
     # -------------------------------------
     def scale_direction_callback(self):
+        plot_type = self.comboBoxPlotType.currentText()
         direction = self.comboBoxScaleDirection.currentText()
-        self.styles[self.comboBoxPlotType.currentText()]['Scales']['Direction'] = direction
+        if self.styles[plot_type]['Scales']['Direction'] == direction:
+            return
 
+        self.styles[plot_type]['Scales']['Direction'] = direction
         if direction == 'none':
             self.labelScaleLocation.setEnabled(False)
             self.comboBoxScaleLocation.setEnabled(False)
@@ -3455,23 +3469,34 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.labelScaleLocation.setEnabled(True)
             self.comboBoxScaleLocation.setEnabled(True)
 
+        self.update_current_plot(save=False)
+
     def scale_location_callback(self):
-        self.styles[self.comboBoxPlotType.currentText()]['Scale']['Location'] = self.comboBoxScaleLocation.currentText()
+        plot_type = self.comboBoxPlotType.currentText()
+
+        if self.styles[plot_type]['Scale']['Location'] == self.comboBoxScaleLocation.currentText():
+            return
+
+        self.styles[plot_type]['Scale']['Location'] = self.comboBoxScaleLocation.currentText()
+        self.update_current_plot(save=False)
     
     def overlay_color_callback(self):
         """Updates color of overlay markers
         
         Uses ``QColorDialog`` to select new marker color and then updates plot on change of backround ``MainWindow.toolButtonOverlayColor`` color.
         """
-        if self.toolButtonOverlayColor.isEnabled():
-            # change color
-            self.button_color_select(self.toolButtonOverlayColor)
-            # update style
-            self.styles[self.comboBoxPlotType.currentText()]['Scale']['OverlayColor'] = self.get_hex_color(self.toolButtonOverlayColor.palette().button().color())
-            # update plot
-            self.update_current_plot(save=False)
-        else:
-            self.styles[self.comboBoxPlotType.currentText()]['Scale']['OverlayColor'] = self.get_hex_color(self.toolButtonOverlayColor.palette().button().color())
+        plot_type = self.comboBoxPlotType.currentText()
+        # change color
+        self.button_color_select(self.toolButtonOverlayColor)
+
+        color = self.get_hex_color(self.toolButtonOverlayColor.palette().button().color())
+        # update style
+        if self.styles[plot_type]['Scale']['OverlayColor'] == color:
+            return
+
+        self.styles[plot_type]['Scale']['OverlayColor'] = color
+        # update plot
+        self.update_current_plot(save=False)
 
     # markers
     # -------------------------------------
@@ -3480,28 +3505,35 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
         Updates marker symbols on current plot on change of ``MainWindow.comboBoxMarker.currentText()``.
         """
-        self.styles[self.comboBoxPlotType.currentText()]['Markers']['Symbol'] = self.comboBoxMarker.currentText()
-        if self.comboBoxMarker.isEnabled():
-            self.update_current_plot(save=False)
+        plot_type = self.comboBoxPlotType.currentText()
+        if self.styles[plot_type]['Markers']['Symbol'] == self.comboBoxMarker.currentText():
+            return
+        self.styles[plot_type]['Markers']['Symbol'] = self.comboBoxMarker.currentText()
+
+        self.update_current_plot(save=False)
 
     def marker_size_callback(self):
         """Updates marker size
 
         Updates marker size on current plot on change of ``MainWindow.doubleSpinBoxMarkerSize.value()``.
         """
-        self.styles[self.comboBoxPlotType.currentText()]['Markers']['Size'] = self.doubleSpinBoxMarkerSize.value()
-        if self.doubleSpinBoxMarkerSize.isEnabled():
-            self.update_current_plot(save=False)
+        plot_type = self.comboBoxPlotType.currentText()
+        if self.styles[plot_type]['Markers']['Size'] == self.doubleSpinBoxMarkerSize.value():
+            return
+        self.styles[plot_type]['Markers']['Size'] = self.doubleSpinBoxMarkerSize.value()
+
+        self.update_current_plot(save=False)
 
     def slider_alpha_changed(self):
         """Updates transparency on scatter plots.
 
         Executes on change of ``MainWindow.horizontalSliderMarkerAlpha.value()``.
         """
+        plot_type = self.comboBoxPlotType.currentText()
         self.labelMarkerAlpha.setText(str(self.horizontalSliderMarkerAlpha.value()))
 
         if self.horizontalSliderMarkerAlpha.isEnabled():
-            self.styles[self.comboBoxPlotType.currentText()]['Markers']['Alpha'] = float(self.horizontalSliderMarkerAlpha.value())
+            self.styles[plot_type]['Markers']['Alpha'] = float(self.horizontalSliderMarkerAlpha.value())
             self.update_current_plot(save=False)
 
     # lines
@@ -3510,9 +3542,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """Updates line width
         
         Updates line width on current plot on change of ``MainWindow.comboBoxLineWidth.currentText()."""
-        self.styles[self.comboBoxPlotType.currentText()]['Lines']['LineWidth'] = float(self.comboBoxLineWidth.currentText())
-        if self.comboBoxLineWidth.isEnabled():
-            self.update_current_plot(save=False)
+        plot_type = self.comboBoxPlotType.currentText()
+        if self.styles[plot_type]['Lines']['LineWidth'] == float(self.comboBoxLineWidth.currentText()):
+            return
+
+        self.styles[plot_type]['Lines']['LineWidth'] = float(self.comboBoxLineWidth.currentText())
+        self.update_current_plot(save=False)
 
     # colors
     # -------------------------------------
@@ -3521,55 +3556,129 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
         Uses ``QColorDialog`` to select new marker color and then updates plot on change of backround ``MainWindow.toolButtonMarkerColor`` color.
         """
-        if self.toolButtonMarkerColor.isEnabled():
-            # change color
-            self.button_color_select(self.toolButtonMarkerColor)
-            # update style
-            self.styles[self.comboBoxPlotType.currentText()]['Colors']['Color'] = self.get_hex_color(self.toolButtonMarkerColor.palette().button().color())
-            # update plot
-            self.update_current_plot(save=False)
-        else:
-            self.styles[self.comboBoxPlotType.currentText()]['Colors']['Color'] = self.get_hex_color(self.toolButtonMarkerColor.palette().button().color())
+        plot_type = self.comboBoxPlotType.currentText()
+        # change color
+        self.button_color_select(self.toolButtonMarkerColor)
+        color = self.get_hex_color(self.toolButtonMarkerColor.palette().button().color())
+        if self.styles[plot_type]['Colors']['Color'] == color:
+            return
+
+        # update style
+        self.styles[plot_type]['Colors']['Color'] = color
+
+        # update plot
+        self.update_current_plot(save=False)
 
     # updates scatter styles when ColorByField comboBox is changed
     def color_by_field_callback(self):
         # write a general version to fill two related comboboxes
         plot_type = self.comboBoxPlotType.currentText()
+        if self.styles[plot_type]['Colors']['ColorByField'] == self.comboBoxColorByField.currentText():
+            return
+        
+        self.styles[plot_type]['Colors']['ColorByField'] = self.comboBoxColorByField.currentText()
+
         itemlist = []
         if self.comboBoxPlotType.isEnabled() == False | self.comboBoxColorByField.isEnabled() == False:
+            self.comboBoxColorField.setEnabled(False)
+            self.labelColorField.setEnabled(False)
+            self.doubleSpinBoxColorLB.setEnabled(False)
+            self.doubleSpinBoxColorUB.setEnabled(False)
+            self.labelColorBounds.setEnabled(False)
+            self.comboBoxFieldColormap.setEnabled(False)
+            self.labelFieldColormap.setEnabled(False)
+            self.comboBoxCbarDirection.setEnabled(False)
+            self.labelCbarDirection.setEnabled(False)
+            self.lineEditCbarLabel.setEnabled(False)
+            self.labelCbarLabel.setEnabled(False)
             return
         
         if self.comboBoxColorByField.currentText() == 'None':
             self.comboBoxColorField.setEnabled(False)
-            pass
+            self.labelColorField.setEnabled(False)
+            self.doubleSpinBoxColorLB.setEnabled(False)
+            self.doubleSpinBoxColorUB.setEnabled(False)
+            self.labelColorBounds.setEnabled(False)
+            self.comboBoxFieldColormap.setEnabled(False)
+            self.labelFieldColormap.setEnabled(False)
+            self.comboBoxCbarDirection.setEnabled(False)
+            self.labelCbarDirection.setEnabled(False)
+            self.lineEditCbarLabel.setEnabled(False)
+            self.labelCbarLabel.setEnabled(False) 
         else:
             self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
             if self.comboBoxColorByField.currentText() in ['Clusters']:
                 self.comboBoxColorField.setEnabled(False)
+                self.labelColorField.setEnabled(False)
+                self.doubleSpinBoxColorLB.setEnabled(False)
+                self.doubleSpinBoxColorUB.setEnabled(False)
+                self.labelColorBounds.setEnabled(False)
+                self.comboBoxFieldColormap.setEnabled(False)
+                self.labelFieldColormap.setEnabled(False)
+                self.comboBoxCbarDirection.setEnabled(False)
+                self.labelCbarDirection.setEnabled(False)
+                self.lineEditCbarLabel.setEnabled(False)
+                self.labelCbarLabel.setEnabled(False)
             else:
                 self.comboBoxColorField.setEnabled(True)
+                self.labelColorField.setEnabled(True)
+                self.doubleSpinBoxColorLB.setEnabled(True)
+                self.doubleSpinBoxColorUB.setEnabled(True)
+                self.labelColorBounds.setEnabled(True)
+                self.comboBoxFieldColormap.setEnabled(True)
+                self.labelFieldColormap.setEnabled(True)
+                self.comboBoxCbarDirection.setEnabled(True)
+                self.labelCbarDirection.setEnabled(True)
+                self.lineEditCbarLabel.setEnabled(True)
+                self.labelCbarLabel.setEnabled(True)
 
-        self.update_current_plot(save=False)
+        # only run update current plot if color field is selected or the color by field is clusters
+        if self.comboBoxColorByField.currentText() == 'None' or self.comboBoxColorField.currentText() != '' or self.comboBoxColorByField.currentText() in ['Clusters']:
+            self.update_current_plot(save=False)
         
     def color_field_callback(self):
-        self.styles[self.comboBoxPlotType.currentText()]['Colors']['Field'] = self.comboBoxColorField.currentText()
-        if self.comboBoxColorField.isEnabled():
+        plot_type = self.comboBoxPlotType.currentText()
+        if self.styles[plot_type]['Colors']['Field'] == self.comboBoxColorField.currentText():
+            return
+        self.styles[plot_type]['Colors']['Field'] = self.comboBoxColorField.currentText()
+
+        if self.comboBoxColorField.isEnabled() and self.comboBoxColorField.currentText() != '' and self.comboBoxColorByField.currentText() != 'None':
             self.lineEditCbarLabel.setText('')
             self.update_current_plot(save=False)
 
     def field_colormap_callback(self):
+        plot_type = self.comboBoxPlotType.currentText()
+        if self.styles[plot_type]['Colors']['Colormap'] == self.comboBoxFieldColormap.currentText():
+            return
+
         self.styles[self.comboBoxPlotType.currentText()]['Colors']['Colormap'] = self.comboBoxFieldColormap.currentText()
 
+        self.update_current_plot(save=False)
+
     def clim_callback(self):
-        self.styles[self.comboBoxPlotType.currentText()]['Colors']['CLim'] = [self.doubleSpinBoxColorLB.value(), self.doubleSpinBoxColorUB.value()]
+        plot_type = self.comboBoxPlotType.currentText()
+        if self.styles[plot_type]['Colors']['CLim'][0] == self.doubleSpinBoxColorLB.value() and self.styles[plot_type]['Colors']['CLim'][1] == self.doubleSpinBoxColorUB.value():
+            return
+
+        self.styles[plot_type]['Colors']['CLim'] = [self.doubleSpinBoxColorLB.value(), self.doubleSpinBoxColorUB.value()]
+
+        self.update_current_plot(save=False)
 
     def cbar_direction_callback(self):
-        self.styles[self.comboBoxPlotType.currentText()]['Colors']['Direction'] = self.comboBoxCbarDirection.currentText()
+        plot_type = self.comboBoxPlotType.currentText()
+        if self.styles[plot_type]['Colors']['Direction'] == self.comboBoxCbarDirection.currentText():
+            return
+        self.styles[plot_type]['Colors']['Direction'] = self.comboBoxCbarDirection.currentText()
+
         if self.comboBoxCbarDirection.isEnabled():
             self.update_current_plot(save=False)
 
     def cbar_label_callback(self):
-        self.styles[self.comboBoxPlotType.currentText()]['Colors']['CLabel'] = self.lineEditCbarLabel.text()
+        plot_type = self.comboBoxPlotType.currentText()
+        if self.styles[plot_type]['Colors']['CLabel'] == self.lineEditCbarLabel.text():
+            return
+        self.styles[plot_type]['Colors']['CLabel'] = self.lineEditCbarLabel.text()
+
         if self.comboBoxCbarLabel.isEnabled():
             self.update_current_plot(save=False)
 
@@ -3695,6 +3804,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 else: #Not a ratio
                     self.create_plot(current_plot_df, sample_id, plot_type = 'histogram', analyte_1=self.comboBoxHistogramField.currentText(), plot=True)
             case 'scatter' | 'heatmap':
+                if self.comboBoxFieldX.currentText() == self.comboBoxFieldY.currentText():
+                    return
                 self.plot_scatter(save) 
             case 'variance' | 'vectors' | 'PCx vs PCy scatter' | 'PCx vs PCy heatmap' | 'PCA Score':
                 self.plot_pca()
@@ -4547,7 +4658,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         pca_dict['explained_variance_ratio'] = pca.explained_variance_ratio_
         pca_dict['components_'] = pca.components_
         if self.data[self.sample_id]['computed_data']['PCA Score'].empty:
-            self.data[self.sample_id]['computed_data']['PCA Score']= self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
+            self.data[self.sample_id]['computed_data']['PCA Score'] = self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
         self.data[self.sample_id]['computed_data']['PCA Score'].loc[self.data[self.sample_id]['mask'],pca_dict['results'].columns ] = pca_dict['results'].values
         print(self.data[self.sample_id]['computed_data']['PCA Score'].head())
         # Determine which PCA plot to create based on the combobox selection
@@ -4654,9 +4765,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 pca_df = pca_dict['results']
                 # Assuming pca_df contains scores for the principal components
                 ax.scatter(pca_df[f'PC{pc_x}'], pca_df[f'PC{pc_y}'])
-                ax.set_xlabel(f'PC{pc_x}')
-                ax.set_ylabel(f'PC{pc_y}')
-                ax.set_title(f'PCA Plot: PC{pc_x} vs PC{pc_y}')
+                xlbl = f'PC{pc_x}'
+                ylbl = f'PC{pc_y}'
+                ttxt = f'PCA Plot: PC{pc_x} vs PC{pc_y}'
             case 'pca score':
                 pc_x = int(self.comboBoxColorField.currentIndex()) + 1
                 print(pc_x)
@@ -4665,7 +4776,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.plot_clustering_result(ax,pca_df[f'PC{pc_x}'],'PCA')
                 xlbl ='Sample Index'
                 ylbl = f'PC{pc_x} Score'
-                ax.set_title(f'PCA Score Map for PC{pc_x}')
+                ttxt = f'PCA Score Map for PC{pc_x}'
             case _:
                 print(f"Unknown PCA plot type: {pca_plot_type}")
                 return
@@ -4707,7 +4818,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 ax.set_yticks(range(1, n_variables+1,1), minor=False)
                 ax.set_yticklabels(analytes)
             case 'PCA Score':
-                ax.tick_params(direction='none', labelbottom=False, labeltop=False, labelright=False, labelleft=False)
+                ax.tick_params(direction=None, labelbottom=False, labeltop=False, labelright=False, labelleft=False)
     
 
     # -------------------------------------
@@ -4810,29 +4921,29 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def plot_clustering_result(self, ax, groups, method_name, fuzzy_cluster_number=None):
         reshaped_array = np.reshape(groups, self.array_size, order=self.order)
 
-        style = self.styles['Clusters']
-
         x_range = self.data[self.sample_id]['processed_data']['X'].max() -  self.data[self.sample_id]['processed_data']['X'].min()
         y_range = self.data[self.sample_id]['processed_data']['Y'].max() -  self.data[self.sample_id]['processed_data']['Y'].min()
-        aspect_ratio =  (y_range/self.clipped_analyte_data[self.sample_id]['Y'].nunique())/ (x_range/self.clipped_analyte_data[self.sample_id]['X'].nunique())
         # aspect_ratio  = 1
         # aspect_ratio = 0.617
         fig = ax.figure
         if method_name == 'Fuzzy' and int(self.comboBoxColorField.currentText())>0:
+            aspect_ratio = (y_range/self.clipped_analyte_data[self.sample_id]['Y'].nunique())/ (x_range/self.clipped_analyte_data[self.sample_id]['X'].nunique())
             style = self.styles['Cluster Score']
 
             cmap = plt.get_cmap(style['Colors']['Colormap'])
             # img = ax.imshow(reshaped_array.T, cmap=cmap,  aspect=aspect_ratio)
             img = ax.imshow(reshaped_array, cmap=cmap,  aspect='equal')
-            fig.colorbar(img, ax=ax, orientation = self.comboBoxCbarDirection.currentText().lower())
+            fig.colorbar(img, ax=ax, orientation=style['Colors']['Direction'])
         elif method_name == 'PCA':
+            aspect_ratio = (y_range/self.data[self.sample_id]['computed_data']['PCA Score']['Y'].nunique())/ (x_range/self.data[self.sample_id]['computed_data']['PCA Score']['X'].nunique())
             style = self.styles['PCA Score']
             
             cmap = plt.get_cmap(style['Colors']['Colormap'])
             # img = ax.imshow(reshaped_array.T, cmap=cmap,  aspect=aspect_ratio)
-            img = ax.imshow(reshaped_array, cmap=cmap,  aspect='equal')
-            fig.colorbar(img, ax=ax, orientation = self.comboBoxCbarDirection.currentText().lower())
+            img = ax.imshow(reshaped_array, cmap=cmap,  aspect=aspect_ratio)
+            fig.colorbar(img, ax=ax, orientation=style['Colors']['Direction'])
         else:
+            aspect_ratio = (y_range/self.clipped_analyte_data[self.sample_id]['Y'].nunique())/ (x_range/self.clipped_analyte_data[self.sample_id]['X'].nunique())
             style = self.styles['Cluster']
 
             unique_groups = np.unique(['Cluster '+str(c) for c in groups])
@@ -4848,7 +4959,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             boundaries = np.arange(-0.5, n_clusters, 1)
             norm = BoundaryNorm(boundaries, cmap.N, clip=True)
             img = ax.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect = 'equal')
-            fig.colorbar(img, ax=ax, ticks=np.arange(0, n_clusters), orientation = self.comboBoxCbarDirection.currentText().lower())
+            fig.colorbar(img, ax=ax, ticks=np.arange(0, n_clusters), orientation=style['Colors']['Direction'])
 
         fig.subplots_adjust(left=0.05, right=1)  # Adjust these values as needed
         fig.tight_layout()
@@ -4936,6 +5047,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------
     # TEC and Radar plots
     # -------------------------------------
+    def n_dim_labels(self, labels):
+        """Removes mass from labels
+
+        Removes mass if ``MainWindow.checkBoxShowMass.isChecked()`` is False
+        
+        :param labels: input labels
+        :type labels: str
+
+        :return: output labels with or without mass
+        :rtype: list
+        """
+        if not self.checkBoxShowMass.isChecked():
+            labels = [re.sub(r'\d', '', col) for col in labels]
+
+        return labels
+
     def plot_n_dim(self):
         """Produces trace element compatibility (TEC) and Radar plots"""
         df_filtered, _  = self.get_processed_data()
@@ -4961,8 +5088,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             axes_interval = 5
             if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['Cluster']:
                 # Get the cluster labels for the data
+                cluster_labels = n_dim_labels(self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']])
 
-                cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']]
                 df_filtered['clusters'] = cluster_labels
 
                 radar = Radar(df_filtered, fields = self.n_dim_list, quantiles=quantiles, axes_interval = axes_interval, group_field ='clusters', groups = np.unique(cluster_labels.dropna()))
@@ -4979,7 +5106,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             yl = [np.inf, -np.inf]
             if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['Cluster']:
                 # Get the cluster labels for the data
-                cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']]
+                n_dim_labels(cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']])
+
                 df_filtered['clusters'] = cluster_labels
                 clusters = np.unique(cluster_labels)
 
@@ -4998,7 +5126,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.logax(ax, yl, 'y')
                 ax.set_ylim(yl)
             else:
-                ax,yl = plot_spider_norm(data = df_filtered, ref_data = self.ref_data, norm_ref_data =  self.ref_data['model'][ref_i], layer = self.ref_data['layer'][ref_i], el_list = self.n_dim_list ,style = 'Quanta', ax = ax)
+                ax,yl = plot_spider_norm(data=df_filtered, ref_data=self.ref_data, norm_ref_data=self.ref_data['model'][ref_i], layer=self.ref_data['layer'][ref_i], el_list=self.n_dim_list, style='Quanta', ax=ax)
+                if self.checkBoxShowMass.isChecked():
+                    angle = 45
+                else:
+                    angle = 0
+                ax.set_xticklabels(self.n_dim_labels(self.n_dim_list), rotation=angle)
             ax.set_ylabel('Abundance / ['+self.ref_data['model'][ref_i]+', '+self.ref_data['layer'][ref_i]+']')
             fig.tight_layout()
         widgetNDim = QtWidgets.QWidget()
@@ -5039,10 +5172,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.data[self.sample_id]['filter_info'].at[row, 'use'] = state == QtCore.Qt.Checked
 
         if calling_widget == 'analyteAdd':
-            el_list = [self.comboBoxNDimanalyte.currentText().lower()]
-            self.comboBoxNDimanalyteset.setCurrentText = 'user defined'
+            el_list = [self.comboBoxNDimAnalyte.currentText().lower()]
+            self.comboBoxNDimAnalyteSet.setCurrentText = 'user defined'
         elif calling_widget == 'analytesetAdd':
-            analyte_set = self.comboBoxNDimanalyteset.currentText().lower()
+            analyte_set = self.comboBoxNDimAnalyteSet.currentText().lower()
 
             ####
             #### This needs to be set up more generic so that a user defined sets can be added to the list
@@ -5311,10 +5444,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.comboBoxColorField.setEnabled(True)
             case 'pca score':
                 if self.data[self.sample_id]['computed_data']['PCA Score'].empty:
-                    fieldlist = []
+                    field_list = []
                     self.comboBoxColorField.setEnabled(False)
                 else:
-                    fieldlist = ['PCA Score']
+                    field_list = ['PCA Score']
                     self.comboBoxColorField.setEnabled(True)
             case _:
                 field_list = ['Analyte', 'Analyte (normalized)']

@@ -1293,15 +1293,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             if plot_type=='histogram':
                 if reset:
-                    bins  = self.default_bins
+                    n_bins  = self.default_bins
                 # If bin_width is not specified, calculate it
                 if bin_s:
-                    bin_width = data_range / bins
+                    bin_width = data_range / n_bins
                     self.spinBoxBinWidth.setValue(int(np.floor(bin_width)))
                 else:
                     bin_width = self.spinBoxBinWidth.value()
-                    bins = int(np.floor(data_range / bin_width))
-                    self.spinBoxNBins.setValue(bins)
+
                 self.plot_histogram(self.current_plot_df,self.current_plot_information, bin_width )
             else:
                 self.plot_laser_map(self.current_plot_df, self.current_plot_information)
@@ -2638,8 +2637,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.noise_red_img.setRect(0, 0, self.x_range, self.y_range)
 
         # Optionally, set a color map
-        self.comboBoxPlotType.currentText('analyte map')
-        cm = pg.colormap.get(self.style['analyte map']['Colors']['Colormap'], source='matplotlib')
+        self.comboBoxPlotType.setCurrentText('analyte map')
+        cm = pg.colormap.get(self.styles['analyte map']['Colors']['Colormap'], source='matplotlib')
         self.noise_red_img.setColorMap(cm)
 
         # Add the image item to the plot
@@ -4202,15 +4201,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def plot_histogram(self, current_plot_df, plot_information, bin_width):
         """Displays histogram for current selected analyte.
 
-        Parameter
-        ---------
-
-        current_plot_df: pandas.DataFrame
-            current active plot
-        plot_information: dict
-            dictionary with information about plot widget
-        bin_width: double
-            width of histogram bins
+        :param current_plot_df: current active plot
+        :type current_plot_df: pandas.DataFrame
+        :param plot_information: dictionary with information about plot widget
+        :type plot_information: dict
+        :param bin_width: width of histogram bins
+        :param bin_width: double
         """
         plot_name = plot_information['plot_name']
         sample_id = plot_information['sample_id']
@@ -4661,6 +4657,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.data[self.sample_id]['computed_data']['PCA Score'] = self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
         self.data[self.sample_id]['computed_data']['PCA Score'].loc[self.data[self.sample_id]['mask'],pca_dict['results'].columns ] = pca_dict['results'].values
         print(self.data[self.sample_id]['computed_data']['PCA Score'].head())
+
+        # update principal component spinBoxes
+        self.spinBoxPCX.setMinimum(int(1))
+        self.spinBoxPCX.setMaximum(int(len(df_filtered)))
+        if self.spinBoxPCX.value() == 0:
+            self.spinBoxPCX.setValue(int(1))
+        self.spinBoxPCY.setMinimum(int(1))
+        self.spinBoxPCY.setMaximum(int(len(df_filtered)))
+        if self.spinBoxPCY.value() == 0:
+            self.spinBoxPCY.setValue(int(2))
+
         # Determine which PCA plot to create based on the combobox selection
         pca_plot_type = self.comboBoxPlotType.currentText()
 
@@ -4764,7 +4771,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 pc_y = int(self.spinBoxPCY.value())
                 pca_df = pca_dict['results']
                 # Assuming pca_df contains scores for the principal components
-                ax.scatter(pca_df[f'PC{pc_x}'], pca_df[f'PC{pc_y}'])
+                #ax.scatter(pca_df[f'PC{pc_x}'], pca_df[f'PC{pc_y}'])
+                fig = ax.get_figure()
+                x, y, _, c = self.get_scatter_values()
+                #x = {'label': 'fPC{pc_x}', 'type': 'pca', 'field': pc_x, 'array': pca_df[f'PC{pc_x}']}
+                #y = {'label': 'fPC{pc_y}', 'type': 'pca', 'field': pc_y, 'array': pca_df[f'PC{pc_y}']}
+                #c = {'label': '', 'type': '', 'field': '', 'array': []}
+
+                c
+
+                self.biplot(fig, x, y, c, style, save=False)
+
                 xlbl = f'PC{pc_x}'
                 ylbl = f'PC{pc_y}'
                 ttxt = f'PCA Plot: PC{pc_x} vs PC{pc_y}'
@@ -5262,6 +5279,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
     def group_changed(self):
+        if self.sample_id == '':
+            return
+
         # Clear the list widget
         self.tableWidgetViewGroups.clear()
         self.tableWidgetViewGroups.setHorizontalHeaderLabels(['Groups'])
@@ -5530,6 +5550,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :return: set_fields, a list of fields within the input set
         :rtype: list
         """
+        if self.sample_id == '':
+            return ['']
+
         match set_name:
             case 'Analyte' | 'Analyte (normalized)':
                 set_fields = self.data[self.sample_id]['analyte_info'].loc[self.data[self.sample_id]['analyte_info']['use']== True,'analytes'].values.tolist()
@@ -5627,8 +5650,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case 'Ratio':
                 current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].loc[:,field].values
 
-            case 'pca':
-                current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].values
+            case 'PCA Score':
+                current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].loc[:,field].values
 
             case 'Cluster':
                 current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].values
@@ -5660,14 +5683,30 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'z': {'field': None, 'type': None, 'label': None, 'array': None},
             'c': {'field': None, 'type': None, 'label': None, 'array': None}
         }
-        value_dict['x']['field'] = self.comboBoxFieldX.currentText()
-        value_dict['x']['type'] = self.comboBoxFieldTypeX.currentText()
-        value_dict['y']['field'] = self.comboBoxFieldY.currentText()
-        value_dict['y']['type'] = self.comboBoxFieldTypeY.currentText()
-        value_dict['z']['field'] = self.comboBoxFieldZ.currentText()
-        value_dict['z']['type'] = self.comboBoxFieldTypeZ.currentText()
-        value_dict['c']['field'] = self.comboBoxColorField.currentText()
-        value_dict['c']['type'] = self.comboBoxColorByField.currentText()
+
+        match self.comboBoxPlotType.currentText():
+            case 'scatter' | 'heatmap' | 'ternary map':
+                value_dict['x']['field'] = self.comboBoxFieldX.currentText()
+                value_dict['x']['type'] = self.comboBoxFieldTypeX.currentText()
+                value_dict['y']['field'] = self.comboBoxFieldY.currentText()
+                value_dict['y']['type'] = self.comboBoxFieldTypeY.currentText()
+                value_dict['z']['field'] = self.comboBoxFieldZ.currentText()
+                value_dict['z']['type'] = self.comboBoxFieldTypeZ.currentText()
+                value_dict['c']['field'] = self.comboBoxColorField.currentText()
+                value_dict['c']['type'] = self.comboBoxColorByField.currentText()
+            case 'PCx vs. PCy scatter' | 'PCx vs. PCy heatmap':
+                value_dict['x']['field'] = f'PC{self.spinBoxPCX.value()}'
+                value_dict['x']['type'] = 'PCA Score'
+                value_dict['y']['field'] = f'PC{self.spinBoxPCY.value()}'
+                value_dict['y']['type'] = 'PCA Score'
+
+                value_dict['z']['field'] = ''
+                value_dict['z']['type'] = ''
+                value_dict['c']['field'] = self.comboBoxColorField.currentText()
+                value_dict['c']['type'] = self.comboBoxColorByField.currentText()
+            case _:
+                print('get_scatter_values(): Not defined for ' + self.comboBoxPlotType.currentText())
+                return
 
         for k, v in value_dict.items():
             if v['type'] == 'Analyte' and v['field']:
@@ -5677,14 +5716,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 #analyte_1, analyte_2 = v['field'].split('/')
                 df = self.get_map_data(self.sample_id, field=v['field'], analysis_type=v['type'])
                 v['label'] = v['field']
-            elif v['type'] == 'pca':
-                #df = self.get_map_data(self.sample_id, v['field'], plot_type=None, plot=False)
+            elif v['type'] == 'PCA Score':
+                print(v)
+                df = self.get_map_data(self.sample_id, v['field'], analysis_type=v['type'])
                 v['label'] = v['field']
             elif v['type'] == 'Cluster':
-                #df = self.get_map_data(self.sample_id, v['field'], plot_type=None, plot=False)
+                df = self.get_map_data(self.sample_id, v['field'], analysis_type='Cluster')
                 v['label'] = v['field']
             elif v['type'] == 'Cluster Score':
-                #df = self.get_map_data(self.sample_id, v['field'], plot_type=None, plot=False)
+                df = self.get_map_data(self.sample_id, v['field'], analysis_type='Cluster Score')
                 v['label'] = v['field']
             elif v['type'] == 'Special':
                 return

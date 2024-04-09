@@ -996,7 +996,7 @@
       <string>Activates the crop tool</string>
      </property>
      <property name="currentIndex">
-      <number>5</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="SelectAnalytePage">
       <property name="enabled">
@@ -1006,8 +1006,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>98</width>
-        <height>28</height>
+        <width>300</width>
+        <height>531</height>
        </rect>
       </property>
       <attribute name="label">
@@ -1356,8 +1356,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>98</width>
-        <height>28</height>
+        <width>300</width>
+        <height>531</height>
        </rect>
       </property>
       <attribute name="label">
@@ -2065,8 +2065,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>98</width>
-        <height>28</height>
+        <width>300</width>
+        <height>531</height>
        </rect>
       </property>
       <attribute name="label">
@@ -2388,8 +2388,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>98</width>
-        <height>28</height>
+        <width>300</width>
+        <height>531</height>
        </rect>
       </property>
       <attribute name="label">
@@ -2500,6 +2500,12 @@
          </item>
          <item row="1" column="0">
           <widget class="QComboBox" name="comboBoxFilterField">
+           <property name="maximumSize">
+            <size>
+             <width>110</width>
+             <height>16777215</height>
+            </size>
+           </property>
            <property name="toolTip">
             <string>Select field for filtering</string>
            </property>
@@ -2507,6 +2513,12 @@
          </item>
          <item row="0" column="0">
           <widget class="QComboBox" name="comboBoxFilterFieldType">
+           <property name="maximumSize">
+            <size>
+             <width>110</width>
+             <height>16777215</height>
+            </size>
+           </property>
            <property name="toolTip">
             <string>Choose a field type for filtering</string>
            </property>
@@ -4456,8 +4468,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>98</width>
-        <height>28</height>
+        <width>300</width>
+        <height>531</height>
        </rect>
       </property>
       <attribute name="label">
@@ -4667,8 +4679,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>98</width>
-        <height>28</height>
+        <width>300</width>
+        <height>531</height>
        </rect>
       </property>
       <attribute name="label">
@@ -4687,7 +4699,7 @@
         <string>Open profile style options</string>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="pageClustering">
         <widget class="QGroupBox" name="groupBoxClustering">
@@ -5208,8 +5220,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>98</width>
-        <height>28</height>
+        <width>300</width>
+        <height>531</height>
        </rect>
       </property>
       <attribute name="label">
@@ -5863,8 +5875,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>98</width>
-        <height>28</height>
+        <width>300</width>
+        <height>531</height>
        </rect>
       </property>
       <attribute name="label">
@@ -6370,8 +6382,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>98</width>
-        <height>28</height>
+        <width>221</width>
+        <height>755</height>
        </rect>
       </property>
       <attribute name="icon">
@@ -6413,8 +6425,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>219</width>
+          <height>421</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6678,8 +6690,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6777,8 +6789,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6931,8 +6943,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7140,8 +7152,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7244,8 +7256,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7627,8 +7639,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7979,8 +7991,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>98</width>
-        <height>28</height>
+        <width>221</width>
+        <height>755</height>
        </rect>
       </property>
       <attribute name="icon">

@@ -3094,7 +3094,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxFieldColormap.setEnabled(True)
                 if plot_type == 'clusters':
                     self.comboBoxColorByField.setEnabled(False)
-                    self.comboBoxFieldColor.setEnabled(False)
+                    self.comboBoxColorField.setEnabled(False)
                     self.doubleSpinBoxColorLB.setEnabled(False)
                     self.doubleSpinBoxColorUB.setEnabled(False)
                     self.comboBoxCbarDirection.setEnabled(False)
@@ -4725,7 +4725,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if exponent == 1:
             exponent = 1.0001
         distance_type = self.comboBoxClusterDistance.currentText()
-        fuzzy_cluster_number = self.comboBoxFieldColor.currentIndex()+1
+        fuzzy_cluster_number = self.comboBoxColorField.currentIndex()+1
 
         if self.comboBoxClusterMethod.currentText() == 'all':
             # clustering_algorithms = {
@@ -4775,7 +4775,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             ax = fig.add_subplot(subplot_num)
             
             # add x y from raw data if empty dataframe
-            if self.data[self.ample_id]['computed_data']['Cluster'].empty:
+            if self.data[self.sample_id]['computed_data']['Cluster'].empty:
                 self.data[self.sample_id]['computed_data']['Cluster']= self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
             
             # Create labels array filled with -1

@@ -4925,10 +4925,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             ax = fig.add_subplot(subplot_num)
             
             # add x y from raw data if empty dataframe
+            if name =='Fuzzy' and self.data[self.sample_id]['computed_data']['Cluster Score'].empty:
+                self.data[self.sample_id]['computed_data']['Cluster Score']= self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
             if self.data[self.sample_id]['computed_data']['Cluster'].empty:
                 self.data[self.sample_id]['computed_data']['Cluster'].loc[:,['X','Y']]= self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
                 
-                self.data[self.sample_id]['computed_data']['Cluster Score']= self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
+                
 
             
             # Create labels array filled with -1
@@ -4949,13 +4951,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     else:
                         groups[self.data[self.sample_id]['mask']] = np.argmax(u, axis=0)[self.data[self.sample_id]['mask']]
                         #add cluster results to self.data
-                        self.data[self.sample_id]['computed_data']['Cluster'][name][self.data[self.sample_id]['mask']] = ['Cluster '+str(c) for c in groups]
+                        self.data[self.sample_id]['computed_data']['Cluster'][name][self.data[self.sample_id]['mask']] = groups[self.data[self.sample_id]['mask']]
             else:
                 model = clustering.fit(filtered_array)
                 groups[self.data[self.sample_id]['mask']] = model.predict(filtered_array[self.data[self.sample_id]['mask']])
                 
                 #add cluster results to self.data
-                self.data[self.sample_id]['computed_data']['Cluster'][name][self.data[self.sample_id]['mask']] = ['Cluster '+str(c) for c in groups]
+                self.data[self.sample_id]['computed_data']['Cluster'][name][self.data[self.sample_id]['mask']] = groups[self.data[self.sample_id]['mask']]
             
             
             # Plot each clustering result
@@ -4975,7 +4977,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         fig = ax.figure
         
         
-        if method_name == 'Fuzzy' and self.comboBoxColorField.currentText():
+        if self.comboBoxPlotType.currentText() == 'Cluster Score':
             aspect_ratio = (y_range/self.data[self.sample_id]['computed_data']['Cluster Score']['Y'].nunique())/ (x_range/self.data[self.sample_id]['computed_data']['Cluster Score']['X'].nunique())
             style = self.styles['Cluster Score']
 

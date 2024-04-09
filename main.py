@@ -113,7 +113,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_spinboxes_bool = False
         self.check_analysis = True
         self.update_bins = True
-
+        self.update_cluster_flag = True
+        
         # set locations of doc widgets
         self.setCorner(0x00002,0x1) # sets left toolbox to bottom left corner
         self.setCorner(0x00003,0x2) # sets right toolbox to bottom right corner
@@ -1290,15 +1291,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             if plot_type=='histogram':
                 if reset:
-                    bins  = self.default_bins
+                    n_bins  = self.default_bins
                 # If bin_width is not specified, calculate it
                 if bin_s:
-                    bin_width = data_range / bins
+                    bin_width = data_range / n_bins
                     self.spinBoxBinWidth.setValue(int(np.floor(bin_width)))
                 else:
                     bin_width = self.spinBoxBinWidth.value()
-                    bins = int(np.floor(data_range / bin_width))
-                    self.spinBoxNBins.setValue(bins)
+
                 self.plot_histogram(self.current_plot_df,self.current_plot_information, bin_width )
             else:
                 self.plot_laser_map(self.current_plot_df, self.current_plot_information)
@@ -2630,8 +2630,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.noise_red_img.setRect(0, 0, self.x_range, self.y_range)
 
         # Optionally, set a color map
-        self.comboBoxPlotType.currentText('analyte map')
-        cm = pg.colormap.get(self.style['analyte map']['Colors']['Colormap'], source='matplotlib')
+        self.comboBoxPlotType.setCurrentText('analyte map')
+        cm = pg.colormap.get(self.styles['analyte map']['Colors']['Colormap'], source='matplotlib')
         self.noise_red_img.setColorMap(cm)
 
         # Add the image item to the plot
@@ -3801,8 +3801,35 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case 'variance' | 'vectors' | 'PCx vs. PCy scatter' | 'PCx vs. PCy heatmap' | 'PCA Score':
                 self.plot_pca()
             case 'Cluster' | 'Cluster Score':
-                self.plot_clustering()
-        
+                
+                
+                if self.comboBoxClusterMethod.currentText() == 'k-means':
+                    name = 'KMeans'
+                elif self.comboBoxClusterMethod.currentText() == 'fuzzy c-means':
+                    name = 'Fuzzy'
+                if self.update_cluster_flag or self.data[self.sample_id]['computed_data']['Cluster'].empty:
+                    self.plot_clustering()
+                else:
+                    fig = Figure(figsize=(6, 4))
+                    ax = fig.add_subplot(111)
+                    if plot_type =='Cluster':
+                        groups = self.data[self.sample_id]['computed_data']['Cluster'][name]
+                        plot_information = {
+                            'plot_name': name,
+                            'sample_id': self.sample_id,
+                            'plot_type': plot_type,
+                            'style': self.styles['Cluster']
+                        }
+                    else:
+                        groups = self.data[self.sample_id]['computed_data']['Cluster Score'][field]
+                        plot_information = {
+                            'plot_name': f'Fuzzy{field}' ,
+                            'sample_id': self.sample_id,
+                            'plot_type': plot_type,
+                            'style': self.styles['Cluster']
+                        }
+                    self.plot_clustering_result(ax, groups.values, name)
+                    self.newplot(fig, plot_information['plot_name'], plot_information, save)
     
         # self.styles = {'analyte map': copy.deepcopy(self.default_styles),
         #                 'correlation': copy.deepcopy(self.default_styles),
@@ -4195,15 +4222,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def plot_histogram(self, current_plot_df, plot_information, bin_width):
         """Displays histogram for current selected analyte.
 
-        Parameter
-        ---------
-
-        current_plot_df: pandas.DataFrame
-            current active plot
-        plot_information: dict
-            dictionary with information about plot widget
-        bin_width: double
-            width of histogram bins
+        :param current_plot_df: current active plot
+        :type current_plot_df: pandas.DataFrame
+        :param plot_information: dictionary with information about plot widget
+        :type plot_information: dict
+        :param bin_width: width of histogram bins
+        :param bin_width: double
         """
         plot_name = plot_information['plot_name']
         sample_id = plot_information['sample_id']
@@ -4656,7 +4680,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.spinBoxPCY.setMinimum(1)
             self.spinBoxPCX.setMaximum(pca.n_components_+1)
             self.spinBoxPCY.setMaximum(pca.n_components_+1)
-        
+            if self.spinBoxPCY.value() == 1:
+                self.spinBoxPCY.setValue(int(2))
         
         # Convert PCA results to DataFrame for easier plotting
         pca_dict['results'] = pd.DataFrame(pca_results, columns=[f'PC{i+1}' for i in range(pca.n_components_)])
@@ -4676,44 +4701,46 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         plot_exist = plot_name in self.plot_widget_dict[plot_type][sample_id]
         duplicate = plot_exist and len(self.plot_widget_dict[plot_type][sample_id][plot_name]['view']) == 1 and self.plot_widget_dict[plot_type][sample_id][plot_name]['view'][0] != self.canvasWindow.currentIndex()
 
-        if plot_exist and not duplicate:
-            widgetPCA = self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'][0]
-            figure_canvas = widgetPCA.findChild(FigureCanvas)
-            figure_canvas.figure.clear()
-            ax = figure_canvas.figure.subplots()
-            self.update_pca_plot(pca_dict, pca_plot_type, ax)
-            figure_canvas.draw()
-        else:
-            figure = Figure()
-            ax = figure.add_subplot(111)
-            self.update_pca_plot(pca_dict, pca_plot_type, ax)
-            widgetPCA = QtWidgets.QWidget()
-            widgetPCA.setLayout(QtWidgets.QVBoxLayout())
-            figure_canvas = FigureCanvas(figure)
-            toolbar = NavigationToolbar(figure_canvas, widgetPCA)
-            toolbar.hide()
-            #widgetPCA.layout().addWidget(toolbar)
-            widgetPCA.layout().addWidget(figure_canvas)
-            view = self.canvasWindow.currentIndex()
-
-            plot_information = {
-                'plot_name': plot_name,
-                'sample_id': self.sample_id,
-                'plot_type': plot_type,
-                'style': self.styles[pca_plot_type]
-            }
-
-            if duplicate:
-                self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'].append(widgetPCA)
-                self.plot_widget_dict[plot_type][sample_id][plot_name]['view'].append(view)
+        if pca_plot_type.lower() not in ['pcx vs. pcy scatter', 'pcx vs. pcy heatmap']:
+            if plot_exist and not duplicate:
+                widgetPCA = self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'][0]
+                figure_canvas = widgetPCA.findChild(FigureCanvas)
+                figure_canvas.figure.clear()
+                ax = figure_canvas.figure.subplots()
+                self.update_pca_plot(pca_dict, pca_plot_type, ax)
+                figure_canvas.draw()
             else:
-                self.plot_widget_dict[plot_type][sample_id][plot_name] = {'widget': [widgetPCA], 'info': plot_information, 'view': [view]}
-
-            # Additional steps to add the PCA widget to the appropriate container in the UI
-            self.add_plot(plot_information)
-            self.update_tree(plot_information['plot_name'], data = plot_information, tree = 'PCA')
-
-    def update_pca_plot(self, pca_dict, pca_plot_type, ax):
+                figure = Figure()
+                ax = figure.add_subplot(111)
+                self.update_pca_plot(pca_dict, pca_plot_type, ax)
+                widgetPCA = QtWidgets.QWidget()
+                widgetPCA.setLayout(QtWidgets.QVBoxLayout())
+                figure_canvas = FigureCanvas(figure)
+                toolbar = NavigationToolbar(figure_canvas, widgetPCA)
+                toolbar.hide()
+                #widgetPCA.layout().addWidget(toolbar)
+                widgetPCA.layout().addWidget(figure_canvas)
+                view = self.canvasWindow.currentIndex()
+    
+                plot_information = {
+                    'plot_name': plot_name,
+                    'sample_id': self.sample_id,
+                    'plot_type': plot_type,
+                    'style': self.styles[pca_plot_type]
+                }
+    
+                if duplicate:
+                    self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'].append(widgetPCA)
+                    self.plot_widget_dict[plot_type][sample_id][plot_name]['view'].append(view)
+                else:
+                    self.plot_widget_dict[plot_type][sample_id][plot_name] = {'widget': [widgetPCA], 'info': plot_information, 'view': [view]}
+    
+                # Additional steps to add the PCA widget to the appropriate container in the UI
+                self.add_plot(plot_information)
+                self.update_tree(plot_information['plot_name'], data = plot_information, tree = 'PCA')
+        else:
+            self.update_pca_plot(pca_dict, pca_plot_type)
+    def update_pca_plot(self, pca_dict, pca_plot_type, ax=None):
 
         style = self.styles[pca_plot_type]
 
@@ -4770,9 +4797,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 pc_y = int(self.spinBoxPCY.value())
                 pca_df = pca_dict['results']
                 # Assuming pca_df contains scores for the principal components
-                
                 # uncomment to use plot scatter instead of ax.scatter
-                fig = ax.get_figure()
                 self.plot_scatter()
                 return
                 # ax.scatter(pca_df[f'PC{pc_x}'], pca_df[f'PC{pc_y}'])
@@ -4780,6 +4805,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # ylbl = f'PC{pc_y}'
                 # ttxt = f'PCA Plot: PC{pc_x} vs PC{pc_y}'
             
+
             case 'pca score':
                 pc_x = int(self.comboBoxColorField.currentIndex()) + 1
                 pca_df = pca_dict['results']
@@ -4848,7 +4874,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if exponent == 1:
             exponent = 1.0001
         distance_type = self.comboBoxClusterDistance.currentText()
-        fuzzy_cluster_number = self.comboBoxColorField.currentIndex()+1
+
 
         if self.comboBoxClusterMethod.currentText() == 'all':
             # clustering_algorithms = {
@@ -4872,9 +4898,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             }
 
 
-        self.process_clustering_methods( n_clusters, exponent, distance_type,fuzzy_cluster_number,  filtered_array,clustering_algorithms )
-
-    def process_clustering_methods(self, n_clusters, exponent, distance_type, fuzzy_cluster_number, filtered_array, clustering_algorithms):
+        self.process_clustering_methods( n_clusters, exponent, distance_type,  filtered_array,clustering_algorithms )
+        self.update_cluster_flag = False
+        
+    def process_clustering_methods(self, n_clusters, exponent, distance_type, filtered_array, clustering_algorithms):
         #create unique id if new plot
         plot_type = 'clustering'
         if self.sample_id in self.plot_id[plot_type]:
@@ -4901,18 +4928,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if self.data[self.sample_id]['computed_data']['Cluster'].empty:
                 self.data[self.sample_id]['computed_data']['Cluster'].loc[:,['X','Y']]= self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
                 
-                self.data[self.sample_id]['computed_data']['Cluster Score'].loc[:,['X','Y']]= self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
+                self.data[self.sample_id]['computed_data']['Cluster Score']= self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
+
             
             # Create labels array filled with -1
             groups = np.full(filtered_array.shape[0], -1, dtype=int)
             if name == 'Fuzzy':
+                
+                
+                fuzzy_cluster_number = self.comboBoxColorField.currentText()
+                
                 cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(filtered_array.T, n_clusters, exponent, error=0.00001, maxiter=1000,seed =23)
                 # cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(array.T, n_clusters, exponent, error=0.005, maxiter=1000,seed =23)
                 for n in range(n_clusters):
-                    self.data[self.sample_id]['computed_data']['Cluster Score'][n][self.data[self.sample_id]['mask']] = u[n-1,:]
-                    if fuzzy_cluster_number>0:
+                    self.data[self.sample_id]['computed_data']['Cluster Score'].loc[:,str(n)] = pd.NA
+                    self.data[self.sample_id]['computed_data']['Cluster Score'].loc[self.data[self.sample_id]['mask'],str(n)] = u[n-1,:]
+                    if fuzzy_cluster_number:
                         #add cluster results to self.data
-                        groups[self.data[self.sample_id]['mask']] = self.data[self.sample_id]['computed_data']['cluster scores'][fuzzy_cluster_number][self.data[self.sample_id]['mask']]
+                        groups[self.data[self.sample_id]['mask']] = self.data[self.sample_id]['computed_data']['cluster scores'][int(fuzzy_cluster_number)][self.data[self.sample_id]['mask']]
                     else:
                         groups[self.data[self.sample_id]['mask']] = np.argmax(u, axis=0)[self.data[self.sample_id]['mask']]
                         #add cluster results to self.data
@@ -4926,13 +4959,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             
             
             # Plot each clustering result
-            self.plot_clustering_result(ax, groups, name, fuzzy_cluster_number)
+            self.plot_clustering_result(ax, groups, name)
 
 
         # Create and add the widget to layout
         self.add_clustering_widget_to_layout(fig,plot_name, plot_type)
 
-    def plot_clustering_result(self, ax, groups, method_name, fuzzy_cluster_number=None):
+    def plot_clustering_result(self, ax, groups, method_name):
         reshaped_array = np.reshape(groups, self.array_size, order=self.order)
         
         x_range = self.data[self.sample_id]['processed_data']['X'].max() -  self.data[self.sample_id]['processed_data']['X'].min()
@@ -4940,12 +4973,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # aspect_ratio  = 1
         # aspect_ratio = 0.617
         fig = ax.figure
-        if method_name == 'Fuzzy' and int(self.comboBoxColorField.currentText())>0:
-            aspect_ratio = (y_range/self.data[self.sample_id]['computed_data']['Cluster Score']['Y'].nunique())/ (x_range/self.data[self.sample_id]['computed_data']['Cluster']['X'].nunique())
+        
+        
+        if method_name == 'Fuzzy' and self.comboBoxColorField.currentText():
+            aspect_ratio = (y_range/self.data[self.sample_id]['computed_data']['Cluster Score']['Y'].nunique())/ (x_range/self.data[self.sample_id]['computed_data']['Cluster Score']['X'].nunique())
             style = self.styles['Cluster Score']
 
             cmap = plt.get_cmap(style['Colors']['Colormap'])
-            img = ax.imshow(reshaped_array.T, cmap=cmap,  aspect=aspect_ratio)
+            img = ax.imshow(reshaped_array, cmap=cmap,  aspect=aspect_ratio)
             # img = ax.imshow(reshaped_array, cmap=cmap,  aspect='equal')
             fig.colorbar(img, ax=ax, orientation=style['Colors']['Direction'])
         elif method_name == 'PCA':
@@ -4953,7 +4988,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             style = self.styles['PCA Score']
             
             cmap = plt.get_cmap(style['Colors']['Colormap'])
-            img = ax.imshow(reshaped_array.T, cmap=cmap,  aspect=aspect_ratio)
+            img = ax.imshow(reshaped_array, cmap=cmap,  aspect=aspect_ratio)
             # img = ax.imshow(reshaped_array, cmap=cmap,  aspect=aspect_ratio)
             fig.colorbar(img, ax=ax, orientation=style['Colors']['Direction'])
         else:
@@ -5277,6 +5312,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
     def group_changed(self):
+        if self.sample_id == '':
+            return
+
         # Clear the list widget
         self.tableWidgetViewGroups.clear()
         self.tableWidgetViewGroups.setHorizontalHeaderLabels(['Groups'])
@@ -5543,6 +5581,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :return: set_fields, a list of fields within the input set
         :rtype: list
         """
+        if self.sample_id == '':
+            return ['']
+
         match set_name:
             case 'Analyte' | 'Analyte (normalized)':
                 set_fields = self.data[self.sample_id]['analyte_info'].loc[self.data[self.sample_id]['analyte_info']['use']== True,'analytes'].values.tolist()
@@ -5643,18 +5684,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].loc[:,field].values
 
             case 'PCA Score':
-                current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].values
+
+                current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].loc[:,field].values
 
             case 'Cluster':
-                current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].values
+                current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].loc[:,field].values
 
             case 'Cluster Score':
-                current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].values
+                current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].loc[:,field].values
 
             case 'Special':
-                current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].values
+                current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].loc[:,field].values
             case 'computed':
-                current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].values
+                current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].loc[:,field].values
 
         # crop plot if filter applied
         # current_plot_df = current_plot_df[self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
@@ -5675,24 +5717,30 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'z': {'field': None, 'type': None, 'label': None, 'array': None},
             'c': {'field': None, 'type': None, 'label': None, 'array': None}
         }
-        
-        if plot_type =='pcx vs. pcy scatter' or plot_type == 'pcx vs. pcy heatmap':
-            value_dict['x']['field'] = 'PC'+str(self.spinBoxPCX.value())
-            value_dict['x']['type'] = 'PCA Score'
-            value_dict['y']['field'] = 'PC'+str(self.spinBoxPCY.value())
-            value_dict['y']['type'] = 'PCA Score'
-            value_dict['c']['field'] = self.comboBoxColorField.currentText()
-            value_dict['c']['type'] = self.comboBoxColorByField.currentText()
-        else:
-                    
-            value_dict['x']['field'] = self.comboBoxFieldX.currentText()
-            value_dict['x']['type'] = self.comboBoxFieldTypeX.currentText()
-            value_dict['y']['field'] = self.comboBoxFieldY.currentText()
-            value_dict['y']['type'] = self.comboBoxFieldTypeY.currentText()
-            value_dict['z']['field'] = self.comboBoxFieldZ.currentText()
-            value_dict['z']['type'] = self.comboBoxFieldTypeZ.currentText()
-            value_dict['c']['field'] = self.comboBoxColorField.currentText()
-            value_dict['c']['type'] = self.comboBoxColorByField.currentText()
+
+        match plot_type:
+            case 'scatter' | 'heatmap' | 'ternary map':
+                value_dict['x']['field'] = self.comboBoxFieldX.currentText()
+                value_dict['x']['type'] = self.comboBoxFieldTypeX.currentText()
+                value_dict['y']['field'] = self.comboBoxFieldY.currentText()
+                value_dict['y']['type'] = self.comboBoxFieldTypeY.currentText()
+                value_dict['z']['field'] = self.comboBoxFieldZ.currentText()
+                value_dict['z']['type'] = self.comboBoxFieldTypeZ.currentText()
+                value_dict['c']['field'] = self.comboBoxColorField.currentText()
+                value_dict['c']['type'] = self.comboBoxColorByField.currentText()
+            case 'PCx vs. PCy scatter' | 'PCx vs. PCy heatmap':
+                value_dict['x']['field'] = f'PC{self.spinBoxPCX.value()}'
+                value_dict['x']['type'] = 'PCA Score'
+                value_dict['y']['field'] = f'PC{self.spinBoxPCY.value()}'
+                value_dict['y']['type'] = 'PCA Score'
+
+                value_dict['z']['field'] = ''
+                value_dict['z']['type'] = ''
+                value_dict['c']['field'] = self.comboBoxColorField.currentText()
+                value_dict['c']['type'] = self.comboBoxColorByField.currentText()
+            case _:
+                print('get_scatter_values(): Not defined for ' + self.comboBoxPlotType.currentText())
+                return
 
         for k, v in value_dict.items():
             if v['type'] == 'Analyte' and v['field']:
@@ -5704,12 +5752,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 v['label'] = v['field']
             elif v['type'] == 'PCA Score':
                 df = self.get_map_data(self.sample_id, field=v['field'], analysis_type=v['type'])
+
                 v['label'] = v['field']
             elif v['type'] == 'Cluster':
-                #df = self.get_map_data(self.sample_id, v['field'], plot_type=None, plot=False)
+                df = self.get_map_data(self.sample_id, v['field'], analysis_type='Cluster')
                 v['label'] = v['field']
             elif v['type'] == 'Cluster Score':
-                #df = self.get_map_data(self.sample_id, v['field'], plot_type=None, plot=False)
+                df = self.get_map_data(self.sample_id, v['field'], analysis_type='Cluster Score')
                 v['label'] = v['field']
             elif v['type'] == 'Special':
                 return

@@ -5322,7 +5322,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Clear the list widget
         self.tableWidgetViewGroups.clear()
-        self.tableWidgetViewGroups.setHorizontalHeaderLabels(['Groups'])
+        self.tableWidgetViewGroups.setHorizontalHeaderLabels(['ID','Name','Link','Color'])
         algorithm = ''
         # Check which radio button is checked and update the list widget
         if self.comboBoxColorField.currentText().lower() == 'none':

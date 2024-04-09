@@ -996,7 +996,7 @@
       <string>Activates the crop tool</string>
      </property>
      <property name="currentIndex">
-      <number>5</number>
+      <number>7</number>
      </property>
      <widget class="QWidget" name="SelectAnalytePage">
       <property name="enabled">
@@ -1006,8 +1006,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>98</width>
-        <height>28</height>
+        <width>300</width>
+        <height>531</height>
        </rect>
       </property>
       <attribute name="label">
@@ -1356,8 +1356,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>98</width>
-        <height>28</height>
+        <width>300</width>
+        <height>531</height>
        </rect>
       </property>
       <attribute name="label">
@@ -2065,8 +2065,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>98</width>
-        <height>28</height>
+        <width>300</width>
+        <height>531</height>
        </rect>
       </property>
       <attribute name="label">
@@ -2388,8 +2388,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>98</width>
-        <height>28</height>
+        <width>300</width>
+        <height>531</height>
        </rect>
       </property>
       <attribute name="label">
@@ -4456,8 +4456,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>98</width>
-        <height>28</height>
+        <width>300</width>
+        <height>531</height>
        </rect>
       </property>
       <attribute name="label">
@@ -4667,8 +4667,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>98</width>
-        <height>28</height>
+        <width>300</width>
+        <height>531</height>
        </rect>
       </property>
       <attribute name="label">
@@ -4687,7 +4687,7 @@
         <string>Open profile style options</string>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="pageClustering">
         <widget class="QGroupBox" name="groupBoxClustering">
@@ -5208,8 +5208,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>98</width>
-        <height>28</height>
+        <width>300</width>
+        <height>531</height>
        </rect>
       </property>
       <attribute name="label">
@@ -5863,8 +5863,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>98</width>
-        <height>28</height>
+        <width>300</width>
+        <height>531</height>
        </rect>
       </property>
       <attribute name="label">
@@ -6370,8 +6370,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>98</width>
-        <height>28</height>
+        <width>221</width>
+        <height>755</height>
        </rect>
       </property>
       <attribute name="icon">
@@ -6413,8 +6413,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>219</width>
+          <height>421</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7979,8 +7979,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>98</width>
-        <height>28</height>
+        <width>221</width>
+        <height>755</height>
        </rect>
       </property>
       <attribute name="icon">

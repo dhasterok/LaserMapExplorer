@@ -800,7 +800,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.update_spinboxes_bool = True  # Place this line at end of method
 
             if self.comboBoxCorrelationMethod.currentText().lower() != 'none':
-                print('plot correlation')
                 self.plot_correlation()
 
         else:
@@ -892,7 +891,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxPlotType.addItems(self.plot_types[self.toolBox.currentIndex()][1:])
         self.comboBoxPlotType.setCurrentIndex(self.plot_types[self.toolBox.currentIndex()][0])
         self.set_style_widgets()
-
+        self.update_current_plot()
 
     def input_ternary_name_dlg(self):
         """Opens a dialog to save new colormap
@@ -1166,7 +1165,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #                              & (self.data[self.sample_id]['ratios_info']['analyte_1']==analyte_1)
             #                              & (self.data[self.sample_id]['ratios_info']['analyte_2']==analyte_2),'auto_scale'].values[0]
 
-            print(auto_scale)
             if auto_scale and not update:
                 #reset to default auto scale values
                 lb = 0.05
@@ -1258,7 +1256,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             data_range = current_plot_df['array'].max() - current_plot_df['array'].min()
             #change axis range for all plots in sample
             if axis:
-                print(self.data[sample_id]['crop_x_min'])
                 # Filtering rows based on the conditions on 'X' and 'Y' columns
                 self.data[self.sample_id]['axis_mask'] = ((current_plot_df['X'] >= self.data[sample_id]['crop_x_min']) & (current_plot_df['X'] <= self.data[sample_id]['crop_x_max']) &
                                (current_plot_df['Y'] <= current_plot_df['Y'].max() - self.data[sample_id]['crop_y_min']) & (current_plot_df['Y'] >= current_plot_df['Y'].max() - self.data[sample_id]['crop_y_max']))
@@ -1369,7 +1366,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             # Set margins to 0 if you want to remove margins as well
             layout.setContentsMargins(0, 0, 0, 0)
-            # show plot sinc parent is visible
+            # show plot since parent is visible
             selected_plot_widget.show()
             #remove tab
             #self.canvasWindow.removeTab(tab_index)
@@ -1477,7 +1474,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if '/' in analyte_1:
                 analyte_1, analyte_2 = analyte_1.split(' / ')
                 f_val = self.data[self.sample_id]['ratios_info'].loc[(self.data[self.sample_id]['ratios_info']['analyte_1'] == analyte_1)& (self.data[self.sample_id]['ratios_info']['analyte_2'] == analyte_2)].iloc[0][['v_min', 'v_max']]
-        print(self.dynamic_format(f_val['v_min']))
         self.lineEditFMin.setText(str(self.dynamic_format(f_val['v_min'])))
         self.lineEditFMax.setText(str(self.dynamic_format(f_val['v_max'])))
 
@@ -2047,7 +2043,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             p1.setMenuEnabled(False)
 
             p1.addItem(img)
-            # print(p1.getAspectRatio())
             p1.setAspectLocked()
             p1.setRange( yRange=[self.y.min(), self.y.max()])
             # To further prevent zooming or panning outside the default view,
@@ -2110,13 +2105,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # proxy = pg.SignalProxy(p1.scene().sigMouseMoved, rateLimit=60, slot=self.mouse_moved)
             # self.proxies.append(proxy)  # Assuming self.proxies is a list to store proxies
 
-            # print(p1.getAspectRatio())
             # p1.autoRange()
             layout.addWidget(glw, 0, 0, 3, 2)
             glw.setBackground('w')
             #add zoom window
             # self.setup_zoom_window(layout)
-            print(style['Colors']['Colormap'])
             self.plot_laser_map_cont(layout,array,img,p1,cm,view)
         p1.getViewBox().autoRange()
 
@@ -2624,7 +2617,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                                     sigma_s=float(val1),
                                                     sigma_r=float(val2))
             case 'bilateral':
-                print('bilateral')
                 # Apply Bilateral filter
                 # Parameters are placeholders, you might need to adjust them based on your data
                 filtered_image = bilateralFilter(self.array.astype(np.float32),
@@ -3318,8 +3310,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # turn properties on/off based on plot type and style settings
         self.toggle_style_widgets()
 
-        # update plot
-        self.update_current_plot()
+        # update plot (is this line needed)
+        # self.update_current_plot()
 
     def get_style_dict(self):
 
@@ -3366,11 +3358,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------
     def style_plot_type_callback(self):
         self.plot_types[self.toolBox.currentIndex()][0] = self.comboBoxPlotType.currentIndex()
-        print(self.comboBoxPlotType.currentText())
         self.set_style_widgets(plot_type=self.comboBoxPlotType.currentText())
-        print('styles set')
         self.check_analysis_type()
-        print('check analysis complete')
+        
         self.update_current_plot(save=False)
         
     # axes
@@ -3571,6 +3561,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # updates scatter styles when ColorByField comboBox is changed
     def color_by_field_callback(self):
+        print('color_by_field_callback')
         # write a general version to fill two related comboboxes
         plot_type = self.comboBoxPlotType.currentText()
         if self.styles[plot_type]['Colors']['ColorByField'] == self.comboBoxColorByField.currentText():
@@ -3637,6 +3628,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.update_current_plot(save=False)
         
     def color_field_callback(self):
+        print('color_field_callback')
         plot_type = self.comboBoxPlotType.currentText()
         if self.styles[plot_type]['Colors']['Field'] == self.comboBoxColorField.currentText():
             return
@@ -3771,8 +3763,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         sample_id = self.sample_id
         analysis = self.comboBoxColorByField.currentText()
         field = self.comboBoxColorField.currentText()
-        print(analysis)
-        print(plot_type)
+        print('update_current_plot')
         style = self.styles[plot_type]
         
         match plot_type:
@@ -3806,8 +3797,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case 'scatter' | 'heatmap':
                 if self.comboBoxFieldX.currentText() == self.comboBoxFieldY.currentText():
                     return
-                self.plot_scatter(save) 
-            case 'variance' | 'vectors' | 'PCx vs PCy scatter' | 'PCx vs PCy heatmap' | 'PCA Score':
+                self.plot_scatter(save= save) 
+            case 'variance' | 'vectors' | 'PCx vs. PCy scatter' | 'PCx vs. PCy heatmap' | 'PCA Score':
                 self.plot_pca()
             case 'Cluster' | 'Cluster Score':
                 self.plot_clustering()
@@ -3855,6 +3846,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Add the plot widget to your layout
         layout.insertWidget(0,scatter_plot)
         toolbar = NavigationToolbar(scatter_plot)  # Create the toolbar for the canvas
+        toolbar.hide()
         # widgetScatter.layout().addWidget(toolbar)
 
         if save:
@@ -4076,6 +4068,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             widgetCorrelation.setLayout(QtWidgets.QVBoxLayout())
             figure_canvas = FigureCanvas(figure)
             toolbar = NavigationToolbar(figure_canvas, widgetCorrelation)
+            toolbar.hide()
             # widgetCorrelation.layout().addWidget(toolbar)
             widgetCorrelation.layout().addWidget(figure_canvas)
             view = self.canvasWindow.currentIndex()
@@ -4306,16 +4299,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :param save: Flag for saving widget to self.toolBoxTreeView Plot Selector page, Defaults to False
         :type save: bool, optional
         """
+        plot_type = self.comboBoxPlotType.currentText()
+        style = self.styles[plot_type]
+        
+        
         # update plot style parameters
-        if fig == None:
-            x, y, z, c = self.get_scatter_values() #get scatter values from elements chosen
+        if not values:
+            x, y, z, c = self.get_scatter_values(plot_type) #get scatter values from elements chosen
         else:
             # get saved scatter values to update plot
             x, y, z, c = values
         
-        plot_type = self.comboBoxPlotType.currentText().lower()
-        style = self.styles[plot_type]
-        match plot_type:
+        
+        match plot_type.split()[-1]:
             # scatter
             case 'scatter':
                 if style['Colors']['ColorByField'] == None:
@@ -4652,15 +4648,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Perform PCA
         pca = PCA(n_components=min(len(df_filtered.columns), len(df_filtered)))  # Adjust n_components as needed
         pca_results = pca.fit_transform(df_scaled)
-
+        
+        #update min and max of PCA spinboxes
+        if pca.n_components_>0:
+            
+            self.spinBoxPCX.setMinimum(1)
+            self.spinBoxPCY.setMinimum(1)
+            self.spinBoxPCX.setMaximum(pca.n_components_+1)
+            self.spinBoxPCY.setMaximum(pca.n_components_+1)
+        
+        
         # Convert PCA results to DataFrame for easier plotting
         pca_dict['results'] = pd.DataFrame(pca_results, columns=[f'PC{i+1}' for i in range(pca.n_components_)])
+        
         pca_dict['explained_variance_ratio'] = pca.explained_variance_ratio_
         pca_dict['components_'] = pca.components_
         if self.data[self.sample_id]['computed_data']['PCA Score'].empty:
             self.data[self.sample_id]['computed_data']['PCA Score'] = self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
         self.data[self.sample_id]['computed_data']['PCA Score'].loc[self.data[self.sample_id]['mask'],pca_dict['results'].columns ] = pca_dict['results'].values
-        print(self.data[self.sample_id]['computed_data']['PCA Score'].head())
         # Determine which PCA plot to create based on the combobox selection
         pca_plot_type = self.comboBoxPlotType.currentText()
 
@@ -4686,6 +4691,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             widgetPCA.setLayout(QtWidgets.QVBoxLayout())
             figure_canvas = FigureCanvas(figure)
             toolbar = NavigationToolbar(figure_canvas, widgetPCA)
+            toolbar.hide()
             #widgetPCA.layout().addWidget(toolbar)
             widgetPCA.layout().addWidget(figure_canvas)
             view = self.canvasWindow.currentIndex()
@@ -4759,34 +4765,40 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # Optional: Rotate x-axis labels for better readability
                 # plt.xticks(rotation=45)
-            case 'pcx vs. pcy scatter':
+            case 'pcx vs. pcy scatter'| 'pcx vs. pcy heatmap':
                 pc_x = int(self.spinBoxPCX.value())
                 pc_y = int(self.spinBoxPCY.value())
                 pca_df = pca_dict['results']
                 # Assuming pca_df contains scores for the principal components
-                ax.scatter(pca_df[f'PC{pc_x}'], pca_df[f'PC{pc_y}'])
-                xlbl = f'PC{pc_x}'
-                ylbl = f'PC{pc_y}'
-                ttxt = f'PCA Plot: PC{pc_x} vs PC{pc_y}'
+                
+                # uncomment to use plot scatter instead of ax.scatter
+                fig = ax.get_figure()
+                self.plot_scatter()
+                return
+                # ax.scatter(pca_df[f'PC{pc_x}'], pca_df[f'PC{pc_y}'])
+                # xlbl = f'PC{pc_x}'
+                # ylbl = f'PC{pc_y}'
+                # ttxt = f'PCA Plot: PC{pc_x} vs PC{pc_y}'
+            
             case 'pca score':
                 pc_x = int(self.comboBoxColorField.currentIndex()) + 1
-                print(pc_x)
                 pca_df = pca_dict['results']
                 # Assuming pca_df contains scores for the principal components
-                self.plot_clustering_result(ax,pca_df[f'PC{pc_x}'],'PCA')
+                self.plot_clustering_result(ax,pca_df[f'PC{pc_x}'].values,'PCA')
                 xlbl ='Sample Index'
                 ylbl = f'PC{pc_x} Score'
                 ttxt = f'PCA Score Map for PC{pc_x}'
             case _:
                 print(f"Unknown PCA plot type: {pca_plot_type}")
                 return
-
+        
         # labels
         font = {'size':style['Text']['FontSize']}
         ax.set_xlabel(xlbl, fontdict=font)
         ax.set_ylabel(ylbl, fontdict=font)
         ax.set_title(ttxt, fontdict=font)
 
+        
         match pca_plot_type:
             case 'variance' | 'pcx vs. pcy scatter':
                 # tick marks
@@ -4887,7 +4899,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             
             # add x y from raw data if empty dataframe
             if self.data[self.sample_id]['computed_data']['Cluster'].empty:
-                self.data[self.sample_id]['computed_data']['Cluster']= self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
+                self.data[self.sample_id]['computed_data']['Cluster'].loc[:,['X','Y']]= self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
+                
+                self.data[self.sample_id]['computed_data']['Cluster Score'].loc[:,['X','Y']]= self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
             
             # Create labels array filled with -1
             groups = np.full(filtered_array.shape[0], -1, dtype=int)
@@ -4895,7 +4909,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(filtered_array.T, n_clusters, exponent, error=0.00001, maxiter=1000,seed =23)
                 # cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(array.T, n_clusters, exponent, error=0.005, maxiter=1000,seed =23)
                 for n in range(n_clusters):
-                    self.data[self.sample_id]['computed_data']['cluster scores'][n][self.data[self.sample_id]['mask']] = u[n-1,:]
+                    self.data[self.sample_id]['computed_data']['Cluster Score'][n][self.data[self.sample_id]['mask']] = u[n-1,:]
                     if fuzzy_cluster_number>0:
                         #add cluster results to self.data
                         groups[self.data[self.sample_id]['mask']] = self.data[self.sample_id]['computed_data']['cluster scores'][fuzzy_cluster_number][self.data[self.sample_id]['mask']]
@@ -4920,30 +4934,30 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def plot_clustering_result(self, ax, groups, method_name, fuzzy_cluster_number=None):
         reshaped_array = np.reshape(groups, self.array_size, order=self.order)
-
+        
         x_range = self.data[self.sample_id]['processed_data']['X'].max() -  self.data[self.sample_id]['processed_data']['X'].min()
         y_range = self.data[self.sample_id]['processed_data']['Y'].max() -  self.data[self.sample_id]['processed_data']['Y'].min()
         # aspect_ratio  = 1
         # aspect_ratio = 0.617
         fig = ax.figure
         if method_name == 'Fuzzy' and int(self.comboBoxColorField.currentText())>0:
-            aspect_ratio = (y_range/self.clipped_analyte_data[self.sample_id]['Y'].nunique())/ (x_range/self.clipped_analyte_data[self.sample_id]['X'].nunique())
+            aspect_ratio = (y_range/self.data[self.sample_id]['computed_data']['Cluster Score']['Y'].nunique())/ (x_range/self.data[self.sample_id]['computed_data']['Cluster']['X'].nunique())
             style = self.styles['Cluster Score']
 
             cmap = plt.get_cmap(style['Colors']['Colormap'])
-            # img = ax.imshow(reshaped_array.T, cmap=cmap,  aspect=aspect_ratio)
-            img = ax.imshow(reshaped_array, cmap=cmap,  aspect='equal')
+            img = ax.imshow(reshaped_array.T, cmap=cmap,  aspect=aspect_ratio)
+            # img = ax.imshow(reshaped_array, cmap=cmap,  aspect='equal')
             fig.colorbar(img, ax=ax, orientation=style['Colors']['Direction'])
         elif method_name == 'PCA':
             aspect_ratio = (y_range/self.data[self.sample_id]['computed_data']['PCA Score']['Y'].nunique())/ (x_range/self.data[self.sample_id]['computed_data']['PCA Score']['X'].nunique())
             style = self.styles['PCA Score']
             
             cmap = plt.get_cmap(style['Colors']['Colormap'])
-            # img = ax.imshow(reshaped_array.T, cmap=cmap,  aspect=aspect_ratio)
-            img = ax.imshow(reshaped_array, cmap=cmap,  aspect=aspect_ratio)
+            img = ax.imshow(reshaped_array.T, cmap=cmap,  aspect=aspect_ratio)
+            # img = ax.imshow(reshaped_array, cmap=cmap,  aspect=aspect_ratio)
             fig.colorbar(img, ax=ax, orientation=style['Colors']['Direction'])
         else:
-            aspect_ratio = (y_range/self.clipped_analyte_data[self.sample_id]['Y'].nunique())/ (x_range/self.clipped_analyte_data[self.sample_id]['X'].nunique())
+            aspect_ratio = (y_range/self.data[self.sample_id]['computed_data']['Cluster']['Y'].nunique())/ (x_range/self.data[self.sample_id]['computed_data']['Cluster']['X'].nunique())
             style = self.styles['Cluster']
 
             unique_groups = np.unique(['Cluster '+str(c) for c in groups])
@@ -4958,9 +4972,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             boundaries = np.arange(-0.5, n_clusters, 1)
             norm = BoundaryNorm(boundaries, cmap.N, clip=True)
-            img = ax.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect = 'equal')
+            img = ax.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect = aspect_ratio)
             fig.colorbar(img, ax=ax, ticks=np.arange(0, n_clusters), orientation=style['Colors']['Direction'])
-
         fig.subplots_adjust(left=0.05, right=1)  # Adjust these values as needed
         fig.tight_layout()
         # fig.canvas.manager.window.move(0,0)
@@ -4973,6 +4986,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         widgetClusterMap.setLayout(QtWidgets.QVBoxLayout())
         figure_canvas = FigureCanvas(fig)
         toolbar = NavigationToolbar(figure_canvas)  # Create the toolbar for the canvas
+        toolbar.hide()
         widgetClusterMap.setObjectName('plotClusterMap')
         widgetClusterMap.layout().addWidget(figure_canvas)
         # widgetClusterMap.layout().addWidget(toolbar)
@@ -4983,7 +4997,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'plot_name': plot_name,
             'sample_id': self.sample_id,
             'plot_type': plot_type,
-            'style': self.styles['clusters']
+            'style': self.styles['Cluster']
         }
         self.update_tree(plot_information['plot_name'], data = plot_information, tree = 'Clustering')
         self.add_plot(plot_information)
@@ -5088,7 +5102,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             axes_interval = 5
             if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['Cluster']:
                 # Get the cluster labels for the data
-                cluster_labels = n_dim_labels(self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']])
+                cluster_labels = self.n_dim_labels(self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']])
 
                 df_filtered['clusters'] = cluster_labels
 
@@ -5106,7 +5120,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             yl = [np.inf, -np.inf]
             if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['Cluster']:
                 # Get the cluster labels for the data
-                n_dim_labels(cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']])
+                self.n_dim_labels(cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']])
 
                 df_filtered['clusters'] = cluster_labels
                 clusters = np.unique(cluster_labels)
@@ -5152,6 +5166,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
         toolbar = NavigationToolbar(figure_canvas)  # Create the toolbar for the canvas
+        toolbar.hide()
         # widgetNDim.layout().addWidget(toolbar)
         self.plot_widget_dict[plot_type][self.sample_id][plot_name] = {'widget': [widgetNDim],
                                                               'info': {'plot_type': plot_type, 'sample_id': self.sample_id},
@@ -5299,7 +5314,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # Get the new name and the row of the changed item
             new_name = item.text()
             row = item.row()
-            print(new_name)
             # Extract the cluster id (assuming it's stored in the table)
             cluster_id = self.current_group['clusters'][row]
 
@@ -5460,7 +5474,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if addNone:
             field_list.insert(0, 'None')
 
-        print(field_list)
         # clear comboBox items
         comboBox.clear()
         # add new items
@@ -5541,10 +5554,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case 'None':
                 return []
             case _:
-                set_fields = self.data[self.sample_id]['computed_data'][set_name].columns.tolist()
+                #populate field name with column names of corresponding dataframe remove 'X', 'Y' is it exists
+                set_fields = [col for col in self.data[self.sample_id]['computed_data'][set_name].columns.tolist() if col not in ['X', 'Y']]
+
         return set_fields
 
     def check_analysis_type(self):
+        print('check_analysis_type')
         self.check_analysis = True
         self.update_field_type_combobox(self.comboBoxColorByField, addNone=True, plot_type=self.comboBoxPlotType.currentText())
         self.check_analysis = False
@@ -5612,7 +5628,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             axis_mask = self.data[self.sample_id]['axis_mask']
 
-        print(sample_id)
         #crop plot if filter applied
         current_plot_df = self.data[sample_id]['raw_data'][['X','Y']][axis_mask].reset_index(drop=True)
 
@@ -5627,7 +5642,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case 'Ratio':
                 current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].loc[:,field].values
 
-            case 'pca':
+            case 'PCA Score':
                 current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].values
 
             case 'Cluster':
@@ -5646,7 +5661,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         return current_plot_df
 
     # extracts data for scatter plot
-    def get_scatter_values(self):
+    def get_scatter_values(self,plot_type):
         """Creates a dictionary of values for plotting
 
         :return: four return variables, x, y, z, and c, each as a dict with locations for bi- and
@@ -5660,14 +5675,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'z': {'field': None, 'type': None, 'label': None, 'array': None},
             'c': {'field': None, 'type': None, 'label': None, 'array': None}
         }
-        value_dict['x']['field'] = self.comboBoxFieldX.currentText()
-        value_dict['x']['type'] = self.comboBoxFieldTypeX.currentText()
-        value_dict['y']['field'] = self.comboBoxFieldY.currentText()
-        value_dict['y']['type'] = self.comboBoxFieldTypeY.currentText()
-        value_dict['z']['field'] = self.comboBoxFieldZ.currentText()
-        value_dict['z']['type'] = self.comboBoxFieldTypeZ.currentText()
-        value_dict['c']['field'] = self.comboBoxColorField.currentText()
-        value_dict['c']['type'] = self.comboBoxColorByField.currentText()
+        
+        if plot_type =='pcx vs. pcy scatter' or plot_type == 'pcx vs. pcy heatmap':
+            value_dict['x']['field'] = 'PC'+str(self.spinBoxPCX.value())
+            value_dict['x']['type'] = 'PCA Score'
+            value_dict['y']['field'] = 'PC'+str(self.spinBoxPCY.value())
+            value_dict['y']['type'] = 'PCA Score'
+            value_dict['c']['field'] = self.comboBoxColorField.currentText()
+            value_dict['c']['type'] = self.comboBoxColorByField.currentText()
+        else:
+                    
+            value_dict['x']['field'] = self.comboBoxFieldX.currentText()
+            value_dict['x']['type'] = self.comboBoxFieldTypeX.currentText()
+            value_dict['y']['field'] = self.comboBoxFieldY.currentText()
+            value_dict['y']['type'] = self.comboBoxFieldTypeY.currentText()
+            value_dict['z']['field'] = self.comboBoxFieldZ.currentText()
+            value_dict['z']['type'] = self.comboBoxFieldTypeZ.currentText()
+            value_dict['c']['field'] = self.comboBoxColorField.currentText()
+            value_dict['c']['type'] = self.comboBoxColorByField.currentText()
 
         for k, v in value_dict.items():
             if v['type'] == 'Analyte' and v['field']:
@@ -5677,8 +5702,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 #analyte_1, analyte_2 = v['field'].split('/')
                 df = self.get_map_data(self.sample_id, field=v['field'], analysis_type=v['type'])
                 v['label'] = v['field']
-            elif v['type'] == 'pca':
-                #df = self.get_map_data(self.sample_id, v['field'], plot_type=None, plot=False)
+            elif v['type'] == 'PCA Score':
+                df = self.get_map_data(self.sample_id, field=v['field'], analysis_type=v['type'])
                 v['label'] = v['field']
             elif v['type'] == 'Cluster':
                 #df = self.get_map_data(self.sample_id, v['field'], plot_type=None, plot=False)
@@ -6242,7 +6267,6 @@ class CustomAxis(AxisItem):
     def tickStrings(self, values, scale, spacing):
         # Scale the values back to the original scale
         scaled_values = [v * self.scale_factor for v in values]
-        print (scaled_values)
         # Format the tick strings as you want them to appear
         return ['{:.2f}'.format(v) for v in scaled_values]
 
@@ -6346,7 +6370,6 @@ class Table_Fcn:
         table: QTableWidget
         """
         rows = [index.row() for index in table.selectionModel().selectedRows()][::-1] #sort descending to pop in order
-        print(table.accessibleName())
         match table.accessibleName():
             case 'Profiling':
                 for row in rows:
@@ -6379,7 +6402,6 @@ class Table_Fcn:
                     table.removeRow(row)
 
             case 'Polygon':
-                print('d')
                 for row in rows:
                     # Get p_id
                     item = self.main_window.tableWidgetPolyPoints.item(row, 0)
@@ -6495,7 +6517,6 @@ class Crop_tool:
     def apply_crop(self):
         """Uses selected crop extent to set viewable area and map region for analysis."""
         if self.crop_rect:
-            print('c')
             crop_rect = self.crop_rect.rect()  # self.crop_rect is ResizableRectItem
             self.main_window.data[self.main_window.sample_id]['crop_x_min'] = crop_rect.left()
             self.main_window.data[self.main_window.sample_id]['crop_x_max'] = crop_rect.right()
@@ -6719,7 +6740,6 @@ class Polygon:
                     if mindist > dist:
                         mindist = dist
                         self.point_index = i
-                    print(dist, round(mindist*self.array_x/self.main_window.x_range))
                 if (round(mindist*self.array_x/self.main_window.x_range) < 50):
                     self.main_window.point_selected = True
 

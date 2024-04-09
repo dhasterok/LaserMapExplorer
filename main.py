@@ -4945,7 +4945,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 
                 fuzzy_cluster_number = self.comboBoxColorField.currentText()
                 
-                cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(filtered_array.T[self.data[self.sample_id]['mask']], n_clusters, exponent, error=0.00001, maxiter=1000,seed =23)
+                cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(filtered_array[self.data[self.sample_id]['mask']].T, n_clusters, exponent, error=0.00001, maxiter=1000,seed =23)
                 # cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(array.T, n_clusters, exponent, error=0.005, maxiter=1000,seed =23)
                 for n in range(n_clusters):
                     self.data[self.sample_id]['computed_data']['Cluster Score'].loc[:,str(n)] = pd.NA

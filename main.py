@@ -444,18 +444,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #-------------------------
         # Populate the comboBoxCluster with distance metrics
         distance_metrics = ['cityblock', 'cosine', 'euclidean', 'l1', 'l2', 'manhattan']
+
+        self.spinBoxNClusters.valueChanged.connect(self.plot_clustering)
+
         self.comboBoxClusterDistance.clear()
         self.comboBoxClusterDistance.addItems(distance_metrics)
-
-        self.toolButtonRunClustering.clicked.connect(self.plot_clustering)
+        self.comboBoxClusterDistance.activated.connect(self.plot_clustering)
 
         self.horizontalSliderClusterExponent.setMinimum(10)  # Represents 1.0 (since 10/10 = 1.0)
         self.horizontalSliderClusterExponent.setMaximum(30)  # Represents 3.0 (since 30/10 = 3.0)
         self.horizontalSliderClusterExponent.setSingleStep(1)  # Represents 0.1 (since 1/10 = 0.1)
         self.horizontalSliderClusterExponent.setTickInterval(1)
-
         self.horizontalSliderClusterExponent.valueChanged.connect(lambda value: self.labelClusterExponent.setText(str(value/10)))
+        self.horizontalSliderClusterExponent.sliderReleased.connect(self.plot_clustering)
+
         self.comboBoxClusterMethod.activated.connect(self.update_cluster_ui)
+
+        # cluster dictionary
+        self.cluster_dict = {'k-means':{'n_clusters':5}, 'fuzzy c-means':{'n_clusters':5, 'exponent':2.1, 'distance':'euclidean'}}
         self.update_cluster_ui()
 
         # Connect color point radio button signals to a slot
@@ -4863,6 +4869,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # Cluster functions
     # -------------------------------------
     def plot_clustering(self):
+        if self.sample_id == '':
+            return
+
         """Plot cluster map"""
         df_filtered, isotopes = self.get_processed_data()
         filtered_array = df_filtered.values
@@ -4875,24 +4884,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             exponent = 1.0001
         distance_type = self.comboBoxClusterDistance.currentText()
 
+        method = self.comboBoxClusterMethod.currentText()
 
-        if self.comboBoxClusterMethod.currentText() == 'all':
-            # clustering_algorithms = {
-            #     'KMeans': KMeans(n_clusters=n_clusters, init='k-means++'),
-            #     'Fuzzy': 'fuzzy'  # Placeholder for fuzzy
-            # }
-
-            # Process for all clustering methods
-            clustering_algorithms = {
-                'KMeans': KMeans(n_clusters=n_clusters, init='k-means++'),
-                'Fuzzy': 'fuzzy'  # Placeholder for fuzzy
-            }
-        elif self.comboBoxClusterMethod.currentText() == 'k-means':
+        if self.comboBoxClusterMethod.currentText() == 'k-means':
+            self.cluster_dict[method]['n_clusters'] = n_clusters
             clustering_algorithms = {
                 'KMeans': KMeans(n_clusters=n_clusters, init='k-means++')
                 }
-
         elif self.comboBoxClusterMethod.currentText() == 'fuzzy c-means':
+            self.cluster_dict[method]['n_clusters'] = n_clusters
+            self.cluster_dict[method]['exponent'] = exponent
+            self.cluster_dict[method]['distance'] = distance_type
             clustering_algorithms = {
                 'Fuzzy': 'fuzzy'  # Placeholder for fuzzy
             }
@@ -5056,44 +5058,41 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def update_cluster_ui(self):
         # update_clusters_ui - Enables/disables tools associated with clusters
+        method = self.comboBoxClusterMethod.currentText()
 
         # Number of Clusters
         self.labelNClusters.setEnabled(True)
         self.spinBoxNClusters.setEnabled(True)
+        self.spinBoxNClusters.setValue(int(self.cluster_dict[method]['n_clusters']))
 
-        if self.comboBoxClusterMethod.currentText() == 'k-means':
-            # Enable parameters relevant to KMeans
-            # Exponent
-            self.labelExponent.setEnabled(False)
-            self.labelClusterExponent.setEnabled(False)
-            self.horizontalSliderClusterExponent.setEnabled(False)
+        match method:
+            case 'k-means':
+                # Enable parameters relevant to KMeans
+                # Exponent
+                self.labelExponent.setEnabled(False)
+                self.labelClusterExponent.setEnabled(False)
+                self.horizontalSliderClusterExponent.setEnabled(False)
 
-            # Distance
-            self.labelClusterDistance.setEnabled(False)
-            self.comboBoxClusterDistance.setEnabled(False)
+                # Distance
+                self.labelClusterDistance.setEnabled(False)
+                self.comboBoxClusterDistance.setEnabled(False)
 
-        elif self.comboBoxClusterMethod.currentText() == 'fuzzy c-means':
-            # Enable parameters relevant to Fuzzy Clustering
-            # Exponent
-            self.labelExponent.setEnabled(True)
-            self.labelClusterExponent.setEnabled(True)
-            self.horizontalSliderClusterExponent.setEnabled(True)
+            case 'fuzzy c-means':
+                self.spinBoxNClusters.setValue(int(self.cluster_dict[method]['n_clusters']))
 
-            # Distance
-            self.labelClusterDistance.setEnabled(False)
-            self.comboBoxClusterDistance.setEnabled(False)
+                # Enable parameters relevant to Fuzzy Clustering
+                # Exponent
+                self.labelExponent.setEnabled(True)
+                self.labelClusterExponent.setEnabled(True)
+                self.horizontalSliderClusterExponent.setEnabled(True)
+                self.horizontalSliderClusterExponent.setValue(int(self.cluster_dict[method]['exponent']*10))
 
-        elif self.comboBoxClusterMethod.currentText() == 'all':
-            # Enable parameters relevant to Fuzzy Clustering
-            # Exponent
-            self.labelExponent.setEnabled(True)
-            self.labelClusterExponent.setEnabled(True)
-            self.horizontalSliderClusterExponent.setEnabled(True)
-
-            # Distance
-            self.labelClusterDistance.setEnabled(True)
-            self.comboBoxClusterDistance.setEnabled(True)
-
+                # Distance
+                self.labelClusterDistance.setEnabled(False)
+                self.comboBoxClusterDistance.setEnabled(False)
+                self.comboBoxClusterDistance.setCurrentText(self.cluster_dict[method]['distance'])
+        
+        self.plot_clustering()
 
     # -------------------------------------
     # TEC and Radar plots
@@ -5777,6 +5776,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         return value_dict['x'], value_dict['y'], value_dict['z'], value_dict['c']
 
     def get_processed_data(self):
+        if self.sample_id == '':
+            return
+
         # return normalised, filtered data with that will be used for analysis
         use_analytes = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['use']==True), 'analytes'].values
         # Combine the two masks to create a final mask

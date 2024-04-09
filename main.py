@@ -1224,6 +1224,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 df = df[self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
 
         self.data[self.sample_id]['mask'] = self.data[self.sample_id]['mask'][self.data[self.sample_id]['axis_mask']]
+        self.data[self.sample_id]['polygon_mask'] = self.data[self.sample_id]['polygon_mask'][self.data[self.sample_id]['axis_mask']]
+        self.data[self.sample_id]['filter_mask'] = self.data[self.sample_id]['filter_mask'][self.data[self.sample_id]['axis_mask']]
         self.prep_data(sample_id)
         self.update_all_plots()
         self.toolButtonCrop.setChecked(False)
@@ -2050,7 +2052,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             p1.addItem(img)
             p1.setAspectLocked()
-            p1.setRange( yRange=[self.y.min(), self.y.max()])
+            # p1.setRange( yRange=[self.y.min(), self.y.max()])
             # To further prevent zooming or panning outside the default view,
             p1.setLimits( yMin=self.y.min(), yMax = self.y.max())
 
@@ -4929,8 +4931,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # add x y from raw data if empty dataframe
             if name =='Fuzzy' and self.data[self.sample_id]['computed_data']['Cluster Score'].empty:
                 self.data[self.sample_id]['computed_data']['Cluster Score']= self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
+            
             if self.data[self.sample_id]['computed_data']['Cluster'].empty:
-                self.data[self.sample_id]['computed_data']['Cluster'].loc[:,['X','Y']]= self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
+                self.data[self.sample_id]['computed_data']['Cluster'][['X','Y']]= self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
                 
                 
 
@@ -4942,25 +4945,26 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 
                 fuzzy_cluster_number = self.comboBoxColorField.currentText()
                 
-                cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(filtered_array.T, n_clusters, exponent, error=0.00001, maxiter=1000,seed =23)
+                cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(filtered_array.T[self.data[self.sample_id]['mask']], n_clusters, exponent, error=0.00001, maxiter=1000,seed =23)
                 # cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(array.T, n_clusters, exponent, error=0.005, maxiter=1000,seed =23)
                 for n in range(n_clusters):
                     self.data[self.sample_id]['computed_data']['Cluster Score'].loc[:,str(n)] = pd.NA
                     self.data[self.sample_id]['computed_data']['Cluster Score'].loc[self.data[self.sample_id]['mask'],str(n)] = u[n-1,:]
                     if fuzzy_cluster_number:
                         #add cluster results to self.data
-                        groups[self.data[self.sample_id]['mask']] = self.data[self.sample_id]['computed_data']['cluster scores'][int(fuzzy_cluster_number)][self.data[self.sample_id]['mask']]
+                        groups = self.data[self.sample_id]['computed_data']['cluster scores'].loc[self.data[self.sample_id]['mask'],fuzzy_cluster_number]
                     else:
-                        groups[self.data[self.sample_id]['mask']] = np.argmax(u, axis=0)[self.data[self.sample_id]['mask']]
+                        groups = np.argmax(u, axis=0)
                         #add cluster results to self.data
-                        self.data[self.sample_id]['computed_data']['Cluster'][name][self.data[self.sample_id]['mask']] = groups[self.data[self.sample_id]['mask']]
+                        self.data[self.sample_id]['computed_data']['Cluster'].loc[self.data[self.sample_id]['mask'],name] = groups
             else:
-                model = clustering.fit(filtered_array)
-                groups[self.data[self.sample_id]['mask']] = model.predict(filtered_array[self.data[self.sample_id]['mask']])
+                model = clustering.fit(filtered_array[self.data[self.sample_id]['mask']])
+                groups = model.predict(filtered_array[self.data[self.sample_id]['mask']])
                 
                 #add cluster results to self.data
-                self.data[self.sample_id]['computed_data']['Cluster'][name][self.data[self.sample_id]['mask']] = groups[self.data[self.sample_id]['mask']]
-            
+                self.data[self.sample_id]['computed_data']['Cluster'].loc[self.data[self.sample_id]['mask'],name] = groups
+                
+                
             
             # Plot each clustering result
             self.plot_clustering_result(ax, groups, name)
@@ -5785,9 +5789,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         nan_mask = self.data[self.sample_id]['processed_data'][use_analytes].notna().all(axis=1)
 
         # mask nan values and add to self.data[self.sample_id]['mask']
-        self.data[self.sample_id]['mask'] = self.data[self.sample_id]['mask']  & nan_mask[self.data[self.sample_id]['axis_mask']].values
+        self.data[self.sample_id]['mask'] = self.data[self.sample_id]['mask']  & nan_mask.values
 
-        df_filtered = self.data[self.sample_id]['processed_data'][use_analytes][self.data[self.sample_id]['mask']]
+        df_filtered = self.data[self.sample_id]['processed_data'][use_analytes]
+        
+        # df_filtered = self.data[self.sample_id]['processed_data'][use_analytes]
 
         return df_filtered, use_analytes
 

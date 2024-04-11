@@ -458,10 +458,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.horizontalSliderClusterExponent.valueChanged.connect(lambda value: self.labelClusterExponent.setText(str(value/10)))
         self.horizontalSliderClusterExponent.sliderReleased.connect(self.plot_clustering)
 
+        self.lineEditSeed.editingFinished.connect(self.plot_clustering)
+
         self.comboBoxClusterMethod.activated.connect(self.update_cluster_ui)
 
         # cluster dictionary
-        self.cluster_dict = {'k-means':{'n_clusters':5}, 'fuzzy c-means':{'n_clusters':5, 'exponent':2.1, 'distance':'euclidean'}}
+        self.cluster_dict = {'k-means':{'n_clusters':5, 'seed':23}, 'fuzzy c-means':{'n_clusters':5, 'exponent':2.1, 'distance':'euclidean', 'seed':23}}
         self.update_cluster_ui()
 
         # Connect color point radio button signals to a slot
@@ -3842,7 +3844,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                             'style': self.styles['Cluster']
                         }
                     self.plot_clustering_result(ax, groups.values, name)
-                    self.newplot(fig, plot_information['plot_name'], plot_information, save)
+
+                    self.newplot(fig, 'Clustering', plot_information, save)
     
         # self.styles = {'analyte map': copy.deepcopy(self.default_styles),
         #                 'correlation': copy.deepcopy(self.default_styles),
@@ -3862,50 +3865,50 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #                 'Cluster Score': copy.deepcopy(self.default_styles),
         #                 'profile': copy.deepcopy(self.default_styles)}
 
-    def newplot(self, fig, plot_name, plot_information, save):
+    def newplot(self, fig, branch, plot_information, save):
         """Creates new figure widget
 
         :param fig: figure object
         :type fig: matplotlib.Figure
-        :param plot_name: used to name the plot in the tree
-        :type plot_name: str
+        :param branch: branch of plot tree to list plot widget
+        :type branch: str
         :param plot_information: plot dictionary
         :type plot_information: dict
         :param save: if the new plot should be saved to be recalled later
         :type save: bool
         """
-        # Create a Matplotlib figure and axis
-        widgetScatter = QtWidgets.QWidget()
+        # Create a plot widget
+        plotWidget = QtWidgets.QWidget()
+        # create layout
         layout = QtWidgets.QVBoxLayout()
-        widgetScatter.setLayout(layout)
+        # place layout into plotWidget
+        plotWidget.setLayout(layout)
 
-        # scatter_plot = pg.PlotWidget(title=select_scatter)
-        scatter_plot = FigureCanvas(fig)
+        # create figure canvas (matplotlib)
+        canvas = FigureCanvas(fig)
+
+        # determine central widget view type (single, multi, quick)
         view = self.canvasWindow.currentIndex()
 
-        # Add the plot widget to your layout
-        layout.insertWidget(0,scatter_plot)
-        toolbar = NavigationToolbar(scatter_plot)  # Create the toolbar for the canvas
+        # create functionality of matplotlib toolbar (then hide)
+        toolbar = NavigationToolbar(canvas, plotWidget)  # Create the toolbar for the canvas
         toolbar.hide()
-        # widgetScatter.layout().addWidget(toolbar)
 
         if save:
-            # adds plot to dictionary for tree
-            self.plot_widget_dict['scatter'][self.sample_id][plot_name] = {'widget':[widgetScatter],
+            # adds plot to plot dictionary for tree
+            self.plot_widget_dict[branch.lower()][self.sample_id][plot_information['plot_name']] = {'widget':[plotWidget],
                                                     'info':plot_information, 'view':[view]}
-            # updates tree
-            self.update_tree(plot_information['plot_name'], data = plot_information, tree = 'Scatter')
+            # updates tree with new plot name
+            self.update_tree(plot_information['plot_name'], data=plot_information, tree=branch)
 
-            # makes plot viewable
+            # makes plot viewable (shows plot on view)
             self.add_plot(plot_information)
         else:
-            # refresh window
-            self.add_temp_plot(plot_information, widgetScatter)
+            # adds plot to single view
+            self.add_temp_plot(plot_information, plotWidget)
 
     def add_temp_plot(self, plot_information, selected_plot_widget):
         plot_name = plot_information['plot_name']
-        sample_id = plot_information['sample_id']
-        plot_type = plot_information['plot_type']
 
         self.canvasWindow.setCurrentIndex(0)
 
@@ -4072,30 +4075,32 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------
     # Correlation functions and plotting
     # -------------------------------------
-    def plot_correlation(self, plot=False):
+    def plot_correlation(self, save=False):
+        if self.sample_id == '':
+            return
+
         correlation_dict = {}
 
         df_filtered, analytes = self.get_processed_data()
 
+        plot_name = self.comboBoxCorrelationMethod.currentText().lower()
+
         # Calculate the correlation matrix
-        correlation_matrix = df_filtered.corr()
+        correlation_matrix = df_filtered.corr(method=plot_name)
 
         # Store the correlation matrix for plotting
         correlation_dict['correlation_matrix'] = correlation_matrix
 
-        # Determine which correlation plot to create based on the combobox selection (assuming you have a combobox for different types of correlation plots, if not just set a default plot type)
-        correlation_plot_type = 'Heatmap'
-
-        plot_name = correlation_plot_type
         sample_id = self.sample_id
-        plot_type = 'correlation'  # Assuming all correlation plots fall under a common plot type
+        branch = 'Correlation'  # Assuming all correlation plots fall under a common plot type
+        plot_type = branch.lower()
 
         plot_exist = plot_name in self.plot_widget_dict[plot_type][sample_id]
         duplicate = plot_exist and len(self.plot_widget_dict[plot_type][sample_id][plot_name]['view']) == 1 and self.plot_widget_dict[plot_type][sample_id][plot_name]['view'][0] != self.canvasWindow.currentIndex()
 
         if plot_exist and not duplicate:
-            widgetCorrelation = self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'][0]
-            figure_canvas = widgetCorrelation.findChild(FigureCanvas)
+            plotWidget = self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'][0]
+            figure_canvas = plotWidget.findChild(FigureCanvas)
             figure_canvas.figure.clear()
             ax = figure_canvas.figure.subplots()
             self.update_correlation_plot(correlation_dict, ax)
@@ -4104,14 +4109,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             figure = Figure()
             ax = figure.add_subplot(111)
             self.update_correlation_plot(correlation_dict, ax)
-            widgetCorrelation = QtWidgets.QWidget()
-            widgetCorrelation.setLayout(QtWidgets.QVBoxLayout())
-            figure_canvas = FigureCanvas(figure)
-            toolbar = NavigationToolbar(figure_canvas, widgetCorrelation)
-            toolbar.hide()
+            plotWidget = QtWidgets.QWidget() #
+            plotWidget.setLayout(QtWidgets.QVBoxLayout()) #
+            canvas = FigureCanvas(figure) #
+            toolbar = NavigationToolbar(canvas, plotWidget) #
+            toolbar.hide() #
             # widgetCorrelation.layout().addWidget(toolbar)
-            widgetCorrelation.layout().addWidget(figure_canvas)
-            view = self.canvasWindow.currentIndex()
+            plotWidget.layout().addWidget(canvas)
+            view = self.canvasWindow.currentIndex() #
 
             plot_information = {
                 'plot_name': plot_name,
@@ -4120,24 +4125,27 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             }
 
             if duplicate:
-                self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'].append(widgetCorrelation)
+                self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'].append(plotWidget)
                 self.plot_widget_dict[plot_type][sample_id][plot_name]['view'].append(view)
             else:
-                self.plot_widget_dict[plot_type][sample_id][plot_name] = {'widget': [widgetCorrelation], 'info': plot_information, 'view': [view]}
+                self.plot_widget_dict[plot_type][sample_id][plot_name] = {'widget': [plotWidget], 'info': plot_information, 'view': [view]}
 
             # Additional steps to add the Correlation widget to the appropriate container in the UI
-            if plot:
+            if save:
                 self.add_plot(plot_information) #do not plot correlation when directory changes
-            self.update_tree(plot_information['plot_name'], data=plot_information, tree='Correlation')
+            self.update_tree(plot_information['plot_name'], data=plot_information, tree=branch)
 
     def update_correlation_plot(self, correlation_dict, ax):
         if self.comboBoxCorrelationMethod.currentText().lower == 'none':
             return
 
-        s = self.heatmap_style[self.sample_tab_id]
-        cmap = plt.get_cmap(s['Colormap'])
+        s = self.styles['correlation']
+        cmap = plt.get_cmap(s['Colors']['Colormap'])
         correlation_matrix = correlation_dict['correlation_matrix']
-        cax = ax.imshow(correlation_matrix, cmap=plt.get_cmap(s['Colormap']))
+
+        #mask = np.triu(np.ones_like(correlation_matrix, dtype=bool))
+        #cax = ax.imshow(correlation_matrix[mask], cmap=plt.get_cmap(s['Colors']['Colormap']))
+        cax = ax.imshow(correlation_matrix, cmap=plt.get_cmap(s['Colors']['Colormap']))
 
         fig = ax.get_figure()
         # Add colorbar to the plot
@@ -4153,10 +4161,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         ax.set_yticks(ticks, minor=False)
         ax.set_xticks(ticks, minor=False)
 
-        ax.set_xticklabels(correlation_matrix.columns, ha='left')
-        ax.set_yticklabels(correlation_matrix.columns, rotation=90, ha='left')
+        labels = self.n_dim_labels(correlation_matrix.columns)
 
-        ax.set_title('Correlation Matrix')
+        ax.set_xticklabels(labels, ha='left')
+        ax.set_yticklabels(labels, rotation=90, ha='left')
+
+        ax.set_title('')
 
 
     # -------------------------------------
@@ -4447,7 +4457,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 'colorbar': cb,
                 'style': style
             }
-            self.newplot(fig, plot_name, plot_information, save)
+            self.newplot(fig, 'Scatter', plot_information, save)
 
     def ternary_scatter(self, fig, x, y, z, c, style, save):
         """Creates ternary scatter plots
@@ -4506,7 +4516,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 'colorbar': cb,
                 'style': style
             }
-            self.newplot(fig, plot_name, plot_information, save)
+            self.newplot(fig, 'Scatter', plot_information, save)
 
     def hist2dbiplot(self, fig, x, y, style, save):
         """Creates 2D histogram figure
@@ -4571,7 +4581,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 'colorbar': cb,
                 'style': style
             }
-            self.newplot(fig, plot_name, plot_information, save)
+            self.newplot(fig, 'Scatter', plot_information, save)
 
     def hist2dternplot(self, fig, x, y, z, style, save, c=None):
         """Creates a ternary histogram figure
@@ -4639,7 +4649,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 'colorbar': cb,
                 'style': style
             }
-            self.newplot(fig, plot_name, plot_information, save)
+            self.newplot(fig, 'Scatter', plot_information, save)
 
     def plot_ternarymap(self):
         """Creates map colored by ternary coordinate positions"""
@@ -4897,13 +4907,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         if self.comboBoxClusterMethod.currentText() == 'k-means':
             self.cluster_dict[method]['n_clusters'] = n_clusters
+            self.cluster_dict[method]['seed'] = int(self.lineEditSeed.text())
             clustering_algorithms = {
-                'KMeans': KMeans(n_clusters=n_clusters, init='k-means++')
+                'KMeans': KMeans(n_clusters=n_clusters, init='k-means++', random_state=self.cluster_dict[method]['seed'])
                 }
         elif self.comboBoxClusterMethod.currentText() == 'fuzzy c-means':
             self.cluster_dict[method]['n_clusters'] = n_clusters
             self.cluster_dict[method]['exponent'] = exponent
             self.cluster_dict[method]['distance'] = distance_type
+            self.cluster_dict[method]['seed'] = int(self.lineEditSeed.text())
             clustering_algorithms = {
                 'Fuzzy': 'fuzzy'  # Placeholder for fuzzy
             }
@@ -4952,7 +4964,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 
                 fuzzy_cluster_number = self.comboBoxColorField.currentText()
                 
-                cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(filtered_array[self.data[self.sample_id]['mask']].T, n_clusters, exponent, error=0.00001, maxiter=1000,seed =23)
+                cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(filtered_array[self.data[self.sample_id]['mask']].T, n_clusters, exponent, error=0.00001, maxiter=1000,seed =self.cluster_dict['fuzzy c-means']['seed'])
                 # cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(array.T, n_clusters, exponent, error=0.005, maxiter=1000,seed =23)
                 for n in range(n_clusters):
                     self.data[self.sample_id]['computed_data']['Cluster Score'].loc[:,str(n)] = pd.NA
@@ -5088,6 +5100,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.labelClusterDistance.setEnabled(False)
                 self.comboBoxClusterDistance.setEnabled(False)
 
+                # Seed
+                self.labelClusterStartingSeed.setEnabled(True)
+                self.lineEditSeed.setEnabled(True)
+                self.lineEditSeed.setText(str(self.cluster_dict[method]['seed']))
+
             case 'fuzzy c-means':
                 self.spinBoxNClusters.setValue(int(self.cluster_dict[method]['n_clusters']))
 
@@ -5102,6 +5119,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.labelClusterDistance.setEnabled(False)
                 self.comboBoxClusterDistance.setEnabled(False)
                 self.comboBoxClusterDistance.setCurrentText(self.cluster_dict[method]['distance'])
+
+                # Seed
+                self.labelClusterStartingSeed.setEnabled(True)
+                self.lineEditSeed.setEnabled(True)
+                self.lineEditSeed.setText(str(self.cluster_dict[method]['seed']))
         
         self.plot_clustering()
 
@@ -5127,6 +5149,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def plot_n_dim(self):
         """Produces trace element compatibility (TEC) and Radar plots"""
         df_filtered, _  = self.get_processed_data()
+
+        match self.comboBoxNorm.currentText():
+            case 'log':
+                df_filtered.loc[:,:] = 10**df_filtered.values
+            case 'mixed':
+                pass
+            case 'linear':
+                # do nothing
+                pass
         df_filtered = df_filtered[self.data[self.sample_id]['mask']]
 
         ref_i = self.comboBoxNDimRefMaterial.currentIndex()
@@ -5169,7 +5200,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             yl = [np.inf, -np.inf]
             if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['Cluster']:
                 # Get the cluster labels for the data
-                cluster_labels =self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']]
+                cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']]
 
                 df_filtered['clusters'] = cluster_labels
                 clusters = [int(c) for c in self.current_group['selected_clusters']]
@@ -5185,9 +5216,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     #store max y limit to convert the set y limit of axis
                     yl = [np.floor(np.nanmin([yl[0] , yl_tmp[0]])), np.ceil(np.nanmax([yl[1] , yl_tmp[1]]))]
 
-                ax.legend()
+                # Put a legend below current axis
+                box = ax.get_position()
+                ax.set_position([box.x0, box.y0 - box.height * 0.1,
+                                box.width, box.height * 0.9])
+                
+                ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=3, handlelength=1)
+                #ax.legend()
                 self.logax(ax, yl, 'y')
                 ax.set_ylim(yl)
+
+                if self.checkBoxShowMass.isChecked():
+                    angle = 45
+                else:
+                    angle = 0
+                ax.set_xticklabels(self.n_dim_labels(self.n_dim_list), rotation=angle)
             else:
                 ax,yl = plot_spider_norm(data=df_filtered, ref_data=self.ref_data, norm_ref_data=self.ref_data['model'][ref_i], layer=self.ref_data['layer'][ref_i], el_list=self.n_dim_list, style='Quanta', ax=ax)
                 if self.checkBoxShowMass.isChecked():

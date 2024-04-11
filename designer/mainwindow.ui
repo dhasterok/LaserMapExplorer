@@ -996,7 +996,7 @@
       <string>Activates the crop tool</string>
      </property>
      <property name="currentIndex">
-      <number>7</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="SelectAnalytePage">
       <property name="enabled">
@@ -4448,7 +4448,7 @@
        </widget>
       </widget>
      </widget>
-     <widget class="QWidget" name="PCAPage">
+     <widget class="QWidget" name="MultidimensionalPage">
       <property name="enabled">
        <bool>true</bool>
       </property>
@@ -4461,7 +4461,7 @@
        </rect>
       </property>
       <attribute name="label">
-       <string>PCA</string>
+       <string>Dimensional Reduction</string>
       </attribute>
       <widget class="QGroupBox" name="groupBox_10">
        <property name="geometry">
@@ -4481,49 +4481,36 @@
           <x>5</x>
           <y>5</y>
           <width>281</width>
-          <height>91</height>
+          <height>92</height>
          </rect>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_12">
          <item>
           <layout class="QFormLayout" name="formLayout_5">
            <item row="0" column="0">
-            <widget class="QLabel" name="labelPCANumBasis">
+            <widget class="QLabel" name="labelDimRedTechnique">
              <property name="font">
               <font>
                <pointsize>11</pointsize>
               </font>
              </property>
              <property name="text">
-              <string>No. basis</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+              <string>Technique</string>
              </property>
             </widget>
            </item>
            <item row="0" column="1">
-            <widget class="QSpinBox" name="spinBoxPCANumBasis">
-             <property name="maximumSize">
-              <size>
-               <width>150</width>
-               <height>16777215</height>
-              </size>
-             </property>
+            <widget class="QComboBox" name="ComboBoxDimRedTechnique">
              <property name="font">
               <font>
                <pointsize>11</pointsize>
               </font>
              </property>
-             <property name="toolTip">
-              <string>Number of basis vectors for dimensional reduction</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-             <property name="keyboardTracking">
-              <bool>false</bool>
-             </property>
+             <item>
+              <property name="text">
+               <string>Principal component analysis (PCA)</string>
+              </property>
+             </item>
             </widget>
            </item>
            <item row="1" column="0">
@@ -4606,55 +4593,6 @@
            </item>
           </layout>
          </item>
-         <item>
-          <layout class="QVBoxLayout" name="verticalLayout_3">
-           <item>
-            <spacer name="verticalSpacer_8">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QToolButton" name="toolButtonPCAPlot">
-             <property name="minimumSize">
-              <size>
-               <width>32</width>
-               <height>32</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>32</width>
-               <height>32</height>
-              </size>
-             </property>
-             <property name="toolTip">
-              <string>Add PCA plot to tree</string>
-             </property>
-             <property name="text">
-              <string>Plot</string>
-             </property>
-             <property name="icon">
-              <iconset resource="../resources.qrc">
-               <normaloff>:/icons/resources/icons/icon-launch-64.png</normaloff>:/icons/resources/icons/icon-launch-64.png</iconset>
-             </property>
-             <property name="iconSize">
-              <size>
-               <width>24</width>
-               <height>24</height>
-              </size>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
         </layout>
        </widget>
       </widget>
@@ -4696,7 +4634,7 @@
            <x>4</x>
            <y>20</y>
            <width>291</width>
-           <height>181</height>
+           <height>206</height>
           </rect>
          </property>
          <property name="title">
@@ -4711,7 +4649,7 @@
             <x>10</x>
             <y>5</y>
             <width>274</width>
-            <height>169</height>
+            <height>194</height>
            </rect>
           </property>
           <layout class="QFormLayout" name="formLayoutClusterSettings">
@@ -4928,6 +4866,56 @@
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
             </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QCheckBox" name="checkBox">
+             <property name="text">
+              <string>PCA</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="1">
+            <layout class="QHBoxLayout" name="horizontalLayout_11">
+             <item>
+              <widget class="QLabel" name="labelPCANumBasis">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>No. basis</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="spinBoxPCANumBasis">
+               <property name="maximumSize">
+                <size>
+                 <width>150</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>Number of basis vectors for dimensional reduction</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+               <property name="keyboardTracking">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
           </layout>
          </widget>
@@ -6353,8 +6341,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6618,8 +6606,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6717,8 +6705,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6871,8 +6859,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>219</width>
-          <height>421</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7080,8 +7068,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7184,8 +7172,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -9205,13 +9193,22 @@
     <number>8</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_4">
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
     <widget class="QTabWidget" name="tabWidget">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>5</x>
        <y>5</y>
        <width>592</width>
-       <height>231</height>
+       <height>230</height>
       </rect>
      </property>
      <property name="minimumSize">
@@ -9232,7 +9229,7 @@
       </font>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="tabNotes">
       <property name="toolTip">
@@ -9270,7 +9267,7 @@
         <rect>
          <x>5</x>
          <y>5</y>
-         <width>1096</width>
+         <width>576</width>
          <height>208</height>
         </rect>
        </property>

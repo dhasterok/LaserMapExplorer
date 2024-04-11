@@ -68,7 +68,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.buttons_layout = None  # create a reference to your layout
 
         #Initialise nested data which will hold the main sets of data for analysis
-        self.data= {}
+        self.data = {}
         
         self.clipped_ratio_data = pd.DataFrame()
         self.analyte_data = {}  #stores orginal analyte data
@@ -76,37 +76,42 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # self.data['computed_data'] = {} # stores computed analyted data (ratios, custom fields)
         self.sample_id = ''
         #self.data = {}
-        self.plot_widget_dict ={'lasermap':{},'histogram':{},'lasermap_norm':{},'clustering':{},'scatter':{},'n-dim':{},'correlation':{}, 'pca':{}}
-        self.multi_view_index = []
-        self.laser_map_dict = {}
-        self.multiview_info_label = {}
         self.selected_analytes = []
         self.n_dim_list = []
         self.group_cmap = {}
         self.lasermaps = {}
         self.proxies = []
         self.prev_plot = ''
-        self.pop_plot = ''
         self.order = 'F'
-        self.default_bins = 100
-        self.swap_xy_val = False
         self.plot_id = {'clustering':{},'scatter':{},'n-dim':{}}
         self.current_group = {'algorithm':None,'clusters': None}
         self.matplotlib_canvas = None
         self.pyqtgraph_widget = None
         self.isUpdatingTable = False
-        colormaps = pg.colormap.listMaps('matplotlib')
-        self.comboBoxFieldColormap.clear()
-        self.comboBoxFieldColormap.addItems(colormaps)
         self.cursor = False
-        self.comboBoxFieldColormap.activated.connect(self.update_all_plots)
+
+        self.plot_widget_dict ={'lasermap':{},'histogram':{},'lasermap_norm':{},'clustering':{},'scatter':{},'n-dim':{},'correlation':{}, 'multidimensional':{}}
+        self.laser_map_dict = {}
+
+        # Central widget plot view layouts
+        # single view
         layout_single_view = QtWidgets.QVBoxLayout()
         layout_single_view.setSpacing(0)
         self.widgetSingleView.setLayout(layout_single_view)
         self.widgetSingleView.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        layout_multi_view = QtWidgets.QHBoxLayout()
+
+        # multiview
+        self.multi_view_index = []
+        self.multiview_info_label = {}
+        layout_multi_view = QtWidgets.QGridLayout()
         layout_multi_view.setSpacing(0)# Set margins to 0 if you want to remove margins as well
         layout_multi_view.setContentsMargins(0, 0, 0, 0)
+
+        # quickview
+        layout_quick_view = QtWidgets.QGridLayout()
+        layout_quick_view.setSpacing(0)# Set margins to 0 if you want to remove margins as well
+        layout_quick_view.setContentsMargins(0, 0, 0, 0)
+
 
         #Flags to prevent plotting when widgets change
         self.point_selected = False
@@ -141,7 +146,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.scatter_tab_id = tid
                 case 'n-dim':
                     self.ndim_tab_id = tid
-                case 'pca':
+                case 'dimensional reduction':
                     self.pca_tab_id = tid
                 case 'clustering':
                     self.cluster_tab_id = tid
@@ -251,7 +256,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.FilterPage.setEnabled(False)
         self.ScatterPage.setEnabled(False)
         self.NDIMPage.setEnabled(False)
-        self.PCAPage.setEnabled(False)
+        self.MultidimensionalPage.setEnabled(False)
         self.ClusteringPage.setEnabled(False)
         self.ProfilingPage.setEnabled(False)
         self.SpecialFunctionPage.setEnabled(False)
@@ -309,7 +314,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Preprocess Tab
         #-------------------------
+        self.swap_xy_val = False
+
         # histogram
+        self.default_bins = 100
         self.comboBoxHistogramFieldType.activated.connect(self.histogram_field_type_callback)
         self.comboBoxHistogramField.activated.connect(self.histogram_field_callback)
         self.spinBoxNBins.setValue(self.default_bins)
@@ -436,7 +444,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # PCA Tab
         #------------------------
-        self.toolButtonPCAPlot.clicked.connect(self.plot_pca)
         self.spinBoxPCX.valueChanged.connect(self.plot_pca)
         self.spinBoxPCY.valueChanged.connect(self.plot_pca)
 
@@ -551,6 +558,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # self.doubleSpinBoxMarkerSize.valueChanged.connect(lambda: self.plot_scatter(save=False))
         #self.comboBoxColorByField.activated.connect(lambda: self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField))
 
+        # colormap
+        colormaps = pg.colormap.listMaps('matplotlib')
+        self.comboBoxFieldColormap.clear()
+        self.comboBoxFieldColormap.addItems(colormaps)
+        self.comboBoxFieldColormap.activated.connect(self.update_all_plots)
+
         # callback functions
         self.comboBoxPlotType.activated.connect(self.style_plot_type_callback)
         self.toolButtonUpdatePlot.clicked.connect(self.update_current_plot)
@@ -664,7 +677,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.FilterPage.setEnabled(True)
         self.ScatterPage.setEnabled(True)
         self.NDIMPage.setEnabled(True)
-        self.PCAPage.setEnabled(True)
+        self.MultidimensionalPage.setEnabled(True)
         self.ClusteringPage.setEnabled(True)
         self.ProfilingPage.setEnabled(True)
         self.SpecialFunctionPage.setEnabled(True)
@@ -881,7 +894,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.toolBox.setCurrentIndex(self.scatter_tab_id)
             case 'ndim':
                 self.toolBox.setCurrentIndex(self.ndim_tab_id)
-            case 'pca':
+            case 'multidimensional':
                 self.toolBox.setCurrentIndex(self.pca_tab_id)
             case 'clustering':
                 self.toolBox.setCurrentIndex(self.cluster_tab_id)
@@ -1445,7 +1458,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if selection =='full':
             #reset self.data
             self.data = {}
-            self.plot_widget_dict ={'lasermap':{},'histogram':{},'lasermap_norm':{},'clustering':{},'scatter':{},'n-dim':{},'correlation':{}, 'pca':{}}
+            self.plot_widget_dict ={'lasermap':{},'histogram':{},'lasermap_norm':{},'clustering':{},'scatter':{},'n-dim':{},'correlation':{}, 'multidimensional':{}}
             self.multi_view_index = []
             self.laser_map_dict = {}
             self.multiview_info_label = {}
@@ -4720,7 +4733,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         plot_name = pca_plot_type
         sample_id = self.sample_id
-        plot_type = 'pca'  # Assuming all PCA plots fall under a common plot type
+        plot_type = 'multidimensional'  # Assuming all PCA plots fall under a common plot type
 
         plot_exist = plot_name in self.plot_widget_dict[plot_type][sample_id]
         duplicate = plot_exist and len(self.plot_widget_dict[plot_type][sample_id][plot_name]['view']) == 1 and self.plot_widget_dict[plot_type][sample_id][plot_name]['view'][0] != self.canvasWindow.currentIndex()
@@ -4761,7 +4774,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     
                 # Additional steps to add the PCA widget to the appropriate container in the UI
                 self.add_plot(plot_information)
-                self.update_tree(plot_information['plot_name'], data = plot_information, tree = 'PCA')
+                self.update_tree(plot_information['plot_name'], data = plot_information, tree = 'multidimensional')
         else:
             self.update_pca_plot(pca_dict, pca_plot_type)
     def update_pca_plot(self, pca_dict, pca_plot_type, ax=None):
@@ -4834,7 +4847,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 pc_x = int(self.comboBoxColorField.currentIndex()) + 1
                 pca_df = pca_dict['results']
                 # Assuming pca_df contains scores for the principal components
-                self.plot_clustering_result(ax,pca_df[f'PC{pc_x}'].values,'PCA')
+                self.plot_clustering_result(ax,pca_df[f'PC{pc_x}'].values,'Multidimensional')
                 xlbl ='Sample Index'
                 ylbl = f'PC{pc_x} Score'
                 ttxt = f'PCA Score Map for PC{pc_x}'
@@ -5010,7 +5023,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             img = ax.imshow(reshaped_array, cmap=cmap,  aspect=aspect_ratio)
             # img = ax.imshow(reshaped_array, cmap=cmap,  aspect='equal')
             fig.colorbar(img, ax=ax, orientation=style['Colors']['Direction'])
-        elif method_name == 'PCA':
+        elif method_name == 'Multidimensonal':
             aspect_ratio = (y_range/self.data[self.sample_id]['computed_data']['PCA Score']['Y'].nunique())/ (x_range/self.data[self.sample_id]['computed_data']['PCA Score']['X'].nunique())
             style = self.styles['PCA Score']
             
@@ -5896,15 +5909,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             treeView.setHeaderHidden(True)
             self.treeModel = QStandardItemModel()
             rootNode = self.treeModel.invisibleRootItem()
-            self.analytes_items = StandardItem('Analyte', 14, True)
-            self.norm_analytes_items = StandardItem('Normalised analyte', 14, True)
-            self.ratios_items = StandardItem('Ratio', 14, True)
-            self.histogram_items = StandardItem('Histogram', 14, True)
-            self.correlation_items = StandardItem('Correlation', 14, True)
-            self.scatter_items = StandardItem('Scatter', 14, True)
-            self.n_dim_items = StandardItem('n-Dim', 14, True)
-            self.pca_items = StandardItem('PCA', 14, True)
-            self.clustering_items = StandardItem('Clustering', 14, True)
+            self.analytes_items = StandardItem('Analyte', 12, True)
+            self.norm_analytes_items = StandardItem('Normalised analyte', 12, True)
+            self.ratios_items = StandardItem('Ratio', 12, True)
+            self.histogram_items = StandardItem('Histogram', 12, True)
+            self.correlation_items = StandardItem('Correlation', 12, True)
+            self.scatter_items = StandardItem('Scatter', 12, True)
+            self.n_dim_items = StandardItem('n-Dim', 12, True)
+            self.pca_items = StandardItem('Multidimensional', 12, True)
+            self.clustering_items = StandardItem('Clustering', 12, True)
 
             rootNode.appendRows([self.analytes_items,self.norm_analytes_items,self.ratios_items,self.histogram_items,self.correlation_items, self.scatter_items,
                                  self.n_dim_items, self.pca_items, self.clustering_items])
@@ -5913,10 +5926,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             treeView.doubleClicked.connect(self.tree_double_click)
         elif sample_id:
             #self.analytes_items.setRowCount(0)
-            sample_id_item = StandardItem(sample_id, 13)
-            histogram_sample_id_item = StandardItem(sample_id, 13)
-            ratio_sampe_id_item = StandardItem(sample_id, 13)
-            norm_sample_id_item = StandardItem(sample_id, 13)
+            sample_id_item = StandardItem(sample_id, 11)
+            histogram_sample_id_item = StandardItem(sample_id, 11)
+            ratio_sampe_id_item = StandardItem(sample_id, 11)
+            norm_sample_id_item = StandardItem(sample_id, 11)
             for analyte in self.data[sample_id]['analyte_info'].loc[:,'analytes']:
                 analyte_item = StandardItem(analyte)
                 sample_id_item.appendRow(analyte_item)
@@ -5957,7 +5970,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.create_plot(current_plot_df,sample_id = level_2_data, plot_type='lasermap', analyte_1=analytes[0], analyte_2=analytes[1])
 
 
-        elif ((level_1_data == 'Clustering') or (level_1_data=='Scatter') or (level_1_data=='n-dim') or (level_1_data=='PCA')or (level_1_data=='Correlation')):
+        elif ((level_1_data == 'Clustering') or (level_1_data=='Scatter') or (level_1_data=='n-dim') or (level_1_data=='Multidimensional')or (level_1_data=='Correlation')):
             plot_info={'plot_name':level_3_data, 'plot_type':level_1_data.lower(),'sample_id':level_2_data }
             self.add_plot(plot_info)
 
@@ -6002,7 +6015,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         elif tree == 'n-Dim':
             self.add_tree_item(self.sample_id,self.n_dim_items,leaf,data)
 
-        elif tree == 'PCA':
+        elif tree == 'Multidimensional':
             self.add_tree_item(self.sample_id,self.pca_items,leaf,data)
         elif tree == 'Correlation':
             self.add_tree_item(self.sample_id,self.correlation_items,leaf,data)

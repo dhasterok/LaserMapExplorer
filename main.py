@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QHBoxLayout, QVBoxLayout, QGridLayout, QMessageBox
+from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QHBoxLayout, QVBoxLayout, QGridLayout, QMessageBox, QHeaderView
 from PyQt5.QtWidgets import QFileDialog, QProgressDialog, QWidget, QTabWidget, QDialog, QLabel, QListWidgetItem, QTableWidget, QInputDialog, QAbstractItemView
 from PyQt5.Qt import QStandardItemModel,QStandardItem
 from pyqtgraph import PlotWidget, ScatterPlotItem, mkPen, AxisItem, PlotDataItem
@@ -209,28 +209,35 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # update default styles
         for k in self.styles.keys():
-            self.styles[k]['Text']['Font'] = self.fontComboBox.currentFont()
+            self.styles[k]['Text']['Font'] = self.fontComboBox.currentFont().family()
 
         self.styles['analyte map']['Colors']['Colormap'] = 'plasma'
         self.styles['analyte map']['Colors']['ColorByField'] = 'Analyte'
+
+        self.styles['correlation']['Axes']['Aspect Ratio'] = 1.0
+        self.styles['correlation']['Text']['FontSize'] = 8
         self.styles['correlation']['Colors']['Colormap'] = 'RdBu'
+        self.styles['correlation']['Colors']['Direction'] = 'vertical'
+
+        self.styles['vectors']['Axes']['Aspect Ratio'] = 1.0
         self.styles['vectors']['Colors']['Colormap'] = 'RdBu'
+        self.styles['vectors']['Colors']['Direction'] = 'vertical'
+
         self.styles['gradient map']['Colors']['Colormap'] = 'RdYlBu'
+
         self.styles['Cluster Score']['Colors']['Colormap'] = 'plasma'
+        self.styles['Cluster Score']['Colors']['Direction'] = 'vertical'
 
         self.styles['PCA Score']['Colors']['ColorByField'] = 'PCA Score'
         self.styles['Cluster Score']['Colors']['ColorByField'] = 'Cluster Score'
 
-        self.styles['correlation']['Axes']['Aspect Ratio'] = 1.0
         self.styles['scatter']['Axes']['Aspect Ratio'] = 1.62
         self.styles['heatmap']['Axes']['Aspect Ratio'] = 1.62
         self.styles['TEC']['Axes']['Aspect Ratio'] = 1.62
-        self.styles['vectors']['Axes']['Aspect Ratio'] = 1.0
         self.styles['variance']['Axes']['Aspect Ratio'] = 1.62
         self.styles['PCx vs. PCy scatter']['Axes']['Aspect Ratio'] = 1.62
         self.styles['PCx vs. PCy heatmap']['Axes']['Aspect Ratio'] = 1.62
 
-        self.styles['correlation']['Text']['FontSize'] = 8
         self.styles['variance']['Text']['FontSize'] = 8
 
         self.styles['profile']['Lines']['LineWidth'] = 1.0
@@ -375,6 +382,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #-------------------------
         self.spotdata = {}
 
+        # spot table
+        header = self.tableWidgetSpots.horizontalHeader()
+        header.setSectionResizeMode(0,QHeaderView.Stretch)
+        header.setSectionResizeMode(1,QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(2,QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(3,QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(4,QHeaderView.Stretch)
+
         # Filter Tabs
         #-------------------------
         # left pane
@@ -442,6 +457,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxTernaryColormap.currentIndexChanged.connect(lambda: self.ternary_colormap_changed())
         self.ternary_colormap_changed()
 
+        # polygon table
+        header = self.tableWidgetPolyPoints.horizontalHeader()
+        header.setSectionResizeMode(0,QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1,QHeaderView.Stretch)
+        header.setSectionResizeMode(2,QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(3,QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(4,QHeaderView.ResizeToContents)
+
         # PCA Tab
         #------------------------
         self.spinBoxPCX.valueChanged.connect(self.plot_pca)
@@ -504,6 +527,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonNDimRemove.clicked.connect(lambda: self.table_fcn.delete_row(self.tableWidgetNDim))
         #self.toolButtonNDimSaveList.clicked.connect(self.ndim_table.save_list)
 
+        # N-dim table
+        header = self.tableWidgetNDim.horizontalHeader()
+        header.setSectionResizeMode(0,QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1,QHeaderView.Stretch)
+        header.setSectionResizeMode(2,QHeaderView.Stretch)
 
         # Profile Tab
         #-------------------------
@@ -558,6 +586,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # self.doubleSpinBoxMarkerSize.valueChanged.connect(lambda: self.plot_scatter(save=False))
         #self.comboBoxColorByField.activated.connect(lambda: self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField))
 
+        # cluster table
+        header = self.tableWidgetViewGroups.horizontalHeader()
+        header.setSectionResizeMode(0,QHeaderView.Stretch)
+        header.setSectionResizeMode(1,QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(2,QHeaderView.ResizeToContents)
+
         # colormap
         colormaps = pg.colormap.listMaps('matplotlib')
         self.comboBoxFieldColormap.clear()
@@ -601,6 +635,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.lineEditCbarLabel.editingFinished.connect(self.cbar_label_callback)
 
         self.toolBox.currentChanged.connect(self.toolbox_changed)
+
+        # Profile filter tab
+        #-------------------------
+        header = self.tableWidgetFilters.horizontalHeader()
+        header.setSectionResizeMode(0,QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1,QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(2,QHeaderView.Stretch)
+        header.setSectionResizeMode(3,QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(4,QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(5,QHeaderView.ResizeToContents)
+
 
         # Plot toolbar
         #-------------------------
@@ -3304,7 +3349,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.lineEditAspectRatio.setText(str(style['Axes']['AspectRatio']))
 
         # annotation properties
-        self.fontComboBox.setFont(style['Text']['Font'])
+        #self.fontComboBox.setCurrentFont(style['Text']['Font'])
         self.doubleSpinBoxFontSize.setValue(style['Text']['FontSize'])
 
         # scalebar properties
@@ -3454,10 +3499,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------
     def font_callback(self):
         plot_type = self.comboBoxPlotType.currentText()
-        if self.styles[plot_type]['Text']['Font'] == self.fontComboBox.currentText():
+        if self.styles[plot_type]['Text']['Font'] == self.fontComboBox.currentText().family():
             return
 
-        self.styles[plot_type]['Text']['Font'] = self.fontComboBox.currentText()
+        self.styles[plot_type]['Text']['Font'] = self.fontComboBox.currentText().family()
         self.update_current_plot(save=False)
 
 
@@ -3845,7 +3890,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     ax = fig.add_subplot(111)
                     if plot_type =='Cluster':
                         groups = self.data[self.sample_id]['computed_data']['Cluster'][name]
-                        plot_information = {
+                        plot_info = {
                             'plot_name': name,
                             'sample_id': self.sample_id,
                             'plot_type': plot_type,
@@ -3854,7 +3899,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         }
                     else:
                         groups = self.data[self.sample_id]['computed_data']['Cluster Score'][field]
-                        plot_information = {
+                        plot_info = {
                             'plot_name': f'Fuzzy{field}' ,
                             'sample_id': self.sample_id,
                             'plot_type': plot_type,
@@ -3863,7 +3908,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         }
                     self.plot_clustering_result(ax, groups.values, name)
 
-                    self.newplot(fig, 'Clustering', plot_information, save)
+                    self.new_plot_widget(plot_info, save)
     
         # self.styles = {'analyte map': copy.deepcopy(self.default_styles),
         #                 'correlation': copy.deepcopy(self.default_styles),
@@ -3883,7 +3928,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #                 'Cluster Score': copy.deepcopy(self.default_styles),
         #                 'profile': copy.deepcopy(self.default_styles)}
 
-    def newplot(self, plot_info, save):
+    def new_plot_widget(self, plot_info, save):
         """Creates new figure widget
 
         :param plot_info: plot dictionary
@@ -3891,7 +3936,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :param save: if the new plot should be saved to be recalled later
         :type save: bool
         """
-        print('newplot')
+        print('new_plot_widget')
         # Create a plot widget
         plotWidget = QtWidgets.QWidget()
 
@@ -4127,22 +4172,40 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Calculate the correlation matrix
         method = self.comboBoxCorrelationMethod.currentText().lower()
         correlation_matrix = df_filtered.corr(method=method)
+        columns = correlation_matrix.columns
 
         fig = Figure()
         ax = fig.add_subplot(111)
 
         style = self.styles['correlation']
+        font = {'size':style['Text']['FontSize']}
 
         #mask = np.triu(np.ones_like(correlation_matrix, dtype=bool))
-        #cax = ax.imshow(correlation_matrix[mask], cmap=plt.get_cmap(s['Colors']['Colormap']))
+        #cax = ax.imshow(correlation_matrix[mask], cmap=plt.get_cmap(style['Colors']['Colormap']))
+        mask = np.zeros_like(correlation_matrix, dtype=bool)
+        mask[np.tril_indices_from(mask)] = True
+        correlation_matrix = np.ma.masked_where(mask, correlation_matrix)
         cax = ax.imshow(correlation_matrix, cmap=plt.get_cmap(style['Colors']['Colormap']))
+        ax.spines['top'].set_visible(False)
+        ax.spines['bottom'].set_visible(False)
+        ax.spines['left'].set_visible(False)
+        ax.spines['right'].set_visible(False)
 
         # Add colorbar to the plot
-        cbar = fig.colorbar(cax, ax=ax)
-        cbar.set_label(['Corr. coeff. ('+self.comboBoxCorrelationMethod.currentText(),')'])
+        if style['Colors']['Direction'] == 'vertical':
+            cbar = fig.colorbar(cax, ax=ax, orientation=style['Colors']['Direction'], location='left', shrink=0.62, fraction=0.1)
+            cbar.set_label('Corr. coeff. ('+self.comboBoxCorrelationMethod.currentText()+')', size=style['Text']['FontSize'])
+            cbar.ax.tick_params(labelsize=style['Text']['FontSize'])
+        elif style['Colors']['Direction'] == 'horizontal':
+            cbar = fig.colorbar(cax, ax=ax, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62, fraction=0.1)
+            cbar.set_label('Corr. coeff. ('+self.comboBoxCorrelationMethod.currentText()+')', size=style['Text']['FontSize'])
+            cbar.ax.tick_params(labelsize=style['Text']['FontSize'])
+        else:
+            cbar = fig.colorbar(cax, ax=ax, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62, fraction=0.1)
+
 
         # Set tick labels
-        ticks = np.arange(len(correlation_matrix.columns))
+        ticks = np.arange(len(columns))
         ax.tick_params(length=0, labelsize=8,
                         labelbottom=False, labeltop=True, labelleft=False, labelright=True,
                         bottom=False, top=True, left=False, right=True)
@@ -4150,10 +4213,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         ax.set_yticks(ticks, minor=False)
         ax.set_xticks(ticks, minor=False)
 
-        labels = self.n_dim_labels(correlation_matrix.columns)
-
-        ax.set_xticklabels(labels, ha='left')
-        ax.set_yticklabels(labels, rotation=90, ha='left')
+        labels = self.toggle_mass(columns)
+        
+        ax.set_xticklabels(labels, rotation=90, ha='center', va='bottom', fontproperties=font)
+        ax.set_yticklabels(labels, ha='left', va='center', fontproperties=font)
 
         ax.set_title('')
 
@@ -4165,7 +4228,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'style': style
         }
 
-        self.newplot(plot_info, save=False)
+        self.new_plot_widget(plot_info, save=False)
 
 
     # -------------------------------------
@@ -4455,7 +4518,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 'figure': fig,
                 'style': style
             }
-            self.newplot(fig, 'Scatter', plot_information, save)
+            self.new_plot_widget(fig, 'Scatter', plot_information, save)
 
     def ternary_scatter(self, fig, x, y, z, c, style, save):
         """Creates ternary scatter plots
@@ -4513,7 +4576,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 'figure': fig,
                 'style': style
             }
-            self.newplot(fig, 'Scatter', plot_information, save)
+            self.new_plot_widget(fig, 'Scatter', plot_information, save)
 
     def hist2dbiplot(self, fig, x, y, style, save):
         """Creates 2D histogram figure
@@ -4577,7 +4640,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 'figure': fig,
                 'style': style
             }
-            self.newplot(fig, 'Scatter', plot_information, save)
+            self.new_plot_widget(fig, 'Scatter', plot_information, save)
 
     def hist2dternplot(self, fig, x, y, z, style, save, c=None):
         """Creates a ternary histogram figure
@@ -4644,9 +4707,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 'figure': fig,
                 'style': style
             }
-            self.newplot(fig, 'Scatter', plot_information, save)
+            self.new_plot_widget(fig, 'Scatter', plot_information, save)
 
-    def plot_ternarymap(self):
+    def plot_ternarymap(self, fig):
         """Creates map colored by ternary coordinate positions"""
         style = self.styles['ternary map']
 
@@ -4654,7 +4717,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             a, b, c = self.get_scatter_values() #get scatter values from elements chosen
         else:
             # get saved scatter values to update plot
-            a, b, c,  = values
+            a, b, c = values
 
         selected_sample = self.data[self.sample_id]
 
@@ -4667,10 +4730,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             axs = [fig.add_subplots(['left' 'center']), fig.add_subplots(['right'])]
         else:
             new = False
-
-        a['array'] = self.clipped_isotope_data[self.sample_id][x['field']].values
-        b['array'] = self.clipped_isotope_data[self.sample_id][y['field']].values
-        c['array'] = self.clipped_isotope_data[self.sample_id][z['field']].values
 
         ternary.ternmap(ax, selected_sample['X'],selected_sample['Y'], a,b,c, ca=[1,1,0], cb=[0.3,0.73,0.1], cc=[0,0,0.15], p=[1/3,1/3,1/3], cp = [])
 
@@ -5121,7 +5180,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------
     # TEC and Radar plots
     # -------------------------------------
-    def n_dim_labels(self, labels):
+    def toggle_mass(self, labels):
         """Removes mass from labels
 
         Removes mass if ``MainWindow.checkBoxShowMass.isChecked()`` is False
@@ -5167,20 +5226,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case 3:
                 quantiles = [0.05, 0.25, 0.5, 0.75, 0.95]
 
+        clusters = [int(c) for c in self.current_group['selected_clusters']]
+
         if plot_name == 'Radar':
             axes_interval = 5
             if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['Cluster']:
                 # Get the cluster labels for the data
-                # cluster_labels = self.n_dim_labels(self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']])
+                # cluster_labels = self.toggle_mass(self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']])
                 cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']]
 
                 df_filtered['clusters'] = cluster_labels
-                clusters = [int(c) for c in self.current_group['selected_clusters']]
                 df_filtered = df_filtered[df_filtered['clusters'].isin(clusters)]
                 radar = Radar(df_filtered, fields = self.n_dim_list, quantiles=quantiles, axes_interval = axes_interval, group_field ='clusters', groups =clusters)
 
                 fig,ax = radar.plot(cmap = self.group_cmap)
-                ax.legend()
+                ax.legend(loc='upper right', frameon='False')
             else:
                 radar = Radar(df_filtered, fields = self.n_dim_list, quantiles=quantiles, axes_interval = axes_interval, group_field ='', groups = None)
 
@@ -5194,7 +5254,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']]
 
                 df_filtered['clusters'] = cluster_labels
-                clusters = [int(c) for c in self.current_group['selected_clusters']]
 
                 # Plot tec for all clusters
                 for i in clusters:
@@ -5221,22 +5280,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     angle = 45
                 else:
                     angle = 0
-                ax.set_xticklabels(self.n_dim_labels(self.n_dim_list), rotation=angle)
+                ax.set_xticklabels(self.toggle_mass(self.n_dim_list), rotation=angle)
             else:
                 ax,yl = plot_spider_norm(data=df_filtered, ref_data=self.ref_data, norm_ref_data=self.ref_data['model'][ref_i], layer=self.ref_data['layer'][ref_i], el_list=self.n_dim_list, style='Quanta', ax=ax)
                 if self.checkBoxShowMass.isChecked():
                     angle = 45
                 else:
                     angle = 0
-                ax.set_xticklabels(self.n_dim_labels(self.n_dim_list), rotation=angle)
+                ax.set_xticklabels(self.toggle_mass(self.n_dim_list), rotation=angle)
             ax.set_ylabel('Abundance / ['+self.ref_data['model'][ref_i]+', '+self.ref_data['layer'][ref_i]+']')
             fig.tight_layout()
-        widgetNDim = QtWidgets.QWidget()
-        widgetNDim.setLayout(QtWidgets.QVBoxLayout())
-        figure_canvas = FigureCanvas(fig)
-
-        widgetNDim.setObjectName('plotNDim')
-        widgetNDim.layout().addWidget(figure_canvas)
 
 
         plot_type = 'n-dim'
@@ -5245,27 +5298,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.plot_id[plot_type][self.sample_id]  = self.plot_id[plot_type][self.sample_id]+1
         else:
             self.plot_id[plot_type][self.sample_id]  = 0
-        plot_name =  plot_name +'_'+str(self.plot_id[plot_type][self.sample_id])
+        plot_name = plot_name +'_'+str(self.plot_id[plot_type][self.sample_id])
 
-
-        toolbar = NavigationToolbar(figure_canvas)  # Create the toolbar for the canvas
-        toolbar.hide()
-        # widgetNDim.layout().addWidget(toolbar)
-        self.plot_widget_dict[plot_type][self.sample_id][plot_name] = {'widget': [widgetNDim],
-                                                              'info': {'plot_type': plot_type, 'sample_id': self.sample_id},
-                                                              'view': [self.canvasWindow.currentIndex()]}
-        plot_information = {
+        plot_info = {
             'plot_name': f'{plot_name}',
             'sample_id': self.sample_id,
             'plot_type': plot_type,
             'figure': fig,
             'style': style
         }
-        self.update_tree(plot_information['plot_name'], data = plot_information, tree = 'n-Dim')
-        self.add_plot(plot_information)
+
+        self.new_plot_widget(plot_info, save=False)
 
     def update_n_dim_table(self,calling_widget):
-
+        """Updates N-Dim table
+        
+        :param calling_widget:
+        :type calling_widget: QWidget
+        """
         def on_use_checkbox_state_changed(row, state):
             # Update the 'use' value in the filter_df for the given row
             self.data[self.sample_id]['filter_info'].at[row, 'use'] = state == QtCore.Qt.Checked
@@ -5310,8 +5360,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             chkBoxItem_select.setCheckState(QtCore.Qt.Unchecked)
             norm = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes'] == analyte)].iloc[0]['norm']
-
-
 
             self.tableWidgetNDim.setCellWidget(row, 0, chkBoxItem_use)
             self.tableWidgetNDim.setItem(row, 1,
@@ -5366,7 +5414,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Clear the list widget
         self.tableWidgetViewGroups.clear()
-        self.tableWidgetViewGroups.setHorizontalHeaderLabels(['ID','Name','Link','Color'])
+        self.tableWidgetViewGroups.setHorizontalHeaderLabels(['Name','Link','Color'])
         algorithm = ''
         # Check which radio button is checked and update the list widget
         if self.comboBoxClusterMethod.currentText().lower() == 'none':
@@ -5390,8 +5438,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     # item = QTableWidgetItem(str(c))
                     # Initialize the flag
                     self.isUpdatingTable = True
-                    self.tableWidgetViewGroups.setItem(i, 0, QTableWidgetItem(str(c)))
-                    self.tableWidgetViewGroups.setItem(i, 1, QTableWidgetItem(cluster_dict[c]))
+                    self.tableWidgetViewGroups.setItem(i, 0, QTableWidgetItem(cluster_dict[c]))
                     self.tableWidgetViewGroups.selectRow(i)
                     
                 
@@ -5409,16 +5456,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             new_name = item.text()
 
             row = item.row()
+            if item.column() > 0:
+                return
 
             # Extract the cluster id (assuming it's stored in the table)
             cluster_id = int(self.tableWidgetViewGroups.item(row,0).text())
-            
-            
         
             old_name = self.current_group['clusters'][cluster_id]
             # Check for duplicate names
             for i in range(self.tableWidgetViewGroups.rowCount()):
-                if i != row and self.tableWidgetViewGroups.item(i, 1).text() == new_name:
+                if i != row and self.tableWidgetViewGroups.item(i, 0).text() == new_name:
                     # Duplicate name found, revert to the original name and show a warning
                     item.setText(old_name)
                     print("Duplicate name not allowed.")

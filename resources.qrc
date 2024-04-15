@@ -76,5 +76,16 @@
         <file>resources/icons/icon-marker-64.png</file>
         <file>resources/icons/icon-text-64.png</file>
         <file>resources/icons/icon-tree-64.png</file>
+        <file>resources/icons/icon-error-64.png</file>
+        <file>resources/icons/icon-question-64.png</file>
+        <file>resources/icons/icon-warning-64.png</file>
+        <file>resources/icons/icon-image-64.png</file>
+        <file>resources/icons/icon-info-64.png</file>
+        <file>resources/icons/icon-pdf-64.png</file>
+        <file>resources/icons/icon-bold-64.png</file>
+        <file>resources/icons/icon-bullet-list-64.png</file>
+        <file>resources/icons/icon-italics-64.png</file>
+        <file>resources/icons/icon-numbered-list-64.png</file>
+        <file>resources/icons/icon-heading-64.png</file>
     </qresource>
 </RCC>

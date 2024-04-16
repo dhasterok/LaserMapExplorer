@@ -4512,7 +4512,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------
     # Scatter/Heatmap functions
     # -------------------------------------
-    def plot_scatter(self, return_flag=False):
+    def plot_scatter(self, canvas=None):
         """Creates a plots from self.toolBox Scatter page.
 
         Creates both scatter and heatmaps (spatial histograms) for bi- and ternary plots.
@@ -4527,7 +4527,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         plot_type = self.comboBoxPlotType.currentText()
         style = self.styles[plot_type]
 
-        canvas = MplCanvas()
+        if canvas is None:
+            plot_flag = True
+            canvas = MplCanvas()
+        else:
+            plot_flag = False
         
         # get data for plotting
         x, y, z, c = self.get_scatter_values(plot_type)
@@ -4554,9 +4558,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 else:
                     self.hist2dternplot(canvas,x,y,z,style,c=c)
         
-        if return_flag:
-            return canvas
-        else:
+        if plot_flag:
             self.clear_view_widget(self.widgetSingleView.layout())
             self.widgetSingleView.layout().addWidget(canvas)
 
@@ -4823,6 +4825,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # PCA functions and plotting
     # -------------------------------------
     def compute_pca(self):
+        print('compute_pca')
         self.pca_results = {}
 
         df_filtered, analytes = self.get_processed_data()
@@ -4885,7 +4888,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 plot_name = plot_type+f'_PC{pc_x}_PC{pc_y}'
                 # Assuming pca_df contains scores for the principal components
                 # uncomment to use plot scatter instead of ax.scatter
-                canvas = self.plot_scatter()
+                canvas = MplCanvas()
+                self.plot_scatter(canvas=canvas)
 
             # make a map of a principal component score
             case 'pca score':
@@ -4906,7 +4910,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'figure': canvas,
             'style': self.styles[plot_type]
             }
-        
+
         self.clear_view_widget(self.widgetSingleView.layout())
         self.widgetSingleView.layout().addWidget(canvas)
     
@@ -5045,6 +5049,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 print('(MainWindow.plot_score_map) Unknown score type'+plot_type)
                 return canvas
 
+        print(list(self.data[self.sample_id]['computed_data']['Cluster Score']['fuzzy c-means'].keys()))
         reshaped_array = np.reshape(self.data[self.sample_id]['computed_data'][plot_type][field].values, self.array_size, order=self.order)
 
         cax = canvas.axes.imshow(reshaped_array, cmap=style['Colors']['Colormap'],  aspect=self.aspect_ratio, interpolation='none')
@@ -5100,6 +5105,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         return canvas
 
     def compute_clusters(self):
+        print('compute_clusters')
         if self.sample_id == '':
             return
 

@@ -1,7 +1,7 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QHBoxLayout, QVBoxLayout, QGridLayout, QMessageBox, QHeaderView, QMenu
 from PyQt5.QtWidgets import QFileDialog, QProgressDialog, QWidget, QTabWidget, QDialog, QLabel, QListWidgetItem, QTableWidget, QInputDialog, QAbstractItemView
-from PyQt5.Qt import QStandardItemModel,QStandardItem,QTextCursor
+from PyQt5.Qt import QStandardItemModel, QStandardItem, QTextCursor
 from pyqtgraph import PlotWidget, ScatterPlotItem, mkPen, AxisItem, PlotDataItem
 from pyqtgraph.Qt import QtWidgets
 from pyqtgraph.GraphicsScene import exportDialog
@@ -20,7 +20,7 @@ from matplotlib.collections import PathCollection
 import matplotlib.pyplot as plt
 from matplotlib.path import Path
 from PyQt5.QtWidgets import QStyledItemDelegate
-from PyQt5.QtCore import Qt, QObject
+from PyQt5.QtCore import Qt, QObject, QTimer
 from PyQt5.QtGui import QPainter, QBrush, QColor
 from PyQt5.QtCore import pyqtSignal
 from src.rotated import RotatedHeaderView
@@ -52,6 +52,7 @@ from scipy.signal import convolve2d, wiener
 from PyQt5.QtWidgets import QGraphicsRectItem
 from PyQt5.QtCore import QRectF, Qt, QPointF
 from PyQt5.QtGui import QPen, QColor, QCursor
+from datetime import datetime
 import copy
 
 pg.setConfigOption('imageAxisOrder', 'row-major') # best performance
@@ -285,7 +286,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Menu and Toolbar
         #-------------------------
         # Connect the "Open" action to a function
-        self.actionOpen.triggered.connect(self.open_directory)
+        self.actionOpenDirectory.triggered.connect(self.open_directory)
         # Intialize Tabs as not enabled
         self.SelectAnalytePage.setEnabled(False)
         self.PreprocessPage.setEnabled(False)
@@ -546,9 +547,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Scatter and Ternary Tab
         #-------------------------
-        self.comboBoxFieldX.activated.connect(lambda: self.plot_scatter(save=False))
-        self.comboBoxFieldY.activated.connect(lambda: self.plot_scatter(save=False))
-        self.comboBoxFieldZ.activated.connect(lambda: self.plot_scatter(save=False))
+        self.comboBoxFieldX.activated.connect(lambda: self.plot_scatter())
+        self.comboBoxFieldY.activated.connect(lambda: self.plot_scatter())
+        self.comboBoxFieldZ.activated.connect(lambda: self.plot_scatter())
 
 
         # N-Dim Tab
@@ -690,16 +691,28 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Notes tab
         #-------------------------
+        self.notes_file = None
         self.textEditNotes.setFont(QFont("Monaco", 10))
         self.toolButtonNotesImage.clicked.connect(self.notes_add_image)
-        self.toolButtonNotesHeading.setStyleSheet('QToolButton::menu-indicator { image: none; }')
 
+        # heading menu
         hmenu_items = ['H1','H2','H3']
         formatHeadingMenu = QMenu()
         formatHeadingMenu.triggered.connect(lambda x:self.add_header_line(x.text()))
         self.add_menu(hmenu_items,formatHeadingMenu)
 
+        #self.toolButtonNotesHeading.setStyleSheet('QToolButton::indicator { image: resources/icons/icon-heading-64.png; };')
+        #self.toolButtonNotesHeading.setStyleSheet('QToolButton::menu-indicator{ width:5px; };')
         self.toolButtonNotesHeading.setMenu(formatHeadingMenu)
+
+        # info menu
+        infomenu_items = ['Sample info','List analytes used','Current plot details','Filter table','PCA results','Cluster results']
+        notesInfoMenu = QMenu()
+        notesInfoMenu.triggered.connect(lambda x:self.add_info_note(x.text()))
+        self.add_menu(infomenu_items,notesInfoMenu)
+
+        #self.toolButtonNotesInfo.setStyleSheet('QToolButton::menu-indicator { image: none; }')
+        self.toolButtonNotesInfo.setMenu(notesInfoMenu)
 
         # Plot toolbar
         #-------------------------
@@ -724,6 +737,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.toolbox_changed()
 
+        self.autosaveTimer = QTimer()
+        self.autosaveTimer.setInterval(300000)
+        self.autosaveTimer.timeout.connect(self.save_notes_file)
+
         # ----start debugging----
         # self.test_get_field_list()
         # ----end debugging----
@@ -734,7 +751,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def open_directory(self):
         """Open directory with samples
 
-        Executes on self.toolBar.actionOpen and self.menuFile.action.Open_Directory.  self.toolBox
+        Executes on self.toolBar.actionOpen and self.menuFile.action.OpenDirectory.  self.toolBox
         pages are enabled upon successful load.
 
         Opens a dialog to select directory filled with samples.  Updates sample list in
@@ -794,6 +811,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             index of sample name for identifying data.  The values are based on the
             comboBoxSampleID
         """
+        # stop autosave timer
+        self.save_notes_file()
+        self.autosaveTimer.stop()
+        
         if self.data:
             # Create and configure the QMessageBox
             messageBoxChangeSample = QMessageBox()
@@ -808,24 +829,25 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # Display the dialog and wait for user action
             response = messageBoxChangeSample.exec_()
 
-
             if response == QMessageBox.Save:
                 self.save_analysis()
                 self.reset_analysis('sample')
-
-
             elif response == QMessageBox.Discard:
                 self.reset_analysis('sample')
             else: #user pressed cancel
                 self.comboBoxSampleId.setCurrentText(self.sample_id)
                 return
 
-
-
         file_path = os.path.join(self.selected_directory, self.csv_files[index])
         self.sample_id = os.path.splitext(self.csv_files[index])[0]
 
-
+        # notes and autosave timer
+        self.notes_file = self.selected_directory + '/' + self.sample_id + '.rst'
+        # open notes file if it exists
+        with open(self.notes_file,'r') as file:
+            self.textEditNotes.setText(file.read())
+        # put current notes into self.textEditNotes
+        self.autosaveTimer.start()
 
         # print(self.sample_id)
         ####
@@ -3882,7 +3904,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case 'scatter' | 'heatmap':
                 if self.comboBoxFieldX.currentText() == self.comboBoxFieldY.currentText():
                     return
-                self.plot_scatter(save=save) 
+                self.plot_scatter()
             case 'variance' | 'vectors' | 'pca scatter' | 'pca heatmap' | 'PCA Score':
                 self.plot_pca()
             case 'Cluster' | 'Cluster Score':
@@ -4490,7 +4512,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------
     # Scatter/Heatmap functions
     # -------------------------------------
-    def plot_scatter(self, values=None, fig=None, save=False):
+    def plot_scatter(self, return_flag=False):
         """Creates a plots from self.toolBox Scatter page.
 
         Creates both scatter and heatmaps (spatial histograms) for bi- and ternary plots.
@@ -4504,15 +4526,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         plot_type = self.comboBoxPlotType.currentText()
         style = self.styles[plot_type]
+
+        canvas = MplCanvas()
         
-        
-        # update plot style parameters
-        if not values:
-            x, y, z, c = self.get_scatter_values(plot_type) #get scatter values from elements chosen
-        else:
-            # get saved scatter values to update plot
-            x, y, z, c = values
-        
+        # get data for plotting
+        x, y, z, c = self.get_scatter_values(plot_type)
         
         match plot_type.split()[-1]:
             # scatter
@@ -4522,21 +4540,27 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 if len(z['array']) == 0:
                     # biplot
-                    self.biplot(fig,x,y,c,style,save)
+                    self.biplot(canvas,x,y,c,style)
                 else:
                     # ternary
-                    self.ternary_scatter(fig,x,y,z,c,style,save)
+                    self.ternary_scatter(canvas,x,y,z,c,style)
 
             # heatmap
             case 'heatmap':
                 # biplot
                 if len(z['array']) == 0:
-                    self.hist2dbiplot(fig,x,y,style,save)
+                    self.hist2dbiplot(canvas,x,y,style)
                 # ternary
                 else:
-                    self.hist2dternplot(fig,x,y,z,style,save,c=c)
+                    self.hist2dternplot(canvas,x,y,z,style,c=c)
+        
+        if return_flag:
+            return canvas
+        else:
+            self.clear_view_widget(self.widgetSingleView.layout())
+            self.widgetSingleView.layout().addWidget(canvas)
 
-    def biplot(self, fig, x, y, c, style, save):
+    def biplot(self, canvas, x, y, c, style):
         """Creates scatter bi-plots
 
         A general function for creating scatter plots of 2-dimensions.
@@ -4552,24 +4576,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :param style: style parameters
         :type style: dict
         """
-        if fig == None:
-            new = True
-            fig = Figure()
-        else:
-            new = False
-
-        ax = fig.add_subplot(111)
         if len(c['array']) == 0:
             # single color
-            ax.scatter(x['array'], y['array'], c=style['Colors']['Color'],
-                        s=style['Markers']['Size'],
-                        marker=self.markerdict[style['Markers']['Symbol']],
-                        edgecolors='none',
-                        alpha=style['Markers']['Alpha']/100)
+            canvas.axes.scatter(x['array'], y['array'], c=style['Colors']['Color'],
+                s=style['Markers']['Size'],
+                marker=self.markerdict[style['Markers']['Symbol']],
+                edgecolors='none',
+                alpha=style['Markers']['Alpha']/100)
             cb = None
         else:
             # color by field
-            ax.scatter(x['array'], y['array'], c=c['array'],
+            cb = canvas.axes.scatter(x['array'], y['array'], c=c['array'],
                 s=style['Markers']['Size'],
                 marker=self.markerdict[style['Markers']['Symbol']],
                 edgecolors='none',
@@ -4577,43 +4594,43 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 alpha=style['Markers']['Alpha']/100)
 
             norm = plt.Normalize(vmin=np.min(c['array']), vmax=np.max(c['array']))
-            scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(style['Colors']['Colormap']), norm=norm)
-            if style['Colors']['Direction'] == 'vertical':
-                cb = fig.colorbar(scalarMappable, ax=ax, orientation=style['Colors']['Direction'], location='right', shrink=0.62)
-                cb.set_label(c['label'])
-            elif style['Colors']['Direction'] == 'horizontal':
-                cb = fig.colorbar(scalarMappable, ax=ax, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62)
-                cb.set_label(c['label'])
-            else:
-                cb = None
+            #scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(style['Colors']['Colormap']), norm=norm)
+            self.add_colorbar(canvas, cb, style, c['label'])
+            # if style['Colors']['Direction'] == 'vertical':
+            #     cb = canvas.fig.colorbar(scalarMappable, ax=canvas.axes, orientation=style['Colors']['Direction'], location='right', shrink=0.62)
+            #     cb.set_label(c['label'])
+            # elif style['Colors']['Direction'] == 'horizontal':
+            #     cb = canvas.fig.colorbar(scalarMappable, ax=canvas.axes, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62)
+            #     cb.set_label(c['label'])
+            # else:
+            #     cb = None
 
         # labels
         font = {'size':style['Text']['FontSize']}
-        ax.set_xlabel(x['label'], fontdict=font)
-        ax.set_ylabel(y['label'], fontdict=font)
+        canvas.axes.set_xlabel(x['label'], fontdict=font)
+        canvas.axes.set_ylabel(y['label'], fontdict=font)
 
         # tick marks
-        ax.tick_params(direction=style['Axes']['TickDir'],
-                        labelsize=style['Text']['FontSize'],
-                        labelbottom=True, labeltop=False, labelleft=True, labelright=False,
-                        bottom=True, top=True, left=True, right=True)
+        canvas.axes.tick_params(direction=style['Axes']['TickDir'],
+            labelsize=style['Text']['FontSize'],
+            labelbottom=True, labeltop=False, labelleft=True, labelright=False,
+            bottom=True, top=True, left=True, right=True)
 
         # aspect ratio
-        ax.set_box_aspect(style['Axes']['AspectRatio'])
+        canvas.axes.set_box_aspect(style['Axes']['AspectRatio'])
+        canvas.fig.tight_layout()
 
-        if new:
-            plot_name = f"{x['field']}_{y['field']}_{'scatter'}"
-            plot_information = {
-                'plot_name': plot_name,
-                'sample_id': self.sample_id,
-                'plot_type': 'scatter',
-                'values': (x, y, c),
-                'figure': fig,
-                'style': style
-            }
-            self.new_plot_widget(fig, 'Scatter', plot_information, save)
+        plot_name = f"{x['field']}_{y['field']}_{'scatter'}"
+        self.plot_info = {
+            'plot_name': plot_name,
+            'sample_id': self.sample_id,
+            'plot_type': 'Scatter',
+            'figure': canvas,
+            'style': style
+        }
+        #self.new_plot_widget(fig, 'Scatter', plot_information, save)
 
-    def ternary_scatter(self, fig, x, y, z, c, style, save):
+    def ternary_scatter(self, canvas, x, y, z, c, style):
         """Creates ternary scatter plots
 
         A general function for creating ternary scatter plots.
@@ -4633,16 +4650,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :param save: flag indicating whether the plot should be saved to the plot tree
         :type save: bool
         """
-        if fig == None:
-            new = True
-            labels = [x['field'], y['field'], z['field']]
-            fig = Figure(figsize=(6, 4))
-            ax = fig.subplots()
-            tp = ternary(ax, labels, 'scatter')
-            #tp = ternary(labels, 'scatter')
-            #fig = tp.fig
-        else:
-            new = False
+        labels = [x['field'], y['field'], z['field']]
+        tp = ternary(canvas.axes, labels, 'scatter')
 
         if len(c['array']) == 0:
             tp.ternscatter(x['array'], y['array'], z['array'],
@@ -4659,19 +4668,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if cb:
                 cb.set_label(c['label'])
 
-        if new:
-            plot_name = f"{x['field']}_{y['field']}_{z['field']}_{'ternscatter'}"
-            plot_information = {
-                'plot_name': plot_name,
-                'sample_id': self.sample_id,
-                'plot_type': 'Scatter',
-                'values': (x, y, z, c),
-                'figure': fig,
-                'style': style
-            }
-            self.new_plot_widget(fig, 'Scatter', plot_information, save)
+        plot_name = f"{x['field']}_{y['field']}_{z['field']}_{'ternscatter'}"
+        self.plot_info = {
+            'plot_name': plot_name,
+            'sample_id': self.sample_id,
+            'plot_type': 'Scatter',
+            'values': (x, y, z, c),
+            'figure': canvas,
+            'style': style
+        }
+            #self.new_plot_widget(fig, 'Scatter', plot_information, save)
 
-    def hist2dbiplot(self, fig, x, y, style, save):
+    def hist2dbiplot(self, canvas, x, y, style):
         """Creates 2D histogram figure
 
         A general function for creating 2D histograms (heatmaps).
@@ -4687,16 +4695,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :param save: saves figure widget to plot tree
         :type save: bool
         """
-        if fig == None:
-            new = True
-            fig = Figure()
-        else:
-            new = False
-
-        ax = fig.add_subplot(111)
-
         # color by field
-        ax.hist2d(x['array'], y['array'], bins=style['Colors']['Resolution'], norm='log', cmap=plt.get_cmap(style['Colors']['Colormap']))
+        canvas.axes.hist2d(x['array'], y['array'], bins=style['Colors']['Resolution'], norm='log', cmap=plt.get_cmap(style['Colors']['Colormap']))
 
         norm = plt.Normalize(vmin=0, vmax=3)
         scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(style['Colors']['Colormap']), norm=norm)
@@ -4711,31 +4711,30 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # labels
         font = {'size':style['Text']['FontSize']}
-        ax.set_xlabel(x['label'], fontdict=font)
-        ax.set_ylabel(y['label'], fontdict=font)
+        canvas.axes.set_xlabel(x['label'], fontdict=font)
+        canvas.axes.set_ylabel(y['label'], fontdict=font)
 
         # tick marks
-        ax.tick_params(direction=style['Axes']['TickDir'],
+        canvas.axes.tick_params(direction=style['Axes']['TickDir'],
                         labelsize=style['Text']['FontSize'],
                         labelbottom=True, labeltop=False, labelleft=True, labelright=False,
                         bottom=True, top=True, left=True, right=True)
 
         # aspect ratio
-        ax.set_box_aspect(style['Axes']['AspectRatio'])
+        canvas.axes.set_box_aspect(style['Axes']['AspectRatio'])
 
-        if new:
-            plot_name = f"{x['field']}_{y['field']}_{'heatmap'}"
-            plot_information = {
-                'plot_name': plot_name,
-                'sample_id': self.sample_id,
-                'plot_type': 'Scatter',
-                'values': (x, y),
-                'figure': fig,
-                'style': style
-            }
-            self.new_plot_widget(fig, 'Scatter', plot_information, save)
+        plot_name = f"{x['field']}_{y['field']}_{'heatmap'}"
+        self.plot_info = {
+            'plot_name': plot_name,
+            'sample_id': self.sample_id,
+            'plot_type': 'Scatter',
+            'values': (x, y),
+            'figure': canvas,
+            'style': style
+        }
+        #    self.new_plot_widget(fig, 'Scatter', plot_information, save)
 
-    def hist2dternplot(self, fig, x, y, z, style, save, c=None):
+    def hist2dternplot(self, canvas, x, y, z, style, c=None):
         """Creates a ternary histogram figure
 
         A general function for creating scatter plots of 2-dimensions.
@@ -4756,16 +4755,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             addition to histogram map. Default is None, which produces a histogram.
         :type c: str
         """
-        if fig == None:
-            new = True
-            labels = [x['field'], y['field'], z['field']]
-            fig = Figure(figsize=(6, 4))
-        else:
-            new = False
+        labels = [x['field'], y['field'], z['field']]
 
         if len(c['array']) == 0:
-            ax = fig.subplots()
-            tp = ternary(ax, labels, 'heatmap')
+            tp = ternary(canvas.axes, labels, 'heatmap')
 
             hexbin_df, cb = tp.ternhex(a=x['array'], b=y['array'], c=z['array'],
                 bins=style['Colors']['Resolution'],
@@ -4790,19 +4783,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             #tp.ternhex(hexbin_df=hexbin_df, plotfield='n', cmap=style['Colors']['Colormap'], orientation='vertical')
 
-        if new:
-            plot_name = f"{x['field']}_{y['field']}_{z['field']}_{'heatmap'}"
-            plot_information = {
-                'plot_name': plot_name,
-                'sample_id': self.sample_id,
-                'plot_type': 'Scatter',
-                'values': (x, y, z),
-                'figure': fig,
-                'style': style
-            }
-            self.new_plot_widget(fig, 'Scatter', plot_information, save)
+        plot_name = f"{x['field']}_{y['field']}_{z['field']}_{'heatmap'}"
+        self.plot_info = {
+            'plot_name': plot_name,
+            'sample_id': self.sample_id,
+            'plot_type': 'Scatter',
+            'values': (x, y, z),
+            'figure': canvas,
+            'style': style
+        }
+        #self.new_plot_widget(fig, 'Scatter', plot_information, save)
 
-    def plot_ternarymap(self, fig):
+    def plot_ternarymap(self, canvas):
         """Creates map colored by ternary coordinate positions"""
         style = self.styles['ternary map']
 
@@ -4831,7 +4823,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # PCA functions and plotting
     # -------------------------------------
     def compute_pca(self):
-        self.pca_dict = {}
+        self.pca_results = {}
 
         df_filtered, analytes = self.get_processed_data()
          
@@ -4893,9 +4885,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 plot_name = plot_type+f'_PC{pc_x}_PC{pc_y}'
                 # Assuming pca_df contains scores for the principal components
                 # uncomment to use plot scatter instead of ax.scatter
-                self.plot_scatter()
-                ### ADD PC vectors to plot
-
+                canvas = self.plot_scatter()
 
             # make a map of a principal component score
             case 'pca score':
@@ -5186,6 +5176,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.data[self.sample_id]['computed_data']['Cluster'].loc[self.data[self.sample_id]['mask'],'fuzzy c-means'] = np.argmax(u, axis=0)
 
         # update cluster table in style menu
+        self.group_changed()
 
         self.statusbar.showMessage('Clustering successful')
 
@@ -5368,6 +5359,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # Plot tec for all clusters
                 for i in clusters:
                     # Create RGBA color
+                    print(f'Cluster {i}')
                     color = self.group_cmap[f'Cluster {i}'][:-1]
                     canvas.axes,yl_tmp = plot_spider_norm(data = df_filtered.loc[df_filtered['clusters']==i,:],
                             ref_data = self.ref_data, norm_ref_data =  self.ref_data['model'][ref_i],
@@ -6274,12 +6266,25 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------
     # Notes functions
     # -------------------------------
+ 
+    def save_notes_file(self):
+        if self.notes_file is None:
+            return
+        
+        self.statusbar.showMessage('Autosaving notes...')
+
+        # write file
+        with open(self.notes_file,'w') as file:
+            file.write(str(self.textEditNotes.toPlainText()))
+
+        self.statusbar.clearMessage()
+
     def notes_add_image(self):
         """Adds placeholder image to notes
         
         Uses the reStructured Text figure format
         """
-        self.textEditNotes.insertPlainText("\n.. figure:: path/to/figure.png\n")
+        self.textEditNotes.insertPlainText("\n\n.. figure:: path/to/figure.png\n")
         self.textEditNotes.insertPlainText("    :align: center\n")
         self.textEditNotes.insertPlainText("    :alt: alternate text\n")
         self.textEditNotes.insertPlainText("    :width: 1000\n")
@@ -6313,7 +6318,48 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         cursor.movePosition(QTextCursor.NextBlock)
 
         # Insert the line of "="
-        cursor.insertText("\n" + f"{symbol}" * (cursor.block().length() - 1))
+        cursor.insertText('\n' + f'{symbol}' * (cursor.block().length() - 1))
+
+    def add_info_note(self, infotype):
+        match infotype:
+            case 'Sample info':
+                self.textEditNotes.insertPlainText(f'**Sample ID: {self.sample_id}**\n')
+                self.textEditNotes.insertPlainText('*' * (len(self.sample_id) + 15) + '\n')
+                self.textEditNotes.insertPlainText(f'\n:Date: {datetime.today().strftime("%Y-%m-%d")}\n')
+                # width/height
+                # list of all analytes
+                self.textEditNotes.insertPlainText(':User: Your name here\n')
+                pass
+            case 'List analytes used':
+                fields = self.get_field_list()
+                self.textEditNotes.insertPlainText('\n\n:analytes used: '+', '.join(fields))
+            case 'Current plot details':
+                text = ['\n\n:plot type: '+self.plot_info['plot_type'],
+                        ':plot name: '+self.plot_info['plot_name']+'\n']
+                self.textEditNotes.insertPlainText('\n'.join(text))
+            case 'Filter table':
+                pass
+            case 'PCA results':
+                pass
+            case 'Cluster results':
+                pass
+    
+    def add_table_note(self,array,col=None,row=None):
+        # if col is not None, add row of column headers (account for row names if necessary)
+        # if row is not None, add column of row names
+        # print table
+        # simple table format:
+        # =====  =====  ======
+        #    Inputs     Output
+        # ------------  ------
+        #   A      B    A or B
+        # =====  =====  ======
+        # False  False  False
+        # True   False  True
+        # False  True   True
+        # True   True   True
+        # =====  =====  ======
+        pass
 
     def add_menu(self, menu_items, menu_obj):
         """Adds items to a context menu

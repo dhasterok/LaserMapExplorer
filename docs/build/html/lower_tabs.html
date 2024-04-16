@@ -41,8 +41,8 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'lower_tabs';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="&lt;no title&gt;" href="multidimensional.html" />
-    <link rel="prev" title="Right Toolbox" href="right_toolbox.html" />
+    <link rel="next" title="Multidimensional Methods" href="multidimensional.html" />
+    <link rel="prev" title="Plot Window (Center Pane)" href="center_pane.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -367,9 +367,16 @@ document.write(`
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">The Interface</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="left_toolbox.html">Left Toolbox</a></li>
-<li class="toctree-l1"><a class="reference internal" href="right_toolbox.html">Right Toolbox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="left_toolbox.html">Control (Left) Toolbox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="right_toolbox.html">Plot and Property (Right) Toolbox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="center_pane.html">Plot Window (Center Pane)</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Lower Tabs</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Figures &amp; Analyses</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="multidimensional.html">Multidimensional Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="special_functions.html">Special Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="export.html">Export Formats</a></li>
 </ul>
 </div>
 </nav></div>
@@ -431,7 +438,51 @@ document.write(`
 <h1>Lower Tabs<a class="headerlink" href="#lower-tabs" title="Link to this heading">#</a></h1>
 <section id="notes">
 <h2>Notes<a class="headerlink" href="#notes" title="Link to this heading">#</a></h2>
-<p>Take notes on a sample and keep them with the files.  The notes are automatically saved as the user types.  The saved file is stored in the same directory as the sample file.</p>
+<p>Take notes on a sample and keep them with the files.  The notes are automatically saved every 5 minutes and when the sample is changed or the program is closed.  The saved file is stored in the same directory as the sample file.  The notes are saved as a plain text file with the extension <em>*.rst</em>.  While in plain text, the notes when written in the proper format can be compiled into a pdf or html.  The specific formatting language is called <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/restructuredtext/">reStructured Text</a> (<em>reST</em>).  This format was chosen due to its basic formatting that can be easily read without compiling and when compiled produces a clean, easy to read document with figures and tables.  In fact, this documentation is compiled from <em>reST</em>.  A simple guide to <em>reST</em> is provided below and more complete documentation can be found online with a greater range of formatting operations.  LaME also includes several formatting tools to quickly add formatted information and figures.</p>
+<section id="intro-to-rest">
+<h3>Intro to <em>reST</em><a class="headerlink" href="#intro-to-rest" title="Link to this heading">#</a></h3>
+<table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>text</p></th>
+<th class="head"><p>result</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">*italics*</span></code></p></td>
+<td><p><em>italics</em></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">**bold**</span></code></p></td>
+<td><p><strong>bold</strong></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">reference_</span></code></p></td>
+<td><p><a class="reference external" href="reference">reference</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">[1]_</span></code></p></td>
+<td><p><a class="footnote-reference brackets" href="#id3" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> footnote</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">[Citation2024]_</span></code></p></td>
+<td><p><a class="reference internal" href="#citation2004" id="id2"><span>[Citation2004]</span></a></p></td>
+</tr>
+</tbody>
+</table>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id3" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p><code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">[1]</span></code> will create a footnote</p>
+</aside>
+</aside>
+<p><code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">_reference:</span> <span class="pre">http://www.this-is-an-external-hyperlink.org</span></code></p>
+<p>To use a phrase, rather than a word, to make a reference, enclose the words within backticks ( ` ) and end with an underscore (_).</p>
+<p><code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">_reference:</span> <span class="pre">this</span> <span class="pre">is</span> <span class="pre">an</span> <span class="pre">internal</span> <span class="pre">hyperlink</span></code></p>
+<div role="list" class="citation-list">
+<div class="citation" id="citation2004" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">Citation2004</a><span class="fn-bracket">]</span></span>
+<p><code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">[Citation2004]</span></code> will produce a journal-like citation (no spaces)</p>
+</div>
+</div>
+<p>To display a special character, use a ‘\’</p>
+<p>Titles, sections and subsections can be created by including a line of *, =, and -, the same length as the heading text.  The <a class="reference internal" href="_images/icon-heading-64.png"><img alt="icon-heading" src="_images/icon-heading-64.png" style="height: 2ex;" /></a> button can be used to add the symbols for you.  Simply put the cursor on the line to make a heading and click the <a class="reference internal" href="_images/icon-heading-64.png"><img alt="icon-heading" src="_images/icon-heading-64.png" style="height: 2ex;" /></a> button.</p>
+</section>
 </section>
 <section id="filters">
 <h2>Filters<a class="headerlink" href="#filters" title="Link to this heading">#</a></h2>
@@ -454,12 +505,12 @@ document.write(`
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="right_toolbox.html"
+       href="center_pane.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Right Toolbox</p>
+        <p class="prev-next-title">Plot Window (Center Pane)</p>
       </div>
     </a>
     <a class="right-next"
@@ -467,7 +518,7 @@ document.write(`
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">&lt;no title&gt;</p>
+        <p class="prev-next-title">Multidimensional Methods</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -489,7 +540,10 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#notes">Notes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#notes">Notes</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#intro-to-rest">Intro to <em>reST</em></a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#filters">Filters</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#profiles">Profiles</a></li>
 </ul>

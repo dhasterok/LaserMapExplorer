@@ -2,7 +2,6 @@
     <qresource prefix="/icons">
         <file>resources/icons/icons8-cells-48.png</file>
         <file>resources/icons/icons8-honeycomb-48.png</file>
-        <file>resources/icons/icons8-add-image-64.png</file>
         <file>resources/icons/icon-swap-64.png</file>
         <file>resources/icons/icons8-mind-map-50.png</file>
         <file>resources/icons/icons8-mind-map-filled-50.png</file>

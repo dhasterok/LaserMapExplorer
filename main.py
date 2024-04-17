@@ -3166,7 +3166,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxFieldColormap.setEnabled(False)
                 self.doubleSpinBoxColorLB.setEnabled(False)
                 self.doubleSpinBoxColorUB.setEnabled(False)
-                self.comboBoxCbarDirection.setEnabled(False)
+                self.comboBoxCbarDirection.setEnabled(True)
                 self.lineEditCbarLabel.setEnabled(False)
 
                 self.spinBoxHeatmapResolution.setEnabled(False)
@@ -3548,27 +3548,99 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.styles[plot_type]['Axes']['TickDir'] = self.comboBoxTickDirection.currentText()
         self.update_SV(save=False)
+    
+    def set_color_axis(self):
+        field = self.comboBoxColorField.currentText()
+        if field == '':
+            return
+        self.doubleSpinBoxColorLB.setValue(self.axis_dict[field]['min'])
+        self.doubleSpinBoxColorUB.setValue(self.axis_dict[field]['max'])
 
-    def axes_reset_callback(self):
-        pass
+    def set_axis(self, ax, field):
+        match ax:
+            case 'x':
+                self.doubleSpinBoxXLB.setValue(self.axis_dict[field]['min'])
+                self.doubleSpinBoxXUB.setValue(self.axis_dict[field]['max'])
+            case 'y':
+                self.doubleSpinBoxYLB.setValue(self.axis_dict[field]['min'])
+                self.doubleSpinBoxYUB.setValue(self.axis_dict[field]['max'])
+            case 'z':
+                self.doubleSpinBoxZLB.setValue(self.axis_dict[field]['min'])
+                self.doubleSpinBoxZUB.setValue(self.axis_dict[field]['max'])
+        
+
+    def axes_reset_callback(self, button):
+        if button.accessibleName() == 'color axis reset':
+            if not (self.comboBoxColorByField.currentText() in ['None','Cluster']):
+                field_type = self.comboBoxColorByField.currentText()
+                field = self.comboBoxColorField.currentText()
+                if field == '':
+                    return
+                self.set_axis_values(field_type, field, status='auto')
+                self.set_color_axis()
+        else:
+            match self.comboBoxPlotType.currentText().lower():
+                case 'histogram' | 'gradient map':
+                    field_type = self.comboBoxHistFieldType.currentText()
+                    field = self.comboBoxHistField.currentText()
+                    self.set_axis_values(field_type, field, status='auto')
+                    self.set_axis('x', field)
+                case 'scatter' | 'heatmap':
+                    field_type = self.comboBoxFieldTypeX.currentText()
+                    field = self.comboBoxFieldX.currentText()
+                    self.set_axis_values(field_type, field, status='auto')
+                    self.set_axis('x', field)
+
+                    field_type = self.comboBoxFieldTypeX.currentText()
+                    field = self.comboBoxFieldY.currentText()
+                    self.set_axis_values(field_type, field, status='auto')
+                    self.set_axis('y', field)
+
+                    field_type = self.comboBoxFieldTypeX.currentText()
+                    if field_type == 'None':
+                        return
+                    field = self.comboBoxFieldZ.currentText()
+                    if field == '':
+                        return
+                    self.set_axis_values(field_type, field, status='auto')
+                    self.set_axis('z', field)
+
+                case 'pca scatter' | 'pca heatmap':
+                    field_type = 'PCA Score'
+
+                    field = self.spinBoxPCX.currentText()
+                    self.set_axis_values(field_type, field, status='auto')
+                    self.set_axis('x', field)
+
+                    field = self.spinBoxPCY.currentText()
+                    self.set_axis_values(field_type, field, status='auto')
+                    self.set_axis('y', field)
+                case _:
+                    print('(axis_reset_callback) Not defined for :'+field_type+'/'+field)
+                    return
 
     def get_axis_values(self, field_type, field):
-
         if field not in self.axes_dict.keys():
-            self.set_axis_values(field_type, field)
+            self.set_axis_values(field_type, field, status='auto')
             
         amin = self.axes_dict[field]['min']
         amax = self.axes_dict[field]['max']
+        label = self.axes_dict[field]['label']
 
-        return amin, amax
+        return amin, amax, label
 
     def set_axis_values(self, field_type, field, status='auto', amin=None, amax=None):
-        if (amin is None) or (amax is None) or (status == 'auto'):
+        if status == 'auto':
             match field_type:
                 case 'Analyte','Analyte (normalized)':
-                    current_plot_df['array'] = self.data[sample_id]['processed_data'].loc[:,field].values
+                    current_plot_df['array'] = self.data[self.sample_id]['processed_data'].loc[:,field].values
+                    if field_type == 'Analyte (normalized)':
+                        self.axes_dict[field]['label'] = field
+                    else:
+                        self.axes_dict[field]['label'] = [field+' ('+self.preferences['Units']['Concentration']+')']
                 case _:
-                    current_plot_df['array'] = self.data[sample_id]['computed_data'][field_type].loc[:,field].values
+                    current_plot_df['array'] = self.data[self.sample_id]['computed_data'][field_type].loc[:,field].values
+                    self.axes_dict[field]['label'] = field
 
             amin = current_plot_df['array'].min()
             amax = current_plot_df['array'].max()
@@ -4084,8 +4156,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def display_SV(self, plot_info, plotWidget):
         print('display_SV')
-        if save:
-            self.add_plotwidget_to_tree(plot_info, plotWidget)
+        self.add_plotwidget_to_tree(plot_info, plotWidget)
 
         #Single view
         self.canvasWindow.setCurrentIndex(0)
@@ -4158,9 +4229,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             
             self.plot_laser_map(current_plot_df,plot_information)
             self.update_spinboxes(parameters)
-
-            
-            self.plot_small_histogram(current_plot_df, analyte_str)
         elif plot_type == 'lasermap_norm':
             ref_data_chem = self.ref_data.iloc[self.comboBoxRefMaterial.currentIndex()]
             ref_data_chem.index = [col.replace('_ppm', '') for col in ref_data_chem.index]
@@ -4301,32 +4369,32 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------
     # Correlation functions and plotting
     # -------------------------------------
-    def update_correlation(self, save=False):
-        if self.sample_id == '':
-            return
+    # def update_correlation(self, save=False):
+    #     if self.sample_id == '':
+    #         return
 
-        plot_exist = plot_name in self.plot_widget_dict[plot_type][sample_id]
-        duplicate = plot_exist and len(self.plot_widget_dict[plot_type][sample_id][plot_name]['view']) == 1 and self.plot_widget_dict[plot_type][sample_id][plot_name]['view'][0] != self.canvasWindow.currentIndex()
+    #     plot_exist = plot_name in self.plot_widget_dict[plot_type][sample_id]
+    #     duplicate = plot_exist and len(self.plot_widget_dict[plot_type][sample_id][plot_name]['view']) == 1 and self.plot_widget_dict[plot_type][sample_id][plot_name]['view'][0] != self.canvasWindow.currentIndex()
 
-        if plot_exist and not duplicate:
+    #     if plot_exist and not duplicate:
 
-            fig = ax.get_figure()
-            plotWidget = self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'][0]
-            figure_canvas = plotWidget.findChild(FigureCanvas)
-            figure_canvas.figure.clear()
-            ax = figure_canvas.figure.subplots()
-            figure_canvas.draw()
-        else:
-            if duplicate:
-                self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'].append(plotWidget)
-                self.plot_widget_dict[plot_type][sample_id][plot_name]['view'].append(view)
-            else:
-                self.plot_widget_dict[plot_type][sample_id][plot_name] = {'widget': [plotWidget], 'info': plot_information, 'view': [view]}
+    #         fig = ax.get_figure()
+    #         plotWidget = self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'][0]
+    #         figure_canvas = plotWidget.findChild(FigureCanvas)
+    #         figure_canvas.figure.clear()
+    #         ax = figure_canvas.figure.subplots()
+    #         figure_canvas.draw()
+    #     else:
+    #         if duplicate:
+    #             self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'].append(plotWidget)
+    #             self.plot_widget_dict[plot_type][sample_id][plot_name]['view'].append(view)
+    #         else:
+    #             self.plot_widget_dict[plot_type][sample_id][plot_name] = {'widget': [plotWidget], 'info': plot_information, 'view': [view]}
 
-            # Additional steps to add the Correlation widget to the appropriate container in the UI
-            if save:
-                self.add_plot(plot_information) #do not plot correlation when directory changes
-            self.update_tree(plot_information['plot_name'], data=plot_information, tree=branch)
+    #         # Additional steps to add the Correlation widget to the appropriate container in the UI
+    #         if save:
+    #             self.add_plot(plot_information) #do not plot correlation when directory changes
+    #         self.update_tree(plot_information['plot_name'], data=plot_information, tree=branch)
 
     def plot_correlation(self):
         print('plot_correlation')
@@ -4799,10 +4867,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         norm = plt.Normalize(vmin=0, vmax=3)
         scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(style['Colors']['Colormap']), norm=norm)
         if style['Colors']['Direction'] == 'vertical':
-            cb = fig.colorbar(scalarMappable, ax=ax, orientation=style['Colors']['Direction'], location='right', shrink=0.62)
+            cb = canvas.fig.colorbar(scalarMappable, ax=canvas.axes, orientation=style['Colors']['Direction'], location='right', shrink=0.62)
             cb.set_label('log(N)')
         elif style['Colors']['Direction'] == 'horizontal':
-            cb = fig.colorbar(scalarMappable, ax=ax, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62)
+            cb = canvas.fig.colorbar(scalarMappable, ax=canvas.axes, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62)
             cb.set_label('log(N)')
         else:
             cb = None
@@ -5500,10 +5568,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     # Create RGBA color
                     print(f'Cluster {i}')
                     color = self.group_cmap[f'Cluster {i}'][:-1]
-                    canvas.axes,yl_tmp = plot_spider_norm(data = df_filtered.loc[df_filtered['clusters']==i,:],
-                            ref_data = self.ref_data, norm_ref_data =  self.ref_data['model'][ref_i],
-                            layer = self.ref_data['layer'][ref_i], el_list = self.n_dim_list ,
-                            style = 'Quanta',quantiles = quantiles, ax = ax, c = color, label=self.current_group['clusters'][i])
+                    canvas.axes,yl_tmp = plot_spider_norm(data=df_filtered.loc[df_filtered['clusters']==i,:],
+                            ref_data=self.ref_data, norm_ref_data=self.ref_data['model'][ref_i],
+                            layer=self.ref_data['layer'][ref_i], el_list=self.n_dim_list ,
+                            style='Quanta', quantiles=quantiles, ax=canvas.axes, c=color, label=self.current_group['clusters'][i])
                     #store max y limit to convert the set y limit of axis
                     yl = [np.floor(np.nanmin([yl[0] , yl_tmp[0]])), np.ceil(np.nanmax([yl[1] , yl_tmp[1]]))]
 
@@ -5854,7 +5922,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 else:
                     field_list = ['PCA Score']
                     self.toggle_color_widgets(True)
-                    print('enable ColorByField')
+            case 'ternary map':
+                self.toggle_color_widgets(False)
+                self.labelCbarDirection.setEnabled(True)
+                self.comboBoxCbarDirection.setEnabled(True)
             case _:
                 field_list = ['Analyte', 'Analyte (normalized)']
                 # add check for ratios

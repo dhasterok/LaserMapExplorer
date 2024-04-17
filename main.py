@@ -615,10 +615,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Styling Tab
         #-------------------------
         # comboBox with plot type
-
         # overlay and annotation properties
         self.toolButtonOverlayColor.clicked.connect(self.overlay_color_callback)
         self.toolButtonMarkerColor.clicked.connect(self.marker_color_callback)
+        self.toolButtonClusterColor.clicked.connect(self.cluster_color_callback)
+        self.toolButtonClusterColorReset.clicked.connect(self.set_default_cluster_colors)
         #self.toolButtonOverlayColor.setStyleSheet("background-color: white;")
 
         setattr(self.comboBoxMarker, "allItems", lambda: [self.comboBoxMarker.itemText(i) for i in range(self.comboBoxMarker.count())])
@@ -646,6 +647,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonUpdatePlot.clicked.connect(self.update_SV)
         self.toolButtonSaveTheme.clicked.connect(self.input_theme_name_dlg)
         # axes
+        self.axes_dict = {}
         self.lineEditXLabel.editingFinished.connect(self.xlabel_callback)
         self.lineEditYLabel.editingFinished.connect(self.ylabel_callback)
         self.lineEditZLabel.editingFinished.connect(self.zlabel_callback)
@@ -676,7 +678,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.doubleSpinBoxColorUB.valueChanged.connect(self.clim_callback)
         self.comboBoxCbarDirection.activated.connect(self.cbar_direction_callback)
         self.lineEditCbarLabel.editingFinished.connect(self.cbar_label_callback)
-
+        # clusters
+        self.spinBoxClusterGroup.valueChanged.connect(self.select_cluster_group_callback)
         self.toolBox.currentChanged.connect(self.toolbox_changed)
 
         # Profile filter tab
@@ -886,7 +889,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 'Ratio':pd.DataFrame(),
                 'Calculated Field':pd.DataFrame(),
                 'PCA Score':pd.DataFrame(),
-                'Cluster':pd.DataFrame(columns = ['Fuzzy', 'KMeans']),
+                'Cluster':pd.DataFrame(columns = ['fuzzy c-means', 'k-means']),
                 'Cluster Score':pd.DataFrame(),
                 'Special':pd.DataFrame(),
                 }
@@ -1211,7 +1214,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         :return: hex-rgb color
         """
-        return "#{:02x}{:02x}{:02x}".format(color.red(), color.green(), color.blue())
+        if type(color) is tuple:
+            color = np.round(255*np.array(color))
+            color[color < 0] = 0
+            color[color > 255] = 255
+            return "#{:02x}{:02x}{:02x}".format(int(color[0]), int(color[1]), int(color[2]))
+        else:
+            return "#{:02x}{:02x}{:02x}".format(color.red(), color.green(), color.blue())
 
     def ternary_colormap_changed(self):
         """Changes toolButton backgrounds associated with ternary colormap
@@ -3529,6 +3538,30 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def axes_reset_callback(self):
         pass
 
+    def get_axis_values(self, field_type, field):
+
+        if field not in self.axes_dict.keys:
+            self.set_axis_values(field_type, field)
+            
+        amin = self.axes_dict[field]['min']
+        amax = self.axes_dict[field]['max']
+
+        return amin, amax
+
+    def set_axis_values(self, field_type, field, amin=None, amax=None):
+        if (amin is None) or (amax is None) or (status == 'auto'):
+            match field_type:
+                case 'Analyte','Analyte (normalized)':
+                    current_plot_df['array'] = self.data[sample_id]['processed_data'].loc[:,field].values
+                case _:
+                    current_plot_df['array'] = self.data[sample_id]['computed_data'][field_type].loc[:,field].values
+
+            amin = current_plot_df['array'].min()
+            amax = current_plot_df['array'].max()
+            self.axes_dict.update(field, {'status':'auto', 'min':amin, 'max':amax})
+        else:
+            self.axes_dict[field] = {'status':'custom', 'min':amin, 'max':amax}
+
     # text
     # -------------------------------------
     def font_callback(self):
@@ -3662,7 +3695,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.styles[plot_type]['Colors']['Color'] = color
 
         # update plot
-        self.update_SV(save=False)
+        self.update_SV()
 
     # updates scatter styles when ColorByField comboBox is changed
     def color_by_field_callback(self):
@@ -3780,6 +3813,54 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         if self.comboBoxCbarLabel.isEnabled():
             self.update_SV(save=False)
+
+    # cluster styles
+    def cluster_color_callback(self):
+        """Updates color of a cluster
+        
+        Uses ``QColorDialog`` to select new cluster color and then updates plot on change of
+        backround ``MainWindow.toolButtonClusterColor`` color.  Also updates ``MainWindow.tableWidgetViewGroups``
+        color associated with selected cluster.  The selected cluster is determined by ``MainWindow.spinBoxClusterGroup.value()``
+        """
+        selected_cluster = self.spinBoxClusterGroup.value()-1
+
+        # change color
+        self.button_color_select(self.toolButtonClusterColor)
+        color = self.get_hex_color(self.toolButtonClusterColor.palette().button().color())
+        if self.tableWidgetViewGroups.item(selected_cluster,2).text() == color:
+            return
+
+        # update_table
+        self.tableWidgetViewGroups.setItem(selected_cluster,2,QTableWidgetItem(color))
+
+        # update plot
+        if self.comboBoxColorByField.currentText() == 'Cluster':
+            self.update_SV()
+
+    def set_default_cluster_colors(self):
+        """Sets cluster group to default colormap
+        
+        Sets the colors in ``MainWindow.tableWidgetViewGroups`` to the default colormap in
+        ``MainWindow.styles['Cluster']['Colors']['Colormap'].  Change the default colormap
+        by changing ``MainWindow.comboBoxColormap``, when ``MainWindow.comboBoxColorByField.currentText()`` is ``Cluster``.
+        """
+        # cluster colormap
+        cmap = plt.get_cmap(self.styles['Cluster']['Colors']['Colormap'], self.tableWidgetViewGroups.rowCount())
+
+        # set color for each cluster and place color in table
+        colors = [cmap(i) for i in range(cmap.N)]
+        for i in range(self.tableWidgetViewGroups.rowCount()):
+            hexcolor = self.get_hex_color(colors[i])
+            self.tableWidgetViewGroups.setItem(i,2,QTableWidgetItem(hexcolor))
+
+        self.toolButtonClusterColor.setStyleSheet("background-color: %s;" % self.tableWidgetViewGroups.item(self.spinBoxClusterGroup.value()-1,2).text())
+
+    def select_cluster_group_callback(self):
+        """Set cluster color button background after change of selected cluster group
+        
+        Sets ``MainWindow.toolButtonClusterColor`` background on change of ``MainWindow.spinBoxClusterGroup``
+        """
+        self.toolButtonClusterColor.setStyleSheet("background-color: %s;" % self.tableWidgetViewGroups.item(self.spinBoxClusterGroup.value()-1,2).text())
 
 
     # -------------------------------------
@@ -5544,6 +5625,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.tableWidgetViewGroups.selectRow(i)
                     
                 self.current_group = {'algorithm':algorithm, 'clusters': cluster_dict, 'selected_clusters':clusters}
+
+                self.spinBoxClusterGroup.setMinimum(1)
+                self.spinBoxClusterGroup.setMaximum(len(clusters))
+                self.set_default_cluster_colors()
         else:
             self.current_group = {'algorithm':None,'clusters': None, 'selected_clusters':None}
         self.isUpdatingTable = False
@@ -5690,7 +5775,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return
 
         match plot_type.lower():
-            case 'histogram' | 'tec':
+            case 'correlation' | 'histogram' | 'tec':
                 if self.data[self.sample_id]['computed_data']['Cluster'].empty:
                     field_list = []
                     self.toggle_color_widgets(False)
@@ -5703,6 +5788,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.toggle_color_widgets(False)
                 else:
                     field_list = ['Cluster Score']
+                    self.toggle_color_widgets(True)
+            case 'cluster':
+                if self.data[self.sample_id]['computed_data']['Cluster'].empty:
+                    field_list = []
+                    self.toggle_color_widgets(False)
+                else:
+                    field_list = ['Cluster']
                     self.toggle_color_widgets(True)
             case 'pca score':
                 if self.data[self.sample_id]['computed_data']['PCA Score'].empty:

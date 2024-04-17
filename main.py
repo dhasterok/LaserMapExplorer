@@ -16,6 +16,7 @@ import matplotlib
 matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+import matplotlib.gridspec as gs
 from matplotlib.collections import PathCollection
 import matplotlib.pyplot as plt
 from matplotlib.path import Path
@@ -881,13 +882,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             self.update_spinboxes_bool = False #prevent update plot from runing
             sample_df = pd.read_csv(file_path, engine='c')
-            sample_df  = sample_df.loc[:, ~sample_df .columns.str.contains('^Unnamed')]
+            sample_df = sample_df.loc[:, ~sample_df .columns.str.contains('^Unnamed')]
             # self.data[sample_id] = pd.read_csv(file_path, engine='c')
-            self.data[sample_id]['raw_data'] = self.add_ree(sample_df)
+            self.data[sample_id]['raw_data'] = sample_df
             self.selected_analytes = self.data[sample_id]['raw_data'].columns[5:].tolist()
             self.data[sample_id]['computed_data'] = {
                 'Ratio':pd.DataFrame(),
-                'Calculated Field':pd.DataFrame(),
+                'Calculated Field': self.add_ree(sample_df),
                 'PCA Score':pd.DataFrame(),
                 'Cluster':pd.DataFrame(columns = ['fuzzy c-means', 'k-means']),
                 'Cluster Score':pd.DataFrame(),
@@ -986,6 +987,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
         Opens a dialog to select analytes for analysis either graphically or in a table.  Selection updates the list of analytes, and ratios in plot selector and comboBoxes.
         """
+        if self.sample_id == '':
+            return
+
         analytes_list = self.data[self.sample_id]['analyte_info']['analytes'].values
 
         self.analyteDialog = analyteSelectionWindow(analytes_list,self.data[self.sample_id]['norm'], self.data[self.sample_id]['processed_data'], self)
@@ -1116,8 +1120,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.swap_xy_val:
             self.order = 'C'
         else:
-
             self.order = 'F'
+
         # swap x and y
         # print(self.data[self.sample_id][['X','Y']])
         self.swap_xy_data(self.data[self.sample_id]['raw_data'])
@@ -1221,6 +1225,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return "#{:02x}{:02x}{:02x}".format(int(color[0]), int(color[1]), int(color[2]))
         else:
             return "#{:02x}{:02x}{:02x}".format(color.red(), color.green(), color.blue())
+
+    def get_rgb_color(self, color):
+
+        if not color:
+            return []
+        
+        color = color.lstrip('#').lower()
+
+        return [int(color[0:2],16), int(color[2:4],16), int(color[4:6],16)]
+
 
     def ternary_colormap_changed(self):
         """Changes toolButton backgrounds associated with ternary colormap
@@ -3540,7 +3554,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def get_axis_values(self, field_type, field):
 
-        if field not in self.axes_dict.keys:
+        if field not in self.axes_dict.keys():
             self.set_axis_values(field_type, field)
             
         amin = self.axes_dict[field]['min']
@@ -3548,7 +3562,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         return amin, amax
 
-    def set_axis_values(self, field_type, field, amin=None, amax=None):
+    def set_axis_values(self, field_type, field, status='auto', amin=None, amax=None):
         if (amin is None) or (amax is None) or (status == 'auto'):
             match field_type:
                 case 'Analyte','Analyte (normalized)':
@@ -3822,6 +3836,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         backround ``MainWindow.toolButtonClusterColor`` color.  Also updates ``MainWindow.tableWidgetViewGroups``
         color associated with selected cluster.  The selected cluster is determined by ``MainWindow.spinBoxClusterGroup.value()``
         """
+        if self.tableWidgetViewGroups.rowCount() == 0:
+            return
+
         selected_cluster = self.spinBoxClusterGroup.value()-1
 
         # change color
@@ -4035,22 +4052,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         return plotWidget
 
-    def add_plotwidget_to_tree(self, plot_info, plotWidget):
+    def add_plotwidget_to_tree(self, plotWidget):
         print('add_plotwidget_to_tree')
         # determine central widget view type (single, multi, quick)
         view = self.canvasWindow.currentIndex()
 
         # adds plot to plot dictionary for tree
-        self.plot_widget_dict[plot_info['plot_type'].lower()][self.sample_id][plot_info['plot_name']] = {'widget':[plotWidget],
-                                                'info':plot_info, 'view':[view]}
+        self.plot_widget_dict[self.plot_info['plot_type'].lower()][self.sample_id][self.plot_info['plot_name']] = {'info':self.plot_info, 'view':[view]}
 
         #self.plot_widget_dict['clustering'][self.sample_id][plot_name] = {'widget': [widgetClusterMap],
         #                                                      'info': {'plot_type': plot_type, 'sample_id': self.sample_id, 'n_clusters': self.spinBoxNClusters.value()},
         #                                                      'view': [self.canvasWindow.currentIndex()]}
 
         # updates tree with new plot name
-        self.update_tree(plot_info['plot_name'], data=plot_info, tree=plot_info['plot_type'])
-        self.display_SV(plot_info, plotWidget)
+        self.update_tree(self.plot_info['plot_name'], data=self.plot_info, tree=self.plot_info['plot_type'])
 
     def clear_view_widget(self, layout):
         """Clears a widget that contains plots
@@ -4881,26 +4896,63 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """Creates map colored by ternary coordinate positions"""
         style = self.styles['ternary map']
 
-        if fig == None:
-            a, b, c = self.get_scatter_values() #get scatter values from elements chosen
+        canvas = MplCanvas(sub=121)
+
+        afield = self.comboBoxFieldX.currentText()
+        bfield = self.comboBoxFieldY.currentText()
+        cfield = self.comboBoxFieldZ.currentText()
+
+        a = self.data[self.sample_id]['processed_data'].loc[:,afield].values
+        b = self.data[self.sample_id]['processed_data'].loc[:,bfield].values
+        c = self.data[self.sample_id]['processed_data'].loc[:,cfield].values
+  
+        ca = self.get_rgb_color(self.get_hex_color(self.toolButtonTCmapXColor.palette().button().color()))
+        cb = self.get_rgb_color(self.get_hex_color(self.toolButtonTCmapYColor.palette().button().color()))
+        cc = self.get_rgb_color(self.get_hex_color(self.toolButtonTCmapZColor.palette().button().color()))
+        cm = self.get_rgb_color(self.get_hex_color(self.toolButtonTCmapMColor.palette().button().color()))
+
+        t = ternary(canvas.axes)
+
+        cval = t.terncolor(a, b, c, ca, cb, cc, cp=cm)
+
+        M, N = self.array_size
+
+        # Reshape the array into MxNx3
+        map_data = np.zeros((M, N, 3), dtype=np.uint8)
+        map_data[:len(cval), :, :] = cval.reshape(M, N, 3, order=self.order)
+
+        canvas.axes.imshow(map_data, aspect=self.aspect_ratio)
+
+        grid = None
+        if style['Colors']['Direction'] == 'vertical':
+            grid = gs.GridSpec(5,1)
+        elif style['Colors']['Direction'] == 'horizontal':
+            grid = gs.GridSpec(1,5)
         else:
-            # get saved scatter values to update plot
-            a, b, c = values
+            self.clear_view_widget(self.widgetSingleView.layout())
+            self.widgetSingleView.layout().addWidget(canvas)
+            return
+            
+        canvas.axes.set_position(grid[0:4].get_position(canvas.fig))
+        canvas.axes.set_subplotspec(grid[0:4])              # only necessary if using tight_layout()
 
-        selected_sample = self.data[self.sample_id]
+        canvas.axes2 = canvas.fig.add_subplot(grid[4])
 
-        df = selected_sample[['X','Y']]
+        canvas.fig.tight_layout() 
 
-        if fig == None:
-            new = True
-            labels = [x['field'], y['field'], z['field']]
-            fig = Figure(figsize=(6, 4))
-            axs = [fig.add_subplots(['left' 'center']), fig.add_subplots(['right'])]
-        else:
-            new = False
+        t2 = ternary(canvas.axes2)
 
-        ternary.ternmap(ax, selected_sample['X'],selected_sample['Y'], a,b,c, ca=[1,1,0], cb=[0.3,0.73,0.1], cc=[0,0,0.15], p=[1/3,1/3,1/3], cp = [])
+        a = []
+        hbin = t2.hexagon(10)
+        xc = np.array([v['xc'] for v in hbin])
+        yc = np.array([v['yc'] for v in hbin])
+        a,b,c = t2.xy2tern(xc,yc)
+        cv = t2.terncolor(a,b,c, ca=ca, cb=cb, cc=cc, cp=cm)
+        for i, hb in enumerate(hbin):
+            t2.ax.fill(hb['xv'], hb['yv'], color=cv[i]/255, edgecolor='none')
 
+        self.clear_view_widget(self.widgetSingleView.layout())
+        self.widgetSingleView.layout().addWidget(canvas)
 
     # -------------------------------------
     # PCA functions and plotting
@@ -5489,7 +5541,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.plot_id[plot_type][self.sample_id]  = 0
         plot_name = plot_name +'_'+str(self.plot_id[plot_type][self.sample_id])
 
-        plot_info = {
+        self.plot_info = {
             'plot_name': f'{plot_name}',
             'sample_id': self.sample_id,
             'plot_type': plot_type,
@@ -5742,6 +5794,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     t_array = np.copy(array)
             return t_array
 
+    # make this part of the calculated fields
     def add_ree(self, sample_df):
 
         lree = ['la', 'ce', 'pr', 'nd', 'sm', 'eu', 'gd']
@@ -5755,15 +5808,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         ree_cols = lree_cols + hree_cols
 
         # Sum up the values for each row
-        sample_df['LREE'] = sample_df[lree_cols].sum(axis=1)
-        sample_df['HREE'] = sample_df[hree_cols].sum(axis=1)
-        sample_df['MREE'] = sample_df[mree_cols].sum(axis=1)
-        sample_df['REE'] = sample_df[ree_cols].sum(axis=1)
+        ree_df = pd.DataFrame(index=sample_df.index)
+        ree_df['LREE'] = sample_df[lree_cols].sum(axis=1)
+        ree_df['HREE'] = sample_df[hree_cols].sum(axis=1)
+        ree_df['MREE'] = sample_df[mree_cols].sum(axis=1)
+        ree_df['REE'] = sample_df[ree_cols].sum(axis=1)
 
-        return sample_df
-
-
-        self.check_analysis = False
+        return ree_df
    
 
     # -------------------------------------
@@ -6503,9 +6554,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 # Matplotlib Canvas object
 # -------------------------------
 class MplCanvas(FigureCanvas):
-    def __init__(self, parent=None, width=5, height=4):
+    def __init__(self, sub=111, parent=None, width=5, height=4):
         self.fig = Figure(figsize=(width, height))
-        self.axes = self.fig.add_subplot(111)
+        self.axes = self.fig.add_subplot(sub)
         super(MplCanvas, self).__init__(self.fig)
 
 

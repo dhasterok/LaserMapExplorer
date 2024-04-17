@@ -1024,7 +1024,7 @@
       <string>Activates the crop tool</string>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="SelectAnalytePage">
       <property name="enabled">
@@ -1614,7 +1614,7 @@
          <item>
           <widget class="QCheckBox" name="checkBoxShowHistCmap">
            <property name="text">
-            <string>Show colors</string>
+            <string>Show with colormap</string>
            </property>
            <property name="checked">
             <bool>true</bool>
@@ -2574,6 +2574,12 @@
          </item>
          <item row="1" column="3">
           <widget class="QDoubleSpinBox" name="doubleSpinBoxFMaxQ">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="font">
             <font>
              <pointsize>11</pointsize>
@@ -2592,6 +2598,12 @@
          </item>
          <item row="0" column="3">
           <widget class="QDoubleSpinBox" name="doubleSpinBoxFMinQ">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="font">
             <font>
              <pointsize>11</pointsize>
@@ -2610,6 +2622,12 @@
          </item>
          <item row="1" column="0">
           <widget class="QComboBox" name="comboBoxFilterField">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="toolTip">
             <string>Select field for filtering</string>
            </property>
@@ -2617,6 +2635,12 @@
          </item>
          <item row="0" column="0">
           <widget class="QComboBox" name="comboBoxFilterFieldType">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="toolTip">
             <string>Choose a field type for filtering</string>
            </property>

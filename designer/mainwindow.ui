@@ -1024,7 +1024,7 @@
       <string>Activates the crop tool</string>
      </property>
      <property name="currentIndex">
-      <number>4</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="SelectAnalytePage">
       <property name="enabled">
@@ -6477,10 +6477,207 @@
            <x>5</x>
            <y>0</y>
            <width>211</width>
-           <height>260</height>
+           <height>226</height>
           </rect>
          </property>
          <layout class="QFormLayout" name="formLayout_11">
+          <item row="0" column="0">
+           <widget class="QLabel" name="labelXLabel">
+            <property name="text">
+             <string>X Label</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="lineEditXLabel">
+            <property name="toolTip">
+             <string>Type x label</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="labelYLabel">
+            <property name="text">
+             <string>Y Label</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="lineEditYLabel">
+            <property name="toolTip">
+             <string>Type y label</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="labelZLabel">
+            <property name="text">
+             <string>Z Label</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="lineEditZLabel">
+            <property name="toolTip">
+             <string>Type y label</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_31">
+            <item>
+             <widget class="QLabel" name="labelXLim">
+              <property name="text">
+               <string>X Limits</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="toolButtonAxesReset_2">
+              <property name="minimumSize">
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>11</pointsize>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="toolTip">
+               <string>Reset histogram axes</string>
+              </property>
+              <property name="accessibleName">
+               <string>axis reset</string>
+              </property>
+              <property name="text">
+               <string>Reset</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../resources.qrc">
+                <normaloff>:/icons/resources/icons/icon-reset-64.png</normaloff>:/icons/resources/icons/icon-reset-64.png</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>14</width>
+                <height>14</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="3" column="1">
+           <layout class="QHBoxLayout" name="horizontalLayout_23">
+            <item>
+             <widget class="QLineEdit" name="lineEditXLB">
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEditXUB">
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="4" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_32">
+            <item>
+             <widget class="QLabel" name="labelYLim">
+              <property name="text">
+               <string>Y Limits</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="toolButtonAxesReset_3">
+              <property name="minimumSize">
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>11</pointsize>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="toolTip">
+               <string>Reset histogram axes</string>
+              </property>
+              <property name="accessibleName">
+               <string>axis reset</string>
+              </property>
+              <property name="text">
+               <string>Reset</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../resources.qrc">
+                <normaloff>:/icons/resources/icons/icon-reset-64.png</normaloff>:/icons/resources/icons/icon-reset-64.png</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>14</width>
+                <height>14</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="4" column="1">
+           <layout class="QHBoxLayout" name="horizontalLayout_24">
+            <item>
+             <widget class="QLineEdit" name="lineEditYLB">
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEditYUB">
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
           <item row="5" column="0">
            <widget class="QLabel" name="labelAspectRatio">
             <property name="font">
@@ -6551,173 +6748,6 @@
               <string>none</string>
              </property>
             </item>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="labelXLabel">
-            <property name="text">
-             <string>X Label</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="lineEditXLabel">
-            <property name="toolTip">
-             <string>Type x label</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="labelYLabel">
-            <property name="text">
-             <string>Y Label</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="labelYLim">
-            <property name="text">
-             <string>Y Limits</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="labelXLim">
-            <property name="text">
-             <string>X Limits</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="1">
-           <layout class="QHBoxLayout" name="horizontalLayout_24">
-            <item>
-             <widget class="QDoubleSpinBox" name="doubleSpinBoxYLB">
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-              <property name="keyboardTracking">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QDoubleSpinBox" name="doubleSpinBoxYUB">
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-              <property name="keyboardTracking">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="3" column="1">
-           <layout class="QHBoxLayout" name="horizontalLayout_23">
-            <item>
-             <widget class="QDoubleSpinBox" name="doubleSpinBoxXLB">
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-              <property name="keyboardTracking">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QDoubleSpinBox" name="doubleSpinBoxXUB">
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-              <property name="keyboardTracking">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="lineEditYLabel">
-            <property name="toolTip">
-             <string>Type y label</string>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="lineEditZLabel">
-            <property name="toolTip">
-             <string>Type y label</string>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="labelZLabel">
-            <property name="text">
-             <string>Z Label</string>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="0">
-           <widget class="QLabel" name="labelResetAxes">
-            <property name="text">
-             <string>Reset Axes</string>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="1">
-           <widget class="QToolButton" name="toolButtonAxesReset">
-            <property name="minimumSize">
-             <size>
-              <width>28</width>
-              <height>28</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>28</width>
-              <height>28</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>11</pointsize>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string>Reset histogram axes</string>
-            </property>
-            <property name="accessibleName">
-             <string>axis reset</string>
-            </property>
-            <property name="text">
-             <string>Reset</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../resources.qrc">
-              <normaloff>:/icons/resources/icons/icon-reset-64.png</normaloff>:/icons/resources/icons/icon-reset-64.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>20</width>
-              <height>20</height>
-             </size>
-            </property>
            </widget>
           </item>
          </layout>
@@ -7330,8 +7360,8 @@
           <rect>
            <x>5</x>
            <y>0</y>
-           <width>226</width>
-           <height>297</height>
+           <width>211</width>
+           <height>266</height>
           </rect>
          </property>
          <layout class="QFormLayout" name="formLayoutScatter">
@@ -7527,103 +7557,83 @@
            </widget>
           </item>
           <item row="4" column="0">
-           <widget class="QLabel" name="labelColorBounds">
-            <property name="font">
-             <font>
-              <pointsize>11</pointsize>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Color limits</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="1">
-           <layout class="QHBoxLayout" name="horizontalLayout_18">
+           <layout class="QHBoxLayout" name="horizontalLayout_33">
             <item>
-             <widget class="QDoubleSpinBox" name="doubleSpinBoxColorLB">
-              <property name="maximumSize">
-               <size>
-                <width>100</width>
-                <height>16777215</height>
-               </size>
+             <widget class="QLabel" name="labelColorBounds">
+              <property name="font">
+               <font>
+                <pointsize>11</pointsize>
+                <bold>false</bold>
+               </font>
               </property>
-              <property name="keyboardTracking">
-               <bool>false</bool>
+              <property name="text">
+               <string>Clim</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QDoubleSpinBox" name="doubleSpinBoxColorUB">
-              <property name="maximumSize">
+             <widget class="QToolButton" name="toolButtonColorAxesReset">
+              <property name="minimumSize">
                <size>
-                <width>100</width>
-                <height>16777215</height>
+                <width>20</width>
+                <height>20</height>
                </size>
               </property>
-              <property name="keyboardTracking">
-               <bool>false</bool>
+              <property name="maximumSize">
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>11</pointsize>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="toolTip">
+               <string>Reset histogram axes</string>
+              </property>
+              <property name="accessibleName">
+               <string>color axis reset</string>
+              </property>
+              <property name="text">
+               <string>Reset</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../resources.qrc">
+                <normaloff>:/icons/resources/icons/icon-reset-64.png</normaloff>:/icons/resources/icons/icon-reset-64.png</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>14</width>
+                <height>14</height>
+               </size>
               </property>
              </widget>
             </item>
            </layout>
           </item>
-          <item row="7" column="0">
-           <widget class="QLabel" name="labelHeatmapResolution">
-            <property name="font">
-             <font>
-              <pointsize>11</pointsize>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Resolution</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="1">
-           <widget class="QSpinBox" name="spinBoxHeatmapResolution">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>125</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>11</pointsize>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string>Select resolution factor for heatmap</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-            <property name="keyboardTracking">
-             <bool>false</bool>
-            </property>
-            <property name="minimum">
-             <number>1</number>
-            </property>
-            <property name="maximum">
-             <number>100</number>
-            </property>
-            <property name="value">
-             <number>10</number>
-            </property>
-           </widget>
+          <item row="4" column="1">
+           <layout class="QHBoxLayout" name="horizontalLayout_18">
+            <item>
+             <widget class="QLineEdit" name="lineEditColorLB">
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEditColorUB">
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
           <item row="5" column="0">
            <widget class="QLabel" name="labelCbarDirection">
@@ -7689,18 +7699,31 @@
             </property>
            </widget>
           </item>
-          <item row="8" column="1">
-           <widget class="QToolButton" name="toolButtonColorAxesReset">
-            <property name="minimumSize">
-             <size>
-              <width>28</width>
-              <height>28</height>
-             </size>
+          <item row="7" column="0">
+           <widget class="QLabel" name="labelHeatmapResolution">
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Resolution</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="1">
+           <widget class="QSpinBox" name="spinBoxHeatmapResolution">
+            <property name="enabled">
+             <bool>true</bool>
             </property>
             <property name="maximumSize">
              <size>
-              <width>28</width>
-              <height>28</height>
+              <width>125</width>
+              <height>16777215</height>
              </size>
             </property>
             <property name="font">
@@ -7710,30 +7733,22 @@
              </font>
             </property>
             <property name="toolTip">
-             <string>Reset histogram axes</string>
+             <string>Select resolution factor for heatmap</string>
             </property>
-            <property name="accessibleName">
-             <string>color axis reset</string>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
-            <property name="text">
-             <string>Reset</string>
+            <property name="keyboardTracking">
+             <bool>false</bool>
             </property>
-            <property name="icon">
-             <iconset resource="../resources.qrc">
-              <normaloff>:/icons/resources/icons/icon-reset-64.png</normaloff>:/icons/resources/icons/icon-reset-64.png</iconset>
+            <property name="minimum">
+             <number>1</number>
             </property>
-            <property name="iconSize">
-             <size>
-              <width>20</width>
-              <height>20</height>
-             </size>
+            <property name="maximum">
+             <number>100</number>
             </property>
-           </widget>
-          </item>
-          <item row="8" column="0">
-           <widget class="QLabel" name="labelResetAxes_2">
-            <property name="text">
-             <string>Reset color axis</string>
+            <property name="value">
+             <number>10</number>
             </property>
            </widget>
           </item>
@@ -9500,13 +9515,13 @@
    <property name="minimumSize">
     <size>
      <width>424</width>
-     <height>50</height>
+     <height>309</height>
     </size>
    </property>
    <property name="maximumSize">
     <size>
      <width>524287</width>
-     <height>50</height>
+     <height>524287</height>
     </size>
    </property>
    <property name="features">
@@ -9569,6 +9584,18 @@
           <layout class="QVBoxLayout" name="verticalLayout_13">
            <item>
             <widget class="QGroupBox" name="verticalGroupBox">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>40</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>40</height>
+              </size>
+             </property>
              <layout class="QHBoxLayout" name="horizontalLayout_30">
               <item>
                <widget class="QToolButton" name="toolButtonNotesHeading">

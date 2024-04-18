@@ -16,6 +16,7 @@ import matplotlib
 matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+import matplotlib.gridspec as gs
 from matplotlib.collections import PathCollection
 import matplotlib.pyplot as plt
 from matplotlib.path import Path
@@ -640,21 +641,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         colormaps = pg.colormap.listMaps('matplotlib')
         self.comboBoxFieldColormap.clear()
         self.comboBoxFieldColormap.addItems(colormaps)
-        self.comboBoxFieldColormap.activated.connect(self.update_all_plots)
+        self.comboBoxFieldColormap.activated.connect(self.update_SV)
 
         # callback functions
         self.comboBoxPlotType.activated.connect(self.style_plot_type_callback)
         self.toolButtonUpdatePlot.clicked.connect(self.update_SV)
         self.toolButtonSaveTheme.clicked.connect(self.input_theme_name_dlg)
         # axes
-        self.axes_dict = {}
+        self.axis_dict = {}
         self.lineEditXLabel.editingFinished.connect(self.xlabel_callback)
         self.lineEditYLabel.editingFinished.connect(self.ylabel_callback)
         self.lineEditZLabel.editingFinished.connect(self.zlabel_callback)
-        self.doubleSpinBoxXLB.valueChanged.connect(self.xlim_callback)
-        self.doubleSpinBoxXUB.valueChanged.connect(self.xlim_callback)
-        self.doubleSpinBoxYLB.valueChanged.connect(self.ylim_callback)
-        self.doubleSpinBoxYUB.valueChanged.connect(self.ylim_callback)
+        self.lineEditXLB.editingFinished.connect(self.xlim_callback)
+        self.lineEditXUB.editingFinished.connect(self.xlim_callback)
+        self.lineEditYLB.editingFinished.connect(self.ylim_callback)
+        self.lineEditYUB.editingFinished.connect(self.ylim_callback)
         self.lineEditAspectRatio.editingFinished.connect(self.aspect_ratio_callback)
         self.comboBoxTickDirection.activated.connect(self.tickdir_callback)
         # annotations
@@ -674,8 +675,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxColorByField.activated.connect(self.color_by_field_callback)
         self.comboBoxColorField.activated.connect(self.color_field_callback)
         self.comboBoxFieldColormap.activated.connect(self.field_colormap_callback)
-        self.doubleSpinBoxColorLB.valueChanged.connect(self.clim_callback)
-        self.doubleSpinBoxColorUB.valueChanged.connect(self.clim_callback)
+        self.lineEditColorLB.editingFinished.connect(self.clim_callback)
+        self.lineEditColorUB.editingFinished.connect(self.clim_callback)
         self.comboBoxCbarDirection.activated.connect(self.cbar_direction_callback)
         self.lineEditCbarLabel.editingFinished.connect(self.cbar_label_callback)
         # clusters
@@ -881,13 +882,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             self.update_spinboxes_bool = False #prevent update plot from runing
             sample_df = pd.read_csv(file_path, engine='c')
-            sample_df  = sample_df.loc[:, ~sample_df .columns.str.contains('^Unnamed')]
+            sample_df = sample_df.loc[:, ~sample_df .columns.str.contains('^Unnamed')]
             # self.data[sample_id] = pd.read_csv(file_path, engine='c')
-            self.data[sample_id]['raw_data'] = self.add_ree(sample_df)
+            self.data[sample_id]['raw_data'] = sample_df
             self.selected_analytes = self.data[sample_id]['raw_data'].columns[5:].tolist()
             self.data[sample_id]['computed_data'] = {
                 'Ratio':pd.DataFrame(),
-                'Calculated Field':pd.DataFrame(),
+                'Calculated Field': self.add_ree(sample_df),
                 'PCA Score':pd.DataFrame(),
                 'Cluster':pd.DataFrame(columns = ['fuzzy c-means', 'k-means']),
                 'Cluster Score':pd.DataFrame(),
@@ -986,6 +987,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
         Opens a dialog to select analytes for analysis either graphically or in a table.  Selection updates the list of analytes, and ratios in plot selector and comboBoxes.
         """
+        if self.sample_id == '':
+            return
+
         analytes_list = self.data[self.sample_id]['analyte_info']['analytes'].values
 
         self.analyteDialog = analyteSelectionWindow(analytes_list,self.data[self.sample_id]['norm'], self.data[self.sample_id]['processed_data'], self)
@@ -1116,8 +1120,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.swap_xy_val:
             self.order = 'C'
         else:
-
             self.order = 'F'
+
         # swap x and y
         # print(self.data[self.sample_id][['X','Y']])
         self.swap_xy_data(self.data[self.sample_id]['raw_data'])
@@ -1221,6 +1225,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return "#{:02x}{:02x}{:02x}".format(int(color[0]), int(color[1]), int(color[2]))
         else:
             return "#{:02x}{:02x}{:02x}".format(color.red(), color.green(), color.blue())
+
+    def get_rgb_color(self, color):
+
+        if not color:
+            return []
+        
+        color = color.lstrip('#').lower()
+
+        return [int(color[0:2],16), int(color[2:4],16), int(color[4:6],16)]
+
 
     def ternary_colormap_changed(self):
         """Changes toolButton backgrounds associated with ternary colormap
@@ -2879,10 +2893,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         match plot_type.lower():
             case 'analyte map' | 'gradient map':
                 # axes properties
-                self.doubleSpinBoxXLB.setEnabled(True)
-                self.doubleSpinBoxXUB.setEnabled(True)
-                self.doubleSpinBoxYLB.setEnabled(True)
-                self.doubleSpinBoxYUB.setEnabled(True)
+                self.lineEditXLB.setEnabled(True)
+                self.lineEditXUB.setEnabled(True)
+                self.lineEditYLB.setEnabled(True)
+                self.lineEditYUB.setEnabled(True)
                 self.lineEditXLabel.setEnabled(False)
                 self.lineEditYLabel.setEnabled(False)
                 self.lineEditZLabel.setEnabled(False)
@@ -2922,18 +2936,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxColorByField.setEnabled(True)
                 self.comboBoxColorField.setEnabled(True)
                 self.comboBoxFieldColormap.setEnabled(True)
-                self.doubleSpinBoxColorLB.setEnabled(True)
-                self.doubleSpinBoxColorUB.setEnabled(True)
+                self.lineEditColorLB.setEnabled(True)
+                self.lineEditColorUB.setEnabled(True)
                 self.comboBoxCbarDirection.setEnabled(True)
                 self.lineEditCbarLabel.setEnabled(True)
 
                 self.spinBoxHeatmapResolution.setEnabled(False)
             case 'correlation' | 'vectors':
                 # axes properties
-                self.doubleSpinBoxXLB.setEnabled(False)
-                self.doubleSpinBoxXUB.setEnabled(False)
-                self.doubleSpinBoxYLB.setEnabled(False)
-                self.doubleSpinBoxYUB.setEnabled(False)
+                self.lineEditXLB.setEnabled(False)
+                self.lineEditXUB.setEnabled(False)
+                self.lineEditYLB.setEnabled(False)
+                self.lineEditYUB.setEnabled(False)
                 self.lineEditXLabel.setEnabled(False)
                 self.lineEditYLabel.setEnabled(False)
                 self.lineEditZLabel.setEnabled(False)
@@ -2959,18 +2973,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxColorByField.setEnabled(False)
                 self.comboBoxColorField.setEnabled(False)
                 self.comboBoxFieldColormap.setEnabled(True)
-                self.doubleSpinBoxColorLB.setEnabled(True)
-                self.doubleSpinBoxColorUB.setEnabled(True)
+                self.lineEditColorLB.setEnabled(True)
+                self.lineEditColorUB.setEnabled(True)
                 self.comboBoxCbarDirection.setEnabled(True)
                 self.lineEditCbarLabel.setEnabled(False)
 
                 self.spinBoxHeatmapResolution.setEnabled(False)
             case 'histogram':
                 # axes properties
-                self.doubleSpinBoxXLB.setEnabled(True)
-                self.doubleSpinBoxXUB.setEnabled(True)
-                self.doubleSpinBoxYLB.setEnabled(True)
-                self.doubleSpinBoxYUB.setEnabled(True)
+                self.lineEditXLB.setEnabled(True)
+                self.lineEditXUB.setEnabled(True)
+                self.lineEditYLB.setEnabled(True)
+                self.lineEditYUB.setEnabled(True)
                 self.lineEditXLabel.setEnabled(True)
                 self.lineEditYLabel.setEnabled(True)
                 self.lineEditZLabel.setEnabled(False)
@@ -3000,25 +3014,25 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.toolButtonMarkerColor.setEnabled(False)
 
                     self.comboBoxFieldColormap.setEnabled(True)
-                    self.doubleSpinBoxColorLB.setEnabled(True)
-                    self.doubleSpinBoxColorUB.setEnabled(True)
+                    self.lineEditColorLB.setEnabled(True)
+                    self.lineEditColorUB.setEnabled(True)
                 else:
                     self.toolButtonMarkerColor.setEnabled(True)
 
                     self.comboBoxFieldColormap.setEnabled(False)
-                    self.doubleSpinBoxColorLB.setEnabled(False)
-                    self.doubleSpinBoxColorUB.setEnabled(False)
+                    self.lineEditColorLB.setEnabled(False)
+                    self.lineEditColorUB.setEnabled(False)
                 self.comboBoxCbarDirection.setEnabled(False)
                 self.lineEditCbarLabel.setEnabled(False)
 
                 self.spinBoxHeatmapResolution.setEnabled(False)
             case 'scatter' | 'pca scatter':
                 # axes properties
-                self.doubleSpinBoxXLB.setEnabled(True)
-                self.doubleSpinBoxXUB.setEnabled(True)
+                self.lineEditXLB.setEnabled(True)
+                self.lineEditXUB.setEnabled(True)
                 self.lineEditXLabel.setEnabled(True)
-                self.doubleSpinBoxYLB.setEnabled(True)
-                self.doubleSpinBoxYUB.setEnabled(True)
+                self.lineEditYLB.setEnabled(True)
+                self.lineEditYUB.setEnabled(True)
                 self.lineEditYLabel.setEnabled(True)
                 if self.comboBoxFieldZ.currentText() == '':
                     self.lineEditZLabel.setEnabled(False)
@@ -3053,8 +3067,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                     self.comboBoxColorField.setEnabled(False)
                     self.comboBoxFieldColormap.setEnabled(False)
-                    self.doubleSpinBoxColorLB.setEnabled(False)
-                    self.doubleSpinBoxColorUB.setEnabled(False)
+                    self.lineEditColorLB.setEnabled(False)
+                    self.lineEditColorUB.setEnabled(False)
                     self.comboBoxCbarDirection.setEnabled(False)
                     self.lineEditCbarLabel.setEnabled(False)
                 else:
@@ -3062,19 +3076,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                     self.comboBoxColorField.setEnabled(True)
                     self.comboBoxFieldColormap.setEnabled(True)
-                    self.doubleSpinBoxColorLB.setEnabled(True)
-                    self.doubleSpinBoxColorUB.setEnabled(True)
+                    self.lineEditColorLB.setEnabled(True)
+                    self.lineEditColorUB.setEnabled(True)
                     self.comboBoxCbarDirection.setEnabled(True)
                     self.lineEditCbarLabel.setEnabled(True)
 
                 self.spinBoxHeatmapResolution.setEnabled(False)
             case 'heatmap' | 'pca heatmap':
                 # axes properties
-                self.doubleSpinBoxXLB.setEnabled(True)
-                self.doubleSpinBoxXUB.setEnabled(True)
+                self.lineEditXLB.setEnabled(True)
+                self.lineEditXUB.setEnabled(True)
                 self.lineEditXLabel.setEnabled(True)
-                self.doubleSpinBoxYLB.setEnabled(True)
-                self.doubleSpinBoxYUB.setEnabled(True)
+                self.lineEditYLB.setEnabled(True)
+                self.lineEditYUB.setEnabled(True)
                 self.lineEditYLabel.setEnabled(True)
                 if self.comboBoxFieldZ.currentText() == '':
                     self.lineEditZLabel.setEnabled(False)
@@ -3105,18 +3119,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxColorByField.setEnabled(False)
                 self.comboBoxColorField.setEnabled(False)
                 self.comboBoxFieldColormap.setEnabled(True)
-                self.doubleSpinBoxColorLB.setEnabled(True)
-                self.doubleSpinBoxColorUB.setEnabled(True)
+                self.lineEditColorLB.setEnabled(True)
+                self.lineEditColorUB.setEnabled(True)
                 self.comboBoxCbarDirection.setEnabled(True)
                 self.lineEditCbarLabel.setEnabled(True)
 
                 self.spinBoxHeatmapResolution.setEnabled(True)
             case 'ternary map':
                 # axes properties
-                self.doubleSpinBoxXLB.setEnabled(True)
-                self.doubleSpinBoxXUB.setEnabled(True)
-                self.doubleSpinBoxYLB.setEnabled(True)
-                self.doubleSpinBoxYUB.setEnabled(True)
+                self.lineEditXLB.setEnabled(True)
+                self.lineEditXUB.setEnabled(True)
+                self.lineEditYLB.setEnabled(True)
+                self.lineEditYUB.setEnabled(True)
                 self.lineEditXLabel.setEnabled(True)
                 self.lineEditYLabel.setEnabled(True)
                 self.lineEditZLabel.setEnabled(True)
@@ -3151,24 +3165,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxColorByField.setEnabled(False)
                 self.comboBoxColorField.setEnabled(False)
                 self.comboBoxFieldColormap.setEnabled(False)
-                self.doubleSpinBoxColorLB.setEnabled(False)
-                self.doubleSpinBoxColorUB.setEnabled(False)
-                self.comboBoxCbarDirection.setEnabled(False)
+                self.lineEditColorLB.setEnabled(False)
+                self.lineEditColorUB.setEnabled(False)
+                self.comboBoxCbarDirection.setEnabled(True)
                 self.lineEditCbarLabel.setEnabled(False)
 
                 self.spinBoxHeatmapResolution.setEnabled(False)
             case 'tec' | 'radar':
                 # axes properties
-                self.doubleSpinBoxXLB.setEnabled(False)
-                self.doubleSpinBoxXUB.setEnabled(False)
+                self.lineEditXLB.setEnabled(False)
+                self.lineEditXUB.setEnabled(False)
                 self.lineEditXLabel.setEnabled(False)
                 if plot_type == 'tec':
-                    self.doubleSpinBoxYLB.setEnabled(True)
-                    self.doubleSpinBoxYUB.setEnabled(True)
+                    self.lineEditYLB.setEnabled(True)
+                    self.lineEditYUB.setEnabled(True)
                     self.lineEditYLabel.setEnabled(True)
                 else:
-                    self.doubleSpinBoxYLB.setEnabled(False)
-                    self.doubleSpinBoxYUB.setEnabled(False)
+                    self.lineEditYLB.setEnabled(False)
+                    self.lineEditYUB.setEnabled(False)
                     self.lineEditYLabel.setEnabled(False)
                 self.lineEditZLabel.setEnabled(False)
                 self.lineEditAspectRatio.setEnabled(True)
@@ -3193,18 +3207,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxColorByField.setEnabled(True)
                 self.comboBoxColorField.setEnabled(False)
                 self.comboBoxFieldColormap.setEnabled(True)
-                self.doubleSpinBoxColorLB.setEnabled(False)
-                self.doubleSpinBoxColorUB.setEnabled(False)
+                self.lineEditColorLB.setEnabled(False)
+                self.lineEditColorUB.setEnabled(False)
                 self.comboBoxCbarDirection.setEnabled(False)
                 self.lineEditCbarLabel.setEnabled(False)
                 self.spinBoxHeatmapResolution.setEnabled(False)
             case 'variance':
                 # axes properties
-                self.doubleSpinBoxXLB.setEnabled(False)
-                self.doubleSpinBoxXUB.setEnabled(False)
+                self.lineEditXLB.setEnabled(False)
+                self.lineEditXUB.setEnabled(False)
                 self.lineEditXLabel.setEnabled(False)
-                self.doubleSpinBoxYLB.setEnabled(False)
-                self.doubleSpinBoxYUB.setEnabled(False)
+                self.lineEditYLB.setEnabled(False)
+                self.lineEditYUB.setEnabled(False)
                 self.lineEditYLabel.setEnabled(False)
                 self.lineEditZLabel.setEnabled(False)
                 self.lineEditAspectRatio.setEnabled(True)
@@ -3228,17 +3242,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.toolButtonMarkerColor.setEnabled(True)
                 self.comboBoxColorByField.setEnabled(False)
                 self.comboBoxFieldColormap.setEnabled(False)
-                self.doubleSpinBoxColorLB.setEnabled(False)
-                self.doubleSpinBoxColorUB.setEnabled(False)
+                self.lineEditColorLB.setEnabled(False)
+                self.lineEditColorUB.setEnabled(False)
                 self.comboBoxCbarDirection.setEnabled(False)
                 self.lineEditCbarLabel.setEnabled(False)
                 self.spinBoxHeatmapResolution.setEnabled(False)
             case 'PCA Score' | 'Cluster Score' | 'clusters':
                 # axes properties
-                self.doubleSpinBoxXLB.setEnabled(True)
-                self.doubleSpinBoxXUB.setEnabled(True)
-                self.doubleSpinBoxYLB.setEnabled(True)
-                self.doubleSpinBoxYUB.setEnabled(True)
+                self.lineEditXLB.setEnabled(True)
+                self.lineEditXUB.setEnabled(True)
+                self.lineEditYLB.setEnabled(True)
+                self.lineEditYUB.setEnabled(True)
                 self.lineEditXLabel.setEnabled(False)
                 self.lineEditYLabel.setEnabled(False)
                 self.lineEditZLabel.setEnabled(False)
@@ -3274,25 +3288,25 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 if plot_type == 'clusters':
                     self.comboBoxColorByField.setEnabled(False)
                     self.comboBoxColorField.setEnabled(False)
-                    self.doubleSpinBoxColorLB.setEnabled(False)
-                    self.doubleSpinBoxColorUB.setEnabled(False)
+                    self.lineEditColorLB.setEnabled(False)
+                    self.lineEditColorUB.setEnabled(False)
                     self.comboBoxCbarDirection.setEnabled(False)
                     self.lineEditCbarLabel.setEnabled(False)
                 else:
                     self.comboBoxColorByField.setEnabled(True)
                     self.comboBoxColorField.setEnabled(True)
-                    self.doubleSpinBoxColorLB.setEnabled(True)
-                    self.doubleSpinBoxColorUB.setEnabled(True)
+                    self.lineEditColorLB.setEnabled(True)
+                    self.lineEditColorUB.setEnabled(True)
                     self.comboBoxCbarDirection.setEnabled(True)
                     self.lineEditCbarLabel.setEnabled(True)
                 self.spinBoxHeatmapResolution.setEnabled(False)
             case 'profile':
                 # axes properties
-                self.doubleSpinBoxXLB.setEnabled(True)
-                self.doubleSpinBoxXUB.setEnabled(True)
+                self.lineEditXLB.setEnabled(True)
+                self.lineEditXUB.setEnabled(True)
                 self.lineEditXLabel.setEnabled(True)
-                self.doubleSpinBoxYLB.setEnabled(False)
-                self.doubleSpinBoxYUB.setEnabled(False)
+                self.lineEditYLB.setEnabled(False)
+                self.lineEditYUB.setEnabled(False)
                 self.lineEditYLabel.setEnabled(False)
                 self.lineEditZLabel.setEnabled(False)
                 self.lineEditAspectRatio.setEnabled(True)
@@ -3316,16 +3330,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.toolButtonMarkerColor.setEnabled(True)
                 self.comboBoxColorByField.setEnabled(False)
                 self.comboBoxFieldColormap.setEnabled(True)
-                self.doubleSpinBoxColorLB.setEnabled(False)
-                self.doubleSpinBoxColorUB.setEnabled(False)
+                self.lineEditColorLB.setEnabled(False)
+                self.lineEditColorUB.setEnabled(False)
                 self.comboBoxCbarDirection.setEnabled(False)
                 self.lineEditCbarLabel.setEnabled(False)
                 self.spinBoxHeatmapResolution.setEnabled(False)
     
         # enable/disable labels
         # axes properties
-        self.labelXLim.setEnabled(self.doubleSpinBoxXLB.isEnabled())
-        self.labelYLim.setEnabled(self.doubleSpinBoxYLB.isEnabled())
+        self.labelXLim.setEnabled(self.lineEditXLB.isEnabled())
+        self.labelYLim.setEnabled(self.lineEditYLB.isEnabled())
         self.labelXLabel.setEnabled(self.lineEditXLabel.isEnabled())
         self.labelYLabel.setEnabled(self.lineEditYLabel.isEnabled())
         self.labelZLabel.setEnabled(self.lineEditZLabel.isEnabled())
@@ -3357,7 +3371,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.labelColorByField.setEnabled(self.comboBoxColorByField.isEnabled())
         self.labelColorField.setEnabled(self.comboBoxColorField.isEnabled())
         self.labelFieldColormap.setEnabled(self.comboBoxFieldColormap.isEnabled())
-        self.labelColorBounds.setEnabled(self.doubleSpinBoxColorLB.isEnabled())
+        self.labelColorBounds.setEnabled(self.lineEditColorLB.isEnabled())
         self.labelCbarDirection.setEnabled(self.comboBoxCbarDirection.isEnabled())
         self.labelCbarLabel.setEnabled(self.lineEditCbarLabel.isEnabled())
         self.labelHeatmapResolution.setEnabled(self.spinBoxHeatmapResolution.isEnabled())
@@ -3382,11 +3396,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         style = self.styles[plot_type]
 
         # axes properties
-        self.doubleSpinBoxXLB.setValue(style['Axes']['XLim'][0])
-        self.doubleSpinBoxXUB.setValue(style['Axes']['XLim'][1])
+        self.lineEditXLB.setText(str(style['Axes']['XLim'][0]))
+        self.lineEditXUB.setText(str(style['Axes']['XLim'][1]))
         self.lineEditXLabel.setText(style['Axes']['XLabel'])
-        self.doubleSpinBoxYLB.setValue(style['Axes']['YLim'][0])
-        self.doubleSpinBoxYUB.setValue(style['Axes']['YLim'][1])
+        self.lineEditYLB.setText(str(style['Axes']['YLim'][0]))
+        self.lineEditYUB.setText(str(style['Axes']['YLim'][1]))
         self.lineEditYLabel.setText(style['Axes']['YLabel'])
         self.lineEditZLabel.setText(style['Axes']['ZLabel'])
         self.lineEditAspectRatio.setText(str(style['Axes']['AspectRatio']))
@@ -3415,8 +3429,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
         self.comboBoxColorField.setCurrentText(style['Colors']['Field'])
         self.comboBoxFieldColormap.setCurrentText(style['Colors']['Colormap'])
-        self.doubleSpinBoxColorLB.setValue(style['Colors']['CLim'][0])
-        self.doubleSpinBoxColorUB.setValue(style['Colors']['CLim'][1])
+        self.lineEditColorLB.setText(str(style['Colors']['CLim'][0]))
+        self.lineEditColorUB.setText(str(style['Colors']['CLim'][1]))
         self.comboBoxCbarDirection.setCurrentText(style['Colors']['Direction'])
         self.lineEditCbarLabel.setText(style['Colors']['CLabel'])
         self.spinBoxHeatmapResolution.setValue(style['Colors']['Resolution'])
@@ -3433,9 +3447,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.plot_types[self.toolBox.currentIndex()][0] = self.comboBoxPlotType.currentIndex()
 
         # update axes properties
-        self.styles[plot_type]['Axes'] = {'XLim': [self.doubleSpinBoxXLB.value(), self.doubleSpinBoxXUB.value()],
+        self.styles[plot_type]['Axes'] = {'XLim': [float(self.lineEditXLB.currentText()), float(self.lineEditXUB.currentText())],
                     'XLabel': self.lineEditXLabel.currentText(),
-                    'YLim': [self.doubleSpinBoxYLB.value(), self.doubleSpinBoxYUB.value()],
+                    'YLim': [float(self.lineEditYLB.currentText()), float(self.lineEditYUB.currentText())],
                     'YLabel': self.lineEditYLabel.currentText(),
                     'ZLabel': self.lineEditZLabel.currentText(),
                     'AspectRatio': float(self.lineEditAspectRatio.currentText()),
@@ -3463,7 +3477,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     'ColorByField': self.comboBoxColorByField.currentText(),
                     'Field': self.comboBoxColorField.currentText(),
                     'Colormap': self.comboBoxFieldColormap.currentText(),
-                    'CLim': [self.doubleSpinBoxColorLB.value(), self.doubleSpinBoxColorUB.value()],
+                    'CLim': [float(self.lineEditColorLB.value()), float(self.lineEditColorUB.value())],
                     'Direction': self.comboBoxCbarDirection.currentText(),
                     'CLabel': self.lineEditCbarLabel.currentText(),
                     'Resolution': self.spinBoxHeatmapResolution.value()}
@@ -3506,18 +3520,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def xlim_callback(self):
         plot_type = self.comboBoxPlotType.currentText()
-        if self.styles[plot_type]['Axes']['XLim'][0] == self.doubleSpinBoxXLB.value() and self.styles[plot_type]['Axes']['XLim'][1] == self.doubleSpinBoxXUB.value():
+        if self.styles[plot_type]['Axes']['XLim'][0] == float(self.lineEditXLB.currentText()) and self.styles[plot_type]['Axes']['XLim'][1] == float(self.lineEditXUB.currentText()):
             return
 
-        self.styles[plot_type]['Axes']['XLim'] = [self.doubleSpinBoxXLB.value(), self.doubleSpinBoxXUB.value()]
+        self.styles[plot_type]['Axes']['XLim'] = [float(self.lineEditXLB.currentText()), float(self.lineEditXUB.currentText())]
         self.update_SV(save=False)
 
     def ylim_callback(self):
         plot_type = self.comboBoxPlotType.currentText()
-        if self.styles[plot_type]['Axes']['YLim'][0] == self.doubleSpinBoxYLB.value() and self.styles[plot_type]['Axes']['YLim'][1] == self.doubleSpinBoxYUB.value():
+        if self.styles[plot_type]['Axes']['YLim'][0] == float(self.lineEditYLB.currentText()) and self.styles[plot_type]['Axes']['YLim'][1] == float(self.lineEditYUB.currentText()):
             return
 
-        self.styles[plot_type]['Axes']['YLim'] = [self.doubleSpinBoxYLB.value(), self.doubleSpinBoxYUB.value()]
+        self.styles[plot_type]['Axes']['YLim'] = [float(self.lineEditYLB.currentText()), float(self.lineEditYUB.currentText())]
         self.update_SV(save=False)
 
     def aspect_ratio_callback(self):
@@ -3535,33 +3549,112 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.styles[plot_type]['Axes']['TickDir'] = self.comboBoxTickDirection.currentText()
         self.update_SV(save=False)
+    
+    def set_color_axis_widgets(self):
+        field = self.comboBoxColorField.currentText()
+        if field == '':
+            return
+        self.lineEditColorLB.setText(str(self.axis_dict[field]['min']))
+        self.lineEditColorUB.setText(str(self.axis_dict[field]['max']))
 
-    def axes_reset_callback(self):
-        pass
+    def set_axis_widgets(self, ax, field):
+        match ax:
+            case 'x':
+                self.lineEditXLB.setText(str(self.axis_dict[field]['min']))
+                self.lineEditXUB.setText(str(self.axis_dict[field]['max']))
+                self.lineEditXLabel.setText(self.axis_dict[field]['label'])
+            case 'y':
+                self.lineEditYLB.setText(str(self.axis_dict[field]['min']))
+                self.lineEditYUB.setText(str(self.axis_dict[field]['max']))
+                self.lineEditYLabel.setText(self.axis_dict[field]['label'])
+            case 'z':
+                self.lineEditZLabel.setText(self.axis_dict[field]['label'])
+        
+    def axes_reset_callback(self, button):
+        if button.accessibleName() == 'color axis reset':
+            if not (self.comboBoxColorByField.currentText() in ['None','Cluster']):
+                field_type = self.comboBoxColorByField.currentText()
+                field = self.comboBoxColorField.currentText()
+                if field == '':
+                    return
+                self.set_axis_values(field_type, field, status='auto')
+                self.set_color_axis_widgets()
+        else:
+            match self.comboBoxPlotType.currentText().lower():
+                case 'histogram' | 'gradient map':
+                    field_type = self.comboBoxHistFieldType.currentText()
+                    field = self.comboBoxHistField.currentText()
+                    self.set_axis_values(field_type, field, status='auto')
+                    self.set_axis_widgets('x', field)
+                case 'scatter' | 'heatmap':
+                    field_type = self.comboBoxFieldTypeX.currentText()
+                    field = self.comboBoxFieldX.currentText()
+                    self.set_axis_values(field_type, field, status='auto')
+                    self.set_axis_widgets('x', field)
+
+                    field_type = self.comboBoxFieldTypeY.currentText()
+                    field = self.comboBoxFieldY.currentText()
+                    self.set_axis_values(field_type, field, status='auto')
+                    self.set_axis_widgets('y', field)
+
+                    field_type = self.comboBoxFieldTypeZ.currentText()
+                    field = self.comboBoxFieldZ.currentText()
+                    if (field_type == '') | (field == ''):
+                        return
+                    self.set_axis_values(field_type, field, status='auto')
+                    self.set_axis_widgets('z', field)
+
+                case 'pca scatter' | 'pca heatmap':
+                    field_type = 'PCA Score'
+
+                    field = self.spinBoxPCX.currentText()
+                    self.set_axis_values(field_type, field, status='auto')
+                    self.set_axis_widgets('x', field)
+
+                    field = self.spinBoxPCY.currentText()
+                    self.set_axis_values(field_type, field, status='auto')
+                    self.set_axis_widgets('y', field)
+                case _:
+                    print('(axis_reset_callback) Not defined for :'+field_type+'/'+field)
+                    return
 
     def get_axis_values(self, field_type, field):
-
-        if field not in self.axes_dict.keys:
-            self.set_axis_values(field_type, field)
+        if field not in self.axis_dict.keys():
+            self.set_axis_values(field_type, field, status='auto')
             
-        amin = self.axes_dict[field]['min']
-        amax = self.axes_dict[field]['max']
+        amin = self.axis_dict[field]['min']
+        amax = self.axis_dict[field]['max']
+        label = self.axis_dict[field]['label']
 
-        return amin, amax
+        return amin, amax, label
 
-    def set_axis_values(self, field_type, field, amin=None, amax=None):
-        if (amin is None) or (amax is None) or (status == 'auto'):
+    def set_axis_values(self, field_type, field, status='auto', amin=None, amax=None):
+        # initialize variables
+        current_plot_df = pd.DataFrame()
+        if field not in self.axis_dict.keys():
+            print('initialize axis_dict["field"]')
+            d = {field:{'status':'auto', 'label':field, 'min':None, 'max':None}}
+            self.axis_dict.update(d)
+        print(self.axis_dict)
+
+        if status == 'auto':
             match field_type:
-                case 'Analyte','Analyte (normalized)':
-                    current_plot_df['array'] = self.data[sample_id]['processed_data'].loc[:,field].values
+                case 'Analyte' | 'Analyte (normalized)':
+                    current_plot_df['array'] = self.data[self.sample_id]['processed_data'].loc[:,field].values
+                    if field_type == 'Analyte':
+                        self.axis_dict[field]['label'] = [field+' ('+self.preferences['Units']['Concentration']+')']
                 case _:
-                    current_plot_df['array'] = self.data[sample_id]['computed_data'][field_type].loc[:,field].values
+                    current_plot_df['array'] = self.data[self.sample_id]['computed_data'][field_type].loc[:,field].values
 
             amin = current_plot_df['array'].min()
             amax = current_plot_df['array'].max()
-            self.axes_dict.update(field, {'status':'auto', 'min':amin, 'max':amax})
+
+            d = {'status':'auto', 'min':amin, 'max':amax}
         else:
-            self.axes_dict[field] = {'status':'custom', 'min':amin, 'max':amax}
+            d = {'status':'custom', 'min':amin, 'max':amax}
+
+        self.axis_dict[field].update(d)
+        print(self.axis_dict[field])
 
     # text
     # -------------------------------------
@@ -3714,8 +3807,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.comboBoxPlotType.isEnabled() == False | self.comboBoxColorByField.isEnabled() == False:
             self.comboBoxColorField.setEnabled(False)
             self.labelColorField.setEnabled(False)
-            self.doubleSpinBoxColorLB.setEnabled(False)
-            self.doubleSpinBoxColorUB.setEnabled(False)
+            self.lineEditColorLB.setEnabled(False)
+            self.lineEditColorUB.setEnabled(False)
             self.labelColorBounds.setEnabled(False)
             self.comboBoxFieldColormap.setEnabled(False)
             self.labelFieldColormap.setEnabled(False)
@@ -3728,8 +3821,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.comboBoxColorByField.currentText() == 'None':
             self.comboBoxColorField.setEnabled(False)
             self.labelColorField.setEnabled(False)
-            self.doubleSpinBoxColorLB.setEnabled(False)
-            self.doubleSpinBoxColorUB.setEnabled(False)
+            self.lineEditColorLB.setEnabled(False)
+            self.lineEditColorUB.setEnabled(False)
             self.labelColorBounds.setEnabled(False)
             self.comboBoxFieldColormap.setEnabled(False)
             self.labelFieldColormap.setEnabled(False)
@@ -3742,8 +3835,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if self.comboBoxColorByField.currentText() in ['Clusters']:
                 self.comboBoxColorField.setEnabled(False)
                 self.labelColorField.setEnabled(False)
-                self.doubleSpinBoxColorLB.setEnabled(False)
-                self.doubleSpinBoxColorUB.setEnabled(False)
+                self.lineEditColorLB.setEnabled(False)
+                self.lineEditColorUB.setEnabled(False)
                 self.labelColorBounds.setEnabled(False)
                 self.comboBoxFieldColormap.setEnabled(False)
                 self.labelFieldColormap.setEnabled(False)
@@ -3754,8 +3847,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             else:
                 self.comboBoxColorField.setEnabled(True)
                 self.labelColorField.setEnabled(True)
-                self.doubleSpinBoxColorLB.setEnabled(True)
-                self.doubleSpinBoxColorUB.setEnabled(True)
+                self.lineEditColorLB.setEnabled(True)
+                self.lineEditColorUB.setEnabled(True)
                 self.labelColorBounds.setEnabled(True)
                 self.comboBoxFieldColormap.setEnabled(True)
                 self.labelFieldColormap.setEnabled(True)
@@ -3790,10 +3883,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def clim_callback(self):
         plot_type = self.comboBoxPlotType.currentText()
-        if self.styles[plot_type]['Colors']['CLim'][0] == self.doubleSpinBoxColorLB.value() and self.styles[plot_type]['Colors']['CLim'][1] == self.doubleSpinBoxColorUB.value():
+        if self.styles[plot_type]['Colors']['CLim'][0] == float(self.lineEditColorLB.currentText()) and self.styles[plot_type]['Colors']['CLim'][1] == float(self.lineEditColorUB.currentText()):
             return
 
-        self.styles[plot_type]['Colors']['CLim'] = [self.doubleSpinBoxColorLB.value(), self.doubleSpinBoxColorUB.value()]
+        self.styles[plot_type]['Colors']['CLim'] = [float(self.lineEditColorLB.currentText()), float(self.lineEditColorUB.currentText())]
 
         self.update_SV(save=False)
 
@@ -3823,6 +3916,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         backround ``MainWindow.toolButtonClusterColor`` color.  Also updates ``MainWindow.tableWidgetViewGroups``
         color associated with selected cluster.  The selected cluster is determined by ``MainWindow.spinBoxClusterGroup.value()``
         """
+        if self.tableWidgetViewGroups.rowCount() == 0:
+            return
+
         selected_cluster = self.spinBoxClusterGroup.value()-1
 
         # change color
@@ -4037,22 +4133,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         return plotWidget
 
-    def add_plotwidget_to_tree(self, plot_info, plotWidget):
+    def add_plotwidget_to_tree(self, plotWidget):
         print('add_plotwidget_to_tree')
         # determine central widget view type (single, multi, quick)
         view = self.canvasWindow.currentIndex()
 
         # adds plot to plot dictionary for tree
-        self.plot_widget_dict[plot_info['plot_type'].lower()][self.sample_id][plot_info['plot_name']] = {'widget':[plotWidget],
-                                                'info':plot_info, 'view':[view]}
+        self.plot_widget_dict[self.plot_info['plot_type'].lower()][self.sample_id][self.plot_info['plot_name']] = {'info':self.plot_info, 'view':[view]}
 
         #self.plot_widget_dict['clustering'][self.sample_id][plot_name] = {'widget': [widgetClusterMap],
         #                                                      'info': {'plot_type': plot_type, 'sample_id': self.sample_id, 'n_clusters': self.spinBoxNClusters.value()},
         #                                                      'view': [self.canvasWindow.currentIndex()]}
 
         # updates tree with new plot name
-        self.update_tree(plot_info['plot_name'], data=plot_info, tree=plot_info['plot_type'])
-        self.display_SV(plot_info, plotWidget)
+        self.update_tree(self.plot_info['plot_name'], data=self.plot_info, tree=self.plot_info['plot_type'])
 
     def clear_view_widget(self, layout):
         """Clears a widget that contains plots
@@ -4071,8 +4165,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def display_SV(self, plot_info, plotWidget):
         print('display_SV')
-        if save:
-            self.add_plotwidget_to_tree(plot_info, plotWidget)
+        self.add_plotwidget_to_tree(plot_info, plotWidget)
 
         #Single view
         self.canvasWindow.setCurrentIndex(0)
@@ -4145,9 +4238,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             
             self.plot_laser_map(current_plot_df,plot_information)
             self.update_spinboxes(parameters)
-
-            
-            self.plot_small_histogram(current_plot_df, analyte_str)
         elif plot_type == 'lasermap_norm':
             ref_data_chem = self.ref_data.iloc[self.comboBoxRefMaterial.currentIndex()]
             ref_data_chem.index = [col.replace('_ppm', '') for col in ref_data_chem.index]
@@ -4288,32 +4378,32 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------
     # Correlation functions and plotting
     # -------------------------------------
-    def update_correlation(self, save=False):
-        if self.sample_id == '':
-            return
+    # def update_correlation(self, save=False):
+    #     if self.sample_id == '':
+    #         return
 
-        plot_exist = plot_name in self.plot_widget_dict[plot_type][sample_id]
-        duplicate = plot_exist and len(self.plot_widget_dict[plot_type][sample_id][plot_name]['view']) == 1 and self.plot_widget_dict[plot_type][sample_id][plot_name]['view'][0] != self.canvasWindow.currentIndex()
+    #     plot_exist = plot_name in self.plot_widget_dict[plot_type][sample_id]
+    #     duplicate = plot_exist and len(self.plot_widget_dict[plot_type][sample_id][plot_name]['view']) == 1 and self.plot_widget_dict[plot_type][sample_id][plot_name]['view'][0] != self.canvasWindow.currentIndex()
 
-        if plot_exist and not duplicate:
+    #     if plot_exist and not duplicate:
 
-            fig = ax.get_figure()
-            plotWidget = self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'][0]
-            figure_canvas = plotWidget.findChild(FigureCanvas)
-            figure_canvas.figure.clear()
-            ax = figure_canvas.figure.subplots()
-            figure_canvas.draw()
-        else:
-            if duplicate:
-                self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'].append(plotWidget)
-                self.plot_widget_dict[plot_type][sample_id][plot_name]['view'].append(view)
-            else:
-                self.plot_widget_dict[plot_type][sample_id][plot_name] = {'widget': [plotWidget], 'info': plot_information, 'view': [view]}
+    #         fig = ax.get_figure()
+    #         plotWidget = self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'][0]
+    #         figure_canvas = plotWidget.findChild(FigureCanvas)
+    #         figure_canvas.figure.clear()
+    #         ax = figure_canvas.figure.subplots()
+    #         figure_canvas.draw()
+    #     else:
+    #         if duplicate:
+    #             self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'].append(plotWidget)
+    #             self.plot_widget_dict[plot_type][sample_id][plot_name]['view'].append(view)
+    #         else:
+    #             self.plot_widget_dict[plot_type][sample_id][plot_name] = {'widget': [plotWidget], 'info': plot_information, 'view': [view]}
 
-            # Additional steps to add the Correlation widget to the appropriate container in the UI
-            if save:
-                self.add_plot(plot_information) #do not plot correlation when directory changes
-            self.update_tree(plot_information['plot_name'], data=plot_information, tree=branch)
+    #         # Additional steps to add the Correlation widget to the appropriate container in the UI
+    #         if save:
+    #             self.add_plot(plot_information) #do not plot correlation when directory changes
+    #         self.update_tree(plot_information['plot_name'], data=plot_information, tree=branch)
 
     def plot_correlation(self):
         print('plot_correlation')
@@ -4786,10 +4876,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         norm = plt.Normalize(vmin=0, vmax=3)
         scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(style['Colors']['Colormap']), norm=norm)
         if style['Colors']['Direction'] == 'vertical':
-            cb = fig.colorbar(scalarMappable, ax=ax, orientation=style['Colors']['Direction'], location='right', shrink=0.62)
+            cb = canvas.fig.colorbar(scalarMappable, ax=canvas.axes, orientation=style['Colors']['Direction'], location='right', shrink=0.62)
             cb.set_label('log(N)')
         elif style['Colors']['Direction'] == 'horizontal':
-            cb = fig.colorbar(scalarMappable, ax=ax, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62)
+            cb = canvas.fig.colorbar(scalarMappable, ax=canvas.axes, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62)
             cb.set_label('log(N)')
         else:
             cb = None
@@ -4883,26 +4973,63 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """Creates map colored by ternary coordinate positions"""
         style = self.styles['ternary map']
 
-        if fig == None:
-            a, b, c = self.get_scatter_values() #get scatter values from elements chosen
+        canvas = MplCanvas(sub=121)
+
+        afield = self.comboBoxFieldX.currentText()
+        bfield = self.comboBoxFieldY.currentText()
+        cfield = self.comboBoxFieldZ.currentText()
+
+        a = self.data[self.sample_id]['processed_data'].loc[:,afield].values
+        b = self.data[self.sample_id]['processed_data'].loc[:,bfield].values
+        c = self.data[self.sample_id]['processed_data'].loc[:,cfield].values
+  
+        ca = self.get_rgb_color(self.get_hex_color(self.toolButtonTCmapXColor.palette().button().color()))
+        cb = self.get_rgb_color(self.get_hex_color(self.toolButtonTCmapYColor.palette().button().color()))
+        cc = self.get_rgb_color(self.get_hex_color(self.toolButtonTCmapZColor.palette().button().color()))
+        cm = self.get_rgb_color(self.get_hex_color(self.toolButtonTCmapMColor.palette().button().color()))
+
+        t = ternary(canvas.axes)
+
+        cval = t.terncolor(a, b, c, ca, cb, cc, cp=cm)
+
+        M, N = self.array_size
+
+        # Reshape the array into MxNx3
+        map_data = np.zeros((M, N, 3), dtype=np.uint8)
+        map_data[:len(cval), :, :] = cval.reshape(M, N, 3, order=self.order)
+
+        canvas.axes.imshow(map_data, aspect=self.aspect_ratio)
+
+        grid = None
+        if style['Colors']['Direction'] == 'vertical':
+            grid = gs.GridSpec(5,1)
+        elif style['Colors']['Direction'] == 'horizontal':
+            grid = gs.GridSpec(1,5)
         else:
-            # get saved scatter values to update plot
-            a, b, c = values
+            self.clear_view_widget(self.widgetSingleView.layout())
+            self.widgetSingleView.layout().addWidget(canvas)
+            return
+            
+        canvas.axes.set_position(grid[0:4].get_position(canvas.fig))
+        canvas.axes.set_subplotspec(grid[0:4])              # only necessary if using tight_layout()
 
-        selected_sample = self.data[self.sample_id]
+        canvas.axes2 = canvas.fig.add_subplot(grid[4])
 
-        df = selected_sample[['X','Y']]
+        canvas.fig.tight_layout() 
 
-        if fig == None:
-            new = True
-            labels = [x['field'], y['field'], z['field']]
-            fig = Figure(figsize=(6, 4))
-            axs = [fig.add_subplots(['left' 'center']), fig.add_subplots(['right'])]
-        else:
-            new = False
+        t2 = ternary(canvas.axes2, labels=[afield,bfield,cfield])
 
-        ternary.ternmap(ax, selected_sample['X'],selected_sample['Y'], a,b,c, ca=[1,1,0], cb=[0.3,0.73,0.1], cc=[0,0,0.15], p=[1/3,1/3,1/3], cp = [])
+        a = []
+        hbin = t2.hexagon(10)
+        xc = np.array([v['xc'] for v in hbin])
+        yc = np.array([v['yc'] for v in hbin])
+        a,b,c = t2.xy2tern(xc,yc)
+        cv = t2.terncolor(a,b,c, ca=ca, cb=cb, cc=cc, cp=cm)
+        for i, hb in enumerate(hbin):
+            t2.ax.fill(hb['xv'], hb['yv'], color=cv[i]/255, edgecolor='none')
 
+        self.clear_view_widget(self.widgetSingleView.layout())
+        self.widgetSingleView.layout().addWidget(canvas)
 
     # -------------------------------------
     # PCA functions and plotting
@@ -5429,12 +5556,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 df_filtered['clusters'] = cluster_labels
                 df_filtered = df_filtered[df_filtered['clusters'].isin(clusters)]
-                radar = Radar(df_filtered, fields = self.n_dim_list, quantiles=quantiles, axes_interval = axes_interval, group_field ='clusters', groups =clusters)
+                radar = Radar(df_filtered, fields=self.n_dim_list, quantiles=quantiles, axes_interval=axes_interval, group_field='clusters', groups=clusters)
 
                 canvas.fig, canvas.axes = radar.plot(cmap = self.group_cmap)
                 canvas.axes.legend(loc='upper right', frameon='False')
             else:
-                radar = Radar(df_filtered, fields = self.n_dim_list, quantiles=quantiles, axes_interval = axes_interval, group_field ='', groups = None)
+                radar = Radar(df_filtered, fields=self.n_dim_list, quantiles=quantiles, axes_interval=axes_interval, group_field='', groups=None)
 
                 canvas.fig, canvas.axes = radar.plot()
         else: #tec plot
@@ -5450,10 +5577,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     # Create RGBA color
                     print(f'Cluster {i}')
                     color = self.group_cmap[f'Cluster {i}'][:-1]
-                    canvas.axes,yl_tmp = plot_spider_norm(data = df_filtered.loc[df_filtered['clusters']==i,:],
-                            ref_data = self.ref_data, norm_ref_data =  self.ref_data['model'][ref_i],
-                            layer = self.ref_data['layer'][ref_i], el_list = self.n_dim_list ,
-                            style = 'Quanta',quantiles = quantiles, ax = ax, c = color, label=self.current_group['clusters'][i])
+                    canvas.axes,yl_tmp = plot_spider_norm(data=df_filtered.loc[df_filtered['clusters']==i,:],
+                            ref_data=self.ref_data, norm_ref_data=self.ref_data['model'][ref_i],
+                            layer=self.ref_data['layer'][ref_i], el_list=self.n_dim_list ,
+                            style='Quanta', quantiles=quantiles, ax=canvas.axes, c=color, label=self.current_group['clusters'][i])
                     #store max y limit to convert the set y limit of axis
                     yl = [np.floor(np.nanmin([yl[0] , yl_tmp[0]])), np.ceil(np.nanmax([yl[1] , yl_tmp[1]]))]
 
@@ -5491,7 +5618,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.plot_id[plot_type][self.sample_id]  = 0
         plot_name = plot_name +'_'+str(self.plot_id[plot_type][self.sample_id])
 
-        plot_info = {
+        self.plot_info = {
             'plot_name': f'{plot_name}',
             'sample_id': self.sample_id,
             'plot_type': plot_type,
@@ -5744,6 +5871,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     t_array = np.copy(array)
             return t_array
 
+    # make this part of the calculated fields
     def add_ree(self, sample_df):
 
         lree = ['la', 'ce', 'pr', 'nd', 'sm', 'eu', 'gd']
@@ -5757,15 +5885,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         ree_cols = lree_cols + hree_cols
 
         # Sum up the values for each row
-        sample_df['LREE'] = sample_df[lree_cols].sum(axis=1)
-        sample_df['HREE'] = sample_df[hree_cols].sum(axis=1)
-        sample_df['MREE'] = sample_df[mree_cols].sum(axis=1)
-        sample_df['REE'] = sample_df[ree_cols].sum(axis=1)
+        ree_df = pd.DataFrame(index=sample_df.index)
+        ree_df['LREE'] = sample_df[lree_cols].sum(axis=1)
+        ree_df['HREE'] = sample_df[hree_cols].sum(axis=1)
+        ree_df['MREE'] = sample_df[mree_cols].sum(axis=1)
+        ree_df['REE'] = sample_df[ree_cols].sum(axis=1)
 
-        return sample_df
-
-
-        self.check_analysis = False
+        return ree_df
    
 
     # -------------------------------------
@@ -5805,7 +5931,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 else:
                     field_list = ['PCA Score']
                     self.toggle_color_widgets(True)
-                    print('enable ColorByField')
+            case 'ternary map':
+                self.toggle_color_widgets(False)
+                self.labelCbarDirection.setEnabled(True)
+                self.comboBoxCbarDirection.setEnabled(True)
             case _:
                 field_list = ['Analyte', 'Analyte (normalized)']
                 # add check for ratios
@@ -5846,8 +5975,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.labelCbarLabel.setEnabled(True)
             self.lineEditCbarLabel.setEnabled(True)
             self.labelColorBounds.setEnabled(True)
-            self.doubleSpinBoxColorLB.setEnabled(True)
-            self.doubleSpinBoxColorUB.setEnabled(True)
+            self.lineEditColorLB.setEnabled(True)
+            self.lineEditColorUB.setEnabled(True)
         else:
             self.labelColorByField.setEnabled(False)
             self.comboBoxColorByField.setEnabled(False)
@@ -5860,8 +5989,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.labelCbarLabel.setEnabled(False)
             self.lineEditCbarLabel.setEnabled(False)
             self.labelColorBounds.setEnabled(False)
-            self.doubleSpinBoxColorLB.setEnabled(False)
-            self.doubleSpinBoxColorUB.setEnabled(False)
+            self.lineEditColorLB.setEnabled(False)
+            self.lineEditColorUB.setEnabled(False)
  
     # updates field comboboxes for analysis and plotting
     def update_field_combobox(self, parentBox, childBox):
@@ -6117,34 +6246,40 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 return
 
         for k, v in value_dict.items():
-            if v['type'] == 'Analyte' and v['field']:
-                df = self.get_map_data(self.sample_id, field=v['field'], analysis_type=v['type'])
-                v['label'] = v['field'] + ' (' + self.preferences['Units']['Concentration'] + ')'
-            elif v['type'] == 'Ratio' and '/' in v['field']:
-                #analyte_1, analyte_2 = v['field'].split('/')
-                df = self.get_map_data(self.sample_id, field=v['field'], analysis_type=v['type'])
-                v['label'] = v['field']
-            elif v['type'] == 'PCA Score':
-                df = self.get_map_data(self.sample_id, field=v['field'], analysis_type=v['type'])
-
-                v['label'] = v['field']
-            elif v['type'] == 'Cluster':
-                df = self.get_map_data(self.sample_id, v['field'], analysis_type='Cluster')
-                v['label'] = v['field']
-            elif v['type'] == 'Cluster Score':
-                df = self.get_map_data(self.sample_id, v['field'], analysis_type='Cluster Score')
-                v['label'] = v['field']
-            elif v['type'] == 'Special':
-                return
-            else:
-                df = pd.DataFrame({'array': []})  # Or however you want to handle this case
+            match v['type']:
+                case 'Analyte' | 'Analyte (normalized)':
+                    df = self.get_map_data(self.sample_id, field=v['field'], analysis_type=v['type'])
+                    v['label'] = v['field'] + ' (' + self.preferences['Units']['Concentration'] + ')'
+                case 'Ratio':
+                    #analyte_1, analyte_2 = v['field'].split('/')
+                    df = self.get_map_data(self.sample_id, field=v['field'], analysis_type=v['type'])
+                    v['label'] = v['field']
+                case 'PCA Score' | 'Cluster' | 'Cluster Score':
+                    df = self.get_map_data(self.sample_id, field=v['field'], analysis_type=v['type'])
+                    v['label'] = v['field']
+                case 'Special':
+                    df = self.get_map_data(self.sample_id, field=v['field'], analysis_type=v['type'])
+                    v['label'] = v['field']
+                case _:
+                    df = pd.DataFrame({'array': []})  # Or however you want to handle this case
 
             value_dict[k]['array'] = df['array'][self.data[self.sample_id]['mask']].values if not df.empty else []
 
-            self.lineEditXLabel.setText(value_dict['x']['label'])
-            self.lineEditYLabel.setText(value_dict['y']['label'])
-            self.lineEditZLabel.setText(value_dict['z']['label'])
-            self.lineEditCbarLabel.setText(value_dict['c']['label'])
+            # set axes widgets
+            if k == 'c':
+                self.set_color_axis_widgets()
+            else:
+                if v['field'] in self.axis_dict.keys():
+                    self.set_axis_widgets(k, v['field'])
+                else:
+                    self.set_axis_values(v['type'], v['field'], status='auto')
+                    self.set_axis_widgets(k, v['field'])
+
+            # set lineEdit labels for axes
+            # self.lineEditXLabel.setText(value_dict['x']['label'])
+            # self.lineEditYLabel.setText(value_dict['y']['label'])
+            # self.lineEditZLabel.setText(value_dict['z']['label'])
+            # self.lineEditCbarLabel.setText(value_dict['c']['label'])
 
         return value_dict['x'], value_dict['y'], value_dict['z'], value_dict['c']
 
@@ -6505,9 +6640,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 # Matplotlib Canvas object
 # -------------------------------
 class MplCanvas(FigureCanvas):
-    def __init__(self, parent=None, width=5, height=4):
+    def __init__(self, sub=111, parent=None, width=5, height=4):
         self.fig = Figure(figsize=(width, height))
-        self.axes = self.fig.add_subplot(111)
+        self.axes = self.fig.add_subplot(sub)
         super(MplCanvas, self).__init__(self.fig)
 
 

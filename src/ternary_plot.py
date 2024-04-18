@@ -109,6 +109,8 @@ class ternary:
         #     ax = plt.gca()
 
         #ax = fig.add_subplot()
+        if self.ax is None:
+            self.ax = plt.gca()
 
         self.ax.axis("off")
         self.ax.set_aspect("equal")
@@ -558,7 +560,7 @@ class ternary:
         """
         # normalize ternary coordinates
     
-        T = np.array(a) + np.array( b) + np.array(c)
+        T = np.array(a) + np.array(b) + np.array(c)
         a = a/T
         b = b/T
         c = c/T
@@ -640,7 +642,7 @@ class ternary:
         cval[inpoly,:] = self.cplanexy(xd[inpoly],yd[inpoly],xp,yp,cp, xc,yc,cc, xb,yb,cb)
         
         cval[cval<0] = 0
-        cval[cval>1] = 1
+        cval[cval>255] = 255
         return cval
 
 
@@ -687,10 +689,13 @@ class ternary:
         
         return cval
 
-    def ternmap(self, x,y, a,b,c, ca=[1,1,0], cb=[0.3,0.73,0.1], cc=[0,0,0.15], p=[1/3,1/3,1/3], cp = []):
+    def ternmap(self, a,b,c, ca=[1,1,0], cb=[0.3,0.73,0.1], cc=[0,0,0.15], p=[1/3,1/3,1/3], cp = []):
         """Generates a raster map colored by position within a ternary plot.
         
         """
+        cval = self.terncolor(a, b, c, ca, cb, cc, p, cp)
+
+        self.ax.imshow(cval)
 
         return cb
 

@@ -1272,7 +1272,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.current_group['selected_clusters'] = selected_clusters
             else:
                 self.current_group['selected_clusters'] = None
-            self.update_SV()
+            if self.comboBoxPlotType.currentText() != 'Cluster' or self.comboBoxPlotType.currentText() != 'Cluster Score':
+                self.update_SV()
 
     def update_color_bar_position(self):
         """Updates the color bar position on a figure
@@ -4128,7 +4129,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.create_plot(current_plot_df, sample_id, plot_type = map_type, analyte_1=field, plot=True)
 
                 if self.toolBox.currentIndex() == self.sample_tab_id:
-                    self.plot_small_histogram(current_plot_df,field)
+                    # self.plot_small_histogram(current_plot_df,field)
+                    pass
             case 'correlation':
                 if self.comboBoxCorrelationMethod.currentText() == 'None':
                     return
@@ -5600,7 +5602,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case 3:
                 quantiles = [0.05, 0.25, 0.5, 0.75, 0.95]
 
-        clusters = [int(c) for c in self.current_group['selected_clusters']]
+        clusters = [c for c in self.current_group['selected_clusters']]
 
         if plot_name == 'Radar':
             axes_interval = 5

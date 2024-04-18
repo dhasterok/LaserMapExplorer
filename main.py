@@ -1891,7 +1891,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :rtype: float
         """
         power = np.floor(np.log10(abs(val)))
-        return np.round(val / 10**(power-order)) * 10**(pow - order)
+        return np.round(val / 10**(power-order)) * 10**(power - order)
 
     def dynamic_format(self, value, threshold=1e4, order=5):
         """Prepares number for display
@@ -3608,23 +3608,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # update plot
         self.update_SV()
 
-    def aspect_ratio_callback(self):
-        plot_type = self.comboBoxPlotType.currentText()
-        if self.styles[plot_type]['Axes']['AspectRatio'] == self.lineEditAspectRatio.text():
-            return
-
-        self.styles[plot_type]['Axes']['AspectRatio'] = self.lineEditAspectRatio.text()
-        self.update_SV()
-
-    def tickdir_callback(self):
-        plot_type = self.comboBoxPlotType.currentText()
-        if self.styles[plot_type]['Axes']['TickDir'] == self.comboBoxTickDirection.currentText():
-            return
-
-        self.styles[plot_type]['Axes']['TickDir'] = self.comboBoxTickDirection.currentText()
-        self.update_SV()
     
     def set_color_axis_widgets(self):
+        print('set_color_axis_widgets')
         field = self.comboBoxColorField.currentText()
         if field == '':
             return
@@ -3632,7 +3618,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.lineEditColorUB.setText(self.dynamic_format(self.axis_dict[field]['max'], order=2))
 
     def set_axis_widgets(self, ax, field):
-        print(self.axis_dict[field])
+        print('set_axis_widgets')
+        print(self.axis_dict,field)
         match ax:
             case 'x':
                 self.lineEditXLB.setText(self.dynamic_format(self.axis_dict[field]['min'],order=2))
@@ -3646,6 +3633,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.lineEditZLabel.setText(self.axis_dict[field]['label'])
         
     def axes_reset_callback(self, button):
+        print('axes_reset_callback')
         if button.accessibleName() == 'color axis reset':
             if not (self.comboBoxColorByField.currentText() in ['None','Cluster']):
                 field_type = self.comboBoxColorByField.currentText()
@@ -3693,6 +3681,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     return
 
     def get_axis_values(self, field_type, field):
+        print('get_axis_values')
         if field not in self.axis_dict.keys():
             self.initialize_axis_values(field_type, field)
             
@@ -3703,6 +3692,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         return amin, amax, label
 
     def initialize_axis_values(self, field_type, field):
+        print('initialize_axis_values')
         # initialize variables
         current_plot_df = pd.DataFrame()
         if field not in self.axis_dict.keys():
@@ -3732,6 +3722,26 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.axis_dict[field].update(d)
         print(self.axis_dict[field])
+
+    def aspect_ratio_callback(self):
+        """Update aspect ratio
+        
+        Updates ``MainWindow.style`` dictionary after user change
+        """
+        plot_type = self.comboBoxPlotType.currentText()
+        if self.styles[plot_type]['Axes']['AspectRatio'] == self.lineEditAspectRatio.text():
+            return
+
+        self.styles[plot_type]['Axes']['AspectRatio'] = self.lineEditAspectRatio.text()
+        self.update_SV()
+
+    def tickdir_callback(self):
+        plot_type = self.comboBoxPlotType.currentText()
+        if self.styles[plot_type]['Axes']['TickDir'] == self.comboBoxTickDirection.currentText():
+            return
+
+        self.styles[plot_type]['Axes']['TickDir'] = self.comboBoxTickDirection.currentText()
+        self.update_SV()
 
     # text
     # -------------------------------------
@@ -4734,11 +4744,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # Regular histogram
             canvas.axes.hist(x['array'], cumulative=cumflag, histtype=type, bins=edges, color=style['Colors']['Color'], edgecolor=ecolor, linewidth=style['Lines']['LineWidth'], alpha=style['Markers']['Alpha']/100, density=True)
 
-        # Set labels
+        # axes
+        xmin, xmax, xlbl = self.get_axis_values(x['type'],x['field'])
+
+        # labels
         font = {'size':style['Text']['FontSize']}
-        canvas.axes.tick_params(labelsize=style['Text']['FontSize'])
-        canvas.axes.set_xlabel(x['label'], fontdict=font)
+        canvas.axes.set_xlabel(xlbl, fontdict=font)
         canvas.axes.set_ylabel(self.comboBoxHistType.currentText(), fontdict=font)
+
+        # axes limits
+        canvas.axes.set_xlim(xmin,xmax)
+
+        # Set labels
+        canvas.axes.tick_params(labelsize=style['Text']['FontSize'])
 
         canvas.axes.set_box_aspect(style['Axes']['AspectRatio'])
 
@@ -4808,6 +4826,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 else:
                     self.hist2dternplot(canvas,x,y,z,style,c=c)
         
+        canvas.axes.margins(x=0)
+        
         if plot_flag:
             self.clear_view_widget(self.widgetSingleView.layout())
             self.widgetSingleView.layout().addWidget(canvas)
@@ -4857,10 +4877,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # else:
             #     cb = None
 
+        # axes
+        xmin, xmax, xlbl = self.get_axis_values(x['type'],x['field'])
+        ymin, ymax, ylbl = self.get_axis_values(y['type'],y['field'])
+
         # labels
         font = {'size':style['Text']['FontSize']}
-        canvas.axes.set_xlabel(x['label'], fontdict=font)
-        canvas.axes.set_ylabel(y['label'], fontdict=font)
+        canvas.axes.set_xlabel(xlbl, fontdict=font)
+        canvas.axes.set_ylabel(ylbl, fontdict=font)
+
+        # axes limits
+        canvas.axes.set_xlim(xmin,xmax)
+        canvas.axes.set_ylim(ymin,ymax)
 
         # tick marks
         canvas.axes.tick_params(direction=style['Axes']['TickDir'],
@@ -4961,10 +4989,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             cb = None
 
+        # axes
+        xmin, xmax, xlbl = self.get_axis_values(x['type'],x['field'])
+        ymin, ymax, ylbl = self.get_axis_values(y['type'],y['field'])
+
         # labels
         font = {'size':style['Text']['FontSize']}
-        canvas.axes.set_xlabel(x['label'], fontdict=font)
-        canvas.axes.set_ylabel(y['label'], fontdict=font)
+        canvas.axes.set_xlabel(xlbl, fontdict=font)
+        canvas.axes.set_ylabel(ylbl, fontdict=font)
+
+        # axes limits
+        canvas.axes.set_xlim(xmin,xmax)
+        canvas.axes.set_ylim(ymin,ymax)
 
         # tick marks
         canvas.axes.tick_params(direction=style['Axes']['TickDir'],

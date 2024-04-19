@@ -118,6 +118,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         layout_multi_view.setContentsMargins(0, 0, 0, 0)
         self.widgetMultiView.setLayout(layout_multi_view)
         self.widgetMultiView.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.toolButtonRemoveMVPlot.clicked.connect(lambda: self.remove_multi_plot(self.comboBoxPlots.currentText()))
+        self.toolButtonRemoveAllMVPlots.clicked.connect(lambda: self.clear_layout(self.widgetMultiView.layout()))
 
         # quick view
         layout_quick_view = QtWidgets.QGridLayout()
@@ -140,6 +142,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         layout_profile_view.setContentsMargins(0, 0, 0, 0)
         self.widgetProfilePlot.setLayout(layout_profile_view)
         self.widgetProfilePlot.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+
 
         #Flags to prevent plotting when widgets change
         self.point_selected = False
@@ -302,7 +305,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ProfilingPage.setEnabled(False)
         self.SpecialFunctionPage.setEnabled(False)
 
-        self.actionSavePlotToTree.triggered.connect(lambda: self.update_SV(save=True))
+        self.actionSavePlotToTree.triggered.connect(self.add_plotwidget_to_tree)
         self.actionSelectAnalytes.triggered.connect(self.open_select_analyte_dialog)
         self.actionSpotData.triggered.connect(lambda: self.open_tab('spot data'))
         self.actionFilter_Tools.triggered.connect(lambda: self.open_tab('filter'))
@@ -335,7 +338,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         #self.comboBoxPlots.activated.connect(lambda: self.add_remove(self.comboBoxPlots.currentText()))
         #self.toolButtonAddPlots.clicked.connect(lambda: self.add_multi_plot(self.comboBoxPlots.currentText()))
-        self.toolButtonRemovePlots.clicked.connect(lambda: self.remove_multi_plot(self.comboBoxPlots.currentText()))
         #add ratio item to tree view
 
         self.canvasWindow.currentChanged.connect(self.canvas_changed)
@@ -3528,7 +3530,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.set_style_widgets(plot_type=self.comboBoxPlotType.currentText())
         self.check_analysis_type()
         
-        self.update_SV(save=False)
+        self.update_SV()
         
     # axes
     # -------------------------------------
@@ -3759,7 +3761,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return
 
         self.styles[plot_type]['Text']['Font'] = self.fontComboBox.currentText().family()
-        self.update_SV(save=False)
+        self.update_SV()
 
 
     def font_size_callback(self):
@@ -3768,7 +3770,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return
             
         self.styles[plot_type]['Text']['FontSize'] = self.doubleSpinBoxFontSize.value()
-        self.update_SV(save=False)
+        self.update_SV()
 
     # scales
     # -------------------------------------
@@ -3786,7 +3788,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.labelScaleLocation.setEnabled(True)
             self.comboBoxScaleLocation.setEnabled(True)
 
-        self.update_SV(save=False)
+        self.update_SV()
 
     def scale_location_callback(self):
         plot_type = self.comboBoxPlotType.currentText()
@@ -3795,7 +3797,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return
 
         self.styles[plot_type]['Scale']['Location'] = self.comboBoxScaleLocation.currentText()
-        self.update_SV(save=False)
+        self.update_SV()
     
     def overlay_color_callback(self):
         """Updates color of overlay markers
@@ -3813,7 +3815,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.styles[plot_type]['Scale']['OverlayColor'] = color
         # update plot
-        self.update_SV(save=False)
+        self.update_SV()
 
     # markers
     # -------------------------------------
@@ -3827,7 +3829,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return
         self.styles[plot_type]['Markers']['Symbol'] = self.comboBoxMarker.currentText()
 
-        self.update_SV(save=False)
+        self.update_SV()
 
     def marker_size_callback(self):
         """Updates marker size
@@ -3839,7 +3841,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return
         self.styles[plot_type]['Markers']['Size'] = self.doubleSpinBoxMarkerSize.value()
 
-        self.update_SV(save=False)
+        self.update_SV()
 
     def slider_alpha_changed(self):
         """Updates transparency on scatter plots.
@@ -3851,7 +3853,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         if self.horizontalSliderMarkerAlpha.isEnabled():
             self.styles[plot_type]['Markers']['Alpha'] = float(self.horizontalSliderMarkerAlpha.value())
-            self.update_SV(save=False)
+            self.update_SV()
 
     # lines
     # -------------------------------------
@@ -3864,7 +3866,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return
 
         self.styles[plot_type]['Lines']['LineWidth'] = float(self.comboBoxLineWidth.currentText())
-        self.update_SV(save=False)
+        self.update_SV()
 
     # colors
     # -------------------------------------
@@ -3954,7 +3956,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # only run update current plot if color field is selected or the color by field is clusters
         if self.comboBoxColorByField.currentText() == 'None' or self.comboBoxColorField.currentText() != '' or self.comboBoxColorByField.currentText() in ['Clusters']:
-            self.update_SV(save=False)
+            self.update_SV()
         
     def color_field_callback(self):
         print('color_field_callback')
@@ -3965,7 +3967,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         if self.comboBoxColorField.isEnabled() and self.comboBoxColorField.currentText() != '' and self.comboBoxColorByField.currentText() != 'None':
             self.lineEditCbarLabel.setText('')
-            self.update_SV(save=False)
+            self.update_SV()
 
     def field_colormap_callback(self):
         plot_type = self.comboBoxPlotType.currentText()
@@ -3974,7 +3976,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.styles[self.comboBoxPlotType.currentText()]['Colors']['Colormap'] = self.comboBoxFieldColormap.currentText()
 
-        self.update_SV(save=False)
+        self.update_SV()
 
     def clim_callback(self):
         plot_type = self.comboBoxPlotType.currentText()
@@ -3983,7 +3985,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.styles[plot_type]['Colors']['CLim'] = [float(self.lineEditColorLB.text()), float(self.lineEditColorUB.text())]
 
-        self.update_SV(save=False)
+        self.update_SV()
 
     def cbar_direction_callback(self):
         plot_type = self.comboBoxPlotType.currentText()
@@ -3992,7 +3994,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.styles[plot_type]['Colors']['Direction'] = self.comboBoxCbarDirection.currentText()
 
         if self.comboBoxCbarDirection.isEnabled():
-            self.update_SV(save=False)
+            self.update_SV()
 
     def cbar_label_callback(self):
         plot_type = self.comboBoxPlotType.currentText()
@@ -4001,7 +4003,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.styles[plot_type]['Colors']['CLabel'] = self.lineEditCbarLabel.text()
 
         if self.comboBoxCbarLabel.isEnabled():
-            self.update_SV(save=False)
+            self.update_SV()
 
     # cluster styles
     def cluster_color_callback(self):
@@ -4129,7 +4131,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                             fig.tight_layout()
                             figure_canvas.draw()
 
-    def update_SV(self, save=False):
+    def update_SV(self):
         """Updates current plot (not saved to plot selector)
         
         Updates the current plot (as determined by ``MainWindow.comboBoxPlotType.currentText()`` and options in ``MainWindow.toolBox.selectedIndex()``.
@@ -4144,7 +4146,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         analysis = self.comboBoxColorByField.currentText()
         field = self.comboBoxColorField.currentText()
         print('update_SV')
-        style = self.styles[plot_type]
         
         match plot_type:
             case 'analyte map':
@@ -4167,7 +4168,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.create_plot(current_plot_df, sample_id, plot_type = map_type, analyte_1=field, plot=True)
 
                 if self.toolBox.currentIndex() == self.sample_tab_id:
-                    # self.plot_small_histogram(current_plot_df,field)
+                    self.plot_small_histogram(current_plot_df,field)
                     pass
             case 'correlation':
                 if self.comboBoxCorrelationMethod.currentText() == 'None':
@@ -4243,7 +4244,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # updates tree with new plot name
         self.update_tree(self.plot_info['plot_name'], data=self.plot_info, tree=self.plot_info['plot_type'])
 
-    def clear_view_widget(self, layout):
+    def clear_layout(self, layout):
         """Clears a widget that contains plots
         
         :param layout: must be a horizontal or vertical layout
@@ -4559,7 +4560,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'style': style
             }
 
-        self.clear_view_widget(self.widgetSingleView.layout())
+        self.clear_layout(self.widgetSingleView.layout())
         self.widgetSingleView.layout().addWidget(canvas)
         #self.new_plot_widget(plot_info, save=False)
 
@@ -4599,7 +4600,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # update histogram
         if self.comboBoxPlotType.currentText() == 'histogram':
-            self.update_SV(save=False)
+            self.update_SV()
 
     def histogram_update_n_bins(self):
         """Updates the number of bins
@@ -4620,7 +4621,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # update histogram
         if self.comboBoxPlotType.currentText() == 'histogram':
-            self.update_SV(save=False)
+            self.update_SV()
 
     def histogram_reset_bins(self):
         """Resets number of histogram bins to default
@@ -4635,7 +4636,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #self.histogram_update_bin_width()
 
         if self.comboBoxPlotType.currentText() == 'histogram':
-            self.update_SV(save=False)
+            self.update_SV()
 
     def plot_small_histogram(self, current_plot_df, field):
         """Creates a small histogram in the Samples and Fields page
@@ -4685,7 +4686,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         pos = canvas.axes.get_position()
         canvas.axes.set_position([pos.x0/2, 3*pos.y0, pos.width+pos.x0, pos.height-1.5*pos.y0])
 
-        self.clear_view_widget(self.widgetHistView.layout())
+        self.clear_layout(self.widgetHistView.layout())
 
         self.widgetHistView.layout().addWidget(canvas)
 
@@ -4780,7 +4781,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'style': self.styles['histogram']
             }
 
-        self.clear_view_widget(self.widgetSingleView.layout())
+        self.clear_layout(self.widgetSingleView.layout())
         self.widgetSingleView.layout().addWidget(canvas)
         #self.new_plot_widget(plot_info, save=False)
 
@@ -4837,7 +4838,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         canvas.axes.margins(x=0)
         
         if plot_flag:
-            self.clear_view_widget(self.widgetSingleView.layout())
+            self.clear_layout(self.widgetSingleView.layout())
             self.widgetSingleView.layout().addWidget(canvas)
 
     def biplot(self, canvas, x, y, c, style):
@@ -5127,7 +5128,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         elif style['Colors']['Direction'] == 'horizontal':
             grid = gs.GridSpec(1,5)
         else:
-            self.clear_view_widget(self.widgetSingleView.layout())
+            self.clear_layout(self.widgetSingleView.layout())
             self.widgetSingleView.layout().addWidget(canvas)
             return
             
@@ -5149,7 +5150,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         for i, hb in enumerate(hbin):
             t2.ax.fill(hb['xv'], hb['yv'], color=cv[i]/255, edgecolor='none')
 
-        self.clear_view_widget(self.widgetSingleView.layout())
+        self.clear_layout(self.widgetSingleView.layout())
         self.widgetSingleView.layout().addWidget(canvas)
 
     # -------------------------------------
@@ -5242,7 +5243,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'style': self.styles[plot_type]
             }
 
-        self.clear_view_widget(self.widgetSingleView.layout())
+        self.clear_layout(self.widgetSingleView.layout())
         self.widgetSingleView.layout().addWidget(canvas)
     
     def plot_pca_variance(self):
@@ -5545,7 +5546,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'style': self.styles[plot_type]
             } 
 
-        self.clear_view_widget(self.widgetSingleView.layout())
+        self.clear_layout(self.widgetSingleView.layout())
         self.widgetSingleView.layout().addWidget(canvas)
 
     def update_plot_with_new_colormap(self):
@@ -5747,7 +5748,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'style': style
         }
 
-        self.clear_view_widget(self.widgetSingleView.layout())
+        self.clear_layout(self.widgetSingleView.layout())
         self.widgetSingleView.layout().addWidget(canvas)
         #self.new_plot_widget(plot_info, save=False)
 

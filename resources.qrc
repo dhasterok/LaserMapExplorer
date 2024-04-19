@@ -86,5 +86,6 @@
         <file>resources/icons/icon-italics-64.png</file>
         <file>resources/icons/icon-numbered-list-64.png</file>
         <file>resources/icons/icon-heading-64.png</file>
+        <file>resources/icons/icon-eraser-64.svg</file>
     </qresource>
 </RCC>

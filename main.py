@@ -44,6 +44,7 @@ from src.calculator import CalWindow
 from src.ui.MainWindow import Ui_MainWindow
 from src.ui.AnalyteSelectionDialog import Ui_Dialog
 from src.ui.PreferencesWindow import Ui_PreferencesWindow
+from src.ui.ExcelConcatenator import Ui_Dialog
 import scipy.stats
 from scipy import ndimage
 from sklearn.preprocessing import StandardScaler
@@ -61,6 +62,7 @@ pg.setConfigOption('imageAxisOrder', 'row-major') # best performance
 ## !pyuic5 designer/mainwindow.ui -o src/ui/MainWindow.py
 ## !pyuic5 -x designer/AnalyteSelectionDialog.ui -o src/ui/AnalyteSelectionDialog.py
 ## !pyuic5 -x designer/PreferencesWindow.ui -o src/ui/PreferencesWindow.py
+## !pyuic5 -x designer/ExcelConcatenator.ui -o src/ui/ExcelConcatenator.py
 # pylint: disable=fixme, line-too-long, no-name-in-module, trailing-whitespace
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
@@ -312,7 +314,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionProfiles.triggered.connect(lambda: self.open_tab('profiles'))
         self.actionCluster.triggered.connect(lambda: self.open_tab('clustering'))
         self.actionReset.triggered.connect(lambda: self.reset_analysis())
-
+        self.actionImportFiles.triggered.connect(lambda: self.import_files())
+            
         # Select analyte Tab
         #-------------------------
         self.ref_data = pd.read_excel('resources/app_data/earthref.xlsx')
@@ -988,6 +991,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def open_preferences_dialog(self):
         pass
 
+
+    def import_files(self):
+        self.analyteDialog = excelConcatenator(self)
+        self.analyteDialog.show()
+        
 
     # Other windows/dialogs
     # -------------------------------------
@@ -7041,6 +7049,227 @@ class analyteSelectionWindow(QDialog, Ui_Dialog):
             self.tableWidgetSelected.setCellWidget(newRow, 1, combo)
             combo.currentIndexChanged.connect(self.update_scale)
 
+        
+        
+# Excel concatenator gui
+# -------------------------------
+class excelConcatenator(QDialog, Ui_Dialog):       
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setupUi(self)
+        
+        self.standard_list = ['STDGL', 'NiS', 'NIST610']
+        self.sample_ids = []
+        self.paths = []
+        
+        
+        
+        self.pushButtonSaveSelection.clicked.connect(self.save_selection)
+
+        self.pushButtonLoadSelection.clicked.connect(self.load_selection)
+
+        # self.pushButtonDone.clicked.connect(self.accept)
+        
+        # self.pushButtonCancel.clicked.connect(self.reject)
+        
+        self.pushButtonImport.clicked.connect(self.import_data)
+        
+        
+        
+        
+        
+        
+        
+    def save_selection(self):
+        file_name, _ = QFileDialog.getSaveFileName(self, "Save File", "", "Text Files (*.txt);;All Files (*)")
+        if file_name:
+            with open(file_name, 'w') as f:
+                for i in range(self.tableWidgetSelected.rowCount()):
+                    analyte_pair = self.tableWidgetSelected.item(i, 0).text()
+                    combo = self.tableWidgetSelected.cellWidget(i, 1)
+                    selection = combo.currentText()
+                    f.write(f"{analyte_pair},{selection}\n")
+
+    def load_selection(self):
+        
+        root_path = QFileDialog.getExistingDirectory(None, "Select a folder", options=QFileDialog.ShowDirsOnly)
+        if not root_path:
+            return
+        
+        # List all entries in the directory given by root_path
+        entries = os.listdir(root_path)
+        subdirectories = [name for name in entries if os.path.isdir(os.path.join(root_path, name))]
+        
+        
+        if subdirectories:
+            # If there are subdirectories, use them as sample IDs
+            self.sample_ids = subdirectories
+            self.paths = [os.path.join(root_path, name) for name in subdirectories]
+        else:
+            # If no subdirectories, use the directory name itself as the sample ID
+            self.sample_ids = [os.path.basename(root_path)]
+            self.paths = [root_path]
+        for sample_id in self.sample_ids:
+            #fill column with column name 'Sample ID' of  self.tableMetaData with sample ids
+            self.populate_table()
+        
+        self.raise_()
+        self.activateWindow()
+         
+    def populate_table(self):
+        self.tableWidgetMetaData.setRowCount(len(self.sample_ids))
+        
+        for i, sample_id in enumerate(self.sample_ids):
+            # Sample ID
+            self.tableWidgetMetaData.setItem(i, 0, QTableWidgetItem(sample_id))
+            
+            # File Direction with dropdown
+            data_type_combo = QComboBox()
+            data_types = ['raw','ppm','LADr ppm']
+            data_type_combo.addItems(data_types)
+            self.tableWidgetMetaData.setCellWidget(i, 1, data_type_combo)
+            
+            # File Direction with dropdown
+            file_direction_combo = QComboBox()
+            directions = ['left to right', 'right to left', 'bottom to top', 'top to bottom']
+            file_direction_combo.addItems(directions)
+            self.tableWidgetMetaData.setCellWidget(i, 2, file_direction_combo)
+            
+            # Scan Direction with dropdown
+            scan_direction_combo = QComboBox()
+            scan_direction_combo.addItems(directions)
+            self.tableWidgetMetaData.setCellWidget(i, 3, scan_direction_combo)
+            
+            positions = ['first','last']
+            # Scan Direction with dropdown
+            scan_num_pos_combo = QComboBox()
+            scan_num_pos_combo.addItems(positions)
+            self.tableWidgetMetaData.setCellWidget(i, 5, scan_num_pos_combo)
+            
+            
+    def import_data(self): 
+        data_frames = []
+        for i,path in enumerate(self.paths):
+            data_type = self.tableWidgetMetaData.cellWidget(i,1).currentText().lower()
+            file_direction   = self.tableWidgetMetaData.cellWidget(i,2).currentText().lower()
+            scan_direction   = self.tableWidgetMetaData.cellWidget(i,3).currentText().lower()
+            delimiter   = self.tableWidgetMetaData.item(i,4).text().strip().lower()
+            scan_no_pos   = self.tableWidgetMetaData.cellWidget(i,5).currentText().lower()
+            spot_size = self.tableWidgetMetaData.item(i,6).text().lower()
+            interline_dist = self.tableWidgetMetaData.item(i,7).text().lower()
+            
+            
+            
+            for subdir, dirs, files in os.walk(path):
+                for file in files:
+                    if file.endswith('.csv') or file.endswith('.xls') or file.endswith('.xlsx'):
+                        file_path = os.path.join(subdir, file)
+                        save_prefix = os.path.basename(subdir)
+                        if any(std in file for std in self.standard_list):
+                            continue  # skip standard files
+                        
+                        if data_type == 'raw':
+                            df = self.read_raw_folder(file,file_path, delimiter, scan_no_pos)
+                        elif data_type == 'ppm':
+                            df = self.read_ppm_folder(file,file_path, spot_size, line_sep, line_dir)
+                        elif data_type == 'ladr ppm':
+                            df = self.read_ladr_ppm_folder(file_path)
+                        else:
+                            QMessageBox.warning(None, "Error", "Unknown Type specified.")
+                            return
+        
+                        data_frames.append(df)
+                final_data = pd.concat(data_frames, ignore_index=True)
+                df.insert(2,'X',final_data['ScanNum'] * float(interline_dist))
+                df.insert(3,'Y',final_data['SpotNum'] * float(interline_dist))
+                
+                
+                #determine read direction
+                x_dir = self.orientation(file_direction)
+                y_dir = self.orientation(scan_direction)
+                
+                # Adjust coordinates based on the reading direction and make upper left corner as (0,0)
+                
+                final_data['X'] = final_data['X'] * x_dir
+                final_data['X'] = final_data['X'] - final_data['X'].min()
+        
+                final_data['Y'] = final_data['Y'] * y_dir
+                final_data['Y'] = final_data['Y'] - final_data['Y'].min()
+                
+                match file_direction:
+                    case 'top to bottom'| 'bottom to top':
+                        pass
+                    case 'left to right' | 'right to left':
+                        Xtmp = final_data['X'];
+                        final_data['X'] =final_data['Y'];
+                        final_data['Y'] = Xtmp;
+                        
+                        
+            
+    def orientation(self,readdir):
+
+        match readdir:
+            case 'top to bottom'|'left to right' :
+                direction = 1
+            case 'bottom to top'| 'right to left':
+                direction = -1
+            case _:
+                print('Unknown read direction.')
+        
+        return direction
+        
+    def read_raw_folder(self,file_name,file_path, delimiter, delimiter_position):
+        if delimiter_position == 'first':
+            scan_num = file_name.split(delimiter)[0].strip()
+        elif delimiter_position == 'last':
+            scan_num = file_name.split(delimiter)[-1].split('.')[0].strip()
+
+        df = pd.read_csv(file_path, skiprows=3)
+        df.insert(0,'ScanNum',int(scan_num))
+        df.insert(1,'SpotNum',range(1, len(df) + 1))
+        return df
+
+    def read_ppm_folder(self,file_path, spot_size, line_sep, line_dir):
+        df = pd.read_csv(file_path)
+        df['ScanNum'] = range(1, len(df) + 1)
+        df['SpotNum'] = range(1, len(df) + 1)
+
+        if line_dir == 'x':
+            df['X'] = df['SpotNum'] * spot_size
+            df['Y'] = df['ScanNum'] * line_sep
+        else:
+            df['X'] = df['ScanNum'] * line_sep
+            df['Y'] = df['SpotNum'] * spot_size
+        return df
+
+    def read_ladr_ppm_folder(self,file_path):
+        df = pd.read_csv(file_path)
+        df['ScanNum'] = range(1, len(df) + 1)
+        df['SpotNum'] = range(1, len(df) + 1)
+        # LADR ppm processing might need specific manipulations, adjust as necessary
+        return df
+        # X = ScanNum*sampleTable.InterlineDistance(i);
+        # Y = data.SpotNum*sampleTable.IntralineDistance(i);
+    
+        # % determine read direction
+        # xdir = orientation(sampleTable.FileDirection{i});
+        # ydir = orientation(sampleTable.ScanDirection{i});
+    
+        # % make upper left corner (0,0), i.e., image coordinates
+        # X = X*xdir; X = X - min(X);
+        # Y = Y*ydir; Y = Y - min(Y);
+            
+        # file_name, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Text Files (*.txt);;All Files (*)")
+        # if file_name:
+        #     with open(file_name, 'r') as f:
+        #         for line in f.readlines():
+        #             self.populate_analyte_list(line)
+        #     self.update_list()
+        #     self.raise_()
+        #     self.activateWindow()
+
+    
+    
 # Classes
 # -------------------------------
 class CustomAxis(AxisItem):

@@ -7148,7 +7148,7 @@ class excelConcatenator(QDialog, Ui_Dialog):
             
             
     def import_data(self): 
-        data_frames = []
+        
         for i,path in enumerate(self.paths):
             data_type = self.tableWidgetMetaData.cellWidget(i,1).currentText().lower()
             file_direction   = self.tableWidgetMetaData.cellWidget(i,2).currentText().lower()
@@ -7161,6 +7161,7 @@ class excelConcatenator(QDialog, Ui_Dialog):
             
             
             for subdir, dirs, files in os.walk(path):
+                data_frames = []
                 for file in files:
                     if file.endswith('.csv') or file.endswith('.xls') or file.endswith('.xlsx'):
                         file_path = os.path.join(subdir, file)
@@ -7180,8 +7181,8 @@ class excelConcatenator(QDialog, Ui_Dialog):
         
                         data_frames.append(df)
                 final_data = pd.concat(data_frames, ignore_index=True)
-                df.insert(2,'X',final_data['ScanNum'] * float(interline_dist))
-                df.insert(3,'Y',final_data['SpotNum'] * float(interline_dist))
+                final_data.insert(2,'X',final_data['ScanNum'] * float(interline_dist))
+                final_data.insert(3,'Y',final_data['SpotNum'] * float(interline_dist))
                 
                 
                 #determine read direction
@@ -7203,8 +7204,8 @@ class excelConcatenator(QDialog, Ui_Dialog):
                         Xtmp = final_data['X'];
                         final_data['X'] =final_data['Y'];
                         final_data['Y'] = Xtmp;
-                        
-                        
+                
+                print(final_data.head())
             
     def orientation(self,readdir):
 

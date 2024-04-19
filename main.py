@@ -198,6 +198,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.calculator_tab_id = tid
 
         # create dictionaries for default plot styles
+        #-------------------------
         self.markerdict = {'circle':'o', 'square':'s', 'diamond':'d', 'triangle (up)':'^', 'triangle (down)':'v', 'hexagon':'h', 'pentagon':'p'}
         self.comboBoxMarker.clear()
         self.comboBoxMarker.addItems(self.markerdict.keys())
@@ -502,8 +503,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         header.setSectionResizeMode(3,QHeaderView.ResizeToContents)
         header.setSectionResizeMode(4,QHeaderView.ResizeToContents)
 
-        # PCA Tab
+        # Multidimensional Tab
         #------------------------
+        self.pca_results = []
         self.spinBoxPCX.valueChanged.connect(self.plot_pca)
         self.spinBoxPCY.valueChanged.connect(self.plot_pca)
 
@@ -575,10 +577,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         header.setSectionResizeMode(1,QHeaderView.Stretch)
         header.setSectionResizeMode(2,QHeaderView.Stretch)
 
-        # Multidimensional Tab
-        #-------------------------
-        self.pca_results = []
-
         # Profile Tab
         #-------------------------
         self.lineEditPointRadius.setValidator(QIntValidator())
@@ -622,6 +620,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonOverlayColor.clicked.connect(self.overlay_color_callback)
         self.toolButtonMarkerColor.clicked.connect(self.marker_color_callback)
         self.toolButtonClusterColor.clicked.connect(self.cluster_color_callback)
+        self.toolButtonXAxisReset.clicked.connect(lambda: self.axis_reset_callback('x'))
+        self.toolButtonYAxisReset.clicked.connect(lambda: self.axis_reset_callback('y'))
+        self.toolButtonCAxisReset.clicked.connect(lambda: self.axis_reset_callback('c'))
         self.toolButtonClusterColorReset.clicked.connect(self.set_default_cluster_colors)
         #self.toolButtonOverlayColor.setStyleSheet("background-color: white;")
 
@@ -646,7 +647,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxFieldColormap.activated.connect(self.update_SV)
 
         # callback functions
-        self.comboBoxPlotType.activated.connect(self.style_plot_type_callback)
+        self.comboBoxPlotType.activated.connect(self.plot_type_callback)
         self.toolButtonUpdatePlot.clicked.connect(self.update_SV)
         self.toolButtonSaveTheme.clicked.connect(self.input_theme_name_dlg)
         # axes
@@ -715,9 +716,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         formatHeadingMenu = QMenu()
         formatHeadingMenu.triggered.connect(lambda x:self.add_header_line(x.text()))
         self.add_menu(hmenu_items,formatHeadingMenu)
-
-        #self.toolButtonNotesHeading.setStyleSheet('QToolButton::indicator { image: resources/icons/icon-heading-64.png; };')
-        #self.toolButtonNotesHeading.setStyleSheet('QToolButton::menu-indicator{ width:5px; };')
         self.toolButtonNotesHeading.setMenu(formatHeadingMenu)
 
         # info menu
@@ -725,19 +723,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         notesInfoMenu = QMenu()
         notesInfoMenu.triggered.connect(lambda x:self.add_info_note(x.text()))
         self.add_menu(infomenu_items,notesInfoMenu)
-
-        #self.toolButtonNotesInfo.setStyleSheet('QToolButton::menu-indicator { image: none; }')
         self.toolButtonNotesInfo.setMenu(notesInfoMenu)
 
-        # Plot toolbar
+        # Plot toolbars
         #-------------------------
 
+        # single view tools
         self.toolButtonHomeSV.clicked.connect(lambda: self.toolbar_plotting('home', 'SV', self.toolButtonHomeSV.isChecked()))
         self.toolButtonPanSV.clicked.connect(lambda: self.toolbar_plotting('pan', 'SV', self.toolButtonPanSV.isChecked()))
         self.toolButtonZoomSV.clicked.connect(lambda: self.toolbar_plotting('zoom', 'SV', self.toolButtonZoomSV.isChecked()))
         self.toolButtonPreferencesSV.clicked.connect(lambda: self.toolbar_plotting('preference', 'SV', self.toolButtonPreferencesSV.isChecked()))
         self.toolButtonAxesSV.clicked.connect(lambda: self.toolbar_plotting('axes', 'SV', self.toolButtonAxesSV.isChecked()))
         self.toolButtonSaveSV.clicked.connect(lambda: self.toolbar_plotting('save', 'SV', self.toolButtonSaveSV.isChecked()))
+        # multi-view tools
 
         self.actionCalculator.triggered.connect(self.open_calculator)
 
@@ -1881,21 +1879,31 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.data[self.sample_id]['mask'] = self.data[self.sample_id]['filter_mask'] & self.data[self.sample_id]['polygon_mask'] & self.data[self.sample_id]['axis_mask']
         self.update_all_plots()
 
-    def oround(self, val, order=2):
+    def oround(self, val, order=2, dir=None):
         """Rounds a number to specified digits after the order
 
         :param val: number to round
         :type val: float
         :param order: number of orders to retain
         :type order: int, optional
+        :param dir: direction for rounding, ``0`` for down, ``1`` for up, and ``None`` for nearest, Defaults to None
+        :type dir: int, optional
 
         :return: rounded number
         :rtype: float
         """
-        power = np.floor(np.log10(abs(val)))
-        return np.round(val / 10**(power-order)) * 10**(power - order)
+        if val == 0:
+            return 0
 
-    def dynamic_format(self, value, threshold=1e4, order=5):
+        power = np.floor(np.log10(abs(val)))
+        if dir == 0:
+            return np.floor(val / 10**(power-order)) * 10**(power - order)
+        elif dir == 1:
+            return np.ceil(val / 10**(power-order)) * 10**(power - order)
+        else:
+            return np.round(val / 10**(power-order)) * 10**(power - order)
+
+    def dynamic_format(self, value, threshold=1e4, order=4, dir=None):
         """Prepares number for display
 
         :param val: number to round
@@ -1903,10 +1911,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :param threshold: order of magnitude for determining display as floating point or expressing in engineering nootation, Defaults to 1e3
         :type threshold: double, optional
         :param order: number of orders to keep
+        :param dir: direction for rounding, ``0`` for down, ``1`` for up, and ``None`` for nearest, Defaults to None
+        :type dir: int, optional
 
         :return: number formatted as string
         :rtype: str
         """
+        if dir is not None:
+            value = self.oround(value, order=order, dir=dir)
+
         if abs(value) > threshold:
             return f'{{:.{order-1}e}}'.format(value)  # Scientific notation with order decimal places
         else:
@@ -3423,11 +3436,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         style = self.styles[plot_type]
 
         # axes properties
-        self.lineEditXLB.setText(self.dynamic_format(style['Axes']['XLim'][0],order=2))
-        self.lineEditXUB.setText(self.dynamic_format(style['Axes']['XLim'][1],order=2))
+        self.lineEditXLB.setText(self.dynamic_format(style['Axes']['XLim'][0],order=3,dir=0))
+        self.lineEditXUB.setText(self.dynamic_format(style['Axes']['XLim'][1],order=3,dir=1))
         self.lineEditXLabel.setText(style['Axes']['XLabel'])
-        self.lineEditYLB.setText(self.dynamic_format(style['Axes']['YLim'][0],order=2))
-        self.lineEditYUB.setText(self.dynamic_format(style['Axes']['YLim'][1],order=2))
+        self.lineEditYLB.setText(self.dynamic_format(style['Axes']['YLim'][0],order=3,dir=0))
+        self.lineEditYUB.setText(self.dynamic_format(style['Axes']['YLim'][1],order=3,dir=1))
         self.lineEditYLabel.setText(style['Axes']['YLabel'])
         self.lineEditZLabel.setText(style['Axes']['ZLabel'])
         self.lineEditAspectRatio.setText(str(style['Axes']['AspectRatio']))
@@ -3456,8 +3469,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
         self.comboBoxColorField.setCurrentText(style['Colors']['Field'])
         self.comboBoxFieldColormap.setCurrentText(style['Colors']['Colormap'])
-        self.lineEditColorLB.setText(self.dynamic_format(style['Colors']['CLim'][0],order=2))
-        self.lineEditColorUB.setText(self.dynamic_format(style['Colors']['CLim'][1],order=2))
+        self.lineEditColorLB.setText(self.dynamic_format(style['Colors']['CLim'][0],order=3,dir=0))
+        self.lineEditColorUB.setText(self.dynamic_format(style['Colors']['CLim'][1],order=3,dir=1))
         self.comboBoxCbarDirection.setCurrentText(style['Colors']['Direction'])
         self.lineEditCbarLabel.setText(style['Colors']['CLabel'])
         self.spinBoxHeatmapResolution.setValue(style['Colors']['Resolution'])
@@ -3511,16 +3524,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # style widget callbacks
     # -------------------------------------
-    def style_plot_type_callback(self):
+    def plot_type_callback(self):
         """Updates styles when plot type is changed
         
         Executes on change of ``MainWindow.comboBoxPlotType.currentText()``, updates the style dictionary,
         toggles widgets and updates single view plot
         """
-        plot_type = self.comboBoxPlotType.currentIndex()
-        self.plot_types[self.toolBox.currentIndex()][0] = plot_type
-        self.set_style_widgets(plot_type=self.comboBoxPlotType.currentText())
+        plot_type = self.comboBoxPlotType.currentText()
+        self.plot_types[self.toolBox.currentIndex()][0] = self.comboBoxPlotType.currentIndex()
+        self.set_style_widgets(plot_type=plot_type)
         self.check_analysis_type()
+
+        match plot_type:
+            case 'correlation':
+                if self.comboBoxCorrelationMethod.currentText() == 'None':
+                    self.comboBoxCorrelationMethod.setCurrentText('Pearson')
         
         self.update_SV()
         
@@ -3539,7 +3557,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         match plot_type:
             case 'histogram':
-                if ax == 'x':
+                if ax in ['x', 'y']:
                     return self.comboBoxHistField.currentText()
             case 'scatter' | 'heatmap':
                 match ax:
@@ -3601,42 +3619,73 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # change label in dictionary
         field = self.get_axis_field(ax)
         if bound:
-            self.axis_dict[field]['max'] = new_value
+            if plot_type == 'histogram' and ax == 'y':
+                self.axis_dict[field]['pmax'] = new_value
+                self.axis_dict[field]['pstatus'] = 'custom'
+            else:
+                self.axis_dict[field]['max'] = new_value
+                self.axis_dict[field]['status'] = 'custom'
         else:
-            self.axis_dict[field]['min'] = new_value
+            if plot_type == 'histogram' and ax == 'y':
+                self.axis_dict[field]['pmin'] = new_value
+                self.axis_dict[field]['pstatus'] = 'custom'
+            else:
+                self.axis_dict[field]['min'] = new_value
+                self.axis_dict[field]['status'] = 'custom'
 
         self.styles[plot_type]['Axes'][ax.upper()+'Lim'][bound] = new_value
 
         # update plot
         self.update_SV()
 
-    
     def set_color_axis_widgets(self):
+        """Sets the color axis widgets
+        
+        Sets color axis limits and label
+        """
         print('set_color_axis_widgets')
         field = self.comboBoxColorField.currentText()
         if field == '':
             return
-        self.lineEditColorLB.setText(self.dynamic_format(self.axis_dict[field]['min'], order=2))
-        self.lineEditColorUB.setText(self.dynamic_format(self.axis_dict[field]['max'], order=2))
+        self.lineEditColorLB.setText(self.dynamic_format(self.axis_dict[field]['min'], order=3,dir=0))
+        self.lineEditColorUB.setText(self.dynamic_format(self.axis_dict[field]['max'], order=3,dir=1))
 
     def set_axis_widgets(self, ax, field):
+        """Sets axis widgets in the style toolbox
+        
+        Updates axes limits and labels.
+
+        :param ax: axis 'x', 'y', or 'z'
+        :type ax: str
+        :param field: field plotted on axis, used as key to ``MainWindow.axis_dict``
+        :type field: str
+        """
         print('set_axis_widgets')
-        print(self.axis_dict,field)
         match ax:
             case 'x':
-                self.lineEditXLB.setText(self.dynamic_format(self.axis_dict[field]['min'],order=2))
-                self.lineEditXUB.setText(self.dynamic_format(self.axis_dict[field]['max'],order=2))
+                self.lineEditXLB.setText(self.dynamic_format(self.axis_dict[field]['min'],order=3,dir=0))
+                self.lineEditXUB.setText(self.dynamic_format(self.axis_dict[field]['max'],order=3,dir=1))
                 self.lineEditXLabel.setText(self.axis_dict[field]['label'])
             case 'y':
-                self.lineEditYLB.setText(self.dynamic_format(self.axis_dict[field]['min'],order=2))
-                self.lineEditYUB.setText(self.dynamic_format(self.axis_dict[field]['max'],order=2))
-                self.lineEditYLabel.setText(self.axis_dict[field]['label'])
+                if self.comboBoxPlotType.currentText() == 'histogram':
+                    self.lineEditYLB.setText(self.dynamic_format(self.axis_dict[field]['pmin'],order=3,dir=0))
+                    self.lineEditYUB.setText(self.dynamic_format(self.axis_dict[field]['pmax'],order=3,dir=1))
+                    self.lineEditYLabel.setText(self.comboBoxHistType.currentText())
+                else:
+                    self.lineEditYLB.setText(self.dynamic_format(self.axis_dict[field]['min'],order=3,dir=0))
+                    self.lineEditYUB.setText(self.dynamic_format(self.axis_dict[field]['max'],order=3,dir=1))
+                    self.lineEditYLabel.setText(self.axis_dict[field]['label'])
             case 'z':
                 self.lineEditZLabel.setText(self.axis_dict[field]['label'])
         
-    def axes_reset_callback(self, button):
-        print('axes_reset_callback')
-        if button.accessibleName() == 'color axis reset':
+    def axis_reset_callback(self, ax):
+        """Resets axes widgets and plot axes to auto values
+        
+        :param ax: axis to reset values, can be `x`, `y`, and `c`
+        :type ax: str
+        """
+        print('axis_reset_callback')
+        if ax == 'c':
             if not (self.comboBoxColorByField.currentText() in ['None','Cluster']):
                 field_type = self.comboBoxColorByField.currentText()
                 field = self.comboBoxColorField.currentText()
@@ -3645,18 +3694,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.initialize_axis_values(field_type, field)
                 self.set_color_axis_widgets()
         else:
-            if button.assessibleName() == 'x axis reset':
-                ax = 'x'
-            else:
-                ax = 'y'
             match self.comboBoxPlotType.currentText().lower():
-                case 'histogram' | 'gradient map':
-                    if ax == 'y':
-                        return
-                    field_type = self.comboBoxHistFieldType.currentText()
+                case 'histogram':
                     field = self.comboBoxHistField.currentText()
-                    self.initialize_axis_values(field_type, field)
-                    self.set_axis_widgets(ax, field)
+                    if ax == 'x':
+                        field_type = self.comboBoxHistFieldType.currentText()
+                        self.initialize_axis_values(field_type, field)
+                        self.set_axis_widgets(ax, field)
+                    else:
+                        self.axis_dict[field].update({'pstatus':'auto', 'pmin':None, 'pmax':None})
 
                 case 'scatter' | 'heatmap':
                     if ax == 'x':
@@ -3682,14 +3728,23 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 case _:
                     return
 
-    def get_axis_values(self, field_type, field):
+        self.update_SV()
+
+    def get_axis_values(self, field_type, field, ax=None):
         print('get_axis_values')
         if field not in self.axis_dict.keys():
             self.initialize_axis_values(field_type, field)
             
+        # get axis values from self.axis_dict
         amin = self.axis_dict[field]['min']
         amax = self.axis_dict[field]['max']
         label = self.axis_dict[field]['label']
+
+        # if probability axis associated with histogram
+        if ax == 'p':
+            pmin = self.axis_dict[field]['pmin']
+            pmax = self.axis_dict[field]['pmax']
+            return amin, amax, label, pmin, pmax
 
         return amin, amax, label
 
@@ -3698,32 +3753,26 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # initialize variables
         current_plot_df = pd.DataFrame()
         if field not in self.axis_dict.keys():
-            print('initialize self.axis_dict["field"]')
-            d = {field:{'status':'auto', 'label':field, 'min':None, 'max':None}}
-            self.axis_dict.update(d)
+            #print('initialize self.axis_dict["field"]')
+            self.axis_dict.update({field:{'status':'auto', 'label':field, 'min':None, 'max':None}})
 
         match field_type:
             case 'Analyte' | 'Analyte (normalized)':
-                current_plot_df['array'] = self.data[self.sample_id]['processed_data'].loc[:,field].values
+                current_plot_df = self.data[self.sample_id]['processed_data'].loc[:,field].values
                 if field_type == 'Analyte':
                     self.axis_dict[field]['label'] = field+' ('+self.preferences['Units']['Concentration']+')'
                 else:
                     self.axis_dict[field]['label'] = field+'_N'
 
             case _:
-                current_plot_df['array'] = self.data[self.sample_id]['computed_data'][field_type].loc[:,field].values
+                current_plot_df = self.data[self.sample_id]['computed_data'][field_type].loc[:,field].values
 
-        amin = self.oround(current_plot_df['array'].min(), order=1)
-        amax = self.oround(current_plot_df['array'].max(), order=1)
-
-        print('\n\n')
-        print([amin, amax])
-        print('\n\n')
+        amin = self.oround(current_plot_df.min(), order=2, dir=0)
+        amax = self.oround(current_plot_df.max(), order=2, dir=1)
 
         d = {'status':'auto', 'min':amin, 'max':amax}
 
         self.axis_dict[field].update(d)
-        print(self.axis_dict[field])
 
     def aspect_ratio_callback(self):
         """Update aspect ratio
@@ -4746,19 +4795,38 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             canvas.axes.hist(x['array'], cumulative=cumflag, histtype=type, bins=edges, color=style['Colors']['Color'], edgecolor=ecolor, linewidth=style['Lines']['LineWidth'], alpha=style['Markers']['Alpha']/100, density=True)
 
         # axes
-        xmin, xmax, xlbl = self.get_axis_values(x['type'],x['field'])
+        # set y-limits as p-axis min and max in self.axis_dict
+        pflag = False
+        if 'pstatus' not in self.axis_dict[x['field']]:
+            pflag = True
+        elif self.axis_dict[x['field']]['pstatus'] == 'auto':
+            pflag = True
 
-        # labels
+        if pflag:
+            ymin, ymax = canvas.axes.get_ylim()
+            d = {'pstatus':'auto', 'pmin':self.oround(ymin,order=2,dir=0), 'pmax':self.oround(ymax,order=2,dir=1)}
+            print(d)
+            self.axis_dict[x['field']].update(d)
+            print(self.axis_dict[x['field']])
+            self.set_axis_widgets('y', x['field'])
+
+        print(self.axis_dict[x['field']])
+
+        # grab axes limits
+        xmin, xmax, xlbl, ymin, ymax = self.get_axis_values(x['type'],x['field'],ax='p')
+
+        # label font
         font = {'size':style['Text']['FontSize']}
-        canvas.axes.set_xlabel(xlbl, fontdict=font)
-        canvas.axes.set_ylabel(self.comboBoxHistType.currentText(), fontdict=font)
 
-        # axes limits
+        # x-axis
+        canvas.axes.set_xlabel(xlbl, fontdict=font)
         canvas.axes.set_xlim(xmin,xmax)
 
-        # Set labels
-        canvas.axes.tick_params(labelsize=style['Text']['FontSize'])
+        # y-axis
+        canvas.axes.set_ylabel(self.comboBoxHistType.currentText(), fontdict=font)
+        canvas.axes.set_ylim(ymin,ymax)
 
+        canvas.axes.tick_params(labelsize=style['Text']['FontSize'])
         canvas.axes.set_box_aspect(style['Axes']['AspectRatio'])
 
         canvas.fig.tight_layout()
@@ -4793,6 +4861,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :param save: Flag for saving widget to self.toolBoxTreeView Plot Selector page, Defaults to False
         :type save: bool, optional
         """
+        print('plot_scatter')
         plot_type = self.comboBoxPlotType.currentText()
         style = self.styles[plot_type]
 
@@ -6235,8 +6304,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.doubleSpinBoxDLB.setValue(parameters['d_l_bound'])
             self.doubleSpinBoxDUB.setValue(parameters['d_u_bound'])
 
-            self.lineEditFMin.setText(self.dynamic_format(parameters['v_min']))
-            self.lineEditFMax.setText(self.dynamic_format(parameters['v_max']))
+            self.lineEditFMin.setText(self.dynamic_format(parameters['v_min'],dir=0))
+            self.lineEditFMax.setText(self.dynamic_format(parameters['v_max'],dir=1))
 
             self.update_spinboxes_bool = True
 
@@ -6387,8 +6456,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     print(self.axis_dict[v['field']])
                     self.set_axis_widgets(k, v['field'])
                 else:
-                    self.initialize_axis_values(v['type'], v['field'])
-                    self.set_axis_widgets(k, v['field'])
+                    if v['field'] != '':
+                        self.initialize_axis_values(v['type'], v['field'])
+                        self.set_axis_widgets(k, v['field'])
 
             # set lineEdit labels for axes
             # self.lineEditXLabel.setText(value_dict['x']['label'])

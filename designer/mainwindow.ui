@@ -4701,7 +4701,7 @@
        <property name="title">
         <string/>
        </property>
-       <widget class="QWidget" name="">
+       <widget class="QWidget" name="layoutWidget">
         <property name="geometry">
          <rect>
           <x>0</x>
@@ -6407,7 +6407,7 @@
       </font>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="TreeView">
       <property name="geometry">
@@ -6663,7 +6663,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QToolButton" name="toolButtonXAxesReset">
+             <widget class="QToolButton" name="toolButtonXAxisReset">
               <property name="minimumSize">
                <size>
                 <width>20</width>
@@ -6733,7 +6733,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QToolButton" name="toolButtonYAxesReset">
+             <widget class="QToolButton" name="toolButtonYAxisReset">
               <property name="minimumSize">
                <size>
                 <width>20</width>
@@ -6873,8 +6873,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>219</width>
-          <height>421</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7345,8 +7345,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>219</width>
-          <height>421</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7690,7 +7690,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QToolButton" name="toolButtonColorAxesReset">
+             <widget class="QToolButton" name="toolButtonCAxisReset">
               <property name="minimumSize">
                <size>
                 <width>20</width>
@@ -7875,8 +7875,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>219</width>
-          <height>421</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1123</width>
-    <height>1027</height>
+    <width>1125</width>
+    <height>1025</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -815,7 +815,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1123</width>
+     <width>1125</width>
      <height>24</height>
     </rect>
    </property>
@@ -1024,7 +1024,7 @@
       <string>Activates the crop tool</string>
      </property>
      <property name="currentIndex">
-      <number>3</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="SelectAnalytePage">
       <property name="enabled">
@@ -6453,7 +6453,7 @@
         <enum>QFrame::Raised</enum>
        </property>
        <property name="currentIndex">
-        <number>5</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="StyleAxes">
         <property name="geometry">
@@ -6548,7 +6548,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QToolButton" name="toolButtonAxesReset_2">
+             <widget class="QToolButton" name="toolButtonXAxesReset">
               <property name="minimumSize">
                <size>
                 <width>20</width>
@@ -6571,7 +6571,7 @@
                <string>Reset histogram axes</string>
               </property>
               <property name="accessibleName">
-               <string>axis reset</string>
+               <string>x axis reset</string>
               </property>
               <property name="text">
                <string>Reset</string>
@@ -6618,7 +6618,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QToolButton" name="toolButtonAxesReset_3">
+             <widget class="QToolButton" name="toolButtonYAxesReset">
               <property name="minimumSize">
                <size>
                 <width>20</width>
@@ -6641,7 +6641,7 @@
                <string>Reset histogram axes</string>
               </property>
               <property name="accessibleName">
-               <string>axis reset</string>
+               <string>y axis reset</string>
               </property>
               <property name="text">
                <string>Reset</string>
@@ -9514,7 +9514,7 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>424</width>
+     <width>476</width>
      <height>309</height>
     </size>
    </property>
@@ -9584,6 +9584,12 @@
           <layout class="QVBoxLayout" name="verticalLayout_13">
            <item>
             <widget class="QGroupBox" name="verticalGroupBox">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -9597,6 +9603,18 @@
               </size>
              </property>
              <layout class="QHBoxLayout" name="horizontalLayout_30">
+              <property name="leftMargin">
+               <number>12</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>12</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
               <item>
                <widget class="QToolButton" name="toolButtonNotesHeading">
                 <property name="minimumSize">

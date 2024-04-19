@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1125</width>
-    <height>1025</height>
+    <width>1123</width>
+    <height>1027</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -930,7 +930,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1125</width>
+     <width>1123</width>
      <height>24</height>
     </rect>
    </property>
@@ -955,6 +955,7 @@
     <addaction name="actionSave"/>
     <addaction name="separator"/>
     <addaction name="actionReset"/>
+    <addaction name="actionImportFiles"/>
    </widget>
    <widget class="QMenu" name="menuPlot">
     <property name="font">
@@ -1139,7 +1140,7 @@
       <string>Activates the crop tool</string>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="SelectAnalytePage">
       <property name="enabled">
@@ -6568,15 +6569,15 @@
         <enum>QFrame::Raised</enum>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>5</number>
        </property>
        <widget class="QWidget" name="StyleAxes">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>219</width>
-          <height>421</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6686,7 +6687,7 @@
                <string>Reset histogram axes</string>
               </property>
               <property name="accessibleName">
-               <string>x axis reset</string>
+               <string>axis reset</string>
               </property>
               <property name="text">
                <string>Reset</string>
@@ -6756,7 +6757,7 @@
                <string>Reset histogram axes</string>
               </property>
               <property name="accessibleName">
-               <string>y axis reset</string>
+               <string>axis reset</string>
               </property>
               <property name="text">
                <string>Reset</string>
@@ -9629,7 +9630,7 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>476</width>
+     <width>428</width>
      <height>309</height>
     </size>
    </property>
@@ -9699,12 +9700,6 @@
           <layout class="QVBoxLayout" name="verticalLayout_13">
            <item>
             <widget class="QGroupBox" name="verticalGroupBox">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -9718,18 +9713,6 @@
               </size>
              </property>
              <layout class="QHBoxLayout" name="horizontalLayout_30">
-              <property name="leftMargin">
-               <number>12</number>
-              </property>
-              <property name="topMargin">
-               <number>0</number>
-              </property>
-              <property name="rightMargin">
-               <number>12</number>
-              </property>
-              <property name="bottomMargin">
-               <number>0</number>
-              </property>
               <item>
                <widget class="QToolButton" name="toolButtonNotesHeading">
                 <property name="minimumSize">
@@ -11103,6 +11086,11 @@
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionImportFiles">
+   <property name="text">
+    <string>Import files</string>
    </property>
   </action>
  </widget>

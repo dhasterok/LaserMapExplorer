@@ -672,7 +672,7 @@ Options include ‘sobel’, ‘canny’, and ‘zero_cross’.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.add_plotwidget_to_tree">
-<span class="sig-name descname"><span class="pre">add_plotwidget_to_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotWidget</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.add_plotwidget_to_tree" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">add_plotwidget_to_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plotWidget</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.add_plotwidget_to_tree" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -710,7 +710,9 @@ Options include ‘sobel’, ‘canny’, and ‘zero_cross’.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.aspect_ratio_callback">
 <span class="sig-name descname"><span class="pre">aspect_ratio_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.aspect_ratio_callback" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Update aspect ratio</p>
+<p>Updates <code class="docutils literal notranslate"><span class="pre">MainWindow.style</span></code> dictionary after user change</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.auto_scale">
@@ -730,9 +732,44 @@ high or low (even negative) values.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="main.MainWindow.axes_reset_callback">
-<span class="sig-name descname"><span class="pre">axes_reset_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.axes_reset_callback" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="main.MainWindow.axis_label_edit_callback">
+<span class="sig-name descname"><span class="pre">axis_label_edit_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_label</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.axis_label_edit_callback" title="Link to this definition">#</a></dt>
+<dd><p>Updates axis label in dictionaries from widget</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ax</strong> (<em>str</em>) – axis, options include <code class="docutils literal notranslate"><span class="pre">x</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code>, <code class="docutils literal notranslate"><span class="pre">z</span></code>, and <code class="docutils literal notranslate"><span class="pre">c</span></code></p></li>
+<li><p><strong>new_label</strong> (<em>str</em>) – new label set by user</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.axis_limit_edit_callback">
+<span class="sig-name descname"><span class="pre">axis_limit_edit_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bound</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.axis_limit_edit_callback" title="Link to this definition">#</a></dt>
+<dd><p>Updates axis limit in dictionaries from widget</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ax</strong> (<em>str</em>) – axis, options include <code class="docutils literal notranslate"><span class="pre">x</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code>, <code class="docutils literal notranslate"><span class="pre">z</span></code>, and <code class="docutils literal notranslate"><span class="pre">c</span></code></p></li>
+<li><p><strong>bound</strong> (<em>int</em>) – <code class="docutils literal notranslate"><span class="pre">0</span></code> for lower and <code class="docutils literal notranslate"><span class="pre">1</span></code> for upper</p></li>
+<li><p><strong>new_value</strong> (<em>float</em>) – new value set by user</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.axis_reset_callback">
+<span class="sig-name descname"><span class="pre">axis_reset_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.axis_reset_callback" title="Link to this definition">#</a></dt>
+<dd><p>Resets axes widgets and plot axes to auto values</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ax</strong> (<em>str</em>) – axis to reset values, can be <cite>x</cite>, <cite>y</cite>, and <cite>c</cite></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.biplot">
@@ -818,8 +855,8 @@ comboBoxSampleID</p>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="main.MainWindow.clear_view_widget">
-<span class="sig-name descname"><span class="pre">clear_view_widget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layout</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.clear_view_widget" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="main.MainWindow.clear_layout">
+<span class="sig-name descname"><span class="pre">clear_layout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layout</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.clear_layout" title="Link to this definition">#</a></dt>
 <dd><p>Clears a widget that contains plots</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -832,6 +869,15 @@ comboBoxSampleID</p>
 <dt class="sig sig-object py" id="main.MainWindow.clim_callback">
 <span class="sig-name descname"><span class="pre">clim_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.clim_callback" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.cluster_color_callback">
+<span class="sig-name descname"><span class="pre">cluster_color_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.cluster_color_callback" title="Link to this definition">#</a></dt>
+<dd><p>Updates color of a cluster</p>
+<p>Uses <code class="docutils literal notranslate"><span class="pre">QColorDialog</span></code> to select new cluster color and then updates plot on change of
+backround <code class="docutils literal notranslate"><span class="pre">MainWindow.toolButtonClusterColor</span></code> color.  Also updates <code class="docutils literal notranslate"><span class="pre">MainWindow.tableWidgetViewGroups</span></code>
+color associated with selected cluster.  The selected cluster is determined by <code class="docutils literal notranslate"><span class="pre">MainWindow.spinBoxClusterGroup.value()</span></code></p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.cluster_label_changed">
@@ -891,11 +937,16 @@ comboBoxSampleID</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.dynamic_format">
-<span class="sig-name descname"><span class="pre">dynamic_format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.dynamic_format" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">dynamic_format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.dynamic_format" title="Link to this definition">#</a></dt>
 <dd><p>Prepares number for display</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>threshold</strong> (<em>double</em>) – order of magnitude for determining display as floating point or expressing in engineering nootation, Defaults to 1e3</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>val</strong> (<em>float</em>) – number to round</p></li>
+<li><p><strong>threshold</strong> (<em>double</em><em>, </em><em>optional</em>) – order of magnitude for determining display as floating point or expressing in engineering nootation, Defaults to 1e3</p></li>
+<li><p><strong>order</strong> – number of orders to keep</p></li>
+<li><p><strong>dir</strong> (<em>int</em><em>, </em><em>optional</em>) – direction for rounding, <code class="docutils literal notranslate"><span class="pre">0</span></code> for down, <code class="docutils literal notranslate"><span class="pre">1</span></code> for up, and <code class="docutils literal notranslate"><span class="pre">None</span></code> for nearest, Defaults to None</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>number formatted as string</p>
@@ -934,6 +985,20 @@ comboBoxSampleID</p>
 value for <code class="docutils literal notranslate"><span class="pre">cv2.GaussianBlur</span></code> only when <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxNoiseReductionMethod</span></code> is ‘Gaussian’ and new kernel
 value is set by the user via <code class="docutils literal notranslate"><span class="pre">MainWindow.spinBoxNoiseReductionOption1.value()</span></code>.</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.get_axis_field">
+<span class="sig-name descname"><span class="pre">get_axis_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.get_axis_field" title="Link to this definition">#</a></dt>
+<dd><p>Grabs the field name from a given axis</p>
+<p>The field name for a given axis comes from a comboBox, and depends upon the plot type.
+:param ax: axis, options include <code class="docutils literal notranslate"><span class="pre">x</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code>, <code class="docutils literal notranslate"><span class="pre">z</span></code>, and <code class="docutils literal notranslate"><span class="pre">c</span></code>
+:type ax: str</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.get_axis_values">
+<span class="sig-name descname"><span class="pre">get_axis_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.get_axis_values" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.get_field_list">
@@ -992,6 +1057,11 @@ Based on the plot type, this method internally calls the appropriate plotting fu
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.get_processed_data">
 <span class="sig-name descname"><span class="pre">get_processed_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.get_processed_data" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.get_rgb_color">
+<span class="sig-name descname"><span class="pre">get_rgb_color</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">color</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.get_rgb_color" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1099,8 +1169,18 @@ addition to histogram map. Default is None, which produces a histogram.</p></li>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.import_files">
+<span class="sig-name descname"><span class="pre">import_files</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.import_files" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.init_zoom_view">
 <span class="sig-name descname"><span class="pre">init_zoom_view</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.init_zoom_view" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.initialize_axis_values">
+<span class="sig-name descname"><span class="pre">initialize_axis_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.initialize_axis_values" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1280,6 +1360,27 @@ in list is loaded by default.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.oround">
+<span class="sig-name descname"><span class="pre">oround</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.oround" title="Link to this definition">#</a></dt>
+<dd><p>Rounds a number to specified digits after the order</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>val</strong> (<em>float</em>) – number to round</p></li>
+<li><p><strong>order</strong> (<em>int</em><em>, </em><em>optional</em>) – number of orders to retain</p></li>
+<li><p><strong>dir</strong> (<em>int</em><em>, </em><em>optional</em>) – direction for rounding, <code class="docutils literal notranslate"><span class="pre">0</span></code> for down, <code class="docutils literal notranslate"><span class="pre">1</span></code> for up, and <code class="docutils literal notranslate"><span class="pre">None</span></code> for nearest, Defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>rounded number</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.outlier_detection">
 <span class="sig-name descname"><span class="pre">outlier_detection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0005</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">99.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_lq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">9.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_uq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">99</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.outlier_detection" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
@@ -1364,7 +1465,7 @@ in list is loaded by default.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.plot_scatter">
-<span class="sig-name descname"><span class="pre">plot_scatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">return_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.plot_scatter" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">plot_scatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">canvas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.plot_scatter" title="Link to this definition">#</a></dt>
 <dd><p>Creates a plots from self.toolBox Scatter page.</p>
 <p>Creates both scatter and heatmaps (spatial histograms) for bi- and ternary plots.</p>
 <dl class="field-list simple">
@@ -1404,6 +1505,14 @@ in list is loaded by default.</p>
 <dt class="sig sig-object py" id="main.MainWindow.plot_ternarymap">
 <span class="sig-name descname"><span class="pre">plot_ternarymap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">canvas</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.plot_ternarymap" title="Link to this definition">#</a></dt>
 <dd><p>Creates map colored by ternary coordinate positions</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.plot_type_callback">
+<span class="sig-name descname"><span class="pre">plot_type_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.plot_type_callback" title="Link to this definition">#</a></dt>
+<dd><p>Updates styles when plot type is changed</p>
+<p>Executes on change of <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxPlotType.currentText()</span></code>, updates the style dictionary,
+toggles widgets and updates single view plot</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1504,6 +1613,44 @@ in list is loaded by default.</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.select_cluster_group_callback">
+<span class="sig-name descname"><span class="pre">select_cluster_group_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.select_cluster_group_callback" title="Link to this definition">#</a></dt>
+<dd><p>Set cluster color button background after change of selected cluster group</p>
+<p>Sets <code class="docutils literal notranslate"><span class="pre">MainWindow.toolButtonClusterColor</span></code> background on change of <code class="docutils literal notranslate"><span class="pre">MainWindow.spinBoxClusterGroup</span></code></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.set_axis_widgets">
+<span class="sig-name descname"><span class="pre">set_axis_widgets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.set_axis_widgets" title="Link to this definition">#</a></dt>
+<dd><p>Sets axis widgets in the style toolbox</p>
+<p>Updates axes limits and labels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ax</strong> (<em>str</em>) – axis ‘x’, ‘y’, or ‘z’</p></li>
+<li><p><strong>field</strong> (<em>str</em>) – field plotted on axis, used as key to <code class="docutils literal notranslate"><span class="pre">MainWindow.axis_dict</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.set_color_axis_widgets">
+<span class="sig-name descname"><span class="pre">set_color_axis_widgets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.set_color_axis_widgets" title="Link to this definition">#</a></dt>
+<dd><p>Sets the color axis widgets</p>
+<p>Sets color axis limits and label</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.set_default_cluster_colors">
+<span class="sig-name descname"><span class="pre">set_default_cluster_colors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.set_default_cluster_colors" title="Link to this definition">#</a></dt>
+<dd><p>Sets cluster group to default colormap</p>
+<p>Sets the colors in <code class="docutils literal notranslate"><span class="pre">MainWindow.tableWidgetViewGroups</span></code> to the default colormap in
+<code class="docutils literal notranslate"><span class="pre">MainWindow.styles['Cluster']['Colors']['Colormap'].</span>&#160; <span class="pre">Change</span> <span class="pre">the</span> <span class="pre">default</span> <span class="pre">colormap</span>
+<span class="pre">by</span> <span class="pre">changing</span> <span class="pre">``MainWindow.comboBoxColormap</span></code>, when <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxColorByField.currentText()</span></code> is <code class="docutils literal notranslate"><span class="pre">Cluster</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.set_style_widgets">
 <span class="sig-name descname"><span class="pre">set_style_widgets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.set_style_widgets" title="Link to this definition">#</a></dt>
 <dd><p>Sets values in right toolbox style page</p>
@@ -1520,11 +1667,6 @@ in list is loaded by default.</p>
 <dd><p>Updates transparency on scatter plots.</p>
 <p>Executes on change of <code class="docutils literal notranslate"><span class="pre">MainWindow.horizontalSliderMarkerAlpha.value()</span></code>.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="main.MainWindow.style_plot_type_callback">
-<span class="sig-name descname"><span class="pre">style_plot_type_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.style_plot_type_callback" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.swap_xy">
@@ -1645,7 +1787,7 @@ selected in <a href="#id4"><span class="problematic" id="id5">``</span></a>MainW
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.update_SV">
-<span class="sig-name descname"><span class="pre">update_SV</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.update_SV" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">update_SV</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.update_SV" title="Link to this definition">#</a></dt>
 <dd><p>Updates current plot (not saved to plot selector)</p>
 <p>Updates the current plot (as determined by <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxPlotType.currentText()</span></code> and options in <code class="docutils literal notranslate"><span class="pre">MainWindow.toolBox.selectedIndex()</span></code>.</p>
 <dl class="field-list simple">
@@ -1685,11 +1827,6 @@ selected in <a href="#id4"><span class="problematic" id="id5">``</span></a>MainW
 <dd><p>Updates the color bar position on a figure</p>
 <p>Currently unused</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="main.MainWindow.update_correlation">
-<span class="sig-name descname"><span class="pre">update_correlation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.update_correlation" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.update_field_combobox">
@@ -1795,26 +1932,6 @@ Calls :get_field_list(): to construct the list.</p>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="main.MainWindow.xlabel_callback">
-<span class="sig-name descname"><span class="pre">xlabel_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.xlabel_callback" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="main.MainWindow.xlim_callback">
-<span class="sig-name descname"><span class="pre">xlim_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.xlim_callback" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="main.MainWindow.ylabel_callback">
-<span class="sig-name descname"><span class="pre">ylabel_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.ylabel_callback" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="main.MainWindow.ylim_callback">
-<span class="sig-name descname"><span class="pre">ylim_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.ylim_callback" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.zero_crossing_laplacian">
 <span class="sig-name descname"><span class="pre">zero_crossing_laplacian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.zero_crossing_laplacian" title="Link to this definition">#</a></dt>
 <dd><p>Apply Zero Crossing on the Laplacian of the image.</p>
@@ -1828,16 +1945,11 @@ Calls :get_field_list(): to construct the list.</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="main.MainWindow.zlabel_callback">
-<span class="sig-name descname"><span class="pre">zlabel_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.zlabel_callback" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="main.MplCanvas">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">MplCanvas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MplCanvas" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">MplCanvas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">111</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MplCanvas" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">FigureCanvasQTAgg</span></code></p>
 </dd></dl>
 
@@ -2263,6 +2375,52 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 .   &#64;param sigma_r %Range between 0 to 1.</p>
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="main.excelConcatenator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">excelConcatenator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.excelConcatenator" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QDialog</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Ui_Dialog</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="main.excelConcatenator.import_data">
+<span class="sig-name descname"><span class="pre">import_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.excelConcatenator.import_data" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.excelConcatenator.load_selection">
+<span class="sig-name descname"><span class="pre">load_selection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.excelConcatenator.load_selection" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.excelConcatenator.orientation">
+<span class="sig-name descname"><span class="pre">orientation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">readdir</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.excelConcatenator.orientation" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.excelConcatenator.populate_table">
+<span class="sig-name descname"><span class="pre">populate_table</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.excelConcatenator.populate_table" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.excelConcatenator.read_ladr_ppm_folder">
+<span class="sig-name descname"><span class="pre">read_ladr_ppm_folder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.excelConcatenator.read_ladr_ppm_folder" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.excelConcatenator.read_ppm_folder">
+<span class="sig-name descname"><span class="pre">read_ppm_folder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spot_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_sep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_dir</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.excelConcatenator.read_ppm_folder" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.excelConcatenator.read_raw_folder">
+<span class="sig-name descname"><span class="pre">read_raw_folder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delimiter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delimiter_position</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.excelConcatenator.read_raw_folder" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.excelConcatenator.save_selection">
+<span class="sig-name descname"><span class="pre">save_selection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.excelConcatenator.save_selection" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="main.main">
 <span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.main" title="Link to this definition">#</a></dt>
@@ -2345,7 +2503,9 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.apply_filters"><code class="docutils literal notranslate"><span class="pre">MainWindow.apply_filters()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.aspect_ratio_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.aspect_ratio_callback()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.auto_scale"><code class="docutils literal notranslate"><span class="pre">MainWindow.auto_scale()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.axes_reset_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.axes_reset_callback()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.axis_label_edit_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.axis_label_edit_callback()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.axis_limit_edit_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.axis_limit_edit_callback()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.axis_reset_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.axis_reset_callback()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.biplot"><code class="docutils literal notranslate"><span class="pre">MainWindow.biplot()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.button_color_select"><code class="docutils literal notranslate"><span class="pre">MainWindow.button_color_select()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.canvas_changed"><code class="docutils literal notranslate"><span class="pre">MainWindow.canvas_changed()</span></code></a></li>
@@ -2355,8 +2515,9 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.change_sample"><code class="docutils literal notranslate"><span class="pre">MainWindow.change_sample()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.check_analysis_type"><code class="docutils literal notranslate"><span class="pre">MainWindow.check_analysis_type()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.clear_analysis"><code class="docutils literal notranslate"><span class="pre">MainWindow.clear_analysis()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.clear_view_widget"><code class="docutils literal notranslate"><span class="pre">MainWindow.clear_view_widget()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.clear_layout"><code class="docutils literal notranslate"><span class="pre">MainWindow.clear_layout()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.clim_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.clim_callback()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.cluster_color_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.cluster_color_callback()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.cluster_label_changed"><code class="docutils literal notranslate"><span class="pre">MainWindow.cluster_label_changed()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.color_by_field_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.color_by_field_callback()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.color_field_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.color_field_callback()</span></code></a></li>
@@ -2374,10 +2535,13 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.font_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.font_callback()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.font_size_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.font_size_callback()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.gaussian_sigma"><code class="docutils literal notranslate"><span class="pre">MainWindow.gaussian_sigma()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_axis_field"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_axis_field()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_axis_values"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_axis_values()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_field_list"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_field_list()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_hex_color"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_hex_color()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_map_data"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_map_data()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_processed_data"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_processed_data()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_rgb_color"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_rgb_color()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_scatter_values"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_scatter_values()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_style_dict"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_style_dict()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.group_changed"><code class="docutils literal notranslate"><span class="pre">MainWindow.group_changed()</span></code></a></li>
@@ -2389,7 +2553,9 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.histogram_update_bin_width"><code class="docutils literal notranslate"><span class="pre">MainWindow.histogram_update_bin_width()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.histogram_update_n_bins"><code class="docutils literal notranslate"><span class="pre">MainWindow.histogram_update_n_bins()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.import_data"><code class="docutils literal notranslate"><span class="pre">MainWindow.import_data()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.import_files"><code class="docutils literal notranslate"><span class="pre">MainWindow.import_files()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.init_zoom_view"><code class="docutils literal notranslate"><span class="pre">MainWindow.init_zoom_view()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.initialize_axis_values"><code class="docutils literal notranslate"><span class="pre">MainWindow.initialize_axis_values()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.input_ternary_name_dlg"><code class="docutils literal notranslate"><span class="pre">MainWindow.input_ternary_name_dlg()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.input_theme_name_dlg"><code class="docutils literal notranslate"><span class="pre">MainWindow.input_theme_name_dlg()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.line_width_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.line_width_callback()</span></code></a></li>
@@ -2409,6 +2575,7 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.open_preferences_dialog"><code class="docutils literal notranslate"><span class="pre">MainWindow.open_preferences_dialog()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.open_select_analyte_dialog"><code class="docutils literal notranslate"><span class="pre">MainWindow.open_select_analyte_dialog()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.open_tab"><code class="docutils literal notranslate"><span class="pre">MainWindow.open_tab()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.oround"><code class="docutils literal notranslate"><span class="pre">MainWindow.oround()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.outlier_detection"><code class="docutils literal notranslate"><span class="pre">MainWindow.outlier_detection()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.overlay_color_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.overlay_color_callback()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.plot_clicked"><code class="docutils literal notranslate"><span class="pre">MainWindow.plot_clicked()</span></code></a></li>
@@ -2427,6 +2594,7 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.plot_score_map"><code class="docutils literal notranslate"><span class="pre">MainWindow.plot_score_map()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.plot_small_histogram"><code class="docutils literal notranslate"><span class="pre">MainWindow.plot_small_histogram()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.plot_ternarymap"><code class="docutils literal notranslate"><span class="pre">MainWindow.plot_ternarymap()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.plot_type_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.plot_type_callback()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.prep_data"><code class="docutils literal notranslate"><span class="pre">MainWindow.prep_data()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.remove_multi_plot"><code class="docutils literal notranslate"><span class="pre">MainWindow.remove_multi_plot()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.remove_selected_rows"><code class="docutils literal notranslate"><span class="pre">MainWindow.remove_selected_rows()</span></code></a></li>
@@ -2440,9 +2608,12 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.save_notes_file"><code class="docutils literal notranslate"><span class="pre">MainWindow.save_notes_file()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.scale_direction_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.scale_direction_callback()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.scale_location_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.scale_location_callback()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.select_cluster_group_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.select_cluster_group_callback()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.set_axis_widgets"><code class="docutils literal notranslate"><span class="pre">MainWindow.set_axis_widgets()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.set_color_axis_widgets"><code class="docutils literal notranslate"><span class="pre">MainWindow.set_color_axis_widgets()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.set_default_cluster_colors"><code class="docutils literal notranslate"><span class="pre">MainWindow.set_default_cluster_colors()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.set_style_widgets"><code class="docutils literal notranslate"><span class="pre">MainWindow.set_style_widgets()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.slider_alpha_changed"><code class="docutils literal notranslate"><span class="pre">MainWindow.slider_alpha_changed()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.style_plot_type_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.style_plot_type_callback()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.swap_xy"><code class="docutils literal notranslate"><span class="pre">MainWindow.swap_xy()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.swap_xy_data"><code class="docutils literal notranslate"><span class="pre">MainWindow.swap_xy_data()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.ternary_colormap_changed"><code class="docutils literal notranslate"><span class="pre">MainWindow.ternary_colormap_changed()</span></code></a></li>
@@ -2462,7 +2633,6 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.update_cluster_ui"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_cluster_ui()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.update_clusters"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_clusters()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.update_color_bar_position"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_color_bar_position()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.update_correlation"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_correlation()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.update_field_combobox"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_field_combobox()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.update_field_type_combobox"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_field_type_combobox()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.update_filter_table"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_filter_table()</span></code></a></li>
@@ -2476,12 +2646,7 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.update_tables"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_tables()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.update_tree"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_tree()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.update_zoom_view_position"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_zoom_view_position()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.xlabel_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.xlabel_callback()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.xlim_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.xlim_callback()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.ylabel_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.ylabel_callback()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.ylim_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.ylim_callback()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.zero_crossing_laplacian"><code class="docutils literal notranslate"><span class="pre">MainWindow.zero_crossing_laplacian()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.zlabel_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.zlabel_callback()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MplCanvas"><code class="docutils literal notranslate"><span class="pre">MplCanvas</span></code></a></li>
@@ -2550,6 +2715,17 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#main.bilateralFilter"><code class="docutils literal notranslate"><span class="pre">bilateralFilter()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#main.edgePreservingFilter"><code class="docutils literal notranslate"><span class="pre">edgePreservingFilter()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#main.excelConcatenator"><code class="docutils literal notranslate"><span class="pre">excelConcatenator</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.excelConcatenator.import_data"><code class="docutils literal notranslate"><span class="pre">excelConcatenator.import_data()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.excelConcatenator.load_selection"><code class="docutils literal notranslate"><span class="pre">excelConcatenator.load_selection()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.excelConcatenator.orientation"><code class="docutils literal notranslate"><span class="pre">excelConcatenator.orientation()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.excelConcatenator.populate_table"><code class="docutils literal notranslate"><span class="pre">excelConcatenator.populate_table()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.excelConcatenator.read_ladr_ppm_folder"><code class="docutils literal notranslate"><span class="pre">excelConcatenator.read_ladr_ppm_folder()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.excelConcatenator.read_ppm_folder"><code class="docutils literal notranslate"><span class="pre">excelConcatenator.read_ppm_folder()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.excelConcatenator.read_raw_folder"><code class="docutils literal notranslate"><span class="pre">excelConcatenator.read_raw_folder()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.excelConcatenator.save_selection"><code class="docutils literal notranslate"><span class="pre">excelConcatenator.save_selection()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#main.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#main.medianBlur"><code class="docutils literal notranslate"><span class="pre">medianBlur()</span></code></a></li>
 </ul>

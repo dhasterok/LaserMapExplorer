@@ -151,6 +151,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_bins = True
         self.update_cluster_flag = True
         self.update_pca_flag = True
+        self.plot_flag = True
 
         self.plot_info = {}
         
@@ -205,13 +206,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxMarker.clear()
         self.comboBoxMarker.addItems(self.markerdict.keys())
 
-        self.default_styles = {'Axes': {'XLimAuto': True, 'XLim': [0,1], 'XLabel': '', 'YLimCustom': True, 'YLim': [0,1], 'YLabel': '', 'ZLabel': '', 'AspectRatio': '1.0', 'TickDir': 'out'},
+        self.default_styles = {'Axes': {'XLimAuto': True, 'XLim': [0,1], 'XScale': 'linear', 'XLabel': '', 'YLimCustom': True, 'YLim': [0,1], 'YScale': 'linear', 'YLabel': '', 'ZLabel': '', 'AspectRatio': '1.0', 'TickDir': 'out'},
                                'Text': {'Font': '', 'FontSize': 11.0},
                                'Scales': {'Direction': 'none', 'Location': 'northeast', 'OverlayColor': '#ffffff'},
                                'Markers': {'Symbol': 'circle', 'Size': 6, 'Alpha': 30},
-                               'Lines': {'LineWidth': 1.5},
-                               'Colors': {'Color': '#1c75bc', 'ColorByField': 'None', 'Field': None, 'Colormap': 'viridis', 'CLimAuto': True, 'CLim':[0,1], 'Direction': None, 'CLabel': None, 'Resolution': 10}
+                               'Lines': {'LineWidth': 1.5, 'Multiplier': 1},
+                               'Colors': {'Color': '#1c75bc', 'ColorByField': 'None', 'Field': None, 'Colormap': 'viridis', 'CLimAuto': True, 'CLim':[0,1], 'CScale':'linear', 'Direction': None, 'CLabel': None, 'Resolution': 10}
                                }
+        default_font = 'Avenir'
+        try:
+            self.fontComboBox.setFont(QFont(default_font))
+            self.default_styles['Text']['Font'] = self.fontComboBox.currentFont().family()
+        except:
+            print('Could not find '+default_font+' font')
 
         self.plot_types = {self.sample_tab_id: [0, 'analyte map', 'correlation'],
                 self.spot_tab_id: [0, 'analyte map', 'gradient map'],
@@ -277,6 +284,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.styles['heatmap']['Axes']['AspectRatio'] = 1
         self.styles['TEC']['Axes']['AspectRatio'] = 0.62
         self.styles['variance']['Axes']['AspectRatio'] = 0.62
+        self.styles['pca scatter']['Scales']['OverlayColor'] = '#4d4d4d' 
+        self.styles['pca scatter']['Lines']['LineWidth'] = 0.5
         self.styles['pca scatter']['Axes']['AspectRatio'] = 1
         self.styles['pca heatmap']['Axes']['AspectRatio'] = 1
 
@@ -401,6 +410,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Noise reduction
         self.noise_method_changed = False
         self.noise_red_img = None
+        self.grad_img = None
         self.noise_red_options = {'median':{'label1':'Kernel size', 'value1':5, 'label2':None},
                 'gaussian':{'label1':'Kernel size', 'value1':5, 'label2':'Sigma', 'value2':self.gaussian_sigma(5)},
                 'wiener':{'label1':'Kernel size', 'value1':5, 'label2':None},
@@ -414,6 +424,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.doubleSpinBoxNoiseOption2.valueChanged.connect(self.noise_reduction_option2_callback)
         self.doubleSpinBoxNoiseOption2.setEnabled(False)
         self.labelNoiseOption2.setEnabled(False)
+        self.toolButtonGradient.clicked.connect(self.noise_reduction_method_callback)
 
         # Initiate crop tool
         self.crop_tool = Crop_tool(self)
@@ -650,7 +661,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxFieldColormap.activated.connect(self.update_SV)
 
         # callback functions
-        self.comboBoxPlotType.activated.connect(self.plot_type_callback)
+        self.comboBoxPlotType.currentIndexChanged.connect(self.plot_type_callback)
         self.toolButtonUpdatePlot.clicked.connect(self.update_SV)
         self.toolButtonSaveTheme.clicked.connect(self.input_theme_name_dlg)
         # axes
@@ -660,12 +671,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.lineEditZLabel.editingFinished.connect(lambda: self.axis_label_edit_callback('z',self.lineEditZLabel.text()))
         self.lineEditCbarLabel.editingFinished.connect(lambda: self.axis_label_edit_callback('c',self.lineEditCbarLabel.text()))
 
+        self.comboBoxXScale.activated.connect(lambda: self.axis_scale_callback(self.comboBoxXScale,'x'))
+        self.comboBoxYScale.activated.connect(lambda: self.axis_scale_callback(self.comboBoxYScale,'y'))
+        self.comboBoxColorScale.activated.connect(lambda: self.axis_scale_callback(self.comboBoxColorScale,'c'))
+
         self.lineEditXLB.setValidator(QDoubleValidator())
         self.lineEditXUB.setValidator(QDoubleValidator())
         self.lineEditYLB.setValidator(QDoubleValidator())
         self.lineEditYUB.setValidator(QDoubleValidator())
         self.lineEditColorLB.setValidator(QDoubleValidator())
         self.lineEditColorUB.setValidator(QDoubleValidator())
+        self.lineEditAspectRatio.setValidator(QDoubleValidator())
     
         self.lineEditXLB.editingFinished.connect(lambda: self.axis_limit_edit_callback('x', 0, float(self.lineEditXLB.text())))
         self.lineEditXUB.editingFinished.connect(lambda: self.axis_limit_edit_callback('x', 1, float(self.lineEditXUB.text())))
@@ -677,6 +693,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.lineEditAspectRatio.editingFinished.connect(self.aspect_ratio_callback)
         self.comboBoxTickDirection.activated.connect(self.tickdir_callback)
         # annotations
+
         self.fontComboBox.activated.connect(self.font_callback)
         self.doubleSpinBoxFontSize.valueChanged.connect(self.font_size_callback)
         # scales
@@ -688,6 +705,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.horizontalSliderMarkerAlpha.sliderReleased.connect(self.slider_alpha_changed)
         # lines
         self.comboBoxLineWidth.activated.connect(self.line_width_callback)
+        self.lineEditLengthMultiplier.editingFinished.connect(self.length_multiplier_callback)
         # colors
         #marker color
         self.comboBoxColorByField.activated.connect(self.color_by_field_callback)
@@ -727,6 +745,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         notesInfoMenu.triggered.connect(lambda x:self.add_info_note(x.text()))
         self.add_menu(infomenu_items,notesInfoMenu)
         self.toolButtonNotesInfo.setMenu(notesInfoMenu)
+
+        # compile rst
+        self.toolButtonNotesSave.clicked.connect(self.save_notes_to_pdf)
 
         # Plot toolbars
         #-------------------------
@@ -870,14 +891,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #### Need to fix this so that it calculates the size appropriately when they load
         #### Also need a program that correctly converts a iolite file to one that is read in hear.
         ####
-        if self.sample_id == 'TR1-07':
-            self.aspect_ratio = 0.976
-        elif self.sample_id == 'TR3-06':
-            self.aspect_ratio = 0.874
-        elif self.sample_id == 'WOS-02':
-            self.aspect_ratio = 0.873
-
-
+        # if self.sample_id == 'TR1-07':
+        #     self.aspect_ratio = 0.976
+        # elif self.sample_id == 'TR3-06':
+        #     self.aspect_ratio = 0.874
+        # elif self.sample_id == 'WOS-02':
+        #     self.aspect_ratio = 0.873
 
         # add sample to sample dictionary
         if self.sample_id not in self.data:
@@ -945,20 +964,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             self.prep_data()
 
-            self.aspect_ratio = self.compute_map_aspect_ratio()
-
             # self.checkBoxViewRatio.setChecked(False)
-
-            # plot first analyte as lasermap
 
             #get plot array
             current_plot_df = self.get_map_data(sample_id=sample_id, field=self.selected_analytes[0], analysis_type='Analyte')
             #set 
-            self.comboBoxColorField.setCurrentText(self.selected_analytes[0])
+            #self.comboBoxColorField.setCurrentText(self.selected_analytes[0])
             self.styles['analyte map']['Colors']['Field'] = self.selected_analytes[0]
             
             #create plot
-            self.create_plot(current_plot_df,sample_id=sample_id, plot_type='lasermap', analyte_1=self.selected_analytes[0])
+            #self.create_plot(current_plot_df,sample_id=sample_id, plot_type='lasermap', analyte_1=self.selected_analytes[0])
 
 
             self.create_tree(sample_id)
@@ -967,17 +982,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             self.update_spinboxes_bool = True  # Place this line at end of method
 
-            self.update_SV()
-
         else:
             #update filters, polygon, profiles with existing data
             self.update_tables()
-            self.aspect_ratio = self.compute_map_aspect_ratio()
+            return
 
             #get plot array
-            current_plot_df = self.get_map_data(sample_id=self.sample_id, field=self.selected_analytes[0], analysis_type='Analyte')
+            #current_plot_df = self.get_map_data(sample_id=self.sample_id, field=self.selected_analytes[0], analysis_type='Analyte')
             #create plot
-            self.create_plot(current_plot_df, sample_id=self.sample_id, plot_type='lasermap', analyte_1=self.selected_analytes[0])
+            #self.create_plot(current_plot_df, sample_id=self.sample_id, plot_type='lasermap', analyte_1=self.selected_analytes[0])
+
+        self.aspect_ratio = self.compute_map_aspect_ratio()
 
         # reset flags
         self.update_cluster_flag = True
@@ -987,6 +1002,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_filter_values()
 
         self.histogram_update_bin_width()
+
+        # plot first analyte as lasermap
+        self.plot_flag = True
+        self.update_SV()
+
 
     def open_preferences_dialog(self):
         pass
@@ -1068,36 +1088,69 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # update_plot()
 
     def canvas_changed(self):
-        match self.canvasWindow.currentTabText():
-            case 'Single View':
-                self.toolBox.setEnabled(True)
+        if self.sample_id == '':
+            return
+
+        match self.canvasWindow.currentIndex():
+            case 0:
+                self.SelectAnalytePage.setEnabled(True)
+                self.PreprocessPage.setEnabled(True)
+                self.SpotDataPage.setEnabled(True)
+                self.FilterPage.setEnabled(True)
+                self.ScatterPage.setEnabled(True)
+                self.NDIMPage.setEnabled(True)
+                self.MultidimensionalPage.setEnabled(True)
+                self.ClusteringPage.setEnabled(True)
+                self.ProfilingPage.setEnabled(True)
+                self.SpecialFunctionPage.setEnabled(True)
+
                 self.toolBoxStyle.setEnabled(True)
                 self.comboBoxPlotType.setEnabled(True)
                 self.comboBoxStyleTheme.setEnabled(True)
                 self.toolButtonUpdatePlot.setEnabled(True)
                 self.toolButtonSaveTheme.setEnabled(True)
-            case 'Multi View':
+
+                self.StylingPage.setEnabled(True)
+                self.CalculatorPage.setEnabled(True)
+            case 1:
+                self.SelectAnalytePage.setEnabled(False)
+                self.PreprocessPage.setEnabled(False)
+                self.SpotDataPage.setEnabled(False)
+                self.FilterPage.setEnabled(False)
+                self.ScatterPage.setEnabled(False)
+                self.NDIMPage.setEnabled(False)
+                self.MultidimensionalPage.setEnabled(False)
+                self.ClusteringPage.setEnabled(False)
+                self.ProfilingPage.setEnabled(False)
+                self.SpecialFunctionPage.setEnabled(False)
+
                 self.toolBoxTreeView.setCurrentIndex(0)
-                self.toolBox.setEnabled(False)
-                self.toolBoxStyle.setEnabled(False)
-                self.comboBoxPlotType.setEnabled(False)
-                self.comboBoxStyleTheme.setEnabled(False)
-                self.toolButtonUpdatePlot.setEnabled(False)
-                self.toolButtonSaveTheme.setEnabled(False)
-            case 'Quick View':
+                self.StylingPage.setEnabled(False)
+                self.CalculatorPage.setEnabled(False)
+            case 2:
+                self.SelectAnalytePage.setEnabled(False)
+                self.PreprocessPage.setEnabled(False)
+                self.SpotDataPage.setEnabled(False)
+                self.FilterPage.setEnabled(False)
+                self.ScatterPage.setEnabled(False)
+                self.NDIMPage.setEnabled(False)
+                self.MultidimensionalPage.setEnabled(False)
+                self.ClusteringPage.setEnabled(False)
+                self.ProfilingPage.setEnabled(False)
+                self.SpecialFunctionPage.setEnabled(False)
+
                 self.toolBoxTreeView.setCurrentIndex(0)
-                self.toolBox.setEnabled(False)
-                self.toolBoxStyle.setEnabled(False)
-                self.comboBoxPlotType.setEnabled(False)
-                self.comboBoxStyleTheme.setEnabled(False)
-                self.toolButtonUpdatePlot.setEnabled(False)
-                self.toolButtonSaveTheme.setEnabled(False)
+                self.StylingPage.setEnabled(False)
+                self.CalculatorPage.setEnabled(False)
 
     def toolbox_changed(self):
         """Updates styles associated with toolbox page
 
         Executes on change of ``MainWindow.toolBox.currentIndex()``.  Updates style related widgets.
         """
+        if not self.toolBox.isEnabled():
+            return
+
         self.comboBoxPlotType.clear()
         self.comboBoxPlotType.addItems(self.plot_types[self.toolBox.currentIndex()][1:])
         self.comboBoxPlotType.setCurrentIndex(self.plot_types[self.toolBox.currentIndex()][0])
@@ -1910,6 +1963,33 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return np.ceil(val / 10**(power-order)) * 10**(power - order)
         else:
             return np.round(val / 10**(power-order)) * 10**(power - order)
+    
+    def oround_matrix(self, val, order=2, dir=None):
+        """Rounds a number to specified digits after the order
+
+        :param val: number to round
+        :type val: float
+        :param order: number of orders to retain
+        :type order: int, optional
+        :param dir: direction for rounding, ``0`` for down, ``1`` for up, and ``None`` for nearest, Defaults to None
+        :type dir: int, optional
+
+        :return: rounded number
+        :rtype: float
+        """
+
+        newval = np.zeros(np.shape(val))
+
+        idx = (val != 0)
+        power = np.floor(np.log10(abs(val[idx])))
+        if dir == 0:
+            newval[idx] = np.floor(val[idx] / 10**(power-order)) * 10**(power - order)
+        elif dir == 1:
+            newval[idx] = np.ceil(val[idx] / 10**(power-order)) * 10**(power - order)
+        else:
+            newval[idx] = np.round(val[idx] / 10**(power-order)) * 10**(power - order)
+        
+        return newval
 
     def dynamic_format(self, value, threshold=1e4, order=4, dir=None):
         """Prepares number for display
@@ -2226,6 +2306,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 img = p1.items[0]
                 img.setImage(image=rgba_array)
                 p1.invertY(True)   # vertical axis counts top to bottom
+
                 #set aspect ratio of rectangle
                 img.setRect(self.x.min(),self.y.min(),self.x_range,self.y_range)
                 p1.setRange( yRange=[self.y.min(), self.y.max()])
@@ -2850,6 +2931,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # Remove existing filters
             self.plot.removeItem(self.noise_red_img)
 
+        if self.grad_img:
+            self.plot.removeItem(self.grad_img)
+
         # Assuming self.array is the current image data
         match algorithm:
             case 'none':
@@ -2888,6 +2972,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Update or create the image item for displaying the filtered image
         self.noise_red_array = filtered_image
+
+        if self.toolButtonGradient.isChecked():
+            self.plot_gradient()
+            return
+
         self.noise_red_img = pg.ImageItem(image=self.noise_red_array)
 
         # Set aspect ratio of rectangle
@@ -2900,6 +2989,34 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Add the image item to the plot
         self.plot.addItem(self.noise_red_img)
+
+    def plot_gradient(self):
+        """Produces a gradient map
+        
+        Executes only when ``MainWindow.comboBoxNoiseReductionMethod.currentText()`` is not ``none``, computes noise reduction and displays gradient map"""
+        # update plot type comboBox
+        self.plot_flag = False
+        self.comboBoxPlotType.setCurrentText('gradient map')
+        self.plot_flat = True
+
+        # remove existing gradient map
+        if self.grad_img:
+            self.plot.removeItem(self.grad_img)
+
+        # Compute gradient
+        grad_array = np.gradient(self.noise_red_array)
+        # gradient magnitude
+        self.grad_mag = np.sqrt(grad_array[0]**2 + grad_array[1]**2)
+
+        self.grad_img = pg.ImageItem(image=self.grad_mag)
+        self.grad_img.setRect(0, 0, self.x_range, self.y_range)
+
+        # Optionally, set a color map
+        cm = pg.colormap.get(self.styles['gradient map']['Colors']['Colormap'], source='matplotlib')
+        self.grad_img.setColorMap(cm)
+
+        # Add the image item to the plot
+        self.plot.addItem(self.grad_img)
 
 
     # -------------------------------------
@@ -2978,6 +3095,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 #else:
                 #    self.comboBoxLineWidth.setEnabled(False)
                 self.comboBoxLineWidth.setEnabled(False)
+                self.lineEditLengthMultiplier.setEnabled(False)
 
 
                 # color properties
@@ -3015,6 +3133,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # line properties
                 self.comboBoxLineWidth.setEnabled(False)
+                self.lineEditLengthMultiplier.setEnabled(False)
 
                 # color properties
                 self.toolButtonMarkerColor.setEnabled(False)
@@ -3052,6 +3171,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # line properties
                 self.comboBoxLineWidth.setEnabled(True)
+                self.lineEditLengthMultiplier.setEnabled(False)
 
                 # color properties
                 self.comboBoxColorByField.setEnabled(True)
@@ -3105,6 +3225,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.comboBoxLineWidth.setEnabled(True)
                 else:
                     self.comboBoxLineWidth.setEnabled(False)
+
+                if plot_type == 'pca scatter':
+                    self.lineEditLengthMultiplier.setEnabled(True)
+                else:
+                    self.lineEditLengthMultiplier.setEnabled(False)
 
                 # color properties
                 self.comboBoxColorByField.setEnabled(True)
@@ -3162,6 +3287,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 else:
                     self.comboBoxLineWidth.setEnabled(False)
 
+                if plot_type == 'pca heatmap':
+                    self.lineEditLengthMultiplier.setEnabled(True)
+                else:
+                    self.lineEditLengthMultiplier.setEnabled(False)
+
                 # color properties
                 self.toolButtonMarkerColor.setEnabled(False)
                 self.comboBoxColorByField.setEnabled(False)
@@ -3208,6 +3338,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # line properties
                 self.comboBoxLineWidth.setEnabled(False)
+                self.lineEditLengthMultiplier.setEnabled(False)
 
                 # color properties
                 self.comboBoxColorByField.setEnabled(False)
@@ -3249,6 +3380,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # line properties
                 self.comboBoxLineWidth.setEnabled(True)
+                self.lineEditLengthMultiplier.setEnabled(False)
 
                 # color properties
                 self.toolButtonMarkerColor.setEnabled(True)
@@ -3285,6 +3417,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # line properties
                 self.comboBoxLineWidth.setEnabled(True)
+                self.lineEditLengthMultiplier.setEnabled(False)
 
                 # color properties
                 self.toolButtonMarkerColor.setEnabled(True)
@@ -3330,6 +3463,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # line properties
                 self.comboBoxLineWidth.setEnabled(False)
+                self.lineEditLengthMultiplier.setEnabled(False)
 
                 # color properties
                 self.comboBoxFieldColormap.setEnabled(True)
@@ -3373,6 +3507,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # line properties
                 self.comboBoxLineWidth.setEnabled(True)
+                self.lineEditLengthMultiplier.setEnabled(False)
 
                 # color properties
                 self.toolButtonMarkerColor.setEnabled(True)
@@ -3470,6 +3605,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # line properties
         self.comboBoxLineWidth.setCurrentText(str(style['Lines']['LineWidth']))
+        self.lineEditLengthMultiplier.setText(str(style['Lines']['Multiplier']))
 
         # color properties
         self.toolButtonMarkerColor.setStyleSheet("background-color: %s;" % style['Colors']['Color'])
@@ -3538,6 +3674,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Executes on change of ``MainWindow.comboBoxPlotType.currentText()``, updates the style dictionary,
         toggles widgets and updates single view plot
         """
+        # set plot flag to false
+        self.plot_flag = False
+
         plot_type = self.comboBoxPlotType.currentText()
         self.plot_types[self.toolBox.currentIndex()][0] = self.comboBoxPlotType.currentIndex()
         self.set_style_widgets(plot_type=plot_type)
@@ -3548,6 +3687,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 if self.comboBoxCorrelationMethod.currentText() == 'None':
                     self.comboBoxCorrelationMethod.setCurrentText('Pearson')
         
+        self.plot_flag = True
         self.update_SV()
         
     # axes
@@ -3646,6 +3786,26 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # update plot
         self.update_SV()
 
+    def axis_scale_callback(self, comboBox, ax):
+        plot_type = self.comboBoxPlotType.currentText() 
+
+        new_value = comboBox.currentText()
+        if ax == 'c':
+            if self.styles[plot_type]['Colors']['CLim'] == new_value:
+                return
+        elif self.styles[plot_type]['Axes'][ax.upper()+'Scale'] == new_value:
+            return
+
+        field = self.get_axis_field(ax)
+        self.axis_dict[field]['scale'] = new_value
+
+        self.axis_dict[field]
+
+        self.styles[plot_type]['Axes'][ax.upper()+'Scale'] = new_value
+
+        # update plot
+        self.update_SV()
+
     def set_color_axis_widgets(self):
         """Sets the color axis widgets
         
@@ -3657,6 +3817,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return
         self.lineEditColorLB.setText(self.dynamic_format(self.axis_dict[field]['min'], order=3,dir=0))
         self.lineEditColorUB.setText(self.dynamic_format(self.axis_dict[field]['max'], order=3,dir=1))
+        self.comboBoxColorScale.setCurrentText(self.axis_dict[field]['scale'])
 
     def set_axis_widgets(self, ax, field):
         """Sets axis widgets in the style toolbox
@@ -3674,15 +3835,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.lineEditXLB.setText(self.dynamic_format(self.axis_dict[field]['min'],order=3,dir=0))
                 self.lineEditXUB.setText(self.dynamic_format(self.axis_dict[field]['max'],order=3,dir=1))
                 self.lineEditXLabel.setText(self.axis_dict[field]['label'])
+                self.comboBoxXScale.setCurrentText(self.axis_dict[field]['scale'])
             case 'y':
                 if self.comboBoxPlotType.currentText() == 'histogram':
                     self.lineEditYLB.setText(self.dynamic_format(self.axis_dict[field]['pmin'],order=3,dir=0))
                     self.lineEditYUB.setText(self.dynamic_format(self.axis_dict[field]['pmax'],order=3,dir=1))
                     self.lineEditYLabel.setText(self.comboBoxHistType.currentText())
+                    self.comboBoxYScale.setCurrentText('linear')
                 else:
                     self.lineEditYLB.setText(self.dynamic_format(self.axis_dict[field]['min'],order=3,dir=0))
                     self.lineEditYUB.setText(self.dynamic_format(self.axis_dict[field]['max'],order=3,dir=1))
                     self.lineEditYLabel.setText(self.axis_dict[field]['label'])
+                    self.comboBoxYScale.setCurrentText(self.axis_dict[field]['scale'])
             case 'z':
                 self.lineEditZLabel.setText(self.axis_dict[field]['label'])
         
@@ -3746,15 +3910,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # get axis values from self.axis_dict
         amin = self.axis_dict[field]['min']
         amax = self.axis_dict[field]['max']
+        scale = self.axis_dict[field]['scale']
         label = self.axis_dict[field]['label']
 
         # if probability axis associated with histogram
         if ax == 'p':
             pmin = self.axis_dict[field]['pmin']
             pmax = self.axis_dict[field]['pmax']
-            return amin, amax, label, pmin, pmax
+            return amin, amax, scale, label, pmin, pmax
 
-        return amin, amax, label
+        return amin, amax, scale, label
 
     def initialize_axis_values(self, field_type, field):
         print('initialize_axis_values')
@@ -3772,15 +3937,25 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 else:
                     self.axis_dict[field]['label'] = field+'_N'
 
+                #amin = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes']==field),'v_min'].values[0]
+                #amax = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes']==field),'v_max'].values[0]
+                amin = current_plot_df.min()
+                amax = current_plot_df.max()
+                scale = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes']==field),'norm'].values[0]
             case _:
                 current_plot_df = self.data[self.sample_id]['computed_data'][field_type].loc[:,field].values
+                scale = 'linear'
 
-        amin = self.oround(current_plot_df.min(), order=2, dir=0)
-        amax = self.oround(current_plot_df.max(), order=2, dir=1)
+                amin = current_plot_df.min()
+                amax = current_plot_df.max()
 
-        d = {'status':'auto', 'min':amin, 'max':amax}
+        amin = self.oround(amin, order=2, dir=0)
+        amax = self.oround(amax, order=2, dir=1)
+
+        d = {'status':'auto', 'min':amin, 'max':amax, 'scale':scale}
 
         self.axis_dict[field].update(d)
+        print(self.axis_dict[field])
 
     def aspect_ratio_callback(self):
         """Update aspect ratio
@@ -3806,12 +3981,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------
     def font_callback(self):
         plot_type = self.comboBoxPlotType.currentText()
-        if self.styles[plot_type]['Text']['Font'] == self.fontComboBox.currentText().family():
+        if self.styles[plot_type]['Text']['Font'] == self.fontComboBox.currentFont().family():
             return
 
-        self.styles[plot_type]['Text']['Font'] = self.fontComboBox.currentText().family()
+        self.styles[plot_type]['Text']['Font'] = self.fontComboBox.currentFont().family()
         self.update_SV()
-
 
     def font_size_callback(self):
         plot_type = self.comboBoxPlotType.currentText()
@@ -3820,6 +3994,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             
         self.styles[plot_type]['Text']['FontSize'] = self.doubleSpinBoxFontSize.value()
         self.update_SV()
+
+    def update_figure_font(self, canvas, font_name):
+        if font_name == '':
+            return
+
+        # Update font of all text elements in the figure
+        try:
+            for text_obj in canvas.fig.findobj(match=plt.Text):
+                text_obj.set_fontname(font_name)
+        except:
+            print('Unable to update figure font.')
 
     # scales
     # -------------------------------------
@@ -3915,6 +4100,27 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return
 
         self.styles[plot_type]['Lines']['LineWidth'] = float(self.comboBoxLineWidth.currentText())
+        self.update_SV()
+
+    def length_multiplier_callback(self):
+        """Updates line length multiplier
+        
+        Used when plotting vector components in multidimensional plots.  Values entered by the user must be (0,10]
+        """
+        plot_type = self.comboBoxPlotType.currentText()
+        if not float(self.lineEditLengthMultiplier.text()):
+            self.lineEditLengthMultiplier.setText(self.styles[plot_type]['Lines']['Multiplier'])
+
+        value = float(self.lineEditLengthMultiplier.text())
+        if self.styles[plot_type]['Lines']['Multiplier'] == value:
+            return
+        elif (value < 0) or (value >= 100):
+            print(value)
+            self.lineEditLengthMultiplier.setText(str(self.styles[plot_type]['Lines']['Multiplier']))
+            return
+
+        print(value)
+        self.styles[plot_type]['Lines']['Multiplier'] = value
         self.update_SV()
 
     # colors
@@ -4188,7 +4394,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :param save: save plot to plot selector, Defaults to False.
         :type save: bool, optional
         """
-        if self.sample_id == '' or not self.comboBoxPlotType.currentText():
+        print('update_SV '+str(self.plot_flag))
+        if self.sample_id == '' or not self.comboBoxPlotType.currentText() or not self.plot_flag:
             return
         plot_type = self.comboBoxPlotType.currentText()
         sample_id = self.sample_id
@@ -4217,22 +4424,34 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.create_plot(current_plot_df, sample_id, plot_type = map_type, analyte_1=field, plot=True)
 
                 if self.toolBox.currentIndex() == self.sample_tab_id:
+                    print('plot_small_histogram')
                     self.plot_small_histogram(current_plot_df,field)
                     pass
+
+            case 'gradient map':
+                if self.comboBoxNoiseReductionMethod.currentText() == 'none':
+                    QMessageBox.warning(None,'Warning','Noise reduction must be performed before computing a gradient.')
+                    return
+                self.noise_reduction_method_callback()
             case 'correlation':
-                if self.comboBoxCorrelationMethod.currentText() == 'None':
+                if self.comboBoxCorrelationMethod.currentText() == 'none':
                     return
                 self.plot_correlation()
+
             case 'histogram':
                 self.plot_histogram()
+
             case 'scatter' | 'heatmap':
                 if self.comboBoxFieldX.currentText() == self.comboBoxFieldY.currentText():
                     return
                 self.plot_scatter()
+
             case 'variance' | 'vectors' | 'pca scatter' | 'pca heatmap' | 'PCA Score':
                 self.plot_pca()
+
             case 'Cluster' | 'Cluster Score':
                 self.plot_clusters()
+
     
         # self.styles = {'analyte map': copy.deepcopy(self.default_styles),
         #                 'correlation': copy.deepcopy(self.default_styles),
@@ -4498,11 +4717,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 loc = 'left'
             else:
                 loc = 'right'
-            cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location=loc, shrink=0.62, fraction=0.1)
+            cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location=loc, shrink=0.62, fraction=0.1, yscale=style['Axes']['Scale'])
             cbar.set_label(label, size=style['Text']['FontSize'])
             cbar.ax.tick_params(labelsize=style['Text']['FontSize'])
         elif style['Colors']['Direction'] == 'horizontal':
-            cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62, fraction=0.1)
+            cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62, fraction=0.1, xscale=style['Axes']['Scale'])
             cbar.set_label(label, size=style['Text']['FontSize'])
             cbar.ax.tick_params(labelsize=style['Text']['FontSize'])
         else:
@@ -4600,6 +4819,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         canvas.axes.set_yticklabels(labels, ha='left', va='center', fontproperties=font)
 
         canvas.axes.set_title('')
+
+        self.update_figure_font(canvas, style['Text']['Font'])
 
         self.plot_info = {
             'plot_name': method,
@@ -4821,14 +5042,23 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         print(self.axis_dict[x['field']])
 
         # grab axes limits
-        xmin, xmax, xlbl, ymin, ymax = self.get_axis_values(x['type'],x['field'],ax='p')
+        xmin, xmax, xscale, xlbl, ymin, ymax = self.get_axis_values(x['type'],x['field'],ax='p')
 
         # label font
-        font = {'size':style['Text']['FontSize']}
+        if 'font' == '':
+            font = {'size':style['Text']['FontSize']}
+        else:
+            font = {'font':style['Text']['Font'], 'size':style['Text']['FontSize']}
+
 
         # x-axis
         canvas.axes.set_xlabel(xlbl, fontdict=font)
         canvas.axes.set_xlim(xmin,xmax)
+        if xscale == 'log':
+            canvas.axes.set_xscale(xscale,base=10)
+        # if style['Axes']['Scale'] == 'linear':
+        # else:
+        #     canvas.axes.set_xlim(xmin,xmax)
 
         # y-axis
         canvas.axes.set_ylabel(self.comboBoxHistType.currentText(), fontdict=font)
@@ -4836,6 +5066,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         canvas.axes.tick_params(labelsize=style['Text']['FontSize'])
         canvas.axes.set_box_aspect(style['Axes']['AspectRatio'])
+
+        self.update_figure_font(canvas, style['Text']['Font'])
 
         canvas.fig.tight_layout()
 
@@ -4907,6 +5139,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         canvas.axes.margins(x=0)
         
         if plot_flag:
+            self.update_figure_font(canvas, style['Text']['Font'])
             self.clear_layout(self.widgetSingleView.layout())
             self.widgetSingleView.layout().addWidget(canvas)
 
@@ -4956,8 +5189,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #     cb = None
 
         # axes
-        xmin, xmax, xlbl = self.get_axis_values(x['type'],x['field'])
-        ymin, ymax, ylbl = self.get_axis_values(y['type'],y['field'])
+        xmin, xmax, xscale, xlbl = self.get_axis_values(x['type'],x['field'])
+        ymin, ymax, yscale, ylbl = self.get_axis_values(y['type'],y['field'])
 
         # labels
         font = {'size':style['Text']['FontSize']}
@@ -4977,6 +5210,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # aspect ratio
         canvas.axes.set_box_aspect(style['Axes']['AspectRatio'])
         canvas.fig.tight_layout()
+
+        if xscale == 'log':
+            canvas.axes.set_xscale(xscale,base=10)
+        if yscale == 'log':
+            canvas.axes.set_yscale(yscale,base=10)
 
         plot_name = f"{x['field']}_{y['field']}_{'scatter'}"
         self.plot_info = {
@@ -5068,8 +5306,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             cb = None
 
         # axes
-        xmin, xmax, xlbl = self.get_axis_values(x['type'],x['field'])
-        ymin, ymax, ylbl = self.get_axis_values(y['type'],y['field'])
+        xmin, xmax, xscale, xlbl = self.get_axis_values(x['type'],x['field'])
+        ymin, ymax, yscale, ylbl = self.get_axis_values(y['type'],y['field'])
 
         # labels
         font = {'size':style['Text']['FontSize']}
@@ -5088,6 +5326,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # aspect ratio
         canvas.axes.set_box_aspect(style['Axes']['AspectRatio'])
+
+        if xscale == 'log':
+            canvas.axes.set_xscale(xscale,base=10)
+        if yscale == 'log':
+            canvas.axes.set_yscale(yscale,base=10)
 
         plot_name = f"{x['field']}_{y['field']}_{'heatmap'}"
         self.plot_info = {
@@ -5286,11 +5529,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 pc_x = int(self.spinBoxPCX.value())
                 pc_y = int(self.spinBoxPCY.value())
 
+                if pc_x == pc_y:
+                    return
+
                 plot_name = plot_type+f'_PC{pc_x}_PC{pc_y}'
                 # Assuming pca_df contains scores for the principal components
                 # uncomment to use plot scatter instead of ax.scatter
                 canvas = MplCanvas()
                 self.plot_scatter(canvas=canvas)
+
+                self.plot_pca_components(canvas)
 
             # make a map of a principal component score
             case 'pca score':
@@ -5303,6 +5551,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case _:
                 print(f'Unknown PCA plot type: {plot_type}')
                 return
+
+        self.update_figure_font(canvas, self.styles[plot_type]['Text']['Font'])
 
         self.plot_info = {
             'plot_name': plot_name,
@@ -5424,6 +5674,52 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         return canvas
         
+    def plot_pca_components(self, canvas):
+        """Adds vector components to PCA scatter and heatmaps
+        
+        :param canvas: canvas object for plotting
+        :type canvas: MplCanvas
+        """
+        print('plot_pca_components')
+        style = self.styles[self.comboBoxPlotType.currentText()]
+        if style['Lines']['LineWidth'] == 0:
+            return
+
+        # field labels
+        analytes = self.data[self.sample_id]['analyte_info'].loc[:,'analytes']
+        nfields = len(analytes)
+
+        # components
+        pc_x = int(self.spinBoxPCX.value())-1
+        pc_y = int(self.spinBoxPCY.value())-1
+
+        x = self.pca_results.components_[pc_x][:]
+        y = self.pca_results.components_[pc_y][:]
+
+        print(pc_x)
+        print(x)
+        print(pc_y)
+        print(y)
+
+        # mulitiplier for scale
+        m = style['Lines']['Multiplier'] #np.min(np.abs(np.sqrt(x**2 + y**2)))
+
+        # arrows
+        canvas.axes.quiver(np.zeros(nfields), np.zeros(nfields), m*x, m*y, color=style['Scales']['OverlayColor'],
+            angles='xy', scale_units='xy', scale=1, # arrow angle and scale set relative to the data
+            linewidth=style['Lines']['LineWidth'], headlength=2, headaxislength=2) # arrow properties
+
+        # labels
+        for i, analyte in enumerate(analytes):
+            if x[i] > 0 and y[i] > 0:
+                canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='left', va='bottom', color=style['Scales']['OverlayColor'])
+            elif x[i] < 0 and y[i] > 0:
+                canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='left', va='top', color=style['Scales']['OverlayColor'])
+            elif x[i] > 0 and y[i] < 0:
+                canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='right', va='bottom', color=style['Scales']['OverlayColor'])
+            elif x[i] < 0 and y[i] < 0:
+                canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='right', va='top', color=style['Scales']['OverlayColor'])
+
 
     # -------------------------------------
     # Cluster functions
@@ -5614,6 +5910,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'figure': canvas,
             'style': self.styles[plot_type]
             } 
+
+        self.update_figure_font(canvas, self.styles[plot_type]['Text']['Font'])
 
         self.clear_layout(self.widgetSingleView.layout())
         self.widgetSingleView.layout().addWidget(canvas)
@@ -5809,6 +6107,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.plot_id[plot_type][self.sample_id]  = 0
         plot_name = plot_name +'_'+str(self.plot_id[plot_type][self.sample_id])
 
+        self.update_figure_font(canvas, self.styles[plot_type]['Text']['Font'])
+
         self.plot_info = {
             'plot_name': f'{plot_name}',
             'sample_id': self.sample_id,
@@ -5900,7 +6200,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         tick_labels = []
         for i in range(int(lim[0]), int(lim[1]) + 1):
             ticks.extend([i + m for m in mt])
-            tick_labels.extend([f'$10^{i}$'] + [''] * (len(mt) - 1))
+            tick_labels.extend([f'$10^{{{i}}}$'] + [''] * (len(mt) - 1))
 
         # Apply settings based on the axis
         if axis.lower() == 'x':
@@ -6155,34 +6455,32 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :type switch: bool
         """
         if switch:
-            self.labelColorByField.setEnabled(True)
             self.comboBoxColorByField.setEnabled(True)
-            self.labelColorField.setEnabled(True)
             self.comboBoxColorField.setEnabled(True)
-            self.labelFieldColormap.setEnabled(True)
             self.comboBoxFieldColormap.setEnabled(True)
-            self.labelCbarDirection.setEnabled(True)
             self.comboBoxCbarDirection.setEnabled(True)
-            self.labelCbarLabel.setEnabled(True)
             self.lineEditCbarLabel.setEnabled(True)
-            self.labelColorBounds.setEnabled(True)
             self.lineEditColorLB.setEnabled(True)
             self.lineEditColorUB.setEnabled(True)
+            self.comboBoxColorScale.setEnabled(True)
         else:
-            self.labelColorByField.setEnabled(False)
             self.comboBoxColorByField.setEnabled(False)
-            self.labelColorField.setEnabled(False)
             self.comboBoxColorField.setEnabled(False)
-            self.labelFieldColormap.setEnabled(False)
             self.comboBoxFieldColormap.setEnabled(False)
-            self.labelCbarDirection.setEnabled(False)
             self.comboBoxCbarDirection.setEnabled(False)
-            self.labelCbarLabel.setEnabled(False)
             self.lineEditCbarLabel.setEnabled(False)
-            self.labelColorBounds.setEnabled(False)
             self.lineEditColorLB.setEnabled(False)
             self.lineEditColorUB.setEnabled(False)
- 
+            self.comboBoxColorScale.setEnabled(False)
+
+        self.labelColorByField.setEnabled(self.comboBoxColorByField.isEnabled())
+        self.labelColorField.setEnabled(self.comboBoxColorField.isEnabled())
+        self.labelFieldColormap.setEnabled(self.comboBoxFieldColormap.isEnabled())
+        self.labelCbarDirection.setEnabled(self.comboBoxCbarDirection.isEnabled())
+        self.labelCbarLabel.setEnabled(self.lineEditCbarLabel.isEnabled())
+        self.labelColorBounds.setEnabled(self.lineEditColorLB.isEnabled())
+        self.labelColorScale.setEnabled(self.comboBoxColorScale.isEnabled())
+
     # updates field comboboxes for analysis and plotting
     def update_field_combobox(self, parentBox, childBox):
         """Updates comboBoxes with fields for plots or analysis
@@ -6694,7 +6992,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------
     # Notes functions
     # -------------------------------
- 
+    def add_menu(self, menu_items, menu_obj):
+        """Adds items to a context menu
+        
+        :param menu_items: Names of the menu text to add
+        :type menu_items: list
+        :param menu_obj: context menu object
+        :type menu_obj: QMenu
+        """
+        for item in menu_items:
+            action = menu_obj.addAction(item)
+            action.setIconVisibleInMenu(False)
+
     def save_notes_file(self):
         if self.notes_file is None:
             return
@@ -6768,38 +7077,73 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case 'Filter table':
                 pass
             case 'PCA results':
-                pass
+                if not self.pca_results:
+                    return
+                analytes = self.data[self.sample_id]['analyte_info'].loc[:,'analytes'].values
+                analytes = np.insert(analytes,0,'lambda')
+
+                matrix = np.vstack([self.pca_results.explained_variance_ratio_, self.pca_results.components_])
+
+                header = self.data[self.sample_id]['computed_data']['PCA Score'].columns[2:].to_numpy()
+
+                print(type(analytes))
+                print(type(header))
+                print(type(matrix))
+                self.add_table_note(matrix, row_labels=analytes, col_labels=header)
             case 'Cluster results':
                 pass
-    
-    def add_table_note(self,array,col=None,row=None):
-        # if col is not None, add row of column headers (account for row names if necessary)
-        # if row is not None, add column of row names
-        # print table
-        # simple table format:
-        # =====  =====  ======
-        #    Inputs     Output
-        # ------------  ------
-        #   A      B    A or B
-        # =====  =====  ======
-        # False  False  False
-        # True   False  True
-        # False  True   True
-        # True   True   True
-        # =====  =====  ======
-        pass
 
-    def add_menu(self, menu_items, menu_obj):
-        """Adds items to a context menu
+    def add_table_note(self, matrix, row_labels=None, col_labels=None):
+        """Convert matrix to restructured text
         
-        :param menu_items: Names of the menu text to add
-        :type menu_items: list
-        :param menu_obj: context menu object
-        :type menu_obj: QMenu
+        Adds a table to the note tab, including row lables and column headers.
+
+        :param matrix: data for printing
+        :type matrix: 2D array
+        :param row_lables: row labels
+        :type row_labels: str, optional
+        :param col_labels: column header
+        :type col_labels: str, optional
         """
-        for item in menu_items:
-            action = menu_obj.addAction(item)
-            action.setIconVisibleInMenu(False)
+        if matrix is None:
+            return ''
+
+        #matrix = self.convert_to_string(matrix)
+        matrix = self.oround_matrix(matrix, order=3)
+
+        # Add row labels to the matrix if provided
+        if row_labels is not None:
+            matrix = np.column_stack((row_labels, matrix))
+            if col_labels is not None:
+                col_labels = np.insert(col_labels,0,' ')
+
+        # Add column headings to the matrix if provided
+        if col_labels is not None:
+            matrix = np.vstack((col_labels, matrix))
+
+        # Calculate column widths
+        col_widths = np.max([np.vectorize(len)(matrix.astype(str))], axis=0)
+
+        # Generate the reST table
+        table = ""
+        for i, row in enumerate(matrix):
+            table += "|"
+            for col, width in zip(row, col_widths[i,:]):
+                table += f" {col:{int(width)}} |"
+            table += "\n"
+
+        self.textEditNotes.insertPlainText(table)
+
+    #def convert_to_string(self, array):
+    #    return np.array2string(array, formatter={'all': lambda x: f'{x:02f}'})
+
+    def save_notes_to_pdf(self):
+        filename = self.notes_file.replace(' ','\ ')
+        try:
+            os.system(f"cat {filename} | rst2pdf -o {os.path.splitext(filename)[0]+'.pdf'}")
+        except:
+            QMessageBox.error(self.main_window,"Error", "Could not save to pdf.")
+            
 
     # -------------------------------
     # Unclassified functions 
@@ -7247,7 +7591,7 @@ class excelConcatenator(QDialog, Ui_Dialog):
                         elif data_type == 'ladr ppm':
                             df = self.read_ladr_ppm_folder(file_path)
                         else:
-                            QMessageBox.warning(None, "Error", "Unknown Type specified.")
+                            QMessageBox.error(self.main_window,"Error", "Unknown Type specified.")
                             return
         
                         data_frames.append(df)

@@ -746,6 +746,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.add_menu(infomenu_items,notesInfoMenu)
         self.toolButtonNotesInfo.setMenu(notesInfoMenu)
 
+        self.toolButtonNotesBold.clicked.connect(lambda: self.format_note_text('bold'))
+        self.toolButtonNotesItalic.clicked.connect(lambda: self.format_note_text('italics'))
+
         # compile rst
         self.toolButtonNotesSave.clicked.connect(self.save_notes_to_pdf)
 
@@ -7021,11 +7024,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
         Uses the reStructured Text figure format
         """
-        self.textEditNotes.insertPlainText("\n\n.. figure:: path/to/figure.png\n")
-        self.textEditNotes.insertPlainText("    :align: center\n")
-        self.textEditNotes.insertPlainText("    :alt: alternate text\n")
-        self.textEditNotes.insertPlainText("    :width: 1000\n")
-        self.textEditNotes.insertPlainText("\n    Caption goes here.\n")
+        dialog = QFileDialog()
+        dialog.setFileMode(QFileDialog.ExistingFiles)
+        dialog.setNameFilter("Image Files (*.jpg *.png *.tif)")
+        filenames = []
+
+        if dialog.exec_():
+            filenames = dialog.selectedFiles()
+        else:
+            return
+
+        for fn in filenames:
+            self.textEditNotes.insertPlainText(f"\n\n.. figure:: {fn}\n")
+            self.textEditNotes.insertPlainText("    :align: center\n")
+            self.textEditNotes.insertPlainText("    :alt: alternate text\n")
+            self.textEditNotes.insertPlainText("    :width: 150mm\n")
+            self.textEditNotes.insertPlainText("\n    Caption goes here.\n")
 
     def add_header_line(self, level):
         """Formats a selected line as a header
@@ -7056,6 +7070,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Insert the line of "="
         cursor.insertText('\n' + f'{symbol}' * (cursor.block().length() - 1))
+
+    def format_note_text(self, style):
+        cursor = self.textEditNotes.textCursor()
+        selected_text = cursor.selectedText()
+
+        match style:
+            case 'italics':
+                modified_text = f"*{selected_text}*"
+            case 'bold':
+                modified_text = f"**{selected_text}**"
+
+        cursor.insertText(modified_text)
 
     def add_info_note(self, infotype):
         match infotype:

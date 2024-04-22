@@ -1613,6 +1613,89 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxPlots.clear()
         self.comboBoxPlots.addItems(self.multi_view_index)
 
+    # def add_plot(self, plot_information, current_plot_df = None):
+    #     """Adds plot to plot widget dictionary and displays in selected view tab
+
+    #     :param plot_information:
+    #     :type plot_information: dict
+    #     :param current_plot_df: Defaults to None
+    #     :param type: dict, optional
+    #     """
+    #     plot_name = plot_information['plot_name']
+    #     sample_id = plot_information['sample_id']
+    #     plot_type = plot_information['plot_type']
+
+
+    #     #get plot widget and view from plot_widget_dict
+    #     for widget, view in zip(self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'],self.plot_widget_dict[plot_type][sample_id][plot_name]['view']):
+    #         if view == self.canvasWindow.currentIndex():
+    #             selected_plot_widget = widget
+    #             continue
+    #         else:
+    #             selected_plot_widget = widget
+
+    #     if (self.canvasWindow.currentIndex() == 1) and plot_name not in self.multi_view_index:
+    #         #Multi view
+    #         layout = self.widgetMultiView.layout()
+
+    #         # Set the inner grid layout for the inner widget
+    #         layout.addWidget(selected_plot_widget)
+
+    #         # Set spacing to 0 to remove gaps between widgets
+    #         layout.setSpacing(0)
+
+    #         # Set margins to 0 if you want to remove margins as well
+    #         layout.setContentsMargins(0, 0, 0, 0)
+    #         # show plot since parent is visible
+    #         selected_plot_widget.show()
+    #         #remove tab
+    #         #self.canvasWindow.removeTab(tab_index)
+    #         #get the the index of plot on multiview
+    #         self.multi_view_index.append(plot_name)
+    #         #self.canvasWindow.setEnabled(index,False)
+    #         #self.add_remove(plot_name)
+    #         #reduce the index of widgets right hand side of index tab by one
+    #         self.comboBoxPlots.clear()
+    #         self.comboBoxPlots.addItems(self.multi_view_index)
+    #     elif self.canvasWindow.currentIndex() == 0:
+    #         #Single view
+    #         self.single_plot_name = plot_name
+
+    #         #remove plot from multi view if the plot is already in multiview
+
+    #         layout = self.widgetSingleView.layout()
+    #         #remove current plot
+    #         for i in reversed(range(layout.count())):
+    #             item = layout.itemAt(i)
+    #             if item is not None:
+    #                 widget = item.widget()   # Get the widget from the item
+    #                 if widget is not None:
+    #                     layout.removeWidget(widget)  # Remove the widget from the layout
+    #                     widget.setParent(None)      # Set the widget's parent to None
+    #         # selected_plot_widget = self.plot_widget_dict[plot_type][sample_id][plot_name]['widget']
+    #         self.current_plot = plot_name
+    #         self.current_plot_information = plot_information
+    #         self.current_plot_df = current_plot_df
+    #         layout.addWidget(selected_plot_widget)
+    #         selected_plot_widget.show()
+
+    #         # Assuming widgetClusterMap is a QWidget with a QVBoxLayout containing figure_canvas
+    #         for i in range(selected_plot_widget.layout().count()):
+    #             widget = selected_plot_widget.layout().itemAt(i).widget()
+    #             if isinstance(widget, FigureCanvas):
+    #                 self.matplotlib_canvas = widget
+    #                 self.pyqtgraph_widget = None
+    #                 break
+    #             elif isinstance(widget, pg.GraphicsLayoutWidget):
+    #                 self.pyqtgraph_widget = widget
+    #                 self.matplotlib_canvas = None
+    #                 break
+
+    #     # After adding the plots, refresh windows to fix toggle button issue
+    #     self.hide()
+    #     self.show()
+
+
     def add_plot(self, plot_information, current_plot_df = None):
         """Adds plot to plot widget dictionary and displays in selected view tab
 
@@ -1624,76 +1707,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         plot_name = plot_information['plot_name']
         sample_id = plot_information['sample_id']
         plot_type = plot_information['plot_type']
-
+        canvas = self.plot_widget_dict[plot_type][sample_id][plot_name]['info']['figure']
 
         #get plot widget and view from plot_widget_dict
-        for widget, view in zip(self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'],self.plot_widget_dict[plot_type][sample_id][plot_name]['view']):
-            if view == self.canvasWindow.currentIndex():
-                selected_plot_widget = widget
-                continue
-            else:
-                selected_plot_widget = widget
-
-        if (self.canvasWindow.currentIndex() == 1) and plot_name not in self.multi_view_index:
-            #Multi view
-            layout = self.widgetMultiView.layout()
-
-            # Set the inner grid layout for the inner widget
-            layout.addWidget(selected_plot_widget)
-
-            # Set spacing to 0 to remove gaps between widgets
-            layout.setSpacing(0)
-
-            # Set margins to 0 if you want to remove margins as well
-            layout.setContentsMargins(0, 0, 0, 0)
-            # show plot since parent is visible
-            selected_plot_widget.show()
-            #remove tab
-            #self.canvasWindow.removeTab(tab_index)
-            #get the the index of plot on multiview
-            self.multi_view_index.append(plot_name)
-            #self.canvasWindow.setEnabled(index,False)
-            #self.add_remove(plot_name)
-            #reduce the index of widgets right hand side of index tab by one
-            self.comboBoxPlots.clear()
-            self.comboBoxPlots.addItems(self.multi_view_index)
-        elif self.canvasWindow.currentIndex() == 0:
-            #Single view
-            self.single_plot_name = plot_name
-
-            #remove plot from multi view if the plot is already in multiview
-
-            layout = self.widgetSingleView.layout()
-            #remove current plot
-            for i in reversed(range(layout.count())):
-                item = layout.itemAt(i)
-                if item is not None:
-                    widget = item.widget()   # Get the widget from the item
-                    if widget is not None:
-                        layout.removeWidget(widget)  # Remove the widget from the layout
-                        widget.setParent(None)      # Set the widget's parent to None
-            # selected_plot_widget = self.plot_widget_dict[plot_type][sample_id][plot_name]['widget']
-            self.current_plot = plot_name
-            self.current_plot_information = plot_information
-            self.current_plot_df = current_plot_df
-            layout.addWidget(selected_plot_widget)
-            selected_plot_widget.show()
-
-            # Assuming widgetClusterMap is a QWidget with a QVBoxLayout containing figure_canvas
-            for i in range(selected_plot_widget.layout().count()):
-                widget = selected_plot_widget.layout().itemAt(i).widget()
-                if isinstance(widget, FigureCanvas):
-                    self.matplotlib_canvas = widget
-                    self.pyqtgraph_widget = None
-                    break
-                elif isinstance(widget, pg.GraphicsLayoutWidget):
-                    self.pyqtgraph_widget = widget
-                    self.matplotlib_canvas = None
-                    break
-
-        # After adding the plots, refresh windows to fix toggle button issue
-        self.hide()
-        self.show()
+        if self.canvasWindow.currentIndex() == 0:
+            self.clear_layout(self.widgetSingleView.layout())
+            self.widgetSingleView.layout().addWidget(canvas)
+        elif self.canvasWindow.currentIndex() == 1:
+            self.widgetMultiView.layout().addWidget(canvas)
 
     def save_analysis(self):
 
@@ -4712,31 +4733,33 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         # Add a colorbar
         cbar = None
+        if style['Colors']['Direction'] == 'none':
+            return
+
+        if style['Colors']['CScale'] == 'linear':
+            norm = colors.Normalize(vmin=)
+
         if style['Colors']['Direction'] == 'vertical':
             if self.comboBoxPlotType.currentText() == 'correlation':
                 loc = 'left'
             else:
                 loc = 'right'
-            cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location=loc, shrink=0.62, fraction=0.1, yscale=style['Axes']['Scale'])
+            cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location=loc, shrink=0.62, fraction=0.1)
             cbar.set_label(label, size=style['Text']['FontSize'])
             cbar.ax.tick_params(labelsize=style['Text']['FontSize'])
         elif style['Colors']['Direction'] == 'horizontal':
-            cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62, fraction=0.1, xscale=style['Axes']['Scale'])
+            cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62, fraction=0.1)
             cbar.set_label(label, size=style['Text']['FontSize'])
             cbar.ax.tick_params(labelsize=style['Text']['FontSize'])
-        else:
-            #cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62, fraction=0.1)
-            pass 
 
         # adjust tick marks if labels are given
-        if cbar is not None:
-            if cbartype == 'continuous' or grouplabels is None:
-                ticks = None
-            elif cbartype == 'discrete':
-                ticks = np.arange(0, len(grouplabels))
-                cbar.set_ticks(ticks=ticks, labels=grouplabels, minor=False)
-            else:
-                print('(add_colorbar) Unknown type: '+cbartype)
+        if cbartype == 'continuous' or grouplabels is None:
+            ticks = None
+        elif cbartype == 'discrete':
+            ticks = np.arange(0, len(grouplabels))
+            cbar.set_ticks(ticks=ticks, labels=grouplabels, minor=False)
+        else:
+            print('(add_colorbar) Unknown type: '+cbartype)
 
    
     # -------------------------------------
@@ -6882,11 +6905,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             current_plot_df = self.get_map_data(sample_id=level_2_data, field=level_3_data)
             self.create_plot(current_plot_df,sample_id = level_2_data,plot_type='lasermap_norm', analyte_1=level_3_data)
 
-        elif level_1_data == 'Histogram' :
-            current_plot_df = self.get_map_data(sample_id=level_2_data, field=level_3_data)
-
-            self.create_plot(current_plot_df,sample_id = level_2_data,plot_type='histogram', analyte_1=level_3_data)
-
         # self.add_plot(val.data())
         elif level_1_data == 'Ratio' :
             analytes= level_3_data.split(' / ')
@@ -6895,7 +6913,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             self.create_plot(current_plot_df,sample_id = level_2_data, plot_type='lasermap', analyte_1=analytes[0], analyte_2=analytes[1])
 
-        elif ((level_1_data == 'Clustering') or (level_1_data=='Scatter') or (level_1_data=='n-dim') or (level_1_data=='Multidimensional')or (level_1_data=='Correlation')):
+        elif level_1_data in ['Histogram', 'Clustering', 'Scatter', 'Multidimensional', 'Correlation']:
             plot_info={'plot_name':level_3_data, 'plot_type':level_1_data.lower(),'sample_id':level_2_data }
             self.add_plot(plot_info)
 

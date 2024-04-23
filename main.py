@@ -32,9 +32,8 @@ from sklearn.cluster import KMeans
 import skfuzzy as fuzz
 from sklearn.metrics.pairwise import manhattan_distances as manhattan, euclidean_distances as euclidean, cosine_distances
 from scipy.spatial.distance import mahalanobis
-from matplotlib.colors import Normalize
 import matplotlib.patches as mpatches
-from matplotlib.colors import BoundaryNorm
+import matplotlib.colors as colors
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from src.plot_spider import plot_spider_norm
 import re
@@ -211,7 +210,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                'Scales': {'Direction': 'none', 'Location': 'northeast', 'OverlayColor': '#ffffff'},
                                'Markers': {'Symbol': 'circle', 'Size': 6, 'Alpha': 30},
                                'Lines': {'LineWidth': 1.5, 'Multiplier': 1},
-                               'Colors': {'Color': '#1c75bc', 'ColorByField': 'None', 'Field': None, 'Colormap': 'viridis', 'CLimAuto': True, 'CLim':[0,1], 'CScale':'linear', 'Direction': None, 'CLabel': None, 'Resolution': 10}
+                               'Colors': {'Color': '#1c75bc', 'ColorByField': 'None', 'Field': '', 'Colormap': 'viridis', 'CLimAuto': True, 'CLim':[0,1], 'CScale':'linear', 'Direction': 'vertical', 'CLabel': '', 'Resolution': 10}
                                }
         default_font = 'Avenir'
         try:
@@ -264,24 +263,26 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.styles['vectors']['Axes']['AspectRatio'] = 1.0
         self.styles['vectors']['Colors']['Colormap'] = 'RdBu'
-        self.styles['vectors']['Colors']['Direction'] = 'vertical'
 
         self.styles['gradient map']['Colors']['Colormap'] = 'RdYlBu'
-        self.styles['gradient map']['Colors']['Direction'] = 'vertical'
 
         self.styles['Cluster Score']['Colors']['Colormap'] = 'plasma'
         self.styles['Cluster Score']['Colors']['Direction'] = 'vertical'
         self.styles['Cluster Score']['Colors']['ColorByField'] = 'Cluster Score'
         self.styles['Cluster Score']['Colors']['ColorField'] = 'Cluster0'
+        self.styles['Cluster Score']['Colors']['CScale'] = 'linear'
 
-        self.styles['Cluster']['Colors']['Direction'] = 'vertical'
+        self.styles['Cluster']['Colors']['CScale'] = 'discrete'
 
-        self.styles['PCA Score']['Colors']['Direction'] = 'vertical'
+        self.styles['PCA Score']['Colors']['CScale'] = 'linear'
         self.styles['PCA Score']['Colors']['ColorByField'] = 'PCA Score'
         self.styles['PCA Score']['Colors']['ColorField'] = 'PC1'
 
         self.styles['scatter']['Axes']['AspectRatio'] = 1
+
         self.styles['heatmap']['Axes']['AspectRatio'] = 1
+        self.styles['heatmap']['Colors']['CLim'] = [1,1000] 
+        self.styles['heatmap']['Colors']['CScale'] = 'log'
         self.styles['TEC']['Axes']['AspectRatio'] = 0.62
         self.styles['variance']['Axes']['AspectRatio'] = 0.62
         self.styles['pca scatter']['Scales']['OverlayColor'] = '#4d4d4d' 
@@ -1336,7 +1337,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.current_group['selected_clusters'] = selected_clusters
             else:
                 self.current_group['selected_clusters'] = None
-            if self.comboBoxPlotType.currentText() != 'Cluster' or self.comboBoxPlotType.currentText() != 'Cluster Score':
+            if (self.comboBoxPlotType.currentText() != 'Cluster' or self.comboBoxPlotType.currentText() != 'Cluster Score'):
                 self.update_SV()
 
     def update_color_bar_position(self):
@@ -2309,7 +2310,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             for widgetLaserMap, view in zip(widget_info['widget'],widget_info['view']):
 
                 # Step 1: Normalize your data array for colormap application
-                norm = Normalize(vmin=array.min(), vmax=array.max())
+                norm = colors.Normalize(vmin=array.min(), vmax=array.max())
                 cmap = plt.get_cmap(style['Colors']['Colormap'])  # Assuming a valid colormap name
 
                 # Step 2: Apply the colormap to get RGB values, then normalize to [0, 255] for QImage
@@ -2370,7 +2371,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             #Change transparency of values outside mask
             # Step 1: Normalize your data array for colormap application
-            norm = Normalize(vmin=array.min(), vmax=array.max())
+            norm = colors.Normalize(vmin=array.min(), vmax=array.max())
+            l
             cmap = plt.get_cmap(style['Colors']['Colormap'])  # Assuming a valid colormap name
 
             # Step 2: Apply the colormap to get RGB values, then normalize to [0, 255] for QImage
@@ -3639,6 +3641,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxFieldColormap.setCurrentText(style['Colors']['Colormap'])
         self.lineEditColorLB.setText(self.dynamic_format(style['Colors']['CLim'][0],order=3,dir=0))
         self.lineEditColorUB.setText(self.dynamic_format(style['Colors']['CLim'][1],order=3,dir=1))
+        self.comboBoxColorScale.setCurrentText(style['Colors']['CScale'])
         self.comboBoxCbarDirection.setCurrentText(style['Colors']['Direction'])
         self.lineEditCbarLabel.setText(style['Colors']['CLabel'])
         self.spinBoxHeatmapResolution.setValue(style['Colors']['Resolution'])
@@ -3686,6 +3689,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     'Field': self.comboBoxColorField.currentText(),
                     'Colormap': self.comboBoxFieldColormap.currentText(),
                     'CLim': [float(self.lineEditColorLB.text()), float(self.lineEditColorUB.text())],
+                    'CScale': self.comboBoxColorScale.currentText(),
                     'Direction': self.comboBoxCbarDirection.currentText(),
                     'CLabel': self.lineEditCbarLabel.text(),
                     'Resolution': self.spinBoxHeatmapResolution.value()}
@@ -3782,10 +3786,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         plot_type = self.comboBoxPlotType.currentText()
 
-        old_value = self.styles[plot_type]['Axes'][ax.upper()+'Lim'][bound]
+        if ax == 'c':
+            old_value = self.styles[plot_type]['Colors']['CLim'][bound]
+        else:
+            old_value = self.styles[plot_type]['Axes'][ax.upper()+'Lim'][bound]
 
         # if label has not changed return
         if old_value == new_value:
+            return
+
+        if ax == 'c' and plot_type in ['heatmap', 'correlation']:
+            self.update_SV()
             return
 
         # change label in dictionary
@@ -3823,9 +3834,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         field = self.get_axis_field(ax)
         self.axis_dict[field]['scale'] = new_value
 
-        self.axis_dict[field]
-
-        self.styles[plot_type]['Axes'][ax.upper()+'Scale'] = new_value
+        if ax == 'c':
+            self.styles[plot_type]['Colors']['CScale'] = new_value
+        else:
+            self.styles[plot_type]['Axes'][ax.upper()+'Scale'] = new_value
 
         # update plot
         self.update_SV()
@@ -4238,15 +4250,29 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.update_SV()
         
     def color_field_callback(self):
+        """Updates color field and plot
+        
+        Executes on change of ``MainWindow.comboBoxColorField``
+        """
         print('color_field_callback')
         plot_type = self.comboBoxPlotType.currentText()
-        if self.styles[plot_type]['Colors']['Field'] == self.comboBoxColorField.currentText():
+        field = self.comboBoxColorField.currentText()
+        if self.styles[plot_type]['Colors']['Field'] == field:
             return
-        self.styles[plot_type]['Colors']['Field'] = self.comboBoxColorField.currentText()
 
-        if self.comboBoxColorField.isEnabled() and self.comboBoxColorField.currentText() != '' and self.comboBoxColorByField.currentText() != 'None':
+        self.styles[plot_type]['Colors']['Field'] = field
+
+        if field != '' and field is not None: 
+            if field not in self.axis_dict.keys():
+                self.initialize_axis_values(self.comboBoxColorByField.currentText(), field)
+
+            self.set_color_axis_widgets()
+            self.styles[plot_type]['Colors']['CLim'] = [self.axis_dict[field]['min'], self.axis_dict[field]['max']]
+            self.styles[plot_type]['Colors']['CLabel'] = self.axis_dict[field]['label']
+        else:
             self.lineEditCbarLabel.setText('')
-            self.update_SV()
+
+        self.update_SV()
 
     def field_colormap_callback(self):
         plot_type = self.comboBoxPlotType.currentText()
@@ -4272,8 +4298,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return
         self.styles[plot_type]['Colors']['Direction'] = self.comboBoxCbarDirection.currentText()
 
-        if self.comboBoxCbarDirection.isEnabled():
-            self.update_SV()
+        self.update_SV()
 
     def cbar_label_callback(self):
         plot_type = self.comboBoxPlotType.currentText()
@@ -4372,7 +4397,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                         # Recalculate boundaries and normalization based on the new colormap and clusters
 
                                         boundaries = np.arange(-0.5, n_clusters, 1)
-                                        norm = BoundaryNorm(boundaries, n_clusters, clip=True)
+                                        norm = colors.BoundaryNorm(boundaries, n_clusters, clip=True)
                                         images = ax.get_images()
                                         if len(images)>0:
                                             im = images[0]
@@ -4720,7 +4745,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         return aspect_ratio
 
-    def add_colorbar(self, canvas, cax, style, label, cbartype='continuous', grouplabels=None):
+    def add_colorbar(self, canvas, cax, style, cbartype='continuous', grouplabels=None):
         """Adds a colorbar to a MPL figure
         
         :param canvas: canvas object
@@ -4739,20 +4764,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if style['Colors']['Direction'] == 'none':
             return
 
-        if style['Colors']['CScale'] == 'linear':
-            norm = colors.Normalize(vmin=)
-
         if style['Colors']['Direction'] == 'vertical':
             if self.comboBoxPlotType.currentText() == 'correlation':
                 loc = 'left'
             else:
                 loc = 'right'
             cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location=loc, shrink=0.62, fraction=0.1)
-            cbar.set_label(label, size=style['Text']['FontSize'])
+            cbar.set_label(style['Colors']['CLabel'], size=style['Text']['FontSize'])
             cbar.ax.tick_params(labelsize=style['Text']['FontSize'])
         elif style['Colors']['Direction'] == 'horizontal':
             cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62, fraction=0.1)
-            cbar.set_label(label, size=style['Text']['FontSize'])
+            cbar.set_label(style['Colors']['CLabel'], size=style['Text']['FontSize'])
             cbar.ax.tick_params(labelsize=style['Text']['FontSize'])
 
         # adjust tick marks if labels are given
@@ -4763,6 +4785,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             cbar.set_ticks(ticks=ticks, labels=grouplabels, minor=False)
         else:
             print('(add_colorbar) Unknown type: '+cbartype)
+
+    def color_norm(self, style, N=1):
+        norm = 0
+        match style['Colors']['CScale']:
+            case 'linear':
+                norm = colors.Normalize(vmin=style['Colors']['CLim'][0], vmax=style['Colors']['CLim'][1])
+            case 'log':
+                norm = colors.LogNorm(vmin=style['Colors']['CLim'][0], vmax=style['Colors']['CLim'][1])
+            case 'discrete':
+                boundaries = np.arange(-0.5, N, N)
+                norm = colors.BoundaryNorm(boundaries, N, clip=True)
+
+        #scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(style['Colors']['Colormap']), norm=norm)
+
+        return norm
+
 
    
     # -------------------------------------
@@ -5195,24 +5233,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             cb = None
         else:
             # color by field
+            norm = self.color_norm(style)
             cb = canvas.axes.scatter(x['array'], y['array'], c=c['array'],
                 s=style['Markers']['Size'],
                 marker=self.markerdict[style['Markers']['Symbol']],
                 edgecolors='none',
                 cmap=plt.get_cmap(style['Colors']['Colormap']),
-                alpha=style['Markers']['Alpha']/100)
+                alpha=style['Markers']['Alpha']/100,
+                norm=norm)
 
-            norm = plt.Normalize(vmin=np.min(c['array']), vmax=np.max(c['array']))
-            #scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(style['Colors']['Colormap']), norm=norm)
-            self.add_colorbar(canvas, cb, style, c['label'])
-            # if style['Colors']['Direction'] == 'vertical':
-            #     cb = canvas.fig.colorbar(scalarMappable, ax=canvas.axes, orientation=style['Colors']['Direction'], location='right', shrink=0.62)
-            #     cb.set_label(c['label'])
-            # elif style['Colors']['Direction'] == 'horizontal':
-            #     cb = canvas.fig.colorbar(scalarMappable, ax=canvas.axes, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62)
-            #     cb.set_label(c['label'])
-            # else:
-            #     cb = None
+            self.add_colorbar(canvas, cb, style)
 
         # axes
         xmin, xmax, xscale, xlbl = self.get_axis_values(x['type'],x['field'])
@@ -5318,18 +5348,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :type save: bool
         """
         # color by field
-        canvas.axes.hist2d(x['array'], y['array'], bins=style['Colors']['Resolution'], norm='log', cmap=plt.get_cmap(style['Colors']['Colormap']))
+        norm = self.color_norm(style)
+        h = canvas.axes.hist2d(x['array'], y['array'], bins=style['Colors']['Resolution'], norm=norm, cmap=plt.get_cmap(style['Colors']['Colormap']))
+        self.add_colorbar(canvas, h[3], style)
 
-        norm = plt.Normalize(vmin=0, vmax=3)
-        scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(style['Colors']['Colormap']), norm=norm)
-        if style['Colors']['Direction'] == 'vertical':
-            cb = canvas.fig.colorbar(scalarMappable, ax=canvas.axes, orientation=style['Colors']['Direction'], location='right', shrink=0.62)
-            cb.set_label('log(N)')
-        elif style['Colors']['Direction'] == 'horizontal':
-            cb = canvas.fig.colorbar(scalarMappable, ax=canvas.axes, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62)
-            cb.set_label('log(N)')
-        else:
-            cb = None
+
+        # norm = colors.Normalize(vmin=0, vmax=3)
+        # scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(style['Colors']['Colormap']), norm=norm)
+        # if style['Colors']['Direction'] == 'vertical':
+        #     cb = canvas.fig.colorbar(scalarMappable, ax=canvas.axes, orientation=style['Colors']['Direction'], location='right', shrink=0.62)
+        #     cb.set_label('log(N)')
+        # elif style['Colors']['Direction'] == 'horizontal':
+        #     cb = canvas.fig.colorbar(scalarMappable, ax=canvas.axes, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62)
+        #     cb.set_label('log(N)')
+        # else:
+        #     cb = None
 
         # axes
         xmin, xmax, xscale, xlbl = self.get_axis_values(x['type'],x['field'])
@@ -5810,7 +5843,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.group_cmap[label] = color
 
         boundaries = np.arange(-0.5, n_clusters, 1)
-        norm = BoundaryNorm(boundaries, cmap.N, clip=True)
+        norm = colors.BoundaryNorm(boundaries, cmap.N, clip=True)
 
         cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect = self.aspect_ratio)
         
@@ -6781,16 +6814,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             value_dict[k]['array'] = df['array'][self.data[self.sample_id]['mask']].values if not df.empty else []
 
             # set axes widgets
+            if v['field'] == '':
+                continue
+
+            if v['field'] not in self.axis_dict.keys():
+                self.initialize_axis_values(v['type'], v['field'])
+
             if k == 'c':
                 self.set_color_axis_widgets()
             else:
-                if v['field'] in self.axis_dict.keys():
-                    print(self.axis_dict[v['field']])
-                    self.set_axis_widgets(k, v['field'])
-                else:
-                    if v['field'] != '':
-                        self.initialize_axis_values(v['type'], v['field'])
-                        self.set_axis_widgets(k, v['field'])
+                self.set_axis_widgets(k, v['field'])
 
             # set lineEdit labels for axes
             # self.lineEditXLabel.setText(value_dict['x']['label'])
@@ -7026,10 +7059,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             action.setIconVisibleInMenu(False)
 
     def save_notes_file(self):
+        """Saves notes to an *.rst file
+        
+        Autosaves the notes to a file ``[sample_id].rst``
+        """
         if self.notes_file is None:
             return
         
-        self.statusbar.showMessage('Autosaving notes...')
+        self.statusbar.showMessage('Saving notes...')
 
         # write file
         with open(self.notes_file,'w') as file:
@@ -7084,12 +7121,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Move the cursor to the end of the selected line
         cursor.movePosition(QTextCursor.EndOfLine)
-        cursor.movePosition(QTextCursor.NextBlock)
+        #cursor.movePosition(QTextCursor.NextBlock)
 
         # Insert the line of "="
         cursor.insertText('\n' + f'{symbol}' * (cursor.block().length() - 1))
 
     def format_note_text(self, style):
+        """Formats the text
+
+        Formats selected text as bold, italic or literal in restructured text format.
+        
+        :param style: type of formatting
+        :type style: str
+        """
         cursor = self.textEditNotes.textCursor()
         selected_text = cursor.selectedText()
 
@@ -7098,10 +7142,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 modified_text = f"*{selected_text}*"
             case 'bold':
                 modified_text = f"**{selected_text}**"
+            case 'literal':
+                modified_text = f"``{selected_text}``"
 
         cursor.insertText(modified_text)
 
     def add_info_note(self, infotype):
+        """Adds preformatted notes
+        
+        :param infotype: name of preformatted information
+        :type infotype: str
+        """
         match infotype:
             case 'Sample info':
                 self.textEditNotes.insertPlainText(f'**Sample ID: {self.sample_id}**\n')
@@ -7135,7 +7186,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 print(type(matrix))
                 self.add_table_note(matrix, row_labels=analytes, col_labels=header)
             case 'Cluster results':
-                pass
+                if not self.cluster_results:
+                    return
 
     def add_table_note(self, matrix, row_labels=None, col_labels=None):
         """Convert matrix to restructured text
@@ -7182,10 +7234,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     #    return np.array2string(array, formatter={'all': lambda x: f'{x:02f}'})
 
     def save_notes_to_pdf(self):
+        """Converts notes *.rst file to *.pdf"""
+        # save note file first to ensure all changes have been recorded
+        self.save_notes_file()
+
+        # replace all spaces with \ space
         filename = self.notes_file.replace(' ','\ ')
         try:
-            os.system(f"cat {filename} | rst2pdf -o {os.path.splitext(filename)[0]+'.pdf'}")
+            # use rst2pdf on the command line to export the file as a pdf
+            os.system(f"cat {filename} | rst2pdf -o --use-floating-images {os.path.splitext(filename)[0]+'.pdf'}")
         except:
+            # if it doesn't work
             QMessageBox.error(self.main_window,"Error", "Could not save to pdf.")
             
 

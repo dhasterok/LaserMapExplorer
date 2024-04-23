@@ -1,17 +1,27 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QHBoxLayout, QVBoxLayout, QGridLayout, QMessageBox, QHeaderView, QMenu
 from PyQt5.QtWidgets import QFileDialog, QProgressDialog, QWidget, QTabWidget, QDialog, QLabel, QListWidgetItem, QTableWidget, QInputDialog, QAbstractItemView
+from PyQt5.QtWidgets import QStyledItemDelegate, QGraphicsRectItem
 from PyQt5.Qt import QStandardItemModel, QStandardItem, QTextCursor
 from pyqtgraph import PlotWidget, ScatterPlotItem, mkPen, AxisItem, PlotDataItem
 from pyqtgraph.Qt import QtWidgets
 from pyqtgraph.GraphicsScene import exportDialog
 from PyQt5.QtGui import QIntValidator, QDoubleValidator, QColor, QImage, QPainter, QPixmap
+from PyQt5.QtGui import QTransform, QFont, QPainter, QBrush, QColor, QPen, QCursor
+from PyQt5.QtCore import Qt, QObject, QTimer, pyqtSignal, QRectF, Qt, QPointF
 import pyqtgraph as pg
+pg.setConfigOption('imageAxisOrder', 'row-major') # best performance
 import sys  # We need sys so that we can pass argv to QApplication
 import os
+import copy
+import re
+from datetime import datetime
 import numpy as np
+from scipy.signal import convolve2d, wiener
+from scipy.spatial.distance import mahalanobis
+from scipy import ndimage
+import scipy.stats
 import pandas as pd
-from PyQt5.QtGui import QTransform, QFont
 import matplotlib
 matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -20,43 +30,28 @@ import matplotlib.gridspec as gs
 from matplotlib.collections import PathCollection
 import matplotlib.pyplot as plt
 from matplotlib.path import Path
-from PyQt5.QtWidgets import QStyledItemDelegate
-from PyQt5.QtCore import Qt, QObject, QTimer
-from PyQt5.QtGui import QPainter, QBrush, QColor
-from PyQt5.QtCore import pyqtSignal
-from src.rotated import RotatedHeaderView
+import matplotlib.patches as mpatches
+import matplotlib.colors as colors
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+import matplotlib.ticker as ticker
 import cmcrameri.cm as cmc
-from src.ternary_plot import ternary
+from src.rotated import RotatedHeaderView
 from sklearn.cluster import KMeans
 #from sklearn_extra.cluster import KMedoids
 import skfuzzy as fuzz
 from sklearn.metrics.pairwise import manhattan_distances as manhattan, euclidean_distances as euclidean, cosine_distances
-from scipy.spatial.distance import mahalanobis
-import matplotlib.patches as mpatches
-import matplotlib.colors as colors
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from cv2 import Canny, Sobel, CV_64F, bilateralFilter, medianBlur, GaussianBlur, edgePreservingFilter
+from src.ternary_plot import ternary
 from src.plot_spider import plot_spider_norm
-import re
-import matplotlib.ticker as ticker
 from src.radar import Radar
 from src.calculator import CalWindow
 from src.ui.MainWindow import Ui_MainWindow
 from src.ui.AnalyteSelectionDialog import Ui_Dialog
 from src.ui.PreferencesWindow import Ui_PreferencesWindow
 from src.ui.ExcelConcatenator import Ui_Dialog
-import scipy.stats
-from scipy import ndimage
-from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
-from cv2 import Canny, Sobel, CV_64F, bilateralFilter, medianBlur, GaussianBlur, edgePreservingFilter
-from scipy.signal import convolve2d, wiener
-from PyQt5.QtWidgets import QGraphicsRectItem
-from PyQt5.QtCore import QRectF, Qt, QPointF
-from PyQt5.QtGui import QPen, QColor, QCursor
-from datetime import datetime
-import copy
 
-pg.setConfigOption('imageAxisOrder', 'row-major') # best performance
 ## !pyrcc5 resources.qrc -o src/ui/resources_rc.py
 ## !pyuic5 designer/mainwindow.ui -o src/ui/MainWindow.py
 ## !pyuic5 -x designer/AnalyteSelectionDialog.ui -o src/ui/AnalyteSelectionDialog.py
@@ -3796,6 +3791,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return
 
         if ax == 'c' and plot_type in ['heatmap', 'correlation']:
+            self.styles[plot_type]['Colors']['CLim'][bound] = new_value
             self.update_SV()
             return
 
@@ -4770,23 +4766,34 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             else:
                 loc = 'right'
             cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location=loc, shrink=0.62, fraction=0.1)
-            cbar.set_label(style['Colors']['CLabel'], size=style['Text']['FontSize'])
-            cbar.ax.tick_params(labelsize=style['Text']['FontSize'])
         elif style['Colors']['Direction'] == 'horizontal':
             cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62, fraction=0.1)
-            cbar.set_label(style['Colors']['CLabel'], size=style['Text']['FontSize'])
-            cbar.ax.tick_params(labelsize=style['Text']['FontSize'])
+
+        cbar.set_label(style['Colors']['CLabel'], size=style['Text']['FontSize'])
+        cbar.ax.tick_params(labelsize=style['Text']['FontSize'])
 
         # adjust tick marks if labels are given
         if cbartype == 'continuous' or grouplabels is None:
-            ticks = None
+            #cax.cmap.set_under('k')
+            #cax.cmap.set_over('w')
+            ticks=None
         elif cbartype == 'discrete':
             ticks = np.arange(0, len(grouplabels))
             cbar.set_ticks(ticks=ticks, labels=grouplabels, minor=False)
         else:
             print('(add_colorbar) Unknown type: '+cbartype)
 
-    def color_norm(self, style, N=1):
+    def color_norm(self, style, N=None):
+        """Creates color norm for matplotlib colormap/colorbar
+        
+        :param style: style dictionary associated with current plot
+        :type style: dict
+        :param N: number of colors for discrete colormap, Defaults to None
+        :type N: int, optional
+        
+        :return: norm supplied to plot function option ``norm``
+        :rtype: matplotlib.colors.'normtype'
+        """
         norm = 0
         match style['Colors']['CScale']:
             case 'linear':
@@ -4798,41 +4805,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 norm = colors.BoundaryNorm(boundaries, N, clip=True)
 
         #scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(style['Colors']['Colormap']), norm=norm)
+        print(type(norm))
 
         return norm
 
 
-   
     # -------------------------------------
-    # Correlation functions and plotting
+    # Correlation and Histogram functions
     # -------------------------------------
-    # def update_correlation(self, save=False):
-    #     if self.sample_id == '':
-    #         return
-
-    #     plot_exist = plot_name in self.plot_widget_dict[plot_type][sample_id]
-    #     duplicate = plot_exist and len(self.plot_widget_dict[plot_type][sample_id][plot_name]['view']) == 1 and self.plot_widget_dict[plot_type][sample_id][plot_name]['view'][0] != self.canvasWindow.currentIndex()
-
-    #     if plot_exist and not duplicate:
-
-    #         fig = ax.get_figure()
-    #         plotWidget = self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'][0]
-    #         figure_canvas = plotWidget.findChild(FigureCanvas)
-    #         figure_canvas.figure.clear()
-    #         ax = figure_canvas.figure.subplots()
-    #         figure_canvas.draw()
-    #     else:
-    #         if duplicate:
-    #             self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'].append(plotWidget)
-    #             self.plot_widget_dict[plot_type][sample_id][plot_name]['view'].append(view)
-    #         else:
-    #             self.plot_widget_dict[plot_type][sample_id][plot_name] = {'widget': [plotWidget], 'info': plot_information, 'view': [view]}
-
-    #         # Additional steps to add the Correlation widget to the appropriate container in the UI
-    #         if save:
-    #             self.add_plot(plot_information) #do not plot correlation when directory changes
-    #         self.update_tree(plot_information['plot_name'], data=plot_information, tree=branch)
-
     def plot_correlation(self):
         print('plot_correlation')
 
@@ -4855,7 +4835,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         mask = np.zeros_like(correlation_matrix, dtype=bool)
         mask[np.tril_indices_from(mask)] = True
         correlation_matrix = np.ma.masked_where(mask, correlation_matrix)
-        cax = canvas.axes.imshow(correlation_matrix, cmap=plt.get_cmap(style['Colors']['Colormap']))
+        norm = self.color_norm(style)
+        cax = canvas.axes.imshow(correlation_matrix, cmap=plt.get_cmap(style['Colors']['Colormap']), norm=norm)
         canvas.axes.spines['top'].set_visible(False)
         canvas.axes.spines['bottom'].set_visible(False)
         canvas.axes.spines['left'].set_visible(False)
@@ -4898,10 +4879,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.widgetSingleView.layout().addWidget(canvas)
         #self.new_plot_widget(plot_info, save=False)
 
-
-    # -------------------------------------
-    # Histogram functions and plotting
-    # -------------------------------------
     def histogram_field_type_callback(self):
         """"Executes when the histogram field type is changed"""
         self.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
@@ -5524,10 +5501,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.clear_layout(self.widgetSingleView.layout())
         self.widgetSingleView.layout().addWidget(canvas)
 
+
     # -------------------------------------
     # PCA functions and plotting
     # -------------------------------------
     def compute_pca(self):
+        """Computes principal component analysis
+        
+        Stores the results of PCA analysis in ``MainWindow.pca_results``, and computes PCA scores for each point and stores the results in
+        ``MainWindow.data[sample_id]['computed_data']['PCA Score']`` as a Pandas DataFrame.  The function also initializes the color limits for the PCA vector plot style."""
         print('compute_pca')
         self.pca_results = {}
 
@@ -5543,11 +5525,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # compute pca scores
         pca_scores = pd.DataFrame(self.pca_results.fit_transform(df_scaled), columns=[f'PC{i+1}' for i in range(self.pca_results.n_components_)])
 
+        # initialize range for PCA vector style
+        components = self.pca_results.components_
+        self.styles['vectors']['Colors']['CLim'] = [components.min(), components.max()]
+
         # Add PCA scores to DataFrame for easier plotting
         if self.data[self.sample_id]['computed_data']['PCA Score'].empty:
             self.data[self.sample_id]['computed_data']['PCA Score'] = self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
 
-        self.data[self.sample_id]['computed_data']['PCA Score'].loc[self.data[self.sample_id]['mask'], pca_scores.columns ] = pca_scores
+        self.data[self.sample_id]['computed_data']['PCA Score'].loc[self.data[self.sample_id]['mask'], pca_scores.columns] = pca_scores
 
         #update min and max of PCA spinboxes
         if self.pca_results.n_components_ > 0:
@@ -5561,7 +5547,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_pca_flag = False
 
     def plot_pca(self):
-        """Plot principal component analysis (PCA)"""
+        """Plot principal component analysis (PCA)
+        
+        Supports four types of plots, ``varaince``, ``vectors``, ``pca scatter``, ``pca heatmap``, and ``PCA score``
+        """
         if self.sample_id == '':
             return
 
@@ -5625,6 +5614,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.widgetSingleView.layout().addWidget(canvas)
     
     def plot_pca_variance(self):
+        """Produces a plot of explained varaince
+        
+        Plot of explained variance, both individual and cumulative resulting from a principal component analysis (PCA).
+
+        :return: canvas containing figure and axes
+        :rtype: MplCanvas
+        """
         canvas = MplCanvas()
 
         # pca_dict contains variance ratios for the principal components
@@ -5673,6 +5669,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         return canvas
     
     def plot_pca_vectors(self):
+        """Plots PCA vector components
+        
+        Produces a heatmap of PCA components associated with each analyte and PC axis.
+
+        :return: canvas containing figure and axes
+        :rtype: MplCanvas
+        """
         canvas = MplCanvas()
 
         style = self.styles['vectors']
@@ -5685,21 +5688,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         n_components = components.shape[0]
         n_variables = components.shape[1]
 
-        cax = canvas.axes.imshow(components, cmap=plt.get_cmap(style['Colors']['Colormap']), aspect=1.0)
+        norm = self.color_norm(style)
+        cax = canvas.axes.imshow(components, cmap=plt.get_cmap(style['Colors']['Colormap']), aspect=1.0, norm=norm)
 
         # Add a colorbar
-        if style['Colors']['Direction'] == 'vertical':
-            cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location='right', shrink=0.62, fraction=0.1)
-            cbar.set_label('PCA Score', size=style['Text']['FontSize'])
-            cbar.ax.tick_params(labelsize=style['Text']['FontSize'])
-        elif style['Colors']['Direction'] == 'horizontal':
-            cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62, fraction=0.1)
-            cbar.set_label('PCA Score', size=style['Text']['FontSize'])
-            cbar.ax.tick_params(labelsize=style['Text']['FontSize'])
-        else:
-            cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62, fraction=0.1)
-
-
+        self.add_colorbar(canvas, cax, style)
+     
         xlbl = 'Principal Components'
 
         # Optional: Rotate x-axis labels for better readability
@@ -5808,7 +5802,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         print(list(self.data[self.sample_id]['computed_data']['Cluster Score']['fuzzy c-means'].keys()))
         reshaped_array = np.reshape(self.data[self.sample_id]['computed_data'][plot_type][field].values, self.array_size, order=self.order)
 
-        cax = canvas.axes.imshow(reshaped_array, cmap=style['Colors']['Colormap'],  aspect=self.aspect_ratio, interpolation='none')
+        norm = self.color_norm(style)
+        cax = canvas.axes.imshow(reshaped_array, cmap=style['Colors']['Colormap'],  aspect=self.aspect_ratio, interpolation='none', norm=norm)
 
          # Add a colorbar
         self.add_colorbar(canvas, cax, style, field)
@@ -7295,6 +7290,7 @@ class StandardItem(QStandardItem):
         self.setEditable(False)
         self.setText(txt)
         self.setFont(fnt)
+
 
 # Analyte GUI
 # -------------------------------

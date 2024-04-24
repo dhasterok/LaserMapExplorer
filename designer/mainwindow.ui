@@ -44,7 +44,7 @@
        <string/>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <property name="documentMode">
        <bool>false</bool>
@@ -1125,7 +1125,7 @@
       <string>Activates the crop tool</string>
      </property>
      <property name="currentIndex">
-      <number>4</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="SelectAnalytePage">
       <property name="enabled">
@@ -1160,7 +1160,7 @@
           <x>5</x>
           <y>5</y>
           <width>281</width>
-          <height>136</height>
+          <height>143</height>
          </rect>
         </property>
         <layout class="QFormLayout" name="formLayout_3">
@@ -1280,44 +1280,6 @@
            </item>
           </widget>
          </item>
-         <item row="3" column="1">
-          <widget class="QComboBox" name="comboBoxCorrelationMethod">
-           <property name="maximumSize">
-            <size>
-             <width>200</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="font">
-            <font>
-             <pointsize>11</pointsize>
-            </font>
-           </property>
-           <property name="toolTip">
-            <string>Choose correlation method</string>
-           </property>
-           <item>
-            <property name="text">
-             <string>none</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Pearson</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Spearman</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Kendall</string>
-            </property>
-           </item>
-          </widget>
-         </item>
          <item row="3" column="0">
           <widget class="QLabel" name="labelCorrelationMethod">
            <property name="font">
@@ -1329,6 +1291,55 @@
             <string>Corr. Method</string>
            </property>
           </widget>
+         </item>
+         <item row="3" column="1">
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <item>
+            <widget class="QComboBox" name="comboBoxCorrelationMethod">
+             <property name="maximumSize">
+              <size>
+               <width>200</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+             <property name="toolTip">
+              <string>Choose correlation method</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>none</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Pearson</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Spearman</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Kendall</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="checkBoxCorrelationSquared">
+             <property name="text">
+              <string>^2</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
         </layout>
        </widget>
@@ -3911,7 +3922,7 @@
        <property name="title">
         <string>Map from ternary</string>
        </property>
-       <widget class="QWidget" name="">
+       <widget class="QWidget" name="layoutWidget">
         <property name="geometry">
          <rect>
           <x>5</x>
@@ -6583,7 +6594,7 @@
         <enum>QFrame::Raised</enum>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>5</number>
        </property>
        <widget class="QWidget" name="StyleAxes">
         <property name="geometry">
@@ -7039,8 +7050,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>219</width>
-          <height>421</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7193,8 +7204,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>219</width>
-          <height>421</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7402,8 +7413,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>219</width>
-          <height>421</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7565,7 +7576,7 @@
            <x>5</x>
            <y>0</y>
            <width>211</width>
-           <height>295</height>
+           <height>318</height>
           </rect>
          </property>
          <layout class="QFormLayout" name="formLayoutScatter">
@@ -7760,7 +7771,7 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="0">
+          <item row="5" column="0">
            <layout class="QHBoxLayout" name="horizontalLayout_33">
             <item>
              <widget class="QLabel" name="labelColorBounds">
@@ -7821,7 +7832,7 @@
             </item>
            </layout>
           </item>
-          <item row="4" column="1">
+          <item row="5" column="1">
            <layout class="QHBoxLayout" name="horizontalLayout_18">
             <item>
              <widget class="QLineEdit" name="lineEditColorLB">
@@ -7840,6 +7851,27 @@
            </layout>
           </item>
           <item row="6" column="0">
+           <widget class="QLabel" name="labelColorScale">
+            <property name="text">
+             <string>Scale</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1">
+           <widget class="QComboBox" name="comboBoxColorScale">
+            <item>
+             <property name="text">
+              <string>linear</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>log</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="7" column="0">
            <widget class="QLabel" name="labelCbarDirection">
             <property name="font">
              <font>
@@ -7855,7 +7887,7 @@
             </property>
            </widget>
           </item>
-          <item row="6" column="1">
+          <item row="7" column="1">
            <widget class="QComboBox" name="comboBoxCbarDirection">
             <property name="maximumSize">
              <size>
@@ -7889,21 +7921,21 @@
             </item>
            </widget>
           </item>
-          <item row="7" column="0">
+          <item row="8" column="0">
            <widget class="QLabel" name="labelCbarLabel">
             <property name="text">
              <string>Cbar label</string>
             </property>
            </widget>
           </item>
-          <item row="7" column="1">
+          <item row="8" column="1">
            <widget class="QLineEdit" name="lineEditCbarLabel">
             <property name="toolTip">
              <string>Set colorbar label</string>
             </property>
            </widget>
           </item>
-          <item row="8" column="0">
+          <item row="9" column="0">
            <widget class="QLabel" name="labelHeatmapResolution">
             <property name="font">
              <font>
@@ -7919,7 +7951,7 @@
             </property>
            </widget>
           </item>
-          <item row="8" column="1">
+          <item row="9" column="1">
            <widget class="QSpinBox" name="spinBoxHeatmapResolution">
             <property name="enabled">
              <bool>true</bool>
@@ -7956,26 +7988,15 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="0">
-           <widget class="QLabel" name="labelColorScale">
+          <item row="4" column="0">
+           <widget class="QLabel" name="labelReverseColormap">
             <property name="text">
-             <string>Scale</string>
+             <string>Reverse</string>
             </property>
            </widget>
           </item>
-          <item row="5" column="1">
-           <widget class="QComboBox" name="comboBoxColorScale">
-            <item>
-             <property name="text">
-              <string>linear</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>log</string>
-             </property>
-            </item>
-           </widget>
+          <item row="4" column="1">
+           <widget class="QCheckBox" name="checkBoxReverseColormap"/>
           </item>
          </layout>
         </widget>

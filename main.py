@@ -1,60 +1,53 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QHBoxLayout, QVBoxLayout, QGridLayout, QMessageBox, QHeaderView, QMenu
-from PyQt5.QtWidgets import QFileDialog, QProgressDialog, QWidget, QTabWidget, QDialog, QLabel, QListWidgetItem, QTableWidget, QInputDialog, QAbstractItemView
 from PyQt5.Qt import QStandardItemModel, QStandardItem, QTextCursor
+from PyQt5.QtCore import Qt, QObject, QTimer, pyqtSignal, QRectF, Qt, QPointF
+from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QHBoxLayout, QVBoxLayout, QGridLayout, QMessageBox, QHeaderView, QMenu, QGraphicsRectItem
+from PyQt5.QtWidgets import QFileDialog, QProgressDialog, QWidget, QTabWidget, QDialog, QLabel, QListWidgetItem, QTableWidget, QInputDialog, QAbstractItemView, QStyledItemDelegate
+from PyQt5.QtGui import QIntValidator, QDoubleValidator, QColor, QImage, QPainter, QPixmap, QTransform, QFont, QPen, QCursor, QPainter, QBrush
 from pyqtgraph import PlotWidget, ScatterPlotItem, mkPen, AxisItem, PlotDataItem
 from pyqtgraph.Qt import QtWidgets
 from pyqtgraph.GraphicsScene import exportDialog
-from PyQt5.QtGui import QIntValidator, QDoubleValidator, QColor, QImage, QPainter, QPixmap
 import pyqtgraph as pg
 import sys  # We need sys so that we can pass argv to QApplication
 import os
+import re
+from datetime import datetime
+import copy
 import numpy as np
 import pandas as pd
-from PyQt5.QtGui import QTransform, QFont
 import matplotlib
 matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-import matplotlib.gridspec as gs
 from matplotlib.collections import PathCollection
+import matplotlib.gridspec as gs
 import matplotlib.pyplot as plt
 from matplotlib.path import Path
-from PyQt5.QtWidgets import QStyledItemDelegate
-from PyQt5.QtCore import Qt, QObject, QTimer
-from PyQt5.QtGui import QPainter, QBrush, QColor
-from PyQt5.QtCore import pyqtSignal
-from src.rotated import RotatedHeaderView
-import cmcrameri.cm as cmc
-from src.ternary_plot import ternary
-from sklearn.cluster import KMeans
-#from sklearn_extra.cluster import KMedoids
-import skfuzzy as fuzz
-from sklearn.metrics.pairwise import manhattan_distances as manhattan, euclidean_distances as euclidean, cosine_distances
-from scipy.spatial.distance import mahalanobis
 import matplotlib.patches as mpatches
 import matplotlib.colors as colors
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from src.plot_spider import plot_spider_norm
-import re
 import matplotlib.ticker as ticker
+import scipy.stats
+from scipy import ndimage
+from scipy.signal import convolve2d, wiener
+from sklearn.cluster import KMeans
+#from sklearn_extra.cluster import KMedoids
+import skfuzzy as fuzz
+import cmcrameri.cm as cmc
+from cv2 import Canny, Sobel, CV_64F, bilateralFilter, medianBlur, GaussianBlur, edgePreservingFilter
+from sklearn.metrics.pairwise import manhattan_distances as manhattan, euclidean_distances as euclidean, cosine_distances
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from scipy.spatial.distance import mahalanobis
+from src.rotated import RotatedHeaderView
+from src.ternary_plot import ternary
+from src.plot_spider import plot_spider_norm
 from src.radar import Radar
 from src.calculator import CalWindow
 from src.ui.MainWindow import Ui_MainWindow
 from src.ui.AnalyteSelectionDialog import Ui_Dialog
 from src.ui.PreferencesWindow import Ui_PreferencesWindow
 from src.ui.ExcelConcatenator import Ui_Dialog
-import scipy.stats
-from scipy import ndimage
-from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
-from cv2 import Canny, Sobel, CV_64F, bilateralFilter, medianBlur, GaussianBlur, edgePreservingFilter
-from scipy.signal import convolve2d, wiener
-from PyQt5.QtWidgets import QGraphicsRectItem
-from PyQt5.QtCore import QRectF, Qt, QPointF
-from PyQt5.QtGui import QPen, QColor, QCursor
-from datetime import datetime
-import copy
 
 pg.setConfigOption('imageAxisOrder', 'row-major') # best performance
 ## !pyrcc5 resources.qrc -o src/ui/resources_rc.py
@@ -74,7 +67,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         #Initialise nested data which will hold the main sets of data for analysis
         self.data = {}
-        
+
         self.clipped_ratio_data = pd.DataFrame()
         self.analyte_data = {}  #stores orginal analyte data
         self.clipped_analyte_data = {} # stores processed analyted data
@@ -156,7 +149,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.plot_flag = True
 
         self.plot_info = {}
-        
+
         # set locations of doc widgets
         self.setCorner(0x00002,0x1) # sets left toolbox to bottom left corner
         self.setCorner(0x00003,0x2) # sets right toolbox to bottom right corner
@@ -252,12 +245,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionCluster.triggered.connect(lambda: self.open_tab('clustering'))
         self.actionReset.triggered.connect(lambda: self.reset_analysis())
         self.actionImportFiles.triggered.connect(lambda: self.import_files())
-            
+
         # Select analyte Tab
         #-------------------------
         self.ref_data = pd.read_excel('resources/app_data/earthref.xlsx')
         ref_list = self.ref_data['layer']+' ['+self.ref_data['model']+'] '+ self.ref_data['reference']
-        self.comboBoxCorrelationMethod.activated.connect(self.update_SV)
+        self.comboBoxCorrelationMethod.activated.connect(self.correlation_method_callback)
+        self.checkBoxCorrelationSquared.stateChanged.connect(self.correlation_squared_callback)
 
         self.comboBoxRefMaterial.addItems(ref_list.values)          # Select analyte Tab
         self.comboBoxNDimRefMaterial.addItems(ref_list.values)      # NDim Tab
@@ -480,7 +474,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Connect color point radio button signals to a slot
         self.comboBoxClusterMethod.currentIndexChanged.connect(self.group_changed)
-        
+
         # Connect the itemChanged signal to a slot
         self.tableWidgetViewGroups.setSelectionMode(QAbstractItemView.MultiSelection)
         self.tableWidgetViewGroups.itemChanged.connect(self.cluster_label_changed)
@@ -582,7 +576,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         colormaps = pg.colormap.listMaps('matplotlib')
         self.comboBoxFieldColormap.clear()
         self.comboBoxFieldColormap.addItems(colormaps)
-        self.comboBoxFieldColormap.activated.connect(self.update_SV)
+        self.comboBoxFieldColormap.activated.connect(self.field_colormap_callback)
+        self.checkBoxReverseColormap.stateChanged.connect(self.colormap_direction_callback)
 
         # callback functions
         self.comboBoxPlotType.currentIndexChanged.connect(self.plot_type_callback)
@@ -606,7 +601,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.lineEditColorLB.setValidator(QDoubleValidator())
         self.lineEditColorUB.setValidator(QDoubleValidator())
         self.lineEditAspectRatio.setValidator(QDoubleValidator())
-    
+
         self.lineEditXLB.editingFinished.connect(lambda: self.axis_limit_edit_callback('x', 0, float(self.lineEditXLB.text())))
         self.lineEditXUB.editingFinished.connect(lambda: self.axis_limit_edit_callback('x', 1, float(self.lineEditXUB.text())))
         self.lineEditYLB.editingFinished.connect(lambda: self.axis_limit_edit_callback('y', 0, float(self.lineEditYLB.text())))
@@ -817,7 +812,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ClusteringPage.setEnabled(True)
         self.ProfilingPage.setEnabled(True)
         self.SpecialFunctionPage.setEnabled(True)
-        
+
     def change_sample(self, index):
         """Changes sample and plots first map
 
@@ -830,7 +825,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # stop autosave timer
         self.save_notes_file()
         self.autosaveTimer.stop()
-        
+
         if self.data:
             # Create and configure the QMessageBox
             messageBoxChangeSample = QMessageBox()
@@ -886,7 +881,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.data[self.sample_id]['analyte_info'] = pd.DataFrame(columns = ['analytes', 'norm','upper_bound','lower_bound','d_l_bound','d_u_bound', 'use'])
             self.data[self.sample_id]['ratios_info'] = pd.DataFrame(columns = [ 'analyte_1','analyte_2', 'norm','upper_bound','lower_bound','d_l_bound','d_u_bound', 'use', 'auto_scale'])
             self.data[self.sample_id]['filter_info'] = pd.DataFrame(columns = [ 'analyte_1', 'analyte_2', 'Ratio','norm','f_min','f_max', 'use'])
-            
+
             #Set crop to false
             self.data[self.sample_id]['crop'] = False
 
@@ -944,15 +939,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.prep_data()
 
             self.compute_map_aspect_ratio()
-            
+
             # self.checkBoxViewRatio.setChecked(False)
 
             #get plot array
             current_plot_df = self.get_map_data(sample_id=sample_id, field=self.selected_analytes[0], analysis_type='Analyte')
-            #set 
+            #set
             #self.comboBoxColorField.setCurrentText(self.selected_analytes[0])
             self.styles['analyte map']['Colors']['Field'] = self.selected_analytes[0]
-            
+
             #create plot
             #self.create_plot(current_plot_df,sample_id=sample_id, plot_type='lasermap', analyte_1=self.selected_analytes[0])
 
@@ -995,13 +990,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def import_files(self):
         self.analyteDialog = excelConcatenator(self)
         self.analyteDialog.show()
-        
+
 
     # Other windows/dialogs
     # -------------------------------------
     def open_select_analyte_dialog(self):
         """Opens Select Analyte dialog
-        
+
         Opens a dialog to select analytes for analysis either graphically or in a table.  Selection updates the list of analytes, and ratios in plot selector and comboBoxes.
         """
         if self.sample_id == '':
@@ -1031,7 +1026,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # -------------------------------
     # User interface functions
-    # -------------------------------                
+    # -------------------------------
     def open_tab(self, tab_name):
         """Opens specified toolBox tab
 
@@ -1202,7 +1197,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         df['X'] = xtemp
 
     # toolbar functions
- 
+
     def change_ref_material(self, comboBox1, comboBox2):
         """Changes reference computing normalized analytes
 
@@ -1286,7 +1281,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         if not color:
             return []
-        
+
         color = color.lstrip('#').lower()
 
         return [int(color[0:2],16), int(color[2:4],16), int(color[4:6],16)]
@@ -1314,7 +1309,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             selected_clusters = []
             for idx in self.tableWidgetViewGroups.selectionModel().selectedRows():
                 selected_clusters.append(self.tableWidgetViewGroups.item(idx.row(), 0).text())
-    
+
             if selected_clusters:
                 self.current_group['selected_clusters'] = selected_clusters
             else:
@@ -1467,7 +1462,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.data[self.sample_id]['axis_mask'] = ((current_plot_df['X'] >= self.data[sample_id]['crop_x_min']) & (current_plot_df['X'] <= self.data[sample_id]['crop_x_max']) &
                        (current_plot_df['Y'] <= current_plot_df['Y'].max() - self.data[sample_id]['crop_y_min']) & (current_plot_df['Y'] >= current_plot_df['Y'].max() - self.data[sample_id]['crop_y_max']))
-        
+
 
         #crop original_data based on self.data[self.sample_id]['axis_mask']
         self.data[sample_id]['cropped_raw_data'] = self.data[sample_id]['raw_data'][self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
@@ -1719,7 +1714,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # -------------------------------
     # Filter functions
-    # -------------------------------                
+    # -------------------------------
     def update_filter_values(self):
         analyte_1 = self.comboBoxFilterField.currentText()
         analyte_2 = None
@@ -1936,7 +1931,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return np.ceil(val / 10**(power-order)) * 10**(power - order)
         else:
             return np.round(val / 10**(power-order)) * 10**(power - order)
-    
+
     def oround_matrix(self, val, order=2, dir=None):
         """Rounds a number to specified digits after the order
 
@@ -1961,7 +1956,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             newval[idx] = np.ceil(val[idx] / 10**(power-order)) * 10**(power - order)
         else:
             newval[idx] = np.round(val[idx] / 10**(power-order)) * 10**(power - order)
-        
+
         return newval
 
     def dynamic_format(self, value, threshold=1e4, order=4, dir=None):
@@ -1998,7 +1993,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :param update:
         :type update:
         """
-        
+
         if analyte_1: #if normalising single analyte
             if not analyte_2: #not a ratio
                 self.data[sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['sample_id']==sample_id)
@@ -2179,7 +2174,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     lq_val = np.nanpercentile(ratio_array, lq, axis=0)
                     uq_val = np.nanpercentile(ratio_array, uq, axis=0)
                     ratio_array = np.clip(ratio_array, lq_val, uq_val)
-                
+
                 if self.data[sample_id]['computed_data']['Ratio'].empty:
                     self.data[sample_id]['computed_data']['Ratio']= self.data[sample_id]['cropped_raw_data'][['X','Y']]
                 self.data[sample_id]['computed_data']['Ratio'][ratio_name] = ratio_array
@@ -2260,7 +2255,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # Step 1: Normalize your data array for colormap application
                 norm = colors.Normalize(vmin=array.min(), vmax=array.max())
-                cmap = plt.get_cmap(style['Colors']['Colormap'])  # Assuming a valid colormap name
+                cmap = self.get_colormap()
 
                 # Step 2: Apply the colormap to get RGB values, then normalize to [0, 255] for QImage
                 rgb_array = cmap(norm(array))[:, :, :3]  # Drop the alpha channel returned by cmap
@@ -2321,7 +2316,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #Change transparency of values outside mask
             # Step 1: Normalize your data array for colormap application
             norm = colors.Normalize(vmin=array.min(), vmax=array.max())
-            cmap = plt.get_cmap(style['Colors']['Colormap'])  # Assuming a valid colormap name
+            cmap = self.get_colormap()
 
             # Step 2: Apply the colormap to get RGB values, then normalize to [0, 255] for QImage
             rgb_array = cmap(norm(array))[:, :, :3]  # Drop the alpha channel returned by cmap
@@ -2514,13 +2509,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #create polygons
         elif self.toolButtonPolyCreate.isChecked() or self.toolButtonPolyMovePoint.isChecked() or self.toolButtonPolyAddPoint.isChecked() or self.toolButtonPolyRemovePoint.isChecked():
             self.polygon.plot_polygon_scatter(event, k, x, y,x_i, y_i)
-        
+
         #apply crop
         elif self.toolButtonCrop.isChecked() and event.button() == QtCore.Qt.RightButton:
             self.crop_tool.apply_crop()
 
     def plot_laser_map_cont(self,layout,array,img,p1,cm, view):
-        # Single views
+        # Single views (add histogram)
         if self.canvasWindow.currentIndex()==0 and view==self.canvasWindow.currentIndex():
             # Try to remove the colorbar just in case it was added somehow
             # for i in reversed(range(p1.layout.count())):  # Reverse to avoid skipping due to layout change
@@ -2536,35 +2531,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             histogram.setImageItem(img)
             histogram.setBackground('w')
             layout.addWidget(histogram, 3, 0,  1, 2)
-            # Set the maximum length
-            # max_length = 1.5 * p1.boundingRect().width()
-            # histogram.setMaximumWidth(max_length)
-            # Create a horizontal spacer to center the histogram
-            # spacer = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-            # # Add a Reset Zoom button
-            # reset_zoom_button = QtWidgets.QPushButton("Reset Zoom")
-            # reset_zoom_button.setObjectName("pushButtonResetZoom")
-            # # reset_button.setMaximumWidth(100)
-            # reset_zoom_button.clicked.connect(lambda: self.reset_zoom(p1,histogram))
-            # # layout.addWidget(reset_zoom_button, 4, 0, 1, 1)
-            # reset_plot_button = QtWidgets.QPushButton("Reset Plot")
-            # reset_plot_button.setObjectName("pushButtonResetPlot")
-            # # reset_button.setMaximumWidth(100)
-            # reset_plot_button.clicked.connect(lambda: print(histogram.getHistogramRange()))
-            # # layout.addWidget(reset_plot_button, 4, 1, 1, 1)
 
-            # hbox = QHBoxLayout()
-            # hbox.addStretch(1)
-            # hbox.addWidget(reset_zoom_button)
-            # hbox.addWidget(reset_plot_button)
-            # vbox = QVBoxLayout()
-            # vbox.setObjectName('buttons')
-            # vbox.addStretch(1)
-            # vbox.addLayout(hbox)
-
-            # layout.addLayout(vbox, 4, 0, 1, 2)
         else:
-            # multi view
+            # multi view (add colorbar)
             object_names_to_remove = ['histogram', 'pushButtonResetZoom', 'pushButtonResetPlot', 'buttons']
             # self.remove_widgets_from_layout(layout, object_names_to_remove)
             # plot = glw.getItem(0, 0)
@@ -2572,25 +2541,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             cbar.setObjectName('colorbar')
             cbar.setImageItem(img, insert_in=p1)
             cbar.setLevels([array.min(), array.max()])
-
-    # def setup_zoom_window(self, layout):
-    #     # Create a GraphicsLayoutWidget for the zoom window
-    #     self.zoomWindow = pg.GraphicsLayoutWidget(show=True)
-    #     self.zoomPlot = self.zoomWindow.addPlot(title="Zoom")
-    #     self.zoomImg = pg.ImageItem()
-    #     self.zoomPlot.addItem(self.zoomImg)
-    #     # You might need to adjust the layout position according to your UI design
-    #     layout.addWidget(self.zoomWindow, 0, 3, 1, 2)  # Example placement
-    #     # Setup initial properties of the zoom window
-    #     self.zoomFactor = 5  # How much to zoom in
-    #     self.zoomPlot.showGrid(x=True, y=True)
-    #     self.zoomPlot.setAspectLocked(True)
-    #     self.zoomPlot.invertY(True)
-
-    #     # Optionally, set up a crosshair or marker in the zoom window
-    #     self.zoomTarget = pg.TargetItem(symbol='+')
-    #     self.zoomPlot.addItem(self.zoomTarget)
-    #     self.zoomTarget.hide()  # Initially hidden
 
     def init_zoom_view(self):
         # Set the initial zoom level
@@ -2663,7 +2613,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Executes on change of ``MainWindow.comboBoxEdgeDetectMethod`` when ``MainWindow.toolButtonEdgeDetect`` is checked.
         Options include 'sobel', 'canny', and 'zero_cross'.
         """
-        print(add_edge_detection)
+        print('add_edge_detection')
         style = self.styles[self.comboBoxPlotType.currentText()]
         if self.edge_img:
             # remove existing filters
@@ -2697,13 +2647,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # This could be an update to an existing ImageItem or creating a new one if necessary.
             self.edge_array = edge_detected_image
             self.edge_img = pg.ImageItem(image=self.edge_array)
+            print(self.edge_img.shape)
             #set aspect ratio of rectangle
             self.edge_img.setRect(0,0,self.x_range,self.y_range)
             # edge_img.setAs
             cm = pg.colormap.get(style['Colors']['Colormap'], source = 'matplotlib')
             self.edge_img.setColorMap(cm)
 
-            self.plot.addItem(self.edge_img)
+            #onemat = np.repeat(np.ones_like(self.edge_img),3).reshape(self.array_size[0],self.array_size[1],3)
+            #self.edge_overlay = pg.ImageItem(image=np.concatenate(onemat,255*(1 - 0.5*(self.edge_array)),axis=2))
+            #self.edge_overlay.setRect(0,0,self.x_range,self.y_range)
+            #self.plot.addItem(self.edge_img)
+            self.plot.addItem(self.edge_overlay)
 
     def zero_crossing_laplacian(self,array):
         """Apply Zero Crossing on the Laplacian of the image.
@@ -2967,7 +2922,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def plot_gradient(self):
         """Produces a gradient map
-        
+
         Executes only when ``MainWindow.comboBoxNoiseReductionMethod.currentText()`` is not ``none``, computes noise reduction and displays gradient map"""
         # update plot type comboBox
         self.plot_flag = False
@@ -3064,11 +3019,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.styles['scatter']['Axes']['AspectRatio'] = 1
 
         self.styles['heatmap']['Axes']['AspectRatio'] = 1
-        self.styles['heatmap']['Colors']['CLim'] = [1,1000] 
+        self.styles['heatmap']['Colors']['CLim'] = [1,1000]
         self.styles['heatmap']['Colors']['CScale'] = 'log'
         self.styles['TEC']['Axes']['AspectRatio'] = 0.62
         self.styles['variance']['Axes']['AspectRatio'] = 0.62
-        self.styles['pca scatter']['Scales']['OverlayColor'] = '#4d4d4d' 
+        self.styles['pca scatter']['Scales']['OverlayColor'] = '#4d4d4d'
         self.styles['pca scatter']['Lines']['LineWidth'] = 0.5
         self.styles['pca scatter']['Axes']['AspectRatio'] = 1
         self.styles['pca heatmap']['Axes']['AspectRatio'] = 1
@@ -3107,7 +3062,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------
     def toggle_style_widgets(self):
         """Enables/disables all style widgets
-        
+
         Toggling of enabled states are based on ``MainWindow.toolBox`` page and the current plot type
         selected in ``MainWindow.comboBoxPlotType."""
         plot_type = self.comboBoxPlotType.currentText().lower()
@@ -3329,7 +3284,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.lineEditZLabel.setEnabled(True)
                 self.lineEditAspectRatio.setEnabled(True)
                 self.comboBoxTickDirection.setEnabled(True)
-                
+
                 # scalebar properties
                 self.comboBoxScaleDirection.setEnabled(False)
                 self.toolButtonOverlayColor.setEnabled(False)
@@ -3578,7 +3533,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxCbarDirection.setEnabled(False)
                 self.lineEditCbarLabel.setEnabled(False)
                 self.spinBoxHeatmapResolution.setEnabled(False)
-    
+
         # enable/disable labels
         # axes properties
         self.labelXLim.setEnabled(self.lineEditXLB.isEnabled())
@@ -3613,6 +3568,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.labelMarkerColor.setEnabled(False)
         self.labelColorByField.setEnabled(self.comboBoxColorByField.isEnabled())
         self.labelColorField.setEnabled(self.comboBoxColorField.isEnabled())
+        self.checkBoxReverseColormap.setEnabled(self.comboBoxColorField.isEnabled())
+        self.labelReverseColormap.setEnabled(self.checkBoxReverseColormap.isEnabled())
         self.labelFieldColormap.setEnabled(self.comboBoxFieldColormap.isEnabled())
         self.labelColorBounds.setEnabled(self.lineEditColorLB.isEnabled())
         self.labelCbarDirection.setEnabled(self.comboBoxCbarDirection.isEnabled())
@@ -3621,7 +3578,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def set_style_widgets(self, plot_type=None):
         """Sets values in right toolbox style page
-        
+
         :param plot_type: dictionary key into ``MainWindow.style``
         :type plot_type: str, optional
         """
@@ -3635,7 +3592,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.comboBoxPlotType.setCurrentText(plot_type)
         elif plot_type == '':
             return
-        
+
         style = self.styles[plot_type]
 
         # axes properties
@@ -3722,6 +3679,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     'ColorByField': self.comboBoxColorByField.currentText(),
                     'Field': self.comboBoxColorField.currentText(),
                     'Colormap': self.comboBoxFieldColormap.currentText(),
+                    'Reverse': self.checkBoxReverseColormap.isChecked(),
                     'CLim': [float(self.lineEditColorLB.text()), float(self.lineEditColorUB.text())],
                     'CScale': self.comboBoxColorScale.currentText(),
                     'Direction': self.comboBoxCbarDirection.currentText(),
@@ -3732,7 +3690,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------
     def plot_type_callback(self):
         """Updates styles when plot type is changed
-        
+
         Executes on change of ``MainWindow.comboBoxPlotType.currentText()``, updates the style dictionary,
         toggles widgets and updates single view plot
         """
@@ -3748,15 +3706,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case 'correlation':
                 if self.comboBoxCorrelationMethod.currentText() == 'None':
                     self.comboBoxCorrelationMethod.setCurrentText('Pearson')
-        
+
         self.plot_flag = True
         self.update_SV()
-        
+
     # axes
     # -------------------------------------
     def get_axis_field(self, ax):
         """Grabs the field name from a given axis
-        
+
         The field name for a given axis comes from a comboBox, and depends upon the plot type.
         :param ax: axis, options include ``x``, ``y``, ``z``, and ``c``
         :type ax: str
@@ -3786,7 +3744,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def axis_label_edit_callback(self, ax, new_label):
         """Updates axis label in dictionaries from widget
-        
+
         :param ax: axis, options include ``x``, ``y``, ``z``, and ``c``
         :type ax: str
         :param new_label: new label set by user
@@ -3810,7 +3768,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def axis_limit_edit_callback(self, ax, bound, new_value):
         """Updates axis limit in dictionaries from widget
-        
+
         :param ax: axis, options include ``x``, ``y``, ``z``, and ``c``
         :type ax: str
         :param bound: ``0`` for lower and ``1`` for upper
@@ -3856,7 +3814,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_SV()
 
     def axis_scale_callback(self, comboBox, ax):
-        plot_type = self.comboBoxPlotType.currentText() 
+        plot_type = self.comboBoxPlotType.currentText()
 
         new_value = comboBox.currentText()
         if ax == 'c':
@@ -3878,7 +3836,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def set_color_axis_widgets(self):
         """Sets the color axis widgets
-        
+
         Sets color axis limits and label
         """
         print('set_color_axis_widgets')
@@ -3891,7 +3849,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def set_axis_widgets(self, ax, field):
         """Sets axis widgets in the style toolbox
-        
+
         Updates axes limits and labels.
 
         :param ax: axis 'x', 'y', or 'z'
@@ -3919,10 +3877,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.comboBoxYScale.setCurrentText(self.axis_dict[field]['scale'])
             case 'z':
                 self.lineEditZLabel.setText(self.axis_dict[field]['label'])
-        
+
     def axis_reset_callback(self, ax):
         """Resets axes widgets and plot axes to auto values
-        
+
         :param ax: axis to reset values, can be `x`, `y`, and `c`
         :type ax: str
         """
@@ -3976,7 +3934,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         print('get_axis_values')
         if field not in self.axis_dict.keys():
             self.initialize_axis_values(field_type, field)
-            
+
         # get axis values from self.axis_dict
         amin = self.axis_dict[field]['min']
         amax = self.axis_dict[field]['max']
@@ -4029,7 +3987,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def aspect_ratio_callback(self):
         """Update aspect ratio
-        
+
         Updates ``MainWindow.style`` dictionary after user change
         """
         plot_type = self.comboBoxPlotType.currentText()
@@ -4061,7 +4019,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         plot_type = self.comboBoxPlotType.currentText()
         if self.styles[plot_type]['Text']['FontSize'] == self.doubleSpinBoxFontSize.value():
             return
-            
+
         self.styles[plot_type]['Text']['FontSize'] = self.doubleSpinBoxFontSize.value()
         self.update_SV()
 
@@ -4102,10 +4060,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.styles[plot_type]['Scale']['Location'] = self.comboBoxScaleLocation.currentText()
         self.update_SV()
-    
+
     def overlay_color_callback(self):
         """Updates color of overlay markers
-        
+
         Uses ``QColorDialog`` to select new marker color and then updates plot on change of backround ``MainWindow.toolButtonOverlayColor`` color.
         """
         plot_type = self.comboBoxPlotType.currentText()
@@ -4125,7 +4083,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------
     def marker_symbol_callback(self):
         """Updates marker symbol
-        
+
         Updates marker symbols on current plot on change of ``MainWindow.comboBoxMarker.currentText()``.
         """
         plot_type = self.comboBoxPlotType.currentText()
@@ -4163,7 +4121,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------
     def line_width_callback(self):
         """Updates line width
-        
+
         Updates line width on current plot on change of ``MainWindow.comboBoxLineWidth.currentText()."""
         plot_type = self.comboBoxPlotType.currentText()
         if self.styles[plot_type]['Lines']['LineWidth'] == float(self.comboBoxLineWidth.currentText()):
@@ -4174,7 +4132,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def length_multiplier_callback(self):
         """Updates line length multiplier
-        
+
         Used when plotting vector components in multidimensional plots.  Values entered by the user must be (0,10]
         """
         plot_type = self.comboBoxPlotType.currentText()
@@ -4197,7 +4155,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------
     def marker_color_callback(self):
         """Updates color of plot markers
-        
+
         Uses ``QColorDialog`` to select new marker color and then updates plot on change of backround ``MainWindow.toolButtonMarkerColor`` color.
         """
         plot_type = self.comboBoxPlotType.currentText()
@@ -4222,7 +4180,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         plot_type = self.comboBoxPlotType.currentText()
         if self.styles[plot_type]['Colors']['ColorByField'] == self.comboBoxColorByField.currentText():
             return
-        
+
         self.styles[plot_type]['Colors']['ColorByField'] = self.comboBoxColorByField.currentText()
 
         itemlist = []
@@ -4239,7 +4197,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.lineEditCbarLabel.setEnabled(False)
             self.labelCbarLabel.setEnabled(False)
             return
-        
+
         if self.comboBoxColorByField.currentText() == 'None':
             self.comboBoxColorField.setEnabled(False)
             self.labelColorField.setEnabled(False)
@@ -4251,7 +4209,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.comboBoxCbarDirection.setEnabled(False)
             self.labelCbarDirection.setEnabled(False)
             self.lineEditCbarLabel.setEnabled(False)
-            self.labelCbarLabel.setEnabled(False) 
+            self.labelCbarLabel.setEnabled(False)
         else:
             self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
             if self.comboBoxColorByField.currentText() in ['Clusters']:
@@ -4282,10 +4240,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # only run update current plot if color field is selected or the color by field is clusters
         if self.comboBoxColorByField.currentText() == 'None' or self.comboBoxColorField.currentText() != '' or self.comboBoxColorByField.currentText() in ['Clusters']:
             self.update_SV()
-        
+
     def color_field_callback(self):
         """Updates color field and plot
-        
+
         Executes on change of ``MainWindow.comboBoxColorField``
         """
         print('color_field_callback')
@@ -4296,7 +4254,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.styles[plot_type]['Colors']['Field'] = field
 
-        if field != '' and field is not None: 
+        if field != '' and field is not None:
             if field not in self.axis_dict.keys():
                 self.initialize_axis_values(self.comboBoxColorByField.currentText(), field)
 
@@ -4316,6 +4274,27 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.styles[self.comboBoxPlotType.currentText()]['Colors']['Colormap'] = self.comboBoxFieldColormap.currentText()
 
         self.update_SV()
+
+    def colormap_direction_callback(self):
+        plot_type = self.comboBoxPlotType.currentText()
+        if self.styles[plot_type]['Colors']['Reverse'] == self.checkBoxReverseColormap.isChecked():
+            return
+
+        self.styles[plot_type]['Colors']['Reverse'] = self.checkBoxReverseColormap.isChecked()
+
+        self.update_SV()
+
+    def get_colormap(self, N=None):
+        plot_type = self.comboBoxPlotType.currentText()
+        if N is not None:
+            cmap = plt.get_cmap(self.styles[plot_type]['Colors']['Colormap'], N)
+        else:
+            cmap = plt.get_cmap(self.styles[plot_type]['Colors']['Colormap'])
+
+        if self.styles[plot_type]['Colors']['Reverse']:
+            cmap = cmap.reversed()
+
+        return cmap
 
     def clim_callback(self):
         plot_type = self.comboBoxPlotType.currentText()
@@ -4346,7 +4325,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # cluster styles
     def cluster_color_callback(self):
         """Updates color of a cluster
-        
+
         Uses ``QColorDialog`` to select new cluster color and then updates plot on change of
         backround ``MainWindow.toolButtonClusterColor`` color.  Also updates ``MainWindow.tableWidgetViewGroups``
         color associated with selected cluster.  The selected cluster is determined by ``MainWindow.spinBoxClusterGroup.value()``
@@ -4371,13 +4350,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def set_default_cluster_colors(self):
         """Sets cluster group to default colormap
-        
+
         Sets the colors in ``MainWindow.tableWidgetViewGroups`` to the default colormap in
         ``MainWindow.styles['Cluster']['Colors']['Colormap'].  Change the default colormap
         by changing ``MainWindow.comboBoxColormap``, when ``MainWindow.comboBoxColorByField.currentText()`` is ``Cluster``.
         """
         # cluster colormap
-        cmap = plt.get_cmap(self.styles['Cluster']['Colors']['Colormap'], self.tableWidgetViewGroups.rowCount())
+        cmap = self.get_colormap(N=self.tableWidgetViewGroups.rowCount())
 
         # set color for each cluster and place color in table
         colors = [cmap(i) for i in range(cmap.N)]
@@ -4389,7 +4368,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def select_cluster_group_callback(self):
         """Set cluster color button background after change of selected cluster group
-        
+
         Sets ``MainWindow.toolButtonClusterColor`` background on change of ``MainWindow.spinBoxClusterGroup``
         """
         self.toolButtonClusterColor.setStyleSheet("background-color: %s;" % self.tableWidgetViewGroups.item(self.spinBoxClusterGroup.value()-1,2).text())
@@ -4424,7 +4403,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         if plot_type == 'clustering':
                                     n_clusters = int(plot['info']['n_clusters'])
                                     # Get the new colormap from the comboBox
-                                    new_cmap = plt.get_cmap(style['Colors']['Colormap'],5)
+                                    new_cmap = self.get_colormap(N=5)
                                     img = []
                                     for ax in fig.get_axes():
                                         # Retrieve the image object from the axes
@@ -4471,7 +4450,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def update_SV(self):
         """Updates current plot (not saved to plot selector)
-        
+
         Updates the current plot (as determined by ``MainWindow.comboBoxPlotType.currentText()`` and options in ``MainWindow.toolBox.selectedIndex()``.
 
         :param save: save plot to plot selector, Defaults to False.
@@ -4484,7 +4463,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         sample_id = self.sample_id
         analysis = self.comboBoxColorByField.currentText()
         field = self.comboBoxColorField.currentText()
-        
+
         match plot_type:
             case 'analyte map':
                 if not self.comboBoxColorField.currentText():
@@ -4534,7 +4513,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case 'Cluster' | 'Cluster Score':
                 self.plot_clusters()
 
-    
+
         # self.styles = {'analyte map': copy.deepcopy(default_plot_style),
         #                 'correlation': copy.deepcopy(default_plot_style),
         #                 'histogram': copy.deepcopy(default_plot_style),
@@ -4596,7 +4575,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def clear_layout(self, layout):
         """Clears a widget that contains plots
-        
+
         :param layout: must be a horizontal or vertical layout
         :type layout: QLayout
         """
@@ -4653,6 +4632,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         pass
 
     def display_QV(self):
+        """Plots selected maps to the Quick View tab
+
+        Adds plots of predefined analytes to the Quick View tab in a grid layout."""
         self.canvasWindow.setCurrentIndex(2)
         if self.sample_id == '':
             return
@@ -4715,13 +4697,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             parameters  = self.data[sample_id]['ratios_info'].iloc[idx]
             analyte_str = analyte_1 +' / '+ analyte_2
             current_plot_df['array'] = self.data[sample_id]['computed_data']['Ratio'][analyte_str].values
-            
+
         if plot_type=='lasermap':
             plot_information={'plot_name':analyte_str,'sample_id':sample_id,
                               'analyte_1':analyte_1, 'analyte_2':analyte_2,
                               'plot_type':plot_type,
                               'style': self.styles['analyte map']}
-            
+
             self.plot_laser_map(current_plot_df,plot_information)
             self.update_spinboxes(parameters)
         elif plot_type == 'lasermap_norm':
@@ -4814,13 +4796,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.x_range = self.x.max() -  self.x.min()
         self.y_range = self.y.max() -  self.y.min()
 
-        self.aspect_ratio = (self.y_range / self.y.nunique()) / (self.x_range / self.x.nunique()) 
+        self.aspect_ratio = (self.y_range / self.y.nunique()) / (self.x_range / self.x.nunique())
 
         self.array_size = (self.y.nunique(), self.x.nunique())
 
     def add_colorbar(self, canvas, cax, style, cbartype='continuous', grouplabels=None):
         """Adds a colorbar to a MPL figure
-        
+
         :param canvas: canvas object
         :type canvas: MplCanvas
         :param cax: color axes object
@@ -4859,7 +4841,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             print('(add_colorbar) Unknown type: '+cbartype)
 
-    def color_norm(self, style, N=1):
+    def color_norm(self, style, N=None):
+        """Normalize colors for colormap
+
+        :param style: Styles associated with current plot type.
+        :type style: dict
+        :param N: The number of colors for discrete color maps, Defaults to None
+        :type N: int, optional
+        """
         norm = 0
         match style['Colors']['CScale']:
             case 'linear':
@@ -4870,12 +4859,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 boundaries = np.arange(-0.5, N, N)
                 norm = colors.BoundaryNorm(boundaries, N, clip=True)
 
-        #scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(style['Colors']['Colormap']), norm=norm)
+        #scalarMappable = plt.cm.ScalarMappable(cmap=self.get_colormap(), norm=norm)
 
         return norm
 
 
-   
+
     # -------------------------------------
     # Correlation functions and plotting
     # -------------------------------------
@@ -4905,8 +4894,50 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     #         if save:
     #             self.add_plot(plot_information) #do not plot correlation when directory changes
     #         self.update_tree(plot_information['plot_name'], data=plot_information, tree=branch)
+    def correlation_method_callback(self):
+        """Updates colorbar label for correlation plots"""
+        method = self.comboBoxCorrelationMethod.currentText()
+        if self.styles['correlation']['Colors']['CLabel'] == method:
+            return
+
+        if self.checkBoxCorrelationSquared.isChecked():
+            power = '^2'
+        else:
+            power = ''
+
+        # update colorbar label for change in method
+        match method:
+            case 'Pearson':
+                self.styles['correlation']['Colors']['CLabel'] = method + "'s $r" + power + "$"
+            case 'Spearman':
+                self.styles['correlation']['Colors']['CLabel'] = method + "'s $\\rho" + power + "$"
+            case 'Kendall':
+                self.styles['correlation']['Colors']['CLabel'] = method + "'s $\\tau" + power + "$"
+
+        self.update_SV()
+
+    def correlation_squared_callback(self):
+        style = self.styles['correlation']
+        # update color limits and colorbar
+        if self.checkBoxCorrelationSquared.isChecked():
+            self.styles['correlation']['Colors']['CLim'] = [0,1]
+            self.styles['correlation']['Colors']['Colormap'] = 'cmc.oslo'
+        else:
+            self.styles['correlation']['Colors']['CLim'] = [-1,1]
+            self.styles['correlation']['Colors']['Colormap'] = 'RdBu'
+
+        # update label
+        if self.plot_flag:
+            self.plot_flag = False
+            self.correlation_method_callback()
+            self.plot_flag = True
+        else:
+            self.correlation_method_callback()
+
+        self.update_SV()
 
     def plot_correlation(self):
+        """Creates an image of the correlation matrix"""
         print('plot_correlation')
 
         canvas = MplCanvas()
@@ -4923,12 +4954,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         style = self.styles['correlation']
         font = {'size':style['Text']['FontSize']}
 
-        #mask = np.triu(np.ones_like(correlation_matrix, dtype=bool))
-        #cax = ax.imshow(correlation_matrix[mask], cmap=plt.get_cmap(style['Colors']['Colormap']))
         mask = np.zeros_like(correlation_matrix, dtype=bool)
         mask[np.tril_indices_from(mask)] = True
         correlation_matrix = np.ma.masked_where(mask, correlation_matrix)
-        cax = canvas.axes.imshow(correlation_matrix, cmap=plt.get_cmap(style['Colors']['Colormap']))
+        norm = self.color_norm(style)
+        if self.checkBoxCorrelationSquared.isChecked():
+            cax = canvas.axes.imshow(correlation_matrix**2, cmap=self.get_colormap(), norm=norm)
+        else:
+            cax = canvas.axes.imshow(correlation_matrix, cmap=self.get_colormap(), norm=norm)
+
         canvas.axes.spines['top'].set_visible(False)
         canvas.axes.spines['bottom'].set_visible(False)
         canvas.axes.spines['left'].set_visible(False)
@@ -4936,7 +4970,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Add colorbar to the plot
         self.add_colorbar(canvas, cax, style, 'Corr. coeff. ('+self.comboBoxCorrelationMethod.currentText()+')')
-        
+
         # set color limits
         cax.set_clim(style['Colors']['CLim'][0], style['Colors']['CLim'][1])
 
@@ -4951,7 +4985,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         canvas.axes.set_xticks(ticks, minor=False)
 
         labels = self.toggle_mass(columns)
-        
+
         canvas.axes.set_xticklabels(labels, rotation=90, ha='center', va='bottom', fontproperties=font)
         canvas.axes.set_yticklabels(labels, ha='left', va='center', fontproperties=font)
 
@@ -4987,7 +5021,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def histogram_update_bin_width(self):
         """Updates the bin width
-        
+
         Generally called when the number of bins is changed by the user.  Updates the plot.
         """
         if not self.update_bins:
@@ -4997,7 +5031,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # get currently selected data
         current_plot_df = self.get_map_data(self.sample_id, field=self.comboBoxHistField.currentText(), analysis_type=self.comboBoxHistFieldType.currentText())
-        
+
         # update bin width
         range = (np.nanmax(current_plot_df['array']) - np.nanmin(current_plot_df['array']))
         self.spinBoxBinWidth.setMinimum(int(range / self.spinBoxNBins.maximum()))
@@ -5011,7 +5045,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def histogram_update_n_bins(self):
         """Updates the number of bins
-        
+
         Generally called when the bin width is changed by the user.  Updates the plot.
         """
         if not self.update_bins:
@@ -5021,7 +5055,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # get currently selected data
         current_plot_df = self.get_map_data(self.sample_id, field=self.comboBoxHistField.currentText(), analysis_type=self.comboBoxHistFieldType.currentText())
-        
+
         # update n bins
         self.spinBoxBinWidth.setValue( int((np.nanmax(current_plot_df['array']) - np.nanmin(current_plot_df['array'])) / self.spinBoxBinWidth.value()) )
         self.update_bins = True
@@ -5032,7 +5066,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def histogram_reset_bins(self):
         """Resets number of histogram bins to default
-        
+
         Resets ``MainWindow.spinBoxNBins.value()`` to default number of bins.  Updates bin width
         ``MainWindow.spinBoxBinWidth.value()`` if an analysis and field are selected
         """
@@ -5047,7 +5081,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def plot_small_histogram(self, current_plot_df, field):
         """Creates a small histogram in the Samples and Fields page
-        
+
         :param current_plot_df: current data for plotting
         :type current_plot_df: dict
         :param field: name of field to plot
@@ -5073,7 +5107,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         _, _, patches = canvas.axes.hist(array, bins=edges, color=style['Colors']['Color'], edgecolor=None, linewidth=style['Lines']['LineWidth'], alpha=0.6)
         # color histogram bins by analyte colormap?
         if self.checkBoxShowHistCmap.isChecked():
-            cmap=plt.get_cmap(self.styles['analyte map']['Colors']['Colormap'])
+            cmap = self.get_colormap()
             for j, p in enumerate(patches):
                 p.set_facecolor(cmap(j / len(patches)))
 
@@ -5132,7 +5166,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             type = 'bar'
             ecolor = None
-        
+
         # CDF or PDF
         match self.comboBoxHistType.currentText():
             case 'PDF':
@@ -5213,7 +5247,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'sample_id': self.sample_id,
             'analyte': field,
             'plot_type': 'Histogram',
-            'bin_width': bin_width, 
+            'bin_width': bin_width,
             'figure': canvas,
             'style': self.styles['histogram']
             }
@@ -5247,10 +5281,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             canvas = MplCanvas()
         else:
             plot_flag = False
-        
+
         # get data for plotting
         x, y, z, c = self.get_scatter_values(plot_type)
-        
+
         match plot_type.split()[-1]:
             # scatter
             case 'scatter':
@@ -5272,9 +5306,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # ternary
                 else:
                     self.hist2dternplot(canvas,x,y,z,style,c=c)
-        
+
         canvas.axes.margins(x=0)
-        
+
         if plot_flag:
             self.update_figure_font(canvas, style['Text']['Font'])
             self.clear_layout(self.widgetSingleView.layout())
@@ -5311,7 +5345,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 s=style['Markers']['Size'],
                 marker=self.markerdict[style['Markers']['Symbol']],
                 edgecolors='none',
-                cmap=plt.get_cmap(style['Colors']['Colormap']),
+                cmap=self.get_colormap(),
                 alpha=style['Markers']['Alpha']/100,
                 norm=norm)
 
@@ -5422,20 +5456,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         # color by field
         norm = self.color_norm(style)
-        h = canvas.axes.hist2d(x['array'], y['array'], bins=style['Colors']['Resolution'], norm=norm, cmap=plt.get_cmap(style['Colors']['Colormap']))
+        h = canvas.axes.hist2d(x['array'], y['array'], bins=style['Colors']['Resolution'], norm=norm, cmap=self.get_colormap())
         self.add_colorbar(canvas, h[3], style)
-
-
-        # norm = colors.Normalize(vmin=0, vmax=3)
-        # scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(style['Colors']['Colormap']), norm=norm)
-        # if style['Colors']['Direction'] == 'vertical':
-        #     cb = canvas.fig.colorbar(scalarMappable, ax=canvas.axes, orientation=style['Colors']['Direction'], location='right', shrink=0.62)
-        #     cb.set_label('log(N)')
-        # elif style['Colors']['Direction'] == 'horizontal':
-        #     cb = canvas.fig.colorbar(scalarMappable, ax=canvas.axes, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62)
-        #     cb.set_label('log(N)')
-        # else:
-        #     cb = None
 
         # axes
         xmin, xmax, xscale, xlbl = self.get_axis_values(x['type'],x['field'])
@@ -5507,9 +5529,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 cmap=style['Colors']['Colormap'],
                 orientation=style['Colors']['Direction'])
 
-            #norm = plt.Normalize(vmin=0, vmax=3)
-            #scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(style['Colors']['Colormap']), norm=norm)
-            #cb = fig.colorbar(scalarMappable, ax=, orientation='vertical', location='right', shrink=0.62)
             if cb is not None:
                 cb.set_label('log(N)')
         else:
@@ -5548,7 +5567,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         a = self.data[self.sample_id]['processed_data'].loc[:,afield].values
         b = self.data[self.sample_id]['processed_data'].loc[:,bfield].values
         c = self.data[self.sample_id]['processed_data'].loc[:,cfield].values
-  
+
         ca = self.get_rgb_color(self.get_hex_color(self.toolButtonTCmapXColor.palette().button().color()))
         cb = self.get_rgb_color(self.get_hex_color(self.toolButtonTCmapYColor.palette().button().color()))
         cc = self.get_rgb_color(self.get_hex_color(self.toolButtonTCmapZColor.palette().button().color()))
@@ -5575,13 +5594,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.clear_layout(self.widgetSingleView.layout())
             self.widgetSingleView.layout().addWidget(canvas)
             return
-            
+
         canvas.axes.set_position(grid[0:4].get_position(canvas.fig))
         canvas.axes.set_subplotspec(grid[0:4])              # only necessary if using tight_layout()
 
         canvas.axes2 = canvas.fig.add_subplot(grid[4])
 
-        canvas.fig.tight_layout() 
+        canvas.fig.tight_layout()
 
         t2 = ternary(canvas.axes2, labels=[afield,bfield,cfield])
 
@@ -5605,7 +5624,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.pca_results = {}
 
         df_filtered, analytes = self.get_processed_data()
-         
+
         # Preprocess the data
         scaler = StandardScaler()
         df_scaled = scaler.fit_transform(df_filtered)
@@ -5630,7 +5649,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.spinBoxPCY.setMaximum(self.pca_results.n_components_+1)
             if self.spinBoxPCY.value() == 1:
                 self.spinBoxPCY.setValue(int(2))
-        
+
         self.update_pca_flag = False
 
     def plot_pca(self):
@@ -5650,7 +5669,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case 'variance':
                 canvas = self.plot_pca_variance()
                 plot_name = plot_type
-            
+
             # make an image of the PC vectors and their components
             case 'vectors':
                 canvas = self.plot_pca_vectors()
@@ -5696,7 +5715,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.clear_layout(self.widgetSingleView.layout())
         self.widgetSingleView.layout().addWidget(canvas)
-    
+
     def plot_pca_variance(self):
         canvas = MplCanvas()
 
@@ -5730,7 +5749,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         font = {'size':style['Text']['FontSize']}
         canvas.axes.set_xlabel(xlbl, fontdict=font)
         canvas.axes.set_ylabel(ylbl, fontdict=font)
-    
+
         # tick marks
         canvas.axes.tick_params(direction=style['Axes']['TickDir'],
             labelsize=style['Text']['FontSize'],
@@ -5744,7 +5763,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         canvas.axes.set_box_aspect(style['Axes']['AspectRatio'])
 
         return canvas
-    
+
     def plot_pca_vectors(self):
         canvas = MplCanvas()
 
@@ -5758,19 +5777,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         n_components = components.shape[0]
         n_variables = components.shape[1]
 
-        cax = canvas.axes.imshow(components, cmap=plt.get_cmap(style['Colors']['Colormap']), aspect=1.0)
+        norm = color_norm(style)
+        cax = canvas.axes.imshow(components, cmap=self.get_colormap(), aspect=1.0, norm=norm)
 
         # Add a colorbar
-        if style['Colors']['Direction'] == 'vertical':
-            cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location='right', shrink=0.62, fraction=0.1)
-            cbar.set_label('PCA Score', size=style['Text']['FontSize'])
-            cbar.ax.tick_params(labelsize=style['Text']['FontSize'])
-        elif style['Colors']['Direction'] == 'horizontal':
-            cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62, fraction=0.1)
-            cbar.set_label('PCA Score', size=style['Text']['FontSize'])
-            cbar.ax.tick_params(labelsize=style['Text']['FontSize'])
-        else:
-            cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62, fraction=0.1)
+        self.add_colorbar(canvas,cax,style)
+        # if style['Colors']['Direction'] == 'vertical':
+        #     cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location='right', shrink=0.62, fraction=0.1)
+        #     cbar.set_label('PCA Score', size=style['Text']['FontSize'])
+        #     cbar.ax.tick_params(labelsize=style['Text']['FontSize'])
+        # elif style['Colors']['Direction'] == 'horizontal':
+        #     cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62, fraction=0.1)
+        #     cbar.set_label('PCA Score', size=style['Text']['FontSize'])
+        #     cbar.ax.tick_params(labelsize=style['Text']['FontSize'])
+        # else:
+        #     cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62, fraction=0.1)
 
 
         xlbl = 'Principal Components'
@@ -5805,10 +5826,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         canvas.fig.tight_layout()
 
         return canvas
-        
+
     def plot_pca_components(self, canvas):
         """Adds vector components to PCA scatter and heatmaps
-        
+
         :param canvas: canvas object for plotting
         :type canvas: MplCanvas
         """
@@ -5825,8 +5846,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         pc_x = int(self.spinBoxPCX.value())-1
         pc_y = int(self.spinBoxPCY.value())-1
 
-        x = self.pca_results.components_[pc_x][:]
-        y = self.pca_results.components_[pc_y][:]
+        x = self.pca_results.components_[:,pc_x]
+        y = self.pca_results.components_[:,pc_y]
 
         print(pc_x)
         print(x)
@@ -5858,7 +5879,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------
     def plot_score_map(self):
         """Plots score maps
-        
+
         Creates a score map for PCA and clusters.
         """
         canvas = MplCanvas()
@@ -5910,7 +5931,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         n_clusters = len(unique_groups)
 
         # Extract colors from the colormap and assign to self.group_cmap
-        cmap = plt.get_cmap(style['Colors']['Colormap'], n_clusters)
+        cmap = self.get_colormap(n_clusters)
         colors = [cmap(i) for i in range(cmap.N)]
         for label, color in zip(unique_groups, colors):
             self.group_cmap[label] = color
@@ -5919,7 +5940,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         norm = colors.BoundaryNorm(boundaries, cmap.N, clip=True)
 
         cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect = self.aspect_ratio)
-        
+
         self.add_colorbar(canvas, cax, style, None, cbartype='discrete', grouplabels=np.arange(0, n_clusters))
 
         canvas.fig.subplots_adjust(left=0.05, right=1)  # Adjust these values as needed
@@ -5945,7 +5966,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         n_clusters = self.spinBoxNClusters.value()
         exponent = float(self.horizontalSliderClusterExponent.value()) / 10
         seed = int(self.lineEditSeed.text())
-        
+
         if exponent == 1:
             exponent = 1.0001
         distance_type = self.comboBoxClusterDistance.currentText()
@@ -5974,11 +5995,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         if self.data[self.sample_id]['computed_data']['Cluster'].empty:
             self.data[self.sample_id]['computed_data']['Cluster'][['X','Y']] = self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
-            
+
         # Create labels array filled with -1
         #groups = np.full(filtered_array.shape[0], -1, dtype=int)
 
-        self.statusbar.showMessage('Computing clusters...') 
+        self.statusbar.showMessage('Computing clusters...')
         match method:
             # k-means
             case 'k-means':
@@ -5987,7 +6008,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # produce k-means model from data
                 model = kmeans.fit(array)
-                
+
                 #add k-means results to self.data
                 self.data[self.sample_id]['computed_data']['Cluster'].loc[self.data[self.sample_id]['mask'],'k-means'] = model.predict(array)
 
@@ -5996,7 +6017,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # add x y from raw data if empty dataframe
                 if self.data[self.sample_id]['computed_data']['Cluster Score'].empty:
                     self.data[self.sample_id]['computed_data']['Cluster Score'] = self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
-            
+
                 # compute cluster scores
                 cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(array.T, n_clusters, exponent, error=0.00001, maxiter=1000, seed=seed)
                 #cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(array.T, n_clusters, exponent, metric='precomputed', error=0.00001, maxiter=1000, seed=seed)
@@ -6025,12 +6046,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         plot_type = self.comboBoxPlotType.currentText()
 
         match plot_type:
-            case 'Cluster': 
+            case 'Cluster':
                 canvas = self.plot_cluster_map()
                 plot_name = plot_type
-            case 'Cluster Score': 
+            case 'Cluster Score':
                 canvas = self.plot_score_map()
-                plot_name = plot_type+f'_{self.comboBoxColorField.currentText()}' 
+                plot_name = plot_type+f'_{self.comboBoxColorField.currentText()}'
             case _:
                 print(f'Unknown PCA plot type: {plot_type}')
                 return
@@ -6041,7 +6062,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'plot_type': 'Multidimensional',
             'figure': canvas,
             'style': self.styles[plot_type]
-            } 
+            }
 
         self.update_figure_font(canvas, self.styles[plot_type]['Text']['Font'])
 
@@ -6065,7 +6086,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def update_cluster_ui(self):
         """Updates clustering-related widgets
-        
+
         Enables/disables widgets in Left Toolbox > Clustering Page.  Updates widget values/text with values saved in ``MainWindow.cluster_dict``.
         """
         # update_clusters_ui - Enables/disables tools associated with clusters
@@ -6112,7 +6133,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.labelClusterStartingSeed.setEnabled(True)
                 self.lineEditSeed.setEnabled(True)
                 self.lineEditSeed.setText(str(self.cluster_dict[method]['seed']))
-        
+
         self.plot_clusters()
 
 
@@ -6123,7 +6144,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """Removes mass from labels
 
         Removes mass if ``MainWindow.checkBoxShowMass.isChecked()`` is False
-        
+
         :param labels: input labels
         :type labels: str
 
@@ -6209,7 +6230,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 box = canvas.axes.get_position()
                 canvas.axes.set_position([box.x0, box.y0 - box.height * 0.1,
                                 box.width, box.height * 0.9])
-                
+
                 canvas.axes.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=3, handlelength=1)
                 #ax.legend()
                 self.logax(canvas.axes, yl, 'y')
@@ -6255,7 +6276,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def update_n_dim_table(self,calling_widget):
         """Updates N-Dim table
-        
+
         :param calling_widget:
         :type calling_widget: QWidget
         """
@@ -6366,7 +6387,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 cluster_dict = {}
                 for c in clusters:
                     cluster_dict[c] = f'Cluster {c}'
-                
+
                 self.tableWidgetViewGroups.setRowCount(len(clusters))
 
                 for i, c in enumerate(clusters):
@@ -6375,7 +6396,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.isUpdatingTable = True
                     self.tableWidgetViewGroups.setItem(i, 0, QTableWidgetItem(cluster_dict[c]))
                     self.tableWidgetViewGroups.selectRow(i)
-                    
+
                 self.current_group = {'algorithm':algorithm, 'clusters': cluster_dict, 'selected_clusters':clusters}
 
                 self.spinBoxClusterGroup.setMinimum(1)
@@ -6397,7 +6418,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             # Extract the cluster id (assuming it's stored in the table)
             cluster_id = int(self.tableWidgetViewGroups.item(row,0).text())
-        
+
             old_name = self.current_group['clusters'][cluster_id]
             # Check for duplicate names
             for i in range(self.tableWidgetViewGroups.rowCount()):
@@ -6418,7 +6439,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # del self.group_cmap[cluster_id]
             # update current_group to reflect the new cluster name
             self.current_group['clusters'][cluster_id] = new_name
-            
+
     def outlier_detection(self, data ,lq=0.0005, uq=99.5, d_lq=9.95 , d_uq=99):
         # Ensure data is a numpy array
         data = np.array(data)
@@ -6515,7 +6536,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         ree_df['REE'] = sample_df[ree_cols].sum(axis=1)
 
         return ree_df
-   
+
 
     # -------------------------------------
     # Field type and field combobox pairs
@@ -6579,10 +6600,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # ----start debugging----
         print('update_field_type_combobox: '+plot_type+',  '+comboBox.currentText())
         # ----end debugging----
-    
+
     def toggle_color_widgets(self, switch):
         """Toggles enabled state of color related widgets
-        
+
         :param switch: toggles enabled state of color widgets
         :type switch: bool
         """
@@ -6590,6 +6611,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.comboBoxColorByField.setEnabled(True)
             self.comboBoxColorField.setEnabled(True)
             self.comboBoxFieldColormap.setEnabled(True)
+            self.checkBoxReverseColormap.setEnabled(True)
             self.comboBoxCbarDirection.setEnabled(True)
             self.lineEditCbarLabel.setEnabled(True)
             self.lineEditColorLB.setEnabled(True)
@@ -6608,6 +6630,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.labelColorByField.setEnabled(self.comboBoxColorByField.isEnabled())
         self.labelColorField.setEnabled(self.comboBoxColorField.isEnabled())
         self.labelFieldColormap.setEnabled(self.comboBoxFieldColormap.isEnabled())
+        self.labelReverseColormap.setEnabled(self.checkBoxReverseColormap.isEnabled())
         self.labelCbarDirection.setEnabled(self.comboBoxCbarDirection.isEnabled())
         self.labelCbarLabel.setEnabled(self.lineEditCbarLabel.isEnabled())
         self.labelColorBounds.setEnabled(self.lineEditColorLB.isEnabled())
@@ -6622,7 +6645,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         :param parentBox: comboBox used to select field type ('Analyte', 'Analyte (normalized)', 'Ratio', etc.), if None, then 'Analyte'
         :type parentBox: QComboBox, None
-            
+
         :param childBox: comboBox with list of field values
         :type childBox: QComboBox
         """
@@ -6641,7 +6664,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             print('update_field_combobox: None')
         print(fields)
         # ----end debugging----
-    
+
         # get a named list of current fields for sample
 
     # updates all field type and field comboboxes
@@ -6695,7 +6718,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 analytes_1 = self.data[self.sample_id]['ratios_info'].loc[self.data[self.sample_id]['ratios_info']['use']== True,'analyte_1']
                 analytes_2 =  self.data[self.sample_id]['ratios_info'].loc[self.data[self.sample_id]['ratios_info']['use']== True,'analyte_2']
                 ratios = analytes_1 +' / '+ analytes_2
-                set_fields = ratios.values.tolist() 
+                set_fields = ratios.values.tolist()
             case 'None':
                 return []
             case _:
@@ -6919,7 +6942,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.data[self.sample_id]['mask'] = self.data[self.sample_id]['mask']  & nan_mask.values
 
         df_filtered = self.data[self.sample_id]['processed_data'][use_analytes]
-        
+
         # df_filtered = self.data[self.sample_id]['processed_data'][use_analytes]
 
         return df_filtered, use_analytes
@@ -6947,7 +6970,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             i += 1
             # progressBar.setValue(i)
         return data_dict
-    
+
     def update_ratio_df(self,sample_id,analyte_1, analyte_2,norm):
         parameter = self.data[sample_id]['ratios_info'].loc[(self.data[sample_id]['ratios_info']['analyte_1'] == analyte_1) & (self.data[sample_id]['ratios_info']['analyte_2'] == analyte_2)]
         if parameter.empty:
@@ -6960,7 +6983,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # -------------------------------
     # Plot Selector (tree) functions
-    # ------------------------------- 
+    # -------------------------------
     def create_tree(self,sample_id = None):
         if not self.data:
             treeView  = self.treeView
@@ -6999,7 +7022,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.histogram_items.appendRow(histogram_sample_id_item)
             self.ratios_items.appendRow(ratio_sampe_id_item)
             self.norm_analytes_items.appendRow(norm_sample_id_item)
-            
+
     def tree_double_click(self,val):
         level_1_data = val.parent().parent().data()
         level_2_data = val.parent().data()
@@ -7122,7 +7145,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------
     def add_menu(self, menu_items, menu_obj):
         """Adds items to a context menu
-        
+
         :param menu_items: Names of the menu text to add
         :type menu_items: list
         :param menu_obj: context menu object
@@ -7134,12 +7157,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def save_notes_file(self):
         """Saves notes to an *.rst file
-        
+
         Autosaves the notes to a file ``[sample_id].rst``
         """
         if self.notes_file is None:
             return
-        
+
         self.statusbar.showMessage('Saving notes...')
 
         # write file
@@ -7150,7 +7173,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def notes_add_image(self):
         """Adds placeholder image to notes
-        
+
         Uses the reStructured Text figure format
         """
         dialog = QFileDialog()
@@ -7172,7 +7195,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def add_header_line(self, level):
         """Formats a selected line as a header
-        
+
         Places a symbol consistent with the heading level below the selected text line.
 
         :param level: The header level is determined from a context menu associated with ``MainWindow.toolButtonNotesHeading``
@@ -7204,7 +7227,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """Formats the text
 
         Formats selected text as bold, italic or literal in restructured text format.
-        
+
         :param style: type of formatting
         :type style: str
         """
@@ -7223,7 +7246,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def add_info_note(self, infotype):
         """Adds preformatted notes
-        
+
         :param infotype: name of preformatted information
         :type infotype: str
         """
@@ -7265,7 +7288,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def add_table_note(self, matrix, row_labels=None, col_labels=None):
         """Convert matrix to restructured text
-        
+
         Adds a table to the note tab, including row lables and column headers.
 
         :param matrix: data for printing
@@ -7320,11 +7343,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         except:
             # if it doesn't work
             QMessageBox.error(self.main_window,"Error", "Could not save to pdf.")
-            
+
 
     # -------------------------------
-    # Unclassified functions 
-    # ------------------------------- 
+    # Unclassified functions
+    # -------------------------------
     def reset_checked_items(self,item):
         #unchecks tool buttons to prevent incorrect behaviour during plot click
         match item:
@@ -7641,37 +7664,37 @@ class analyteSelectionWindow(QDialog, Ui_Dialog):
             self.tableWidgetSelected.setCellWidget(newRow, 1, combo)
             combo.currentIndexChanged.connect(self.update_scale)
 
-        
-        
+
+
 # Excel concatenator gui
 # -------------------------------
-class excelConcatenator(QDialog, Ui_Dialog):       
+class excelConcatenator(QDialog, Ui_Dialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
-        
+
         self.standard_list = ['STDGL', 'NiS', 'NIST610']
         self.sample_ids = []
         self.paths = []
-        
-        
-        
+
+
+
         self.pushButtonSaveSelection.clicked.connect(self.save_selection)
 
         self.pushButtonLoadSelection.clicked.connect(self.load_selection)
 
         # self.pushButtonDone.clicked.connect(self.accept)
-        
+
         # self.pushButtonCancel.clicked.connect(self.reject)
-        
+
         self.pushButtonImport.clicked.connect(self.import_data)
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
     def save_selection(self):
         file_name, _ = QFileDialog.getSaveFileName(self, "Save File", "", "Text Files (*.txt);;All Files (*)")
         if file_name:
@@ -7683,16 +7706,16 @@ class excelConcatenator(QDialog, Ui_Dialog):
                     f.write(f"{analyte_pair},{selection}\n")
 
     def load_selection(self):
-        
+
         root_path = QFileDialog.getExistingDirectory(None, "Select a folder", options=QFileDialog.ShowDirsOnly)
         if not root_path:
             return
-        
+
         # List all entries in the directory given by root_path
         entries = os.listdir(root_path)
         subdirectories = [name for name in entries if os.path.isdir(os.path.join(root_path, name))]
-        
-        
+
+
         if subdirectories:
             # If there are subdirectories, use them as sample IDs
             self.sample_ids = subdirectories
@@ -7704,43 +7727,43 @@ class excelConcatenator(QDialog, Ui_Dialog):
         for sample_id in self.sample_ids:
             #fill column with column name 'Sample ID' of  self.tableMetaData with sample ids
             self.populate_table()
-        
+
         self.raise_()
         self.activateWindow()
-         
+
     def populate_table(self):
         self.tableWidgetMetaData.setRowCount(len(self.sample_ids))
-        
+
         for i, sample_id in enumerate(self.sample_ids):
             # Sample ID
             self.tableWidgetMetaData.setItem(i, 0, QTableWidgetItem(sample_id))
-            
+
             # File Direction with dropdown
             data_type_combo = QComboBox()
             data_types = ['raw','ppm','LADr ppm']
             data_type_combo.addItems(data_types)
             self.tableWidgetMetaData.setCellWidget(i, 1, data_type_combo)
-            
+
             # File Direction with dropdown
             file_direction_combo = QComboBox()
             directions = ['left to right', 'right to left', 'bottom to top', 'top to bottom']
             file_direction_combo.addItems(directions)
             self.tableWidgetMetaData.setCellWidget(i, 2, file_direction_combo)
-            
+
             # Scan Direction with dropdown
             scan_direction_combo = QComboBox()
             scan_direction_combo.addItems(directions)
             self.tableWidgetMetaData.setCellWidget(i, 3, scan_direction_combo)
-            
+
             positions = ['first','last']
             # Scan Direction with dropdown
             scan_num_pos_combo = QComboBox()
             scan_num_pos_combo.addItems(positions)
             self.tableWidgetMetaData.setCellWidget(i, 5, scan_num_pos_combo)
-            
-            
-    def import_data(self): 
-        
+
+
+    def import_data(self):
+
         for i,path in enumerate(self.paths):
             data_type = self.tableWidgetMetaData.cellWidget(i,1).currentText().lower()
             file_direction   = self.tableWidgetMetaData.cellWidget(i,2).currentText().lower()
@@ -7749,9 +7772,9 @@ class excelConcatenator(QDialog, Ui_Dialog):
             scan_no_pos   = self.tableWidgetMetaData.cellWidget(i,5).currentText().lower()
             spot_size = self.tableWidgetMetaData.item(i,6).text().lower()
             interline_dist = self.tableWidgetMetaData.item(i,7).text().lower()
-            
-            
-            
+
+
+
             for subdir, dirs, files in os.walk(path):
                 data_frames = []
                 for file in files:
@@ -7760,7 +7783,7 @@ class excelConcatenator(QDialog, Ui_Dialog):
                         save_prefix = os.path.basename(subdir)
                         if any(std in file for std in self.standard_list):
                             continue  # skip standard files
-                        
+
                         if data_type == 'raw':
                             df = self.read_raw_folder(file,file_path, delimiter, scan_no_pos)
                         elif data_type == 'ppm':
@@ -7770,25 +7793,25 @@ class excelConcatenator(QDialog, Ui_Dialog):
                         else:
                             QMessageBox.error(self.main_window,"Error", "Unknown Type specified.")
                             return
-        
+
                         data_frames.append(df)
                 final_data = pd.concat(data_frames, ignore_index=True)
                 final_data.insert(2,'X',final_data['ScanNum'] * float(interline_dist))
                 final_data.insert(3,'Y',final_data['SpotNum'] * float(interline_dist))
-                
-                
+
+
                 #determine read direction
                 x_dir = self.orientation(file_direction)
                 y_dir = self.orientation(scan_direction)
-                
+
                 # Adjust coordinates based on the reading direction and make upper left corner as (0,0)
-                
+
                 final_data['X'] = final_data['X'] * x_dir
                 final_data['X'] = final_data['X'] - final_data['X'].min()
-        
+
                 final_data['Y'] = final_data['Y'] * y_dir
                 final_data['Y'] = final_data['Y'] - final_data['Y'].min()
-                
+
                 match file_direction:
                     case 'top to bottom'| 'bottom to top':
                         pass
@@ -7796,9 +7819,9 @@ class excelConcatenator(QDialog, Ui_Dialog):
                         Xtmp = final_data['X'];
                         final_data['X'] =final_data['Y'];
                         final_data['Y'] = Xtmp;
-                
+
                 print(final_data.head())
-            
+
     def orientation(self,readdir):
 
         match readdir:
@@ -7808,9 +7831,9 @@ class excelConcatenator(QDialog, Ui_Dialog):
                 direction = -1
             case _:
                 print('Unknown read direction.')
-        
+
         return direction
-        
+
     def read_raw_folder(self,file_name,file_path, delimiter, delimiter_position):
         if delimiter_position == 'first':
             scan_num = file_name.split(delimiter)[0].strip()
@@ -7843,15 +7866,15 @@ class excelConcatenator(QDialog, Ui_Dialog):
         return df
         # X = ScanNum*sampleTable.InterlineDistance(i);
         # Y = data.SpotNum*sampleTable.IntralineDistance(i);
-    
+
         # % determine read direction
         # xdir = orientation(sampleTable.FileDirection{i});
         # ydir = orientation(sampleTable.ScanDirection{i});
-    
+
         # % make upper left corner (0,0), i.e., image coordinates
         # X = X*xdir; X = X - min(X);
         # Y = Y*ydir; Y = Y - min(Y);
-            
+
         # file_name, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Text Files (*.txt);;All Files (*)")
         # if file_name:
         #     with open(file_name, 'r') as f:
@@ -7861,8 +7884,8 @@ class excelConcatenator(QDialog, Ui_Dialog):
         #     self.raise_()
         #     self.activateWindow()
 
-    
-    
+
+
 # Classes
 # -------------------------------
 class CustomAxis(AxisItem):
@@ -8062,8 +8085,8 @@ class Crop_tool:
         self.overlays = []
     def init_crop(self):
         """Sets intial crop region as full map extent."""
-        
-        
+
+
         if self.main_window.toolButtonCrop.isChecked():
             if self.main_window.data[self.main_window.sample_id]['crop']:
                 # reset to full view and remove overlays if user unselects crop tool
@@ -8093,7 +8116,7 @@ class Crop_tool:
                 self.overlays.append(overlay)
 
             self.update_overlay(self.crop_rect.rect())
-            
+
         else:
             # reset to full view and remove overlays if user unselects crop tool
             self.main_window.reset_to_full_view()
@@ -8438,7 +8461,7 @@ class Polygon:
                     for line in self.lines[self.p_id]:
                         self.main_window.plot.removeItem(line)
                 self.lines[self.p_id] = []
-    
+
                 points = self.polygons[self.main_window.sample_id][self.p_id]
                 if len(points) == 1:
                     # Draw line from the first point to cursor
@@ -8446,16 +8469,16 @@ class Polygon:
                     self.main_window.plot.addItem(line)
                     self.lines[self.p_id].append(line)
                 elif not complete and len(points) > 1:
-    
+
                     if self.main_window.point_selected:
                         # self.point_index is the index of the pont that needs to be moved
-    
+
                         # create polygon with moved point
                         x_points = [p[0] for p in points[:self.point_index]] + [x]+ [p[0] for p in points[(self.point_index+1):]]
                         y_points = [p[1] for p in points[:self.point_index]] + [y]+ [p[1] for p in points[(self.point_index+1):]]
-    
+
                     else:
-    
+
                         # create polygon with new point
                         x_points = [p[0] for p in points] + [x, points[0][0]]
                         y_points = [p[1] for p in points] + [y, points[0][1]]
@@ -8464,12 +8487,12 @@ class Polygon:
                     poly_item.setBrush(QtGui.QColor(100, 100, 150, 100))
                     self.main_window.plot.addItem(poly_item)
                     self.lines[self.p_id].append(poly_item)
-    
+
                     # Draw line from last point to cursor
                     # line = PlotDataItem([points[-1][0], x], [points[-1][1], y], pen='r')
                     # self.main_window.plot.addItem(line)
                     # self.lines[self.p_id].append(line)
-    
+
                 elif complete and len(points) > 2:
                     points = [QtCore.QPointF(x, y) for x, y, _ in self.polygons[self.main_window.sample_id][self.p_id]]
                     polygon = QtGui.QPolygonF(points)
@@ -8477,7 +8500,7 @@ class Polygon:
                     poly_item.setBrush(QtGui.QColor(100, 100, 150, 100))
                     self.main_window.plot.addItem(poly_item)
                     self.lines[self.p_id].append(poly_item)
-    
+
                     self.update_table_widget()
                     # Find the row where the first column matches self.p_id and select it
                     for row in range(self.main_window.tableWidgetPolyPoints.rowCount()):
@@ -8558,8 +8581,8 @@ class Profiling:
         self.array_y = array.shape[0]
 
         interpolate = False
-        
-        
+
+
         radius= int(self.main_window.lineEditPointRadius.text())
         # turn off profile (need to suppress context menu on right click)
         if event.button() == QtCore.Qt.RightButton and self.main_window.toolButtonPlotProfile.isChecked():
@@ -8846,7 +8869,7 @@ class Profiling:
                     child.widget().deleteLater()
 
             # Get the colormap specified by the user
-            cmap = matplotlib.colormaps.get_cmap(self.main_window.comboBoxFieldColormap.currentText())
+            cmap = self.get_colormap()
             # Determine point type from the pushButtonProfileType text
             if self.main_window.comboBoxPointType.currentText() == 'median + IQR':
                 point_type = 'median'

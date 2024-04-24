@@ -1,60 +1,53 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QHBoxLayout, QVBoxLayout, QGridLayout, QMessageBox, QHeaderView, QMenu
-from PyQt5.QtWidgets import QFileDialog, QProgressDialog, QWidget, QTabWidget, QDialog, QLabel, QListWidgetItem, QTableWidget, QInputDialog, QAbstractItemView
 from PyQt5.Qt import QStandardItemModel, QStandardItem, QTextCursor
+from PyQt5.QtCore import Qt, QObject, QTimer, pyqtSignal, QRectF, Qt, QPointF
+from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QHBoxLayout, QVBoxLayout, QGridLayout, QMessageBox, QHeaderView, QMenu, QGraphicsRectItem
+from PyQt5.QtWidgets import QFileDialog, QProgressDialog, QWidget, QTabWidget, QDialog, QLabel, QListWidgetItem, QTableWidget, QInputDialog, QAbstractItemView, QStyledItemDelegate
+from PyQt5.QtGui import QIntValidator, QDoubleValidator, QColor, QImage, QPainter, QPixmap, QTransform, QFont, QPen, QCursor, QPainter, QBrush 
 from pyqtgraph import PlotWidget, ScatterPlotItem, mkPen, AxisItem, PlotDataItem
 from pyqtgraph.Qt import QtWidgets
 from pyqtgraph.GraphicsScene import exportDialog
-from PyQt5.QtGui import QIntValidator, QDoubleValidator, QColor, QImage, QPainter, QPixmap
 import pyqtgraph as pg
 import sys  # We need sys so that we can pass argv to QApplication
 import os
+import re
+from datetime import datetime
+import copy
 import numpy as np
 import pandas as pd
-from PyQt5.QtGui import QTransform, QFont
 import matplotlib
 matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-import matplotlib.gridspec as gs
 from matplotlib.collections import PathCollection
+import matplotlib.gridspec as gs
 import matplotlib.pyplot as plt
 from matplotlib.path import Path
-from PyQt5.QtWidgets import QStyledItemDelegate
-from PyQt5.QtCore import Qt, QObject, QTimer
-from PyQt5.QtGui import QPainter, QBrush, QColor
-from PyQt5.QtCore import pyqtSignal
-from src.rotated import RotatedHeaderView
-import cmcrameri.cm as cmc
-from src.ternary_plot import ternary
-from sklearn.cluster import KMeans
-#from sklearn_extra.cluster import KMedoids
-import skfuzzy as fuzz
-from sklearn.metrics.pairwise import manhattan_distances as manhattan, euclidean_distances as euclidean, cosine_distances
-from scipy.spatial.distance import mahalanobis
 import matplotlib.patches as mpatches
 import matplotlib.colors as colors
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from src.plot_spider import plot_spider_norm
-import re
 import matplotlib.ticker as ticker
+import scipy.stats
+from scipy import ndimage
+from scipy.signal import convolve2d, wiener
+from sklearn.cluster import KMeans
+#from sklearn_extra.cluster import KMedoids
+import skfuzzy as fuzz
+import cmcrameri.cm as cmc
+from cv2 import Canny, Sobel, CV_64F, bilateralFilter, medianBlur, GaussianBlur, edgePreservingFilter
+from sklearn.metrics.pairwise import manhattan_distances as manhattan, euclidean_distances as euclidean, cosine_distances
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from scipy.spatial.distance import mahalanobis
+from src.rotated import RotatedHeaderView
+from src.ternary_plot import ternary
+from src.plot_spider import plot_spider_norm
 from src.radar import Radar
 from src.calculator import CalWindow
 from src.ui.MainWindow import Ui_MainWindow
 from src.ui.AnalyteSelectionDialog import Ui_Dialog
 from src.ui.PreferencesWindow import Ui_PreferencesWindow
 from src.ui.ExcelConcatenator import Ui_Dialog
-import scipy.stats
-from scipy import ndimage
-from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
-from cv2 import Canny, Sobel, CV_64F, bilateralFilter, medianBlur, GaussianBlur, edgePreservingFilter
-from scipy.signal import convolve2d, wiener
-from PyQt5.QtWidgets import QGraphicsRectItem
-from PyQt5.QtCore import QRectF, Qt, QPointF
-from PyQt5.QtGui import QPen, QColor, QCursor
-from datetime import datetime
-import copy
 
 pg.setConfigOption('imageAxisOrder', 'row-major') # best performance
 ## !pyrcc5 resources.qrc -o src/ui/resources_rc.py
@@ -213,7 +206,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                'Scales': {'Direction': 'none', 'Location': 'northeast', 'OverlayColor': '#ffffff'},
                                'Markers': {'Symbol': 'circle', 'Size': 6, 'Alpha': 30},
                                'Lines': {'LineWidth': 1.5, 'Multiplier': 1},
-                               'Colors': {'Color': '#1c75bc', 'ColorByField': 'None', 'Field': '', 'Colormap': 'viridis', 'CLimAuto': True, 'CLim':[0,1], 'CScale':'linear', 'Direction': 'vertical', 'CLabel': '', 'Resolution': 10}
+                               'Colors': {'Color': '#1c75bc', 'ColorByField': 'None', 'Field': '', 'Colormap': 'viridis', 'Reverse': False, 'CLimAuto': True, 'CLim':[0,1], 'CScale':'linear', 'Direction': 'vertical', 'CLabel': '', 'Resolution': 10}
                                }
         default_font = 'Avenir'
         try:
@@ -337,7 +330,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #-------------------------
         self.ref_data = pd.read_excel('resources/app_data/earthref.xlsx')
         ref_list = self.ref_data['layer']+' ['+self.ref_data['model']+'] '+ self.ref_data['reference']
-        self.comboBoxCorrelationMethod.activated.connect(self.update_SV)
+        self.comboBoxCorrelationMethod.activated.connect(self.correlation_method_callback)
+        self.checkBoxCorrelationSquared.stateChanged.connect(self.correlation_squared_callback)
 
         self.comboBoxRefMaterial.addItems(ref_list.values)          # Select analyte Tab
         self.comboBoxNDimRefMaterial.addItems(ref_list.values)      # NDim Tab
@@ -662,7 +656,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         colormaps = pg.colormap.listMaps('matplotlib')
         self.comboBoxFieldColormap.clear()
         self.comboBoxFieldColormap.addItems(colormaps)
-        self.comboBoxFieldColormap.activated.connect(self.update_SV)
+        self.comboBoxFieldColormap.activated.connect(self.field_colormap_callback)
+        self.checkBoxReverseColormap.stateChanged.connect(self.colormap_direction_callback)
 
         # callback functions
         self.comboBoxPlotType.currentIndexChanged.connect(self.plot_type_callback)
@@ -2322,7 +2317,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # Step 1: Normalize your data array for colormap application
                 norm = colors.Normalize(vmin=array.min(), vmax=array.max())
-                cmap = plt.get_cmap(style['Colors']['Colormap'])  # Assuming a valid colormap name
+                cmap = self.get_colormap()
 
                 # Step 2: Apply the colormap to get RGB values, then normalize to [0, 255] for QImage
                 rgb_array = cmap(norm(array))[:, :, :3]  # Drop the alpha channel returned by cmap
@@ -2383,7 +2378,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #Change transparency of values outside mask
             # Step 1: Normalize your data array for colormap application
             norm = colors.Normalize(vmin=array.min(), vmax=array.max())
-            cmap = plt.get_cmap(style['Colors']['Colormap'])  # Assuming a valid colormap name
+            cmap = self.get_colormap()
 
             # Step 2: Apply the colormap to get RGB values, then normalize to [0, 255] for QImage
             rgb_array = cmap(norm(array))[:, :, :3]  # Drop the alpha channel returned by cmap
@@ -3590,6 +3585,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.labelMarkerColor.setEnabled(False)
         self.labelColorByField.setEnabled(self.comboBoxColorByField.isEnabled())
         self.labelColorField.setEnabled(self.comboBoxColorField.isEnabled())
+        self.checkBoxReverseColormap.setEnabled(self.comboBoxColorField.isEnabled())
+        self.labelReverseColormap.setEnabled(self.checkBoxReverseColormap.isEnabled())
         self.labelFieldColormap.setEnabled(self.comboBoxFieldColormap.isEnabled())
         self.labelColorBounds.setEnabled(self.lineEditColorLB.isEnabled())
         self.labelCbarDirection.setEnabled(self.comboBoxCbarDirection.isEnabled())
@@ -3699,6 +3696,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     'ColorByField': self.comboBoxColorByField.currentText(),
                     'Field': self.comboBoxColorField.currentText(),
                     'Colormap': self.comboBoxFieldColormap.currentText(),
+                    'Reverse': self.checkBoxReverseColormap.isChecked(),
                     'CLim': [float(self.lineEditColorLB.text()), float(self.lineEditColorUB.text())],
                     'CScale': self.comboBoxColorScale.currentText(),
                     'Direction': self.comboBoxCbarDirection.currentText(),
@@ -4294,6 +4292,30 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.update_SV()
 
+    def colormap_direction_callback(self):
+        plot_type = self.comboBoxPlotType.currentText()
+        if self.styles[plot_type]['Colors']['Reverse'] == self.checkBoxReverseColormap.isChecked():
+            return
+
+        self.styles[plot_type]['Colors']['Reverse'] = self.checkBoxReverseColormap.isChecked()
+
+        self.update_SV()
+
+    def get_colormap(self, N=None):
+        plot_type = self.comboBoxPlotType.currentText()
+        if self.styles[plot_type]['Colors']['Reverse']:
+            if N is not None:
+                cmap = plt.get_cmap(self.styles[plot_type]['Colors']['Colormap'], N).reversed()
+            else:
+                cmap = plt.get_cmap(self.styles[plot_type]['Colors']['Colormap']).reversed()
+        else:
+            if N is not None:
+                cmap = plt.get_cmap(self.styles[plot_type]['Colors']['Colormap'], N)
+            else:
+                cmap = plt.get_cmap(self.styles[plot_type]['Colors']['Colormap'])
+
+        return cmap
+
     def clim_callback(self):
         plot_type = self.comboBoxPlotType.currentText()
         if self.styles[plot_type]['Colors']['CLim'][0] == float(self.lineEditColorLB.text()) and self.styles[plot_type]['Colors']['CLim'][1] == float(self.lineEditColorUB.text()):
@@ -4354,7 +4376,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         by changing ``MainWindow.comboBoxColormap``, when ``MainWindow.comboBoxColorByField.currentText()`` is ``Cluster``.
         """
         # cluster colormap
-        cmap = plt.get_cmap(self.styles['Cluster']['Colors']['Colormap'], self.tableWidgetViewGroups.rowCount())
+        cmap = self.get_colormap(N=self.tableWidgetViewGroups.rowCount())
 
         # set color for each cluster and place color in table
         colors = [cmap(i) for i in range(cmap.N)]
@@ -4401,7 +4423,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         if plot_type == 'clustering':
                                     n_clusters = int(plot['info']['n_clusters'])
                                     # Get the new colormap from the comboBox
-                                    new_cmap = plt.get_cmap(style['Colors']['Colormap'],5)
+                                    new_cmap = self.get_colormap(N=5)
                                     img = []
                                     for ax in fig.get_axes():
                                         # Retrieve the image object from the axes
@@ -4630,6 +4652,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         pass
 
     def display_QV(self):
+        """Plots selected maps to the Quick View tab
+        
+        Adds plots of predefined analytes to the Quick View tab in a grid layout."""
         self.canvasWindow.setCurrentIndex(2)
         if self.sample_id == '':
             return
@@ -4836,7 +4861,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             print('(add_colorbar) Unknown type: '+cbartype)
 
-    def color_norm(self, style, N=1):
+    def color_norm(self, style, N=None):
+        """Normalize colors for colormap
+        
+        :param style: Styles associated with current plot type.
+        :type style: dict
+        :param N: The number of colors for discrete color maps, Defaults to None
+        :type N: int, optional
+        """
         norm = 0
         match style['Colors']['CScale']:
             case 'linear':
@@ -4847,7 +4879,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 boundaries = np.arange(-0.5, N, N)
                 norm = colors.BoundaryNorm(boundaries, N, clip=True)
 
-        #scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(style['Colors']['Colormap']), norm=norm)
+        #scalarMappable = plt.cm.ScalarMappable(cmap=self.get_colormap(), norm=norm)
 
         return norm
 
@@ -4882,8 +4914,50 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     #         if save:
     #             self.add_plot(plot_information) #do not plot correlation when directory changes
     #         self.update_tree(plot_information['plot_name'], data=plot_information, tree=branch)
+    def correlation_method_callback(self):
+        """Updates colorbar label for correlation plots"""
+        method = self.comboBoxCorrelationMethod.currentText()
+        if self.styles['correlation']['Colors']['CLabel'] == method:
+            return
+
+        if self.checkBoxCorrelationSquared.isChecked():
+            power = '^2'
+        else:
+            power = ''
+
+        # update colorbar label for change in method
+        match method:
+            case 'Pearson':
+                self.styles['correlation']['Colors']['CLabel'] = method + "'s $r" + power + "$"
+            case 'Spearman':
+                self.styles['correlation']['Colors']['CLabel'] = method + "'s $\\rho" + power + "$"
+            case 'Kendall':
+                self.styles['correlation']['Colors']['CLabel'] = method + "'s $\\tau" + power + "$"
+
+        self.update_SV()
+
+    def correlation_squared_callback(self):
+        style = self.styles['correlation']
+        # update color limits and colorbar
+        if self.checkBoxCorrelationSquared.isChecked():
+            self.styles['correlation']['Colors']['CLim'] = [0,1]
+            self.styles['correlation']['Colors']['Colormap'] = 'cmc.oslo'
+        else:
+            self.styles['correlation']['Colors']['CLim'] = [-1,1]
+            self.styles['correlation']['Colors']['Colormap'] = 'RdBu'
+
+        # update label
+        if self.plot_flag:
+            self.plot_flag = False
+            self.correlation_method_callback()
+            self.plot_flag = True
+        else:
+            self.correlation_method_callback()
+
+        self.update_SV()
 
     def plot_correlation(self):
+        """Creates an image of the correlation matrix"""
         print('plot_correlation')
 
         canvas = MplCanvas()
@@ -4900,12 +4974,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         style = self.styles['correlation']
         font = {'size':style['Text']['FontSize']}
 
-        #mask = np.triu(np.ones_like(correlation_matrix, dtype=bool))
-        #cax = ax.imshow(correlation_matrix[mask], cmap=plt.get_cmap(style['Colors']['Colormap']))
         mask = np.zeros_like(correlation_matrix, dtype=bool)
         mask[np.tril_indices_from(mask)] = True
         correlation_matrix = np.ma.masked_where(mask, correlation_matrix)
-        cax = canvas.axes.imshow(correlation_matrix, cmap=plt.get_cmap(style['Colors']['Colormap']))
+        norm = self.color_norm(style)
+        if self.checkBoxCorrelationSquared.isChecked():
+            cax = canvas.axes.imshow(correlation_matrix**2, cmap=self.get_colormap(), norm=norm)
+        else:
+            cax = canvas.axes.imshow(correlation_matrix, cmap=self.get_colormap(), norm=norm)
+
         canvas.axes.spines['top'].set_visible(False)
         canvas.axes.spines['bottom'].set_visible(False)
         canvas.axes.spines['left'].set_visible(False)
@@ -5050,7 +5127,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         _, _, patches = canvas.axes.hist(array, bins=edges, color=style['Colors']['Color'], edgecolor=None, linewidth=style['Lines']['LineWidth'], alpha=0.6)
         # color histogram bins by analyte colormap?
         if self.checkBoxShowHistCmap.isChecked():
-            cmap=plt.get_cmap(self.styles['analyte map']['Colors']['Colormap'])
+            cmap = self.get_colormap()
             for j, p in enumerate(patches):
                 p.set_facecolor(cmap(j / len(patches)))
 
@@ -5288,7 +5365,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 s=style['Markers']['Size'],
                 marker=self.markerdict[style['Markers']['Symbol']],
                 edgecolors='none',
-                cmap=plt.get_cmap(style['Colors']['Colormap']),
+                cmap=self.get_colormap(),
                 alpha=style['Markers']['Alpha']/100,
                 norm=norm)
 
@@ -5399,20 +5476,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         # color by field
         norm = self.color_norm(style)
-        h = canvas.axes.hist2d(x['array'], y['array'], bins=style['Colors']['Resolution'], norm=norm, cmap=plt.get_cmap(style['Colors']['Colormap']))
+        h = canvas.axes.hist2d(x['array'], y['array'], bins=style['Colors']['Resolution'], norm=norm, cmap=self.get_colormap())
         self.add_colorbar(canvas, h[3], style)
-
-
-        # norm = colors.Normalize(vmin=0, vmax=3)
-        # scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(style['Colors']['Colormap']), norm=norm)
-        # if style['Colors']['Direction'] == 'vertical':
-        #     cb = canvas.fig.colorbar(scalarMappable, ax=canvas.axes, orientation=style['Colors']['Direction'], location='right', shrink=0.62)
-        #     cb.set_label('log(N)')
-        # elif style['Colors']['Direction'] == 'horizontal':
-        #     cb = canvas.fig.colorbar(scalarMappable, ax=canvas.axes, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62)
-        #     cb.set_label('log(N)')
-        # else:
-        #     cb = None
 
         # axes
         xmin, xmax, xscale, xlbl = self.get_axis_values(x['type'],x['field'])
@@ -5484,9 +5549,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 cmap=style['Colors']['Colormap'],
                 orientation=style['Colors']['Direction'])
 
-            #norm = plt.Normalize(vmin=0, vmax=3)
-            #scalarMappable = plt.cm.ScalarMappable(cmap=plt.get_cmap(style['Colors']['Colormap']), norm=norm)
-            #cb = fig.colorbar(scalarMappable, ax=, orientation='vertical', location='right', shrink=0.62)
             if cb is not None:
                 cb.set_label('log(N)')
         else:
@@ -5735,7 +5797,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         n_components = components.shape[0]
         n_variables = components.shape[1]
 
-        cax = canvas.axes.imshow(components, cmap=plt.get_cmap(style['Colors']['Colormap']), aspect=1.0)
+        cax = canvas.axes.imshow(components, cmap=self.get_colormap(), aspect=1.0)
 
         # Add a colorbar
         if style['Colors']['Direction'] == 'vertical':
@@ -5887,7 +5949,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         n_clusters = len(unique_groups)
 
         # Extract colors from the colormap and assign to self.group_cmap
-        cmap = plt.get_cmap(style['Colors']['Colormap'], n_clusters)
+        cmap = self.get_colormap(n_clusters)
         colors = [cmap(i) for i in range(cmap.N)]
         for label, color in zip(unique_groups, colors):
             self.group_cmap[label] = color
@@ -6567,6 +6629,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.comboBoxColorByField.setEnabled(True)
             self.comboBoxColorField.setEnabled(True)
             self.comboBoxFieldColormap.setEnabled(True)
+            self.checkBoxReverseColormap.setEnabled(True)
             self.comboBoxCbarDirection.setEnabled(True)
             self.lineEditCbarLabel.setEnabled(True)
             self.lineEditColorLB.setEnabled(True)
@@ -6585,6 +6648,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.labelColorByField.setEnabled(self.comboBoxColorByField.isEnabled())
         self.labelColorField.setEnabled(self.comboBoxColorField.isEnabled())
         self.labelFieldColormap.setEnabled(self.comboBoxFieldColormap.isEnabled())
+        self.labelReverseColormap.setEnabled(self.checkBoxReverseColormap.isEnabled())
         self.labelCbarDirection.setEnabled(self.comboBoxCbarDirection.isEnabled())
         self.labelCbarLabel.setEnabled(self.lineEditCbarLabel.isEnabled())
         self.labelColorBounds.setEnabled(self.lineEditColorLB.isEnabled())
@@ -8823,7 +8887,7 @@ class Profiling:
                     child.widget().deleteLater()
 
             # Get the colormap specified by the user
-            cmap = matplotlib.colormaps.get_cmap(self.main_window.comboBoxFieldColormap.currentText())
+            cmap = self.get_colormap()
             # Determine point type from the pushButtonProfileType text
             if self.main_window.comboBoxPointType.currentText() == 'median + IQR':
                 point_type = 'median'

@@ -208,99 +208,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxMarker.clear()
         self.comboBoxMarker.addItems(self.markerdict.keys())
 
-        self.default_styles = {'Axes': {'XLimAuto': True, 'XLim': [0,1], 'XScale': 'linear', 'XLabel': '', 'YLimCustom': True, 'YLim': [0,1], 'YScale': 'linear', 'YLabel': '', 'ZLabel': '', 'AspectRatio': '1.0', 'TickDir': 'out'},
-                               'Text': {'Font': '', 'FontSize': 11.0},
-                               'Scales': {'Direction': 'none', 'Location': 'northeast', 'OverlayColor': '#ffffff'},
-                               'Markers': {'Symbol': 'circle', 'Size': 6, 'Alpha': 30},
-                               'Lines': {'LineWidth': 1.5, 'Multiplier': 1},
-                               'Colors': {'Color': '#1c75bc', 'ColorByField': 'None', 'Field': '', 'Colormap': 'viridis', 'CLimAuto': True, 'CLim':[0,1], 'CScale':'linear', 'Direction': 'vertical', 'CLabel': '', 'Resolution': 10}
-                               }
-        default_font = 'Avenir'
-        try:
-            self.fontComboBox.setFont(QFont(default_font))
-            self.default_styles['Text']['Font'] = self.fontComboBox.currentFont().family()
-        except:
-            print('Could not find '+default_font+' font')
-
         self.plot_types = {self.sample_tab_id: [0, 'analyte map', 'correlation'],
-                self.spot_tab_id: [0, 'analyte map', 'gradient map'],
-                self.process_tab_id: [0, 'analyte map', 'gradient map', 'histogram'],
-                self.filter_tab_id: [0, 'analyte map', 'gradient map'],
-                self.scatter_tab_id: [0, 'scatter', 'heatmap', 'ternary map'],
-                self.ndim_tab_id: [0, 'TEC', 'Radar'],
-                self.pca_tab_id: [0, 'variance','vectors','pca scatter','pca heatmap','PCA Score'],
-                self.cluster_tab_id: [0, 'Cluster', 'Cluster Score'],
-                self.profile_tab_id: [0, 'profile', 'analyte map', 'gradient map', 'Cluster Score', 'PCA Score'],
-                self.special_tab_id: [0, 'profile', 'analyte map', 'gradient map', 'Cluster Score', 'PCA Score']}
+            self.spot_tab_id: [0, 'analyte map', 'gradient map'],
+            self.process_tab_id: [0, 'analyte map', 'gradient map', 'histogram'],
+            self.filter_tab_id: [0, 'analyte map', 'gradient map'],
+            self.scatter_tab_id: [0, 'scatter', 'heatmap', 'ternary map'],
+            self.ndim_tab_id: [0, 'TEC', 'Radar'],
+            self.pca_tab_id: [0, 'variance','vectors','pca scatter','pca heatmap','PCA Score'],
+            self.cluster_tab_id: [0, 'Cluster', 'Cluster Score'],
+            self.profile_tab_id: [0, 'profile', 'analyte map', 'gradient map', 'Cluster Score', 'PCA Score'],
+            self.special_tab_id: [0, 'profile', 'analyte map', 'gradient map', 'Cluster Score', 'PCA Score']}
 
-        self.styles = {'analyte map': copy.deepcopy(self.default_styles),
-                'correlation': copy.deepcopy(self.default_styles),
-                'histogram': copy.deepcopy(self.default_styles),
-                'gradient map': copy.deepcopy(self.default_styles),
-                'scatter': copy.deepcopy(self.default_styles),
-                'heatmap': copy.deepcopy(self.default_styles),
-                'ternary map': copy.deepcopy(self.default_styles),
-                'TEC': copy.deepcopy(self.default_styles),
-                'Radar': copy.deepcopy(self.default_styles),
-                'variance': copy.deepcopy(self.default_styles),
-                'vectors': copy.deepcopy(self.default_styles),
-                'pca scatter': copy.deepcopy(self.default_styles),
-                'pca heatmap': copy.deepcopy(self.default_styles),
-                'PCA Score': copy.deepcopy(self.default_styles),
-                'Cluster': copy.deepcopy(self.default_styles),
-                'Cluster Score': copy.deepcopy(self.default_styles),
-                'profile': copy.deepcopy(self.default_styles)}
-
-        # update default styles
-        for k in self.styles.keys():
-            self.styles[k]['Text']['Font'] = self.fontComboBox.currentFont().family()
-
-        self.styles['analyte map']['Colors']['Colormap'] = 'plasma'
-        self.styles['analyte map']['Colors']['ColorByField'] = 'Analyte'
-
-        self.styles['correlation']['Axes']['AspectRatio'] = 1.0
-        self.styles['correlation']['Text']['FontSize'] = 8
-        self.styles['correlation']['Colors']['Colormap'] = 'RdBu'
-        self.styles['correlation']['Colors']['Direction'] = 'vertical'
-        self.styles['correlation']['Colors']['CLim'] = [-1,1]
-
-        self.styles['vectors']['Axes']['AspectRatio'] = 1.0
-        self.styles['vectors']['Colors']['Colormap'] = 'RdBu'
-
-        self.styles['gradient map']['Colors']['Colormap'] = 'RdYlBu'
-
-        self.styles['Cluster Score']['Colors']['Colormap'] = 'plasma'
-        self.styles['Cluster Score']['Colors']['Direction'] = 'vertical'
-        self.styles['Cluster Score']['Colors']['ColorByField'] = 'Cluster Score'
-        self.styles['Cluster Score']['Colors']['ColorField'] = 'Cluster0'
-        self.styles['Cluster Score']['Colors']['CScale'] = 'linear'
-
-        self.styles['Cluster']['Colors']['CScale'] = 'discrete'
-
-        self.styles['PCA Score']['Colors']['CScale'] = 'linear'
-        self.styles['PCA Score']['Colors']['ColorByField'] = 'PCA Score'
-        self.styles['PCA Score']['Colors']['ColorField'] = 'PC1'
-
-        self.styles['scatter']['Axes']['AspectRatio'] = 1
-
-        self.styles['heatmap']['Axes']['AspectRatio'] = 1
-        self.styles['heatmap']['Colors']['CLim'] = [1,1000] 
-        self.styles['heatmap']['Colors']['CScale'] = 'log'
-        self.styles['TEC']['Axes']['AspectRatio'] = 0.62
-        self.styles['variance']['Axes']['AspectRatio'] = 0.62
-        self.styles['pca scatter']['Scales']['OverlayColor'] = '#4d4d4d' 
-        self.styles['pca scatter']['Lines']['LineWidth'] = 0.5
-        self.styles['pca scatter']['Axes']['AspectRatio'] = 1
-        self.styles['pca heatmap']['Axes']['AspectRatio'] = 1
-
-        self.styles['variance']['Text']['FontSize'] = 8
-
-        self.styles['histogram']['Axes']['AspectRatio'] = 0.62
-        self.styles['histogram']['Lines']['LineWidth'] = 0
-
-        self.styles['profile']['Lines']['LineWidth'] = 1.0
-        self.styles['profile']['Markers']['Size'] = 12
-        self.styles['profile']['Colors']['Color'] = '#d3d3d3'
+        self.styles = {}
+        self.reset_default_styles()
 
 
         # Menu and Toolbar
@@ -788,6 +708,58 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # ----start debugging----
         # self.test_get_field_list()
         # ----end debugging----
+
+    # -------------------------------------
+    # Reset to start
+    # -------------------------------------
+    def reset_analysis(self, selection='full'):
+        if selection =='full':
+            #reset self.data
+            self.data = {}
+            self.plot_widget_dict ={'lasermap':{},'histogram':{},'lasermap_norm':{},'clustering':{},'scatter':{},'n-dim':{},'correlation':{}, 'multidimensional':{}}
+            self.multi_view_index = []
+            self.laser_map_dict = {}
+            self.multiview_info_label = {}
+            self.selected_analytes = []
+            self.n_dim_list = []
+            self.group_cmap = {}
+            self.lasermaps = {}
+            self.proxies = []
+            self.treeModel.clear()
+            self.prev_plot = ''
+            self.create_tree()
+            self.change_sample(self.comboBoxSampleId.currentIndex())
+
+            # reset styles
+            self.axis_dict = {}
+            self.reset_default_styles()
+
+            # reset plot layouts
+            self.clear_layout(self.widgetSingleView.layout())
+            self.clear_layout(self.widgetMultiView.layout())
+            self.clear_layout(self.widgetQuickView.layout())
+
+            # make the first plot
+            self.plot_flag = True
+            self.update_SV()
+        elif selection == 'sample': #sample is changed
+
+            #clear filter table
+            self.tableWidgetFilters.clearContents()
+            self.tableWidgetFilters.setRowCount(0)
+
+            #clear profiling
+            self.profiling.clear_profiles()
+
+            #clear polygons
+            self.polygon.clear_polygons()
+
+        pass
+
+    def clear_analysis(self):
+        # clears analysis
+
+        pass
 
     # -------------------------------------
     # File I/O related functions
@@ -1742,41 +1714,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.polygon.update_table_widget()
         pass
 
-    def reset_analysis(self, selection='full'):
-        if selection =='full':
-            #reset self.data
-            self.data = {}
-            self.plot_widget_dict ={'lasermap':{},'histogram':{},'lasermap_norm':{},'clustering':{},'scatter':{},'n-dim':{},'correlation':{}, 'multidimensional':{}}
-            self.multi_view_index = []
-            self.laser_map_dict = {}
-            self.multiview_info_label = {}
-            self.selected_analytes = []
-            self.n_dim_list = []
-            self.group_cmap = {}
-            self.lasermaps = {}
-            self.proxies = []
-            self.treeModel.clear()
-            self.prev_plot = ''
-            self.create_tree()
-            self.change_sample(self.comboBoxSampleId.currentIndex())
-        elif selection == 'sample': #sample is changed
 
-            #clear filter table
-            self.tableWidgetFilters.clearContents()
-            self.tableWidgetFilters.setRowCount(0)
-
-            #clear profiling
-            self.profiling.clear_profiles()
-
-            #clear polygons
-            self.polygon.clear_polygons()
-
-        pass
-
-    def clear_analysis(self):
-        # clears analysis
-
-        pass
 
 
     # -------------------------------
@@ -3059,6 +2997,91 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------
     # Style related fuctions/callbacks
     # -------------------------------------
+    def reset_default_styles(self):
+        default_plot_style = {'Axes': {'XLimAuto': True, 'XLim': [0,1], 'XScale': 'linear', 'XLabel': '', 'YLimCustom': True, 'YLim': [0,1], 'YScale': 'linear', 'YLabel': '', 'ZLabel': '', 'AspectRatio': '1.0', 'TickDir': 'out'},
+                               'Text': {'Font': '', 'FontSize': 11.0},
+                               'Scales': {'Direction': 'none', 'Location': 'northeast', 'OverlayColor': '#ffffff'},
+                               'Markers': {'Symbol': 'circle', 'Size': 6, 'Alpha': 30},
+                               'Lines': {'LineWidth': 1.5, 'Multiplier': 1},
+                               'Colors': {'Color': '#1c75bc', 'ColorByField': 'None', 'Field': '', 'Colormap': 'viridis', 'CLimAuto': True, 'CLim':[0,1], 'CScale':'linear', 'Direction': 'vertical', 'CLabel': '', 'Resolution': 10}
+                               }
+        default_font = 'Avenir'
+        try:
+            self.fontComboBox.setFont(QFont(default_font))
+            default_plot_style['Text']['Font'] = self.fontComboBox.currentFont().family()
+        except:
+            print('Could not find '+default_font+' font')
+
+
+        self.styles = {'analyte map': copy.deepcopy(default_plot_style),
+                'correlation': copy.deepcopy(default_plot_style),
+                'histogram': copy.deepcopy(default_plot_style),
+                'gradient map': copy.deepcopy(default_plot_style),
+                'scatter': copy.deepcopy(default_plot_style),
+                'heatmap': copy.deepcopy(default_plot_style),
+                'ternary map': copy.deepcopy(default_plot_style),
+                'TEC': copy.deepcopy(default_plot_style),
+                'Radar': copy.deepcopy(default_plot_style),
+                'variance': copy.deepcopy(default_plot_style),
+                'vectors': copy.deepcopy(default_plot_style),
+                'pca scatter': copy.deepcopy(default_plot_style),
+                'pca heatmap': copy.deepcopy(default_plot_style),
+                'PCA Score': copy.deepcopy(default_plot_style),
+                'Cluster': copy.deepcopy(default_plot_style),
+                'Cluster Score': copy.deepcopy(default_plot_style),
+                'profile': copy.deepcopy(default_plot_style)}
+
+        # update default styles
+        for k in self.styles.keys():
+            self.styles[k]['Text']['Font'] = self.fontComboBox.currentFont().family()
+
+        self.styles['analyte map']['Colors']['Colormap'] = 'plasma'
+        self.styles['analyte map']['Colors']['ColorByField'] = 'Analyte'
+
+        self.styles['correlation']['Axes']['AspectRatio'] = 1.0
+        self.styles['correlation']['Text']['FontSize'] = 8
+        self.styles['correlation']['Colors']['Colormap'] = 'RdBu'
+        self.styles['correlation']['Colors']['Direction'] = 'vertical'
+        self.styles['correlation']['Colors']['CLim'] = [-1,1]
+
+        self.styles['vectors']['Axes']['AspectRatio'] = 1.0
+        self.styles['vectors']['Colors']['Colormap'] = 'RdBu'
+
+        self.styles['gradient map']['Colors']['Colormap'] = 'RdYlBu'
+
+        self.styles['Cluster Score']['Colors']['Colormap'] = 'plasma'
+        self.styles['Cluster Score']['Colors']['Direction'] = 'vertical'
+        self.styles['Cluster Score']['Colors']['ColorByField'] = 'Cluster Score'
+        self.styles['Cluster Score']['Colors']['ColorField'] = 'Cluster0'
+        self.styles['Cluster Score']['Colors']['CScale'] = 'linear'
+
+        self.styles['Cluster']['Colors']['CScale'] = 'discrete'
+
+        self.styles['PCA Score']['Colors']['CScale'] = 'linear'
+        self.styles['PCA Score']['Colors']['ColorByField'] = 'PCA Score'
+        self.styles['PCA Score']['Colors']['ColorField'] = 'PC1'
+
+        self.styles['scatter']['Axes']['AspectRatio'] = 1
+
+        self.styles['heatmap']['Axes']['AspectRatio'] = 1
+        self.styles['heatmap']['Colors']['CLim'] = [1,1000] 
+        self.styles['heatmap']['Colors']['CScale'] = 'log'
+        self.styles['TEC']['Axes']['AspectRatio'] = 0.62
+        self.styles['variance']['Axes']['AspectRatio'] = 0.62
+        self.styles['pca scatter']['Scales']['OverlayColor'] = '#4d4d4d' 
+        self.styles['pca scatter']['Lines']['LineWidth'] = 0.5
+        self.styles['pca scatter']['Axes']['AspectRatio'] = 1
+        self.styles['pca heatmap']['Axes']['AspectRatio'] = 1
+
+        self.styles['variance']['Text']['FontSize'] = 8
+
+        self.styles['histogram']['Axes']['AspectRatio'] = 0.62
+        self.styles['histogram']['Lines']['LineWidth'] = 0
+
+        self.styles['profile']['Lines']['LineWidth'] = 1.0
+        self.styles['profile']['Markers']['Size'] = 12
+        self.styles['profile']['Colors']['Color'] = '#d3d3d3'
+
 
     # Themes
     # -------------------------------------
@@ -4512,23 +4535,23 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.plot_clusters()
 
     
-        # self.styles = {'analyte map': copy.deepcopy(self.default_styles),
-        #                 'correlation': copy.deepcopy(self.default_styles),
-        #                 'histogram': copy.deepcopy(self.default_styles),
-        #                 'gradient map': copy.deepcopy(self.default_styles),
-        #                 'scatter': copy.deepcopy(self.default_styles),
-        #                 'heatmap': copy.deepcopy(self.default_styles),
-        #                 'ternary map': copy.deepcopy(self.default_styles),
-        #                 'TEC': copy.deepcopy(self.default_styles),
-        #                 'Radar': copy.deepcopy(self.default_styles),
-        #                 'variance': copy.deepcopy(self.default_styles),
-        #                 'vectors': copy.deepcopy(self.default_styles),
-        #                 'pca scatter': copy.deepcopy(self.default_styles),
-        #                 'pca heatmap': copy.deepcopy(self.default_styles),
-        #                 'PCA Score': copy.deepcopy(self.default_styles),
-        #                 'Cluster': copy.deepcopy(self.default_styles),
-        #                 'Cluster Score': copy.deepcopy(self.default_styles),
-        #                 'profile': copy.deepcopy(self.default_styles)}
+        # self.styles = {'analyte map': copy.deepcopy(default_plot_style),
+        #                 'correlation': copy.deepcopy(default_plot_style),
+        #                 'histogram': copy.deepcopy(default_plot_style),
+        #                 'gradient map': copy.deepcopy(default_plot_style),
+        #                 'scatter': copy.deepcopy(default_plot_style),
+        #                 'heatmap': copy.deepcopy(default_plot_style),
+        #                 'ternary map': copy.deepcopy(default_plot_style),
+        #                 'TEC': copy.deepcopy(default_plot_style),
+        #                 'Radar': copy.deepcopy(default_plot_style),
+        #                 'variance': copy.deepcopy(default_plot_style),
+        #                 'vectors': copy.deepcopy(default_plot_style),
+        #                 'pca scatter': copy.deepcopy(default_plot_style),
+        #                 'pca heatmap': copy.deepcopy(default_plot_style),
+        #                 'PCA Score': copy.deepcopy(default_plot_style),
+        #                 'Cluster': copy.deepcopy(default_plot_style),
+        #                 'Cluster Score': copy.deepcopy(default_plot_style),
+        #                 'profile': copy.deepcopy(default_plot_style)}
 
     def new_plot_widget(self, plot_info, save):
         """Creates new figure widget

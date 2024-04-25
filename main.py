@@ -2577,7 +2577,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.crop_tool.apply_crop()
 
     def plot_laser_map_cont(self,layout,array,img,p1,cm, view):
-        # Single views
+        # Single views (add histogram)
         if self.canvasWindow.currentIndex()==0 and view==self.canvasWindow.currentIndex():
             # Try to remove the colorbar just in case it was added somehow
             # for i in reversed(range(p1.layout.count())):  # Reverse to avoid skipping due to layout change
@@ -2593,35 +2593,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             histogram.setImageItem(img)
             histogram.setBackground('w')
             layout.addWidget(histogram, 3, 0,  1, 2)
-            # Set the maximum length
-            # max_length = 1.5 * p1.boundingRect().width()
-            # histogram.setMaximumWidth(max_length)
-            # Create a horizontal spacer to center the histogram
-            # spacer = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-            # # Add a Reset Zoom button
-            # reset_zoom_button = QtWidgets.QPushButton("Reset Zoom")
-            # reset_zoom_button.setObjectName("pushButtonResetZoom")
-            # # reset_button.setMaximumWidth(100)
-            # reset_zoom_button.clicked.connect(lambda: self.reset_zoom(p1,histogram))
-            # # layout.addWidget(reset_zoom_button, 4, 0, 1, 1)
-            # reset_plot_button = QtWidgets.QPushButton("Reset Plot")
-            # reset_plot_button.setObjectName("pushButtonResetPlot")
-            # # reset_button.setMaximumWidth(100)
-            # reset_plot_button.clicked.connect(lambda: print(histogram.getHistogramRange()))
-            # # layout.addWidget(reset_plot_button, 4, 1, 1, 1)
-
-            # hbox = QHBoxLayout()
-            # hbox.addStretch(1)
-            # hbox.addWidget(reset_zoom_button)
-            # hbox.addWidget(reset_plot_button)
-            # vbox = QVBoxLayout()
-            # vbox.setObjectName('buttons')
-            # vbox.addStretch(1)
-            # vbox.addLayout(hbox)
-
-            # layout.addLayout(vbox, 4, 0, 1, 2)
+            
         else:
-            # multi view
+            # multi view (add colorbar)
             object_names_to_remove = ['histogram', 'pushButtonResetZoom', 'pushButtonResetPlot', 'buttons']
             # self.remove_widgets_from_layout(layout, object_names_to_remove)
             # plot = glw.getItem(0, 0)
@@ -2629,25 +2603,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             cbar.setObjectName('colorbar')
             cbar.setImageItem(img, insert_in=p1)
             cbar.setLevels([array.min(), array.max()])
-
-    # def setup_zoom_window(self, layout):
-    #     # Create a GraphicsLayoutWidget for the zoom window
-    #     self.zoomWindow = pg.GraphicsLayoutWidget(show=True)
-    #     self.zoomPlot = self.zoomWindow.addPlot(title="Zoom")
-    #     self.zoomImg = pg.ImageItem()
-    #     self.zoomPlot.addItem(self.zoomImg)
-    #     # You might need to adjust the layout position according to your UI design
-    #     layout.addWidget(self.zoomWindow, 0, 3, 1, 2)  # Example placement
-    #     # Setup initial properties of the zoom window
-    #     self.zoomFactor = 5  # How much to zoom in
-    #     self.zoomPlot.showGrid(x=True, y=True)
-    #     self.zoomPlot.setAspectLocked(True)
-    #     self.zoomPlot.invertY(True)
-
-    #     # Optionally, set up a crosshair or marker in the zoom window
-    #     self.zoomTarget = pg.TargetItem(symbol='+')
-    #     self.zoomPlot.addItem(self.zoomTarget)
-    #     self.zoomTarget.hide()  # Initially hidden
 
     def init_zoom_view(self):
         # Set the initial zoom level
@@ -2720,7 +2675,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Executes on change of ``MainWindow.comboBoxEdgeDetectMethod`` when ``MainWindow.toolButtonEdgeDetect`` is checked.
         Options include 'sobel', 'canny', and 'zero_cross'.
         """
-        print(add_edge_detection)
+        print('add_edge_detection')
         style = self.styles[self.comboBoxPlotType.currentText()]
         if self.edge_img:
             # remove existing filters
@@ -2754,13 +2709,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # This could be an update to an existing ImageItem or creating a new one if necessary.
             self.edge_array = edge_detected_image
             self.edge_img = pg.ImageItem(image=self.edge_array)
+            print(self.edge_img.shape)
             #set aspect ratio of rectangle
             self.edge_img.setRect(0,0,self.x_range,self.y_range)
             # edge_img.setAs
             cm = pg.colormap.get(style['Colors']['Colormap'], source = 'matplotlib')
             self.edge_img.setColorMap(cm)
 
-            self.plot.addItem(self.edge_img)
+            #onemat = np.repeat(np.ones_like(self.edge_img),3).reshape(self.array_size[0],self.array_size[1],3)
+            #self.edge_overlay = pg.ImageItem(image=np.concatenate(onemat,255*(1 - 0.5*(self.edge_array)),axis=2))
+            #self.edge_overlay.setRect(0,0,self.x_range,self.y_range)
+            #self.plot.addItem(self.edge_img)
+            self.plot.addItem(self.edge_overlay)
 
     def zero_crossing_laplacian(self,array):
         """Apply Zero Crossing on the Laplacian of the image.
@@ -4303,16 +4263,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def get_colormap(self, N=None):
         plot_type = self.comboBoxPlotType.currentText()
-        if self.styles[plot_type]['Colors']['Reverse']:
-            if N is not None:
-                cmap = plt.get_cmap(self.styles[plot_type]['Colors']['Colormap'], N).reversed()
-            else:
-                cmap = plt.get_cmap(self.styles[plot_type]['Colors']['Colormap']).reversed()
+        if N is not None:
+            cmap = plt.get_cmap(self.styles[plot_type]['Colors']['Colormap'], N)
         else:
-            if N is not None:
-                cmap = plt.get_cmap(self.styles[plot_type]['Colors']['Colormap'], N)
-            else:
-                cmap = plt.get_cmap(self.styles[plot_type]['Colors']['Colormap'])
+            cmap = plt.get_cmap(self.styles[plot_type]['Colors']['Colormap'])
+
+        if self.styles[plot_type]['Colors']['Reverse']:
+            cmap = cmap.reversed()
 
         return cmap
 
@@ -5797,19 +5754,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         n_components = components.shape[0]
         n_variables = components.shape[1]
 
-        cax = canvas.axes.imshow(components, cmap=self.get_colormap(), aspect=1.0)
+        norm = color_norm(style)
+        cax = canvas.axes.imshow(components, cmap=self.get_colormap(), aspect=1.0, norm=norm)
 
         # Add a colorbar
-        if style['Colors']['Direction'] == 'vertical':
-            cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location='right', shrink=0.62, fraction=0.1)
-            cbar.set_label('PCA Score', size=style['Text']['FontSize'])
-            cbar.ax.tick_params(labelsize=style['Text']['FontSize'])
-        elif style['Colors']['Direction'] == 'horizontal':
-            cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62, fraction=0.1)
-            cbar.set_label('PCA Score', size=style['Text']['FontSize'])
-            cbar.ax.tick_params(labelsize=style['Text']['FontSize'])
-        else:
-            cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62, fraction=0.1)
+        self.add_colorbar(canvas,cax,style)
+        # if style['Colors']['Direction'] == 'vertical':
+        #     cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location='right', shrink=0.62, fraction=0.1)
+        #     cbar.set_label('PCA Score', size=style['Text']['FontSize'])
+        #     cbar.ax.tick_params(labelsize=style['Text']['FontSize'])
+        # elif style['Colors']['Direction'] == 'horizontal':
+        #     cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62, fraction=0.1)
+        #     cbar.set_label('PCA Score', size=style['Text']['FontSize'])
+        #     cbar.ax.tick_params(labelsize=style['Text']['FontSize'])
+        # else:
+        #     cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62, fraction=0.1)
 
 
         xlbl = 'Principal Components'
@@ -5864,8 +5823,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         pc_x = int(self.spinBoxPCX.value())-1
         pc_y = int(self.spinBoxPCY.value())-1
 
-        x = self.pca_results.components_[pc_x][:]
-        y = self.pca_results.components_[pc_y][:]
+        x = self.pca_results.components_[:,pc_x]
+        y = self.pca_results.components_[:,pc_y]
 
         print(pc_x)
         print(x)

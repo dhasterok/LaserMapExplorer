@@ -7,7 +7,7 @@ Created on Fri Apr 26 01:02:07 2024
 """
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QDialog, QFileDialog, QTableWidgetItem, QComboBox
+from PyQt5.QtWidgets import QDialog, QFileDialog, QTableWidgetItem, QComboBox,  QProgressBar
 import os
 import re
 import sys
@@ -25,7 +25,12 @@ class excelConcatenator(QtWidgets.QMainWindow, Ui_ExelConcatenator):
         self.sample_ids = []
         self.paths = []
         
-        
+        self.statusBar = self.statusBar()
+        # Set a message that will be displayed in the status bar
+        self.statusBar.showMessage('Ready')
+        # Adding a progress bar to the status bar
+        self.progressBar = QProgressBar()
+        self.statusBar.addPermanentWidget(self.progressBar)
         
         self.pushButtonSaveSelection.clicked.connect(self.save_selection)
 
@@ -117,7 +122,11 @@ class excelConcatenator(QtWidgets.QMainWindow, Ui_ExelConcatenator):
                 sweep_speed = float(sweep_speed_item.text())
                 if sweep_time > 0 and sweep_speed > 0:
                     intraline_dist = sweep_time * sweep_speed
-                    self.tableWidgetMetaData.setItem(row, 10, QTableWidgetItem(str(intraline_dist)))
+                    if self.checkBoxApplyAll.isChecked():
+                        for row in range(self.tableWidgetMetaData.rowCount()):
+                                self.tableWidgetMetaData.setItem(row, 10, QTableWidgetItem(str(intraline_dist)))
+                    else:
+                        self.tableWidgetMetaData.setItem(row, 10, QTableWidgetItem(str(intraline_dist)))
             elif sweep_time_item and sweep_speed_item:
                 self.statusBar.showMessage('Sweep time and sweep speed should be postive')
 
@@ -141,10 +150,10 @@ class excelConcatenator(QtWidgets.QMainWindow, Ui_ExelConcatenator):
             if delimiter:
                 delimiter = delimiter.text().strip().lower()
             scan_no_pos   = self.tableWidgetMetaData.cellWidget(i,5).currentText().lower()
-            spot_size = self.tableWidgetMetaData.item(i,6).text().lower()
-            interline_dist = self.tableWidgetMetaData.item(i,7).text().lower()
+            spot_size = float(self.tableWidgetMetaData.item(i,6).text().lower())
+            interline_dist = float(self.tableWidgetMetaData.item(i,7).text().lower())
 
-            intraline_dist = self.tableWidgetMetaData.item(i,10).text().lower()
+            intraline_dist = float(self.tableWidgetMetaData.item(i,10).text().lower())
             line_sep =20
             line_dir = 'x'
             
@@ -214,8 +223,11 @@ class excelConcatenator(QtWidgets.QMainWindow, Ui_ExelConcatenator):
                     final_data.insert(2,'X',final_data['SpotNum'] * line_sep)
                     final_data.insert(3,'Y',final_data['SpotNum'] * spot_size)
                     
+                    final_data.insert(3,'Time_Sec_',np.nan)
+                    
                     print(final_data.head())
                     
+            
     def orientation(self,readdir):
    
         match readdir:
@@ -255,7 +267,11 @@ class excelConcatenator(QtWidgets.QMainWindow, Ui_ExelConcatenator):
         else:
             self.statusBar.showMessage('Iolite name not part of filename')
             return []
-        df = pd.read_csv(file_path, header=None)
+        
+        # drop rows and columns with all nans 
+        df = pd.read_csv(file_path, header=None).dropna(how='all', axis=0).dropna(how='all', axis=1)
+       
+        print(df.shape)
         if line_dir =='x':
             new_df= pd.DataFrame(df.values.flatten(), columns = [iolite_name])
         elif line_dir =='y':

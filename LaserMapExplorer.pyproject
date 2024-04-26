@@ -8,6 +8,7 @@
         "resources.qrc",
         "designer/toggleswitch.cpp",
         "designer/toggleswitch.h",
+        "designer/ExcelConcatenator_old.ui",
         "designer/ExcelConcatenator.ui"
     ]
 }

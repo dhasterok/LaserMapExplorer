@@ -1,7 +1,7 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.Qt import QStandardItemModel, QStandardItem, QTextCursor
 from PyQt5.QtCore import Qt, QObject, QTimer, pyqtSignal, QRectF, Qt, QPointF
-from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QHBoxLayout, QVBoxLayout, QGridLayout, QMessageBox, QHeaderView, QMenu, QGraphicsRectItem
+from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QHBoxLayout, QVBoxLayout, QGridLayout, QMessageBox, QHeaderView, QMenu, QGraphicsRectItem, QStatusBar
 from PyQt5.QtWidgets import QFileDialog, QProgressDialog, QWidget, QTabWidget, QDialog, QLabel, QListWidgetItem, QTableWidget, QInputDialog, QAbstractItemView, QStyledItemDelegate
 from PyQt5.QtGui import QIntValidator, QDoubleValidator, QColor, QImage, QPainter, QPixmap, QTransform, QFont, QPen, QCursor, QPainter, QBrush
 from pyqtgraph import PlotWidget, ScatterPlotItem, mkPen, AxisItem, PlotDataItem
@@ -47,7 +47,7 @@ from src.calculator import CalWindow
 from src.ui.MainWindow import Ui_MainWindow
 from src.ui.AnalyteSelectionDialog import Ui_Dialog
 from src.ui.PreferencesWindow import Ui_PreferencesWindow
-from src.ui.ExcelConcatenator import Ui_Dialog
+from src.ui.ExcelConcatenator import Ui_ExelConcatenator
 
 pg.setConfigOption('imageAxisOrder', 'row-major') # best performance
 ## !pyrcc5 resources.qrc -o src/ui/resources_rc.py
@@ -4267,7 +4267,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def field_colormap_callback(self):
         """Sets the color map
-        
+
         Sets the colormap in ``MainWindow.styles`` for the current plot type, set from ``MainWindow.comboBoxFieldColormap``.
         """
         plot_type = self.comboBoxPlotType.currentText()
@@ -4280,7 +4280,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def colormap_direction_callback(self):
         """Set colormap direction (normal/reverse)
-        
+
         Reverses colormap if ``MainWindow.checkBoxReverseColormap.isChecked()`` is ``True``."""
         plot_type = self.comboBoxPlotType.currentText()
         if self.styles[plot_type]['Colors']['Reverse'] == self.checkBoxReverseColormap.isChecked():
@@ -4292,9 +4292,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def get_colormap(self, N=None):
         """Gets the color map
-        
+
         Gets the colormap from ``MainWindow.styles`` for the current plot type and reverses or sets as discrete in needed.
-        
+
         :param N: Creates a discrete color map, if not supplied, the colormap is continuous, Defaults to None.
         :type N: int, optional
 
@@ -4314,7 +4314,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def clim_callback(self):
         """Sets the color limits
-        
+
         Sets the color limits in ``MainWindow.styles`` for the current plot type.
         """
         plot_type = self.comboBoxPlotType.currentText()
@@ -4327,7 +4327,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def cbar_direction_callback(self):
         """Sets the colorbar direction
-        
+
         Sets the colorbar direction in ``MainWindow.styles`` for the current plot type.
         """
         plot_type = self.comboBoxPlotType.currentText()
@@ -4339,7 +4339,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def cbar_label_callback(self):
         """Sets color label
-        
+
         Sets the color label in ``MainWindow.styles`` for the current plot type.
         """
         plot_type = self.comboBoxPlotType.currentText()
@@ -4611,7 +4611,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # check if canvas is full
             if row == self.spinBoxMaxRows.value()-1 and col == self.spinBoxMaxCols.value()-1 and self.widgetMultiView.layout().itemAtPosition(row,col):
                 QMessageBox.warning(self.main_window, "Add plot warning", "Canvas is full, to add more plots, increase row or column max.")
-                
+
             # add figure to canvas
             self.widgetMultiView.layout().addWidget(widget_dict['info']['figure'],row,col)
             widget_dict['view'] = 1
@@ -4930,15 +4930,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------
     def array_to_image(self, map_df):
         """Prepares map for display by converting to RGBA image
-        
+
         :param map_df: contains map data to convert
         :type map_df: pandas.DataFrame
-        
+
         :returns: an rgba array
         :rtype: numpy.ndarray
         """
         mask = self.data[self.sample_id]['mask']
-        
+
         array = np.reshape(map_df['array'].values, self.array_size, order=self.order)
 
         # Step 1: Normalize your data array for colormap application
@@ -5006,7 +5006,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         plotWindow.addItem(img_item)
 
-        # turn off axes and 
+        # turn off axes and
         plotWindow.showAxes(False, showValues=(True,False,False,True) )
         plotWindow.invertY(True)
         plotWindow.setAspectLocked()
@@ -6466,7 +6466,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.plot_id[plot_type][self.sample_id]  = self.plot_id[plot_type][self.sample_id]+1
         else:
             self.plot_id[plot_type][self.sample_id]  = 0
-            
+
         plot_name = plot_type +'_'+str(self.plot_id[plot_type][self.sample_id])
 
         self.update_figure_font(canvas, self.styles[plot_type]['Text']['Font'])
@@ -7888,7 +7888,7 @@ class analyteSelectionWindow(QDialog, Ui_Dialog):
 
 # Excel concatenator gui
 # -------------------------------
-class excelConcatenator(QDialog, Ui_Dialog):
+class excelConcatenator(QtWidgets.QMainWindow, Ui_ExelConcatenator):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
@@ -7910,7 +7910,7 @@ class excelConcatenator(QDialog, Ui_Dialog):
         self.pushButtonImport.clicked.connect(self.import_data)
 
 
-
+        self.tableWidgetMetaData.currentItemChanged.connect(self.on_item_changed)
 
 
 
@@ -7953,33 +7953,53 @@ class excelConcatenator(QDialog, Ui_Dialog):
 
     def populate_table(self):
         self.tableWidgetMetaData.setRowCount(len(self.sample_ids))
-
         for i, sample_id in enumerate(self.sample_ids):
-            # Sample ID
-            self.tableWidgetMetaData.setItem(i, 0, QTableWidgetItem(sample_id))
+            item = QTableWidgetItem(sample_id)
+            item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+            self.tableWidgetMetaData.setItem(i, 0, item)
+            self.add_combobox(i, 1, ['raw','ppm','LADr ppm'])
+            self.add_combobox(i, 2, ['left to right', 'right to left', 'bottom to top', 'top to bottom'])
+            self.add_combobox(i, 3, ['left to right', 'right to left', 'bottom to top', 'top to bottom'])
+            self.add_combobox(i, 5, ['first','last'])
 
-            # File Direction with dropdown
-            data_type_combo = QComboBox()
-            data_types = ['raw','ppm','LADr ppm']
-            data_type_combo.addItems(data_types)
-            self.tableWidgetMetaData.setCellWidget(i, 1, data_type_combo)
+        self.table_update = True
 
-            # File Direction with dropdown
-            file_direction_combo = QComboBox()
-            directions = ['left to right', 'right to left', 'bottom to top', 'top to bottom']
-            file_direction_combo.addItems(directions)
-            self.tableWidgetMetaData.setCellWidget(i, 2, file_direction_combo)
+    def add_combobox(self, row, column, items):
+        combo = QComboBox()
+        combo.addItems(items)
+        combo.currentIndexChanged.connect(lambda _, r=row, c=column: self.on_combobox_changed(r, c))
+        self.tableWidgetMetaData.setCellWidget(row, column, combo)
 
-            # Scan Direction with dropdown
-            scan_direction_combo = QComboBox()
-            scan_direction_combo.addItems(directions)
-            self.tableWidgetMetaData.setCellWidget(i, 3, scan_direction_combo)
+    def on_item_changed(self , curr_item, prev_item):
+        if prev_item:
+            if self.checkBoxApplyAll.isChecked() and prev_item.column != 0:
+                column = prev_item.column()
+                for row in range(self.tableWidgetMetaData.rowCount()):
+                    if row != prev_item.row():
+                        new_item = QTableWidgetItem(prev_item.text())
+                        self.tableWidgetMetaData.setItem(row, column, new_item)
 
-            positions = ['first','last']
-            # Scan Direction with dropdown
-            scan_num_pos_combo = QComboBox()
-            scan_num_pos_combo.addItems(positions)
-            self.tableWidgetMetaData.setCellWidget(i, 5, scan_num_pos_combo)
+            # Always check and compute intraline distance when columns 7 or 8 change
+            row = prev_item.row()
+            sweep_time_item = self.tableWidgetMetaData.item(row, 8)
+            sweep_speed_item = self.tableWidgetMetaData.item(row, 9)
+
+            if sweep_time_item and sweep_speed_item and sweep_time_item.text().isdigit() and sweep_speed_item.text().isdigit():
+                sweep_time = float(sweep_time_item.text())
+                sweep_speed = float(sweep_speed_item.text())
+                if sweep_time > 0 and sweep_speed > 0:
+                    intraline_dist = sweep_time * sweep_speed
+                    self.tableWidgetMetaData.setItem(row, 10, QTableWidgetItem(str(intraline_dist)))
+            elif sweep_time_item and sweep_speed_item:
+                self.statusBar.showMessage('Sweep time and sweep speed should be postive')
+
+    def on_combobox_changed(self, row, column):
+        if self.checkBoxApplyAll.isChecked():
+            combo = self.tableWidgetMetaData.cellWidget(row, column)
+            selected_text = combo.currentText()
+            for r in range(self.tableWidgetMetaData.rowCount()):
+                if r != row:
+                    self.tableWidgetMetaData.cellWidget(r, column).setCurrentText(selected_text)
 
 
     def import_data(self):
@@ -7988,11 +8008,17 @@ class excelConcatenator(QDialog, Ui_Dialog):
             data_type = self.tableWidgetMetaData.cellWidget(i,1).currentText().lower()
             file_direction   = self.tableWidgetMetaData.cellWidget(i,2).currentText().lower()
             scan_direction   = self.tableWidgetMetaData.cellWidget(i,3).currentText().lower()
-            delimiter   = self.tableWidgetMetaData.item(i,4).text().strip().lower()
+
+            delimiter   = self.tableWidgetMetaData.item(i,4)
+            if delimiter:
+                delimiter = delimiter.text().strip().lower()
             scan_no_pos   = self.tableWidgetMetaData.cellWidget(i,5).currentText().lower()
             spot_size = self.tableWidgetMetaData.item(i,6).text().lower()
             interline_dist = self.tableWidgetMetaData.item(i,7).text().lower()
 
+            intraline_dist = self.tableWidgetMetaData.item(i,10).text().lower()
+            line_sep =20
+            line_dir = 'x'
 
 
             for subdir, dirs, files in os.walk(path):
@@ -8006,41 +8032,63 @@ class excelConcatenator(QDialog, Ui_Dialog):
 
                         if data_type == 'raw':
                             df = self.read_raw_folder(file,file_path, delimiter, scan_no_pos)
+                            data_frames.append(df)
                         elif data_type == 'ppm':
-                            df = self.read_ppm_folder(file,file_path, spot_size, line_sep, line_dir)
+                            df,nr,nc = self.read_ppm_folder(file,file_path, spot_size, line_sep, line_dir)
+
+                            data_frames.append(df)
                         elif data_type == 'ladr ppm':
                             df = self.read_ladr_ppm_folder(file_path)
                         else:
                             QMessageBox.error(self.main_window,"Error", "Unknown Type specified.")
                             return
 
-                        data_frames.append(df)
-                final_data = pd.concat(data_frames, ignore_index=True)
-                final_data.insert(2,'X',final_data['ScanNum'] * float(interline_dist))
-                final_data.insert(3,'Y',final_data['SpotNum'] * float(interline_dist))
+                if data_type == 'raw':
+                    final_data = pd.concat(data_frames, ignore_index=True)
+                    final_data.insert(2,'X',final_data['ScanNum'] * float(interline_dist))
+                    final_data.insert(3,'Y',final_data['SpotNum'] * float(intraline_dist))
 
 
-                #determine read direction
-                x_dir = self.orientation(file_direction)
-                y_dir = self.orientation(scan_direction)
+                    #determine read direction
+                    x_dir = self.orientation(file_direction)
+                    y_dir = self.orientation(scan_direction)
 
-                # Adjust coordinates based on the reading direction and make upper left corner as (0,0)
+                    # Adjust coordinates based on the reading direction and make upper left corner as (0,0)
 
-                final_data['X'] = final_data['X'] * x_dir
-                final_data['X'] = final_data['X'] - final_data['X'].min()
+                    final_data['X'] = final_data['X'] * x_dir
+                    final_data['X'] = final_data['X'] - final_data['X'].min()
 
-                final_data['Y'] = final_data['Y'] * y_dir
-                final_data['Y'] = final_data['Y'] - final_data['Y'].min()
+                    final_data['Y'] = final_data['Y'] * y_dir
+                    final_data['Y'] = final_data['Y'] - final_data['Y'].min()
 
-                match file_direction:
-                    case 'top to bottom'| 'bottom to top':
-                        pass
-                    case 'left to right' | 'right to left':
-                        Xtmp = final_data['X'];
-                        final_data['X'] =final_data['Y'];
-                        final_data['Y'] = Xtmp;
+                    match file_direction:
+                        case 'top to bottom'| 'bottom to top':
+                            pass
+                        case 'left to right' | 'right to left':
+                            Xtmp = final_data['X'];
+                            final_data['X'] =final_data['Y'];
+                            final_data['Y'] = Xtmp;
 
-                print(final_data.head())
+
+                elif data_type == 'ppm':
+                    final_data = pd.concat(data_frames, axis = 1)
+
+                    # Create scanNum array
+                    scanNum = np.tile(np.arange(1, nc + 1), (nr, 1))  # Tile the sequence horizontally
+
+                    # Create spotNum array
+                    spotNum = np.tile(np.arange(1, nr + 1).reshape(nr, 1), (1, nc))  # Tile the sequence vertically
+
+                    final_data.insert(0,'ScanNum',scanNum.flatten('F'))
+                    final_data.insert(1,'SpotNum', spotNum.flatten('F'))
+
+
+                    final_data.insert(2,'X',final_data['SpotNum'] * line_sep)
+                    final_data.insert(3,'Y',final_data['SpotNum'] * spot_size)
+
+                    print(final_data.head())
+
+
 
     def orientation(self,readdir):
 
@@ -8065,18 +8113,29 @@ class excelConcatenator(QDialog, Ui_Dialog):
         df.insert(1,'SpotNum',range(1, len(df) + 1))
         return df
 
-    def read_ppm_folder(self,file_path, spot_size, line_sep, line_dir):
-        df = pd.read_csv(file_path)
-        df['ScanNum'] = range(1, len(df) + 1)
-        df['SpotNum'] = range(1, len(df) + 1)
+    def read_ppm_folder(self,file_name, file_path, spot_size, line_sep, line_dir):
 
-        if line_dir == 'x':
-            df['X'] = df['SpotNum'] * spot_size
-            df['Y'] = df['ScanNum'] * line_sep
+        match = re.search(r' (\w+)_ppm', file_name)
+
+        match2 = re.search(r'(\D+)(\d+).csv', file_name) or re.search(r'(\d+)(\D+).csv', file_name)
+
+        if match:
+            iolite_name =  match.group(1)  # Returns the captured group, which is the text of interest
+        elif  match2:
+            name = match2.group(1)  # First group: iolite name
+            number = match2.group(2)  # Second group: iolite number
+            # Create the variable combining name and number
+            iolite_name = f"{name}{number}"
         else:
-            df['X'] = df['ScanNum'] * line_sep
-            df['Y'] = df['SpotNum'] * spot_size
-        return df
+            self.statusBar.showMessage('Iolite name not part of filename')
+            return []
+        df = pd.read_csv(file_path, header=None)
+        if line_dir =='x':
+            new_df= pd.DataFrame(df.values.flatten(), columns = [iolite_name])
+        elif line_dir =='y':
+            new_df= pd(df.values.T.flatten(), columns = [iolite_name])
+        r,c = df.shape
+        return new_df, r,c
 
     def read_ladr_ppm_folder(self,file_path):
         df = pd.read_csv(file_path)

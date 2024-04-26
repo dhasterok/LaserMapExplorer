@@ -7246,8 +7246,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def tree_double_click(self,val):
         level_1_data = val.parent().parent().data()
+        
         level_2_data = val.parent().data()
         level_3_data = val.data()
+        print(level_3_data)
         # self.checkBoxViewRatio.setChecked(False)
         if level_1_data == 'Analyte' :
             #current_plot_df = self.get_map_data(sample_id=level_2_data, field=level_3_data, field_type='Analyte')

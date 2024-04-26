@@ -4610,7 +4610,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             # check if canvas is full
             if row == self.spinBoxMaxRows.value()-1 and col == self.spinBoxMaxCols.value()-1 and self.widgetMultiView.layout().itemAtPosition(row,col):
-                QMessageBox.warning(self.main_window, "Add plot warning", "Canvas is full, to add more plots, increase row or column max.")
+                QMessageBox.warning(self, "Add plot warning", "Canvas is full, to add more plots, increase row or column max.")
 
             # add figure to canvas
             self.widgetMultiView.layout().addWidget(widget_dict['info']['figure'],row,col)
@@ -4996,7 +4996,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # layout.addWidget(graphicWidget)
 
         # Create the ImageItem
-        img_item = pg.ImageItem(image=self.array)
+        img_item = pg.ImageItem(image=self.array, antialias=False)
 
         #set aspect ratio of rectangle
         img_item.setRect(self.x.min(),self.y.min(),self.x_range,self.y_range)
@@ -5009,23 +5009,23 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # turn off axes and
         plotWindow.showAxes(False, showValues=(True,False,False,True) )
         plotWindow.invertY(True)
+        if view == 0:
+            plotWindow.setRange(yRange=[self.y.min(), self.y.max()])
         plotWindow.setAspectLocked()
-        plotWindow.setRange(yRange=[self.y.min(), self.y.max()])
 
         # Prevent zooming/panning outside the default view
-        plotWindow.setLimits( yMin=self.y.min(), yMax = self.y.max())
+        plotWindow.setLimits(yMin=self.y.min(), yMax = self.y.max())
 
         #supress right click menu
         plotWindow.setMenuEnabled(False)
 
 
+        # colorbar
         cmap = pg.colormap.get(style['Colors']['Colormap'], source = 'matplotlib')
         clb,cub,cscale,clabel = self.get_axis_values(field_type,field)
         cbar = pg.ColorBarItem(values=(clb,cub), width=25, colorMap=cmap, label=clabel, interactive=False, limits=(clb,cub), orientation=style['Colors']['Direction'], pen='black')
         img_item.setLookupTable(cmap.getLookupTable())
         graphicWidget.addItem(cbar)
-
-
 
         # ... Inside your plotting function
         target = pg.TargetItem(symbol = '+', )
@@ -5043,14 +5043,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         plotWindow.scene().sigMouseClicked.connect(lambda event,array=self.array, k=name, plot=plotWindow: self.plot_clicked(event,array, k, plotWindow))
 
         #remove previous plot in single view
-        if self.prev_plot:
-            del self.lasermaps[self.prev_plot]
-        # update variables which stores current plot in SV
-        self.plot = plotWindow
-        self.prev_plot = name
-        self.init_zoom_view()
-        # uncheck edge detection
-        self.toolButtonEdgeDetect.setChecked(False)
+        if view == 0:
+            if self.prev_plot:
+                del self.lasermaps[self.prev_plot]
+            # update variables which stores current plot in SV
+            self.plot = plotWindow
+            self.prev_plot = name
+            self.init_zoom_view()
+            # uncheck edge detection
+            self.toolButtonEdgeDetect.setChecked(False)
 
 
         # Create a SignalProxy to handle mouse movement events

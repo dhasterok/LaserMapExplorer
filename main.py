@@ -89,7 +89,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.isUpdatingTable = False
         self.cursor = False
 
-        self.plot_widget_dict ={'lasermap':{},'histogram':{},'lasermap_norm':{},'clustering':{},'scatter':{},'n-dim':{},'correlation':{}, 'multidimensional':{}}
+        self.plot_widget_dict = {
+            'Analyte':{},
+            'Histogram':{},
+            'Correlation':{},
+            'Multidimensional Analysis':{},
+            'Geochemistry':{},
+            'Calculated':{}
+        }
+
         self.laser_map_dict = {}
 
         # Plot Layouts
@@ -215,6 +223,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.styles = {}
         self.reset_default_styles()
 
+        # initalize self.comboBoxPlotType
+        self.comboBoxPlotType.clear()
+        self.comboBoxPlotType.addItems(self.plot_types[self.toolBox.currentIndex()][1:])
+        self.comboBoxPlotType.setCurrentIndex(self.plot_types[self.toolBox.currentIndex()][0])
+
 
         # Menu and Toolbar
         #-------------------------
@@ -261,8 +274,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Selecting analytes
         #-------------------------
         # Connect the currentIndexChanged signal of comboBoxSampleId to load_data method
-        self.comboBoxSampleId.activated.connect(
-            lambda: self.change_sample(self.comboBoxSampleId.currentIndex()))
+        self.comboBoxSampleId.activated.connect(lambda: self.change_sample(self.comboBoxSampleId.currentIndex()))
 
         #self.comboBoxPlots.activated.connect(lambda: self.add_remove(self.comboBoxPlots.currentText()))
         #self.toolButtonAddPlots.clicked.connect(lambda: self.add_multi_plot(self.comboBoxPlots.currentText()))
@@ -330,10 +342,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.noise_red_img = None
         self.grad_img = None
         self.noise_red_options = {'median':{'label1':'Kernel size', 'value1':5, 'label2':None},
-                'gaussian':{'label1':'Kernel size', 'value1':5, 'label2':'Sigma', 'value2':self.gaussian_sigma(5)},
-                'wiener':{'label1':'Kernel size', 'value1':5, 'label2':None},
-                'edge-preserving':{'label1':'Sigma S', 'value1':25, 'label2':'Sigma R', 'value2': 0.2},
-                'bilateral':{'label1':'Diameter', 'value1':9, 'label2':'Sigma', 'value2':75}}
+            'gaussian':{'label1':'Kernel size', 'value1':5, 'label2':'Sigma', 'value2':self.gaussian_sigma(5)},
+            'wiener':{'label1':'Kernel size', 'value1':5, 'label2':None},
+            'edge-preserving':{'label1':'Sigma S', 'value1':25, 'label2':'Sigma R', 'value2': 0.2},
+            'bilateral':{'label1':'Diameter', 'value1':9, 'label2':'Sigma', 'value2':75}}
 
         self.comboBoxNoiseReductionMethod.activated.connect(self.noise_reduction_method_callback)
         self.spinBoxNoiseOption1.valueChanged.connect(self.noise_reduction_option1_callback)
@@ -366,8 +378,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonAddFilter.clicked.connect(self.update_filter_table)
         self.comboBoxFilterFieldType.activated.connect(lambda: self.update_field_combobox(self.comboBoxFilterFieldType, self.comboBoxFilterField))
         self.comboBoxFilterField.activated.connect(self.update_filter_values)
-        #     lambda: self.get_map_data(self.sample_id,analyte_1=self.comboBoxFilterField_1.currentText(),
-        #                           analyte_2=self.comboBoxFilterField_2.currentText(),view = 1))
 
         # central-bottom pane
         self.toolButtonFilterUp.clicked.connect(lambda: self.table_fcn.move_row_up(self.tableWidgetFilters))
@@ -711,7 +721,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if selection =='full':
             #reset self.data
             self.data = {}
-            self.plot_widget_dict ={'lasermap':{},'histogram':{},'lasermap_norm':{},'clustering':{},'scatter':{},'n-dim':{},'correlation':{}, 'multidimensional':{}}
+            self.plot_widget_dict = {
+                'Analyte':{},
+                'Histogram':{},
+                'Correlation':{},
+                'Multidimensional Analysis':{},
+                'Geochemistry':{},
+                'Calculated':{}
+            }
             self.multi_view_index = []
             self.laser_map_dict = {}
             self.multiview_info_label = {}
@@ -943,7 +960,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # self.checkBoxViewRatio.setChecked(False)
 
             #get plot array
-            current_plot_df = self.get_map_data(sample_id=sample_id, field=self.selected_analytes[0], analysis_type='Analyte')
+            current_plot_df = self.get_map_data(sample_id=sample_id, field=self.selected_analytes[0], field_type='Analyte')
             #set
             #self.comboBoxColorField.setCurrentText(self.selected_analytes[0])
             self.styles['analyte map']['Colors']['Field'] = self.selected_analytes[0]
@@ -972,6 +989,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # reset flags
         self.update_cluster_flag = True
         self.update_pca_flag = True
+        self.plot_flag = False
 
         self.update_all_field_comboboxes()
         self.update_filter_values()
@@ -979,13 +997,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.histogram_update_bin_width()
 
         # plot first analyte as lasermap
+        self.styles['analyte map']['Colors']['ColorByField'] = 'Analyte'
+        self.comboBoxColorByField.setCurrentText(self.styles['analyte map']['Colors']['ColorByField'])
+        self.color_by_field_callback()
+        fields = self.get_field_list('Analyte')
+        self.styles['analyte map']['Colors']['Field'] = fields[0]
+        self.comboBoxColorField.setCurrentText(fields[0])
+        self.color_field_callback()
+
         self.plot_flag = True
         self.update_SV()
 
-
     def open_preferences_dialog(self):
         pass
-
 
     def import_files(self):
         self.analyteDialog = excelConcatenator(self)
@@ -1006,7 +1030,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.analyteDialog = analyteSelectionWindow(analytes_list,self.data[self.sample_id]['norm'], self.data[self.sample_id]['processed_data'], self)
         self.analyteDialog.show()
-        # self.analyteDialog.listUpdated.connect(lambda: self.update_tree(self.analyteDialog.norm_dict, norm_update = True))
+
         result = self.analyteDialog.exec_()  # Store the result here
         if result == QDialog.Accepted:
             #update self.data['norm'] with selection
@@ -1128,15 +1152,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.sample_id == '':
             return
 
-        if not self.toolBox.isEnabled():
-            return
-
         self.comboBoxPlotType.clear()
         self.comboBoxPlotType.addItems(self.plot_types[self.toolBox.currentIndex()][1:])
         self.comboBoxPlotType.setCurrentIndex(self.plot_types[self.toolBox.currentIndex()][0])
         self.set_style_widgets()
 
-        self.update_SV()
+        if self.canvasWindow.currentIndex() == 0:
+            self.update_SV()
 
     def input_ternary_name_dlg(self):
         """Opens a dialog to save new colormap
@@ -1209,6 +1231,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :type comboBox2: QComboBox
         """
         comboBox2.setCurrentIndex(comboBox1.currentIndex())
+
+        self.ref_chem = self.ref_data.iloc[comboBox1.currentIndex()]
+        self.ref_chem.index = [col.replace('_ppm', '') for col in ref_chem.index]
+
         self.update_all_plots()
 
     def reset_to_full_view(self):
@@ -1450,7 +1476,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.data[sample_id]['ratios_info'].loc[ (self.data[sample_id]['ratios_info']['analyte_1']==analyte_1)
                                           & (self.data[sample_id]['ratios_info']['analyte_2']==analyte_2),
                                           ['upper_bound','lower_bound','d_l_bound', 'd_u_bound']] = [ub,lb,d_lb, d_ub]
-            #self.get_map_data(self.sample_id, analyte_1 = analyte_1, analyte_2 = analyte_2, plot_type = plot_type, update = True)
+
             self.prep_data(sample_id, analyte_1,analyte_2)
             self.update_filter_values()
             self.update_SV()
@@ -1485,6 +1511,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.data[self.sample_id]['crop'] = True
 
     def update_plot(self,bin_s=True, axis=False, reset=False):
+        print('update_plot')
         """"Update plot
 
         :param bin_s: Defaults to True
@@ -1677,30 +1704,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.show()
 
 
-    def add_plot(self, plot_information, current_plot_df = None):
-        """Adds plot to plot widget dictionary and displays in selected view tab
-
-        :param plot_information:
-        :type plot_information: dict
-        :param current_plot_df: Defaults to None
-        :param type: dict, optional
-        """
-        plot_name = plot_information['plot_name']
-        sample_id = plot_information['sample_id']
-        plot_type = plot_information['plot_type']
-        canvas = self.plot_widget_dict[plot_type][sample_id][plot_name]['info']['figure']
-
-        #get plot widget and view from plot_widget_dict
-        if self.canvasWindow.currentIndex() == 0:
-            self.clear_layout(self.widgetSingleView.layout())
-            self.widgetSingleView.layout().addWidget(canvas)
-        elif self.canvasWindow.currentIndex() == 1:
-            self.widgetMultiView.layout().addWidget(canvas)
-
     def save_analysis(self):
-
-
-
         pass
 
     def update_tables(self):
@@ -1863,9 +1867,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             for index, filter_row in self.data[self.sample_id]['filter_info'].iterrows():
                 if filter_row['use']:
                     if not filter_row['analyte_2']:
-                        analyte_df = self.get_map_data(sample_id=self.sample_id, field=filter_row['analyte_1'], analysis_type = 'Analyte')
+                        analyte_df = self.get_map_data(sample_id=self.sample_id, field=filter_row['analyte_1'], field_type = 'Analyte')
                     else: #if ratio
-                        analyte_df = self.get_map_data(sample_id=self.sample_id, field=filter_row['analyte_1']+'/'+filter_row['analyte_2'], analysis_type='Ratio')
+                        analyte_df = self.get_map_data(sample_id=self.sample_id, field=filter_row['analyte_1']+'/'+filter_row['analyte_2'], field_type='Ratio')
 
                     self.data[self.sample_id]['filter_mask'] = self.data[self.sample_id]['filter_mask'] & (analyte_df['array'].values <= filter_row['f_min']) | (analyte_df['array'].values >= filter_row['f_max'])
         elif self.toolButtonMapPolygon.isChecked():
@@ -2213,7 +2217,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         layout.update()
 
-    def plot_laser_map(self, current_plot_df, plot_information):
+    def plot_laser_map(self, current_plot_df, plot_info):
         """Plots laser map
 
         :param current_plot_df: Current dataframe
@@ -2222,11 +2226,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :type plot_information: dict
         """
         print('plot_laser_map')
-        plot_name = plot_information['plot_name']
-        sample_id = plot_information['sample_id']
-        plot_type = plot_information['plot_type']
+        plot_name = plot_info['plot_name']
+        sample_id = plot_info['sample_id']
+        plot_type = plot_info['plot_type']
 
-        style = plot_information['style']
+        style = plot_info['style']
 
         view = self.canvasWindow.currentIndex()
 
@@ -2241,8 +2245,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             mask = self.data[self.sample_id]['mask']
 
-        array = np.reshape(current_plot_df['array'].values,
-                                    self.array_size, order=self.order)
         duplicate = False
         plot_exist = False
         if plot_name in self.plot_widget_dict[plot_type][sample_id]:
@@ -2253,22 +2255,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             widget_info = self.plot_widget_dict[plot_type][sample_id][plot_name]
             for widgetLaserMap, view in zip(widget_info['widget'],widget_info['view']):
 
-                # Step 1: Normalize your data array for colormap application
-                norm = colors.Normalize(vmin=array.min(), vmax=array.max())
-                cmap = self.get_colormap()
-
-                # Step 2: Apply the colormap to get RGB values, then normalize to [0, 255] for QImage
-                rgb_array = cmap(norm(array))[:, :, :3]  # Drop the alpha channel returned by cmap
-                rgb_array = (rgb_array * 255).astype(np.uint8)
-
-                # Step 3: Create an RGBA array where the alpha channel is based on self.data[self.sample_id]['mask']
-                rgba_array = np.zeros((*rgb_array.shape[:2], 4), dtype=np.uint8)
-                rgba_array[:, :, :3] = rgb_array  # Set RGB channels
-
-                mask_r = np.reshape(mask,
-                                    self.array_size, order=self.order)
-
-                rgba_array[:, :, 3] = np.where(mask_r, 255, 100)  # Set alpha channel based on self.data[self.sample_id]['mask']
+                rgba_array = self.array_to_image(current_plot_df)
 
                 glw = widgetLaserMap.findChild(pg.GraphicsLayoutWidget, 'plotLaserMap')
                 p1 = glw.getItem(0, 0)  # Assuming ImageItem is the first item in the plot
@@ -2283,20 +2270,28 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 p1.setLimits( yMin=self.y.min(), yMax = self.y.max())
                 cm = pg.colormap.get(style['Colors']['Colormap'], source = 'matplotlib')
                 # img.setColorMap(cm)
-                histogram = widgetLaserMap.findChild(pg.HistogramLUTWidget, 'histogram')
+
+                ## histogram - removed for now as is not working as expected
+                # histogram = widgetLaserMap.findChild(pg.HistogramLUTWidget, 'histogram')
+                ## end removal
+
                 if view ==0:
                     # update variables which stores current plot in SV
                     self.plot = p1
                     self.array = array
 
-                if histogram:
-                    histogram.gradient.setColorMap(cm)
-                    histogram.setImageItem(img)
+                ## histogram - removed for now as is not working as expected
+                # if histogram:
+                #     histogram.gradient.setColorMap(cm)
+                #     histogram.setImageItem(img)
+                ## end removal
+
                 for i in reversed(range(p1.layout.count())):  # Reverse to avoid skipping due to layout change
                     item = p1.layout.itemAt(i)
                     if isinstance(item, pg.ColorBarItem):#find colorbar
                         item.setColorMap(cm)
                         item.setLevels([array.min(), array.max()])
+
                 layout = widgetLaserMap.layout()
                 # self.plot_laser_map_cont(layout,array,img,p1,cm,view)
         else:
@@ -2311,24 +2306,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             else:
                 self.plot_widget_dict[plot_type][sample_id][plot_name] = {'widget':[widgetLaserMap],
-                                                      'info':plot_information, 'view':[view]}
+                                                      'info':plot_info, 'view':[view]}
 
             #Change transparency of values outside mask
-            # Step 1: Normalize your data array for colormap application
-            norm = colors.Normalize(vmin=array.min(), vmax=array.max())
-            cmap = self.get_colormap()
-
-            # Step 2: Apply the colormap to get RGB values, then normalize to [0, 255] for QImage
-            rgb_array = cmap(norm(array))[:, :, :3]  # Drop the alpha channel returned by cmap
-            rgb_array = (rgb_array * 255).astype(np.uint8)
-
-            # Step 3: Create an RGBA array where the alpha channel is based on self.data[self.sample_id]['mask']
-            rgba_array = np.zeros((*rgb_array.shape[:2], 4), dtype=np.uint8)
-            rgba_array[:, :, :3] = rgb_array  # Set RGB channels
-            mask_r = np.reshape(mask,
-                                self.array_size, order=self.order)
-
-            rgba_array[:, :, 3] = np.where(mask_r, 255, 100)  # Set alpha channel based on self.data[self.sample_id]['mask']
+            rgba_array = self.array_to_image(current_plot_df)
 
             # self.array = array[:, ::-1]
             layout = widgetLaserMap.layout()
@@ -2524,13 +2505,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #         p1.layout.removeAt(i)
             # Create the histogram item
 
-
-            histogram = pg.HistogramLUTWidget( orientation='horizontal')
-            histogram.setObjectName('histogram')
-            histogram.gradient.setColorMap(cm)
-            histogram.setImageItem(img)
-            histogram.setBackground('w')
-            layout.addWidget(histogram, 3, 0,  1, 2)
+            ## histogram - removed for now as is not working as expected
+            # histogram = pg.HistogramLUTWidget( orientation='horizontal')
+            # histogram.setObjectName('histogram')
+            # histogram.gradient.setColorMap(cm)
+            # histogram.setImageItem(img)
+            # histogram.setBackground('w')
+            # layout.addWidget(histogram, 3, 0,  1, 2)
+            ## end removal
+            pass
 
         else:
             # multi view (add colorbar)
@@ -2958,7 +2941,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                'Scales': {'Direction': 'none', 'Location': 'northeast', 'OverlayColor': '#ffffff'},
                                'Markers': {'Symbol': 'circle', 'Size': 6, 'Alpha': 30},
                                'Lines': {'LineWidth': 1.5, 'Multiplier': 1},
-                               'Colors': {'Color': '#1c75bc', 'ColorByField': 'None', 'Field': '', 'Colormap': 'viridis', 'CLimAuto': True, 'CLim':[0,1], 'CScale':'linear', 'Direction': 'vertical', 'CLabel': '', 'Resolution': 10}
+                               'Colors': {'Color': '#1c75bc', 'ColorByField': 'None', 'Field': '', 'Colormap': 'viridis', 'Reverse': False, 'CLimAuto': True, 'CLim':[0,1], 'CScale':'linear', 'Direction': 'vertical', 'CLabel': '', 'Resolution': 10}
                                }
         default_font = 'Avenir'
         try:
@@ -4005,7 +3988,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.styles[plot_type]['Axes']['TickDir'] = self.comboBoxTickDirection.currentText()
         self.update_SV()
 
-    # text
+    # text and annotations
     # -------------------------------------
     def font_callback(self):
         plot_type = self.comboBoxPlotType.currentText()
@@ -4033,6 +4016,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 text_obj.set_fontname(font_name)
         except:
             print('Unable to update figure font.')
+
+    def toggle_mass(self, labels):
+        """Removes mass from labels
+
+        Removes mass if ``MainWindow.checkBoxShowMass.isChecked()`` is False
+
+        :param labels: input labels
+        :type labels: str
+
+        :return: output labels with or without mass
+        :rtype: list
+        """
+        if not self.checkBoxShowMass.isChecked():
+            labels = [re.sub(r'\d', '', col) for col in labels]
+
+        return labels
 
     # scales
     # -------------------------------------
@@ -4238,7 +4237,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.labelCbarLabel.setEnabled(True)
 
         # only run update current plot if color field is selected or the color by field is clusters
-        if self.comboBoxColorByField.currentText() == 'None' or self.comboBoxColorField.currentText() != '' or self.comboBoxColorByField.currentText() in ['Clusters']:
+        if self.comboBoxColorByField.currentText() != 'None' or self.comboBoxColorField.currentText() != '' or self.comboBoxColorByField.currentText() in ['Clusters']:
             self.update_SV()
 
     def color_field_callback(self):
@@ -4267,6 +4266,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_SV()
 
     def field_colormap_callback(self):
+        """Sets the color map
+        
+        Sets the colormap in ``MainWindow.styles`` for the current plot type, set from ``MainWindow.comboBoxFieldColormap``.
+        """
         plot_type = self.comboBoxPlotType.currentText()
         if self.styles[plot_type]['Colors']['Colormap'] == self.comboBoxFieldColormap.currentText():
             return
@@ -4276,6 +4279,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_SV()
 
     def colormap_direction_callback(self):
+        """Set colormap direction (normal/reverse)
+        
+        Reverses colormap if ``MainWindow.checkBoxReverseColormap.isChecked()`` is ``True``."""
         plot_type = self.comboBoxPlotType.currentText()
         if self.styles[plot_type]['Colors']['Reverse'] == self.checkBoxReverseColormap.isChecked():
             return
@@ -4285,6 +4291,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_SV()
 
     def get_colormap(self, N=None):
+        """Gets the color map
+        
+        Gets the colormap from ``MainWindow.styles`` for the current plot type and reverses or sets as discrete in needed.
+        
+        :param N: Creates a discrete color map, if not supplied, the colormap is continuous, Defaults to None.
+        :type N: int, optional
+
+        :returns: Matplotlib colormap
+        :rtype: matplotlib.colors.ListedColormap
+        """
         plot_type = self.comboBoxPlotType.currentText()
         if N is not None:
             cmap = plt.get_cmap(self.styles[plot_type]['Colors']['Colormap'], N)
@@ -4297,6 +4313,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         return cmap
 
     def clim_callback(self):
+        """Sets the color limits
+        
+        Sets the color limits in ``MainWindow.styles`` for the current plot type.
+        """
         plot_type = self.comboBoxPlotType.currentText()
         if self.styles[plot_type]['Colors']['CLim'][0] == float(self.lineEditColorLB.text()) and self.styles[plot_type]['Colors']['CLim'][1] == float(self.lineEditColorUB.text()):
             return
@@ -4306,6 +4326,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_SV()
 
     def cbar_direction_callback(self):
+        """Sets the colorbar direction
+        
+        Sets the colorbar direction in ``MainWindow.styles`` for the current plot type.
+        """
         plot_type = self.comboBoxPlotType.currentText()
         if self.styles[plot_type]['Colors']['Direction'] == self.comboBoxCbarDirection.currentText():
             return
@@ -4314,6 +4338,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_SV()
 
     def cbar_label_callback(self):
+        """Sets color label
+        
+        Sets the color label in ``MainWindow.styles`` for the current plot type.
+        """
         plot_type = self.comboBoxPlotType.currentText()
         if self.styles[plot_type]['Colors']['CLabel'] == self.lineEditCbarLabel.text():
             return
@@ -4378,17 +4406,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # General plot functions
     # -------------------------------------
     def update_all_plots(self):
+        print('update_all_plots')
         """Updates all plots in plot widget dictionary"""
         style = self.styles[self.comboBoxPlotType.currentText()]
         for plot_type,sample_ids in self.plot_widget_dict.items():
-            if plot_type == 'lasermap' or 'histogram' or 'lasermap_norm':
+            if plot_type == 'analyte' or 'histogram' or 'analyte_norm':
                 for sample_id, plots in sample_ids.items():
                     for plot_name, plot in plots.items():
                         info = plot['info']
                         if not info['analyte_2']:
-                            current_plot_df = self.get_map_data(sample_id=info['sample_id'], field=info['analyte_1'],analysis_type = 'Analyte')
+                            current_plot_df = self.get_map_data(sample_id=info['sample_id'], field=info['analyte_1'],field_type = 'Analyte')
                         else: #if ratio
-                            current_plot_df = self.get_map_data(sample_id=info['sample_id'], field=info['analyte_1']+'/'+info['analyte_2'], analysis_type = 'Ratio')
+                            current_plot_df = self.get_map_data(sample_id=info['sample_id'], field=info['analyte_1']+'/'+info['analyte_2'], field_type = 'Ratio')
 
                         # self.plot_laser_map(current_plot_df,info)
 
@@ -4456,38 +4485,37 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :param save: save plot to plot selector, Defaults to False.
         :type save: bool, optional
         """
-        print('update_SV, self.plot_flag: '+str(self.plot_flag))
+        print('update_SV, self.plot_flag: '+str(self.plot_flag)+'   sample_id: '+self.sample_id+'   field_type: '+self.comboBoxColorByField.currentText()+'   field: '+self.comboBoxColorField.currentText())
         if self.sample_id == '' or not self.comboBoxPlotType.currentText() or not self.plot_flag:
             return
-        plot_type = self.comboBoxPlotType.currentText()
-        sample_id = self.sample_id
-        analysis = self.comboBoxColorByField.currentText()
-        field = self.comboBoxColorField.currentText()
 
-        match plot_type:
+        match self.comboBoxPlotType.currentText():
             case 'analyte map':
-                if not self.comboBoxColorField.currentText():
+                sample_id = self.sample_id
+                field_type = self.comboBoxColorByField.currentText()
+                field = self.comboBoxColorField.currentText()
+
+                if not sample_id or not field_type or not field:
                     return
 
-                if analysis in ['Analyte', 'Ratio']:
-                    map_type = 'lasermap'
-                elif analysis == 'Analyte (normalized)':
-                    map_type = 'lasermap_norm'
-                else:
-                    return
+                self.create_map_plotwidget(sample_id, field_type, field)
+                # if not self.comboBoxColorField.currentText():
+                #     return
 
-                current_plot_df = self.get_map_data(sample_id=sample_id, field=field, analysis_type=analysis)
-                if analysis == 'Ratio':
-                    analyte_1 = field.split(' / ')[0]
-                    analyte_2 = field.split(' / ')[1]
-                    self.create_plot(current_plot_df, sample_id, plot_type = map_type, analyte_1=analyte_1, analyte_2=analyte_2, plot=True)
-                else: #Not a ratio
-                    self.create_plot(current_plot_df, sample_id, plot_type = map_type, analyte_1=field, plot=True)
+                # if analysis in ['Analyte', 'Ratio']:
+                #     map_type = 'analyte'
+                # elif analysis == 'Analyte (normalized)':
+                #     map_type = 'analyte_norm'
+                # else:
+                #     return
 
-                if self.toolBox.currentIndex() == self.sample_tab_id:
-                    print('plot_small_histogram')
-                    self.plot_small_histogram(current_plot_df,field)
-                    pass
+                # current_plot_df = self.get_map_data(sample_id=sample_id, field=field, field_type=analysis)
+                # if analysis == 'Ratio':
+                #     analyte_1 = field.split(' / ')[0]
+                #     analyte_2 = field.split(' / ')[1]
+                #     self.create_plot(current_plot_df, sample_id, plot_type = map_type, analyte_1=analyte_1, analyte_2=analyte_2, plot=True)
+                # else: #Not a ratio
+                #     self.create_plot(current_plot_df, sample_id, plot_type = map_type, analyte_1=field, plot=True)
 
             case 'gradient map':
                 if self.comboBoxNoiseReductionMethod.currentText() == 'none':
@@ -4513,24 +4541,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case 'Cluster' | 'Cluster Score':
                 self.plot_clusters()
 
-
-        # self.styles = {'analyte map': copy.deepcopy(default_plot_style),
-        #                 'correlation': copy.deepcopy(default_plot_style),
-        #                 'histogram': copy.deepcopy(default_plot_style),
-        #                 'gradient map': copy.deepcopy(default_plot_style),
-        #                 'scatter': copy.deepcopy(default_plot_style),
-        #                 'heatmap': copy.deepcopy(default_plot_style),
-        #                 'ternary map': copy.deepcopy(default_plot_style),
-        #                 'TEC': copy.deepcopy(default_plot_style),
-        #                 'Radar': copy.deepcopy(default_plot_style),
-        #                 'variance': copy.deepcopy(default_plot_style),
-        #                 'vectors': copy.deepcopy(default_plot_style),
-        #                 'pca scatter': copy.deepcopy(default_plot_style),
-        #                 'pca heatmap': copy.deepcopy(default_plot_style),
-        #                 'PCA Score': copy.deepcopy(default_plot_style),
-        #                 'Cluster': copy.deepcopy(default_plot_style),
-        #                 'Cluster Score': copy.deepcopy(default_plot_style),
-        #                 'profile': copy.deepcopy(default_plot_style)}
+        # 'TEC'
+        # 'Radar'
+        # 'profile'
 
     def new_plot_widget(self, plot_info, save):
         """Creates new figure widget
@@ -4558,17 +4571,66 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         return plotWidget
 
-    def add_plotwidget_to_tree(self, plotWidget):
+    def add_plotwidget_to_canvas(self, plot_info, current_plot_df = None):
+        """Adds plot to plot widget dictionary and displays in selected view tab
+
+        :param plot_information:
+        :type plot_information: dict
+        :param current_plot_df: Defaults to None
+        :param type: dict, optional
+        """
+        print('add_plotwidget_to_canvas')
+
+        plot_name = plot_info['plot_name']
+        sample_id = plot_info['sample_id']
+        tree = plot_info['tree']
+
+        widget_dict = self.plot_widget_dict[tree][sample_id][plot_name]
+
+        # if on QuickView canvas, then set to SingleView canvas
+        if self.canvasWindow.currentIndex() == 2:
+            self.canvasWindow.setCurrentIndex(0)
+
+        # add figure to SingleView canvas
+        if self.canvasWindow.currentIndex() == 0:
+            print('add_plotwidget_to_canvas: SV')
+            self.clear_layout(self.widgetSingleView.layout())
+            self.widgetSingleView.layout().addWidget(widget_dict['info']['figure'])
+            widget_dict['view'] = 0
+
+        # add figure to MultiView canvas
+        elif self.canvasWindow.currentIndex() == 1:
+            print('add_plotwidget_to_canvas: MV')
+            # get position of for first empty plot
+            for row in range(self.spinBoxMaxRows.value()):
+                for col in range(self.spinBoxMaxCols.value()):
+                    if self.widgetMultiView.layout().itemAtPosition(row,col):
+                        continue
+                    break
+
+            # check if canvas is full
+            if row == self.spinBoxMaxRows.value()-1 and col == self.spinBoxMaxCols.value()-1 and self.widgetMultiView.layout().itemAtPosition(row,col):
+                QMessageBox.warning(self.main_window, "Add plot warning", "Canvas is full, to add more plots, increase row or column max.")
+                
+            # add figure to canvas
+            self.widgetMultiView.layout().addWidget(widget_dict['info']['figure'],row,col)
+            widget_dict['view'] = 1
+            widget_dict['position'] = [row,col]
+
+        self.hide()
+        self.show()
+
+    def add_plotwidget_to_tree(self):
         print('add_plotwidget_to_tree')
+        # if standard map type
+        if self.plot_info['plot_type'] in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
+            return
+
         # determine central widget view type (single, multi, quick)
         view = self.canvasWindow.currentIndex()
 
-        # adds plot to plot dictionary for tree
-        self.plot_widget_dict[self.plot_info['plot_type'].lower()][self.sample_id][self.plot_info['plot_name']] = {'info':self.plot_info, 'view':[view]}
-
-        #self.plot_widget_dict['clustering'][self.sample_id][plot_name] = {'widget': [widgetClusterMap],
-        #                                                      'info': {'plot_type': plot_type, 'sample_id': self.sample_id, 'n_clusters': self.spinBoxNClusters.value()},
-        #                                                      'view': [self.canvasWindow.currentIndex()]}
+        # add plot to dictionary for tree
+        self.plot_widget_dict[self.plot_info['plot_type'].lower()][self.sample_id][self.plot_info['plot_name']] = {'info':self.plot_info, 'view':view, 'position':None}
 
         # updates tree with new plot name
         self.update_tree(self.plot_info['plot_name'], data=self.plot_info, tree=self.plot_info['plot_type'])
@@ -4628,9 +4690,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.hide()
         self.show()
 
-    def display_MV(self):
-        pass
-
     def display_QV(self):
         """Plots selected maps to the Quick View tab
 
@@ -4664,7 +4723,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             row = i // ncol
 
             # get data for current analyte
-            current_plot_df = self.get_map_data(self.sample_id, field=analyte, analysis_type='Analyte')
+            current_plot_df = self.get_map_data(self.sample_id, field=analyte, field_type='Analyte')
             reshaped_array = np.reshape(current_plot_df['array'], self.array_size, order=self.order)
 
             # add image to canvas
@@ -4677,7 +4736,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # add canvas to quickView grid layout
             self.widgetQuickView.layout().addWidget(canvas,row,col)
 
-    def create_plot(self,current_plot_df, sample_id = None, plot_type = 'lasermap', analyte_1 = None, analyte_2 = None, plot = True):
+    def create_plot(self,current_plot_df, sample_id = None, plot_type = 'analyte', analyte_1 = None, analyte_2 = None, plot = True):
         # creates plot information and send to relevant plotting method
         # adds plot to canvas if specified by user
         if not sample_id:
@@ -4698,7 +4757,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             analyte_str = analyte_1 +' / '+ analyte_2
             current_plot_df['array'] = self.data[sample_id]['computed_data']['Ratio'][analyte_str].values
 
-        if plot_type=='lasermap':
+        if plot_type=='analyte':
             plot_information={'plot_name':analyte_str,'sample_id':sample_id,
                               'analyte_1':analyte_1, 'analyte_2':analyte_2,
                               'plot_type':plot_type,
@@ -4706,7 +4765,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             self.plot_laser_map(current_plot_df,plot_information)
             self.update_spinboxes(parameters)
-        elif plot_type == 'lasermap_norm':
+        elif plot_type == 'analyte_norm':
             ref_data_chem = self.ref_data.iloc[self.comboBoxRefMaterial.currentIndex()]
             ref_data_chem.index = [col.replace('_ppm', '') for col in ref_data_chem.index]
             ref_series =  ref_data_chem[re.sub(r'\d', '', analyte_1).lower()]
@@ -4865,35 +4924,167 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
 
+
+    # -------------------------------------
+    # laser map functions and plotting
+    # -------------------------------------
+    def array_to_image(self, map_df):
+        """Prepares map for display by converting to RGBA image
+        
+        :param map_df: contains map data to convert
+        :type map_df: pandas.DataFrame
+        
+        :returns: an rgba array
+        :rtype: numpy.ndarray
+        """
+        mask = self.data[self.sample_id]['mask']
+        
+        array = np.reshape(map_df['array'].values, self.array_size, order=self.order)
+
+        # Step 1: Normalize your data array for colormap application
+        norm = colors.Normalize(vmin=array.min(), vmax=array.max())
+        cmap = self.get_colormap()
+
+        # Step 2: Apply the colormap to get RGB values, then normalize to [0, 255] for QImage
+        rgb_array = cmap(norm(array))[:, :, :3]  # Drop the alpha channel returned by cmap
+        rgb_array = (rgb_array * 255).astype(np.uint8)
+
+        # Step 3: Create an RGBA array where the alpha channel is based on self.data[self.sample_id]['mask']
+        rgba_array = np.zeros((*rgb_array.shape[:2], 4), dtype=np.uint8)
+        rgba_array[:, :, :3] = rgb_array  # Set RGB channels
+        mask_r = np.reshape(mask, self.array_size, order=self.order)
+
+        rgba_array[:, :, 3] = np.where(mask_r, 255, 100)  # Set alpha channel based on self.data[self.sample_id]['mask']
+
+        return array, rgba_array
+
+    def create_map_plotwidget(self, sample_id, field_type, field):
+        # ----start debugging----
+        print('[create_map_plotwidget] sample_id: '+sample_id+'   field_type: '+'   field: '+field)
+        # ----end debugging----
+
+        style = self.styles['analyte map']
+
+        # get data for current map
+        map_df = self.get_map_data(sample_id, field, field_type=field_type)
+
+        #Change transparency of values outside mask
+        self.array, rgba_array = self.array_to_image(map_df)
+
+        # plotWidget = QtWidgets.QWidget()
+        # layout = QVBoxLayout()
+        # layout.setSpacing(0)
+        # plotWidget.setLayout(layout)
+
+        plot_name = field
+        title = ''
+
+        view = self.canvasWindow.currentIndex()
+        if view == 2:
+            view = 0
+            self.canvasWindow.setCurrentIndex(view)
+        match view:
+            case 0:
+                title = plot_name
+            case 1:
+                title = sample_id + '_' + plot_name
+
+        graphicWidget = pg.GraphicsLayoutWidget(show=True)
+        graphicWidget.setObjectName('LaserMap')
+        graphicWidget.setBackground('w')
+
+        # layout.addWidget(graphicWidget)
+
+        # Create the ImageItem
+        img_item = pg.ImageItem(image=self.array)
+
+        #set aspect ratio of rectangle
+        img_item.setRect(self.x.min(),self.y.min(),self.x_range,self.y_range)
+
+        #--- add non-interactive image with integrated color ------------------
+        plotWindow = graphicWidget.addPlot(0,0,title=plot_name.replace('_',' '))
+
+        plotWindow.addItem(img_item)
+
+        # turn off axes and 
+        plotWindow.showAxes(False, showValues=(True,False,False,True) )
+        plotWindow.invertY(True)
+        plotWindow.setAspectLocked()
+        plotWindow.setRange(yRange=[self.y.min(), self.y.max()])
+
+        # Prevent zooming/panning outside the default view
+        plotWindow.setLimits( yMin=self.y.min(), yMax = self.y.max())
+
+        #supress right click menu
+        plotWindow.setMenuEnabled(False)
+
+
+        cmap = pg.colormap.get(style['Colors']['Colormap'], source = 'matplotlib')
+        clb,cub,cscale,clabel = self.get_axis_values(field_type,field)
+        cbar = pg.ColorBarItem(values=(clb,cub), width=25, colorMap=cmap, label=clabel, interactive=False, limits=(clb,cub), orientation=style['Colors']['Direction'], pen='black')
+        img_item.setLookupTable(cmap.getLookupTable())
+        graphicWidget.addItem(cbar)
+
+
+
+        # ... Inside your plotting function
+        target = pg.TargetItem(symbol = '+', )
+        target.setZValue(1e9)
+        plotWindow.addItem(target)
+
+        # Optionally, configure the appearance
+        # For example, set the size of the crosshair
+        name = sample_id + plot_name
+        self.lasermaps[name] = (target, plotWindow, view, self.array)
+
+        #hide pointer
+        target.hide()
+
+        plotWindow.scene().sigMouseClicked.connect(lambda event,array=self.array, k=name, plot=plotWindow: self.plot_clicked(event,array, k, plotWindow))
+
+        #remove previous plot in single view
+        if self.prev_plot:
+            del self.lasermaps[self.prev_plot]
+        # update variables which stores current plot in SV
+        self.plot = plotWindow
+        self.prev_plot = name
+        self.init_zoom_view()
+        # uncheck edge detection
+        self.toolButtonEdgeDetect.setChecked(False)
+
+
+        # Create a SignalProxy to handle mouse movement events
+        # Create a SignalProxy for this plot and connect it to mouseMoved
+
+        plotWindow.scene().sigMouseMoved.connect(lambda event,plot=plotWindow: self.mouse_moved(event,plot))
+
+        #add zoom window
+        plotWindow.getViewBox().autoRange()
+
+        self.plot_info = {
+            'tree': 'Analyte',
+            'sample_id': sample_id,
+            'plot_name': field,
+            'plot_type': 'analyte map',
+            'field_type': field_type,
+            'field': field,
+            'figure': graphicWidget,
+            'style': style
+            }
+
+        self.plot_widget_dict[self.plot_info['tree']][self.plot_info['sample_id']][self.plot_info['plot_name']] = {'info':self.plot_info, 'view':view, 'position':None}
+        self.add_plotwidget_to_canvas(self.plot_info)
+
+        self.update_tree(self.plot_info['plot_name'], data=self.plot_info, tree=self.plot_info['plot_type'])
+
+        # add small histogram
+        if self.toolBox.currentIndex() == self.sample_tab_id:
+            self.plot_small_histogram(map_df,field)
+
+
     # -------------------------------------
     # Correlation functions and plotting
     # -------------------------------------
-    # def update_correlation(self, save=False):
-    #     if self.sample_id == '':
-    #         return
-
-    #     plot_exist = plot_name in self.plot_widget_dict[plot_type][sample_id]
-    #     duplicate = plot_exist and len(self.plot_widget_dict[plot_type][sample_id][plot_name]['view']) == 1 and self.plot_widget_dict[plot_type][sample_id][plot_name]['view'][0] != self.canvasWindow.currentIndex()
-
-    #     if plot_exist and not duplicate:
-
-    #         fig = ax.get_figure()
-    #         plotWidget = self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'][0]
-    #         figure_canvas = plotWidget.findChild(FigureCanvas)
-    #         figure_canvas.figure.clear()
-    #         ax = figure_canvas.figure.subplots()
-    #         figure_canvas.draw()
-    #     else:
-    #         if duplicate:
-    #             self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'].append(plotWidget)
-    #             self.plot_widget_dict[plot_type][sample_id][plot_name]['view'].append(view)
-    #         else:
-    #             self.plot_widget_dict[plot_type][sample_id][plot_name] = {'widget': [plotWidget], 'info': plot_information, 'view': [view]}
-
-    #         # Additional steps to add the Correlation widget to the appropriate container in the UI
-    #         if save:
-    #             self.add_plot(plot_information) #do not plot correlation when directory changes
-    #         self.update_tree(plot_information['plot_name'], data=plot_information, tree=branch)
     def correlation_method_callback(self):
         """Updates colorbar label for correlation plots"""
         method = self.comboBoxCorrelationMethod.currentText()
@@ -4954,11 +5145,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         style = self.styles['correlation']
         font = {'size':style['Text']['FontSize']}
 
+        # mask lower triangular matrix to show only upper triangle
         mask = np.zeros_like(correlation_matrix, dtype=bool)
         mask[np.tril_indices_from(mask)] = True
         correlation_matrix = np.ma.masked_where(mask, correlation_matrix)
+
         norm = self.color_norm(style)
-        if self.checkBoxCorrelationSquared.isChecked():
+
+        # plot correlation or correlation^2
+        square_flag = self.checkBoxCorrelationSquared.isChecked()
+        if square_flag:
             cax = canvas.axes.imshow(correlation_matrix**2, cmap=self.get_colormap(), norm=norm)
         else:
             cax = canvas.axes.imshow(correlation_matrix, cmap=self.get_colormap(), norm=norm)
@@ -4969,11 +5165,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         canvas.axes.spines['right'].set_visible(False)
 
         # Add colorbar to the plot
-        self.add_colorbar(canvas, cax, style, 'Corr. coeff. ('+self.comboBoxCorrelationMethod.currentText()+')')
+        self.add_colorbar(canvas, cax, style)
 
         # set color limits
         cax.set_clim(style['Colors']['CLim'][0], style['Colors']['CLim'][1])
-
 
         # Set tick labels
         ticks = np.arange(len(columns))
@@ -4993,17 +5188,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.update_figure_font(canvas, style['Text']['Font'])
 
+        if square_flag:
+            plot_name = method+'_squared'
+        else:
+            plot_name = method
+
         self.plot_info = {
-            'plot_name': method,
+            'tree': 'Correlation',
             'sample_id': self.sample_id,
-            'plot_type': 'Correlation',
+            'plot_name': plot_name,
+            'plot_type': 'correlation',
+            'field_type': None,
+            'field': None,
             'figure': canvas,
             'style': style
-            }
+        }
 
         self.clear_layout(self.widgetSingleView.layout())
         self.widgetSingleView.layout().addWidget(canvas)
-        #self.new_plot_widget(plot_info, save=False)
 
 
     # -------------------------------------
@@ -5030,7 +5232,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_bins = False
 
         # get currently selected data
-        current_plot_df = self.get_map_data(self.sample_id, field=self.comboBoxHistField.currentText(), analysis_type=self.comboBoxHistFieldType.currentText())
+        current_plot_df = self.get_map_data(self.sample_id, self.comboBoxHistField.currentText(), field_type=self.comboBoxHistFieldType.currentText())
 
         # update bin width
         range = (np.nanmax(current_plot_df['array']) - np.nanmin(current_plot_df['array']))
@@ -5054,10 +5256,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_bins = False
 
         # get currently selected data
-        current_plot_df = self.get_map_data(self.sample_id, field=self.comboBoxHistField.currentText(), analysis_type=self.comboBoxHistFieldType.currentText())
+        map_df = self.get_map_data(self.sample_id, field=self.comboBoxHistField.currentText(), analysis_type=self.comboBoxHistFieldType.currentText())
 
         # update n bins
-        self.spinBoxBinWidth.setValue( int((np.nanmax(current_plot_df['array']) - np.nanmin(current_plot_df['array'])) / self.spinBoxBinWidth.value()) )
+        self.spinBoxBinWidth.setValue( int((np.nanmax(map_df['array']) - np.nanmin(map_df['array'])) / self.spinBoxBinWidth.value()) )
         self.update_bins = True
 
         # update histogram
@@ -5243,18 +5445,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         canvas.fig.tight_layout()
 
         self.plot_info = {
-            'plot_name': analysis,
+            'tree': 'Histogram',
             'sample_id': self.sample_id,
-            'analyte': field,
-            'plot_type': 'Histogram',
+            'plot_name': analysis+'_'+field,
+            'field_type': analysis,
+            'field': field,
+            'plot_type': 'histogram',
             'bin_width': bin_width,
             'figure': canvas,
-            'style': self.styles['histogram']
-            }
+            'style': style
+        }
 
         self.clear_layout(self.widgetSingleView.layout())
         self.widgetSingleView.layout().addWidget(canvas)
-        #self.new_plot_widget(plot_info, save=False)
 
 
     # -------------------------------------
@@ -5380,14 +5583,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             canvas.axes.set_yscale(yscale,base=10)
 
         plot_name = f"{x['field']}_{y['field']}_{'scatter'}"
+
         self.plot_info = {
-            'plot_name': plot_name,
+            'tree': 'Geochemistry',
             'sample_id': self.sample_id,
-            'plot_type': 'Scatter',
+            'plot_name': plot_name,
+            'plot_type': 'scatter',
+            'field_type': [x['type'], y['type'], '', c['type']],
+            'field': [x['field'], y['field'], '', c['field']],
             'figure': canvas,
             'style': style
         }
-        #self.new_plot_widget(fig, 'Scatter', plot_information, save)
 
     def ternary_scatter(self, canvas, x, y, z, c, style):
         """Creates ternary scatter plots
@@ -5429,14 +5635,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         plot_name = f"{x['field']}_{y['field']}_{z['field']}_{'ternscatter'}"
         self.plot_info = {
-            'plot_name': plot_name,
+            'tree': 'Geochemistry',
             'sample_id': self.sample_id,
-            'plot_type': 'Scatter',
-            'values': (x, y, z, c),
+            'plot_name': plot_name,
+            'plot_type': 'scatter',
+            'field_type': [x['type'], y['type'], z['type'], c['type']],
+            'field': [x['field'], y['field'], z['field'], c['field']],
             'figure': canvas,
             'style': style
         }
-            #self.new_plot_widget(fig, 'Scatter', plot_information, save)
 
     def hist2dbiplot(self, canvas, x, y, style):
         """Creates 2D histogram figure
@@ -5488,14 +5695,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         plot_name = f"{x['field']}_{y['field']}_{'heatmap'}"
         self.plot_info = {
-            'plot_name': plot_name,
+            'tree': 'Geochemistry',
             'sample_id': self.sample_id,
-            'plot_type': 'Scatter',
-            'values': (x, y),
+            'plot_name': plot_name,
+            'plot_type': 'heatmap',
+            'field_type': [x['type'], y['type'], '', ''],
+            'field': [x['field'], y['field'], '', ''],
             'figure': canvas,
             'style': style
         }
-        #    self.new_plot_widget(fig, 'Scatter', plot_information, save)
 
     def hist2dternplot(self, canvas, x, y, z, style, c=None):
         """Creates a ternary histogram figure
@@ -5545,14 +5753,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         plot_name = f"{x['field']}_{y['field']}_{z['field']}_{'heatmap'}"
         self.plot_info = {
-            'plot_name': plot_name,
+            'tree': 'Geochemistry',
             'sample_id': self.sample_id,
-            'plot_type': 'Scatter',
-            'values': (x, y, z),
+            'plot_name': plot_name,
+            'plot_type': 'heatmap',
+            'field_type': [x['type'], y['type'], z['type'], ''],
+            'field': [x['field'], y['field'], z['field'], ''],
             'figure': canvas,
             'style': style
         }
-        #self.new_plot_widget(fig, 'Scatter', plot_information, save)
 
     def plot_ternarymap(self, canvas):
         """Creates map colored by ternary coordinate positions"""
@@ -5608,10 +5817,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         hbin = t2.hexagon(10)
         xc = np.array([v['xc'] for v in hbin])
         yc = np.array([v['yc'] for v in hbin])
-        a,b,c = t2.xy2tern(xc,yc)
-        cv = t2.terncolor(a,b,c, ca=ca, cb=cb, cc=cc, cp=cm)
+        at,bt,ct = t2.xy2tern(xc,yc)
+        cv = t2.terncolor(at,bt,ct, ca=ca, cb=cb, cc=cc, cp=cm)
         for i, hb in enumerate(hbin):
             t2.ax.fill(hb['xv'], hb['yv'], color=cv[i]/255, edgecolor='none')
+
+        plot_name = f"{a['field']}_{b['field']}_{c['field']}_{'ternarymap'}"
+        self.plot_info = {
+            'tree': 'Geochemistry',
+            'sample_id': self.sample_id,
+            'plot_name': plot_name,
+            'plot_type': 'ternary map',
+            'field_type': [x['type'], y['type'], z['type'], ''],
+            'field': [x['field'], y['field'], z['field'], ''],
+            'figure': canvas,
+            'style': style
+        }
 
         self.clear_layout(self.widgetSingleView.layout())
         self.widgetSingleView.layout().addWidget(canvas)
@@ -5706,12 +5927,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_figure_font(canvas, self.styles[plot_type]['Text']['Font'])
 
         self.plot_info = {
-            'plot_name': plot_name,
+            'tree': 'Multidimensional Analysis',
             'sample_id': self.sample_id,
-            'plot_type': 'Multidimensional',
+            'plot_name': plot_name,
+            'plot_type': plot_type,
             'figure': canvas,
             'style': self.styles[plot_type]
-            }
+        }
 
         self.clear_layout(self.widgetSingleView.layout())
         self.widgetSingleView.layout().addWidget(canvas)
@@ -6057,9 +6279,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 return
 
         self.plot_info = {
-            'plot_name': plot_name,
+            'tree': 'Multidimensional Analysis',
             'sample_id': self.sample_id,
-            'plot_type': 'Multidimensional',
+            'plot_name': plot_name,
+            'plot_type': plot_type,
             'figure': canvas,
             'style': self.styles[plot_type]
             }
@@ -6140,21 +6363,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------
     # TEC and Radar plots
     # -------------------------------------
-    def toggle_mass(self, labels):
-        """Removes mass from labels
-
-        Removes mass if ``MainWindow.checkBoxShowMass.isChecked()`` is False
-
-        :param labels: input labels
-        :type labels: str
-
-        :return: output labels with or without mass
-        :rtype: list
-        """
-        if not self.checkBoxShowMass.isChecked():
-            labels = [re.sub(r'\d', '', col) for col in labels]
-
-        return labels
 
     def plot_n_dim(self):
         canvas = MplCanvas()
@@ -6173,7 +6381,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         ref_i = self.comboBoxNDimRefMaterial.currentIndex()
 
-        plot_name = self.comboBoxPlotType.currentText()
+        plot_type = self.comboBoxPlotType.currentText()
         style = self.styles[plot_name]
 
         # Get quantile for plotting TEC & radar plots
@@ -6189,90 +6397,93 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         clusters = [c for c in self.current_group['selected_clusters']]
 
-        if plot_name == 'Radar':
-            axes_interval = 5
-            if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['Cluster']:
-                # Get the cluster labels for the data
-                # cluster_labels = self.toggle_mass(self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']])
-                cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']]
+        match plot_type:
+            case 'Radar':
+                axes_interval = 5
+                if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['Cluster']:
+                    # Get the cluster labels for the data
+                    # cluster_labels = self.toggle_mass(self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']])
+                    cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']]
 
-                df_filtered['clusters'] = cluster_labels
-                df_filtered = df_filtered[df_filtered['clusters'].isin(clusters)]
-                radar = Radar(df_filtered, fields=self.n_dim_list, quantiles=quantiles, axes_interval=axes_interval, group_field='clusters', groups=clusters)
+                    df_filtered['clusters'] = cluster_labels
+                    df_filtered = df_filtered[df_filtered['clusters'].isin(clusters)]
+                    radar = Radar(df_filtered, fields=self.n_dim_list, quantiles=quantiles, axes_interval=axes_interval, group_field='clusters', groups=clusters)
 
-                canvas.fig, canvas.axes = radar.plot(cmap = self.group_cmap)
-                canvas.axes.legend(loc='upper right', frameon='False')
-            else:
-                radar = Radar(df_filtered, fields=self.n_dim_list, quantiles=quantiles, axes_interval=axes_interval, group_field='', groups=None)
-
-                canvas.fig, canvas.axes = radar.plot()
-        else: #tec plot
-            yl = [np.inf, -np.inf]
-            if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['Cluster']:
-                # Get the cluster labels for the data
-                cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']]
-
-                df_filtered['clusters'] = cluster_labels
-
-                # Plot tec for all clusters
-                for i in clusters:
-                    # Create RGBA color
-                    print(f'Cluster {i}')
-                    color = self.group_cmap[f'Cluster {i}'][:-1]
-                    canvas.axes,yl_tmp = plot_spider_norm(data=df_filtered.loc[df_filtered['clusters']==i,:],
-                            ref_data=self.ref_data, norm_ref_data=self.ref_data['model'][ref_i],
-                            layer=self.ref_data['layer'][ref_i], el_list=self.n_dim_list ,
-                            style='Quanta', quantiles=quantiles, ax=canvas.axes, c=color, label=self.current_group['clusters'][i])
-                    #store max y limit to convert the set y limit of axis
-                    yl = [np.floor(np.nanmin([yl[0] , yl_tmp[0]])), np.ceil(np.nanmax([yl[1] , yl_tmp[1]]))]
-
-                # Put a legend below current axis
-                box = canvas.axes.get_position()
-                canvas.axes.set_position([box.x0, box.y0 - box.height * 0.1,
-                                box.width, box.height * 0.9])
-
-                canvas.axes.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=3, handlelength=1)
-                #ax.legend()
-                self.logax(canvas.axes, yl, 'y')
-                canvas.axes.set_ylim(yl)
-
-                if self.checkBoxShowMass.isChecked():
-                    angle = 45
+                    canvas.fig, canvas.axes = radar.plot(cmap = self.group_cmap)
+                    canvas.axes.legend(loc='upper right', frameon='False')
                 else:
-                    angle = 0
-                canvas.axes.set_xticklabels(self.toggle_mass(self.n_dim_list), rotation=angle)
-            else:
-                canvas.axes,yl = plot_spider_norm(data=df_filtered, ref_data=self.ref_data, norm_ref_data=self.ref_data['model'][ref_i], layer=self.ref_data['layer'][ref_i], el_list=self.n_dim_list, style='Quanta', ax=ax)
-                if self.checkBoxShowMass.isChecked():
-                    angle = 45
+                    radar = Radar(df_filtered, fields=self.n_dim_list, quantiles=quantiles, axes_interval=axes_interval, group_field='', groups=None)
+
+                    canvas.fig, canvas.axes = radar.plot()
+            case 'TEC':
+                yl = [np.inf, -np.inf]
+                if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['Cluster']:
+                    # Get the cluster labels for the data
+                    cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']]
+
+                    df_filtered['clusters'] = cluster_labels
+
+                    # Plot tec for all clusters
+                    for i in clusters:
+                        # Create RGBA color
+                        print(f'Cluster {i}')
+                        color = self.group_cmap[f'Cluster {i}'][:-1]
+                        canvas.axes,yl_tmp = plot_spider_norm(data=df_filtered.loc[df_filtered['clusters']==i,:],
+                                ref_data=self.ref_data, norm_ref_data=self.ref_data['model'][ref_i],
+                                layer=self.ref_data['layer'][ref_i], el_list=self.n_dim_list ,
+                                style='Quanta', quantiles=quantiles, ax=canvas.axes, c=color, label=self.current_group['clusters'][i])
+                        #store max y limit to convert the set y limit of axis
+                        yl = [np.floor(np.nanmin([yl[0] , yl_tmp[0]])), np.ceil(np.nanmax([yl[1] , yl_tmp[1]]))]
+
+                    # Put a legend below current axis
+                    box = canvas.axes.get_position()
+                    canvas.axes.set_position([box.x0, box.y0 - box.height * 0.1,
+                                    box.width, box.height * 0.9])
+
+                    canvas.axes.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=3, handlelength=1)
+                    #ax.legend()
+                    self.logax(canvas.axes, yl, 'y')
+                    canvas.axes.set_ylim(yl)
+
+                    if self.checkBoxShowMass.isChecked():
+                        angle = 45
+                    else:
+                        angle = 0
+                    canvas.axes.set_xticklabels(self.toggle_mass(self.n_dim_list), rotation=angle)
                 else:
-                    angle = 0
-                canvas.axes.set_xticklabels(self.toggle_mass(self.n_dim_list), rotation=angle)
-            canvas.axes.set_ylabel('Abundance / ['+self.ref_data['model'][ref_i]+', '+self.ref_data['layer'][ref_i]+']')
-            canvas.fig.tight_layout()
+                    canvas.axes,yl = plot_spider_norm(data=df_filtered, ref_data=self.ref_data, norm_ref_data=self.ref_data['model'][ref_i], layer=self.ref_data['layer'][ref_i], el_list=self.n_dim_list, style='Quanta', ax=ax)
+                    if self.checkBoxShowMass.isChecked():
+                        angle = 45
+                    else:
+                        angle = 0
+                    canvas.axes.set_xticklabels(self.toggle_mass(self.n_dim_list), rotation=angle)
+                canvas.axes.set_ylabel('Abundance / ['+self.ref_data['model'][ref_i]+', '+self.ref_data['layer'][ref_i]+']')
+                canvas.fig.tight_layout()
 
 
-        plot_type = 'n-dim'
         #create unique id if new plot
         if self.sample_id in self.plot_id[plot_type]:
             self.plot_id[plot_type][self.sample_id]  = self.plot_id[plot_type][self.sample_id]+1
         else:
             self.plot_id[plot_type][self.sample_id]  = 0
-        plot_name = plot_name +'_'+str(self.plot_id[plot_type][self.sample_id])
+            
+        plot_name = plot_type +'_'+str(self.plot_id[plot_type][self.sample_id])
 
         self.update_figure_font(canvas, self.styles[plot_type]['Text']['Font'])
 
         self.plot_info = {
-            'plot_name': f'{plot_name}',
+            'tree': 'Geochemistry',
             'sample_id': self.sample_id,
+            'plot_name': plot_name,
             'plot_type': plot_type,
+            'field_type': 'analyte',
+            'field': self.n_dim_list,
             'figure': canvas,
             'style': style
         }
 
         self.clear_layout(self.widgetSingleView.layout())
         self.widgetSingleView.layout().addWidget(canvas)
-        #self.new_plot_widget(plot_info, save=False)
 
     def update_n_dim_table(self,calling_widget):
         """Updates N-Dim table
@@ -6784,7 +6995,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------
     # Data functions functions
     # -------------------------------------
-    def get_map_data(self,sample_id, field=None, analysis_type='Analyte'):
+    def get_map_data(self, sample_id, field, field_type='Analyte'):
         """
         Retrieves and processes the mapping data for the given sample and analytes, then plots the result if required.
 
@@ -6793,14 +7004,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         :param sample_id: Sample identifier
         :type sample_id: str
+        :param field: name of field to plot, Defaults to None
+        :type field: str, optional
         :param analysis_type: field type for plotting, options include: 'Analyte', 'Ratio', 'pca', 'Cluster', 'Cluster Score',
             'Special', 'computed'. Some options require a field. Defaults to 'Analyte'
         :type analysis_type: str, optional
-        :param field: name of field to plot, Defaults to None
-        :type field: str, optional
 
         :return DataFrame: Processed data for plotting. This is only returned if analysis_type is not 'laser' or 'hist'.
         """
+        # ----begin debugging----
+        print('[get_map_data] sample_id: '+sample_id+'   field_type: '+field_type+'   field: '+field)
+        # ----end debugging----
+
         if sample_id != self.sample_id:
             #axis mask is not used when plot analytes of a different sample
             axis_mask  = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
@@ -6808,37 +7023,41 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             axis_mask = self.data[self.sample_id]['axis_mask']
 
         #crop plot if filter applied
-        current_plot_df = self.data[sample_id]['raw_data'][['X','Y']][axis_mask].reset_index(drop=True)
+        df = self.data[sample_id]['raw_data'][['X','Y']][axis_mask].reset_index(drop=True)
 
-        match analysis_type:
+        match field_type:
+            case 'Analyte' | 'Analyte (normalized)':
+                # unnormalized
+                df ['array'] = self.data[sample_id]['processed_data'].loc[:,field].values
 
-            case 'Analyte':
-                current_plot_df['array'] = self.data[sample_id]['processed_data'].loc[:,field].values
+                # normalize
+                if 'normalized' in field_type:
+                    refval = self.ref_chem[re.sub(r'\d', '', field).lower()]
+                    df['array'] = df['array'] / refval
 
-            case 'Analyte (normalized)':
-                current_plot_df['array'] = self.data[sample_id]['processed_data'].loc[:,field].values
+            case 'Ratio' | 'Ratio (normalized)':
+                field_1 = field.split(' / ')[0]
+                field_2 = field.split(' / ')[1]
 
-            case 'Ratio':
-                current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].loc[:,field].values
+                # unnormalized
+                df['array'] = self.data[sample_id]['processed_data'].loc[:,field_1].values / self.data[sample_id]['processed_data'].loc[:,field_2].values
 
-            case 'PCA Score':
+                # normalize
+                if 'normalized' in field_type:
+                    refval_1 = self.ref_chem[re.sub(r'\d', '', field_1).lower()]
+                    refval_2 = self.ref_chem[re.sub(r'\d', '', field_2).lower()]
+                    df['array'] = df * (refval_2 / refval_1)
 
-                current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].loc[:,field].values
+            case 'PCA Score' | 'Cluster' | 'Cluster Score' | 'Special' | 'Computed':
+                df['array'] = self.data[sample_id]['computed_data'][field_type].loc[:,field].values
 
-            case 'Cluster':
-                current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].loc[:,field].values
-
-            case 'Cluster Score':
-                current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].loc[:,field].values
-
-            case 'Special':
-                current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].loc[:,field].values
-            case 'computed':
-                current_plot_df['array'] = self.data[sample_id]['computed_data'][analysis_type].loc[:,field].values
+        # ----begin debugging----
+        print(df.columns)
+        # ----end debugging----
 
         # crop plot if filter applied
         # current_plot_df = current_plot_df[self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
-        return current_plot_df
+        return df
 
     # extracts data for scatter plot
     def get_scatter_values(self,plot_type):
@@ -6892,17 +7111,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         for k, v in value_dict.items():
             match v['type']:
                 case 'Analyte' | 'Analyte (normalized)':
-                    df = self.get_map_data(self.sample_id, field=v['field'], analysis_type=v['type'])
+                    df = self.get_map_data(self.sample_id, field=v['field'], field_type=v['type'])
                     v['label'] = v['field'] + ' (' + self.preferences['Units']['Concentration'] + ')'
                 case 'Ratio':
                     #analyte_1, analyte_2 = v['field'].split('/')
-                    df = self.get_map_data(self.sample_id, field=v['field'], analysis_type=v['type'])
+                    df = self.get_map_data(self.sample_id, field=v['field'], field_type=v['type'])
                     v['label'] = v['field']
                 case 'PCA Score' | 'Cluster' | 'Cluster Score':
-                    df = self.get_map_data(self.sample_id, field=v['field'], analysis_type=v['type'])
+                    df = self.get_map_data(self.sample_id, field=v['field'], field_type=v['type'])
                     v['label'] = v['field']
                 case 'Special':
-                    df = self.get_map_data(self.sample_id, field=v['field'], analysis_type=v['type'])
+                    df = self.get_map_data(self.sample_id, field=v['field'], field_type=v['type'])
                     v['label'] = v['field']
                 case _:
                     df = pd.DataFrame({'array': []})  # Or however you want to handle this case
@@ -6990,18 +7209,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             treeView.setHeaderHidden(True)
             self.treeModel = QStandardItemModel()
             rootNode = self.treeModel.invisibleRootItem()
-            self.analytes_items = StandardItem('Analyte', 12, True)
-            self.norm_analytes_items = StandardItem('Normalised analyte', 12, True)
-            self.ratios_items = StandardItem('Ratio', 12, True)
-            self.histogram_items = StandardItem('Histogram', 12, True)
-            self.correlation_items = StandardItem('Correlation', 12, True)
-            self.scatter_items = StandardItem('Scatter', 12, True)
-            self.n_dim_items = StandardItem('n-Dim', 12, True)
-            self.pca_items = StandardItem('Multidimensional', 12, True)
-            self.clustering_items = StandardItem('Clustering', 12, True)
+            self.analytes_items = StandardItem('Analyte', 11, True)
+            self.norm_analytes_items = StandardItem('Analyte (normalized)', 11, True)
+            self.ratios_items = StandardItem('Ratio', 11, True)
+            self.norm_ratios_items = StandardItem('Ratio (normalized)', 11, True)
+            self.histogram_items = StandardItem('Histogram', 11, True)
+            self.correlation_items = StandardItem('Correlation', 11, True)
+            self.geochemistry_items = StandardItem('Geochemistry', 11, True)
+            self.multidim_items = StandardItem('Multidimensional Analysis', 11, True)
+            self.calculated_items = StandardItem('Calculated Map', 11, True)
 
-            rootNode.appendRows([self.analytes_items,self.norm_analytes_items,self.ratios_items,self.histogram_items,self.correlation_items, self.scatter_items,
-                                 self.n_dim_items, self.pca_items, self.clustering_items])
+            rootNode.appendRows([self.analytes_items, self.norm_analytes_items, self.ratios_items, self.norm_ratios_items,
+                                self.histogram_items,self.correlation_items, self.geochemistry_items,
+                                self.multidim_items, self.calculated_items])
             treeView.setModel(self.treeModel)
             treeView.expandAll()
             treeView.doubleClicked.connect(self.tree_double_click)
@@ -7009,7 +7229,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #self.analytes_items.setRowCount(0)
             sample_id_item = StandardItem(sample_id, 11)
             histogram_sample_id_item = StandardItem(sample_id, 11)
-            ratio_sampe_id_item = StandardItem(sample_id, 11)
+            ratio_sample_id_item = StandardItem(sample_id, 11)
             norm_sample_id_item = StandardItem(sample_id, 11)
             for analyte in self.data[sample_id]['analyte_info'].loc[:,'analytes']:
                 analyte_item = StandardItem(analyte)
@@ -7020,7 +7240,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 norm_sample_id_item.appendRow(norm_item)
             self.analytes_items.appendRow(sample_id_item)
             self.histogram_items.appendRow(histogram_sample_id_item)
-            self.ratios_items.appendRow(ratio_sampe_id_item)
+            self.ratios_items.appendRow(ratio_sample_id_item)
             self.norm_analytes_items.appendRow(norm_sample_id_item)
 
     def tree_double_click(self,val):
@@ -7029,68 +7249,68 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         level_3_data = val.data()
         # self.checkBoxViewRatio.setChecked(False)
         if level_1_data == 'Analyte' :
-            current_plot_df = self.get_map_data(sample_id=level_2_data, field=level_3_data, analysis_type='Analyte')
-            self.create_plot(current_plot_df, sample_id=level_2_data, plot_type='lasermap', analyte_1=level_3_data)
+            #current_plot_df = self.get_map_data(sample_id=level_2_data, field=level_3_data, field_type='Analyte')
+            #self.create_plot(current_plot_df, sample_id=level_2_data, plot_type='analyte', analyte_1=level_3_data)
+            self.create_map_plotwidget(sample_id=level_2_data, field_type='Analyte', field=level_3_data)
 
 
-        if level_1_data == 'Normalised analyte' :
+        if level_1_data == 'Analyte (normalized)' :
             current_plot_df = self.get_map_data(sample_id=level_2_data, field=level_3_data)
-            self.create_plot(current_plot_df,sample_id = level_2_data,plot_type='lasermap_norm', analyte_1=level_3_data)
+            self.create_plot(current_plot_df,sample_id = level_2_data,plot_type='analyte_norm', analyte_1=level_3_data)
 
         # self.add_plot(val.data())
-        elif level_1_data == 'Ratio' :
+        elif level_1_data == 'Ratio':
             analytes= level_3_data.split(' / ')
+            current_plot_df = self.get_map_data(sample_id=level_2_data, field=level_3_data, field_type='Ratio')
+            self.create_plot(current_plot_df,sample_id = level_2_data, plot_type='analyte', analyte_1=analytes[0], analyte_2=analytes[1])
 
-            current_plot_df = self.get_map_data(sample_id=level_2_data, field=level_3_data, analysis_type='Ratio')
-
-            self.create_plot(current_plot_df,sample_id = level_2_data, plot_type='lasermap', analyte_1=analytes[0], analyte_2=analytes[1])
-
-        elif level_1_data in ['Histogram', 'Clustering', 'Scatter', 'Multidimensional', 'Correlation']:
+        elif level_1_data in ['Histogram', 'Correlation', 'Scatter', 'Multidimensional', 'Clustering']:
             plot_info={'plot_name':level_3_data, 'plot_type':level_1_data.lower(),'sample_id':level_2_data }
-            self.add_plot(plot_info)
+            self.add_plotwidget_to_canvas(plot_info)
 
     def update_tree(self, leaf, data=None, tree='Analyte', norm_update=False):
-        if tree.lower() == 'analyte':
-            # Highlight analytes in treeView
-            # Un-highlight all leaf in the trees
-            self.unhighlight_tree(self.ratios_items)
-            self.unhighlight_tree(self.analytes_items)
-            self.data[self.sample_id]['analyte_info'].loc[:,'use'] = False
-            if len(leaf.keys())>0:
-                for analyte_pair, norm in leaf.items():
-                    if '/' in analyte_pair:
-                        analyte_1, analyte_2 = analyte_pair.split(' / ')
-                        self.update_ratio_df(self.sample_id,analyte_1, analyte_2, norm)
-                        ratio_name = f"{analyte_1} / {analyte_2}"
-                        # Populate ratios_items if the pair doesn't already exist
-                        item,check = self.find_leaf(tree = self.ratios_items, branch = self.sample_id, leaf = ratio_name)
+        match tree:
+            case 'Analyte':
+                # Highlight analytes in treeView
+                # Un-highlight all leaf in the trees
+                self.unhighlight_tree(self.ratios_items)
+                self.unhighlight_tree(self.analytes_items)
+                self.data[self.sample_id]['analyte_info'].loc[:,'use'] = False
+                if len(leaf.keys())>0:
+                    for analyte_pair, norm in leaf.items():
+                        if '/' in analyte_pair:
+                            analyte_1, analyte_2 = analyte_pair.split(' / ')
+                            self.update_ratio_df(self.sample_id,analyte_1, analyte_2, norm)
+                            ratio_name = f"{analyte_1} / {analyte_2}"
+                            # Populate ratios_items if the pair doesn't already exist
+                            item,check = self.find_leaf(tree = self.ratios_items, branch = self.sample_id, leaf = ratio_name)
 
-                        if not check: #if ratio doesnt exist
-                            child_item = StandardItem(ratio_name)
-                            child_item.setBackground(QBrush(QColor(255, 255, 200)))
-                            item.appendRow(child_item)
-                        else:
+                            if not check: #if ratio doesnt exist
+                                child_item = StandardItem(ratio_name)
+                                child_item.setBackground(QBrush(QColor(255, 255, 200)))
+                                item.appendRow(child_item)
+                            else:
+                                item.setBackground(QBrush(QColor(255, 255, 200)))
+                        else: #single analyte
+                            analyte_1 = analyte_pair
+                            analyte_2 = None
+                            item,check = self.find_leaf(tree = self.analytes_items, branch = self.sample_id, leaf = analyte_pair)
                             item.setBackground(QBrush(QColor(255, 255, 200)))
-                    else: #single analyte
-                        analyte_1 = analyte_pair
-                        analyte_2 = None
-                        item,check = self.find_leaf(tree = self.analytes_items, branch = self.sample_id, leaf = analyte_pair)
-                        item.setBackground(QBrush(QColor(255, 255, 200)))
-                        self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes']==analyte_pair),'use'] = True
-                    if norm_update: #update if analytes are returned from analyte selection window
-                        self.update_norm(self.sample_id,norm,analyte_1 = analyte_1, analyte_2 = analyte_2)
-                # self.update_all_plots()
-                self.update_SV()
-        elif tree == 'Scatter':
-            self.add_tree_item(self.sample_id,self.scatter_items,leaf,data)
-        elif tree == 'Clustering':
-            self.add_tree_item(self.sample_id,self.clustering_items,leaf,data)
-        elif tree == 'n-Dim':
-            self.add_tree_item(self.sample_id,self.n_dim_items,leaf,data)
-        elif tree == 'Multidimensional':
-            self.add_tree_item(self.sample_id,self.pca_items,leaf,data)
-        elif tree == 'Correlation':
-            self.add_tree_item(self.sample_id,self.correlation_items,leaf,data)
+                            self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes']==analyte_pair),'use'] = True
+                        if norm_update: #update if analytes are returned from analyte selection window
+                            self.update_norm(self.sample_id,norm,analyte_1 = analyte_1, analyte_2 = analyte_2)
+                    # self.update_all_plots()
+                    # self.update_SV()
+            case 'Histogram':
+                self.add_tree_item(self.sample_id,self.histogram_items,leaf,data)
+            case 'Correlation':
+                self.add_tree_item(self.sample_id,self.correlation_items,leaf,data)
+            case 'Geochemistry':
+                self.add_tree_item(self.sample_id,self.geochemistry_items,leaf,data)
+            case 'Multidimensional Analysis':
+                self.add_tree_item(self.sample_id,self.multidim_items,leaf,data)
+            case 'Calculated Map':
+                self.add_tree_item(self.sample_id,self.calculated_items,leaf,data)
 
     def add_tree_item(self,sample_id,tree, leaf, data):
         #check if leaf is in tree

@@ -572,6 +572,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         setattr(self.comboBoxLineWidth, "allItems", lambda: [self.comboBoxLineWidth.itemText(i) for i in range(self.comboBoxLineWidth.count())])
         setattr(self.comboBoxColorByField, "allItems", lambda: [self.comboBoxColorByField.itemText(i) for i in range(self.comboBoxColorByField.count())])
         setattr(self.comboBoxFieldColormap, "allItems", lambda: [self.comboBoxFieldColormap.itemText(i) for i in range(self.comboBoxFieldColormap.count())])
+        setattr(self.comboBoxMVPlots, "allItems", lambda: [self.comboBoxMVPlots.itemText(i) for i in range(self.comboBoxMVPlots.count())])
 
         # self.doubleSpinBoxMarkerSize.valueChanged.connect(lambda: self.plot_scatter(save=False))
         #self.comboBoxColorByField.activated.connect(lambda: self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField))
@@ -4571,7 +4572,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         return plotWidget
 
-    def add_plotwidget_to_canvas(self, plot_info, current_plot_df = None):
+    def add_plotwidget_to_canvas(self, plot_info, view=None, position=None):
         """Adds plot to plot widget dictionary and displays in selected view tab
 
         :param plot_information:
@@ -4600,22 +4601,59 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # add figure to MultiView canvas
         elif self.canvasWindow.currentIndex() == 1:
+            name = f"{plot_info['sample_id']}:{plot_info['plot_type']}:{plot_info['plot_name']}"
+            layout = self.widgetMultiView.layout()
+
             print('add_plotwidget_to_canvas: MV')
-            # get position of for first empty plot
-            for row in range(self.spinBoxMaxRows.value()):
-                for col in range(self.spinBoxMaxCols.value()):
-                    if self.widgetMultiView.layout().itemAtPosition(row,col):
-                        continue
-                    break
+            list = self.comboBoxMVPlots.allItems()
+
+            if list:
+                for i, item in enumerate(list):
+                    mv_plot_data = self.comboBoxMVPlots.itemData(i)
+                    if mv_plot_data[2] == tree and mv_plot_data[3] == sample_id and mv_plot_data[4] == plot_name:
+                        self.statusBar.showMessage('Plot already displayed on canvas.')
+                        return
+
+            # if position is given, use it
+            if position:
+                row = position[0]
+                col = position[1]
+
+                # remove widget that is currently in this place
+                widget = layout.itemAt(row,col)
+                if widget is not None:
+                    layout.removeWidget(widget)
+                    widget.setParent(None)
+
+            # if no position, find first empty space
+            else:
+                keepgoing = True
+                for row in range(self.spinBoxMaxRows.value()):
+                    for col in range(self.spinBoxMaxCols.value()):
+                        if layout.itemAt(row,col):
+                            #print(f'row: {row}   col : {col}')
+                            continue
+                        else:
+                            keepgoing = False
+                            break
+
+                    if not keepgoing:
+                        #print(f'row: {row}   col : {col}')
+                        break
 
             # check if canvas is full
-            if row == self.spinBoxMaxRows.value()-1 and col == self.spinBoxMaxCols.value()-1 and self.widgetMultiView.layout().itemAtPosition(row,col):
-                QMessageBox.warning(self, "Add plot warning", "Canvas is full, to add more plots, increase row or column max.")
+            if row == self.spinBoxMaxRows.value()-1 and col == self.spinBoxMaxCols.value()-1 and layout.itemAtPosition(row,col):
+                QMessageBox.warning(self, "Add plot to canvas warning", "Canvas is full, to add more plots, increase row or column max.")
+                return
 
             # add figure to canvas
-            self.widgetMultiView.layout().addWidget(widget_dict['info']['figure'],row,col)
+            layout.addWidget(widget_dict['info']['figure'],row,col)
             widget_dict['view'] = 1
             widget_dict['position'] = [row,col]
+
+            data = [row, col, plot_info.tree, plot_info.sample, plot_info.name]
+
+            self.comboBoxMVPlots.addItem(name, data)
 
         self.hide()
         self.show()
@@ -4630,7 +4668,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         view = self.canvasWindow.currentIndex()
 
         # add plot to dictionary for tree
-        self.plot_widget_dict[self.plot_info['plot_type'].lower()][self.sample_id][self.plot_info['plot_name']] = {'info':self.plot_info, 'view':view, 'position':None}
+        self.plot_widget_dict[self.plot_info['tree']][self.sample_id][self.plot_info['plot_name']] = {'info':self.plot_info, 'view':view, 'position':None}
 
         # updates tree with new plot name
         self.update_tree(self.plot_info['plot_name'], data=self.plot_info, tree=self.plot_info['plot_type'])
@@ -5009,12 +5047,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # turn off axes and
         plotWindow.showAxes(False, showValues=(True,False,False,True) )
         plotWindow.invertY(True)
-        if view == 0:
-            plotWindow.setRange(yRange=[self.y.min(), self.y.max()])
         plotWindow.setAspectLocked()
 
         # Prevent zooming/panning outside the default view
-        plotWindow.setLimits(yMin=self.y.min(), yMax = self.y.max())
+        ## These cut off parts of the map when plotting.
+        #plotWindow.setRange(yRange=[self.y.min(), self.y.max()])
+        #plotWindow.setLimits(xMin=self.x.min(), xMax=self.x.max(), yMin=self.y.min(), yMax = self.y.max())
+        #plotWindow.setLimits(maxXRange=self.x_range, maxYRange=self.y_range)
 
         #supress right click menu
         plotWindow.setMenuEnabled(False)
@@ -5079,7 +5118,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_tree(self.plot_info['plot_name'], data=self.plot_info, tree=self.plot_info['plot_type'])
 
         # add small histogram
-        if self.toolBox.currentIndex() == self.sample_tab_id:
+        if self.toolBox.currentIndex() == self.sample_tab_id and view == 0:
             self.plot_small_histogram(map_df,field)
 
 
@@ -7245,29 +7284,26 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.norm_analytes_items.appendRow(norm_sample_id_item)
 
     def tree_double_click(self,val):
-        level_1_data = val.parent().parent().data()
-        level_2_data = val.parent().data()
-        level_3_data = val.data()
-        # self.checkBoxViewRatio.setChecked(False)
-        if level_1_data == 'Analyte' :
+        # get double-click result
+        tree = val.parent().parent().data()
+        branch = val.parent().data()
+        leaf = val.data()
+
+        # 
+        if tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
             #current_plot_df = self.get_map_data(sample_id=level_2_data, field=level_3_data, field_type='Analyte')
             #self.create_plot(current_plot_df, sample_id=level_2_data, plot_type='analyte', analyte_1=level_3_data)
-            self.create_map_plotwidget(sample_id=level_2_data, field_type='Analyte', field=level_3_data)
+            if leaf in self.plot_widget_dict[tree][branch].keys():
+                widget_dict = self.plot_widget_dict[tree][branch][leaf]
+                self.add_plotwidget_to_canvas(widget_dict['info'], view=widget_dict['view'], position=widget_dict['position'])
+            else:
+                self.create_map_plotwidget(sample_id=branch, field_type=tree, field=leaf)
 
-
-        if level_1_data == 'Analyte (normalized)' :
-            current_plot_df = self.get_map_data(sample_id=level_2_data, field=level_3_data)
-            self.create_plot(current_plot_df,sample_id = level_2_data,plot_type='analyte_norm', analyte_1=level_3_data)
-
-        # self.add_plot(val.data())
-        elif level_1_data == 'Ratio':
-            analytes= level_3_data.split(' / ')
-            current_plot_df = self.get_map_data(sample_id=level_2_data, field=level_3_data, field_type='Ratio')
-            self.create_plot(current_plot_df,sample_id = level_2_data, plot_type='analyte', analyte_1=analytes[0], analyte_2=analytes[1])
-
-        elif level_1_data in ['Histogram', 'Correlation', 'Scatter', 'Multidimensional', 'Clustering']:
-            plot_info={'plot_name':level_3_data, 'plot_type':level_1_data.lower(),'sample_id':level_2_data }
+        elif tree in ['Histogram', 'Correlation', 'Scatter', 'Multidimensional', 'Clustering']:
             self.add_plotwidget_to_canvas(plot_info)
+        
+        else:
+            QMessageBox.error(self, "Double-click failed", "Unknown group plot type.")
 
     def update_tree(self, leaf, data=None, tree='Analyte', norm_update=False):
         match tree:

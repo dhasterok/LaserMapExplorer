@@ -44,7 +44,7 @@
        <string/>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="documentMode">
        <bool>false</bool>
@@ -475,18 +475,13 @@
             </widget>
            </item>
            <item row="0" column="5">
-            <widget class="QComboBox" name="comboBoxPlots">
+            <widget class="QComboBox" name="comboBoxMVPlots">
              <property name="maximumSize">
               <size>
                <width>200</width>
                <height>16777215</height>
               </size>
              </property>
-             <item>
-              <property name="text">
-               <string>New Item</string>
-              </property>
-             </item>
             </widget>
            </item>
            <item row="0" column="6">
@@ -6433,7 +6428,7 @@
       </font>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="PlotSelectorPage">
       <property name="geometry">
@@ -6601,8 +6596,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>219</width>
-          <height>421</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6941,8 +6936,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>219</width>
-          <height>421</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="icon">

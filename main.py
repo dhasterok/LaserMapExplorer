@@ -1740,7 +1740,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             data_dict['tree'] =  self.get_model_data(self.treeModel)
             # data_dict['plot_widget_dict'] = self.plot_widget_dict
             
-            data_dict['plot_widget_dict'] = self.plot_widget_dict
+                
             with open(file_name, 'wb') as file:
                 pickle.dump(data_dict, file)
             
@@ -1782,7 +1782,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.polygons = data_dict['polygons'] 
                 self.styles = data_dict['styles']
                 self.axis_dict = data_dict['axis_dict']
-                self.plot_widget_dict = data_dict['plot_widget_dict']
                 model = QStandardItemModel()
                 root = model.invisibleRootItem()
                 for item_data in data_dict['tree']:
@@ -1797,7 +1796,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def extract_tree_data(self,item):
         """Recursively extract data from QStandardItem to a serializable format."""
         children = [self.extract_tree_data(item.child(i)) for i in range(item.rowCount())]
-        return {'text': item.text(), 'children': children}
+        plot_info = item.data(role=Qt.UserRole)
+        if not plot_info:
+            return {'text': item.text(), 'children': children}
+        else:
+            return {'plot_info':plot_info,'text': item.text(), 'children': children}
 
     def get_model_data(self,model):
         """Extract data from the root of QStandardItemModel."""

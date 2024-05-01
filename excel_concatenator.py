@@ -14,6 +14,7 @@ import sys
 import pandas as pd
 from src.ui.ExcelConcatenator import Ui_ExelConcatenator
 import numpy as np
+
 # Excel concatenator gui
 # -------------------------------
 class excelConcatenator(QtWidgets.QMainWindow, Ui_ExelConcatenator):       
@@ -29,12 +30,22 @@ class excelConcatenator(QtWidgets.QMainWindow, Ui_ExelConcatenator):
         # Set a message that will be displayed in the status bar
         self.statusBar.showMessage('Ready')
         # Adding a progress bar to the status bar
+        
+        
+        # Adding a progress bar to the status bar
         self.progressBar = QProgressBar()
         self.statusBar.addPermanentWidget(self.progressBar)
         
-        self.pushButtonSaveSelection.clicked.connect(self.save_selection)
+        
+        self.pushButtonSaveMetaData.setEnabled(False)
+        self.pushButtonLoadMetaData.setEnabled(False)
+        
+        self.pushButtonSaveMetaData.clicked.connect(self.save_meta_data)
+       
+        self.pushButtonLoadMetaData.clicked.connect(self.load_meta_data)
 
-        self.pushButtonLoadSelection.clicked.connect(self.load_selection)
+        self.pushButtonOpenDirectory.clicked.connect(self.open_directory)
+        
 
         # self.pushButtonDone.clicked.connect(self.accept)
         
@@ -48,22 +59,118 @@ class excelConcatenator(QtWidgets.QMainWindow, Ui_ExelConcatenator):
         
         
         
-    def save_selection(self):
-        file_name, _ = QFileDialog.getSaveFileName(self, "Save File", "", "Text Files (*.txt);;All Files (*)")
+    def load_meta_data(self):
+        file_name, _ = QFileDialog.getOpenFileName(self, "Open File", "", "CSV Files (*.csv);;All Files (*)")
+        status = True
         if file_name:
-            with open(file_name, 'w') as f:
-                for i in range(self.tableWidgetSelected.rowCount()):
-                    analyte_pair = self.tableWidgetSelected.item(i, 0).text()
-                    combo = self.tableWidgetSelected.cellWidget(i, 1)
-                    selection = combo.currentText()
-                    f.write(f"{analyte_pair},{selection}\n")
+            data = pd.read_csv(file_name)
+    
+            # Assuming 'Sample ID' is the column to match sample IDs
+            for index, row in data.iterrows():
+                sample_id = row['Sample ID']
+                if sample_id in self.sample_ids:
+                    row_pos = self.sample_ids.index(sample_id)
+                    self.update_table_row(row_pos, row)
+                else:
+                    status = False
+              
+            if status:
+                self.statusBar.showMessage("Metadata loaded successfully")
+            else:
+                self.statusBar.showMessage("Some metadata sample IDs do not match sample IDs in directory")
+    
+    def update_table_row(self, row_pos, row_data):
+        # Ensure the table has enough rows
+        if self.tableWidgetMetaData.rowCount() <= row_pos:
+            self.tableWidgetMetaData.insertRow(row_pos)
+    
+        for col_index, (col_name, value) in enumerate(row_data.items()):
+            if col_name == 'Sample ID':
+                continue  # Skip the sample ID since it's just a reference, not to be edited
+    
+            # Handling different widget types in the table
+            cell_widget = self.tableWidgetMetaData.cellWidget(row_pos, col_index)
+            if isinstance(cell_widget, QComboBox):
+                # Set the current index for combo box if the value exists in its options
+                index = cell_widget.findText(str(value), Qt.MatchFixedString)
+                if index >= 0:
+                    cell_widget.setCurrentIndex(index)
+                else:
+                    self.statusBar.showMessage(f"Value {value} not found in ComboBox options at column {col_index}")
+            else:
+                # For QTableWidgetItem, just set the text
+                item = QTableWidgetItem(str(value))
+                self.tableWidgetMetaData.setItem(row_pos, col_index, item)
+    
+        
+            
+                        
+    def save_meta_data(self):
+        file_name, _ = QFileDialog.getSaveFileName(self, "Save File", "", "CSV Files (*.csv);;All Files (*)")
+        if file_name:
+            # Collect data from QTableWidget
+            data = []
+            headers = []
+            
+            # Retrieve headers
+            for column in range(self.tableWidgetMetaData.columnCount()):
+                header = self.tableWidgetMetaData.horizontalHeaderItem(column)
+                if header is not None:
+                    headers.append(header.text())
+                else:
+                    headers.append(f"Column{column}")
+            
+            # Retrieve cell data
+            for row in range(self.tableWidgetMetaData.rowCount()):
+                row_data = []
+                for column in range(self.tableWidgetMetaData.columnCount()):
+                    item = self.tableWidgetMetaData.item(row, column)
+                    if item:
+                        row_data.append(item.text())
+                    else:
+                        # Try to fetch the QComboBox if QTableWidgetItem is not found
+                        cell_widget = self.tableWidgetMetaData.cellWidget(row, column)
+                        if isinstance(cell_widget, QComboBox):
+                            row_data.append(cell_widget.currentText())
+                        else:
+                            row_data.append('')
+                data.append(row_data)
+            
+            # Create a DataFrame and save to CSV
+            df = pd.DataFrame(data, columns=headers)
+            df.to_csv(file_name, index=False)  # Save DataFrame to CSV without the index
+            self.statusBar.showMessage("Metadata saved successfully")
 
-    def load_selection(self):
+                    
+        
+        
+
+    def open_directory(self):
         
         root_path = QFileDialog.getExistingDirectory(None, "Select a folder", options=QFileDialog.ShowDirsOnly)
         if not root_path:
             return
         
+        self.root_path = root_path 
+        self.lineEditRootDirectory.setText(root_path)  # Set the directory path in the QTextEdit
+        
+        #clear existing contents in tableWidgetMetaData
+        self.tableWidgetMetaData.clearContents()
+        self.tableWidgetMetaData.setRowCount(0)
+        
+        self.fill_sample_id_path(root_path)
+        
+        self.pushButtonSaveMetaData.setEnabled(True)
+        self.pushButtonLoadMetaData.setEnabled(True)
+        
+        for sample_id in self.sample_ids:
+            #fill column with column name 'Sample ID' of  self.tableMetaData with sample ids
+            self.populate_table()
+        
+        self.raise_()
+        self.activateWindow()
+    
+    def fill_sample_id_path(self,root_path):
         # List all entries in the directory given by root_path
         entries = os.listdir(root_path)
         subdirectories = [name for name in entries if os.path.isdir(os.path.join(root_path, name))]
@@ -77,12 +184,10 @@ class excelConcatenator(QtWidgets.QMainWindow, Ui_ExelConcatenator):
             # If no subdirectories, use the directory name itself as the sample ID
             self.sample_ids = [os.path.basename(root_path)]
             self.paths = [root_path]
-        for sample_id in self.sample_ids:
-            #fill column with column name 'Sample ID' of  self.tableMetaData with sample ids
-            self.populate_table()
+
+            
         
-        self.raise_()
-        self.activateWindow()
+
          
     def populate_table(self):
         self.tableWidgetMetaData.setRowCount(len(self.sample_ids))
@@ -90,7 +195,7 @@ class excelConcatenator(QtWidgets.QMainWindow, Ui_ExelConcatenator):
             item = QTableWidgetItem(sample_id)
             item.setFlags(item.flags() & ~Qt.ItemIsEditable)
             self.tableWidgetMetaData.setItem(i, 0, item)
-            self.add_combobox(i, 1, ['raw','ppm','LADr ppm'])
+            self.add_combobox(i, 1, ['XMap','Iolite','LADr'])
             self.add_combobox(i, 2, ['left to right', 'right to left', 'bottom to top', 'top to bottom'])
             self.add_combobox(i, 3, ['left to right', 'right to left', 'bottom to top', 'top to bottom'])
             self.add_combobox(i, 5, ['first','last'])
@@ -140,93 +245,119 @@ class excelConcatenator(QtWidgets.QMainWindow, Ui_ExelConcatenator):
             
             
     def import_data(self): 
+        if not self.checkBoxSaveAtRoot.isChecked():
+            save_path = QFileDialog.getExistingDirectory(None, "Select a folder to Save imports", options=QFileDialog.ShowDirsOnly)
+            if not save_path:
+                return
+        else:
+            save_path = self.root_path
+        total_files = sum(len(files) for path in self.paths for r, d, files in os.walk(path))
+        current_progress = 0
+        self.progressBar.setMaximum(total_files)
         
-        for i,path in enumerate(self.paths):
-            data_type = self.tableWidgetMetaData.cellWidget(i,1).currentText().lower()
-            file_direction   = self.tableWidgetMetaData.cellWidget(i,2).currentText().lower()
-            scan_direction   = self.tableWidgetMetaData.cellWidget(i,3).currentText().lower()
-            
-            delimiter   = self.tableWidgetMetaData.item(i,4)
-            if delimiter:
-                delimiter = delimiter.text().strip().lower()
-            scan_no_pos   = self.tableWidgetMetaData.cellWidget(i,5).currentText().lower()
-            spot_size = float(self.tableWidgetMetaData.item(i,6).text().lower())
-            interline_dist = float(self.tableWidgetMetaData.item(i,7).text().lower())
-
-            intraline_dist = float(self.tableWidgetMetaData.item(i,10).text().lower())
-            line_sep =20
-            line_dir = 'x'
-            
-            
-            for subdir, dirs, files in os.walk(path):
-                data_frames = []
-                for file in files:
-                    if file.endswith('.csv') or file.endswith('.xls') or file.endswith('.xlsx'):
-                        file_path = os.path.join(subdir, file)
-                        save_prefix = os.path.basename(subdir)
-                        if any(std in file for std in self.standard_list):
-                            continue  # skip standard files
-                        
-                        if data_type == 'raw':
-                            df = self.read_raw_folder(file,file_path, delimiter, scan_no_pos)
-                            data_frames.append(df)
-                        elif data_type == 'ppm':
-                            df,nr,nc = self.read_ppm_folder(file,file_path, spot_size, line_sep, line_dir)
+        final_data = pd.DataFrame([])
+        try:
+            for i,path in enumerate(self.paths):
+                data_type = self.tableWidgetMetaData.cellWidget(i,1).currentText().lower()
+                file_direction   = self.tableWidgetMetaData.cellWidget(i,2).currentText().lower()
+                scan_direction   = self.tableWidgetMetaData.cellWidget(i,3).currentText().lower()
+                
+                delimiter   = self.tableWidgetMetaData.item(i,4)
+                if delimiter:
+                    delimiter = delimiter.text().strip().lower()
+                scan_no_pos   = self.tableWidgetMetaData.cellWidget(i,5).currentText().lower()
+                spot_size = float(self.tableWidgetMetaData.item(i,6).text().lower())
+                interline_dist = float(self.tableWidgetMetaData.item(i,7).text().lower())
+    
+                intraline_dist = float(self.tableWidgetMetaData.item(i,10).text().lower())
+                line_sep =20
+                line_dir = 'x'
+                
+                
+                for subdir, dirs, files in os.walk(path):
+                    data_frames = []
+                    for file in files:
+                        if file.endswith('.csv') or file.endswith('.xls') or file.endswith('.xlsx'):
+                            file_path = os.path.join(subdir, file)
+                            save_prefix = os.path.basename(subdir)
+                            if any(std in file for std in self.standard_list):
+                                continue  # skip standard files
                             
-                            data_frames.append(df)
-                        elif data_type == 'ladr ppm':
-                            df = self.read_ladr_ppm_folder(file_path)
-                        else:
-                            QMessageBox.error(self.main_window,"Error", "Unknown Type specified.")
-                            return
-        
-                if data_type == 'raw':
-                    final_data = pd.concat(data_frames, ignore_index=True)
-                    final_data.insert(2,'X',final_data['ScanNum'] * float(interline_dist))
-                    final_data.insert(3,'Y',final_data['SpotNum'] * float(intraline_dist))
+                            if data_type == 'iolite':
+                                df = self.read_raw_folder(file,file_path, delimiter, scan_no_pos)
+                                data_frames.append(df)
+                            elif data_type == 'xmap':
+                                df,nr,nc = self.read_ppm_folder(file,file_path, spot_size, line_sep, line_dir)
+                                
+                                data_frames.append(df)
+                            elif data_type == 'ladr':
+                                df = self.read_ladr_ppm_folder(file_path)
+                                data_frames.append(df)
+                        current_progress += 1
+                        self.progressBar.setValue(current_progress)
+                        self.statusBar.showMessage(f" {current_progress}/{total_files} files imported.")
+                        QtWidgets.QApplication.processEvents()  # Process GUI events to update the progress bar
+                
+                        
+                        
+                    if data_type == 'iolite':
+                        final_data = pd.concat(data_frames, ignore_index=True)
+                        final_data.insert(2,'X',final_data['ScanNum'] * float(interline_dist))
+                        final_data.insert(3,'Y',final_data['SpotNum'] * float(intraline_dist))
+                        
+                        
+                        #determine read direction
+                        x_dir = self.orientation(file_direction)
+                        y_dir = self.orientation(scan_direction)
+                        
+                        # Adjust coordinates based on the reading direction and make upper left corner as (0,0)
+                        
+                        final_data['X'] = final_data['X'] * x_dir
+                        final_data['X'] = final_data['X'] - final_data['X'].min()
+                
+                        final_data['Y'] = final_data['Y'] * y_dir
+                        final_data['Y'] = final_data['Y'] - final_data['Y'].min()
+                        
+                        match file_direction:
+                            case 'top to bottom'| 'bottom to top':
+                                pass
+                            case 'left to right' | 'right to left':
+                                Xtmp = final_data['X'];
+                                final_data['X'] =final_data['Y'];
+                                final_data['Y'] = Xtmp;
+                        
+                        
+                    elif data_type == 'xmap':
+                        final_data = pd.concat(data_frames, axis = 1)
+                        
+                        # Create scanNum array
+                        scanNum = np.tile(np.arange(1, nc + 1), (nr, 1))  # Tile the sequence horizontally
+                        
+                        # Create spotNum array
+                        spotNum = np.tile(np.arange(1, nr + 1).reshape(nr, 1), (1, nc))  # Tile the sequence vertically
+                       
+                        final_data.insert(0,'ScanNum',scanNum.flatten('F'))
+                        final_data.insert(1,'SpotNum', spotNum.flatten('F'))
+                        
+                        
+                        final_data.insert(2,'X',final_data['SpotNum'] * line_sep)
+                        final_data.insert(3,'Y',final_data['SpotNum'] * spot_size)
+                        
+                        final_data.insert(3,'Time_Sec_',np.nan)
+                        
+                    else:
+                        final_data = pd.concat(data_frames, ignore_index=True)
                     
-                    
-                    #determine read direction
-                    x_dir = self.orientation(file_direction)
-                    y_dir = self.orientation(scan_direction)
-                    
-                    # Adjust coordinates based on the reading direction and make upper left corner as (0,0)
-                    
-                    final_data['X'] = final_data['X'] * x_dir
-                    final_data['X'] = final_data['X'] - final_data['X'].min()
-            
-                    final_data['Y'] = final_data['Y'] * y_dir
-                    final_data['Y'] = final_data['Y'] - final_data['Y'].min()
-                    
-                    match file_direction:
-                        case 'top to bottom'| 'bottom to top':
-                            pass
-                        case 'left to right' | 'right to left':
-                            Xtmp = final_data['X'];
-                            final_data['X'] =final_data['Y'];
-                            final_data['Y'] = Xtmp;
-                    
-                    
-                elif data_type == 'ppm':
-                    final_data = pd.concat(data_frames, axis = 1)
-                    
-                    # Create scanNum array
-                    scanNum = np.tile(np.arange(1, nc + 1), (nr, 1))  # Tile the sequence horizontally
-                    
-                    # Create spotNum array
-                    spotNum = np.tile(np.arange(1, nr + 1).reshape(nr, 1), (1, nc))  # Tile the sequence vertically
-                   
-                    final_data.insert(0,'ScanNum',scanNum.flatten('F'))
-                    final_data.insert(1,'SpotNum', spotNum.flatten('F'))
-                    
-                    
-                    final_data.insert(2,'X',final_data['SpotNum'] * line_sep)
-                    final_data.insert(3,'Y',final_data['SpotNum'] * spot_size)
-                    
-                    final_data.insert(3,'Time_Sec_',np.nan)
-                    
+                    file_name = os.path.join(save_path, self.sample_ids[i]+'.csv')
+                    print(file_name)
                     print(final_data.head())
-                    
+                    # final_data.to_csv(file_name, index= False)
+                
+        except Exception as e:
+            self.statusBar.showMessage(f"Error during import: {str(e)}")
+            return
+        self.statusBar.showMessage("Import completed successfully!")
+        self.progressBar.setValue(total_files)  # Ensure the progress bar reaches full upon completion
             
     def orientation(self,readdir):
    
@@ -279,31 +410,33 @@ class excelConcatenator(QtWidgets.QMainWindow, Ui_ExelConcatenator):
         r,c = df.shape
         return new_df, r,c
    
-    def read_ladr_ppm_folder(self,file_path):
-        df = pd.read_csv(file_path)
-        df['ScanNum'] = range(1, len(df) + 1)
-        df['SpotNum'] = range(1, len(df) + 1)
-        # LADR ppm processing might need specific manipulations, adjust as necessary
-        return df
-        # X = ScanNum*sampleTable.InterlineDistance(i);
-        # Y = data.SpotNum*sampleTable.IntralineDistance(i);
+    def read_ladr_ppm_folder(self,file_name,file_path):
+        match = re.search(r' (\w+)_ppm', file_name)
+        if match:
+            iolite_name =  match.group(1)  # Returns the captured group, which is the text of interest
+        else:
+            self.statusBar.showMessage('Iolite name not part of filename')
+            return []
+        data = pd.read_csv(file_path)
+        
+        # Rename the first two columns to X and Y
+        data.columns = ['X', 'Y'] + list(data.columns[2:])
     
-        # % determine read direction
-        # xdir = orientation(sampleTable.FileDirection{i});
-        # ydir = orientation(sampleTable.ScanDirection{i});
+        # Calculate unique counts to define the grid
+        nr = data['X'].nunique()
+        nc = data['Y'].nunique()
     
-        # % make upper left corner (0,0), i.e., image coordinates
-        # X = X*xdir; X = X - min(X);
-        # Y = Y*ydir; Y = Y - min(Y);
-            
-        # file_name, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Text Files (*.txt);;All Files (*)")
-        # if file_name:
-        #     with open(file_name, 'r') as f:
-        #         for line in f.readlines():
-        #             self.populate_analyte_list(line)
-        #     self.update_list()
-        #     self.raise_()
-        #     self.activateWindow()
+        # Generate ScanNum and SpotNum
+        ScanNum = pd.DataFrame((1 + i for i in range(nc)).repeat(nr)).reset_index(drop=True)
+        SpotNum = pd.DataFrame((1 + i for i in range(nr)).repeat(nc)).reset_index(drop=True)
+        
+        # Insert ScanNum and SpotNum as the first columns
+        data.insert(0, 'ScanNum', ScanNum)
+        data.insert(1, 'SpotNum', SpotNum)
+    
+        # Insert a NaN column for Time_Sec_ after 'Y'
+        data.insert(data.columns.get_loc('Y') + 1, 'Time_Sec_', pd.Series([float('nan')] * len(data)))
+        return data
                     
 app = None
 def main():

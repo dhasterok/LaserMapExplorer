@@ -899,6 +899,8 @@
     <addaction name="separator"/>
     <addaction name="actionReset"/>
     <addaction name="actionImportFiles"/>
+    <addaction name="actionLoadAnalysis"/>
+    <addaction name="actionSaveAnalysis"/>
    </widget>
    <widget class="QMenu" name="menuPlot">
     <property name="font">
@@ -11475,6 +11477,16 @@
   <action name="actionImportFiles">
    <property name="text">
     <string>Import files</string>
+   </property>
+  </action>
+  <action name="actionLoadAnalysis">
+   <property name="text">
+    <string>Load Analysis</string>
+   </property>
+  </action>
+  <action name="actionSaveAnalysis">
+   <property name="text">
+    <string>Save Analysis</string>
    </property>
   </action>
  </widget>

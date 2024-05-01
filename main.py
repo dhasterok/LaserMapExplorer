@@ -813,13 +813,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return
         self.csv_files = [file for file in file_list if file.endswith('.csv')]
         self.comboBoxSampleId.clear()
-        self.comboBoxSampleId.addItems([os.path.splitext(file)[0] for file in self.csv_files])
-        # Populate the sampleidcomboBox with the file names
-        # self.canvasWindow.setCurrentIndex(0)
-        # self.change_sample(0)
-
+        self.sample_ids = [os.path.splitext(file)[0] for file in self.csv_files]
+        self.comboBoxSampleId.addItems(self.sample_ids)
+        self.init_tabs()
+        
+    def init_tabs(self):
         self.toolBox.setCurrentIndex(self.sample_tab_id)
-
+    
         self.SelectAnalytePage.setEnabled(True)
         self.PreprocessPage.setEnabled(True)
         self.SpotDataPage.setEnabled(True)
@@ -1735,6 +1735,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             data_dict['styles'] =self.styles
             data_dict['axis_dict'] =self.axis_dict 
             data_dict['tree'] =  self.get_model_data(self.treeModel)
+            data_dict['sample_ids'] = self.sample_ids
+            data_dict['sample_id'] = self.sample_id
             # data_dict['plot_widget_dict'] = self.plot_widget_dict
             
                 
@@ -1786,7 +1788,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     root.appendRow(item)
                 
                 self.treeView.setModel(model)
+                self.sample_ids = data_dict['sample_ids']
+                # update sample id combo
+                self.comboBoxSampleId.clear()
+                self.comboBoxSampleId.addItems(self.sample_ids)
+                self.sample_id = data_dict['sample_id']
+                #compute aspect ratio
+                self.compute_map_aspect_ratio()
                 
+                #inilialise tabs
+                self.init_tabs()
                 self.statusBar.showMessage("Analysis loaded successfully")  
     
     ### tree functions 
@@ -1794,10 +1805,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """Recursively extract data from QStandardItem to a serializable format."""
         children = [self.extract_tree_data(item.child(i)) for i in range(item.rowCount())]
         plot_info = item.data(role=Qt.UserRole)
-        if not plot_info:
-            return {'text': item.text(), 'children': children}
-        else:
-            return {'plot_info':plot_info,'text': item.text(), 'children': children}
+        out_dict = {'text': item.text(), 'children': children}
+        if plot_info:
+            if isinstance(plot_info['figure'], FigureCanvas):
+                out_dict = {'plot_info':plot_info, 'text': item.text(), 'children': children}
+        return out_dict
 
     def get_model_data(self,model):
         """Extract data from the root of QStandardItemModel."""
@@ -1808,6 +1820,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def create_item_from_data(self,data):
         """Recursively create QStandardItem from data."""
         item = QStandardItem(data['text'])
+        if 'plot_info' in data:
+            #create new matplotlib canvas and save fig
+            # canvas = FigureCanvas(data['plot_info']['figure'])
+            # data['plot_info']['figure'] = canvas
+            # store plot dictionary in tree
+            item.setData(data['plot_info'], role=Qt.UserRole)
         for child_data in data['children']:
             child_item = self.create_item_from_data(child_data)
             item.appendRow(child_item)
@@ -7975,6 +7993,11 @@ class MplCanvas(FigureCanvas):
         self.fig = Figure(figsize=(width, height))
         self.axes = self.fig.add_subplot(sub)
         super(MplCanvas, self).__init__(self.fig)
+    def load_figure(self, fig):
+        """Load existing figure"""
+        self.fig =fig
+        self.axes = self.fig.gca()  # Get current axes
+        self.draw()  # Redraw the canvas with the loaded figure
 
 
 class StandardItem(QStandardItem):

@@ -220,7 +220,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.special_tab_id: [0, 'profile', 'analyte map', 'gradient map', 'Cluster Score', 'PCA Score']}
 
         self.styles = {}
-        self.reset_default_styles()
+        self.load_theme_names()
 
         # initalize self.comboBoxPlotType
         self.comboBoxPlotType.clear()
@@ -3129,6 +3129,26 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # Themes
     # -------------------------------------
+    def load_theme_names(self):
+        # read filenames with *.sty
+        file_list = os.listdir('resources/styles/')
+        style_list = [file.replace('.sty','') for file in file_list if file.endswith('.sty')]
+
+        # add default to list
+        style_list.insert(0,'default')
+
+        # update theme comboBox
+        self.comboBoxStyleTheme.clear()
+        self.comboBoxStyleTheme.addItems(style_list)
+
+        self.reset_default_styles()
+
+    def read_theme(self):
+        name = self.comboBoxStyleTheme.currentText()
+
+        with open(f'resources/styles/{name}.sty', 'rb') as file:
+            self.styles = pickle.load(file)
+
     def input_theme_name_dlg(self):
         """Opens a dialog to save style theme
 
@@ -3136,13 +3156,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         name, ok = QInputDialog.getText(self, 'Save custom theme', 'Enter theme name:')
         if ok:
-
             # update comboBox
             self.comboBoxStyleTheme.addItem(name)
             self.comboBoxStyleTheme.setCurrentText(name)
 
             # append theme to file of saved themes
-            pass
+            with open(f'resources/styles/{name}.sty', 'wb') as file:
+                pickle.dump(self.styles, file, protocol=pickle.HIGHEST_PROTOCOL)
         else:
             # throw a warning that name is not saved
             return
@@ -4810,7 +4830,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # get plot_info from tree location and
                 # reset view to False and position to none
-                plot_info = self.retrieve_tableitem_plotinfo(tree=data[2], branch=data[3], leaf=data[4])
+                plot_info = self.retrieve_plotinfo_from_tree(tree=data[2], branch=data[3], leaf=data[4])
                 plot_info['view'][1] = False
                 plot_info['position'] = None
             
@@ -7467,7 +7487,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             print(self.analytes_items)
             print('\n')
 
-    def retrieve_tableitem_plotinfo(self, tree_index=None, tree=None, branch=None, leaf=None):
+    def retrieve_plotinfo_from_tree(self, tree_index=None, tree=None, branch=None, leaf=None):
         """Gets the plot_info associated with a tree location
         
         Can recall the plot info given the index into the tree (top level group in ``Plot Selector``), or by the tree, branch, leaf location.
@@ -7519,7 +7539,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :type val: PyQt5.QtCore.QModelIndex
         """
         # get double-click result
-        plot_info = self.retrieve_tableitem_plotinfo(tree_index=tree_index)
+        plot_info = self.retrieve_plotinfo_from_tree(tree_index=tree_index)
         tree = tree_index.parent().parent().data()
         branch = tree_index.parent().data()
         leaf = tree_index.data()
@@ -7592,7 +7612,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 item.setBackground(QBrush(QColor(255, 255, 200)))
 
-                self.data[self.sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['analytes']==analyte_df),'use'] = True
+                self.data[self.sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['analytes']==analyte),'use'] = True
 
             if norm_update: #update if analytes are returned from analyte selection window
                 self.update_norm(self.sample_id, norm, analyte_1=analyte_1, analyte_2=analyte_2)

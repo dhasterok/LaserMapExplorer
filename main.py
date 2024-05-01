@@ -559,6 +559,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Styling Tab
         #-------------------------
+        # set style theme
+        self.comboBoxStyleTheme.activated.connect(self.read_theme)
+
         # comboBox with plot type
         # overlay and annotation properties
         self.toolButtonOverlayColor.clicked.connect(self.overlay_color_callback)
@@ -3063,6 +3066,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # Style related fuctions/callbacks
     # -------------------------------------
     def reset_default_styles(self):
+        """Resets ``MainWindow.styles`` dictionary to default values."""
         default_plot_style = {'Axes': {'XLimAuto': True, 'XLim': [0,1], 'XScale': 'linear', 'XLabel': '', 'YLimCustom': True, 'YLim': [0,1], 'YScale': 'linear', 'YLabel': '', 'ZLabel': '', 'AspectRatio': '1.0', 'TickDir': 'out'},
                                'Text': {'Font': '', 'FontSize': 11.0},
                                'Scales': {'Direction': 'none', 'Location': 'northeast', 'OverlayColor': '#ffffff'},
@@ -3151,6 +3155,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # Themes
     # -------------------------------------
     def load_theme_names(self):
+        """Loads theme names and adds them to the theme comboBox
+        
+        Looks for saved style themes (*.sty) in ``resources/styles/`` directory and adds them to
+        ``MainWindow.comboBoxStyleTheme``.  After setting list, the comboBox is set to default style.
+        """
         # read filenames with *.sty
         file_list = os.listdir('resources/styles/')
         style_list = [file.replace('.sty','') for file in file_list if file.endswith('.sty')]
@@ -3161,11 +3170,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # update theme comboBox
         self.comboBoxStyleTheme.clear()
         self.comboBoxStyleTheme.addItems(style_list)
+        self.comboBoxStyleTheme.setCurrentIndex(0)
 
         self.reset_default_styles()
 
     def read_theme(self):
+        """Reads a style theme
+        
+        Executes when the user changes the ``MainWindow.comboBoxStyleTheme.currentIndex()``.
+        """
         name = self.comboBoxStyleTheme.currentText()
+
+        if name == 'default':
+            self.reset_default_styles()
+            return
 
         with open(f'resources/styles/{name}.sty', 'rb') as file:
             self.styles = pickle.load(file)
@@ -3173,7 +3191,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def input_theme_name_dlg(self):
         """Opens a dialog to save style theme
 
-        Executes on ``MainWindow.toolButtonSaveTheme`` is clicked
+        Executes on ``MainWindow.toolButtonSaveTheme`` is clicked.  The theme is added to
+        ``MainWindow.comboBoxStyleTheme`` and the style widget settings for each plot type (``MainWindow.styles``) are saved as a
+        dictionary into the theme name with a ``.sty`` extension.
         """
         name, ok = QInputDialog.getText(self, 'Save custom theme', 'Enter theme name:')
         if ok:
@@ -6287,6 +6307,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         :param canvas: canvas object for plotting
         :type canvas: MplCanvas
+
+        See also ``MainWindow.plot_pca_vectors``
         """
         print('plot_pca_components')
         style = self.styles[self.comboBoxPlotType.currentText()]
@@ -6335,7 +6357,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def plot_score_map(self):
         """Plots score maps
 
-        Creates a score map for PCA and clusters.
+        Creates a score map for PCA and clusters.  Maps are displayed on an ``MplCanvas``.
         """
         canvas = MplCanvas()
 
@@ -6371,6 +6393,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         return canvas
 
     def plot_cluster_map(self):
+        """Produces a map of cluster categories
+        
+        Creates the map on an ``MplCanvas``.  Each cluster category is assigned a unique color.
+        """
         canvas = MplCanvas()
 
         plot_type = self.comboBoxPlotType.currentText()
@@ -6410,6 +6436,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         return canvas
 
     def compute_clusters(self):
+        """Computes cluster results
+        
+        Cluster properties are defined in the ``MainWindow.toolBox.ClusterPage``."""
         print('compute_clusters')
         if self.sample_id == '':
             return
@@ -6601,8 +6630,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------
 
     def plot_n_dim(self):
-        canvas = MplCanvas()
         """Produces trace element compatibility (TEC) and Radar plots"""
+        canvas = MplCanvas()
+
         df_filtered, _  = self.get_processed_data()
 
         match self.comboBoxNorm.currentText():
@@ -6977,6 +7007,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         :param sample_df: Sample data
         :type sample_df: pandas.DataFrame
+        
+        :returns: REE dataframe
+        :rtype: pandas.DataFrame
         """
 
         lree = ['la', 'ce', 'pr', 'nd', 'sm', 'eu', 'gd']
@@ -7004,6 +7037,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------
     # updates field type comboboxes for analyses and plotting
     def update_field_type_combobox(self, comboBox, addNone=False, plot_type=''):
+        """Updates field type combobox
+        
+        Used to update ``MainWindow.comboBoxHistFieldType``, ``MainWindow.comboBoxFilterFieldType``,
+        ``MainWindow.comboBoxFieldTypeX``, ``MainWindow.comboBoxFieldTypeY``,
+        ``MainWindow.comboBoxFieldTypeZ``, and ``MainWindow.comboBoxColorByField``
+
+        :param combobox: The combobox to update.
+        :type combobox: Qt.ComboBox
+        :param addNone: Adds ``None`` to the top of the ``combobox`` list
+        :type addNone: bool
+        :param plot_type: The plot type helps to define the set of field types available, Defaults to '' (no change)
+        :type plot_type: str
+        """
         if self.sample_id == '':
             return
 
@@ -7189,6 +7235,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         return set_fields
 
     def check_analysis_type(self):
+        """Updates field type/field paired comboBoxes
+        
+        see also: ``MainWindow.update_field_type_combobox`` and ``MainWindow.update_field_combobox``"""
         print('check_analysis_type')
         self.check_analysis = True
         self.update_field_type_combobox(self.comboBoxColorByField, addNone=True, plot_type=self.comboBoxPlotType.currentText())
@@ -7400,6 +7449,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         return value_dict['x'], value_dict['y'], value_dict['z'], value_dict['c']
 
     def get_processed_data(self):
+        """Gets the processed data for analysis
+
+        :returns: filtered data frame and a boolean associated with analytes included from processed data."""
         if self.sample_id == '':
             return
 
@@ -7417,6 +7469,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         return df_filtered, use_analytes
 
     def import_data(self, path):
+        """Reads data files and returns data dictionary
+
+        Reads available csv files in ``path`` and returns a dictionary with sample id's (file names minus extension).
+
+        :param path: Path with data files.
+        :type path: str
+        :returns: Dictionary of dataframes
+        :rtype: dict
+        """
         # Get a list of all files in the directory
         file_list = os.listdir(path)
         csv_files = [file for file in file_list if file.endswith('.csv')]

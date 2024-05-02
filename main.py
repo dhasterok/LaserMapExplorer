@@ -47,6 +47,7 @@ from src.ui.PreferencesWindow import Ui_PreferencesWindow
 from src.ui.ExcelConcatenator import Ui_ExelConcatenator
 
 pg.setConfigOption('imageAxisOrder', 'row-major') # best performance
+## sphinx-build -b html docs/source/ docs/build/html
 ## !pyrcc5 resources.qrc -o src/ui/resources_rc.py
 ## !pyuic5 designer/mainwindow.ui -o src/ui/MainWindow.py
 ## !pyuic5 -x designer/AnalyteSelectionDialog.ui -o src/ui/AnalyteSelectionDialog.py
@@ -54,9 +55,112 @@ pg.setConfigOption('imageAxisOrder', 'row-major') # best performance
 ## !pyuic5 -x designer/ExcelConcatenator.ui -o src/ui/ExcelConcatenator.py
 # pylint: disable=fixme, line-too-long, no-name-in-module, trailing-whitespace
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
+    """_summary_
 
+    _extended_summary_
+
+    Parameters
+    ----------
+    QtWidgets : _type_
+        _description_
+    Ui_MainWindow : _type_
+        _description_
+    """
     def __init__(self, *args, **kwargs):
+        """
+        Initializes the GUI and sets up connections from widgets to functions
+        
+        Attributes
+        ----------
+        aspect_ratio : float
+            The aspect ratio for the current sample.
+        sample_id : str
+            The name of the current sample.  *sample_id* is used as the key into several dictionaries.
+        styles : dict of dict
+            Dictionary with plot style information that saves the properties of style widgets.  There is a keyword
+            for each plot type listed in ``comboBoxPlotType``.  The exact behavior of each style item may vary depending upon the
+            plot type.  While data related to plot and color axes may be stored in *styles*, *axis_dict* stores labels, bounds and scale for most plot fields.
+
+            styles[plot_type] -- plot types include ``analyte map``, ``histogram``, ``correlation``, ``gradient map``, ``scatter``, ``heatmap``, ``ternary map``
+            ``TEC``, ``radar``, ``variance``, ``vectors``, ``pca scatter``, ``pca heatmap``, ``PCA Score``, ``Clusters``, ``Cluster Score``, ``profile``
+
+            ['Axes'] -- associated with widgets in the toolBoxTreeView > Styling > Axes tab
+                | 'XLabel' : (str) -- x-axis label, set in ``lineEditXLabel``
+                | 'YLabel' : (str) -- y-axis label, set in ``lineEditYLabel``
+                | 'ZLabel' : (str) -- z-axis label, set in ``lineEditZLabel``, used only for ternary plots
+                | 'XLim' : (list of float) -- x-axis bounds, set by ``lineEditXLB`` and ``lineEditXUB`` for the lower and upper bounds
+                | 'YLim' : (list of float) -- y-axis bounds, set by ``lineEditYLB`` and ``lineEditYUB`` for the lower and upper bounds
+                | 'XScale' : (str) -- x-axis normalization ``linear`` or ``log`` (note for ternary plots the scale is linear), set by ``comboBoxXScale``
+                | 'YScale' : (str) -- y-axis normalization ``linear`` or ``log`` (note for ternary plots the scale is linear), set by ``comboBoxYScale``
+                | 'TickDir' : (str) -- tick direction for all axes, ``none``, ``in`` or ``out``, set by ``comboBoxTickDirection``
+                | 'AspectRatio' : (float) -- aspect ratio of plot area (relative to figure units, not axes), set in ``lineEditAspectRatio``
+            ['Text'] -- associated with widgets in the toolBoxTreeView > Styling > Annotations tab
+                | 'Font' : (str) -- font type, pulled from the system font library, set in ``fontComboBox``
+                | 'Size' : (str) -- font size in points, set in ``doubleSpinBoxFontSize``
+            ['Scales'] -- associated with widgets in the toolBoxTreeView > Styling > Annotations tab
+                | 'Direction' : (str) -- direction of distance scale bar on maps, options include ``none``, ``horizontal`` and ``vertical``, set by ``comboBoxScaleDirection``
+                | 'Location' : (str) -- position of scale bar on maps, options include ``southeast``, ``northeast``, ``northwest``, and ``southwest``, set by ``comboBoxScaleLocation``
+                | 'OverlayColor' : (hex str) -- color of overlay objects and annotations, also color of vectors on pca scatter/heatmap, set by ``toolButtonOverlayColor``
+            ['Markers'] -- associated with widgets in the toolBoxTreeView > Styling > Markers tab
+                | 'Symbol' : (str) -- marker symbol defined by matplotlib styles in the attribute ``markerdict``
+                | 'Size' : (int) -- marker size in points, set by ``doubleSpinBoxMarkerSize``
+                | 'Alpha' : (int) -- marker transparency, set by ``horizontalSliderMarkerAlpha``
+            ['Lines'] -- associated with widgets in the toolBoxTreeView > Styling > Lines tab
+                | 'LineWidth' : (float) -- width of line objects, varies between plot types, set by ``comboBoxLineWidth``
+                | 'Multiplier' : (float) -- multiplier for the length of vectors on pca scatter/heatmaps, set by ``lineEditLengthMultiplier``
+            ['Colors'] -- associated with widgets in the toolBoxTreeView > Styling > Colors tab
+                | 'Color' : (hex str) -- color of markers, set by ``toolButtonOverlayColor``
+                | 'ColorByField' : (str) -- field type used to set colors in a figure, set by ``comboBoxColorByField``
+                | 'Field' : (str) -- field used to set colors in a figure, set by ``comboBoxColorField``
+                | 'Colormap' : (str) -- colormap used in figure, set by ``comboBoxFieldColormap``
+                | 'Reverse' : (bool) -- inverts colormap, set by ``checkBoxReverseColormap``
+                | 'CLim' : (list of float) -- color bounds, set by ``lineEditXLB`` and ``lineEditXUB`` for the lower and upper bounds
+                | 'CScale' : (str) -- c-axis normalization ``linear`` or ``log`` (note for ternary plots the scale is linear), set by ``comboBoxYScale``
+                | 'Direction' : (str) -- colorbar direction, options include ``none``, ``vertical``, and ``horizontal``, set by ``comboBoxCbarDirection``
+                | 'CLabel' : (str) -- colorbar label, set in ``lineEditCbarLabel``
+                | 'Resolution' : (int) -- used to set discritization in 2D and ternary heatmaps, set by ``spinBoxHeatmapResolution``
+        axis_dict : dict of dict
+            Dictionary containing axes for individual plot fields.  Setting these properties will set them for
+            all plots which use the same field, though it does not update them on previous plots.
+
+            Keywords for the first level are given by the field names used for plotting associated with entries
+            into the field-related QComboBoxes.  Associated with each field are the axes properties.
+        
+            [field] : name of field
+                | 'label' : (str) -- axis label, may include units or custom names
+                | 'status' : (str) -- *auto* or *custom* indicates the use of default bounds or user defined axes limits
+                | 'min' : (float) -- minimum axis value
+                | 'max' : (float) -- maximum axis value
+                | 'scale' : (str) -- normalization for analyte, options include ``linear`` or ``log``, though this is not included for all field types
+                | 'pstatus' : (str) -- *auto* or *custom* limits for probability axis on histograms when displayed as a PDF type
+                | 'pmin' : (float) -- minimum probability value
+                | 'pmax' : (float) -- maximum probability value
+        data : dict
+            Dictionary containing a dictionary of each sample with the raw, processed, and computed (analyses) DataFrames, mask array, and informational dataframes
+            with relevant data
+        layoutSingleView : QVBoxLayout
+            layout for Single View tab of ``canvasWindow``
+        layoutMultiView : QGridLayout
+            layout for Multi View tab of ``canvasWindow``
+        layoutQuickView : QGridLayout
+            layout for Quick View tab of ``canvasWindow``
+        plot_info : dict
+            | 'tree' : (str) -- tree name, ``Analyte``, ``Analyte (normalized)``
+            | 'sample_id': sample_id,
+            | 'plot_name': field,
+            | 'plot_type': 'analyte map',
+            | 'field_type': field_type,
+            | 'field': field,
+            | 'figure': graphicWidget,
+            | 'style': style,
+            | 'cluster_groups': None,
+            | 'view': tmp,
+            | 'position': None
+        QVAnalyteList : list of str
+            ordered set of analytes to display in on the Quick View tab
+        """
         super(MainWindow, self).__init__(*args, **kwargs)
+
         self.setupUi(self)
         # Add this line to set the size policy
         self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
@@ -787,7 +891,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         pages are enabled upon successful load.
 
         Opens a dialog to select directory filled with samples.  Updates sample list in
-        self.comboBoxSampleID and comboBoxes associated with analyte lists.  The first sample
+        ``MainWindow.comboBoxSampleID`` and comboBoxes associated with analyte lists.  The first sample
         in list is loaded by default.
         """
         dialog = QFileDialog()
@@ -1027,6 +1131,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """Opens Select Analyte dialog
 
         Opens a dialog to select analytes for analysis either graphically or in a table.  Selection updates the list of analytes, and ratios in plot selector and comboBoxes.
+        
+        .. seealso::
+            :ref:`analyteSelectionWindow` for the dialog
         """
         if self.sample_id == '':
             return
@@ -1062,9 +1169,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         Opens the specified tab in ``MainWindow.toolbox``
 
-        :param tab_name: opens tab, values: 'samples', 'preprocess', 'spot data', 'filter',
-              'scatter', 'ndim', pca', 'clustering', 'profiles', 'Special'
-        :type tab_name: str
+        Parameters
+        ----------
+        tab_name : str
+            opens tab, values: 'samples', 'preprocess', 'spot data', 'filter',
+            'scatter', 'ndim', pca', 'clustering', 'profiles', 'Special'
         """
         match tab_name.lower():
             case 'samples':
@@ -3074,12 +3183,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------
     def reset_default_styles(self):
         """Resets ``MainWindow.styles`` dictionary to default values."""
-        default_plot_style = {'Axes': {'XLimAuto': True, 'XLim': [0,1], 'XScale': 'linear', 'XLabel': '', 'YLimCustom': True, 'YLim': [0,1], 'YScale': 'linear', 'YLabel': '', 'ZLabel': '', 'AspectRatio': '1.0', 'TickDir': 'out'},
+        default_plot_style = {'Axes': {'XLim': [0,1], 'XScale': 'linear', 'XLabel': '', 'YLim': [0,1], 'YScale': 'linear', 'YLabel': '', 'ZLabel': '', 'AspectRatio': '1.0', 'TickDir': 'out'},
                                'Text': {'Font': '', 'FontSize': 11.0},
                                'Scales': {'Direction': 'none', 'Location': 'northeast', 'OverlayColor': '#ffffff'},
                                'Markers': {'Symbol': 'circle', 'Size': 6, 'Alpha': 30},
                                'Lines': {'LineWidth': 1.5, 'Multiplier': 1},
-                               'Colors': {'Color': '#1c75bc', 'ColorByField': 'None', 'Field': '', 'Colormap': 'viridis', 'Reverse': False, 'CLimAuto': True, 'CLim':[0,1], 'CScale':'linear', 'Direction': 'vertical', 'CLabel': '', 'Resolution': 10}
+                               'Colors': {'Color': '#1c75bc', 'ColorByField': 'None', 'Field': '', 'Colormap': 'viridis', 'Reverse': False, 'CLim':[0,1], 'CScale':'linear', 'Direction': 'vertical', 'CLabel': '', 'Resolution': 10}
                                }
         default_font = 'Avenir'
         try:
@@ -4869,6 +4978,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     # layout.removeWidget(widget)  # Remove the widget from the layout
                     # widget.setParent(None)      # Set the widget's parent to None
                     
+
         if self.canvasWindow.currentIndex() == 1:
             list = self.comboBoxMVPlots.allItems()
             if not list:
@@ -6765,11 +6875,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.widgetSingleView.layout().addWidget(canvas)
 
     def update_n_dim_table(self,calling_widget):
-        """Updates N-Dim table
+        # Updates N-Dim table
 
-        :param calling_widget:
-        :type calling_widget: QWidget
-        """
+        # :param calling_widget:
+        # :type calling_widget: QWidget
+        # 
         def on_use_checkbox_state_changed(row, state):
             # Update the 'use' value in the filter_df for the given row
             self.data[self.sample_id]['filter_info'].at[row, 'use'] = state == QtCore.Qt.Checked

@@ -1737,7 +1737,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             data_dict['polygons'] =self.polygon.polygons
             data_dict['styles'] =self.styles
             data_dict['axis_dict'] =self.axis_dict 
-            data_dict['tree'] =  self.get_model_data(self.treeModel)
+            data_dict['plot_infos'] =  self.get_plot_info_from_tree(self.treeModel)
+            
+            
+            
             data_dict['sample_ids'] = self.sample_ids
             data_dict['sample_id'] = self.sample_id
             # data_dict['plot_widget_dict'] = self.plot_widget_dict
@@ -1780,17 +1783,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 data_dict = pickle.load(file)
             if data_dict:
                 self.data = data_dict['data']
-                self.profiling = data_dict['profiling'] 
-                self.polygons = data_dict['polygons'] 
+                self.profiling.profiles = data_dict['profiling'] 
+                self.polygon.polygons = data_dict['polygons'] 
                 self.styles = data_dict['styles']
                 self.axis_dict = data_dict['axis_dict']
-                model = QStandardItemModel()
-                root = model.invisibleRootItem()
-                for item_data in data_dict['tree']:
-                    item = self.create_item_from_data(item_data)
-                    root.appendRow(item)
                 
-                self.treeView.setModel(model)
+                
+                
+                #update tree with selected iolites
+                self.update_tree(self.data[self.sample_id]['norm'], norm_update = False)
+                
+                #add plot info to tree
+                for plot_info in data_dict['plot_infos']:
+                    self.add_tree_item(plot_info)
+            
                 self.sample_ids = data_dict['sample_ids']
                 # update sample id combo
                 self.comboBoxSampleId.clear()
@@ -1805,16 +1811,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     
     ### tree functions 
     def extract_tree_data(self,item):
-        """Recursively extract data from QStandardItem to a serializable format."""
+        """Recursively extract plot_info from QStandardItem to a serializable format."""
         children = [self.extract_tree_data(item.child(i)) for i in range(item.rowCount())]
         plot_info = item.data(role=Qt.UserRole)
-        out_dict = {'text': item.text(), 'children': children}
+        
         if plot_info:
             if isinstance(plot_info['figure'], FigureCanvas):
-                out_dict = {'plot_info':plot_info, 'text': item.text(), 'children': children}
-        return out_dict
+                plot_info_copy = plot_info.copy()
+                plot_info_copy['figure'] = plot_info_copy['figure'].fig
+                return plot_info_copy
 
-    def get_model_data(self,model):
+    def get_plot_info_from_tree(self,model):
         """Extract data from the root of QStandardItemModel."""
         root = model.invisibleRootItem()
         return [self.extract_tree_data(root.child(i)) for i in range(root.rowCount())]       
@@ -1823,11 +1830,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def create_item_from_data(self,data):
         """Recursively create QStandardItem from data."""
         item = QStandardItem(data['text'])
-        if 'plot_info' in data:
+        if 'plot_info' in data.keys():
             #create new matplotlib canvas and save fig
-            # canvas = FigureCanvas(data['plot_info']['figure'])
-            # data['plot_info']['figure'] = canvas
-            # store plot dictionary in tree
+            canvas = FigureCanvas(data['plot_info']['figure'])
+            data['plot_info']['figure'] = canvas
+            #store plot dictionary in tree
             item.setData(data['plot_info'], role=Qt.UserRole)
         for child_data in data['children']:
             child_item = self.create_item_from_data(child_data)
@@ -4762,7 +4769,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.canvasWindow.currentIndex() == 0:
             print('add_plotwidget_to_canvas: SV')
             self.clear_layout(self.widgetSingleView.layout())
-            self.widgetSingleView.layout().addWidget(plot_info['figure'])
+            widget =plot_info['figure']
+            self.widgetSingleView.layout().addWidget(widget)
+            widget.show()
             plot_info['view'][0] = True
 
             #self.labelPlotInfo.
@@ -4856,9 +4865,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if item is not None:
                 widget = item.widget()   # Get the widget from the item
                 if widget is not None:
-                    layout.removeWidget(widget)  # Remove the widget from the layout
-                    widget.setParent(None)      # Set the widget's parent to None
-        
+                    widget.hide()
+                    # layout.removeWidget(widget)  # Remove the widget from the layout
+                    # widget.setParent(None)      # Set the widget's parent to None
+                    
         if self.canvasWindow.currentIndex() == 1:
             list = self.comboBoxMVPlots.allItems()
             if not list:
@@ -5258,7 +5268,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             #print(self.lasermaps)
             #print(self.prev_plot)
-            if self.prev_plot:
+            if self.prev_plot and self.prev_plot in self.lasermaps:
                 self.plot_info['view'][0] = False
                 del self.lasermaps[self.prev_plot]
             # update variables which stores current plot in SV
@@ -7713,7 +7723,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         leaf = plot_info['plot_name']
         tree = plot_info['tree']
         tree_items = self.get_tree_items(tree)
-
+        
+        
+        # Ensure there's a persistent reference to items.
+        # if not hasattr(self, 'item_refs'):
+        #     self.item_refs = {}  # Initialize once
+        
         #check if leaf is in tree
         item,check = self.find_leaf(tree=tree, branch=sample_id, leaf=leaf)
         # sample id item and plot item both dont exist
@@ -7729,7 +7744,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             sample_id_item.appendRow(plot_item)
             tree_items.appendRow(sample_id_item)
-
+            
+            # Store references
+            # self.item_refs[(tree, sample_id)] = sample_id_item
+            # self.item_refs[(tree, sample_id, leaf)] = plot_item
+            
         # sample id item exists plot item doesnt exist
         elif item is not None and not check:
             # create new leaf item
@@ -7740,12 +7759,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             #item is sample id item (branch)
             item.appendRow(plot_item)
+            
+            # Update reference
+            # self.item_refs[(tree, sample_id, leaf)] = plot_item
 
         # sample id item exists and plot item exists
         elif item is not None and check: 
             # store plot dictionary in tree
             item.setData(plot_info, role=Qt.UserRole)
-
+            
+            # self.item_refs[(tree, sample_id, leaf)] = item
     def unhighlight_tree(self, tree):
         """Reset the highlight of all items in the tree.
         

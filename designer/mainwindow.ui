@@ -52,7 +52,7 @@
        <string/>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <property name="documentMode">
        <bool>false</bool>
@@ -753,7 +753,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QGroupBox" name="groupBoxInfoM_2">
+         <widget class="QGroupBox" name="groupBoxQVList">
           <property name="minimumSize">
            <size>
             <width>0</width>
@@ -766,6 +766,12 @@
             <height>40</height>
            </size>
           </property>
+          <property name="toolTip">
+           <string>Select group of analytes for quick view</string>
+          </property>
+          <property name="statusTip">
+           <string/>
+          </property>
           <property name="title">
            <string/>
           </property>
@@ -776,58 +782,20 @@
            <property name="bottomMargin">
             <number>0</number>
            </property>
-           <item row="0" column="0">
-            <widget class="QToolButton" name="toolButtonHomeQV">
-             <property name="toolTip">
-              <string>Original view</string>
-             </property>
-             <property name="icon">
-              <iconset resource="../resources.qrc">
-               <normaloff>:/icons/resources/icons/icon-home-64.png</normaloff>:/icons/resources/icons/icon-home-64.png</iconset>
-             </property>
-             <property name="iconSize">
-              <size>
-               <width>18</width>
-               <height>18</height>
-              </size>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="2">
-            <widget class="QToolButton" name="toolButtonPanQV">
-             <property name="toolTip">
-              <string>Pan figure</string>
-             </property>
-             <property name="icon">
-              <iconset resource="../resources.qrc">
-               <normaloff>:/icons/resources/icons/icon-move-64.png</normaloff>:/icons/resources/icons/icon-move-64.png</iconset>
-             </property>
-             <property name="iconSize">
-              <size>
-               <width>18</width>
-               <height>18</height>
-              </size>
-             </property>
-            </widget>
-           </item>
            <item row="0" column="3">
-            <widget class="QToolButton" name="toolButtonZoomQV">
-             <property name="toolTip">
-              <string>Zoom in/out</string>
+            <spacer name="horizontalSpacer_6">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
              </property>
-             <property name="icon">
-              <iconset resource="../resources.qrc">
-               <normaloff>:/icons/resources/icons/icon-zoom-64.png</normaloff>:/icons/resources/icons/icon-zoom-64.png</iconset>
-             </property>
-             <property name="iconSize">
+             <property name="sizeHint" stdset="0">
               <size>
-               <width>18</width>
-               <height>18</height>
+               <width>40</width>
+               <height>20</height>
               </size>
              </property>
-            </widget>
+            </spacer>
            </item>
-           <item row="0" column="4">
+           <item row="0" column="1">
             <widget class="QToolButton" name="toolButtonSaveQV">
              <property name="toolTip">
               <string>Save image or data</string>
@@ -844,18 +812,14 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="5">
-            <spacer name="horizontalSpacer_6">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
+           <item row="0" column="2">
+            <widget class="QComboBox" name="comboBox_4">
+             <item>
+              <property name="text">
+               <string>default</string>
+              </property>
+             </item>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -6617,7 +6581,7 @@
         </font>
        </property>
        <property name="currentIndex">
-        <number>2</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="PlotSelectorPage">
         <property name="geometry">
@@ -6625,7 +6589,7 @@
           <x>0</x>
           <y>0</y>
           <width>241</width>
-          <height>433</height>
+          <height>412</height>
          </rect>
         </property>
         <attribute name="label">
@@ -6750,7 +6714,7 @@
           <x>0</x>
           <y>0</y>
           <width>241</width>
-          <height>433</height>
+          <height>412</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6786,7 +6750,7 @@
           <enum>QFrame::Raised</enum>
          </property>
          <property name="currentIndex">
-          <number>3</number>
+          <number>5</number>
          </property>
          <widget class="QWidget" name="StyleAxes">
           <property name="geometry">
@@ -7152,7 +7116,7 @@
             <rect>
              <x>5</x>
              <y>0</y>
-             <width>231</width>
+             <width>253</width>
              <height>86</height>
             </rect>
            </property>
@@ -7252,8 +7216,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>100</width>
-            <height>30</height>
+            <width>239</width>
+            <height>461</height>
            </rect>
           </property>
           <attribute name="icon">
@@ -8660,7 +8624,7 @@
           <x>0</x>
           <y>0</y>
           <width>241</width>
-          <height>433</height>
+          <height>412</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -10012,7 +9976,7 @@
         </font>
        </property>
        <property name="currentIndex">
-        <number>3</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="tabNotes">
         <property name="sizePolicy">

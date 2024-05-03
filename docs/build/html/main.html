@@ -694,24 +694,35 @@ into the field-related QComboBoxes.  Associated with each field are the axes pro
 <dt>data<span class="classifier">dict</span></dt><dd><p>Dictionary containing a dictionary of each sample with the raw, processed, and computed (analyses) DataFrames, mask array, and informational dataframes
 with relevant data</p>
 </dd>
-<dt>layoutSingleView<span class="classifier">QVBoxLayout</span></dt><dd><p>layout for Single View tab of <code class="docutils literal notranslate"><span class="pre">canvasWindow</span></code></p>
+<dt>layoutSingleView<span class="classifier">QVBoxLayout</span></dt><dd><p>Layout for Single View tab of <code class="docutils literal notranslate"><span class="pre">canvasWindow</span></code></p>
 </dd>
-<dt>layoutMultiView<span class="classifier">QGridLayout</span></dt><dd><p>layout for Multi View tab of <code class="docutils literal notranslate"><span class="pre">canvasWindow</span></code></p>
+<dt>layoutMultiView<span class="classifier">QGridLayout</span></dt><dd><p>Layout for Multi View tab of <code class="docutils literal notranslate"><span class="pre">canvasWindow</span></code></p>
 </dd>
-<dt>layoutQuickView<span class="classifier">QGridLayout</span></dt><dd><p>layout for Quick View tab of <code class="docutils literal notranslate"><span class="pre">canvasWindow</span></code></p>
+<dt>layoutQuickView<span class="classifier">QGridLayout</span></dt><dd><p>Layout for Quick View tab of <code class="docutils literal notranslate"><span class="pre">canvasWindow</span></code></p>
 </dd>
-<dt>plot_info<span class="classifier">dict</span></dt><dd><div class="line-block">
+<dt>marker_dict<span class="classifier">dict</span></dt><dd><p>Dictionary of marker names used to translate <code class="docutils literal notranslate"><span class="pre">comboBoxMarker</span></code> to a matplotlib maker symbol, though not all matplotlib markers
+are used.</p>
+</dd>
+<dt>n_dim_list: (list)</dt><dd><p>Fields used to for <code class="docutils literal notranslate"><span class="pre">TEC</span></code> and <code class="docutils literal notranslate"><span class="pre">radar</span></code> style plots.</p>
+</dd>
+<dt>plot_info<span class="classifier">dict</span></dt><dd><p>Dictionary that holds information about plots.  These dictionaries are often saved to the tree when the user clicks
+the <code class="docutils literal notranslate"><span class="pre">actionSaveToTree</span></code> toolbar button.</p>
+<div class="line-block">
 <div class="line">‘tree’ : (str) – tree name, <code class="docutils literal notranslate"><span class="pre">Analyte</span></code>, <code class="docutils literal notranslate"><span class="pre">Analyte</span> <span class="pre">(normalized)</span></code></div>
-<div class="line">‘sample_id’: sample_id,</div>
-<div class="line">‘plot_name’: field,</div>
-<div class="line">‘plot_type’: ‘analyte map’,</div>
-<div class="line">‘field_type’: field_type,</div>
-<div class="line">‘field’: field,</div>
-<div class="line">‘figure’: graphicWidget,</div>
-<div class="line">‘style’: style,</div>
-<div class="line">‘cluster_groups’: None,</div>
-<div class="line">‘view’: tmp,</div>
-<div class="line">‘position’: None</div>
+<div class="line">‘sample_id’ : (str) – sample id, which doubles as <code class="docutils literal notranslate"><span class="pre">treeView</span></code> branch</div>
+<div class="line">‘plot_name’ : (str) – plot name, which doubles as <code class="docutils literal notranslate"><span class="pre">treeView</span></code> leaf</div>
+<div class="line">‘plot_type’ : (str) – type of plot (e.g., <code class="docutils literal notranslate"><span class="pre">analyte</span> <span class="pre">map</span></code>, <code class="docutils literal notranslate"><span class="pre">scatter</span></code>, <code class="docutils literal notranslate"><span class="pre">Cluster</span> <span class="pre">Score</span></code>)</div>
+<div class="line">‘field_type’ : (list of str) – type of field(s) used to create plot</div>
+<div class="line">‘field’ : (list of str) – analyte or other field(s) used to create plot</div>
+<div class="line">‘figure’ : (pgGraphicsWidget or MplCanvas) – object holding figure for display</div>
+<div class="line">‘style’ : (dict) – dictionary associated with <code class="docutils literal notranslate"><span class="pre">styles[*plot_type*]</span></code></div>
+<div class="line">‘cluster_groups’ : (list) – cluster groups used to generate plot</div>
+<div class="line">‘view’ : (bool,bool) – indicates whether <code class="docutils literal notranslate"><span class="pre">plot_info['figure']</span></code> is displayed in SingleView and/or MultiView</div>
+<div class="line">‘position’ : (list) – location <em>(row,col)</em> in <code class="docutils literal notranslate"><span class="pre">layoutMultiView</span></code> a value of None indicates not displayed in MultiView</div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><span class="xref std std-ref">add_plotwidget_to_tree</span> for details about saving <em>plot_info</em> to the tree (Plot Selector)</p>
 </div>
 </dd>
 <dt>QVAnalyteList<span class="classifier">list of str</span></dt><dd><p>ordered set of analytes to display in on the Quick View tab</p>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ExelConcatenator</class>
- <widget class="QMainWindow" name="ExelConcatenator">
+ <class>ExcelConcatenator</class>
+ <widget class="QMainWindow" name="ExcelConcatenator">
   <property name="geometry">
    <rect>
     <x>0</x>

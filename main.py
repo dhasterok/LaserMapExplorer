@@ -1,4 +1,4 @@
-import sys, os, re, copy
+import sys, os, re, copy, csv
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtCore import Qt, QObject, QTimer, pyqtSignal, QRectF, QPointF
 from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QHBoxLayout, QVBoxLayout, QGridLayout, QMessageBox, QHeaderView, QMenu, QGraphicsRectItem, QStatusBar
@@ -44,12 +44,14 @@ from src.calculator import CalWindow
 from src.ui.MainWindow import Ui_MainWindow
 from src.ui.AnalyteSelectionDialog import Ui_Dialog
 from src.ui.PreferencesWindow import Ui_PreferencesWindow
-from src.ui.ExcelConcatenator import Ui_ExelConcatenator
+from src.ui.ExcelConcatenator import Ui_ExcelConcatenator
+from src.ui.QuickViewDialog import Ui_QuickViewDialog
 
 pg.setConfigOption('imageAxisOrder', 'row-major') # best performance
 ## sphinx-build -b html docs/source/ docs/build/html
 ## !pyrcc5 resources.qrc -o src/ui/resources_rc.py
 ## !pyuic5 designer/mainwindow.ui -o src/ui/MainWindow.py
+## !pyuic5 designer/QuickViewDialog.ui -o src/ui/QuickViewDialog.py
 ## !pyuic5 -x designer/AnalyteSelectionDialog.ui -o src/ui/AnalyteSelectionDialog.py
 ## !pyuic5 -x designer/PreferencesWindow.ui -o src/ui/PreferencesWindow.py
 ## !pyuic5 -x designer/ExcelConcatenator.ui -o src/ui/ExcelConcatenator.py
@@ -139,23 +141,34 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             Dictionary containing a dictionary of each sample with the raw, processed, and computed (analyses) DataFrames, mask array, and informational dataframes
             with relevant data
         layoutSingleView : QVBoxLayout
-            layout for Single View tab of ``canvasWindow``
+            Layout for Single View tab of ``canvasWindow``
         layoutMultiView : QGridLayout
-            layout for Multi View tab of ``canvasWindow``
+            Layout for Multi View tab of ``canvasWindow``
         layoutQuickView : QGridLayout
-            layout for Quick View tab of ``canvasWindow``
+            Layout for Quick View tab of ``canvasWindow``
+        marker_dict : dict
+            Dictionary of marker names used to translate ``comboBoxMarker`` to a matplotlib maker symbol, though not all matplotlib markers
+            are used.
+        n_dim_list: (list)
+            Fields used to for ``TEC`` and ``radar`` style plots.
         plot_info : dict
+            Dictionary that holds information about plots.  These dictionaries are often saved to the tree when the user clicks
+            the ``actionSaveToTree`` toolbar button.  
+
             | 'tree' : (str) -- tree name, ``Analyte``, ``Analyte (normalized)``
-            | 'sample_id': sample_id,
-            | 'plot_name': field,
-            | 'plot_type': 'analyte map',
-            | 'field_type': field_type,
-            | 'field': field,
-            | 'figure': graphicWidget,
-            | 'style': style,
-            | 'cluster_groups': None,
-            | 'view': tmp,
-            | 'position': None
+            | 'sample_id' : (str) -- sample id, which doubles as ``treeView`` branch
+            | 'plot_name' : (str) -- plot name, which doubles as ``treeView`` leaf
+            | 'plot_type' : (str) -- type of plot (e.g., ``analyte map``, ``scatter``, ``Cluster Score``)
+            | 'field_type' : (list of str) -- type of field(s) used to create plot
+            | 'field' : (list of str) -- analyte or other field(s) used to create plot
+            | 'figure' : (pgGraphicsWidget or MplCanvas) -- object holding figure for display
+            | 'style' : (dict) -- dictionary associated with ``styles[*plot_type*]``
+            | 'cluster_groups' : (list) -- cluster groups used to generate plot
+            | 'view' : (bool,bool) -- indicates whether ``plot_info['figure']`` is displayed in SingleView and/or MultiView
+            | 'position' : (list) -- location *(row,col)* in ``layoutMultiView`` a value of None indicates not displayed in MultiView
+
+            .. seealso::
+                :ref:`add_plotwidget_to_tree` for details about saving *plot_info* to the tree (Plot Selector)
         QVAnalyteList : list of str
             ordered set of analytes to display in on the Quick View tab
         """
@@ -230,9 +243,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         layout_quick_view.setContentsMargins(0, 0, 0, 0)
         self.widgetQuickView.setLayout(layout_quick_view)
         self.widgetQuickView.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        self.QV_analyte_list = ['Si29','Ti47','Al27','Cr52','Fe56','Mn55','Mg24','Ca43','K39','Na23','P31',
-            'Ba137','Th232','U238','La139','Ce140','Pb206','Pr141','Sr88','Zr90','Hf178','Nd146','Eu153',
-            'Gd157','Tb159','Dy163','Ho165','Y89','Er166','Tm169','Yb172','Lu175']
+
+        try:
+            self.QV_analyte_list = self.import_csv_to_dict('resources/styles/qv_list.csv')
+        except:
+            self.QV_analyte_list = {'default':['Si29','Ti47','Al27','Cr52','Fe56','Mn55','Mg24','Ca43','K39','Na23','P31',
+                'Ba137','Th232','U238','La139','Ce140','Pb206','Pr141','Sr88','Zr90','Hf178','Nd146','Eu153',
+                'Gd157','Tb159','Dy163','Ho165','Y89','Er166','Tm169','Yb172','Lu175']}
+
+        self.toolButtonNewList.clicked.connect(lambda: quickView(self))
 
         # right toolbar plot layout
         # histogram view
@@ -821,7 +840,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # ----start debugging----
         # self.test_get_field_list()
         # ----end debugging----
-
+    
     # -------------------------------------
     # Reset to start
     # -------------------------------------
@@ -1124,6 +1143,48 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.analyteDialog = excelConcatenator(self)
         self.analyteDialog.show()
 
+    def export_dict_to_csv(dictionary, filename):
+        """Exports a dictionary to csv file
+
+        Explorts a simple dictionary that includes a set of keyword associated with lists to a csv.
+        The first column are the dictionary keys and all subsequent columns are values associated with the key.
+
+        Parameters
+        ----------
+        dictionary : dict
+            Dictionary to save.
+        filename : str
+            Name of file used to save dictionary.  Include path in the filename.
+        """        
+        with open(filename, 'w', newline='') as csvfile:
+            csv_writer = csv.writer(csvfile)
+            for key, values in dictionary.items():
+                csv_writer.writerow([key] + values)
+
+    def import_csv_to_dict(filename):
+        """Imports a csv to a dictionary
+
+        Imports a csv in the format produced by ``MainWindow.export_dict_to_csv``
+
+        Parameters
+        ----------
+        filename : str
+            File for import, include path name.
+
+        Returns
+        -------
+        dict
+            Contents of filename as a dictionary.
+        """        
+        dictionary = {}
+        with open(filename, 'r', newline='') as csvfile:
+            csv_reader = csv.reader(csvfile)
+            for row in csv_reader:
+                key = row[0]
+                values = row[1:]
+                dictionary[key] = values
+        return dictionary
+
 
     # Other windows/dialogs
     # -------------------------------------
@@ -1155,7 +1216,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.update.all_field_comboboxes()
         if result == QDialog.Rejected:
             pass
-
+    
     def open_calculator(self):
         analytes_list = self.data[self.sample_id]['analyte_info']['analytes'].values
         self.calWindow = CalWindow(analytes_list,self.data[self.sample_id] )
@@ -5002,17 +5063,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         style = self.styles['analyte map']
 
+        key = self.comboBoxQVList.currentText()
+
         # establish number of rows and columns
         ratio = 1.8 # aspect ratio of gridlayout
         # ratio = ncol / nrow, nplots = ncol * nrow
-        ncol = int(np.sqrt(len(self.QV_analyte_list)*ratio))
+        ncol = int(np.sqrt(len(self.QV_analyte_list[key])*ratio))
 
         # fields in current sample
         fields = self.get_field_list()
 
         # clear the quickView layout
         self.clear_layout(self.widgetQuickView.layout())
-        for i, analyte in enumerate(self.QV_analyte_list):
+        for i, analyte in enumerate(self.QV_analyte_list[key]):
             # if analyte is in list of measured fields
             if analyte not in fields:
                 continue
@@ -8454,10 +8517,113 @@ class analyteSelectionWindow(QDialog, Ui_Dialog):
             combo.currentIndexChanged.connect(self.update_scale)
 
 
+# QuickViewDialog gui
+# -------------------------------
+class quickView(QDialog, Ui_QuickViewDialog):
+    """Creates a dialog for the user to select and order analytes for Quick View
+
+    Opens an instance of QuickViewDialog for the user to select and order analytes for Quick View.
+    The lists are automatically saved for future use.
+
+    Parameters
+    ----------
+    QDialog : QDialog
+        
+    Ui_QuickViewDialog : QuickViewDialog
+        User interface design.
+    """    
+    def __init__(self, main_window):
+        """Initializes quickView
+
+        Parameters
+        ----------
+        analyte_list : list
+            List of analytes to populate column 0 of  ``quickView.tableWidget``.
+        quickview_list : dict
+            Dictionary to be updated with an ordered list of analytes to be added to the ``MainWindow.layoutQuickView``.
+        parent : None, optional
+            Parent UI, by default None
+        """        
+        super().__init__()
+        self.setupUi(self)
+
+        self.main_window = main_window
+        self.analyte_list = self.main_window.data[self.main_window.sample_id]['analyte_info']['analytes']
+        self.quickview_list = self.main_window.QV_analyte_list
+
+        self.tableWidget.setSelectionBehavior(QTableWidget.SelectRows)
+        # fill table
+        for row, analyte in enumerate(self.analyte_list):
+            # analyte text in column 1
+            item = QTableWidgetItem(analyte)
+            self.tableWidget.setItem(row, 0, item)
+
+            # checkbox in column 1
+            checkbox = QCheckBox()
+            checkbox.setChecked(True)
+            self.tableWidget.setCellWidget(row, 1, checkbox)
+
+        #self.toolButtonSort.clicked.connect()
+
+        # close dialog signal
+        self.pushButtonClose.clicked.connect(lambda: self.done(0))
+
+        # Set drag and drop mode
+        self.tableWidget.setDragEnabled(True)
+        self.tableWidget.setDropIndicatorShown(True)
+        self.tableWidget.setDragDropMode(QTableWidget.InternalMove)
+
+    def button_save(self):
+        """Gets list of analytes and group name when Save button is clicked
+
+        Retrieves the user defined name from ``quickView.lineEditViewName`` and list of analytes using ``quickView.column_to_list()``
+        and adds them to a dictionary item with the name defined as the key.
+
+        Raises
+        ------
+            A warning is raised if the user does not provide a name.  The list is not added to the dictionary in this case.
+        """        
+        name = self.lineEditViewName.currentText()
+        if not name:
+            QMessageBox.warning(self.quickView, "QuickView: Warning", "Enter a name for the new list.")
+            return
+        elif name in list(self.quickview_list.keys()):
+            # ask user if they wish to overwite the list item
+            # if no, return
+            pass
+        self.quickview_list.update({name: self.column_to_list()})
+
+        self.main_window.comboBoxQVList.clear()
+        self.main_window.comboBoxQVList.addItems(self.quickview_list.keys())
+
+        # append theme to file of saved themes
+        self.main_window.export_dict_to_csv(self.quickview_list, 'resources/styles/qv_lists.csv')
+        
+    def column_to_list(self):
+        """Extracts selected analytes from the table into a list
+
+        Analytes from column 0 of the table with checked boxes in column 1 are added to a list for use with plotting
+        maps in ``MainWindow.layoutQuickView``.  The order is set by the user dragging and droping to swap rows.
+
+        Returns
+        -------
+        list
+            Analytes for display in ``MainWindow.layoutQuickView``
+        """        
+        quickview_list = []
+        for row in range(self.tableWidget.rowCount()):
+            # get analyte
+            item = self.tableWidget.item(row, 0)
+            # get checkbox
+            checkbox = self.table_widget.cellWidget(row, 1)
+            if item is not None and checkbox.isChecked():
+                quickview_list.append(item.text())
+        return quickview_list         
+
 
 # Excel concatenator gui
 # -------------------------------
-class excelConcatenator(QtWidgets.QMainWindow, Ui_ExelConcatenator):       
+class excelConcatenator(QtWidgets.QMainWindow, Ui_ExcelConcatenator):       
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
@@ -8541,9 +8707,6 @@ class excelConcatenator(QtWidgets.QMainWindow, Ui_ExelConcatenator):
                 # For QTableWidgetItem, just set the text
                 item = QTableWidgetItem(str(value))
                 self.tableWidgetMetaData.setItem(row_pos, col_index, item)
-    
-        
-            
                         
     def save_meta_data(self):
         file_name, _ = QFileDialog.getSaveFileName(self, "Save File", "", "CSV Files (*.csv);;All Files (*)")
@@ -8580,10 +8743,6 @@ class excelConcatenator(QtWidgets.QMainWindow, Ui_ExelConcatenator):
             df = pd.DataFrame(data, columns=headers)
             df.to_csv(file_name, index=False)  # Save DataFrame to CSV without the index
             self.statusBar.showMessage("Metadata saved successfully")
-
-                    
-        
-        
 
     def open_directory(self):
         
@@ -8625,10 +8784,6 @@ class excelConcatenator(QtWidgets.QMainWindow, Ui_ExelConcatenator):
             self.sample_ids = [os.path.basename(root_path)]
             self.paths = [root_path]
 
-            
-        
-
-         
     def populate_table(self):
         self.tableWidgetMetaData.setRowCount(len(self.sample_ids))
         for i, sample_id in enumerate(self.sample_ids):
@@ -8682,7 +8837,6 @@ class excelConcatenator(QtWidgets.QMainWindow, Ui_ExelConcatenator):
             for r in range(self.tableWidgetMetaData.rowCount()):
                 if r != row:
                     self.tableWidgetMetaData.cellWidget(r, column).setCurrentText(selected_text)
-            
             
     def import_data(self): 
         if not self.checkBoxSaveAtRoot.isChecked():

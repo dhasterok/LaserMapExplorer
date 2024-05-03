@@ -77,9 +77,9 @@ class Ui_QuickViewDialog(object):
 
     def retranslateUi(self, QuickViewDialog):
         _translate = QtCore.QCoreApplication.translate
-        QuickViewDialog.setWindowTitle(_translate("QuickViewDialog", "Dialog"))
+        QuickViewDialog.setWindowTitle(_translate("QuickViewDialog", "Quick View List Editor"))
         item = self.tableWidget.horizontalHeaderItem(0)
-        item.setText(_translate("QuickViewDialog", "New Column"))
+        item.setText(_translate("QuickViewDialog", "Analyte"))
         item = self.tableWidget.horizontalHeaderItem(1)
         item.setText(_translate("QuickViewDialog", "Show"))
         self.label.setText(_translate("QuickViewDialog", "Enter name:"))

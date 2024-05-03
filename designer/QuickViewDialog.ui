@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Quick View List Editor</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -29,7 +29,7 @@
      </attribute>
      <column>
       <property name="text">
-       <string>New Column</string>
+       <string>Analyte</string>
       </property>
      </column>
      <column>

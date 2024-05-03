@@ -8238,6 +8238,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.toolButtonPlotProfile.setChecked(False)
                 self.toolButtonPointMove.setChecked(False)
 
+    def sort_analytes(self, method, analytes):
+        match method:
+            case 'alphabetical':
+                pass
+            case 'atomic number':
+                pass
+            case 'mass':
+                pass
+            case 'compatibility':
+                pass
+
 
 # -------------------------------
 # Classes
@@ -8569,12 +8580,25 @@ class quickView(QDialog, Ui_QuickViewDialog):
         """        
         super().__init__()
         self.setupUi(self)
-
         self.main_window = main_window
         self.analyte_list = self.main_window.data[self.main_window.sample_id]['analyte_info']['analytes']
         self.quickview_list = self.main_window.QV_analyte_list
 
+        # flexible column widths
+        header = self.tableWidget.horizontalHeader()
+        header.setSectionResizeMode(0,QHeaderView.Stretch)
+        header.setSectionResizeMode(1,QHeaderView.ResizeToContents)
+
+        # setup sort menu
+        sortmenu_items = ['alphabetical','atomic number','mass','compatibility']
+        SortMenu = QMenu()
+        SortMenu.triggered.connect(lambda x:self.main_window.sort_analytes(x.text(), self.analyte_list))
+        self.main_window.add_menu(sortmenu_items,SortMenu)
+        self.toolButtonSort.setMenu(SortMenu)
+
         self.tableWidget.setSelectionBehavior(QTableWidget.SelectRows)
+
+        self.tableWidget.setRowCount(len(self.analyte_list))
         # fill table
         for row, analyte in enumerate(self.analyte_list):
             # analyte text in column 1
@@ -8595,6 +8619,8 @@ class quickView(QDialog, Ui_QuickViewDialog):
         self.tableWidget.setDragEnabled(True)
         self.tableWidget.setDropIndicatorShown(True)
         self.tableWidget.setDragDropMode(QTableWidget.InternalMove)
+
+        self.show()
 
     def button_save(self):
         """Gets list of analytes and group name when Save button is clicked

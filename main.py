@@ -76,51 +76,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         ----------
         aspect_ratio : float
             The aspect ratio for the current sample.
-        sample_id : str
-            The name of the current sample.  *sample_id* is used as the key into several dictionaries.
-        styles : dict of dict
-            Dictionary with plot style information that saves the properties of style widgets.  There is a keyword
-            for each plot type listed in ``comboBoxPlotType``.  The exact behavior of each style item may vary depending upon the
-            plot type.  While data related to plot and color axes may be stored in *styles*, *axis_dict* stores labels, bounds and scale for most plot fields.
-
-            styles[plot_type] -- plot types include ``analyte map``, ``histogram``, ``correlation``, ``gradient map``, ``scatter``, ``heatmap``, ``ternary map``
-            ``TEC``, ``radar``, ``variance``, ``vectors``, ``pca scatter``, ``pca heatmap``, ``PCA Score``, ``Clusters``, ``Cluster Score``, ``profile``
-
-            ['Axes'] -- associated with widgets in the toolBoxTreeView > Styling > Axes tab
-                | 'XLabel' : (str) -- x-axis label, set in ``lineEditXLabel``
-                | 'YLabel' : (str) -- y-axis label, set in ``lineEditYLabel``
-                | 'ZLabel' : (str) -- z-axis label, set in ``lineEditZLabel``, used only for ternary plots
-                | 'XLim' : (list of float) -- x-axis bounds, set by ``lineEditXLB`` and ``lineEditXUB`` for the lower and upper bounds
-                | 'YLim' : (list of float) -- y-axis bounds, set by ``lineEditYLB`` and ``lineEditYUB`` for the lower and upper bounds
-                | 'XScale' : (str) -- x-axis normalization ``linear`` or ``log`` (note for ternary plots the scale is linear), set by ``comboBoxXScale``
-                | 'YScale' : (str) -- y-axis normalization ``linear`` or ``log`` (note for ternary plots the scale is linear), set by ``comboBoxYScale``
-                | 'TickDir' : (str) -- tick direction for all axes, ``none``, ``in`` or ``out``, set by ``comboBoxTickDirection``
-                | 'AspectRatio' : (float) -- aspect ratio of plot area (relative to figure units, not axes), set in ``lineEditAspectRatio``
-            ['Text'] -- associated with widgets in the toolBoxTreeView > Styling > Annotations tab
-                | 'Font' : (str) -- font type, pulled from the system font library, set in ``fontComboBox``
-                | 'Size' : (str) -- font size in points, set in ``doubleSpinBoxFontSize``
-            ['Scales'] -- associated with widgets in the toolBoxTreeView > Styling > Annotations tab
-                | 'Direction' : (str) -- direction of distance scale bar on maps, options include ``none``, ``horizontal`` and ``vertical``, set by ``comboBoxScaleDirection``
-                | 'Location' : (str) -- position of scale bar on maps, options include ``southeast``, ``northeast``, ``northwest``, and ``southwest``, set by ``comboBoxScaleLocation``
-                | 'OverlayColor' : (hex str) -- color of overlay objects and annotations, also color of vectors on pca scatter/heatmap, set by ``toolButtonOverlayColor``
-            ['Markers'] -- associated with widgets in the toolBoxTreeView > Styling > Markers tab
-                | 'Symbol' : (str) -- marker symbol defined by matplotlib styles in the attribute ``markerdict``
-                | 'Size' : (int) -- marker size in points, set by ``doubleSpinBoxMarkerSize``
-                | 'Alpha' : (int) -- marker transparency, set by ``horizontalSliderMarkerAlpha``
-            ['Lines'] -- associated with widgets in the toolBoxTreeView > Styling > Lines tab
-                | 'LineWidth' : (float) -- width of line objects, varies between plot types, set by ``comboBoxLineWidth``
-                | 'Multiplier' : (float) -- multiplier for the length of vectors on pca scatter/heatmaps, set by ``lineEditLengthMultiplier``
-            ['Colors'] -- associated with widgets in the toolBoxTreeView > Styling > Colors tab
-                | 'Color' : (hex str) -- color of markers, set by ``toolButtonOverlayColor``
-                | 'ColorByField' : (str) -- field type used to set colors in a figure, set by ``comboBoxColorByField``
-                | 'Field' : (str) -- field used to set colors in a figure, set by ``comboBoxColorField``
-                | 'Colormap' : (str) -- colormap used in figure, set by ``comboBoxFieldColormap``
-                | 'Reverse' : (bool) -- inverts colormap, set by ``checkBoxReverseColormap``
-                | 'CLim' : (list of float) -- color bounds, set by ``lineEditXLB`` and ``lineEditXUB`` for the lower and upper bounds
-                | 'CScale' : (str) -- c-axis normalization ``linear`` or ``log`` (note for ternary plots the scale is linear), set by ``comboBoxYScale``
-                | 'Direction' : (str) -- colorbar direction, options include ``none``, ``vertical``, and ``horizontal``, set by ``comboBoxCbarDirection``
-                | 'CLabel' : (str) -- colorbar label, set in ``lineEditCbarLabel``
-                | 'Resolution' : (int) -- used to set discritization in 2D and ternary heatmaps, set by ``spinBoxHeatmapResolution``
         axis_dict : dict of dict
             Dictionary containing axes for individual plot fields.  Setting these properties will set them for
             all plots which use the same field, though it does not update them on previous plots.
@@ -167,8 +122,59 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             | 'view' : (bool,bool) -- indicates whether ``plot_info['figure']`` is displayed in SingleView and/or MultiView
             | 'position' : (list) -- location *(row,col)* in ``layoutMultiView`` a value of None indicates not displayed in MultiView
 
+            Plot specific keys include:
+            | 'bin_width' : (float) -- histogram bin width
+            | 'type' : (str) -- ``PDF`` (probablity density function) or ``CDF`` (cumulative density function)
+            | 'method' : (str) -- correlation method, ``Pearson``, ``Spearman``, or ``Kendall``
+            | 'squared_flag' : (bool) -- squared correlation if ``True``
+
             .. seealso::
                 :ref:`add_plotwidget_to_tree` for details about saving *plot_info* to the tree (Plot Selector)
+        sample_id : str
+            The name of the current sample.  *sample_id* is used as the key into several dictionaries.
+        styles : dict of dict
+            Dictionary with plot style information that saves the properties of style widgets.  There is a keyword
+            for each plot type listed in ``comboBoxPlotType``.  The exact behavior of each style item may vary depending upon the
+            plot type.  While data related to plot and color axes may be stored in *styles*, *axis_dict* stores labels, bounds and scale for most plot fields.
+
+            styles[plot_type] -- plot types include ``analyte map``, ``histogram``, ``correlation``, ``gradient map``, ``scatter``, ``heatmap``, ``ternary map``
+            ``TEC``, ``radar``, ``variance``, ``vectors``, ``pca scatter``, ``pca heatmap``, ``PCA Score``, ``Clusters``, ``Cluster Score``, ``profile``
+
+            ['Axes'] -- associated with widgets in the toolBoxTreeView > Styling > Axes tab
+                | 'XLabel' : (str) -- x-axis label, set in ``lineEditXLabel``
+                | 'YLabel' : (str) -- y-axis label, set in ``lineEditYLabel``
+                | 'ZLabel' : (str) -- z-axis label, set in ``lineEditZLabel``, used only for ternary plots
+                | 'XLim' : (list of float) -- x-axis bounds, set by ``lineEditXLB`` and ``lineEditXUB`` for the lower and upper bounds
+                | 'YLim' : (list of float) -- y-axis bounds, set by ``lineEditYLB`` and ``lineEditYUB`` for the lower and upper bounds
+                | 'XScale' : (str) -- x-axis normalization ``linear`` or ``log`` (note for ternary plots the scale is linear), set by ``comboBoxXScale``
+                | 'YScale' : (str) -- y-axis normalization ``linear`` or ``log`` (note for ternary plots the scale is linear), set by ``comboBoxYScale``
+                | 'TickDir' : (str) -- tick direction for all axes, ``none``, ``in`` or ``out``, set by ``comboBoxTickDirection``
+                | 'AspectRatio' : (float) -- aspect ratio of plot area (relative to figure units, not axes), set in ``lineEditAspectRatio``
+            ['Text'] -- associated with widgets in the toolBoxTreeView > Styling > Annotations tab
+                | 'Font' : (str) -- font type, pulled from the system font library, set in ``fontComboBox``
+                | 'Size' : (str) -- font size in points, set in ``doubleSpinBoxFontSize``
+            ['Scales'] -- associated with widgets in the toolBoxTreeView > Styling > Annotations tab
+                | 'Direction' : (str) -- direction of distance scale bar on maps, options include ``none``, ``horizontal`` and ``vertical``, set by ``comboBoxScaleDirection``
+                | 'Location' : (str) -- position of scale bar on maps, options include ``southeast``, ``northeast``, ``northwest``, and ``southwest``, set by ``comboBoxScaleLocation``
+                | 'OverlayColor' : (hex str) -- color of overlay objects and annotations, also color of vectors on pca scatter/heatmap, set by ``toolButtonOverlayColor``
+            ['Markers'] -- associated with widgets in the toolBoxTreeView > Styling > Markers tab
+                | 'Symbol' : (str) -- marker symbol defined by matplotlib styles in the attribute ``markerdict``
+                | 'Size' : (int) -- marker size in points, set by ``doubleSpinBoxMarkerSize``
+                | 'Alpha' : (int) -- marker transparency, set by ``horizontalSliderMarkerAlpha``
+            ['Lines'] -- associated with widgets in the toolBoxTreeView > Styling > Lines tab
+                | 'LineWidth' : (float) -- width of line objects, varies between plot types, set by ``comboBoxLineWidth``
+                | 'Multiplier' : (float) -- multiplier for the length of vectors on pca scatter/heatmaps, set by ``lineEditLengthMultiplier``
+            ['Colors'] -- associated with widgets in the toolBoxTreeView > Styling > Colors tab
+                | 'Color' : (hex str) -- color of markers, set by ``toolButtonOverlayColor``
+                | 'ColorByField' : (str) -- field type used to set colors in a figure, set by ``comboBoxColorByField``
+                | 'Field' : (str) -- field used to set colors in a figure, set by ``comboBoxColorField``
+                | 'Colormap' : (str) -- colormap used in figure, set by ``comboBoxFieldColormap``
+                | 'Reverse' : (bool) -- inverts colormap, set by ``checkBoxReverseColormap``
+                | 'CLim' : (list of float) -- color bounds, set by ``lineEditXLB`` and ``lineEditXUB`` for the lower and upper bounds
+                | 'CScale' : (str) -- c-axis normalization ``linear`` or ``log`` (note for ternary plots the scale is linear), set by ``comboBoxYScale``
+                | 'Direction' : (str) -- colorbar direction, options include ``none``, ``vertical``, and ``horizontal``, set by ``comboBoxCbarDirection``
+                | 'CLabel' : (str) -- colorbar label, set in ``lineEditCbarLabel``
+                | 'Resolution' : (int) -- used to set discritization in 2D and ternary heatmaps, set by ``spinBoxHeatmapResolution``
         QVAnalyteList : list of str
             ordered set of analytes to display in on the Quick View tab
         """
@@ -196,7 +202,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.proxies = []
         self.prev_plot = ''
         self.order = 'F'
-        self.plot_id = {'clustering':{},'scatter':{},'n-dim':{}}
         self.current_group = {'algorithm':None,'clusters': None}
         self.matplotlib_canvas = None
         self.pyqtgraph_widget = None
@@ -3808,10 +3813,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.lineEditLengthMultiplier.setEnabled(False)
 
                 # color properties
-                self.comboBoxFieldColormap.setEnabled(True)
                 if plot_type == 'clusters':
                     self.comboBoxColorByField.setEnabled(False)
                     self.comboBoxColorField.setEnabled(False)
+                    self.comboBoxFieldColormap.setEnabled(False)
                     self.lineEditColorLB.setEnabled(False)
                     self.lineEditColorUB.setEnabled(False)
                     self.comboBoxCbarDirection.setEnabled(False)
@@ -3819,6 +3824,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 else:
                     self.comboBoxColorByField.setEnabled(True)
                     self.comboBoxColorField.setEnabled(True)
+                    self.comboBoxFieldColormap.setEnabled(True)
                     self.lineEditColorLB.setEnabled(True)
                     self.lineEditColorUB.setEnabled(True)
                     self.comboBoxCbarDirection.setEnabled(True)
@@ -3864,7 +3870,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # enable/disable labels
         # axes properties
         self.labelXLim.setEnabled(self.lineEditXLB.isEnabled())
+        self.toolButtonXAxisReset.setEnabled(self.labelXLim.isEnabled())
         self.labelYLim.setEnabled(self.lineEditYLB.isEnabled())
+        self.toolButtonYAxisReset.setEnabled(self.labelYLim.isEnabled())
         self.labelXLabel.setEnabled(self.lineEditXLabel.isEnabled())
         self.labelYLabel.setEnabled(self.lineEditYLabel.isEnabled())
         self.labelZLabel.setEnabled(self.lineEditZLabel.isEnabled())
@@ -3895,10 +3903,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.labelMarkerColor.setEnabled(False)
         self.labelColorByField.setEnabled(self.comboBoxColorByField.isEnabled())
         self.labelColorField.setEnabled(self.comboBoxColorField.isEnabled())
-        self.checkBoxReverseColormap.setEnabled(self.comboBoxColorField.isEnabled())
+        self.checkBoxReverseColormap.setEnabled(self.comboBoxFieldColormap.isEnabled())
         self.labelReverseColormap.setEnabled(self.checkBoxReverseColormap.isEnabled())
         self.labelFieldColormap.setEnabled(self.comboBoxFieldColormap.isEnabled())
         self.labelColorBounds.setEnabled(self.lineEditColorLB.isEnabled())
+        self.toolButtonCAxisReset.setEnabled(self.labelColorBounds.isEnabled())
         self.labelCbarDirection.setEnabled(self.comboBoxCbarDirection.isEnabled())
         self.labelCbarLabel.setEnabled(self.lineEditCbarLabel.isEnabled())
         self.labelHeatmapResolution.setEnabled(self.spinBoxHeatmapResolution.isEnabled())
@@ -4213,7 +4222,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         print('axis_reset_callback')
         if ax == 'c':
-            if not (self.comboBoxColorByField.currentText() in ['None','Cluster']):
+            if self.comboBoxPlotType.currentText() == 'vectors':
+                self.styles['vectors']['Colors']['CLim'] = [np.amin(self.pca_results.components_), np.amax(self.pca_results.components_)]
+                self.set_color_axis_widgets()
+            elif not (self.comboBoxColorByField.currentText() in ['None','Cluster']):
                 field_type = self.comboBoxColorByField.currentText()
                 field = self.comboBoxColorField.currentText()
                 if field == '':
@@ -5609,6 +5621,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'sample_id': self.sample_id,
             'plot_name': plot_name,
             'plot_type': 'correlation',
+            'method': method,
+            'square_flag': square_flag,
             'field_type': None,
             'field': None,
             'figure': canvas,
@@ -5807,6 +5821,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # Add a legend
             canvas.axes.legend()
         else:
+            clusters = None
             # Regular histogram
             canvas.axes.hist(x['array'], cumulative=cumflag, histtype=type, bins=edges, color=style['Colors']['Color'], edgecolor=ecolor, linewidth=style['Lines']['LineWidth'], alpha=style['Markers']['Alpha']/100, density=True)
 
@@ -5865,10 +5880,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'field_type': analysis,
             'field': field,
             'plot_type': 'histogram',
+            'type': self.comboBoxHistType.currentText(),
             'bin_width': bin_width,
             'figure': canvas,
             'style': style,
-            'cluster_groups': [],
+            'cluster_groups': clusters,
             'view': [True,False],
             'position': []
         }
@@ -6045,10 +6061,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                             color=style['Colors']['Color'])
             cb = None
         else:
+            norm = self.color_norm(style)
             _, cb = tp.ternscatter(x['array'], y['array'], z['array'], categories=c['array'],
                                             marker=self.markerdict[style['Markers']['Symbol']],
                                             size=style['Markers']['Size'],
                                             cmap=style['Colors']['Colormap'],
+                                            norm=norm,
                                             orientation=style['Colors']['Direction'])
             if cb:
                 cb.set_label(c['label'])
@@ -6157,11 +6175,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if len(c['array']) == 0:
             tp = ternary(canvas.axes, labels, 'heatmap')
 
+            norm = self.color_norm(style)
             hexbin_df, cb = tp.ternhex(a=x['array'], b=y['array'], c=z['array'],
                 bins=style['Colors']['Resolution'],
                 plotfield='n',
                 cmap=style['Colors']['Colormap'],
-                orientation=style['Colors']['Direction'])
+                orientation=style['Colors']['Direction'],
+                norm=norm)
 
             if cb is not None:
                 cb.set_label('log(N)')
@@ -6243,7 +6263,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         t2 = ternary(canvas.axes2, labels=[afield,bfield,cfield])
 
-        a = []
         hbin = t2.hexagon(10)
         xc = np.array([v['xc'] for v in hbin])
         yc = np.array([v['yc'] for v in hbin])
@@ -6252,14 +6271,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         for i, hb in enumerate(hbin):
             t2.ax.fill(hb['xv'], hb['yv'], color=cv[i]/255, edgecolor='none')
 
-        plot_name = f"{a['field']}_{b['field']}_{c['field']}_{'ternarymap'}"
+        plot_name = f'{afield}_{bfield}_{cfield}_ternarymap'
         self.plot_info = {
             'tree': 'Geochemistry',
             'sample_id': self.sample_id,
             'plot_name': plot_name,
             'plot_type': 'ternary map',
-            'field_type': [a['type'], b['type'], c['type'], ''],
-            'field': [a['field'], b['field'], c['field'], ''],
+            'field_type': [self.comboBoxFieldTypeX.currentText(),
+                self.comboBoxFieldTypeY.currentText(),
+                self.comboBoxFieldTypeZ.currentText(),
+                ''],
+            'field': [afield, bfield, cfield, ''],
             'figure': canvas,
             'style': style,
             'cluster_groups': [],
@@ -6288,6 +6310,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # compute pca scores
         pca_scores = pd.DataFrame(self.pca_results.fit_transform(df_scaled), columns=[f'PC{i+1}' for i in range(self.pca_results.n_components_)])
+        self.styles['vectors']['Colors']['CLim'] = [np.amin(self.pca_results.components_), np.amax(self.pca_results.components_)]
 
         # Add PCA scores to DataFrame for easier plotting
         if self.data[self.sample_id]['computed_data']['PCA Score'].empty:
@@ -6831,7 +6854,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         ref_i = self.comboBoxNDimRefMaterial.currentIndex()
 
         plot_type = self.comboBoxPlotType.currentText()
-        style = self.styles[plot_name]
+        style = self.styles[plot_type]
 
         # Get quantile for plotting TEC & radar plots
         match self.comboBoxNDimQuantiles.currentIndex():
@@ -6844,12 +6867,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case 3:
                 quantiles = [0.05, 0.25, 0.5, 0.75, 0.95]
 
-        clusters = [c for c in self.current_group['selected_clusters']]
+        if self.comboBoxColorByField.currentText() == 'Cluster':
+            clusters = [int(c) for c in self.current_group['selected_clusters']]
+            cluster_flag = True
+        else:
+            clusters = None
+            cluster_flag = False
 
         match plot_type:
             case 'Radar':
                 axes_interval = 5
-                if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['Cluster']:
+                if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['Cluster'] and cluster_flag:
                     # Get the cluster labels for the data
                     # cluster_labels = self.toggle_mass(self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']])
                     cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']]
@@ -6866,7 +6894,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     canvas.fig, canvas.axes = radar.plot()
             case 'TEC':
                 yl = [np.inf, -np.inf]
-                if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['Cluster']:
+                if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['Cluster'] and cluster_flag:
                     # Get the cluster labels for the data
                     cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']]
 
@@ -6909,14 +6937,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 canvas.axes.set_ylabel('Abundance / ['+self.ref_data['model'][ref_i]+', '+self.ref_data['layer'][ref_i]+']')
                 canvas.fig.tight_layout()
 
-
-        #create unique id if new plot
-        if self.sample_id in self.plot_id[plot_type]:
-            self.plot_id[plot_type][self.sample_id]  = self.plot_id[plot_type][self.sample_id]+1
+        if cluster_flag:
+            plot_name = f"{plot_type}_"
         else:
-            self.plot_id[plot_type][self.sample_id]  = 0
-
-        plot_name = plot_type +'_'+str(self.plot_id[plot_type][self.sample_id])
+            plot_name = f"{plot_type}_all"
 
         self.update_figure_font(canvas, self.styles[plot_type]['Text']['Font'])
 
@@ -6929,7 +6953,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'field': self.n_dim_list,
             'figure': canvas,
             'style': style,
-            'cluster_groups': [],
+            'cluster_groups': clusters,
             'view': [True,False],
             'position': []
         }
@@ -7240,33 +7264,33 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case 'correlation' | 'histogram' | 'tec':
                 if self.data[self.sample_id]['computed_data']['Cluster'].empty:
                     field_list = []
-                    self.toggle_color_widgets(False)
+                    self.toggle_style_widgets()
                 else:
                     field_list = ['Cluster']
-                    self.toggle_color_widgets(True)
+                    self.toggle_style_widgets()
             case 'cluster score':
                 if self.data[self.sample_id]['computed_data']['Cluster Score'].empty:
                     field_list = []
-                    self.toggle_color_widgets(False)
+                    self.toggle_style_widgets()
                 else:
                     field_list = ['Cluster Score']
-                    self.toggle_color_widgets(True)
+                    self.toggle_style_widgets()
             case 'cluster':
                 if self.data[self.sample_id]['computed_data']['Cluster'].empty:
                     field_list = []
-                    self.toggle_color_widgets(False)
+                    self.toggle_style_widgets()
                 else:
                     field_list = ['Cluster']
-                    self.toggle_color_widgets(True)
+                    self.toggle_style_widgets()
             case 'pca score':
                 if self.data[self.sample_id]['computed_data']['PCA Score'].empty:
                     field_list = []
-                    self.toggle_color_widgets(False)
+                    self.toggle_style_widgets()
                 else:
                     field_list = ['PCA Score']
-                    self.toggle_color_widgets(True)
+                    self.toggle_style_widgets()
             case 'ternary map':
-                self.toggle_color_widgets(False)
+                self.toggle_style_widgets()
                 self.labelCbarDirection.setEnabled(True)
                 self.comboBoxCbarDirection.setEnabled(True)
             case _:
@@ -7276,7 +7300,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 for field in self.data[self.sample_id]['computed_data']:
                     if not (self.data[self.sample_id]['computed_data'][field].empty):
                         field_list.append(field)
-                self.toggle_color_widgets(True)
+                self.toggle_style_widgets()
 
         # add None to list?
         if addNone:
@@ -7774,23 +7798,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             branch = tree_index.parent().data()
             leaf = tree_index.data()
 
-        item,item_flag = self.find_leaf(tree=tree, branch=branch, leaf=leaf)
+        item,item_flag = self.find_leaf(tree, branch, leaf)
 
         if not item_flag:
             return None
 
         # ----start debugging----
-        print(tree_index)
-        print('item')
-        print(tree+':'+branch+':'+leaf)
+        # print(tree_index)
+        # print('item')
+        # print(tree+':'+branch+':'+leaf)
         # ----end debugging----
 
-        #item = self.treeModel.itemFromIndex(tree_index)
         plot_info = item.data(role=Qt.UserRole)
 
         # ----start debugging----
-        print(plot_info)
-        print('\nsuccessfully retrieved plot info\n')
+        # print(plot_info)
+        # print('\nsuccessfully retrieved plot info\n')
         # ----end debugging----
 
         return plot_info
@@ -7805,6 +7828,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         # get double-click result
         plot_info = self.retrieve_plotinfo_from_tree(tree_index=tree_index)
+
         tree = tree_index.parent().parent().data()
         branch = tree_index.parent().data()
         leaf = tree_index.data()
@@ -8566,7 +8590,7 @@ class quickView(QDialog, Ui_QuickViewDialog):
     Ui_QuickViewDialog : QuickViewDialog
         User interface design.
     """    
-    def __init__(self, main_window):
+    def __init__(self, parent=None):
         """Initializes quickView
 
         Parameters
@@ -8578,9 +8602,9 @@ class quickView(QDialog, Ui_QuickViewDialog):
         parent : None, optional
             Parent UI, by default None
         """        
-        super().__init__()
+        super().__init__(parent)
         self.setupUi(self)
-        self.main_window = main_window
+        self.main_window = parent
         self.analyte_list = self.main_window.data[self.main_window.sample_id]['analyte_info']['analytes']
         self.quickview_list = self.main_window.QV_analyte_list
 
@@ -8589,17 +8613,25 @@ class quickView(QDialog, Ui_QuickViewDialog):
         header.setSectionResizeMode(0,QHeaderView.Stretch)
         header.setSectionResizeMode(1,QHeaderView.ResizeToContents)
 
-        # setup sort menu
+        # Set selection rules
+        self.tableWidget.setSelectionBehavior(QTableWidget.SelectRows)
+        self.tableWidget.setSelectionMode(QTableWidget.SingleSelection)
+
+        # Set drag and drop mode
+        self.tableWidget.setDragEnabled(True)
+        self.tableWidget.viewport().setAcceptDrops(True)
+        self.tableWidget.setDropIndicatorShown(True)
+        self.tableWidget.cellClicked.connect(lambda: self.mousePressEvent(event))
+
+        # setup sort menu and associated toolButton
         sortmenu_items = ['alphabetical','atomic number','mass','compatibility']
         SortMenu = QMenu()
         SortMenu.triggered.connect(lambda x:self.main_window.sort_analytes(x.text(), self.analyte_list))
         self.main_window.add_menu(sortmenu_items,SortMenu)
         self.toolButtonSort.setMenu(SortMenu)
 
-        self.tableWidget.setSelectionBehavior(QTableWidget.SelectRows)
-
-        self.tableWidget.setRowCount(len(self.analyte_list))
         # fill table
+        self.tableWidget.setRowCount(len(self.analyte_list))
         for row, analyte in enumerate(self.analyte_list):
             # analyte text in column 1
             item = QTableWidgetItem(analyte)
@@ -8610,17 +8642,61 @@ class quickView(QDialog, Ui_QuickViewDialog):
             checkbox.setChecked(True)
             self.tableWidget.setCellWidget(row, 1, checkbox)
 
-        #self.toolButtonSort.clicked.connect()
-
         # close dialog signal
         self.pushButtonClose.clicked.connect(lambda: self.done(0))
 
-        # Set drag and drop mode
-        self.tableWidget.setDragEnabled(True)
-        self.tableWidget.setDropIndicatorShown(True)
-        self.tableWidget.setDragDropMode(QTableWidget.InternalMove)
-
         self.show()
+
+    # def mousePressEvent(self, event):
+    #     print('mousePressEvent')
+    #     if event.buttons() == Qt.LeftButton:
+    #         self.drag_start_position = event.pos()
+
+    # def mouseMoveEvent(self, event):
+    #     print('mouseEvent')
+    #     if not event.buttons() & Qt.LeftButton:
+    #         return
+    #     if (event.pos() - self.drag_start_position).manhattanLength() < QApplication.startDragDistance():
+    #         return
+    #     item = self.tableWidget.itemAt(self.drag_start_position)
+    #     if item is None:
+    #         return
+    #     drag = QDrag(self)
+    #     mime_data = self.tableWidget.mimeData(self.tableWidget.selectedIndexes())
+    #     drag.setMimeData(mime_data)
+    #     drag.exec_(Qt.MoveAction)
+
+    def dropEvent(self, event):
+        print('dropEvent')
+
+        # Get the target row where the item was dropped
+        target_row = self.dropIndicatorPosition()
+        if target_row == -1:
+            target_row = self.rowCount() - 1
+
+        # Get the selected rows
+        selected_rows = sorted(set(index.row() for index in self.selectedIndexes()))
+
+        # Adjust the target row if dropping below selected rows
+        if target_row > selected_rows[-1]:
+            target_row = max(target_row - len(selected_rows) + 1, 0)
+
+        # Move the selected rows to the target row
+        for row in selected_rows:
+            self.move_row(row, target_row)
+            if row < target_row:
+                target_row += 1
+
+        # Call the default dropEvent to complete the operation
+        super().dropEvent(event)
+
+    def move_row(self, source_row, target_row):
+        print('move_row')
+        items = []
+        for column in range(self.columnCount()):
+            items.append(self.takeItem(source_row, column))
+        for column in range(self.columnCount()):
+            self.setItem(target_row, column, items[column])
 
     def button_save(self):
         """Gets list of analytes and group name when Save button is clicked
@@ -8664,7 +8740,7 @@ class quickView(QDialog, Ui_QuickViewDialog):
             # get analyte
             item = self.tableWidget.item(row, 0)
             # get checkbox
-            checkbox = self.table_widget.cellWidget(row, 1)
+            checkbox = self.tableWidget.cellWidget(row, 1)
             if item is not None and checkbox.isChecked():
                 quickview_list.append(item.text())
         return quickview_list         

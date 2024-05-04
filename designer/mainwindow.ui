@@ -2762,6 +2762,12 @@
          </item>
          <item row="1" column="2">
           <widget class="QLineEdit" name="lineEditFMax">
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
            <property name="toolTip">
             <string>Input maximum value for filtering</string>
            </property>
@@ -2772,6 +2778,12 @@
          </item>
          <item row="0" column="2">
           <widget class="QLineEdit" name="lineEditFMin">
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
            <property name="toolTip">
             <string>Input minimum value for filtering</string>
            </property>
@@ -2798,6 +2810,12 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="minimumSize">
+            <size>
+             <width>45</width>
+             <height>0</height>
+            </size>
+           </property>
            <property name="font">
             <font>
              <pointsize>11</pointsize>
@@ -2822,6 +2840,12 @@
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>45</width>
+             <height>0</height>
+            </size>
            </property>
            <property name="font">
             <font>
@@ -3441,7 +3465,7 @@
          <rect>
           <x>5</x>
           <y>20</y>
-          <width>276</width>
+          <width>281</width>
           <height>36</height>
          </rect>
         </property>
@@ -6670,7 +6694,7 @@
         </font>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="PlotSelectorPage">
         <property name="geometry">
@@ -6839,7 +6863,7 @@
           <enum>QFrame::Raised</enum>
          </property>
          <property name="currentIndex">
-          <number>3</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="StyleAxes">
           <property name="geometry">

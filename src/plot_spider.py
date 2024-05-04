@@ -98,7 +98,6 @@ def plot_spider_norm(data, ref_data, norm_ref_data, layer,el_list=None, style='Q
         result_df['se'] = result_df['sigma']/len(result_df['sigma'])
         result_df['se_norm'] = result_df['sigma_norm']
         
-        
         plot_inf['dimention_names'] = ['Element', 'Concentration Data'] 
         plot_inf ['variable_units'] = ['log10 (ppm)']
         
@@ -161,7 +160,7 @@ def fillinterval(ax, x, y, color, alpha):
     # y[:,1] =  y[:,1][::-1]
 
     # Filling the interval in the plot
-    ax.fill_between(x[:,0], y[:,0],y[:,1], color=color, alpha=alpha)
+    ax.fill_between(x[:,0], y[:,0],y[:,1], color=color, alpha=alpha, edgecolor=None)
 
 def plot_data(ax, t, C, style,el_list, Q=None, label= None):
     x = np.hstack([t.loc[:,['elid']].values, t.loc[:,['elid']].values])

@@ -244,7 +244,7 @@ class ternary:
     
     
     def ternscatter(self, a, b, c, d=None, size=36, cmap=None, color=None, categories=None, labels = False,
-            alpha=1, marker='o', edgecolors='none', ax=None, orientation ='horizontal'):
+            alpha=1, marker='o', edgecolors='none', ax=None, orientation ='horizontal', norm=None):
         """Scatter plot data on ternary axes.
 
         Ternary scatter plot, ternscatter() uses many of the same parameters as
@@ -264,6 +264,8 @@ class ternary:
         :type cmap: matplotlib.Colormap
         :param color: Defaults to None
         :type color: optional
+        :param norm: normalize colormap
+        :type norm: matplotlib.colors.Norm
         :param edgecolors: Defaults to None
         :type edgecolors: optional
         :param marker: Symbol used for plotting, Defaults to 'o'
@@ -302,12 +304,13 @@ class ternary:
             return t
         elif not labels:
             # Handle continuous categories
-            norm = plt.Normalize(vmin=np.min(categories), vmax=np.max(categories))
+            if not norm:
+                norm = plt.Normalize(vmin=np.min(categories), vmax=np.max(categories))
             scalarMappable = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
             scalarMappable.set_array(categories)
             fig = plt.gcf()
             if orientation.lower() != 'none':
-                cbar = fig.colorbar(scalarMappable, ax=self.ax, pad=0, shrink=0.50, orientation = orientation.lower())
+                cbar = fig.colorbar(scalarMappable, ax=self.ax, fraction=0.046, shrink=0.50, pad=0.04, orientation = orientation.lower())
             self.ax.scatter(x, y, c=scalarMappable.to_rgba(categories), s=size, marker=marker, edgecolors=edgecolors, alpha=alpha)
         else:
             group_cmap = cmap
@@ -327,7 +330,8 @@ class ternary:
             
             # Create a normalization object
             bounds = np.arange(len(unique_categories) + 1)
-            norm = BoundaryNorm(bounds, cmap_discrete.N)
+            if not norm:
+                norm = BoundaryNorm(bounds, cmap_discrete.N)
             
             # Scatter plot using the discrete colormap and normalization
             self.ax.scatter(x, y, c=color_values, cmap=cmap_discrete, norm=norm, s=size, marker=marker, edgecolors=edgecolors, alpha=alpha)
@@ -447,7 +451,7 @@ class ternary:
 
         return hexbin
     
-    def ternhex(self, a=None, b=None, c=None, val=None, hexbin_df=None, plotfield=None, bins=10, cmap=None, orientation='horizontal'):
+    def ternhex(self, a=None, b=None, c=None, val=None, hexbin_df=None, plotfield=None, bins=10, cmap=None, orientation='horizontal', norm=None):
         """Creates a heatmap from a set of hexgonal bins
         
         :param a: locations of points within a ternary system, not needed if hexbin_df is provided,
@@ -472,6 +476,8 @@ class ternary:
         :type bins: int
         :param cmap: colormap, Defaults to None
         :type cmap: 
+        :param norm: normalize colormap
+        :type norm: matplotlib.colors.Norm
         :param orientation: orientation of colormap, 'horizontal' (default) or vertical
         :type orientation: str
         """
@@ -514,7 +520,8 @@ class ternary:
         else:
             cmap = cm.get_cmap(cmap)
         
-        norm = colors.Normalize(vmin=hexbin_df[plotfield].min(), vmax=hexbin_df[plotfield].max())
+        if not norm:
+            norm = colors.Normalize(vmin=hexbin_df[plotfield].min(), vmax=hexbin_df[plotfield].max())
 
         # for hb in hexbin:
         #     ax.fill(hb['xv'], hb['yv'], hb[data_key], edgecolor='none')
@@ -524,9 +531,9 @@ class ternary:
             self.ax.fill(row['xv'], row['yv'], color=color, edgecolor='none')
 
         self.ax.set_aspect('equal', 'box')
-        self.ax.set_title(plotfield)
+        #self.ax.set_title(plotfield)
         if orientation != 'none':
-            cbar = plt.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), ax=self.ax, fraction=0.046, pad=0.04, orientation=orientation)
+            cbar = plt.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), ax=self.ax, fraction=0.046, shrink=0.50, pad=0.04, orientation=orientation.lower())
             return hexbin_df, cbar
         else:
             return hexbin_df, None

@@ -83,7 +83,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             Keywords for the first level are given by the field names used for plotting associated with entries
             into the field-related QComboBoxes.  Associated with each field are the axes properties.
         
-            [field] : name of field
+            [*field*] : name of field
                 | 'label' : (str) -- axis label, may include units or custom names
                 | 'status' : (str) -- *auto* or *custom* indicates the use of default bounds or user defined axes limits
                 | 'min' : (float) -- minimum axis value
@@ -97,7 +97,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             cluster_dict[*method*], where *method* is ``k-means`` or ``fuzzy c-means``
 
             'active method' : (str) -- current selected method for plotting, masking, etc.
-            [method] : (str) -- clustering method
+            [*method*] : (str) -- clustering method
                 | 'n_clusters' : (int) -- number of clusters, set in ``spinBoxNClusters``
                 | 'seed' : (int) -- seed for clustering, which can be user input (``lineEditSeed``) or randomly generated (``toolButtonRandomSeed``), default is 23
                 | 'exponent' : (float) -- exponent for fuzzy c-means, dictates the amount of overlap possible between the different clusters, set by ``horizontalSliderClusterExponent``, default is 2.1
@@ -106,13 +106,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 | 'cluster_id' : (dict) -- metadata associated with each cluster_id
                 | 'norm' : (matplotlib.colors.Norm) -- norm for plotting colormap
 
-            [cluster_id] -- cluster index, this data is displayed for the user in ``tableWidgetViewGroups``
+            [*cluster_id*] -- cluster index, this data is displayed for the user in ``tableWidgetViewGroups``
                 | 'name' : (str) -- user-defined name for cluster, defaults to ``f"Cluster {cluster_id}"``
                 | 'link' : (list) -- list of clusters id's linked to current cluster
                 | 'color' : (str) -- hex color string
         data : dict
             Dictionary containing a dictionary of each sample with the raw, processed, and computed (analyses) DataFrames, mask array, and informational dataframes
-            with relevant data
+            with relevant data.  The dictionary is nested with the first level keys defined by the sample ID.
+            
+            [*sample_id*] : (str) -- sample identifier
+                | 'analysis data'
+                | 'computed data'
+                | 'processed data'
+                | 'raw data'
         layoutSingleView : QVBoxLayout
             Layout for Single View tab of ``canvasWindow``
         layoutMultiView : QGridLayout
@@ -149,7 +155,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             .. seealso::
                 :ref:`add_plotwidget_to_tree` for details about saving *plot_info* to the tree (Plot Selector)
         sample_id : str
-            The name of the current sample.  *sample_id* is used as the key into several dictionaries.
+            The name of the current sample, chosen by the user with ``comboBoxSampleID``.  *sample_id* is used as the key into several dictionaries.
         styles : dict of dict
             Dictionary with plot style information that saves the properties of style widgets.  There is a keyword
             for each plot type listed in ``comboBoxPlotType``.  The exact behavior of each style item may vary depending upon the

@@ -629,40 +629,6 @@
            <property name="bottomMargin">
             <number>0</number>
            </property>
-           <item row="0" column="2">
-            <widget class="QToolButton" name="toolButtonPanMV">
-             <property name="toolTip">
-              <string>Pan figure</string>
-             </property>
-             <property name="icon">
-              <iconset resource="../resources.qrc">
-               <normaloff>:/icons/resources/icons/icon-move-64.png</normaloff>:/icons/resources/icons/icon-move-64.png</iconset>
-             </property>
-             <property name="iconSize">
-              <size>
-               <width>18</width>
-               <height>18</height>
-              </size>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="0">
-            <widget class="QToolButton" name="toolButtonHomeMV">
-             <property name="toolTip">
-              <string>Original view</string>
-             </property>
-             <property name="icon">
-              <iconset resource="../resources.qrc">
-               <normaloff>:/icons/resources/icons/icon-home-64.png</normaloff>:/icons/resources/icons/icon-home-64.png</iconset>
-             </property>
-             <property name="iconSize">
-              <size>
-               <width>18</width>
-               <height>18</height>
-              </size>
-             </property>
-            </widget>
-           </item>
            <item row="0" column="3">
             <widget class="QToolButton" name="toolButtonZoomMV">
              <property name="toolTip">
@@ -680,24 +646,7 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="4">
-            <widget class="QToolButton" name="toolButtonSaveMV">
-             <property name="toolTip">
-              <string>Save image or data</string>
-             </property>
-             <property name="icon">
-              <iconset resource="../resources.qrc">
-               <normaloff>:/icons/resources/icons/icon-save-file-64.png</normaloff>:/icons/resources/icons/icon-save-file-64.png</iconset>
-             </property>
-             <property name="iconSize">
-              <size>
-               <width>18</width>
-               <height>18</height>
-              </size>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="5">
+           <item row="0" column="6">
             <layout class="QHBoxLayout" name="horizontalLayout_28">
              <item>
               <widget class="QLabel" name="labelMVInfoLabel">
@@ -770,6 +719,70 @@
               <layout class="QGridLayout" name="gridLayoutMVInfo"/>
              </item>
             </layout>
+           </item>
+           <item row="0" column="0">
+            <widget class="QToolButton" name="toolButtonHomeMV">
+             <property name="toolTip">
+              <string>Original view</string>
+             </property>
+             <property name="icon">
+              <iconset resource="../resources.qrc">
+               <normaloff>:/icons/resources/icons/icon-home-64.png</normaloff>:/icons/resources/icons/icon-home-64.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>18</width>
+               <height>18</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QToolButton" name="toolButtonPanMV">
+             <property name="toolTip">
+              <string>Pan figure</string>
+             </property>
+             <property name="icon">
+              <iconset resource="../resources.qrc">
+               <normaloff>:/icons/resources/icons/icon-move-64.png</normaloff>:/icons/resources/icons/icon-move-64.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>18</width>
+               <height>18</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="4">
+            <widget class="QToolButton" name="toolButtonSaveMV">
+             <property name="toolTip">
+              <string>Save image or data</string>
+             </property>
+             <property name="icon">
+              <iconset resource="../resources.qrc">
+               <normaloff>:/icons/resources/icons/icon-save-file-64.png</normaloff>:/icons/resources/icons/icon-save-file-64.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>18</width>
+               <height>18</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="5">
+            <spacer name="horizontalSpacer_20">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </widget>
@@ -5038,7 +5051,7 @@
            <x>4</x>
            <y>20</y>
            <width>291</width>
-           <height>206</height>
+           <height>216</height>
           </rect>
          </property>
          <property name="title">
@@ -5053,7 +5066,7 @@
             <x>10</x>
             <y>5</y>
             <width>274</width>
-            <height>194</height>
+            <height>207</height>
            </rect>
           </property>
           <layout class="QFormLayout" name="formLayoutClusterSettings">
@@ -5257,31 +5270,6 @@
              </property>
             </widget>
            </item>
-           <item row="4" column="1">
-            <widget class="QLineEdit" name="lineEditSeed">
-             <property name="maximumSize">
-              <size>
-               <width>150</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>11</pointsize>
-               <stylestrategy>PreferDefault</stylestrategy>
-              </font>
-             </property>
-             <property name="toolTip">
-              <string>Change the starting seed</string>
-             </property>
-             <property name="text">
-              <string>23</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
            <item row="5" column="0">
             <widget class="QCheckBox" name="checkBox">
              <property name="text">
@@ -5329,6 +5317,64 @@
                </property>
                <property name="keyboardTracking">
                 <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="4" column="1">
+            <layout class="QHBoxLayout" name="horizontalLayout_5">
+             <item>
+              <widget class="QToolButton" name="toolButtonRandomSeed">
+               <property name="minimumSize">
+                <size>
+                 <width>32</width>
+                 <height>32</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>32</width>
+                 <height>32</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>...</string>
+               </property>
+               <property name="icon">
+                <iconset resource="../resources.qrc">
+                 <normaloff>:/icons/resources/icons/icon-randomize-64.png</normaloff>:/icons/resources/icons/icon-randomize-64.png</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>24</width>
+                 <height>24</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="lineEditSeed">
+               <property name="maximumSize">
+                <size>
+                 <width>150</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                 <stylestrategy>PreferDefault</stylestrategy>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>Change the starting seed</string>
+               </property>
+               <property name="text">
+                <string>23</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                </property>
               </widget>
              </item>

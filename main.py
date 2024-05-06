@@ -1,4 +1,4 @@
-import sys, os, re, copy, csv
+import sys, os, re, copy, csv, random
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtCore import Qt, QObject, QTimer, pyqtSignal, QRectF, QPointF
 from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QHBoxLayout, QVBoxLayout, QGridLayout, QMessageBox, QHeaderView, QMenu, QGraphicsRectItem, QStatusBar
@@ -92,6 +92,23 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 | 'pstatus' : (str) -- *auto* or *custom* limits for probability axis on histograms when displayed as a PDF type
                 | 'pmin' : (float) -- minimum probability value
                 | 'pmax' : (float) -- maximum probability value
+        cluster_dict : dict of dict
+            A dictionary that holds settings and cluster metadata used for plotting.  Each cluster method has its own key and associated dictionary.
+            cluster_dict[*method*], where *method* is ``k-means`` or ``fuzzy c-means``
+
+            [method] : clustering method
+                | 'n_clusters' : (int) -- number of clusters, set in ``spinBoxNClusters``
+                | 'seed' : (int) -- seed for clustering, which can be user input (``lineEditSeed``) or randomly generated (``toolButtonRandomSeed``), default is 23
+                | 'exponent' : (float) -- exponent for fuzzy c-means, dictates the amount of overlap possible between the different clusters, set by ``horizontalSliderClusterExponent``, default is 2.1
+                | 'distance' : (str) -- distance metric for fuzzy c-means, *haven't gotten this to work yet, check scikit-learn package*
+                | 'selected_clusters' : (list) -- clusters selected in ``tableWidgetViewGroups`` for plotting
+                | 'cluster_id' : (dict) -- metadata associated with each cluster_id
+                | 'norm' : (matplotlib.colors.Norm) -- norm for plotting colormap
+                
+                [cluster_id] -- cluster index, this data is displayed for the user in ``tableWidgetViewGroups``
+                    | 'name' : (str) -- user-defined name for cluster, defaults to ``f"Cluster {cluster_id}"``
+                    | 'link' : (list) -- list of clusters id's linked to current cluster
+                    | 'color' : (str) -- hex color string
         data : dict
             Dictionary containing a dictionary of each sample with the raw, processed, and computed (analyses) DataFrames, mask array, and informational dataframes
             with relevant data
@@ -605,11 +622,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.horizontalSliderClusterExponent.sliderReleased.connect(self.update_SV)
 
         self.lineEditSeed.editingFinished.connect(self.update_SV)
+        self.toolButtonRandomSeed.clicked.connect(self.generate_random_seed)
 
         self.comboBoxClusterMethod.activated.connect(self.update_cluster_ui)
 
         # cluster dictionary
-        self.cluster_dict = {'k-means':{'n_clusters':5, 'seed':23}, 'fuzzy c-means':{'n_clusters':5, 'exponent':2.1, 'distance':'euclidean', 'seed':23}}
+        self.cluster_dict = {'k-means':{'n_clusters':5, 'seed':23, 'selected_clusters':[], 'cluster_id':{}, 'norm':None},
+            'fuzzy c-means':{'n_clusters':5, 'exponent':2.1, 'distance':'euclidean', 'seed':23, 'selected_clusters':[], 'cluster_id':{}, 'norm':None}}
         self.update_cluster_ui()
 
         # Connect color point radio button signals to a slot
@@ -5369,6 +5388,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             Discrete colormap.
         """
         if colormap and not colors:
+            pass
 
         num_colors = len(colors)
         colormap = ListedColormap.from_list("custom_colormap", colors, N=num_colors)
@@ -6709,6 +6729,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         return canvas
 
+    def generate_random_seed(self):
+        r = random.randint(0,1000000000)
+        self.lineEditSeed.setText(str(r))
+        self.cluster_dict[self.comboBoxClusterMethod.currentText()]['seed'] = r
+
+        self.update_cluster_flag = True
+        self.plot_clusters()
+        pass
+
     def compute_clusters(self):
         """Computes cluster results
         
@@ -6793,6 +6822,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.group_changed()
 
         self.statusbar.showMessage('Clustering successful')
+        self.update_cluster_flag = False
 
     def plot_clusters(self):
         if self.sample_id == '':

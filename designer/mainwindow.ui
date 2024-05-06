@@ -52,7 +52,7 @@
        <string/>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <property name="documentMode">
        <bool>false</bool>
@@ -1110,7 +1110,7 @@
    <attribute name="dockWidgetArea">
     <number>1</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents">
+   <widget class="QWidget" name="dockWidgetContentsLeftToolbox">
     <widget class="QToolBox" name="toolBox">
      <property name="enabled">
       <bool>true</bool>
@@ -1369,7 +1369,7 @@
            <item>
             <widget class="QCheckBox" name="checkBoxCorrelationSquared">
              <property name="text">
-              <string>^2</string>
+              <string>C²</string>
              </property>
             </widget>
            </item>
@@ -6572,7 +6572,7 @@
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents_2">
+   <widget class="QWidget" name="dockWidgetContentsRightToolbox">
     <layout class="QVBoxLayout" name="verticalLayout_11">
      <property name="leftMargin">
       <number>2</number>
@@ -7020,7 +7020,7 @@
              </layout>
             </item>
             <item row="4" column="0">
-             <widget class="QLabel" name="xScaleLabel">
+             <widget class="QLabel" name="labelXScale">
               <property name="text">
                <string>X Scale</string>
               </property>
@@ -8601,14 +8601,14 @@
              <widget class="QToolButton" name="toolButtonClusterColorReset">
               <property name="minimumSize">
                <size>
-                <width>28</width>
-                <height>28</height>
+                <width>20</width>
+                <height>20</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>28</width>
-                <height>28</height>
+                <width>20</width>
+                <height>20</height>
                </size>
               </property>
               <property name="font">
@@ -8630,8 +8630,8 @@
               </property>
               <property name="iconSize">
                <size>
-                <width>20</width>
-                <height>20</height>
+                <width>14</width>
+                <height>14</height>
                </size>
               </property>
              </widget>
@@ -10057,7 +10057,7 @@
    <attribute name="dockWidgetArea">
     <number>8</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents_4">
+   <widget class="QWidget" name="dockWidgetContentsBottomTabs">
     <property name="sizePolicy">
      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
       <horstretch>0</horstretch>

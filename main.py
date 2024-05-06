@@ -3407,8 +3407,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # axes properties
                 self.lineEditXLB.setEnabled(True)
                 self.lineEditXUB.setEnabled(True)
+                self.comboBoxXScale.setEnabled(False)
                 self.lineEditYLB.setEnabled(True)
                 self.lineEditYUB.setEnabled(True)
+                self.comboBoxYScale.setEnabled(False)
                 self.lineEditXLabel.setEnabled(False)
                 self.lineEditYLabel.setEnabled(False)
                 self.lineEditZLabel.setEnabled(False)
@@ -3459,11 +3461,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # axes properties
                 self.lineEditXLB.setEnabled(False)
                 self.lineEditXUB.setEnabled(False)
+                self.comboBoxXScale.setEnabled(False)
                 self.lineEditYLB.setEnabled(False)
                 self.lineEditYUB.setEnabled(False)
+                self.comboBoxYScale.setEnabled(False)
                 self.lineEditXLabel.setEnabled(False)
                 self.lineEditYLabel.setEnabled(False)
                 self.lineEditZLabel.setEnabled(False)
+                self.comboBoxXScale.setEnabled(False)
+                self.comboBoxYScale.setEnabled(False)
                 self.lineEditAspectRatio.setEnabled(False)
                 self.comboBoxTickDirection.setEnabled(True)
 
@@ -3486,6 +3492,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.toolButtonMarkerColor.setEnabled(False)
                 self.comboBoxColorByField.setEnabled(False)
                 self.comboBoxColorField.setEnabled(False)
+                self.comboBoxColorScale.setEnabled(False)
                 self.comboBoxFieldColormap.setEnabled(True)
                 self.lineEditColorLB.setEnabled(True)
                 self.lineEditColorUB.setEnabled(True)
@@ -3497,8 +3504,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # axes properties
                 self.lineEditXLB.setEnabled(True)
                 self.lineEditXUB.setEnabled(True)
+                self.comboBoxXScale.setEnabled(True)
                 self.lineEditYLB.setEnabled(True)
                 self.lineEditYUB.setEnabled(True)
+                self.comboBoxYScale.setEnabled(False)
                 self.lineEditXLabel.setEnabled(True)
                 self.lineEditYLabel.setEnabled(True)
                 self.lineEditZLabel.setEnabled(False)
@@ -3525,6 +3534,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # if color by field is set to clusters, then colormap fields are on,
                 # field is set by cluster table
                 self.comboBoxColorField.setEnabled(True)
+                self.comboBoxColorScale.setEnabled(False)
                 if self.comboBoxColorByField.currentText() == 'Clusters':
                     self.toolButtonMarkerColor.setEnabled(False)
 
@@ -3543,11 +3553,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.spinBoxHeatmapResolution.setEnabled(False)
             case 'scatter' | 'pca scatter':
                 # axes properties
-                self.lineEditXLB.setEnabled(True)
-                self.lineEditXUB.setEnabled(True)
+                if self.toolBox.currentIndex() != self.scatter_tab_id or self.comboBoxFieldZ.currentText() == '':
+                    self.lineEditXLB.setEnabled(True)
+                    self.lineEditXUB.setEnabled(True)
+                    self.comboBoxXScale.setEnabled(True)
+                    self.lineEditYLB.setEnabled(True)
+                    self.lineEditYUB.setEnabled(True)
+                    self.comboBoxYScale.setEnabled(True)
+                else:
+                    self.lineEditXLB.setEnabled(False)
+                    self.lineEditXUB.setEnabled(False)
+                    self.comboBoxXScale.setEnabled(False)
+                    self.lineEditYLB.setEnabled(False)
+                    self.lineEditYUB.setEnabled(False)
+                    self.comboBoxYScale.setEnabled(False)
+
                 self.lineEditXLabel.setEnabled(True)
-                self.lineEditYLB.setEnabled(True)
-                self.lineEditYUB.setEnabled(True)
                 self.lineEditYLabel.setEnabled(True)
                 if self.comboBoxFieldZ.currentText() == '':
                     self.lineEditZLabel.setEnabled(False)
@@ -3589,6 +3610,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.comboBoxFieldColormap.setEnabled(False)
                     self.lineEditColorLB.setEnabled(False)
                     self.lineEditColorUB.setEnabled(False)
+                    self.comboBoxColorScale.setEnabled(True)
                     self.comboBoxCbarDirection.setEnabled(False)
                     self.lineEditCbarLabel.setEnabled(False)
                 else:
@@ -3598,19 +3620,31 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.comboBoxFieldColormap.setEnabled(True)
                     self.lineEditColorLB.setEnabled(True)
                     self.lineEditColorUB.setEnabled(True)
+                    self.comboBoxColorScale.setEnabled(False)
                     self.comboBoxCbarDirection.setEnabled(True)
                     self.lineEditCbarLabel.setEnabled(True)
 
                 self.spinBoxHeatmapResolution.setEnabled(False)
             case 'heatmap' | 'pca heatmap':
                 # axes properties
-                self.lineEditXLB.setEnabled(True)
-                self.lineEditXUB.setEnabled(True)
+                if self.toolBox.currentIndex() != self.scatter_tab_id or self.comboBoxFieldZ.currentText() == '':
+                    self.lineEditXLB.setEnabled(True)
+                    self.lineEditXUB.setEnabled(True)
+                    self.comboBoxXScale.setEnabled(True)
+                    self.lineEditYLB.setEnabled(True)
+                    self.lineEditYUB.setEnabled(True)
+                    self.comboBoxYScale.setEnabled(True)
+                else:
+                    self.lineEditXLB.setEnabled(False)
+                    self.lineEditXUB.setEnabled(False)
+                    self.comboBoxXScale.setEnabled(False)
+                    self.lineEditYLB.setEnabled(False)
+                    self.lineEditYUB.setEnabled(False)
+                    self.comboBoxYScale.setEnabled(False)
+
                 self.lineEditXLabel.setEnabled(True)
-                self.lineEditYLB.setEnabled(True)
-                self.lineEditYUB.setEnabled(True)
                 self.lineEditYLabel.setEnabled(True)
-                if self.comboBoxFieldZ.currentText() == '':
+                if self.toolBox.currentIndex() != self.scatter_tab_id or self.comboBoxFieldZ.currentText() == '':
                     self.lineEditZLabel.setEnabled(False)
                 else:
                     self.lineEditZLabel.setEnabled(True)
@@ -3646,6 +3680,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxFieldColormap.setEnabled(True)
                 self.lineEditColorLB.setEnabled(True)
                 self.lineEditColorUB.setEnabled(True)
+                self.comboBoxColorScale.setEnabled(True)
                 self.comboBoxCbarDirection.setEnabled(True)
                 self.lineEditCbarLabel.setEnabled(True)
 
@@ -3654,8 +3689,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # axes properties
                 self.lineEditXLB.setEnabled(True)
                 self.lineEditXUB.setEnabled(True)
+                self.comboBoxXScale.setEnabled(False)
                 self.lineEditYLB.setEnabled(True)
                 self.lineEditYUB.setEnabled(True)
+                self.comboBoxXScale.setEnabled(False)
                 self.lineEditXLabel.setEnabled(True)
                 self.lineEditYLabel.setEnabled(True)
                 self.lineEditZLabel.setEnabled(True)
@@ -3691,6 +3728,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxColorByField.setEnabled(False)
                 self.comboBoxColorField.setEnabled(False)
                 self.comboBoxFieldColormap.setEnabled(False)
+                self.comboBoxColorScale.setEnabled(False)
                 self.lineEditColorLB.setEnabled(False)
                 self.lineEditColorUB.setEnabled(False)
                 self.comboBoxCbarDirection.setEnabled(True)
@@ -3734,6 +3772,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxColorByField.setEnabled(True)
                 self.comboBoxColorField.setEnabled(False)
                 self.comboBoxFieldColormap.setEnabled(True)
+                self.comboBoxColorScale.setEnabled(False)
                 self.lineEditColorLB.setEnabled(False)
                 self.lineEditColorUB.setEnabled(False)
                 self.comboBoxCbarDirection.setEnabled(False)
@@ -3772,6 +3811,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxFieldColormap.setEnabled(False)
                 self.lineEditColorLB.setEnabled(False)
                 self.lineEditColorUB.setEnabled(False)
+                self.comboBoxColorScale.setEnabled(False)
                 self.comboBoxCbarDirection.setEnabled(False)
                 self.lineEditCbarLabel.setEnabled(False)
                 self.spinBoxHeatmapResolution.setEnabled(False)
@@ -3819,6 +3859,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.comboBoxFieldColormap.setEnabled(False)
                     self.lineEditColorLB.setEnabled(False)
                     self.lineEditColorUB.setEnabled(False)
+                    self.comboBoxColorScale.setEnabled(False)
                     self.comboBoxCbarDirection.setEnabled(False)
                     self.lineEditCbarLabel.setEnabled(False)
                 else:
@@ -3827,6 +3868,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.comboBoxFieldColormap.setEnabled(True)
                     self.lineEditColorLB.setEnabled(True)
                     self.lineEditColorUB.setEnabled(True)
+                    self.comboBoxColorScale.setEnabled(True)
                     self.comboBoxCbarDirection.setEnabled(True)
                     self.lineEditCbarLabel.setEnabled(True)
                 self.spinBoxHeatmapResolution.setEnabled(False)
@@ -3863,6 +3905,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxFieldColormap.setEnabled(True)
                 self.lineEditColorLB.setEnabled(False)
                 self.lineEditColorUB.setEnabled(False)
+                self.comboBoxColorScale.setEnabled(False)
                 self.comboBoxCbarDirection.setEnabled(False)
                 self.lineEditCbarLabel.setEnabled(False)
                 self.spinBoxHeatmapResolution.setEnabled(False)
@@ -3871,8 +3914,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # axes properties
         self.labelXLim.setEnabled(self.lineEditXLB.isEnabled())
         self.toolButtonXAxisReset.setEnabled(self.labelXLim.isEnabled())
+        self.labelXScale.setEnabled(self.comboBoxXScale.isEnabled())
         self.labelYLim.setEnabled(self.lineEditYLB.isEnabled())
         self.toolButtonYAxisReset.setEnabled(self.labelYLim.isEnabled())
+        self.labelYScale.setEnabled(self.comboBoxYScale.isEnabled())
         self.labelXLabel.setEnabled(self.lineEditXLabel.isEnabled())
         self.labelYLabel.setEnabled(self.lineEditYLabel.isEnabled())
         self.labelZLabel.setEnabled(self.lineEditZLabel.isEnabled())
@@ -3906,6 +3951,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.checkBoxReverseColormap.setEnabled(self.comboBoxFieldColormap.isEnabled())
         self.labelReverseColormap.setEnabled(self.checkBoxReverseColormap.isEnabled())
         self.labelFieldColormap.setEnabled(self.comboBoxFieldColormap.isEnabled())
+        self.labelColorScale.setEnabled(self.comboBoxColorScale.isEnabled())
         self.labelColorBounds.setEnabled(self.lineEditColorLB.isEnabled())
         self.toolButtonCAxisReset.setEnabled(self.labelColorBounds.isEnabled())
         self.labelCbarDirection.setEnabled(self.comboBoxCbarDirection.isEnabled())
@@ -5287,7 +5333,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             print('(add_colorbar) Unknown type: '+cbartype)
 
-    def color_norm(self, style, N=None):
+    def color_norm(self, style, n=None):
         """Normalize colors for colormap
 
         :param style: Styles associated with current plot type.
@@ -5302,8 +5348,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case 'log':
                 norm = colors.LogNorm(vmin=style['Colors']['CLim'][0], vmax=style['Colors']['CLim'][1])
             case 'discrete':
-                boundaries = np.arange(-0.5, N, N)
-                norm = colors.BoundaryNorm(boundaries, N, clip=True)
+                boundaries = np.arange(-0.5, n, n)
+                norm = colors.BoundaryNorm(boundaries, n, clip=True)
 
         #scalarMappable = plt.cm.ScalarMappable(cmap=self.get_colormap(), norm=norm)
 
@@ -6618,17 +6664,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         n_clusters = len(unique_groups)
 
         # Extract colors from the colormap and assign to self.group_cmap
-        cmap = self.get_colormap(n_clusters)
-        colors = [cmap(i) for i in range(cmap.N)]
-        for label, color in zip(unique_groups, colors):
-            self.group_cmap[label] = color
+        # cmap = self.get_colormap(n_clusters)
+        # colors = [cmap(i) for i in range(cmap.N)]
+        # for label, color in zip(unique_groups, colors):
+        #     self.group_cmap[label] = color
 
-        boundaries = np.arange(-0.5, n_clusters, 1)
-        norm = colors.BoundaryNorm(boundaries, cmap.N, clip=True)
+        # boundaries = np.arange(-0.5, n_clusters, 1)
+        # norm = BoundaryNorm(boundaries, cmap.N, clip=True)
+        norm = self.color_norm(style, n=n_clusters)
 
         cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect = self.aspect_ratio)
 
-        self.add_colorbar(canvas, cax, style, None, cbartype='discrete', grouplabels=np.arange(0, n_clusters))
+        self.add_colorbar(canvas, cax, style, None, cbartype='discrete', grouplabels=np.arange(0, n_clusters), norm=norm)
 
         canvas.fig.subplots_adjust(left=0.05, right=1)  # Adjust these values as needed
         canvas.fig.tight_layout()

@@ -8765,6 +8765,8 @@ class quickView(QDialog, Ui_QuickViewDialog):
         mime_data = self.tableWidget.mimeData(self.tableWidget.selectedIndexes())
         drag.setMimeData(mime_data)
         drag.exec_(Qt.MoveAction)
+        #super(quickView, self).mouseMoveEvent(event)
+
     def dropEvent(self, event):
         if event.source() == self.table_widget:
             super().dropEvent(event)
@@ -8781,29 +8783,29 @@ class quickView(QDialog, Ui_QuickViewDialog):
                     dropped_index = self.table_widget.indexFromItem(self.table_widget.item(dropped_index.row() + 1, 0))
         super(quickView, self).mouseMoveEvent(event)
 
-    def dropEvent(self, event):
-        print('dropEvent')
+    # def dropEvent(self, event):
+    #     print('dropEvent')
 
-        # Get the target row where the item was dropped
-        target_row = self.dropIndicatorPosition()
-        if target_row == -1:
-            target_row = self.rowCount() - 1
+    #     # Get the target row where the item was dropped
+    #     target_row = self.dropIndicatorPosition()
+    #     if target_row == -1:
+    #         target_row = self.rowCount() - 1
 
-        # Get the selected rows
-        selected_rows = sorted(set(index.row() for index in self.selectedIndexes()))
+    #     # Get the selected rows
+    #     selected_rows = sorted(set(index.row() for index in self.selectedIndexes()))
 
-        # Adjust the target row if dropping below selected rows
-        if target_row > selected_rows[-1]:
-            target_row = max(target_row - len(selected_rows) + 1, 0)
+    #     # Adjust the target row if dropping below selected rows
+    #     if target_row > selected_rows[-1]:
+    #         target_row = max(target_row - len(selected_rows) + 1, 0)
 
-        # Move the selected rows to the target row
-        for row in selected_rows:
-            self.move_row(row, target_row)
-            if row < target_row:
-                target_row += 1
+    #     # Move the selected rows to the target row
+    #     for row in selected_rows:
+    #         self.move_row(row, target_row)
+    #         if row < target_row:
+    #             target_row += 1
 
-        # Call the default dropEvent to complete the operation
-        super(quickView, self).dropEvent(event)
+    #     # Call the default dropEvent to complete the operation
+    #     super(quickView, self).dropEvent(event)
 
     def move_row(self, source_row, target_row):
         print('move_row')

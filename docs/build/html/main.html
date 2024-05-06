@@ -616,6 +616,84 @@ thus the tick should display 0.001 * 1000 = 1.</p>
 <dl>
 <dt>aspect_ratio<span class="classifier">float</span></dt><dd><p>The aspect ratio for the current sample.</p>
 </dd>
+<dt>axis_dict<span class="classifier">dict of dict</span></dt><dd><p>Dictionary containing axes for individual plot fields.  Setting these properties will set them for
+all plots which use the same field, though it does not update them on previous plots.</p>
+<p>Keywords for the first level are given by the field names used for plotting associated with entries
+into the field-related QComboBoxes.  Associated with each field are the axes properties.</p>
+<dl>
+<dt>[field]<span class="classifier">name of field</span></dt><dd><div class="line-block">
+<div class="line">‘label’ : (str) – axis label, may include units or custom names</div>
+<div class="line">‘status’ : (str) – <em>auto</em> or <em>custom</em> indicates the use of default bounds or user defined axes limits</div>
+<div class="line">‘min’ : (float) – minimum axis value</div>
+<div class="line">‘max’ : (float) – maximum axis value</div>
+<div class="line">‘scale’ : (str) – normalization for analyte, options include <code class="docutils literal notranslate"><span class="pre">linear</span></code> or <code class="docutils literal notranslate"><span class="pre">log</span></code>, though this is not included for all field types</div>
+<div class="line">‘pstatus’ : (str) – <em>auto</em> or <em>custom</em> limits for probability axis on histograms when displayed as a PDF type</div>
+<div class="line">‘pmin’ : (float) – minimum probability value</div>
+<div class="line">‘pmax’ : (float) – maximum probability value</div>
+</div>
+</dd>
+</dl>
+</dd>
+<dt>cluster_dict<span class="classifier">dict of dict</span></dt><dd><p>A dictionary that holds settings and cluster metadata used for plotting.  Each cluster method has its own key and associated dictionary.
+cluster_dict[<em>method</em>], where <em>method</em> is <code class="docutils literal notranslate"><span class="pre">k-means</span></code> or <code class="docutils literal notranslate"><span class="pre">fuzzy</span> <span class="pre">c-means</span></code></p>
+<dl>
+<dt>[method]<span class="classifier">clustering method</span></dt><dd><div class="line-block">
+<div class="line">‘n_clusters’ : (int) – number of clusters, set in <code class="docutils literal notranslate"><span class="pre">spinBoxNClusters</span></code></div>
+<div class="line">‘seed’ : (int) – seed for clustering, which can be user input (<code class="docutils literal notranslate"><span class="pre">lineEditSeed</span></code>) or randomly generated (<code class="docutils literal notranslate"><span class="pre">toolButtonRandomSeed</span></code>), default is 23</div>
+<div class="line">‘exponent’ : (float) – exponent for fuzzy c-means, dictates the amount of overlap possible between the different clusters, set by <code class="docutils literal notranslate"><span class="pre">horizontalSliderClusterExponent</span></code>, default is 2.1</div>
+<div class="line">‘distance’ : (str) – distance metric for fuzzy c-means, <em>haven’t gotten this to work yet, check scikit-learn package</em></div>
+<div class="line">‘selected_clusters’ : (list) – clusters selected in <code class="docutils literal notranslate"><span class="pre">tableWidgetViewGroups</span></code> for plotting</div>
+<div class="line">‘cluster_id’ : (dict) – metadata associated with each cluster_id</div>
+<div class="line">‘norm’ : (matplotlib.colors.Norm) – norm for plotting colormap</div>
+</div>
+</dd>
+<dt>[cluster_id] – cluster index, this data is displayed for the user in <code class="docutils literal notranslate"><span class="pre">tableWidgetViewGroups</span></code></dt><dd><div class="line-block">
+<div class="line">‘name’ : (str) – user-defined name for cluster, defaults to <code class="docutils literal notranslate"><span class="pre">f&quot;Cluster</span> <span class="pre">{cluster_id}&quot;</span></code></div>
+<div class="line">‘link’ : (list) – list of clusters id’s linked to current cluster</div>
+<div class="line">‘color’ : (str) – hex color string</div>
+</div>
+</dd>
+</dl>
+</dd>
+<dt>data<span class="classifier">dict</span></dt><dd><p>Dictionary containing a dictionary of each sample with the raw, processed, and computed (analyses) DataFrames, mask array, and informational dataframes
+with relevant data</p>
+</dd>
+<dt>layoutSingleView<span class="classifier">QVBoxLayout</span></dt><dd><p>Layout for Single View tab of <code class="docutils literal notranslate"><span class="pre">canvasWindow</span></code></p>
+</dd>
+<dt>layoutMultiView<span class="classifier">QGridLayout</span></dt><dd><p>Layout for Multi View tab of <code class="docutils literal notranslate"><span class="pre">canvasWindow</span></code></p>
+</dd>
+<dt>layoutQuickView<span class="classifier">QGridLayout</span></dt><dd><p>Layout for Quick View tab of <code class="docutils literal notranslate"><span class="pre">canvasWindow</span></code></p>
+</dd>
+<dt>marker_dict<span class="classifier">dict</span></dt><dd><p>Dictionary of marker names used to translate <code class="docutils literal notranslate"><span class="pre">comboBoxMarker</span></code> to a matplotlib maker symbol, though not all matplotlib markers
+are used.</p>
+</dd>
+<dt>n_dim_list: (list)</dt><dd><p>Fields used to for <code class="docutils literal notranslate"><span class="pre">TEC</span></code> and <code class="docutils literal notranslate"><span class="pre">radar</span></code> style plots.</p>
+</dd>
+<dt>plot_info<span class="classifier">dict</span></dt><dd><p>Dictionary that holds information about plots.  These dictionaries are often saved to the tree when the user clicks
+the <code class="docutils literal notranslate"><span class="pre">actionSaveToTree</span></code> toolbar button.</p>
+<div class="line-block">
+<div class="line">‘tree’ : (str) – tree name, <code class="docutils literal notranslate"><span class="pre">Analyte</span></code>, <code class="docutils literal notranslate"><span class="pre">Analyte</span> <span class="pre">(normalized)</span></code></div>
+<div class="line">‘sample_id’ : (str) – sample id, which doubles as <code class="docutils literal notranslate"><span class="pre">treeView</span></code> branch</div>
+<div class="line">‘plot_name’ : (str) – plot name, which doubles as <code class="docutils literal notranslate"><span class="pre">treeView</span></code> leaf</div>
+<div class="line">‘plot_type’ : (str) – type of plot (e.g., <code class="docutils literal notranslate"><span class="pre">analyte</span> <span class="pre">map</span></code>, <code class="docutils literal notranslate"><span class="pre">scatter</span></code>, <code class="docutils literal notranslate"><span class="pre">Cluster</span> <span class="pre">Score</span></code>)</div>
+<div class="line">‘field_type’ : (list of str) – type of field(s) used to create plot</div>
+<div class="line">‘field’ : (list of str) – analyte or other field(s) used to create plot</div>
+<div class="line">‘figure’ : (pgGraphicsWidget or MplCanvas) – object holding figure for display</div>
+<div class="line">‘style’ : (dict) – dictionary associated with <code class="docutils literal notranslate"><span class="pre">styles[*plot_type*]</span></code></div>
+<div class="line">‘cluster_groups’ : (list) – cluster groups used to generate plot</div>
+<div class="line">‘view’ : (bool,bool) – indicates whether <code class="docutils literal notranslate"><span class="pre">plot_info['figure']</span></code> is displayed in SingleView and/or MultiView</div>
+<div class="line">‘position’ : (list) – location <em>(row,col)</em> in <code class="docutils literal notranslate"><span class="pre">layoutMultiView</span></code> a value of None indicates not displayed in MultiView</div>
+</div>
+<p>Plot specific keys include:
+| ‘bin_width’ : (float) – histogram bin width
+| ‘type’ : (str) – <code class="docutils literal notranslate"><span class="pre">PDF</span></code> (probablity density function) or <code class="docutils literal notranslate"><span class="pre">CDF</span></code> (cumulative density function)
+| ‘method’ : (str) – correlation method, <code class="docutils literal notranslate"><span class="pre">Pearson</span></code>, <code class="docutils literal notranslate"><span class="pre">Spearman</span></code>, or <code class="docutils literal notranslate"><span class="pre">Kendall</span></code>
+| ‘squared_flag’ : (bool) – squared correlation if <code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><span class="xref std std-ref">add_plotwidget_to_tree</span> for details about saving <em>plot_info</em> to the tree (Plot Selector)</p>
+</div>
+</dd>
 <dt>sample_id<span class="classifier">str</span></dt><dd><p>The name of the current sample.  <em>sample_id</em> is used as the key into several dictionaries.</p>
 </dd>
 <dt>styles<span class="classifier">dict of dict</span></dt><dd><p>Dictionary with plot style information that saves the properties of style widgets.  There is a keyword
@@ -672,58 +750,6 @@ plot type.  While data related to plot and color axes may be stored in <em>style
 </div>
 </dd>
 </dl>
-</dd>
-<dt>axis_dict<span class="classifier">dict of dict</span></dt><dd><p>Dictionary containing axes for individual plot fields.  Setting these properties will set them for
-all plots which use the same field, though it does not update them on previous plots.</p>
-<p>Keywords for the first level are given by the field names used for plotting associated with entries
-into the field-related QComboBoxes.  Associated with each field are the axes properties.</p>
-<dl>
-<dt>[field]<span class="classifier">name of field</span></dt><dd><div class="line-block">
-<div class="line">‘label’ : (str) – axis label, may include units or custom names</div>
-<div class="line">‘status’ : (str) – <em>auto</em> or <em>custom</em> indicates the use of default bounds or user defined axes limits</div>
-<div class="line">‘min’ : (float) – minimum axis value</div>
-<div class="line">‘max’ : (float) – maximum axis value</div>
-<div class="line">‘scale’ : (str) – normalization for analyte, options include <code class="docutils literal notranslate"><span class="pre">linear</span></code> or <code class="docutils literal notranslate"><span class="pre">log</span></code>, though this is not included for all field types</div>
-<div class="line">‘pstatus’ : (str) – <em>auto</em> or <em>custom</em> limits for probability axis on histograms when displayed as a PDF type</div>
-<div class="line">‘pmin’ : (float) – minimum probability value</div>
-<div class="line">‘pmax’ : (float) – maximum probability value</div>
-</div>
-</dd>
-</dl>
-</dd>
-<dt>data<span class="classifier">dict</span></dt><dd><p>Dictionary containing a dictionary of each sample with the raw, processed, and computed (analyses) DataFrames, mask array, and informational dataframes
-with relevant data</p>
-</dd>
-<dt>layoutSingleView<span class="classifier">QVBoxLayout</span></dt><dd><p>Layout for Single View tab of <code class="docutils literal notranslate"><span class="pre">canvasWindow</span></code></p>
-</dd>
-<dt>layoutMultiView<span class="classifier">QGridLayout</span></dt><dd><p>Layout for Multi View tab of <code class="docutils literal notranslate"><span class="pre">canvasWindow</span></code></p>
-</dd>
-<dt>layoutQuickView<span class="classifier">QGridLayout</span></dt><dd><p>Layout for Quick View tab of <code class="docutils literal notranslate"><span class="pre">canvasWindow</span></code></p>
-</dd>
-<dt>marker_dict<span class="classifier">dict</span></dt><dd><p>Dictionary of marker names used to translate <code class="docutils literal notranslate"><span class="pre">comboBoxMarker</span></code> to a matplotlib maker symbol, though not all matplotlib markers
-are used.</p>
-</dd>
-<dt>n_dim_list: (list)</dt><dd><p>Fields used to for <code class="docutils literal notranslate"><span class="pre">TEC</span></code> and <code class="docutils literal notranslate"><span class="pre">radar</span></code> style plots.</p>
-</dd>
-<dt>plot_info<span class="classifier">dict</span></dt><dd><p>Dictionary that holds information about plots.  These dictionaries are often saved to the tree when the user clicks
-the <code class="docutils literal notranslate"><span class="pre">actionSaveToTree</span></code> toolbar button.</p>
-<div class="line-block">
-<div class="line">‘tree’ : (str) – tree name, <code class="docutils literal notranslate"><span class="pre">Analyte</span></code>, <code class="docutils literal notranslate"><span class="pre">Analyte</span> <span class="pre">(normalized)</span></code></div>
-<div class="line">‘sample_id’ : (str) – sample id, which doubles as <code class="docutils literal notranslate"><span class="pre">treeView</span></code> branch</div>
-<div class="line">‘plot_name’ : (str) – plot name, which doubles as <code class="docutils literal notranslate"><span class="pre">treeView</span></code> leaf</div>
-<div class="line">‘plot_type’ : (str) – type of plot (e.g., <code class="docutils literal notranslate"><span class="pre">analyte</span> <span class="pre">map</span></code>, <code class="docutils literal notranslate"><span class="pre">scatter</span></code>, <code class="docutils literal notranslate"><span class="pre">Cluster</span> <span class="pre">Score</span></code>)</div>
-<div class="line">‘field_type’ : (list of str) – type of field(s) used to create plot</div>
-<div class="line">‘field’ : (list of str) – analyte or other field(s) used to create plot</div>
-<div class="line">‘figure’ : (pgGraphicsWidget or MplCanvas) – object holding figure for display</div>
-<div class="line">‘style’ : (dict) – dictionary associated with <code class="docutils literal notranslate"><span class="pre">styles[*plot_type*]</span></code></div>
-<div class="line">‘cluster_groups’ : (list) – cluster groups used to generate plot</div>
-<div class="line">‘view’ : (bool,bool) – indicates whether <code class="docutils literal notranslate"><span class="pre">plot_info['figure']</span></code> is displayed in SingleView and/or MultiView</div>
-<div class="line">‘position’ : (list) – location <em>(row,col)</em> in <code class="docutils literal notranslate"><span class="pre">layoutMultiView</span></code> a value of None indicates not displayed in MultiView</div>
-</div>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<p><span class="xref std std-ref">add_plotwidget_to_tree</span> for details about saving <em>plot_info</em> to the tree (Plot Selector)</p>
-</div>
 </dd>
 <dt>QVAnalyteList<span class="classifier">list of str</span></dt><dd><p>ordered set of analytes to display in on the Quick View tab</p>
 </dd>
@@ -1101,7 +1127,7 @@ color associated with selected cluster.  The selected cluster is determined by <
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.color_norm">
-<span class="sig-name descname"><span class="pre">color_norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">style</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.color_norm" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">color_norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">style</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.color_norm" title="Link to this definition">#</a></dt>
 <dd><p>Normalize colors for colormap</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1180,6 +1206,26 @@ data are stored in <code class="docutils literal notranslate"><span class="pre">
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.custom_discrete_colormap">
+<span class="sig-name descname"><span class="pre">custom_discrete_colormap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">colors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.custom_discrete_colormap" title="Link to this definition">#</a></dt>
+<dd><p>Create a colormap from user-defined colors</p>
+<section id="id3">
+<h3>Parameters<a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
+<dl class="simple">
+<dt>colors<span class="classifier">list</span></dt><dd><p>Colors used to produce custom colormap.</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h3>Returns<a class="headerlink" href="#returns" title="Link to this heading">#</a></h3>
+<dl class="simple">
+<dt>matplotlib.colormap</dt><dd><p>Discrete colormap.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.display_QV">
 <span class="sig-name descname"><span class="pre">display_QV</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.display_QV" title="Link to this definition">#</a></dt>
 <dd><p>Plots selected maps to the Quick View tab</p>
@@ -1209,9 +1255,26 @@ data are stored in <code class="docutils literal notranslate"><span class="pre">
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.export_dict_to_csv">
+<span class="sig-name descname"><span class="pre">export_dict_to_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.export_dict_to_csv" title="Link to this definition">#</a></dt>
+<dd><p>Exports a dictionary to csv file</p>
+<p>Explorts a simple dictionary that includes a set of keyword associated with lists to a csv.
+The first column are the dictionary keys and all subsequent columns are values associated with the key.</p>
+<section id="id4">
+<h3>Parameters<a class="headerlink" href="#id4" title="Link to this heading">#</a></h3>
+<dl class="simple">
+<dt>dictionary<span class="classifier">dict</span></dt><dd><p>Dictionary to save.</p>
+</dd>
+<dt>filename<span class="classifier">str</span></dt><dd><p>Name of file used to save dictionary.  Include path in the filename.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.extract_tree_data">
 <span class="sig-name descname"><span class="pre">extract_tree_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.extract_tree_data" title="Link to this definition">#</a></dt>
-<dd><p>Recursively extract data from QStandardItem to a serializable format.</p>
+<dd><p>Recursively extract plot_info from QStandardItem to a serializable format.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1269,6 +1332,11 @@ data are stored in <code class="docutils literal notranslate"><span class="pre">
 value for <code class="docutils literal notranslate"><span class="pre">cv2.GaussianBlur</span></code> only when <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxNoiseReductionMethod</span></code> is ‘Gaussian’ and new kernel
 value is set by the user via <code class="docutils literal notranslate"><span class="pre">MainWindow.spinBoxNoiseReductionOption1.value()</span></code>.</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.generate_random_seed">
+<span class="sig-name descname"><span class="pre">generate_random_seed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.generate_random_seed" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.get_axis_field">
@@ -1357,8 +1425,8 @@ Based on the plot type, this method internally calls the appropriate plotting fu
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="main.MainWindow.get_model_data">
-<span class="sig-name descname"><span class="pre">get_model_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.get_model_data" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="main.MainWindow.get_plot_info_from_tree">
+<span class="sig-name descname"><span class="pre">get_plot_info_from_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.get_plot_info_from_tree" title="Link to this definition">#</a></dt>
 <dd><p>Extract data from the root of QStandardItemModel.</p>
 </dd></dl>
 
@@ -1495,6 +1563,27 @@ addition to histogram map. Default is None, which produces a histogram.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.import_csv_to_dict">
+<span class="sig-name descname"><span class="pre">import_csv_to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.import_csv_to_dict" title="Link to this definition">#</a></dt>
+<dd><p>Imports a csv to a dictionary</p>
+<p>Imports a csv in the format produced by <code class="docutils literal notranslate"><span class="pre">MainWindow.export_dict_to_csv</span></code></p>
+<section id="id5">
+<h3>Parameters<a class="headerlink" href="#id5" title="Link to this heading">#</a></h3>
+<dl class="simple">
+<dt>filename<span class="classifier">str</span></dt><dd><p>File for import, include path name.</p>
+</dd>
+</dl>
+</section>
+<section id="id6">
+<h3>Returns<a class="headerlink" href="#id6" title="Link to this heading">#</a></h3>
+<dl class="simple">
+<dt>dict</dt><dd><p>Contents of filename as a dictionary.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.import_data">
 <span class="sig-name descname"><span class="pre">import_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.import_data" title="Link to this definition">#</a></dt>
 <dd><p>Reads data files and returns data dictionary</p>
@@ -1559,7 +1648,7 @@ dictionary into the theme name with a <code class="docutils literal notranslate"
 <dt class="sig sig-object py" id="main.MainWindow.line_width_callback">
 <span class="sig-name descname"><span class="pre">line_width_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.line_width_callback" title="Link to this definition">#</a></dt>
 <dd><p>Updates line width</p>
-<p>Updates line width on current plot on change of <a href="#id3"><span class="problematic" id="id4">``</span></a>MainWindow.comboBoxLineWidth.currentText().</p>
+<p>Updates line width on current plot on change of <a href="#id7"><span class="problematic" id="id8">``</span></a>MainWindow.comboBoxLineWidth.currentText().</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1571,7 +1660,7 @@ dictionary into the theme name with a <code class="docutils literal notranslate"
 <dt class="sig sig-object py" id="main.MainWindow.load_theme_names">
 <span class="sig-name descname"><span class="pre">load_theme_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.load_theme_names" title="Link to this definition">#</a></dt>
 <dd><p>Loads theme names and adds them to the theme comboBox</p>
-<p>Looks for saved style themes (<a href="#id5"><span class="problematic" id="id6">*</span></a>.sty) in <code class="docutils literal notranslate"><span class="pre">resources/styles/</span></code> directory and adds them to
+<p>Looks for saved style themes (<a href="#id9"><span class="problematic" id="id10">*</span></a>.sty) in <code class="docutils literal notranslate"><span class="pre">resources/styles/</span></code> directory and adds them to
 <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxStyleTheme</span></code>.  After setting list, the comboBox is set to default style.</p>
 </dd></dl>
 
@@ -1726,8 +1815,8 @@ in list is loaded by default.</p>
 <span class="sig-name descname"><span class="pre">open_tab</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tab_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.open_tab" title="Link to this definition">#</a></dt>
 <dd><p>Opens specified toolBox tab</p>
 <p>Opens the specified tab in <code class="docutils literal notranslate"><span class="pre">MainWindow.toolbox</span></code></p>
-<section id="id7">
-<h3>Parameters<a class="headerlink" href="#id7" title="Link to this heading">#</a></h3>
+<section id="id11">
+<h3>Parameters<a class="headerlink" href="#id11" title="Link to this heading">#</a></h3>
 <dl class="simple">
 <dt>tab_name<span class="classifier">str</span></dt><dd><p>opens tab, values: ‘samples’, ‘preprocess’, ‘spot data’, ‘filter’,
 ‘scatter’, ‘ndim’, pca’, ‘clustering’, ‘profiles’, ‘Special’</p>
@@ -2050,14 +2139,14 @@ toggles widgets and updates single view plot</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.save_notes_file">
 <span class="sig-name descname"><span class="pre">save_notes_file</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.save_notes_file" title="Link to this definition">#</a></dt>
-<dd><p>Saves notes to an <a href="#id8"><span class="problematic" id="id9">*</span></a>.rst file</p>
+<dd><p>Saves notes to an <a href="#id12"><span class="problematic" id="id13">*</span></a>.rst file</p>
 <p>Autosaves the notes to a file <code class="docutils literal notranslate"><span class="pre">[sample_id].rst</span></code></p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.save_notes_to_pdf">
 <span class="sig-name descname"><span class="pre">save_notes_to_pdf</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.save_notes_to_pdf" title="Link to this definition">#</a></dt>
-<dd><p>Converts notes <a href="#id10"><span class="problematic" id="id11">*</span></a>.rst file to <a href="#id12"><span class="problematic" id="id13">*</span></a>.pdf</p>
+<dd><p>Converts notes <a href="#id14"><span class="problematic" id="id15">*</span></a>.rst file to <a href="#id16"><span class="problematic" id="id17">*</span></a>.pdf</p>
 </dd></dl>
 
 <dl class="py method">
@@ -2125,6 +2214,11 @@ toggles widgets and updates single view plot</p>
 <dd><p>Updates transparency on scatter plots.</p>
 <p>Executes on change of <code class="docutils literal notranslate"><span class="pre">MainWindow.horizontalSliderMarkerAlpha.value()</span></code>.</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.sort_analytes">
+<span class="sig-name descname"><span class="pre">sort_analytes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.sort_analytes" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.swap_xy">
@@ -2212,7 +2306,7 @@ Map from Ternary groupbox.  The ternary colored chemical map is updated.</p>
 <span class="sig-name descname"><span class="pre">toggle_style_widgets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.MainWindow.toggle_style_widgets" title="Link to this definition">#</a></dt>
 <dd><p>Enables/disables all style widgets</p>
 <p>Toggling of enabled states are based on <code class="docutils literal notranslate"><span class="pre">MainWindow.toolBox</span></code> page and the current plot type
-selected in <a href="#id14"><span class="problematic" id="id15">``</span></a>MainWindow.comboBoxPlotType.</p>
+selected in <a href="#id18"><span class="problematic" id="id19">``</span></a>MainWindow.comboBoxPlotType.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -2436,8 +2530,8 @@ to light yellow for analytes used in analyses.</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Operations related to polygon generation and manipulation</p>
 <p>Polygons can be used to select or exclude regions of maps for analysis.</p>
-<section id="id16">
-<h2>Methods<a class="headerlink" href="#id16" title="Link to this heading">#</a></h2>
+<section id="id20">
+<h2>Methods<a class="headerlink" href="#id20" title="Link to this heading">#</a></h2>
 <dl class="simple">
 <dt>increment_pid()</dt><dd><p>creates a new polygon pid for addressing polygon when toolButtonPolyCreate is checked</p>
 </dd>
@@ -2654,8 +2748,8 @@ update_table_widget:</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Common table operations class</p>
 <p>For moving and deleting rows in QTableWidgets</p>
-<section id="id17">
-<h2>Methods<a class="headerlink" href="#id17" title="Link to this heading">#</a></h2>
+<section id="id21">
+<h2>Methods<a class="headerlink" href="#id21" title="Link to this heading">#</a></h2>
 <dl class="simple">
 <dt>move_row_up(table)</dt><dd><p>moves a single row of table up one position</p>
 </dd>
@@ -2668,8 +2762,8 @@ update_table_widget:</p>
 <dt class="sig sig-object py" id="main.Table_Fcn.delete_row">
 <span class="sig-name descname"><span class="pre">delete_row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.Table_Fcn.delete_row" title="Link to this definition">#</a></dt>
 <dd><p>Deletes selected rows in a table</p>
-<section id="id18">
-<h3>Parameter<a class="headerlink" href="#id18" title="Link to this heading">#</a></h3>
+<section id="id22">
+<h3>Parameter<a class="headerlink" href="#id22" title="Link to this heading">#</a></h3>
 <p>table: QTableWidget</p>
 </section>
 </dd></dl>
@@ -2678,8 +2772,8 @@ update_table_widget:</p>
 <dt class="sig sig-object py" id="main.Table_Fcn.move_row_down">
 <span class="sig-name descname"><span class="pre">move_row_down</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.Table_Fcn.move_row_down" title="Link to this definition">#</a></dt>
 <dd><p>Moves a row down one position in a table</p>
-<section id="id19">
-<h3>Parameter<a class="headerlink" href="#id19" title="Link to this heading">#</a></h3>
+<section id="id23">
+<h3>Parameter<a class="headerlink" href="#id23" title="Link to this heading">#</a></h3>
 <dl class="simple">
 <dt>table: QTableWidget</dt><dd><p>Moves the selected row in a table down one position. If multiple are selected
 only the top row is moved.</p>
@@ -2692,8 +2786,8 @@ only the top row is moved.</p>
 <dt class="sig sig-object py" id="main.Table_Fcn.move_row_up">
 <span class="sig-name descname"><span class="pre">move_row_up</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.Table_Fcn.move_row_up" title="Link to this definition">#</a></dt>
 <dd><p>Moves a row up one position in a table</p>
-<section id="id20">
-<h3>Parameter<a class="headerlink" href="#id20" title="Link to this heading">#</a></h3>
+<section id="id24">
+<h3>Parameter<a class="headerlink" href="#id24" title="Link to this heading">#</a></h3>
 <dl class="simple">
 <dt>table: QTableWidget</dt><dd><p>Moves the selected row in a table up one position. If multiple are selected
 only the top row is moved.</p>
@@ -2753,7 +2847,7 @@ only the top row is moved.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="main.analyteSelectionWindow.listUpdated">
 <span class="sig-name descname"><span class="pre">listUpdated</span></span><a class="headerlink" href="#main.analyteSelectionWindow.listUpdated" title="Link to this definition">#</a></dt>
-<dd><p>pyqtSignal(<a href="#id21"><span class="problematic" id="id22">*</span></a>types, name: str = …, revision: int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<dd><p>pyqtSignal(<a href="#id25"><span class="problematic" id="id26">*</span></a>types, name: str = …, revision: int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
 <p>types is normally a sequence of individual types.  Each type is either a
 type object or a string that is the name of a C++ type.  Alternatively
 each type could itself be a sequence of types each describing a different
@@ -2817,11 +2911,11 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 .   bilateralFilter can reduce unwanted noise very well while keeping edges fairly sharp. However, it is
 .   very slow compared to most filters.
 .   
-.   _Sigma <a href="#id23"><span class="problematic" id="id24">values_</span></a>: For simplicity, you can set the 2 sigma values to be the same. If they are small (&lt;
+.   _Sigma <a href="#id30"><span class="problematic" id="id31">values_</span></a>: For simplicity, you can set the 2 sigma values to be the same. If they are small (&lt;
 .   10), the filter will not have much effect, whereas if they are large (&gt; 150), they will have a very
 .   strong effect, making the image look “cartoonish”.
 .   
-.   _Filter <a href="#id25"><span class="problematic" id="id26">size_</span></a>: Large filters (d &gt; 5) are very slow, so it is recommended to use d=5 for real-time
+.   _Filter <a href="#id32"><span class="problematic" id="id33">size_</span></a>: Large filters (d &gt; 5) are very slow, so it is recommended to use d=5 for real-time
 .   applications, and perhaps d=9 for offline applications that need heavy noise filtering.
 .   
 .   This filter does not work inplace.
@@ -2855,7 +2949,7 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="main.excelConcatenator">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">excelConcatenator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.excelConcatenator" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QMainWindow</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Ui_ExelConcatenator</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QMainWindow</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Ui_ExcelConcatenator</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="main.excelConcatenator.add_combobox">
 <span class="sig-name descname"><span class="pre">add_combobox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.excelConcatenator.add_combobox" title="Link to this definition">#</a></dt>
@@ -2951,6 +3045,84 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 .   &#64;sa  bilateralFilter, blur, boxFilter, GaussianBlur</p>
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="main.quickView">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">quickView</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.quickView" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QDialog</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Ui_QuickViewDialog</span></code></p>
+<p>Creates a dialog for the user to select and order analytes for Quick View</p>
+<p>Opens an instance of QuickViewDialog for the user to select and order analytes for Quick View.
+The lists are automatically saved for future use.</p>
+<section id="id27">
+<h2>Parameters<a class="headerlink" href="#id27" title="Link to this heading">#</a></h2>
+<p>QDialog : QDialog</p>
+<dl class="simple">
+<dt>Ui_QuickViewDialog<span class="classifier">QuickViewDialog</span></dt><dd><p>User interface design.</p>
+</dd>
+</dl>
+<p>Initializes quickView</p>
+</section>
+<section id="id28">
+<h2>Parameters<a class="headerlink" href="#id28" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>analyte_list<span class="classifier">list</span></dt><dd><p>List of analytes to populate column 0 of  <code class="docutils literal notranslate"><span class="pre">quickView.tableWidget</span></code>.</p>
+</dd>
+<dt>quickview_list<span class="classifier">dict</span></dt><dd><p>Dictionary to be updated with an ordered list of analytes to be added to the <code class="docutils literal notranslate"><span class="pre">MainWindow.layoutQuickView</span></code>.</p>
+</dd>
+<dt>parent<span class="classifier">None, optional</span></dt><dd><p>Parent UI, by default None</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="main.quickView.button_save">
+<span class="sig-name descname"><span class="pre">button_save</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.quickView.button_save" title="Link to this definition">#</a></dt>
+<dd><p>Gets list of analytes and group name when Save button is clicked</p>
+<p>Retrieves the user defined name from <code class="docutils literal notranslate"><span class="pre">quickView.lineEditViewName</span></code> and list of analytes using <code class="docutils literal notranslate"><span class="pre">quickView.column_to_list()</span></code>
+and adds them to a dictionary item with the name defined as the key.</p>
+<section id="raises">
+<h3>Raises<a class="headerlink" href="#raises" title="Link to this heading">#</a></h3>
+<blockquote>
+<div><p>A warning is raised if the user does not provide a name.  The list is not added to the dictionary in this case.</p>
+</div></blockquote>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.quickView.column_to_list">
+<span class="sig-name descname"><span class="pre">column_to_list</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main.quickView.column_to_list" title="Link to this definition">#</a></dt>
+<dd><p>Extracts selected analytes from the table into a list</p>
+<p>Analytes from column 0 of the table with checked boxes in column 1 are added to a list for use with plotting
+maps in <code class="docutils literal notranslate"><span class="pre">MainWindow.layoutQuickView</span></code>.  The order is set by the user dragging and droping to swap rows.</p>
+<section id="id29">
+<h3>Returns<a class="headerlink" href="#id29" title="Link to this heading">#</a></h3>
+<dl class="simple">
+<dt>list</dt><dd><p>Analytes for display in <code class="docutils literal notranslate"><span class="pre">MainWindow.layoutQuickView</span></code></p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.quickView.dropEvent">
+<span class="sig-name descname"><span class="pre">dropEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QDropEvent</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.quickView.dropEvent" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.quickView.mouseMoveEvent">
+<span class="sig-name descname"><span class="pre">mouseMoveEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QMouseEvent</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.quickView.mouseMoveEvent" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.quickView.mousePressEvent">
+<span class="sig-name descname"><span class="pre">mousePressEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QMouseEvent</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.quickView.mousePressEvent" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.quickView.move_row">
+<span class="sig-name descname"><span class="pre">move_row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_row</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.quickView.move_row" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</section>
+</dd></dl>
+
 </section>
 
 
@@ -3041,8 +3213,10 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.create_map_plotwidget"><code class="docutils literal notranslate"><span class="pre">MainWindow.create_map_plotwidget()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.create_plot"><code class="docutils literal notranslate"><span class="pre">MainWindow.create_plot()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.create_tree"><code class="docutils literal notranslate"><span class="pre">MainWindow.create_tree()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.custom_discrete_colormap"><code class="docutils literal notranslate"><span class="pre">MainWindow.custom_discrete_colormap()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.display_QV"><code class="docutils literal notranslate"><span class="pre">MainWindow.display_QV()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.dynamic_format"><code class="docutils literal notranslate"><span class="pre">MainWindow.dynamic_format()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.export_dict_to_csv"><code class="docutils literal notranslate"><span class="pre">MainWindow.export_dict_to_csv()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.extract_tree_data"><code class="docutils literal notranslate"><span class="pre">MainWindow.extract_tree_data()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.field_colormap_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.field_colormap_callback()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.find_leaf"><code class="docutils literal notranslate"><span class="pre">MainWindow.find_leaf()</span></code></a></li>
@@ -3050,13 +3224,14 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.font_size_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.font_size_callback()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.format_note_text"><code class="docutils literal notranslate"><span class="pre">MainWindow.format_note_text()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.gaussian_sigma"><code class="docutils literal notranslate"><span class="pre">MainWindow.gaussian_sigma()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.generate_random_seed"><code class="docutils literal notranslate"><span class="pre">MainWindow.generate_random_seed()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_axis_field"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_axis_field()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_axis_values"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_axis_values()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_colormap"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_colormap()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_field_list"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_field_list()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_hex_color"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_hex_color()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_map_data"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_map_data()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_model_data"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_model_data()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_plot_info_from_tree"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_plot_info_from_tree()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_processed_data"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_processed_data()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_rgb_color"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_rgb_color()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.get_scatter_values"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_scatter_values()</span></code></a></li>
@@ -3070,6 +3245,7 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.histogram_reset_bins"><code class="docutils literal notranslate"><span class="pre">MainWindow.histogram_reset_bins()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.histogram_update_bin_width"><code class="docutils literal notranslate"><span class="pre">MainWindow.histogram_update_bin_width()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.histogram_update_n_bins"><code class="docutils literal notranslate"><span class="pre">MainWindow.histogram_update_n_bins()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.import_csv_to_dict"><code class="docutils literal notranslate"><span class="pre">MainWindow.import_csv_to_dict()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.import_data"><code class="docutils literal notranslate"><span class="pre">MainWindow.import_data()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.import_files"><code class="docutils literal notranslate"><span class="pre">MainWindow.import_files()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.init_tabs"><code class="docutils literal notranslate"><span class="pre">MainWindow.init_tabs()</span></code></a></li>
@@ -3143,6 +3319,7 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.set_default_cluster_colors"><code class="docutils literal notranslate"><span class="pre">MainWindow.set_default_cluster_colors()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.set_style_widgets"><code class="docutils literal notranslate"><span class="pre">MainWindow.set_style_widgets()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.slider_alpha_changed"><code class="docutils literal notranslate"><span class="pre">MainWindow.slider_alpha_changed()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.sort_analytes"><code class="docutils literal notranslate"><span class="pre">MainWindow.sort_analytes()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.swap_xy"><code class="docutils literal notranslate"><span class="pre">MainWindow.swap_xy()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.swap_xy_data"><code class="docutils literal notranslate"><span class="pre">MainWindow.swap_xy_data()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.ternary_colormap_changed"><code class="docutils literal notranslate"><span class="pre">MainWindow.ternary_colormap_changed()</span></code></a></li>
@@ -3265,6 +3442,15 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#main.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#main.medianBlur"><code class="docutils literal notranslate"><span class="pre">medianBlur()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#main.quickView"><code class="docutils literal notranslate"><span class="pre">quickView</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.quickView.button_save"><code class="docutils literal notranslate"><span class="pre">quickView.button_save()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.quickView.column_to_list"><code class="docutils literal notranslate"><span class="pre">quickView.column_to_list()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.quickView.dropEvent"><code class="docutils literal notranslate"><span class="pre">quickView.dropEvent()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.quickView.mouseMoveEvent"><code class="docutils literal notranslate"><span class="pre">quickView.mouseMoveEvent()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.quickView.mousePressEvent"><code class="docutils literal notranslate"><span class="pre">quickView.mousePressEvent()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.quickView.move_row"><code class="docutils literal notranslate"><span class="pre">quickView.move_row()</span></code></a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 

@@ -83,7 +83,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             Keywords for the first level are given by the field names used for plotting associated with entries
             into the field-related QComboBoxes.  Associated with each field are the axes properties.
         
-            [field] : name of field
+            [*field*] : name of field
                 | 'label' : (str) -- axis label, may include units or custom names
                 | 'status' : (str) -- *auto* or *custom* indicates the use of default bounds or user defined axes limits
                 | 'min' : (float) -- minimum axis value
@@ -96,7 +96,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             A dictionary that holds settings and cluster metadata used for plotting.  Each cluster method has its own key and associated dictionary.
             cluster_dict[*method*], where *method* is ``k-means`` or ``fuzzy c-means``
 
-            [method] : clustering method
+            'active method' : (str) -- current selected method for plotting, masking, etc.
+            [*method*] : (str) -- clustering method
                 | 'n_clusters' : (int) -- number of clusters, set in ``spinBoxNClusters``
                 | 'seed' : (int) -- seed for clustering, which can be user input (``lineEditSeed``) or randomly generated (``toolButtonRandomSeed``), default is 23
                 | 'exponent' : (float) -- exponent for fuzzy c-means, dictates the amount of overlap possible between the different clusters, set by ``horizontalSliderClusterExponent``, default is 2.1
@@ -104,14 +105,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 | 'selected_clusters' : (list) -- clusters selected in ``tableWidgetViewGroups`` for plotting
                 | 'cluster_id' : (dict) -- metadata associated with each cluster_id
                 | 'norm' : (matplotlib.colors.Norm) -- norm for plotting colormap
-                
-                [cluster_id] -- cluster index, this data is displayed for the user in ``tableWidgetViewGroups``
-                    | 'name' : (str) -- user-defined name for cluster, defaults to ``f"Cluster {cluster_id}"``
-                    | 'link' : (list) -- list of clusters id's linked to current cluster
-                    | 'color' : (str) -- hex color string
+
+            [*cluster_id*] -- cluster index, this data is displayed for the user in ``tableWidgetViewGroups``
+                | 'name' : (str) -- user-defined name for cluster, defaults to ``f"Cluster {cluster_id}"``
+                | 'link' : (list) -- list of clusters id's linked to current cluster
+                | 'color' : (str) -- hex color string
         data : dict
             Dictionary containing a dictionary of each sample with the raw, processed, and computed (analyses) DataFrames, mask array, and informational dataframes
-            with relevant data
+            with relevant data.  The dictionary is nested with the first level keys defined by the sample ID.
+            
+            [*sample_id*] : (str) -- sample identifier
+                | 'analysis data'
+                | 'computed data'
+                | 'processed data'
+                | 'raw data'
         layoutSingleView : QVBoxLayout
             Layout for Single View tab of ``canvasWindow``
         layoutMultiView : QGridLayout
@@ -148,7 +155,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             .. seealso::
                 :ref:`add_plotwidget_to_tree` for details about saving *plot_info* to the tree (Plot Selector)
         sample_id : str
-            The name of the current sample.  *sample_id* is used as the key into several dictionaries.
+            The name of the current sample, chosen by the user with ``comboBoxSampleID``.  *sample_id* is used as the key into several dictionaries.
         styles : dict of dict
             Dictionary with plot style information that saves the properties of style widgets.  There is a keyword
             for each plot type listed in ``comboBoxPlotType``.  The exact behavior of each style item may vary depending upon the
@@ -629,8 +636,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxClusterMethod.activated.connect(self.update_cluster_ui)
 
         # cluster dictionary
-        self.cluster_dict = {'k-means':{'n_clusters':5, 'seed':23, 'selected_clusters':[], 'cluster_id':{}, 'norm':None},
-            'fuzzy c-means':{'n_clusters':5, 'exponent':2.1, 'distance':'euclidean', 'seed':23, 'selected_clusters':[], 'cluster_id':{}, 'norm':None}}
+        self.cluster_dict = {
+            'active method' : 'k-means',
+            'k-means':{'n_clusters':5, 'seed':23, 'selected_clusters':[], 'cluster_id':{}, 'norm':None},
+            'fuzzy c-means':{'n_clusters':5, 'exponent':2.1, 'distance':'euclidean', 'seed':23, 'selected_clusters':[], 'cluster_id':{}, 'norm':None}
+        }
         self.update_cluster_ui()
 
         # Connect color point radio button signals to a slot
@@ -1562,13 +1572,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def update_clusters(self):
         if not self.isUpdatingTable:
             selected_clusters = []
+            method = self.cluster_dict['active method']
             for idx in self.tableWidgetViewGroups.selectionModel().selectedRows():
                 selected_clusters.append(self.tableWidgetViewGroups.item(idx.row(), 0).text())
 
             if selected_clusters:
-                self.current_group['selected_clusters'] = selected_clusters
+                self.cluster_dict[method]['selected_clusters'] = selected_clusters
             else:
-                self.current_group['selected_clusters'] = None
+                self.cluster_dict[method]['selected_clusters'] = None
             if (self.comboBoxPlotType.currentText() != 'Cluster' or self.comboBoxPlotType.currentText() != 'Cluster Score'):
                 self.update_SV()
 
@@ -4607,66 +4618,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         print('color_by_field_callback')
         self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
 
-        # write a general version to fill two related comboboxes
         plot_type = self.comboBoxPlotType.currentText()
         if self.styles[plot_type]['Colors']['ColorByField'] == self.comboBoxColorByField.currentText():
             return
 
+        if self.comboBoxColorByField.currentText() == 'Clusters':
+            self.comboBoxColorField.setCurrentText(self.cluster_dict['active method'])
+
         self.styles[plot_type]['Colors']['ColorByField'] = self.comboBoxColorByField.currentText()
 
-        itemlist = []
         if self.comboBoxPlotType.isEnabled() == False | self.comboBoxColorByField.isEnabled() == False:
-            self.comboBoxColorField.setEnabled(False)
-            self.labelColorField.setEnabled(False)
-            self.lineEditColorLB.setEnabled(False)
-            self.lineEditColorUB.setEnabled(False)
-            self.labelColorBounds.setEnabled(False)
-            self.comboBoxFieldColormap.setEnabled(False)
-            self.labelFieldColormap.setEnabled(False)
-            self.comboBoxCbarDirection.setEnabled(False)
-            self.labelCbarDirection.setEnabled(False)
-            self.lineEditCbarLabel.setEnabled(False)
-            self.labelCbarLabel.setEnabled(False)
             return
 
-        if self.comboBoxColorByField.currentText() == 'None':
-            self.comboBoxColorField.setEnabled(False)
-            self.labelColorField.setEnabled(False)
-            self.lineEditColorLB.setEnabled(False)
-            self.lineEditColorUB.setEnabled(False)
-            self.labelColorBounds.setEnabled(False)
-            self.comboBoxFieldColormap.setEnabled(False)
-            self.labelFieldColormap.setEnabled(False)
-            self.comboBoxCbarDirection.setEnabled(False)
-            self.labelCbarDirection.setEnabled(False)
-            self.lineEditCbarLabel.setEnabled(False)
-            self.labelCbarLabel.setEnabled(False)
-        else:
+        if self.comboBoxColorByField.currentText() != 'None':
             self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
-            if self.comboBoxColorByField.currentText() in ['Clusters']:
-                self.comboBoxColorField.setEnabled(False)
-                self.labelColorField.setEnabled(False)
-                self.lineEditColorLB.setEnabled(False)
-                self.lineEditColorUB.setEnabled(False)
-                self.labelColorBounds.setEnabled(False)
-                self.comboBoxFieldColormap.setEnabled(False)
-                self.labelFieldColormap.setEnabled(False)
-                self.comboBoxCbarDirection.setEnabled(False)
-                self.labelCbarDirection.setEnabled(False)
-                self.lineEditCbarLabel.setEnabled(False)
-                self.labelCbarLabel.setEnabled(False)
-            else:
-                self.comboBoxColorField.setEnabled(True)
-                self.labelColorField.setEnabled(True)
-                self.lineEditColorLB.setEnabled(True)
-                self.lineEditColorUB.setEnabled(True)
-                self.labelColorBounds.setEnabled(True)
-                self.comboBoxFieldColormap.setEnabled(True)
-                self.labelFieldColormap.setEnabled(True)
-                self.comboBoxCbarDirection.setEnabled(True)
-                self.labelCbarDirection.setEnabled(True)
-                self.lineEditCbarLabel.setEnabled(True)
-                self.labelCbarLabel.setEnabled(True)
+            self.set_style_widgets(plot_type)
 
         # only run update current plot if color field is selected or the color by field is clusters
         if self.comboBoxColorByField.currentText() != 'None' or self.comboBoxColorField.currentText() != '' or self.comboBoxColorByField.currentText() in ['Clusters']:
@@ -5987,11 +5953,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case 'CDF':
                 cumflag = True
 
+        cluster_flag = True
+        method = self.cluster_dict['active method']
+        if method is None:
+            cluster_flag = False
+        elif not self.cluster_dict[method]['selected clusters'] | method not in list(self.data[self.sample_id]['computed_data']['Cluster'].keys()):
+            cluster_flag = False
+            
+
+
         # Check if the algorithm is in the current group and if results are available
-        if 'algorithm' in self.current_group and self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['Cluster']:
+        if cluster_flag: 
             # Get the cluster labels for the data
-            cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'].loc[:,self.current_group['algorithm']]
-            clusters = [int(c) for c in self.current_group['selected_clusters']]
+            cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'].loc[:,method]
+            clusters = [int(c) for c in self.cluster_dict[method]['selected_clusters']]
 
             # Plot histogram for all clusters
             for i in clusters:
@@ -5999,7 +5974,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # Create RGBA color with transparency by directly indexing the colormap
                 # color = self.group_cmap(i)[:-1]  # Create a new RGBA tuple with a
                 color = self.group_cmap[f'Cluster {i}'][:-1] + (0.6,)
-                canvas.axes.hist(cluster_data, cumulative=cumflag, histtype=type, bins=edges, color=color, edgecolor=ecolor, linewidth=lw, label=self.current_group['clusters'][i], alpha=style['Markers']['Alpha']/100, density=True)
+                canvas.axes.hist(cluster_data, cumulative=cumflag, histtype=type, bins=edges, color=color, edgecolor=ecolor, linewidth=lw, label=self.cluster_dict[method]['cluster_id']['name'][i], alpha=style['Markers']['Alpha']/100, density=True)
 
             # Add a legend
             canvas.axes.legend()
@@ -6928,6 +6903,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.update_cluster_flag or self.data[self.sample_id]['computed_data']['Cluster'].empty:
             self.compute_clusters()
 
+        self.cluster_dict['active method'] = self.comboBoxClusterMethod.currentText()
+        if self.comboBoxColorByField.currentText() == 'Clusters':
+            self.comboBoxColorField.setCurrentText(self.comboBoxClusterMethod.currentText())
+
         plot_type = self.comboBoxPlotType.currentText()
 
         match plot_type:
@@ -6980,6 +6959,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         # update_clusters_ui - Enables/disables tools associated with clusters
         method = self.comboBoxClusterMethod.currentText()
+        if  method not in self.data[self.sample_id]['computed_data']['Cluster']:
+            self.update_cluster_flag = True
 
         # Number of Clusters
         self.labelNClusters.setEnabled(True)

@@ -8694,24 +8694,27 @@ class quickView(QDialog, Ui_QuickViewDialog):
 
         self.show()
 
-    # def mousePressEvent(self, event):
-    #     print('mousePressEvent')
-    #     if event.buttons() == Qt.LeftButton:
-    #         self.drag_start_position = event.pos()
+    def mousePressEvent(self, event):
+        print('mousePressEvent')
+        if event.buttons() == Qt.LeftButton:
+            self.drag_start_position = event.pos()
+        else:
+            super(quickView, self).mousePressEvent(event)
 
-    # def mouseMoveEvent(self, event):
-    #     print('mouseEvent')
-    #     if not event.buttons() & Qt.LeftButton:
-    #         return
-    #     if (event.pos() - self.drag_start_position).manhattanLength() < QApplication.startDragDistance():
-    #         return
-    #     item = self.tableWidget.itemAt(self.drag_start_position)
-    #     if item is None:
-    #         return
-    #     drag = QDrag(self)
-    #     mime_data = self.tableWidget.mimeData(self.tableWidget.selectedIndexes())
-    #     drag.setMimeData(mime_data)
-    #     drag.exec_(Qt.MoveAction)
+    def mouseMoveEvent(self, event):
+        print('mouseEvent')
+        if not event.buttons() & Qt.LeftButton:
+            return
+        if (event.pos() - self.drag_start_position).manhattanLength() < QApplication.startDragDistance():
+            return
+        item = self.tableWidget.itemAt(self.drag_start_position)
+        if item is None:
+            return
+        drag = QDrag(self)
+        mime_data = self.tableWidget.mimeData(self.tableWidget.selectedIndexes())
+        drag.setMimeData(mime_data)
+        drag.exec_(Qt.MoveAction)
+        super(quickView, self).mouseMoveEvent(event)
 
     def dropEvent(self, event):
         print('dropEvent')
@@ -8735,7 +8738,7 @@ class quickView(QDialog, Ui_QuickViewDialog):
                 target_row += 1
 
         # Call the default dropEvent to complete the operation
-        super().dropEvent(event)
+        super(quickView, self).dropEvent(event)
 
     def move_row(self, source_row, target_row):
         print('move_row')

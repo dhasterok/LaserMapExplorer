@@ -4601,66 +4601,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         print('color_by_field_callback')
         self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
 
-        # write a general version to fill two related comboboxes
         plot_type = self.comboBoxPlotType.currentText()
         if self.styles[plot_type]['Colors']['ColorByField'] == self.comboBoxColorByField.currentText():
             return
 
+        if self.comboBoxColorByField.currentText() == 'Clusters':
+            self.comboBoxColorField.setCurrentText(self.cluster_dict['active method'])
+
         self.styles[plot_type]['Colors']['ColorByField'] = self.comboBoxColorByField.currentText()
 
-        itemlist = []
         if self.comboBoxPlotType.isEnabled() == False | self.comboBoxColorByField.isEnabled() == False:
-            self.comboBoxColorField.setEnabled(False)
-            self.labelColorField.setEnabled(False)
-            self.lineEditColorLB.setEnabled(False)
-            self.lineEditColorUB.setEnabled(False)
-            self.labelColorBounds.setEnabled(False)
-            self.comboBoxFieldColormap.setEnabled(False)
-            self.labelFieldColormap.setEnabled(False)
-            self.comboBoxCbarDirection.setEnabled(False)
-            self.labelCbarDirection.setEnabled(False)
-            self.lineEditCbarLabel.setEnabled(False)
-            self.labelCbarLabel.setEnabled(False)
             return
 
-        if self.comboBoxColorByField.currentText() == 'None':
-            self.comboBoxColorField.setEnabled(False)
-            self.labelColorField.setEnabled(False)
-            self.lineEditColorLB.setEnabled(False)
-            self.lineEditColorUB.setEnabled(False)
-            self.labelColorBounds.setEnabled(False)
-            self.comboBoxFieldColormap.setEnabled(False)
-            self.labelFieldColormap.setEnabled(False)
-            self.comboBoxCbarDirection.setEnabled(False)
-            self.labelCbarDirection.setEnabled(False)
-            self.lineEditCbarLabel.setEnabled(False)
-            self.labelCbarLabel.setEnabled(False)
-        else:
+        if self.comboBoxColorByField.currentText() != 'None':
             self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
-            if self.comboBoxColorByField.currentText() in ['Clusters']:
-                self.comboBoxColorField.setEnabled(False)
-                self.labelColorField.setEnabled(False)
-                self.lineEditColorLB.setEnabled(False)
-                self.lineEditColorUB.setEnabled(False)
-                self.labelColorBounds.setEnabled(False)
-                self.comboBoxFieldColormap.setEnabled(False)
-                self.labelFieldColormap.setEnabled(False)
-                self.comboBoxCbarDirection.setEnabled(False)
-                self.labelCbarDirection.setEnabled(False)
-                self.lineEditCbarLabel.setEnabled(False)
-                self.labelCbarLabel.setEnabled(False)
-            else:
-                self.comboBoxColorField.setEnabled(True)
-                self.labelColorField.setEnabled(True)
-                self.lineEditColorLB.setEnabled(True)
-                self.lineEditColorUB.setEnabled(True)
-                self.labelColorBounds.setEnabled(True)
-                self.comboBoxFieldColormap.setEnabled(True)
-                self.labelFieldColormap.setEnabled(True)
-                self.comboBoxCbarDirection.setEnabled(True)
-                self.labelCbarDirection.setEnabled(True)
-                self.lineEditCbarLabel.setEnabled(True)
-                self.labelCbarLabel.setEnabled(True)
+            self.set_style_widgets(plot_type)
 
         # only run update current plot if color field is selected or the color by field is clusters
         if self.comboBoxColorByField.currentText() != 'None' or self.comboBoxColorField.currentText() != '' or self.comboBoxColorByField.currentText() in ['Clusters']:
@@ -5895,11 +5850,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case 'CDF':
                 cumflag = True
 
+        cluster_flag = True
+        method = self.cluster_dict['active method']
+        if method is None:
+            cluster_flag = False
+        elif not self.cluster_dict[method]['selected clusters'] | method not in list(self.data[self.sample_id]['computed_data']['Cluster'].keys()):
+            cluster_flag = False
+            
+
+
         # Check if the algorithm is in the current group and if results are available
-        if 'algorithm' in self.current_group and self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['Cluster']:
+        if cluster_flag: 
             # Get the cluster labels for the data
-            cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'].loc[:,self.current_group['algorithm']]
-            clusters = [int(c) for c in self.current_group['selected_clusters']]
+            cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'].loc[:,method]
+            clusters = [int(c) for c in self.cluster_dict[method]['selected_clusters']]
 
             # Plot histogram for all clusters
             for i in clusters:
@@ -5907,7 +5871,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # Create RGBA color with transparency by directly indexing the colormap
                 # color = self.group_cmap(i)[:-1]  # Create a new RGBA tuple with a
                 color = self.group_cmap[f'Cluster {i}'][:-1] + (0.6,)
-                canvas.axes.hist(cluster_data, cumulative=cumflag, histtype=type, bins=edges, color=color, edgecolor=ecolor, linewidth=lw, label=self.current_group['clusters'][i], alpha=style['Markers']['Alpha']/100, density=True)
+                canvas.axes.hist(cluster_data, cumulative=cumflag, histtype=type, bins=edges, color=color, edgecolor=ecolor, linewidth=lw, label=self.cluster_dict[method]['cluster_id']['name'][i], alpha=style['Markers']['Alpha']/100, density=True)
 
             # Add a legend
             canvas.axes.legend()
@@ -6836,6 +6800,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.update_cluster_flag or self.data[self.sample_id]['computed_data']['Cluster'].empty:
             self.compute_clusters()
 
+        self.cluster_dict['active method'] = self.comboBoxClusterMethod.currentText()
+        if self.comboBoxColorByField.currentText() == 'Clusters':
+            self.comboBoxColorField.setCurrentText(self.comboBoxClusterMethod.currentText())
+
         plot_type = self.comboBoxPlotType.currentText()
 
         match plot_type:
@@ -6888,6 +6856,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         # update_clusters_ui - Enables/disables tools associated with clusters
         method = self.comboBoxClusterMethod.currentText()
+        if  method not in self.data[self.sample_id]['computed_data']['Cluster']:
+            self.update_cluster_flag = True
 
         # Number of Clusters
         self.labelNClusters.setEnabled(True)

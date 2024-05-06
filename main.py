@@ -224,7 +224,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.pyqtgraph_widget = None
         self.isUpdatingTable = False
         self.cursor = False
-
+        
+        
+        self.duplicate_plot_info = None
         # self.plot_widget_dict = {
         #     'Analyte':{},
         #     'Histogram':{},
@@ -1311,6 +1313,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 self.StylingPage.setEnabled(True)
                 self.CalculatorPage.setEnabled(True)
+                
+                if self.duplicate_plot_info:
+                    self.add_plotwidget_to_canvas(self.duplicate_plot_info)
+                
             case 1:
                 self.SelectAnalytePage.setEnabled(False)
                 self.PreprocessPage.setEnabled(False)
@@ -1326,6 +1332,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.toolBoxTreeView.setCurrentIndex(0)
                 self.StylingPage.setEnabled(False)
                 self.CalculatorPage.setEnabled(False)
+                
+                if self.duplicate_plot_info:
+                    position = self.duplicate_plot_info['position']
+                    self.add_plotwidget_to_canvas(self.duplicate_plot_info, position= position)
+                
             case 2:
                 self.SelectAnalytePage.setEnabled(False)
                 self.PreprocessPage.setEnabled(False)
@@ -4992,7 +5003,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         return plotWidget
 
-    def add_plotwidget_to_canvas(self, plot_info, view=None, position=None):
+    def add_plotwidget_to_canvas(self, plot_info, position=None):
         """Adds plot to selected view
 
         :param plot_info: A dictionary with details about the plot
@@ -5017,12 +5028,40 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             print('add_plotwidget_to_canvas: SV')
             self.clear_layout(self.widgetSingleView.layout())
             widget =plot_info['figure']
+            
+            
+            
+            
+            
+            
+            
+
+            
+            
+            
+            
+            
+            plot_info['view'][0] = True
+            
+            self.SV_plot_name = f"{plot_info['sample_id']}:{plot_info['plot_type']}:{plot_info['plot_name']}"
+            #self.labelPlotInfo.
+            self.duplicate_plot_info = None #reset to avoid plotting previous duplicates
+            for index in range(self.comboBoxMVPlots.count()):
+                if self.comboBoxMVPlots.itemText(index) == self.SV_plot_name:
+                    #plot exists in MV
+                    self.move_widget_between_layouts(self.widgetMultiView.layout(), self.widgetSingleView.layout(),widget)
+                    self.duplicate_plot_info = plot_info
+                    self.hide()
+                    self.show()
+                    return
+                    
             self.widgetSingleView.layout().addWidget(widget)
             widget.show()
-            plot_info['view'][0] = True
-
-            #self.labelPlotInfo.
-
+                
+                
+            
+                
+            
         # add figure to MultiView canvas
         elif self.canvasWindow.currentIndex() == 1:
             name = f"{plot_info['sample_id']}:{plot_info['plot_type']}:{plot_info['plot_name']}"
@@ -5030,24 +5069,38 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             print('add_plotwidget_to_canvas: MV')
             list = self.comboBoxMVPlots.allItems()
-
-            if list:
-                for i, item in enumerate(list):
-                    mv_plot_data = self.comboBoxMVPlots.itemData(i)
-                    if mv_plot_data[2] == tree and mv_plot_data[3] == sample_id and mv_plot_data[4] == plot_name:
-                        self.statusBar.showMessage('Plot already displayed on canvas.')
-                        return
-
+            
+            
+            
+            
+            # if list:
+            #     for i, item in enumerate(list):
+            #         mv_plot_data = self.comboBoxMVPlots.itemData(i)
+            #         if mv_plot_data[2] == tree and mv_plot_data[3] == sample_id and mv_plot_data[4] == plot_name:
+            #             self.statusBar.showMessage('Plot already displayed on canvas.')
+            #             return
+            plot_exists = False # to check if plot is already in comboBoxMVPlots
+            for index in range(self.comboBoxMVPlots.count()):
+                if self.comboBoxMVPlots.itemText(index) == name:
+                    plot_exists = True
+                
+            if plot_exists and name != self.SV_plot_name:
+                #plot exists in MV and is doesnt exist in SV
+                self.statusBar.showMessage('Plot already displayed on canvas.')
+                return
+            
             # if position is given, use it
             if position:
                 row = position[0]
                 col = position[1]
-
+                print(position)
+                
                 # remove widget that is currently in this place
                 widget = layout.itemAtPosition(row,col)
-                if widget is not None:
-                    layout.removeWidget(widget)
-                    widget.setParent(None)
+                if widget is not None and name != self.SV_plot_name:
+                    # layout.removeWidget(widget)
+                    # widget.setParent(None)
+                    widget.hide()
 
             # if no position, find first empty space
             else:
@@ -5070,17 +5123,61 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 QMessageBox.warning(self, "Add plot to canvas warning", "Canvas is full, to add more plots, increase row or column max.")
                 return
 
-            # add figure to canvas
-            layout.addWidget(plot_info['figure'],row,col)
+            
+            widget = plot_info['figure']
             plot_info['view'][1] = True
             plot_info['position'] = [row,col]
-
-            data = [row, col, tree, sample_id, name]
-
-            self.comboBoxMVPlots.addItem(name, userData=data)
+            
+            
+            if name == self.SV_plot_name and plot_exists: #if plot already exists in MV and SV
+                self.move_widget_between_layouts(self.widgetSingleView.layout(),self.widgetMultiView.layout(),widget, row,col)
+                self.duplicate_plot_info = plot_info
+            elif name == self.SV_plot_name and not plot_exists: #if plot doesnt exist in MV but exists in SV
+                # save plot info to replot when tab changes to single view and add plot to comboBox
+                self.duplicate_plot_info = plot_info
+                data = [row, col, tree, sample_id, name]
+                self.move_widget_between_layouts(self.widgetSingleView.layout(),self.widgetMultiView.layout(),widget, row,col)
+                self.comboBoxMVPlots.addItem(name, userData=data)
+            else: #new plot which doesnt exist in single view
+                # add figure to canvas
+                layout.addWidget(widget,row,col)    
+                
+                data = [row, col, tree, sample_id, name]
+                self.comboBoxMVPlots.addItem(name, userData=data)
 
         self.hide()
         self.show()
+        
+        
+        
+    def move_widget_between_layouts(self,source_layout, target_layout, widget, row=None, col=None):
+        """
+        Move a widget from source_layout to a specific position in target layout,  (row, col) if target layout is a QGridLayout.
+        This function also inserts a placeholder in the original position to maintain layout integrity.
+        """
+        # Remove widget from source layout
+        index = source_layout.indexOf(widget)
+        # source_layout.removeWidget(widget)
+        widget.hide()
+        # If the source layout is a grid, handle placeholders differently
+        if isinstance(source_layout, QGridLayout):
+            placeholder = QWidget()
+            placeholder.setFixedSize(widget.size())
+            src_row, src_col, _, _ = source_layout.getItemPosition(index)
+            source_layout.addWidget(placeholder, src_row, src_col)
+        else:
+            placeholder = QWidget()  # Create an empty placeholder widget for non-grid layouts
+            placeholder.setFixedSize(widget.size())
+            source_layout.addWidget( placeholder)
+            
+            
+        if isinstance(target_layout, QGridLayout):
+            # Add widget to the target grid layout
+            target_layout.addWidget(widget, row, col)
+        else:
+            # Add widget to the target layout
+            target_layout.addWidget(widget)
+        widget.show()  # Ensure the widget is visible in the new layout
 
     def add_plotwidget_to_tree(self):
         """Adds plot widget to plot selector

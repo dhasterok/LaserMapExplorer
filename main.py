@@ -5354,6 +5354,26 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #scalarMappable = plt.cm.ScalarMappable(cmap=self.get_colormap(), norm=norm)
 
         return norm
+    
+    def custom_discrete_colormap(self, colors=None, colormap=None):
+        """Create a colormap from user-defined colors
+
+        Parameters
+        ----------
+        colors : list
+            Colors used to produce custom colormap.
+
+        Returns
+        -------
+        matplotlib.colormap
+            Discrete colormap.
+        """
+        if colormap and not colors:
+
+        num_colors = len(colors)
+        colormap = ListedColormap.from_list("custom_colormap", colors, N=num_colors)
+
+        return colormap
 
 
 
@@ -6664,16 +6684,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         n_clusters = len(unique_groups)
 
         # Extract colors from the colormap and assign to self.group_cmap
-        # cmap = self.get_colormap(n_clusters)
-        # colors = [cmap(i) for i in range(cmap.N)]
-        # for label, color in zip(unique_groups, colors):
-        #     self.group_cmap[label] = color
+        cmap = self.get_colormap(n_clusters)
+        colors = [cmap(i) for i in range(cmap.N)]
+        for label, color in zip(unique_groups, colors):
+            self.group_cmap[label] = color
 
         # boundaries = np.arange(-0.5, n_clusters, 1)
         # norm = BoundaryNorm(boundaries, cmap.N, clip=True)
         norm = self.color_norm(style, n=n_clusters)
 
-        cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect = self.aspect_ratio)
+        #cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect = self.aspect_ratio)
+        cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=style['Colors']['Colormap'], norm=norm, aspect = self.aspect_ratio)
 
         self.add_colorbar(canvas, cax, style, None, cbartype='discrete', grouplabels=np.arange(0, n_clusters), norm=norm)
 
@@ -8712,6 +8733,20 @@ class quickView(QDialog, Ui_QuickViewDialog):
     #     mime_data = self.tableWidget.mimeData(self.tableWidget.selectedIndexes())
     #     drag.setMimeData(mime_data)
     #     drag.exec_(Qt.MoveAction)
+    def dropEvent(self, event):
+        if event.source() == self.table_widget:
+            super().dropEvent(event)
+        else:
+            dropped_index = self.table_widget.indexAt(event.pos())
+            if not dropped_index.isValid():
+                return
+            selected_rows = sorted(set(index.row() for index in self.table_widget.selectedIndexes()))
+            if dropped_index.row() > selected_rows[-1]:
+                dropped_index = self.table_widget.indexFromItem(self.table_widget.item(dropped_index.row() - len(selected_rows), 0))
+            for row in selected_rows:
+                self.move_row(row, dropped_index.row())
+                if row < dropped_index.row():
+                    dropped_index = self.table_widget.indexFromItem(self.table_widget.item(dropped_index.row() + 1, 0))
 
     def dropEvent(self, event):
         print('dropEvent')

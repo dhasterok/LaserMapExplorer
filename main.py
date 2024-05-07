@@ -3426,6 +3426,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.styles['Cluster Score']['Colors']['CScale'] = 'linear'
 
         self.styles['Cluster']['Colors']['CScale'] = 'discrete'
+        self.styles['Cluster']['Markers']['Alpha'] = 100
 
         self.styles['PCA Score']['Colors']['CScale'] = 'linear'
         self.styles['PCA Score']['Colors']['ColorByField'] = 'PCA Score'
@@ -4766,16 +4767,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.update_SV()
 
-    def get_cluster_colormap(self, cluster_dict, alpha=1):
+    def get_cluster_colormap(self, cluster_dict, alpha=100):
         cluster_color = []
+        cluster_label = []
+        alpha = int(2.55*alpha)
+        print(alpha)
 
         for c in range(cluster_dict['n_clusters']):
-            tmp = self.get_rgb_color(cluster_dict[c]['color'])
-            cluster_color.append(tmp.append(alpha))
+            cluster_color.append(cluster_dict[c]['color'])
+            cluster_label.append(cluster_dict[c]['name'])
 
         cmap = colors.ListedColormap(cluster_color, N=len(cluster_color))
 
-        return cluster_color, cmap
+        return cluster_color, cluster_label, cmap
 
     def get_colormap(self, N=None):
         """Gets the color map
@@ -5467,7 +5471,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.array_size = (self.y.nunique(), self.x.nunique())
 
-    def add_colorbar(self, canvas, cax, style, cbartype='continuous', grouplabels=None):
+    def add_colorbar(self, canvas, cax, style, cbartype='continuous', grouplabels=None, groupcolors=None):
         """Adds a colorbar to a MPL figure
 
         :param canvas: canvas object
@@ -5494,7 +5498,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         if style['Colors']['Direction'] == 'vertical':
             if cbartype == 'discrete':
-                cbar = canvas.axes.legend(loc='upper right', fontsize=style['Text']['FontSize'], frameon=False, ncol=1)
+                p = [None]*len(grouplabels)
+                for i, label in enumerate(grouplabels):
+                    p[i] = canvas.axes.fill([0,0,0,0],[0,0,0,0],edgecolor=None, facecolor=groupcolors[i])
+                cbar = canvas.axes.legend(p, grouplabels, fontsize=style['Text']['FontSize'], frameon=False, ncol=1)
             else:
                 if self.comboBoxPlotType.currentText() == 'correlation':
                     loc = 'left'
@@ -5517,8 +5524,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # elif cbartype == 'discrete':
         #     ticks = np.arange(0, len(grouplabels))
         #     cbar.set_ticks(ticks=ticks, labels=grouplabels, minor=False)
-        else:
-            print('(add_colorbar) Unknown type: '+cbartype)
+        #else:
+        #    print('(add_colorbar) Unknown type: '+cbartype)
 
     def color_norm(self, style, n=None):
         """Normalize colors for colormap
@@ -6883,7 +6890,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # norm = self.color_norm(style, n=n_clusters)
 
         #cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=style['Colors']['Colormap'], norm=norm, aspect = self.aspect_ratio)
-        cluster_color, cmap = self.get_cluster_colormap(self.cluster_dict[self.cluster_dict['active method']],alpha=1)
+        cluster_color, cluster_label, cmap = self.get_cluster_colormap(self.cluster_dict[self.cluster_dict['active method']],alpha=style['Markers']['Alpha'])
         print(cluster_color)
         print(cmap)
         boundaries = np.arange(-0.5, n_clusters, 1)
@@ -6895,7 +6902,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         glabels = []
         for i in range(self.cluster_dict[method]['n_clusters']):
             glabels.append(self.cluster_dict[method][i]['name'])
-        self.add_colorbar(canvas, cax, style, cbartype='discrete', grouplabels=glabels)
+        self.add_colorbar(canvas, cax, style, cbartype='discrete', grouplabels=glabels, groupcolors=cluster_color)
 
         canvas.fig.subplots_adjust(left=0.05, right=1)  # Adjust these values as needed
         canvas.fig.tight_layout()
@@ -7135,18 +7142,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 quantiles = [0.25, 0.5, 0.75]
             case 3:
                 quantiles = [0.05, 0.25, 0.5, 0.75, 0.95]
+            
+        if self.comboBoxColorByField.currentText() == 'Cluster' and self.comboBoxColorField.currentText() != '':
+            method = self.comboBoxColorField.currentText()
+            cluster_dict = self.cluster_dict[method]
+            cluster_color, cluster_label, cmap = self.get_cluster_colormap(cluster_dict, alpha=style['Markers']['Alpha'])
 
-        if self.comboBoxColorByField.currentText() == 'Cluster':
-            clusters = [int(c) for c in self.current_group['selected_clusters']]
+            clusters = cluster_dict['selected_clusters']
             cluster_flag = True
         else:
-            clusters = None
             cluster_flag = False
 
         match plot_type:
             case 'Radar':
                 axes_interval = 5
-                if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['Cluster'] and cluster_flag:
+                if cluster_flag and method in self.data[self.sample_id]['computed_data']['Cluster']:
                     # Get the cluster labels for the data
                     # cluster_labels = self.toggle_mass(self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']])
                     cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']]
@@ -7163,7 +7173,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     canvas.fig, canvas.axes = radar.plot()
             case 'TEC':
                 yl = [np.inf, -np.inf]
-                if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['Cluster'] and cluster_flag:
+                if cluster_flag and method in self.data[self.sample_id]['computed_data']['Cluster']:
                     # Get the cluster labels for the data
                     cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']]
 

@@ -4766,6 +4766,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.update_SV()
 
+    def get_cluster_colormap(self, cluster_dict, alpha=1):
+        cluster_color = []
+
+        for c in range(cluster_dict['n_clusters']):
+            tmp = self.get_rgb_color(cluster_dict[c]['color'])
+            cluster_color.append(tmp.append(alpha))
+
+        cmap = colors.ListedColormap(cluster_color, N=len(cluster_color))
+
+        return cluster_color, cmap
+
     def get_colormap(self, N=None):
         """Gets the color map
 
@@ -4781,14 +4792,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if N is not None:
             cmap = plt.get_cmap(self.styles[plot_type]['Colors']['Colormap'], N)
         else:
-            if (plot_type == 'Clusters') | (self.comboBoxColorByField.currentText() == 'Clusters'):
-                method = self.cluster_dict['active method']
-                for c in self.cluster_dict[method]['selected clusters']:
-                    cmap[c].append = self.hex2rgb(self.cluster_dict[method][c]['color']) + (self.styles['Markers']['Alpha']/100,)
-
-                return cmap
-            else:
-                cmap = plt.get_cmap(self.styles[plot_type]['Colors']['Colormap'])
+            cmap = plt.get_cmap(self.styles[plot_type]['Colors']['Colormap'])
 
         if self.styles[plot_type]['Colors']['Reverse']:
             cmap = cmap.reversed()
@@ -5538,7 +5542,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         return norm
     
-    def custom_discrete_colormap(self, colors=None, colormap=None):
+    def custom_discrete_colormap(self, colors=None):
         """Create a colormap from user-defined colors
 
         Parameters
@@ -5551,15 +5555,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         matplotlib.colormap
             Discrete colormap.
         """
-        if colormap and not colors:
-            pass
+        cmap = ListedColormap.from_list("custom_colormap", colors, N=len(colors))
 
-        num_colors = len(colors)
-        colormap = ListedColormap.from_list("custom_colormap", colors, N=num_colors)
-
-        return colormap
-
-
+        return cmap
 
 
     # -------------------------------------
@@ -6877,19 +6875,27 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         n_clusters = len(unique_groups)
 
         # Extract colors from the colormap and assign to self.group_cmap
-        cmap = self.get_colormap(n_clusters)
-        colors = [cmap(i) for i in range(cmap.N)]
-        for label, color in zip(unique_groups, colors):
-            self.group_cmap[label] = color
+        # cmap = self.get_colormap(n_clusters)
+        # colors = [cmap(i) for i in range(cmap.N)]
+        # for label, color in zip(unique_groups, colors):
+        #     self.group_cmap[label] = color
 
-        # boundaries = np.arange(-0.5, n_clusters, 1)
-        # norm = BoundaryNorm(boundaries, cmap.N, clip=True)
-        norm = self.color_norm(style, n=n_clusters)
+        # norm = self.color_norm(style, n=n_clusters)
 
-        #cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect = self.aspect_ratio)
-        cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=style['Colors']['Colormap'], norm=norm, aspect = self.aspect_ratio)
+        #cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=style['Colors']['Colormap'], norm=norm, aspect = self.aspect_ratio)
+        cluster_color, cmap = self.get_cluster_colormap(self.cluster_dict[self.cluster_dict['active method']],alpha=1)
+        print(cluster_color)
+        print(cmap)
+        boundaries = np.arange(-0.5, n_clusters, 1)
+        norm = colors.BoundaryNorm(boundaries, cmap.N, clip=True)
 
-        self.add_colorbar(canvas, cax, style, None, cbartype='discrete', grouplabels=np.arange(0, n_clusters), norm=norm)
+        cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect = self.aspect_ratio)
+
+        #self.add_colorbar(canvas, cax, style, None, cbartype='discrete', grouplabels=np.arange(0, n_clusters), norm=norm)
+        glabels = []
+        for i in range(self.cluster_dict[method]['n_clusters']):
+            glabels.append(self.cluster_dict[method][i]['name'])
+        self.add_colorbar(canvas, cax, style, cbartype='discrete', grouplabels=glabels)
 
         canvas.fig.subplots_adjust(left=0.05, right=1)  # Adjust these values as needed
         canvas.fig.tight_layout()
@@ -7037,21 +7043,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.clear_layout(self.widgetSingleView.layout())
         self.widgetSingleView.layout().addWidget(canvas)
-
-    def update_plot_with_new_colormap(self):
-        if self.fig and self.clustering_results:
-            for name, results in self.clustering_results.items():
-                groups = results['groups']
-                method_name = results['method_name']
-                fuzzy_cluster_number = results['fuzzy_cluster_number']
-                # Find the corresponding axis to update
-                ax_index = list(self.clustering_results.keys()).index(name)
-                ax = self.axs[ax_index]
-                # Redraw the plot with the new colormap on the existing axis
-                self.plot_clustering_result(ax, groups, method_name, fuzzy_cluster_number)
-
-            # Redraw the figure canvas to reflect the updates
-            self.fig.canvas.draw_idle()
 
     def update_cluster_ui(self):
         """Updates clustering-related widgets

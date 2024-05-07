@@ -46,7 +46,8 @@ from src.ui.AnalyteSelectionDialog import Ui_Dialog
 from src.ui.PreferencesWindow import Ui_PreferencesWindow
 from src.ui.ExcelConcatenator import Ui_ExcelConcatenator
 from src.ui.QuickViewDialog import Ui_QuickViewDialog
-
+# __file__ holds full path of current python file
+basedir = os.path.dirname(__file__)
 pg.setConfigOption('imageAxisOrder', 'row-major') # best performance
 ## sphinx-build -b html docs/source/ docs/build/html
 ## !pyrcc5 resources.qrc -o src/ui/resources_rc.py
@@ -417,7 +418,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Select analyte Tab
         #-------------------------
-        self.ref_data = pd.read_excel('resources/app_data/earthref.xlsx')
+        self.ref_data = pd.read_excel(os.path.join(basedir,'resources/app_data/earthref.xlsx'))
         ref_list = self.ref_data['layer']+' ['+self.ref_data['model']+'] '+ self.ref_data['reference']
         self.comboBoxCorrelationMethod.activated.connect(self.correlation_method_callback)
         self.checkBoxCorrelationSquared.stateChanged.connect(self.correlation_squared_callback)
@@ -573,7 +574,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # ternary colormaps
         # create ternary colors dictionary
-        df = pd.read_csv('resources/styles/ternary_colormaps.csv')
+        df = pd.read_csv(os.path.join(basedir,'resources/styles/ternary_colormaps.csv'))
         self.ternary_colormaps = df.to_dict(orient='records')
         self.comboBoxTernaryColormap.clear()
         schemes = []
@@ -953,7 +954,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         dialog.setFileMode(QFileDialog.Directory)
         # Set the default directory to the current working directory
         # dialog.setDirectory(os.getcwd())
-        dialog.setDirectory('/Users/shavinkalu/Library/CloudStorage/GoogleDrive-a1904121@adelaide.edu.au/.shortcut-targets-by-id/1r_MeSExALnv9lHE58GoG7pbtC8TOwSk4/laser_mapping/Alex_garnet_maps/')
+        dialog.setDirectory(basedir)
         if dialog.exec_():
             self.selected_directory = dialog.selectedFiles()[0]
             file_list = os.listdir(self.selected_directory)
@@ -3463,7 +3464,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         ``MainWindow.comboBoxStyleTheme``.  After setting list, the comboBox is set to default style.
         """
         # read filenames with *.sty
-        file_list = os.listdir('resources/styles/')
+        file_list = os.listdir(os.path.join(basedir,'resources/styles/'))
         style_list = [file.replace('.sty','') for file in file_list if file.endswith('.sty')]
 
         # add default to list
@@ -3487,7 +3488,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.reset_default_styles()
             return
 
-        with open(f'resources/styles/{name}.sty', 'rb') as file:
+        with open(os.path.join(basedir,f'resources/styles/{name}.sty'), 'rb') as file:
             self.styles = pickle.load(file)
 
     def input_theme_name_dlg(self):
@@ -3504,7 +3505,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.comboBoxStyleTheme.setCurrentText(name)
 
             # append theme to file of saved themes
-            with open(f'resources/styles/{name}.sty', 'wb') as file:
+            with open(os.path.join(basedir,f'resources/styles/{name}.sty'), 'wb') as file:
                 pickle.dump(self.styles, file, protocol=pickle.HIGHEST_PROTOCOL)
         else:
             # throw a warning that name is not saved
@@ -10844,7 +10845,8 @@ def main():
     global app
 
     app = QtWidgets.QApplication(sys.argv)
-
+    # Uncomment this line to set icon to App
+    app.setWindowIcon(QtGui.QIcon(os.path.join(basedir, '/resources/icons/LaME-64.png')))
     main = MainWindow()
 
     # Set the main window to fullscreen

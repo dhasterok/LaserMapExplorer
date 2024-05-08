@@ -3,7 +3,7 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtCore import Qt, QObject, QTimer, pyqtSignal, QRectF, QPointF
 from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QHBoxLayout, QVBoxLayout, QGridLayout, QMessageBox, QHeaderView, QMenu, QGraphicsRectItem, QStatusBar
 from PyQt5.QtWidgets import QFileDialog, QProgressDialog, QWidget, QTabWidget, QDialog, QLabel, QListWidgetItem, QTableWidget, QInputDialog, QAbstractItemView, QStyledItemDelegate, QProgressBar
-from PyQt5.QtGui import QIntValidator, QDoubleValidator, QColor, QImage, QPainter, QPixmap, QTransform, QFont, QPen, QCursor, QPainter, QBrush, QStandardItemModel, QStandardItem, QTextCursor
+from PyQt5.QtGui import QIntValidator, QDoubleValidator, QColor, QImage, QPainter, QPixmap, QTransform, QFont, QPen, QCursor, QPainter, QBrush, QStandardItemModel, QStandardItem, QTextCursor, QDropEvent
 from pyqtgraph import PlotWidget, ScatterPlotItem, mkPen, AxisItem, PlotDataItem
 from pyqtgraph.Qt import QtWidgets
 from pyqtgraph.GraphicsScene import exportDialog
@@ -5339,7 +5339,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             # get data for current analyte
             current_plot_df = self.get_map_data(self.sample_id, field=analyte, field_type='Analyte')
-            reshaped_array = np.reshape(current_plot_df['array'], self.array_size, order=self.order)
+            reshaped_array = np.reshape(current_plot_df['array'].values, self.array_size, order=self.order)
 
             # add image to canvas
             cax = canvas.axes.imshow(reshaped_array, cmap=style['Colors']['Colormap'],  aspect=self.aspect_ratio, interpolation='none')
@@ -8906,21 +8906,23 @@ class quickView(QDialog, Ui_QuickViewDialog):
         self.main_window = parent
         self.analyte_list = self.main_window.data[self.main_window.sample_id]['analyte_info']['analytes']
         self.quickview_list = self.main_window.QV_analyte_list
-
+        
+        self.tableWidget = TableWidgetDragRows()
+        
         # flexible column widths
-        header = self.tableWidget.horizontalHeader()
-        header.setSectionResizeMode(0,QHeaderView.Stretch)
-        header.setSectionResizeMode(1,QHeaderView.ResizeToContents)
+        # header = self.tableWidget.horizontalHeader()
+        # header.setSectionResizeMode(0,QHeaderView.Stretch)
+        # header.setSectionResizeMode(1,QHeaderView.ResizeToContents)
 
-        # Set selection rules
-        self.tableWidget.setSelectionBehavior(QTableWidget.SelectRows)
-        self.tableWidget.setSelectionMode(QTableWidget.SingleSelection)
+        # # Set selection rules
+        # self.tableWidget.setSelectionBehavior(QTableWidget.SelectRows)
+        # self.tableWidget.setSelectionMode(QTableWidget.SingleSelection)
 
-        # Set drag and drop mode
-        self.tableWidget.setDragEnabled(True)
-        self.tableWidget.viewport().setAcceptDrops(True)
-        self.tableWidget.setDropIndicatorShown(True)
-        self.tableWidget.cellClicked.connect(lambda: self.mousePressEvent(event))
+        # # Set drag and drop mode
+        # self.tableWidget.setDragEnabled(True)
+        # self.tableWidget.viewport().setAcceptDrops(True)
+        # self.tableWidget.setDropIndicatorShown(True)
+        # self.tableWidget.cellClicked.connect(lambda: self.mousePressEvent(event))
 
         # setup sort menu and associated toolButton
         sortmenu_items = ['alphabetical','atomic number','mass','compatibility']
@@ -8931,6 +8933,11 @@ class quickView(QDialog, Ui_QuickViewDialog):
 
         # fill table
         self.tableWidget.setRowCount(len(self.analyte_list))
+        self.tableWidget.setColumnCount(2)
+        self.tableWidget.setHorizontalHeaderLabels(['Analyte', 'Show'])
+        header = self.tableWidget.horizontalHeader()
+        header.setSectionResizeMode(0,QHeaderView.Stretch)
+        header.setSectionResizeMode(1,QHeaderView.ResizeToContents)
         for row, analyte in enumerate(self.analyte_list):
             # analyte text in column 1
             item = QTableWidgetItem(analyte)
@@ -8943,125 +8950,209 @@ class quickView(QDialog, Ui_QuickViewDialog):
 
         # close dialog signal
         self.pushButtonClose.clicked.connect(lambda: self.done(0))
-
+        self.layout().insertWidget(0,self.tableWidget)
         self.show()
+        
+        
+    # def mousePressEvent(self, event):
+    #     print('mousePressEvent')
+    #     if event.buttons() == Qt.LeftButton:
+    #         self.drag_start_position = event.pos()
+    #     else:
+    #         super(quickView, self).mousePressEvent(event)
 
-    def mousePressEvent(self, event):
-        print('mousePressEvent')
-        if event.buttons() == Qt.LeftButton:
-            self.drag_start_position = event.pos()
-        else:
-            super(quickView, self).mousePressEvent(event)
-
-    def mouseMoveEvent(self, event):
-        print('mouseEvent')
-        if not event.buttons() & Qt.LeftButton:
-            return
-        if (event.pos() - self.drag_start_position).manhattanLength() < QApplication.startDragDistance():
-            return
-        item = self.tableWidget.itemAt(self.drag_start_position)
-        if item is None:
-            return
-        drag = QDrag(self)
-        mime_data = self.tableWidget.mimeData(self.tableWidget.selectedIndexes())
-        drag.setMimeData(mime_data)
-        drag.exec_(Qt.MoveAction)
-        #super(quickView, self).mouseMoveEvent(event)
-
-    def dropEvent(self, event):
-        if event.source() == self.table_widget:
-            super().dropEvent(event)
-        else:
-            dropped_index = self.table_widget.indexAt(event.pos())
-            if not dropped_index.isValid():
-                return
-            selected_rows = sorted(set(index.row() for index in self.table_widget.selectedIndexes()))
-            if dropped_index.row() > selected_rows[-1]:
-                dropped_index = self.table_widget.indexFromItem(self.table_widget.item(dropped_index.row() - len(selected_rows), 0))
-            for row in selected_rows:
-                self.move_row(row, dropped_index.row())
-                if row < dropped_index.row():
-                    dropped_index = self.table_widget.indexFromItem(self.table_widget.item(dropped_index.row() + 1, 0))
-        super(quickView, self).mouseMoveEvent(event)
+    # def mouseMoveEvent(self, event):
+    #     print('mouseEvent')
+    #     if not event.buttons() & Qt.LeftButton:
+    #         return
+    #     if (event.pos() - self.drag_start_position).manhattanLength() < QApplication.startDragDistance():
+    #         return
+    #     item = self.tableWidget.itemAt(self.drag_start_position)
+    #     if item is None:
+    #         return
+    #     drag = QDrag(self)
+    #     mime_data = self.tableWidget.mimeData(self.tableWidget.selectedIndexes())
+    #     drag.setMimeData(mime_data)
+    #     drag.exec_(Qt.MoveAction)
+    #     #super(quickView, self).mouseMoveEvent(event)
 
     # def dropEvent(self, event):
-    #     print('dropEvent')
+    #     if event.source() == self.table_widget:
+    #         super().dropEvent(event)
+    #     else:
+    #         dropped_index = self.table_widget.indexAt(event.pos())
+    #         if not dropped_index.isValid():
+    #             return
+    #         selected_rows = sorted(set(index.row() for index in self.table_widget.selectedIndexes()))
+    #         if dropped_index.row() > selected_rows[-1]:
+    #             dropped_index = self.table_widget.indexFromItem(self.table_widget.item(dropped_index.row() - len(selected_rows), 0))
+    #         for row in selected_rows:
+    #             self.move_row(row, dropped_index.row())
+    #             if row < dropped_index.row():
+    #                 dropped_index = self.table_widget.indexFromItem(self.table_widget.item(dropped_index.row() + 1, 0))
+    #     super(quickView, self).mouseMoveEvent(event)
 
-    #     # Get the target row where the item was dropped
-    #     target_row = self.dropIndicatorPosition()
-    #     if target_row == -1:
-    #         target_row = self.rowCount() - 1
+    # # def dropEvent(self, event):
+    # #     print('dropEvent')
 
-    #     # Get the selected rows
-    #     selected_rows = sorted(set(index.row() for index in self.selectedIndexes()))
+    # #     # Get the target row where the item was dropped
+    # #     target_row = self.dropIndicatorPosition()
+    # #     if target_row == -1:
+    # #         target_row = self.rowCount() - 1
 
-    #     # Adjust the target row if dropping below selected rows
-    #     if target_row > selected_rows[-1]:
-    #         target_row = max(target_row - len(selected_rows) + 1, 0)
+    # #     # Get the selected rows
+    # #     selected_rows = sorted(set(index.row() for index in self.selectedIndexes()))
 
-    #     # Move the selected rows to the target row
-    #     for row in selected_rows:
-    #         self.move_row(row, target_row)
-    #         if row < target_row:
-    #             target_row += 1
+    # #     # Adjust the target row if dropping below selected rows
+    # #     if target_row > selected_rows[-1]:
+    # #         target_row = max(target_row - len(selected_rows) + 1, 0)
 
-    #     # Call the default dropEvent to complete the operation
-    #     super(quickView, self).dropEvent(event)
+    # #     # Move the selected rows to the target row
+    # #     for row in selected_rows:
+    # #         self.move_row(row, target_row)
+    # #         if row < target_row:
+    # #             target_row += 1
 
-    def move_row(self, source_row, target_row):
-        print('move_row')
-        items = []
-        for column in range(self.columnCount()):
-            items.append(self.takeItem(source_row, column))
-        for column in range(self.columnCount()):
-            self.setItem(target_row, column, items[column])
+    # #     # Call the default dropEvent to complete the operation
+    # #     super(quickView, self).dropEvent(event)
 
-    def button_save(self):
-        """Gets list of analytes and group name when Save button is clicked
+    # def move_row(self, source_row, target_row):
+    #     print('move_row')
+    #     items = []
+    #     for column in range(self.columnCount()):
+    #         items.append(self.takeItem(source_row, column))
+    #     for column in range(self.columnCount()):
+    #         self.setItem(target_row, column, items[column])
 
-        Retrieves the user defined name from ``quickView.lineEditViewName`` and list of analytes using ``quickView.column_to_list()``
-        and adds them to a dictionary item with the name defined as the key.
+    # def button_save(self):
+    #     """Gets list of analytes and group name when Save button is clicked
 
-        Raises
-        ------
-            A warning is raised if the user does not provide a name.  The list is not added to the dictionary in this case.
-        """        
-        name = self.lineEditViewName.currentText()
-        if not name:
-            QMessageBox.warning(self.quickView, "QuickView: Warning", "Enter a name for the new list.")
-            return
-        elif name in list(self.quickview_list.keys()):
-            # ask user if they wish to overwite the list item
-            # if no, return
-            pass
-        self.quickview_list.update({name: self.column_to_list()})
+    #     Retrieves the user defined name from ``quickView.lineEditViewName`` and list of analytes using ``quickView.column_to_list()``
+    #     and adds them to a dictionary item with the name defined as the key.
 
-        self.main_window.comboBoxQVList.clear()
-        self.main_window.comboBoxQVList.addItems(self.quickview_list.keys())
+    #     Raises
+    #     ------
+    #         A warning is raised if the user does not provide a name.  The list is not added to the dictionary in this case.
+    #     """        
+    #     name = self.lineEditViewName.currentText()
+    #     if not name:
+    #         QMessageBox.warning(self.quickView, "QuickView: Warning", "Enter a name for the new list.")
+    #         return
+    #     elif name in list(self.quickview_list.keys()):
+    #         # ask user if they wish to overwite the list item
+    #         # if no, return
+    #         pass
+    #     self.quickview_list.update({name: self.column_to_list()})
 
-        # append theme to file of saved themes
-        self.main_window.export_dict_to_csv(self.quickview_list, 'resources/styles/qv_lists.csv')
+    #     self.main_window.comboBoxQVList.clear()
+    #     self.main_window.comboBoxQVList.addItems(self.quickview_list.keys())
+
+    #     # append theme to file of saved themes
+    #     self.main_window.export_dict_to_csv(self.quickview_list, 'resources/styles/qv_lists.csv')
         
-    def column_to_list(self):
-        """Extracts selected analytes from the table into a list
+    # def column_to_list(self):
+    #     """Extracts selected analytes from the table into a list
 
-        Analytes from column 0 of the table with checked boxes in column 1 are added to a list for use with plotting
-        maps in ``MainWindow.layoutQuickView``.  The order is set by the user dragging and droping to swap rows.
+    #     Analytes from column 0 of the table with checked boxes in column 1 are added to a list for use with plotting
+    #     maps in ``MainWindow.layoutQuickView``.  The order is set by the user dragging and droping to swap rows.
 
-        Returns
-        -------
-        list
-            Analytes for display in ``MainWindow.layoutQuickView``
-        """        
-        quickview_list = []
-        for row in range(self.tableWidget.rowCount()):
-            # get analyte
-            item = self.tableWidget.item(row, 0)
-            # get checkbox
-            checkbox = self.tableWidget.cellWidget(row, 1)
-            if item is not None and checkbox.isChecked():
-                quickview_list.append(item.text())
-        return quickview_list         
+    #     Returns
+    #     -------
+    #     list
+    #         Analytes for display in ``MainWindow.layoutQuickView``
+    #     """        
+    #     quickview_list = []
+    #     for row in range(self.tableWidget.rowCount()):
+    #         # get analyte
+    #         item = self.tableWidget.item(row, 0)
+    #         # get checkbox
+    #         checkbox = self.tableWidget.cellWidget(row, 1)
+    #         if item is not None and checkbox.isChecked():
+    #             quickview_list.append(item.text())
+    #     return quickview_list         
+
+
+class TableWidgetDragRows(QTableWidget):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.setDragEnabled(True)
+        self.setAcceptDrops(True)
+        self.viewport().setAcceptDrops(True)
+        self.setDragDropOverwriteMode(False)
+        self.setDropIndicatorShown(True)
+
+        self.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.setDragDropMode(QAbstractItemView.InternalMove)
+
+    def dropEvent(self, event: QDropEvent):
+        if not event.isAccepted() and event.source() == self:
+            drop_row = self.drop_on(event)
+
+            rows = sorted(set(item.row() for item in self.selectedItems()))
+            rows_to_move = []
+            for row_index in rows:
+                row_data = []
+                for column_index in range(self.columnCount()):
+                    item = self.item(row_index, column_index)
+                    if item:
+                        row_data.append(QTableWidgetItem(item))
+                    else:
+                        widget = self.cellWidget(row_index, column_index)
+                        if isinstance(widget, QCheckBox):
+                            state = widget.isChecked()
+                            row_data.append(state)
+                        else:
+                            row_data.append(None)
+                rows_to_move.append(row_data)
+            
+            
+            for row_index in reversed(rows):
+                self.removeRow(row_index)
+                if row_index < drop_row:
+                    drop_row -= 1
+
+            for row_index, data in enumerate(rows_to_move):
+                row_pos = row_index + drop_row
+                self.insertRow(row_pos)
+                for column_index, value in enumerate(data):
+                    if isinstance(value, QTableWidgetItem):
+                        self.setItem(row_pos, column_index, value)
+                    elif isinstance(value, bool):  # It's a checkbox state
+                        checkbox = QCheckBox()
+                        checkbox.setChecked(value)
+                        self.setCellWidget(row_pos, column_index, checkbox)
+            event.accept()
+            #select the chosen row
+            self.select_rows(drop_row, len(rows_to_move))
+        super().dropEvent(event)
+    
+    def select_rows(self, start_row, num_rows):
+        for row in range(start_row, start_row + num_rows):
+            for column in range(self.columnCount()):
+                item = self.item(row, column)
+                if item:
+                    item.setSelected(True)
+
+    def drop_on(self, event):
+        index = self.indexAt(event.pos())
+        if not index.isValid():
+            return self.rowCount()
+
+        return index.row() + 1 if self.is_below(event.pos(), index) else index.row()
+
+    def is_below(self, pos, index):
+        rect = self.visualRect(index)
+        margin = 2
+        if pos.y() - rect.top() < margin:
+            return False
+        elif rect.bottom() - pos.y() < margin:
+            return True
+        # noinspection PyTypeChecker
+        return rect.contains(pos, True) and not (int(self.model().flags(index)) & Qt.ItemIsDropEnabled) and pos.y() >= rect.center().y()
+
+
 
 
 # Excel concatenator gui

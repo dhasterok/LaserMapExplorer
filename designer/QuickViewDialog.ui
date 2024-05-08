@@ -15,31 +15,6 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QTableWidget" name="tableWidget">
-     <property name="font">
-      <font>
-       <pointsize>11</pointsize>
-      </font>
-     </property>
-     <attribute name="horizontalHeaderVisible">
-      <bool>true</bool>
-     </attribute>
-     <attribute name="verticalHeaderCascadingSectionResizes">
-      <bool>false</bool>
-     </attribute>
-     <column>
-      <property name="text">
-       <string>Analyte</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Show</string>
-      </property>
-     </column>
-    </widget>
-   </item>
-   <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QLabel" name="label">

@@ -20,7 +20,7 @@ from matplotlib.collections import PathCollection
 import matplotlib.gridspec as gs
 import matplotlib.pyplot as plt
 from matplotlib.path import Path
-import matplotlib.patches as mpatches
+from matplotlib.patches import Patch
 import matplotlib.colors as colors
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.ticker as ticker
@@ -58,7 +58,7 @@ pg.setConfigOption('imageAxisOrder', 'row-major') # best performance
 ## !pyuic5 -x designer/ExcelConcatenator.ui -o src/ui/ExcelConcatenator.py
 # pylint: disable=fixme, line-too-long, no-name-in-module, trailing-whitespace
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
-    """_summary_
+    """MainWindow
 
     _extended_summary_
 
@@ -69,6 +69,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     Ui_MainWindow : _type_
         _description_
     """
+    # # for button show hide
+    # def mouseEnter(self, event):
+    #     self.tool_button.setVisible(True)
+
+    # def mouseLeave(self, event):
+    #     self.tool_button.setVisible(False)
+
+
+
     def __init__(self, *args, **kwargs):
         """
         Initializes the GUI and sets up connections from widgets to functions
@@ -2253,12 +2262,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             filter_info = { 'analyte_1': analyte_1, 'analyte_2': analyte_2, 'Ratio': ratio,'norm':norm ,'f_min': f_min,'f_max':f_max, 'use':True}
             self.data[self.sample_id]['filter_info'].loc[len(self.data[self.sample_id]['filter_info'])]=filter_info
 
-    def remove_selected_rows(self,sample):
+    def remove_selected_rows(self):
         """Remove selected rows from filter table.
 
-        :param sample:
-        :type sample:
+        Removes selected rows from ``MainWindow.tableWidgetFilter``.
         """
+        sample_id = self.sample_id
         # We loop in reverse to avoid issues when removing rows
         for row in range(self.tableWidgetFilters.rowCount()-1, -1, -1):
             chkBoxItem = self.tableWidgetFilters.item(row, 7)
@@ -2269,10 +2278,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if chkBoxItem.checkState() == QtCore.Qt.Checked:
                 self.tableWidgetFilters.removeRow(row)
                 if not ratio:
-                    self.data[self.sample_id]['filter_info'].drop(self.data[self.sample_id]['filter_info'][(self.data[self.sample_id]['filter_info']['analyte_1'] == analyte_1)& (self.data[self.sample_id]['filter_info']['Ratio'] == ratio)].index, inplace=True)
+                    self.data[sample_id]['filter_info'].drop(self.data[sample_id]['filter_info'][(self.data[sample_id]['filter_info']['analyte_1'] == analyte_1)& (self.data[sample_id]['filter_info']['Ratio'] == ratio)].index, inplace=True)
                 else:
                     # Remove corresponding row from filter_df
-                    self.data[self.sample_id]['filter_info'].drop(self.data[self.sample_id]['filter_info'][(self.data[self.sample_id]['filter_info']['analyte_1'] == analyte_1)& (self.data[self.sample_id]['filter_info']['analyte_2'] == analyte_2)].index, inplace=True)
+                    self.data[sample_id]['filter_info'].drop(self.data[sample_id]['filter_info'][(self.data[sample_id]['filter_info']['analyte_1'] == analyte_1)& (self.data[sample_id]['filter_info']['analyte_2'] == analyte_2)].index, inplace=True)
         self.apply_filters(sample_id)
 
     def apply_filters(self, fullmap=False):
@@ -2283,8 +2292,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :param fullmap: If True, filters are ignored, otherwise filter maps, Defaults to False
         :type fullmap: bool, optional"""
         #reset all masks in current sample id
-        self.data[self.sample_id]['polygon_mask'] = np.ones_like( self.data[self.sample_id]['mask'], dtype=bool)
-        self.data[self.sample_id]['filter_mask'] = np.ones_like( self.data[self.sample_id]['mask'], dtype=bool)
+        sample_id = self.sample_id
+        self.data[sample_id]['polygon_mask'] = np.ones_like( self.data[sample_id]['mask'], dtype=bool)
+        self.data[sample_id]['filter_mask'] = np.ones_like( self.data[sample_id]['mask'], dtype=bool)
 
 
         if fullmap:
@@ -2294,16 +2304,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.toolButtonMapMask.setChecked(False)
 
         elif self.toolButtonFilterToggle.isChecked():
-            # Check if rows in self.data[self.sample_id]['filter_info'] exist and filter array in current_plot_df
+            # Check if rows in self.data[sample_id]['filter_info'] exist and filter array in current_plot_df
             # by creating a mask based on f_min and f_max of the corresponding filter analytes
-            for index, filter_row in self.data[self.sample_id]['filter_info'].iterrows():
+            for index, filter_row in self.data[sample_id]['filter_info'].iterrows():
                 if filter_row['use']:
                     if not filter_row['analyte_2']:
-                        analyte_df = self.get_map_data(sample_id=self.sample_id, field=filter_row['analyte_1'], field_type = 'Analyte')
+                        analyte_df = self.get_map_data(sample_id=sample_id, field=filter_row['analyte_1'], field_type = 'Analyte')
                     else: #if ratio
-                        analyte_df = self.get_map_data(sample_id=self.sample_id, field=filter_row['analyte_1']+'/'+filter_row['analyte_2'], field_type='Ratio')
+                        analyte_df = self.get_map_data(sample_id=sample_id, field=filter_row['analyte_1']+'/'+filter_row['analyte_2'], field_type='Ratio')
 
-                    self.data[self.sample_id]['filter_mask'] = self.data[self.sample_id]['filter_mask'] & (analyte_df['array'].values <= filter_row['f_min']) | (analyte_df['array'].values >= filter_row['f_max'])
+                    self.data[sample_id]['filter_mask'] = self.data[sample_id]['filter_mask'] & (analyte_df['array'].values <= filter_row['f_min']) | (analyte_df['array'].values >= filter_row['f_max'])
         elif self.toolButtonMapPolygon.isChecked():
             # apply polygon mask
             # Iterate through each polygon in self.polygons[self.main_window.sample_id]
@@ -2314,7 +2324,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 if checkBox.isChecked():
                     p_id = int(self.tableWidgetPolyPoints.item(row,0).text())
 
-                    polygon_points = self.polygon.polygons[self.sample_id][p_id]
+                    polygon_points = self.polygon.polygons[sample_id][p_id]
                     polygon_points = [(x,y) for x,y,_ in polygon_points]
 
                     # Convert the list of (x, y) tuples to a list of points acceptable by Path
@@ -2332,7 +2342,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     # inside_polygon_mask = inside_polygon.reshape(self.array.shape)
 
                     # Update the polygon mask - include points that are inside this polygon
-                    self.data[self.sample_id]['polygon_mask'] &= inside_polygon
+                    self.data[sample_id]['polygon_mask'] &= inside_polygon
 
                     #clear existing polygon lines
                     self.polygon.clear_lines()
@@ -2341,22 +2351,28 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # apply map mask
             pass
 
-        self.data[self.sample_id]['mask'] = self.data[self.sample_id]['filter_mask'] & self.data[self.sample_id]['polygon_mask'] & self.data[self.sample_id]['axis_mask']
+        self.data[sample_id]['mask'] = self.data[sample_id]['filter_mask'] & self.data[sample_id]['polygon_mask'] & self.data[sample_id]['axis_mask']
         self.update_all_plots()
 
     def oround(self, val, order=2, dir=None):
-        """Rounds a number to specified digits after the order
+        """Rounds a single of value to n digits
 
-        :param val: number to round
-        :type val: float
-        :param order: number of orders to retain
-        :type order: int, optional
-        :param dir: direction for rounding, ``0`` for down, ``1`` for up, and ``None`` for nearest, Defaults to None
-        :type dir: int, optional
+        Round a single number to the first n digits.
 
-        :return: rounded number
-        :rtype: float
-        """
+        Parameters
+        ----------
+        val : float
+            number to round
+        order : int, optional
+            number of orders to retain, by default 2
+        dir : int, optional
+            direction for rounding, ``0`` for down, ``1`` for up, and ``None`` for nearest, by default None
+
+        Returns
+        -------
+        float
+            rounded matrix values
+        """        
         if val == 0:
             return 0
 
@@ -2369,19 +2385,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return np.round(val / 10**(power-order)) * 10**(power - order)
 
     def oround_matrix(self, val, order=2, dir=None):
-        """Rounds a number to specified digits after the order
+        """Rounds a matrix of values to n digits
 
-        :param val: number to round
-        :type val: float
-        :param order: number of orders to retain
-        :type order: int, optional
-        :param dir: direction for rounding, ``0`` for down, ``1`` for up, and ``None`` for nearest, Defaults to None
-        :type dir: int, optional
+        Rounds all numbers in a matrix to the first n digits.
 
-        :return: rounded number
-        :rtype: float
-        """
+        Parameters
+        ----------
+        val : float
+            number to round
+        order : int, optional
+            number of orders to retain, by default 2
+        dir : int, optional
+            direction for rounding, ``0`` for down, ``1`` for up, and ``None`` for nearest, by default None
 
+        Returns
+        -------
+        float
+            rounded matrix values
+        """        
         newval = np.zeros(np.shape(val))
 
         idx = (val != 0)
@@ -2396,19 +2417,26 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         return newval
 
     def dynamic_format(self, value, threshold=1e4, order=4, dir=None):
-        """Prepares number for display
+        """Prepares number for display as *str*
 
-        :param val: number to round
-        :type val: float
-        :param threshold: order of magnitude for determining display as floating point or expressing in engineering nootation, Defaults to 1e3
-        :type threshold: double, optional
-        :param order: number of orders to keep
-        :param dir: direction for rounding, ``0`` for down, ``1`` for up, and ``None`` for nearest, Defaults to None
-        :type dir: int, optional
+        Formats a number of display as a *str*, typically in a *lineEdit* widget.
 
-        :return: number formatted as string
-        :rtype: str
-        """
+        Parameters
+        ----------
+        value : float
+            number to round
+        threshold : float, optional
+            order of magnitude for determining display as floating point or expressing in engineering nootation, by default 1e4
+        order : int, optional
+            number of orders to keep, by default 4
+        dir : int, optional
+            direction for rounding, ``0`` for down, ``1`` for up, and ``None`` for nearest, by default None
+
+        Returns
+        -------
+        str
+            number formatted as a string
+        """        
         if dir is not None:
             value = self.oround(value, order=order, dir=dir)
 
@@ -2466,7 +2494,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         The prepped data is stored in one of 2 Dataframes: analysis_analyte_data or computed_analyte_data
         """
-
         if sample_id is None:
             sample_id = self.sample_id #set to default sample_id
 
@@ -2481,7 +2508,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if not analyte_2: #not a ratio
             # shifts analyte values so that all values are postive
             adj_data = pd.DataFrame(self.transform_plots(self.data[sample_id]['cropped_raw_data'][analytes].values), columns= analytes)
-
 
             #perform scaling for groups of analytes with same norm parameter
             for norm in analyte_info['norm'].unique():
@@ -2501,7 +2527,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 else:
                     # set to clipped data with original values if linear normalisation
                     self.data[sample_id]['processed_data'].loc[:,filtered_analytes] = filtered_data
-
 
             # perform autoscaling on columns where auto_scale is set to true
             for auto_scale in analyte_info['auto_scale'].unique():
@@ -2525,28 +2550,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         filtered_data = np.clip(filtered_data, lq_val, uq_val)
                         self.data[sample_id]['processed_data'].loc[:,analyte_1] = filtered_data
 
-
                     # update v_min and v_max in self.data[sample_id]['analyte_info']
                     self.data[sample_id]['analyte_info'].loc[
                                              (self.data[sample_id]['analyte_info']['analytes']==analyte_1),'v_max'] = filtered_data.max()
                     self.data[sample_id]['analyte_info'].loc[
                                              (self.data[sample_id]['analyte_info']['analytes']==analyte_1), 'v_min'] = filtered_data.min()
 
-
-
-
             #add x and y columns from raw data
             self.data[sample_id]['processed_data']['X'] = self.data[sample_id]['raw_data']['X']
             self.data[sample_id]['processed_data']['Y'] = self.data[sample_id]['raw_data']['Y']
-
-
 
         else:  #if ratio
             ratio_df = self.data[sample_id]['cropped_raw_data'][[analyte_1,analyte_2]] #consider original data for ratio
 
             ratio_name = analyte_1+' / '+analyte_2
-
-
 
             # shifts analyte values so that all values are postive
             ratio_array = self.transform_plots(ratio_df.values)
@@ -3641,7 +3658,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxScaleLocation.setEnabled(False)
 
                 # marker properties
-                self.comboBoxMarker.setEnabled(False)
                 self.doubleSpinBoxMarkerSize.setEnabled(False)
                 self.horizontalSliderMarkerAlpha.setEnabled(True)
                 self.labelMarkerAlpha.setEnabled(True)
@@ -3654,21 +3670,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxColorByField.setEnabled(True)
                 # if color by field is set to clusters, then colormap fields are on,
                 # field is set by cluster table
-                self.comboBoxColorField.setEnabled(True)
                 self.comboBoxColorScale.setEnabled(False)
-                if self.comboBoxColorByField.currentText() == 'Clusters':
+                if self.comboBoxColorByField.currentText().lower() == 'none':
+                    self.comboBoxMarker.setEnabled(True)
+                    self.comboBoxColorField.setEnabled(False)
                     self.toolButtonMarkerColor.setEnabled(False)
-
-                    self.comboBoxFieldColormap.setEnabled(True)
-                    self.lineEditColorLB.setEnabled(True)
-                    self.lineEditColorUB.setEnabled(True)
+                    self.comboBoxCbarDirection.setEnabled(False)
                 else:
+                    self.comboBoxMarker.setEnabled(False)
+                    self.comboBoxColorField.setEnabled(True)
                     self.toolButtonMarkerColor.setEnabled(True)
+                    self.comboBoxCbarDirection.setEnabled(True)
 
-                    self.comboBoxFieldColormap.setEnabled(False)
-                    self.lineEditColorLB.setEnabled(False)
-                    self.lineEditColorUB.setEnabled(False)
-                self.comboBoxCbarDirection.setEnabled(False)
+                self.comboBoxFieldColormap.setEnabled(False)
+                self.lineEditColorLB.setEnabled(False)
+                self.lineEditColorUB.setEnabled(False)
                 self.lineEditCbarLabel.setEnabled(False)
 
                 self.spinBoxHeatmapResolution.setEnabled(False)
@@ -3731,8 +3747,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.comboBoxFieldColormap.setEnabled(False)
                     self.lineEditColorLB.setEnabled(False)
                     self.lineEditColorUB.setEnabled(False)
-                    self.comboBoxColorScale.setEnabled(True)
+                    self.comboBoxColorScale.setEnabled(False)
                     self.comboBoxCbarDirection.setEnabled(False)
+                    self.lineEditCbarLabel.setEnabled(False)
+                elif self.comboBoxColorByField.currentText() == 'Cluster':
+                    self.toolButtonMarkerColor.setEnabled(False)
+
+                    self.comboBoxColorField.setEnabled(True)
+                    self.comboBoxFieldColormap.setEnabled(False)
+                    self.lineEditColorLB.setEnabled(False)
+                    self.lineEditColorUB.setEnabled(False)
+                    self.comboBoxColorScale.setEnabled(False)
+                    self.comboBoxCbarDirection.setEnabled(True)
                     self.lineEditCbarLabel.setEnabled(False)
                 else:
                     self.toolButtonMarkerColor.setEnabled(False)
@@ -3741,7 +3767,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.comboBoxFieldColormap.setEnabled(True)
                     self.lineEditColorLB.setEnabled(True)
                     self.lineEditColorUB.setEnabled(True)
-                    self.comboBoxColorScale.setEnabled(False)
+                    self.comboBoxColorScale.setEnabled(True)
                     self.comboBoxCbarDirection.setEnabled(True)
                     self.lineEditCbarLabel.setEnabled(True)
 
@@ -3889,10 +3915,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.lineEditLengthMultiplier.setEnabled(False)
 
                 # color properties
-                self.toolButtonMarkerColor.setEnabled(True)
                 self.comboBoxColorByField.setEnabled(True)
-                self.comboBoxColorField.setEnabled(False)
-                self.comboBoxFieldColormap.setEnabled(True)
+                if self.comboBoxColorByField.currentText().lower() == 'none':
+                    self.toolButtonMarkerColor.setEnabled(True)
+                    self.comboBoxColorField.setEnabled(False)
+                    self.comboBoxFieldColormap.setEnabled(False)
+                else:
+                    self.toolButtonMarkerColor.setEnabled(False)
+                    self.comboBoxColorField.setEnabled(True)
+                    self.comboBoxFieldColormap.setEnabled(True)
                 self.comboBoxColorScale.setEnabled(False)
                 self.lineEditColorLB.setEnabled(False)
                 self.lineEditColorUB.setEnabled(False)
@@ -4769,16 +4800,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_SV()
 
     def get_cluster_colormap(self, cluster_dict, alpha=100):
-        cluster_color = []
-        cluster_label = []
+
         alpha = int(2.55*alpha)
-        print(alpha)
 
-        for c in range(cluster_dict['n_clusters']):
-            cluster_color.append(cluster_dict[c]['color'])
-            cluster_label.append(cluster_dict[c]['name'])
+        n = cluster_dict['n_clusters']
+        cluster_color = [None]*n
+        cluster_label = [None]*n
+        for c in range(n):
+            cluster_color[c] = cluster_dict[c]['color']
+            cluster_label[c] = cluster_dict[c]['name']
 
-        cmap = colors.ListedColormap(cluster_color, N=len(cluster_color))
+        cmap = colors.ListedColormap(cluster_color, N=n)
 
         return cluster_color, cluster_label, cmap
 
@@ -5501,8 +5533,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if cbartype == 'discrete':
                 p = [None]*len(grouplabels)
                 for i, label in enumerate(grouplabels):
-                    p[i] = canvas.axes.fill([0,0,0,0],[0,0,0,0],edgecolor=None, facecolor=groupcolors[i])
-                cbar = canvas.axes.legend(p, grouplabels, fontsize=style['Text']['FontSize'], frameon=False, ncol=1)
+                    p[i] = Patch(facecolor=groupcolors[i], edgecolor='#111111', linewidth=0.5, label=label)
+
+                canvas.axes.legend(
+                        handles=p,
+                        handlelength=1,
+                        loc='upper left',
+                        bbox_to_anchor=(1.025,1),
+                        fontsize=style['Text']['FontSize'],
+                        frameon=False,
+                        ncol=1
+                    )
             else:
                 if self.comboBoxPlotType.currentText() == 'correlation':
                     loc = 'left'
@@ -5513,7 +5554,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 cbar.ax.tick_params(labelsize=style['Text']['FontSize'])
         elif style['Colors']['Direction'] == 'horizontal':
             if cbartype == 'discrete':
-                cbar = canvas.axes.legend(loc='lower center', fontsize=style['Text']['FontSize'], frameon=False, ncol=len(grouplabels))
+                p = [None]*len(grouplabels)
+                for i, label in enumerate(grouplabels):
+                    p[i] = Patch(facecolor=groupcolors[i], edgecolor='#111111', linewidth=0.5, label=label)
+                canvas.axes.legend(
+                        handles=p,
+                        handlelength=1,
+                        loc='upper center',
+                        bbox_to_anchor=(0.5,-0.1),
+                        fontsize=style['Text']['FontSize'],
+                        frameon=False,
+                        ncol=3
+                    )
             else:
                 cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62, fraction=0.1)
                 cbar.set_label(style['Colors']['CLabel'], size=style['Text']['FontSize'])
@@ -7113,7 +7165,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------
 
     def plot_n_dim(self):
-        """Produces trace element compatibility (TEC) and Radar plots"""
+        """Produces trace element compatibility (TEC) and Radar plots
+        
+        Geochemical TEC diagrams are a staple of geochemical analysis, often referred to as spider diagrams, which display a set of elements
+        arranged by compatibility.  Radar plots show data displayed on a set of radial spokes (axes), giving the appearance of a radar screen
+        or spider web.
+        
+        The function updates ``MainWindow.plot_info`` with the displayed plot metadata and figure ``MplCanvas`` for display in the centralWidget views."""
         canvas = MplCanvas()
 
         df_filtered, _  = self.get_processed_data()
@@ -7152,6 +7210,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             clusters = cluster_dict['selected_clusters']
             cluster_flag = True
         else:
+            cluster_dict = None
             cluster_flag = False
 
         match plot_type:
@@ -7159,10 +7218,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 axes_interval = 5
                 if cluster_flag and method in self.data[self.sample_id]['computed_data']['Cluster']:
                     # Get the cluster labels for the data
-                    # cluster_labels = self.toggle_mass(self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']])
-                    cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']]
+                    #cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']]
 
-                    df_filtered['clusters'] = cluster_labels
+                    df_filtered['clusters'] = cluster_label
                     df_filtered = df_filtered[df_filtered['clusters'].isin(clusters)]
                     radar = Radar(df_filtered, fields=self.n_dim_list, quantiles=quantiles, axes_interval=axes_interval, group_field='clusters', groups=clusters)
 
@@ -7176,19 +7234,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 yl = [np.inf, -np.inf]
                 if cluster_flag and method in self.data[self.sample_id]['computed_data']['Cluster']:
                     # Get the cluster labels for the data
-                    cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']]
+                    #cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']]
 
-                    df_filtered['clusters'] = cluster_labels
+                    df_filtered['clusters'] = cluster_label
 
                     # Plot tec for all clusters
                     for i in clusters:
                         # Create RGBA color
                         print(f'Cluster {i}')
-                        color = self.group_cmap[f'Cluster {i}'][:-1]
-                        canvas.axes,yl_tmp = plot_spider_norm(data=df_filtered.loc[df_filtered['clusters']==i,:],
+                        canvas.axes,yl_tmp = plot_spider_norm(
+                                data=df_filtered.loc[df_filtered['clusters']==i,:],
                                 ref_data=self.ref_data, norm_ref_data=self.ref_data['model'][ref_i],
                                 layer=self.ref_data['layer'][ref_i], el_list=self.n_dim_list ,
-                                style='Quanta', quantiles=quantiles, ax=canvas.axes, c=color, label=self.current_group['clusters'][i])
+                                style='Quanta', quantiles=quantiles, ax=canvas.axes, c=cluster_color[i], label=cluster_label[i]
+                            )
                         #store max y limit to convert the set y limit of axis
                         yl = [np.floor(np.nanmin([yl[0] , yl_tmp[0]])), np.ceil(np.nanmax([yl[1] , yl_tmp[1]]))]
 
@@ -7198,7 +7257,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                     box.width, box.height * 0.9])
 
                     canvas.axes.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=3, handlelength=1)
-                    #ax.legend()
+
                     self.logax(canvas.axes, yl, 'y')
                     canvas.axes.set_ylim(yl)
 
@@ -7233,7 +7292,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'field': self.n_dim_list,
             'figure': canvas,
             'style': style,
-            'cluster_groups': clusters,
+            'cluster_groups': cluster_dict,
             'view': [True,False],
             'position': []
         }
@@ -7369,19 +7428,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.spinBoxClusterGroup.setMaximum(len(clusters))
                 hexcolor = self.set_default_cluster_colors()
 
-                for i, c in enumerate(clusters):
+                for c in clusters:
                     cluster_name = f'Cluster {c+1}'
                     #cluster_color = hexcolor[i]
 
                     # Initialize the flag
                     self.isUpdatingTable = True
-                    self.tableWidgetViewGroups.setItem(i, 0, QTableWidgetItem(cluster_name))
-                    self.tableWidgetViewGroups.setItem(i, 1, QTableWidgetItem(''))
+                    self.tableWidgetViewGroups.setItem(c, 0, QTableWidgetItem(cluster_name))
+                    self.tableWidgetViewGroups.setItem(c, 1, QTableWidgetItem(''))
                     # colors in table are set by self.set_default_cluster_colors()
                     #self.tableWidgetViewGroups.setItem(i, 2, QTableWidgetItem(cluster_color))
-                    self.tableWidgetViewGroups.selectRow(i)
+                    self.tableWidgetViewGroups.selectRow(c)
                     
-                    self.cluster_dict[method].update({i: {'name':cluster_name, 'link':[], 'color':hexcolor[i]}})
+                    self.cluster_dict[method].update({c: {'name':cluster_name, 'link':[], 'color':hexcolor[c]}})
 
                 self.cluster_dict[method]['selected_clusters'] = clusters
         else:
@@ -7401,9 +7460,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 return
 
             # Extract the cluster id (assuming it's stored in the table)
-            cluster_id = int(self.tableWidgetViewGroups.item(row,0).text())
+            cluster_id = row
 
-            old_name = self.current_group['clusters'][cluster_id]
+            old_name = self.cluster_dict[self.cluster_dict['active method']][cluster_id]['name']
             # Check for duplicate names
             for i in range(self.tableWidgetViewGroups.rowCount()):
                 if i != row and self.tableWidgetViewGroups.item(i, 0).text() == new_name:
@@ -7422,7 +7481,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # self.group_cmap[new_name] = self.group_cmap[cluster_id]
                 # del self.group_cmap[cluster_id]
             # update current_group to reflect the new cluster name
-            self.current_group['clusters'][cluster_id] = new_name
+            self.cluster_dict[self.cluster_dict['active method']][cluster_id]['name'] = new_name
+
+            # update plot with new cluster name
+            self.update_SV()
 
     def outlier_detection(self, data ,lq=0.0005, uq=99.5, d_lq=9.95 , d_uq=99):
         # Ensure data is a numpy array

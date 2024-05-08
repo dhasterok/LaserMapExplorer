@@ -46,7 +46,8 @@ from src.ui.AnalyteSelectionDialog import Ui_Dialog
 from src.ui.PreferencesWindow import Ui_PreferencesWindow
 from src.ui.ExcelConcatenator import Ui_ExcelConcatenator
 from src.ui.QuickViewDialog import Ui_QuickViewDialog
-
+# __file__ holds full path of current python file
+basedir = os.path.dirname(__file__)
 pg.setConfigOption('imageAxisOrder', 'row-major') # best performance
 ## sphinx-build -b html docs/source/ docs/build/html
 ## !pyrcc5 resources.qrc -o src/ui/resources_rc.py
@@ -103,7 +104,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 | 'exponent' : (float) -- exponent for fuzzy c-means, dictates the amount of overlap possible between the different clusters, set by ``horizontalSliderClusterExponent``, default is 2.1
                 | 'distance' : (str) -- distance metric for fuzzy c-means, *haven't gotten this to work yet, check scikit-learn package*
                 | 'selected_clusters' : (list) -- clusters selected in ``tableWidgetViewGroups`` for plotting
-                | 'cluster_id' : (dict) -- metadata associated with each cluster_id
+                | *cluster_id* : (dict) -- the key is an integer, with metadata associated with each cluster_id
                 | 'norm' : (matplotlib.colors.Norm) -- norm for plotting colormap
 
             [*cluster_id*] -- cluster index, this data is displayed for the user in ``tableWidgetViewGroups``
@@ -115,8 +116,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             with relevant data.  The dictionary is nested with the first level keys defined by the sample ID.
             
             [*sample_id*] : (str) -- sample identifier
-                | 'analysis data'
-                | 'computed data'
+                | 'analysis data' : () --
+                | 'computed data' : () --
+                    | 'Cluster' : () --
                 | 'processed data'
                 | 'raw data'
         layoutSingleView : QVBoxLayout
@@ -231,9 +233,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.pyqtgraph_widget = None
         self.isUpdatingTable = False
         self.cursor = False
-        
-        
-        self.duplicate_plot_info = None
+        self.duplicate_plot_info= None
         # self.plot_widget_dict = {
         #     'Analyte':{},
         #     'Histogram':{},
@@ -417,7 +417,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Select analyte Tab
         #-------------------------
-        self.ref_data = pd.read_excel('resources/app_data/earthref.xlsx')
+        self.ref_data = pd.read_excel(os.path.join(basedir,'resources/app_data/earthref.xlsx'))
         ref_list = self.ref_data['layer']+' ['+self.ref_data['model']+'] '+ self.ref_data['reference']
         self.comboBoxCorrelationMethod.activated.connect(self.correlation_method_callback)
         self.checkBoxCorrelationSquared.stateChanged.connect(self.correlation_squared_callback)
@@ -573,7 +573,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # ternary colormaps
         # create ternary colors dictionary
-        df = pd.read_csv('resources/styles/ternary_colormaps.csv')
+        df = pd.read_csv(os.path.join(basedir,'resources/styles/ternary_colormaps.csv'))
         self.ternary_colormaps = df.to_dict(orient='records')
         self.comboBoxTernaryColormap.clear()
         schemes = []
@@ -638,12 +638,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # cluster dictionary
         self.cluster_dict = {
             'active method' : 'k-means',
-            'k-means':{'n_clusters':5, 'seed':23, 'selected_clusters':[], 'cluster_id':{}, 'norm':None},
-            'fuzzy c-means':{'n_clusters':5, 'exponent':2.1, 'distance':'euclidean', 'seed':23, 'selected_clusters':[], 'cluster_id':{}, 'norm':None}
+            'k-means':{'n_clusters':5, 'seed':23, 'selected_clusters':[]},
+            'fuzzy c-means':{'n_clusters':5, 'exponent':2.1, 'distance':'euclidean', 'seed':23, 'selected_clusters':[]}
         }
         self.update_cluster_ui()
 
-        # Connect color point radio button signals to a slot
+        # Connect cluster method comboBox to slot
         self.comboBoxClusterMethod.currentIndexChanged.connect(self.group_changed)
 
         # Connect the itemChanged signal to a slot
@@ -953,7 +953,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         dialog.setFileMode(QFileDialog.Directory)
         # Set the default directory to the current working directory
         # dialog.setDirectory(os.getcwd())
-        dialog.setDirectory('/Users/shavinkalu/Library/CloudStorage/GoogleDrive-a1904121@adelaide.edu.au/.shortcut-targets-by-id/1r_MeSExALnv9lHE58GoG7pbtC8TOwSk4/laser_mapping/Alex_garnet_maps/')
+        dialog.setDirectory(basedir)
         if dialog.exec_():
             self.selected_directory = dialog.selectedFiles()[0]
             file_list = os.listdir(self.selected_directory)
@@ -1323,10 +1323,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 self.StylingPage.setEnabled(True)
                 self.CalculatorPage.setEnabled(True)
-                
+
                 if self.duplicate_plot_info:
                     self.add_plotwidget_to_canvas(self.duplicate_plot_info)
-                
             case 1:
                 self.SelectAnalytePage.setEnabled(False)
                 self.PreprocessPage.setEnabled(False)
@@ -1342,11 +1341,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.toolBoxTreeView.setCurrentIndex(0)
                 self.StylingPage.setEnabled(False)
                 self.CalculatorPage.setEnabled(False)
-                
                 if self.duplicate_plot_info:
-                    position = self.duplicate_plot_info['position']
-                    self.add_plotwidget_to_canvas(self.duplicate_plot_info, position= position)
-                
+                    self.add_plotwidget_to_canvas(self.duplicate_plot_info)
             case 2:
                 self.SelectAnalytePage.setEnabled(False)
                 self.PreprocessPage.setEnabled(False)
@@ -1529,11 +1525,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def get_hex_color(self, color):
         """Converts QColor to hex-rgb format
 
-        :param color: rgb formatted color
-        :type color: QColor
+        Parameters
+        ----------
+            color : (list of int)
+                RGB color triplet
 
-        :return: hex-rgb color
-        """
+        Returns
+        -------
+            str : hex code for an RGB color triplet
+        """        
         if type(color) is tuple:
             color = np.round(255*np.array(color))
             color[color < 0] = 0
@@ -1543,7 +1543,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return "#{:02x}{:02x}{:02x}".format(color.red(), color.green(), color.blue())
 
     def get_rgb_color(self, color):
+        """Convert from hex to RGB formatted color
 
+        Parameters
+        ----------
+            color : (str)
+                hex code for an RGB color
+
+        Returns
+        -------
+            list of int: RGB color triplet
+        """        
         if not color:
             return []
 
@@ -1970,6 +1980,34 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # pass
 
 
+    def save_analysis(self):
+        file_name, _ = QFileDialog.getSaveFileName(self, "Save File", "", "Pickle Files (*.pkl);;All Files (*)")
+        if file_name:
+            data_dict = {}
+            data_dict['data'] = self.data
+            data_dict['profiling'] =self.profiling.profiles
+            data_dict['polygons'] =self.polygon.polygons
+            data_dict['styles'] =self.styles
+            data_dict['axis_dict'] =self.axis_dict 
+            data_dict['plot_infos'] =  self.get_plot_info_from_tree(self.treeModel)
+            
+            
+            
+            data_dict['sample_ids'] = self.sample_ids
+            data_dict['sample_id'] = self.sample_id
+            
+            data_dict['selected_directory'] = self.selected_directory
+            # data_dict['plot_widget_dict'] = self.plot_widget_dict
+            
+                
+            with open(file_name, 'wb') as file:
+                pickle.dump(data_dict, file)
+            
+            self.statusBar.showMessage("Analysis saved successfully")    
+        
+        # pass
+
+
     def load_analysis(self):
         if self.data:
             # Create and configure the QMessageBox
@@ -2003,15 +2041,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.polygon.polygons = data_dict['polygons'] 
                 self.styles = data_dict['styles']
                 self.axis_dict = data_dict['axis_dict']
-                
-                
-                
+                self.sample_ids = data_dict['sample_ids']
+                self.sample_id = data_dict['sample_id'] 
+                self.selected_dirctory= data_dict['selected_directory'] 
+                self.create_tree(self.sample_id)
                 #update tree with selected iolites
                 self.update_tree(self.data[self.sample_id]['norm'], norm_update = False)
-                
+                print(data_dict['plot_infos'])
                 #add plot info to tree
                 for plot_info in data_dict['plot_infos']:
-                    self.add_tree_item(plot_info)
+                    if plot_info:
+                        canvas = MplCanvas(fig =  plot_info['figure'])
+                        plot_info['figure'] = canvas
+                        self.add_tree_item(plot_info)
             
                 self.sample_ids = data_dict['sample_ids']
                 # update sample id combo
@@ -2024,23 +2066,60 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 #inilialise tabs
                 self.init_tabs()
                 self.statusBar.showMessage("Analysis loaded successfully")  
-    
-    ### tree functions 
-    def extract_tree_data(self,item):
-        """Recursively extract plot_info from QStandardItem to a serializable format."""
-        children = [self.extract_tree_data(item.child(i)) for i in range(item.rowCount())]
-        plot_info = item.data(role=Qt.UserRole)
-        
-        if plot_info:
-            if isinstance(plot_info['figure'], FigureCanvas):
-                plot_info_copy = plot_info.copy()
-                plot_info_copy['figure'] = plot_info_copy['figure'].fig
-                return plot_info_copy
+                
+                
+                # reset flags
+                self.update_cluster_flag = True
+                self.update_pca_flag = True
+                self.plot_flag = False
 
-    def get_plot_info_from_tree(self,model):
-        """Extract data from the root of QStandardItemModel."""
+                self.update_all_field_comboboxes()
+                self.update_filter_values()
+
+                self.histogram_update_bin_width()
+
+                # plot first analyte as lasermap
+                self.styles['analyte map']['Colors']['ColorByField'] = 'Analyte'
+                self.comboBoxColorByField.setCurrentText(self.styles['analyte map']['Colors']['ColorByField'])
+                self.color_by_field_callback()
+                fields = self.get_field_list('Analyte')
+                self.styles['analyte map']['Colors']['Field'] = fields[0]
+                self.comboBoxColorField.setCurrentText(fields[0])
+                self.color_field_callback()
+
+                self.plot_flag = True
+                self.update_SV()
+    
+    def extract_plot_info(self, item):
+        """
+        Recursively extract plot_info from QStandardItem and append to a flat list.
+        """
+        # Retrieve the plot_info from the UserRole data
+        plot_info = item.data(Qt.UserRole)
+        if isinstance(plot_info, dict) and 'figure' in plot_info:
+            # Check if it contains an MplCanvas object
+            if isinstance(plot_info['figure'], MplCanvas):
+                # Create a copy of plot_info and replace the MplCanvas object with its Figure
+                plot_info_copy = plot_info.copy()
+                plot_info_copy['figure'] = plot_info['figure'].fig
+                self.plot_info_list.append(plot_info_copy)
+
+        # Recursively process each child of this item
+        for i in range(item.rowCount()):
+            child = item.child(i)
+            if child:
+                self.extract_plot_info(child)  # Process child recursively
+
+    def get_plot_info_from_tree(self, model):
+        """
+        Extract plot_info data from the root of QStandardItemModel as a flat list.
+        """
+        self.plot_info_list = []  # Reset the list each time this method is called
         root = model.invisibleRootItem()
-        return [self.extract_tree_data(root.child(i)) for i in range(root.rowCount())]       
+        for i in range(root.rowCount()):
+            self.extract_plot_info(root.child(i))
+        return self.plot_info_list
+     
                 
     
     def create_item_from_data(self,data):
@@ -2048,7 +2127,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         item = QStandardItem(data['text'])
         if 'plot_info' in data.keys():
             #create new matplotlib canvas and save fig
-            canvas = FigureCanvas(data['plot_info']['figure'])
+            canvas = MplCanvas(fig =  data['plot_info']['figure'])
             data['plot_info']['figure'] = canvas
             #store plot dictionary in tree
             item.setData(data['plot_info'], role=Qt.UserRole)
@@ -3348,6 +3427,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.styles['Cluster Score']['Colors']['CScale'] = 'linear'
 
         self.styles['Cluster']['Colors']['CScale'] = 'discrete'
+        self.styles['Cluster']['Markers']['Alpha'] = 100
 
         self.styles['PCA Score']['Colors']['CScale'] = 'linear'
         self.styles['PCA Score']['Colors']['ColorByField'] = 'PCA Score'
@@ -3384,7 +3464,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         ``MainWindow.comboBoxStyleTheme``.  After setting list, the comboBox is set to default style.
         """
         # read filenames with *.sty
-        file_list = os.listdir('resources/styles/')
+        file_list = os.listdir(os.path.join(basedir,'resources/styles/'))
         style_list = [file.replace('.sty','') for file in file_list if file.endswith('.sty')]
 
         # add default to list
@@ -3408,7 +3488,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.reset_default_styles()
             return
 
-        with open(f'resources/styles/{name}.sty', 'rb') as file:
+        with open(os.path.join(basedir,f'resources/styles/{name}.sty'), 'rb') as file:
             self.styles = pickle.load(file)
 
     def input_theme_name_dlg(self):
@@ -3425,7 +3505,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.comboBoxStyleTheme.setCurrentText(name)
 
             # append theme to file of saved themes
-            with open(f'resources/styles/{name}.sty', 'wb') as file:
+            with open(os.path.join(basedir,f'resources/styles/{name}.sty'), 'wb') as file:
                 pickle.dump(self.styles, file, protocol=pickle.HIGHEST_PROTOCOL)
         else:
             # throw a warning that name is not saved
@@ -4688,6 +4768,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.update_SV()
 
+    def get_cluster_colormap(self, cluster_dict, alpha=100):
+        cluster_color = []
+        cluster_label = []
+        alpha = int(2.55*alpha)
+        print(alpha)
+
+        for c in range(cluster_dict['n_clusters']):
+            cluster_color.append(cluster_dict[c]['color'])
+            cluster_label.append(cluster_dict[c]['name'])
+
+        cmap = colors.ListedColormap(cluster_color, N=len(cluster_color))
+
+        return cluster_color, cluster_label, cmap
+
     def get_colormap(self, N=None):
         """Gets the color map
 
@@ -4780,17 +4874,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Sets the colors in ``MainWindow.tableWidgetViewGroups`` to the default colormap in
         ``MainWindow.styles['Cluster']['Colors']['Colormap'].  Change the default colormap
         by changing ``MainWindow.comboBoxColormap``, when ``MainWindow.comboBoxColorByField.currentText()`` is ``Cluster``.
+
+        Returns
+        -------
+            str : hexcolor
         """
         # cluster colormap
         cmap = self.get_colormap(N=self.tableWidgetViewGroups.rowCount())
 
         # set color for each cluster and place color in table
         colors = [cmap(i) for i in range(cmap.N)]
+        hexcolor = []
         for i in range(self.tableWidgetViewGroups.rowCount()):
-            hexcolor = self.get_hex_color(colors[i])
-            self.tableWidgetViewGroups.setItem(i,2,QTableWidgetItem(hexcolor))
+            hexcolor.append(self.get_hex_color(colors[i]))
+            self.tableWidgetViewGroups.setItem(i,2,QTableWidgetItem(hexcolor[i]))
 
         self.toolButtonClusterColor.setStyleSheet("background-color: %s;" % self.tableWidgetViewGroups.item(self.spinBoxClusterGroup.value()-1,2).text())
+
+        return hexcolor
 
     def select_cluster_group_callback(self):
         """Set cluster color button background after change of selected cluster group
@@ -4995,23 +5096,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.clear_layout(self.widgetSingleView.layout())
             widget =plot_info['figure']
             
-            
-            
-            
-            
-            
-            
 
-            
-            
-            
-            
-            
             plot_info['view'][0] = True
             
             self.SV_plot_name = f"{plot_info['sample_id']}:{plot_info['plot_type']}:{plot_info['plot_name']}"
             #self.labelPlotInfo.
-            self.duplicate_plot_info = None #reset to avoid plotting previous duplicates
+
             for index in range(self.comboBoxMVPlots.count()):
                 if self.comboBoxMVPlots.itemText(index) == self.SV_plot_name:
                     #plot exists in MV
@@ -5020,9 +5110,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.hide()
                     self.show()
                     return
-                    
-            self.widgetSingleView.layout().addWidget(widget)
-            widget.show()
+
+            
+            if self.duplicate_plot_info: #if duplicate exisits and new plot has been plotted on SV
+                #return duplicate back to MV
+                row, col = self.duplicate_plot_info['position']
+                print(f'd{row,col}')
+                dup_widget =self.duplicate_plot_info['figure']
+                self.widgetMultiView.layout().addWidget( dup_widget, row, col )
+                dup_widget.show()
+                self.duplicate_plot_info = None #reset to avoid plotting previous duplicates
+            self.widgetSingleView.layout().insertWidget(0,widget)
                 
                 
             
@@ -5123,8 +5221,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         # Remove widget from source layout
         index = source_layout.indexOf(widget)
-        # source_layout.removeWidget(widget)
-        widget.hide()
+
+        source_layout.removeWidget(widget)
+        # widget.hide()
         # If the source layout is a grid, handle placeholders differently
         if isinstance(source_layout, QGridLayout):
             placeholder = QWidget()
@@ -5134,7 +5233,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             placeholder = QWidget()  # Create an empty placeholder widget for non-grid layouts
             placeholder.setFixedSize(widget.size())
-            source_layout.addWidget( placeholder)
+
+            source_layout.insertWidget(0, placeholder)
             
             
         if isinstance(target_layout, QGridLayout):
@@ -5374,7 +5474,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.array_size = (self.y.nunique(), self.x.nunique())
 
-    def add_colorbar(self, canvas, cax, style, cbartype='continuous', grouplabels=None):
+    def add_colorbar(self, canvas, cax, style, cbartype='continuous', grouplabels=None, groupcolors=None):
         """Adds a colorbar to a MPL figure
 
         :param canvas: canvas object
@@ -5393,27 +5493,42 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if style['Colors']['Direction'] == 'none':
             return
 
+        # # Plot rectangles with colors and labels
+        # for i, color in enumerate(colors):
+        #     ax.add_patch(plt.Rectangle((i, 0), 1, 1, color=color, label=color))
+        # .   use this line to produce the discrete colormap
+        #     ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), shadow=True, ncol=len(colors))
+
         if style['Colors']['Direction'] == 'vertical':
-            if self.comboBoxPlotType.currentText() == 'correlation':
-                loc = 'left'
+            if cbartype == 'discrete':
+                p = [None]*len(grouplabels)
+                for i, label in enumerate(grouplabels):
+                    p[i] = canvas.axes.fill([0,0,0,0],[0,0,0,0],edgecolor=None, facecolor=groupcolors[i])
+                cbar = canvas.axes.legend(p, grouplabels, fontsize=style['Text']['FontSize'], frameon=False, ncol=1)
             else:
-                loc = 'right'
-            cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location=loc, shrink=0.62, fraction=0.1)
-            cbar.set_label(style['Colors']['CLabel'], size=style['Text']['FontSize'])
-            cbar.ax.tick_params(labelsize=style['Text']['FontSize'])
+                if self.comboBoxPlotType.currentText() == 'correlation':
+                    loc = 'left'
+                else:
+                    loc = 'right'
+                cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location=loc, shrink=0.62, fraction=0.1)
+                cbar.set_label(style['Colors']['CLabel'], size=style['Text']['FontSize'])
+                cbar.ax.tick_params(labelsize=style['Text']['FontSize'])
         elif style['Colors']['Direction'] == 'horizontal':
-            cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62, fraction=0.1)
-            cbar.set_label(style['Colors']['CLabel'], size=style['Text']['FontSize'])
-            cbar.ax.tick_params(labelsize=style['Text']['FontSize'])
+            if cbartype == 'discrete':
+                cbar = canvas.axes.legend(loc='lower center', fontsize=style['Text']['FontSize'], frameon=False, ncol=len(grouplabels))
+            else:
+                cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62, fraction=0.1)
+                cbar.set_label(style['Colors']['CLabel'], size=style['Text']['FontSize'])
+                cbar.ax.tick_params(labelsize=style['Text']['FontSize'])
 
         # adjust tick marks if labels are given
         if cbartype == 'continuous' or grouplabels is None:
             ticks = None
-        elif cbartype == 'discrete':
-            ticks = np.arange(0, len(grouplabels))
-            cbar.set_ticks(ticks=ticks, labels=grouplabels, minor=False)
-        else:
-            print('(add_colorbar) Unknown type: '+cbartype)
+        # elif cbartype == 'discrete':
+        #     ticks = np.arange(0, len(grouplabels))
+        #     cbar.set_ticks(ticks=ticks, labels=grouplabels, minor=False)
+        #else:
+        #    print('(add_colorbar) Unknown type: '+cbartype)
 
     def color_norm(self, style, n=None):
         """Normalize colors for colormap
@@ -5437,7 +5552,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         return norm
     
-    def custom_discrete_colormap(self, colors=None, colormap=None):
+    def custom_discrete_colormap(self, colors=None):
         """Create a colormap from user-defined colors
 
         Parameters
@@ -5450,15 +5565,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         matplotlib.colormap
             Discrete colormap.
         """
-        if colormap and not colors:
-            pass
+        cmap = ListedColormap.from_list("custom_colormap", colors, N=len(colors))
 
-        num_colors = len(colors)
-        colormap = ListedColormap.from_list("custom_colormap", colors, N=num_colors)
-
-        return colormap
-
-
+        return cmap
 
 
     # -------------------------------------
@@ -6776,19 +6885,27 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         n_clusters = len(unique_groups)
 
         # Extract colors from the colormap and assign to self.group_cmap
-        cmap = self.get_colormap(n_clusters)
-        colors = [cmap(i) for i in range(cmap.N)]
-        for label, color in zip(unique_groups, colors):
-            self.group_cmap[label] = color
+        # cmap = self.get_colormap(n_clusters)
+        # colors = [cmap(i) for i in range(cmap.N)]
+        # for label, color in zip(unique_groups, colors):
+        #     self.group_cmap[label] = color
 
-        # boundaries = np.arange(-0.5, n_clusters, 1)
-        # norm = BoundaryNorm(boundaries, cmap.N, clip=True)
-        norm = self.color_norm(style, n=n_clusters)
+        # norm = self.color_norm(style, n=n_clusters)
 
-        #cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect = self.aspect_ratio)
-        cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=style['Colors']['Colormap'], norm=norm, aspect = self.aspect_ratio)
+        #cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=style['Colors']['Colormap'], norm=norm, aspect = self.aspect_ratio)
+        cluster_color, cluster_label, cmap = self.get_cluster_colormap(self.cluster_dict[self.cluster_dict['active method']],alpha=style['Markers']['Alpha'])
+        print(cluster_color)
+        print(cmap)
+        boundaries = np.arange(-0.5, n_clusters, 1)
+        norm = colors.BoundaryNorm(boundaries, cmap.N, clip=True)
 
-        self.add_colorbar(canvas, cax, style, None, cbartype='discrete', grouplabels=np.arange(0, n_clusters), norm=norm)
+        cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect = self.aspect_ratio)
+
+        #self.add_colorbar(canvas, cax, style, None, cbartype='discrete', grouplabels=np.arange(0, n_clusters), norm=norm)
+        glabels = []
+        for i in range(self.cluster_dict[method]['n_clusters']):
+            glabels.append(self.cluster_dict[method][i]['name'])
+        self.add_colorbar(canvas, cax, style, cbartype='discrete', grouplabels=glabels, groupcolors=cluster_color)
 
         canvas.fig.subplots_adjust(left=0.05, right=1)  # Adjust these values as needed
         canvas.fig.tight_layout()
@@ -6937,21 +7054,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.clear_layout(self.widgetSingleView.layout())
         self.widgetSingleView.layout().addWidget(canvas)
 
-    def update_plot_with_new_colormap(self):
-        if self.fig and self.clustering_results:
-            for name, results in self.clustering_results.items():
-                groups = results['groups']
-                method_name = results['method_name']
-                fuzzy_cluster_number = results['fuzzy_cluster_number']
-                # Find the corresponding axis to update
-                ax_index = list(self.clustering_results.keys()).index(name)
-                ax = self.axs[ax_index]
-                # Redraw the plot with the new colormap on the existing axis
-                self.plot_clustering_result(ax, groups, method_name, fuzzy_cluster_number)
-
-            # Redraw the figure canvas to reflect the updates
-            self.fig.canvas.draw_idle()
-
     def update_cluster_ui(self):
         """Updates clustering-related widgets
 
@@ -6959,8 +7061,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         # update_clusters_ui - Enables/disables tools associated with clusters
         method = self.comboBoxClusterMethod.currentText()
-        if  method not in self.data[self.sample_id]['computed_data']['Cluster']:
-            self.update_cluster_flag = True
+        if self.sample_id != '':
+            if  method not in self.data[self.sample_id]['computed_data']['Cluster']:
+                self.update_cluster_flag = True
 
         # Number of Clusters
         self.labelNClusters.setEnabled(True)
@@ -7042,18 +7145,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 quantiles = [0.25, 0.5, 0.75]
             case 3:
                 quantiles = [0.05, 0.25, 0.5, 0.75, 0.95]
+            
+        if self.comboBoxColorByField.currentText() == 'Cluster' and self.comboBoxColorField.currentText() != '':
+            method = self.comboBoxColorField.currentText()
+            cluster_dict = self.cluster_dict[method]
+            cluster_color, cluster_label, cmap = self.get_cluster_colormap(cluster_dict, alpha=style['Markers']['Alpha'])
 
-        if self.comboBoxColorByField.currentText() == 'Cluster':
-            clusters = [int(c) for c in self.current_group['selected_clusters']]
+            clusters = cluster_dict['selected_clusters']
             cluster_flag = True
         else:
-            clusters = None
             cluster_flag = False
 
         match plot_type:
             case 'Radar':
                 axes_interval = 5
-                if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['Cluster'] and cluster_flag:
+                if cluster_flag and method in self.data[self.sample_id]['computed_data']['Cluster']:
                     # Get the cluster labels for the data
                     # cluster_labels = self.toggle_mass(self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']])
                     cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']]
@@ -7070,7 +7176,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     canvas.fig, canvas.axes = radar.plot()
             case 'TEC':
                 yl = [np.inf, -np.inf]
-                if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['Cluster'] and cluster_flag:
+                if cluster_flag and method in self.data[self.sample_id]['computed_data']['Cluster']:
                     # Get the cluster labels for the data
                     cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']]
 
@@ -7242,31 +7348,48 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.tableWidgetViewGroups.clear()
         self.tableWidgetViewGroups.setHorizontalHeaderLabels(['Name','Link','Color'])
 
-        algorithm = self.comboBoxClusterMethod.currentText()
-        if algorithm in self.data[self.sample_id]['computed_data']['Cluster']:
-            if not self.data[self.sample_id]['computed_data']['Cluster'][algorithm].empty:
-                clusters = self.data[self.sample_id]['computed_data']['Cluster'][algorithm].dropna().unique()
+        method = self.comboBoxClusterMethod.currentText()
+        if method in self.data[self.sample_id]['computed_data']['Cluster']:
+            if not self.data[self.sample_id]['computed_data']['Cluster'][method].empty:
+                clusters = self.data[self.sample_id]['computed_data']['Cluster'][method].dropna().unique()
                 clusters.sort()
-                cluster_dict = {}
-                for c in clusters:
-                    cluster_dict[c] = f'Cluster {c}'
 
+                self.cluster_dict[method]['selected clusters'] = []
+                i = 0
+                while True:
+                    try:
+                        self.cluster_dict[method].pop(i)
+                        i += 1
+                    except:
+                        break
+
+                # set number of rows in tableWidgetViewGroups
                 self.tableWidgetViewGroups.setRowCount(len(clusters))
 
-                for i, c in enumerate(clusters):
-                    # item = QTableWidgetItem(str(c))
-                    # Initialize the flag
-                    self.isUpdatingTable = True
-                    self.tableWidgetViewGroups.setItem(i, 0, QTableWidgetItem(cluster_dict[c]))
-                    self.tableWidgetViewGroups.selectRow(i)
-
-                self.current_group = {'algorithm':algorithm, 'clusters': cluster_dict, 'selected_clusters':clusters}
-
+                # set default colors for clusters and update associated widgets
                 self.spinBoxClusterGroup.setMinimum(1)
                 self.spinBoxClusterGroup.setMaximum(len(clusters))
-                self.set_default_cluster_colors()
+                hexcolor = self.set_default_cluster_colors()
+
+                for i, c in enumerate(clusters):
+                    cluster_name = f'Cluster {c+1}'
+                    #cluster_color = hexcolor[i]
+
+                    # Initialize the flag
+                    self.isUpdatingTable = True
+                    self.tableWidgetViewGroups.setItem(i, 0, QTableWidgetItem(cluster_name))
+                    self.tableWidgetViewGroups.setItem(i, 1, QTableWidgetItem(''))
+                    # colors in table are set by self.set_default_cluster_colors()
+                    #self.tableWidgetViewGroups.setItem(i, 2, QTableWidgetItem(cluster_color))
+                    self.tableWidgetViewGroups.selectRow(i)
+                    
+                    self.cluster_dict[method].update({i: {'name':cluster_name, 'link':[], 'color':hexcolor[i]}})
+
+                self.cluster_dict[method]['selected_clusters'] = clusters
         else:
-            self.current_group = {'algorithm':None,'clusters': None, 'selected_clusters':None}
+            print(f'(group_changed) Cluster method, ({method}) is not defined')
+
+        print(self.cluster_dict)
         self.isUpdatingTable = False
 
     def cluster_label_changed(self, item):
@@ -10724,7 +10847,8 @@ def main():
     global app
 
     app = QtWidgets.QApplication(sys.argv)
-
+    # Uncomment this line to set icon to App
+    app.setWindowIcon(QtGui.QIcon(os.path.join(basedir, '/resources/icons/LaME-64.png')))
     main = MainWindow()
 
     # Set the main window to fullscreen

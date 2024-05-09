@@ -63,6 +63,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         _description_
     """
     # # for button show hide
+    # add to MainWindow
+    # self.label.enterEvent = self.mouseEnter
+    # self.label.leaveEvent = self.mouseLeave
+
     # def mouseEnter(self, event):
     #     self.tool_button.setVisible(True)
 
@@ -118,13 +122,28 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             with relevant data.  The dictionary is nested with the first level keys defined by the sample ID.
             
             [*sample_id*] : (str) -- sample identifier
+                | 'raw data' : (pandas.DataFrame) --
+                | 'x_min' : (float) -- minimum x of full data
+                | 'x_max' : (float) -- maximum x of full data
+                | 'y_min' : (float) -- minimum y of full data
+                | 'y_max' : (float) -- maximum y of full data
+                | 'crop_x_min' : (float) -- minimum x of cropped data
+                | 'crop_x_max' : (float) -- maximum x of cropped data
+                | 'crop_x_min' : (float) -- minimum y of cropped data
+                | 'crop_x_max' : (float) -- maximum y of cropped data
+                | 'norm' : () --
                 | 'analysis data' : () --
+                | 'cropped_raw_data'
                 | 'computed_data' : () --
-                    | 'Cluster' : () --
                     | 'PCA Score' : () --
-                | 'processed data'
-                | 'raw data'
-                | 'mask' : () -- 
+                    | 'Cluster' : () --
+                    | 'Cluster Score' : () --
+                | 'processed_data'
+                | 'axis_mask' : (MaskObj) -- mask created from cropped data.
+                | 'filter_mask' : (MaskObj) -- mask created by a combination of filters.  Filters are displayed for the user in ``tableWidgetFilters``.
+                | 'polygon_mask' : (MaskObj) -- mask created from selected polygons.
+                | 'cluster_mask' : (MaskObj) -- mask created from selected or inverse selected cluster groups.  Once this mask is set, it cannot be reset unless it is turned off, clustering is recomputed, and selected clusters are used to produce a new mask.
+                | 'mask' : () -- combined mask, derived from filter_mask & 'polygon_mask' & 'axis_mask'
         layoutSingleView : QVBoxLayout
             Layout for Single View tab of ``canvasWindow``
         layoutMultiView : QGridLayout
@@ -613,7 +632,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Clustering Tab
         #-------------------------
-        self.spinBoxNClusters.valueChanged.connect(self.update_SV)
+        self.spinBoxNClusters.valueChanged.connect(self.update_n_clusters)
 
         # Populate the comboBoxClusterDistance with distance metrics
         # euclidean (a.k.a. L2-norm) = euclidean
@@ -625,16 +644,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxClusterDistance.clear()
         self.comboBoxClusterDistance.addItems(distance_metrics)
         self.comboBoxClusterDistance.setCurrentIndex(0)
-        self.comboBoxClusterDistance.activated.connect(self.update_SV)
+        self.comboBoxClusterDistance.activated.connect(self.update_cluster_distance)
 
         self.horizontalSliderClusterExponent.setMinimum(10)  # Represents 1.0 (since 10/10 = 1.0)
         self.horizontalSliderClusterExponent.setMaximum(30)  # Represents 3.0 (since 30/10 = 3.0)
         self.horizontalSliderClusterExponent.setSingleStep(1)  # Represents 0.1 (since 1/10 = 0.1)
         self.horizontalSliderClusterExponent.setTickInterval(1)
         self.horizontalSliderClusterExponent.valueChanged.connect(lambda value: self.labelClusterExponent.setText(str(value/10)))
-        self.horizontalSliderClusterExponent.sliderReleased.connect(self.update_SV)
+        self.horizontalSliderClusterExponent.sliderReleased.connect(self.update_cluster_exponent)
 
-        self.lineEditSeed.editingFinished.connect(self.update_SV)
+        self.lineEditSeed.editingFinished.connect(self.update_cluster_seed)
         self.toolButtonRandomSeed.clicked.connect(self.generate_random_seed)
 
         self.comboBoxClusterMethod.activated.connect(self.update_cluster_ui)
@@ -739,6 +758,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         setattr(self.comboBoxMarker, "allItems", lambda: [self.comboBoxMarker.itemText(i) for i in range(self.comboBoxMarker.count())])
         setattr(self.comboBoxLineWidth, "allItems", lambda: [self.comboBoxLineWidth.itemText(i) for i in range(self.comboBoxLineWidth.count())])
         setattr(self.comboBoxColorByField, "allItems", lambda: [self.comboBoxColorByField.itemText(i) for i in range(self.comboBoxColorByField.count())])
+        setattr(self.comboBoxColorField, "allItems", lambda: [self.comboBoxColorField.itemText(i) for i in range(self.comboBoxColorField.count())])
         setattr(self.comboBoxFieldColormap, "allItems", lambda: [self.comboBoxFieldColormap.itemText(i) for i in range(self.comboBoxFieldColormap.count())])
         setattr(self.comboBoxMVPlots, "allItems", lambda: [self.comboBoxMVPlots.itemText(i) for i in range(self.comboBoxMVPlots.count())])
 
@@ -1115,10 +1135,23 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #         self.plot_widget_dict[plot_type][sample_id]={}
 
             # set mask of size of analyte array
+            # self.data[self.sample_id]['axis_mask'] = MaskObj( np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool) )
+            # self.data[self.sample_id]['axis_mask'].register_callback(self.mask_changed_callback)
+            # self.data[self.sample_id]['filter_mask'] = MaskObj( np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool) )
+            # self.data[self.sample_id]['filter_mask'].register_callback(self.mask_changed_callback)
+            # self.data[self.sample_id]['polygon_mask'] = MaskObj( np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool) )
+            # self.data[self.sample_id]['polygon_mask'].register_callback(self.mask_changed_callback)
+            # self.data[self.sample_id]['cluster_mask'] = MaskObj( np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool) )
+            # self.data[self.sample_id]['cluster_mask'].register_callback(self.mask_changed_callback)
+            self.data[self.sample_id]['axis_mask'] = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
             self.data[self.sample_id]['filter_mask'] = np.ones_like( self.data[sample_id]['raw_data']['X'].values, dtype=bool)
             self.data[self.sample_id]['polygon_mask'] = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
-            self.data[self.sample_id]['axis_mask'] = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
-            self.data[self.sample_id]['mask'] = self.data[self.sample_id]['filter_mask'] & self.data[self.sample_id]['polygon_mask'] & self.data[self.sample_id]['axis_mask']
+            self.data[self.sample_id]['cluster_mask'] = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
+            self.data[self.sample_id]['mask'] = \
+                self.data[self.sample_id]['axis_mask'] & \
+                self.data[self.sample_id]['filter_mask'] & \
+                self.data[self.sample_id]['polygon_mask'] & \
+                self.data[self.sample_id]['cluster_mask']
 
             self.prep_data()
 
@@ -1504,7 +1537,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         #reset axis mask
         self.data[self.sample_id]['axis_mask'] = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
-        self.data[self.sample_id]['mask'] = self.data[self.sample_id]['filter_mask'] & self.data[self.sample_id]['polygon_mask'] & self.data[self.sample_id]['axis_mask']
+        self.data[self.sample_id]['mask'] = self.data[self.sample_id]['axis_mask'] & self.data[self.sample_id]['filter_mask'] & self.data[self.sample_id]['polygon_mask'] & self.data[self.sample_id]['cluster_mask']
         self.prep_data()
         self.update_all_plots()
 
@@ -4733,6 +4766,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         if self.comboBoxColorByField.currentText() == 'Clusters':
             # set ColorField to active cluster method
+            print('should have changed color scale to discrete')
             self.comboBoxColorField.setCurrentText(self.cluster_dict['active method'])
             print(self.cluster_dict['active method'])
 
@@ -4892,6 +4926,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         backround ``MainWindow.toolButtonClusterColor`` color.  Also updates ``MainWindow.tableWidgetViewGroups``
         color associated with selected cluster.  The selected cluster is determined by ``MainWindow.spinBoxClusterGroup.value()``
         """
+        print('cluster_color_callback')
         if self.tableWidgetViewGroups.rowCount() == 0:
             return
 
@@ -4921,6 +4956,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         -------
             str : hexcolor
         """
+        print('set_default_cluster_colors')
         # cluster colormap
         cmap = self.get_colormap(N=self.tableWidgetViewGroups.rowCount())
 
@@ -4940,6 +4976,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         Sets ``MainWindow.toolButtonClusterColor`` background on change of ``MainWindow.spinBoxClusterGroup``
         """
+        if self.tableWidgetViewGroups.rowCount() == 0:
+            return
         self.toolButtonClusterColor.setStyleSheet("background-color: %s;" % self.tableWidgetViewGroups.item(self.spinBoxClusterGroup.value()-1,2).text())
 
 
@@ -5598,7 +5636,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Parameters
         ----------
         style : dict
-            Styles associated with current plot type.
+            Styles associated with current plot type, required for all plot types except those with discrete
+            colormaps i.e., ``Cluster``.
         N : int, optional
             The number of colors for discrete color maps, Defaults to None
         
@@ -5607,37 +5646,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             matplotlib.colors.Norm
                 Color norm for plotting.
         """
-        norm = 0
+        norm = None
         match style['Colors']['CScale']:
             case 'linear':
                 norm = colors.Normalize(vmin=style['Colors']['CLim'][0], vmax=style['Colors']['CLim'][1])
             case 'log':
                 norm = colors.LogNorm(vmin=style['Colors']['CLim'][0], vmax=style['Colors']['CLim'][1])
             case 'discrete':
-                boundaries = np.arange(-0.5, n, n)
+                boundaries = np.arange(-0.5, n, 1)
                 norm = colors.BoundaryNorm(boundaries, n, clip=True)
+                print(boundaries)
+                print(norm)
 
         #scalarMappable = plt.cm.ScalarMappable(cmap=self.get_colormap(), norm=norm)
 
         return norm
     
-    def custom_discrete_colormap(self, colors=None):
-        """Create a colormap from user-defined colors
-
-        Parameters
-        ----------
-        colors : list
-            Colors used to produce custom colormap.
-
-        Returns
-        -------
-        matplotlib.colormap
-            Discrete colormap.
-        """
-        cmap = ListedColormap.from_list("custom_colormap", colors, N=len(colors))
-
-        return cmap
-
 
     # -------------------------------------
     # laser map functions and plotting
@@ -6939,6 +6963,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
         Creates the map on an ``MplCanvas``.  Each cluster category is assigned a unique color.
         """
+        print('plot_cluster_map')
         canvas = MplCanvas()
 
         plot_type = self.comboBoxPlotType.currentText()
@@ -6964,7 +6989,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         norm = self.color_norm(style, n=n_clusters)
 
         #cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=style['Colors']['Colormap'], norm=norm, aspect = self.aspect_ratio)
-        cluster_color, cluster_label, cmap = self.get_cluster_colormap(self.cluster_dict[self.cluster_dict['active method']],alpha=style['Markers']['Alpha'])
+        cluster_color, cluster_label, cmap = self.get_cluster_colormap(self.cluster_dict[method],alpha=style['Markers']['Alpha'])
         #print(cluster_color)
         #print(cmap)
         #boundaries = np.arange(-0.5, n_clusters, 1)
@@ -6990,20 +7015,63 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         return canvas
 
+    def update_n_clusters(self):
+        """Updates cluster dictionary with the new number of clusters
+
+        Updates ``MainWindow.cluster_dict[*method*]['n_clusters'] from ``MainWindow.spinBoxNClusters``.  Updates cluster results.
+        """
+        self.cluster_dict[self.comboBoxClusterMethod.currentText()]['n_clusters'] = self.spinBoxNClusters.value()
+
+        self.update_cluster_flag = True
+        self.update_SV()
+
+    def update_cluster_distance(self):
+        """Updates cluster dictionary with the new distance metric
+
+        Updates ``MainWindow.cluster_dict[*method*]['distance'] from ``MainWindow.comboBoxClusterDistance``.  Updates cluster results.
+        """
+        self.cluster_dict[self.comboBoxClusterMethod.currentText()]['distance'] = self.comboBoxClusterDistance.currentText()
+
+        self.update_cluster_flag = True
+        self.update_SV()
+
+    def update_cluster_exponent(self):
+        """Updates cluster dictionary with the new exponent
+
+        Updates ``MainWindow.cluster_dict[*method*]['exponent'] from ``MainWindow.horizontalSliderClusterExponent``.  Updates cluster results.
+        """
+        self.cluster_dict[self.comboBoxClusterMethod.currentText()]['exponent'] = self.horizontalSliderClusterExponent.value()/10
+
+        self.update_cluster_flag = True
+        self.update_SV()
+    
+    def update_cluster_seed(self):
+        """Updates cluster dictionary with the new exponent
+
+        Updates ``MainWindow.cluster_dict[*method*]['seed'] from ``MainWindow.lineEditSeed``.  Updates cluster results.
+        """
+        self.cluster_dict[self.comboBoxClusterMethod.currentText()]['exponent'] = int(self.lineEditSeed.text())
+
+        self.update_cluster_flag = True
+        self.update_SV()
+
     def generate_random_seed(self):
+        """Generates a random seed for clustering
+
+        Updates ``MainWindow.cluster_dict[*method*]['seed'] using a random number generator with one of 10**9 integers. 
+        """        
         r = random.randint(0,1000000000)
         self.lineEditSeed.setText(str(r))
         self.cluster_dict[self.comboBoxClusterMethod.currentText()]['seed'] = r
 
         self.update_cluster_flag = True
-        self.plot_clusters()
-        pass
+        self.update_SV()
 
     def compute_clusters(self):
         """Computes cluster results
         
         Cluster properties are defined in the ``MainWindow.toolBox.ClusterPage``."""
-        print('compute_clusters')
+        print('\n===compute_clusters===')
         if self.sample_id == '':
             return
 
@@ -7011,6 +7079,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         filtered_array = df_filtered.values
         array = filtered_array[self.data[self.sample_id]['mask']]
 
+        method = self.comboBoxClusterMethod.currentText()
         n_clusters = self.spinBoxNClusters.value()
         exponent = float(self.horizontalSliderClusterExponent.value()) / 10
         seed = int(self.lineEditSeed.text())
@@ -7039,7 +7108,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #     case 'cosine':
         #         distance = cosine_distances(array)
 
-        method = self.comboBoxClusterMethod.currentText()
 
         if self.data[self.sample_id]['computed_data']['Cluster'].empty:
             self.data[self.sample_id]['computed_data']['Cluster'][['X','Y']] = self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
@@ -7131,11 +7199,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         Enables/disables widgets in Left Toolbox > Clustering Page.  Updates widget values/text with values saved in ``MainWindow.cluster_dict``.
         """
+        if self.sample_id == '':
+            return
+
         # update_clusters_ui - Enables/disables tools associated with clusters
         method = self.comboBoxClusterMethod.currentText()
-        if self.sample_id != '':
-            if  method not in self.data[self.sample_id]['computed_data']['Cluster']:
-                self.update_cluster_flag = True
+        self.cluster_dict['active method'] = method
+
+        if method not in self.data[self.sample_id]['computed_data']['Cluster']:
+            self.update_cluster_flag = True
 
         # Number of Clusters
         self.labelNClusters.setEnabled(True)
@@ -7179,7 +7251,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.lineEditSeed.setEnabled(True)
                 self.lineEditSeed.setText(str(self.cluster_dict[method]['seed']))
 
-        self.plot_clusters()
+        self.update_SV()
 
 
     # -------------------------------------
@@ -7792,7 +7864,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_field_combobox(None, self.comboBoxNDimAnalyte)
 
         # colors
-        self.update_field_type_combobox(self.comboBoxColorByField, addNone=True, plot_type=self.comboBoxPlotType.currentText())
+        addNone = True
+        if self.comboBoxPlotType.currentText() in ['PCA Score','Cluster','Cluster Score']:
+            addNone = False
+        self.update_field_type_combobox(self.comboBoxColorByField, addNone=addNone, plot_type=self.comboBoxPlotType.currentText())
         self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
 
     # gets the set of fields
@@ -7814,7 +7889,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         match set_name:
             case 'Analyte' | 'Analyte (normalized)':
                 set_fields = self.data[self.sample_id]['analyte_info'].loc[self.data[self.sample_id]['analyte_info']['use']== True,'analytes'].values.tolist()
-            case 'Ratio':
+            case 'Ratio' | 'Ratio (normalized)':
                 analytes_1 = self.data[self.sample_id]['ratios_info'].loc[self.data[self.sample_id]['ratios_info']['use']== True,'analyte_1']
                 analytes_2 =  self.data[self.sample_id]['ratios_info'].loc[self.data[self.sample_id]['ratios_info']['use']== True,'analyte_2']
                 ratios = analytes_1 +' / '+ analytes_2
@@ -8659,6 +8734,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case 'compatibility':
                 pass
 
+    def mask_changed_callback(self):
+        """Updates mask for current sample
+
+        Updates mask for the current sample whenever the crop (axis), filter, polygon, or cluster mask changes.
+        Updates figure if the *Single View* canvas is active.
+        """        
+        self.data[self.sample_id]['mask'] = \
+            self.data[self.sample_id]['axis_mask'].value & \
+            self.data[self.sample_id]['filter_mask'].value & \
+            self.data[self.sample_id]['polygon_mask'].value & \
+            self.data[self.sample_id]['cluster_mask'].value
+        
+        if self.canvasWindow.currentIndex() == 0:
+            self.update_SV()
+
 
 # -------------------------------
 # Classes
@@ -8688,6 +8778,31 @@ class StandardItem(QStandardItem):
         self.setEditable(False)
         self.setText(txt)
         self.setFont(fnt)
+
+
+# Mask object
+# -------------------------------
+class MaskObj:
+    def __init__(self, initial_value=None):
+        self._value = initial_value
+        self._callbacks = []
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, new_value):
+        old_value = self._value
+        self._value = new_value 
+        self._notify_observers(old_value, new_value)
+
+    def _notify_observers(self, old_value, new_value):
+        for callback in self._callbacks:
+            callback(old_value, new_value)
+    
+    def register_callback(self, callback):
+        self._callbacks.append(callback)
 
 # Analyte GUI
 # -------------------------------

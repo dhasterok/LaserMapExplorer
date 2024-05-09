@@ -20,7 +20,7 @@ from src.gausscensor import gausscensor
 from matplotlib.figure import Figure
 import re
 
-def plot_spider_norm(data, ref_data, norm_ref_data, layer,el_list=None, style='Quanta', quantiles=[ 0.25, 0.5, 0.75], ax=None, c = 'b', label = None):
+def plot_spider_norm(data, ref_data, norm_ref_data, layer,el_list=None, style='Quanta', quantiles=[0.25, 0.5, 0.75], ax=None, c = 'b', label = None):
     
     el_list_lower = [re.sub(r'\d', '', el).lower() for el in el_list]
     # Filter ref_dataerence data
@@ -76,7 +76,7 @@ def plot_spider_norm(data, ref_data, norm_ref_data, layer,el_list=None, style='Q
             elif style=='Quanta':
                 y_q = np.quantile(np.log10(y), q=quantiles)
         else: #censorred data
-            ymodel, y_q = gausscensor(y,scale = 'log',q= quantiles); 
+            ymodel, y_q = gausscensor(y,scale = 'log',q=quantiles); 
             y_q = y_q[:,1]
         
         
@@ -92,7 +92,7 @@ def plot_spider_norm(data, ref_data, norm_ref_data, layer,el_list=None, style='Q
     
     if style in ['MeanSD', 'MeanSE']:
             
-        result_df['mu_norm'] = np.log10(10**result_df['mu'].div(ref_series, axis =0))
+        result_df['mu_norm'] = np.log10(10**result_df['mu'].div(ref_series, axis=0))
         result_df['sigma_norm'] = result_df['sigma'].div(np.log10(ref_series))
         
         result_df['se'] = result_df['sigma']/len(result_df['sigma'])
@@ -102,7 +102,7 @@ def plot_spider_norm(data, ref_data, norm_ref_data, layer,el_list=None, style='Q
         plot_inf ['variable_units'] = ['log10 (ppm)']
         
     elif style == 'Quanta':
-        result_df[result_df.columns[:-1]] = np.log10((10**result_df[result_df.columns[:-1]]).div(ref_series, axis =0))
+        result_df[result_df.columns[:-1]] = np.log10((10**result_df[result_df.columns[:-1]]).div(ref_series, axis=0))
         
         plot_inf ['variable_names'] = result_df.columns[:-1]
     
@@ -187,12 +187,13 @@ def plot_data(ax, t, C, style,el_list, Q=None, label= None):
         ax.plot(x, t.loc[ind,'mu_norm'], color=C, linewidth=0.75)
     
     elif style == 'Quanta':
-        Q= t.columns[:-2]
+        Q = t.columns[:-2]
         if len(Q) == 1:
             ind = ~t.loc[:, Q[0]].isna()
             ax.plot(t.loc[ind, 'elid'], t.loc[ind, Q[0]], color=C, linewidth=0.75, label=label)
             yl = [np.floor(np.nanmin(t.iloc[:, 0])), np.ceil(np.nanmax(t.iloc[:, 0]))]
         elif len(Q) == 2:
+            ind = ~t.loc[:, Q[0]].isna()
             y = t.loc[ind, [Q[0], Q[1]]].values
             fillinterval(ax, x[ind], y, C, 0.3)
             yl = [np.floor(np.nanmin(t.iloc[:, 0])), np.ceil(np.nanmax(t.iloc[:, 1]))]

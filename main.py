@@ -87,7 +87,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             into the field-related QComboBoxes.  Associated with each field are the axes properties.
         
             [*field*] : name of field
-                | 'label' : (str) -- axis label, may include units or custom names
+                | 'label' : (str) -- axis label, may include units or c<<ustom names
                 | 'status' : (str) -- *auto* or *custom* indicates the use of default bounds or user defined axes limits
                 | 'min' : (float) -- minimum axis value
                 | 'max' : (float) -- maximum axis value
@@ -133,7 +133,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     /'use' (bool) -- indicates whether the iolite is being used in the analysis
                     
                     
-                
                 | 'ratios_info' : (dataframe) --
                 | 'filter_info' : (dataframe) --
                 | 'crop' : () --
@@ -149,6 +148,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 | 'raw_data': () -- 
                 | 'cropped_raw_data': () -- 
                 
+
         layoutSingleView : QVBoxLayout
             Layout for Single View tab of ``canvasWindow``
         layoutMultiView : QGridLayout
@@ -3986,7 +3986,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxCbarDirection.setEnabled(False)
                 self.lineEditCbarLabel.setEnabled(False)
                 self.spinBoxHeatmapResolution.setEnabled(False)
-            case 'PCA Score' | 'Cluster Score' | 'clusters':
+            case 'pca score' | 'cluster score' | 'cluster':
                 # axes properties
                 self.lineEditXLB.setEnabled(True)
                 self.lineEditXUB.setEnabled(True)
@@ -4093,6 +4093,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.labelYLabel.setEnabled(self.lineEditYLabel.isEnabled())
         self.labelZLabel.setEnabled(self.lineEditZLabel.isEnabled())
         self.labelAspectRatio.setEnabled(self.lineEditAspectRatio.isEnabled())
+        self.labelTickDirection.setEnabled(self.comboBoxTickDirection.isEnabled())
 
         # scalebar properties
         self.labelScaleLocation.setEnabled(self.comboBoxScaleLocation.isEnabled())
@@ -4197,7 +4198,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # self.update_SV()
 
     def get_style_dict(self):
-
+        """Get style properties"""        
         plot_type = self.comboBoxPlotType.currentText()
         self.plot_types[self.toolBox.currentIndex()][0] = self.comboBoxPlotType.currentIndex()
 
@@ -4752,10 +4753,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.styles[plot_type]['Colors']['ColorByField'] == self.comboBoxColorByField.currentText():
             return
 
-        if self.comboBoxColorByField.currentText() == 'Clusters':
-            self.comboBoxColorField.setCurrentText(self.cluster_dict['active method'])
-
         self.styles[plot_type]['Colors']['ColorByField'] = self.comboBoxColorByField.currentText()
+
+        if self.comboBoxColorByField.currentText() == 'Clusters':
+            # set ColorField to active cluster method
+            self.comboBoxColorField.setCurrentText(self.cluster_dict['active method'])
+            print(self.cluster_dict['active method'])
+
+            # set color scale to discrete
+            self.comboBoxColorScale.clear()
+            self.comboBoxColorScale.addItem('discrete')
+            self.comboBoxColorScale.setCurrentText('discrete')
+
+            self.styles[plot_type]['Colors']['CScale'] = 'discrete'
+        else:
+            # set color scale options to linear/log
+            self.comboBoxColorScale.clear()
+            self.comboBoxColorScale.addItems(['linear','log'])
+            self.comboBoxColorScale.setCurrentText(self.styles[plot_type]['Colors']['CScale'])
 
         if self.comboBoxPlotType.isEnabled() == False | self.comboBoxColorByField.isEnabled() == False:
             return
@@ -5604,10 +5619,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def color_norm(self, style, n=None):
         """Normalize colors for colormap
 
-        :param style: Styles associated with current plot type.
-        :type style: dict
-        :param N: The number of colors for discrete color maps, Defaults to None
-        :type N: int, optional
+        Parameters
+        ----------
+        style : dict
+            Styles associated with current plot type.
+        N : int, optional
+            The number of colors for discrete color maps, Defaults to None
+        
+        Returns
+        -------
+            matplotlib.colors.Norm
+                Color norm for plotting.
         """
         norm = 0
         match style['Colors']['CScale']:
@@ -6961,14 +6983,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # for label, color in zip(unique_groups, colors):
         #     self.group_cmap[label] = color
 
-        # norm = self.color_norm(style, n=n_clusters)
+        
+        print(style['Colors']['CScale'])
+        norm = self.color_norm(style, n=n_clusters)
 
         #cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=style['Colors']['Colormap'], norm=norm, aspect = self.aspect_ratio)
         cluster_color, cluster_label, cmap = self.get_cluster_colormap(self.cluster_dict[self.cluster_dict['active method']],alpha=style['Markers']['Alpha'])
-        print(cluster_color)
-        print(cmap)
-        boundaries = np.arange(-0.5, n_clusters, 1)
-        norm = colors.BoundaryNorm(boundaries, cmap.N, clip=True)
+        #print(cluster_color)
+        #print(cmap)
+        #boundaries = np.arange(-0.5, n_clusters, 1)
+        #norm = colors.BoundaryNorm(boundaries, cmap.N, clip=True)
+        norm = self.color_norm(style,n_clusters)
 
         cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect = self.aspect_ratio)
 
@@ -7091,22 +7116,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.update_cluster_flag or self.data[self.sample_id]['computed_data']['Cluster'].empty:
             self.compute_clusters()
 
-        self.cluster_dict['active method'] = self.comboBoxClusterMethod.currentText()
-        if self.comboBoxColorByField.currentText() == 'Clusters':
-            self.comboBoxColorField.setCurrentText(self.comboBoxClusterMethod.currentText())
+        method = self.comboBoxClusterMethod.currentText()
 
+        self.cluster_dict['active method'] = method
         plot_type = self.comboBoxPlotType.currentText()
 
         match plot_type:
             case 'Cluster':
+                self.comboBoxColorField.setCurrentText(method)
+                plot_name = f"{plot_type}_{method}_map"
                 canvas = self.plot_cluster_map()
-                plot_name = plot_type
             case 'Cluster Score':
+                plot_name = f"{plot_type}_{method}_{self.comboBoxColorField.currentText()}_score_map"
                 canvas = self.plot_score_map()
-                plot_name = plot_type+f'_{self.comboBoxColorField.currentText()}'
             case _:
                 print(f'Unknown PCA plot type: {plot_type}')
                 return
+
+        self.update_figure_font(canvas, self.styles[plot_type]['Text']['Font'])
 
         self.plot_info = {
             'tree': 'Multidimensional Analysis',
@@ -7115,12 +7142,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'plot_type': plot_type,
             'figure': canvas,
             'style': self.styles[plot_type],
-            'cluster_groups': [],
+            'cluster_groups': self.cluster_dict[method],
             'view': [True,False],
             'position': []
             }
-
-        self.update_figure_font(canvas, self.styles[plot_type]['Text']['Font'])
 
         self.clear_layout(self.widgetSingleView.layout())
         self.widgetSingleView.layout().addWidget(canvas)
@@ -7229,7 +7254,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             cluster_color, cluster_label, cmap = self.get_cluster_colormap(cluster_dict, alpha=style['Markers']['Alpha'])
 
             clusters = cluster_dict['selected_clusters']
-            cluster_flag = True
+            if 0 in list(cluster_dict.keys()):
+                cluster_flag = True
+            else:
+                cluster_dict = None
+                cluster_flag = False
+                print(f'No cluster data found for {method}, recompute?')
         else:
             cluster_dict = None
             cluster_flag = False
@@ -7255,14 +7285,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 yl = [np.inf, -np.inf]
                 if cluster_flag and method in self.data[self.sample_id]['computed_data']['Cluster']:
                     # Get the cluster labels for the data
-                    #cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']]
+                    cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][method][self.data[self.sample_id]['mask']]
 
-                    df_filtered['clusters'] = cluster_label
+                    df_filtered['clusters'] = cluster_labels
 
                     # Plot tec for all clusters
                     for i in clusters:
                         # Create RGBA color
-                        print(f'Cluster {i}')
+                        #print(f'Cluster {i}')
                         canvas.axes,yl_tmp = plot_spider_norm(
                                 data=df_filtered.loc[df_filtered['clusters']==i,:],
                                 ref_data=self.ref_data, norm_ref_data=self.ref_data['model'][ref_i],

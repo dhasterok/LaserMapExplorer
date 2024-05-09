@@ -304,14 +304,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.widgetQuickView.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
         try:
-            self.QV_analyte_list = self.import_csv_to_dict('resources/styles/qv_list.csv')
+            self.QV_analyte_list = self.import_csv_to_dict(os.path.join(basedir,'resources/styles/qv_lists.csv'))
         except:
             self.QV_analyte_list = {'default':['Si29','Ti47','Al27','Cr52','Fe56','Mn55','Mg24','Ca43','K39','Na23','P31',
                 'Ba137','Th232','U238','La139','Ce140','Pb206','Pr141','Sr88','Zr90','Hf178','Nd146','Eu153',
                 'Gd157','Tb159','Dy163','Ho165','Y89','Er166','Tm169','Yb172','Lu175']}
 
         self.toolButtonNewList.clicked.connect(lambda: quickView(self))
-
+        self.comboBoxQVList.activated.connect(lambda: self.display_QV())
         # right toolbar plot layout
         # histogram view
         layout_histogram_view = QtWidgets.QVBoxLayout()
@@ -446,6 +446,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Select analyte Tab
         #-------------------------
         self.ref_data = pd.read_excel(os.path.join(basedir,'resources/app_data/earthref.xlsx'))
+        self.sort_data = pd.read_excel(os.path.join(basedir,'resources/app_data/element_info.xlsx'))
         ref_list = self.ref_data['layer']+' ['+self.ref_data['model']+'] '+ self.ref_data['reference']
         self.comboBoxCorrelationMethod.activated.connect(self.correlation_method_callback)
         self.checkBoxCorrelationSquared.stateChanged.connect(self.correlation_squared_callback)
@@ -1207,7 +1208,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.analyteDialog = excelConcatenator(self)
         self.analyteDialog.show()
 
-    def export_dict_to_csv(dictionary, filename):
+    def export_dict_to_csv(self,dictionary, filename):
         """Exports a dictionary to csv file
 
         Explorts a simple dictionary that includes a set of keyword associated with lists to a csv.
@@ -1225,7 +1226,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             for key, values in dictionary.items():
                 csv_writer.writerow([key] + values)
 
-    def import_csv_to_dict(filename):
+    def import_csv_to_dict(self,filename):
         """Imports a csv to a dictionary
 
         Imports a csv in the format produced by ``MainWindow.export_dict_to_csv``
@@ -8672,18 +8673,40 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.toolButtonPlotProfile.setChecked(False)
                 self.toolButtonPointMove.setChecked(False)
 
-    def sort_analytes(self, method, analytes):
-        match method:
-            case 'alphabetical':
-                pass
-            case 'atomic number':
-                pass
-            case 'mass':
-                pass
-            case 'compatibility':
-                pass
+    def sort_analytes(self, method, analytes, order = 'desc'):
+        # Extract element symbols and any mass numbers if present
+        parsed_analytes = []
+        for analyte in analytes:
+            # Extracts the element symbol and mass if available (e.g., "Al27" -> ("Al", 27))
+            match = re.match(r"([A-Za-z]+)(\d*)", analyte)
+            element_symbol = match.group(1) if match else analyte
+            mass_number = int(match.group(2)) if match.group(2) else None
+            parsed_analytes.append((element_symbol, mass_number))
+        
+        # Convert to DataFrame for easier manipulation
+        df_analytes = pd.DataFrame(parsed_analytes, columns=['element_symbol', 'mass'])
 
+        # Merge with sort_data for additional information
+        df_analytes = df_analytes.merge(self.sort_data, on='element_symbol', how='left')
 
+        # Sort based on the selected method
+        if method == 'alphabetical':
+            df_analytes.sort_values(by='element_symbol', ascending=(order != 'desc'), inplace=True)
+        elif method == 'atomic number':
+            df_analytes.sort_values(by='atomic_number', ascending=(order != 'desc'), inplace=True)
+        elif method == 'mass':
+            # Use provided mass or average mass if not available
+            df_analytes['computed_mass'] = df_analytes['mass'].fillna(df_analytes['average_mass'])
+            df_analytes.sort_values(by='computed_mass', ascending=(order != 'desc'), inplace=True)
+        elif method == 'compatibility':
+            df_analytes.sort_values(by='order', ascending=(order != 'desc'), inplace=True)
+            
+        analytes = df_analytes['element_symbol']+ df_analytes['mass'].astype(str)
+        # Return the sorted list of analytes as (symbol, mass) tuples
+        return analytes.to_list()
+        
+        
+       
 # -------------------------------
 # Classes
 # -------------------------------
@@ -9016,54 +9039,97 @@ class quickView(QDialog, Ui_QuickViewDialog):
         self.setupUi(self)
         self.main_window = parent
         self.analyte_list = self.main_window.data[self.main_window.sample_id]['analyte_info']['analytes']
-        self.quickview_list = self.main_window.QV_analyte_list
+
+        self.tableWidget = TableWidgetDragRows()  # Assuming TableWidgetDragRows is defined elsewhere
+        self.setup_table()
         
-        self.tableWidget = TableWidgetDragRows()
+        # Setup sort menu and associated toolButton
+        self.setup_sort_menu()
         
-        # flexible column widths
-        # header = self.tableWidget.horizontalHeader()
-        # header.setSectionResizeMode(0,QHeaderView.Stretch)
-        # header.setSectionResizeMode(1,QHeaderView.ResizeToContents)
+        # Save functionality
+        self.toolButtonSave.clicked.connect(self.save_selected_analytes)
 
-        # # Set selection rules
-        # self.tableWidget.setSelectionBehavior(QTableWidget.SelectRows)
-        # self.tableWidget.setSelectionMode(QTableWidget.SingleSelection)
+        # Close dialog signal
+        self.pushButtonClose.clicked.connect(lambda: self.done(0))
+        self.layout().insertWidget(0, self.tableWidget)
+        self.show()
 
-        # # Set drag and drop mode
-        # self.tableWidget.setDragEnabled(True)
-        # self.tableWidget.viewport().setAcceptDrops(True)
-        # self.tableWidget.setDropIndicatorShown(True)
-        # self.tableWidget.cellClicked.connect(lambda: self.mousePressEvent(event))
-
-        # setup sort menu and associated toolButton
-        sortmenu_items = ['alphabetical','atomic number','mass','compatibility']
-        SortMenu = QMenu()
-        SortMenu.triggered.connect(lambda x:self.main_window.sort_analytes(x.text(), self.analyte_list))
-        self.main_window.add_menu(sortmenu_items,SortMenu)
-        self.toolButtonSort.setMenu(SortMenu)
-
-        # fill table
+    def setup_table(self):
         self.tableWidget.setRowCount(len(self.analyte_list))
         self.tableWidget.setColumnCount(2)
         self.tableWidget.setHorizontalHeaderLabels(['Analyte', 'Show'])
         header = self.tableWidget.horizontalHeader()
-        header.setSectionResizeMode(0,QHeaderView.Stretch)
-        header.setSectionResizeMode(1,QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(0, QHeaderView.Stretch)
+        header.setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.populate_table()
+
+    def populate_table(self):
+        # Before repopulating, save the current state of checkboxes
+        checkbox_states = {}
+        for row in range(self.tableWidget.rowCount()):
+            checkbox = self.tableWidget.cellWidget(row, 1)
+            if checkbox:
+                analyte = self.tableWidget.item(row, 0).text()
+                checkbox_states[analyte] = checkbox.isChecked()
+
+        # Clear the table and repopulate
+        self.tableWidget.setRowCount(len(self.analyte_list))
         for row, analyte in enumerate(self.analyte_list):
-            # analyte text in column 1
             item = QTableWidgetItem(analyte)
             self.tableWidget.setItem(row, 0, item)
-
-            # checkbox in column 1
             checkbox = QCheckBox()
-            checkbox.setChecked(True)
+            # Restore the checkbox state based on the previous state if available
+            checkbox.setChecked(checkbox_states.get(analyte, True))
             self.tableWidget.setCellWidget(row, 1, checkbox)
 
-        # close dialog signal
-        self.pushButtonClose.clicked.connect(lambda: self.done(0))
-        self.layout().insertWidget(0,self.tableWidget)
-        self.show()
+    def setup_sort_menu(self):
+        sortmenu_items = ['alphabetical', 'atomic number', 'mass', 'compatibility']
+        SortMenu = QMenu()
+        SortMenu.triggered.connect(self.apply_sort)
+        self.toolButtonSort.setMenu(SortMenu)
+        for item in sortmenu_items:
+            SortMenu.addAction(item)
+
+    def apply_sort(self, action):
+        method = action.text()
+        self.analyte_list = self.main_window.sort_analytes(method, self.analyte_list)
+        self.populate_table()  # Refresh table with sorted data
+
+    def save_selected_analytes(self):
+        """Gets list of analytes and group name when Save button is clicked
+
+        #     Retrieves the user defined name from ``quickView.lineEditViewName`` and list of analytes using ``quickView.column_to_list()``
+        #     and adds them to a dictionary item with the name defined as the key.
+
+        #     Raises
+        #     ------
+        #         A warning is raised if the user does not provide a name.  The list is not added to the dictionary in this case.
+        #     """        
+        self.view_name = self.lineEditViewName.text().strip()
+        if not self.view_name:
+            QMessageBox.warning(self, "Invalid Input", "Please enter a valid view name.")
+            return
+
+        selected_analytes = [self.tableWidget.item(row, 0).text() for row in range(self.tableWidget.rowCount()) if self.tableWidget.cellWidget(row, 1).isChecked()]
+        self.main_window.QV_analyte_list[self.view_name] = selected_analytes
+
+        # update self.comboBoxQVList combo box with view_name
+        self.main_window.comboBoxQVList.addItem(self.view_name)
         
+        # Save to CSV
+        self.save_to_csv()
+
+    def save_to_csv(self):
+        
+        file_path = os.path.join(basedir,'resources', 'styles', 'qv_lists.csv')
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+        # append dictionary to file of saved qv_lists
+        self.main_window.export_dict_to_csv(self.main_window.QV_analyte_list, file_path)
+        
+
+        QMessageBox.information(self, "Save Successful", f"Analytes view saved under '{self.view_name}' successfully.")
         
     # def mousePressEvent(self, event):
     #     print('mousePressEvent')

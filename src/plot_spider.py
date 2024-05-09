@@ -208,7 +208,7 @@ def plot_data(ax, t, C, style,el_list, Q=None, label= None):
             y = t.loc[ind, [Q[0], Q[4]]].values
             ax.plot(x[ind], y, color=C, linewidth=0.25)
             y = t.loc[ind, [Q[1], Q[3]]].values
-            fillinterval(ax, x[ind], y.T, C, 0.3)
+            fillinterval(ax, x[ind], y, C, 0.3)
             ax.plot(x[ind], t.loc[ind, Q[2]], color=C, linewidth=0.75, label=label)
             yl = [np.floor(np.nanmin(t.iloc[:, 0])), np.ceil(np.nanmax(t.iloc[:, 4]))]
         else:

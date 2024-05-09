@@ -3454,8 +3454,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                'Colors': {'Color': '#1c75bc', 'ColorByField': 'None', 'Field': '', 'Colormap': 'viridis', 'Reverse': False, 'CLim':[0,1], 'CScale':'linear', 'Direction': 'vertical', 'CLabel': '', 'Resolution': 10}
                                }
         default_font = 'Avenir'
+        print(self.fontComboBox.currentFont().family())
         try:
-            self.fontComboBox.setFont(QFont(default_font))
+            self.fontComboBox.setCurrentFont(QFont(default_font, 11))
             default_plot_style['Text']['Font'] = self.fontComboBox.currentFont().family()
         except:
             print('Could not find '+default_font+' font')
@@ -7398,7 +7399,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         angle = 0
                     canvas.axes.set_xticklabels(self.toggle_mass(self.n_dim_list), rotation=angle)
                 else:
-                    canvas.axes,yl = plot_spider_norm(data=df_filtered, ref_data=self.ref_data, norm_ref_data=self.ref_data['model'][ref_i], layer=self.ref_data['layer'][ref_i], el_list=self.n_dim_list, style='Quanta', ax=canvas.axes)
+                    canvas.axes,yl = plot_spider_norm(data=df_filtered, ref_data=self.ref_data, norm_ref_data=self.ref_data['model'][ref_i], layer=self.ref_data['layer'][ref_i], el_list=self.n_dim_list, style='Quanta', quantiles=quantiles, ax=canvas.axes)
                     if self.checkBoxShowMass.isChecked():
                         angle = 45
                     else:
@@ -10848,7 +10849,7 @@ class Profiling:
                     child.widget().deleteLater()
 
             # Get the colormap specified by the user
-            cmap = self.get_colormap()
+            cmap = self.main_window.get_colormap()
             # Determine point type from the pushButtonProfileType text
             if self.main_window.comboBoxPointType.currentText() == 'median + IQR':
                 point_type = 'median'

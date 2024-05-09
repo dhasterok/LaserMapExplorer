@@ -1181,7 +1181,7 @@
          <x>4</x>
          <y>0</y>
          <width>291</width>
-         <height>146</height>
+         <height>151</height>
         </rect>
        </property>
        <property name="title">
@@ -1800,8 +1800,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>300</width>
-        <height>531</height>
+        <width>98</width>
+        <height>28</height>
        </rect>
       </property>
       <attribute name="label">
@@ -2404,8 +2404,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>300</width>
-        <height>531</height>
+        <width>98</width>
+        <height>28</height>
        </rect>
       </property>
       <attribute name="label">
@@ -2728,8 +2728,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>300</width>
-        <height>531</height>
+        <width>98</width>
+        <height>28</height>
        </rect>
       </property>
       <attribute name="label">
@@ -3768,8 +3768,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>300</width>
-        <height>531</height>
+        <width>98</width>
+        <height>28</height>
        </rect>
       </property>
       <attribute name="label">
@@ -4307,8 +4307,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>300</width>
-        <height>531</height>
+        <width>98</width>
+        <height>28</height>
        </rect>
       </property>
       <attribute name="label">
@@ -4859,8 +4859,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>300</width>
-        <height>531</height>
+        <width>98</width>
+        <height>28</height>
        </rect>
       </property>
       <attribute name="label">
@@ -5022,8 +5022,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>300</width>
-        <height>531</height>
+        <width>98</width>
+        <height>28</height>
        </rect>
       </property>
       <attribute name="label">
@@ -5599,8 +5599,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>300</width>
-        <height>531</height>
+        <width>98</width>
+        <height>28</height>
        </rect>
       </property>
       <attribute name="label">
@@ -6263,8 +6263,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>300</width>
-        <height>531</height>
+        <width>98</width>
+        <height>28</height>
        </rect>
       </property>
       <attribute name="label">
@@ -6634,6 +6634,15 @@
      </property>
      <item>
       <layout class="QGridLayout" name="gridLayout_5">
+       <property name="leftMargin">
+        <number>6</number>
+       </property>
+       <property name="topMargin">
+        <number>6</number>
+       </property>
+       <property name="rightMargin">
+        <number>6</number>
+       </property>
        <item row="0" column="0">
         <widget class="QLabel" name="labelPlotType">
          <property name="font">
@@ -6740,7 +6749,7 @@
         </font>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="PlotSelectorPage">
         <property name="geometry">
@@ -6748,7 +6757,7 @@
           <x>0</x>
           <y>0</y>
           <width>241</width>
-          <height>412</height>
+          <height>408</height>
          </rect>
         </property>
         <attribute name="label">
@@ -6873,7 +6882,7 @@
           <x>0</x>
           <y>0</y>
           <width>241</width>
-          <height>412</height>
+          <height>408</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6909,7 +6918,7 @@
           <enum>QFrame::Raised</enum>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="StyleAxes">
           <property name="geometry">
@@ -7259,8 +7268,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>100</width>
-            <height>30</height>
+            <width>239</width>
+            <height>461</height>
            </rect>
           </property>
           <attribute name="icon">
@@ -7275,7 +7284,7 @@
             <rect>
              <x>5</x>
              <y>0</y>
-             <width>253</width>
+             <width>231</width>
              <height>86</height>
             </rect>
            </property>
@@ -7375,8 +7384,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>100</width>
-            <height>30</height>
+            <width>239</width>
+            <height>461</height>
            </rect>
           </property>
           <attribute name="icon">
@@ -7391,7 +7400,7 @@
             <rect>
              <x>5</x>
              <y>0</y>
-             <width>219</width>
+             <width>231</width>
              <height>106</height>
             </rect>
            </property>
@@ -7533,8 +7542,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>100</width>
-            <height>30</height>
+            <width>239</width>
+            <height>461</height>
            </rect>
           </property>
           <attribute name="icon">
@@ -7746,8 +7755,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>100</width>
-            <height>30</height>
+            <width>239</width>
+            <height>461</height>
            </rect>
           </property>
           <attribute name="icon">
@@ -7892,8 +7901,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>100</width>
-            <height>30</height>
+            <width>239</width>
+            <height>461</height>
            </rect>
           </property>
           <attribute name="icon">
@@ -8353,8 +8362,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>100</width>
-            <height>30</height>
+            <width>239</width>
+            <height>461</height>
            </rect>
           </property>
           <attribute name="icon">
@@ -8418,7 +8427,7 @@
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_14">
             <item>
-             <widget class="QToolButton" name="toolButtonPolyLink_2">
+             <widget class="QToolButton" name="toolButtonClusterLink">
               <property name="maximumSize">
                <size>
                 <width>32</width>
@@ -8451,7 +8460,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QToolButton" name="toolButtonPolyDelink_2">
+             <widget class="QToolButton" name="toolButtonClusterDelink">
               <property name="maximumSize">
                <size>
                 <width>32</width>
@@ -8782,8 +8791,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>241</width>
-          <height>412</height>
+          <width>98</width>
+          <height>28</height>
          </rect>
         </property>
         <attribute name="icon">

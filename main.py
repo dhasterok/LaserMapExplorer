@@ -3596,6 +3596,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         Toggling of enabled states are based on ``MainWindow.toolBox`` page and the current plot type
         selected in ``MainWindow.comboBoxPlotType."""
+        print('toggle_style_widgets')
         plot_type = self.comboBoxPlotType.currentText().lower()
 
         # annotation properties
@@ -3719,6 +3720,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxScaleLocation.setEnabled(False)
 
                 # marker properties
+                self.comboBoxMarker.setEnabled(False)
                 self.doubleSpinBoxMarkerSize.setEnabled(False)
                 self.horizontalSliderMarkerAlpha.setEnabled(True)
                 self.labelMarkerAlpha.setEnabled(True)
@@ -3733,14 +3735,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # field is set by cluster table
                 self.comboBoxColorScale.setEnabled(False)
                 if self.comboBoxColorByField.currentText().lower() == 'none':
-                    self.comboBoxMarker.setEnabled(True)
+                    self.toolButtonMarkerColor.setEnabled(True)
                     self.comboBoxColorField.setEnabled(False)
-                    self.toolButtonMarkerColor.setEnabled(False)
                     self.comboBoxCbarDirection.setEnabled(False)
                 else:
-                    self.comboBoxMarker.setEnabled(False)
+                    self.toolButtonMarkerColor.setEnabled(False)
                     self.comboBoxColorField.setEnabled(True)
-                    self.toolButtonMarkerColor.setEnabled(True)
                     self.comboBoxCbarDirection.setEnabled(True)
 
                 self.comboBoxFieldColormap.setEnabled(False)
@@ -3981,14 +3981,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.toolButtonMarkerColor.setEnabled(True)
                     self.comboBoxColorField.setEnabled(False)
                     self.comboBoxFieldColormap.setEnabled(False)
-                else:
+                    self.comboBoxCbarDirection.setEnabled(False)
+                elif self.comboBoxColorByField.currentText().lower() == 'cluster':
                     self.toolButtonMarkerColor.setEnabled(False)
                     self.comboBoxColorField.setEnabled(True)
-                    self.comboBoxFieldColormap.setEnabled(True)
+                    self.comboBoxFieldColormap.setEnabled(False)
+                    self.comboBoxCbarDirection.setEnabled(True)
+
                 self.comboBoxColorScale.setEnabled(False)
                 self.lineEditColorLB.setEnabled(False)
                 self.lineEditColorUB.setEnabled(False)
-                self.comboBoxCbarDirection.setEnabled(False)
                 self.lineEditCbarLabel.setEnabled(False)
                 self.spinBoxHeatmapResolution.setEnabled(False)
             case 'variance':
@@ -4860,6 +4862,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.styles[plot_type]['Colors']['Colormap'] == self.comboBoxFieldColormap.currentText():
             return
 
+        self.toggle_style_widgets()
         self.styles[self.comboBoxPlotType.currentText()]['Colors']['Colormap'] = self.comboBoxFieldColormap.currentText()
 
         self.update_SV()
@@ -5606,18 +5609,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if style['Colors']['Direction'] == 'none':
             return
 
-        # # Plot rectangles with colors and labels
-        # for i, color in enumerate(colors):
-        #     ax.add_patch(plt.Rectangle((i, 0), 1, 1, color=color, label=color))
-        # .   use this line to produce the discrete colormap
-        #     ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), shadow=True, ncol=len(colors))
+        # discrete colormap - plot as a legend
+        if cbartype == 'discrete':
+            # create patches for legend items
+            p = [None]*len(grouplabels)
+            for i, label in enumerate(grouplabels):
+                p[i] = Patch(facecolor=groupcolors[i], edgecolor='#111111', linewidth=0.5, label=label)
 
-        if style['Colors']['Direction'] == 'vertical':
-            if cbartype == 'discrete':
-                p = [None]*len(grouplabels)
-                for i, label in enumerate(grouplabels):
-                    p[i] = Patch(facecolor=groupcolors[i], edgecolor='#111111', linewidth=0.5, label=label)
-
+            if style['Colors']['Direction'] == 'vertical':
                 canvas.axes.legend(
                         handles=p,
                         handlelength=1,
@@ -5627,19 +5626,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         frameon=False,
                         ncol=1
                     )
-            else:
-                if self.comboBoxPlotType.currentText() == 'correlation':
-                    loc = 'left'
-                else:
-                    loc = 'right'
-                cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location=loc, shrink=0.62, fraction=0.1)
-                cbar.set_label(style['Colors']['CLabel'], size=style['Text']['FontSize'])
-                cbar.ax.tick_params(labelsize=style['Text']['FontSize'])
-        elif style['Colors']['Direction'] == 'horizontal':
-            if cbartype == 'discrete':
-                p = [None]*len(grouplabels)
-                for i, label in enumerate(grouplabels):
-                    p[i] = Patch(facecolor=groupcolors[i], edgecolor='#111111', linewidth=0.5, label=label)
+            elif style['Colors']['Direction'] == 'horizontal':
                 canvas.axes.legend(
                         handles=p,
                         handlelength=1,
@@ -5649,10 +5636,34 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         frameon=False,
                         ncol=3
                     )
-            else:
-                cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=style['Colors']['Direction'], location='bottom', shrink=0.62, fraction=0.1)
-                cbar.set_label(style['Colors']['CLabel'], size=style['Text']['FontSize'])
-                cbar.ax.tick_params(labelsize=style['Text']['FontSize'])
+        # continuous colormap - plot with colorbar
+        else:
+            if style['Colors']['Direction'] == 'vertical':
+                if self.comboBoxPlotType.currentText() == 'correlation':
+                    loc = 'left'
+                else:
+                    loc = 'right'
+                cbar = canvas.fig.colorbar( cax,
+                        ax=canvas.axes,
+                        orientation=style['Colors']['Direction'],
+                        location=loc,
+                        shrink=0.62,
+                        fraction=0.1,
+                        alpha=1
+                    )
+            elif style['Colors']['Direction'] == 'horizontal':
+                cbar = canvas.fig.colorbar( cax,
+                        ax=canvas.axes,
+                        orientation=style['Colors']['Direction'],
+                        location='bottom',
+                        shrink=0.62,
+                        fraction=0.1,
+                        alpha=1
+                    )
+
+            cbar.set_label(style['Colors']['CLabel'], size=style['Text']['FontSize'])
+            cbar.ax.tick_params(labelsize=style['Text']['FontSize'])
+            cbar.set_alpha(1)
 
         # adjust tick marks if labels are given
         if cbartype == 'continuous' or grouplabels is None:
@@ -6192,10 +6203,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         method = self.cluster_dict['active method']
         if method is None:
             cluster_flag = False
-        elif not self.cluster_dict[method]['selected clusters'] | method not in list(self.data[self.sample_id]['computed_data']['Cluster'].keys()):
+        elif (not self.cluster_dict[method]['selected clusters']) | (method not in list(self.data[self.sample_id]['computed_data']['Cluster'].keys())):
             cluster_flag = False
-            
-
 
         # Check if the algorithm is in the current group and if results are available
         if cluster_flag: 
@@ -6367,6 +6376,27 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 edgecolors='none',
                 alpha=style['Markers']['Alpha']/100)
             cb = None
+        elif style['Colors']['ColorByField'] == 'Cluster':
+            # color by cluster
+            method = self.comboBoxColorField.currentText()
+            if method not in list(self.cluster_dict.keys()):
+                return
+            else:
+                if 0 not in list(self.cluster_dict[method].keys()):
+                    return
+
+            cluster_color, cluster_label, cmap = self.get_cluster_colormap(self.cluster_dict[method],alpha=style['Markers']['Alpha'])
+            norm = self.color_norm(style,self.cluster_dict[method]['n_clusters'])
+
+            cb = canvas.axes.scatter(x['array'], y['array'], c=c['array'],
+                s=style['Markers']['Size'],
+                marker=self.markerdict[style['Markers']['Symbol']],
+                edgecolors='none',
+                cmap=cmap,
+                alpha=style['Markers']['Alpha']/100,
+                norm=norm)
+
+            self.add_colorbar(canvas, cb, style, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color)
         else:
             # color by field
             norm = self.color_norm(style)
@@ -6453,7 +6483,28 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                             size=style['Markers']['Size'],
                             color=style['Colors']['Color'])
             cb = None
+        elif style['Colors']['ColorByField'] == 'Cluster':
+            # color by cluster
+            method = self.comboBoxColorField.currentText()
+            if method not in list(self.cluster_dict.keys()):
+                return
+            else:
+                if 0 not in list(self.cluster_dict[method].keys()):
+                    return
+
+            cluster_color, cluster_label, cmap = self.get_cluster_colormap(self.cluster_dict[method],alpha=style['Markers']['Alpha'])
+            norm = self.color_norm(style,self.cluster_dict[method]['n_clusters'])
+
+            _, cb = tp.ternscatter(x['array'], y['array'], z['array'], categories=c['array'],
+                                            marker=self.markerdict[style['Markers']['Symbol']],
+                                            size=style['Markers']['Size'],
+                                            cmap=cmap,
+                                            norm=norm,
+                                            orientation=style['Colors']['Direction'])
+
+            self.add_colorbar(canvas, cb, style, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color)
         else:
+            # color field
             norm = self.color_norm(style)
             _, cb = tp.ternscatter(x['array'], y['array'], z['array'], categories=c['array'],
                                             marker=self.markerdict[style['Markers']['Symbol']],
@@ -6969,16 +7020,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 idx = int(self.comboBoxColorField.currentIndex()) + 1
                 field = f'PC{idx}'
             case 'Cluster Score':
-                idx = int(self.comboBoxColorField.currentIndex())
-                field = f'Cluster{idx}'
+                #idx = int(self.comboBoxColorField.currentIndex())
+                #field = f'{idx}'
+                field = self.comboBoxColorField.currentText()
             case _:
                 print('(MainWindow.plot_score_map) Unknown score type'+plot_type)
                 return canvas
 
-        print(list(self.data[self.sample_id]['computed_data']['Cluster Score']['fuzzy c-means'].keys()))
         reshaped_array = np.reshape(self.data[self.sample_id]['computed_data'][plot_type][field].values, self.array_size, order=self.order)
 
-        cax = canvas.axes.imshow(reshaped_array, cmap=style['Colors']['Colormap'],  aspect=self.aspect_ratio, interpolation='none')
+        cax = canvas.axes.imshow(reshaped_array, cmap=style['Colors']['Colormap'], aspect=self.aspect_ratio, interpolation='none')
 
          # Add a colorbar
         self.add_colorbar(canvas, cax, style, field)
@@ -7017,25 +7068,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # for label, color in zip(unique_groups, colors):
         #     self.group_cmap[label] = color
 
-        
-        print(style['Colors']['CScale'])
-        norm = self.color_norm(style, n=n_clusters)
-
-        #cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=style['Colors']['Colormap'], norm=norm, aspect = self.aspect_ratio)
         cluster_color, cluster_label, cmap = self.get_cluster_colormap(self.cluster_dict[method],alpha=style['Markers']['Alpha'])
-        #print(cluster_color)
-        #print(cmap)
+
         #boundaries = np.arange(-0.5, n_clusters, 1)
         #norm = colors.BoundaryNorm(boundaries, cmap.N, clip=True)
         norm = self.color_norm(style,n_clusters)
 
+        #cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=style['Colors']['Colormap'], norm=norm, aspect = self.aspect_ratio)
         cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect = self.aspect_ratio)
 
-        #self.add_colorbar(canvas, cax, style, None, cbartype='discrete', grouplabels=np.arange(0, n_clusters), norm=norm)
-        glabels = []
-        for i in range(self.cluster_dict[method]['n_clusters']):
-            glabels.append(self.cluster_dict[method][i]['name'])
-        self.add_colorbar(canvas, cax, style, cbartype='discrete', grouplabels=glabels, groupcolors=cluster_color)
+        self.add_colorbar(canvas, cax, style, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color)
 
         canvas.fig.subplots_adjust(left=0.05, right=1)  # Adjust these values as needed
         canvas.fig.tight_layout()
@@ -7190,12 +7232,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.sample_id == '':
             return
 
-        if self.update_cluster_flag or self.data[self.sample_id]['computed_data']['Cluster'].empty:
+        method = self.comboBoxClusterMethod.currentText()
+        if self.update_cluster_flag or \
+                self.data[self.sample_id]['computed_data']['Cluster'].empty or \
+                (method not in list(self.data[self.sample_id]['computed_data']['Cluster Score'].keys())):
             self.compute_clusters()
 
-        method = self.comboBoxClusterMethod.currentText()
 
         self.cluster_dict['active method'] = method
+
         plot_type = self.comboBoxPlotType.currentText()
 
         match plot_type:
@@ -7335,6 +7380,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             cluster_color, cluster_label, cmap = self.get_cluster_colormap(cluster_dict, alpha=style['Markers']['Alpha'])
 
             clusters = cluster_dict['selected_clusters']
+            print(clusters)
             if 0 in list(cluster_dict.keys()):
                 cluster_flag = True
             else:
@@ -7388,7 +7434,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     canvas.axes.set_position([box.x0, box.y0 - box.height * 0.1,
                                     box.width, box.height * 0.9])
 
-                    canvas.axes.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=3, handlelength=1)
+                    self.add_colorbar(canvas, None, style, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color)
+                    #canvas.axes.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=3, handlelength=1)
 
                     self.logax(canvas.axes, yl, 'y')
                     canvas.axes.set_ylim(yl)
@@ -7600,18 +7647,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 if i != row and self.tableWidgetViewGroups.item(i, 0).text() == new_name:
                     # Duplicate name found, revert to the original name and show a warning
                     item.setText(old_name)
-                    print("Duplicate name not allowed.")
+                    QMessageBox.warning(self, "Clusters", "Duplicate name not allowed.")
                     return
 
             # Update self.data[self.sample_id]['computed_data']['Cluster'] with the new name
-            # if self.current_group['algorithm'] in self.data[self.sample_id]['computed_data']['Cluster']:
+            if self.cluster_dict['active method'] in self.data[self.sample_id]['computed_data']['Cluster']:
                 # Find the rows where the value matches cluster_id
-                # rows_to_update = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']] == cluster_id
+                rows_to_update = self.data[self.sample_id]['computed_data']['Cluster'][self.cluster_dict['active method']] == cluster_id
 
                 # Update these rows with the new name
-                # self.data[self.sample_id]['computed_data']['Cluster'].loc[rows_to_update, self.current_group['algorithm']] = new_name
-                # self.group_cmap[new_name] = self.group_cmap[cluster_id]
-                # del self.group_cmap[cluster_id]
+                self.data[self.sample_id]['computed_data']['Cluster'].loc[rows_to_update, self.cluster_dict['active method']] = new_name
+                self.group_cmap[new_name] = self.group_cmap[cluster_id]
+                del self.group_cmap[cluster_id]
+
             # update current_group to reflect the new cluster name
             self.cluster_dict[self.cluster_dict['active method']][cluster_id]['name'] = new_name
 

@@ -20,7 +20,7 @@ from src.gausscensor import gausscensor
 from matplotlib.figure import Figure
 import re
 
-def plot_spider_norm(data, ref_data, norm_ref_data, layer,el_list=None, style='Quanta', quantiles=[0.25, 0.5, 0.75], ax=None, c = 'b', label = None):
+def plot_spider_norm(data, ref_data, norm_ref_data, layer,el_list=None, style='Quanta', quantiles=[0.25, 0.5, 0.75], ax=None, c='b', label=None):
     
     el_list_lower = [re.sub(r'\d', '', el).lower() for el in el_list]
     # Filter ref_dataerence data

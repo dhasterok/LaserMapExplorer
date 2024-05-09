@@ -1,13 +1,11 @@
 import sys, os, re, copy, csv, random
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtCore import Qt, QObject, QTimer, pyqtSignal, QRectF, QPointF
-from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QHBoxLayout, QVBoxLayout, QGridLayout, QMessageBox, QHeaderView, QMenu, QGraphicsRectItem, QStatusBar
-from PyQt5.QtWidgets import QFileDialog, QProgressDialog, QWidget, QTabWidget, QDialog, QLabel, QListWidgetItem, QTableWidget, QInputDialog, QAbstractItemView, QStyledItemDelegate, QProgressBar
-from PyQt5.QtGui import QIntValidator, QDoubleValidator, QColor, QImage, QPainter, QPixmap, QTransform, QFont, QPen, QCursor, QPainter, QBrush, QStandardItemModel, QStandardItem, QTextCursor, QDropEvent
-from pyqtgraph import PlotWidget, ScatterPlotItem, mkPen, AxisItem, PlotDataItem
-from pyqtgraph.Qt import QtWidgets
+from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QRectF, QPointF
+from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QVBoxLayout, QGridLayout, QMessageBox, QHeaderView, QMenu, QGraphicsRectItem
+from PyQt5.QtWidgets import QFileDialog, QWidget, QDialog, QLabel, QTableWidget, QInputDialog, QAbstractItemView, QProgressBar
+from PyQt5.QtGui import QIntValidator, QDoubleValidator, QColor, QImage, QPainter, QPixmap, QFont, QPen, QCursor, QBrush, QStandardItemModel, QStandardItem, QTextCursor, QDropEvent
 from pyqtgraph.GraphicsScene import exportDialog
-import pyqtgraph as pg
+from pyqtgraph import setConfigOption, colormap, ColorBarItem,ViewBox, TargetItem, ImageItem, GraphicsLayoutWidget, ScatterPlotItem, AxisItem, PlotDataItem
 from datetime import datetime
 import numpy as np
 import pandas as pd
@@ -23,19 +21,14 @@ from matplotlib.path import Path
 from matplotlib.patches import Patch
 import matplotlib.colors as colors
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-import matplotlib.ticker as ticker
-import scipy.stats
 from scipy import ndimage
 from scipy.signal import convolve2d, wiener
 from sklearn.cluster import KMeans
 #from sklearn_extra.cluster import KMedoids
 import skfuzzy as fuzz
-import cmcrameri.cm as cmc
 from cv2 import Canny, Sobel, CV_64F, bilateralFilter, medianBlur, GaussianBlur, edgePreservingFilter
-from sklearn.metrics.pairwise import manhattan_distances as manhattan, euclidean_distances as euclidean, cosine_distances
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-from scipy.spatial.distance import mahalanobis
 from src.rotated import RotatedHeaderView
 from src.ternary_plot import ternary
 from src.plot_spider import plot_spider_norm
@@ -48,7 +41,7 @@ from src.ui.ExcelConcatenator import Ui_ExcelConcatenator
 from src.ui.QuickViewDialog import Ui_QuickViewDialog
 # __file__ holds full path of current python file
 basedir = os.path.dirname(__file__)
-pg.setConfigOption('imageAxisOrder', 'row-major') # best performance
+setConfigOption('imageAxisOrder', 'row-major') # best performance
 ## sphinx-build -b html docs/source/ docs/build/html
 ## !pyrcc5 resources.qrc -o src/ui/resources_rc.py
 ## !pyuic5 designer/mainwindow.ui -o src/ui/MainWindow.py
@@ -759,7 +752,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         header.setSectionResizeMode(2,QHeaderView.ResizeToContents)
 
         # colormap
-        colormaps = pg.colormap.listMaps('matplotlib')
+        colormaps = colormap.listMaps('matplotlib')
         self.comboBoxFieldColormap.clear()
         self.comboBoxFieldColormap.addItems(colormaps)
         self.comboBoxFieldColormap.activated.connect(self.field_colormap_callback)
@@ -1955,7 +1948,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     #                 self.matplotlib_canvas = widget
     #                 self.pyqtgraph_widget = None
     #                 break
-    #             elif isinstance(widget, pg.GraphicsLayoutWidget):
+    #             elif isinstance(widget, GraphicsLayoutWidget):
     #                 self.pyqtgraph_widget = widget
     #                 self.matplotlib_canvas = None
     #                 break
@@ -2708,7 +2701,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     #             rgba_array = self.array_to_image(current_plot_df)
 
-    #             glw = widgetLaserMap.findChild(pg.GraphicsLayoutWidget, 'plotLaserMap')
+    #             glw = widgetLaserMap.findChild(GraphicsLayoutWidget, 'plotLaserMap')
     #             p1 = glw.getItem(0, 0)  # Assuming ImageItem is the first item in the plot
     #             img = p1.items[0]
     #             img.setImage(image=rgba_array)
@@ -2719,11 +2712,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     #             p1.setRange( yRange=[self.y.min(), self.y.max()])
     #             # To further prevent zooming or panning outside the default view,
     #             p1.setLimits( yMin=self.y.min(), yMax = self.y.max())
-    #             cm = pg.colormap.get(style['Colors']['Colormap'], source = 'matplotlib')
+    #             cm = colormap.get(style['Colors']['Colormap'], source = 'matplotlib')
     #             # img.setColorMap(cm)
 
     #             ## histogram - removed for now as is not working as expected
-    #             # histogram = widgetLaserMap.findChild(pg.HistogramLUTWidget, 'histogram')
+    #             # histogram = widgetLaserMap.findChild(HistogramLUTWidget, 'histogram')
     #             ## end removal
 
     #             if view ==0:
@@ -2739,7 +2732,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     #             for i in reversed(range(p1.layout.count())):  # Reverse to avoid skipping due to layout change
     #                 item = p1.layout.itemAt(i)
-    #                 if isinstance(item, pg.ColorBarItem):#find colorbar
+    #                 if isinstance(item, ColorBarItem):#find colorbar
     #                     item.setColorMap(cm)
     #                     item.setLevels([array.min(), array.max()])
 
@@ -2764,15 +2757,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     #         # self.array = array[:, ::-1]
     #         layout = widgetLaserMap.layout()
-    #         glw = pg.GraphicsLayoutWidget(show=True)
+    #         glw = GraphicsLayoutWidget(show=True)
     #         glw.setObjectName('plotLaserMap')
     #         # Create the ImageItem
-    #         img = pg.ImageItem(image=rgba_array)
+    #         img = ImageItem(image=rgba_array)
 
     #         #set aspect ratio of rectangle
     #         img.setRect(self.x.min(),self.y.min(),self.x_range,self.y_range)
     #         # img.setAs
-    #         cm = pg.colormap.get(style['Colors']['Colormap'], source = 'matplotlib')
+    #         cm = colormap.get(style['Colors']['Colormap'], source = 'matplotlib')
     #         # img.setColorMap(cm)
 
     #         # img.setLookupTable(cm.getLookupTable())
@@ -2791,7 +2784,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     #         p1.setLimits( yMin=self.y.min(), yMax = self.y.max())
 
     #         # ... Inside your plotting function
-    #         target = pg.TargetItem(symbol = '+', )
+    #         target = TargetItem(symbol = '+', )
     #         target.setZValue(1e9)
     #         p1.addItem(target)
 
@@ -2840,11 +2833,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     #             self.toolButtonEdgeDetect.setChecked(False)
 
     #         # Create a SignalProxy to handle mouse movement events
-    #         # self.proxy = pg.SignalProxy(p1.scene().sigMouseMoved, rateLimit=60, slot=self.mouseMoved)
+    #         # self.proxy = SignalProxy(p1.scene().sigMouseMoved, rateLimit=60, slot=self.mouseMoved)
     #         # Create a SignalProxy for this plot and connect it to mouseMoved
 
     #         p1.scene().sigMouseMoved.connect(lambda event,plot=p1: self.mouse_moved(event,plot))
-    #         # proxy = pg.SignalProxy(p1.scene().sigMouseMoved, rateLimit=60, slot=self.mouse_moved)
+    #         # proxy = SignalProxy(p1.scene().sigMouseMoved, rateLimit=60, slot=self.mouse_moved)
     #         # self.proxies.append(proxy)  # Assuming self.proxies is a list to store proxies
 
     #         # p1.autoRange()
@@ -2952,12 +2945,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # Try to remove the colorbar just in case it was added somehow
             # for i in reversed(range(p1.layout.count())):  # Reverse to avoid skipping due to layout change
             #     item = p1.layout.itemAt(i)
-            #     if isinstance(item, pg.ColorBarItem):
+            #     if isinstance(item, ColorBarItem):
             #         p1.layout.removeAt(i)
             # Create the histogram item
 
             ## histogram - removed for now as is not working as expected
-            # histogram = pg.HistogramLUTWidget( orientation='horizontal')
+            # histogram = HistogramLUTWidget( orientation='horizontal')
             # histogram.setObjectName('histogram')
             # histogram.gradient.setColorMap(cm)
             # histogram.setImageItem(img)
@@ -2971,7 +2964,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             object_names_to_remove = ['histogram', 'pushButtonResetZoom', 'pushButtonResetPlot', 'buttons']
             # self.remove_widgets_from_layout(layout, object_names_to_remove)
             # plot = glw.getItem(0, 0)
-            cbar = pg.ColorBarItem(orientation = 'h',colorMap = cm)
+            cbar = ColorBarItem(orientation = 'h',colorMap = cm)
             cbar.setObjectName('colorbar')
             cbar.setImageItem(img, insert_in=p1)
             cbar.setLevels([array.min(), array.max()])
@@ -2980,8 +2973,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Set the initial zoom level
         self.zoomLevel = 0.02  # Adjust as needed for initial zoom level
         # Create a ViewBox for the zoomed view
-        self.zoomViewBox = pg.ViewBox(border={'color': 'w', 'width': 1})
-        self.zoomImg = pg.ImageItem()
+        self.zoomViewBox = ViewBox(border={'color': 'w', 'width': 1})
+        self.zoomImg = ImageItem()
         self.zoomViewBox.addItem(self.zoomImg)
         self.zoomViewBox.setAspectLocked(True)
         self.zoomViewBox.invertY(True)
@@ -2993,7 +2986,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.zoomViewBox.setFixedHeight(400)  # Height of the zoom box in pixels
 
         # Optionally, set up a crosshair or marker in the zoom window
-        self.zoomTarget = pg.TargetItem(symbol='+', size = 5)
+        self.zoomTarget = TargetItem(symbol='+', size = 5)
         self.zoomViewBox.addItem(self.zoomTarget)
         self.zoomTarget.hide()  # Initially hidden
         self.zoomViewBox.hide()
@@ -3028,7 +3021,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.zoomImg.setRect(0,0,self.x_range,self.y_range)
         self.zoomViewBox.setRange(zoomRect) # Set the zoom area in the image
-        self.zoomImg.setColorMap(pg.colormap.get(style['Colors']['Colormap'], source = 'matplotlib'))
+        self.zoomImg.setColorMap(colormap.get(style['Colors']['Colormap'], source = 'matplotlib'))
         self.zoomTarget.setPos(x, y)  # Update target position
         self.zoomTarget.show()
         self.zoomViewBox.setZValue(1e10)
@@ -3080,16 +3073,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # Assuming you have a way to display this edge_detected_image on your plot.
             # This could be an update to an existing ImageItem or creating a new one if necessary.
             self.edge_array = edge_detected_image
-            self.edge_img = pg.ImageItem(image=self.edge_array)
+            self.edge_img = ImageItem(image=self.edge_array)
             print(self.edge_img.shape)
             #set aspect ratio of rectangle
             self.edge_img.setRect(0,0,self.x_range,self.y_range)
             # edge_img.setAs
-            cm = pg.colormap.get(style['Colors']['Colormap'], source = 'matplotlib')
+            cm = colormap.get(style['Colors']['Colormap'], source = 'matplotlib')
             self.edge_img.setColorMap(cm)
 
             #onemat = np.repeat(np.ones_like(self.edge_img),3).reshape(self.array_size[0],self.array_size[1],3)
-            #self.edge_overlay = pg.ImageItem(image=np.concatenate(onemat,255*(1 - 0.5*(self.edge_array)),axis=2))
+            #self.edge_overlay = ImageItem(image=np.concatenate(onemat,255*(1 - 0.5*(self.edge_array)),axis=2))
             #self.edge_overlay.setRect(0,0,self.x_range,self.y_range)
             #self.plot.addItem(self.edge_img)
             self.plot.addItem(self.edge_overlay)
@@ -3341,14 +3334,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.plot_gradient()
             return
 
-        self.noise_red_img = pg.ImageItem(image=self.noise_red_array)
+        self.noise_red_img = ImageItem(image=self.noise_red_array)
 
         # Set aspect ratio of rectangle
         self.noise_red_img.setRect(0, 0, self.x_range, self.y_range)
 
         # Optionally, set a color map
         self.comboBoxPlotType.setCurrentText('analyte map')
-        cm = pg.colormap.get(self.styles['analyte map']['Colors']['Colormap'], source='matplotlib')
+        cm = colormap.get(self.styles['analyte map']['Colors']['Colormap'], source='matplotlib')
         self.noise_red_img.setColorMap(cm)
 
         # Add the image item to the plot
@@ -3372,11 +3365,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # gradient magnitude
         self.grad_mag = np.sqrt(grad_array[0]**2 + grad_array[1]**2)
 
-        self.grad_img = pg.ImageItem(image=self.grad_mag)
+        self.grad_img = ImageItem(image=self.grad_mag)
         self.grad_img.setRect(0, 0, self.x_range, self.y_range)
 
         # Optionally, set a color map
-        cm = pg.colormap.get(self.styles['gradient map']['Colors']['Colormap'], source='matplotlib')
+        cm = colormap.get(self.styles['gradient map']['Colors']['Colormap'], source='matplotlib')
         self.grad_img.setColorMap(cm)
 
         # Add the image item to the plot
@@ -5463,7 +5456,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.matplotlib_canvas.toolbar.pan()
             if self.pyqtgraph_widget:
                 # Enable or disable panning
-                self.pyqtgraph_widget.getItem(0, 0).getViewBox().setMouseMode(pg.ViewBox.PanMode if enable else pg.ViewBox.RectMode)
+                self.pyqtgraph_widget.getItem(0, 0).getViewBox().setMouseMode(ViewBox.PanMode if enable else ViewBox.RectMode)
 
         if function == 'zoom':
             self.toolButtonPanSV.setChecked(False)
@@ -5474,9 +5467,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # Assuming pyqtgraph_widget is a GraphicsLayoutWidget or similar
                 if enable:
 
-                    self.pyqtgraph_widget.getItem(0, 0).getViewBox().setMouseMode(pg.ViewBox.RectMode)
+                    self.pyqtgraph_widget.getItem(0, 0).getViewBox().setMouseMode(ViewBox.RectMode)
                 else:
-                    self.pyqtgraph_widget.getItem(0, 0).getViewBox().setMouseMode(pg.ViewBox.PanMode)
+                    self.pyqtgraph_widget.getItem(0, 0).getViewBox().setMouseMode(ViewBox.PanMode)
 
         if function == 'preference':
             if self.matplotlib_canvas:
@@ -5709,14 +5702,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case 1:
                 title = sample_id + '_' + field
 
-        graphicWidget = pg.GraphicsLayoutWidget(show=True)
+        graphicWidget = GraphicsLayoutWidget(show=True)
         graphicWidget.setObjectName('LaserMap')
         graphicWidget.setBackground('w')
 
         # layout.addWidget(graphicWidget)
 
         # Create the ImageItem
-        img_item = pg.ImageItem(image=self.array, antialias=False)
+        img_item = ImageItem(image=self.array, antialias=False)
 
         #set aspect ratio of rectangle
         img_item.setRect(self.x.min(),self.y.min(),self.x_range,self.y_range)
@@ -5741,14 +5734,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         plotWindow.setMenuEnabled(False)
 
         # colorbar
-        cmap = pg.colormap.get(style['Colors']['Colormap'], source = 'matplotlib')
+        cmap = colormap.get(style['Colors']['Colormap'], source = 'matplotlib')
         clb,cub,cscale,clabel = self.get_axis_values(field_type,field)
-        cbar = pg.ColorBarItem(values=(clb,cub), width=25, colorMap=cmap, label=clabel, interactive=False, limits=(clb,cub), orientation=style['Colors']['Direction'], pen='black')
+        cbar = ColorBarItem(values=(clb,cub), width=25, colorMap=cmap, label=clabel, interactive=False, limits=(clb,cub), orientation=style['Colors']['Direction'], pen='black')
         img_item.setLookupTable(cmap.getLookupTable())
         graphicWidget.addItem(cbar)
 
         # ... Inside your plotting function
-        target = pg.TargetItem(symbol = '+', )
+        target = TargetItem(symbol = '+', )
         target.setZValue(1e9)
         plotWindow.addItem(target)
 
@@ -10945,7 +10938,7 @@ class Profiling:
             profile_key = picked_scatter.get_gid()
             # Determine the color of the picked point
             facecolors = picked_scatter.get_facecolors().copy()
-            original_color = matplotlib.colors.to_rgba(self.original_colors[profile_key])  # Assuming you have a way to map indices to original colors
+            original_color = colors.to_rgba(self.original_colors[profile_key])  # Assuming you have a way to map indices to original colors
 
             # Toggle selection state
             self.selected_points[profile_key][ind] = not self.selected_points[profile_key][ind]
@@ -10960,7 +10953,7 @@ class Profiling:
             if not self.selected_points[profile_key][ind]:
                 # If already grey (picked)
                 # Set to original color
-                facecolors[ind] = matplotlib.colors.to_rgba(original_color)
+                facecolors[ind] = colors.to_rgba(original_color)
             else:
                 # Set to grey
                 facecolors[ind] = (0.75, 0.75, 0.75, 1)

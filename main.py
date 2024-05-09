@@ -118,11 +118,37 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             with relevant data.  The dictionary is nested with the first level keys defined by the sample ID.
             
             [*sample_id*] : (str) -- sample identifier
-                | 'analysis data' : () --
-                | 'computed data' : () --
-                    | 'Cluster' : () --
-                | 'processed data'
-                | 'raw data'
+                | 'analyte_info' : (dataframe) -- holds information regarding each iolite in sample id,
+                columns:
+                    /'analytes' (str) -- name of iolite
+                    /'sample_id' (str) -- sample id
+                    /'norm' (str) -- type of normalisation used(linear,log,logit)
+                    /'upper_bound' (float) --  upper bound for autoscaling/scaling
+                    /'lower_bound' (float) --  lower bound for autoscaling/scaling
+                    /'d_l_bound' (float) --  difference lower bound for autoscaling
+                    /'d_u_bound' (float) --  difference upper bound for autoscaling
+                    /'v_min' (float) -- max value of iolite
+                    /'v_max' (float) -- min value of iolite
+                    /'auto_scale' (bool) -- indicates whether auto_scaling is switched on for that iolite, use percentile bounds if False
+                    /'use' (bool) -- indicates whether the iolite is being used in the analysis
+                    
+                    
+                
+                | 'ratios_info' : (dataframe) --
+                | 'filter_info' : (dataframe) --
+                | 'crop' : () --
+                | 'x_max' : () --
+                | 'x_min' : () --
+                | 'y_max' : () --
+                | 'y_min' : () --
+                | 'crop_x_max' : () --
+                | 'crop_x_min' : () --
+                | 'crop_y_max' : () --
+                | 'crop_y_min' : () --
+                | 'processed data': () --
+                | 'raw_data': () -- 
+                | 'cropped_raw_data': () -- 
+                
         layoutSingleView : QVBoxLayout
             Layout for Single View tab of ``canvasWindow``
         layoutMultiView : QGridLayout

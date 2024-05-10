@@ -88,6 +88,7 @@
         <file>resources/icons/icon-heading-64.png</file>
         <file>resources/icons/icon-eraser-64.svg</file>
         <file>resources/icons/icon-randomize-64.png</file>
+        <file>resources/icons/icon-popout-64.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

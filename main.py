@@ -32,6 +32,7 @@ from sklearn.decomposition import PCA
 from src.rotated import RotatedHeaderView
 from src.ternary_plot import ternary
 from src.plot_spider import plot_spider_norm
+import src.radar_factory
 from src.radar import Radar
 from src.calculator import CalWindow
 from src.ui.MainWindow import Ui_MainWindow
@@ -6556,10 +6557,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         tp = ternary(canvas.axes, labels, 'scatter')
 
         if len(c['array']) == 0:
-            tp.ternscatter(x['array'], y['array'], z['array'],
-                            marker=self.markerdict[style['Markers']['Symbol']],
-                            size=style['Markers']['Size'],
-                            color=style['Colors']['Color'])
+            tp.ternscatter( x['array'], y['array'], z['array'],
+                    marker=self.markerdict[style['Markers']['Symbol']],
+                    size=style['Markers']['Size'],
+                    color=style['Colors']['Color'],
+                    alpha=style['Markers']['Alpha']/100,
+                )
             cb = None
         elif style['Colors']['ColorByField'] == 'Cluster':
             # color by cluster
@@ -6578,24 +6581,31 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             norm = self.color_norm(style,self.cluster_dict[method]['n_clusters'])
 
-            _, cb = tp.ternscatter(x['array'][ind], y['array'][ind], z['array'][ind], categories=c['array'][ind],
-                                            marker=self.markerdict[style['Markers']['Symbol']],
-                                            size=style['Markers']['Size'],
-                                            cmap=cmap,
-                                            norm=norm,
-                                            labels=cluster_label[cluster_group[ind]],
-                                            orientation='None')
+            _, cb = tp.ternscatter( x['array'][ind], y['array'][ind], z['array'][ind],
+                    categories=c['array'][ind],
+                    marker=self.markerdict[style['Markers']['Symbol']],
+                    size=style['Markers']['Size'],
+                    cmap=cmap,
+                    norm=norm,
+                    labels=True,
+                    alpha=style['Markers']['Alpha']/100,
+                    orientation='None'
+                )
 
             self.add_colorbar(canvas, cb, style, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color)
         else:
             # color field
             norm = self.color_norm(style)
-            _, cb = tp.ternscatter(x['array'], y['array'], z['array'], categories=c['array'],
-                                            marker=self.markerdict[style['Markers']['Symbol']],
-                                            size=style['Markers']['Size'],
-                                            cmap=style['Colors']['Colormap'],
-                                            norm=norm,
-                                            orientation=style['Colors']['Direction'])
+            _, cb = tp.ternscatter(x['array'], y['array'], z['array'],
+                    categories=c['array'],
+                    marker=self.markerdict[style['Markers']['Symbol']],
+                    size=style['Markers']['Size'],
+                    cmap=style['Colors']['Colormap'],
+                    norm=norm,
+                    alpha=style['Markers']['Alpha']/100,
+                    orientation=style['Colors']['Direction']
+                )
+
             if cb:
                 cb.set_label(c['label'])
 
@@ -7423,6 +7433,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         or spider web.
         
         The function updates ``MainWindow.plot_info`` with the displayed plot metadata and figure ``MplCanvas`` for display in the centralWidget views."""
+        if not self.n_dim_list:
+            return
 
         df_filtered, _  = self.get_processed_data()
 
@@ -7451,6 +7463,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 quantiles = [0.25, 0.5, 0.75]
             case 3:
                 quantiles = [0.05, 0.25, 0.5, 0.75, 0.95]
+
+        # remove mass from labels
+        if self.checkBoxShowMass.isChecked():
+            angle = 45
+        else:
+            angle = 0
+        labels = self.toggle_mass(self.n_dim_list)
             
         if self.comboBoxColorByField.currentText() == 'Cluster' and self.comboBoxColorField.currentText() != '':
             method = self.comboBoxColorField.currentText()
@@ -7469,6 +7488,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             cluster_dict = None
             cluster_flag = False
 
+        
         match plot_type:
             case 'Radar':
                 canvas = MplCanvas(parent=self, proj='radar')
@@ -7482,21 +7502,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     df_filtered['clusters'] = cluster_group
                     df_filtered = df_filtered[df_filtered['clusters'].isin(clusters)]
                     radar = Radar( 
-                        df_filtered,
                         canvas.axes,
+                        df_filtered,
                         fields=self.n_dim_list,
+                        fieldlabels=labels,
                         quantiles=quantiles,
                         axes_interval=axes_interval,
-                        cmap=cmap,
                         group_field='clusters',
                         groups=clusters)
 
                     canvas.fig, canvas.axes = radar.plot(cmap = cmap)
                     canvas.axes.legend(loc='upper right', frameon='False')
                 else:
-                    radar = Radar(df_filtered, fields=self.n_dim_list, quantiles=quantiles, axes_interval=axes_interval, group_field='', groups=None)
+                    radar = Radar(canvas.axes, df_filtered, fields=self.n_dim_list, fieldlabels=labels, quantiles=quantiles, axes_interval=axes_interval, group_field='', groups=None)
 
-                    canvas.fig, canvas.axes = radar.plot()
+                    radar.plot()
             case 'TEC':
                 canvas = MplCanvas(parent=self)
 
@@ -7531,18 +7551,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.logax(canvas.axes, yl, 'y')
                     canvas.axes.set_ylim(yl)
 
-                    if self.checkBoxShowMass.isChecked():
-                        angle = 45
-                    else:
-                        angle = 0
-                    canvas.axes.set_xticklabels(self.toggle_mass(self.n_dim_list), rotation=angle)
+                    canvas.axes.set_xticklabels(labels, rotation=angle)
                 else:
                     canvas.axes,yl = plot_spider_norm(data=df_filtered, ref_data=self.ref_data, norm_ref_data=self.ref_data['model'][ref_i], layer=self.ref_data['layer'][ref_i], el_list=self.n_dim_list, style='Quanta', quantiles=quantiles, ax=canvas.axes)
-                    if self.checkBoxShowMass.isChecked():
-                        angle = 45
-                    else:
-                        angle = 0
-                    canvas.axes.set_xticklabels(self.toggle_mass(self.n_dim_list), rotation=angle)
+
+                    canvas.axes.set_xticklabels(labels, rotation=angle)
                 canvas.axes.set_ylabel('Abundance / ['+self.ref_data['model'][ref_i]+', '+self.ref_data['layer'][ref_i]+']')
                 canvas.fig.tight_layout()
 
@@ -9012,8 +9025,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 class MplCanvas(FigureCanvas):
     def __init__(self, sub=111, parent=None, width=5, height=4, proj=None):
         self.fig = Figure(figsize=(width, height))
-        if proj:
-            self.axes = self.fig.add_subplot(sub,projection=proj)
+        if proj is not None:
+            self.axes = self.fig.add_subplot(sub, projection='radar')
         else:
             self.axes = self.fig.add_subplot(sub)
         super(MplCanvas, self).__init__(self.fig)

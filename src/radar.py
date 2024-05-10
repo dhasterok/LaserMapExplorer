@@ -1,28 +1,25 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.patches import Circle, RegularPolygon
-from matplotlib.path import Path
-from matplotlib.projections import register_projection
-from matplotlib.projections.polar import PolarAxes
-from matplotlib.spines import Spine
-from matplotlib.transforms import Affine2D
-from matplotlib.patches import Polygon
 from matplotlib.figure import Figure
+import src.radar_factory as radar_factory
+
 class Radar:
-    def __init__(self, ax, data, fields, group_field='',  groups=None, quantiles=None, axes_interval=5):
+    def __init__(self, ax, data, fields, fieldlabels=None, group_field='', groups=None, quantiles=None, axes_interval=5):
         """Prepares a DataFrame for a radar plot.
 
         _extended_summary_
 
         Parameters
         ----------
-        ax : _type_
-            _description_
-        data : _type_
-            _description_
-        fields : _type_
-            _description_
+        ax : matplotlib.axes
+            Axis object
+        data : pandas.DataFrame
+            Data used for averaging.
+        fields : list
+            list of fields in data used to define the axes.
+        fieldlabels : list
+            Labels associated with fields. If ``None``, ``fieldlabels`` is set to ``fields``, by default None
         group_field : str, optional
             _description_, by default ''
         groups : _type_, optional
@@ -38,10 +35,18 @@ class Radar:
             _description_
         """        
         self.fields = fields
+        if fieldlabels is None:
+            self.fieldlabels = self.fields
+        else:
+            self.fieldlabels = fieldlabels
         self.data = data
         self.groups = groups
         self.quantiles = quantiles
-        self.ax = ax
+        if ax is None:
+            self.fig = Figure(figsize=(6, 6))
+            self.ax = self.fig.add_subplot(projection='radar')
+        else:
+            self.ax = ax
         
         if self.quantiles is not None:
             if group_field == '':
@@ -73,118 +78,7 @@ class Radar:
         self.normalize_vals()
         self.radius = 1+ self.normalized_axis_increment
 
-    def radar_factory(num_vars, frame='polygon'):
-        """Create a radar chart with `num_vars` axes.
 
-        :param num_vars: number of variables for radar chart
-        :type frame: shape of frame surrounding axes, options include {'circle', 'polygon'}, defaults to 'polygon'
-        ...
-        :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
-        """
-#        """
-#    
-#        This function creates a RadarAxes projection and registers it.
-#    
-#        Parameters
-#        ----------
-#        num_vars : int
-#            Number of variables for radar chart.
-#        frame : {'circle', 'polygon'}
-#            Shape of frame surrounding axes.
-#    
-#        """
-        # calculate evenly-spaced axis angles
-        theta = np.linspace(0, 2*np.pi, num_vars, endpoint=False)
-    
-        class RadarTransform(PolarAxes.PolarTransform):
-    
-            def transform_path_non_affine(self, path):
-                # Paths with non-unit interpolation steps correspond to gridlines,
-                # in which case we force interpolation (to defeat PolarTransform's
-                # autoconversion to circular arcs).
-                if path._interpolation_steps > 1:
-                    path = path.interpolated(num_vars)
-                return Path(self.transform(path.vertices), path.codes)
-            
-        class RadarAxes(PolarAxes):
-        
-            name = 'radar'
-            PolarTransform = RadarTransform
-    
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, **kwargs)
-                # rotate plot such that the first axis is at the top
-                self.set_theta_zero_location('N')
-    
-            def fill(self, *args, closed=True, **kwargs):
-                """Override fill so that line is closed by default"""
-                return super().fill(closed=closed, *args, **kwargs)
-    
-            def plot(self, *args, **kwargs):
-                """Override plot so that line is closed by default"""
-                lines = super().plot(*args, **kwargs)
-                for line in lines:
-                    self._close_line(line)
-    
-            def _close_line(self, line):
-                x, y = line.get_data()
-                # FIXME: markers at x[0], y[0] get doubled-up
-                if x[0] != x[-1]:
-                    x = np.append(x, x[0])
-                    y = np.append(y, y[0])
-                    line.set_data(x, y)
-    
-            def set_varlabels(self, labels):
-                self.set_thetagrids(np.degrees(theta), labels)
-    
-            def _gen_axes_patch(self):
-                # The Axes patch must be centered at (0.5, 0.5) and of radius 0.5
-                # in axes coordinates.
-                if frame == 'circle':
-                    return Circle((0.5, 0.5), 0.5)
-                elif frame == 'polygon':
-                    return RegularPolygon((0.5, 0.5), num_vars,
-                                          radius=.5, edgecolor="k")
-                else:
-                    raise ValueError("Unknown value for 'frame': %s" % frame)
-    
-            def _gen_axes_spines(self):
-                if frame == 'circle':
-                    return super()._gen_axes_spines()
-                elif frame == 'polygon':
-                    # spine_type must be 'left'/'right'/'top'/'bottom'/'circle'.
-                    spine = Spine(axes=self,
-                                  spine_type='circle',
-                                  path=Path.unit_regular_polygon(num_vars))
-                    # unit_regular_polygon gives a polygon of radius 1 centered at
-                    # (0, 0) but we want a polygon of radius 0.5 centered at (0.5,
-                    # 0.5) in axes coordinates.
-                    spine.set_transform(Affine2D().scale(.5).translate(.5, .5)
-                                        + self.transAxes)
-                    # Set dotted line style for the hexagonal frame
-                    spine.set_linestyle('--')
-                    # return {'polar': spine}
-                    return {} #hide frame
-                else:
-                    raise ValueError("Unknown value for 'frame': %s" % frame)
-                    
-            # Custom method to make grid lines dotted
-            def set_dotted_grid_lines(self):
-                for line in self.yaxis.get_gridlines():
-                    line.set_linestyle('--')
-                for line in self.xaxis.get_gridlines():
-                    line.set_linestyle('--')
-                    
-            def set_rgrids(self, radii, **kwargs):
-                # Set the radial grids (rgrids) without labels
-                labels = ['' for _ in radii]  # Create an empty label for each radius
-                return super().set_rgrids(radii, labels, **kwargs)
-    
-        register_projection(RadarAxes)
-        return theta
     
     def normalize_vals(self):
         """Normalizes the data in self.vals for radar plot visualization."""
@@ -213,7 +107,7 @@ class Radar:
         for k in range(self.vals.shape[2]):
             self.vals[:, :, k] = (self.vals[:, :, k] - self.fieldmin) * radius_adj  / field_range + self.normalized_axis_increment
     
-    def plot(self, cmap = None):
+    def plot(self, cmap=None):
         """_summary_
 
         _extended_summary_
@@ -225,7 +119,7 @@ class Radar:
         """        
         axes_precision = 2
         num_vars = len(self.fields)
-        theta = Radar.radar_factory(num_vars, frame='polygon')
+        theta = radar_factory(num_vars, frame='polygon')
         
         #fig = Figure(figsize=(6, 6))
         #ax = fig.add_subplot(projection='radar')
@@ -289,8 +183,9 @@ class Radar:
                 ha='center', va='center')
 
         
-        self.ax.set_varlabels(self.fields)
-        self.ax.set_dotted_grid_lines()
+        self.ax.set_xticklabels(self.fieldlabels)
+        #self.ax.set_dotted_grid_lines()
+        self.ax.get_yaxis_transform(which='grid')
         self.ax.set_rgrids([0, 0.2, 0.4, 0.6, 0.8, 1.0])
     
 # Usage

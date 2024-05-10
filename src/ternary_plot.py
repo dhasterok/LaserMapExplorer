@@ -313,25 +313,30 @@ class ternary:
                 cbar = fig.colorbar(scalarMappable, ax=self.ax, fraction=0.046, shrink=0.50, pad=0.04, orientation = orientation.lower())
             self.ax.scatter(x, y, c=scalarMappable.to_rgba(categories), s=size, marker=marker, edgecolors=edgecolors, alpha=alpha)
         else:
-            group_cmap = cmap
             # Assuming clusters and categories are the same
             unique_categories = np.unique(categories)
-            
-            color_mapping = {cluster: i for i, cluster in enumerate(unique_categories)}
-
-            # Apply the mapping to get colors/numbers
-            color_values = categories.map(color_mapping)
-            
-            # Create a list of colors for each category from self.group_cmap
-            category_colors = [group_cmap[category] for category in unique_categories]
-            
-            # Create a discrete colormap
-            cmap_discrete = ListedColormap(category_colors)
-            
-            # Create a normalization object
             bounds = np.arange(len(unique_categories) + 1)
-            if not norm:
-                norm = BoundaryNorm(bounds, cmap_discrete.N)
+
+            if np.all(np.equal(np.mod(unique_categories,1),0)):
+                cmap_discrete = cmap
+                color_values = categories
+            else:
+                group_cmap = cmap
+
+                color_mapping = {cluster: i for i, cluster in enumerate(unique_categories)}
+
+                # Apply the mapping to get colors/numbers
+                color_values = categories.map(color_mapping)
+                
+                # Create a list of colors for each category from self.group_cmap
+                category_colors = [group_cmap[category] for category in unique_categories]
+                
+                # Create a discrete colormap
+                cmap_discrete = ListedColormap(category_colors)
+                
+                # Create a normalization object
+                if not norm:
+                    norm = BoundaryNorm(bounds, cmap_discrete.N)
             
             # Scatter plot using the discrete colormap and normalization
             self.ax.scatter(x, y, c=color_values, cmap=cmap_discrete, norm=norm, s=size, marker=marker, edgecolors=edgecolors, alpha=alpha)

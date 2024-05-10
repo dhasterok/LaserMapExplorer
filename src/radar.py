@@ -10,14 +10,38 @@ from matplotlib.transforms import Affine2D
 from matplotlib.patches import Polygon
 from matplotlib.figure import Figure
 class Radar:
-    def __init__(self, data,fields, group_field='',  groups=None, quantiles=None, axes_interval =5):
-        """
-        Prepares a DataFrame for a radar plot.
-        """
+    def __init__(self, ax, data, fields, group_field='',  groups=None, quantiles=None, axes_interval=5):
+        """Prepares a DataFrame for a radar plot.
+
+        _extended_summary_
+
+        Parameters
+        ----------
+        ax : _type_
+            _description_
+        data : _type_
+            _description_
+        fields : _type_
+            _description_
+        group_field : str, optional
+            _description_, by default ''
+        groups : _type_, optional
+            _description_, by default None
+        quantiles : _type_, optional
+            _description_, by default None
+        axes_interval : int, optional
+            _description_, by default 5
+
+        Raises
+        ------
+        ValueError
+            _description_
+        """        
         self.fields = fields
         self.data = data
         self.groups = groups
         self.quantiles = quantiles
+        self.ax = ax
         
         if self.quantiles is not None:
             if group_field == '':
@@ -163,11 +187,7 @@ class Radar:
         return theta
     
     def normalize_vals(self):
-        """
-        Normalizes the data in self.vals for radar plot visualization.
-        """
-
-
+        """Normalizes the data in self.vals for radar plot visualization."""
         # Determine the number of fields and groups
         group_count, field_count = self.vals.shape[:2]
 
@@ -194,15 +214,23 @@ class Radar:
             self.vals[:, :, k] = (self.vals[:, :, k] - self.fieldmin) * radius_adj  / field_range + self.normalized_axis_increment
     
     def plot(self, cmap = None):
+        """_summary_
+
+        _extended_summary_
+
+        Parameters
+        ----------
+        cmap : matplotlib.colormap, optional
+            colormap, by default None
+        """        
         axes_precision = 2
         num_vars = len(self.fields)
         theta = Radar.radar_factory(num_vars, frame='polygon')
         
-        fig = Figure(figsize=(6, 6))
-        ax = fig.add_subplot( projection='radar')
+        #fig = Figure(figsize=(6, 6))
+        #ax = fig.add_subplot(projection='radar')
         
-
-        ax.set_theta_direction(-1)
+        self.ax.set_theta_direction(-1)
          
         if cmap is None:
             # Create a colormap object based on the provided name
@@ -218,35 +246,32 @@ class Radar:
                 color = cmap(0.5)
                 label = None
             if q_count == 1:
-                ax.plot(theta, self.vals[idx, :], color = color, label = label)
-                ax.fill(theta, self.vals[idx, :], alpha=0.25, color = color)
+                self.ax.plot(theta, self.vals[idx, :], color = color, label = label)
+                self.ax.fill(theta, self.vals[idx, :], alpha=0.25, color = color)
             elif q_count == 2:
                 inner_vals = np.append(self.vals[idx, :, 0],self.vals[idx, 0, 0])
                 outer_vals = np.append(self.vals[idx, :, 1],self.vals[idx, 0, 1])
-                ax.fill_between(np.append(theta, theta[0]), inner_vals, outer_vals, alpha =0.2,  color = color)
+                self.ax.fill_between(np.append(theta, theta[0]), inner_vals, outer_vals, alpha =0.2,  color = color)
             elif q_count == 3:
                 # Plot lower and upper quantiles as a filled area
                 inner_vals = np.append(self.vals[idx, :, 0],self.vals[idx, 0, 0])
                 outer_vals = np.append(self.vals[idx, :, 2],self.vals[idx, 0, 2])
-                ax.fill_between(np.append(theta, theta[0]), inner_vals, outer_vals, alpha =0.2,  color = color)
+                self.ax.fill_between(np.append(theta, theta[0]), inner_vals, outer_vals, alpha =0.2,  color = color)
                 # Plot middle quantile as a line
-                ax.plot(theta, self.vals[idx, :, 1], color = color, label = label)
-
-                
+                self.ax.plot(theta, self.vals[idx, :, 1], color = color, label = label)
             elif q_count == 5:
                 # Similar approach for 5 quantiles...
                 # Plot lowest and highest as lines, and fill between lower-middle-upper
-                ax.plot(theta, self.vals[idx, :, 0], linestyle='dashed', alpha=0.5, color = color)
-                ax.plot(theta, self.vals[idx, :, 4], linestyle='dashed', alpha=0.5, color = color)
-                ax.plot(theta, self.vals[idx, :, 2], color = color)
+                self.ax.plot(theta, self.vals[idx, :, 0], linestyle='dashed', alpha=0.5, color = color)
+                self.ax.plot(theta, self.vals[idx, :, 4], linestyle='dashed', alpha=0.5, color = color)
+                self.ax.plot(theta, self.vals[idx, :, 2], color = color)
                 inner_vals = np.append(self.vals[idx, :, 0],self.vals[idx, 0, 0])
                 outer_vals = np.append(self.vals[idx, :, 1],self.vals[idx, 0, 1])
-                ax.fill_between(np.append(theta, theta[0]), inner_vals, outer_vals, alpha =0.2, color = color)
+                self.ax.fill_between(np.append(theta, theta[0]), inner_vals, outer_vals, alpha =0.2, color = color)
                 
-        radius = np.linspace(0, 1, len(ax.get_yticks()))  # Assuming normalized radius
+        radius = np.linspace(0, 1, len(self.ax.get_yticks()))  # Assuming normalized radius
         
         axis_increment = (self.fieldmax-self.fieldmin)/(self.axes_interval)
-        
         
         # Calculate positions for the isocurve labels
         # x_isocurves = np.cos(theta[:, None]) * radius
@@ -259,18 +284,15 @@ class Radar:
 
             # Display axis text for each isocurve
             for i in range(1, len(radius)):
-                ax.text(theta[j], radius[i], f"{row_axis_labels[i-1]:.{axes_precision}f}",
+                self.ax.text(theta[j], radius[i], f"{row_axis_labels[i-1]:.{axes_precision}f}",
                 color='k', fontsize=8,
                 ha='center', va='center')
 
         
-        ax.set_varlabels(self.fields)
-        ax.set_dotted_grid_lines()
-        ax.set_rgrids([0, 0.2, 0.4, 0.6, 0.8, 1.0])
-        return fig, ax
+        self.ax.set_varlabels(self.fields)
+        self.ax.set_dotted_grid_lines()
+        self.ax.set_rgrids([0, 0.2, 0.4, 0.6, 0.8, 1.0])
     
-    
-
 # Usage
 # data = pd.read_csv('/Users/a1904121/LaserMapExplorer/laser_mapping/Alex_garnet_maps/processed data/RM01.csv')
 # # data = pd.read_csv('/Users/shavinkalu/Library/CloudStorage/GoogleDrive-a1904121@adelaide.edu.au/.shortcut-targets-by-id/1r_MeSExALnv9lHE58GoG7pbtC8TOwSk4/laser_mapping/Alex_garnet_maps/processed data/RM01.csv')
@@ -287,23 +309,16 @@ class Radar:
 # for label, color in zip(unique_labels, colors):
 #     group_cmap[label] = color
 
-
 # radar = Radar(data, el_list, quantiles=[0.05,0.25, 0.5, 0.75,0.95], axes_interval = axes_interval, group_field ='clusters', groups = unique_labels)
 
 
 # fig,ax = radar.plot(cmap = group_cmap)
-
-
-
-
-
 
 # # ref_data = pd.read_excel('earthref.xlsx')
 
 # # # data = pd.read_csv('/Users/a1904121/LaserMapExplorer/laser_mapping/Alex_garnet_maps/processed data/RM01.csv')
 # data = pd.read_csv('/Users/shavinkalu/Library/CloudStorage/GoogleDrive-a1904121@adelaide.edu.au/.shortcut-targets-by-id/1r_MeSExALnv9lHE58GoG7pbtC8TOwSk4/laser_mapping/Alex_garnet_maps/processed data/RM01.csv')
 # el_list = data.columns[5:10]
-
 
 # # i = 1
 

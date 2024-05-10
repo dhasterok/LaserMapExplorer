@@ -6740,7 +6740,7 @@
         </font>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="PlotSelectorPage">
         <property name="geometry">
@@ -6816,6 +6816,9 @@
               <width>28</width>
               <height>28</height>
              </size>
+            </property>
+            <property name="popupMode">
+             <enum>QToolButton::MenuButtonPopup</enum>
             </property>
            </widget>
           </item>
@@ -7259,8 +7262,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>100</width>
-            <height>30</height>
+            <width>98</width>
+            <height>28</height>
            </rect>
           </property>
           <attribute name="icon">
@@ -7275,7 +7278,7 @@
             <rect>
              <x>5</x>
              <y>0</y>
-             <width>253</width>
+             <width>289</width>
              <height>86</height>
             </rect>
            </property>
@@ -7375,8 +7378,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>100</width>
-            <height>30</height>
+            <width>98</width>
+            <height>28</height>
            </rect>
           </property>
           <attribute name="icon">
@@ -7533,8 +7536,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>100</width>
-            <height>30</height>
+            <width>98</width>
+            <height>28</height>
            </rect>
           </property>
           <attribute name="icon">
@@ -7746,8 +7749,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>100</width>
-            <height>30</height>
+            <width>98</width>
+            <height>28</height>
            </rect>
           </property>
           <attribute name="icon">
@@ -7892,8 +7895,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>100</width>
-            <height>30</height>
+            <width>98</width>
+            <height>28</height>
            </rect>
           </property>
           <attribute name="icon">
@@ -8353,8 +8356,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>100</width>
-            <height>30</height>
+            <width>98</width>
+            <height>28</height>
            </rect>
           </property>
           <attribute name="icon">

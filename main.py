@@ -434,7 +434,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxPlotType.clear()
         self.comboBoxPlotType.addItems(self.plot_types[self.toolBox.currentIndex()][1:])
         self.comboBoxPlotType.setCurrentIndex(self.plot_types[self.toolBox.currentIndex()][0])
-
+        
+        # create analyte sort menu
+        sortmenu_items = ['alphabetical', 'atomic number', 'mass', 'compatibility']
+        SortMenu = QMenu()
+        SortMenu.triggered.connect(self.apply_sort)
+        self.toolButtonSortAnalyte.setMenu(SortMenu)
+        for item in sortmenu_items:
+            SortMenu.addAction(item)
+        
 
         # Menu and Toolbar
         #-------------------------
@@ -928,6 +936,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.autosaveTimer = QTimer()
         self.autosaveTimer.setInterval(300000)
         self.autosaveTimer.timeout.connect(self.save_notes_file)
+        
+        
+        
 
         # ----start debugging----
         # self.test_get_field_list()
@@ -2917,7 +2928,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         pos_view = plot.vb.mapSceneToView(event)  # This is in view coordinates
         pos_scene = plot.vb.mapViewToScene(pos_view)  # Map from view to scene coordinates
         any_plot_hovered = False
-        for k, (_, p, v, array) in self.lasermaps.items():
+        for (k,v), (_, p, array) in self.lasermaps.items():
             # print(p.sceneBoundingRect(), pos)
             if p.sceneBoundingRect().contains(pos_scene) and v == self.canvasWindow.currentIndex() and not self.toolButtonPanSV.isChecked() and not self.toolButtonZoomSV.isChecked() :
 
@@ -2957,7 +2968,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         self.labelMVInfoX.setText('X: '+str(round(x)))
                         self.labelMVInfoY.setText('Y: '+str(round(y)))
 
-                    for k, (target, _, _,array) in self.lasermaps.items():
+                    for k, (target, _,array) in self.lasermaps.items():
                         if not self.toolButtonCrop.isChecked():
                             target.setPos(mouse_point)
                             target.show()
@@ -2968,7 +2979,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if not any_plot_hovered and not self.toolButtonCrop.isChecked():
             QtWidgets.QApplication.restoreOverrideCursor()
             self.cursor = False
-            for target,_, _, _ in self.lasermaps.values():
+            for target, _, _ in self.lasermaps.values():
                 target.hide() # Hide crosshairs if no plot is hovered
             # hide zoom view
             self.zoomViewBox.hide()
@@ -2978,7 +2989,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # get click location
         click_pos = plot.vb.mapSceneToView(event.scenePos())
         x, y = click_pos.x(), click_pos.y()
-
+        v = self.canvasWindow.currentIndex() #view
         # Convert the click position to plot coordinates
         self.array_x = array.shape[1]
         self.array_y = array.shape[0]
@@ -2995,7 +3006,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # if event.button() == QtCore.Qt.LeftButton and self.main_window.pushButtonStartProfile.isChecked():
        #apply profiles
         elif self.toolButtonPlotProfile.isChecked() or self.toolButtonPointMove.isChecked():
-            self.profiling.plot_profile_scatter(event, array, k, plot, x, y,x_i, y_i)
+            self.profiling.plot_profile_scatter(event, array, k,v, plot, x, y,x_i, y_i)
         #create polygons
         elif self.toolButtonPolyCreate.isChecked() or self.toolButtonPolyMovePoint.isChecked() or self.toolButtonPolyAddPoint.isChecked() or self.toolButtonPolyRemovePoint.isChecked():
             self.polygon.plot_polygon_scatter(event, k, x, y,x_i, y_i)
@@ -3454,7 +3465,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                'Colors': {'Color': '#1c75bc', 'ColorByField': 'None', 'Field': '', 'Colormap': 'viridis', 'Reverse': False, 'CLim':[0,1], 'CScale':'linear', 'Direction': 'vertical', 'CLabel': '', 'Resolution': 10}
                                }
         default_font = 'Avenir'
-        print(self.fontComboBox.currentFont().family())
         try:
             self.fontComboBox.setCurrentFont(QFont(default_font, 11))
             default_plot_style['Text']['Font'] = self.fontComboBox.currentFont().family()
@@ -5802,9 +5812,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         target.setZValue(1e9)
         plotWindow.addItem(target)
 
-        # Optionally, configure the appearance
-        # For example, set the size of the crosshair
-        self.lasermaps[field] = (target, plotWindow, view, self.array)
+        # store plots in self.lasermap to be used in profiling store view at end of name
+        self.lasermaps[field,view] = (target, plotWindow, self.array)
 
         #hide pointer
         target.hide()
@@ -8265,10 +8274,72 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.ratios_items.appendRow(ratio_sample_id_item)
             self.norm_ratios_items.appendRow(norm_ratio_sample_id_item)
             self.norm_analytes_items.appendRow(norm_sample_id_item)
-
+            
+            
+            
             print('\ncreate_tree: analyte_items')
             print(self.analytes_items)
             print('\n')
+    
+    def apply_sort(self, action):
+        method = action.text()
+        # retrieve analyte_list
+        self.analyte_list = self.data[self.sample_id]['analyte_info']['analytes']
+        
+        # sort analyte sort based on method chosen by user
+        self.analyte_list = self.sort_analytes(method, self.analyte_list)
+        
+        # sort analyte dataframes in a self.data
+        # Convert the 'analytes' column in DataFrame to a categorical type with the specified order
+        self.data[self.sample_id]['analyte_info']['analytes'] = pd.Categorical(
+            self.data[self.sample_id]['analyte_info']['analytes'],
+            categories=self.analyte_list,
+            ordered=True
+        )
+        
+        # Sort the DataFrame by the 'analytes' column
+        self.data[self.sample_id]['analyte_info'] = self.data[self.sample_id]['analyte_info'].sort_values('analytes')
+        
+        # Ensure all analytes in self.analyte_list are actually columns in the DataFrame
+        # This step filters out any items in self.analyte_list that are not columns in the DataFrame
+        columns_to_order = [analyte for analyte in self.analyte_list if analyte in self.data[self.sample_id]['raw_data'].columns]
+        
+        # Reorder the columns of the DataFrame based on self.analyte_list
+        self.data[self.sample_id]['raw_data'][columns_to_order] = self.data[self.sample_id]['raw_data'][columns_to_order]
+        
+        self.data[self.sample_id]['processed_data'][columns_to_order] = self.data[self.sample_id]['processed_data'][columns_to_order]
+        
+        self.data[self.sample_id]['cropped_raw_data'][columns_to_order] = self.data[self.sample_id]['cropped_raw_data'][columns_to_order]
+         
+        # Reorder tree items according to the new analyte list
+        # Sort the tree branches
+        self.sort_tree_branch(self.analytes_items, self.analyte_list)
+        self.sort_tree_branch(self.norm_analytes_items, self.analyte_list)
+        self.sort_tree_branch(self.ratios_items, self.analyte_list)
+        self.sort_tree_branch(self.norm_ratios_items, self.analyte_list)
+    
+    def sort_tree_branch(self, branch, order_list):
+        for i in range(branch.rowCount()):
+            leaf = branch.child(i)
+            # Create a list of tuples containing the row index and item reference
+            item_list = [(i, leaf.child(i)) for i in range(leaf.rowCount())]
+            
+            # Sort this list based on the order_list ensuring that each item is found in the order_list
+            # If not found, it is placed at the end
+            item_list.sort(key=lambda x: order_list.index(x[1].text()) if x[1].text() in order_list else len(order_list))
+            
+            # Move the items within the leaf to reflect the new order
+            # We move the items to the beginning in the order defined by the sorted list
+            for new_index, (original_index, item) in enumerate(item_list):
+                if original_index != new_index:  # Check if item needs to be moved
+                    # Take the item out from its current position
+                    taken_item = leaf.takeChild(original_index)
+                    # Insert the item at its new position
+                    leaf.insertRow(new_index, taken_item)
+                    if (original_index > new_index):
+                        leaf.removeRow(original_index+1)
+                    else:
+                        leaf.removeRow(original_index)
 
     def retrieve_plotinfo_from_tree(self, tree_index=None, tree=None, branch=None, leaf=None):
         """Gets the plot_info associated with a tree location
@@ -9170,7 +9241,6 @@ class quickView(QDialog, Ui_QuickViewDialog):
         
         # Save functionality
         self.toolButtonSave.clicked.connect(self.save_selected_analytes)
-
         # Close dialog signal
         self.pushButtonClose.clicked.connect(lambda: self.done(0))
         self.layout().insertWidget(0, self.tableWidget)
@@ -10551,12 +10621,12 @@ class Profiling:
         self.edit_mode_enabled = False  # Track if edit mode is enabled
         self.original_colors = {}
 
-    def plot_profile_scatter(self, event, array,k, plot, x, y, x_i, y_i):
+    def plot_profile_scatter(self, event, array,k,v, plot, x, y, x_i, y_i):
+        #k is key (name of Iolite)
         #create profile dict particular sample if it doesnt exisist
         if self.main_window.sample_id not in self.profiles:
             self.profiles[self.main_window.sample_id] = {}
             self.i_profiles[self.main_window.sample_id] = {}
-
         self.array_x = array.shape[1]
         self.array_y = array.shape[0]
 
@@ -10583,7 +10653,7 @@ class Profiling:
             # move point
             if self.point_selected:
                 #remove selected point
-                prev_scatter = self.profiles[self.main_window.sample_id][k][self.point_index][3]
+                prev_scatter = self.profiles[self.main_window.sample_id][k,v][self.point_index][3]
                 plot.removeItem(prev_scatter)
 
 
@@ -10602,14 +10672,14 @@ class Profiling:
                             circ_val.append( value)
 
                 #update self.point_index index of self.profiles[self.main_window.sample_id] with new point data
-                if k in self.profiles[self.main_window.sample_id]:
+                if (k,v) in self.profiles[self.main_window.sample_id]:
 
-                    self.profiles[self.main_window.sample_id][k][self.point_index] = (x,y, circ_val,scatter, interpolate)
+                    self.profiles[self.main_window.sample_id][k,v][self.point_index] = (x,y, circ_val,scatter, interpolate)
 
 
                 if self.main_window.canvasWindow.currentIndex() == 1:
                     # Add the scatter item to all other plots and save points in self.profiles[self.main_window.sample_id]
-                    for k, (_, p, v, array) in self.main_window.lasermaps.items():
+                    for (k,v), (_, p, array) in self.main_window.lasermaps.items():
                         circ_val = []
                         if p != plot and v==1 and self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #only add scatters to other lasermaps of same sample
                             # Create a scatter plot item at the clicked position
@@ -10619,8 +10689,8 @@ class Profiling:
                             for c in circ_cord:
                                 value = array[c[0], c[1]]
                                 circ_val.append( value)
-                            if k in self.profiles[self.main_window.sample_id]:
-                                self.profiles[self.main_window.sample_id][k][self.point_index] = (x,y, circ_val,scatter, interpolate)
+                            if (k,v) in self.profiles[self.main_window.sample_id]:
+                                self.profiles[self.main_window.sample_id][k,v][self.point_index] = (x,y, circ_val,scatter, interpolate)
 
                 #update plot and table widget
                 self.main_window.plot_profiles()
@@ -10640,7 +10710,7 @@ class Profiling:
                     self.point_selected = True
 
 
-        elif event.button() == QtCore.Qt.LeftButton:
+        elif event.button() == QtCore.Qt.LeftButton:  #plot profile
             #switch to profile tab
             self.main_window.tabWidget.setCurrentIndex(2)
 
@@ -10659,15 +10729,15 @@ class Profiling:
                         circ_val.append( value)
 
             #add values within circle of radius in self.profiles[self.main_window.sample_id]
-            if k in self.profiles[self.main_window.sample_id]:
-                self.profiles[self.main_window.sample_id][k].append((x,y,circ_val,scatter, interpolate))
+            if (k,v) in self.profiles[self.main_window.sample_id]:
+                self.profiles[self.main_window.sample_id][(k,v)].append((x,y,circ_val,scatter, interpolate))
             else:
-                self.profiles[self.main_window.sample_id][k] = [(x,y, circ_val,scatter, interpolate)]
+                self.profiles[self.main_window.sample_id][(k,v)] = [(x,y, circ_val,scatter, interpolate)]
 
 
             if self.main_window.canvasWindow.currentIndex() == 1:
                 # Add the scatter item to all other plots and save points in self.profiles[self.main_window.sample_id]
-                for k, (_, p, v, array) in self.main_window.lasermaps.items():
+                for (k,v), (_, p,  array) in self.main_window.lasermaps.items():
                     circ_val = []
                     if p != plot and v==1 and self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #only add scatters to other lasermaps of same sample
                         # Create a scatter plot item at the clicked position
@@ -10677,10 +10747,10 @@ class Profiling:
                         for c in circ_cord:
                             value = array[c[0], c[1]]
                             circ_val.append( value)
-                        if k in self.profiles[self.main_window.sample_id]:
-                            self.profiles[self.main_window.sample_id][k].append((x,y,circ_val, scatter, interpolate))
+                        if (k,v) in self.profiles[self.main_window.sample_id]:
+                            self.profiles[self.main_window.sample_id][k,v].append((x,y,circ_val, scatter, interpolate))
                         else:
-                            self.profiles[self.main_window.sample_id][k] = [(x,y, circ_val,scatter, interpolate)]
+                            self.profiles[self.main_window.sample_id][k,v] = [(x,y, circ_val,scatter, interpolate)]
 
             self.plot_profiles()
             self.update_table_widget()
@@ -10692,14 +10762,14 @@ class Profiling:
         """
         if self.main_window.toolButtonIPProfile.isChecked():
             interpolate = True
-            for k, points in self.profiles[self.main_window.sample_id].items():
+            for (k,v), points in self.profiles[self.main_window.sample_id].items():
                 for i in range(len(points) - 1):
                     start_point = points[i]
                     end_point = points[i + 1]
                     if i==0:
-                        self.i_profiles[self.main_window.sample_id][k] = [start_point]
+                        self.i_profiles[self.main_window.sample_id][(k,v)] = [start_point]
                     else:
-                        self.i_profiles[self.main_window.sample_id][k].append(start_point)
+                        self.i_profiles[self.main_window.sample_id][(k,v)].append(start_point)
 
                     # Calculate the distance between start and end points
                     dist = self.calculate_distance(start_point, end_point)
@@ -10715,7 +10785,7 @@ class Profiling:
                         x_i = round(x*self.array_x /self.main_window.x_range) #index points
                         y_i = round(y*self.array_y/self.main_window.y_range)
                         # Add the scatter item to all other plots and save points in self.profiles[self.main_window.sample_id]
-                        _, p, v, array= self.main_window.lasermaps[k]
+                        _, p, array= self.main_window.lasermaps[(k,v)]
                         if v==self.main_window.canvasWindow.currentIndex() and self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #only add scatters to other lasermaps of same sample
                             # Create a scatter plot item at the clicked position
                             scatter = ScatterPlotItem([x], [y], symbol='+', size=5)
@@ -10728,10 +10798,10 @@ class Profiling:
                                     if np.sqrt((x_i - j)**2 + (y_i - i)**2) <= radius:
                                         value = array[i, j]
                                         circ_val.append(value)
-                            if k in self.i_profiles[self.main_window.sample_id]:
-                                self.i_profiles[self.main_window.sample_id][k].append((x,y,circ_val, scatter, interpolate))
+                            if (k,v) in self.i_profiles[self.main_window.sample_id]:
+                                self.i_profiles[self.main_window.sample_id][(k,v)].append((x,y,circ_val, scatter, interpolate))
 
-                    self.i_profiles[self.main_window.sample_id][k].append(end_point)
+                    self.i_profiles[self.main_window.sample_id][(k,v)].append(end_point)
             # After interpolation, update the plot and table widget
             self.plot_profiles(interpolate= interpolate)
         else:
@@ -10743,12 +10813,12 @@ class Profiling:
     def clear_interpolation(self):
             # remove interpolation
             if len(self.i_profiles[self.main_window.sample_id])>0:
-                for key, profile in self.i_profiles[self.main_window.sample_id].items():
+                for (k,v), profile in self.i_profiles[self.main_window.sample_id].items():
                     for point in profile:
                         scatter_item = point[3]  # Access the scatter plot item
                         interpolate =point[4]
                         if interpolate:
-                            _, plot, _, _ = self.main_window.lasermaps[key]
+                            _, plot, _, _ = self.main_window.lasermaps[(k,v)]
                             plot.removeItem(scatter_item)
 
     def plot_profiles(self,interpolate= False, sort_axis='x'):
@@ -10789,17 +10859,17 @@ class Profiling:
             profile_groups = {}
             keys = []
             if self.main_window.canvasWindow.currentIndex(): #multiview
-                keys= [k for k in profiles.keys() if k[-1]== '1']
+                keys= [(k,v) for (k,v) in profiles.keys() if v== 1]
 
 
 
             else: #singleview
-                keys = [k for k in profiles.keys() if k[-1]== '0']
+                keys = [(k,v) for (k,v) in profiles.keys() if v== 0]
 
             colors = [cmap(i / len(keys)) for i in range(len(keys))]
 
-            for k in keys:
-                points =  profiles[k]
+            for (k,v) in keys:
+                points =  profiles[(k,v)]
                 distances, medians, lowers, uppers, mean,s_error  = process_points(points, sort_axis)
                 if point_type == 'mean':
                     range_value = np.max(mean)- np.min(mean)
@@ -10910,7 +10980,7 @@ class Profiling:
                                                   marker=self.main_window.markerdict[style['Markers']['Symbol']],
                                                   edgecolors='none',
                                                   picker=5,
-                                                  label=f'{profile_key[:-1]}',
+                                                  label=f'{profile_key}',
                                                   zorder=2*g_idx+1)
 
                             #plot errorbars with no marker
@@ -10959,7 +11029,7 @@ class Profiling:
                         self.all_errorbars.append((scatter,barlinecols[0]))
                         self.original_colors[profile_key] = colors[idx+g_idx]  # Assuming colors is accessible
                         self.selected_points[profile_key] = [False] * len(means)
-                        el_labels.append(profile_key[:-1].split('_')[-1]) #get element name
+                        el_labels.append(profile_key.split('_')[-1]) #get element name
                         y_axis_text = ','.join(el_labels)
                         if scale_factor>0:
                             ax2.set_ylabel(f'{y_axis_text}')
@@ -10996,7 +11066,7 @@ class Profiling:
                                                 edgecolors='none',
                                                 picker=5,
                                                 gid=profile_key,
-                                                label=f'{profile_key[:-1]}',
+                                                label=f'{profile_key}',
                                                 zorder=2*g_idx+1)
                             # ax2.scatter(distances, medians, color=colors[idx+g_idx],s=self.scatter_size, picker=5, gid=profile_key, edgecolors = 'none', label=f'{profile_key[:-1]}')
                             #plot errorbars with no marker
@@ -11032,7 +11102,7 @@ class Profiling:
                                                  edgecolors='none',
                                                  picker=5,
                                                  gid=profile_key,
-                                                 label=f'{profile_key[:-1]}',
+                                                 label=f'{profile_key}',
                                                  zorder=2*g_idx+1)
 
                             #plot errorbars with no marker

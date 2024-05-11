@@ -478,13 +478,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ref_data = pd.read_excel(os.path.join(basedir,'resources/app_data/earthref.xlsx'))
         self.sort_data = pd.read_excel(os.path.join(basedir,'resources/app_data/element_info.xlsx'))
         ref_list = self.ref_data['layer']+' ['+self.ref_data['model']+'] '+ self.ref_data['reference']
-        self.comboBoxCorrelationMethod.activated.connect(self.correlation_method_callback)
-        self.checkBoxCorrelationSquared.stateChanged.connect(self.correlation_squared_callback)
 
         self.comboBoxRefMaterial.addItems(ref_list.values)          # Select analyte Tab
         self.comboBoxNDimRefMaterial.addItems(ref_list.values)      # NDim Tab
         self.comboBoxRefMaterial.activated.connect(lambda: self.change_ref_material(self.comboBoxRefMaterial, self.comboBoxNDimRefMaterial))
         self.comboBoxNDimRefMaterial.activated.connect(lambda: self.change_ref_material(self.comboBoxNDimRefMaterial, self.comboBoxRefMaterial))
+        self.ref_chem = None
+        self.change_ref_material(self.comboBoxRefMaterial, self.comboBoxNDimRefMaterial)
+
+        self.comboBoxCorrelationMethod.activated.connect(self.correlation_method_callback)
+        self.checkBoxCorrelationSquared.stateChanged.connect(self.correlation_squared_callback)
 
         # Selecting analytes
         #-------------------------
@@ -1426,7 +1429,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.NDIMPage.setEnabled(False)
                 self.MultidimensionalPage.setEnabled(False)
                 self.ClusteringPage.setEnabled(False)
-                self.ProfilingPage.setEnabled(False)
+                self.ProfilingPage.setEnabled(True)
                 self.SpecialFunctionPage.setEnabled(False)
 
                 self.toolBoxTreeView.setCurrentIndex(0)
@@ -1530,7 +1533,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # self.swap_xy_data(self.data[self.sample_id]['computed_data']['Cluster'])
 
         # update plots
-        self.update_all_plots()
+        self.update_SV()
+        # self.update_all_plots()
 
     def swap_xy_data(self, df):
         """Swaps X and Y of a dataframe
@@ -1561,7 +1565,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ref_chem = self.ref_data.iloc[comboBox1.currentIndex()]
         self.ref_chem.index = [col.replace('_ppm', '') for col in self.ref_chem.index]
 
-        self.update_all_plots()
+        self.update_SV()
+        #self.update_all_plots()
 
     def reset_to_full_view(self):
         """Reset the map to full view (i.e., remove crop)
@@ -1593,7 +1598,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.data[self.sample_id]['axis_mask'] = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
         self.data[self.sample_id]['mask'] = self.data[self.sample_id]['axis_mask'] & self.data[self.sample_id]['filter_mask'] & self.data[self.sample_id]['polygon_mask'] & self.data[self.sample_id]['cluster_mask']
         self.prep_data()
-        self.update_all_plots()
+
+        self.update_SV()
+        #self.update_all_plots()
 
         self.data[self.sample_id]['crop'] = False
 
@@ -1852,7 +1859,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.data[self.sample_id]['polygon_mask'] = self.data[self.sample_id]['polygon_mask'][self.data[self.sample_id]['axis_mask']]
         self.data[self.sample_id]['filter_mask'] = self.data[self.sample_id]['filter_mask'][self.data[self.sample_id]['axis_mask']]
         self.prep_data(sample_id)
-        self.update_all_plots()
+        #self.update_all_plots()
         self.toolButtonCrop.setChecked(False)
         self.data[self.sample_id]['crop'] = True
 
@@ -2439,7 +2446,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             pass
 
         self.data[sample_id]['mask'] = self.data[sample_id]['filter_mask'] & self.data[sample_id]['polygon_mask'] & self.data[sample_id]['axis_mask']
-        self.update_all_plots()
+
+        self.update_SV()
+        #self.update_all_plots()
 
     def oround(self, val, order=2, dir=None):
         """Rounds a single of value to n digits
@@ -2568,8 +2577,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.data[sample_id]['norm'][analyte] = norm
 
         #if update:
-        #    self.update_all_plots()
+        # self.update_all_plots()
         # self.update_plot()
+        self.update_SV()
 
     def prep_data(self, sample_id=None, analyte_1=None, analyte_2=None):
         """Prepares data to be used in analysis
@@ -3563,6 +3573,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.styles['histogram']['Axes']['AspectRatio'] = 0.62
         self.styles['histogram']['Lines']['LineWidth'] = 0
 
+        self.styles['profile']['Axes']['AspectRatio'] = 0.62
         self.styles['profile']['Lines']['LineWidth'] = 1.0
         self.styles['profile']['Markers']['Size'] = 12
         self.styles['profile']['Colors']['Color'] = '#d3d3d3'
@@ -4271,6 +4282,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
         self.comboBoxColorField.setCurrentText(style['Colors']['Field'])
         self.comboBoxFieldColormap.setCurrentText(style['Colors']['Colormap'])
+        if style['Colors']['Field'] in list(self.axis_dict.keys()):
+            style['Colors']['CLim'] = [self.axis_dict[style['Colors']['Field']]['min'], self.axis_dict[style['Colors']['Field']]['max']]
         self.lineEditColorLB.setText(self.dynamic_format(style['Colors']['CLim'][0],order=3,dir=0))
         self.lineEditColorUB.setText(self.dynamic_format(style['Colors']['CLim'][1],order=3,dir=1))
         self.comboBoxColorScale.setCurrentText(style['Colors']['CScale'])
@@ -4860,6 +4873,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # updates scatter styles when ColorByField comboBox is changed
     def color_by_field_callback(self):
+        """Executes on change to *ColorByField* combobox
+        
+        Updates style associated with ``MainWindow.comboBoxColorByField``.  Also updates
+        ``MainWindow.comboBoxColorField`` and ``MainWindow.comboBoxColorScale``."""
         #print('color_by_field_callback')
         self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
 
@@ -4914,8 +4931,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.initialize_axis_values(self.comboBoxColorByField.currentText(), field)
 
             self.set_color_axis_widgets()
-            self.styles[plot_type]['Colors']['CLim'] = [self.axis_dict[field]['min'], self.axis_dict[field]['max']]
-            self.styles[plot_type]['Colors']['CLabel'] = self.axis_dict[field]['label']
+            if plot_type not in ['correlation']:
+                self.styles[plot_type]['Colors']['CLim'] = [self.axis_dict[field]['min'], self.axis_dict[field]['max']]
+                self.styles[plot_type]['Colors']['CLabel'] = self.axis_dict[field]['label']
         else:
             self.lineEditCbarLabel.setText('')
 
@@ -4981,11 +4999,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         Gets the colormap from ``MainWindow.styles`` for the current plot type and reverses or sets as discrete in needed.
 
-        :param N: Creates a discrete color map, if not supplied, the colormap is continuous, Defaults to None.
-        :type N: int, optional
+        Parameters
+        ----------
+        N : int, optional
+            Creates a discrete color map, if not supplied, the colormap is continuous, Defaults to None.
 
-        :returns: Matplotlib colormap
-        :rtype: matplotlib.colors.ListedColormap
+        Returns
+        -------
+        matplotlib.colormap.ListedColormap : colormap
         """
         plot_type = self.comboBoxPlotType.currentText()
         if N is not None:
@@ -5180,8 +5201,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         Updates the current plot (as determined by ``MainWindow.comboBoxPlotType.currentText()`` and options in ``MainWindow.toolBox.selectedIndex()``.
 
-        :param save: save plot to plot selector, Defaults to False.
-        :type save: bool, optional
+        save : bool, optional
+            save plot to plot selector, Defaults to False.
         """
         #print('update_SV, self.plot_flag: '+str(self.plot_flag)+'   sample_id: '+self.sample_id+'   field_type: '+self.comboBoxColorByField.currentText()+'   field: '+self.comboBoxColorField.currentText())
         if self.sample_id == '' or not self.comboBoxPlotType.currentText() or not self.plot_flag:
@@ -5193,10 +5214,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 field_type = self.comboBoxColorByField.currentText()
                 field = self.comboBoxColorField.currentText()
 
-                if not sample_id or not field_type or not field:
+                if not field_type or not field:
                     return
 
-                self.create_map_plotwidget(sample_id, field_type, field)
+                if self.toolBox.currentIndex() in [self.process_tab_id, self.filter_tab_id, self.profile_tab_id]:
+                    self.create_map_plotwidget(sample_id, field_type, field)
+                else:
+                    self.plot_map_mpl(sample_id, field_type, field)
                 # if not self.comboBoxColorField.currentText():
                 #     return
 
@@ -5247,10 +5271,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def add_plotwidget_to_canvas(self, plot_info, position=None):
         """Adds plot to selected view
 
-        :param plot_info: A dictionary with details about the plot
-        :type plot_info: dict
-        :param current_plot_df: Defaults to None
-        :param type: dict, optional
+        Parameters
+        ----------
+        plot_info : dict
+            A dictionary with details about the plot
+        current_plot_df : dict, optional
+            Defaults to None
         """
         #print('add_plotwidget_to_canvas')
 
@@ -5268,8 +5294,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.canvasWindow.currentIndex() == 0:
             #print('add_plotwidget_to_canvas: SV')
             self.clear_layout(self.widgetSingleView.layout())
-            widget =plot_info['figure']
-            
+            widget = plot_info['figure']
 
             plot_info['view'][0] = True
             
@@ -5384,6 +5409,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.hide()
         self.show()
+
+        # put plot_info back into table
+        #print(plot_info)
+        self.add_tree_item(plot_info)
         
         
         
@@ -5439,8 +5468,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def clear_layout(self, layout):
         """Clears a widget that contains plots
 
-        :param layout: must be a horizontal or vertical layout
-        :type layout: QLayout
+        Parameters
+        ----------
+        layout : QLayout
+            A layout associated with a ``canvasWindow`` tab.
         """
         #remove current plot
         for i in reversed(range(layout.count())):
@@ -5465,6 +5496,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # get plot_info from tree location and
                 # reset view to False and position to none
                 plot_info = self.retrieve_plotinfo_from_tree(tree=data[2], branch=data[3], leaf=data[4])
+                print(plot_info)
                 plot_info['view'][1] = False
                 plot_info['position'] = None
             
@@ -5523,52 +5555,52 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # add canvas to quickView grid layout
             self.widgetQuickView.layout().addWidget(canvas,row,col)
 
-    def create_plot(self,current_plot_df, sample_id = None, plot_type = 'analyte', analyte_1 = None, analyte_2 = None, plot = True):
-        # creates plot information and send to relevant plotting method
-        # adds plot to canvas if specified by user
-        if not sample_id:
-            sample_id = self.sample_id
+    # def create_plot(self,current_plot_df, sample_id = None, plot_type = 'analyte', analyte_1 = None, analyte_2 = None, plot = True):
+    #     # creates plot information and send to relevant plotting method
+    #     # adds plot to canvas if specified by user
+    #     if not sample_id:
+    #         sample_id = self.sample_id
 
-        if not analyte_2: #not a ratio
-            current_plot_df['array'] = self.data[sample_id]['processed_data'][analyte_1].values
-            parameters = self.data[sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['analytes']==analyte_1)].iloc[0]
-            analyte_str = analyte_1
-        else:
-            # Get the index of the row that matches the criteria
-            index_to_update = self.data[sample_id]['ratios_info'].loc[
-                (self.data[sample_id]['ratios_info']['analyte_1'] == analyte_1) &
-                (self.data[sample_id]['ratios_info']['analyte_2'] == analyte_2)
-            ].index
-            idx = index_to_update[0]
-            parameters  = self.data[sample_id]['ratios_info'].iloc[idx]
-            analyte_str = analyte_1 +' / '+ analyte_2
-            current_plot_df['array'] = self.data[sample_id]['computed_data']['Ratio'][analyte_str].values
+    #     if not analyte_2: #not a ratio
+    #         current_plot_df['array'] = self.data[sample_id]['processed_data'][analyte_1].values
+    #         parameters = self.data[sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['analytes']==analyte_1)].iloc[0]
+    #         analyte_str = analyte_1
+    #     else:
+    #         # Get the index of the row that matches the criteria
+    #         index_to_update = self.data[sample_id]['ratios_info'].loc[
+    #             (self.data[sample_id]['ratios_info']['analyte_1'] == analyte_1) &
+    #             (self.data[sample_id]['ratios_info']['analyte_2'] == analyte_2)
+    #         ].index
+    #         idx = index_to_update[0]
+    #         parameters  = self.data[sample_id]['ratios_info'].iloc[idx]
+    #         analyte_str = analyte_1 +' / '+ analyte_2
+    #         current_plot_df['array'] = self.data[sample_id]['computed_data']['Ratio'][analyte_str].values
 
-        if plot_type=='analyte':
-            plot_information={'plot_name':analyte_str,'sample_id':sample_id,
-                              'analyte_1':analyte_1, 'analyte_2':analyte_2,
-                              'plot_type':plot_type,
-                              'style': self.styles['analyte map']}
+    #     if plot_type=='analyte':
+    #         plot_information={'plot_name':analyte_str,'sample_id':sample_id,
+    #                           'analyte_1':analyte_1, 'analyte_2':analyte_2,
+    #                           'plot_type':plot_type,
+    #                           'style': self.styles['analyte map']}
 
-            self.plot_laser_map(current_plot_df,plot_information)
-            self.update_spinboxes(parameters)
-        elif plot_type == 'analyte_norm':
-            ref_data_chem = self.ref_data.iloc[self.comboBoxRefMaterial.currentIndex()]
-            ref_data_chem.index = [col.replace('_ppm', '') for col in ref_data_chem.index]
-            ref_series = ref_data_chem[re.sub(r'\d', '', analyte_1).lower()]
-            current_plot_df['array']= current_plot_df['array'] / ref_series
-            plot_information={'plot_name':analyte_str,'sample_id':sample_id,
-                              'analyte_1':analyte_1, 'analyte_2':analyte_2,
-                              'plot_type':plot_type}
-            self.plot_laser_map(current_plot_df,plot_information)
-            self.update_spinboxes(parameters)
-        else:
-            # Return df for analysis
-            ## filter current_plot_df based on active filters
-            current_plot_df['array'] = np.where(self.data[self.sample_id]['mask'], current_plot_df['array'], np.nan)
-            return current_plot_df
-        if plot:
-            self.add_laser_map(plot_information, current_plot_df)
+    #         self.plot_laser_map(current_plot_df,plot_information)
+    #         self.update_spinboxes(parameters)
+    #     elif plot_type == 'analyte_norm':
+    #         ref_data_chem = self.ref_data.iloc[self.comboBoxRefMaterial.currentIndex()]
+    #         ref_data_chem.index = [col.replace('_ppm', '') for col in ref_data_chem.index]
+    #         ref_series = ref_data_chem[re.sub(r'\d', '', analyte_1).lower()]
+    #         current_plot_df['array']= current_plot_df['array'] / ref_series
+    #         plot_information={'plot_name':analyte_str,'sample_id':sample_id,
+    #                           'analyte_1':analyte_1, 'analyte_2':analyte_2,
+    #                           'plot_type':plot_type}
+    #         self.plot_laser_map(current_plot_df,plot_information)
+    #         self.update_spinboxes(parameters)
+    #     else:
+    #         # Return df for analysis
+    #         ## filter current_plot_df based on active filters
+    #         current_plot_df['array'] = np.where(self.data[self.sample_id]['mask'], current_plot_df['array'], np.nan)
+    #         return current_plot_df
+    #     if plot:
+    #         self.add_laser_map(plot_information, current_plot_df)
 
     def toolbar_plotting(self,function,view,enable):
         if function == 'home':
@@ -5649,16 +5681,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def add_colorbar(self, canvas, cax, style, cbartype='continuous', grouplabels=None, groupcolors=None):
         """Adds a colorbar to a MPL figure
 
-        :param canvas: canvas object
-        :type canvas: MplCanvas
-        :param cax: color axes object
-        :type cax: axes
-        :param style: plot style parameters
-        :type style: dict
-        :param cbartype: Type of colorbar, ``dicrete`` or ``continuous``, Defaults to continuous
-        :type cbartype: str
-        :param grouplabels: category/group labels for tick marks
-        :type grouplabels: list of str, optional
+        Parameters
+        ----------
+        canvas : MplCanvas
+            canvas object
+        cax : axes
+            color axes object
+        style : dict
+            plot style parameters
+        cbartype : str
+            Type of colorbar, ``dicrete`` or ``continuous``, Defaults to continuous
+        grouplabels : list of str, optional
+            category/group labels for tick marks
         """
         # Add a colorbar
         cbar = None
@@ -5794,7 +5828,83 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         return array, rgba_array
 
+    def plot_map_mpl(self, sample_id, field_type, field):
+        """_summary_
+
+        _extended_summary_
+
+        Parameters
+        ----------
+        sample_id : _type_
+            _description_
+        field_type : _type_
+            _description_
+        field : _type_
+            _description_
+        """        
+        canvas = MplCanvas(parent=self)
+
+        style = self.styles['analyte map']
+        clb,cub,cscale,clabel = self.get_axis_values(field_type,field)
+        print([clb,cub,cscale,clabel])
+        print(self.axis_dict[field])
+        print(style['Colors']['CLim'])
+
+        # get data for current map
+        map_df = self.get_map_data(sample_id, field, field_type=field_type)
+
+        #Change transparency of values outside mask
+        reshaped_array = np.reshape(map_df['array'].values, self.array_size, order=self.order)
+
+        # create plot canvas
+
+        norm = self.color_norm(style)
+
+        # add image to canvas
+        cax = canvas.axes.imshow(reshaped_array, cmap=self.get_colormap(),  aspect=self.aspect_ratio, interpolation='none', norm=norm)
+
+        # set color limits
+        print(style['Colors']['CLim'])
+        cax.set_clim(style['Colors']['CLim'][0], style['Colors']['CLim'][1])
+
+        # font = {'family': 'sans-serif', 'stretch': 'condensed', 'size': 8, 'weight': 'semibold'}
+        # canvas.axes.text(0.025*self.array_size[0],0.1*self.array_size[1], field, fontdict=font, color=style['Scales']['OverlayColor'], ha='left', va='top')
+        canvas.axes.set_axis_off()
+        canvas.fig.tight_layout()
+
+        self.add_colorbar(canvas, cax, style)
+
+        self.plot_info = {
+            'tree': 'Analyte',
+            'sample_id': sample_id,
+            'plot_name': field,
+            'plot_type': 'analyte map',
+            'field_type': field_type,
+            'field': field,
+            'figure': canvas,
+            'style': style,
+            'cluster_groups': None,
+            'view': [True,False],
+            'position': None
+            }
+
+        self.clear_layout(self.widgetSingleView.layout())
+        self.widgetSingleView.layout().addWidget(canvas)
+
     def create_map_plotwidget(self, sample_id, field_type, field):
+        """Create a graphic widget for plotting a map
+
+        Create a map using pyqtgraph.
+
+        Parameters
+        ----------
+        sample_id : str
+            Sample identifier
+        field_type : str
+            Type of field for plotting
+        field : str
+            Field for plotting
+        """        
         # ----start debugging----
         # print('[create_map_plotwidget] sample_id: '+sample_id+'   field_type: '+'   field: '+field)
         # ----end debugging----
@@ -8205,7 +8315,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 df['array'] = self.data[sample_id]['computed_data'][field_type].loc[:,field].values
 
         # ----begin debugging----
-        print(df.columns)
+        # print(df.columns)
         # ----end debugging----
 
         # crop plot if filter applied
@@ -8304,7 +8414,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def get_processed_data(self):
         """Gets the processed data for analysis
 
-        :returns: filtered data frame and a boolean associated with analytes included from processed data."""
+        Returns
+        ------
+        pandas.DataFrame : filtered data frame 
+        bool : analytes included from processed data
+        """
         if self.sample_id == '':
             return
 
@@ -8326,10 +8440,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         Reads available csv files in ``path`` and returns a dictionary with sample id's (file names minus extension).
 
-        :param path: Path with data files.
-        :type path: str
-        :returns: Dictionary of dataframes
-        :rtype: dict
+        Parameters
+        ----------
+        path : str
+            Path with data files.
+        
+        Returns
+        -------
+        dict : Dictionary of dataframes
         """
         # Get a list of all files in the directory
         file_list = os.listdir(path)
@@ -8418,9 +8536,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.norm_ratios_items.appendRow(norm_ratio_sample_id_item)
             self.norm_analytes_items.appendRow(norm_sample_id_item)
 
-            print('\ncreate_tree: analyte_items')
-            print(self.analytes_items)
-            print('\n')
+            # print('\ncreate_tree: analyte_items')
+            # print(self.analytes_items)
+            # print('\n')
     
     def apply_sort(self, action):
         method = action.text()
@@ -8546,12 +8664,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # if leaf in self.plot_widget_dict[tree][branch].keys():
             #     widget_dict = self.plot_widget_dict[tree][branch][leaf]
             #     self.add_plotwidget_to_canvas(widget_dict['info'], view=widget_dict['view'], position=widget_dict['position'])
+            self.initialize_axis_values(tree, leaf)
             if plot_info:
-                print('tree_double_click: add_plotwidget_to_canvas')
+                #print('tree_double_click: add_plotwidget_to_canvas')
                 self.add_plotwidget_to_canvas(plot_info)
             else:
-                print('tree_double_click: create_map_plotwidget')
-                self.create_map_plotwidget(sample_id=branch, field_type=tree, field=leaf)
+                #print('tree_double_click: create_map_plotwidget')
+                
+                if self.canvasWindow.currentIndex() == 0:
+                    self.plot_map_mpl(sample_id=branch, field_type=tree, field=leaf)
+                else:
+                    self.create_map_plotwidget(sample_id=branch, field_type=tree, field=leaf)
 
         elif tree in ['Histogram', 'Correlation', 'Geochemistry', 'Multidimensional', 'Calculated']:
             self.add_plotwidget_to_canvas(plot_info)
@@ -10011,8 +10134,8 @@ class excelConcatenator(QtWidgets.QMainWindow, Ui_ExcelConcatenator):
                         final_data = pd.concat(data_frames, ignore_index=True)
                     
                     file_name = os.path.join(save_path, self.sample_ids[i]+'.csv')
-                    print(file_name)
-                    print(final_data.head())
+                    #print(file_name)
+                    #print(final_data.head())
                     # final_data.to_csv(file_name, index= False)
                 
         except Exception as e:
@@ -10064,7 +10187,7 @@ class excelConcatenator(QtWidgets.QMainWindow, Ui_ExcelConcatenator):
         # drop rows and columns with all nans 
         df = pd.read_csv(file_path, header=None).dropna(how='all', axis=0).dropna(how='all', axis=1)
        
-        print(df.shape)
+        #print(df.shape)
         if line_dir =='x':
             new_df= pd.DataFrame(df.values.flatten(), columns = [iolite_name])
         elif line_dir =='y':

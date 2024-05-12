@@ -433,6 +433,9 @@
                <height>28</height>
               </size>
              </property>
+             <property name="toolTip">
+              <string>Pop the figure out into a separate window</string>
+             </property>
              <property name="text">
               <string>...</string>
              </property>
@@ -2798,7 +2801,7 @@
          <item row="0" column="1">
           <widget class="QLabel" name="labelFMinVal">
            <property name="text">
-            <string>min</string>
+            <string>Min</string>
            </property>
           </widget>
          </item>
@@ -2945,8 +2948,32 @@
          <item row="1" column="1">
           <widget class="QLabel" name="labelFMaxVal">
            <property name="text">
-            <string>max</string>
+            <string>Max</string>
            </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QLabel" name="labelFilterOperator">
+           <property name="text">
+            <string>Operator</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="2">
+          <widget class="QComboBox" name="comboBoxFilterOperator">
+           <property name="toolTip">
+            <string>Set the behavior when filters combine</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>and</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>or</string>
+            </property>
+           </item>
           </widget>
          </item>
          <item row="2" column="3">
@@ -3551,19 +3578,6 @@
           </widget>
          </item>
          <item>
-          <spacer name="horizontalSpacer_4">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
           <widget class="QToolButton" name="toolButtonFilterToggle">
            <property name="minimumSize">
             <size>
@@ -3600,7 +3614,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QToolButton" name="toolButtonMapPolygon">
+          <widget class="QToolButton" name="toolButtonPolygonMask">
            <property name="minimumSize">
             <size>
              <width>32</width>
@@ -3636,7 +3650,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QToolButton" name="toolButtonMapMask">
+          <widget class="QToolButton" name="toolButtonClusterMask">
            <property name="minimumSize">
             <size>
              <width>32</width>
@@ -6914,7 +6928,7 @@
           <x>0</x>
           <y>0</y>
           <width>241</width>
-          <height>408</height>
+          <height>411</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7316,7 +7330,7 @@
             <rect>
              <x>5</x>
              <y>0</y>
-             <width>231</width>
+             <width>253</width>
              <height>86</height>
             </rect>
            </property>
@@ -8824,7 +8838,7 @@
           <x>0</x>
           <y>0</y>
           <width>241</width>
-          <height>408</height>
+          <height>411</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -10175,6 +10189,9 @@
          <stylestrategy>PreferDefault</stylestrategy>
         </font>
        </property>
+       <property name="toolTip">
+        <string>Pop the figure out into a separate window</string>
+       </property>
        <property name="currentIndex">
         <number>0</number>
        </property>
@@ -10886,7 +10903,7 @@
                </column>
                <column>
                 <property name="text">
-                 <string>Norm</string>
+                 <string>Scale</string>
                 </property>
                 <property name="font">
                  <font>
@@ -10912,6 +10929,16 @@
                  <font>
                   <pointsize>11</pointsize>
                  </font>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>Operator</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string/>
                 </property>
                </column>
               </widget>

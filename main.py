@@ -79,7 +79,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             Keywords for the first level are given by the field names used for plotting associated with entries
             into the field-related QComboBoxes.  Associated with each field are the axes properties.
         
-            [*field*] : name of field
+            [*field*] : (dict) -- field as (*str*)
                 | 'label' : (str) -- axis label, may include units or custom names
                 | 'status' : (str) -- *auto* or *custom* indicates the use of default bounds or user defined axes limits
                 | 'min' : (float) -- minimum axis value
@@ -92,8 +92,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             A dictionary that holds settings and cluster metadata used for plotting.  Each cluster method has its own key and associated dictionary.
             cluster_dict[*method*], where *method* is ``k-means`` or ``fuzzy c-means``
 
-            'active method' : (str) -- current selected method for plotting, masking, etc.
-            [*method*] : (str) -- clustering method
+            **'active method' : (str)** -- current selected method for plotting, masking, etc.
+
+            [*method*] : (dict) -- clustering method as (*str*)
                 | 'n_clusters' : (int) -- number of clusters, set in ``spinBoxNClusters``
                 | 'seed' : (int) -- seed for clustering, which can be user input (``lineEditSeed``) or randomly generated (``toolButtonRandomSeed``), default is 23
                 | 'exponent' : (float) -- exponent for fuzzy c-means, dictates the amount of overlap possible between the different clusters, set by ``horizontalSliderClusterExponent``, default is 2.1
@@ -102,7 +103,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 | *cluster_id* : (dict) -- the key is an integer, with metadata associated with each cluster_id
                 | 'norm' : (matplotlib.colors.Norm) -- norm for plotting colormap
 
-            [*cluster_id*] -- cluster index, this data is displayed for the user in ``tableWidgetViewGroups``
+            [*cluster_id*] : (dict) -- cluster index as (*int*), this data is displayed for the user in ``tableWidgetViewGroups``
                 | 'name' : (str) -- user-defined name for cluster, defaults to ``f"Cluster {cluster_id}"``
                 | 'link' : (list) -- list of clusters id's linked to current cluster
                 | 'color' : (str) -- hex color string
@@ -110,60 +111,66 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             Dictionary containing a dictionary of each sample with the raw, processed, and computed (analyses) DataFrames, mask array, and informational dataframes
             with relevant data.  The dictionary is nested with the first level keys defined by the sample ID.
             
-            [*sample_id*] : (str) -- sample identifier
-                | 'analyte_info' : (dataframe) -- holds information regarding each iolite in sample id,
-                columns:
-                    /'analytes' (str) -- name of iolite
-                    /'sample_id' (str) -- sample id
-                    /'norm' (str) -- type of normalisation used(linear,log,logit)
-                    /'upper_bound' (float) --  upper bound for autoscaling/scaling
-                    /'lower_bound' (float) --  lower bound for autoscaling/scaling
-                    /'d_l_bound' (float) --  difference lower bound for autoscaling
-                    /'d_u_bound' (float) --  difference upper bound for autoscaling
-                    /'v_min' (float) -- max value of iolite
-                    /'v_max' (float) -- min value of iolite
-                    /'auto_scale' (bool) -- indicates whether auto_scaling is switched on for that iolite, use percentile bounds if False
-                    /'use' (bool) -- indicates whether the iolite is being used in the analysis
-                    
-                    
-                | 'ratios_info' : (dataframe) --
-                | 'filter_info' : (dataframe) --
-                | 'crop' : () --
-                | 'x_max' : () --
-                | 'x_min' : () --
-                | 'y_max' : () --
-                | 'y_min' : () --
-                | 'crop_x_max' : () --
-                | 'crop_x_min' : () --
-                | 'crop_y_max' : () --
-                | 'crop_y_min' : () --
-                | 'processed data': () --
-                | 'raw_data': () -- 
-                | 'cropped_raw_data': () -- 
-                
+            **[*sample_id*] : (dict)** -- sample identifier as (*str*), keys within *sample_id* include
 
-                | 'raw data' : (pandas.DataFrame) --
-                | 'x_min' : (float) -- minimum x of full data
-                | 'x_max' : (float) -- maximum x of full data
-                | 'y_min' : (float) -- minimum y of full data
-                | 'y_max' : (float) -- maximum y of full data
-                | 'crop_x_min' : (float) -- minimum x of cropped data
-                | 'crop_x_max' : (float) -- maximum x of cropped data
-                | 'crop_x_min' : (float) -- minimum y of cropped data
-                | 'crop_x_max' : (float) -- maximum y of cropped data
-                | 'norm' : () --
-                | 'analysis data' : () --
-                | 'cropped_raw_data'
-                | 'computed_data' : () --
-                    | 'PCA Score' : () --
-                    | 'Cluster' : () --
-                    | 'Cluster Score' : () --
-                | 'processed_data'
-                | 'axis_mask' : (MaskObj) -- mask created from cropped data.
-                | 'filter_mask' : (MaskObj) -- mask created by a combination of filters.  Filters are displayed for the user in ``tableWidgetFilters``.
-                | 'polygon_mask' : (MaskObj) -- mask created from selected polygons.
-                | 'cluster_mask' : (MaskObj) -- mask created from selected or inverse selected cluster groups.  Once this mask is set, it cannot be reset unless it is turned off, clustering is recomputed, and selected clusters are used to produce a new mask.
-                | 'mask' : () -- combined mask, derived from filter_mask & 'polygon_mask' & 'axis_mask'
+            ['analyte_info'] : (pandas.DataFrame) -- holds information regarding each analyte in sample id,
+                | 'analytes' (str) -- name of analyte
+                | 'sample_id' (str) -- sample id
+                | 'norm' (str) -- type of normalisation used(linear,log,logit)
+                | 'upper_bound' (float) --  upper bound for autoscaling/scaling
+                | 'lower_bound' (float) --  lower bound for autoscaling/scaling
+                | 'd_l_bound' (float) --  difference lower bound for autoscaling
+                | 'd_u_bound' (float) --  difference upper bound for autoscaling
+                | 'v_min' (float) -- max value of analyte
+                | 'v_max' (float) -- min value of analyte
+                | 'auto_scale' (bool) -- indicates whether auto_scaling is switched on for that analyte, use percentile bounds if False
+                | 'use' (bool) -- indicates whether the analyte is being used in the analysis
+                
+            | 'ratios_info' : (dataframe) --
+            | 'crop' : () --
+            | 'x_max' : () --
+            | 'x_min' : () --
+            | 'y_max' : () --
+            | 'y_min' : () --
+            | 'crop_x_max' : () --
+            | 'crop_x_min' : () --
+            | 'crop_y_max' : () --
+            | 'crop_y_min' : () --
+            | 'processed data': () --
+            | 'raw_data': () -- 
+            | 'cropped_raw_data': () -- 
+            | 'raw data' : (pandas.DataFrame) --
+            | 'x_min' : (float) -- minimum x of full data
+            | 'x_max' : (float) -- maximum x of full data
+            | 'y_min' : (float) -- minimum y of full data
+            | 'y_max' : (float) -- maximum y of full data
+            | 'crop_x_min' : (float) -- minimum x of cropped data
+            | 'crop_x_max' : (float) -- maximum x of cropped data
+            | 'crop_x_min' : (float) -- minimum y of cropped data
+            | 'crop_x_max' : (float) -- maximum y of cropped data
+            | 'norm' : () --
+            | 'analysis data' : () --
+            | 'cropped_raw_data'
+            | 'computed_data' : (dict) --
+                | 'PCA Score' : (pandas.DataFrame) --
+                | 'Cluster' : (pandas.DataFrame) --
+                | 'Cluster Score' : (pandas.DataFrame) --
+            | 'processed_data'
+
+            ['filer_info'] : (pandas.DataFrame) -- stores filters for each sample
+                | 'field_type' : (str) -- field type
+                | 'analyte_1' : (str) -- most fields
+                | 'analyte_2' : (str) -- for ratios
+                | 'norm' : (str) -- scale normalization function, ``linear`` or ``log``
+                | 'min' : (float) -- minimum value for filtering
+                | 'max' : (float) -- maximum value for filtering
+                | 'operator' : (str) -- boolean operator for combining filters, ``and`` or ``or``
+
+            | 'axis_mask' : (MaskObj) -- mask created from cropped data.
+            | 'filter_mask' : (MaskObj) -- mask created by a combination of filters.  Filters are displayed for the user in ``tableWidgetFilters``.
+            | 'polygon_mask' : (MaskObj) -- mask created from selected polygons.
+            | 'cluster_mask' : (MaskObj) -- mask created from selected or inverse selected cluster groups.  Once this mask is set, it cannot be reset unless it is turned off, clustering is recomputed, and selected clusters are used to produce a new mask.
+            | 'mask' : () -- combined mask, derived from filter_mask & 'polygon_mask' & 'axis_mask'
         layoutSingleView : QVBoxLayout
             Layout for Single View tab of ``canvasWindow``
         layoutMultiView : QGridLayout
@@ -616,11 +623,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxEdgeDetectMethod.activated.connect(self.add_edge_detection)
 
         #apply filters
-        self.toolButtonMapViewable.clicked.connect(lambda: self.apply_filters(fullmap =True))
-        self.toolButtonMapPolygon.clicked.connect(lambda: self.apply_filters(fullmap =False))
-
-        self.toolButtonFilterToggle.clicked.connect(lambda:self.apply_filters(fullmap =False))
-        self.toolButtonMapMask.clicked.connect(lambda:self.apply_filters(fullmap =False))
+        self.toolButtonMapViewable.clicked.connect(lambda: self.apply_filters(fullmap=True))
+        self.toolButtonPolygonMask.clicked.connect(lambda: self.apply_filters(fullmap=False))
+        self.toolButtonFilterToggle.clicked.connect(lambda:self.apply_filters(fullmap=False))
+        self.toolButtonClusterMask.clicked.connect(lambda:self.apply_filters(fullmap=False))
 
         # Scatter and Ternary Tab
         #-------------------------
@@ -882,6 +888,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         header.setSectionResizeMode(3,QHeaderView.ResizeToContents)
         header.setSectionResizeMode(4,QHeaderView.ResizeToContents)
         header.setSectionResizeMode(5,QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(6,QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(7,QHeaderView.ResizeToContents)
 
         # Notes tab
         #-------------------------
@@ -1139,9 +1147,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #initialise nested dict for each sample
             self.data[self.sample_id] = {}
             #set info dataframes for each sample
-            self.data[self.sample_id]['analyte_info'] = pd.DataFrame(columns = ['analytes', 'norm','upper_bound','lower_bound','d_l_bound','d_u_bound', 'use'])
-            self.data[self.sample_id]['ratios_info'] = pd.DataFrame(columns = [ 'analyte_1','analyte_2', 'norm','upper_bound','lower_bound','d_l_bound','d_u_bound', 'use', 'auto_scale'])
-            self.data[self.sample_id]['filter_info'] = pd.DataFrame(columns = [ 'analyte_1', 'analyte_2', 'Ratio','norm','f_min','f_max', 'use'])
+            self.data[self.sample_id]['analyte_info'] = pd.DataFrame(columns = ['analytes', 'norm', 'upper_bound', 'lower_bound', 'd_l_bound', 'd_u_bound', 'use'])
+            self.data[self.sample_id]['ratios_info'] = pd.DataFrame(columns = [ 'analyte_1', 'analyte_2', 'norm', 'upper_bound', 'lower_bound', 'd_l_bound', 'd_u_bound', 'use', 'auto_scale'])
+            self.data[self.sample_id]['filter_info'] = pd.DataFrame(columns = [ 'field_type', 'analyte_1', 'analyte_2', 'norm', 'f_min', 'f_max', 'operator', 'use'])
 
             #Set crop to false
             self.data[self.sample_id]['crop'] = False
@@ -1261,6 +1269,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         fields = self.get_field_list('Analyte')
         self.styles['analyte map']['Colors']['Field'] = fields[0]
         self.comboBoxColorField.setCurrentText(fields[0])
+        self.initialize_axis_values('Analyte', fields[0])
         self.color_field_callback()
         self.set_style_widgets('analyte map')
 
@@ -2149,7 +2158,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.sample_id = data_dict['sample_id'] 
                 self.selected_dirctory= data_dict['selected_directory'] 
                 self.create_tree(self.sample_id)
-                #update tree with selected iolites
+                #update tree with selected analytes
                 self.update_tree(self.data[self.sample_id]['norm'], norm_update = False)
                 #print(data_dict['plot_infos'])
                 #add plot info to tree
@@ -2253,19 +2262,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # Filter functions
     # -------------------------------
     def update_filter_values(self):
-        analyte_select = self.comboBoxFilterFieldType.currentText()
-        analyte_1 = self.comboBoxFilterField.currentText()
-        analyte_2 = None
+        field_type = self.comboBoxFilterFieldType.currentText()
+        field = self.comboBoxFilterField.currentText()
 
-        if not analyte_1:
+        if not field:
             return
 
-        if analyte_select == 'Analyte':
-            f_val =  self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes'] == analyte_1)].iloc[0][['v_min', 'v_max']]
-        else:
+        if 'Analyte' in field_type:
+            f_val =  self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes'] == field)].iloc[0][['v_min', 'v_max']]
+        elif 'Ratio' in field_type:
             if '/' in analyte_1:
-                analyte_1, analyte_2 = analyte_1.split(' / ')
+                analyte_1, analyte_2 = field.split(' / ')
                 f_val = self.data[self.sample_id]['ratios_info'].loc[(self.data[self.sample_id]['ratios_info']['analyte_1'] == analyte_1)& (self.data[self.sample_id]['ratios_info']['analyte_2'] == analyte_2)].iloc[0][['v_min', 'v_max']]
+        else:
+            pass
+
         self.lineEditFMin.setText(self.dynamic_format(f_val['v_min']))
         self.lineEditFMax.setText(self.dynamic_format(f_val['v_max']))
 
@@ -2288,16 +2299,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.tableWidgetFilters.setCellWidget(current_row, 0, chkBoxItem_use)
 
                 # Add other items from the row
-                self.tableWidgetFilters.setItem(current_row, 1, QtWidgets.QTableWidgetItem(row['analyte_1']))
-                self.tableWidgetFilters.setItem(current_row, 2, QtWidgets.QTableWidgetItem(row.get('analyte_2', '')))  # 'analyte_2' might be None
-                self.tableWidgetFilters.setItem(current_row, 3, QtWidgets.QTableWidgetItem(str(row['Ratio'])))
+                self.tableWidgetFilters.setItem(current_row, 1, QtWidgets.QTableWidgetItem(row['field_type']))
+                self.tableWidgetFilters.setItem(current_row, 2, QtWidgets.QTableWidgetItem(row['field']))
+                self.tableWidgetFilters.setItem(current_row, 3, QtWidgets.QTableWidgetItem(row['scale']))
                 self.tableWidgetFilters.setItem(current_row, 4, QtWidgets.QTableWidgetItem(self.dynamic_format(row['f_min'])))
                 self.tableWidgetFilters.setItem(current_row, 5, QtWidgets.QTableWidgetItem(self.dynamic_format(row['f_max'])))
+                self.tableWidgetFilters.setItem(current_row, 6, QtWidgets.QTableWidgetItem(row['operator']))
 
                 # Create and set the checkbox for selection (assuming this is a checkbox similar to 'use')
                 chkBoxItem_select = QtWidgets.QCheckBox()
                 chkBoxItem_select.setCheckState(QtCore.Qt.Checked if row.get('select', False) else QtCore.Qt.Unchecked)
-                self.tableWidgetFilters.setCellWidget(current_row, 6, chkBoxItem_select)
+                self.tableWidgetFilters.setCellWidget(current_row, 7, chkBoxItem_select)
 
         else:
             # open tabFilterList
@@ -2308,11 +2320,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.data[self.sample_id]['filter_info'].at[row, 'use'] = state == QtCore.Qt.Checked
 
 
-            analyte_1 = self.comboBoxFilterField.currentText()
-            analyte_2 = None
-            analyte_select = self.comboBoxFilterFieldType.currentText()
+            field_type = self.comboBoxFilterFieldType.currentText()
+            field = self.comboBoxFilterField.currentText()
             f_min = float(self.lineEditFMin.text())
             f_max = float(self.lineEditFMax.text())
+            operator = self.comboBoxFilterOperator.currentText()
             # Add a new row at the end of the table
             row = self.tableWidgetFilters.rowCount()
             self.tableWidgetFilters.insertRow(row)
@@ -2325,36 +2337,32 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             chkBoxItem_select = QTableWidgetItem()
             chkBoxItem_select.setFlags(QtCore.Qt.ItemIsUserCheckable |
                                 QtCore.Qt.ItemIsEnabled)
-            ratio = False
-            if analyte_select.lower() == 'Analyte':
+
+            if 'Analyte' in field_type:
                 chkBoxItem_select.setCheckState(QtCore.Qt.Unchecked)
-                norm = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes'] == analyte_1)].iloc[0]['norm']
+                analyte_1 = field
+                analyte_2 = None
+                scale = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes'] == field)].iloc[0]['norm']
+            elif 'Ratio' in field_type:
+                chkBoxItem_select.setCheckState(QtCore.Qt.Unchecked)
+                analyte_1, analyte_2 = field.split(' / ')
+                scale = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes'] == analyte_1)].iloc[0]['norm'].value
+                #norm = self.data[self.sample_id]['ratios_info'].loc[(self.data[self.sample_id]['ratios_info']['analyte_1'] == analyte_1)
+                #        & (self.data[self.sample_id]['ratios_info']['analyte_2'] == analyte_2)].iloc[0]['norm']
             else:
-                if '/' in analyte_1:
-                    ratio = True
-                    analyte_1, analyte_2 = analyte_1.split(' / ')
-                    norm = self.data[self.sample_id]['ratios_info'].loc[(self.data[self.sample_id]['ratios_info']['analyte_1'] == analyte_1)
-                                                                        & (self.data[self.sample_id]['ratios_info']['analyte_2'] == analyte_2)].iloc[0]['norm']
+                scale = 'linear'
 
             self.tableWidgetFilters.setCellWidget(row, 0, chkBoxItem_use)
-            self.tableWidgetFilters.setItem(row, 1,
-                                     QtWidgets.QTableWidgetItem(analyte_1))
-            self.tableWidgetFilters.setItem(row, 2,
-                                     QtWidgets.QTableWidgetItem(analyte_2))
-            self.tableWidgetFilters.setItem(row, 3,
-                                     QtWidgets.QTableWidgetItem(ratio))
+            self.tableWidgetFilters.setItem(row, 1, QtWidgets.QTableWidgetItem(field_type))
+            self.tableWidgetFilters.setItem(row, 2, QtWidgets.QTableWidgetItem(field))
+            self.tableWidgetFilters.setItem(row, 3, QtWidgets.QTableWidgetItem(scale))
+            self.tableWidgetFilters.setItem(row, 4, QtWidgets.QTableWidgetItem(self.dynamic_format(f_min)))
+            self.tableWidgetFilters.setItem(row, 5, QtWidgets.QTableWidgetItem(self.dynamic_format(f_max)))
+            self.tableWidgetFilters.setItem(row, 6, QtWidgets.QTableWidgetItem(operator))
+            self.tableWidgetFilters.setItem(row, 7, chkBoxItem_select)
 
-            self.tableWidgetFilters.setItem(row, 4,
-                                     QtWidgets.QTableWidgetItem(self.dynamic_format(f_min)))
-            self.tableWidgetFilters.setItem(row, 5,
-                                     QtWidgets.QTableWidgetItem(self.dynamic_format(f_max)))
-
-
-            self.tableWidgetFilters.setItem(row, 6,
-                                     chkBoxItem_select)
-
-
-            filter_info = { 'analyte_1': analyte_1, 'analyte_2': analyte_2, 'Ratio': ratio,'norm':norm ,'f_min': f_min,'f_max':f_max, 'use':True}
+            filter_info = {'field_type': field_type, 'analyte_1': analyte_1, 'analyte_2': analyte_2,
+                    'norm':scale ,'f_min': f_min,'f_max':f_max, 'operator':operator, 'use':True}
             self.data[self.sample_id]['filter_info'].loc[len(self.data[self.sample_id]['filter_info'])]=filter_info
 
     def remove_selected_rows(self):
@@ -2366,17 +2374,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # We loop in reverse to avoid issues when removing rows
         for row in range(self.tableWidgetFilters.rowCount()-1, -1, -1):
             chkBoxItem = self.tableWidgetFilters.item(row, 7)
-            sample_id = self.tableWidgetFilters.item(row, 1).text()
-            analyte_1 = self.tableWidgetFilters.item(row, 2).text()
-            analyte_2 = self.tableWidgetFilters.item(row, 3).text()
-            ratio = bool(self.tableWidgetFilters.item(row, 4).text())
+            field_type = self.tableWidgetFilters.item(row, 1).text()
+            field = self.tableWidgetFilters.item(row, 2).text()
             if chkBoxItem.checkState() == QtCore.Qt.Checked:
                 self.tableWidgetFilters.removeRow(row)
-                if not ratio:
-                    self.data[sample_id]['filter_info'].drop(self.data[sample_id]['filter_info'][(self.data[sample_id]['filter_info']['analyte_1'] == analyte_1)& (self.data[sample_id]['filter_info']['Ratio'] == ratio)].index, inplace=True)
-                else:
+                if 'Analyte' in field_type:
+                    self.data[sample_id]['filter_info'].drop(self.data[sample_id]['filter_info'][(self.data[sample_id]['filter_info']['analyte_1'] == field)].index, inplace=True)
+                elif 'Ratio' in field_type:
+                    analyte_1, analyte_2 = field.split(' / ')
                     # Remove corresponding row from filter_df
-                    self.data[sample_id]['filter_info'].drop(self.data[sample_id]['filter_info'][(self.data[sample_id]['filter_info']['analyte_1'] == analyte_1)& (self.data[sample_id]['filter_info']['analyte_2'] == analyte_2)].index, inplace=True)
+                    self.data[sample_id]['filter_info'].drop(self.data[sample_id]['filter_info'][(self.data[sample_id]['filter_info']['analyte_1'] == analyte_1) & (self.data[sample_id]['filter_info']['analyte_2'] == analyte_2)].index, inplace=True)
+                else:
+                    pass
+
         self.apply_filters(sample_id)
 
     def apply_filters(self, fullmap=False):
@@ -2384,32 +2394,45 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         Applies user specified data filters to mask data for analysis
 
-        :param fullmap: If True, filters are ignored, otherwise filter maps, Defaults to False
-        :type fullmap: bool, optional"""
+        Parameters
+        ----------
+        fullmap : bool, optional
+            If True, filters are ignored, otherwise the map is filtered, by default False
+        """
         #reset all masks in current sample id
         sample_id = self.sample_id
-        self.data[sample_id]['polygon_mask'] = np.ones_like( self.data[sample_id]['mask'], dtype=bool)
-        self.data[sample_id]['filter_mask'] = np.ones_like( self.data[sample_id]['mask'], dtype=bool)
+        self.data[sample_id]['polygon_mask'] = np.ones_like(self.data[sample_id]['mask'], dtype=bool)
+        self.data[sample_id]['filter_mask'] = np.ones_like(self.data[sample_id]['mask'], dtype=bool)
 
-
+        # remove all masks
         if fullmap:
             #user clicked on Map viewable
             self.toolButtonFilterToggle.setChecked(False)
-            self.toolButtonMapPolygon.setChecked(False)
-            self.toolButtonMapMask.setChecked(False)
+            self.toolButtonPolygonMask.setChecked(False)
+            self.toolButtonClusterMask.setChecked(False)
 
+        # apply interval filters
         elif self.toolButtonFilterToggle.isChecked():
+            print(self.data[sample_id]['filter_info'])
             # Check if rows in self.data[sample_id]['filter_info'] exist and filter array in current_plot_df
             # by creating a mask based on f_min and f_max of the corresponding filter analytes
             for index, filter_row in self.data[sample_id]['filter_info'].iterrows():
                 if filter_row['use']:
-                    if not filter_row['analyte_2']:
-                        analyte_df = self.get_map_data(sample_id=sample_id, field=filter_row['analyte_1'], field_type = 'Analyte')
-                    else: #if ratio
-                        analyte_df = self.get_map_data(sample_id=sample_id, field=filter_row['analyte_1']+'/'+filter_row['analyte_2'], field_type='Ratio')
+                    if 'Analyte' in filter_row['field_type']:
+                        analyte_df = self.get_map_data(sample_id=sample_id, field=filter_row['analyte_1'], field_type=filter_row['field_type'])
+                    elif 'Row' in filter_row['field_type']:
+                        analyte_df = self.get_map_data(sample_id=sample_id, field=filter_row['analyte_1']+'/'+filter_row['analyte_2'], field_type=filter_row['field_type'])
+                    else:
+                        pass
+                    
+                    operator = filter_row['operator']
+                    if operator == 'and':
+                        self.data[sample_id]['filter_mask'] = self.data[sample_id]['filter_mask'] & ((filter_row['f_min'] <= analyte_df['array'].values) & (analyte_df['array'].values <= filter_row['f_max']))
+                    elif operator == 'or':
+                        self.data[sample_id]['filter_mask'] = self.data[sample_id]['filter_mask'] | ((filter_row['f_min'] <= analyte_df['array'].values) & (analyte_df['array'].values <= filter_row['f_max']))
 
-                    self.data[sample_id]['filter_mask'] = self.data[sample_id]['filter_mask'] & (analyte_df['array'].values <= filter_row['f_min']) | (analyte_df['array'].values >= filter_row['f_max'])
-        elif self.toolButtonMapPolygon.isChecked():
+        # apply polygon filters
+        elif self.toolButtonPolygonMask.isChecked():
             # apply polygon mask
             # Iterate through each polygon in self.polygons[self.main_window.sample_id]
             for row in range(self.tableWidgetPolyPoints.rowCount()):
@@ -2442,11 +2465,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     #clear existing polygon lines
                     self.polygon.clear_lines()
 
-        elif self.toolButtonMapMask.isChecked():
+        # apply cluster mask
+        elif self.toolButtonClusterMask.isChecked():
             # apply map mask
             pass
 
-        self.data[sample_id]['mask'] = self.data[sample_id]['filter_mask'] & self.data[sample_id]['polygon_mask'] & self.data[sample_id]['axis_mask']
+        self.data[sample_id]['mask'] = self.data[sample_id]['axis_mask'] & self.data[sample_id]['filter_mask'] & self.data[sample_id]['polygon_mask'] & self.data[sample_id]['cluster_mask']
 
         self.update_SV()
         #self.update_all_plots()
@@ -5835,42 +5859,52 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         return array, rgba_array
 
     def plot_map_mpl(self, sample_id, field_type, field):
-        """_summary_
+        """Create a matplotlib canvas for plotting a map
 
-        _extended_summary_
+        Create a map using ``MplCanvas``.
 
         Parameters
         ----------
-        sample_id : _type_
-            _description_
-        field_type : _type_
-            _description_
-        field : _type_
-            _description_
+        sample_id : str
+            Sample identifier
+        field_type : str
+            Type of field for plotting
+        field : str
+            Field for plotting
         """        
         canvas = MplCanvas(parent=self)
 
         style = self.styles['analyte map']
         clb,cub,cscale,clabel = self.get_axis_values(field_type,field)
-        print([clb,cub,cscale,clabel])
-        print(self.axis_dict[field])
-        print(style['Colors']['CLim'])
+
 
         # get data for current map
         map_df = self.get_map_data(sample_id, field, field_type=field_type)
+        print(np.count_nonzero(map_df))
 
         #Change transparency of values outside mask
         reshaped_array = np.reshape(map_df['array'].values, self.array_size, order=self.order)
 
         # create plot canvas
-
         norm = self.color_norm(style)
 
         # add image to canvas
         cax = canvas.axes.imshow(reshaped_array, cmap=self.get_colormap(),  aspect=self.aspect_ratio, interpolation='none', norm=norm)
 
         # set color limits
+        self.add_colorbar(canvas, cax, style)
         cax.set_clim(style['Colors']['CLim'][0], style['Colors']['CLim'][1])
+
+        mask = self.data[self.sample_id]['mask'].astype(int)
+        print(mask.shape)
+        print(mask.sum())
+        reshaped_mask = np.reshape(mask, self.array_size, order=self.order)
+        #alphas = colors.Normalize(0, 1, clip=False)(np.abs(reshaped_mask))
+        #print(alphas)
+        #alphas = np.clip(alphas, .4, 1)  # alpha value clipped at the bottom at .4
+        # Set alpha to 0.5 where mask is 0, otherwise 0
+        alpha_mask = np.where(reshaped_mask == 0, 0.5, 0)  
+        plt.imshow(alpha_mask, cmap='Greys', alpha=0.5)#, interpolation='nearest')
 
         # font = {'family': 'sans-serif', 'stretch': 'condensed', 'size': 8, 'weight': 'semibold'}
         # canvas.axes.text(0.025*self.array_size[0],0.1*self.array_size[1], field, fontdict=font, color=style['Scales']['OverlayColor'], ha='left', va='top')
@@ -5880,7 +5914,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             bottom=False, top=False, left=False, right=False)
         canvas.fig.tight_layout()
 
-        self.add_colorbar(canvas, cax, style)
+        # add small histogram
+        if (self.toolBox.currentIndex() == self.sample_tab_id) and (self.canvasWindow.currentIndex() == 0):
+            self.plot_small_histogram(map_df,field)
 
         self.plot_info = {
             'tree': 'Analyte',

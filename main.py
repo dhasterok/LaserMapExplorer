@@ -1262,6 +1262,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.styles['analyte map']['Colors']['Field'] = fields[0]
         self.comboBoxColorField.setCurrentText(fields[0])
         self.color_field_callback()
+        self.set_style_widgets('analyte map')
 
         self.plot_flag = True
         self.update_SV()
@@ -4228,7 +4229,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.labelCbarLabel.setEnabled(self.lineEditCbarLabel.isEnabled())
         self.labelHeatmapResolution.setEnabled(self.spinBoxHeatmapResolution.isEnabled())
 
-    def set_style_widgets(self, plot_type=None):
+    def set_style_widgets(self, plot_type=None, style=None):
         """Sets values in right toolbox style page
 
         :param plot_type: dictionary key into ``MainWindow.style``
@@ -4245,7 +4246,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         elif plot_type == '':
             return
 
-        style = self.styles[plot_type]
+        if style is None:
+            style = self.styles[plot_type]
 
         # axes properties
         self.lineEditXLB.setText(self.dynamic_format(style['Axes']['XLim'][0],order=3,dir=0))
@@ -4284,6 +4286,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxFieldColormap.setCurrentText(style['Colors']['Colormap'])
         if style['Colors']['Field'] in list(self.axis_dict.keys()):
             style['Colors']['CLim'] = [self.axis_dict[style['Colors']['Field']]['min'], self.axis_dict[style['Colors']['Field']]['max']]
+            style['Colors']['CLabel'] = self.axis_dict[style['Colors']['Field']]['label']
         self.lineEditColorLB.setText(self.dynamic_format(style['Colors']['CLim'][0],order=3,dir=0))
         self.lineEditColorUB.setText(self.dynamic_format(style['Colors']['CLim'][1],order=3,dir=1))
         self.comboBoxColorScale.setCurrentText(style['Colors']['CScale'])
@@ -4462,7 +4465,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.axis_dict[field]['min'] = new_value
                 self.axis_dict[field]['status'] = 'custom'
 
-        self.styles[plot_type]['Axes'][ax.upper()+'Lim'][bound] = new_value
+        if ax == 'c':
+            self.styles[plot_type]['Colors'][f'{ax.upper()}Lim'][bound] = new_value
+        else:
+            self.styles[plot_type]['Axes'][f'{ax.upper()}Lim'][bound] = new_value
 
         # update plot
         self.update_SV()
@@ -5864,12 +5870,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         cax = canvas.axes.imshow(reshaped_array, cmap=self.get_colormap(),  aspect=self.aspect_ratio, interpolation='none', norm=norm)
 
         # set color limits
-        print(style['Colors']['CLim'])
         cax.set_clim(style['Colors']['CLim'][0], style['Colors']['CLim'][1])
 
         # font = {'family': 'sans-serif', 'stretch': 'condensed', 'size': 8, 'weight': 'semibold'}
         # canvas.axes.text(0.025*self.array_size[0],0.1*self.array_size[1], field, fontdict=font, color=style['Scales']['OverlayColor'], ha='left', va='top')
-        canvas.axes.set_axis_off()
+        #canvas.axes.set_axis_off()
+        canvas.axes.tick_params(direction=None,
+            labelbottom=False, labeltop=False, labelright=False, labelleft=False,
+            bottom=False, top=False, left=False, right=False)
         canvas.fig.tight_layout()
 
         self.add_colorbar(canvas, cax, style)
@@ -8670,6 +8678,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.add_plotwidget_to_canvas(plot_info)
             else:
                 #print('tree_double_click: create_map_plotwidget')
+                if self.toolBox.currentIndex() not in [self.sample_tab_id, self.process_tab_id, self.filter_tab_id, self.profile_tab_id]:
+                    self.toolBox.setCurrentIndex(self.sample_tab_id)
+                
+                if branch == self.sample_id:
+                    self.styles['analyte map']['Colors']['ColorByField'] = tree
+                    self.styles['analyte map']['Colors']['Field'] = leaf
+                    style = self.styles['analyte map']
+                else:
+                    pass
+
+                self.set_style_widgets('analyte map', style)
                 
                 if self.canvasWindow.currentIndex() == 0:
                     self.plot_map_mpl(sample_id=branch, field_type=tree, field=leaf)

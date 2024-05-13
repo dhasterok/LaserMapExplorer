@@ -111,20 +111,60 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             Dictionary containing a dictionary of each sample with the raw, processed, and computed (analyses) DataFrames, mask array, and informational dataframes
             with relevant data.  The dictionary is nested with the first level keys defined by the sample ID.
             
-            **[*sample_id*] : (dict)** -- sample identifier as (*str*), keys within *sample_id* include
-
-            ['analyte_info'] : (pandas.DataFrame) -- holds information regarding each analyte in sample id,
-                | 'analytes' (str) -- name of analyte
-                | 'sample_id' (str) -- sample id
-                | 'norm' (str) -- type of normalisation used(linear,log,logit)
-                | 'upper_bound' (float) --  upper bound for autoscaling/scaling
-                | 'lower_bound' (float) --  lower bound for autoscaling/scaling
-                | 'd_l_bound' (float) --  difference lower bound for autoscaling
-                | 'd_u_bound' (float) --  difference upper bound for autoscaling
-                | 'v_min' (float) -- max value of analyte
-                | 'v_max' (float) -- min value of analyte
-                | 'auto_scale' (bool) -- indicates whether auto_scaling is switched on for that analyte, use percentile bounds if False
-                | 'use' (bool) -- indicates whether the analyte is being used in the analysis
+            [*sample_id*] : (str) -- sample identifier
+                | 'analyte_info' : (dataframe) -- holds information regarding each iolite in sample id,
+                columns:
+                    /'analytes' (str) -- name of iolite
+                    /'sample_id' (str) -- sample id
+                    /'norm' (str) -- type of normalisation used(linear,log,logit)
+                    /'upper_bound' (float) --  upper bound for autoscaling/scaling
+                    /'lower_bound' (float) --  lower bound for autoscaling/scaling
+                    /'d_l_bound' (float) --  difference lower bound for autoscaling
+                    /'d_u_bound' (float) --  difference upper bound for autoscaling
+                    /'v_min' (float) -- max value of iolite
+                    /'v_max' (float) -- min value of iolite
+                    /'auto_scale' (bool) -- indicates whether auto_scaling is switched on for that iolite, use percentile bounds if False
+                    /'use' (bool) -- indicates whether the iolite is being used in the analys
+                | 'ratios_info' : (dataframe) -- holds information  regarding computerd ratios 
+                columns:
+                    /'analyte_1' (str) -- name of iolite at numerator of ratio
+                    /'analyte_2' (str) -- name of iolite at denominator of ratio
+                    /'norm' (str) -- type of normalisation used(linear,log,logit)
+                    /'upper_bound' (float) --  upper bound for autoscaling/scaling
+                    /'lower_bound' (float) --  lower bound for autoscaling/scaling
+                    /'d_l_bound' (float) --  difference lower bound for autoscaling
+                    /'d_u_bound' (float) --  difference upper bound for autoscaling
+                    /'v_min' (float) -- max value of iolite
+                    /'v_max' (float) -- min value of iolite
+                    /'auto_scale' (bool) -- indicates whether auto_scaling is switched on for that iolite, use percentile bounds if False
+                    /'use' (bool) -- indicates whether the iolite is being used in the analysis
+                    
+                
+                | 'filter_info' : (dataframe) --
+                columns:
+                    /'analyte_1' (str) -- name of iolite used for filtering
+                    /'analyte_2' (str) -- name of iolite in denominator if Ratio is used for filtering 
+                    /'Ratio' (bool) -- name of iolite
+                    /'norm' (str) -- type of normalisation used(linear,log,logit)
+                    /'f_min' (float) --  upper bound for autoscaling/scaling
+                    /'f_max' (float) --  lower bound for autoscaling/scaling
+                    /'use' (bool) -- indicates whether the iolite is being used in the analysis
+                    
+                
+                | 'filter_info' : (dataframe) --
+                
+                | 'crop' : () --
+                | 'x_max' : () --
+                | 'x_min' : () --
+                | 'y_max' : () --
+                | 'y_min' : () --
+                | 'crop_x_max' : () --
+                | 'crop_x_min' : () --
+                | 'crop_y_max' : () --
+                | 'crop_y_min' : () --
+                | 'processed data': () --
+                | 'raw_data': () -- 
+                | 'cropped_raw_data': () --
                 
             | 'ratios_info' : (dataframe) --
             | 'crop' : () --

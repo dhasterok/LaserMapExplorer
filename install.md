@@ -1,22 +1,36 @@
-# Step 1: Clone repository to local directory
-git clone https://github.com/shavinkalu23/LaserMapExplorer.git
-cd LaserMapExplorer
-
-# Step 2: Install qt designer to make changes to the UI 
-
-https://www.qt.io/download-qt-installer-oss?hsCtaTracking=99d9dd4f-5681-48d2-b096-470725510d34%7C074ddad0-fdef-4e53-8aa8-5e8a876d6ab4
-
-# Step 3: Install anaconda 
+# Step 1: Install anaconda 
 
 https://www.anaconda.com/download
 
-# Step 4: Create virtual environment in anaconda 
+# Step 2: Install git
 
-conda create --name pyqt python=3.9
+windows: open anaconda prompt
+mac/linux: open terminal
+
+conda install git
+
+
+# Step 3: Clone repository to local directory
+
+git clone https://github.com/dhasterok/LaserMapExplorer.git
+cd LaserMapExplorer
+
+
+# Step 4: Install anaconda 
+
+https://www.anaconda.com/download
+
+# Step 5: Create virtual environment in anaconda 
+
+conda create --name pyqt python=3.11 --file req.txt
 conda activate pyqt
 
-# Step 5: Install package list
-conda install --file packagelist.txt
+# if Step 5 fails, try:
+
+conda create --name pyqt python=3.11
+conda activate pyqt
+conda install python=3.11 pyqt pyqtgraph pandas matplotlib scikit-learn opencv, openpyxl
+conda install conda-forge::scikit-fuzzyy
 
 # Step 6: Run main.py on spyder or on terminal 
 

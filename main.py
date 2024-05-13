@@ -134,11 +134,35 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     /'v_min' (float) -- max value of iolite
                     /'v_max' (float) -- min value of iolite
                     /'auto_scale' (bool) -- indicates whether auto_scaling is switched on for that iolite, use percentile bounds if False
+                    /'use' (bool) -- indicates whether the iolite is being used in the analys
+                | 'ratios_info' : (dataframe) -- holds information  regarding computerd ratios 
+                columns:
+                    /'analyte_1' (str) -- name of iolite at numerator of ratio
+                    /'analyte_2' (str) -- name of iolite at denominator of ratio
+                    /'norm' (str) -- type of normalisation used(linear,log,logit)
+                    /'upper_bound' (float) --  upper bound for autoscaling/scaling
+                    /'lower_bound' (float) --  lower bound for autoscaling/scaling
+                    /'d_l_bound' (float) --  difference lower bound for autoscaling
+                    /'d_u_bound' (float) --  difference upper bound for autoscaling
+                    /'v_min' (float) -- max value of iolite
+                    /'v_max' (float) -- min value of iolite
+                    /'auto_scale' (bool) -- indicates whether auto_scaling is switched on for that iolite, use percentile bounds if False
                     /'use' (bool) -- indicates whether the iolite is being used in the analysis
                     
-                    
-                | 'ratios_info' : (dataframe) --
+                
                 | 'filter_info' : (dataframe) --
+                columns:
+                    /'analyte_1' (str) -- name of iolite used for filtering
+                    /'analyte_2' (str) -- name of iolite in denominator if Ratio is used for filtering 
+                    /'Ratio' (bool) -- name of iolite
+                    /'norm' (str) -- type of normalisation used(linear,log,logit)
+                    /'f_min' (float) --  upper bound for autoscaling/scaling
+                    /'f_max' (float) --  lower bound for autoscaling/scaling
+                    /'use' (bool) -- indicates whether the iolite is being used in the analysis
+                    
+                
+                | 'filter_info' : (dataframe) --
+                
                 | 'crop' : () --
                 | 'x_max' : () --
                 | 'x_min' : () --
@@ -473,7 +497,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #-------------------------
         self.ref_data = pd.read_excel(os.path.join(basedir,'resources/app_data/earthref.xlsx'))
         self.sort_data = pd.read_excel(os.path.join(basedir,'resources/app_data/element_info.xlsx'))
-        ref_list = self.ref_data['layer']+' ['+self.ref_data['model']+'] '+ self.ref_data['reference']
+        ref_list = self.ref_data['layer'] + self.ref_data['model']  + self.ref_data['reference']
         self.comboBoxCorrelationMethod.activated.connect(self.correlation_method_callback)
         self.checkBoxCorrelationSquared.stateChanged.connect(self.correlation_squared_callback)
 

@@ -420,12 +420,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.plot_types = {self.sample_tab_id: [0, 'analyte map', 'correlation'],
             self.spot_tab_id: [0, 'analyte map', 'gradient map'],
             self.process_tab_id: [0, 'analyte map', 'gradient map', 'histogram'],
-            self.filter_tab_id: [0, 'analyte map', 'gradient map'],
+            self.filter_tab_id: [0, 'analyte map'],
             self.scatter_tab_id: [0, 'scatter', 'heatmap', 'ternary map'],
             self.ndim_tab_id: [0, 'TEC', 'Radar'],
             self.pca_tab_id: [0, 'variance','vectors','pca scatter','pca heatmap','PCA Score'],
             self.cluster_tab_id: [0, 'Cluster', 'Cluster Score'],
-            self.profile_tab_id: [0, 'profile', 'analyte map', 'gradient map', 'Cluster Score', 'PCA Score'],
+            self.profile_tab_id: [0, 'analyte map'],
             self.special_tab_id: [0, 'profile', 'analyte map', 'gradient map', 'Cluster Score', 'PCA Score']}
 
         self.styles = {}
@@ -601,12 +601,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #-------------------------
         # left pane
         self.toolButtonAddFilter.clicked.connect(self.update_filter_table)
+        self.toolButtonAddFilter.clicked.connect(lambda: self.apply_filters(fullmap=False))
+
         self.comboBoxFilterFieldType.activated.connect(lambda: self.update_field_combobox(self.comboBoxFilterFieldType, self.comboBoxFilterField))
         self.comboBoxFilterField.activated.connect(self.update_filter_values)
 
         # central-bottom pane
         self.toolButtonFilterUp.clicked.connect(lambda: self.table_fcn.move_row_up(self.tableWidgetFilters))
+        self.toolButtonFilterUp.clicked.connect(lambda: self.apply_filters(fullmap=False))
         self.toolButtonFilterDown.clicked.connect(lambda: self.table_fcn.move_row_down(self.tableWidgetFilters))
+        self.toolButtonFilterDown.clicked.connect(lambda: self.apply_filters(fullmap=False))
         # There is currently a special function for removing rows, convert to table_fcn.delete_row
         self.toolButtonFilterRemove.clicked.connect(self.remove_selected_rows)
         self.toolButtonFilterRemove.clicked.connect(lambda: self.table_fcn.delete_row(self.tableWidgetFilters))
@@ -623,10 +627,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxEdgeDetectMethod.activated.connect(self.add_edge_detection)
 
         #apply filters
-        self.toolButtonMapViewable.clicked.connect(lambda: self.apply_filters(fullmap=True))
-        self.toolButtonPolygonMask.clicked.connect(lambda: self.apply_filters(fullmap=False))
-        self.toolButtonFilterToggle.clicked.connect(lambda:self.apply_filters(fullmap=False))
-        self.toolButtonClusterMask.clicked.connect(lambda:self.apply_filters(fullmap=False))
+        self.toolButtonMapViewable.toggled.connect(lambda: self.apply_filters(fullmap=True))
+        self.toolButtonPolygonMask.toggled.connect(lambda: self.apply_filters(fullmap=False))
+        self.toolButtonFilterToggle.toggled.connect(lambda: self.apply_filters(fullmap=False))
+        self.toolButtonClusterMask.toggled.connect(lambda: self.apply_filters(fullmap=False))
 
         # Scatter and Ternary Tab
         #-------------------------
@@ -815,6 +819,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         header.setSectionResizeMode(0,QHeaderView.Stretch)
         header.setSectionResizeMode(1,QHeaderView.ResizeToContents)
         header.setSectionResizeMode(2,QHeaderView.ResizeToContents)
+        self.toolButtonGroupMask.clicked.connect(lambda: self.apply_cluster_mask(inverse=False))
+        self.toolButtonGroupMaskInverse.clicked.connect(lambda: self.apply_cluster_mask(inverse=True))
 
         # colormap
         colormaps = colormap.listMaps('matplotlib')
@@ -1584,7 +1590,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Executes on ``MainWindow.toolButtonFullView`` is clicked.
         """
 
-        sample_id = self.current_plot_information['sample_id']
+        sample_id = self.plot_info['sample_id']
         #set original bounds
         self.data[sample_id]['crop_x_max'] = self.data[sample_id]['x_max']
         self.data[sample_id]['crop_x_min'] = self.data[sample_id]['x_min']
@@ -1606,7 +1612,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         #reset axis mask
         self.data[self.sample_id]['axis_mask'] = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
-        self.data[self.sample_id]['mask'] = self.data[self.sample_id]['axis_mask'] & self.data[self.sample_id]['filter_mask'] & self.data[self.sample_id]['polygon_mask'] & self.data[self.sample_id]['cluster_mask']
+        self.data[self.sample_id]['mask'] = \
+                self.data[self.sample_id]['axis_mask'] & \
+                self.data[self.sample_id]['filter_mask'] & \
+                self.data[self.sample_id]['polygon_mask'] & \
+                self.data[self.sample_id]['cluster_mask']
         self.prep_data()
 
         self.update_SV()
@@ -1614,6 +1624,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.data[self.sample_id]['crop'] = False
 
+    # for a disappearing button
     # def mouseEnter(self, event):
     #     self.toolButtonPopFigure.setVisible(True)
 
@@ -1673,7 +1684,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         color = color.lstrip('#').lower()
 
         return [int(color[0:2],16), int(color[2:4],16), int(color[4:6],16)]
-
 
     def ternary_colormap_changed(self):
         """Changes toolButton backgrounds associated with ternary colormap
@@ -1784,7 +1794,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def auto_scale(self,update = False):
         """Auto-scales pixel values in map
 
-        Executes on self.toolButtonAutoScale.clicked.
+        Executes on ``MainWindow.toolButtonAutoScale`` click.
 
         Outliers can make it difficult to view the variations of values within a map.
         This is a larger problem for linear scales, but can happen when log-scaled. Auto-
@@ -1792,14 +1802,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         acceptable as minerals that were not specifically calibrated can have erroneously
         high or low (even negative) values.
 
-        :param update: update, auto scale parameters updates
-        :type update: bool
+        Parameters
+        ----------
+        update : bool
+            Update auto scale parameters, by default, False
         """
         if self.update_spinboxes_bool: # spinboxes are not being updated
-            sample_id = self.current_plot_information['sample_id']
-            analyte_1 = self.current_plot_information['analyte_1']
-            analyte_2 = self.current_plot_information['analyte_2']
-            plot_type = self.current_plot_information['plot_type']
+            sample_id = self.plot_info['sample_id']
+            field = self.plot_info['field']
+            if '/' in field:
+                analyte_1, analyte_2 = field.split(' / ')
+            else:
+                analyte_1 = field
+                analyte_2 = None
+            plot_type = self.plot_info['plot_type']
             lb = self.doubleSpinBoxLB.value()
             ub = self.doubleSpinBoxUB.value()
             d_lb = self.doubleSpinBoxDLB.value()
@@ -1843,35 +1859,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.prep_data(sample_id, analyte_1,analyte_2)
             self.update_filter_values()
             self.update_SV()
-
-    def apply_crop(self):
-        current_plot_df = self.current_plot_df
-        sample_id = self.current_plot_information['sample_id']
-
-
-        self.data[self.sample_id]['axis_mask'] = ((current_plot_df['X'] >= self.data[sample_id]['crop_x_min']) & (current_plot_df['X'] <= self.data[sample_id]['crop_x_max']) &
-                       (current_plot_df['Y'] <= current_plot_df['Y'].max() - self.data[sample_id]['crop_y_min']) & (current_plot_df['Y'] >= current_plot_df['Y'].max() - self.data[sample_id]['crop_y_max']))
-
-
-        #crop original_data based on self.data[self.sample_id]['axis_mask']
-        self.data[sample_id]['cropped_raw_data'] = self.data[sample_id]['raw_data'][self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
-
-
-        #crop clipped_analyte_data based on self.data[self.sample_id]['axis_mask']
-        self.data[sample_id]['processed_data'] = self.data[sample_id]['processed_data'][self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
-
-        #crop each df of computed_analyte_data based on self.data[self.sample_id]['axis_mask']
-        for analysis_type, df in self.data[sample_id]['computed_data'].items():
-            if isinstance(df, pd.DataFrame):
-                self.data[sample_id]['computed_data'][analysis_type] = df[self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
-
-        self.data[self.sample_id]['mask'] = self.data[self.sample_id]['mask'][self.data[self.sample_id]['axis_mask']]
-        self.data[self.sample_id]['polygon_mask'] = self.data[self.sample_id]['polygon_mask'][self.data[self.sample_id]['axis_mask']]
-        self.data[self.sample_id]['filter_mask'] = self.data[self.sample_id]['filter_mask'][self.data[self.sample_id]['axis_mask']]
-        self.prep_data(sample_id)
-        #self.update_all_plots()
-        self.toolButtonCrop.setChecked(False)
-        self.data[self.sample_id]['crop'] = True
 
     def update_plot(self,bin_s=True, axis=False, reset=False):
         """"Update plot
@@ -1960,8 +1947,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def remove_multi_plot(self, selected_plot_name):
         """Removes selected plot from MulitView
 
-        :param selected_plot_name:
-        :type selected_plot_name:
+        Parameters
+        ----------
+        selected_plot_name : str
+            Plot selected in ``MainWindow.treeWidget``
         """
         widget_index = self.multi_view_index.index(selected_plot_name)
         layout = self.widgetMultiView.layout()
@@ -2092,7 +2081,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
         # pass
 
-
     def save_analysis(self):
         file_name, _ = QFileDialog.getSaveFileName(self, "Save File", "", "Pickle Files (*.pkl);;All Files (*)")
         if file_name:
@@ -2119,7 +2107,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.statusBar.showMessage("Analysis saved successfully")    
         
         # pass
-
 
     def load_analysis(self):
         if self.data:
@@ -2233,8 +2220,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.extract_plot_info(root.child(i))
         return self.plot_info_list
      
-                
-    
     def create_item_from_data(self,data):
         """Recursively create QStandardItem from data."""
         item = QStandardItem(data['text'])
@@ -2249,13 +2234,45 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             item.appendRow(child_item)
         return item
 
-    
-    
     def update_tables(self):
         self.update_filter_table(reload = True)
         self.profiling.update_table_widget()
         self.polygon.update_table_widget()
         pass
+
+
+
+    # -------------------------------
+    # Crop functions - also see Crop_tool class below
+    # -------------------------------
+    def apply_crop(self):
+        current_plot_df = self.current_plot_df
+        sample_id = self.current_plot_information['sample_id']
+
+
+        self.data[self.sample_id]['axis_mask'] = ((current_plot_df['X'] >= self.data[sample_id]['crop_x_min']) & (current_plot_df['X'] <= self.data[sample_id]['crop_x_max']) &
+                       (current_plot_df['Y'] <= current_plot_df['Y'].max() - self.data[sample_id]['crop_y_min']) & (current_plot_df['Y'] >= current_plot_df['Y'].max() - self.data[sample_id]['crop_y_max']))
+
+
+        #crop original_data based on self.data[self.sample_id]['axis_mask']
+        self.data[sample_id]['cropped_raw_data'] = self.data[sample_id]['raw_data'][self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
+
+
+        #crop clipped_analyte_data based on self.data[self.sample_id]['axis_mask']
+        self.data[sample_id]['processed_data'] = self.data[sample_id]['processed_data'][self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
+
+        #crop each df of computed_analyte_data based on self.data[self.sample_id]['axis_mask']
+        for analysis_type, df in self.data[sample_id]['computed_data'].items():
+            if isinstance(df, pd.DataFrame):
+                self.data[sample_id]['computed_data'][analysis_type] = df[self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
+
+        self.data[self.sample_id]['mask'] = self.data[self.sample_id]['mask'][self.data[self.sample_id]['axis_mask']]
+        self.data[self.sample_id]['polygon_mask'] = self.data[self.sample_id]['polygon_mask'][self.data[self.sample_id]['axis_mask']]
+        self.data[self.sample_id]['filter_mask'] = self.data[self.sample_id]['filter_mask'][self.data[self.sample_id]['axis_mask']]
+        self.prep_data(sample_id)
+        #self.update_all_plots()
+        self.toolButtonCrop.setChecked(False)
+        self.data[self.sample_id]['crop'] = True
 
 
     # -------------------------------
@@ -2364,6 +2381,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             filter_info = {'field_type': field_type, 'analyte_1': analyte_1, 'analyte_2': analyte_2,
                     'norm':scale ,'f_min': f_min,'f_max':f_max, 'operator':operator, 'use':True}
             self.data[self.sample_id]['filter_info'].loc[len(self.data[self.sample_id]['filter_info'])]=filter_info
+
+            self.toolButtonFilterToggle.setChecked(True)
 
     def remove_selected_rows(self):
         """Remove selected rows from filter table.
@@ -2474,6 +2493,39 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.update_SV()
         #self.update_all_plots()
+
+
+    # -------------------------------
+    # Cluster mask functions
+    # -------------------------------
+    def apply_cluster_mask(self, inverse=False):
+        """Creates a mask from selected clusters
+
+        Uses selected clusters in ``MainWindow.tableWidgetViewGroups`` to create a mask (or inverse mask).  Masking is controlled
+        clicking either ``MainWindow.toolButtonGroupMask`` or ``MainWindow.toolButtonGroupMaskInverse``.  The masking can be turned
+        on or off by changing the checked state of ``MainWindow.toolButtonClusterMask`` on the *Left Toolbox \> Filter Page*.
+
+        Parameters
+        ----------
+        inverse : bool, optional
+            Inverts selected clusters to define the mask when ``MainWindow.toolButtonGroupMaskInverse`` is clicked, otherwise
+            the selected clusers are used to define the mask when ``MainWindow.toolButtonGroupMask`` is clicked, by default False
+        """        
+        method = self.cluster_dict['active method']
+        selected_clusters = self.cluster_dict[method]['selected_clusters']
+
+        # Invert list of selected clusters
+        if inverse:
+            selected_clusters = [cluster_idx for cluster_idx in range(self.cluster_dict[method]['n_clusters']) if cluster_idx not in selected_clusters]
+
+        cluster_group = self.data[self.sample_id]['computed_data']['Cluster'].loc[:,method]
+        ind = np.isin(cluster_group, selected_clusters)
+        self.data[self.sample_id]['cluster_mask'] = ind
+        
+        self.toolButtonClusterMask.setChecked(True)
+
+        self.update_cluster_flag = True
+
 
     def oround(self, val, order=2, dir=None):
         """Rounds a single of value to n digits
@@ -5248,7 +5300,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     return
 
                 if self.toolBox.currentIndex() in [self.process_tab_id, self.filter_tab_id, self.profile_tab_id]:
-                    self.create_map_plotwidget(sample_id, field_type, field)
+                    self.plot_map_pyqt(sample_id, field_type, field)
                 else:
                     self.plot_map_mpl(sample_id, field_type, field)
                 # if not self.comboBoxColorField.currentText():
@@ -5889,30 +5941,33 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         norm = self.color_norm(style)
 
         # add image to canvas
+        mask = self.data[self.sample_id]['mask'].astype(float)
+        reshaped_mask = np.reshape(mask, self.array_size, order=self.order)
+
+        alphas = colors.Normalize(0, 1, clip=False)(reshaped_mask)
+        alphas = np.clip(alphas, .4, 1)
+        #cax = canvas.axes.imshow(reshaped_array, alpha=alphas, cmap=self.get_colormap(),  aspect=self.aspect_ratio, interpolation='none', norm=norm)
         cax = canvas.axes.imshow(reshaped_array, cmap=self.get_colormap(),  aspect=self.aspect_ratio, interpolation='none', norm=norm)
+
+        #canvas.axes.set_facecolor('w')
 
         # set color limits
         self.add_colorbar(canvas, cax, style)
         cax.set_clim(style['Colors']['CLim'][0], style['Colors']['CLim'][1])
 
-        mask = self.data[self.sample_id]['mask'].astype(int)
-        print(mask.shape)
-        print(mask.sum())
-        reshaped_mask = np.reshape(mask, self.array_size, order=self.order)
-        #alphas = colors.Normalize(0, 1, clip=False)(np.abs(reshaped_mask))
-        #print(alphas)
-        #alphas = np.clip(alphas, .4, 1)  # alpha value clipped at the bottom at .4
-        # Set alpha to 0.5 where mask is 0, otherwise 0
         alpha_mask = np.where(reshaped_mask == 0, 0.5, 0)  
-        plt.imshow(alpha_mask, cmap='Greys', alpha=0.5)#, interpolation='nearest')
+        canvas.axes.imshow(np.ones_like(alpha_mask), aspect=self.aspect_ratio, interpolation='none', cmap='Greys', alpha=alpha_mask)
+
+        #masked = np.ma.masked_where(reshaped_mask == 0, reshaped_mask)
+        #canvas.axes.imshow(masked, alpha=0.5, aspect=self.aspect_ratio, interpolation='none', cmap='Greys')
 
         # font = {'family': 'sans-serif', 'stretch': 'condensed', 'size': 8, 'weight': 'semibold'}
         # canvas.axes.text(0.025*self.array_size[0],0.1*self.array_size[1], field, fontdict=font, color=style['Scales']['OverlayColor'], ha='left', va='top')
         #canvas.axes.set_axis_off()
-        canvas.axes.tick_params(direction=None,
-            labelbottom=False, labeltop=False, labelright=False, labelleft=False,
-            bottom=False, top=False, left=False, right=False)
-        canvas.fig.tight_layout()
+        #canvas.axes.tick_params(direction=None,
+        #    labelbottom=False, labeltop=False, labelright=False, labelleft=False,
+        #    bottom=False, top=False, left=False, right=False)
+        #canvas.fig.tight_layout()
 
         # add small histogram
         if (self.toolBox.currentIndex() == self.sample_tab_id) and (self.canvasWindow.currentIndex() == 0):
@@ -5935,7 +5990,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.clear_layout(self.widgetSingleView.layout())
         self.widgetSingleView.layout().addWidget(canvas)
 
-    def create_map_plotwidget(self, sample_id, field_type, field):
+    def plot_map_pyqt(self, sample_id, field_type, field):
         """Create a graphic widget for plotting a map
 
         Create a map using pyqtgraph.
@@ -5950,7 +6005,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             Field for plotting
         """        
         # ----start debugging----
-        # print('[create_map_plotwidget] sample_id: '+sample_id+'   field_type: '+'   field: '+field)
+        # print('[plot_map_pyqt] sample_id: '+sample_id+'   field_type: '+'   field: '+field)
         # ----end debugging----
 
         style = self.styles['analyte map']
@@ -6002,19 +6057,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Prevent zooming/panning outside the default view
         ## These cut off parts of the map when plotting.
-        #plotWindow.setRange(yRange=[self.y.min(), self.y.max()])
+        plotWindow.setRange(yRange=[self.y.min(), self.y.max()])
         #plotWindow.setLimits(xMin=self.x.min(), xMax=self.x.max(), yMin=self.y.min(), yMax = self.y.max())
-        #plotWindow.setLimits(maxXRange=self.x_range, maxYRange=self.y_range)
+        plotWindow.setLimits(maxXRange=self.x_range, maxYRange=self.y_range)
 
         #supress right click menu
         plotWindow.setMenuEnabled(False)
 
         # colorbar
         cmap = colormap.get(style['Colors']['Colormap'], source = 'matplotlib')
-        clb,cub,cscale,clabel = self.get_axis_values(field_type,field)
-        cbar = ColorBarItem(values=(clb,cub), width=25, colorMap=cmap, label=clabel, interactive=False, limits=(clb,cub), orientation=style['Colors']['Direction'], pen='black')
+        #clb,cub,cscale,clabel = self.get_axis_values(field_type,field)
+        # cbar = ColorBarItem(values=(clb,cub), width=25, colorMap=cmap, label=clabel, interactive=False, limits=(clb,cub), orientation=style['Colors']['Direction'], pen='black')
         img_item.setLookupTable(cmap.getLookupTable())
-        graphicWidget.addItem(cbar)
+        # graphicWidget.addItem(cbar)
 
         # ... Inside your plotting function
         target = TargetItem(symbol = '+', )
@@ -6344,7 +6399,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         bin_width = (current_plot_df['array'].max() - current_plot_df['array'].min()) / self.default_bins
         edges = np.arange(array.min(), array.max() + bin_width, bin_width)
 
-        _, _, patches = canvas.axes.hist(array, bins=edges, color=style['Colors']['Color'], edgecolor=None, linewidth=style['Lines']['LineWidth'], alpha=0.6)
+        logflag = False
+        if self.styles['analyte map']['Colors']['CScale'] == 'log':
+            print('log scale')
+            logflag = True
+
+        _, _, patches = canvas.axes.hist(array, bins=edges, color=style['Colors']['Color'], edgecolor=None, linewidth=style['Lines']['LineWidth'], log=logflag, alpha=0.6)
         # color histogram bins by analyte colormap?
         if self.checkBoxShowHistCmap.isChecked():
             cmap = self.get_colormap()
@@ -6368,7 +6428,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         canvas.axes.set_position([pos.x0/2, 3*pos.y0, pos.width+pos.x0, pos.height-1.5*pos.y0])
 
         self.clear_layout(self.widgetHistView.layout())
-
         self.widgetHistView.layout().addWidget(canvas)
 
         #self.widgetHistView.hide()
@@ -7432,6 +7491,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Create labels array filled with -1
         #groups = np.full(filtered_array.shape[0], -1, dtype=int)
+        self.toolButtonGroupMask.setChecked(False)
+        self.toolButtonGroupMaskInverse.setChecked(False)
 
         self.statusbar.showMessage('Computing clusters...')
         match method:
@@ -8713,7 +8774,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 #print('tree_double_click: add_plotwidget_to_canvas')
                 self.add_plotwidget_to_canvas(plot_info)
             else:
-                #print('tree_double_click: create_map_plotwidget')
+                #print('tree_double_click: plot_map_pyqt')
                 if self.toolBox.currentIndex() not in [self.sample_tab_id, self.process_tab_id, self.filter_tab_id, self.profile_tab_id]:
                     self.toolBox.setCurrentIndex(self.sample_tab_id)
                 
@@ -8729,7 +8790,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 if self.canvasWindow.currentIndex() == 0:
                     self.plot_map_mpl(sample_id=branch, field_type=tree, field=leaf)
                 else:
-                    self.create_map_plotwidget(sample_id=branch, field_type=tree, field=leaf)
+                    self.plot_map_pyqt(sample_id=branch, field_type=tree, field=leaf)
 
         elif tree in ['Histogram', 'Correlation', 'Geochemistry', 'Multidimensional', 'Calculated']:
             self.add_plotwidget_to_canvas(plot_info)
@@ -10606,29 +10667,29 @@ class ResizableRectItem(QGraphicsRectItem):
     def onEdge(self, pos):
         rect = self.rect()
         if (abs(pos.x() - rect.left()) < self.cursorChangeThreshold and abs(pos.y() - rect.top()) < self.cursorChangeThreshold):
-            self.pos = 'TL'
+            self.pos = 'TL' # top, left
             return True
         elif (abs(pos.x() - rect.right()) < self.cursorChangeThreshold and abs(pos.y() - rect.bottom()) < self.cursorChangeThreshold):
-            self.pos = 'BR'
+            self.pos = 'BR' # bottom, right
             return True
         elif (abs(pos.x() - rect.left()) < self.cursorChangeThreshold and abs(pos.y() - rect.bottom()) < self.cursorChangeThreshold):
-            self.pos = 'BL'
+            self.pos = 'BL' # bottom, left
             return True
         elif (abs(pos.x() - rect.right()) < self.cursorChangeThreshold and abs(pos.y() - rect.top()) < self.cursorChangeThreshold):
-            self.pos = 'TR'
+            self.pos = 'TR' # top, right
             return True
         return False
 
     def resizeRect(self, newPos):
         rect = self.dragStartRect.normalized()
         if self.pos:
-            if self.pos =='TL' or self.pos =='BL':
+            if self.pos =='TL' or self.pos =='BL':  # left
                 rect.setLeft(newPos.x())
-            elif self.pos =='TR' or self.pos =='BR':
+            elif self.pos =='TR' or self.pos =='BR': # right
                 rect.setRight(newPos.x())
-            if self.pos =='TR' or self.pos =='TL':
+            if self.pos =='TR' or self.pos =='TL': # top
                 rect.setTop(newPos.y())
-            elif self.pos =='BR' or self.pos =='BL':
+            elif self.pos =='BR' or self.pos =='BL': # bottom
                 rect.setBottom(newPos.y())
 
         # Ensure the rectangle does not exceed plot boundaries

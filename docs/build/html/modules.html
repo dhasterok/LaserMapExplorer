@@ -491,6 +491,7 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.add_tree_item"><code class="docutils literal notranslate"><span class="pre">MainWindow.add_tree_item()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.apply_crop"><code class="docutils literal notranslate"><span class="pre">MainWindow.apply_crop()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.apply_filters"><code class="docutils literal notranslate"><span class="pre">MainWindow.apply_filters()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.apply_sort"><code class="docutils literal notranslate"><span class="pre">MainWindow.apply_sort()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.array_to_image"><code class="docutils literal notranslate"><span class="pre">MainWindow.array_to_image()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.aspect_ratio_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.aspect_ratio_callback()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.auto_scale"><code class="docutils literal notranslate"><span class="pre">MainWindow.auto_scale()</span></code></a></li>
@@ -522,13 +523,11 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.correlation_squared_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.correlation_squared_callback()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.create_item_from_data"><code class="docutils literal notranslate"><span class="pre">MainWindow.create_item_from_data()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.create_map_plotwidget"><code class="docutils literal notranslate"><span class="pre">MainWindow.create_map_plotwidget()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.create_plot"><code class="docutils literal notranslate"><span class="pre">MainWindow.create_plot()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.create_tree"><code class="docutils literal notranslate"><span class="pre">MainWindow.create_tree()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.custom_discrete_colormap"><code class="docutils literal notranslate"><span class="pre">MainWindow.custom_discrete_colormap()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.display_QV"><code class="docutils literal notranslate"><span class="pre">MainWindow.display_QV()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.dynamic_format"><code class="docutils literal notranslate"><span class="pre">MainWindow.dynamic_format()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.export_dict_to_csv"><code class="docutils literal notranslate"><span class="pre">MainWindow.export_dict_to_csv()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.extract_tree_data"><code class="docutils literal notranslate"><span class="pre">MainWindow.extract_tree_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.extract_plot_info"><code class="docutils literal notranslate"><span class="pre">MainWindow.extract_plot_info()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.field_colormap_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.field_colormap_callback()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.find_leaf"><code class="docutils literal notranslate"><span class="pre">MainWindow.find_leaf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.font_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.font_callback()</span></code></a></li>
@@ -538,6 +537,7 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.generate_random_seed"><code class="docutils literal notranslate"><span class="pre">MainWindow.generate_random_seed()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.get_axis_field"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_axis_field()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.get_axis_values"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_axis_values()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.get_cluster_colormap"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_cluster_colormap()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.get_colormap"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_colormap()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.get_field_list"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_field_list()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.get_hex_color"><code class="docutils literal notranslate"><span class="pre">MainWindow.get_hex_color()</span></code></a></li>
@@ -572,8 +572,9 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.marker_color_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.marker_color_callback()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.marker_size_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.marker_size_callback()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.marker_symbol_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.marker_symbol_callback()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.mask_changed_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.mask_changed_callback()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.mouse_moved"><code class="docutils literal notranslate"><span class="pre">MainWindow.mouse_moved()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.new_plot_widget"><code class="docutils literal notranslate"><span class="pre">MainWindow.new_plot_widget()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.move_widget_between_layouts"><code class="docutils literal notranslate"><span class="pre">MainWindow.move_widget_between_layouts()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.noise_reduction"><code class="docutils literal notranslate"><span class="pre">MainWindow.noise_reduction()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.noise_reduction_method_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.noise_reduction_method_callback()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.noise_reduction_option1_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.noise_reduction_option1_callback()</span></code></a></li>
@@ -582,6 +583,7 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.open_calculator"><code class="docutils literal notranslate"><span class="pre">MainWindow.open_calculator()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.open_directory"><code class="docutils literal notranslate"><span class="pre">MainWindow.open_directory()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.open_preferences_dialog"><code class="docutils literal notranslate"><span class="pre">MainWindow.open_preferences_dialog()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.open_sample"><code class="docutils literal notranslate"><span class="pre">MainWindow.open_sample()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.open_select_analyte_dialog"><code class="docutils literal notranslate"><span class="pre">MainWindow.open_select_analyte_dialog()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.open_tab"><code class="docutils literal notranslate"><span class="pre">MainWindow.open_tab()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.open_ternary"><code class="docutils literal notranslate"><span class="pre">MainWindow.open_ternary()</span></code></a></li>
@@ -596,6 +598,7 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.plot_gradient"><code class="docutils literal notranslate"><span class="pre">MainWindow.plot_gradient()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.plot_histogram"><code class="docutils literal notranslate"><span class="pre">MainWindow.plot_histogram()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.plot_laser_map_cont"><code class="docutils literal notranslate"><span class="pre">MainWindow.plot_laser_map_cont()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.plot_map_mpl"><code class="docutils literal notranslate"><span class="pre">MainWindow.plot_map_mpl()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.plot_n_dim"><code class="docutils literal notranslate"><span class="pre">MainWindow.plot_n_dim()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.plot_pca"><code class="docutils literal notranslate"><span class="pre">MainWindow.plot_pca()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.plot_pca_components"><code class="docutils literal notranslate"><span class="pre">MainWindow.plot_pca_components()</span></code></a></li>
@@ -631,6 +634,7 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.set_style_widgets"><code class="docutils literal notranslate"><span class="pre">MainWindow.set_style_widgets()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.slider_alpha_changed"><code class="docutils literal notranslate"><span class="pre">MainWindow.slider_alpha_changed()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.sort_analytes"><code class="docutils literal notranslate"><span class="pre">MainWindow.sort_analytes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.sort_tree_branch"><code class="docutils literal notranslate"><span class="pre">MainWindow.sort_tree_branch()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.swap_xy"><code class="docutils literal notranslate"><span class="pre">MainWindow.swap_xy()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.swap_xy_data"><code class="docutils literal notranslate"><span class="pre">MainWindow.swap_xy_data()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.ternary_colormap_changed"><code class="docutils literal notranslate"><span class="pre">MainWindow.ternary_colormap_changed()</span></code></a></li>
@@ -646,6 +650,9 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.unhighlight_tree"><code class="docutils literal notranslate"><span class="pre">MainWindow.unhighlight_tree()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_SV"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_SV()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_all_field_comboboxes"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_all_field_comboboxes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_cluster_distance"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_cluster_distance()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_cluster_exponent"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_cluster_exponent()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_cluster_seed"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_cluster_seed()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_cluster_ui"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_cluster_ui()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_clusters"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_clusters()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_field_combobox"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_field_combobox()</span></code></a></li>
@@ -653,10 +660,10 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_figure_font"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_figure_font()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_filter_table"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_filter_table()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_filter_values"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_filter_values()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_n_clusters"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_n_clusters()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_n_dim_table"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_n_dim_table()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_norm"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_norm()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_plot"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_plot()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_plot_with_new_colormap"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_plot_with_new_colormap()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_ratio_df"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_ratio_df()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_spinboxes"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_spinboxes()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_tables"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_tables()</span></code></a></li>
@@ -665,8 +672,15 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.zero_crossing_laplacian"><code class="docutils literal notranslate"><span class="pre">MainWindow.zero_crossing_laplacian()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="main.html#main.MaskObj"><code class="docutils literal notranslate"><span class="pre">MaskObj</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.MaskObj.register_callback"><code class="docutils literal notranslate"><span class="pre">MaskObj.register_callback()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.MaskObj.value"><code class="docutils literal notranslate"><span class="pre">MaskObj.value</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="main.html#main.MplCanvas"><code class="docutils literal notranslate"><span class="pre">MplCanvas</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MplCanvas.load_figure"><code class="docutils literal notranslate"><span class="pre">MplCanvas.load_figure()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.MplCanvas.setCursorPosition"><code class="docutils literal notranslate"><span class="pre">MplCanvas.setCursorPosition()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.MplCanvas.textOnClick"><code class="docutils literal notranslate"><span class="pre">MplCanvas.textOnClick()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="main.html#main.Polygon"><code class="docutils literal notranslate"><span class="pre">Polygon</span></code></a><ul>
@@ -706,6 +720,13 @@ document.write(`
 </li>
 <li class="toctree-l2"><a class="reference internal" href="main.html#main.Sobel"><code class="docutils literal notranslate"><span class="pre">Sobel()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="main.html#main.StandardItem"><code class="docutils literal notranslate"><span class="pre">StandardItem</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="main.html#main.TableWidgetDragRows"><code class="docutils literal notranslate"><span class="pre">TableWidgetDragRows</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.TableWidgetDragRows.dropEvent"><code class="docutils literal notranslate"><span class="pre">TableWidgetDragRows.dropEvent()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.TableWidgetDragRows.drop_on"><code class="docutils literal notranslate"><span class="pre">TableWidgetDragRows.drop_on()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.TableWidgetDragRows.is_below"><code class="docutils literal notranslate"><span class="pre">TableWidgetDragRows.is_below()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.TableWidgetDragRows.select_rows"><code class="docutils literal notranslate"><span class="pre">TableWidgetDragRows.select_rows()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="main.html#main.Table_Fcn"><code class="docutils literal notranslate"><span class="pre">Table_Fcn</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.Table_Fcn.delete_row"><code class="docutils literal notranslate"><span class="pre">Table_Fcn.delete_row()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.Table_Fcn.move_row_down"><code class="docutils literal notranslate"><span class="pre">Table_Fcn.move_row_down()</span></code></a></li>
@@ -754,12 +775,12 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="main.html#main.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="main.html#main.medianBlur"><code class="docutils literal notranslate"><span class="pre">medianBlur()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="main.html#main.quickView"><code class="docutils literal notranslate"><span class="pre">quickView</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="main.html#main.quickView.button_save"><code class="docutils literal notranslate"><span class="pre">quickView.button_save()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="main.html#main.quickView.column_to_list"><code class="docutils literal notranslate"><span class="pre">quickView.column_to_list()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="main.html#main.quickView.dropEvent"><code class="docutils literal notranslate"><span class="pre">quickView.dropEvent()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="main.html#main.quickView.mouseMoveEvent"><code class="docutils literal notranslate"><span class="pre">quickView.mouseMoveEvent()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="main.html#main.quickView.mousePressEvent"><code class="docutils literal notranslate"><span class="pre">quickView.mousePressEvent()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="main.html#main.quickView.move_row"><code class="docutils literal notranslate"><span class="pre">quickView.move_row()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.quickView.apply_sort"><code class="docutils literal notranslate"><span class="pre">quickView.apply_sort()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.quickView.populate_table"><code class="docutils literal notranslate"><span class="pre">quickView.populate_table()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.quickView.save_selected_analytes"><code class="docutils literal notranslate"><span class="pre">quickView.save_selected_analytes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.quickView.save_to_csv"><code class="docutils literal notranslate"><span class="pre">quickView.save_to_csv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.quickView.setup_sort_menu"><code class="docutils literal notranslate"><span class="pre">quickView.setup_sort_menu()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.quickView.setup_table"><code class="docutils literal notranslate"><span class="pre">quickView.setup_table()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -776,7 +797,6 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="radar.html#radar.Radar"><code class="docutils literal notranslate"><span class="pre">Radar</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="radar.html#radar.Radar.normalize_vals"><code class="docutils literal notranslate"><span class="pre">Radar.normalize_vals()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="radar.html#radar.Radar.plot"><code class="docutils literal notranslate"><span class="pre">Radar.plot()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="radar.html#radar.Radar.radar_factory"><code class="docutils literal notranslate"><span class="pre">Radar.radar_factory()</span></code></a></li>
 </ul>
 </li>
 </ul>

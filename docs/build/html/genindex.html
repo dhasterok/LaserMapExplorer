@@ -426,10 +426,10 @@ document.write(`
 </li>
       <li><a href="main.html#main.MainWindow.add_table_note">add_table_note() (main.MainWindow method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="main.html#main.MainWindow.add_tree_item">add_tree_item() (main.MainWindow method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="main.html#main.analyteSelectionWindow">analyteSelectionWindow (class in main)</a>
 </li>
       <li><a href="main.html#main.Crop_tool.apply_crop">apply_crop() (main.Crop_tool method)</a>
@@ -440,6 +440,12 @@ document.write(`
       </ul></li>
       <li><a href="main.html#main.MainWindow.apply_filters">apply_filters() (main.MainWindow method)</a>
 </li>
+      <li><a href="main.html#main.MainWindow.apply_sort">apply_sort() (main.MainWindow method)</a>
+
+      <ul>
+        <li><a href="main.html#main.quickView.apply_sort">(main.quickView method)</a>
+</li>
+      </ul></li>
       <li><a href="main.html#main.MainWindow.array_to_image">array_to_image() (main.MainWindow method)</a>
 </li>
       <li><a href="main.html#main.MainWindow.aspect_ratio_callback">aspect_ratio_callback() (main.MainWindow method)</a>
@@ -462,13 +468,11 @@ document.write(`
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="main.html#main.bilateralFilter">bilateralFilter() (in module main)</a>
 </li>
-      <li><a href="main.html#main.MainWindow.biplot">biplot() (main.MainWindow method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="main.html#main.MainWindow.button_color_select">button_color_select() (main.MainWindow method)</a>
+      <li><a href="main.html#main.MainWindow.biplot">biplot() (main.MainWindow method)</a>
 </li>
-      <li><a href="main.html#main.quickView.button_save">button_save() (main.quickView method)</a>
+      <li><a href="main.html#main.MainWindow.button_color_select">button_color_select() (main.MainWindow method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -528,12 +532,12 @@ document.write(`
 </li>
       <li><a href="main.html#main.MainWindow.cluster_color_callback">cluster_color_callback() (main.MainWindow method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="main.html#main.MainWindow.cluster_label_changed">cluster_label_changed() (main.MainWindow method)</a>
 </li>
       <li><a href="main.html#main.MainWindow.color_by_field_callback">color_by_field_callback() (main.MainWindow method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="main.html#main.analyteSelectionWindow.color_cell">color_cell() (main.analyteSelectionWindow method)</a>
 </li>
       <li><a href="main.html#main.MainWindow.color_field_callback">color_field_callback() (main.MainWindow method)</a>
@@ -541,8 +545,6 @@ document.write(`
       <li><a href="main.html#main.MainWindow.color_norm">color_norm() (main.MainWindow method)</a>
 </li>
       <li><a href="main.html#main.MainWindow.colormap_direction_callback">colormap_direction_callback() (main.MainWindow method)</a>
-</li>
-      <li><a href="main.html#main.quickView.column_to_list">column_to_list() (main.quickView method)</a>
 </li>
       <li><a href="main.html#main.MainWindow.compute_clusters">compute_clusters() (main.MainWindow method)</a>
 </li>
@@ -566,8 +568,6 @@ document.write(`
 </li>
       <li><a href="main.html#main.MainWindow.create_map_plotwidget">create_map_plotwidget() (main.MainWindow method)</a>
 </li>
-      <li><a href="main.html#main.MainWindow.create_plot">create_plot() (main.MainWindow method)</a>
-</li>
       <li><a href="main.html#main.MainWindow.create_tree">create_tree() (main.MainWindow method)</a>
 </li>
       <li><a href="crop_tool.html#crop_tool.CropTool.crop_image">crop_image() (crop_tool.CropTool method)</a>
@@ -582,8 +582,6 @@ document.write(`
       <li><a href="main.html#main.Crop_tool">Crop_tool (class in main)</a>
 </li>
       <li><a href="crop_tool.html#crop_tool.CropTool">CropTool (class in crop_tool)</a>
-</li>
-      <li><a href="main.html#main.MainWindow.custom_discrete_colormap">custom_discrete_colormap() (main.MainWindow method)</a>
 </li>
       <li><a href="main.html#main.CustomAxis">CustomAxis (class in main)</a>
 </li>
@@ -603,7 +601,9 @@ document.write(`
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="main.html#main.analyteSelectionWindow.done_selection">done_selection() (main.analyteSelectionWindow method)</a>
 </li>
-      <li><a href="main.html#main.quickView.dropEvent">dropEvent() (main.quickView method)</a>
+      <li><a href="main.html#main.TableWidgetDragRows.drop_on">drop_on() (main.TableWidgetDragRows method)</a>
+</li>
+      <li><a href="main.html#main.TableWidgetDragRows.dropEvent">dropEvent() (main.TableWidgetDragRows method)</a>
 </li>
       <li><a href="main.html#main.MainWindow.dynamic_format">dynamic_format() (main.MainWindow method)</a>
 </li>
@@ -621,7 +621,7 @@ document.write(`
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="main.html#main.MainWindow.export_dict_to_csv">export_dict_to_csv() (main.MainWindow method)</a>
 </li>
-      <li><a href="main.html#main.MainWindow.extract_tree_data">extract_tree_data() (main.MainWindow method)</a>
+      <li><a href="main.html#main.MainWindow.extract_plot_info">extract_plot_info() (main.MainWindow method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -671,6 +671,8 @@ document.write(`
       <li><a href="main.html#main.MainWindow.get_axis_field">get_axis_field() (main.MainWindow method)</a>
 </li>
       <li><a href="main.html#main.MainWindow.get_axis_values">get_axis_values() (main.MainWindow method)</a>
+</li>
+      <li><a href="main.html#main.MainWindow.get_cluster_colormap">get_cluster_colormap() (main.MainWindow method)</a>
 </li>
       <li><a href="main.html#main.analyteSelectionWindow.get_color_for_correlation">get_color_for_correlation() (main.analyteSelectionWindow method)</a>
 </li>
@@ -750,10 +752,10 @@ document.write(`
 </li>
       <li><a href="main.html#main.MainWindow.init_tabs">init_tabs() (main.MainWindow method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="main.html#main.MainWindow.init_zoom_view">init_zoom_view() (main.MainWindow method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="main.html#main.MainWindow.initialize_axis_values">initialize_axis_values() (main.MainWindow method)</a>
 </li>
       <li><a href="crop_tool.html#crop_tool.CropTool.initUI">initUI() (crop_tool.CropTool method)</a>
@@ -763,6 +765,8 @@ document.write(`
       <li><a href="main.html#main.MainWindow.input_theme_name_dlg">input_theme_name_dlg() (main.MainWindow method)</a>
 </li>
       <li><a href="main.html#main.Profiling.interpolate_points">interpolate_points() (main.Profiling method)</a>
+</li>
+      <li><a href="main.html#main.TableWidgetDragRows.is_below">is_below() (main.TableWidgetDragRows method)</a>
 </li>
       <li>
     IsotopeSelectionDialog
@@ -844,6 +848,10 @@ document.write(`
 </li>
       <li><a href="main.html#main.MainWindow.marker_symbol_callback">marker_symbol_callback() (main.MainWindow method)</a>
 </li>
+      <li><a href="main.html#main.MainWindow.mask_changed_callback">mask_changed_callback() (main.MainWindow method)</a>
+</li>
+      <li><a href="main.html#main.MaskObj">MaskObj (class in main)</a>
+</li>
       <li><a href="main.html#main.medianBlur">medianBlur() (in module main)</a>
 </li>
       <li><a href="rotated.html#rotated.RotatedHeaderView.minimumSizeHint">minimumSizeHint() (rotated.RotatedHeaderView method)</a>
@@ -902,25 +910,17 @@ document.write(`
 </li>
       <li><a href="main.html#main.MainWindow.mouse_moved">mouse_moved() (main.MainWindow method)</a>
 </li>
-      <li><a href="main.html#main.quickView.mouseMoveEvent">mouseMoveEvent() (main.quickView method)</a>
-
-      <ul>
-        <li><a href="main.html#main.ResizableRectItem.mouseMoveEvent">(main.ResizableRectItem method)</a>
+      <li><a href="main.html#main.ResizableRectItem.mouseMoveEvent">mouseMoveEvent() (main.ResizableRectItem method)</a>
 </li>
-      </ul></li>
-      <li><a href="main.html#main.quickView.mousePressEvent">mousePressEvent() (main.quickView method)</a>
-
-      <ul>
-        <li><a href="main.html#main.ResizableRectItem.mousePressEvent">(main.ResizableRectItem method)</a>
+      <li><a href="main.html#main.ResizableRectItem.mousePressEvent">mousePressEvent() (main.ResizableRectItem method)</a>
 </li>
-      </ul></li>
       <li><a href="main.html#main.ResizableRectItem.mouseReleaseEvent">mouseReleaseEvent() (main.ResizableRectItem method)</a>
-</li>
-      <li><a href="main.html#main.quickView.move_row">move_row() (main.quickView method)</a>
 </li>
       <li><a href="main.html#main.Table_Fcn.move_row_down">move_row_down() (main.Table_Fcn method)</a>
 </li>
       <li><a href="main.html#main.Table_Fcn.move_row_up">move_row_up() (main.Table_Fcn method)</a>
+</li>
+      <li><a href="main.html#main.MainWindow.move_widget_between_layouts">move_widget_between_layouts() (main.MainWindow method)</a>
 </li>
       <li><a href="main.html#main.MplCanvas">MplCanvas (class in main)</a>
 </li>
@@ -930,16 +930,14 @@ document.write(`
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="main.html#main.MainWindow.new_plot_widget">new_plot_widget() (main.MainWindow method)</a>
-</li>
       <li><a href="main.html#main.MainWindow.noise_reduction">noise_reduction() (main.MainWindow method)</a>
 </li>
       <li><a href="main.html#main.MainWindow.noise_reduction_method_callback">noise_reduction_method_callback() (main.MainWindow method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="main.html#main.MainWindow.noise_reduction_option1_callback">noise_reduction_option1_callback() (main.MainWindow method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="main.html#main.MainWindow.noise_reduction_option2_callback">noise_reduction_option2_callback() (main.MainWindow method)</a>
 </li>
       <li><a href="radar.html#radar.Radar.normalize_vals">normalize_vals() (radar.Radar method)</a>
@@ -977,6 +975,8 @@ document.write(`
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="main.html#main.MainWindow.open_preferences_dialog">open_preferences_dialog() (main.MainWindow method)</a>
+</li>
+      <li><a href="main.html#main.MainWindow.open_sample">open_sample() (main.MainWindow method)</a>
 </li>
       <li><a href="main.html#main.MainWindow.open_select_analyte_dialog">open_select_analyte_dialog() (main.MainWindow method)</a>
 </li>
@@ -1022,6 +1022,8 @@ document.write(`
 </li>
       <li><a href="main.html#main.MainWindow.plot_laser_map_cont">plot_laser_map_cont() (main.MainWindow method)</a>
 </li>
+      <li><a href="main.html#main.MainWindow.plot_map_mpl">plot_map_mpl() (main.MainWindow method)</a>
+</li>
       <li><a href="main.html#main.MainWindow.plot_n_dim">plot_n_dim() (main.MainWindow method)</a>
 </li>
       <li><a href="main.html#main.MainWindow.plot_pca">plot_pca() (main.MainWindow method)</a>
@@ -1066,7 +1068,11 @@ document.write(`
       <li><a href="main.html#main.analyteSelectionWindow.populate_analyte_list">populate_analyte_list() (main.analyteSelectionWindow method)</a>
 </li>
       <li><a href="main.html#main.excelConcatenator.populate_table">populate_table() (main.excelConcatenator method)</a>
+
+      <ul>
+        <li><a href="main.html#main.quickView.populate_table">(main.quickView method)</a>
 </li>
+      </ul></li>
       <li><a href="main.html#main.MainWindow.prep_data">prep_data() (main.MainWindow method)</a>
 </li>
       <li><a href="main.html#main.Profiling">Profiling (class in main)</a>
@@ -1100,8 +1106,6 @@ document.write(`
       </ul></li>
       <li><a href="radar.html#radar.Radar">Radar (class in radar)</a>
 </li>
-      <li><a href="radar.html#radar.Radar.radar_factory">radar_factory() (radar.Radar method)</a>
-</li>
       <li><a href="main.html#main.excelConcatenator.read_ladr_ppm_folder">read_ladr_ppm_folder() (main.excelConcatenator method)</a>
 </li>
       <li><a href="main.html#main.excelConcatenator.read_ppm_folder">read_ppm_folder() (main.excelConcatenator method)</a>
@@ -1109,6 +1113,8 @@ document.write(`
       <li><a href="main.html#main.excelConcatenator.read_raw_folder">read_raw_folder() (main.excelConcatenator method)</a>
 </li>
       <li><a href="main.html#main.MainWindow.read_theme">read_theme() (main.MainWindow method)</a>
+</li>
+      <li><a href="main.html#main.MaskObj.register_callback">register_callback() (main.MaskObj method)</a>
 </li>
       <li><a href="main.html#main.analyteSelectionWindow.remove_analyte_from_list">remove_analyte_from_list() (main.analyteSelectionWindow method)</a>
 </li>
@@ -1180,7 +1186,11 @@ document.write(`
 </li>
       <li><a href="main.html#main.MainWindow.save_notes_to_pdf">save_notes_to_pdf() (main.MainWindow method)</a>
 </li>
+      <li><a href="main.html#main.quickView.save_selected_analytes">save_selected_analytes() (main.quickView method)</a>
+</li>
       <li><a href="main.html#main.analyteSelectionWindow.save_selection">save_selection() (main.analyteSelectionWindow method)</a>
+</li>
+      <li><a href="main.html#main.quickView.save_to_csv">save_to_csv() (main.quickView method)</a>
 </li>
       <li><a href="main.html#main.MainWindow.scale_direction_callback">scale_direction_callback() (main.MainWindow method)</a>
 </li>
@@ -1199,17 +1209,25 @@ document.write(`
 </li>
       <li><a href="main.html#main.MainWindow.select_cluster_group_callback">select_cluster_group_callback() (main.MainWindow method)</a>
 </li>
+      <li><a href="main.html#main.TableWidgetDragRows.select_rows">select_rows() (main.TableWidgetDragRows method)</a>
+</li>
       <li><a href="main.html#main.MainWindow.set_axis_widgets">set_axis_widgets() (main.MainWindow method)</a>
+</li>
+      <li><a href="main.html#main.MainWindow.set_color_axis_widgets">set_color_axis_widgets() (main.MainWindow method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="main.html#main.MainWindow.set_color_axis_widgets">set_color_axis_widgets() (main.MainWindow method)</a>
-</li>
       <li><a href="main.html#main.MainWindow.set_default_cluster_colors">set_default_cluster_colors() (main.MainWindow method)</a>
 </li>
       <li><a href="main.html#main.MainWindow.set_style_widgets">set_style_widgets() (main.MainWindow method)</a>
 </li>
+      <li><a href="main.html#main.MplCanvas.setCursorPosition">setCursorPosition() (main.MplCanvas method)</a>
+</li>
       <li><a href="main.html#main.CustomAxis.setScaleFactor">setScaleFactor() (main.CustomAxis method)</a>
+</li>
+      <li><a href="main.html#main.quickView.setup_sort_menu">setup_sort_menu() (main.quickView method)</a>
+</li>
+      <li><a href="main.html#main.quickView.setup_table">setup_table() (main.quickView method)</a>
 </li>
       <li><a href="CalculatorWindow.html#CalculatorWindow.Ui_CalWindow.setupUi">setupUi() (CalculatorWindow.Ui_CalWindow method)</a>
 
@@ -1227,6 +1245,8 @@ document.write(`
 </li>
       <li><a href="main.html#main.MainWindow.sort_analytes">sort_analytes() (main.MainWindow method)</a>
 </li>
+      <li><a href="main.html#main.MainWindow.sort_tree_branch">sort_tree_branch() (main.MainWindow method)</a>
+</li>
       <li><a href="main.html#main.StandardItem">StandardItem (class in main)</a>
 </li>
       <li><a href="main.html#main.MainWindow.swap_xy">swap_xy() (main.MainWindow method)</a>
@@ -1240,6 +1260,8 @@ document.write(`
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="main.html#main.Table_Fcn">Table_Fcn (class in main)</a>
+</li>
+      <li><a href="main.html#main.TableWidgetDragRows">TableWidgetDragRows (class in main)</a>
 </li>
       <li><a href="ternary_plot.html#ternary_plot.ternary.tern2xy">tern2xy() (ternary_plot.ternary method)</a>
 </li>
@@ -1286,6 +1308,8 @@ document.write(`
 </li>
       <li><a href="ternary_plot.html#ternary_plot.ternary.ternticks">ternticks() (ternary_plot.ternary method)</a>
 </li>
+      <li><a href="main.html#main.MplCanvas.textOnClick">textOnClick() (main.MplCanvas method)</a>
+</li>
       <li><a href="main.html#main.MainWindow.tickdir_callback">tickdir_callback() (main.MainWindow method)</a>
 </li>
       <li><a href="main.html#main.CustomAxis.tickStrings">tickStrings() (main.CustomAxis method)</a>
@@ -1330,6 +1354,12 @@ document.write(`
 </li>
       <li><a href="main.html#main.MainWindow.update_all_field_comboboxes">update_all_field_comboboxes() (main.MainWindow method)</a>
 </li>
+      <li><a href="main.html#main.MainWindow.update_cluster_distance">update_cluster_distance() (main.MainWindow method)</a>
+</li>
+      <li><a href="main.html#main.MainWindow.update_cluster_exponent">update_cluster_exponent() (main.MainWindow method)</a>
+</li>
+      <li><a href="main.html#main.MainWindow.update_cluster_seed">update_cluster_seed() (main.MainWindow method)</a>
+</li>
       <li><a href="main.html#main.MainWindow.update_cluster_ui">update_cluster_ui() (main.MainWindow method)</a>
 </li>
       <li><a href="main.html#main.MainWindow.update_clusters">update_clusters() (main.MainWindow method)</a>
@@ -1344,12 +1374,14 @@ document.write(`
 </li>
       <li><a href="main.html#main.MainWindow.update_filter_values">update_filter_values() (main.MainWindow method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="calculator.html#calculator.CalWindow.update_isotope_list">update_isotope_list() (calculator.CalWindow method)</a>
 </li>
       <li><a href="main.html#main.analyteSelectionWindow.update_list">update_list() (main.analyteSelectionWindow method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="main.html#main.MainWindow.update_n_clusters">update_n_clusters() (main.MainWindow method)</a>
+</li>
       <li><a href="main.html#main.MainWindow.update_n_dim_table">update_n_dim_table() (main.MainWindow method)</a>
 </li>
       <li><a href="main.html#main.MainWindow.update_norm">update_norm() (main.MainWindow method)</a>
@@ -1357,8 +1389,6 @@ document.write(`
       <li><a href="main.html#main.Crop_tool.update_overlay">update_overlay() (main.Crop_tool method)</a>
 </li>
       <li><a href="main.html#main.MainWindow.update_plot">update_plot() (main.MainWindow method)</a>
-</li>
-      <li><a href="main.html#main.MainWindow.update_plot_with_new_colormap">update_plot_with_new_colormap() (main.MainWindow method)</a>
 </li>
       <li><a href="main.html#main.MainWindow.update_ratio_df">update_ratio_df() (main.MainWindow method)</a>
 </li>
@@ -1389,6 +1419,10 @@ document.write(`
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="main.html#main.ResizableRectItem.validateRect">validateRect() (main.ResizableRectItem method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="main.html#main.MaskObj.value">value (main.MaskObj property)</a>
 </li>
   </ul></td>
 </tr></table>

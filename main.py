@@ -1,4 +1,4 @@
-import sys, os, re, copy, csv, random, pickle
+import sys, os, re, copy, csv, random, pickle, darkdetect
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QRectF, QPointF
 from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QVBoxLayout, QGridLayout, QMessageBox, QHeaderView, QMenu, QGraphicsRectItem
@@ -23,7 +23,7 @@ from matplotlib.patches import Patch
 import matplotlib.colors as colors
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy import ndimage
-from scipy.signal import convolve2d, wiener
+from scipy.signal import convolve2d, wiener, decimate
 from sklearn.cluster import KMeans
 #from sklearn_extra.cluster import KMedoids
 import skfuzzy as fuzz
@@ -301,6 +301,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Add this line to set the size policy
         self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         self.buttons_layout = None  # create a reference to your layout
+
+        #darkdetect.theme()
+        # Returns 'Dark'
+        if darkdetect.isDark():
+            print('Dark Mode')
+        else:
+            print('Light Mode')
+
+        #darkdetect.isLight()
+        # Returns False
 
         #Initialise nested data which will hold the main sets of data for analysis
         self.data = {}
@@ -3509,12 +3519,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.noise_method_changed:
             return
 
-        if self.noise_red_img:
-            # Remove existing filters
-            self.plot.removeItem(self.noise_red_img)
+        # if self.noise_red_img:
+        #     # Remove existing filters
+        #     self.plot.removeItem(self.noise_red_img)
 
-        if self.grad_img:
-            self.plot.removeItem(self.grad_img)
+        # if self.grad_img:
+        #     self.plot.removeItem(self.grad_img)
 
         # Assuming self.array is the current image data
         match algorithm:
@@ -3522,18 +3532,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 return
             case 'median':
                 # Apply Median filter
-                filtered_image = medianBlur(self.array.astype(np.float32),
-                                                int(val1))  # Kernel size is 5
+                filtered_image = medianBlur(self.array.astype(np.float32), int(val1))  # Kernel size is 5
             case 'gaussian':
                 # Apply Median filter
                 filtered_image = GaussianBlur(self.array.astype(np.float32),
-                                                int(val1), sigmaX=float(val2), sigmaY=float(val2))  # Kernel size is 5
+                        int(val1), sigmaX=float(val2), sigmaY=float(val2))  # Kernel size is 5
             case 'wiener':
                 # Apply Wiener filter
                 # Wiener filter in scipy expects the image in double precision
                 # Myopic deconvolution, kernel size set by spinBoxNoiseOption1
-                filtered_image = wiener(self.array.astype(np.float64),
-                                                (int(val1), int(val1)))
+                filtered_image = wiener(self.array.astype(np.float64), (int(val1), int(val1)))
                 filtered_image = filtered_image.astype(np.float32)  # Convert back to float32 to maintain consistency
             case 'edge-preserving':
                 # Apply Edge-Preserving filter (RECURSIVE_FILTER or NORMCONV_FILTER)
@@ -3543,14 +3551,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # Scale to [0, 255] and convert to uint8
                 image = (normalized_array * 255).astype(np.uint8)
                 filtered_image = edgePreservingFilter(image,
-                                                    flags=1,
-                                                    sigma_s=float(val1),
-                                                    sigma_r=float(val2))
+                        flags=1,
+                        sigma_s=float(val1),
+                        sigma_r=float(val2)
+                    )
+
+                # convert back to original units
+                filtered_image = (filtered_image.astype(np.float32) / 255) * (np.max(self.array) - np.min(self.array)) + np.min(self.array)
+                
             case 'bilateral':
                 # Apply Bilateral filter
                 # Parameters are placeholders, you might need to adjust them based on your data
                 filtered_image = bilateralFilter(self.array.astype(np.float32),
-                                                int(val1), float(val2), float(val2))
+                        int(val1), float(val2), float(val2))
 
         # Update or create the image item for displaying the filtered image
         self.noise_red_array = filtered_image
@@ -3559,18 +3572,77 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.plot_gradient()
             return
 
-        self.noise_red_img = ImageItem(image=self.noise_red_array)
+        # uncomment for pyqtgraph version
+        # -----------
+        # self.noise_red_img = ImageItem(image=self.noise_red_array)
 
-        # Set aspect ratio of rectangle
-        self.noise_red_img.setRect(0, 0, self.x_range, self.y_range)
+        # # Set aspect ratio of rectangle
+        # self.noise_red_img.setRect(0, 0, self.x_range, self.y_range)
 
-        # Optionally, set a color map
-        self.comboBoxPlotType.setCurrentText('analyte map')
-        cm = colormap.get(self.styles['analyte map']['Colors']['Colormap'], source='matplotlib')
-        self.noise_red_img.setColorMap(cm)
+        # # Optionally, set a color map
+        # self.comboBoxPlotType.setCurrentText('analyte map')
+        # cm = colormap.get(self.styles['analyte map']['Colors']['Colormap'], source='matplotlib')
+        # self.noise_red_img.setColorMap(cm)
 
-        # Add the image item to the plot
-        self.plot.addItem(self.noise_red_img)
+        # # Add the image item to the plot
+        # self.plot.addItem(self.noise_red_img)
+
+        # uncomment for matplotlib version
+        # -----------
+        canvas = MplCanvas(parent=self)
+
+        style = self.styles['analyte map']
+
+        norm = self.color_norm(style)
+
+        cax = canvas.axes.imshow(filtered_image, cmap=self.get_colormap(),  aspect=self.aspect_ratio, interpolation='none', norm=norm)
+
+        # set color limits
+        self.add_colorbar(canvas, cax, style)
+        cax.set_clim(style['Colors']['CLim'][0], style['Colors']['CLim'][1])
+
+        # use mask to create an alpha layer
+        mask = self.data[self.sample_id]['mask'].astype(float)
+        reshaped_mask = np.reshape(mask, self.array_size, order=self.order)
+
+        alphas = colors.Normalize(0, 1, clip=False)(reshaped_mask)
+        alphas = np.clip(alphas, .4, 1)
+        #cax = canvas.axes.imshow(reshaped_array, alpha=alphas, cmap=self.get_colormap(),  aspect=self.aspect_ratio, interpolation='none', norm=norm)
+        #canvas.axes.set_facecolor('w')
+
+        alpha_mask = np.where(reshaped_mask == 0, 0.5, 0)  
+        canvas.axes.imshow(np.ones_like(alpha_mask), aspect=self.aspect_ratio, interpolation='none', cmap='Greys', alpha=alpha_mask)
+
+        #masked = np.ma.masked_where(reshaped_mask == 0, reshaped_mask)
+        #canvas.axes.imshow(masked, alpha=0.5, aspect=self.aspect_ratio, interpolation='none', cmap='Greys')
+
+        # font = {'family': 'sans-serif', 'stretch': 'condensed', 'size': 8, 'weight': 'semibold'}
+        # canvas.axes.text(0.025*self.array_size[0],0.1*self.array_size[1], field, fontdict=font, color=style['Scales']['OverlayColor'], ha='left', va='top')
+        #canvas.axes.set_axis_off()
+        #canvas.axes.tick_params(direction=None,
+        #    labelbottom=False, labeltop=False, labelright=False, labelleft=False,
+        #    bottom=False, top=False, left=False, right=False)
+        #canvas.fig.tight_layout()
+
+        field = self.comboBoxColorField.currentText()
+        self.plot_info = {
+            'tree': 'Analyte',
+            'sample_id': self.sample_id,
+            'plot_name': field,
+            'plot_type': 'analyte map',
+            'field_type': self.comboBoxColorByField.currentText(),
+            'field': field,
+            'figure': canvas,
+            'style': style,
+            'cluster_groups': None,
+            'view': [True,False],
+            'position': None
+            }
+
+        self.clear_layout(self.widgetSingleView.layout())
+        self.widgetSingleView.layout().addWidget(canvas)
+
+        self.add_tree_item(self.plot_info)
 
     def plot_gradient(self):
         """Produces a gradient map
@@ -3581,25 +3653,90 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxPlotType.setCurrentText('gradient map')
         self.plot_flat = True
 
-        # remove existing gradient map
-        if self.grad_img:
-            self.plot.removeItem(self.grad_img)
-
         # Compute gradient
         grad_array = np.gradient(self.noise_red_array)
         # gradient magnitude
         self.grad_mag = np.sqrt(grad_array[0]**2 + grad_array[1]**2)
 
-        self.grad_img = ImageItem(image=self.grad_mag)
-        self.grad_img.setRect(0, 0, self.x_range, self.y_range)
+        dx = decimate(grad_array[0],10)
+        dy = decimate(grad_array[1],10)
 
-        # Optionally, set a color map
-        cm = colormap.get(self.styles['gradient map']['Colors']['Colormap'], source='matplotlib')
-        self.grad_img.setColorMap(cm)
+        x = np.arange((dx.T).shape[0])*10
+        y = np.arange((dy.T).shape[1])*10
+        X, Y = np.meshgrid(x, y)
 
-        # Add the image item to the plot
-        self.plot.addItem(self.grad_img)
+        # uncomment for pyqtgraph version
+        # -----------
+        # remove existing gradient map
+        # if self.grad_img:
+        #     self.plot.removeItem(self.grad_img)
 
+        # self.grad_img = ImageItem(image=self.grad_mag)
+        # self.grad_img.setRect(0, 0, self.x_range, self.y_range)
+
+        # # Optionally, set a color map
+        # cm = colormap.get(self.styles['gradient map']['Colors']['Colormap'], source='matplotlib')
+        # self.grad_img.setColorMap(cm)
+
+        # # Add the image item to the plot
+        # self.plot.addItem(self.grad_img)
+
+        # uncomment for matplotlib version
+        # -----------
+        canvas = MplCanvas(parent=self)
+
+        style = self.styles['analyte map']
+
+        q = np.quantile(self.grad_mag.flatten(), q=[0.025, 0.975])
+        norm = colors.Normalize(q[0],q[1], clip=False)
+
+        cax = canvas.axes.imshow(self.grad_mag, cmap=self.get_colormap(),  aspect=self.aspect_ratio, interpolation='none', norm=norm)
+        canvas.axes.quiver(X,Y,dx,dy, color=style['Scales']['OverlayColor'], linewidth=0.5)
+
+        # set color limits
+        #self.add_colorbar(canvas, cax, style)
+        #cax.set_clim(style['Colors']['CLim'][0], style['Colors']['CLim'][1])
+
+        # use mask to create an alpha layer
+        mask = self.data[self.sample_id]['mask'].astype(float)
+        reshaped_mask = np.reshape(mask, self.array_size, order=self.order)
+
+        alphas = colors.Normalize(0, 1, clip=False)(reshaped_mask)
+        alphas = np.clip(alphas, .4, 1)
+        #cax = canvas.axes.imshow(reshaped_array, alpha=alphas, cmap=self.get_colormap(),  aspect=self.aspect_ratio, interpolation='none', norm=norm)
+        #canvas.axes.set_facecolor('w')
+
+        alpha_mask = np.where(reshaped_mask == 0, 0.5, 0)  
+        canvas.axes.imshow(np.ones_like(alpha_mask), aspect=self.aspect_ratio, interpolation='none', cmap='Greys', alpha=alpha_mask)
+
+        #masked = np.ma.masked_where(reshaped_mask == 0, reshaped_mask)
+        #canvas.axes.imshow(masked, alpha=0.5, aspect=self.aspect_ratio, interpolation='none', cmap='Greys')
+
+        # font = {'family': 'sans-serif', 'stretch': 'condensed', 'size': 8, 'weight': 'semibold'}
+        # canvas.axes.text(0.025*self.array_size[0],0.1*self.array_size[1], field, fontdict=font, color=style['Scales']['OverlayColor'], ha='left', va='top')
+        #canvas.axes.set_axis_off()
+        #canvas.axes.tick_params(direction=None,
+        #    labelbottom=False, labeltop=False, labelright=False, labelleft=False,
+        #    bottom=False, top=False, left=False, right=False)
+        #canvas.fig.tight_layout()
+
+        field = self.comboBoxColorField.currentText()
+        self.plot_info = {
+            'tree': 'Analyte',
+            'sample_id': self.sample_id,
+            'plot_name': field,
+            'plot_type': 'analyte map',
+            'field_type': self.comboBoxColorByField.currentText(),
+            'field': field,
+            'figure': canvas,
+            'style': style,
+            'cluster_groups': None,
+            'view': [True,False],
+            'position': None
+            }
+
+        self.clear_layout(self.widgetSingleView.layout())
+        self.widgetSingleView.layout().addWidget(canvas)
 
     # -------------------------------------
     # Style related fuctions/callbacks
@@ -5978,7 +6115,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # get data for current map
         map_df = self.get_map_data(sample_id, field, field_type=field_type)
-        print(np.count_nonzero(map_df))
 
         # plot map
         reshaped_array = np.reshape(map_df['array'].values, self.array_size, order=self.order)
@@ -8861,6 +8997,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         #print('update_tree')
 
+        if darkdetect.isDark():
+            hexcolor = '#696880'
+        else:
+            hexcolor = '#3E3D53'
+
         sample_id = self.sample_id
 
         # Un-highlight all leaf in the trees
@@ -8884,10 +9025,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 if not check: #if ratio doesnt exist
                     child_item = StandardItem(ratio_name)
-                    child_item.setBackground(QBrush(QColor(255, 255, 200)))
+                    child_item.setBackground(QBrush(QColor(hexcolor)))
                     item.appendRow(child_item)
                 else:
-                    item.setBackground(QBrush(QColor(255, 255, 200)))
+                    item.setBackground(QBrush(QColor(hexcolor)))
             else: #single analyte
                 analyte_1 = analyte
                 analyte_2 = None
@@ -8897,7 +9038,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 else:
                     item,check = self.find_leaf('Analyte', branch = sample_id, leaf = analyte)
 
-                item.setBackground(QBrush(QColor(255, 255, 200)))
+                item.setBackground(QBrush(QColor(hexcolor)))
 
                 self.data[self.sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['analytes']==analyte),'use'] = True
 
@@ -8971,11 +9112,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :type tree:
         """
         for i in range(tree.rowCount()):
+            bgcolor = tree.background().color()
             branch_item = tree.child(i)
-            branch_item.setBackground(QBrush(QColor(255, 255, 255)))  # white or any default background color
+            # branch_item.setBackground(QBrush(QColor(bgcolor)))  # white or any default background color
             for j in range(branch_item.rowCount()):
                 leaf_item = branch_item.child(j)
-                leaf_item.setBackground(QBrush(QColor(255, 255, 255)))  # white or any default background color
+                leaf_item.setBackground(QBrush(QColor(bgcolor)))  # white or any default background color
 
     def get_tree_items(self, tree):
         """Returns items associated with the specified tree

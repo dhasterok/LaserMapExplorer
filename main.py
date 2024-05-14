@@ -4,6 +4,7 @@ from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QRectF, QPointF
 from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QVBoxLayout, QGridLayout, QMessageBox, QHeaderView, QMenu, QGraphicsRectItem
 from PyQt5.QtWidgets import QFileDialog, QWidget, QDialog, QLabel, QTableWidget, QInputDialog, QAbstractItemView, QProgressBar
 from PyQt5.QtGui import QIntValidator, QDoubleValidator, QColor, QImage, QPainter, QPixmap, QFont, QPen, QCursor, QBrush, QStandardItemModel, QStandardItem, QTextCursor, QDropEvent, QFontDatabase
+import pyqtgraph as pg
 from pyqtgraph.GraphicsScene import exportDialog
 from pyqtgraph import setConfigOption, colormap, ColorBarItem,ViewBox, TargetItem, ImageItem, GraphicsLayoutWidget, ScatterPlotItem, AxisItem, PlotDataItem
 from datetime import datetime
@@ -3067,6 +3068,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     #         self.plot_laser_map_cont(layout,array,img,p1,cm,view)
     #     p1.getViewBox().autoRange()
 
+
+    # -------------------------------
+    # Mouse/Plot interactivity Events
+    # -------------------------------
     def mouse_moved(self,event,plot):
         pos_view = plot.vb.mapSceneToView(event)  # This is in view coordinates
         pos_scene = plot.vb.mapViewToScene(pos_view)  # Map from view to scene coordinates
@@ -3486,19 +3491,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Reduces noise by smoothing via one of several algorithms chosen from
         ``MainWindow.comboBoxNoiseReductionMethod``.
 
-        :param algorithm:  Options include:
-            'None' - no smoothing
-            'Median' - simple blur that computes each pixel from the median of a window including
-                surrounding points
-            'Gaussian' - a simple Gaussian blur
-            'Weiner' - a Fourier domain filtering method that low pass filters to smooth the map
-            'Edge-preserving' - filter that does an excellent job of preserving edges when smoothing
-            'Bilateral' - an edge-preserving Gaussian weighted filter
-        :type algorithm: str
-        :param val1: first filter argument, required for all filters
-        :type val1: int, optional
-        :param val2: second filter argument, required for Gaussian, Edge-preserving, and Bilateral methods
-        :type val2: double, optional
+        Parameters
+        ----------
+        algorithm : str
+            Options include:
+            | 'None' - no smoothing
+            | 'Median' - simple blur that computes each pixel from the median of a window including surrounding points
+            | 'Gaussian' - a simple Gaussian blur
+            | 'Weiner' - a Fourier domain filtering method that low pass filters to smooth the map
+            | 'Edge-preserving' - filter that does an excellent job of preserving edges when smoothing
+            | 'Bilateral' - an edge-preserving Gaussian weighted filter
+        val1 : int, optional
+            First filter argument, required for all filters
+        val2 : float, optional
+            Second filter argument, required for *Gaussian*, *Edge-preserving*, and *Bilateral* methods
         """
         if self.noise_method_changed:
             return
@@ -5964,36 +5970,34 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         field : str
             Field for plotting
         """        
+        # create plot canvas
         canvas = MplCanvas(parent=self)
 
         style = self.styles['analyte map']
         clb,cub,cscale,clabel = self.get_axis_values(field_type,field)
 
-
         # get data for current map
         map_df = self.get_map_data(sample_id, field, field_type=field_type)
         print(np.count_nonzero(map_df))
 
-        #Change transparency of values outside mask
+        # plot map
         reshaped_array = np.reshape(map_df['array'].values, self.array_size, order=self.order)
-
-        # create plot canvas
         norm = self.color_norm(style)
 
-        # add image to canvas
+        cax = canvas.axes.imshow(reshaped_array, cmap=self.get_colormap(),  aspect=self.aspect_ratio, interpolation='none', norm=norm)
+
+        # set color limits
+        self.add_colorbar(canvas, cax, style)
+        cax.set_clim(style['Colors']['CLim'][0], style['Colors']['CLim'][1])
+
+        # use mask to create an alpha layer
         mask = self.data[self.sample_id]['mask'].astype(float)
         reshaped_mask = np.reshape(mask, self.array_size, order=self.order)
 
         alphas = colors.Normalize(0, 1, clip=False)(reshaped_mask)
         alphas = np.clip(alphas, .4, 1)
         #cax = canvas.axes.imshow(reshaped_array, alpha=alphas, cmap=self.get_colormap(),  aspect=self.aspect_ratio, interpolation='none', norm=norm)
-        cax = canvas.axes.imshow(reshaped_array, cmap=self.get_colormap(),  aspect=self.aspect_ratio, interpolation='none', norm=norm)
-
         #canvas.axes.set_facecolor('w')
-
-        # set color limits
-        self.add_colorbar(canvas, cax, style)
-        cax.set_clim(style['Colors']['CLim'][0], style['Colors']['CLim'][1])
 
         alpha_mask = np.where(reshaped_mask == 0, 0.5, 0)  
         canvas.axes.imshow(np.ones_like(alpha_mask), aspect=self.aspect_ratio, interpolation='none', cmap='Greys', alpha=alpha_mask)
@@ -6029,6 +6033,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.clear_layout(self.widgetSingleView.layout())
         self.widgetSingleView.layout().addWidget(canvas)
+
+        self.add_tree_item(self.plot_info)
 
     def plot_map_pyqt(self, sample_id, field_type, field):
         """Create a graphic widget for plotting a map
@@ -6097,9 +6103,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Prevent zooming/panning outside the default view
         ## These cut off parts of the map when plotting.
-        plotWindow.setRange(yRange=[self.y.min(), self.y.max()])
+        #plotWindow.setRange(yRange=[self.y.min(), self.y.max()])
         #plotWindow.setLimits(xMin=self.x.min(), xMax=self.x.max(), yMin=self.y.min(), yMax = self.y.max())
-        plotWindow.setLimits(maxXRange=self.x_range, maxYRange=self.y_range)
+        #plotWindow.setLimits(maxXRange=self.x_range, maxYRange=self.y_range)
 
         #supress right click menu
         plotWindow.setMenuEnabled(False)
@@ -6110,6 +6116,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # cbar = ColorBarItem(values=(clb,cub), width=25, colorMap=cmap, label=clabel, interactive=False, limits=(clb,cub), orientation=style['Colors']['Direction'], pen='black')
         img_item.setLookupTable(cmap.getLookupTable())
         # graphicWidget.addItem(cbar)
+        pg.setConfigOption('leftButtonPan', False)
 
         # ... Inside your plotting function
         target = TargetItem(symbol = '+', )

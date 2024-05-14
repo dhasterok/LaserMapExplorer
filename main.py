@@ -7410,6 +7410,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         unique_groups = np.unique(['Cluster '+str(c) for c in groups])
         unique_groups.sort()
         n_clusters = len(unique_groups)
+        print(unique_groups)
 
         # Extract colors from the colormap and assign to self.group_cmap
         # cmap = self.get_colormap(n_clusters)
@@ -7425,6 +7426,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         #cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=style['Colors']['Colormap'], norm=norm, aspect = self.aspect_ratio)
         cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect = self.aspect_ratio)
+        cax.cmap.set_under(style['Scales']['OverlayColor'])
 
         self.add_colorbar(canvas, cax, style, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color)
 
@@ -7535,6 +7537,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         if self.data[self.sample_id]['computed_data']['Cluster'].empty:
             self.data[self.sample_id]['computed_data']['Cluster'][['X','Y']] = self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
+
+        # set all masked data to cluster id -1
+        self.data[self.sample_id]['computed_data']['Cluster'].loc[~self.data[self.sample_id]['mask'],method] = -1
 
         # Create labels array filled with -1
         #groups = np.full(filtered_array.shape[0], -1, dtype=int)

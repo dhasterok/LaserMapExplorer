@@ -614,7 +614,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonHistogramReset.clicked.connect(lambda: self.update_plot(reset = True))
 
         # Noise reduction
-        self.noise_method_changed = False
         self.noise_red_img = None
         self.grad_img = None
         self.noise_red_options = {'median':{'label1':'Kernel size', 'value1':5, 'label2':None},
@@ -624,9 +623,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'bilateral':{'label1':'Diameter', 'value1':9, 'label2':'Sigma', 'value2':75}}
 
         self.comboBoxNoiseReductionMethod.activated.connect(self.noise_reduction_method_callback)
+        self.update_noise1_flag = False
         self.spinBoxNoiseOption1.valueChanged.connect(self.noise_reduction_option1_callback)
         self.spinBoxNoiseOption1.setEnabled(False)
         self.labelNoiseOption1.setEnabled(False)
+        self.update_noise2_flag = False
         self.doubleSpinBoxNoiseOption2.valueChanged.connect(self.noise_reduction_option2_callback)
         self.doubleSpinBoxNoiseOption2.setEnabled(False)
         self.labelNoiseOption2.setEnabled(False)
@@ -3372,7 +3373,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         After enabling options, it runs ``noise_reduction``.
         """
-        self.noise_method_changed = True
         algorithm = self.comboBoxNoiseReductionMethod.currentText().lower()
 
         match algorithm:
@@ -3385,10 +3385,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.labelNoiseOption2.setText('')
                 self.doubleSpinBoxNoiseOption2.setEnabled(False)
 
-                self.noise_method_changed = False
                 self.noise_reduction(algorithm)
             case _:
                 # set option 1
+                self.spinBoxNoiseOption1.blockSignals(True)
                 self.labelNoiseOption1.setEnabled(True)
                 self.labelNoiseOption1.setText(self.noise_red_options[algorithm]['label1'])
                 self.spinBoxNoiseOption1.setEnabled(True)
@@ -3405,7 +3405,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     case _:
                         self.spinBoxNoiseOption1.setRange(0,200)
                         self.spinBoxNoiseOption1.setSingleStep(5)
+
                 self.spinBoxNoiseOption1.setValue(int(self.noise_red_options[algorithm]['value1']))
+                self.spinBoxNoiseOption1.blockSignals(False)
 
                 val1 = self.spinBoxNoiseOption1.value()
 
@@ -3416,10 +3418,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.labelNoiseOption2.setText('')
                     self.doubleSpinBoxNoiseOption2.setEnabled(False)
 
-                    self.noise_method_changed = False
                     self.noise_reduction(algorithm, val1)
                 else:
-                    # option 2
+                    # yes option 2
+                    self.doubleSpinBoxNoiseOption2.blockSignals(True)
                     self.labelNoiseOption2.setEnabled(True)
                     self.labelNoiseOption2.setText(self.noise_red_options[algorithm]['label2'])
                     self.doubleSpinBoxNoiseOption2.setEnabled(True)
@@ -3428,10 +3430,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                             self.doubleSpinBoxNoiseOption2.setRange(0,1)
                         case 'bilateral':
                             self.doubleSpinBoxNoiseOption2.setRange(0,200)
+
+                    print(self.noise_red_options[algorithm])
                     self.doubleSpinBoxNoiseOption2.setValue(self.noise_red_options[algorithm]['value2'])
+                    self.doubleSpinBoxNoiseOption2.blockSignals(False)
 
                     val2 = self.doubleSpinBoxNoiseOption2.value()
-                    self.noise_method_changed = False
                     self.noise_reduction(algorithm, val1, val2)
 
     def gaussian_sigma(self, ksize):
@@ -3464,6 +3468,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         the user."""
         algorithm = self.comboBoxNoiseReductionMethod.currentText().lower()
 
+        # get option 1
         val1 = self.spinBoxNoiseOption1.value()
         match algorithm:
             case 'median' | 'gaussian' | 'wiener':
@@ -3471,12 +3476,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 if val1 % 2 != 1:
                     val1 = val1 + 1
         self.noise_red_options[algorithm]['value1'] = val1
+
+        # add a second parameter (if required and run noise reduction)
         if self.noise_red_options[algorithm]['label2'] is None:
             self.noise_reduction(algorithm,val1)
+
         else:
             if algorithm == 'gaussian':
-                self.doubleSpinBoxNoiseOption2.setValue(self.gaussian_sigma(val1))
-            val2 = self.doubleSpinBoxNoiseOption2.value()
+                val2 = self.gaussian_sigma(val1)
+                self.doubleSpinBoxNoiseOption2.blockSignals(True)
+                self.doubleSpinBoxNoiseOption2.setValue(val2)
+                self.doubleSpinBoxNoiseOption2.blockSignals(False)
+                self.noise_red_options[algorithm]['value2'] = val2
+            else:
+                val2 = self.doubleSpinBoxNoiseOption2.value()
+
             self.noise_reduction(algorithm,val1,val2)
 
     def noise_reduction_option2_callback(self):
@@ -3488,8 +3502,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         val1 = self.spinBoxNoiseOption1.value()
         val2 = self.doubleSpinBoxNoiseOption2.value()
-        self.noise_red_options[algorithm]['value1'] = val2
+        self.noise_red_options[algorithm]['value2'] = val2
         self.noise_reduction(algorithm,val1,val2)
+        print(self.noise_red_options[algorithm])
 
     def noise_reduction(self, algorithm, val1=None, val2=None):
         """
@@ -3516,9 +3531,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         val2 : float, optional
             Second filter argument, required for *Gaussian*, *Edge-preserving*, and *Bilateral* methods
         """
-        if self.noise_method_changed:
-            return
-
         # if self.noise_red_img:
         #     # Remove existing filters
         #     self.plot.removeItem(self.noise_red_img)
@@ -3550,11 +3562,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # Scale to [0, 255] and convert to uint8
                 image = (normalized_array * 255).astype(np.uint8)
-                filtered_image = edgePreservingFilter(image,
-                        flags=1,
-                        sigma_s=float(val1),
-                        sigma_r=float(val2)
-                    )
+                filtered_image = edgePreservingFilter(image, flags=1, sigma_s=float(val1), sigma_r=float(val2))
 
                 # convert back to original units
                 filtered_image = (filtered_image.astype(np.float32) / 255) * (np.max(self.array) - np.min(self.array)) + np.min(self.array)
@@ -3562,8 +3570,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case 'bilateral':
                 # Apply Bilateral filter
                 # Parameters are placeholders, you might need to adjust them based on your data
-                filtered_image = bilateralFilter(self.array.astype(np.float32),
-                        int(val1), float(val2), float(val2))
+                filtered_image = bilateralFilter(self.array.astype(np.float32), int(val1), float(val2), float(val2))
 
         # Update or create the image item for displaying the filtered image
         self.noise_red_array = filtered_image

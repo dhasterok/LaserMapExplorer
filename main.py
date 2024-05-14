@@ -478,7 +478,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxPlotType.setCurrentIndex(self.plot_types[self.toolBox.currentIndex()][0])
         
         # create analyte sort menu
-        sortmenu_items = ['alphabetical', 'atomic number', 'mass', 'compatibility']
+        sortmenu_items = ['alphabetical', 'atomic number', 'mass', 'compatibility', 'radius']
         SortMenu = QMenu()
         SortMenu.triggered.connect(self.apply_sort)
         self.toolButtonSortAnalyte.setMenu(SortMenu)
@@ -8704,6 +8704,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
         # sort analyte sort based on method chosen by user
         self.analyte_list = self.sort_analytes(method, self.analyte_list)
+        print(self.analyte_list)
         
         # sort analyte dataframes in a self.data
         # Convert the 'analytes' column in DataFrame to a categorical type with the specified order
@@ -9259,7 +9260,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.toolButtonPlotProfile.setChecked(False)
                 self.toolButtonPointMove.setChecked(False)
 
-    def sort_analytes(self, method, analytes, order = 'desc'):
+    def sort_analytes(self, method, analytes, order = 'd'):
         # Extract element symbols and any mass numbers if present
         parsed_analytes = []
         for analyte in analytes:
@@ -9276,18 +9277,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         df_analytes = df_analytes.merge(self.sort_data, on='element_symbol', how='left')
 
         # Sort based on the selected method
-        if method == 'alphabetical':
-            df_analytes.sort_values(by='element_symbol', ascending=(order != 'desc'), inplace=True)
-        elif method == 'atomic number':
-            df_analytes.sort_values(by='atomic_number', ascending=(order != 'desc'), inplace=True)
-        elif method == 'mass':
-            # Use provided mass or average mass if not available
-            df_analytes['computed_mass'] = df_analytes['mass'].fillna(df_analytes['average_mass'])
-            df_analytes.sort_values(by='computed_mass', ascending=(order != 'desc'), inplace=True)
-        elif method == 'compatibility':
-            df_analytes.sort_values(by='order', ascending=(order != 'desc'), inplace=True)
+        match method:
+            case 'alphabetical':
+                df_analytes.sort_values(by='element_symbol', ascending=True, inplace=True)
+            case 'atomic number':
+                df_analytes.sort_values(by='atomic_number', ascending=True, inplace=True)
+            case 'mass':
+                # Use provided mass or average mass if not available
+                df_analytes['computed_mass'] = df_analytes['mass'].fillna(df_analytes['average_mass'])
+                df_analytes.sort_values(by='computed_mass', ascending=True, inplace=True)
+            case 'compatibility':
+                df_analytes.sort_values(by='order', ascending=False, inplace=True)
+            case 'radius':
+                df_analytes.sort_values(by='radius1', ascending=True, inplace=True)
             
-        analytes = df_analytes['element_symbol']+ df_analytes['mass'].astype(str)
+        analytes = df_analytes['element_symbol'] + df_analytes['mass'].astype(str)
         # Return the sorted list of analytes as (symbol, mass) tuples
         return analytes.to_list()
 
@@ -9731,7 +9735,7 @@ class quickView(QDialog, Ui_QuickViewDialog):
             self.tableWidget.setCellWidget(row, 1, checkbox)
 
     def setup_sort_menu(self):
-        sortmenu_items = ['alphabetical', 'atomic number', 'mass', 'compatibility']
+        sortmenu_items = ['alphabetical', 'atomic number', 'mass', 'compatibility', 'radius']
         SortMenu = QMenu()
         SortMenu.triggered.connect(self.apply_sort)
         self.toolButtonSort.setMenu(SortMenu)

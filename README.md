@@ -3,11 +3,13 @@
 
 ## Overview
 
-Laser Map Explorer (LaME) is an innovative software tool developed by Derrick Hasterok and his team. It is designed for processing and visualizing multi-element and isotope maps of minerals. The software aims to simplify the complex task of handling large volumes of geochemical data through an intuitive user interface.
+Laser Map Explorer (LaME) is an innovative software tool developed by researchers in the University of Adelaide, Earth Sciences Department.  The work is supported by the MinEx CRC.  LaME is designed for processing and visualizing multi-analyte maps of minerals, whether it be LA-ICP-MS maps of isotopes, XRF maps of elements, or some other imaging method. The software aims to simplify the complex task of handling large volumes of map-form data via an intuitive user interface.
+
+![Laser Map Explorer](images/LaME_interface.png)
 
 ## Features
 
-* Isotope Selection: Simple intuitive window to choose elements used for analysis, create ratios and apply vaious scaling and transformation techniques.
+* Analyte Selection: Simple intuitive window to choose analytes used for analysis, create ratios and apply transformations (e.g., log).
 
 ![Isotope Selection Window](images/Isotope_selection.png)
 

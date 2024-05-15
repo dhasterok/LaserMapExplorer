@@ -249,6 +249,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 :ref:`add_plotwidget_to_tree` for details about saving *plot_info* to the tree (Plot Selector)
         sample_id : str
             The name of the current sample, chosen by the user with ``comboBoxSampleID``.  *sample_id* is used as the key into several dictionaries.
+        sort_method : str
+            Method used to sort the analytes.  This is changed by choosing a different sorting method for the analytes by pushing the ``toolButtonSortAnalyte``.
+            However, only the analytes for the current sample with be sorted.  Other samples will be sorted when when they are reselected.  To ensure that all samples
+            use the same sorting algorithm, change the default preferences using the PreferencesDialog.
         styles : dict of dict
             Dictionary with plot style information that saves the properties of style widgets.  There is a keyword
             for each plot type listed in ``comboBoxPlotType``.  The exact behavior of each style item may vary depending upon the
@@ -348,6 +352,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         #initialise status bar
         self.statusBar = self.statusBar()
+
+        # Plot Selector
+        #-------------------------
+        self.sort_method = 'mass'
+
+
         # Plot Layouts
         #-------------------------
         # Central widget plot view layouts
@@ -1309,6 +1319,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #create plot
             #self.create_plot(current_plot_df, sample_id=self.sample_id, plot_type='lasermap', analyte_1=self.selected_analytes[0])
 
+        # sort data
+        self.apply_sort(None, method=self.sort_method)
 
         # reset flags
         self.update_cluster_flag = True
@@ -3620,16 +3632,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         alpha_mask = np.where(reshaped_mask == 0, 0.5, 0)  
         canvas.axes.imshow(np.ones_like(alpha_mask), aspect=self.aspect_ratio, interpolation='none', cmap='Greys', alpha=alpha_mask)
 
-        #masked = np.ma.masked_where(reshaped_mask == 0, reshaped_mask)
-        #canvas.axes.imshow(masked, alpha=0.5, aspect=self.aspect_ratio, interpolation='none', cmap='Greys')
-
-        # font = {'family': 'sans-serif', 'stretch': 'condensed', 'size': 8, 'weight': 'semibold'}
-        # canvas.axes.text(0.025*self.array_size[0],0.1*self.array_size[1], field, fontdict=font, color=style['Scales']['OverlayColor'], ha='left', va='top')
-        #canvas.axes.set_axis_off()
-        #canvas.axes.tick_params(direction=None,
-        #    labelbottom=False, labeltop=False, labelright=False, labelleft=False,
-        #    bottom=False, top=False, left=False, right=False)
-        #canvas.fig.tight_layout()
+        canvas.axes.tick_params(direction=None,
+            labelbottom=False, labeltop=False, labelright=False, labelleft=False,
+            bottom=False, top=False, left=False, right=False)
+        canvas.fig.tight_layout()
 
         field = self.comboBoxColorField.currentText()
         self.plot_info = {
@@ -3716,16 +3722,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         alpha_mask = np.where(reshaped_mask == 0, 0.5, 0)  
         canvas.axes.imshow(np.ones_like(alpha_mask), aspect=self.aspect_ratio, interpolation='none', cmap='Greys', alpha=alpha_mask)
 
-        #masked = np.ma.masked_where(reshaped_mask == 0, reshaped_mask)
-        #canvas.axes.imshow(masked, alpha=0.5, aspect=self.aspect_ratio, interpolation='none', cmap='Greys')
-
-        # font = {'family': 'sans-serif', 'stretch': 'condensed', 'size': 8, 'weight': 'semibold'}
-        # canvas.axes.text(0.025*self.array_size[0],0.1*self.array_size[1], field, fontdict=font, color=style['Scales']['OverlayColor'], ha='left', va='top')
-        #canvas.axes.set_axis_off()
-        #canvas.axes.tick_params(direction=None,
-        #    labelbottom=False, labeltop=False, labelright=False, labelleft=False,
-        #    bottom=False, top=False, left=False, right=False)
-        #canvas.fig.tight_layout()
+        canvas.axes.tick_params(direction=None,
+            labelbottom=False, labeltop=False, labelright=False, labelleft=False,
+            bottom=False, top=False, left=False, right=False)
+        canvas.fig.tight_layout()
 
         field = self.comboBoxColorField.currentText()
         self.plot_info = {
@@ -6151,10 +6151,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # font = {'family': 'sans-serif', 'stretch': 'condensed', 'size': 8, 'weight': 'semibold'}
         # canvas.axes.text(0.025*self.array_size[0],0.1*self.array_size[1], field, fontdict=font, color=style['Scales']['OverlayColor'], ha='left', va='top')
         #canvas.axes.set_axis_off()
-        #canvas.axes.tick_params(direction=None,
-        #    labelbottom=False, labeltop=False, labelright=False, labelleft=False,
-        #    bottom=False, top=False, left=False, right=False)
-        #canvas.fig.tight_layout()
+        canvas.axes.tick_params(direction=None,
+            labelbottom=False, labeltop=False, labelright=False, labelleft=False,
+            bottom=False, top=False, left=False, right=False)
+        canvas.fig.tight_layout()
 
         # add small histogram
         if (self.toolBox.currentIndex() == self.sample_tab_id) and (self.canvasWindow.currentIndex() == 0):
@@ -6177,7 +6177,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.clear_layout(self.widgetSingleView.layout())
         self.widgetSingleView.layout().addWidget(canvas)
 
-        self.add_tree_item(self.plot_info)
+        #self.add_tree_item(self.plot_info)
 
     def plot_map_pyqt(self, sample_id, field_type, field):
         """Create a graphic widget for plotting a map
@@ -8840,8 +8840,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # print(self.analytes_items)
             # print('\n')
     
-    def apply_sort(self, action):
-        method = action.text()
+    def apply_sort(self, action, method=None):
+
+        if method is None:
+            method = action.text()
+            self.sort_method = method
+
         # retrieve analyte_list
         self.analyte_list = self.data[self.sample_id]['analyte_info']['analytes']
         
@@ -8870,7 +8874,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.data[self.sample_id]['processed_data'][columns_to_order] = self.data[self.sample_id]['processed_data'][columns_to_order]
         
         self.data[self.sample_id]['cropped_raw_data'][columns_to_order] = self.data[self.sample_id]['cropped_raw_data'][columns_to_order]
+
+        self.data[self.sample_id]['norm'] = {key: self.data[self.sample_id]['norm'][key] for key in self.analyte_list if key in self.data[self.sample_id]['norm']}
          
+        #self.update_tree(self.data[self.sample_id]['norm'])
         # Reorder tree items according to the new analyte list
         # Sort the tree branches
         self.sort_tree_branch(self.analytes_items, self.analyte_list)
@@ -8879,27 +8886,45 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.sort_tree_branch(self.norm_ratios_items, self.analyte_list)
     
     def sort_tree_branch(self, branch, order_list):
-        for i in range(branch.rowCount()):
-            leaf = branch.child(i)
-            # Create a list of tuples containing the row index and item reference
-            item_list = [(i, leaf.child(i)) for i in range(leaf.rowCount())]
-            
-            # Sort this list based on the order_list ensuring that each item is found in the order_list
-            # If not found, it is placed at the end
-            item_list.sort(key=lambda x: order_list.index(x[1].text()) if x[1].text() in order_list else len(order_list))
-            
-            # Move the items within the leaf to reflect the new order
-            # We move the items to the beginning in the order defined by the sorted list
-            for new_index, (original_index, item) in enumerate(item_list):
-                if original_index != new_index:  # Check if item needs to be moved
-                    # Take the item out from its current position
-                    taken_item = leaf.takeChild(original_index)
-                    # Insert the item at its new position
-                    leaf.insertRow(new_index, taken_item)
-                    if (original_index > new_index):
-                        leaf.removeRow(original_index+1)
-                    else:
-                        leaf.removeRow(original_index)
+        print(branch)
+        print(branch.rowCount())
+        #for i in range(branch.rowCount()):
+        i = 0
+        leaf = branch.child(i)
+
+        # Create a list of tuples containing the row index and item reference
+        item_list = [(i, leaf.takeChild(i)) for i in range(leaf.rowCount()-1,-1,-1)]
+
+        item_list.sort(key=lambda x: order_list.index(x[1].text()) if x[1].text() in order_list else len(order_list))
+
+        for i in range(len(item_list)-1,-1,-1):
+            leaf.removeRow(i)
+
+        for row, (original_index, item) in enumerate(item_list):
+            print(i)
+            leaf.insertRow(row, item)
+
+        # # Sort this list based on the order_list ensuring that each item is found in the order_list
+        # # If not found, it is placed at the end
+        # item_list.sort(key=lambda x: order_list.index(x[1].text()) if x[1].text() in order_list else len(order_list))
+        
+        # # Move the items within the leaf to reflect the new order
+        # # We move the items to the beginning in the order defined by the sorted list
+        # #for i in range(len(item_list)):
+        # #    leaf.removeRow(i)
+
+        # for new_index, (original_index, item) in enumerate(item_list):
+        #     leaf.insertRow(new_index, item)
+        #     # if original_index != new_index:  # Check if item needs to be moved
+        #     #     # Take the item out from its current position
+        #     #     #taken_item = leaf.takeChild(original_index)
+        #     #     # Insert the item at its new position
+        #     #     #leaf.insertRow(new_index, taken_item)
+        #     #     leaf.insertRow(new_index, item)
+        #     #     if (original_index > new_index):
+        #     #         leaf.removeRow(original_index+1)
+        #     #     else:
+        #     #         leaf.removeRow(original_index)
 
     def retrieve_plotinfo_from_tree(self, tree_index=None, tree=None, branch=None, leaf=None):
         """Gets the plot_info associated with a tree location
@@ -9007,7 +9032,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if darkdetect.isDark():
             hexcolor = '#696880'
         else:
-            hexcolor = '#3E3D53'
+            hexcolor = '#FFFFC8'
 
         sample_id = self.sample_id
 

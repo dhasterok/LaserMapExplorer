@@ -618,6 +618,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #uncheck crop is checked
         self.toolButtonFullView.clicked.connect(lambda: self.toolButtonCrop.setChecked(False))
         self.toolBox.currentChanged.connect(lambda: self.canvasWindow.setCurrentIndex(0))
+        self.toolBox.currentChanged.connect(self.toolbox_changed)
         #auto scale
         self.toolButtonAutoScale.clicked.connect(lambda: self.auto_scale(False) )
         self.toolButtonAutoScale.setChecked(True)
@@ -884,14 +885,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonGroupMask.clicked.connect(lambda: self.apply_cluster_mask(inverse=False))
         self.toolButtonGroupMaskInverse.clicked.connect(lambda: self.apply_cluster_mask(inverse=True))
 
-        # colormap
-        colormaps = colormap.listMaps('matplotlib')
-        for i in range(len(colormaps) - 1, -1, -1):
-            if colormaps[i].endswith('_r'):
+        # colormaps
+        # matplotlib colormaps
+        self.mpl_colormaps = colormap.listMaps('matplotlib')
+        for i in range(len(self.mpl_colormaps) - 1, -1, -1):
+            if self.mpl_colormaps[i].endswith('_r'):
                 # If the item ends with '_r', remove it from the list
-                del colormaps[i]
+                del self.mpl_colormaps[i]
+
+        # custom colormaps
+        self.custom_color_dict = self.import_csv_to_dict('resources/app_data/custom_colormaps.csv')
+        for key in self.custom_color_dict:
+            self.custom_color_dict[key] = [h for h in self.custom_color_dict[key] if h]
+
+        # add list of colormaps to comboBoxFieldColormap and set callbacks
         self.comboBoxFieldColormap.clear()
-        self.comboBoxFieldColormap.addItems(colormaps)
+        self.comboBoxFieldColormap.addItems(list(self.custom_color_dict.keys())+self.mpl_colormaps)
         self.comboBoxFieldColormap.activated.connect(self.field_colormap_callback)
         self.checkBoxReverseColormap.stateChanged.connect(self.colormap_direction_callback)
 
@@ -949,7 +958,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxCbarDirection.activated.connect(self.cbar_direction_callback)
         # clusters
         self.spinBoxClusterGroup.valueChanged.connect(self.select_cluster_group_callback)
-        self.toolBox.currentChanged.connect(self.toolbox_changed)
 
         # Profile filter tab
         #-------------------------
@@ -1009,8 +1017,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonPolyMovePoint.clicked.connect(lambda: self.reset_checked_items('polygon'))
         self.toolButtonPolyAddPoint.clicked.connect(lambda: self.reset_checked_items('polygon'))
         self.toolButtonPolyRemovePoint.clicked.connect(lambda: self.reset_checked_items('polygon'))
-
-        self.toolbox_changed()
 
         self.autosaveTimer = QTimer()
         self.autosaveTimer.setInterval(300000)
@@ -1706,7 +1712,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :param button: button clicked
         :type button: QPushbutton | QToolButton
         """
-        color = QColorDialog.getColor()
+        old_color = button.palette().color(button.backgroundRole())
+        color_dlg = QColorDialog(self)
+        color_dlg.setCurrentColor(old_color)
+        color_dlg.setCustomColor(int(1),old_color)
+
+        color = color_dlg.getColor()
 
         if color.isValid():
             button.setStyleSheet("background-color: %s;" % color.name())
@@ -1719,13 +1730,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         Parameters
         ----------
-            color : (list of int)
-                RGB color triplet
+        color : list of int
+            RGB color triplet
 
         Returns
         -------
-            str : hex code for an RGB color triplet
-        """        
+        str : 
+            hex code for an RGB color triplet
+        """
         if type(color) is tuple:
             color = np.round(255*np.array(color))
             color[color < 0] = 0
@@ -1739,19 +1751,25 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         Parameters
         ----------
-            color : (str)
-                hex code for an RGB color
+        color : str or list
+            Converts a hex str to RGB colors.  If list, should be a list of hex str.
 
         Returns
         -------
-            list of int: RGB color triplet
+        list of int or list of RGB tuples:
+            RGB color triplets used to create colormaps.
         """        
         if not color:
             return []
-
-        color = color.lstrip('#').lower()
-
-        return [int(color[0:2],16), int(color[2:4],16), int(color[4:6],16)]
+        elif isinstance(color,str):
+            color = color.lstrip('#').lower()
+            return [int(color[0:2],16), int(color[2:4],16), int(color[4:6],16)]
+        else:
+            color_list = [None]*len(color)
+            for i, hexcolor in enumerate(color):
+                rgb = self.get_rgb_color(hexcolor)
+                color_list[i] = tuple(float(c)/255 for c in rgb) + (1.0,)
+            return color_list
 
     def ternary_colormap_changed(self):
         """Changes toolButton backgrounds associated with ternary colormap
@@ -3111,7 +3129,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 mouse_point = pos_view
                 x, y = mouse_point.x(), mouse_point.y()
 
-                # print(x,y)
                 x_i = round(x*array.shape[1]/self.x_range)
                 y_i = round(y*array.shape[0]/self.y_range)
 
@@ -3325,7 +3342,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # This could be an update to an existing ImageItem or creating a new one if necessary.
             self.edge_array = edge_detected_image
             self.edge_img = ImageItem(image=self.edge_array)
-            #print(self.edge_img.shape)
+
             #set aspect ratio of rectangle
             self.edge_img.setRect(0,0,self.x_range,self.y_range)
             # edge_img.setAs
@@ -3447,7 +3464,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         case 'bilateral':
                             self.doubleSpinBoxNoiseOption2.setRange(0,200)
 
-                    print(self.noise_red_options[algorithm])
                     self.doubleSpinBoxNoiseOption2.setValue(self.noise_red_options[algorithm]['value2'])
                     self.doubleSpinBoxNoiseOption2.blockSignals(False)
 
@@ -3520,7 +3536,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         val2 = self.doubleSpinBoxNoiseOption2.value()
         self.noise_red_options[algorithm]['value2'] = val2
         self.noise_reduction(algorithm,val1,val2)
-        print(self.noise_red_options[algorithm])
 
     def noise_reduction(self, algorithm, val1=None, val2=None):
         """
@@ -4508,11 +4523,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         tab_id = self.toolBox.currentIndex()
 
         if plot_type is None:
+            self.comboBoxPlotType.blockSignals(True)
             self.comboBoxPlotType.clear()
             self.comboBoxPlotType.addItems(self.plot_types[tab_id][1:])
+            self.comboBoxPlotType.blockSignals(False)
 
             plot_type = self.plot_types[tab_id][self.plot_types[tab_id][0]+1]
+            self.comboBoxPlotType.blockSignals(True)
             self.comboBoxPlotType.setCurrentText(plot_type)
+            self.comboBoxPlotType.blockSignals(False)
         elif plot_type == '':
             return
 
@@ -4531,7 +4550,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # annotation properties
         #self.fontComboBox.setCurrentFont(style['Text']['Font'])
+        self.doubleSpinBoxFontSize.blockSignals(True)
         self.doubleSpinBoxFontSize.setValue(style['Text']['FontSize'])
+        self.doubleSpinBoxFontSize.blockSignals(False)
 
         # scalebar properties
         self.comboBoxScaleLocation.setCurrentText(style['Scales']['Location'])
@@ -4540,7 +4561,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # marker properties
         self.comboBoxMarker.setCurrentText(style['Markers']['Symbol'])
+
+        self.doubleSpinBoxMarkerSize.blockSignals(True)
         self.doubleSpinBoxMarkerSize.setValue(style['Markers']['Size'])
+        self.doubleSpinBoxMarkerSize.blockSignals(False)
+
         self.horizontalSliderMarkerAlpha.setValue(int(style['Markers']['Alpha']))
         self.labelMarkerAlpha.setText(str(self.horizontalSliderMarkerAlpha.value()))
 
@@ -4554,6 +4579,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
         self.comboBoxColorField.setCurrentText(style['Colors']['Field'])
         self.comboBoxFieldColormap.setCurrentText(style['Colors']['Colormap'])
+        self.checkBoxReverseColormap.blockSignals(True)
+        self.checkBoxReverseColormap.setChecked(style['Colors']['Reverse'])
+        self.checkBoxReverseColormap.blockSignals(False)
         if style['Colors']['Field'] in list(self.axis_dict.keys()):
             style['Colors']['CLim'] = [self.axis_dict[style['Colors']['Field']]['min'], self.axis_dict[style['Colors']['Field']]['max']]
             style['Colors']['CLabel'] = self.axis_dict[style['Colors']['Field']]['label']
@@ -4562,7 +4590,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxColorScale.setCurrentText(style['Colors']['CScale'])
         self.comboBoxCbarDirection.setCurrentText(style['Colors']['Direction'])
         self.lineEditCbarLabel.setText(style['Colors']['CLabel'])
+
+        self.spinBoxHeatmapResolution.blockSignals(True)
         self.spinBoxHeatmapResolution.setValue(style['Colors']['Resolution'])
+        self.spinBoxHeatmapResolution.blockSignals(False)
 
         # turn properties on/off based on plot type and style settings
         self.toggle_style_widgets()
@@ -5050,10 +5081,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         color = self.get_hex_color(self.toolButtonOverlayColor.palette().button().color())
         # update style
-        if self.styles[plot_type]['Scale']['OverlayColor'] == color:
+        if self.styles[plot_type]['Scales']['OverlayColor'] == color:
             return
 
-        self.styles[plot_type]['Scale']['OverlayColor'] = color
+        self.styles[plot_type]['Scales']['OverlayColor'] = color
         # update plot
         self.update_SV()
 
@@ -5259,9 +5290,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             A discrete (colors.ListedColormap) colormap
         """
         n = cluster_dict['n_clusters']
+        if -1 in list(cluster_dict.keys()):
+            n += 1
+            idx = range(-1,n-1)
+        else:
+            idx = range(n)
         cluster_color = [None]*n
         cluster_label = [None]*n
-        for c in range(n):
+        for c in idx:
             color = self.get_rgb_color(cluster_dict[c]['color'])
             cluster_color[c] = tuple(float(c)/255 for c in color) + (float(alpha)/100,)
             cluster_label[c] = cluster_dict[c]['name']
@@ -5285,45 +5321,43 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         matplotlib.colormap.ListedColormap : colormap
         """
         plot_type = self.comboBoxPlotType.currentText()
-        if N is not None:
-            cmap = plt.get_cmap(self.styles[plot_type]['Colors']['Colormap'], N)
+        name = self.styles[plot_type]['Colors']['Colormap']
+        if name in self.mpl_colormaps:
+            if N is not None:
+                cmap = plt.get_cmap(name, N)
+            else:
+                cmap = plt.get_cmap(name)
         else:
-            cmap = plt.get_cmap(self.styles[plot_type]['Colors']['Colormap'])
+            cmap = self.create_custom_colormap(name, N)
 
         if self.styles[plot_type]['Colors']['Reverse']:
             cmap = cmap.reversed()
 
         return cmap
 
-    def custom_colormaps(self, name):
+    def create_custom_colormap(self, name, N=None):
+        """Creates custom colormaps
 
-        match name:
-            case 'ryb':
-                cdict = {'red': [(0, 0.8039, 0.8039), (0.5, 1, 1), (1, 0, 0)],
-                         'green': [(0, 0, 0), (0.5, 0.7843, 0.7843), (1, 0, 0)],
-                         'blue': [(0, 0, 0), (0.5, 0.1176, 0.1176), (1, 0.8039, 0.8039)]}
-            case 'ryb2':
-                cdict = {'red': [(0, 0.8039, 0.8039), (0.5, 0.9412, 0.9412), (1, 0.3922, 0.3922)],
-                         'green': [(0, 0.3608, 0.3608), (0.5, 0.9020, 0.9020), (1, 0.5843, 0.5843)],
-                         'blue': [(0, 0.3608, 0.3608), (0.5, 0.5490, 0.5490), (1, 0.9294, 0.9294)]}
-            case 'klindman':
-                cdict = {'red': [(0,0,0), (0.14285714285714285,0.1411764705882353,0.1411764705882353), (0.2857142857142857,0.027450980392156862,0.027450980392156862), (0.42857142857142855,0.0196078431372549,0.0196078431372549), (0.5714285714285714,0.03137254901960784,0.03137254901960784), (0.7142857142857142,0.4392156862745098,0.4392156862745098), (0.8571428571428571,0.9803921568627451,0.9803921568627451), (1,1,1)],
-                         'green': [(0,0,0), (0.14285714285714285,0.023529411764705882,0.023529411764705882),  (0.2857142857142857,0.24313725490196078,0.24313725490196078), (0.42857142857142855,0.45098039215686275,0.45098039215686275), (0.5714285714285714,0.6235294117647059,0.6235294117647059), (0.7142857142857142,0.7686274509803922,0.7686274509803922), (0.8571428571428571,0.8156862745098039,0.8156862745098039), (1,1,1)],
-                         'blue': [(0,0,0), (0.14285714285714285,0.4588235294117647,0.4588235294117647), (0.2857142857142857,0.5882352941176471,0.5882352941176471), (0.42857142857142855,0.3803921568627451,0.3803921568627451), (0.5714285714285714,0.08235294117647059,0.08235294117647059), (0.7142857142857142,0.03529411764705882,0.03529411764705882), (0.8571428571428571,0.5725490196078431,0.5725490196078431), (1,1,1)]}
-            case 'blackbody':
-                cdict = {'red': [(0,0,0), (0.14285714285714285,0.25490196,0.25490196), (0.2857142857142857,0.50196078,0.50196078), (0.42857142857142855,0.7372549,0.7372549), (0.5714285714285714,0.87843137,0.87843137), (0.7142857142857142,0.90980392,0.90980392), (0.8571428571428571,0.90588235,0.90588235), (1,1,1)],
-                         'green': [(0,0,0), (0.14285714285714285,0.09019608,0.09019608), (0.2857142857142857,0.12156863,0.12156863), (0.42857142857142855,0.2,0.2), (0.5714285714285714,0.39607843,0.39607843), (0.7142857142857142,0.63137255,0.63137255), (0.8571428571428571,0.85490196,0.85490196), (1,1,1)],
-                         'blue': [(0,0,0), (0.14285714285714285,0.07058824,0.07058824), (0.2857142857142857,0.10588235,0.10588235), (0.42857142857142855,0.1254902,0.1254902), (0.5714285714285714,0.03921569,0.03921569), (0.7142857142857142,0.10196078,0.10196078), (0.8571428571428571,0.18823529,0.18823529), (1,1,1)]}
-            case 'bivroy':
-                cdict = {'red': [(0,0,0), (0.1850,0.03922,0.03922), (0.4083,0.341176,0.341176), (0.5683,0.76078,0.76078), (0.6483,0.93725,0.93725), (1,1,1)],
-                         'green': [(0,0.066667,0.066667), (0.1850,0.74118,0.74118), (0.4083,0.17647,0.17647), (0.5683,0.094118,0.094118), (0.6483,0.17255,0.17255), (1,1,1)],
-                         'blue': [(0,0.22745,0.22745), (0.1850,0.97256,0.97256), (0.4083,0.27059,0.27059), (0.5683,0.11765,0.11765), (0.6483,0.09804,0.09804), (1,0.03922,0.03922)]}
-            case 'bivroy2':
-                cdict = {'red': [(0,0,0), (0.1850,0.03922,0.03922), (0.4083,0.38431,0.38431), (0.5683,0.76078,0.76078), (0.6483,0.93725,0.93725), (1,1,1)],
-                         'green': [(0,0.10588,0.10588), (0.1850,0.74118,0.74118), (0.4083,0,0), (0.5683,0.094118,0.094118), (0.6483,0.17255,0.17255), (1,1,1)],
-                         'blue': [(0,0.18824,0.18824), (0.1850,0.97256,0.97256), (0.4083,0.59216,0.59216), (0.5683,0.11765,0.11765), (0.6483,0.09804,0.09804), (1,0.03922,0.03922)]}
+        Custom colormaps as found in ``resources/appdata/custom_colormaps.xlsx``.
 
-        cmap = LinearSegmentedColormap(name, segmentdata=cdict, N=256)
+        Parameters
+        ----------
+        name : str
+            Name of colormap
+        N : int, optional
+            Number of colors to compute using colormap, by default None
+
+        Returns
+        -------
+        matplotlib.LinearSegmentedColormap
+            Colormap
+        """
+        if N is None:
+            N = 256
+
+        color_list = self.get_rgb_color(self.custom_color_dict[name])
+
+        cmap = colors.LinearSegmentedColormap.from_list(name, color_list, N=256)
 
         return cmap
 
@@ -5393,7 +5427,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.comboBoxColorByField.currentText() == 'Cluster':
             self.update_SV()
 
-    def set_default_cluster_colors(self):
+    def set_default_cluster_colors(self, mask=False):
         """Sets cluster group to default colormap
 
         Sets the colors in ``MainWindow.tableWidgetViewGroups`` to the default colormap in
@@ -5410,7 +5444,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # set color for each cluster and place color in table
         colors = [cmap(i) for i in range(cmap.N)]
-        hexcolor = []
+        if mask:
+            hexcolor = [self.styles['Cluster']['Scales']['OverlayColor']]
+        else:
+            hexcolor = []
         for i in range(self.tableWidgetViewGroups.rowCount()):
             hexcolor.append(self.get_hex_color(colors[i]))
             self.tableWidgetViewGroups.setItem(i,2,QTableWidgetItem(hexcolor[i]))
@@ -7575,7 +7612,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
         Creates the map on an ``MplCanvas``.  Each cluster category is assigned a unique color.
         """
-        #print('plot_cluster_map')
+        print('plot_cluster_map')
         canvas = MplCanvas(parent=self)
 
         plot_type = self.comboBoxPlotType.currentText()
@@ -7586,10 +7623,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         groups = self.data[self.sample_id]['computed_data'][plot_type][method].values
         reshaped_array = np.reshape(groups, self.array_size, order=self.order)
 
-        unique_groups = np.unique(['Cluster '+str(c) for c in groups])
-        unique_groups.sort()
+        unique_groups = []
+        for g in enumerate(np.unique(groups)):
+            if g == -1:
+                unique_groups.append('Mask') 
+            else:
+                unique_groups.append(f'Cluster {str(g)}')
+
         n_clusters = len(unique_groups)
-        print(unique_groups)
 
         # Extract colors from the colormap and assign to self.group_cmap
         # cmap = self.get_colormap(n_clusters)
@@ -7612,7 +7653,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         canvas.fig.subplots_adjust(left=0.05, right=1)  # Adjust these values as needed
         canvas.fig.tight_layout()
 
-        canvas.axes.set_title(f'Clusters ({method})')
+        canvas.axes.set_title(f'Clustering ({method})')
         canvas.axes.tick_params(direction=None,
             labelbottom=False, labeltop=False, labelright=False, labelleft=False,
             bottom=False, top=False, left=False, right=False)
@@ -7676,7 +7717,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """Computes cluster results
         
         Cluster properties are defined in the ``MainWindow.toolBox.ClusterPage``."""
-        #print('\n===compute_clusters===')
+        print('\n===compute_clusters===')
         if self.sample_id == '':
             return
 
@@ -7722,8 +7763,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Create labels array filled with -1
         #groups = np.full(filtered_array.shape[0], -1, dtype=int)
+        self.toolButtonGroupMask.blockSignals(True)
+        self.toolButtonGroupMaskInverse.blockSignals(True)
         self.toolButtonGroupMask.setChecked(False)
         self.toolButtonGroupMaskInverse.setChecked(False)
+        self.toolButtonGroupMask.blockSignals(False)
+        self.toolButtonGroupMaskInverse.blockSignals(False)
 
         self.statusbar.showMessage('Computing clusters...')
         match method:
@@ -7764,6 +7809,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_cluster_flag = False
 
     def plot_clusters(self):
+        """Plot maps associated with clustering
+
+        Will produce plots of Clusters or Cluster Scores and computes clusters if necesseary.
+        """        
+        print('plot_clusters')
         if self.sample_id == '':
             return
 
@@ -7923,7 +7973,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             cluster_color, cluster_label, cmap = self.get_cluster_colormap(cluster_dict, alpha=style['Markers']['Alpha'])
 
             clusters = cluster_dict['selected_clusters']
-            print(clusters)
             if 0 in list(cluster_dict.keys()):
                 cluster_flag = True
             else:
@@ -8130,6 +8179,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.sample_id == '':
             return
 
+        # block signals
+        self.tableWidgetViewGroups.blockSignals(True)
+        self.spinBoxClusterGroup.blockSignals(True)
+
         # Clear the list widget
         self.tableWidgetViewGroups.clear()
         self.tableWidgetViewGroups.setHorizontalHeaderLabels(['Name','Link','Color'])
@@ -8141,6 +8194,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 clusters.sort()
 
                 self.cluster_dict[method]['selected_clusters'] = []
+                try:
+                    self.cluster_dict[method].pop(-1)
+                except:
+                    pass
+
                 i = 0
                 while True:
                     try:
@@ -8155,27 +8213,39 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # set default colors for clusters and update associated widgets
                 self.spinBoxClusterGroup.setMinimum(1)
                 self.spinBoxClusterGroup.setMaximum(len(clusters))
-                hexcolor = self.set_default_cluster_colors()
+                if -1 in clusters:
+                    hexcolor = self.set_default_cluster_colors(mask=True)
+                else:
+                    hexcolor = self.set_default_cluster_colors(mask=False)
 
                 for c in clusters:
-                    cluster_name = f'Cluster {c+1}'
-                    #cluster_color = hexcolor[i]
+                    if -1 in clusters:
+                        r = c -1
+                        cluster_name = 'Mask'
+                    else:
+                        r = c
+                        cluster_name = f'Cluster {c+1}'
 
                     # Initialize the flag
                     self.isUpdatingTable = True
-                    self.tableWidgetViewGroups.setItem(c, 0, QTableWidgetItem(cluster_name))
-                    self.tableWidgetViewGroups.setItem(c, 1, QTableWidgetItem(''))
+                    self.tableWidgetViewGroups.setItem(r, 0, QTableWidgetItem(cluster_name))
+                    self.tableWidgetViewGroups.setItem(r, 1, QTableWidgetItem(''))
                     # colors in table are set by self.set_default_cluster_colors()
                     #self.tableWidgetViewGroups.setItem(i, 2, QTableWidgetItem(cluster_color))
-                    self.tableWidgetViewGroups.selectRow(c)
+                    self.tableWidgetViewGroups.selectRow(r)
                     
                     self.cluster_dict[method].update({c: {'name':cluster_name, 'link':[], 'color':hexcolor[c]}})
 
-                self.cluster_dict[method]['selected_clusters'] = clusters
+                if -1 in clusters:
+                    self.cluster_dict[method]['selected_clusters'] = clusters[1:]
+                else:
+                    self.cluster_dict[method]['selected_clusters'] = clusters
         else:
             print(f'(group_changed) Cluster method, ({method}) is not defined')
 
         print(self.cluster_dict)
+        self.tableWidgetViewGroups.blockSignals(False)
+        self.spinBoxClusterGroup.blockSignals(False)
         self.isUpdatingTable = False
 
     def cluster_label_changed(self, item):
@@ -8887,7 +8957,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
         # sort analyte sort based on method chosen by user
         self.analyte_list = self.sort_analytes(method, self.analyte_list)
-        print(self.analyte_list)
         
         # sort analyte dataframes in a self.data
         # Convert the 'analytes' column in DataFrame to a categorical type with the specified order
@@ -8922,8 +8991,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.sort_tree_branch(self.norm_ratios_items, self.analyte_list)
     
     def sort_tree_branch(self, branch, order_list):
-        print(branch)
-        print(branch.rowCount())
         #for i in range(branch.rowCount()):
         i = 0
         leaf = branch.child(i)
@@ -8937,7 +9004,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             leaf.removeRow(i)
 
         for row, (original_index, item) in enumerate(item_list):
-            print(i)
             leaf.insertRow(row, item)
 
         # # Sort this list based on the order_list ensuring that each item is found in the order_list

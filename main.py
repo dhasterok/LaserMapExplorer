@@ -2384,7 +2384,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.lineEditFMax.setText(self.dynamic_format(f_val['v_max']))
 
     def update_filter_table(self, reload = False):
-        """Update data for analysis when fiter table is updated."""
+        """Update data for analysis when fiter table is updated.
+
+        Parameters
+        ----------
+        reload : bool, optional
+            Reload ``True`` updates the filter table, by default False
+        """
         # If reload is True, clear the table and repopulate it from 'filter_info'
         if reload:
             # Clear the table
@@ -2421,7 +2427,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             def on_use_checkbox_state_changed(row, state):
                 # Update the 'use' value in the filter_df for the given row
                 self.data[self.sample_id]['filter_info'].at[row, 'use'] = state == QtCore.Qt.Checked
-
 
             field_type = self.comboBoxFilterFieldType.currentText()
             field = self.comboBoxFilterField.currentText()
@@ -2705,18 +2710,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return f'{{:.{order}g}}'.format(value)
 
     def update_norm(self,sample_id, norm=None, analyte_1=None, analyte_2=None, update=False):
-        """
+        """Update the norm of the data.
 
-        :param sample_id:
-        :type sample_id: int
-        :param norm: Defaults to None
-        :type norm: optional
-        :param analyte:
-        :type analyte:
-        :param update:
-        :type update:
-        """
-
+        Parameters
+        ----------
+        sample_id : str
+            Sample identifier
+        norm : str, optional
+            Data scale method ``linear`` or ``log``, by default None
+        analyte_1 : str, optional
+            Analyte, numerator of ratio if *analyte_2* is not None, by default None
+        analyte_2 : str, optional
+            Denominator of ratio, by default None
+        update : bool, optional
+            Update the scal information of the data, by default False
+        """        
         if analyte_1: #if normalising single analyte
             if not analyte_2: #not a ratio
                 self.data[sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['sample_id']==sample_id)
@@ -2889,7 +2897,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     ratio_array = np.clip(ratio_array, lq_val, uq_val)
 
                 if self.data[sample_id]['computed_data']['Ratio'].empty:
-                    self.data[sample_id]['computed_data']['Ratio']= self.data[sample_id]['cropped_raw_data'][['X','Y']]
+                    self.data[sample_id]['computed_data']['Ratio'] = self.data[sample_id]['cropped_raw_data'][['X','Y']]
                 self.data[sample_id]['computed_data']['Ratio'][ratio_name] = ratio_array
 
                 self.data[sample_id]['ratios_info'].at[idx, 'v_min'] = ratio_array.min()
@@ -9130,6 +9138,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :type norm_update: bool
         """
         #print('update_tree')
+        if self.sample_id == '':
+            return
 
         if darkdetect.isDark():
             hexcolor = '#696880'
@@ -9147,6 +9157,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return
 
         for analyte, norm in analyte_df.items():
+            print(analyte)
             if '/' in analyte:
                 analyte_1, analyte_2 = analyte.split(' / ')
                 self.update_ratio_df(self.sample_id, analyte_1, analyte_2, norm)
@@ -9296,6 +9307,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         tree_items = self.get_tree_items(tree)
 
         #Returns leaf_item & True if leaf exists, else returns branch_item, False
+        print(f'{tree} : {branch} : {leaf}')
         for index in range(tree_items.rowCount()):
             branch_item = tree_items.child(index)
             if branch_item.text() == branch:
@@ -9686,10 +9698,7 @@ class analyteSelectionWindow(QDialog, Ui_Dialog):
         self.comboBoxScale.currentIndexChanged.connect(self.update_all_combos)
 
         self.tableWidgetAnalytes.setVerticalHeaderLabels(analytes)
-        self.correlation_methods = [
-            "Pearson",
-            "Spearman",
-        ]
+        self.correlation_methods = ["Pearson", "Spearman"]
 
         for method in self.correlation_methods:
             self.comboBoxCorrelation.addItem(method)

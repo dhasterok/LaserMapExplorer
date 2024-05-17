@@ -1,9 +1,10 @@
 import sys, os, re, copy, csv, random, pickle, darkdetect
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QRectF, QPointF
+from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QRectF, QPointF, QUrl
 from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QVBoxLayout, QGridLayout, QMessageBox, QHeaderView, QMenu, QGraphicsRectItem
-from PyQt5.QtWidgets import QFileDialog, QWidget, QDialog, QLabel, QTableWidget, QInputDialog, QAbstractItemView, QProgressBar
+from PyQt5.QtWidgets import QFileDialog, QWidget, QDialog, QLabel, QTableWidget, QInputDialog, QAbstractItemView, QProgressBar, QApplication
 from PyQt5.QtGui import QIntValidator, QDoubleValidator, QColor, QImage, QPainter, QPixmap, QFont, QPen, QCursor, QBrush, QStandardItemModel, QStandardItem, QTextCursor, QDropEvent, QFontDatabase
+from PyQt5.QtWebEngineWidgets import QWebEngineView
 import pyqtgraph as pg
 from pyqtgraph.GraphicsScene import exportDialog
 from pyqtgraph import setConfigOption, colormap, ColorBarItem,ViewBox, TargetItem, ImageItem, GraphicsLayoutWidget, ScatterPlotItem, AxisItem, PlotDataItem
@@ -996,6 +997,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # compile rst
         self.toolButtonNotesSave.clicked.connect(self.save_notes_to_pdf)
+
+        # Browser
+        #-------------------------
+        self.open_browser()
+        self.toolButtonBrowserHome.clicked.connect(self.browser_home_callback)
+        self.lineEditBrowserLocation.editingFinished.connect(self.browser_location_callback)
+
 
         # Plot toolbars
         #-------------------------
@@ -9523,6 +9531,30 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # if it doesn't work
             QMessageBox.error(self.main_window,"Error", "Could not save to pdf.")
 
+    def open_browser(self):
+        # Open a file dialog to select a local HTML file
+        # Create a QWebEngineView widget
+        self.browser = QWebEngineView()
+        self.verticalLayoutBrowser.addWidget(self.browser)
+
+        #file_name, _ = QFileDialog.getOpenFileName(self, "Open HTML File", "", "HTML Files (*.html *.htm)")
+        self.browser_home_callback()
+
+    def browser_home_callback(self):
+        filename = os.path.abspath("docs/build/html/index.html")
+
+        if filename:
+            # Load the selected HTML file into the QWebEngineView
+            self.browser.setUrl(QUrl.fromLocalFile(filename))
+        
+    def browser_location_callback(self):
+        location = self.lineEditBrowserLocation.text()
+
+        try:
+            if location:
+                self.browser.setUrl(QUrl.fromLocalFile(os.path.abspath(location)))
+        except:
+            self.browser.setUrl(QUrl(os.path.abspath('docs/build/html/404.html')))
 
     # -------------------------------
     # Unclassified functions

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>640</width>
+    <width>552</width>
     <height>640</height>
    </rect>
   </property>
@@ -43,7 +43,7 @@
     <rect>
      <x>159</x>
      <y>10</y>
-     <width>471</width>
+     <width>386</width>
      <height>581</height>
     </rect>
    </property>
@@ -54,38 +54,25 @@
     <enum>QFrame::Raised</enum>
    </property>
    <property name="currentIndex">
-    <number>2</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="Files">
     <widget class="QWidget" name="formLayoutWidget">
      <property name="geometry">
       <rect>
-       <x>20</x>
+       <x>10</x>
        <y>25</y>
-       <width>431</width>
-       <height>151</height>
+       <width>366</width>
+       <height>162</height>
       </rect>
      </property>
      <layout class="QFormLayout" name="formLayout">
-      <item row="0" column="0">
-       <widget class="QLabel" name="analyteListsLabel">
-        <property name="text">
-         <string>Analyte lists</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="analyteListsLineEdit"/>
-      </item>
       <item row="1" column="0">
        <widget class="QLabel" name="colormapsLabel">
         <property name="text">
-         <string>Colormaps</string>
+         <string>Custom colormap file</string>
         </property>
        </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="colormapsLineEdit"/>
       </item>
       <item row="2" column="0">
        <widget class="QLabel" name="abundanceModelsLabel">
@@ -97,21 +84,180 @@
       <item row="2" column="1">
        <widget class="QLineEdit" name="abundanceModelsLineEdit"/>
       </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Default quick view</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QComboBox" name="comboBox"/>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Analyte sorting</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QComboBox" name="comboBox_2">
+        <item>
+         <property name="text">
+          <string>none</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>alphabetical</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>atomic number</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>mass</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>compatibility</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>radius</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="analyteListsLabel">
+        <property name="text">
+         <string>Default path</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="analyteListsLineEdit"/>
+      </item>
+      <item row="1" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QLineEdit" name="colormapsLineEdit"/>
+        </item>
+        <item>
+         <widget class="QToolButton" name="toolButton">
+          <property name="minimumSize">
+           <size>
+            <width>24</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>24</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../resources.qrc">
+            <normaloff>:/icons/resources/icons/icon-add-directory-64.png</normaloff>:/icons/resources/icons/icon-add-directory-64.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>18</width>
+            <height>18</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
      </layout>
     </widget>
    </widget>
-   <widget class="QWidget" name="Default">
-    <widget class="QWidget" name="formLayoutWidget_3">
+   <widget class="QWidget" name="Startup">
+    <widget class="QWidget" name="formLayoutWidget_2">
      <property name="geometry">
       <rect>
-       <x>25</x>
-       <y>40</y>
-       <width>160</width>
-       <height>162</height>
+       <x>20</x>
+       <y>35</y>
+       <width>279</width>
+       <height>301</height>
       </rect>
      </property>
-     <layout class="QFormLayout" name="formLayout_3">
+     <layout class="QFormLayout" name="formLayout_2">
+      <item row="0" column="1">
+       <widget class="QComboBox" name="comboBoxAnalyteScale">
+        <item>
+         <property name="text">
+          <string>linear</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>log</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="labelDefaultSort">
+        <property name="text">
+         <string>Sort analytes by</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="comboBoxDefaultSort">
+        <item>
+         <property name="text">
+          <string>none</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>alphabetical</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>atomic number</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>mass</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>compatibility</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>radius</string>
+         </property>
+        </item>
+       </widget>
+      </item>
       <item row="0" column="0">
+       <widget class="QLabel" name="LabelAnalyteScale">
+        <property name="text">
+         <string>Analyte Scale</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
        <widget class="QLabel" name="labelAnalyteUnits">
         <property name="font">
          <font>
@@ -124,7 +270,7 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
+      <item row="2" column="1">
        <widget class="QLineEdit" name="lineEditAnalyteUnits">
         <property name="maximumSize">
          <size>
@@ -146,7 +292,7 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
+      <item row="3" column="0">
        <widget class="QLabel" name="labelScaleUnits">
         <property name="font">
          <font>
@@ -159,7 +305,7 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item row="3" column="1">
        <widget class="QLineEdit" name="lineEditScaleUnits">
         <property name="maximumSize">
          <size>
@@ -181,14 +327,14 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
+      <item row="4" column="0">
        <widget class="QLabel" name="labelPressure">
         <property name="text">
          <string>Pressure</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
+      <item row="4" column="1">
        <widget class="QComboBox" name="comboBoxPUnits">
         <property name="maximumSize">
          <size>
@@ -216,14 +362,14 @@
         </item>
        </widget>
       </item>
-      <item row="3" column="0">
+      <item row="5" column="0">
        <widget class="QLabel" name="labelTemperature">
         <property name="text">
          <string>Temperature</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
+      <item row="5" column="1">
        <widget class="QComboBox" name="comboBoxTUnits">
         <property name="maximumSize">
          <size>
@@ -246,14 +392,14 @@
         </item>
        </widget>
       </item>
-      <item row="4" column="0">
+      <item row="6" column="0">
        <widget class="QLabel" name="labelDate">
         <property name="text">
          <string>Date</string>
         </property>
        </widget>
       </item>
-      <item row="4" column="1">
+      <item row="6" column="1">
        <widget class="QComboBox" name="comboBoxDateUnits">
         <property name="maximumSize">
          <size>
@@ -281,74 +427,33 @@
         </item>
        </widget>
       </item>
-     </layout>
-    </widget>
-   </widget>
-   <widget class="QWidget" name="Startup">
-    <widget class="QWidget" name="formLayoutWidget_2">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>35</y>
-       <width>188</width>
-       <height>80</height>
-      </rect>
-     </property>
-     <layout class="QFormLayout" name="formLayout_2">
-      <item row="0" column="1">
-       <widget class="QComboBox" name="comboBoxAnalyteScale">
-        <item>
-         <property name="text">
-          <string>linear</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>log</string>
-         </property>
-        </item>
-       </widget>
+      <item row="7" column="1">
+       <widget class="QFontComboBox" name="fontComboBox"/>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="labelDefaultSort">
+      <item row="7" column="0">
+       <widget class="QLabel" name="label">
         <property name="text">
-         <string>Sort isotopes by</string>
+         <string>Figure font</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QComboBox" name="comboBoxDefaultSort">
-        <item>
-         <property name="text">
-          <string>none</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>alphabetical</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>mass</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>atomic number</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>compatibility</string>
-         </property>
-        </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="labelFontSize">
+        <property name="text">
+         <string>Font size</string>
+        </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="LabelAnalyteScale">
-        <property name="text">
-         <string>Analyte Scale</string>
+      <item row="8" column="1">
+       <widget class="QDoubleSpinBox" name="fontSizeDoubleSpinBox">
+        <property name="minimum">
+         <double>4.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>48.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>11.000000000000000</double>
         </property>
        </widget>
       </item>
@@ -366,24 +471,15 @@
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
-    <item alignment="Qt::AlignLeft">
-     <widget class="QPushButton" name="pushButton_3">
-      <property name="text">
-       <string>Startup</string>
-      </property>
-      <property name="default">
-       <bool>false</bool>
-      </property>
-      <property name="flat">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-    <item alignment="Qt::AlignLeft">
+    <item>
      <widget class="QPushButton" name="pushButton_2">
       <property name="text">
        <string>Files</string>
       </property>
+      <property name="icon">
+       <iconset resource="../resources.qrc">
+        <normaloff>:/icons/resources/icons/icon-gear-64.png</normaloff>:/icons/resources/icons/icon-gear-64.png</iconset>
+      </property>
       <property name="default">
        <bool>false</bool>
       </property>
@@ -392,10 +488,34 @@
       </property>
      </widget>
     </item>
-    <item alignment="Qt::AlignLeft">
-     <widget class="QPushButton" name="pushButton">
+    <item>
+     <widget class="QPushButton" name="pushButton_3">
+      <property name="text">
+       <string>Styles</string>
+      </property>
+      <property name="icon">
+       <iconset resource="../resources.qrc">
+        <normaloff>:/icons/resources/icons/icon-style-pallette-64.png</normaloff>:/icons/resources/icons/icon-style-pallette-64.png</iconset>
+      </property>
+      <property name="default">
+       <bool>false</bool>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="pushButton_4">
       <property name="text">
        <string>Defaults</string>
+      </property>
+      <property name="icon">
+       <iconset resource="../resources.qrc">
+        <normaloff>:/icons/resources/icons/icon-scatter-64.png</normaloff>:/icons/resources/icons/icon-scatter-64.png</iconset>
+      </property>
+      <property name="autoDefault">
+       <bool>true</bool>
       </property>
       <property name="default">
        <bool>false</bool>

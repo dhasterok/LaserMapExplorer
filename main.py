@@ -745,7 +745,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Clustering Tab
         #-------------------------
-        self.spinBoxNClusters.valueChanged.connect(self.update_n_clusters)
+        # cluster dictionary
+        self.cluster_dict = {
+            'active method' : 'k-means',
+            'k-means':{'n_clusters':5, 'seed':23, 'selected_clusters':[]},
+            'fuzzy c-means':{'n_clusters':5, 'exponent':2.1, 'distance':'euclidean', 'seed':23, 'selected_clusters':[]}
+        }
+
+        # number of clusters
+        self.spinBoxNClusters.valueChanged.connect(self.number_of_clusters_callback)
 
         # Populate the comboBoxClusterDistance with distance metrics
         # euclidean (a.k.a. L2-norm) = euclidean
@@ -757,27 +765,23 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxClusterDistance.clear()
         self.comboBoxClusterDistance.addItems(distance_metrics)
         self.comboBoxClusterDistance.setCurrentIndex(0)
-        self.comboBoxClusterDistance.activated.connect(self.update_cluster_distance)
+        self.comboBoxClusterDistance.activated.connect(self.cluster_distance_callback)
 
+        # cluster exponent
         self.horizontalSliderClusterExponent.setMinimum(10)  # Represents 1.0 (since 10/10 = 1.0)
         self.horizontalSliderClusterExponent.setMaximum(30)  # Represents 3.0 (since 30/10 = 3.0)
         self.horizontalSliderClusterExponent.setSingleStep(1)  # Represents 0.1 (since 1/10 = 0.1)
         self.horizontalSliderClusterExponent.setTickInterval(1)
         self.horizontalSliderClusterExponent.valueChanged.connect(lambda value: self.labelClusterExponent.setText(str(value/10)))
-        self.horizontalSliderClusterExponent.sliderReleased.connect(self.update_cluster_exponent)
+        self.horizontalSliderClusterExponent.sliderReleased.connect(self.cluster_exponent_callback)
 
-        self.lineEditSeed.editingFinished.connect(self.update_cluster_seed)
+        # starting seed
+        self.lineEditSeed.editingFinished.connect(self.cluster_seed_callback)
         self.toolButtonRandomSeed.clicked.connect(self.generate_random_seed)
 
-        self.comboBoxClusterMethod.activated.connect(self.update_cluster_ui)
-
-        # cluster dictionary
-        self.cluster_dict = {
-            'active method' : 'k-means',
-            'k-means':{'n_clusters':5, 'seed':23, 'selected_clusters':[]},
-            'fuzzy c-means':{'n_clusters':5, 'exponent':2.1, 'distance':'euclidean', 'seed':23, 'selected_clusters':[]}
-        }
-        self.update_cluster_ui()
+        # cluster method
+        self.comboBoxClusterMethod.activated.connect(self.cluster_method_callback)
+        self.cluster_method_callback()
 
         # Connect cluster method comboBox to slot
         self.comboBoxClusterMethod.currentIndexChanged.connect(self.group_changed)
@@ -1030,9 +1034,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.autosaveTimer.setInterval(300000)
         self.autosaveTimer.timeout.connect(self.save_notes_file)
         
-        
-        
-
         # ----start debugging----
         # self.test_get_field_list()
         # ----end debugging----
@@ -1561,9 +1562,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.sample_id == '':
             return
 
+        self.comboBoxPlotType.blockSignals(True)
         self.comboBoxPlotType.clear()
         self.comboBoxPlotType.addItems(self.plot_types[self.toolBox.currentIndex()][1:])
         self.comboBoxPlotType.setCurrentIndex(self.plot_types[self.toolBox.currentIndex()][0])
+        self.comboBoxPlotType.blockSignals(False)
         self.set_style_widgets()
 
         if self.canvasWindow.currentIndex() == 0:
@@ -1795,20 +1798,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def plot_profile_and_table(self):
         self.profiling.plot_profiles()
         self.profiling.update_table_widget()
-
-    def update_clusters(self):
-        if not self.isUpdatingTable:
-            selected_clusters = []
-            method = self.cluster_dict['active method']
-            for idx in self.tableWidgetViewGroups.selectionModel().selectedRows():
-                selected_clusters.append(idx.row())
-
-            if selected_clusters:
-                self.cluster_dict[method]['selected_clusters'] = selected_clusters
-            else:
-                self.cluster_dict[method]['selected_clusters'] = []
-            if (self.comboBoxPlotType.currentText() != 'Cluster' or self.comboBoxPlotType.currentText() != 'Cluster Score'):
-                self.update_SV()
 
     # def update_color_bar_position(self):
     #     """Updates the color bar position on a figure
@@ -3780,6 +3769,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.clear_layout(self.widgetSingleView.layout())
         self.widgetSingleView.layout().addWidget(canvas)
 
+
     # -------------------------------------
     # Style related fuctions/callbacks
     # -------------------------------------
@@ -3879,7 +3869,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.styles['profile']['Lines']['LineWidth'] = 1.0
         self.styles['profile']['Markers']['Size'] = 12
         self.styles['profile']['Colors']['Color'] = '#d3d3d3'
-
 
     # Themes
     # -------------------------------------
@@ -5288,7 +5277,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.update_SV()
 
-    def  get_cluster_colormap(self, cluster_dict, alpha=100):
+    def get_cluster_colormap(self, cluster_dict, alpha=100):
         """Converts hex colors to a colormap
 
         Creates a discrete colormap given a list of hex color strings.  The colors in cluster_dict are set/changed in the ``MainWindow.tableWidgetViewGroups``.
@@ -5313,10 +5302,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             idx = range(n)
         cluster_color = [None]*n
         cluster_label = [None]*n
-        for c in idx:
-            color = self.get_rgb_color(cluster_dict[c]['color'])
-            cluster_color[c] = tuple(float(c)/255 for c in color) + (float(alpha)/100,)
-            cluster_label[c] = cluster_dict[c]['name']
+        for i in idx:
+            color = self.get_rgb_color(cluster_dict[i]['color'])
+            cluster_color[i] = tuple(float(c)/255 for c in color) + (float(alpha)/100,)
+            cluster_label[i] = cluster_dict[i]['name']
 
         cmap = colors.ListedColormap(cluster_color, N=n)
 
@@ -5416,6 +5405,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.update_SV()
 
     # cluster styles
+    # -------------------------------------
     def cluster_color_callback(self):
         """Updates color of a cluster
 
@@ -5472,14 +5462,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         return hexcolor
 
-    def select_cluster_group_callback(self):
-        """Set cluster color button background after change of selected cluster group
-
-        Sets ``MainWindow.toolButtonClusterColor`` background on change of ``MainWindow.spinBoxClusterGroup``
-        """
-        if self.tableWidgetViewGroups.rowCount() == 0:
-            return
-        self.toolButtonClusterColor.setStyleSheet("background-color: %s;" % self.tableWidgetViewGroups.item(self.spinBoxClusterGroup.value()-1,2).text())
 
 
     # -------------------------------------
@@ -5774,8 +5756,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # put plot_info back into table
         #print(plot_info)
         self.add_tree_item(plot_info)
-        
-        
         
     def move_widget_between_layouts(self,source_layout, target_layout, widget, row=None, col=None):
         """
@@ -7632,37 +7612,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         canvas = MplCanvas(parent=self)
 
         plot_type = self.comboBoxPlotType.currentText()
-        style = self.styles[plot_type]
         method = self.comboBoxClusterMethod.currentText()
+        style = self.styles[plot_type]
 
         # data frame for plotting
         groups = self.data[self.sample_id]['computed_data'][plot_type][method].values
         reshaped_array = np.reshape(groups, self.array_size, order=self.order)
 
-        unique_groups = []
-        for g in enumerate(np.unique(groups)):
-            if g == -1:
-                unique_groups.append('Mask') 
-            else:
-                unique_groups.append(f'Cluster {str(g)}')
+        n_clusters = len(np.unique(groups))
 
-        n_clusters = len(unique_groups)
-
-        # Extract colors from the colormap and assign to self.group_cmap
-        # cmap = self.get_colormap(n_clusters)
-        # colors = [cmap(i) for i in range(cmap.N)]
-        # for label, color in zip(unique_groups, colors):
-        #     self.group_cmap[label] = color
-
-        cluster_color, cluster_label, cmap = self.get_cluster_colormap(self.cluster_dict[method],alpha=style['Markers']['Alpha'])
+        cluster_color, cluster_label, cmap = self.get_cluster_colormap(self.cluster_dict[method], alpha=style['Markers']['Alpha'])
 
         #boundaries = np.arange(-0.5, n_clusters, 1)
         #norm = colors.BoundaryNorm(boundaries, cmap.N, clip=True)
         norm = self.color_norm(style,n_clusters)
 
         #cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=style['Colors']['Colormap'], norm=norm, aspect = self.aspect_ratio)
-        cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect = self.aspect_ratio)
-        cax.cmap.set_under(style['Scales']['OverlayColor'])
+        cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect=self.aspect_ratio)
+        #cax.cmap.set_under(style['Scales']['OverlayColor'])
 
         self.add_colorbar(canvas, cax, style, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color)
 
@@ -7676,58 +7643,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #canvas.axes.set_axis_off()
 
         return canvas
-
-    def update_n_clusters(self):
-        """Updates cluster dictionary with the new number of clusters
-
-        Updates ``MainWindow.cluster_dict[*method*]['n_clusters'] from ``MainWindow.spinBoxNClusters``.  Updates cluster results.
-        """
-        self.cluster_dict[self.comboBoxClusterMethod.currentText()]['n_clusters'] = self.spinBoxNClusters.value()
-
-        self.update_cluster_flag = True
-        self.update_SV()
-
-    def update_cluster_distance(self):
-        """Updates cluster dictionary with the new distance metric
-
-        Updates ``MainWindow.cluster_dict[*method*]['distance'] from ``MainWindow.comboBoxClusterDistance``.  Updates cluster results.
-        """
-        self.cluster_dict[self.comboBoxClusterMethod.currentText()]['distance'] = self.comboBoxClusterDistance.currentText()
-
-        self.update_cluster_flag = True
-        self.update_SV()
-
-    def update_cluster_exponent(self):
-        """Updates cluster dictionary with the new exponent
-
-        Updates ``MainWindow.cluster_dict[*method*]['exponent'] from ``MainWindow.horizontalSliderClusterExponent``.  Updates cluster results.
-        """
-        self.cluster_dict[self.comboBoxClusterMethod.currentText()]['exponent'] = self.horizontalSliderClusterExponent.value()/10
-
-        self.update_cluster_flag = True
-        self.update_SV()
-    
-    def update_cluster_seed(self):
-        """Updates cluster dictionary with the new exponent
-
-        Updates ``MainWindow.cluster_dict[*method*]['seed'] from ``MainWindow.lineEditSeed``.  Updates cluster results.
-        """
-        self.cluster_dict[self.comboBoxClusterMethod.currentText()]['exponent'] = int(self.lineEditSeed.text())
-
-        self.update_cluster_flag = True
-        self.update_SV()
-
-    def generate_random_seed(self):
-        """Generates a random seed for clustering
-
-        Updates ``MainWindow.cluster_dict[*method*]['seed'] using a random number generator with one of 10**9 integers. 
-        """        
-        r = random.randint(0,1000000000)
-        self.lineEditSeed.setText(str(r))
-        self.cluster_dict[self.comboBoxClusterMethod.currentText()]['seed'] = r
-
-        self.update_cluster_flag = True
-        self.update_SV()
 
     def compute_clusters(self):
         """Computes cluster results
@@ -7873,11 +7788,64 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.clear_layout(self.widgetSingleView.layout())
         self.widgetSingleView.layout().addWidget(canvas)
 
-    def update_cluster_ui(self):
+    def number_of_clusters_callback(self):
+        """Updates cluster dictionary with the new number of clusters
+
+        Updates ``MainWindow.cluster_dict[*method*]['n_clusters'] from ``MainWindow.spinBoxNClusters``.  Updates cluster results.
+        """
+        self.cluster_dict[self.comboBoxClusterMethod.currentText()]['n_clusters'] = self.spinBoxNClusters.value()
+
+        self.update_cluster_flag = True
+        self.update_SV()
+
+    def cluster_distance_callback(self):
+        """Updates cluster dictionary with the new distance metric
+
+        Updates ``MainWindow.cluster_dict[*method*]['distance'] from ``MainWindow.comboBoxClusterDistance``.  Updates cluster results.
+        """
+        self.cluster_dict[self.comboBoxClusterMethod.currentText()]['distance'] = self.comboBoxClusterDistance.currentText()
+
+        self.update_cluster_flag = True
+        self.update_SV()
+
+    def cluster_exponent_callback(self):
+        """Updates cluster dictionary with the new exponent
+
+        Updates ``MainWindow.cluster_dict[*method*]['exponent'] from ``MainWindow.horizontalSliderClusterExponent``.  Updates cluster results.
+        """
+        self.cluster_dict[self.comboBoxClusterMethod.currentText()]['exponent'] = self.horizontalSliderClusterExponent.value()/10
+
+        self.update_cluster_flag = True
+        self.update_SV()
+    
+    def cluster_seed_callback(self):
+        """Updates cluster dictionary with the new exponent
+
+        Updates ``MainWindow.cluster_dict[*method*]['seed'] from ``MainWindow.lineEditSeed``.  Updates cluster results.
+        """
+        self.cluster_dict[self.comboBoxClusterMethod.currentText()]['exponent'] = int(self.lineEditSeed.text())
+
+        self.update_cluster_flag = True
+        self.update_SV()
+
+    def generate_random_seed(self):
+        """Generates a random seed for clustering
+
+        Updates ``MainWindow.cluster_dict[*method*]['seed'] using a random number generator with one of 10**9 integers. 
+        """        
+        r = random.randint(0,1000000000)
+        self.lineEditSeed.setText(str(r))
+        self.cluster_dict[self.comboBoxClusterMethod.currentText()]['seed'] = r
+
+        self.update_cluster_flag = True
+        self.update_SV()
+
+    def cluster_method_callback(self):
         """Updates clustering-related widgets
 
         Enables/disables widgets in Left Toolbox > Clustering Page.  Updates widget values/text with values saved in ``MainWindow.cluster_dict``.
         """
+        print('cluster_method_callback')
         if self.sample_id == '':
             return
 
@@ -7890,8 +7858,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Number of Clusters
         self.labelNClusters.setEnabled(True)
+        self.spinBoxNClusters.blockSignals(True)
         self.spinBoxNClusters.setEnabled(True)
         self.spinBoxNClusters.setValue(int(self.cluster_dict[method]['n_clusters']))
+        self.spinBoxNClusters.blockSignals(False)
 
         match method:
             case 'k-means':
@@ -7911,8 +7881,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.lineEditSeed.setText(str(self.cluster_dict[method]['seed']))
 
             case 'fuzzy c-means':
-                self.spinBoxNClusters.setValue(int(self.cluster_dict[method]['n_clusters']))
-
                 # Enable parameters relevant to Fuzzy Clustering
                 # Exponent
                 self.labelExponent.setEnabled(True)
@@ -7930,7 +7898,43 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.lineEditSeed.setEnabled(True)
                 self.lineEditSeed.setText(str(self.cluster_dict[method]['seed']))
 
-        self.update_SV()
+        if self.update_cluster_flag:
+            self.update_SV()
+
+    def select_cluster_group_callback(self):
+        """Set cluster color button background after change of selected cluster group
+
+        Sets ``MainWindow.toolButtonClusterColor`` background on change of ``MainWindow.spinBoxClusterGroup``
+        """
+        if self.tableWidgetViewGroups.rowCount() == 0:
+            return
+        self.toolButtonClusterColor.setStyleSheet("background-color: %s;" % self.tableWidgetViewGroups.item(self.spinBoxClusterGroup.value()-1,2).text())
+
+    def update_clusters(self):
+        """Executed on update to cluster table.
+
+        Updates ``MainWindow.cluster_dict`` and plot when the selected cluster have changed.
+        """        
+        if not self.isUpdatingTable:
+            selected_clusters = []
+            method = self.cluster_dict['active method']
+
+            # get the selected clusters
+            for idx in self.tableWidgetViewGroups.selectionModel().selectedRows():
+                selected_clusters.append(idx.row())
+            selected_clusters.sort()
+
+            # update selected cluster list in cluster_dict
+            if selected_clusters:
+                if np.array_equal(self.cluster_dict[method]['selected_clusters'], selected_clusters):
+                    return
+                self.cluster_dict[method]['selected_clusters'] = selected_clusters
+            else:
+                self.cluster_dict[method]['selected_clusters'] = []
+
+            # update plot
+            if (self.comboBoxPlotType.currentText() not in ['Cluster', 'Cluster Score']) and (self.comboBoxColorByField.currentText() == 'Cluster'):
+                self.update_SV()
 
 
     # -------------------------------------
@@ -8235,8 +8239,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     hexcolor = self.set_default_cluster_colors(mask=False)
 
                 for c in clusters:
-                    if -1 in clusters:
-                        r = c -1
+                    if (-1 in clusters) and (c == -1):
+                        r = c - 1
                         cluster_name = 'Mask'
                     else:
                         r = c
@@ -9531,6 +9535,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # if it doesn't work
             QMessageBox.error(self.main_window,"Error", "Could not save to pdf.")
 
+    # def to_rst_table(df):
+    #     """Converts a Pandas DataFrame to a reST table string."""
+    #     def rst_row(row):
+    #         return ' '.join(f'{str(item):^10}' for item in row)
+
+    #     # Extracting column names and data as lists
+    #     columns = df.columns.tolist()
+    #     data = df.values.tolist()
+        
+    #     # Creating reST table components
+    #     header = rst_row(columns)
+    #     separator = ' '.join(['-'*10]*len(columns))
+    #     rows = [rst_row(row) for row in data]
+        
+    #     # Combining components into the reST table format
+    #     rst_table = '\n'.join([header, separator] + rows)
+    #     return rst_table
+
     def open_browser(self):
         # Open a file dialog to select a local HTML file
         # Create a QWebEngineView widget
@@ -10297,8 +10319,6 @@ class TableWidgetDragRows(QTableWidget):
             return True
         # noinspection PyTypeChecker
         return rect.contains(pos, True) and not (int(self.model().flags(index)) & Qt.ItemIsDropEnabled) and pos.y() >= rect.center().y()
-
-
 
 
 # Excel concatenator gui
@@ -11531,7 +11551,6 @@ class Profiling:
 
             self.plot_profiles()
             self.update_table_widget()
-
 
     def interpolate_points(self, interpolation_distance,radius):
         """

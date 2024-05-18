@@ -6967,15 +6967,15 @@
           <enum>QFrame::Raised</enum>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="StyleAxes">
           <property name="geometry">
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>100</width>
-            <height>30</height>
+            <width>239</width>
+            <height>461</height>
            </rect>
           </property>
           <attribute name="icon">
@@ -7333,7 +7333,7 @@
             <rect>
              <x>5</x>
              <y>0</y>
-             <width>253</width>
+             <width>231</width>
              <height>86</height>
             </rect>
            </property>
@@ -8411,8 +8411,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>100</width>
-            <height>30</height>
+            <width>239</width>
+            <height>461</height>
            </rect>
           </property>
           <attribute name="icon">
@@ -8470,7 +8470,7 @@
             <rect>
              <x>5</x>
              <y>225</y>
-             <width>211</width>
+             <width>231</width>
              <height>46</height>
             </rect>
            </property>
@@ -10143,7 +10143,7 @@
    <property name="minimumSize">
     <size>
      <width>428</width>
-     <height>309</height>
+     <height>280</height>
     </size>
    </property>
    <property name="maximumSize">

@@ -2603,7 +2603,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         selected_clusters = self.cluster_dict[method]['selected_clusters']
 
         # Invert list of selected clusters
-        if inverse:
+        if not inverse:
             selected_clusters = [cluster_idx for cluster_idx in range(self.cluster_dict[method]['n_clusters']) if cluster_idx not in selected_clusters]
 
         cluster_group = self.data[self.sample_id]['computed_data']['Cluster'].loc[:,method]
@@ -5295,19 +5295,23 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             A discrete (colors.ListedColormap) colormap
         """
         n = cluster_dict['n_clusters']
-        if -1 in list(cluster_dict.keys()):
-            n += 1
-            idx = range(-1,n-1)
-        else:
-            idx = range(n)
         cluster_color = [None]*n
         cluster_label = [None]*n
-        for i in idx:
+        
+        # convert colors from hex to rgb and add to cluster_color list
+        for i in range(n):
             color = self.get_rgb_color(cluster_dict[i]['color'])
             cluster_color[i] = tuple(float(c)/255 for c in color) + (float(alpha)/100,)
             cluster_label[i] = cluster_dict[i]['name']
 
-        cmap = colors.ListedColormap(cluster_color, N=n)
+        # mask
+        if 99 in list(cluster_dict.keys()):
+            color = self.get_rgb_color(cluster_dict[99]['color'])
+            cluster_color.append(tuple(float(c)/255 for c in color) + (float(alpha)/100,))
+            cluster_label.append(cluster_dict[99]['name'])
+            cmap = colors.ListedColormap(cluster_color, N=n+1)
+        else:
+            cmap = colors.ListedColormap(cluster_color, N=n)
 
         return cluster_color, cluster_label, cmap
 
@@ -5450,18 +5454,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # set color for each cluster and place color in table
         colors = [cmap(i) for i in range(cmap.N)]
-        if mask:
-            hexcolor = [self.styles['Cluster']['Scales']['OverlayColor']]
-        else:
-            hexcolor = []
+
+        hexcolor = []
         for i in range(self.tableWidgetViewGroups.rowCount()):
             hexcolor.append(self.get_hex_color(colors[i]))
+            self.tableWidgetViewGroups.blockSignals(True)
             self.tableWidgetViewGroups.setItem(i,2,QTableWidgetItem(hexcolor[i]))
+            self.tableWidgetViewGroups.blockSignals(False)
+
+        if mask:
+            hexcolor.append(self.styles['Cluster']['Scales']['OverlayColor'])
 
         self.toolButtonClusterColor.setStyleSheet("background-color: %s;" % self.tableWidgetViewGroups.item(self.spinBoxClusterGroup.value()-1,2).text())
 
         return hexcolor
-
 
 
     # -------------------------------------
@@ -7618,6 +7624,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # data frame for plotting
         groups = self.data[self.sample_id]['computed_data'][plot_type][method].values
         reshaped_array = np.reshape(groups, self.array_size, order=self.order)
+        if 99 in list(self.cluster_dict.keys()):
+            print(self.cluster_dict[99])
 
         n_clusters = len(np.unique(groups))
 
@@ -7690,7 +7698,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.data[self.sample_id]['computed_data']['Cluster'][['X','Y']] = self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
 
         # set all masked data to cluster id -1
-        self.data[self.sample_id]['computed_data']['Cluster'].loc[~self.data[self.sample_id]['mask'],method] = -1
+        self.data[self.sample_id]['computed_data']['Cluster'].loc[~self.data[self.sample_id]['mask'],method] = 99 
 
         # Create labels array filled with -1
         #groups = np.full(filtered_array.shape[0], -1, dtype=int)
@@ -8215,7 +8223,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 self.cluster_dict[method]['selected_clusters'] = []
                 try:
-                    self.cluster_dict[method].pop(-1)
+                    self.cluster_dict[method].pop(99)
                 except:
                     pass
 
@@ -8227,37 +8235,41 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     except:
                         break
 
-                # set number of rows in tableWidgetViewGroups
-                self.tableWidgetViewGroups.setRowCount(len(clusters))
 
+                # set number of rows in tableWidgetViewGroups
                 # set default colors for clusters and update associated widgets
                 self.spinBoxClusterGroup.setMinimum(1)
-                self.spinBoxClusterGroup.setMaximum(len(clusters))
-                if -1 in clusters:
+                if 99 in clusters:
+                    self.tableWidgetViewGroups.setRowCount(len(clusters)-1)
+                    self.spinBoxClusterGroup.setMaximum(len(clusters)-1)
+
                     hexcolor = self.set_default_cluster_colors(mask=True)
                 else:
+                    self.tableWidgetViewGroups.setRowCount(len(clusters))
+                    self.spinBoxClusterGroup.setMaximum(len(clusters))
+
                     hexcolor = self.set_default_cluster_colors(mask=False)
 
                 for c in clusters:
-                    if (-1 in clusters) and (c == -1):
-                        r = c - 1
+                    if c == 99:
                         cluster_name = 'Mask'
+                        self.cluster_dict[method].update({c: {'name':cluster_name, 'link':[], 'color':hexcolor[-1]}})
+                        break
                     else:
-                        r = c
                         cluster_name = f'Cluster {c+1}'
 
                     # Initialize the flag
                     self.isUpdatingTable = True
-                    self.tableWidgetViewGroups.setItem(r, 0, QTableWidgetItem(cluster_name))
-                    self.tableWidgetViewGroups.setItem(r, 1, QTableWidgetItem(''))
+                    self.tableWidgetViewGroups.setItem(c, 0, QTableWidgetItem(cluster_name))
+                    self.tableWidgetViewGroups.setItem(c, 1, QTableWidgetItem(''))
                     # colors in table are set by self.set_default_cluster_colors()
                     #self.tableWidgetViewGroups.setItem(i, 2, QTableWidgetItem(cluster_color))
-                    self.tableWidgetViewGroups.selectRow(r)
+                    self.tableWidgetViewGroups.selectRow(c)
                     
                     self.cluster_dict[method].update({c: {'name':cluster_name, 'link':[], 'color':hexcolor[c]}})
 
-                if -1 in clusters:
-                    self.cluster_dict[method]['selected_clusters'] = clusters[1:]
+                if 99 in clusters:
+                    self.cluster_dict[method]['selected_clusters'] = clusters[:-1]
                 else:
                     self.cluster_dict[method]['selected_clusters'] = clusters
         else:

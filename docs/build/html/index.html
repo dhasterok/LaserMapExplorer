@@ -29,6 +29,8 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=eafc0fe6" />
+    <link rel="stylesheet" type="text/css" href="_static/mpl.css?v=369bd9d1" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
@@ -378,7 +380,11 @@ document.write(`
                   
   <section id="welcome-to-laser-map-explorer-lame">
 <h1>Welcome to Laser Map Explorer (LaME)!<a class="headerlink" href="#welcome-to-laser-map-explorer-lame" title="Link to this heading">#</a></h1>
-<p>LaME is a graphical user interface for rapidly diplaying and analyzing data generated from LA-ICP-MS.  The app allows users to simply and quickly filter data, produce standard geochemical plots, perform multi-dimensional analyses, and more sophistocated computations relevant to geoscientific interpretation.</p>
+<p>LaME is a graphical user interface for rapidly diplaying and analyzing data generated from LA-ICP-MS.  The app allows users to simply and quickly filter data, produce standard geochemical plots, perform multi-dimensional analyses, and computations relevant to geoscientific interpretation.</p>
+<p>The penultimate goal is to allow users to intuitively analyze multi-analyte data, and produce publication ready figures with minimal effort.  The program is currently in beta release.  There are plenty of bugs and some features that have yet to be implemented.  Release notes below detail the progress and future plans.</p>
+<figure class="align-center">
+<img alt="LaME interface" src="_images/LaME_quickview.png" />
+</figure>
 <div class="toctree-wrapper compound">
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
@@ -388,7 +394,24 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="contact.html">Contact</a></li>
 </ul>
 </div>
-<p>Funding for this app has been provided by the <a class="reference external" href="https://minexcrc.com.au/">MinEx CRC</a>.</p>
+<section id="release-notes">
+<h2>Release notes:<a class="headerlink" href="#release-notes" title="Link to this heading">#</a></h2>
+<p>As this program is currently in beta, there are still some features that need to be completed/fixed.  Most plot functions are working.  Analyte maps, noise reduction, scatter and heatmaps, PCA and clustering are all working properly.  Histograms and correlation plots are also working.  Most plot types can be customized by selecting/filtering the data.  Masking and filtering are functional, but have not been extensively tested.  Profiling works, but is not yet displayed in an easy to customize format.  There are a few buttons that have planned functionality, but have yet to be implemented wholly or in part.  Note taking functions, figure saving, spot data, and the custom field calculator are places where fuctionality are not at 100%.</p>
+<p>We can use your help to identify bugs, places where the program is not intuitive, and/or layout can be improved.  We would also like to know what features you would like to see.  For instance, are there types of analyses, plots, or auto-generated note capabilites that you might like to see?</p>
+<p>The documentation can be accessed through the help browser in the bottom dock.  Since the documentation is integrated with the program it should be viewable when offline.  The documentation is not yet complete.</p>
+</section>
+<section id="know-issues">
+<h2>Know issues:<a class="headerlink" href="#know-issues" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Ratios are not currently being added to the plot selector, but are at the top of the list to correct.</p></li>
+<li><p>Log scaling may not be implemented properly in all cases yet (e.g., maps, PCA, Clustering).</p></li>
+<li><p>Not all buttons are set up yet.</p></li>
+<li><p>Crop tool does not allow adjustment.</p></li>
+</ul>
+<p>If you would like to contribute in any way to the improvement of the program, have feature requests or would like to help with documentation, please contact us via the GitHub project page or using the email link on the <a href="#id1"><span class="problematic" id="id2">`Contact &lt;&gt;`_</span></a> page.</p>
+<p>Funding for this app has been provided by the <a class="reference external" href="https://minexcrc.com.au/">MinEx CRC</a> by developers at
+the <a class="reference external" href="https://www.adelaide.edu.au/">University of Adelaide</a>.</p>
+</section>
 </section>
 
 
@@ -419,6 +442,19 @@ document.write(`
               
                 <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#release-notes">Release notes:</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#know-issues">Know issues:</a></li>
+</ul>
+  </nav></div>
 
   <div class="sidebar-secondary-item">
 

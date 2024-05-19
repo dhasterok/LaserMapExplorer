@@ -10143,7 +10143,7 @@
    <property name="minimumSize">
     <size>
      <width>428</width>
-     <height>280</height>
+     <height>309</height>
     </size>
    </property>
    <property name="maximumSize">
@@ -10196,7 +10196,7 @@
         <string>Pop the figure out into a separate window</string>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>4</number>
        </property>
        <widget class="QWidget" name="tabNotes">
         <property name="sizePolicy">
@@ -11206,13 +11206,19 @@
              <property name="maximumSize">
               <size>
                <width>16777215</width>
-               <height>60</height>
+               <height>40</height>
               </size>
              </property>
              <property name="title">
               <string/>
              </property>
              <layout class="QHBoxLayout" name="horizontalLayout_7">
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
               <item>
                <widget class="QToolButton" name="toolButtonBrowserHome">
                 <property name="minimumSize">
@@ -11243,6 +11249,70 @@
                </widget>
               </item>
               <item>
+               <widget class="QToolButton" name="toolButtonBack">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>28</width>
+                  <height>28</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>28</width>
+                  <height>28</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>...</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="../resources.qrc">
+                  <normaloff>:/icons/resources/icons/icon-left-arrow-64.png</normaloff>:/icons/resources/icons/icon-left-arrow-64.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>20</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QToolButton" name="toolButtonForward">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>28</width>
+                  <height>28</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>28</width>
+                  <height>28</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>...</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="../resources.qrc">
+                  <normaloff>:/icons/resources/icons/icon-right-arrow-64.png</normaloff>:/icons/resources/icons/icon-right-arrow-64.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>20</width>
+                  <height>18</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
                <widget class="QLabel" name="label">
                 <property name="text">
                  <string>file:///</string>
@@ -11250,7 +11320,20 @@
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="lineEditBrowserLocation"/>
+               <widget class="QLineEdit" name="lineEditBrowserLocation">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>20</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </widget>
               </item>
              </layout>
             </widget>

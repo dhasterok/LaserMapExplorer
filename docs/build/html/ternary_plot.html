@@ -29,6 +29,8 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=eafc0fe6" />
+    <link rel="stylesheet" type="text/css" href="_static/mpl.css?v=369bd9d1" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
@@ -415,20 +417,77 @@ document.write(`
 <dl class="py class">
 <dt class="sig sig-object py" id="ternary_plot.ternary">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ternary_plot.</span></span><span class="sig-name descname"><span class="pre">ternary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'scatter'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ternary'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_spacing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_spacing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ternary_plot.ternary" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Initialize the ternary plotting class.</p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Ternary plotting class, produces ternary axes and creates various plot types.</p>
+<p>The ternary plotting class can be used to produce scatter plots, heatmaps, or produce ternary coloring maps that can be used to color points</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>ax</strong> (<em>matplotlib.axes</em>) – Axes object for displaying ternary diagram</p></li>
-<li><p><strong>labels</strong> (<em>list</em><em> of </em><em>str</em>) – vertex labels</p></li>
-<li><p><strong>plot_type</strong> (<em>str</em><em>, </em><em>optional</em>) – Defaults to ‘scatter’</p></li>
-<li><p><strong>style</strong> (<em>str</em><em>, </em><em>optional</em>) – ternary plot style, ternary (triangle) or quaternary (diamond)</p></li>
-<li><p><strong>dg</strong> (<em>double</em><em>, </em><em>optional</em>) – grid spacing (0,1), Defaults to None</p></li>
-<li><p><strong>dt</strong> (<em>double</em><em>, </em><em>optional</em>) – tick spacing (0,1), Defaults to None</p></li>
-</ul>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>ax</strong><span class="classifier">matplotlib.axes</span></dt><dd><p>Axes object for displaying ternary diagram</p>
+</dd>
+<dt><strong>labels</strong><span class="classifier">list of str</span></dt><dd><p>Vertex labels</p>
+</dd>
+<dt><strong>plot_type</strong><span class="classifier">str, optional</span></dt><dd><p>Defaults to ‘scatter’</p>
+</dd>
+<dt><strong>style</strong><span class="classifier">str, optional</span></dt><dd><p>Ternary plot style, ternary (triangle) or quaternary (diamond)</p>
+</dd>
+<dt><strong>grid_spacing</strong><span class="classifier">float, optional</span></dt><dd><p>grid spacing (0,1), Defaults to None</p>
+</dd>
+<dt><strong>tick_spacing</strong><span class="classifier">float, optional</span></dt><dd><p>tick spacing (0,1), Defaults to None</p>
 </dd>
 </dl>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>ValueError</dt><dd><p>‘Bins must be a positive integer’, requires bin values are positive.</p>
+</dd>
+<dt>ValueError</dt><dd><p>‘Number of vertices must be 3 or 4’, 3 verticies are required for ternary diagram and 4 for quaternary (double ternary).</p>
+</dd>
+<dt>ValueError</dt><dd><p>‘Tick spacing must be between 0 and 1’</p>
+</dd>
+<dt>ValueError</dt><dd><p>“Style must be ‘ternary’ or ‘quaternary’”</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ternary_plot.ternary.cplane" title="ternary_plot.ternary.cplane"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cplane</span></code></a>(a, b, c, ca, cb, cc, p, cp)</p></td>
+<td><p>Determines colors for a set of points (a,b,c) within a ternary</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ternary_plot.ternary.cplanexy" title="ternary_plot.ternary.cplanexy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cplanexy</span></code></a>(xd, yd, xp, yp, cp, x1, y1, cv1, ...)</p></td>
+<td><p>Fits a plane to (x,y,color) data</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ternary_plot.ternary.hexagon" title="ternary_plot.ternary.hexagon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hexagon</span></code></a>(bins)</p></td>
+<td><p>Creates hexagonal bins within a ternary</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ternary_plot.ternary.tern2xy" title="ternary_plot.ternary.tern2xy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tern2xy</span></code></a>(a, b, c)</p></td>
+<td><p>Converts ternary (a,b,c) points to cartesian (x,y) coordinates.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ternary_plot.ternary.ternaxes" title="ternary_plot.ternary.ternaxes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ternaxes</span></code></a>([labels])</p></td>
+<td><p>Set up ternary plot axes with optional labeling for a quaternary plot.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ternary_plot.ternary.terncolor" title="ternary_plot.ternary.terncolor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">terncolor</span></code></a>(a, b, c[, ca, cb, cc, p, cp])</p></td>
+<td><p>Computes colors using a ternary colormap</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ternary_plot.ternary.terngrid" title="ternary_plot.ternary.terngrid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">terngrid</span></code></a>([spacing])</p></td>
+<td><p>Adds ternary grid lines to ternary axes.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ternary_plot.ternary.ternhex" title="ternary_plot.ternary.ternhex"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ternhex</span></code></a>([a, b, c, val, hexbin_df, ...])</p></td>
+<td><p>Creates a heatmap from a set of hexgonal bins</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ternary_plot.ternary.ternscatter" title="ternary_plot.ternary.ternscatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ternscatter</span></code></a>(a, b, c[, d, size, cmap, color, ...])</p></td>
+<td><p>Scatter plot data on ternary axes.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ternary_plot.ternary.ternticks" title="ternary_plot.ternary.ternticks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ternticks</span></code></a>([spacing])</p></td>
+<td><p>Adds ternary tick marks to ternary axes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ternary_plot.ternary.xy2tern" title="ternary_plot.ternary.xy2tern"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xy2tern</span></code></a>(x, y)</p></td>
+<td><p>Converts cartesian (x,y) points to ternary (a,b,c) coordinates.</p></td>
+</tr>
+</tbody>
+</table>
 <dl class="py method">
 <dt class="sig sig-object py" id="ternary_plot.ternary.cplane">
 <span class="sig-name descname"><span class="pre">cplane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ca</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cp</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ternary_plot.ternary.cplane" title="Link to this definition">#</a></dt>
@@ -438,22 +497,22 @@ location within the triangle, the function computes a gradient for any set of po
 within the triangle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>a</strong> (<em>np.array</em>) – a coordinate of data points where color is computed</p></li>
-<li><p><strong>b</strong> (<em>np.array</em>) – b coordinate of data points where color is computed</p></li>
-<li><p><strong>c</strong> (<em>np.array</em>) – c coordinate of data points where color is computed</p></li>
-<li><p><strong>ca</strong> (<em>np.array</em>) – color at each vertex a</p></li>
-<li><p><strong>cb</strong> (<em>np.array</em>) – color at each vertex b</p></li>
-<li><p><strong>cc</strong> (<em>np.array</em>) – color at each vertex c</p></li>
-<li><p><strong>p</strong> (<em>np.array</em>) – location of point within ternary</p></li>
-<li><p><strong>cp</strong> (<em>np.array</em>) – color at p</p></li>
-</ul>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>a, b, c</strong><span class="classifier">np.array</span></dt><dd><p>Ternary coordinates of data points where color is computed</p>
+</dd>
+<dt><strong>ca, cb, cc</strong><span class="classifier">np.array</span></dt><dd><p>Colors set at verticies</p>
+</dd>
+<dt><strong>p</strong><span class="classifier">np.array</span></dt><dd><p>Location of interior point where an additional color can be defined (i.e., cp)</p>
+</dd>
+<dt><strong>cp</strong><span class="classifier">np.array</span></dt><dd><p>Color at p, default is [], which will use average of colors</p>
+</dd>
+</dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>cval, colors at (a,b,c)</p>
+<dd class="field-even"><dl class="simple">
+<dt>np.array</dt><dd><p>cval, colors at (a,b,c)</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>np.array</p>
+</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -466,25 +525,28 @@ within the triangle.</p>
 color of know points.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>xd</strong> (<em>np.array</em>) – x Cartesian coordinates for data within ternary</p></li>
-<li><p><strong>yd</strong> (<em>np.array</em>) – y Cartesian coordinates for data within ternary</p></li>
-<li><p><strong>xp</strong> (<em>double</em>) – x coordinate of point within ternary</p></li>
-<li><p><strong>yp</strong> (<em>double</em>) – y coordinate of point within ternary</p></li>
-<li><p><strong>cp</strong> (<em>np.array</em>) – color at point within ternary</p></li>
-<li><p><strong>x1</strong> (<em>double</em>) – x coordinate at ternary vertex 1</p></li>
-<li><p><strong>y1</strong> (<em>double</em>) – y coordinate at ternary vertex 1</p></li>
-<li><p><strong>cv1</strong> (<em>np.array</em>) – color at vertex 1</p></li>
-<li><p><strong>x2</strong> (<em>double</em>) – x coordinate at ternary vertex 2</p></li>
-<li><p><strong>y2</strong> (<em>double</em>) – y coordinate at ternary vertex 2</p></li>
-<li><p><strong>cv2</strong> (<em>np.array</em>) – color at vertex 2</p></li>
-</ul>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>xd, yd</strong><span class="classifier">np.array</span></dt><dd><p>Cartesian coordinates for data within ternary</p>
+</dd>
+<dt><strong>xp, yp</strong><span class="classifier">float</span></dt><dd><p>Coordinates of point within ternary</p>
+</dd>
+<dt><strong>cp</strong><span class="classifier">np.array</span></dt><dd><p>color at point within ternary</p>
+</dd>
+<dt><strong>x1, y1</strong><span class="classifier">float</span></dt><dd><p>Coordinates at ternary vertex 1</p>
+</dd>
+<dt><strong>cv1</strong><span class="classifier">np.array</span></dt><dd><p>Color at vertex 1</p>
+</dd>
+<dt><strong>x2, y2</strong><span class="classifier">float</span></dt><dd><p>Coordinates at ternary vertex 2</p>
+</dd>
+<dt><strong>cv2</strong><span class="classifier">np.array</span></dt><dd><p>Color at vertex 2</p>
+</dd>
+</dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>cval, colors at (a,b,c)</p>
+<dd class="field-even"><dl class="simple">
+<dt>np.array</dt><dd><p>cval, colors at (a,b,c)</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>np.array</p>
+</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -495,15 +557,17 @@ color of know points.</p>
 <dd><p>Creates hexagonal bins within a ternary</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>n</strong> (<em>int</em>) – Hexagonal cell resolution, equivalent to n+1 cells across the bottom
-ternary axis</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>n</strong><span class="classifier">int</span></dt><dd><p>Hexagonal cell resolution, equivalent to n+1 cells across the bottom</p>
+</dd>
+</dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>hexbin, Dictionary of hexagonal bins, including verticies, in Cartesian
+<dd class="field-even"><dl class="simple">
+<dt>dict</dt><dd><p>hexbin, Dictionary of hexagonal bins, including verticies, in Cartesian
 coordinates and the center of each cell</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>dict</p>
+</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -516,11 +580,10 @@ coordinates and the center of each cell</p>
 the Cartesian origin is defined at the midpoint between b and c.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>a</strong> (<em>np.array</em>) – top vertex coordinates</p></li>
-<li><p><strong>b</strong> (<em>np.array</em>) – left vertex coordinates</p></li>
-<li><p><strong>c</strong> (<em>np.array</em>) – right vertex coordinates</p></li>
-</ul>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>a, b, c</strong><span class="classifier">np.array</span></dt><dd><p>Top, left and right vertex coordinates, respectively</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -531,7 +594,10 @@ the Cartesian origin is defined at the midpoint between b and c.</p>
 <dd><p>Set up ternary plot axes with optional labeling for a quaternary plot.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>labels</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – List of strings for the labels of the axes.</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>labels</strong><span class="classifier">list of str</span></dt><dd><p>List of strings for the labels of the axes.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -543,24 +609,22 @@ the Cartesian origin is defined at the midpoint between b and c.</p>
 <p>Given four colors, one for each vertex of a ternary and a fourth at an arbitrary
 location within the triangle, the function computes a gradient for any set of points
 within the triangle.  Default color scheme is yellow-green-navy.</p>
+<dl class="simple">
+<dt>a, b, c<span class="classifier">np.array</span></dt><dd><p>Ternary coordinates of data points where color is to be computed</p>
+</dd>
+<dt>ca, cb, cc<span class="classifier">np.array, optional</span></dt><dd><p>Colors set at verticies, by defaults ca=[0.3,0.73,0.1], cb=[0,0,0.15], cc=[1/3,1/3,1/3]</p>
+</dd>
+<dt>p<span class="classifier">np.array, optional</span></dt><dd><p>Location of interior point where an additional color can be defined (i.e., cp)</p>
+</dd>
+<dt>cp<span class="classifier">np.array, optional</span></dt><dd><p>Color at p, default is [], which will use average of colors</p>
+</dd>
+</dl>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>a</strong> (<em>np.array</em>) – a coordinate of data points where color is computed</p></li>
-<li><p><strong>b</strong> (<em>np.array</em>) – b coordinate of data points where color is computed</p></li>
-<li><p><strong>c</strong> (<em>np.array</em>) – c coordinate of data points where color is computed</p></li>
-<li><p><strong>ca</strong> (<em>np.array</em><em>, </em><em>optional</em>) – color at top vertex, Defaults to [0.3,0.73,0.1]</p></li>
-<li><p><strong>cb</strong> (<em>np.array</em><em>, </em><em>optional</em>) – color at left vertex, Defaults to [0,0,0.15]</p></li>
-<li><p><strong>cc</strong> (<em>np.array</em><em>, </em><em>optional</em>) – color at right vertex, Defaults to [1/3,1/3,1/3]</p></li>
-<li><p><strong>p</strong> (<em>np.array</em><em>, </em><em>optional</em>) – location of point within ternary associated with cp</p></li>
-<li><p><strong>cp</strong> (<em>np.array</em><em>, </em><em>optional</em>) – color at p, default is [], which will use average of colors</p></li>
-</ul>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>np.array</dt><dd><p>cval, colors at (a,b,c)</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>cval, colors at (a,b,c)</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>np.array</p>
+</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -572,10 +636,12 @@ within the triangle.  Default color scheme is yellow-green-navy.</p>
 <p>Updates current ternary axes with tick marks.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>spacing</strong> (<em>double</em>) – Grid spacing. Default is 0.1 units.</p></li>
-<li><p><strong>nvertices</strong> (<em>int</em>) – Number of vertices, either 3 or 4.</p></li>
-</ul>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>spacing</strong><span class="classifier">float</span></dt><dd><p>Grid spacing, by default 0.1 units.</p>
+</dd>
+<dt><strong>nvertices</strong><span class="classifier">int</span></dt><dd><p>Number of vertices, either 3 or 4.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -586,32 +652,26 @@ within the triangle.  Default color scheme is yellow-green-navy.</p>
 <dd><p>Creates a heatmap from a set of hexgonal bins</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>a</strong> (<em>np.array</em>) – locations of points within a ternary system, not needed if hexbin_df is provided,
-Defaults to None</p></li>
-<li><p><strong>b</strong> (<em>np.array</em>) – locations of points within a ternary system, not needed if hexbin_df is provided,
-Defaults to None</p></li>
-<li><p><strong>c</strong> (<em>np.array</em>) – locations of points within a ternary system, not needed if hexbin_df is provided,
-Defaults to None</p></li>
-<li><p><strong>val</strong> (<em>np.array</em>) – a fourth-dimension, compute statistics of val within each hexbin,
-not supplied if hexbin_df is provided, Defaults to None</p></li>
-<li><p><strong>hexbin_df</strong> (<em>pandas.DataFrame</em>) – a data frame containing statistics from a previously call to ternhex, in this case,
-do not supply a, b, c, or val, Defaults to None</p></li>
-<li><p><strong>plotfield</strong> (<em>str</em>) – field in hexbin_df to plot, values may include [‘n’, ‘mean’, ‘median’, ‘std’]
-if None, no plot is produced, but hexbin_df is returned, Defaults to None</p></li>
-<li><p><strong>bins</strong> (<em>int</em>) – resolution factor (bins+1 hexagons across bottom axis)</p></li>
-<li><p><strong>cmap</strong> – colormap, Defaults to None</p></li>
-<li><p><strong>norm</strong> (<em>matplotlib.colors.Norm</em>) – normalize colormap</p></li>
-<li><p><strong>orientation</strong> (<em>str</em>) – orientation of colormap, ‘horizontal’ (default) or vertical</p></li>
-</ul>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>a, b, c</strong><span class="classifier">np.array, optional</span></dt><dd><p>Locations of points within a ternary system, not needed if hexbin_df is provided, by default None</p>
+</dd>
+<dt><strong>val</strong><span class="classifier">np.array, optional</span></dt><dd><p>A fourth-dimension, compute statistics of val within each hexbin, not supplied if hexbin_df is provided, by default None</p>
+</dd>
+<dt><strong>hexbin_df</strong><span class="classifier">pandas.DataFrame, optional</span></dt><dd><p>A data frame containing statistics from a previously call to ternhex, in this case, do not supply a, b, c, or val, by default None</p>
+</dd>
+<dt><strong>plotfield</strong><span class="classifier">str, optional</span></dt><dd><p>Field in hexbin_df to plot, values may include [‘n’, ‘mean’, ‘median’, ‘std’]. If None, no plot is produced, but hexbin_df is returned, by defaults None</p>
+</dd>
+<dt><strong>bins</strong><span class="classifier">int, optional</span></dt><dd><p>Resolution factor (bins+1 hexagons across bottom axis), by default 10</p>
+</dd>
+<dt><strong>cmap</strong><span class="classifier">matplotlib.colors.Colormap</span></dt><dd><p>colormap, by defaults None</p>
+</dd>
+<dt><strong>norm</strong><span class="classifier">matplotlib.colors.Norm, optional</span></dt><dd><p>Normalize colormap</p>
+</dd>
+<dt><strong>orientation</strong><span class="classifier">str, optional</span></dt><dd><p>orientation of colormap, <code class="docutils literal notranslate"><span class="pre">horizontal</span></code> or <code class="docutils literal notranslate"><span class="pre">vertical</span></code>, by default horizontal</p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ternary_plot.ternary.ternmap">
-<span class="sig-name descname"><span class="pre">ternmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ca</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[1,</span> <span class="pre">1,</span> <span class="pre">0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0.3,</span> <span class="pre">0.73,</span> <span class="pre">0.1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0.15]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0.3333333333333333,</span> <span class="pre">0.3333333333333333,</span> <span class="pre">0.3333333333333333]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ternary_plot.ternary.ternmap" title="Link to this definition">#</a></dt>
-<dd><p>Generates a raster map colored by position within a ternary plot.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -622,23 +682,35 @@ if None, no plot is produced, but hexbin_df is returned, Defaults to None</p></l
 matplotlib scatter.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>a</strong> (<em>np.array</em>) – coordinate associated with top vertex</p></li>
-<li><p><strong>b</strong> (<em>np.array</em>) – coordinate associated with left vertex</p></li>
-<li><p><strong>c</strong> (<em>np.array</em>) – coordinate associated with right vertex</p></li>
-<li><p><strong>d</strong> (<em>np.array</em><em>, </em><em>optional</em>) – coordinate associated with bottom vertex (diamond plot)</p></li>
-<li><p><strong>size</strong> (<em>double</em><em>, </em><em>optional</em>) – Marker size (in points), Defaults to 36</p></li>
-<li><p><strong>cmap</strong> (<em>matplotlib.Colormap</em>) – Colormap, Defaults to None</p></li>
-<li><p><strong>color</strong> (<em>optional</em>) – Defaults to None</p></li>
-<li><p><strong>norm</strong> (<em>matplotlib.colors.Norm</em>) – normalize colormap</p></li>
-<li><p><strong>edgecolors</strong> (<em>optional</em>) – Defaults to None</p></li>
-<li><p><strong>marker</strong> (<em>str</em><em>, </em><em>optional</em>) – Symbol used for plotting, Defaults to ‘o’</p></li>
-<li><p><strong>categories</strong> (<em>optional</em>) – Defaults to None</p></li>
-<li><p><strong>labels</strong> (<em>bool</em><em>, </em><em>optional</em>) – </p></li>
-</ul>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>a, b, c</strong><span class="classifier">np.array</span></dt><dd><p>Coordinate associated with top, left and right vertices, respectively</p>
+</dd>
+<dt><strong>d</strong><span class="classifier">np.array, optional</span></dt><dd><p>Coordinate associated with bottom vertex of quaternary (diamond) plot, by default None</p>
+</dd>
+<dt><strong>size</strong><span class="classifier">float, optional</span></dt><dd><p>Marker size (in points), by defaults 36</p>
+</dd>
+<dt><strong>cmap</strong><span class="classifier">matplotlib.Colormap, optional</span></dt><dd><p>Colormap if points are to be colored by value, by defaults None</p>
+</dd>
+<dt><strong>color</strong><span class="classifier">optional</span></dt><dd><p>Color of markers, defaults to None</p>
+</dd>
+<dt><strong>norm</strong><span class="classifier">matplotlib.colors.norm</span></dt><dd><p>Normalize colormap</p>
+</dd>
+<dt><strong>edgecolors</strong><span class="classifier">optional</span></dt><dd><p>By default None</p>
+</dd>
+<dt><strong>marker</strong><span class="classifier">str, optional</span></dt><dd><p>Symbol used for plotting, Defaults to ‘o’</p>
+</dd>
+<dt><strong>categories</strong><span class="classifier">optional</span></dt><dd><p>Values used to determine color for plotting.  If categries is a set of discrete categories, add <code class="docutils literal notranslate"><span class="pre">labels=True</span></code>
+to display a legend with values for labels, by default None</p>
+</dd>
+<dt><strong>labels: bool, optional</strong></dt><dd><p>Indicates categories are lables</p>
+</dd>
+</dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>t, scatter plot object, legend (if applicable)</p>
+<dd class="field-even"><dl class="simple">
+<dt>matplotlib.scatter_object</dt><dd><p>Scatter plot object, legend (if applicable)</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -650,7 +722,10 @@ matplotlib scatter.</p>
 <p>Updates current ternary axes with tick marks.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>spacing</strong> (<em>double</em>) – Distance between tick marks.</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>spacing</strong><span class="classifier">float</span></dt><dd><p>Distance between tick marks.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -663,10 +738,10 @@ matplotlib scatter.</p>
 the Cartesian origin is defined at the midpoint between b and c.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<em>np.array</em>) – x coordinates</p></li>
-<li><p><strong>y</strong> (<em>np.array</em>) – y coordinates</p></li>
-</ul>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x, y</strong><span class="classifier">np.array</span></dt><dd><p>Cartesian, x and y coordinates</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -712,7 +787,6 @@ the Cartesian origin is defined at the midpoint between b and c.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ternary_plot.ternary.terncolor"><code class="docutils literal notranslate"><span class="pre">ternary.terncolor()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ternary_plot.ternary.terngrid"><code class="docutils literal notranslate"><span class="pre">ternary.terngrid()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ternary_plot.ternary.ternhex"><code class="docutils literal notranslate"><span class="pre">ternary.ternhex()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ternary_plot.ternary.ternmap"><code class="docutils literal notranslate"><span class="pre">ternary.ternmap()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ternary_plot.ternary.ternscatter"><code class="docutils literal notranslate"><span class="pre">ternary.ternscatter()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ternary_plot.ternary.ternticks"><code class="docutils literal notranslate"><span class="pre">ternary.ternticks()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ternary_plot.ternary.xy2tern"><code class="docutils literal notranslate"><span class="pre">ternary.xy2tern()</span></code></a></li>

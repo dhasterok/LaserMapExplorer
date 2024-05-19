@@ -5329,7 +5329,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         -------
         matplotlib.colormap.ListedColormap : colormap
         """
-        plot_type = self.comboBoxPlotType.currentText()
+        if self.canvasWindow.currentIndex() == 2:
+            plot_type = 'analyte map'
+        else:
+            plot_type = self.comboBoxPlotType.currentText()
+
         name = self.styles[plot_type]['Colors']['Colormap']
         if name in self.mpl_colormaps:
             if N is not None:
@@ -5366,7 +5370,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         color_list = self.get_rgb_color(self.custom_color_dict[name])
 
-        cmap = colors.LinearSegmentedColormap.from_list(name, color_list, N=256)
+        cmap = colors.LinearSegmentedColormap.from_list(name, color_list, N=N)
 
         return cmap
 
@@ -5893,7 +5897,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             reshaped_array = np.reshape(current_plot_df['array'].values, self.array_size, order=self.order)
 
             # add image to canvas
-            cax = canvas.axes.imshow(reshaped_array, cmap=style['Colors']['Colormap'],  aspect=self.aspect_ratio, interpolation='none')
+            cmap = self.get_colormap()
+            cax = canvas.axes.imshow(reshaped_array, cmap=cmap,  aspect=self.aspect_ratio, interpolation='none')
             font = {'family': 'sans-serif', 'stretch': 'condensed', 'size': 8, 'weight': 'semibold'}
             canvas.axes.text(0.025*self.array_size[0],0.1*self.array_size[1], analyte, fontdict=font, color=style['Scales']['OverlayColor'], ha='left', va='top')
             canvas.axes.set_axis_off()
@@ -7624,8 +7629,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # data frame for plotting
         groups = self.data[self.sample_id]['computed_data'][plot_type][method].values
         reshaped_array = np.reshape(groups, self.array_size, order=self.order)
-        if 99 in list(self.cluster_dict.keys()):
-            print(self.cluster_dict[99])
 
         n_clusters = len(np.unique(groups))
 
@@ -8275,7 +8278,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             print(f'(group_changed) Cluster method, ({method}) is not defined')
 
-        print(self.cluster_dict)
+        #print(self.cluster_dict)
         self.tableWidgetViewGroups.blockSignals(False)
         self.spinBoxClusterGroup.blockSignals(False)
         self.isUpdatingTable = False
@@ -9470,7 +9473,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         ':plot name: '+self.plot_info['plot_name']+'\n']
                 self.textEditNotes.insertPlainText('\n'.join(text))
             case 'Filter table':
-                pass
+                filter_table = self.data[self.sample_id]['filter_info']
+                rst_table = self.to_rst_table(filter_table)
+
+                self.textEditNotes.insertPlainText(rst_table)
             case 'PCA results':
                 if not self.pca_results:
                     return
@@ -9547,23 +9553,34 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # if it doesn't work
             QMessageBox.error(self.main_window,"Error", "Could not save to pdf.")
 
-    # def to_rst_table(df):
-    #     """Converts a Pandas DataFrame to a reST table string."""
-    #     def rst_row(row):
-    #         return ' '.join(f'{str(item):^10}' for item in row)
+    def to_rst_table(self, df):
+        """Converts a Pandas DataFrame to a reST table string.
 
-    #     # Extracting column names and data as lists
-    #     columns = df.columns.tolist()
-    #     data = df.values.tolist()
+        Parameters
+        ----------
+        df : pandas.DataFrame
+            Data table to convert to restructured text
+
+        Returns
+        -------
+        str
+            Table in restructred text format
+        """
+        def rst_row(row):
+            return ' '.join(f'{str(item):^10}' for item in row)
+
+        # Extracting column names and data as lists
+        columns = df.columns.tolist()
+        data = df.values.tolist()
         
-    #     # Creating reST table components
-    #     header = rst_row(columns)
-    #     separator = ' '.join(['-'*10]*len(columns))
-    #     rows = [rst_row(row) for row in data]
+        # Creating reST table components
+        header = rst_row(columns)
+        separator = ' '.join(['-'*10]*len(columns))
+        rows = [rst_row(row) for row in data]
         
-    #     # Combining components into the reST table format
-    #     rst_table = '\n'.join([header, separator] + rows)
-    #     return rst_table
+        # Combining components into the reST table format
+        rst_table = '\n'.join([header, separator] + rows)
+        return rst_table
 
     def open_browser(self):
         # Open a file dialog to select a local HTML file
@@ -9577,12 +9594,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def browser_home_callback(self):
         filename = os.path.abspath("docs/build/html/index.html")
 
+        self.lineEditBrowserLocation.setText(filename)
+
         if filename:
             # Load the selected HTML file into the QWebEngineView
             self.browser.setUrl(QUrl.fromLocalFile(filename))
         
     def browser_location_callback(self):
         location = self.lineEditBrowserLocation.text()
+
+        self.lineEditBrowserLocation.setText(location)
 
         try:
             if location:

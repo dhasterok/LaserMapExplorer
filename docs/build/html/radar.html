@@ -29,6 +29,8 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=eafc0fe6" />
+    <link rel="stylesheet" type="text/css" href="_static/mpl.css?v=369bd9d1" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
@@ -413,36 +415,48 @@ document.write(`
 <dl class="py class">
 <dt class="sig sig-object py" id="radar.Radar">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">radar.</span></span><span class="sig-name descname"><span class="pre">Radar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fields</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fieldlabels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes_interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#radar.Radar" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Prepares a DataFrame for a radar plot.</p>
 <p>_extended_summary_</p>
-<section id="parameters">
-<h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
-<dl class="simple">
-<dt>ax<span class="classifier">matplotlib.axes</span></dt><dd><p>Axis object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>ax</strong><span class="classifier">matplotlib.axes</span></dt><dd><p>Axis object</p>
 </dd>
-<dt>data<span class="classifier">pandas.DataFrame</span></dt><dd><p>Data used for averaging.</p>
+<dt><strong>data</strong><span class="classifier">pandas.DataFrame</span></dt><dd><p>Data used for averaging.</p>
 </dd>
-<dt>fields<span class="classifier">list</span></dt><dd><p>list of fields in data used to define the axes.</p>
+<dt><strong>fields</strong><span class="classifier">list</span></dt><dd><p>list of fields in data used to define the axes.</p>
 </dd>
-<dt>fieldlabels<span class="classifier">list</span></dt><dd><p>Labels associated with fields. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="docutils literal notranslate"><span class="pre">fieldlabels</span></code> is set to <code class="docutils literal notranslate"><span class="pre">fields</span></code>, by default None</p>
+<dt><strong>fieldlabels</strong><span class="classifier">list</span></dt><dd><p>Labels associated with fields. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="docutils literal notranslate"><span class="pre">fieldlabels</span></code> is set to <code class="docutils literal notranslate"><span class="pre">fields</span></code>, by default None</p>
 </dd>
-<dt>group_field<span class="classifier">str, optional</span></dt><dd><p>_description_, by default ‘’</p>
+<dt><strong>group_field</strong><span class="classifier">str, optional</span></dt><dd><p>_description_, by default ‘’</p>
 </dd>
-<dt>groups<span class="classifier">_type_, optional</span></dt><dd><p>_description_, by default None</p>
+<dt><strong>groups</strong><span class="classifier">_type_, optional</span></dt><dd><p>_description_, by default None</p>
 </dd>
-<dt>quantiles<span class="classifier">_type_, optional</span></dt><dd><p>_description_, by default None</p>
+<dt><strong>quantiles</strong><span class="classifier">_type_, optional</span></dt><dd><p>_description_, by default None</p>
 </dd>
-<dt>axes_interval<span class="classifier">int, optional</span></dt><dd><p>_description_, by default 5</p>
+<dt><strong>axes_interval</strong><span class="classifier">int, optional</span></dt><dd><p>_description_, by default 5</p>
 </dd>
 </dl>
-</section>
-<section id="raises">
-<h2>Raises<a class="headerlink" href="#raises" title="Link to this heading">#</a></h2>
-<dl class="simple">
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
 <dt>ValueError</dt><dd><p>_description_</p>
 </dd>
 </dl>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#radar.Radar.normalize_vals" title="radar.Radar.normalize_vals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalize_vals</span></code></a>()</p></td>
+<td><p>Normalizes the data in self.vals for radar plot visualization.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#radar.Radar.plot" title="radar.Radar.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>([cmap])</p></td>
+<td><p>_summary_</p></td>
+</tr>
+</tbody>
+</table>
 <dl class="py method">
 <dt class="sig sig-object py" id="radar.Radar.normalize_vals">
 <span class="sig-name descname"><span class="pre">normalize_vals</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#radar.Radar.normalize_vals" title="Link to this definition">#</a></dt>
@@ -454,16 +468,16 @@ document.write(`
 <span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#radar.Radar.plot" title="Link to this definition">#</a></dt>
 <dd><p>_summary_</p>
 <p>_extended_summary_</p>
-<section id="id1">
-<h3>Parameters<a class="headerlink" href="#id1" title="Link to this heading">#</a></h3>
-<dl class="simple">
-<dt>cmap<span class="classifier">matplotlib.colormap, optional</span></dt><dd><p>colormap, by default None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>cmap</strong><span class="classifier">matplotlib.colormap, optional</span></dt><dd><p>colormap, by default None</p>
 </dd>
 </dl>
-</section>
+</dd>
+</dl>
 </dd></dl>
 
-</section>
 </dd></dl>
 
 </section>

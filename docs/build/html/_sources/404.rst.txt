@@ -1,0 +1,1 @@
+.. image:: _static/drowing_cat.png

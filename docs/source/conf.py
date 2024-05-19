@@ -20,7 +20,12 @@ print(sys.executable)
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx.ext.autodoc']
+extensions = ['sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.inheritance_diagram',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.autosectionlabel',
+    'numpydoc']
 
 templates_path = ['_templates']
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints"]
@@ -28,8 +33,15 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints"]
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
+import pydata_sphinx_theme
+import mpl_sphinx_theme
 
 html_theme = 'pydata_sphinx_theme'
+html_css_files = [
+    "mpl.css",
+]
+#html_theme = "mpl_sphinx_theme"
+
 html_theme_options = {"navbar_start": ["navbar-logo"],
                       "navbar_center": ["navbar-nav"],
                       "navbar_end": ["navbar-icon-links"]}
@@ -37,6 +49,20 @@ html_theme_options = {"navbar_start": ["navbar-logo"],
 html_static_path = ['_static']
 
 html_logo = "_static/LaME-logo-64.png"
+
+intersphinx_mapping = {
+    'dateutil': ('https://dateutil.readthedocs.io/en/stable/', None),
+    'matplotlib': ('https://matplotlib.org/stable/', None),
+    'pyqtgraph': ('https://www.pyqtgraph.org', None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
+    'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),
+    'python': ('https://docs.python.org/3/', None),
+    'scipy': ('https://docs.scipy.org/doc/scipy/', None),
+    'scikit-learn': ('https://scikit-learn.org/stable/', None),
+    'pyqt5': ('https://pypi.org/project/PyQt5/', None),
+    'darkdetect': ('https://pypi.org/project/darkdetect/', None),
+    'rst2pdf': ('https://rst2pdf.org', None)
+}
 
 html_theme_options = {
     "logo": {
@@ -66,7 +92,7 @@ html_theme_options = {
 # link to github
 html_context = {
     "display_github": True, # Integrate GitHub
-    "github_user": "shavinkalu23", # Username
+    "github_user": "dhasterok", # Username
     "github_repo": "LaserMapExplorer", # Repo name
     "github_version": "master", # Version
     "conf_py_path": "/doc/", # Path in the checkout to the docs root

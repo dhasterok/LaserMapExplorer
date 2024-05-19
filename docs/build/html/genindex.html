@@ -28,6 +28,8 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=eafc0fe6" />
+    <link rel="stylesheet" type="text/css" href="_static/mpl.css?v=369bd9d1" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
@@ -432,6 +434,8 @@ document.write(`
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="main.html#main.analyteSelectionWindow">analyteSelectionWindow (class in main)</a>
 </li>
+      <li><a href="main.html#main.MainWindow.apply_cluster_mask">apply_cluster_mask() (main.MainWindow method)</a>
+</li>
       <li><a href="main.html#main.Crop_tool.apply_crop">apply_crop() (main.Crop_tool method)</a>
 
       <ul>
@@ -468,9 +472,13 @@ document.write(`
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="main.html#main.bilateralFilter">bilateralFilter() (in module main)</a>
 </li>
+      <li><a href="main.html#main.MainWindow.biplot">biplot() (main.MainWindow method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="main.html#main.MainWindow.biplot">biplot() (main.MainWindow method)</a>
+      <li><a href="main.html#main.MainWindow.browser_home_callback">browser_home_callback() (main.MainWindow method)</a>
+</li>
+      <li><a href="main.html#main.MainWindow.browser_location_callback">browser_location_callback() (main.MainWindow method)</a>
 </li>
       <li><a href="main.html#main.MainWindow.button_color_select">button_color_select() (main.MainWindow method)</a>
 </li>
@@ -532,9 +540,17 @@ document.write(`
 </li>
       <li><a href="main.html#main.MainWindow.cluster_color_callback">cluster_color_callback() (main.MainWindow method)</a>
 </li>
+      <li><a href="main.html#main.MainWindow.cluster_distance_callback">cluster_distance_callback() (main.MainWindow method)</a>
+</li>
+      <li><a href="main.html#main.MainWindow.cluster_exponent_callback">cluster_exponent_callback() (main.MainWindow method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="main.html#main.MainWindow.cluster_label_changed">cluster_label_changed() (main.MainWindow method)</a>
+</li>
+      <li><a href="main.html#main.MainWindow.cluster_method_callback">cluster_method_callback() (main.MainWindow method)</a>
+</li>
+      <li><a href="main.html#main.MainWindow.cluster_seed_callback">cluster_seed_callback() (main.MainWindow method)</a>
 </li>
       <li><a href="main.html#main.MainWindow.color_by_field_callback">color_by_field_callback() (main.MainWindow method)</a>
 </li>
@@ -564,9 +580,9 @@ document.write(`
 </li>
       <li><a href="main.html#main.analyteSelectionWindow.create_colorbar">create_colorbar() (main.analyteSelectionWindow method)</a>
 </li>
-      <li><a href="main.html#main.MainWindow.create_item_from_data">create_item_from_data() (main.MainWindow method)</a>
+      <li><a href="main.html#main.MainWindow.create_custom_colormap">create_custom_colormap() (main.MainWindow method)</a>
 </li>
-      <li><a href="main.html#main.MainWindow.create_map_plotwidget">create_map_plotwidget() (main.MainWindow method)</a>
+      <li><a href="main.html#main.MainWindow.create_item_from_data">create_item_from_data() (main.MainWindow method)</a>
 </li>
       <li><a href="main.html#main.MainWindow.create_tree">create_tree() (main.MainWindow method)</a>
 </li>
@@ -944,6 +960,8 @@ document.write(`
 </li>
       <li><a href="main.html#main.MainWindow.notes_add_image">notes_add_image() (main.MainWindow method)</a>
 </li>
+      <li><a href="main.html#main.MainWindow.number_of_clusters_callback">number_of_clusters_callback() (main.MainWindow method)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -963,6 +981,8 @@ document.write(`
       <li><a href="crop_tool.html#crop_tool.CropTool.on_release">on_release() (crop_tool.CropTool method)</a>
 </li>
       <li><a href="main.html#main.ResizableRectItem.onEdge">onEdge() (main.ResizableRectItem method)</a>
+</li>
+      <li><a href="main.html#main.MainWindow.open_browser">open_browser() (main.MainWindow method)</a>
 </li>
       <li><a href="main.html#main.MainWindow.open_calculator">open_calculator() (main.MainWindow method)</a>
 </li>
@@ -1024,6 +1044,8 @@ document.write(`
 </li>
       <li><a href="main.html#main.MainWindow.plot_map_mpl">plot_map_mpl() (main.MainWindow method)</a>
 </li>
+      <li><a href="main.html#main.MainWindow.plot_map_pyqt">plot_map_pyqt() (main.MainWindow method)</a>
+</li>
       <li><a href="main.html#main.MainWindow.plot_n_dim">plot_n_dim() (main.MainWindow method)</a>
 </li>
       <li><a href="main.html#main.MainWindow.plot_pca">plot_pca() (main.MainWindow method)</a>
@@ -1034,10 +1056,10 @@ document.write(`
 </li>
       <li><a href="main.html#main.MainWindow.plot_pca_vectors">plot_pca_vectors() (main.MainWindow method)</a>
 </li>
-      <li><a href="main.html#main.Polygon.plot_polygon_scatter">plot_polygon_scatter() (main.Polygon method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="main.html#main.Polygon.plot_polygon_scatter">plot_polygon_scatter() (main.Polygon method)</a>
+</li>
       <li><a href="main.html#main.MainWindow.plot_profile_and_table">plot_profile_and_table() (main.MainWindow method)</a>
 </li>
       <li><a href="main.html#main.Profiling.plot_profile_scatter">plot_profile_scatter() (main.Profiling method)</a>
@@ -1302,8 +1324,6 @@ document.write(`
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ternary_plot.html#ternary_plot.ternary.ternmap">ternmap() (ternary_plot.ternary method)</a>
-</li>
       <li><a href="ternary_plot.html#ternary_plot.ternary.ternscatter">ternscatter() (ternary_plot.ternary method)</a>
 </li>
       <li><a href="ternary_plot.html#ternary_plot.ternary.ternticks">ternticks() (ternary_plot.ternary method)</a>
@@ -1313,6 +1333,8 @@ document.write(`
       <li><a href="main.html#main.MainWindow.tickdir_callback">tickdir_callback() (main.MainWindow method)</a>
 </li>
       <li><a href="main.html#main.CustomAxis.tickStrings">tickStrings() (main.CustomAxis method)</a>
+</li>
+      <li><a href="main.html#main.MainWindow.to_rst_table">to_rst_table() (main.MainWindow method)</a>
 </li>
       <li><a href="main.html#main.Profiling.toggle_buttons">toggle_buttons() (main.Profiling method)</a>
 </li>
@@ -1354,14 +1376,6 @@ document.write(`
 </li>
       <li><a href="main.html#main.MainWindow.update_all_field_comboboxes">update_all_field_comboboxes() (main.MainWindow method)</a>
 </li>
-      <li><a href="main.html#main.MainWindow.update_cluster_distance">update_cluster_distance() (main.MainWindow method)</a>
-</li>
-      <li><a href="main.html#main.MainWindow.update_cluster_exponent">update_cluster_exponent() (main.MainWindow method)</a>
-</li>
-      <li><a href="main.html#main.MainWindow.update_cluster_seed">update_cluster_seed() (main.MainWindow method)</a>
-</li>
-      <li><a href="main.html#main.MainWindow.update_cluster_ui">update_cluster_ui() (main.MainWindow method)</a>
-</li>
       <li><a href="main.html#main.MainWindow.update_clusters">update_clusters() (main.MainWindow method)</a>
 </li>
       <li><a href="main.html#main.MainWindow.update_field_combobox">update_field_combobox() (main.MainWindow method)</a>
@@ -1374,14 +1388,12 @@ document.write(`
 </li>
       <li><a href="main.html#main.MainWindow.update_filter_values">update_filter_values() (main.MainWindow method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="calculator.html#calculator.CalWindow.update_isotope_list">update_isotope_list() (calculator.CalWindow method)</a>
 </li>
       <li><a href="main.html#main.analyteSelectionWindow.update_list">update_list() (main.analyteSelectionWindow method)</a>
 </li>
-      <li><a href="main.html#main.MainWindow.update_n_clusters">update_n_clusters() (main.MainWindow method)</a>
-</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="main.html#main.MainWindow.update_n_dim_table">update_n_dim_table() (main.MainWindow method)</a>
 </li>
       <li><a href="main.html#main.MainWindow.update_norm">update_norm() (main.MainWindow method)</a>

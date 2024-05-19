@@ -29,6 +29,8 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=eafc0fe6" />
+    <link rel="stylesheet" type="text/css" href="_static/mpl.css?v=369bd9d1" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
@@ -489,6 +491,7 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.add_ree"><code class="docutils literal notranslate"><span class="pre">MainWindow.add_ree()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.add_table_note"><code class="docutils literal notranslate"><span class="pre">MainWindow.add_table_note()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.add_tree_item"><code class="docutils literal notranslate"><span class="pre">MainWindow.add_tree_item()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.apply_cluster_mask"><code class="docutils literal notranslate"><span class="pre">MainWindow.apply_cluster_mask()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.apply_crop"><code class="docutils literal notranslate"><span class="pre">MainWindow.apply_crop()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.apply_filters"><code class="docutils literal notranslate"><span class="pre">MainWindow.apply_filters()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.apply_sort"><code class="docutils literal notranslate"><span class="pre">MainWindow.apply_sort()</span></code></a></li>
@@ -500,6 +503,8 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.axis_reset_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.axis_reset_callback()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.axis_scale_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.axis_scale_callback()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.biplot"><code class="docutils literal notranslate"><span class="pre">MainWindow.biplot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.browser_home_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.browser_home_callback()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.browser_location_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.browser_location_callback()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.button_color_select"><code class="docutils literal notranslate"><span class="pre">MainWindow.button_color_select()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.canvas_changed"><code class="docutils literal notranslate"><span class="pre">MainWindow.canvas_changed()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.cbar_direction_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.cbar_direction_callback()</span></code></a></li>
@@ -511,7 +516,11 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.clear_layout"><code class="docutils literal notranslate"><span class="pre">MainWindow.clear_layout()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.clim_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.clim_callback()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.cluster_color_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.cluster_color_callback()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.cluster_distance_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.cluster_distance_callback()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.cluster_exponent_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.cluster_exponent_callback()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.cluster_label_changed"><code class="docutils literal notranslate"><span class="pre">MainWindow.cluster_label_changed()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.cluster_method_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.cluster_method_callback()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.cluster_seed_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.cluster_seed_callback()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.color_by_field_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.color_by_field_callback()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.color_field_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.color_field_callback()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.color_norm"><code class="docutils literal notranslate"><span class="pre">MainWindow.color_norm()</span></code></a></li>
@@ -521,8 +530,8 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.compute_pca"><code class="docutils literal notranslate"><span class="pre">MainWindow.compute_pca()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.correlation_method_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.correlation_method_callback()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.correlation_squared_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.correlation_squared_callback()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.create_custom_colormap"><code class="docutils literal notranslate"><span class="pre">MainWindow.create_custom_colormap()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.create_item_from_data"><code class="docutils literal notranslate"><span class="pre">MainWindow.create_item_from_data()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.create_map_plotwidget"><code class="docutils literal notranslate"><span class="pre">MainWindow.create_map_plotwidget()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.create_tree"><code class="docutils literal notranslate"><span class="pre">MainWindow.create_tree()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.display_QV"><code class="docutils literal notranslate"><span class="pre">MainWindow.display_QV()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.dynamic_format"><code class="docutils literal notranslate"><span class="pre">MainWindow.dynamic_format()</span></code></a></li>
@@ -580,6 +589,8 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.noise_reduction_option1_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.noise_reduction_option1_callback()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.noise_reduction_option2_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.noise_reduction_option2_callback()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.notes_add_image"><code class="docutils literal notranslate"><span class="pre">MainWindow.notes_add_image()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.number_of_clusters_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.number_of_clusters_callback()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.open_browser"><code class="docutils literal notranslate"><span class="pre">MainWindow.open_browser()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.open_calculator"><code class="docutils literal notranslate"><span class="pre">MainWindow.open_calculator()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.open_directory"><code class="docutils literal notranslate"><span class="pre">MainWindow.open_directory()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.open_preferences_dialog"><code class="docutils literal notranslate"><span class="pre">MainWindow.open_preferences_dialog()</span></code></a></li>
@@ -599,6 +610,7 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.plot_histogram"><code class="docutils literal notranslate"><span class="pre">MainWindow.plot_histogram()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.plot_laser_map_cont"><code class="docutils literal notranslate"><span class="pre">MainWindow.plot_laser_map_cont()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.plot_map_mpl"><code class="docutils literal notranslate"><span class="pre">MainWindow.plot_map_mpl()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.plot_map_pyqt"><code class="docutils literal notranslate"><span class="pre">MainWindow.plot_map_pyqt()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.plot_n_dim"><code class="docutils literal notranslate"><span class="pre">MainWindow.plot_n_dim()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.plot_pca"><code class="docutils literal notranslate"><span class="pre">MainWindow.plot_pca()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.plot_pca_components"><code class="docutils literal notranslate"><span class="pre">MainWindow.plot_pca_components()</span></code></a></li>
@@ -640,6 +652,7 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.ternary_colormap_changed"><code class="docutils literal notranslate"><span class="pre">MainWindow.ternary_colormap_changed()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.ternary_scatter"><code class="docutils literal notranslate"><span class="pre">MainWindow.ternary_scatter()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.tickdir_callback"><code class="docutils literal notranslate"><span class="pre">MainWindow.tickdir_callback()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.to_rst_table"><code class="docutils literal notranslate"><span class="pre">MainWindow.to_rst_table()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.toggle_color_widgets"><code class="docutils literal notranslate"><span class="pre">MainWindow.toggle_color_widgets()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.toggle_mass"><code class="docutils literal notranslate"><span class="pre">MainWindow.toggle_mass()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.toggle_style_widgets"><code class="docutils literal notranslate"><span class="pre">MainWindow.toggle_style_widgets()</span></code></a></li>
@@ -650,17 +663,12 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.unhighlight_tree"><code class="docutils literal notranslate"><span class="pre">MainWindow.unhighlight_tree()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_SV"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_SV()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_all_field_comboboxes"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_all_field_comboboxes()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_cluster_distance"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_cluster_distance()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_cluster_exponent"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_cluster_exponent()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_cluster_seed"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_cluster_seed()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_cluster_ui"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_cluster_ui()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_clusters"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_clusters()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_field_combobox"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_field_combobox()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_field_type_combobox"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_field_type_combobox()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_figure_font"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_figure_font()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_filter_table"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_filter_table()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_filter_values"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_filter_values()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_n_clusters"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_n_clusters()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_n_dim_table"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_n_dim_table()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_norm"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_norm()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="main.html#main.MainWindow.update_plot"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_plot()</span></code></a></li>
@@ -833,7 +841,6 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="ternary_plot.html#ternary_plot.ternary.terncolor"><code class="docutils literal notranslate"><span class="pre">ternary.terncolor()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="ternary_plot.html#ternary_plot.ternary.terngrid"><code class="docutils literal notranslate"><span class="pre">ternary.terngrid()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="ternary_plot.html#ternary_plot.ternary.ternhex"><code class="docutils literal notranslate"><span class="pre">ternary.ternhex()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="ternary_plot.html#ternary_plot.ternary.ternmap"><code class="docutils literal notranslate"><span class="pre">ternary.ternmap()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="ternary_plot.html#ternary_plot.ternary.ternscatter"><code class="docutils literal notranslate"><span class="pre">ternary.ternscatter()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="ternary_plot.html#ternary_plot.ternary.ternticks"><code class="docutils literal notranslate"><span class="pre">ternary.ternticks()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="ternary_plot.html#ternary_plot.ternary.xy2tern"><code class="docutils literal notranslate"><span class="pre">ternary.xy2tern()</span></code></a></li>

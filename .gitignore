@@ -70,6 +70,12 @@ env*
 # Python byte code
 *.pyc
 
+# Directories
+# -----------
+illustrator
+dist
+build
+
 # Binaries
 # --------
 *.dll

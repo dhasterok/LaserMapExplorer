@@ -2,7 +2,7 @@ import sys, os, re, copy, csv, random, pickle, darkdetect
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QRectF, QPointF, QUrl
 from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QVBoxLayout, QGridLayout, QMessageBox, QHeaderView, QMenu, QGraphicsRectItem
-from PyQt5.QtWidgets import QFileDialog, QWidget, QDialog, QLabel, QTableWidget, QInputDialog, QAbstractItemView, QProgressBar, QApplication
+from PyQt5.QtWidgets import QFileDialog, QWidget, QDialog, QLabel, QTableWidget, QInputDialog, QAbstractItemView, QProgressBar, QApplication, QSplashScreen
 from PyQt5.QtGui import QIntValidator, QDoubleValidator, QColor, QImage, QPainter, QPixmap, QFont, QPen, QCursor, QBrush, QStandardItemModel, QStandardItem, QTextCursor, QDropEvent, QFontDatabase
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 import pyqtgraph as pg
@@ -132,7 +132,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     /'v_max' (float) -- min value of iolite
                     /'auto_scale' (bool) -- indicates whether auto_scaling is switched on for that iolite, use percentile bounds if False
                     /'use' (bool) -- indicates whether the iolite is being used in the analys
-                | 'ratios_info' : (dataframe) -- holds information  regarding computerd ratios 
+                | 'ratio_info' : (dataframe) -- holds information  regarding computerd ratios 
                 columns:
                     /'analyte_1' (str) -- name of iolite at numerator of ratio
                     /'analyte_2' (str) -- name of iolite at denominator of ratio
@@ -171,7 +171,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 | 'raw_data': () -- 
                 | 'cropped_raw_data': () --
                 
-            | 'ratios_info' : (dataframe) --
+            | 'ratio_info' : (dataframe) --
             | 'crop' : () --
             | 'x_max' : () --
             | 'x_min' : () --
@@ -1252,7 +1252,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.data[self.sample_id] = {}
             #set info dataframes for each sample
             self.data[self.sample_id]['analyte_info'] = pd.DataFrame(columns = ['analytes', 'norm', 'upper_bound', 'lower_bound', 'd_l_bound', 'd_u_bound', 'use'])
-            self.data[self.sample_id]['ratios_info'] = pd.DataFrame(columns = [ 'analyte_1', 'analyte_2', 'norm', 'upper_bound', 'lower_bound', 'd_l_bound', 'd_u_bound', 'use', 'auto_scale'])
+            self.data[self.sample_id]['ratio_info'] = pd.DataFrame(columns = [ 'analyte_1', 'analyte_2', 'norm', 'upper_bound', 'lower_bound', 'd_l_bound', 'd_u_bound', 'use', 'auto_scale'])
             self.data[self.sample_id]['filter_info'] = pd.DataFrame(columns = [ 'field_type', 'analyte_1', 'analyte_2', 'norm', 'f_min', 'f_max', 'operator', 'use'])
 
             #Set crop to false
@@ -1865,10 +1865,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                          ['upper_bound','lower_bound','d_l_bound', 'd_u_bound']] = [ub,lb,d_lb, d_ub]
 
             else:
-                self.data[sample_id]['ratios_info'].loc[ (self.data[sample_id]['ratios_info']['analyte_1']==analyte_1)
-                                         & (self.data[sample_id]['ratios_info']['analyte_2']==analyte_2),'auto_scale']  = auto_scale
-                self.data[sample_id]['ratios_info'].loc[ (self.data[sample_id]['ratios_info']['analyte_1']==analyte_1)
-                                          & (self.data[sample_id]['ratios_info']['analyte_2']==analyte_2),
+                self.data[sample_id]['ratio_info'].loc[ (self.data[sample_id]['ratio_info']['analyte_1']==analyte_1)
+                                         & (self.data[sample_id]['ratio_info']['analyte_2']==analyte_2),'auto_scale']  = auto_scale
+                self.data[sample_id]['ratio_info'].loc[ (self.data[sample_id]['ratio_info']['analyte_1']==analyte_1)
+                                          & (self.data[sample_id]['ratio_info']['analyte_2']==analyte_2),
                                           ['upper_bound','lower_bound','d_l_bound', 'd_u_bound']] = [ub,lb,d_lb, d_ub]
 
             self.prep_data(sample_id, analyte_1,analyte_2)
@@ -2198,7 +2198,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         elif 'Ratio' in field_type:
             if '/' in analyte_1:
                 analyte_1, analyte_2 = field.split(' / ')
-                f_val = self.data[self.sample_id]['ratios_info'].loc[(self.data[self.sample_id]['ratios_info']['analyte_1'] == analyte_1)& (self.data[self.sample_id]['ratios_info']['analyte_2'] == analyte_2)].iloc[0][['v_min', 'v_max']]
+                f_val = self.data[self.sample_id]['ratio_info'].loc[(self.data[self.sample_id]['ratio_info']['analyte_1'] == analyte_1) & (self.data[self.sample_id]['ratio_info']['analyte_2'] == analyte_2)].iloc[0][['v_min', 'v_max']]
         else:
             pass
 
@@ -2277,8 +2277,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 chkBoxItem_select.setCheckState(QtCore.Qt.Unchecked)
                 analyte_1, analyte_2 = field.split(' / ')
                 scale = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes'] == analyte_1)].iloc[0]['norm'].value
-                #norm = self.data[self.sample_id]['ratios_info'].loc[(self.data[self.sample_id]['ratios_info']['analyte_1'] == analyte_1)
-                #        & (self.data[self.sample_id]['ratios_info']['analyte_2'] == analyte_2)].iloc[0]['norm']
+                #norm = self.data[self.sample_id]['ratio_info'].loc[(self.data[self.sample_id]['ratio_info']['analyte_1'] == analyte_1)
+                #        & (self.data[self.sample_id]['ratio_info']['analyte_2'] == analyte_2)].iloc[0]['norm']
             else:
                 scale = 'linear'
 
@@ -2345,7 +2345,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # apply interval filters
         elif self.toolButtonFilterToggle.isChecked():
-            print(self.data[sample_id]['filter_info'])
+            #print(self.data[sample_id]['filter_info'])
+
             # Check if rows in self.data[sample_id]['filter_info'] exist and filter array in current_plot_df
             # by creating a mask based on f_min and f_max of the corresponding filter analytes
             for index, filter_row in self.data[sample_id]['filter_info'].iterrows():
@@ -2553,9 +2554,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                  & (self.data[sample_id]['analyte_info']['analytes']==analyte_1),'norm'] = norm
                 analytes = [analyte_1]
             else:
-               self.data[sample_id]['ratios_info'].loc[
-                   (self.data[sample_id]['ratios_info']['analyte_1'] == analyte_1) &
-                   (self.data[sample_id]['ratios_info']['analyte_2'] == analyte_2),'norm'] = norm
+               self.data[sample_id]['ratio_info'].loc[
+                   (self.data[sample_id]['ratio_info']['analyte_1'] == analyte_1) &
+                   (self.data[sample_id]['ratio_info']['analyte_2'] == analyte_2),'norm'] = norm
                analytes = [analyte_1+' / '+analyte_2]
 
         else: #if normalising all analytes in sample
@@ -2664,36 +2665,36 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             ratio_array = np.where(mask, ratio_array[:,0] / ratio_array[:,1], np.nan)
 
             # Get the index of the row that matches the criteria
-            index_to_update = self.data[sample_id]['ratios_info'].loc[
-                    (self.data[sample_id]['ratios_info']['analyte_1'] == analyte_1) &
-                    (self.data[sample_id]['ratios_info']['analyte_2'] == analyte_2)
+            index_to_update = self.data[sample_id]['ratio_info'].loc[
+                    (self.data[sample_id]['ratio_info']['analyte_1'] == analyte_1) &
+                    (self.data[sample_id]['ratio_info']['analyte_2'] == analyte_2)
                 ].index
 
             # Check if we found such a row
             if len(index_to_update) > 0:
                 idx = index_to_update[0]
 
-                if pd.isna(self.data[sample_id]['ratios_info'].at[idx, 'lower_bound']): #if bounds are not updated in dataframe
+                if pd.isna(self.data[sample_id]['ratio_info'].at[idx, 'lower_bound']): #if bounds are not updated in dataframe
                     #sets auto scale to true by default with default values for lb,db, d_lb and d_ub
                     auto_scale = True
-                    norm = self.data[sample_id]['ratios_info'].at[idx, 'norm']
+                    norm = self.data[sample_id]['ratio_info'].at[idx, 'norm']
                     lb = 0.05
                     ub = 99.5
                     d_lb = 99
                     d_ub = 99
-                    self.data[sample_id]['ratios_info'].at[idx, 'lower_bound'] = lb
-                    self.data[sample_id]['ratios_info'].at[idx, 'upper_bound'] = ub
-                    self.data[sample_id]['ratios_info'].at[idx, 'd_l_bound'] = d_lb
-                    self.data[sample_id]['ratios_info'].at[idx, 'd_u_bound'] = d_ub
-                    self.data[sample_id]['ratios_info'].at[idx, 'auto_scale'] = auto_scale
+                    self.data[sample_id]['ratio_info'].at[idx, 'lower_bound'] = lb
+                    self.data[sample_id]['ratio_info'].at[idx, 'upper_bound'] = ub
+                    self.data[sample_id]['ratio_info'].at[idx, 'd_l_bound'] = d_lb
+                    self.data[sample_id]['ratio_info'].at[idx, 'd_u_bound'] = d_ub
+                    self.data[sample_id]['ratio_info'].at[idx, 'auto_scale'] = auto_scale
 
                 else: #if bounds exist in ratios_df
-                    norm = self.data[sample_id]['ratios_info'].at[idx, 'norm']
-                    lb = self.data[sample_id]['ratios_info'].at[idx, 'lower_bound']
-                    ub = self.data[sample_id]['ratios_info'].at[idx, 'upper_bound']
-                    d_lb = self.data[sample_id]['ratios_info'].at[idx, 'd_l_bound']
-                    d_ub = self.data[sample_id]['ratios_info'].at[idx, 'd_u_bound']
-                    auto_scale = self.data[sample_id]['ratios_info'].at[idx, 'auto_scale']
+                    norm = self.data[sample_id]['ratio_info'].at[idx, 'norm']
+                    lb = self.data[sample_id]['ratio_info'].at[idx, 'lower_bound']
+                    ub = self.data[sample_id]['ratio_info'].at[idx, 'upper_bound']
+                    d_lb = self.data[sample_id]['ratio_info'].at[idx, 'd_l_bound']
+                    d_ub = self.data[sample_id]['ratio_info'].at[idx, 'd_u_bound']
+                    auto_scale = self.data[sample_id]['ratio_info'].at[idx, 'auto_scale']
 
                 if norm == 'log':
 
@@ -2720,11 +2721,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 if self.data[sample_id]['computed_data']['Ratio'].empty:
                     self.data[sample_id]['computed_data']['Ratio'] = self.data[sample_id]['cropped_raw_data'][['X','Y']]
-                print(ratio_name)
+
                 self.data[sample_id]['computed_data']['Ratio'][ratio_name] = ratio_array
 
-                self.data[sample_id]['ratios_info'].at[idx, 'v_min'] = ratio_array.min()
-                self.data[sample_id]['ratios_info'].at[idx, 'v_max'] = ratio_array.max()
+                self.data[sample_id]['ratio_info'].at[idx, 'v_min'] = ratio_array.min()
+                self.data[sample_id]['ratio_info'].at[idx, 'v_max'] = ratio_array.max()
 
     def remove_widgets_from_layout(self, layout, object_names_to_remove):
         """
@@ -4776,30 +4777,48 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def initialize_axis_values(self, field_type, field):
         #print('initialize_axis_values')
         # initialize variables
-        current_plot_df = pd.DataFrame()
         if field not in self.axis_dict.keys():
             #print('initialize self.axis_dict["field"]')
             self.axis_dict.update({field:{'status':'auto', 'label':field, 'min':None, 'max':None}})
 
+        #current_plot_df = pd.DataFrame()
+        df = self.get_map_data(self.sample_id, field, field_type)
+        array = df['array'][self.data[self.sample_id]['mask']].values if not df.empty else []
         match field_type:
             case 'Analyte' | 'Analyte (normalized)':
-                current_plot_df = self.data[self.sample_id]['processed_data'].loc[:,field].values
+                #current_plot_df = self.data[self.sample_id]['processed_data'].loc[:,field].values
+                symbol, mass = self.parse_field(field)
                 if field_type == 'Analyte':
-                    self.axis_dict[field]['label'] = field+' ('+self.preferences['Units']['Concentration']+')'
+                    self.axis_dict[field]['label'] = f"$^{{{mass}}}${symbol} ({self.preferences['Units']['Concentration']})"
                 else:
-                    self.axis_dict[field]['label'] = field+'_N'
+                    self.axis_dict[field]['label'] = f"$^{{{mass}}}${symbol}$_N$ ({self.preferences['Units']['Concentration']})"
 
                 #amin = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes']==field),'v_min'].values[0]
                 #amax = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes']==field),'v_max'].values[0]
-                amin = current_plot_df.min()
-                amax = current_plot_df.max()
+                amin = array.min()
+                amax = array.max()
                 scale = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes']==field),'norm'].values[0]
+            case 'Ratio' | 'Ratio (normalized)':
+                field_1 = field.split(' / ')[0]
+                field_2 = field.split(' / ')[1]
+                symbol_1, mass_1 = self.parse_field(field_1)
+                symbol_2, mass_2 = self.parse_field(field_2)
+                if field_type == 'Ratio':
+                    self.axis_dict[field]['label'] = f"$^{{{mass_1}}}${symbol_1} / $^{{{mass_2}}}${symbol_2}"
+                else:
+                    self.axis_dict[field]['label'] = f"$^{{{mass_1}}}${symbol_1}$_N$ / $^{{{mass_2}}}${symbol_2}$_N$"
+
+                amin = array.min()
+                amax = array.max()
+                scale = self.data[self.sample_id]['ratio_info'].loc[
+                    (self.data[self.sample_id]['ratio_info']['analyte_1']==field_1) & (self.data[self.sample_id]['ratio_info']['analyte_2']==field_2),
+                    'norm'].values[0]
             case _:
-                current_plot_df = self.data[self.sample_id]['computed_data'][field_type].loc[:,field].values
+                #current_plot_df = self.data[self.sample_id]['computed_data'][field_type].loc[:,field].values
                 scale = 'linear'
 
-                amin = current_plot_df.min()
-                amax = current_plot_df.max()
+                amin = array.min()
+                amax = array.max()
 
         amin = self.oround(amin, order=2, dir=0)
         amax = self.oround(amax, order=2, dir=1)
@@ -4808,6 +4827,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.axis_dict[field].update(d)
         #print(self.axis_dict[field])
+
+    def parse_field(self,field):
+
+        match = re.match(r"([A-Za-z]+)(\d*)", field)
+        symbol = match.group(1) if match else field
+        mass = int(match.group(2)) if match.group(2) else None
+
+        return symbol, mass
 
     def aspect_ratio_callback(self):
         """Update aspect ratio
@@ -5664,7 +5691,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # get plot_info from tree location and
                 # reset view to False and position to none
                 plot_info = self.retrieve_plotinfo_from_tree(tree=data[2], branch=data[3], leaf=data[4])
-                print(plot_info)
+                #print(plot_info)
                 plot_info['view'][1] = False
                 plot_info['position'] = None
             
@@ -5736,12 +5763,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     #         analyte_str = analyte_1
     #     else:
     #         # Get the index of the row that matches the criteria
-    #         index_to_update = self.data[sample_id]['ratios_info'].loc[
-    #             (self.data[sample_id]['ratios_info']['analyte_1'] == analyte_1) &
-    #             (self.data[sample_id]['ratios_info']['analyte_2'] == analyte_2)
+    #         index_to_update = self.data[sample_id]['ratio_info'].loc[
+    #             (self.data[sample_id]['ratio_info']['analyte_1'] == analyte_1) &
+    #             (self.data[sample_id]['ratio_info']['analyte_2'] == analyte_2)
     #         ].index
     #         idx = index_to_update[0]
-    #         parameters  = self.data[sample_id]['ratios_info'].iloc[idx]
+    #         parameters  = self.data[sample_id]['ratio_info'].iloc[idx]
     #         analyte_str = analyte_1 +' / '+ analyte_2
     #         current_plot_df['array'] = self.data[sample_id]['computed_data']['Ratio'][analyte_str].values
 
@@ -8495,8 +8522,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case 'Analyte' | 'Analyte (normalized)':
                 set_fields = self.data[self.sample_id]['analyte_info'].loc[self.data[self.sample_id]['analyte_info']['use']== True,'analytes'].values.tolist()
             case 'Ratio' | 'Ratio (normalized)':
-                analytes_1 = self.data[self.sample_id]['ratios_info'].loc[self.data[self.sample_id]['ratios_info']['use']== True,'analyte_1']
-                analytes_2 =  self.data[self.sample_id]['ratios_info'].loc[self.data[self.sample_id]['ratios_info']['use']== True,'analyte_2']
+                analytes_1 = self.data[self.sample_id]['ratio_info'].loc[self.data[self.sample_id]['ratio_info']['use']== True,'analyte_1']
+                analytes_2 =  self.data[self.sample_id]['ratio_info'].loc[self.data[self.sample_id]['ratio_info']['use']== True,'analyte_2']
                 ratios = analytes_1 +' / '+ analytes_2
                 set_fields = ratios.values.tolist()
             case 'None':
@@ -8626,9 +8653,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 if 'normalized' in field_type:
                     refval_1 = self.ref_chem[re.sub(r'\d', '', field_1).lower()]
                     refval_2 = self.ref_chem[re.sub(r'\d', '', field_2).lower()]
-                    df['array'] = df * (refval_2 / refval_1)
+                    df['array'] = df['array'] * (refval_2 / refval_1)
 
-            case 'PCA Score' | 'Cluster' | 'Cluster Score' | 'Special' | 'Computed':
+            case _:#'PCA Score' | 'Cluster' | 'Cluster Score' | 'Special' | 'Computed':
                 df['array'] = self.data[sample_id]['computed_data'][field_type].loc[:,field].values
 
         # ----begin debugging----
@@ -8795,11 +8822,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         return data_dict
 
     def update_ratio_df(self,sample_id,analyte_1, analyte_2,norm):
-        parameter = self.data[sample_id]['ratios_info'].loc[(self.data[sample_id]['ratios_info']['analyte_1'] == analyte_1) & (self.data[sample_id]['ratios_info']['analyte_2'] == analyte_2)]
+        parameter = self.data[sample_id]['ratio_info'].loc[(self.data[sample_id]['ratio_info']['analyte_1'] == analyte_1) & (self.data[sample_id]['ratio_info']['analyte_2'] == analyte_2)]
         if parameter.empty:
             ratio_info = {'sample_id': self.sample_id, 'analyte_1':analyte_1, 'analyte_2':analyte_2, 'norm': norm,
                             'upper_bound':np.nan,'lower_bound':np.nan,'d_bound':np.nan,'use': True,'auto_scale': True}
-            self.data[sample_id]['ratios_info'].loc[len(self.data[sample_id]['ratios_info'])] = ratio_info
+            self.data[sample_id]['ratio_info'].loc[len(self.data[sample_id]['ratio_info'])] = ratio_info
 
             self.prep_data(sample_id, analyte_1=analyte_1, analyte_2=analyte_2)
 
@@ -8987,7 +9014,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         item,item_flag = self.find_leaf(tree, branch, leaf)
 
         if not item_flag:
-            return None
+            return None, True
+
+        if not item.isEnabled():
+            return None, False
 
         # ----start debugging----
         # print(tree_index)
@@ -9002,7 +9032,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # print('\nsuccessfully retrieved plot info\n')
         # ----end debugging----
 
-        return plot_info
+        return plot_info, True
 
     def tree_double_click(self,tree_index):
         """Double-click on plot selector
@@ -9015,12 +9045,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             Item selected in ``Plot Selector``
         """
         # get double-click result
-        plot_info = self.retrieve_plotinfo_from_tree(tree_index=tree_index)
+        plot_info, flag = self.retrieve_plotinfo_from_tree(tree_index=tree_index)
+
+        if not flag:
+            return
 
         tree = tree_index.parent().parent().data()
         branch = tree_index.parent().data()
         leaf = tree_index.data()
-        print(tree+':'+branch+':'+leaf)
+        #print(tree+':'+branch+':'+leaf)
 
         if tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
             #current_plot_df = self.get_map_data(sample_id=level_2_data, field=level_3_data, field_type='Analyte')
@@ -9087,26 +9120,43 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return
 
         for analyte, norm in analyte_df.items():
-            print(analyte)
             if '/' in analyte:
                 analyte_1, analyte_2 = analyte.split(' / ')
                 self.update_ratio_df(self.sample_id, analyte_1, analyte_2, norm)
                 ratio_name = f"{analyte_1} / {analyte_2}"
                 # Populate ratios_items if the pair doesn't already exist
+
+
                 if norm_update:
-                    item,check = self.find_leaf('Ratio (normalized)', branch = self.sample_id, leaf = ratio_name)
-                    item2,check = self.find_leaf('Ratio', branch = self.sample_id, leaf = ratio_name)
-                else:
+                    item1,check = self.find_leaf('Ratio', branch = self.sample_id, leaf = ratio_name)
                     item2,check = self.find_leaf('Ratio (normalized)', branch = self.sample_id, leaf = ratio_name)
-                    item,check = self.find_leaf('Ratio', branch = self.sample_id, leaf = ratio_name)
+                else:
+                    item1,check = self.find_leaf('Ratio', branch = self.sample_id, leaf = ratio_name)
+                    item2,check = self.find_leaf('Ratio (normalized)', branch = self.sample_id, leaf = ratio_name)
 
                 if not check: #if ratio doesn't exist
+                    # ratio
                     child_item = StandardItem(ratio_name)
                     child_item.setBackground(QBrush(QColor(hexcolor)))
-                    item.appendRow(child_item)
+                    item1.appendRow(child_item)
+
+                    # ratio normalized
+                    # check if ratio can be normalized (note: normalization is not handled here)
+                    refval_1 = self.ref_chem[re.sub(r'\d', '', analyte_1).lower()]
+                    refval_2 = self.ref_chem[re.sub(r'\d', '', analyte_2).lower()]
+                    ratio_flag = False
+                    if (refval_1 > 0) and (refval_2 > 0):
+                        ratio_flag = True
+                    #print([analyte, refval_1, refval_2, ratio_flag])
 
                     child_item2 = StandardItem(ratio_name)
                     child_item2.setBackground(QBrush(QColor(hexcolor)))
+                    # if normization cannot be done, make text italic and disable item
+                    if not ratio_flag:
+                        font = child_item2.font()
+                        font.setItalic(True)
+                        child_item2.setFont(font)
+                        child_item2.setEnabled(False)
                     item2.appendRow(child_item2)
                 else:
                     item.setBackground(QBrush(QColor(hexcolor)))
@@ -9256,10 +9306,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         tuple
             (item, flag), item is a branch (``flag==False``) or leaf (``flag==True``), if item neither return is ``(None, None)``.
         """
+        #print('find_leaf')
+        #print(f'{tree} : {branch} : {leaf}')
         tree_items = self.get_tree_items(tree)
 
         #Returns leaf_item & True if leaf exists, else returns branch_item, False
-        print(f'{tree} : {branch} : {leaf}')
         for index in range(tree_items.rowCount()):
             branch_item = tree_items.child(index)
             if branch_item.text() == branch:
@@ -9816,7 +9867,7 @@ class analyteSelectionWindow(QDialog, Ui_Dialog):
         self.create_colorbar()  # Call this to create and display the colorbar
 
     def color_cell(self, row, column, correlation):
-        """Colors cells in """
+        """Colors cells in the correlation table"""
         color = self.get_color_for_correlation(correlation)
         item = self.tableWidgetAnalytes.item(row, column)
         if not item:
@@ -9825,11 +9876,17 @@ class analyteSelectionWindow(QDialog, Ui_Dialog):
         item.setBackground(color)
 
     def get_color_for_correlation(self, correlation):
-            # Map correlation to RGB color
-            r = 255 * (1 - (correlation > 0) * ( abs(correlation)))
-            g = 255 * (1 - abs(correlation))
-            b = 255 * (1 - (correlation < 0) * ( abs(correlation)))
-            return QColor(int(r), int(g),int(b))
+        #cmap = plt.get_cmap('RdBu')
+        #c = cmap((1 + correlation)/2)
+        #r = c[1]
+        #g = c[2]
+        #b = c[3]
+
+        # Map correlation to RGB color
+        r = 255 * (1 - (correlation > 0) * ( abs(correlation)))
+        g = 255 * (1 - abs(correlation))
+        b = 255 * (1 - (correlation < 0) * ( abs(correlation)))
+        return QColor(int(r), int(g),int(b))
 
     def create_colorbar(self):
         colorbar_image = self.generate_colorbar_image(40, 200)  # Width, Height of colorbar
@@ -12073,8 +12130,15 @@ class Profiling:
 app = None
 def main():
     global app
-
     app = QtWidgets.QApplication(sys.argv)
+
+    pixmap = QPixmap("lame_splash.png")
+    splash = QSplashScreen(pixmap)
+    splash.setMask(pixmap.mask())
+    splash.show()
+
+    QTimer.singleShot(3000, splash.close)
+
     # Uncomment this line to set icon to App
     app.setWindowIcon(QtGui.QIcon(os.path.join(basedir, '/resources/icons/LaME-64.png')))
     main = MainWindow()

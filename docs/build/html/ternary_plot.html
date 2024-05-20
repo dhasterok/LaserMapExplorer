@@ -558,7 +558,7 @@ color of know points.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>n</strong><span class="classifier">int</span></dt><dd><p>Hexagonal cell resolution, equivalent to n+1 cells across the bottom</p>
+<dt><strong>n</strong><span class="classifier">int</span></dt><dd><p>Hexagonal cell resolution, equivalent to n+1 cells across the bottom, values must be &gt;0.</p>
 </dd>
 </dl>
 </dd>
@@ -595,7 +595,7 @@ the Cartesian origin is defined at the midpoint between b and c.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>labels</strong><span class="classifier">list of str</span></dt><dd><p>List of strings for the labels of the axes.</p>
+<dt><strong>labels</strong><span class="classifier">list of str, optional</span></dt><dd><p>List of strings for the labels of the axes, by default None.</p>
 </dd>
 </dl>
 </dd>
@@ -637,9 +637,9 @@ within the triangle.  Default color scheme is yellow-green-navy.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>spacing</strong><span class="classifier">float</span></dt><dd><p>Grid spacing, by default 0.1 units.</p>
+<dt><strong>spacing</strong><span class="classifier">float</span></dt><dd><p>Grid spacing.  Values must be on the interval (0,1), by default 0.1</p>
 </dd>
-<dt><strong>nvertices</strong><span class="classifier">int</span></dt><dd><p>Number of vertices, either 3 or 4.</p>
+<dt><strong>nvertices</strong><span class="classifier">int</span></dt><dd><p>Number of vertices, either 3 or 4.  A value of 3 produces a ternary grid and a value of 4 produces a quaternary grid.</p>
 </dd>
 </dl>
 </dd>
@@ -678,8 +678,7 @@ within the triangle.  Default color scheme is yellow-green-navy.</p>
 <dt class="sig sig-object py" id="ternary_plot.ternary.ternscatter">
 <span class="sig-name descname"><span class="pre">ternscatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">36</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">categories</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marker</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'o'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edgecolors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'none'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'horizontal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ternary_plot.ternary.ternscatter" title="Link to this definition">#</a></dt>
 <dd><p>Scatter plot data on ternary axes.</p>
-<p>Ternary scatter plot, ternscatter() uses many of the same parameters as
-matplotlib scatter.</p>
+<p>Ternary scatter plot, ternscatter() uses many of the same parameters as matplotlib scatter.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">

@@ -9,36 +9,46 @@ Laser Map Explorer (LaME) is an innovative software tool developed by researcher
 
 ## Features
 
-* Analyte Selection: Simple intuitive window to choose analytes used for analysis, create ratios and apply transformations (e.g., log).
+* Analyte Selection: Simple intuitive window to choose analytes used for analysis, create ratios and apply transformations (e.g., log).  Simply click on the desired analyte along the diagonal to turn add/remove it from analysis.  Add ratios by clicking on the row and column desired.
 
-![Isotope Selection Window](images/Isotope_selection.png)
-
-* Cluster Analysis: Enables effective categorization and analysis of geochemical data.
-
-![Cluster Analysis](images/tr-06_cluster_fuzzy_2.png)
+![Analyte Selection Window](docs/source/_static/screenshots/LaME_Analyte_Selector.png)
 
 
 * Geochemical Plotting: Offers various plotting capabilities for both qualitative and quantitative analysis of mineral maps.
-- Ternary Plot
+- Biplot (scatter and heatmaps)
+- Ternary plots (scatter and heatmaps)
 
-![Ternary Plot](images/ternary_plots.png)
+![Ternary Plot](images/tr3-06_ternary.png)
 
-- Trace Element Compatibility Plots
+- Trace element compatibility diagrams
 
-![Tec Analysis](images/n-dim_plot.png)
+![Tec Analysis](images/tr3-06_tec.png)
+
+- Radar plots
+
+* Multidimensional Analysis: Enables effective categorization and analysis of geochemical data that can be used to separate regions of the sample (e.g., TEC diagram above)
+
+![Cluster Analysis](images/tr3-06_clusters.png)
+
+Figures produced using LaME with garnet-chlorite schists from the Walter-Outalpa Shear Zone, South Australia.
 
 * User-Friendly Interface: Streamlined data handling process, making it accessible to users with varying levels of expertise.
+- Note taking capability
+- Integrated web-browser that links to the user guide and documentation
 
-* Multi-view: Large canvas for multiple plots
+* Multiple Plot Views: Large canvas for displaying multiple plots
+- Multiview, display multiple plots plots for comparison/interpretation
+- Quickview, get a quick overview of the data using preset or user defined data displays.
 
-![Mulit-view Interface](images/TR3-06_Multiview_2.png)
+![Mulit-view Interface](images/tr3-06_quickview.png)
 
-
-LaME is demonstrated using data from garnet-chlorite schists found in the Walter-Outalpa Shear Zone, South Australia.
+* Customizable
+- Style pane for customizing figures
+- Import custom colormaps
+- Set prefered data views
 
 ## Planned functionality:
 
-* Create custom maps and layouts
 * Produce chemical profiles
 * Diffusion modeling (1D and 2D)
 * Temperature calculations
@@ -46,7 +56,6 @@ LaME is demonstrated using data from garnet-chlorite schists found in the Walter
 * Isotopic systems
 * Batch processing of multiple samples
 * Calculator for custom field generation
-
 
 ## Development and Availability
 

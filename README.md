@@ -11,7 +11,7 @@ Laser Map Explorer (LaME) is an innovative software tool developed by researcher
 
 * Analyte Selection: Simple intuitive window to choose analytes used for analysis, create ratios and apply transformations (e.g., log).  Simply click on the desired analyte along the diagonal to turn add/remove it from analysis.  Add ratios by clicking on the row and column desired.
 
-![Analyte Selection Window](docs/source/_static/screenshots/LaME_Analyte_Selector.png | width=200)
+![Analyte Selection Window](http://github.com/dhasterok/LaserMapExplorer/docs/source/_static/screenshots/LaME_Analyte_Selector.png | width=200)
 
 
 * Geochemical Plotting: Offers various plotting capabilities for both qualitative and quantitative analysis of mineral maps.

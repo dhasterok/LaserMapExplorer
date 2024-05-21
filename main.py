@@ -482,7 +482,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 case 'notes':
                     self.bottom_tab.update({'notes': tid})
                 case 'filters':
-                    self.bottom_tab.update({'filters': tid})
+                    self.bottom_tab.update({'filter': tid})
                 case 'profiles':
                     self.bottom_tab.update({'profile': tid})
                 case 'plot info':

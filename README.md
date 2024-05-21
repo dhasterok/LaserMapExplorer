@@ -10,25 +10,20 @@ Laser Map Explorer (LaME) is an innovative software tool developed by researcher
 ## Features
 
 * Analyte Selection: Simple intuitive window to choose analytes used for analysis, create ratios and apply transformations (e.g., log).  Simply click on the desired analyte along the diagonal to turn add/remove it from analysis.  Add ratios by clicking on the row and column desired.
-
-![Analyte Selection Window](docs/source/_static/screenshots/LaME_Analyte_Selector.png)
-
+<center><img src="docs/source/_static/screenshots/LaME_Analyte_Selector.png" width="600"/></center>
 
 * Geochemical Plotting: Offers various plotting capabilities for both qualitative and quantitative analysis of mineral maps.
 - Biplot (scatter and heatmaps)
 - Ternary plots (scatter and heatmaps)
-
-![Ternary Plot](images/tr3-06_ternary.png)
+<center><img src="images/tr3-06_ternary.png" width="600"/></center>
 
 - Trace element compatibility diagrams
-
-![Tec Analysis](images/tr3-06_tec.png)
+<center><img src="images/tr3-06_tec.png" width="600"/></center>
 
 - Radar plots
 
 * Multidimensional Analysis: Enables effective categorization and analysis of geochemical data that can be used to separate regions of the sample (e.g., TEC diagram above)
-
-![Cluster Analysis](images/tr3-06_clusters.png)
+<center><img src="images/tr3-06_clusters.png" width="600"/></center>
 
 Figures produced using LaME with garnet-chlorite schists from the Walter-Outalpa Shear Zone, South Australia.
 
@@ -40,7 +35,7 @@ Figures produced using LaME with garnet-chlorite schists from the Walter-Outalpa
 - Multiview, display multiple plots plots for comparison/interpretation
 - Quickview, get a quick overview of the data using preset or user defined data displays.
 
-<img src="images/tr3-06_quickview.png" width="400"/>
+<center><img src="images/tr3-06_quickview.png" width="600"/></center>
 
 * Customizable
 - Style pane for customizing figures

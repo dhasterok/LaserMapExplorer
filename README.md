@@ -54,8 +54,8 @@ Figures produced using LaME with garnet-chlorite schists from the Walter-Outalpa
 
 ## Development and Availability
 
-Currently in the prototype phase developed using Matlab.
-Expected GitHub release: April 2024.
+Currently in beta
+Expected stable version release: June 2024
 
 
 ## Contribution

@@ -3410,6 +3410,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #     self.plot.removeItem(self.grad_img)
 
         # Assuming self.array is the current image data
+        # get data for current map
+        field_type = self.comboBoxColorByField.currentText()
+        field = self.comboBoxColorField.currentText()
+        map_df = self.get_map_data(self.sample_id, field, field_type=field_type)
+
+        # plot map
+        self.array = np.reshape(map_df['array'].values, self.array_size, order=self.order)
+
         match algorithm:
             case 'none':
                 return
@@ -6119,7 +6127,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         clb,cub,cscale,clabel = self.get_axis_values(field_type,field)
 
         # get data for current map
-        map_df = self.get_map_data(sample_id, field, field_type=field_type)
+        map_df = self.get_map_data(self.sample_id, field, field_type=field_type)
 
         # plot map
         reshaped_array = np.reshape(map_df['array'].values, self.array_size, order=self.order)

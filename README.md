@@ -15,15 +15,15 @@ Laser Map Explorer (LaME) is an innovative software tool developed by researcher
 * Geochemical Plotting: Offers various plotting capabilities for both qualitative and quantitative analysis of mineral maps.
 - Biplot (scatter and heatmaps)
 - Ternary plots (scatter and heatmaps)
-<center><img src="images/tr3-06_ternary.png" width="600"/></center>
+<center><img src="images/tr3-06_ternary.png" width="500"/></center>
 
 - Trace element compatibility diagrams
-<center><img src="images/tr3-06_tec.png" width="600"/></center>
+<center><img src="images/tr3-06_tec.png" width="500"/></center>
 
 - Radar plots
 
 * Multidimensional Analysis: Enables effective categorization and analysis of geochemical data that can be used to separate regions of the sample (e.g., TEC diagram above)
-<center><img src="images/tr3-06_clusters.png" width="600"/></center>
+<center><img src="images/tr3-06_clusters.png" width="500"/></center>
 
 Figures produced using LaME with garnet-chlorite schists from the Walter-Outalpa Shear Zone, South Australia.
 
@@ -35,7 +35,7 @@ Figures produced using LaME with garnet-chlorite schists from the Walter-Outalpa
 - Multiview, display multiple plots plots for comparison/interpretation
 - Quickview, get a quick overview of the data using preset or user defined data displays.
 
-<center><img src="images/tr3-06_quickview.png" width="600"/></center>
+<center><img src="images/tr3-06_quickview.png" width="500"/></center>
 
 * Customizable
 - Style pane for customizing figures

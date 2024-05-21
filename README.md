@@ -40,7 +40,7 @@ Figures produced using LaME with garnet-chlorite schists from the Walter-Outalpa
 - Multiview, display multiple plots plots for comparison/interpretation
 - Quickview, get a quick overview of the data using preset or user defined data displays.
 
-<img src="images/tr3-06_quickview.png" width="200"/>
+<img src="images/tr3-06_quickview.png" width="400"/>
 
 * Customizable
 - Style pane for customizing figures

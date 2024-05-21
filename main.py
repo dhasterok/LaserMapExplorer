@@ -224,6 +224,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             Layout for Quick View tab of ``canvasWindow``
         left_tab : dict
             Holds the indices for pages in ``toolBox``
+        map_plot_types : list
+            A list of plots that result in a map, i.e., ['analyte map', 'ternary map', 'PCA Score', 'Cluster', 'Cluster Score'].  This list is generally used as a check when setting certain styles or other plotting behavior related to maps.
         marker_dict : dict
             Dictionary of marker names used to translate ``comboBoxMarker`` to a matplotlib maker symbol, though not all matplotlib markers
             are used.
@@ -482,7 +484,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 case 'filters':
                     self.bottom_tab.update({'filters': tid})
                 case 'profiles':
-                    self.bottom_tab.update({'profiles': tid})
+                    self.bottom_tab.update({'profile': tid})
                 case 'plot info':
                     self.bottom_tab.update({'plotinfo': tid})
                 case 'help':
@@ -504,6 +506,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.markerdict = {'circle':'o', 'square':'s', 'diamond':'d', 'triangle (up)':'^', 'triangle (down)':'v', 'hexagon':'h', 'pentagon':'p'}
         self.comboBoxMarker.clear()
         self.comboBoxMarker.addItems(self.markerdict.keys())
+        self.map_plot_types = ['analyte map', 'ternary map', 'PCA Score', 'Cluster', 'Cluster Score']
 
         self.plot_types = {self.left_tab['sample']: [0, 'analyte map', 'correlation'],
             self.left_tab['spot']: [0, 'analyte map', 'gradient map'],
@@ -1576,13 +1579,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.sample_id == '':
             return
 
+        tab_id = self.toolBox.currentIndex()
+
         self.comboBoxPlotType.blockSignals(True)
         self.comboBoxPlotType.clear()
-        self.comboBoxPlotType.addItems(self.plot_types[self.toolBox.currentIndex()][1:])
-        self.comboBoxPlotType.setCurrentIndex(self.plot_types[self.toolBox.currentIndex()][0])
+        self.comboBoxPlotType.addItems(self.plot_types[tab_id][1:])
+        self.comboBoxPlotType.setCurrentIndex(self.plot_types[tab_id][0])
         self.comboBoxPlotType.blockSignals(False)
-        self.set_style_widgets()
 
+        plot_type = self.comboBoxPlotType.currentText()
+        self.set_style_widgets(plot_type=plot_type, style=self.styles[plot_type])
+
+        # If canvasWindow is set to SingleView, update the plot
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
             self.update_SV()
 
@@ -3810,13 +3818,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxLineWidth.setEnabled(False)
                 self.lineEditLengthMultiplier.setEnabled(False)
 
-
                 # color properties
                 self.comboBoxColorByField.setEnabled(True)
                 self.comboBoxColorField.setEnabled(True)
                 self.comboBoxFieldColormap.setEnabled(True)
                 self.lineEditColorLB.setEnabled(True)
                 self.lineEditColorUB.setEnabled(True)
+                self.comboBoxColorScale.setEnabled(True)
                 self.comboBoxCbarDirection.setEnabled(True)
                 self.lineEditCbarLabel.setEnabled(True)
 
@@ -4355,13 +4363,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         tab_id = self.toolBox.currentIndex()
 
         if plot_type is None:
+            plot_type = self.plot_types[tab_id][self.plot_types[tab_id][0]+1]
             self.comboBoxPlotType.blockSignals(True)
             self.comboBoxPlotType.clear()
             self.comboBoxPlotType.addItems(self.plot_types[tab_id][1:])
-            self.comboBoxPlotType.blockSignals(False)
-
-            plot_type = self.plot_types[tab_id][self.plot_types[tab_id][0]+1]
-            self.comboBoxPlotType.blockSignals(True)
             self.comboBoxPlotType.setCurrentText(plot_type)
             self.comboBoxPlotType.blockSignals(False)
         elif plot_type == '':
@@ -4371,12 +4376,45 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             style = self.styles[plot_type]
 
         # axes properties
-        self.lineEditXLB.setText(self.dynamic_format(style['Axes']['XLim'][0],order=3,dir=0))
-        self.lineEditXUB.setText(self.dynamic_format(style['Axes']['XLim'][1],order=3,dir=1))
+        # for map plots, check to see that 'X' and 'Y' are initialized
+        if plot_type.lower() in self.map_plot_types:
+            if ('X' not in list(self.axis_dict.keys())) or ('Y' not in list(self.axis_dict.keys())):
+                # initialize 'X' and 'Y' axes
+                # all plot types use the same map dimensions so just use Analyte for the field_type
+                self.initialize_axis_values('Analyte','X')
+                self.initialize_axis_values('Analyte','Y')
+            xmin,xmax,xscale,xlabel = self.get_axis_values('Analyte','X')
+            ymin,ymax,yscale,ylabel = self.get_axis_values('Analyte','Y')
+
+            # set style dictionary values for X and Y
+            style['Axes']['XLim'] = [xmin, xmax]
+            style['Axes']['XScale'] = xscale
+            style['Axes']['XLabel'] = 'X'
+            style['Axes']['YLim'] = [ymin, ymax]
+            style['Axes']['YScale'] = yscale
+            style['Axes']['YLabel'] = 'Y'
+            style['Axes']['AspectRatio'] = self.aspect_ratio
+
+            # do not round axes limits for maps
+            self.lineEditXLB.setText(str(style['Axes']['XLim'][0]))
+            self.lineEditXUB.setText(str(style['Axes']['XLim'][1]))
+
+            self.lineEditYLB.setText(str(style['Axes']['YLim'][0]))
+            self.lineEditYUB.setText(str(style['Axes']['YLim'][1]))
+        else:
+            # round axes limits for everything that isn't a map
+            self.lineEditXLB.setText(self.dynamic_format(style['Axes']['XLim'][0],order=3,dir=0))
+            self.lineEditXUB.setText(self.dynamic_format(style['Axes']['XLim'][1],order=3,dir=1))
+
+            self.lineEditYLB.setText(self.dynamic_format(style['Axes']['YLim'][0],order=3,dir=0))
+            self.lineEditYUB.setText(self.dynamic_format(style['Axes']['YLim'][1],order=3,dir=1))
+
+        self.comboBoxXScale.setCurrentText(style['Axes']['XScale'])
         self.lineEditXLabel.setText(style['Axes']['XLabel'])
-        self.lineEditYLB.setText(self.dynamic_format(style['Axes']['YLim'][0],order=3,dir=0))
-        self.lineEditYUB.setText(self.dynamic_format(style['Axes']['YLim'][1],order=3,dir=1))
+
+        self.comboBoxYScale.setCurrentText(style['Axes']['YScale'])
         self.lineEditYLabel.setText(style['Axes']['YLabel'])
+
         self.lineEditZLabel.setText(style['Axes']['ZLabel'])
         self.lineEditAspectRatio.setText(str(style['Axes']['AspectRatio']))
 
@@ -4407,9 +4445,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # color properties
         self.toolButtonMarkerColor.setStyleSheet("background-color: %s;" % style['Colors']['Color'])
+        self.update_field_type_combobox(self.comboBoxColorByField,addNone=True,plot_type=plot_type)
         self.comboBoxColorByField.setCurrentText(style['Colors']['ColorByField'])
-        self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
-        self.comboBoxColorField.setCurrentText(style['Colors']['Field'])
+
+        if style['Colors']['ColorByField'] == '':
+            self.comboBoxColorField.clear()
+        else:
+            self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
+
+        if style['Colors']['Field'] in self.comboBoxColorField.allItems():
+            self.comboBoxColorField.setCurrentText(style['Colors']['Field'])
+        else:
+            style['Colors']['Field'] = self.comboBoxColorField.currentText()
+
         self.comboBoxFieldColormap.setCurrentText(style['Colors']['Colormap'])
         self.checkBoxReverseColormap.blockSignals(True)
         self.checkBoxReverseColormap.setChecked(style['Colors']['Reverse'])
@@ -4419,6 +4467,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             style['Colors']['CLabel'] = self.axis_dict[style['Colors']['Field']]['label']
         self.lineEditColorLB.setText(self.dynamic_format(style['Colors']['CLim'][0],order=3,dir=0))
         self.lineEditColorUB.setText(self.dynamic_format(style['Colors']['CLim'][1],order=3,dir=1))
+        if style['Colors']['ColorByField'] == 'Cluster':
+            # set ColorField to active cluster method
+            self.comboBoxColorField.setCurrentText(self.cluster_dict['active method'])
+
+            # set color scale to discrete
+            self.comboBoxColorScale.clear()
+            self.comboBoxColorScale.addItem('discrete')
+            self.comboBoxColorScale.setCurrentText('discrete')
+
+            self.styles[plot_type]['Colors']['CScale'] = 'discrete'
+        else:
+            # set color scale options to linear/log
+            self.comboBoxColorScale.clear()
+            self.comboBoxColorScale.addItems(['linear','log'])
+            self.comboBoxColorScale.setCurrentText(self.styles[plot_type]['Colors']['CScale'])
         self.comboBoxColorScale.setCurrentText(style['Colors']['CScale'])
         self.comboBoxCbarDirection.setCurrentText(style['Colors']['Direction'])
         self.lineEditCbarLabel.setText(style['Colors']['CLabel'])
@@ -4481,8 +4544,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def plot_type_callback(self):
         """Updates styles when plot type is changed
 
-        Executes on change of ``MainWindow.comboBoxPlotType.currentText()``, updates the style dictionary,
-        toggles widgets and updates single view plot
+        Executes on change of ``MainWindow.comboBoxPlotType``.  Updates ``MainWindow.plot_type[0]`` to the current index of the 
+        combobox, then updates the style widgets to match the dictionary entries and updates the plot.
         """
         # set plot flag to false
         self.plot_flag = False
@@ -4531,6 +4594,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         return f'PC{self.spinBoxPCX.value()}'
                     case 'y':
                         return f'PC{self.spinBoxPCY.value()}'
+            case 'analyte map' | 'ternary map' | 'PCA Score' | 'Cluster' | 'Cluster Score':
+                return ax.upper()
+
 
     def axis_label_edit_callback(self, ax, new_label):
         """Updates axis label in dictionaries from widget
@@ -4653,8 +4719,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #print('set_axis_widgets')
         match ax:
             case 'x':
-                self.lineEditXLB.setText(self.dynamic_format(self.axis_dict[field]['min'],order=3,dir=0))
-                self.lineEditXUB.setText(self.dynamic_format(self.axis_dict[field]['max'],order=3,dir=1))
+                if field == 'X':
+                    self.lineEditXLB.setText(str(self.axis_dict[field]['min']))
+                    self.lineEditXUB.setText(str(self.axis_dict[field]['max']))
+                else:
+                    self.lineEditXLB.setText(self.dynamic_format(self.axis_dict[field]['min'],order=3,dir=0))
+                    self.lineEditXUB.setText(self.dynamic_format(self.axis_dict[field]['max'],order=3,dir=1))
                 self.lineEditXLabel.setText(self.axis_dict[field]['label'])
                 self.comboBoxXScale.setCurrentText(self.axis_dict[field]['scale'])
             case 'y':
@@ -4664,8 +4734,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.lineEditYLabel.setText(self.comboBoxHistType.currentText())
                     self.comboBoxYScale.setCurrentText('linear')
                 else:
-                    self.lineEditYLB.setText(self.dynamic_format(self.axis_dict[field]['min'],order=3,dir=0))
-                    self.lineEditYUB.setText(self.dynamic_format(self.axis_dict[field]['max'],order=3,dir=1))
+                    if field == 'X':
+                        self.lineEditYLB.setText(str(self.axis_dict[field]['min']))
+                        self.lineEditYUB.setText(str(self.axis_dict[field]['max']))
+                    else:
+                        self.lineEditYLB.setText(self.dynamic_format(self.axis_dict[field]['min'],order=3,dir=0))
+                        self.lineEditYUB.setText(self.dynamic_format(self.axis_dict[field]['max'],order=3,dir=1))
                     self.lineEditYLabel.setText(self.axis_dict[field]['label'])
                     self.comboBoxYScale.setCurrentText(self.axis_dict[field]['scale'])
             case 'z':
@@ -4700,6 +4774,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.set_color_axis_widgets()
         else:
             match self.comboBoxPlotType.currentText().lower():
+                case 'analyte map' | 'cluster' | 'cluster score' | 'pca score':
+                    field = ax.upper()
+                    self.initialize_axis_values('Analyte', field)
+                    self.set_axis_widgets(ax, field)
                 case 'histogram':
                     field = self.comboBoxHistField.currentText()
                     if ax == 'x':
@@ -4782,22 +4860,31 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.axis_dict.update({field:{'status':'auto', 'label':field, 'min':None, 'max':None}})
 
         #current_plot_df = pd.DataFrame()
-        df = self.get_map_data(self.sample_id, field, field_type)
-        array = df['array'][self.data[self.sample_id]['mask']].values if not df.empty else []
+        if field not in ['X','Y']:
+            df = self.get_map_data(self.sample_id, field, field_type)
+            array = df['array'][self.data[self.sample_id]['mask']].values if not df.empty else []
+        else:
+            # field 'X' and 'Y' require separate extraction
+            array = self.data[self.sample_id]['raw_data'].loc[:,field].values
+
         match field_type:
             case 'Analyte' | 'Analyte (normalized)':
-                #current_plot_df = self.data[self.sample_id]['processed_data'].loc[:,field].values
-                symbol, mass = self.parse_field(field)
-                if field_type == 'Analyte':
-                    self.axis_dict[field]['label'] = f"$^{{{mass}}}${symbol} ({self.preferences['Units']['Concentration']})"
+                if field in ['X','Y']:
+                    scale = 'linear'
                 else:
-                    self.axis_dict[field]['label'] = f"$^{{{mass}}}${symbol}$_N$ ({self.preferences['Units']['Concentration']})"
+                    #current_plot_df = self.data[self.sample_id]['processed_data'].loc[:,field].values
+                    symbol, mass = self.parse_field(field)
+                    if field_type == 'Analyte':
+                        self.axis_dict[field]['label'] = f"$^{{{mass}}}${symbol} ({self.preferences['Units']['Concentration']})"
+                    else:
+                        self.axis_dict[field]['label'] = f"$^{{{mass}}}${symbol}$_N$ ({self.preferences['Units']['Concentration']})"
 
-                #amin = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes']==field),'v_min'].values[0]
-                #amax = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes']==field),'v_max'].values[0]
+                    #amin = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes']==field),'v_min'].values[0]
+                    #amax = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes']==field),'v_max'].values[0]
+                    scale = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes']==field),'norm'].values[0]
+
                 amin = array.min()
                 amax = array.max()
-                scale = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes']==field),'norm'].values[0]
             case 'Ratio' | 'Ratio (normalized)':
                 field_1 = field.split(' / ')[0]
                 field_2 = field.split(' / ')[1]
@@ -4820,8 +4907,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 amin = array.min()
                 amax = array.max()
 
-        amin = self.oround(amin, order=2, dir=0)
-        amax = self.oround(amax, order=2, dir=1)
+        # do not round 'X' and 'Y' so full extent of map is viewable
+        if field not in ['X','Y']:
+            amin = self.oround(amin, order=2, dir=0)
+            amax = self.oround(amax, order=2, dir=1)
 
         d = {'status':'auto', 'min':amin, 'max':amax, 'scale':scale}
 
@@ -5043,39 +5132,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Updates style associated with ``MainWindow.comboBoxColorByField``.  Also updates
         ``MainWindow.comboBoxColorField`` and ``MainWindow.comboBoxColorScale``."""
         #print('color_by_field_callback')
-        self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
-
+        #self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
         plot_type = self.comboBoxPlotType.currentText()
-        if self.styles[plot_type]['Colors']['ColorByField'] == self.comboBoxColorByField.currentText():
+        if plot_type == '':
             return
 
-        self.styles[plot_type]['Colors']['ColorByField'] = self.comboBoxColorByField.currentText()
+        style = self.styles[plot_type]
+        if style['Colors']['ColorByField'] == self.comboBoxColorByField.currentText():
+            return
 
-        if self.comboBoxColorByField.currentText() == 'Clusters':
-            # set ColorField to active cluster method
-            self.comboBoxColorField.setCurrentText(self.cluster_dict['active method'])
-
-            # set color scale to discrete
-            self.comboBoxColorScale.clear()
-            self.comboBoxColorScale.addItem('discrete')
-            self.comboBoxColorScale.setCurrentText('discrete')
-
-            self.styles[plot_type]['Colors']['CScale'] = 'discrete'
-        else:
-            # set color scale options to linear/log
-            self.comboBoxColorScale.clear()
-            self.comboBoxColorScale.addItems(['linear','log'])
-            self.comboBoxColorScale.setCurrentText(self.styles[plot_type]['Colors']['CScale'])
+        style['Colors']['ColorByField'] = self.comboBoxColorByField.currentText()
+        if self.comboBoxColorByField.currentText() != '':
+            self.set_style_widgets(plot_type)
 
         if self.comboBoxPlotType.isEnabled() == False | self.comboBoxColorByField.isEnabled() == False:
             return
 
-        if self.comboBoxColorByField.currentText() != 'None':
-            self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
-            self.set_style_widgets(plot_type)
-
         # only run update current plot if color field is selected or the color by field is clusters
-        if self.comboBoxColorByField.currentText() != 'None' or self.comboBoxColorField.currentText() != '' or self.comboBoxColorByField.currentText() in ['Clusters']:
+        if self.comboBoxColorByField.currentText() != 'None' or self.comboBoxColorField.currentText() != '' or self.comboBoxColorByField.currentText() in ['Cluster']:
             self.update_SV()
 
     def color_field_callback(self):
@@ -8504,14 +8578,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         Set names are consistent with QComboBox.
 
-        Parameter
-        ---------
+        Parameters
+        ----------
         set_name : str, optional
             name of set list, options include ``Analyte``, ``Analyte (normalized)``, ``Ratio``, ``Calcualated Field``,
             ``PCA Score``, ``Cluster``, ``Cluster Score``, ``Special``, Defaults to ``Analyte``
 
-        Return
-        ------
+        Returns
+        -------
         list
             Set_fields, a list of fields within the input set
         """
@@ -11503,7 +11577,7 @@ class Profiling:
                     self.profiles[self.main_window.sample_id][k,v][self.point_index] = (x,y, circ_val,scatter, interpolate)
 
 
-                if self.main_window.canvasWindow.currentIndex() == self.canvas_tab['mv']:
+                if self.main_window.canvasWindow.currentIndex() == self.main_window.canvas_tab['mv']:
                     # Add the scatter item to all other plots and save points in self.profiles[self.main_window.sample_id]
                     for (k,v), (_, p, array) in self.main_window.lasermaps.items():
                         circ_val = []
@@ -11538,7 +11612,7 @@ class Profiling:
 
         elif event.button() == QtCore.Qt.LeftButton:  #plot profile
             #switch to profile tab
-            self.main_window.tabWidget.setCurrentIndex(self.bottom_tab['profile'])
+            self.main_window.tabWidget.setCurrentIndex(self.main_window.bottom_tab['profile'])
 
             # Create a scatter plot item at the clicked position
             scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
@@ -11561,7 +11635,7 @@ class Profiling:
                 self.profiles[self.main_window.sample_id][(k,v)] = [(x,y, circ_val,scatter, interpolate)]
 
 
-            if self.main_window.canvasWindow.currentIndex() == self.canvas_tab['mv']:
+            if self.main_window.canvasWindow.currentIndex() == self.main_window.canvas_tab['mv']:
                 # Add the scatter item to all other plots and save points in self.profiles[self.main_window.sample_id]
                 for (k,v), (_, p,  array) in self.main_window.lasermaps.items():
                     circ_val = []
@@ -11733,7 +11807,7 @@ class Profiling:
         style = self.main_window.styles['profile']
 
         if len(list(profiles.values())[0])>0: #if self.profiles[self.main_window.sample_id] has values
-            self.main_window.tabWidget.setCurrentIndex(self.bottom_tab['profile']) #show profile plot tab
+            self.main_window.tabWidget.setCurrentIndex(self.main_window.bottom_tab['profile']) #show profile plot tab
             sort_axis=self.main_window.comboBoxProfileSort.currentText()
             range_threshold=int(self.main_window.lineEditYThresh.text())
             # Clear existing plot

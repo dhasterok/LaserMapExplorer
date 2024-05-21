@@ -8,6 +8,7 @@ a = Analysis(
     datas=[('resources/','resources'),
         ('src/','src'),
         ('user_preferences/','user_preferences'),
+        ('lame_splash.png','.'),
         ('LaME-64.png','.'),
         ('docs/build/','docs')],
     hiddenimports=[],

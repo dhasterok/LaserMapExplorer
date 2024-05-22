@@ -30,7 +30,6 @@ from sklearn.cluster import KMeans
 #from sklearn_extra.cluster import KMedoids
 import skfuzzy as fuzz
 import cv2
-#from cv2 import CV_64F
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from src.rotated import RotatedHeaderView

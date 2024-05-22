@@ -29,7 +29,8 @@ from scipy.signal import convolve2d, wiener, decimate
 from sklearn.cluster import KMeans
 #from sklearn_extra.cluster import KMedoids
 import skfuzzy as fuzz
-from cv2 import Canny, Sobel, CV_64F, bilateralFilter, medianBlur, GaussianBlur, edgePreservingFilter
+import cv2
+#from cv2 import CV_64F
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from src.rotated import RotatedHeaderView
@@ -1688,6 +1689,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ref_chem = self.ref_data.iloc[comboBox1.currentIndex()]
         self.ref_chem.index = [col.replace('_ppm', '') for col in self.ref_chem.index]
 
+        # loop through normalized ratios and enable/disable ratios based
+        # on the new reference's analytes
+
+
         self.update_SV()
         #self.update_all_plots()
 
@@ -3158,8 +3163,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             algorithm = self.comboBoxEdgeDetectMethod.currentText().lower()
             if algorithm == 'sobel':
                 # Apply Sobel edge detection
-                sobelx = Sobel(self.array, CV_64F, 1, 0, ksize=5)
-                sobely = Sobel(self.array, CV_64F, 0, 1, ksize=5)
+                sobelx = cv2.Sobel(self.array, cv2.CV_64F, 1, 0, ksize=5)
+                sobely = cv2.Sobel(self.array, cv2.CV_64F, 0, 1, ksize=5)
                 edge_detected_image = np.sqrt(sobelx**2 + sobely**2)
             elif algorithm == 'canny':
 
@@ -3170,7 +3175,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 scaled_array = (normalized_array * 255).astype(np.uint8)
 
                 # Apply Canny edge detection
-                edge_detected_image = Canny(scaled_array, 100, 200)
+                edge_detected_image = cv2.Canny(scaled_array, 100, 200)
             elif algorithm == 'zero cross':
                 # Apply Zero Crossing edge detection (This is a placeholder as OpenCV does not have a direct function)
                 # You might need to implement a custom function or find a library that supports Zero Crossing
@@ -3181,19 +3186,32 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # Assuming you have a way to display this edge_detected_image on your plot.
             # This could be an update to an existing ImageItem or creating a new one if necessary.
             self.edge_array = edge_detected_image
+            if (np.min(self.edge_array) < 0) or (np.max(self.edge_array) > 255):
+                self.edge_array = (self.edge_array - np.min(self.edge_array)) / (np.max(self.edge_array) - np.min(self.edge_array))
+
+                # Scale to [0, 255] and convert to uint8
+                self.edge_array = (self.edge_array * 255).astype(np.uint8)
+
             self.edge_img = ImageItem(image=self.edge_array)
+            #set aspect ratio of rectangle
+            #self.edge_img.setRect(0,0,self.x_range,self.y_range)
+            # edge_img.setAs
+            #cm = colormap.get(style['Colors']['Colormap'], source = 'matplotlib')
+            #self.edge_img.setColorMap(cm)
+            #self.plot.addItem(self.edge_img)
+
+            overlay_image = np.zeros(self.edge_array.shape+(4,), dtype=np.uint8)
+            colorlist = self.get_rgb_color(self.styles['analyte map']['Scales']['OverlayColor'])
+            overlay_image[..., 0] = colorlist[0]  # Red channel
+            overlay_image[..., 1] = colorlist[1]  # Green channel
+            overlay_image[..., 2] = colorlist[2]  # Blue channel
+            overlay_image[..., 3] = 0.9*self.edge_array
+
+            self.edge_img = ImageItem(image=overlay_image)
 
             #set aspect ratio of rectangle
             self.edge_img.setRect(0,0,self.x_range,self.y_range)
-            # edge_img.setAs
-            cm = colormap.get(style['Colors']['Colormap'], source = 'matplotlib')
-            self.edge_img.setColorMap(cm)
-
-            #onemat = np.repeat(np.ones_like(self.edge_img),3).reshape(self.array_size[0],self.array_size[1],3)
-            #self.edge_overlay = ImageItem(image=np.concatenate(onemat,255*(1 - 0.5*(self.edge_array)),axis=2))
-            #self.edge_overlay.setRect(0,0,self.x_range,self.y_range)
-            #self.plot.addItem(self.edge_img)
-            self.plot.addItem(self.edge_overlay)
+            self.plot.addItem(self.edge_img)
 
     def zero_crossing_laplacian(self,array):
         """Apply Zero Crossing on the Laplacian of the image.
@@ -3423,10 +3441,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 return
             case 'median':
                 # Apply Median filter
-                filtered_image = medianBlur(self.array.astype(np.float32), int(val1))  # Kernel size is 5
+                filtered_image = cv2.medianBlur(self.array.astype(np.float32), int(val1))  # Kernel size is 5
             case 'gaussian':
                 # Apply Median filter
-                filtered_image = GaussianBlur(self.array.astype(np.float32),
+                filtered_image = cv2.GaussianBlur(self.array.astype(np.float32),
                         int(val1), sigmaX=float(val2), sigmaY=float(val2))  # Kernel size is 5
             case 'wiener':
                 # Apply Wiener filter
@@ -3441,7 +3459,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # Scale to [0, 255] and convert to uint8
                 image = (normalized_array * 255).astype(np.uint8)
-                filtered_image = edgePreservingFilter(image, flags=1, sigma_s=float(val1), sigma_r=float(val2))
+                filtered_image = cv2.edgePreservingFilter(image, flags=1, sigma_s=float(val1), sigma_r=float(val2))
 
                 # convert back to original units
                 filtered_image = (filtered_image.astype(np.float32) / 255) * (np.max(self.array) - np.min(self.array)) + np.min(self.array)
@@ -3449,7 +3467,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case 'bilateral':
                 # Apply Bilateral filter
                 # Parameters are placeholders, you might need to adjust them based on your data
-                filtered_image = bilateralFilter(self.array.astype(np.float32), int(val1), float(val2), float(val2))
+                filtered_image = cv2.bilateralFilter(self.array.astype(np.float32), int(val1), float(val2), float(val2))
 
         # Update or create the image item for displaying the filtered image
         self.noise_red_array = filtered_image
@@ -6324,6 +6342,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         #add zoom window
         plotWindow.getViewBox().autoRange()
+
+        # add edge detection
+        if self.toolButtonEdgeDetect.isChecked():
+            self.add_edge_detection()
 
         if view == 0 and self.plot_info:
             self.plot_info['view'][0] = False
@@ -9330,8 +9352,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         tree : str
             Highest level of tree with branches to unhighlight
         """
+        #bgcolor = tree.background().color()
+        if darkdetect.isDark():
+            bgcolor = '#1e1e1e'
+        else:
+            bgcolor = '#ffffff'
+
         for i in range(tree.rowCount()):
-            bgcolor = tree.background().color()
             branch_item = tree.child(i)
             # branch_item.setBackground(QBrush(QColor(bgcolor)))  # white or any default background color
             for j in range(branch_item.rowCount()):
@@ -10986,6 +11013,7 @@ class Table_Fcn:
                 for row in rows:
                     # Get selected row and delete it
                     table.removeRow(row)
+                    self.main_window.ndim_list.pop(row)
 
             case 'Filters':
                 for row in rows:

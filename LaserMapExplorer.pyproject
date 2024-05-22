@@ -9,6 +9,7 @@
         "designer/toggleswitch.cpp",
         "designer/toggleswitch.h",
         "designer/ExcelConcatenator.ui",
-        "designer/QuickViewDialog.ui"
+        "designer/QuickViewDialog.ui",
+        "designer/ImageImportDialog.ui"
     ]
 }

@@ -1196,7 +1196,7 @@
         <string>Activates the crop tool</string>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>8</number>
        </property>
        <widget class="QWidget" name="SelectAnalytePage">
         <property name="enabled">
@@ -1207,7 +1207,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>235</height>
+          <height>238</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1772,7 +1772,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>235</height>
+          <height>238</height>
          </rect>
         </property>
         <attribute name="label">
@@ -2376,7 +2376,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>235</height>
+          <height>238</height>
          </rect>
         </property>
         <attribute name="label">
@@ -2700,7 +2700,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>235</height>
+          <height>238</height>
          </rect>
         </property>
         <attribute name="label">
@@ -3818,7 +3818,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>235</height>
+          <height>238</height>
          </rect>
         </property>
         <attribute name="label">
@@ -4357,7 +4357,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>235</height>
+          <height>238</height>
          </rect>
         </property>
         <attribute name="label">
@@ -4909,7 +4909,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>235</height>
+          <height>238</height>
          </rect>
         </property>
         <attribute name="label">
@@ -5072,7 +5072,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>235</height>
+          <height>238</height>
          </rect>
         </property>
         <attribute name="label">
@@ -5649,7 +5649,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>235</height>
+          <height>238</height>
          </rect>
         </property>
         <attribute name="label">
@@ -6313,7 +6313,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>235</height>
+          <height>238</height>
          </rect>
         </property>
         <attribute name="label">
@@ -6811,7 +6811,7 @@
           <x>0</x>
           <y>0</y>
           <width>241</width>
-          <height>408</height>
+          <height>411</height>
          </rect>
         </property>
         <attribute name="label">
@@ -6939,7 +6939,7 @@
           <x>0</x>
           <y>0</y>
           <width>241</width>
-          <height>408</height>
+          <height>411</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7325,8 +7325,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>98</width>
-            <height>28</height>
+            <width>100</width>
+            <height>30</height>
            </rect>
           </property>
           <attribute name="icon">
@@ -7441,8 +7441,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>98</width>
-            <height>28</height>
+            <width>100</width>
+            <height>30</height>
            </rect>
           </property>
           <attribute name="icon">
@@ -7599,8 +7599,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>98</width>
-            <height>28</height>
+            <width>100</width>
+            <height>30</height>
            </rect>
           </property>
           <attribute name="icon">
@@ -7812,8 +7812,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>98</width>
-            <height>28</height>
+            <width>100</width>
+            <height>30</height>
            </rect>
           </property>
           <attribute name="icon">
@@ -7958,8 +7958,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>98</width>
-            <height>28</height>
+            <width>100</width>
+            <height>30</height>
            </rect>
           </property>
           <attribute name="icon">
@@ -8419,8 +8419,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>98</width>
-            <height>28</height>
+            <width>100</width>
+            <height>30</height>
            </rect>
           </property>
           <attribute name="icon">
@@ -8849,7 +8849,7 @@
           <x>0</x>
           <y>0</y>
           <width>241</width>
-          <height>408</height>
+          <height>411</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -10207,7 +10207,7 @@
         <string>Pop the figure out into a separate window</string>
        </property>
        <property name="currentIndex">
-        <number>2</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="tabNotes">
         <property name="sizePolicy">

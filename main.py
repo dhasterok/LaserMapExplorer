@@ -1690,7 +1690,38 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # loop through normalized ratios and enable/disable ratios based
         # on the new reference's analytes
+        if self.sample_id == '':
+            return
 
+        tree = 'Ratio (normalized)'
+        branch = self.sample_id
+        for i, row in self.data[branch]['ratio_info'].iterrows():
+            analyte_1 = row['analyte_1']
+            analyte_2 = row['analyte_2']
+            ratio_name = f"{analyte_1} / {analyte_2}"
+            item, check = self.find_leaf(tree, branch, leaf=ratio_name)
+
+            if check:
+                # ratio normalized
+                # check if ratio can be normalized (note: normalization is not handled here)
+                refval_1 = self.ref_chem[re.sub(r'\d', '', analyte_1).lower()]
+                refval_2 = self.ref_chem[re.sub(r'\d', '', analyte_2).lower()]
+                ratio_flag = False
+                if (refval_1 > 0) and (refval_2 > 0):
+                    ratio_flag = True
+                #print([analyte, refval_1, refval_2, ratio_flag])
+
+                # if normization cannot be done, make text italic and disable item
+                if ratio_flag:
+                    font = item.font()
+                    font.setItalic(False)
+                    item.setFont(font)
+                    item.setEnabled(True)
+                else:
+                    font = item.font()
+                    font.setItalic(True)
+                    item.setFont(font)
+                    item.setEnabled(False)
 
         self.update_SV()
         #self.update_all_plots()

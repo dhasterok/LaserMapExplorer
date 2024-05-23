@@ -1196,7 +1196,7 @@
         <string>Activates the crop tool</string>
        </property>
        <property name="currentIndex">
-        <number>8</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="SelectAnalytePage">
         <property name="enabled">
@@ -1207,7 +1207,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>238</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="label">
@@ -4729,6 +4729,13 @@
                    <height>32</height>
                   </size>
                  </property>
+                 <property name="font">
+                  <font>
+                   <family>.AppleSystemUIFont</family>
+                   <pointsize>11</pointsize>
+                   <stylestrategy>PreferDefault</stylestrategy>
+                  </font>
+                 </property>
                  <property name="toolTip">
                   <string>Delete selected analyte(s)</string>
                  </property>
@@ -4937,30 +4944,11 @@
            </rect>
           </property>
           <layout class="QFormLayout" name="formLayout_5">
-           <item row="0" column="0">
-            <widget class="QLabel" name="labelDimRedTechnique">
-             <property name="font">
-              <font>
-               <pointsize>11</pointsize>
-               <stylestrategy>PreferDefault</stylestrategy>
-              </font>
-             </property>
-             <property name="text">
-              <string>Technique</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QComboBox" name="ComboBoxDimRedTechnique">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
+           <item row="2" column="1">
+            <widget class="QSpinBox" name="spinBoxPCY">
              <property name="maximumSize">
               <size>
-               <width>220</width>
+               <width>150</width>
                <height>16777215</height>
               </size>
              </property>
@@ -4970,15 +4958,19 @@
                <stylestrategy>PreferDefault</stylestrategy>
               </font>
              </property>
-             <item>
-              <property name="text">
-               <string>Principal component analysis (PCA)</string>
-              </property>
-             </item>
+             <property name="toolTip">
+              <string>Principal component to display on y-axis</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+             <property name="keyboardTracking">
+              <bool>false</bool>
+             </property>
             </widget>
            </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="labelPCX">
+           <item row="2" column="0">
+            <widget class="QLabel" name="labelPCY">
              <property name="font">
               <font>
                <pointsize>11</pointsize>
@@ -4986,7 +4978,7 @@
               </font>
              </property>
              <property name="text">
-              <string>PC X</string>
+              <string>PC Y</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -5018,8 +5010,8 @@
              </property>
             </widget>
            </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="labelPCY">
+           <item row="1" column="0">
+            <widget class="QLabel" name="labelPCX">
              <property name="font">
               <font>
                <pointsize>11</pointsize>
@@ -5027,18 +5019,24 @@
               </font>
              </property>
              <property name="text">
-              <string>PC Y</string>
+              <string>PC X</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
              </property>
             </widget>
            </item>
-           <item row="2" column="1">
-            <widget class="QSpinBox" name="spinBoxPCY">
+           <item row="0" column="1">
+            <widget class="QComboBox" name="ComboBoxDimRedTechnique">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="maximumSize">
               <size>
-               <width>150</width>
+               <width>220</width>
                <height>16777215</height>
               </size>
              </property>
@@ -5048,14 +5046,23 @@
                <stylestrategy>PreferDefault</stylestrategy>
               </font>
              </property>
-             <property name="toolTip">
-              <string>Principal component to display on y-axis</string>
+             <item>
+              <property name="text">
+               <string>Principal component analysis (PCA)</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="labelDimRedTechnique">
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+               <stylestrategy>PreferDefault</stylestrategy>
+              </font>
              </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-             <property name="keyboardTracking">
-              <bool>false</bool>
+             <property name="text">
+              <string>Technique</string>
              </property>
             </widget>
            </item>
@@ -6811,7 +6818,7 @@
           <x>0</x>
           <y>0</y>
           <width>241</width>
-          <height>411</height>
+          <height>408</height>
          </rect>
         </property>
         <attribute name="label">
@@ -7441,8 +7448,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>100</width>
-            <height>30</height>
+            <width>239</width>
+            <height>461</height>
            </rect>
           </property>
           <attribute name="icon">
@@ -7458,7 +7465,7 @@
              <x>5</x>
              <y>0</y>
              <width>231</width>
-             <height>106</height>
+             <height>123</height>
             </rect>
            </property>
            <layout class="QFormLayout" name="formLayoutStyleMaps">
@@ -7496,7 +7503,7 @@
               </item>
              </widget>
             </item>
-            <item row="2" column="0">
+            <item row="3" column="0">
              <widget class="QLabel" name="labelOverlayColor">
               <property name="font">
                <font>
@@ -7513,7 +7520,7 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="1">
+            <item row="3" column="1">
              <widget class="QToolButton" name="toolButtonOverlayColor">
               <property name="maximumSize">
                <size>
@@ -7590,6 +7597,16 @@
                </property>
               </item>
              </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="labelScaleLength">
+              <property name="text">
+               <string>Scale length</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLineEdit" name="lineEditScaleLength"/>
             </item>
            </layout>
           </widget>
@@ -10207,7 +10224,7 @@
         <string>Pop the figure out into a separate window</string>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="tabNotes">
         <property name="sizePolicy">

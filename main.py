@@ -35,6 +35,7 @@ from sklearn.decomposition import PCA
 from src.rotated import RotatedHeaderView
 from src.ternary_plot import ternary
 from src.plot_spider import plot_spider_norm
+from src.scalebar import scalebar
 import src.radar_factory
 from src.radar import Radar
 from src.calculator import CalWindow
@@ -284,7 +285,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             ['Text'] -- associated with widgets in the toolBoxTreeView > Styling > Annotations tab
                 | 'Font' : (str) -- font type, pulled from the system font library, set in ``fontComboBox``
                 | 'Size' : (str) -- font size in points, set in ``doubleSpinBoxFontSize``
-            ['Scales'] -- associated with widgets in the toolBoxTreeView > Styling > Annotations tab
+            ['Scale'] -- associated with widgets in the toolBoxTreeView > Styling > Annotations tab
                 | 'Direction' : (str) -- direction of distance scale bar on maps, options include ``none``, ``horizontal`` and ``vertical``, set by ``comboBoxScaleDirection``
                 | 'Location' : (str) -- position of scale bar on maps, options include ``southeast``, ``northeast``, ``northwest``, and ``southwest``, set by ``comboBoxScaleLocation``
                 | 'OverlayColor' : (hex str) -- color of overlay objects and annotations, also color of vectors on pca scatter/heatmap, set by ``toolButtonOverlayColor``
@@ -434,9 +435,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setCorner(0x00003,0x2) # sets right toolbox to bottom right corner
 
         # preferences
-        self.default_preferences = {'Units':{'Concentration': 'ppm', 'Distance': 'um', 'Temperature':'°C', 'Pressure':'MPa', 'Date':'Ma', 'FontSize':11, 'TickDir':'out'}}
+        self.default_preferences = {'Units':{'Concentration': 'ppm', 'Distance': 'µm', 'Temperature':'°C', 'Pressure':'MPa', 'Date':'Ma', 'FontSize':11, 'TickDir':'out'}}
         # in future will be set from preference ui
-        self.preferences = self.default_preferences
+        self.preferences = copy.deepcopy(self.default_preferences)
 
         # code is more resilient if toolbox indices for each page is not hard coded
         # will need to change case text if the page text is changed
@@ -966,8 +967,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.fontComboBox.activated.connect(self.font_callback)
         self.doubleSpinBoxFontSize.valueChanged.connect(self.font_size_callback)
         # scales
+        self.lineEditScaleLength.setValidator(QDoubleValidator())
         self.comboBoxScaleDirection.activated.connect(self.scale_direction_callback)
         self.comboBoxScaleLocation.activated.connect(self.scale_location_callback)
+        self.lineEditScaleLength.editingFinished.connect(self.scale_length_callback)
         #overlay color
         self.comboBoxMarker.activated.connect(self.marker_symbol_callback)
         self.doubleSpinBoxMarkerSize.valueChanged.connect(self.marker_size_callback)
@@ -3231,7 +3234,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #self.plot.addItem(self.edge_img)
 
             overlay_image = np.zeros(self.edge_array.shape+(4,), dtype=np.uint8)
-            colorlist = self.get_rgb_color(self.styles['analyte map']['Scales']['OverlayColor'])
+            colorlist = self.get_rgb_color(self.styles['analyte map']['Scale']['OverlayColor'])
             overlay_image[..., 0] = colorlist[0]  # Red channel
             overlay_image[..., 1] = colorlist[1]  # Green channel
             overlay_image[..., 2] = colorlist[2]  # Blue channel
@@ -3547,6 +3550,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         alpha_mask = np.where(reshaped_mask == 0, 0.5, 0)  
         canvas.axes.imshow(np.ones_like(alpha_mask), aspect=self.aspect_ratio, interpolation='none', cmap='Greys', alpha=alpha_mask)
 
+        # add scalebar
+        self.add_scalebar(canvas.axes)
+
         canvas.axes.tick_params(direction=None,
             labelbottom=False, labeltop=False, labelright=False, labelleft=False,
             bottom=False, top=False, left=False, right=False)
@@ -3619,7 +3625,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         norm = colors.Normalize(q[0],q[1], clip=False)
 
         cax = canvas.axes.imshow(self.grad_mag, cmap=self.get_colormap(),  aspect=self.aspect_ratio, interpolation='none', norm=norm)
-        canvas.axes.quiver(X,Y,dx,dy, color=style['Scales']['OverlayColor'], linewidth=0.5)
+        canvas.axes.quiver(X,Y,dx,dy, color=style['Scale']['OverlayColor'], linewidth=0.5)
 
         # set color limits
         #self.add_colorbar(canvas, cax, style)
@@ -3636,6 +3642,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         alpha_mask = np.where(reshaped_mask == 0, 0.5, 0)  
         canvas.axes.imshow(np.ones_like(alpha_mask), aspect=self.aspect_ratio, interpolation='none', cmap='Greys', alpha=alpha_mask)
+
+        # add scalebar
+        self.add_scalebar(canvas.axes)
 
         canvas.axes.tick_params(direction=None,
             labelbottom=False, labeltop=False, labelright=False, labelleft=False,
@@ -3668,7 +3677,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """Resets ``MainWindow.styles`` dictionary to default values."""
         default_plot_style = {'Axes': {'XLim': [0,1], 'XScale': 'linear', 'XLabel': '', 'YLim': [0,1], 'YScale': 'linear', 'YLabel': '', 'ZLabel': '', 'AspectRatio': '1.0', 'TickDir': 'out'},
                                'Text': {'Font': '', 'FontSize': 11.0},
-                               'Scales': {'Direction': 'none', 'Location': 'northeast', 'OverlayColor': '#ffffff'},
+                               'Scale': {'Direction': 'none', 'Location': 'northeast', 'Length': None, 'OverlayColor': '#ffffff'},
                                'Markers': {'Symbol': 'circle', 'Size': 6, 'Alpha': 30},
                                'Lines': {'LineWidth': 1.5, 'Multiplier': 1},
                                'Colors': {'Color': '#1c75bc', 'ColorByField': 'None', 'Field': '', 'Colormap': 'viridis', 'Reverse': False, 'CLim':[0,1], 'CScale':'linear', 'Direction': 'vertical', 'CLabel': '', 'Resolution': 10}
@@ -3746,7 +3755,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.styles['heatmap']['Colors']['CScale'] = 'log'
         self.styles['TEC']['Axes']['AspectRatio'] = 0.62
         self.styles['variance']['Axes']['AspectRatio'] = 0.62
-        self.styles['pca scatter']['Scales']['OverlayColor'] = '#4d4d4d'
+        self.styles['pca scatter']['Scale']['OverlayColor'] = '#4d4d4d'
         self.styles['pca scatter']['Lines']['LineWidth'] = 0.5
         self.styles['pca scatter']['Axes']['AspectRatio'] = 1
         self.styles['pca heatmap']['Axes']['AspectRatio'] = 1
@@ -3848,6 +3857,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # scalebar properties
                 self.comboBoxScaleDirection.setEnabled(True)
                 self.comboBoxScaleLocation.setEnabled(True)
+                self.lineEditScaleLength.setEnabled(True)
                 self.toolButtonOverlayColor.setEnabled(True)
 
                 # marker properties
@@ -3903,8 +3913,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # scalebar properties
                 self.comboBoxScaleDirection.setEnabled(False)
-                self.toolButtonOverlayColor.setEnabled(False)
                 self.comboBoxScaleLocation.setEnabled(False)
+                self.lineEditScaleLength.setEnabled(False)
+                self.toolButtonOverlayColor.setEnabled(False)
 
                 # marker properties
                 self.comboBoxMarker.setEnabled(False)
@@ -3952,8 +3963,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # scalebar properties
                 self.comboBoxScaleDirection.setEnabled(False)
-                self.toolButtonOverlayColor.setEnabled(False)
                 self.comboBoxScaleLocation.setEnabled(False)
+                self.lineEditScaleLength.setEnabled(False)
+                self.toolButtonOverlayColor.setEnabled(False)
 
                 # marker properties
                 self.comboBoxMarker.setEnabled(False)
@@ -4013,8 +4025,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # scalebar properties
                 self.comboBoxScaleDirection.setEnabled(False)
-                self.toolButtonOverlayColor.setEnabled(False)
                 self.comboBoxScaleLocation.setEnabled(False)
+                self.lineEditScaleLength.setEnabled(False)
+                self.toolButtonOverlayColor.setEnabled(False)
 
                 # marker properties
                 self.comboBoxMarker.setEnabled(True)
@@ -4097,8 +4110,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # scalebar properties
                 self.comboBoxScaleDirection.setEnabled(False)
-                self.toolButtonOverlayColor.setEnabled(False)
                 self.comboBoxScaleLocation.setEnabled(False)
+                self.toolButtonOverlayColor.setEnabled(False)
+                self.lineEditScaleLength.setEnabled(False)
 
                 # marker properties
                 self.comboBoxMarker.setEnabled(False)
@@ -4145,8 +4159,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # scalebar properties
                 self.comboBoxScaleDirection.setEnabled(True)
-                self.toolButtonOverlayColor.setEnabled(True)
                 self.comboBoxScaleLocation.setEnabled(True)
+                self.lineEditScaleLength.setEnabled(True)
+                self.toolButtonOverlayColor.setEnabled(True)
 
                 # marker properties
                 if len(self.spotdata.spots) != 0:
@@ -4198,8 +4213,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # scalebar properties
                 self.comboBoxScaleDirection.setEnabled(False)
-                self.toolButtonOverlayColor.setEnabled(False)
                 self.comboBoxScaleLocation.setEnabled(False)
+                self.lineEditScaleLength.setEnabled(True)
+                self.toolButtonOverlayColor.setEnabled(False)
 
                 # marker properties
                 self.comboBoxMarker.setEnabled(False)
@@ -4243,8 +4259,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # scalebar properties
                 self.comboBoxScaleDirection.setEnabled(False)
-                self.toolButtonOverlayColor.setEnabled(False)
                 self.comboBoxScaleLocation.setEnabled(False)
+                self.lineEditScaleLength.setEnabled(True)
+                self.toolButtonOverlayColor.setEnabled(True)
 
                 # marker properties
                 self.comboBoxMarker.setEnabled(True)
@@ -4280,8 +4297,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # scalebar properties
                 self.comboBoxScaleDirection.setEnabled(True)
-                self.toolButtonOverlayColor.setEnabled(True)
                 self.comboBoxScaleLocation.setEnabled(True)
+                self.lineEditScaleLength.setEnabled(True)
+                self.toolButtonOverlayColor.setEnabled(True)
 
                 # marker properties
                 if len(self.spotdata) != 0:
@@ -4337,8 +4355,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # scalebar properties
                 self.comboBoxScaleDirection.setEnabled(False)
-                self.toolButtonOverlayColor.setEnabled(False)
                 self.comboBoxScaleLocation.setEnabled(False)
+                self.lineEditScaleLength.setEnabled(True)
+                self.toolButtonOverlayColor.setEnabled(False)
 
                 # marker properties
                 self.comboBoxMarker.setEnabled(True)
@@ -4383,6 +4402,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             self.toolButtonOverlayColor.setStyleSheet("background-color: %s;" % '#e6e6e6')
             self.labelOverlayColor.setEnabled(False)
+        self.labelScaleLength.setEnabled(self.lineEditScaleLength.isEnabled())
 
         # marker properties
         self.labelMarker.setEnabled(self.comboBoxMarker.isEnabled())
@@ -4481,9 +4501,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.doubleSpinBoxFontSize.blockSignals(False)
 
         # scalebar properties
-        self.comboBoxScaleLocation.setCurrentText(style['Scales']['Location'])
-        self.comboBoxScaleDirection.setCurrentText(style['Scales']['Direction'])
-        self.toolButtonOverlayColor.setStyleSheet("background-color: %s;" % style['Scales']['OverlayColor'])
+        self.comboBoxScaleLocation.setCurrentText(style['Scale']['Location'])
+        self.comboBoxScaleDirection.setCurrentText(style['Scale']['Direction'])
+        if (style['Scale']['Length'] is None) and (plot_type in self.map_plot_types):
+            style['Scale']['Length'] = self.default_scale_length()
+
+            if style['Scale']['Length'] is not None:
+                self.lineEditScaleLength.setText(f"{style['Scale']['Length']}")
+            else:
+                self.lineEditScaleLength.setText('')
+        else:
+            self.lineEditScaleLength.setText('')
+            
+        self.toolButtonOverlayColor.setStyleSheet("background-color: %s;" % style['Scale']['OverlayColor'])
 
         # marker properties
         self.comboBoxMarker.setCurrentText(style['Markers']['Symbol'])
@@ -4571,7 +4601,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     'FontSize': self.doubleSpinBoxFontSize.value()}
 
         # update scale properties
-        self.styles[plot_type]['Scales'] = {'Location': self.comboBoxScaleLocation.currentText(),
+        self.styles[plot_type]['Scale'] = {'Location': self.comboBoxScaleLocation.currentText(),
                     'Direction': self.comboBoxScaleDirection.currentText(),
                     'OverlayColor': self.get_hex_color(self.toolButtonOverlayColor.palette().button().color())}
 
@@ -5051,16 +5081,33 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def scale_direction_callback(self):
         plot_type = self.comboBoxPlotType.currentText()
         direction = self.comboBoxScaleDirection.currentText()
-        if self.styles[plot_type]['Scales']['Direction'] == direction:
+        if self.styles[plot_type]['Scale']['Direction'] == direction:
             return
 
-        self.styles[plot_type]['Scales']['Direction'] = direction
+        self.styles[plot_type]['Scale']['Direction'] = direction
         if direction == 'none':
             self.labelScaleLocation.setEnabled(False)
             self.comboBoxScaleLocation.setEnabled(False)
+            self.labelScaleLength.setEnabled(False)
+            self.lineEditScaleLength.setEnabled(False)
+            self.lineEditScaleLength.setText('')
         else:
             self.labelScaleLocation.setEnabled(True)
             self.comboBoxScaleLocation.setEnabled(True)
+            self.labelScaleLength.setEnabled(True)
+            self.lineEditScaleLength.setEnabled(True)
+            # set scalebar length if plot is a map type
+            if plot_type in self.map_plot_types:
+                if self.styles[plot_type]['Scale']['Length'] is None:
+                    scale_length = self.default_scale_length()
+                elif ((direction == 'horizontal') and (self.styles[plot_type]['Scale']['Length'] > self.x_range)) or ((direction == 'vertical') and (self.styles[plot_type]['Scale']['Length'] > self.y_range)):
+                    scale_length = self.default_scale_length()
+                else:
+                    scale_length = self.styles[plot_type]['Scale']['Length']
+                self.styles[plot_type]['Scale']['Length'] = scale_length
+                self.lineEditScaleLength.setText(f'{scale_length}')
+            else:
+                self.lineEditScaleLength.setText('')
 
         self.update_SV()
 
@@ -5071,6 +5118,45 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return
 
         self.styles[plot_type]['Scale']['Location'] = self.comboBoxScaleLocation.currentText()
+        self.update_SV()
+
+    def scale_length_callback(self):
+        """Updates length of scalebar on map-type plots
+        
+        Executes on change of ``MainWindow.lineEditScaleLength``, updates length if within bounds set by plot dimensions, then updates plot.
+        """        
+        plot_type = self.comboBoxPlotType.currentText()
+
+        # if length is changed to None
+        if self.lineEditScaleLength.text() == '':
+            if self.styles[plot_type]['Scale']['Length'] is None:
+                return
+            else:
+                self.styles[plot_type]['Scale']['Length'] = None
+                self.update_SV()
+                return
+
+        scale_length = float(self.lineEditScaleLength.text())
+        if plot_type in self.map_plot_types:
+            # make sure user input is within bounds, do not change
+            if ((self.comboBoxScaleDirection.currentText() == 'horizontal') and (scale_length > self.x_range)) or (scale_length <= 0):
+                scale_length = self.styles[plot_type]['Scale']['Length']
+                self.lineEditScaleLength.setText(f'{scale_length}')
+                return
+            elif ((self.comboBoxScaleDirection.currentText() == 'vertical') and (scale_length > self.y_range)) or (scale_length <= 0):
+                scale_length = self.styles[plot_type]['Scale']['Length']
+                self.lineEditScaleLength.setText(f'{scale_length}')
+                return
+        else:
+            self.lineEditScaleLength.setText('')
+            return
+
+        # update style dictionary
+        if scale_length == self.styles[plot_type]['Scale']['Length']:
+            return
+        self.styles[plot_type]['Scale']['Length'] = scale_length
+
+        # update plot
         self.update_SV()
 
     def overlay_color_callback(self):
@@ -5084,10 +5170,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         color = self.get_hex_color(self.toolButtonOverlayColor.palette().button().color())
         # update style
-        if self.styles[plot_type]['Scales']['OverlayColor'] == color:
+        if self.styles[plot_type]['Scale']['OverlayColor'] == color:
             return
 
-        self.styles[plot_type]['Scales']['OverlayColor'] = color
+        self.styles[plot_type]['Scale']['OverlayColor'] = color
         # update plot
         self.update_SV()
 
@@ -5450,7 +5536,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.tableWidgetViewGroups.blockSignals(False)
 
         if mask:
-            hexcolor.append(self.styles['Cluster']['Scales']['OverlayColor'])
+            hexcolor.append(self.styles['Cluster']['Scale']['OverlayColor'])
 
         self.toolButtonClusterColor.setStyleSheet("background-color: %s;" % self.tableWidgetViewGroups.item(self.spinBoxClusterGroup.value()-1,2).text())
 
@@ -5874,7 +5960,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             cmap = self.get_colormap()
             cax = canvas.axes.imshow(reshaped_array, cmap=cmap,  aspect=self.aspect_ratio, interpolation='none')
             font = {'family': 'sans-serif', 'stretch': 'condensed', 'size': 8, 'weight': 'semibold'}
-            canvas.axes.text(0.025*self.array_size[0],0.1*self.array_size[1], analyte, fontdict=font, color=style['Scales']['OverlayColor'], ha='left', va='top')
+            canvas.axes.text(0.025*self.array_size[0],0.1*self.array_size[1], analyte, fontdict=font, color=style['Scale']['OverlayColor'], ha='left', va='top')
             canvas.axes.set_axis_off()
             canvas.fig.tight_layout()
 
@@ -5992,17 +6078,78 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 export.show(self.pyqtgraph_widget.getItem(0, 0).getViewBox())
                 export.exec_()
 
+    def default_scale_length(self):
+        """Sets default length of a scale bar for map-type plots
+
+        Returns
+        -------
+        float
+            Length of scalebar dependent on direction of scalebar.
+        """        
+        plot_type = self.comboBoxPlotType.currentText()
+        direction = self.styles[plot_type]['Scale']['Direction']
+        if (plot_type not in self.map_plot_types) or (direction == 'none'):
+            return None
+
+        if direction == 'vertical':
+            length = 10**np.floor(np.log10(self.y_range))
+            if length > self.x_range:
+                length = 0.2 * self.y_range
+        else: # direction == horizontal
+            length = 10**np.floor(np.log10(self.x_range))
+            if length > self.x_range:
+                length = 0.2 * self.x_range
+
+        return length
+
     def compute_map_aspect_ratio(self):
-        """Computes aspect ratio of current sample"""
+        """Computes aspect ratio of current sample
+        
+        The aspect ratio is needed for maps and computations of areas as the pixels may not be square in dimension.
+        The aspect ratio is defined as dy/dx where dy is y_range/n_y and dx is x_range/n_x.
+        """
         self.x = self.data[self.sample_id]['processed_data']['X']
         self.y = self.data[self.sample_id]['processed_data']['Y']
 
         self.x_range = self.x.max() -  self.x.min()
         self.y_range = self.y.max() -  self.y.min()
 
-        self.aspect_ratio = (self.y_range / self.y.nunique()) / (self.x_range / self.x.nunique())
+        self.dx = self.x_range/self.x.nunique()
+        self.dy = self.y_range/self.y.nunique()
+
+        self.aspect_ratio = self.dy / self.dx
 
         self.array_size = (self.y.nunique(), self.x.nunique())
+
+    def add_scalebar(self, ax):
+        """Add a scalebar to a map
+
+        Parameters
+        ----------
+        ax : 
+            Axes to place scalebar on.
+        """        
+        style = self.styles[self.comboBoxPlotType.currentText()]
+
+        # add scalebar
+        direction = style['Scale']['Direction']
+        length = style['Scale']['Length']
+        if (length is not None) and (direction != 'none'):
+            if direction == 'horizontal':
+                dd = self.dx
+            else:
+                dd = self.dy
+            sb = scalebar( width=length,
+                    pixel_width=dd,
+                    units=self.preferences['Units']['Distance'],
+                    location=style['Scale']['Location'],
+                    orientation=direction,
+                    color=style['Scale']['OverlayColor'],
+                    ax=ax )
+
+            sb.create()
+        else:
+            return
 
     def add_colorbar(self, canvas, cax, style, cbartype='continuous', grouplabels=None, groupcolors=None):
         """Adds a colorbar to a MPL figure
@@ -6203,11 +6350,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #canvas.axes.imshow(masked, alpha=0.5, aspect=self.aspect_ratio, interpolation='none', cmap='Greys')
 
         # font = {'family': 'sans-serif', 'stretch': 'condensed', 'size': 8, 'weight': 'semibold'}
-        # canvas.axes.text(0.025*self.array_size[0],0.1*self.array_size[1], field, fontdict=font, color=style['Scales']['OverlayColor'], ha='left', va='top')
+        # canvas.axes.text(0.025*self.array_size[0],0.1*self.array_size[1], field, fontdict=font, color=style['Scale']['OverlayColor'], ha='left', va='top')
         #canvas.axes.set_axis_off()
         canvas.axes.tick_params(direction=None,
             labelbottom=False, labeltop=False, labelright=False, labelleft=False,
             bottom=False, top=False, left=False, right=False)
+        
+        # add scalebar
+        self.add_scalebar(canvas.axes)
+
         canvas.fig.tight_layout()
 
         # add small histogram
@@ -7241,6 +7392,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         canvas.axes.imshow(map_data, aspect=self.aspect_ratio)
 
+        # add scalebar
+        self.add_scalebar(canvas.axes)
+
         grid = None
         if style['Colors']['Direction'] == 'vertical':
             grid = gs.GridSpec(5,1)
@@ -7560,20 +7714,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         m = style['Lines']['Multiplier'] #np.min(np.abs(np.sqrt(x**2 + y**2)))
 
         # arrows
-        canvas.axes.quiver(np.zeros(nfields), np.zeros(nfields), m*x, m*y, color=style['Scales']['OverlayColor'],
+        canvas.axes.quiver(np.zeros(nfields), np.zeros(nfields), m*x, m*y, color=style['Scale']['OverlayColor'],
             angles='xy', scale_units='xy', scale=1, # arrow angle and scale set relative to the data
             linewidth=style['Lines']['LineWidth'], headlength=2, headaxislength=2) # arrow properties
 
         # labels
         for i, analyte in enumerate(analytes):
             if x[i] > 0 and y[i] > 0:
-                canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='left', va='bottom', color=style['Scales']['OverlayColor'])
+                canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='left', va='bottom', color=style['Scale']['OverlayColor'])
             elif x[i] < 0 and y[i] > 0:
-                canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='left', va='top', color=style['Scales']['OverlayColor'])
+                canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='left', va='top', color=style['Scale']['OverlayColor'])
             elif x[i] > 0 and y[i] < 0:
-                canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='right', va='bottom', color=style['Scales']['OverlayColor'])
+                canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='right', va='bottom', color=style['Scale']['OverlayColor'])
             elif x[i] < 0 and y[i] < 0:
-                canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='right', va='top', color=style['Scales']['OverlayColor'])
+                canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='right', va='top', color=style['Scale']['OverlayColor'])
 
 
     # -------------------------------------
@@ -7615,6 +7769,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             bottom=False, top=False, left=False, right=False)
         #canvas.axes.set_axis_off()
 
+        # add scalebar
+        self.add_scalebar(canvas.axes)
+
         return canvas
 
     def plot_cluster_map(self):
@@ -7643,7 +7800,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         #cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=style['Colors']['Colormap'], norm=norm, aspect = self.aspect_ratio)
         cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect=self.aspect_ratio)
-        #cax.cmap.set_under(style['Scales']['OverlayColor'])
+        #cax.cmap.set_under(style['Scale']['OverlayColor'])
 
         self.add_colorbar(canvas, cax, style, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color)
 
@@ -7655,6 +7812,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             labelbottom=False, labeltop=False, labelright=False, labelleft=False,
             bottom=False, top=False, left=False, right=False)
         #canvas.axes.set_axis_off()
+
+        # add scalebar
+        self.add_scalebar(canvas.axes)
 
         return canvas
 
@@ -9853,7 +10013,7 @@ class MplCanvas(FigureCanvas):
             return
 
         style = self.main_window.styles[self.main_window.comboBoxPlotType.currentText()]
-        self.axes.text(x,y,txt, color=style['Scales']['OverlayColor'], fontsize=style['Text']['FontSize'])
+        self.axes.text(x,y,txt, color=style['Scale']['OverlayColor'], fontsize=style['Text']['FontSize'])
         self.draw()
 
 
@@ -11465,6 +11625,25 @@ class Polygon:
                 self.polygons[self.main_window.sample_id][self.p_id].append((x,y, scatter))
 
     def distance_to_line_segment(self, px, py, x1, y1, x2, y2):
+        """Computes distance to the line segment of a polygon
+
+        Determines the minimum distance from a point (px,py) to a line segment defined by
+        the points (x1,y1) and (x2,y2).
+
+        Parameters
+        ----------
+        px, py : float
+            Point used to determine minimum distance
+        x1, y1 : float
+            Point 1 on a line
+        x2, y2 : float
+            Point 2 on a line
+
+        Returns
+        -------
+        float
+            Minimum distance from point to a line
+        """        
         # Calculate the distance from point (px, py) to the line segment defined by points (x1, y1) and (x2, y2)
         # This is a simplified version; you might need a more accurate calculation based on your coordinate system
         return min(((px - x1)**2 + (py - y1)**2)**0.5, ((px - x2)**2 + (py - y2)**2)**0.5)

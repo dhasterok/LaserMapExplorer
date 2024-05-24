@@ -6113,6 +6113,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.pop_figure = MplDialog(self,canvas,self.plot_info['plot_name'])
                 self.pop_figure.show()
 
+            # since the canvas is moved to the dialog, the figure needs to be recreated in the main window
+            self.update_SV()
+
         if function == 'save':
             if isinstance(canvas,MplCanvas):
                 self.mpl_toolbar.save_figure()
@@ -10274,20 +10277,10 @@ class MplDialog(QDialog):
 
         # Create a button box for OK and Cancel buttons
         button_box = QDialogButtonBox(QDialogButtonBox.Close)
-        button_box.rejected.connect(self.on_close)
+        button_box.rejected.connect(self.reject)
         layout.addWidget(button_box,2)
 
         self.main_window.clear_layout(self.main_window.widgetSingleView.layout())
-
-    def on_close(self):
-        
-        canvas = self.layout().itemAt(1)
-        self.main_window.mpl_toolbar = NavigationToolbar(canvas, self)
-        self.main_window.widgetSingleView.layout().addWidget(self.main_window.mpl_toolbar)
-        self.main_window.mpl_toolbar.hide()
-        self.main_window.widgetSingleView.layout().addWidget(canvas)
-
-        self.reject
 
 
 class StandardItem(QStandardItem):

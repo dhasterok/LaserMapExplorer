@@ -1,1 +1,2 @@
-.. image:: _static/drowing_cat.png
+.. image:: _static/drowning_cat.png
+    :width: 650

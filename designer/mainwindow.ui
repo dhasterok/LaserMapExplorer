@@ -103,7 +103,7 @@
             <number>-1</number>
            </property>
            <item row="0" column="12">
-            <layout class="QHBoxLayout" name="horizontalLayout_27">
+            <layout class="QHBoxLayout" name="horizontalLayoutPlotTools">
              <property name="sizeConstraint">
               <enum>QLayout::SetDefaultConstraint</enum>
              </property>
@@ -1772,7 +1772,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>238</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="label">
@@ -2376,7 +2376,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>238</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="label">
@@ -2700,7 +2700,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>238</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="label">
@@ -3818,7 +3818,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>238</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="label">
@@ -4357,7 +4357,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>238</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="label">
@@ -4916,7 +4916,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>238</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="label">
@@ -5079,7 +5079,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>238</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="label">
@@ -5656,7 +5656,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>238</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="label">
@@ -6320,7 +6320,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>238</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="label">
@@ -6946,7 +6946,7 @@
           <x>0</x>
           <y>0</y>
           <width>241</width>
-          <height>411</height>
+          <height>408</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -8866,7 +8866,7 @@
           <x>0</x>
           <y>0</y>
           <width>241</width>
-          <height>411</height>
+          <height>408</height>
          </rect>
         </property>
         <attribute name="icon">

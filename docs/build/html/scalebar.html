@@ -414,20 +414,53 @@ document.write(`
 <span id="scalebar-module"></span><h1>scalebar module<a class="headerlink" href="#module-scalebar" title="Link to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="scalebar.scalebar">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scalebar.</span></span><span class="sig-name descname"><span class="pre">scalebar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'southeast'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scalebar.scalebar" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scalebar.</span></span><span class="sig-name descname"><span class="pre">scalebar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixel_width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'southeast'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'horizontal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scalebar.scalebar" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Produces a scalebar on x,y maps</p>
+<p>Produce a scalebar on (x,y) maps, just inside one corner of the map.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>width</strong><span class="classifier">float</span></dt><dd><p>Absolute width of the scalebar in <em>units</em></p>
+</dd>
+<dt><strong>pixel_width</strong><span class="classifier">float</span></dt><dd><p>Pixel dimensions in the <em>orientation</em> direction.  Since <code class="docutils literal notranslate"><span class="pre">matplotlib.pyplot.imshow</span></code> does not allow for x, y values,
+the pixel_width is important for converting between absolute units and image units.</p>
+</dd>
+<dt><strong>units</strong><span class="classifier">str, optional</span></dt><dd><p>Units to include on plot e.g., ‘mm’, by default None</p>
+</dd>
+<dt><strong>location</strong><span class="classifier">str, optional</span></dt><dd><p>Scalebar location, defined by corner.  Options include <code class="docutils literal notranslate"><span class="pre">'northeast'</span></code>, <code class="docutils literal notranslate"><span class="pre">'northwest'</span></code>, <code class="docutils literal notranslate"><span class="pre">'southeast'</span></code>, and <code class="docutils literal notranslate"><span class="pre">'southwest'</span></code>, by default <code class="docutils literal notranslate"><span class="pre">'southeast'</span></code></p>
+</dd>
+<dt><strong>orientation</strong><span class="classifier">str, optional</span></dt><dd><p>Scalebar orientation, either <code class="docutils literal notranslate"><span class="pre">'horizontal'</span></code> or <code class="docutils literal notranslate"><span class="pre">'vertical'</span></code>, by default <code class="docutils literal notranslate"><span class="pre">'horizontal'</span></code></p>
+</dd>
+<dt><strong>color</strong><span class="classifier">list, optional</span></dt><dd><p>Color of scalebar in matplotlib color spec., by default [0, 0, 0]</p>
+</dd>
+<dt><strong>ax</strong><span class="classifier">matplotlib.axes, optional</span></dt><dd><p>Axis to add scalebar onto, by default None</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>ValueError</dt><dd><p>‘Unknown location, choose from [northeast, northwest, southwest, southeast].’</p>
+</dd>
+<dt>ValueError</dt><dd><p>‘Unknown location, choose from [horizontal, vertical].’</p>
+</dd>
+</dl>
+</dd>
+</dl>
 <p class="rubric">Methods</p>
-<table class="table">
+<table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><strong>create</strong></p></td>
-<td></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#scalebar.scalebar.create" title="scalebar.scalebar.create"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create</span></code></a>()</p></td>
+<td><p>_summary_</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="scalebar.scalebar.create">
 <span class="sig-name descname"><span class="pre">create</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scalebar.scalebar.create" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>_summary_</p>
+<p>_extended_summary_</p>
+</dd></dl>
 
 </dd></dl>
 

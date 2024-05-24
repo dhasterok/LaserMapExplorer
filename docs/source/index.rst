@@ -9,7 +9,7 @@ Welcome to Laser Map Explorer (LaME)!
 
 LaME is a graphical user interface for rapidly diplaying and analyzing data generated from LA-ICP-MS.  The app allows users to simply and quickly filter data, produce standard geochemical plots, perform multi-dimensional analyses, and computations relevant to geoscientific interpretation.
 
-The penultimate goal is to allow users to intuitively analyze multi-analyte data, and produce publication ready figures with minimal effort.  The program is currently in beta release.  There are plenty of bugs and some features that have yet to be implemented.  Release notes below detail the progress and future plans.
+The penultimate goal is to allow users to intuitively analyze multi-analyte data, and produce publication ready figures with minimal effort.  The program is currently in beta release.  There are plenty of bugs and some features that have yet to be partially or fully implemented.  Release notes below detail the progress and future plans.
 
 .. figure:: _static/screenshots/LaME_quickview.png
     :align: center
@@ -41,7 +41,7 @@ Know issues:
 - Not all buttons are set up yet.
 - Crop tool does not allow adjustment.
 
-If you would like to contribute in any way to the improvement of the program, have feature requests or would like to help with documentation, please contact us via the GitHub project page or using the email link on the `Contact <>`_ page.
+If you would like to contribute in any way to the improvement of the program, have feature requests or would like to help with documentation, please contact us via the GitHub project page or using the email link on the :doc:`contact` page.
 
 Funding for this app has been provided by the `MinEx CRC <https://minexcrc.com.au/>`_ by developers at
 the `University of Adelaide <https://www.adelaide.edu.au/>`_.

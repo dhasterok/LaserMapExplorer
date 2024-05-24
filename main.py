@@ -1,10 +1,10 @@
 import sys, os, re, copy, csv, random, pickle, darkdetect
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QRectF, QPointF, QUrl
+from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QRectF, QPointF, QUrl, pyqtSlot, QSize
 from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QVBoxLayout, QGridLayout, QMessageBox, QHeaderView, QMenu, QGraphicsRectItem
-from PyQt5.QtWidgets import QFileDialog, QWidget, QDialog, QLabel, QTableWidget, QInputDialog, QAbstractItemView, QProgressBar, QApplication, QSplashScreen
+from PyQt5.QtWidgets import QFileDialog, QWidget, QDialog, QLabel, QTableWidget, QInputDialog, QAbstractItemView, QProgressBar, QApplication, QSplashScreen, QDialogButtonBox
 from PyQt5.QtGui import QIntValidator, QDoubleValidator, QColor, QImage, QPainter, QPixmap, QFont, QPen, QCursor, QBrush, QStandardItemModel, QStandardItem, QTextCursor, QDropEvent, QFontDatabase
-from PyQt5.QtWebEngineWidgets import QWebEngineView
+from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
 import pyqtgraph as pg
 from pyqtgraph.GraphicsScene import exportDialog
 from pyqtgraph import setConfigOption, colormap, ColorBarItem,ViewBox, TargetItem, ImageItem, GraphicsLayoutWidget, ScatterPlotItem, AxisItem, PlotDataItem
@@ -62,10 +62,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     Parameters
     ----------
-    QtWidgets : _type_
+    QtWidgets : Main window widgets
         _description_
-    Ui_MainWindow : _type_
-        _description_
+    Ui_MainWindow : Qt.MainWindow
+        Main window  UI.
     """
 
     def __init__(self, *args, **kwargs):
@@ -217,12 +217,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             | 'polygon_mask' : (MaskObj) -- mask created from selected polygons.
             | 'cluster_mask' : (MaskObj) -- mask created from selected or inverse selected cluster groups.  Once this mask is set, it cannot be reset unless it is turned off, clustering is recomputed, and selected clusters are used to produce a new mask.
             | 'mask' : () -- combined mask, derived from filter_mask & 'polygon_mask' & 'axis_mask'
-        layoutSingleView : QVBoxLayout
-            Layout for Single View tab of ``canvasWindow``
-        layoutMultiView : QGridLayout
-            Layout for Multi View tab of ``canvasWindow``
-        layoutQuickView : QGridLayout
-            Layout for Quick View tab of ``canvasWindow``
+        widgetSingleView : QVBoxLayout
+            Widget holding layout for Single View tab of ``canvasWindow``
+        widgetMultiView : QGridLayout
+            Widget holding layout for Multi View tab of ``canvasWindow``
+        widgetQuickView : QGridLayout
+            Widget holding layout for Quick View tab of ``canvasWindow``
         left_tab : dict
             Holds the indices for pages in ``toolBox``
         map_plot_types : list
@@ -345,7 +345,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.prev_plot = ''
         self.order = 'F'
         self.current_group = {'algorithm':None,'clusters': None}
-        self.matplotlib_canvas = None
         self.pyqtgraph_widget = None
         self.isUpdatingTable = False
         self.cursor = False
@@ -370,6 +369,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         layout_single_view.setContentsMargins(0, 0, 0, 0)
         self.widgetSingleView.setLayout(layout_single_view)
         self.widgetSingleView.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.mpl_toolbar = NavigationToolbar(MplCanvas())
         # for button show hide
         #self.toolButtonPopFigure.setVisible(False)
         #self.toolButtonPopFigure.raise_()
@@ -1036,10 +1036,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #-------------------------
 
         # single view tools
-        self.toolButtonHomeSV.clicked.connect(lambda: self.toolbar_plotting('home', 'SV', self.toolButtonHomeSV.isChecked()))
+        self.toolButtonHomeSV.clicked.connect(lambda: self.toolbar_plotting('home', 'SV'))
         self.toolButtonPanSV.clicked.connect(lambda: self.toolbar_plotting('pan', 'SV', self.toolButtonPanSV.isChecked()))
         self.toolButtonZoomSV.clicked.connect(lambda: self.toolbar_plotting('zoom', 'SV', self.toolButtonZoomSV.isChecked()))
         self.toolButtonSaveSV.clicked.connect(lambda: self.toolbar_plotting('save', 'SV', self.toolButtonSaveSV.isChecked()))
+        self.toolButtonPopFigure.clicked.connect(lambda: self.toolbar_plotting('pop', 'SV'))
         # multi-view tools
 
         self.actionCalculator.triggered.connect(self.open_calculator)
@@ -4634,8 +4635,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         combobox, then updates the style widgets to match the dictionary entries and updates the plot.
         """
         # set plot flag to false
-        self.plot_flag = False
-
         plot_type = self.comboBoxPlotType.currentText()
         self.plot_types[self.toolBox.currentIndex()][0] = self.comboBoxPlotType.currentIndex()
         self.set_style_widgets(plot_type=plot_type)
@@ -4646,7 +4645,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 if self.comboBoxCorrelationMethod.currentText() == 'None':
                     self.comboBoxCorrelationMethod.setCurrentText('Pearson')
 
-        self.plot_flag = True
         self.update_SV()
 
     # axes
@@ -5740,7 +5738,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.widgetMultiView.layout().addWidget( dup_widget, row, col )
                 dup_widget.show()
                 self.duplicate_plot_info = None #reset to avoid plotting previous duplicates
-            self.widgetSingleView.layout().insertWidget(0,widget)
+            self.widgetSingleView.layout().insertWidget(1,widget)
             
         # add figure to MultiView canvas
         elif self.canvasWindow.currentIndex() == self.canvas_tab['mv']:
@@ -5827,6 +5825,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # put plot_info back into table
         #print(plot_info)
         self.add_tree_item(plot_info)
+    
+    def get_SV_widget(self, index):
+        layout = self.widgetSingleView.layout()
+        if layout is not None:
+            item = layout.itemAt(index)
+            if item is not None:
+                return item.widget()
+        return None
         
     def move_widget_between_layouts(self,source_layout, target_layout, widget, row=None, col=None):
         """
@@ -6014,40 +6020,70 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     #     if plot:
     #         self.add_laser_map(plot_information, current_plot_df)
 
-    def toolbar_plotting(self,function,view,enable):
+    def toolbar_plotting(self,function,view,enable=None):
+        """Controls functionality of the toolbar
+
+        Controls the viewing behavior, home view, pan, zoom, pop out, and saving.
+
+        Parameters
+        ----------
+        function : str
+            Button fuction
+        view : _type_
+            _description_
+        enable : _type_
+            _description_
+        """
+        
+        match view:
+            case 'SV':
+                canvas = self.get_SV_widget(1)
+            case 'MV':
+                pass
+            case 'QV':
+                pass
+
         if function == 'home':
             self.toolButtonPanSV.setChecked(False)
             self.toolButtonZoomSV.setChecked(False)
-            if self.matplotlib_canvas:
-                self.matplotlib_canvas.toolbar.home()
-            if self.pyqtgraph_widget:
+            self.toolButtonAnnotateSV.setChecked(False)
+            if isinstance(canvas,MplCanvas):
+                canvas.restore_view()
+            elif self.pyqtgraph_widget:
                 self.pyqtgraph_widget.getItem(0, 0).getViewBox().autoRange()
 
         if function == 'pan':
             self.toolButtonZoomSV.setChecked(False)
-            if self.matplotlib_canvas:
+            self.toolButtonAnnotateSV.setChecked(False)
+            if isinstance(canvas,MplCanvas):
                 # Toggle pan mode in Matplotlib
-                self.matplotlib_canvas.toolbar.pan()
-            if self.pyqtgraph_widget:
+                self.mpl_toolbar.pan()
+                print(self.mpl_toolbar)
+                #canvas.figure.canvas.toolbar.pan()
+            elif self.pyqtgraph_widget:
                 # Enable or disable panning
                 self.pyqtgraph_widget.getItem(0, 0).getViewBox().setMouseMode(ViewBox.PanMode if enable else ViewBox.RectMode)
 
         if function == 'zoom':
             self.toolButtonPanSV.setChecked(False)
-            if self.matplotlib_canvas:
+            self.toolButtonAnnotateSV.setChecked(False)
+            if isinstance(canvas,MplCanvas):
                 # Toggle zoom mode in Matplotlib
-                self.matplotlib_canvas.toolbar.zoom()  # Assuming your Matplotlib canvas has a toolbar with a zoom function
-            if self.pyqtgraph_widget:
+                self.mpl_toolbar.zoom()  # Assuming your Matplotlib canvas has a toolbar with a zoom function
+            elif self.pyqtgraph_widget:
                 # Assuming pyqtgraph_widget is a GraphicsLayoutWidget or similar
                 if enable:
 
                     self.pyqtgraph_widget.getItem(0, 0).getViewBox().setMouseMode(ViewBox.RectMode)
                 else:
                     self.pyqtgraph_widget.getItem(0, 0).getViewBox().setMouseMode(ViewBox.PanMode)
+        if function == 'annotate':
+            self.toolButtonPanSV.setChecked(False)
+            self.toolButtonZoomSV.setChecked(False)
 
         if function == 'preference':
-            if self.matplotlib_canvas:
-                self.matplotlib_canvas.toolbar.edit_parameters()
+            if isinstance(canvas,MplCanvas):
+                self.mpl_toolbar.edit_parameters()
             if self.pyqtgraph_widget:
                 # Assuming it's about showing/hiding axes
                 if enable:
@@ -6058,8 +6094,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.pyqtgraph_widget.showAxis('bottom', False)
 
         if function == 'axes':
-            if self.matplotlib_canvas:
-                self.matplotlib_canvas.toolbar.configure_subplots()
+            if isinstance(canvas,MplCanvas):
+                self.mpl_toolbar.configure_subplots()
             if self.pyqtgraph_widget:
                 # Assuming it's about showing/hiding axes
                 if enable:
@@ -6068,10 +6104,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 else:
                     self.pyqtgraph_widget.showAxis('left', False)
                     self.pyqtgraph_widget.showAxis('bottom', False)
+        
+        if function == 'pop':
+            self.toolButtonPanSV.setChecked(False)
+            self.toolButtonZoomSV.setChecked(False)
+            self.toolButtonAnnotateSV.setChecked(False)
+            if isinstance(canvas,MplCanvas):
+                self.pop_figure = MplDialog(self,canvas,self.plot_info['plot_name'])
+                self.pop_figure.show()
 
         if function == 'save':
-            if self.matplotlib_canvas:
-                self.matplotlib_canvas.toolbar.save_figure()
+            if isinstance(canvas,MplCanvas):
+                self.mpl_toolbar.save_figure()
             if self.pyqtgraph_widget:
                 # Save functionality for pyqtgraph
                 export = exportDialog.ExportDialog(self.pyqtgraph_widget.getItem(0, 0).scene())
@@ -6355,6 +6399,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         canvas.axes.tick_params(direction=None,
             labelbottom=False, labeltop=False, labelright=False, labelleft=False,
             bottom=False, top=False, left=False, right=False)
+
+        canvas.set_initial_extent()
         
         # add scalebar
         self.add_scalebar(canvas.axes)
@@ -6380,6 +6426,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             }
 
         self.clear_layout(self.widgetSingleView.layout())
+
+        self.mpl_toolbar = NavigationToolbar(canvas, self)
+        self.widgetSingleView.layout().addWidget(self.mpl_toolbar)
+        self.mpl_toolbar.hide()
         self.widgetSingleView.layout().addWidget(canvas)
 
         #self.add_tree_item(self.plot_info)
@@ -9872,7 +9922,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """        
         # Open a file dialog to select a local HTML file
         # Create a QWebEngineView widget
-        self.browser = QWebEngineView()
+        self.browser = WebEngineView(parent=self)
         self.verticalLayoutBrowser.addWidget(self.browser)
 
         #file_name, _ = QFileDialog.getOpenFileName(self, "Open HTML File", "", "HTML Files (*.html *.htm)")
@@ -9898,12 +9948,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if location:
                 self.browser.setUrl(QUrl.fromLocalFile(os.path.abspath(location)))
         except:
-            self.browser.setUrl(QUrl(os.path.abspath('docs/build/html/404.html')))
+            pass
+            #self.browser.setUrl(QUrl(os.path.abspath('docs/build/html/404.html')))
 
     # -------------------------------
     # Unclassified functions
     # -------------------------------
     def reset_checked_items(self,item):
+        """Resets tool buttons as filters/masks are toggled
+
+        Parameters
+        ----------
+        item : str
+            Identifier associated with toggle button that was clicked.
+        """        
         #unchecks tool buttons to prevent incorrect behaviour during plot click
         match item:
             case 'crop':
@@ -9925,6 +9983,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.toolButtonPointMove.setChecked(False)
 
     def sort_analytes(self, method, analytes, order = 'd'):
+        """Sort the analyte list
+
+        Sorting the analyte list can make data selection easier, or improve the pattern of correlations and PCA vectors.
+
+        Parameters
+        ----------
+        method : str
+            Method used for sorting.  Options include ``'alphabetical'``, ``'atomic number'``, ``'mass'``, ``'compatibility'``, and ``'radius'``.
+        analytes : list
+            List of analytes to sort
+        order : str, optional
+            Sets order as ascending (``'a'``) or decending (``'d'``), by default 'd'
+
+        Returns
+        -------
+        list
+            Sorted analyte list.
+        """        
         # Extract element symbols and any mass numbers if present
         parsed_analytes = []
         for analyte in analytes:
@@ -9982,6 +10058,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 # Matplotlib Canvas object
 # -------------------------------
 class MplCanvas(FigureCanvas):
+    """Matplotlib canvas object
+
+    Parameters
+    ----------
+    sub : int, optional
+        Subplot location, by default 111
+    parent : object, optional
+        Parent calling MplCanvas, by default None
+    width : int, optional
+        Width in inches, by default 5
+    height : int, optional
+        Height in inches, by default 4
+    proj : str, optional
+        Projection, by default None
+    """    
     def __init__(self, sub=111, parent=None, width=5, height=4, proj=None):
         self.fig = Figure(figsize=(width, height))
         if proj is not None:
@@ -9993,16 +10084,60 @@ class MplCanvas(FigureCanvas):
 
         self.main_window = parent
 
+        self.initial_extent = None
+
+    def set_initial_extent(self):
+        """Initial extent of the plot
+
+        Sets the initital extent of the plot.
+        """
+        xlim = self.axes.get_xlim()
+        ylim = self.axes.get_ylim()
+        self.initial_extent = [xlim[0], xlim[1], ylim[0], ylim[1]]
+        print(f"Initial extent set to: {self.initial_extent}")
+
+    def restore_view(self):
+        """Restores the initial extent
+
+        Restores the initial extent when ``MainWindow.toolButtonHomeSV`` is clicked.
+        """
+        if self.initial_extent:
+            self.axes.set_xlim(self.initial_extent[:2])
+            self.axes.set_ylim(self.initial_extent[2:])
+        else:
+            self.axes.set_xlim(auto=True)
+            self.axes.set_ylim(auto=True)
+        self.draw()
+
     def load_figure(self, fig):
-        """Load existing figure"""
-        self.fig =fig
+        """Load existing figure
+        
+        Parameters
+        ----------
+        fig : matplotlib.Figure
+            Matplotlib figure.
+        """
+        self.fig = fig
         self.axes = self.fig.gca()  # Get current axes
         self.draw()  # Redraw the canvas with the loaded figure
 
     def setCursorPosition(self):
+        """Gets the cursor position on an MplCanvas
+
+        Mouse listener
+        """        
         self.cid = self.mpl_connect('button_press_event', self.textOnClick)
 
     def textOnClick(self, event):
+        """Adds text to plot at clicked position
+
+        Only adds a text to a plot when the Annotate button is checked.
+
+        Parameters
+        ----------
+        event : MouseEvent
+            Mouse click event.
+        """        
         if not self.main_window.toolButtonAnnotateSV.isChecked():
             return
 
@@ -10015,6 +10150,144 @@ class MplCanvas(FigureCanvas):
         style = self.main_window.styles[self.main_window.comboBoxPlotType.currentText()]
         self.axes.text(x,y,txt, color=style['Scale']['OverlayColor'], fontsize=style['Text']['FontSize'])
         self.draw()
+
+# class DistanceMeasureApp(QMainWindow):
+#     def __init__(self):
+#         super().__init__()
+
+#         self.initUI()
+
+#     def initUI(self):
+#         self.setWindowTitle('Distance Measurement Tool')
+
+#         # Create a main widget
+#         self.main_widget = QWidget(self)
+#         self.setCentralWidget(self.main_widget)
+
+#         # Create a vertical layout
+#         layout = QVBoxLayout(self.main_widget)
+
+#         # Create a matplotlib figure and add it to the canvas
+#         self.figure = Figure()
+#         self.canvas = FigureCanvas(self.figure)
+#         self.ax = self.figure.add_subplot(111)
+#         layout.addWidget(self.canvas)
+
+#         # Plot some data
+#         t = np.linspace(0, 10, 100)
+#         y = np.sin(t)
+#         self.ax.plot(t, y)
+
+#         # Create a toolbar button for distance measurement
+#         self.measure_btn = QToolButton(self)
+#         self.measure_btn.setText("Measure Distance")
+#         self.measure_btn.setCheckable(True)
+#         layout.addWidget(self.measure_btn)
+
+#         # Create a label to display the distance
+#         self.distance_label = QLabel("Distance: N/A", self)
+#         layout.addWidget(self.distance_label)
+
+#         # Variables to store points and line
+#         self.first_point = None
+#         self.line = None
+
+#         # Connect the button and canvas events
+#         self.measure_btn.toggled.connect(self.toggle_measure_mode)
+#         self.canvas.mpl_connect('button_press_event', self.on_click)
+#         self.canvas.mpl_connect('motion_notify_event', self.on_move)
+
+#     def toggle_measure_mode(self, checked):
+#         if not checked:
+#             self.reset_measurement()
+
+#     def on_click(self, event):
+#         if self.measure_btn.isChecked():
+#             if event.inaxes:
+#                 if self.first_point is None:
+#                     # First click
+#                     self.first_point = (event.xdata, event.ydata)
+#                     self.distance_label.setText(f"First Point: {self.first_point}")
+#                 else:
+#                     # Second click
+#                     second_point = (event.xdata, event.ydata)
+#                     distance = np.sqrt((second_point[0] - self.first_point[0])**2 + (second_point[1] - self.first_point[1])**2)
+#                     self.distance_label.setText(f"Distance: {distance:.2f}")
+#                     self.reset_measurement()
+
+#     def on_move(self, event):
+#         if self.measure_btn.isChecked() and self.first_point is not None and event.inaxes:
+#             if self.line:
+#                 self.line.remove()
+#             self.line = self.ax.plot(
+#                 [self.first_point[0], event.xdata],
+#                 [self.first_point[1], event.ydata],
+#                 'r--'
+#             )[0]
+#             self.canvas.draw()
+
+#     def reset_measurement(self):
+#         self.first_point = None
+#         if self.line:
+#             self.line.remove()
+#             self.line = None
+#         self.canvas.draw()
+#         self.distance_label.setText("Distance: N/A")
+
+class MplDialog(QDialog):
+    def __init__(self, parent, canvas, title=''):
+        super(MplDialog, self).__init__(parent)
+
+        self.main_window = parent
+
+        self.setWindowTitle(title)
+
+        # Create a QVBoxLayout to hold the canvas and toolbar
+        layout = QVBoxLayout(self)
+
+        # Create a NavigationToolbar and add it to the layout
+        self.toolbar = NavigationToolbar(canvas, self)
+
+        # use custom buttons
+        unwanted_buttons = ["Back", "Forward", "Customize", "Subplots"]
+
+        icons_buttons = {
+            "Home": QtGui.QIcon("resources/icons/icon-home-64.png"),
+            "Pan": QtGui.QIcon("resources/icons/icon-move-64.png"),
+            "Zoom": QtGui.QIcon("resources/icons/icon-zoom-64.png"),
+            "Save": QtGui.QIcon("resources/icons/icon-save-file-64.png")
+        }
+        for action in self.toolbar.actions():
+            if action.text() in unwanted_buttons:
+                self.toolbar.removeAction(action)
+            if action.text() in icons_buttons:
+                action.setIcon(icons_buttons.get(action.text(), QtGui.QIcon()))
+
+        self.toolbar.setMaximumHeight(int(32))
+        self.toolbar.setIconSize(QSize(24,24))
+
+        # Add toolbar to self.layout
+        layout.addWidget(self.toolbar,0)
+
+        # Add a matplotlib canvas to self.layout
+        layout.addWidget(canvas,1)
+
+        # Create a button box for OK and Cancel buttons
+        button_box = QDialogButtonBox(QDialogButtonBox.Close)
+        button_box.rejected.connect(self.on_close)
+        layout.addWidget(button_box,2)
+
+        self.main_window.clear_layout(self.main_window.widgetSingleView.layout())
+
+    def on_close(self):
+        
+        canvas = self.layout().itemAt(1)
+        self.main_window.mpl_toolbar = NavigationToolbar(canvas, self)
+        self.main_window.widgetSingleView.layout().addWidget(self.main_window.mpl_toolbar)
+        self.main_window.mpl_toolbar.hide()
+        self.main_window.widgetSingleView.layout().addWidget(canvas)
+
+        self.reject
 
 
 class StandardItem(QStandardItem):
@@ -10566,7 +10839,45 @@ class quickView(QDialog, Ui_QuickViewDialog):
     #         if item is not None and checkbox.isChecked():
     #             quickview_list.append(item.text())
     #     return quickview_list         
+class WebEngineView(QWebEngineView):
+    def __init__(self, parent=None):
+        super().__init__(parent)
 
+        self.main_window = parent
+
+        # Connect signals
+        self.loadFinished.connect(self.on_load_finished)
+        self.loadStarted.connect(self.on_load_started)
+        self.loadProgress.connect(self.on_load_progress)
+        self.page().profile().setHttpAcceptLanguage("en-US,en;q=0.9")
+        self.page().profile().setHttpUserAgent("MyBrowser 1.0")
+
+        # Set up a JavaScript console message handler
+        self.page().setWebChannel(None)
+        self.page().setFeaturePermission(QUrl(), QWebEnginePage.Notifications, QWebEnginePage.PermissionGrantedByUser)
+        self.page().javaScriptConsoleMessage = self.handle_console_message
+
+    @pyqtSlot(bool)
+    def on_load_finished(self, success):
+        if not success:
+            self.setUrl(QUrl(os.path.abspath('docs/build/html/404.html')))
+            #self.show_error_page()
+
+    @pyqtSlot()
+    def on_load_started(self):
+        self.main_window.statusBar.showMessage("Loading started...")
+
+    @pyqtSlot(int)
+    def on_load_progress(self, progress):
+        self.main_window.statusBar.showMessage(f"Loading progress: {progress}%")
+
+    def show_error_page(self):
+        html = f"<html><body><img src={os.path.abspath('docs/build/html/404.html')} /></html>"
+        self.setHtml(html)
+
+    def handle_console_message(self, level, message, line, source_id):
+        pass
+        #print(f"JavaScript Console: {message} at line {line} in {source_id}")
 
 class TableWidgetDragRows(QTableWidget):
     def __init__(self, *args, **kwargs):

@@ -1040,6 +1040,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonPanSV.clicked.connect(lambda: self.toolbar_plotting('pan', 'SV', self.toolButtonPanSV.isChecked()))
         self.toolButtonZoomSV.clicked.connect(lambda: self.toolbar_plotting('zoom', 'SV', self.toolButtonZoomSV.isChecked()))
         self.toolButtonSaveSV.clicked.connect(lambda: self.toolbar_plotting('save', 'SV', self.toolButtonSaveSV.isChecked()))
+        self.toolButtonAnnotateSV.clicked.connect(lambda: self.toolbar_plotting('annotate', 'SV'))
+        self.toolButtonDistanceSV.toggled.connect(self.toggle_distance_tool)
+        self.toolButtonDistanceSV.clicked.connect(lambda: self.toolbar_plotting('distance', 'SV'))
         self.toolButtonPopFigure.clicked.connect(lambda: self.toolbar_plotting('pop', 'SV'))
         # multi-view tools
 
@@ -6020,6 +6023,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     #     if plot:
     #         self.add_laser_map(plot_information, current_plot_df)
 
+    def toggle_distance_tool(self):
+        canvas = self.get_SV_widget(1)
+        if not isinstance(canvas, MplCanvas):
+            return
+
+        if not self.toolButtonDistanceSV.isChecked():
+            canvas.reset_measurement()
+
     def toolbar_plotting(self,function,view,enable=None):
         """Controls functionality of the toolbar
 
@@ -6077,9 +6088,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.pyqtgraph_widget.getItem(0, 0).getViewBox().setMouseMode(ViewBox.RectMode)
                 else:
                     self.pyqtgraph_widget.getItem(0, 0).getViewBox().setMouseMode(ViewBox.PanMode)
+
         if function == 'annotate':
             self.toolButtonPanSV.setChecked(False)
             self.toolButtonZoomSV.setChecked(False)
+        
+        if function == 'distance':
+            self.toolButtonPanSV.setChecked(False)
+            self.toolButtonZoomSV.setChecked(False)
+
 
         if function == 'preference':
             if isinstance(canvas,MplCanvas):
@@ -10083,11 +10100,26 @@ class MplCanvas(FigureCanvas):
         else:
             self.axes = self.fig.add_subplot(sub)
         super(MplCanvas, self).__init__(self.fig)
-        self.setCursorPosition()
 
         self.main_window = parent
 
+        # for placing text annotations
+        # --------------------
+        self.setCursorPosition()
+
+        # restoring initial axes
+        # --------------------
         self.initial_extent = None
+
+        # distance measurement
+        # --------------------
+        # Variables to store points and line
+        self.first_point = None
+        self.line = None
+
+        # Connect the button and canvas events
+        self.mpl_connect('button_press_event', self.distanceOnClick)
+        self.mpl_connect('motion_notify_event', self.distanceOnMove)
 
     def set_initial_extent(self):
         """Initial extent of the plot
@@ -10155,87 +10187,44 @@ class MplCanvas(FigureCanvas):
         self.draw()
 
 # class DistanceMeasureApp(QMainWindow):
-#     def __init__(self):
-#         super().__init__()
-
-#         self.initUI()
-
-#     def initUI(self):
-#         self.setWindowTitle('Distance Measurement Tool')
-
-#         # Create a main widget
-#         self.main_widget = QWidget(self)
-#         self.setCentralWidget(self.main_widget)
-
-#         # Create a vertical layout
-#         layout = QVBoxLayout(self.main_widget)
-
-#         # Create a matplotlib figure and add it to the canvas
-#         self.figure = Figure()
-#         self.canvas = FigureCanvas(self.figure)
-#         self.ax = self.figure.add_subplot(111)
-#         layout.addWidget(self.canvas)
-
-#         # Plot some data
-#         t = np.linspace(0, 10, 100)
-#         y = np.sin(t)
-#         self.ax.plot(t, y)
-
-#         # Create a toolbar button for distance measurement
-#         self.measure_btn = QToolButton(self)
-#         self.measure_btn.setText("Measure Distance")
-#         self.measure_btn.setCheckable(True)
-#         layout.addWidget(self.measure_btn)
 
 #         # Create a label to display the distance
 #         self.distance_label = QLabel("Distance: N/A", self)
 #         layout.addWidget(self.distance_label)
 
-#         # Variables to store points and line
-#         self.first_point = None
-#         self.line = None
 
-#         # Connect the button and canvas events
-#         self.measure_btn.toggled.connect(self.toggle_measure_mode)
-#         self.canvas.mpl_connect('button_press_event', self.on_click)
-#         self.canvas.mpl_connect('motion_notify_event', self.on_move)
+    def distanceOnClick(self, event):
+        if self.main_window.toolButtonDistanceSV.isChecked():
+            if event.inaxes:
+                if self.first_point is None:
+                    # First click
+                    self.first_point = (event.xdata, event.ydata)
+                    self.distance_label.setText(f"First Point: {self.first_point}")
+                else:
+                    # Second click
+                    second_point = (event.xdata, event.ydata)
+                    distance = np.sqrt((second_point[0] - self.first_point[0])**2 + (second_point[1] - self.first_point[1])**2)
+                    self.distance_label.setText(f"Distance: {distance:.2f}")
+                    self.reset_measurement()
 
-#     def toggle_measure_mode(self, checked):
-#         if not checked:
-#             self.reset_measurement()
+    def distanceOnMove(self, event):
+        if self.main_window.toolButtonDistanceSV.isChecked() and self.first_point is not None and event.inaxes:
+            if self.line:
+                self.line.remove()
+            self.line = self.axes.plot(
+                    [self.first_point[0], event.xdata],
+                    [self.first_point[1], event.ydata],
+                    'r--'
+                )[0]
+            self.draw()
 
-#     def on_click(self, event):
-#         if self.measure_btn.isChecked():
-#             if event.inaxes:
-#                 if self.first_point is None:
-#                     # First click
-#                     self.first_point = (event.xdata, event.ydata)
-#                     self.distance_label.setText(f"First Point: {self.first_point}")
-#                 else:
-#                     # Second click
-#                     second_point = (event.xdata, event.ydata)
-#                     distance = np.sqrt((second_point[0] - self.first_point[0])**2 + (second_point[1] - self.first_point[1])**2)
-#                     self.distance_label.setText(f"Distance: {distance:.2f}")
-#                     self.reset_measurement()
-
-#     def on_move(self, event):
-#         if self.measure_btn.isChecked() and self.first_point is not None and event.inaxes:
-#             if self.line:
-#                 self.line.remove()
-#             self.line = self.ax.plot(
-#                 [self.first_point[0], event.xdata],
-#                 [self.first_point[1], event.ydata],
-#                 'r--'
-#             )[0]
-#             self.canvas.draw()
-
-#     def reset_measurement(self):
-#         self.first_point = None
-#         if self.line:
-#             self.line.remove()
-#             self.line = None
-#         self.canvas.draw()
-#         self.distance_label.setText("Distance: N/A")
+    def reset_measurement(self):
+        self.first_point = None
+        if self.line:
+            self.line.remove()
+            self.line = None
+        self.draw()
+        self.distance_label.setText("Distance: N/A")
 
 class MplDialog(QDialog):
     def __init__(self, parent, canvas, title=''):

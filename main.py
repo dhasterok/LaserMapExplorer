@@ -10231,13 +10231,13 @@ class MplCanvas(FigureCanvas):
         x_i = round(event.xdata)
         if x_i < 0:
             x_i = 0
-        elif x_i > self.array.shape[1]:
+        elif x_i > self.array.shape[1]-1:
             x_i = self.array.shape[1]
         
         y_i = round(event.ydata)
         if y_i < 0:
             y_i = 0
-        elif y_i > self.array.shape[0]:
+        elif y_i > self.array.shape[0]-1:
             y_i = self.array.shape[0]
         
         x = x_i*self.main_window.dx
@@ -10334,11 +10334,90 @@ class MplCanvas(FigureCanvas):
 
         return np.sqrt(((p2[0] - p1[0])*dx)**2 + ((p2[1] - p1[1])*dy)**2)
 
-    def plot_line(self):
+    def plot_line(self, p1, p2):
+        """Plots line from distance calculation
 
-    def plot_text(self):
+        Parameters
+        ----------
+        p1, p2 : tuple
+            Endpoints of line.
+
+        Returns
+        -------
+        matplotlib.plot
+            Handle to line
+        """        
+        plot_type = self.main_window.plot_info['plot_type']
+        style = self.main_window.styles[plot_type]
+
+        # plot line (keep only first returned handle)
+        p = self.axes.plot([p1[0], p2[0]], [p1[1], p2[1]],
+                ':', c=style['Scale']['OverlayColor'], lw=style['Lines']['LineWidth']
+            )[0]
+
+        return p
+ 
+    def plot_text(self, p1,p2):
+        """Adds distance to plot and updates distance label
+
+        Updates distance in ``MainWindow.labelSVInfoDistance`` and adds distance
+        at the end of the measuring line.
+
+        Parameters
+        ----------
+        p1, p2 : tuple
+            Endpoints of line.
+
+        Returns
+        -------
+        matplotlib.text
+            Handle to text.
+        """        
+        plot_type = self.main_window.plot_info['plot_type']
+        style = self.main_window.styles[plot_type]
+
+        # compute distance
+        distance = self.calculate_distance(p1, p2)
+
+        # Update distance label in widget 
+        distance_text = f"{distance:.2f} {self.main_window.preferences['Units']['Distance']}"
+        self.main_window.labelSVInfoDistance.setText(f"D: {distance_text}")
+
+        # Update distance label on map
+        # x-shift for text
+        dx = 0.03*self.main_window.x.nunique()*self.main_window.aspect_ratio
+        if p2[0] > p1[0]:
+            halign = 'left'
+        else:
+            dx = -dx
+            halign = 'right'
+
+        # y-shift for text
+        dy = 0.03*self.main_window.y.nunique()
+        if p2[1] > p1[1]:
+            valign = 'bottom'
+        else:
+            dy = -dy
+            valign = 'top'
+
+        # text on plot
+        font = {'family':style['Text']['Font'], 'size':style['Text']['FontSize']-2}
+        t = self.axes.text(p2[0]+dx, p2[1]+dy, distance_text, ha=halign, va=valign, fontdict=font, c=style['Scale']['OverlayColor'])
+
+        return t
 
     def distanceOnClick(self, event):
+        """Updates static endpoints of distance measuring line.
+
+        Updates the endpoint of the distance measuring line and calls methods that 
+        update the line and text.  Updates ``MplCanvas.first_point`` if it is the start of the line
+        and ``MplCanvas.line_saved`` and ``MplCanvas.dtext_saved`` if it is the end of the line.
+
+        Parameters
+        ----------
+        event : MouseEvent
+            Mouse click event.
+        """        
         self.setCursor(Qt.CrossCursor)
         if self.main_window.toolButtonDistance.isChecked():
             if event.inaxes:
@@ -10349,40 +10428,25 @@ class MplCanvas(FigureCanvas):
                 else:
                     # Second click
                     second_point = (event.xdata, event.ydata)
-                    distance = self.calculate_distance(self.first_point, second_point)
 
-                    plot_type = self.main_window.plot_info['plot_type']
-                    style = self.main_window.styles[plot_type]
-
-                    distance_text = f"{distance:.2f} {self.main_window.preferences['Units']['Distance']}"
-                    self.main_window.labelSVInfoDistance.setText(f"D: {distance_text}")
-                    self.saved_line.append(self.axes.plot(
-                            [self.first_point[0], second_point[0]],
-                            [self.first_point[1], second_point[1]],
-                            ':',
-                            c=style['Scale']['OverlayColor'],
-                            lw=style['Lines']['LineWidth'])[0])
-
-                    plot_type = self.main_window.plot_info['plot_type']
-                    style = self.main_window.styles[plot_type]
-                    dx = 0.03*self.main_window.x.nunique()*self.main_window.aspect_ratio
-                    if second_point[0] > self.first_point[0]:
-                        halign = 'left'
-                    else:
-                        dx = -dx
-                        halign = 'right'
-                    dy = 0.03*self.main_window.y.nunique()
-                    if second_point[1] > self.first_point[1]:
-                        valign = 'bottom'
-                    else:
-                        dy = -dy
-                        valign = 'top'
-                    font = {'family':style['Text']['Font'], 'size':style['Text']['FontSize']-2}
-                    self.saved_dtext.append(self.axes.text(second_point[0]+dx, second_point[1]+dy, distance_text, ha=halign, va=valign, fontdict=font, c=style['Scale']['OverlayColor']))
+                    self.saved_line.append(self.plot_line(self.first_point, second_point))
+                    self.saved_dtext.append(self.plot_text(self.first_point, second_point))
                     
                     self.distance_reset()
 
+            self.draw()
+
     def distanceOnMove(self, event):
+        """Updates dynamic second point of distance measuring line.
+
+        Updates the second endpoint of the distance measuring line and calls methods that 
+        update the line and text.  Updates ``MplCanvas.line`` and ``MplCanvas.dtext``.
+
+        Parameters
+        ----------
+        event : MouseEvent
+            Mouse click event.
+        """        
         self.setCursor(Qt.CrossCursor)
         if (self.main_window.toolButtonDistance.isChecked()) and (self.first_point is not None) and event.inaxes:
             if self.line:
@@ -10390,38 +10454,19 @@ class MplCanvas(FigureCanvas):
             if self.dtext:
                 self.dtext.remove()
 
-            distance = self.calculate_distance((event.xdata,event.ydata),self.first_point)
-            distance_text = f"{distance:.2f}"
-
-            self.main_window.labelSVInfoDistance.setText(f"D: {distance_text} {self.main_window.preferences['Units']['Distance']}")
-
-            plot_type = self.main_window.plot_info['plot_type']
-            style = self.main_window.styles[plot_type]
-            self.line = self.axes.plot(
-                    [self.first_point[0], event.xdata],
-                    [self.first_point[1], event.ydata],
-                    ':',
-                    c=style['Scale']['OverlayColor'],
-                    lw=style['Lines']['LineWidth']
-                )[0]
-            dx = 0.03*self.main_window.x.nunique()*self.main_window.aspect_ratio
-            if event.xdata > self.first_point[0]:
-                halign = 'left'
-            else:
-                dx = -dx
-                halign = 'right'
-            dy = 0.03*self.main_window.y.nunique()
-            if event.ydata > self.first_point[1]:
-                valign = 'bottom'
-            else:
-                dy = -dy
-                valign = 'top'
-            font = {'family':style['Text']['Font'], 'size':style['Text']['FontSize']-2}
-            self.dtext = self.axes.text(event.xdata+dx, event.ydata+dy, distance_text, ha=halign, va=valign, fontdict=font, c=style['Scale']['OverlayColor'])
+            second_point = (event.xdata,event.ydata)
+            self.line = self.plot_line(self.first_point, second_point)
+            self.dtext = self.plot_text(self.first_point, second_point)
 
             self.draw()
 
     def distance_reset(self):
+        """Resets distance variables and clears plot
+
+        Sets ``MplCanvas.first_point`` to ``None``, ``MplCanvas.line`` and ``MplCanvas.dtext``.
+        If ``MainWindow.toolButtonDistance`` is not checked, then ``MainWindow.labelSVInfoDistance`` is 
+        also reset.
+        """        
         self.first_point = None
         if self.line:
             self.line.remove()

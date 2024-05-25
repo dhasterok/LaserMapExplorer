@@ -871,11 +871,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Special Tab
         #------------------------
         #SV/MV tool box
-        self.toolButtonPanSV.setCheckable(True)
-        self.toolButtonPanMV.setCheckable(True)
+        self.toolButtonPan.setCheckable(True)
+        self.toolButtonPan.setCheckable(True)
 
-        self.toolButtonZoomSV.setCheckable(True)
-        self.toolButtonZoomMV.setCheckable(True)
+        self.toolButtonZoom.setCheckable(True)
+        self.toolButtonZoom.setCheckable(True)
 
         # Styling Tab
         #-------------------------
@@ -1036,16 +1036,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #-------------------------
 
         # single view tools
-        self.toolButtonHomeSV.clicked.connect(lambda: self.toolbar_plotting('home', 'SV'))
-        self.toolButtonPanSV.clicked.connect(lambda: self.toolbar_plotting('pan', 'SV', self.toolButtonPanSV.isChecked()))
-        self.toolButtonZoomSV.clicked.connect(lambda: self.toolbar_plotting('zoom', 'SV', self.toolButtonZoomSV.isChecked()))
-        self.toolButtonSaveSV.clicked.connect(lambda: self.toolbar_plotting('save', 'SV', self.toolButtonSaveSV.isChecked()))
-        self.toolButtonAnnotateSV.clicked.connect(lambda: self.toolbar_plotting('annotate', 'SV'))
-        self.toolButtonDistanceSV.toggled.connect(self.toggle_distance_tool)
-        self.toolButtonDistanceSV.clicked.connect(lambda: self.toolbar_plotting('distance', 'SV'))
+        self.toolButtonHome.clicked.connect(lambda: self.toolbar_plotting('home', 'SV'))
+        self.toolButtonPan.clicked.connect(lambda: self.toolbar_plotting('pan', 'SV', self.toolButtonPan.isChecked()))
+        self.toolButtonZoom.clicked.connect(lambda: self.toolbar_plotting('zoom', 'SV', self.toolButtonZoom.isChecked()))
+        self.toolButtonSave.clicked.connect(lambda: self.toolbar_plotting('save', 'SV', self.toolButtonSave.isChecked()))
+        self.toolButtonAnnotate.clicked.connect(lambda: self.toolbar_plotting('annotate', 'SV'))
+        self.toolButtonDistance.toggled.connect(self.toggle_distance_tool)
+        self.toolButtonDistance.clicked.connect(lambda: self.toolbar_plotting('distance', 'SV'))
         self.toolButtonPopFigure.clicked.connect(lambda: self.toolbar_plotting('pop', 'SV'))
-        # multi-view tools
+        self.canvas_changed()
 
+        # multi-view tools
         self.actionCalculator.triggered.connect(self.open_calculator)
 
         #reset check boxes to prevent incorrect behaviour during plot click
@@ -1388,6 +1389,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.initialize_axis_values('Analyte', fields[0])
         self.color_field_callback()
         self.set_style_widgets('analyte map')
+        self.canvas_changed()
 
         self.plot_flag = True
         self.update_SV()
@@ -1518,9 +1520,33 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def canvas_changed(self):
         if self.sample_id == '':
+            self.toolButtonHome.setVisible(False)
+            self.toolButtonPan.setVisible(False)
+            self.toolButtonZoom.setVisible(False)
+            self.toolButtonAnnotate.setVisible(False)
+            self.toolButtonDistance.setVisible(False)
+            self.toolButtonPopFigure.setVisible(False)
+            self.toolButtonSave.setVisible(False)
+            self.widgetPlotInfoSV.hide()
+            self.widgetPlotInfoMV.hide()
+            self.comboBoxQVList.setVisible(False)
+            self.toolButtonNewList.setVisible(False)
             return
 
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
+            # plot toolbar items
+            self.toolButtonHome.setVisible(True)
+            self.toolButtonPan.setVisible(True)
+            self.toolButtonZoom.setVisible(True)
+            self.toolButtonAnnotate.setVisible(True)
+            self.toolButtonDistance.setVisible(True)
+            self.toolButtonPopFigure.setVisible(True)
+            self.toolButtonSave.setVisible(True)
+            self.widgetPlotInfoSV.show()
+            self.widgetPlotInfoMV.hide()
+            self.comboBoxQVList.setVisible(False)
+            self.toolButtonNewList.setVisible(False)
+
             self.SelectAnalytePage.setEnabled(True)
             self.PreprocessPage.setEnabled(True)
             self.SpotDataPage.setEnabled(True)
@@ -1544,6 +1570,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if self.duplicate_plot_info:
                 self.add_plotwidget_to_canvas(self.duplicate_plot_info)
         elif self.canvasWindow.currentIndex() == self.canvas_tab['mv']:
+            # plot toolbar items
+            self.toolButtonHome.setVisible(False)
+            self.toolButtonPan.setVisible(False)
+            self.toolButtonZoom.setVisible(False)
+            self.toolButtonAnnotate.setVisible(False)
+            self.toolButtonDistance.setVisible(False)
+            self.toolButtonPopFigure.setVisible(False)
+            self.toolButtonSave.setVisible(True)
+            self.widgetPlotInfoSV.hide()
+            self.widgetPlotInfoMV.show()
+            self.comboBoxQVList.setVisible(False)
+            self.toolButtonNewList.setVisible(False)
+
             self.SelectAnalytePage.setEnabled(False)
             self.PreprocessPage.setEnabled(False)
             self.SpotDataPage.setEnabled(False)
@@ -1561,6 +1600,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if self.duplicate_plot_info:
                 self.add_plotwidget_to_canvas(self.duplicate_plot_info)
         else:
+            # plot toolbar items
+            self.toolButtonHome.setVisible(False)
+            self.toolButtonPan.setVisible(False)
+            self.toolButtonZoom.setVisible(False)
+            self.toolButtonAnnotate.setVisible(False)
+            self.toolButtonDistance.setVisible(False)
+            self.toolButtonPopFigure.setVisible(False)
+            self.toolButtonSave.setVisible(True)
+            self.widgetPlotInfoSV.hide()
+            self.widgetPlotInfoMV.hide()
+            self.comboBoxQVList.setVisible(True)
+            self.toolButtonNewList.setVisible(True)
+
             self.SelectAnalytePage.setEnabled(False)
             self.PreprocessPage.setEnabled(False)
             self.SpotDataPage.setEnabled(False)
@@ -2983,8 +3035,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     #         # self.proxy = SignalProxy(p1.scene().sigMouseMoved, rateLimit=60, slot=self.mouseMoved)
     #         # Create a SignalProxy for this plot and connect it to mouseMoved
 
-    #         p1.scene().sigMouseMoved.connect(lambda event,plot=p1: self.mouse_moved(event,plot))
-    #         # proxy = SignalProxy(p1.scene().sigMouseMoved, rateLimit=60, slot=self.mouse_moved)
+    #         p1.scene().sigMouseMoved.connect(lambda event,plot=p1: self.mouse_moved_pg(event,plot))
+    #         # proxy = SignalProxy(p1.scene().sigMouseMoved, rateLimit=60, slot=self.mouse_moved_pg)
     #         # self.proxies.append(proxy)  # Assuming self.proxies is a list to store proxies
 
     #         # p1.autoRange()
@@ -2999,13 +3051,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------
     # Mouse/Plot interactivity Events
     # -------------------------------
-    def mouse_moved(self,event,plot):
+    def mouse_moved_pg(self,event,plot):
         pos_view = plot.vb.mapSceneToView(event)  # This is in view coordinates
         pos_scene = plot.vb.mapViewToScene(pos_view)  # Map from view to scene coordinates
         any_plot_hovered = False
         for (k,v), (_, p, array) in self.lasermaps.items():
             # print(p.sceneBoundingRect(), pos)
-            if p.sceneBoundingRect().contains(pos_scene) and v == self.canvasWindow.currentIndex() and not self.toolButtonPanSV.isChecked() and not self.toolButtonZoomSV.isChecked() :
+            if p.sceneBoundingRect().contains(pos_scene) and v == self.canvasWindow.currentIndex() and not self.toolButtonPan.isChecked() and not self.toolButtonZoom.isChecked() :
 
                 # mouse_point = p.vb.mapSceneToView(pos)
                 mouse_point = pos_view
@@ -3013,7 +3065,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 x_i = round(x*array.shape[1]/self.x_range)
                 y_i = round(y*array.shape[0]/self.y_range)
-
 
                 # if hover within lasermap array
                 if 0 <= x_i < array.shape[1] and 0 <= y_i < array.shape[0] :
@@ -3037,7 +3088,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                         self.labelSVInfoX.setText('X: '+str(round(x)))
                         self.labelSVInfoY.setText('Y: '+str(round(y)))
-                        self.labelSVInfoValue.setText('V: '+str(round(value,2)))
+                        self.labelSVInfoValue.setText(f"V: {round(value,2)} {self.preferences['Units']['Concentration']}")
                     else: #multi-view
                         self.labelMVInfoX.setText('X: '+str(round(x)))
                         self.labelMVInfoY.setText('Y: '+str(round(y)))
@@ -3548,7 +3599,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         alphas = colors.Normalize(0, 1, clip=False)(reshaped_mask)
         alphas = np.clip(alphas, .4, 1)
-        #cax = canvas.axes.imshow(reshaped_array, alpha=alphas, cmap=self.get_colormap(),  aspect=self.aspect_ratio, interpolation='none', norm=norm)
+        #cax = canvas.axes.imshow(self.array, alpha=alphas, cmap=self.get_colormap(),  aspect=self.aspect_ratio, interpolation='none', norm=norm)
         #canvas.axes.set_facecolor('w')
 
         alpha_mask = np.where(reshaped_mask == 0, 0.5, 0)  
@@ -3641,7 +3692,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         alphas = colors.Normalize(0, 1, clip=False)(reshaped_mask)
         alphas = np.clip(alphas, .4, 1)
-        #cax = canvas.axes.imshow(reshaped_array, alpha=alphas, cmap=self.get_colormap(),  aspect=self.aspect_ratio, interpolation='none', norm=norm)
+        #cax = canvas.axes.imshow(self.array, alpha=alphas, cmap=self.get_colormap(),  aspect=self.aspect_ratio, interpolation='none', norm=norm)
         #canvas.axes.set_facecolor('w')
 
         alpha_mask = np.where(reshaped_mask == 0, 0.5, 0)  
@@ -5641,7 +5692,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     return
 
                 if self.toolBox.currentIndex() in [self.left_tab['filter'], self.left_tab['profile']]:
-                    self.plot_map_pyqt(sample_id, field_type, field)
+                    self.plot_map_pg(sample_id, field_type, field)
                 else:
                     self.plot_map_mpl(sample_id, field_type, field)
                 # if not self.comboBoxColorField.currentText():
@@ -6028,8 +6079,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if not isinstance(canvas, MplCanvas):
             return
 
-        if not self.toolButtonDistanceSV.isChecked():
-            canvas.reset_measurement()
+        if not self.toolButtonDistance.isChecked():
+            canvas.distance_reset()
+            for line, dtext in zip(reversed(canvas.saved_line), reversed(canvas.saved_dtext)):
+                line.remove()
+                dtext.remove()
+            canvas.saved_line = []
+            canvas.saved_dtext = []
+            canvas.draw()
 
     def toolbar_plotting(self,function,view,enable=None):
         """Controls functionality of the toolbar
@@ -6055,17 +6112,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 pass
 
         if function == 'home':
-            self.toolButtonPanSV.setChecked(False)
-            self.toolButtonZoomSV.setChecked(False)
-            self.toolButtonAnnotateSV.setChecked(False)
+            self.toolButtonPan.setChecked(False)
+            self.toolButtonZoom.setChecked(False)
+            self.toolButtonAnnotate.setChecked(False)
             if isinstance(canvas,MplCanvas):
                 canvas.restore_view()
             elif self.pyqtgraph_widget:
                 self.pyqtgraph_widget.getItem(0, 0).getViewBox().autoRange()
 
         if function == 'pan':
-            self.toolButtonZoomSV.setChecked(False)
-            self.toolButtonAnnotateSV.setChecked(False)
+            self.toolButtonZoom.setChecked(False)
+            self.toolButtonAnnotate.setChecked(False)
             if isinstance(canvas,MplCanvas):
                 # Toggle pan mode in Matplotlib
                 self.mpl_toolbar.pan()
@@ -6076,8 +6133,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.pyqtgraph_widget.getItem(0, 0).getViewBox().setMouseMode(ViewBox.PanMode if enable else ViewBox.RectMode)
 
         if function == 'zoom':
-            self.toolButtonPanSV.setChecked(False)
-            self.toolButtonAnnotateSV.setChecked(False)
+            self.toolButtonPan.setChecked(False)
+            self.toolButtonAnnotate.setChecked(False)
             if isinstance(canvas,MplCanvas):
                 # Toggle zoom mode in Matplotlib
                 self.mpl_toolbar.zoom()  # Assuming your Matplotlib canvas has a toolbar with a zoom function
@@ -6090,12 +6147,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.pyqtgraph_widget.getItem(0, 0).getViewBox().setMouseMode(ViewBox.PanMode)
 
         if function == 'annotate':
-            self.toolButtonPanSV.setChecked(False)
-            self.toolButtonZoomSV.setChecked(False)
+            self.toolButtonPan.setChecked(False)
+            self.toolButtonZoom.setChecked(False)
         
         if function == 'distance':
-            self.toolButtonPanSV.setChecked(False)
-            self.toolButtonZoomSV.setChecked(False)
+            self.toolButtonPan.setChecked(False)
+            self.toolButtonZoom.setChecked(False)
 
 
         if function == 'preference':
@@ -6123,9 +6180,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.pyqtgraph_widget.showAxis('bottom', False)
         
         if function == 'pop':
-            self.toolButtonPanSV.setChecked(False)
-            self.toolButtonZoomSV.setChecked(False)
-            self.toolButtonAnnotateSV.setChecked(False)
+            self.toolButtonPan.setChecked(False)
+            self.toolButtonZoom.setChecked(False)
+            self.toolButtonAnnotate.setChecked(False)
             if isinstance(canvas,MplCanvas):
                 self.pop_figure = MplDialog(self,canvas,self.plot_info['plot_name'])
                 self.pop_figure.show()
@@ -6404,14 +6461,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         alphas = colors.Normalize(0, 1, clip=False)(reshaped_mask)
         alphas = np.clip(alphas, .4, 1)
-        #cax = canvas.axes.imshow(reshaped_array, alpha=alphas, cmap=self.get_colormap(),  aspect=self.aspect_ratio, interpolation='none', norm=norm)
-        #canvas.axes.set_facecolor('w')
 
         alpha_mask = np.where(reshaped_mask == 0, 0.5, 0)  
         canvas.axes.imshow(np.ones_like(alpha_mask), aspect=self.aspect_ratio, interpolation='none', cmap='Greys', alpha=alpha_mask)
-
-        #masked = np.ma.masked_where(reshaped_mask == 0, reshaped_mask)
-        #canvas.axes.imshow(masked, alpha=0.5, aspect=self.aspect_ratio, interpolation='none', cmap='Greys')
+        canvas.array = reshaped_array
 
         # font = {'family': 'sans-serif', 'stretch': 'condensed', 'size': 8, 'weight': 'semibold'}
         # canvas.axes.text(0.025*self.array_size[0],0.1*self.array_size[1], field, fontdict=font, color=style['Scale']['OverlayColor'], ha='left', va='top')
@@ -6454,7 +6507,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         #self.add_tree_item(self.plot_info)
 
-    def plot_map_pyqt(self, sample_id, field_type, field):
+    def plot_map_pg(self, sample_id, field_type, field):
         """Create a graphic widget for plotting a map
 
         Create a map using pyqtgraph.
@@ -6469,7 +6522,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             Field for plotting
         """        
         # ----start debugging----
-        # print('[plot_map_pyqt] sample_id: '+sample_id+'   field_type: '+'   field: '+field)
+        # print('[plot_map_pg] sample_id: '+sample_id+'   field_type: '+'   field: '+field)
         # ----end debugging----
 
         style = self.styles['analyte map']
@@ -6553,7 +6606,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if view == 1:
             #create label with analyte name
             #create another label for value of the corresponding plot
-            labelMVInfoField = QLabel(self.groupBoxMVInfo)
+            labelMVInfoField = QLabel()
             # labelMVInfoValueLabel.setMaximumSize(QtCore.QSize(20, 16777215))
             labelMVInfoField.setObjectName("labelMVInfoField"+field)
             labelMVInfoField.setText(field)
@@ -6565,7 +6618,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             verticalLayout.setObjectName(field + str(view))
             verticalLayout.addWidget(labelMVInfoField)
 
-            labelMVInfoValue = QLabel(self.groupBoxMVInfo)
+            labelMVInfoValue = QLabel()
             labelMVInfoValue.setObjectName("labelMVInfoValue"+field)
             labelMVInfoValue.setFont(font)
             verticalLayout.addWidget(labelMVInfoValue)
@@ -6589,7 +6642,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Create a SignalProxy to handle mouse movement events
         # Create a SignalProxy for this plot and connect it to mouseMoved
 
-        plotWindow.scene().sigMouseMoved.connect(lambda event,plot=plotWindow: self.mouse_moved(event,plot))
+        plotWindow.scene().sigMouseMoved.connect(lambda event,plot=plotWindow: self.mouse_moved_pg(event,plot))
 
         #add zoom window
         plotWindow.getViewBox().autoRange()
@@ -6853,7 +6906,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         #print('plot_small_histogram')
         # create Mpl canvas
-        canvas = MplCanvas()
+        canvas = SimpleMplCanvas()
         #canvas.axes.clear()
 
         style = self.styles['histogram']
@@ -7461,6 +7514,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         map_data[:len(cval), :, :] = cval.reshape(M, N, 3, order=self.order)
 
         canvas.axes.imshow(map_data, aspect=self.aspect_ratio)
+        canvas.array = map_data
 
         # add scalebar
         self.add_scalebar(canvas.axes)
@@ -7829,6 +7883,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         reshaped_array = np.reshape(self.data[self.sample_id]['computed_data'][plot_type][field].values, self.array_size, order=self.order)
 
         cax = canvas.axes.imshow(reshaped_array, cmap=style['Colors']['Colormap'], aspect=self.aspect_ratio, interpolation='none')
+        canvas.array = reshaped_array
 
          # Add a colorbar
         self.add_colorbar(canvas, cax, style, field)
@@ -7868,8 +7923,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #norm = colors.BoundaryNorm(boundaries, cmap.N, clip=True)
         norm = self.color_norm(style,n_clusters)
 
-        #cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=style['Colors']['Colormap'], norm=norm, aspect = self.aspect_ratio)
+        #cax = canvas.axes.imshow(self.array.astype('float'), cmap=style['Colors']['Colormap'], norm=norm, aspect = self.aspect_ratio)
         cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect=self.aspect_ratio)
+        canvas.array = reshaped_array
         #cax.cmap.set_under(style['Scale']['OverlayColor'])
 
         self.add_colorbar(canvas, cax, style, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color)
@@ -9430,7 +9486,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 #print('tree_double_click: add_plotwidget_to_canvas')
                 self.add_plotwidget_to_canvas(plot_info)
             else:
-                #print('tree_double_click: plot_map_pyqt')
+                #print('tree_double_click: plot_map_pg')
                 if self.toolBox.currentIndex() not in [self.left_tab['sample'], self.left_tab['process'], self.left_tab['filter'], self.left_tab['profile']]:
                     self.toolBox.setCurrentIndex(self.left_tab['sample'])
                 
@@ -9446,7 +9502,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
                     self.plot_map_mpl(sample_id=branch, field_type=tree, field=leaf)
                 else:
-                    self.plot_map_pyqt(sample_id=branch, field_type=tree, field=leaf)
+                    self.plot_map_pg(sample_id=branch, field_type=tree, field=leaf)
 
         elif tree in ['Histogram', 'Correlation', 'Geochemistry', 'Multidimensional', 'Calculated']:
             self.add_plotwidget_to_canvas(plot_info)
@@ -10077,8 +10133,32 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 # Matplotlib Canvas object
 # -------------------------------
+class SimpleMplCanvas(FigureCanvas):
+    """Matplotlib canvas object for non-interactive plots
+
+    Parameters
+    ----------
+    sub : int, optional
+        Subplot location, by default 111
+    parent : object, optional
+        Parent calling MplCanvas, by default None
+    width : int, optional
+        Width in inches, by default 5
+    height : int, optional
+        Height in inches, by default 4
+    proj : str, optional
+        Projection, by default None
+    """    
+    def __init__(self, sub=111, parent=None, width=5, height=4, proj=None):
+        self.fig = Figure(figsize=(width, height))
+        if proj is not None:
+            self.axes = self.fig.add_subplot(sub, projection='radar')
+        else:
+            self.axes = self.fig.add_subplot(sub)
+        super(SimpleMplCanvas, self).__init__(self.fig)
+
 class MplCanvas(FigureCanvas):
-    """Matplotlib canvas object
+    """Matplotlib canvas object for interactive plots
 
     Parameters
     ----------
@@ -10116,10 +10196,58 @@ class MplCanvas(FigureCanvas):
         # Variables to store points and line
         self.first_point = None
         self.line = None
+        self.dtext = None
+        self.saved_line = []
+        self.saved_dtext = []
+        self.array = None
 
         # Connect the button and canvas events
         self.mpl_connect('button_press_event', self.distanceOnClick)
         self.mpl_connect('motion_notify_event', self.distanceOnMove)
+        self.mpl_connect('motion_notify_event', self.mouseLocation)
+
+    def enterEvent(self, event):
+        # Set cursor to cross when the mouse enters the window
+        self.setCursor(Qt.CrossCursor)
+
+    def leaveEvent(self, event):
+        # Reset cursor to default when the mouse leaves the window
+        self.unsetCursor()
+
+    def mouseLocation(self,event):
+        """Get mouse location on axes for display
+
+        Displays the location and value of a map in ``MainWindow.widgetPlotInfoSV``.
+
+        Parameters
+        ----------
+        event : event data
+            Includes the location of mouse pointer.
+        """        
+        if (not event.inaxes) or (self.array is None) or (event.xdata is None) or (event.ydata is None):
+            return
+
+        # pixel location on current MplCanvas
+        x_i = round(event.xdata)
+        if x_i < 0:
+            x_i = 0
+        elif x_i > self.array.shape[1]:
+            x_i = self.array.shape[1]
+        
+        y_i = round(event.ydata)
+        if y_i < 0:
+            y_i = 0
+        elif y_i > self.array.shape[0]:
+            y_i = self.array.shape[0]
+        
+        x = x_i*self.main_window.dx
+        y = y_i*self.main_window.dy
+
+        value = self.array[y_i][x_i]
+
+        self.main_window.labelSVInfoX.setText('X: '+str(round(x)))
+        self.main_window.labelSVInfoY.setText('Y: '+str(round(y)))
+        self.main_window.labelSVInfoValue.setText(f"V: {round(value,2)} {self.main_window.preferences['Units']['Concentration']}")
 
     def set_initial_extent(self):
         """Initial extent of the plot
@@ -10129,12 +10257,12 @@ class MplCanvas(FigureCanvas):
         xlim = self.axes.get_xlim()
         ylim = self.axes.get_ylim()
         self.initial_extent = [xlim[0], xlim[1], ylim[0], ylim[1]]
-        print(f"Initial extent set to: {self.initial_extent}")
+        #print(f"Initial extent set to: {self.initial_extent}")
 
     def restore_view(self):
         """Restores the initial extent
 
-        Restores the initial extent when ``MainWindow.toolButtonHomeSV`` is clicked.
+        Restores the initial extent when ``MainWindow.toolButtonHome`` is clicked.
         """
         if self.initial_extent:
             self.axes.set_xlim(self.initial_extent[:2])
@@ -10173,7 +10301,7 @@ class MplCanvas(FigureCanvas):
         event : MouseEvent
             Mouse click event.
         """        
-        if not self.main_window.toolButtonAnnotateSV.isChecked():
+        if (self.main_window.canvasWindow.currentIndex() != self.main_window.canvas_tab['sv']) or (not self.main_window.toolButtonAnnotate.isChecked()):
             return
 
         x,y = event.xdata, event.ydata
@@ -10186,48 +10314,140 @@ class MplCanvas(FigureCanvas):
         self.axes.text(x,y,txt, color=style['Scale']['OverlayColor'], fontsize=style['Text']['FontSize'])
         self.draw()
 
-# class DistanceMeasureApp(QMainWindow):
+    def calculate_distance(self,p1,p2):
+        """Calculuates distance on a figure
 
-#         # Create a label to display the distance
-#         self.distance_label = QLabel("Distance: N/A", self)
-#         layout.addWidget(self.distance_label)
+        Parameters
+        ----------
+        p1 : _type_
+            _description_
+        p2 : _type_
+            _description_
 
+        Returns
+        -------
+        float
+            Distance between two given points.
+        """        
+        dx = self.main_window.dx
+        dy = self.main_window.dy
+
+        return np.sqrt(((p2[0] - p1[0])*dx)**2 + ((p2[1] - p1[1])*dy)**2)
+
+    def plot_line(self):
+
+    def plot_text(self):
 
     def distanceOnClick(self, event):
-        if self.main_window.toolButtonDistanceSV.isChecked():
+        self.setCursor(Qt.CrossCursor)
+        if self.main_window.toolButtonDistance.isChecked():
             if event.inaxes:
                 if self.first_point is None:
                     # First click
                     self.first_point = (event.xdata, event.ydata)
-                    self.distance_label.setText(f"First Point: {self.first_point}")
+                    self.main_window.labelSVInfoDistance.setText(f"D: 0 {self.main_window.preferences['Units']['Distance']}")
                 else:
                     # Second click
                     second_point = (event.xdata, event.ydata)
-                    distance = np.sqrt((second_point[0] - self.first_point[0])**2 + (second_point[1] - self.first_point[1])**2)
-                    self.distance_label.setText(f"Distance: {distance:.2f}")
-                    self.reset_measurement()
+                    distance = self.calculate_distance(self.first_point, second_point)
+
+                    plot_type = self.main_window.plot_info['plot_type']
+                    style = self.main_window.styles[plot_type]
+
+                    distance_text = f"{distance:.2f} {self.main_window.preferences['Units']['Distance']}"
+                    self.main_window.labelSVInfoDistance.setText(f"D: {distance_text}")
+                    self.saved_line.append(self.axes.plot(
+                            [self.first_point[0], second_point[0]],
+                            [self.first_point[1], second_point[1]],
+                            ':',
+                            c=style['Scale']['OverlayColor'],
+                            lw=style['Lines']['LineWidth'])[0])
+
+                    plot_type = self.main_window.plot_info['plot_type']
+                    style = self.main_window.styles[plot_type]
+                    dx = 0.03*self.main_window.x.nunique()*self.main_window.aspect_ratio
+                    if second_point[0] > self.first_point[0]:
+                        halign = 'left'
+                    else:
+                        dx = -dx
+                        halign = 'right'
+                    dy = 0.03*self.main_window.y.nunique()
+                    if second_point[1] > self.first_point[1]:
+                        valign = 'bottom'
+                    else:
+                        dy = -dy
+                        valign = 'top'
+                    font = {'family':style['Text']['Font'], 'size':style['Text']['FontSize']-2}
+                    self.saved_dtext.append(self.axes.text(second_point[0]+dx, second_point[1]+dy, distance_text, ha=halign, va=valign, fontdict=font, c=style['Scale']['OverlayColor']))
+                    
+                    self.distance_reset()
 
     def distanceOnMove(self, event):
-        if self.main_window.toolButtonDistanceSV.isChecked() and self.first_point is not None and event.inaxes:
+        self.setCursor(Qt.CrossCursor)
+        if (self.main_window.toolButtonDistance.isChecked()) and (self.first_point is not None) and event.inaxes:
             if self.line:
                 self.line.remove()
+            if self.dtext:
+                self.dtext.remove()
+
+            distance = self.calculate_distance((event.xdata,event.ydata),self.first_point)
+            distance_text = f"{distance:.2f}"
+
+            self.main_window.labelSVInfoDistance.setText(f"D: {distance_text} {self.main_window.preferences['Units']['Distance']}")
+
+            plot_type = self.main_window.plot_info['plot_type']
+            style = self.main_window.styles[plot_type]
             self.line = self.axes.plot(
                     [self.first_point[0], event.xdata],
                     [self.first_point[1], event.ydata],
-                    'r--'
+                    ':',
+                    c=style['Scale']['OverlayColor'],
+                    lw=style['Lines']['LineWidth']
                 )[0]
+            dx = 0.03*self.main_window.x.nunique()*self.main_window.aspect_ratio
+            if event.xdata > self.first_point[0]:
+                halign = 'left'
+            else:
+                dx = -dx
+                halign = 'right'
+            dy = 0.03*self.main_window.y.nunique()
+            if event.ydata > self.first_point[1]:
+                valign = 'bottom'
+            else:
+                dy = -dy
+                valign = 'top'
+            font = {'family':style['Text']['Font'], 'size':style['Text']['FontSize']-2}
+            self.dtext = self.axes.text(event.xdata+dx, event.ydata+dy, distance_text, ha=halign, va=valign, fontdict=font, c=style['Scale']['OverlayColor'])
+
             self.draw()
 
-    def reset_measurement(self):
+    def distance_reset(self):
         self.first_point = None
         if self.line:
             self.line.remove()
             self.line = None
+        if self.dtext:
+            self.dtext.remove()
+            self.dtext = None
         self.draw()
-        self.distance_label.setText("Distance: N/A")
+        if not self.main_window.toolButtonDistance.isChecked():
+            self.main_window.labelSVInfoDistance.setText("D: N/A")
 
 class MplDialog(QDialog):
     def __init__(self, parent, canvas, title=''):
+        """A plot dialog
+
+        This dialog is used to plot a matplotlib figure.  In general the dialog is used when a figure popped out from ``MainWindow.canvasWindow`` using ``MainWindow.toolButtonPopFigure``.
+
+        Parameters
+        ----------
+        parent : MainWindow
+            Calling class.
+        canvas : MplCanvas
+            Matplotlib plot canvas.
+        title : str, optional
+            Dialog title, by default ''
+        """        
         super(MplDialog, self).__init__(parent)
 
         self.main_window = parent

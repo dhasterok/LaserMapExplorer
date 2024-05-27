@@ -5161,4 +5161,4 @@ class Ui_MainWindow(object):
         self.actionImportFiles.setText(_translate("MainWindow", "Import files"))
         self.actionLoadAnalysis.setText(_translate("MainWindow", "Load Analysis"))
         self.actionSaveAnalysis.setText(_translate("MainWindow", "Save Analysis"))
-import resources_rc
+import src.ui.resources_rc

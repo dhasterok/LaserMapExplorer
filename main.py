@@ -987,6 +987,55 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # clusters
         self.spinBoxClusterGroup.valueChanged.connect(self.select_cluster_group_callback)
 
+
+        # Calculator tab
+        #-------------------------
+        buttons = [
+                ('+', self.pushButtonAdd, self.calc_insert_operator),
+                ('-', self.pushButtonSubtract, self.calc_insert_operator),
+                ('*', self.pushButtonMultiply, self.calc_insert_operator),
+                ('/', self.pushButtonDivide, self.calc_insert_operator),
+                ('^()', self.pushButtonPower, self.calc_insert_operator),
+                ('^2', self.pushButtonSquare, self.calc_insert_operator),
+                ('^-1', self.pushButtonInverse, self.calc_insert_operator),
+                ('10^()', self.pushButtonPower10, self.calc_insert_operator),
+                ('()^(1/2)', self.pushButtonSqrt, self.calc_insert_operator),
+                ('()', self.pushButtonBrackets, self.calc_insert_operator),
+                ('exp', self.pushButtonExp, self.calc_insert_function),
+                ('ln', self.pushButtonLn, self.calc_insert_function),
+                ('log', self.pushButtonLog, self.calc_insert_function),
+                ('abs', self.pushButtonAbs, self.calc_insert_function),
+                ('case', self.pushButtonCase, self.calc_insert_function),
+                (' < ', self.pushButtonLessThan, self.calc_insert_operator),
+                (' > ', self.pushButtonGreaterThan, self.calc_insert_operator),
+                (' <= ', self.pushButtonLessThanEqualTo, self.calc_insert_operator),
+                (' >= ', self.pushButtonGreaterThanEqualTo, self.calc_insert_operator),
+                (' == ', self.pushButtonEqualTo, self.calc_insert_operator),
+                (' != ', self.pushButtonNotEqualTo, self.calc_insert_operator),
+                (' and ', self.pushButtonAnd, self.calc_insert_operator),
+                (' or ', self.pushButtonOr, self.calc_insert_operator),
+                (' not ', self.pushButtonNot, self.calc_insert_operator),
+                (None, self.toolButtonCalcHelp, self.calc_help),
+                (None, self.toolButtonCalcAddField, self.calc_add_field),
+                (None, self.toolButtonCalcSave, self.calc_save_formula),
+                (None, self.toolButtonCalcDelete, self.calc_delete_formula),
+                (None, self.toolButtonCalculate, self.calculate_new_field)
+            ]
+
+        def create_handler(handler, text=None):
+            if text is not None:
+                return lambda: handler(text)
+            else:
+                return handler
+
+        for text, button, handler in buttons:
+            button.clicked.connect(create_handler(handler, text))
+
+        self.comboBoxCalcFormula.activated.connect(self.calc_load_formula)
+        self.comboBoxCalcFieldType.currentIndexChanged.connect(lambda: self.update_field_combobox(self.comboBoxCalcFieldType, self.comboBoxCalcField))
+        self.toolButtonCalcClear.clicked.connect(self.textEditCalcScreen.clear)
+        self.update_field_combobox(self.comboBoxCalcFieldType, self.comboBoxCalcField)
+
         # Profile filter tab
         #-------------------------
         header = self.tableWidgetFilters.horizontalHeader()
@@ -1528,6 +1577,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.toolButtonPopFigure.setVisible(False)
             self.toolButtonSave.setVisible(False)
             self.widgetPlotInfoSV.hide()
+            self.labelMaxRows.setVisible(False)
+            self.spinBoxMaxRows.setVisible(False)
+            self.labelMaxCols.setVisible(False)
+            self.spinBoxMaxCols.setVisible(False)
+            self.comboBoxMVPlots.setVisible(False)
+            self.toolButtonRemoveMVPlot.setVisible(False)
+            self.toolButtonRemoveAllMVPlots.setVisible(False)
             self.widgetPlotInfoMV.hide()
             self.comboBoxQVList.setVisible(False)
             self.toolButtonNewList.setVisible(False)
@@ -1543,6 +1599,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.toolButtonPopFigure.setVisible(True)
             self.toolButtonSave.setVisible(True)
             self.widgetPlotInfoSV.show()
+            self.labelMaxRows.setVisible(False)
+            self.spinBoxMaxRows.setVisible(False)
+            self.labelMaxCols.setVisible(False)
+            self.spinBoxMaxCols.setVisible(False)
+            self.comboBoxMVPlots.setVisible(False)
+            self.toolButtonRemoveMVPlot.setVisible(False)
+            self.toolButtonRemoveAllMVPlots.setVisible(False)
             self.widgetPlotInfoMV.hide()
             self.comboBoxQVList.setVisible(False)
             self.toolButtonNewList.setVisible(False)
@@ -1579,6 +1642,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.toolButtonPopFigure.setVisible(False)
             self.toolButtonSave.setVisible(True)
             self.widgetPlotInfoSV.hide()
+            self.labelMaxRows.setVisible(True)
+            self.spinBoxMaxRows.setVisible(True)
+            self.labelMaxCols.setVisible(True)
+            self.spinBoxMaxCols.setVisible(True)
+            self.comboBoxMVPlots.setVisible(True)
+            self.toolButtonRemoveMVPlot.setVisible(True)
+            self.toolButtonRemoveAllMVPlots.setVisible(True)
             self.widgetPlotInfoMV.show()
             self.comboBoxQVList.setVisible(False)
             self.toolButtonNewList.setVisible(False)
@@ -1609,6 +1679,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.toolButtonPopFigure.setVisible(False)
             self.toolButtonSave.setVisible(True)
             self.widgetPlotInfoSV.hide()
+            self.labelMaxRows.setVisible(False)
+            self.spinBoxMaxRows.setVisible(False)
+            self.labelMaxCols.setVisible(False)
+            self.spinBoxMaxCols.setVisible(False)
+            self.comboBoxMVPlots.setVisible(False)
+            self.toolButtonRemoveMVPlot.setVisible(False)
+            self.toolButtonRemoveAllMVPlots.setVisible(False)
             self.widgetPlotInfoMV.hide()
             self.comboBoxQVList.setVisible(True)
             self.toolButtonNewList.setVisible(True)
@@ -8918,6 +8995,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_field_type_combobox(self.comboBoxColorByField, addNone=addNone, plot_type=self.comboBoxPlotType.currentText())
         self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
 
+        # calculator
+        self.update_field_combobox(self.comboBoxCalcFieldType, self.comboBoxCalcField)
+
     # gets the set of fields
     def get_field_list(self, set_name='Analyte'):
         """Gets the fields associated with a defined set
@@ -9748,6 +9828,177 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
     # -------------------------------
+    # Calculator
+    # -------------------------------
+    def calc_help(self):
+        """Loads the help webpage associated with the calculator in the Help tab"""
+        filename = os.path.abspath("docs/build/html/custom_fields.html")
+
+        self.lineEditBrowserLocation.setText(filename)
+
+        if filename:
+            # Load the selected HTML file into the QWebEngineView
+            self.browser.setUrl(QUrl.fromLocalFile(filename))
+        
+
+    def calc_insert_operator(self, operator):
+        """Inserts an operator into the calculator
+
+        When the user pushes an operator button on the calculator, *operator* is inserted 
+        into ``MainWindow.textEditCalcScreen``.
+
+        Parameters
+        ----------
+        operator : str
+            Inserts operators from calculator
+        """        
+        print('calc_insert_operator')
+        cursor = self.textEditCalcScreen.textCursor()
+        cursor.insertText(operator)
+    
+    def calc_insert_function(self, function):
+        """Inserts a function into the calculator
+
+        When the user pushes a function button on the calculator, *operator* is inserted 
+        into ``MainWindow.textEditCalcScreen``.  The ``case()`` function inserts ``(cond, expr)``
+        as both a condition and expression are required to compute.  
+
+        Parameters
+        ----------
+        operator : str
+            Inserts operators from calculator
+        """        
+        print('calc_insert_function')
+        cursor = self.textEditCalcScreen.textCursor()
+        if cursor.hasSelection():
+            if function == 'case':
+                cursor.insertText(f"{function}(cond, {cursor.selectedText()})")
+            else:
+                cursor.insertText(f"{function}({cursor.selectedText()})")
+        else:
+            if function == 'case':
+                cursor.insertText(f"{function}(cond, expr)")
+            else:
+                cursor.insertText(f"{function}()")
+    
+    def calc_add_field(self):
+        """Adds the selected field to the calculator
+
+        Adds the selected field as ``{field_type.field}``.  If the field is normalized,
+        a ``_N`` is added to the end of the field name, i.e., ``{field_type.field_N}``.
+        """        
+        # get field type and name
+        field_type = self.comboBoxCalcFieldType.currentText()
+        field = self.comboBoxCalcField.currentText()
+
+        # combine name in calculator style
+        match field_type:
+            case 'Analyte (normalized)':
+                fieldname = f'Analyte.{field}_N'
+            case 'Ratio (normalized)':
+                fieldname = f'Ratio.{field}_N'
+            case 'Calculated Field':
+                fieldname = f'Calculated.{field}'
+            case _:
+                if field != '':
+                    fieldname = f'{field_type}.{field}'
+
+        # add to calculation screen
+        cursor = self.textEditCalcScreen.textCursor()
+        cursor.insertText(f"{{{fieldname}}}")
+
+    #def calc_clear_text(self):
+    #    self.textEditCalcScreen.clear()
+
+    def calc_save_formula(self):
+        """Saves the formula in ``MainWindow.textEditCalcScreen``
+
+        Saves the formula to a file so it can be recalled and used at a future time or in another sample.
+        Pushing ``MainWindow.toolButtonCalcSave``, opens a dialog prompting the user to input the name for
+        the newly calculated field.
+        """        
+        pass
+
+    def calc_delete_formula(self):
+        """Deletes a previously stored formula"""
+        f_name = self.comboBoxCalcFormula.currentText()
+        self.comboBoxCalcFormula.removeItem(self.comboBoxCalcFormula.currentIndex())
+
+        # remove line with f_name from calculator formula file
+        pass
+    
+    def calc_load_formula(self):
+        """Loads a predefined formula to use in the calculator"""        
+        pass
+        
+    def calc_parse(self):
+        """Parses ``MainWindow.textEditCalcScreen`` to produce an expression that can be evaluated by python ``eval``.
+
+        _extended_summary_
+        """        
+        expr = self.text_edit.toPlainText()
+
+        return expr
+
+
+    def calculate_new_field(self):
+        """Calculates a new field from ``MainWindow.textEditCalcScreen``
+
+        When ``MainWindow.toolButtonCalculate`` is clicked, ...
+        """        
+        # open dialog to get new field
+        #new_field = 
+
+        cond, expr = self.calc_parse()
+        if cond is None:
+            result = self.calc_evaluate_expr(expr)
+            if result is None:
+                return
+            self.data[self.sample_id]['computed_data']['Calculated'][new_field] = result
+        else:
+            result = pd.DataFrame({new_field: [None]*len(self.data[self.sample_id]['computed_data']['Calculated'])})
+            for cond_i, expr_i in zip(cond, expr):
+                keep = self.calc_evaluate_expr(cond_i)
+                if (not np.issubdtype(keep.dtype, np.bool_)) or (keep is None):
+                    self.labelCalcMessage.setText(f'Error: conditional did not return boolean result.')
+                    return
+                res = self.calc_evaluate_expr(expr_i,keep)
+                if res is None:
+                    return
+                result.loc[keep,0] = res
+
+            self.data[self.sample_id]['computed_data']['Calculated'][new_field] = result
+
+
+    def calc_evaluate_expr(self, expr, keep=None):
+        """Evaluates an expression and returns the result
+
+        Parameters
+        ----------
+        expr : string
+            Expression to be evaluated.  The expression can be a conditional expression, which results
+            in returning a np.ndarray of bool, otherwise, generally np.ndarray of float
+        keep : np.ndarray of bool or None, optional
+            An array of True/False values that are used to evaluate the expression of limited values,
+            i.e., generally when cases are involved.
+
+        Returns
+        -------
+        np.ndarray of float or bool
+            Result of evaluated expression.
+        """        
+        try:
+            # Safe evaluation of the expression using DataFrame's eval method
+            result = self.df.eval(expr)
+            self.labelCalcMessage.setText(f'Success')
+            return result
+        except Exception as e:
+            self.labelCalcMessage.setText(f'Error: unable to evaluate expression.')
+            QMessageBox.error(self.main_window,"Error", f"Error: {e}")
+            return None
+        
+
+    # -------------------------------
     # Notes functions
     # -------------------------------
     def add_menu(self, menu_items, menu_obj):
@@ -10130,7 +10381,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 # -------------------------------
 # Classes
 # -------------------------------
-
 # Matplotlib Canvas object
 # -------------------------------
 class SimpleMplCanvas(FigureCanvas):
@@ -10894,6 +11144,7 @@ class quickView(QDialog, Ui_QuickViewDialog):
         self.show()
 
     def setup_table(self):
+        """Sets up analyte selection table in dialog"""
         self.tableWidget.setRowCount(len(self.analyte_list))
         self.tableWidget.setColumnCount(2)
         self.tableWidget.setHorizontalHeaderLabels(['Analyte', 'Show'])
@@ -10903,6 +11154,7 @@ class quickView(QDialog, Ui_QuickViewDialog):
         self.populate_table()
 
     def populate_table(self):
+        """Populates dialog table with analytes"""
         # Before repopulating, save the current state of checkboxes
         checkbox_states = {}
         for row in range(self.tableWidget.rowCount()):
@@ -10922,6 +11174,7 @@ class quickView(QDialog, Ui_QuickViewDialog):
             self.tableWidget.setCellWidget(row, 1, checkbox)
 
     def setup_sort_menu(self):
+        """Adds options to sort menu"""
         sortmenu_items = ['alphabetical', 'atomic number', 'mass', 'compatibility', 'radius']
         SortMenu = QMenu()
         SortMenu.triggered.connect(self.apply_sort)
@@ -10930,6 +11183,7 @@ class quickView(QDialog, Ui_QuickViewDialog):
             SortMenu.addAction(item)
 
     def apply_sort(self, action):
+        """Sorts analyte table in dialog"""        
         method = action.text()
         self.analyte_list = self.main_window.sort_analytes(method, self.analyte_list)
         self.populate_table()  # Refresh table with sorted data
@@ -10959,7 +11213,7 @@ class quickView(QDialog, Ui_QuickViewDialog):
         self.save_to_csv()
 
     def save_to_csv(self):
-        
+        """Opens a message box, prompting user to in put a file to save the table list"""
         file_path = os.path.join(basedir,'resources', 'styles', 'qv_lists.csv')
         # Ensure directory exists
         os.makedirs(os.path.dirname(file_path), exist_ok=True)

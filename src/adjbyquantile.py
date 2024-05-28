@@ -14,19 +14,28 @@ from scipy.special import erfinv,erf
 from gausscensor import gausscensor
 
 def adjby_quantile2(x_v, y_v, xref=None, x=None, y=None):
-    """
-    
-    :param x_v:
-    :type x_v:
-    :param y_v:
-    :type y_v:
-    :param xref: Defaults to None
-    :type xref: optional
-    :param x: Defaults to None
-    :type y: optional
-    :param y: Defaults to None
-    :type x: optional
-    """
+    """_summary_
+
+    _extended_summary_
+
+    Parameters
+    ----------
+    x_v : _type_
+        _description_
+    y_v : _type_
+        _description_
+    xref : _type_, optional
+        _description_, by default None
+    x : _type_, optional
+        _description_, by default None
+    y : _type_, optional
+        _description_, by default None
+
+    Returns
+    -------
+    _type_
+        _description_
+    """    
     # Step 1 - create x bins
     min_x = np.min(x_v)
     max_x = np.max(x_v)

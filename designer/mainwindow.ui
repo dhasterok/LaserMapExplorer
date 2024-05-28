@@ -8764,7 +8764,7 @@
            <x>5</x>
            <y>200</y>
            <width>231</width>
-           <height>151</height>
+           <height>156</height>
           </rect>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_24">
@@ -9035,7 +9035,7 @@
          <property name="geometry">
           <rect>
            <x>3</x>
-           <y>360</y>
+           <y>365</y>
            <width>235</width>
            <height>230</height>
           </rect>
@@ -9081,13 +9081,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
@@ -9113,13 +9113,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
@@ -9145,13 +9145,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
@@ -9177,13 +9177,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
@@ -9209,13 +9209,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
@@ -9244,13 +9244,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
@@ -9276,13 +9276,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
@@ -9308,13 +9308,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
@@ -9340,13 +9340,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
@@ -9372,13 +9372,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
@@ -9404,13 +9404,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
@@ -9436,13 +9436,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
@@ -9468,13 +9468,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
@@ -9500,13 +9500,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
@@ -9532,13 +9532,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
@@ -9564,13 +9564,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
@@ -9596,13 +9596,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
@@ -9628,13 +9628,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
@@ -9660,13 +9660,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
@@ -9692,13 +9692,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
@@ -9724,13 +9724,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
@@ -9756,13 +9756,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
@@ -9788,13 +9788,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
@@ -9820,13 +9820,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>55</width>
+              <width>60</width>
               <height>35</height>
              </size>
             </property>

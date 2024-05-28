@@ -10,6 +10,7 @@ from pyqtgraph.GraphicsScene import exportDialog
 from pyqtgraph import setConfigOption, colormap, ColorBarItem,ViewBox, TargetItem, ImageItem, GraphicsLayoutWidget, ScatterPlotItem, AxisItem, PlotDataItem
 from datetime import datetime
 import numpy as np
+import numexpr as ne
 import pandas as pd
 pd.options.mode.copy_on_write = True
 import matplotlib
@@ -38,7 +39,6 @@ from src.plot_spider import plot_spider_norm
 from src.scalebar import scalebar
 import src.radar_factory
 from src.radar import Radar
-from src.calculator import CalWindow
 from src.ui.MainWindow import Ui_MainWindow
 from src.ui.AnalyteSelectionDialog import Ui_Dialog
 from src.ui.PreferencesWindow import Ui_PreferencesWindow
@@ -475,7 +475,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 case 'styling':
                     self.right_tab.update({'style': tid})
                 case 'calculator':
-                    self.right_tab.update({'calc': tid})
+                    self.right_tab.update({'calculator': tid})
 
         self.bottom_tab = {}
         for tid in range(self.tabWidget.count()):
@@ -1096,7 +1096,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.canvas_changed()
 
         # multi-view tools
-        self.actionCalculator.triggered.connect(self.open_calculator)
+        self.actionCalculator.triggered.connect(lambda: self.toolBoxTreeView.currentIndex(self.right_tab['calculator']))
 
         #reset check boxes to prevent incorrect behaviour during plot click
         self.toolButtonCrop.clicked.connect(lambda: self.reset_checked_items('crop'))
@@ -1524,11 +1524,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if result == QDialog.Rejected:
             pass
     
-    def open_calculator(self):
-        analytes_list = self.data[self.sample_id]['analyte_info']['analytes'].values
-        self.calWindow = CalWindow(analytes_list,self.data[self.sample_id] )
-        self.calWindow.show()
-
     # -------------------------------
     # User interface functions
     # -------------------------------
@@ -7679,6 +7674,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if self.spinBoxPCY.value() == 1:
                 self.spinBoxPCY.setValue(int(2))
 
+        self.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
         self.update_pca_flag = False
 
     def plot_pca(self):
@@ -7758,6 +7754,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.clear_layout(self.widgetSingleView.layout())
         self.widgetSingleView.layout().addWidget(canvas)
+
+        self.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
 
     def plot_pca_variance(self):
         """Creates a plot of explained variance, individual and cumulative, for PCA
@@ -8114,6 +8112,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.group_changed()
 
         self.statusbar.showMessage('Clustering successful')
+
+        self.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
         self.update_cluster_flag = False
 
     def plot_clusters(self):
@@ -9872,12 +9872,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         cursor = self.textEditCalcScreen.textCursor()
         if cursor.hasSelection():
             if function == 'case':
-                cursor.insertText(f"{function}(cond, {cursor.selectedText()})")
+                cursor.insertText(f"{function}(cond, {cursor.selectedText()}) | ")
             else:
                 cursor.insertText(f"{function}({cursor.selectedText()})")
         else:
             if function == 'case':
-                cursor.insertText(f"{function}(cond, expr)")
+                cursor.insertText(f"{function}(cond, expr) | ")
             else:
                 cursor.insertText(f"{function}()")
     
@@ -9931,14 +9931,65 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """Loads a predefined formula to use in the calculator"""        
         pass
         
-    def calc_parse(self):
+    def calc_parse(self, txt=None):
         """Parses ``MainWindow.textEditCalcScreen`` to produce an expression that can be evaluated by python ``eval``.
 
         _extended_summary_
-        """        
-        expr = self.text_edit.toPlainText()
+        """
+        # Get text 
+        if txt is None:
+            txt = self.textEditCalcScreen.toPlainText()
+            txt = ''.join(txt.split())
+        print(txt)
 
-        return expr
+        cond = []
+        expr = []
+        if 'case' in txt:
+            cases = txt.split('|')
+            for c in cases:
+                c = c.replace('case','')
+                # separate conditional from expression
+                cond_temp, expr_temp = c.split(',')
+
+                # parse conditional and expression
+                _, cond_temp = self.calc_parse(txt=cond_temp)
+                _, expr_temp = self.calc_parse(txt=expr_temp)
+
+                # append list
+                cond.append(cond_temp)
+                expr.append(expr_temp)
+
+            return cond, expr
+        else:
+            cond = None
+
+        if txt.count('(') != txt.count(')'):
+            self.labelCalcMessage.setText(f'Error: mismatched parentheses in expr')
+            return None
+
+        if txt.count('{') != txt.count('}'):
+            self.labelCalcMessage.setText(f'Error: mismatched braces in expr')
+            return None
+        
+        field_list = re.findall(r'\{.*?\}', txt)
+        var = {}
+        for field_str in field_list:
+            field_type, field = field_str.split('.')
+            if field[-2:] == '_N':
+                field = field[:-2]
+                if field_type in ['Analyte', 'Ratio']:
+                    field_type = f"{field_type} (normalized)"
+
+            df = self.get_map_data(self.sample_id, field, field_type)
+            var.update({field: df['array']})
+
+            txt = txt.replace(f"{{{field_str}}}", f"{field}")
+        
+        expr = [txt, var]
+
+        print(expr)
+
+        return cond, expr
 
 
     def calculate_new_field(self):
@@ -9969,6 +10020,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             self.data[self.sample_id]['computed_data']['Calculated'][new_field] = result
 
+        self.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
+
 
     def calc_evaluate_expr(self, expr, keep=None):
         """Evaluates an expression and returns the result
@@ -9987,6 +10040,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         np.ndarray of float or bool
             Result of evaluated expression.
         """        
+        # variables = {element: self.isotope_df[element].values for element in self.isotopes}
+        # try:
+        #     result = ne.evaluate(expression, local_dict=variables)
         try:
             # Safe evaluation of the expression using DataFrame's eval method
             result = self.df.eval(expr)

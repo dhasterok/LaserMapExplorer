@@ -920,7 +920,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 del self.mpl_colormaps[i]
 
         # custom colormaps
-        self.custom_color_dict = self.import_csv_to_dict('resources/app_data/custom_colormaps.csv')
+        self.custom_color_dict = self.import_csv_to_dict(os.path.join(basedir,'resources/app_data/custom_colormaps.csv'))
         for key in self.custom_color_dict:
             self.custom_color_dict[key] = [h for h in self.custom_color_dict[key] if h]
 
@@ -9832,7 +9832,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------
     def calc_help(self):
         """Loads the help webpage associated with the calculator in the Help tab"""
-        filename = os.path.abspath("docs/build/html/custom_fields.html")
+        filename = os.path.join(basedir,"docs/build/html/custom_fields.html")
 
         self.lineEditBrowserLocation.setText(filename)
 
@@ -10313,7 +10313,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def browser_home_callback(self):
         """The browser returns to the documentation index.html file"""        
-        filename = os.path.abspath("docs/build/html/index.html")
+        filename = os.path.join(basedir,"docs/build/html/index.html")
 
         self.lineEditBrowserLocation.setText(filename)
 
@@ -10329,7 +10329,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         try:
             if location:
-                self.browser.setUrl(QUrl.fromLocalFile(os.path.abspath(location)))
+                self.browser.setUrl(QUrl.fromLocalFile(location))
         except:
             pass
             #self.browser.setUrl(QUrl(os.path.abspath('docs/build/html/404.html')))

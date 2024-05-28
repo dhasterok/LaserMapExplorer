@@ -1883,17 +1883,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'Cluster Score':None
             }
 
-        #reset axis mask
+        # reset axis mask and mask
         self.data[self.sample_id]['axis_mask'] = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
-        self.data[self.sample_id]['mask'] = \
-                self.data[self.sample_id]['axis_mask'] & \
-                self.data[self.sample_id]['filter_mask'] & \
-                self.data[self.sample_id]['polygon_mask'] & \
-                self.data[self.sample_id]['cluster_mask']
+        self.data[self.sample_id]['mask'] = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
+        # self.data[self.sample_id]['mask'] = \
+        #         self.data[self.sample_id]['axis_mask'] & \
+        #         self.data[self.sample_id]['filter_mask'] & \
+        #         self.data[self.sample_id]['polygon_mask'] & \
+        #         self.data[self.sample_id]['cluster_mask']
         self.prep_data()
-
-        self.update_SV()
-        #self.update_all_plots()
+        # re-compute aspect ratio
+        self.compute_map_aspect_ratio()
+        # reapply existing filters
+        self.apply_filters(fullmap=False)
 
         self.data[self.sample_id]['crop'] = False
 
@@ -2330,11 +2332,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # Crop functions - also see Crop_tool class below
     # -------------------------------
     def apply_crop(self):
-        current_plot_df = self.current_plot_df
-        sample_id = self.current_plot_information['sample_id']
-
+        
+        sample_id = self.plot_info['sample_id']
+        field_type = self.comboBoxColorByField.currentText()
+        field = self.comboBoxColorField.currentText()
+        current_plot_df = self.get_map_data(sample_id, field, field_type=field_type)
+        
         self.data[self.sample_id]['axis_mask'] = ((current_plot_df['X'] >= self.data[sample_id]['crop_x_min']) & (current_plot_df['X'] <= self.data[sample_id]['crop_x_max']) &
-                       (current_plot_df['Y'] <= current_plot_df['Y'].max() - self.data[sample_id]['crop_y_min']) & (current_plot_df['Y'] >= current_plot_df['Y'].max() - self.data[sample_id]['crop_y_max']))
+                       (current_plot_df['Y'] <=  self.data[sample_id]['crop_y_max']) & (current_plot_df['Y'] >= self.data[sample_id]['crop_y_min']))
 
 
         #crop original_data based on self.data[self.sample_id]['axis_mask']
@@ -2353,6 +2358,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.data[self.sample_id]['filter_mask'] = self.data[self.sample_id]['filter_mask'][self.data[self.sample_id]['axis_mask']]
         self.prep_data(sample_id)
         #self.update_all_plots()
+        # compute new aspect ratio
+        self.compute_map_aspect_ratio()
+        # replot after cropping 
+        self.plot_map_pg(sample_id, field_type, field)
+        
         self.toolButtonCrop.setChecked(False)
         self.data[self.sample_id]['crop'] = True
 
@@ -2822,8 +2832,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                              (self.data[sample_id]['analyte_info']['analytes']==analyte_1), 'v_min'] = filtered_data.min()
 
             #add x and y columns from raw data
-            self.data[sample_id]['processed_data']['X'] = self.data[sample_id]['raw_data']['X']
-            self.data[sample_id]['processed_data']['Y'] = self.data[sample_id]['raw_data']['Y']
+            self.data[sample_id]['processed_data']['X'] = self.data[sample_id]['cropped_raw_data']['X']
+            self.data[sample_id]['processed_data']['Y'] = self.data[sample_id]['cropped_raw_data']['Y']
 
         else:  #if ratio
             ratio_df = self.data[sample_id]['cropped_raw_data'][[analyte_1,analyte_2]] #consider original data for ratio
@@ -6515,10 +6525,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         clb,cub,cscale,clabel = self.get_axis_values(field_type,field)
 
         # get data for current map
-        map_df = self.get_map_data(self.sample_id, field, field_type=field_type)
+        self.map_df = self.get_map_data(self.sample_id, field, field_type=field_type)
 
         # plot map
-        reshaped_array = np.reshape(map_df['array'].values, self.array_size, order=self.order)
+        reshaped_array = np.reshape(self.map_df['array'].values, self.array_size, order=self.order)
         norm = self.color_norm(style)
 
         cax = canvas.axes.imshow(reshaped_array, cmap=self.get_colormap(),  aspect=self.aspect_ratio, interpolation='none', norm=norm)
@@ -6554,7 +6564,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # add small histogram
         if (self.toolBox.currentIndex() == self.left_tab['sample']) and (self.canvasWindow.currentIndex() == self.canvas_tab['sv']):
-            self.plot_small_histogram(map_df,field)
+            self.plot_small_histogram(self.map_df,field)
 
         self.plot_info = {
             'tree': 'Analyte',
@@ -12164,7 +12174,7 @@ class Crop_tool:
         else:
             # reset to full view and remove overlays if user unselects crop tool
             self.main_window.reset_to_full_view()
-            self.toolButtonCrop.setChecked(False)
+            self.main_window.toolButtonCrop.setChecked(False)
 
     def remove_overlays(self):
         """Removes darkened overlay following completion of crop."""

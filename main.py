@@ -644,7 +644,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #auto scale
         self.toolButtonAutoScale.clicked.connect(lambda: self.auto_scale(False) )
         self.toolButtonAutoScale.setChecked(True)
-        self.toolButtonHistogramReset.clicked.connect(lambda: self.update_plot(reset = True))
+        self.toolButtonHistogramReset.clicked.connect(self.plot_histogram)
 
         # Noise reduction
         self.noise_red_img = None
@@ -652,7 +652,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.noise_red_options = {'median':{'label1':'Kernel size', 'value1':5, 'label2':None},
             'gaussian':{'label1':'Kernel size', 'value1':5, 'label2':'Sigma', 'value2':self.gaussian_sigma(5)},
             'wiener':{'label1':'Kernel size', 'value1':5, 'label2':None},
-            'edge-preserving':{'label1':'Sigma S', 'value1':25, 'label2':'Sigma R', 'value2': 0.2},
+            'edge-preserving':{'label1':'Sigma S', 'value1':5, 'label2':'Sigma R', 'value2': 0.2},
             'bilateral':{'label1':'Diameter', 'value1':9, 'label2':'Sigma', 'value2':75}}
 
         self.comboBoxNoiseReductionMethod.activated.connect(self.noise_reduction_method_callback)
@@ -992,8 +992,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #-------------------------
         self.calc_filename = os.path.join(basedir,f'resources/app_data/calculator.txt')
         self.calc_load_dict()
+        self.add_formula = True
         self.precalculate_custom_fields = False
         self.labelCalcMessage.setWordWrap(True)
+        self.textEditCalcScreen.textChanged.connect(self.calc_set_add_formula)
         buttons = [
                 ('+', self.pushButtonAdd, self.calc_insert_operator),
                 ('-', self.pushButtonSubtract, self.calc_insert_operator),
@@ -6722,13 +6724,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         array = current_plot_df['array'][mask].values
 
-        bin_width = (current_plot_df['array'].max() - current_plot_df['array'].min()) / self.default_bins
-        edges = np.arange(array.min(), array.max() + bin_width, bin_width)
-
         logflag = False
         if self.styles['analyte map']['Colors']['CScale'] == 'log':
             print('log scale')
             logflag = True
+            array = np.log10(array)
+
+        bin_width = (array.max() - array.min()) / self.default_bins
+        edges = np.arange(array.min(), array.max() + bin_width, bin_width)
 
         _, _, patches = canvas.axes.hist(array, bins=edges, color=style['Colors']['Color'], edgecolor=None, linewidth=style['Lines']['LineWidth'], log=logflag, alpha=0.6)
         # color histogram bins by analyte colormap?
@@ -9563,6 +9566,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------
     # Calculator
     # -------------------------------
+    def calc_set_add_formula(self):
+        """Sets whether to add a new function
+
+        Sets ``MainWindow.add_formula`` to ``True``, a flag used by ``MainWindow.calculate_new_field`` to determine
+        whether to add an item to ``MainWindow.comboBoxCalcFormula``.
+        """        
+        self.add_formula = True
+
     def calc_help(self):
         """Loads the help webpage associated with the calculator in the Help tab"""
         filename = os.path.join(basedir,"docs/build/html/custom_fields.html")
@@ -9705,6 +9716,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.textEditCalcScreen.clear()
         self.textEditCalcScreen.setText(self.calc_dict[name])
+
+        self.add_formula = False
         
     def calc_parse(self, txt=None):
         """Prepares expression for calculating a custom field 
@@ -9787,17 +9800,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         ----------
         save: bool, optional
             Determines whether to save upon successful calculation, by default ``False``
-        """        
+        """
         # open dialog to get new field
-        new_field, ok = QInputDialog.getText(self, 'Save expression', 'Enter custon field name:')
-        if ok:
-            # check for valid field name
-            if self.partial_match_in_list(['_N',':'],new_field):
-                self.labelCalcMessage.setText(f"Error: new field name cannot have an '_N' or ':' in the name")
-                ok = False
-                
-        if not ok:
-            return
+        if self.add_formula:
+            new_field, ok = QInputDialog.getText(self, 'Save expression', 'Enter custon field name:')
+            if ok:
+                # check for valid field name
+                if self.partial_match_in_list(['_N',':'],new_field):
+                    self.labelCalcMessage.setText(f"Error: new field name cannot have an '_N' or ':' in the name")
+                    ok = False
+                    
+            if not ok:
+                return
+        else:
+            new_field = self.comboBoxCalcFormula.currentText()
 
         # parse the expression
         cond, expr = self.calc_parse()
@@ -9831,14 +9847,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         formula = self.textEditCalcScreen.toPlainText()
         self.calc_dict.update({'field':new_field, 'expr':formula})
 
-        # append theme to file of saved themes
-        try:
-            with open(self.calc_filename, 'a') as file:
-                file.write(f"{new_field}: {formula}\n")
-        except:
-            # throw a warning that nam
-            QMessageBox.error(None,'Error','could not save expression, problem with write.')
-            return
+        # append calculator file
+        if save:
+            try:
+                with open(self.calc_filename, 'a') as file:
+                    file.write(f"{new_field}: {formula}\n")
+            except:
+                # throw a warning that nam
+                QMessageBox.error(None,'Error','could not save expression, problem with write.')
+                return
 
     def calc_evaluate_expr(self, expr, keep=None):
         """Evaluates an expression and returns the result

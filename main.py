@@ -9829,7 +9829,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # get the formula and add to custom field dictionary
         formula = self.textEditCalcScreen.toPlainText()
-        self.calc_dict.update = {'field':new_field, 'expr':formula}
+        self.calc_dict.update({'field':new_field, 'expr':formula})
 
         # append theme to file of saved themes
         try:
@@ -10231,8 +10231,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Return the sorted list of analytes as (symbol, mass) tuples
         return analytes.to_list()
 
-    def partial_match_in_list(lst, string):
+    def partial_match_in_list(self, lst, string):
         """Checks whether values in a list partially match a string
+
+        Parameters
+        ----------
+        lst: list
+            List of partial strings to find in ``string``
+        string: str
+            Text to test.
 
         Returns
         -------

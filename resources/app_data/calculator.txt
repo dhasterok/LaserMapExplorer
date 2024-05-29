@@ -1,0 +1,1 @@
+Eu*: {Analyte.Eu153_N}/({Analyte.Sm147_N}*{Analyte.Gd157_N})^(1/2)

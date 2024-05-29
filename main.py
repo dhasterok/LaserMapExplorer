@@ -25,6 +25,7 @@ from matplotlib.path import Path
 from matplotlib.patches import Patch
 import matplotlib.colors as colors
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+import cmcrameri as cmc
 from scipy import ndimage
 from scipy.signal import convolve2d, wiener, decimate
 from sklearn.cluster import KMeans
@@ -6539,7 +6540,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """Creates an image of the correlation matrix"""
         #print('plot_correlation')
 
-        canvas = MplCanvas()
+        canvas = MplCanvas(parent=self)
         canvas.axes.clear()
 
         # get the data for computing correlations
@@ -6573,8 +6574,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         square_flag = self.checkBoxCorrelationSquared.isChecked()
         if square_flag:
             cax = canvas.axes.imshow(correlation_matrix**2, cmap=self.get_colormap(), norm=norm)
+            canvas.array = correlation_matrix**2
         else:
             cax = canvas.axes.imshow(correlation_matrix, cmap=self.get_colormap(), norm=norm)
+            canvas.array = correlation_matrix
 
         canvas.axes.spines['top'].set_visible(False)
         canvas.axes.spines['bottom'].set_visible(False)
@@ -7501,7 +7504,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         MplCanvas
             
         """        
-        canvas = MplCanvas()
+        canvas = MplCanvas(parent=self)
 
         # pca_dict contains variance ratios for the principal components
         variances = self.pca_results.explained_variance_ratio_
@@ -7556,7 +7559,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         MplCanvas
             Creates figure on MplCanvas
         """        
-        canvas = MplCanvas()
+        canvas = MplCanvas(parent=self)
 
         style = self.styles['vectors']
 
@@ -7570,6 +7573,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         norm = self.color_norm(style)
         cax = canvas.axes.imshow(components, cmap=self.get_colormap(), aspect=1.0, norm=norm)
+        canvas.array = components
 
         # Add a colorbar
         self.add_colorbar(canvas,cax,style)
@@ -10392,12 +10396,22 @@ class MplCanvas(FigureCanvas):
             x = x_i*self.main_window.dx
             y = y_i*self.main_window.dy
 
-            value = self.array[y_i][x_i]
-            self.main_window.labelSVInfoValue.setText(f"V: {value:.4g} {self.main_window.preferences['Units']['Concentration']}")
+            label =  f" {self.main_window.preferences['Units']['Concentration']}"
         else:
             x = event.xdata
             y = event.ydata
             self.main_window.labelSVInfoValue.setText(f"V: N/A")
+
+            if self.array is not None:
+                x_i = round(x)
+                y_i = round(y)
+
+                label = ''
+        
+
+        if self.array is not None:
+            value = self.array[y_i][x_i]
+            self.main_window.labelSVInfoValue.setText(f"V: {value:.4g}{label}")
 
         self.main_window.labelSVInfoX.setText(f'X: {x:.4g}')
         self.main_window.labelSVInfoY.setText(f'Y: {y:.4g}')

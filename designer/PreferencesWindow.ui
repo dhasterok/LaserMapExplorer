@@ -41,9 +41,9 @@
   <widget class="QStackedWidget" name="stackedWidget">
    <property name="geometry">
     <rect>
-     <x>159</x>
+     <x>114</x>
      <y>10</y>
-     <width>386</width>
+     <width>431</width>
      <height>581</height>
     </rect>
    </property>
@@ -54,16 +54,16 @@
     <enum>QFrame::Raised</enum>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="Files">
     <widget class="QWidget" name="formLayoutWidget">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>25</y>
-       <width>366</width>
-       <height>162</height>
+       <y>10</y>
+       <width>411</width>
+       <height>231</height>
       </rect>
      </property>
      <layout class="QFormLayout" name="formLayout">
@@ -81,27 +81,24 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="abundanceModelsLineEdit"/>
-      </item>
-      <item row="3" column="0">
+      <item row="5" column="0">
        <widget class="QLabel" name="label_2">
         <property name="text">
          <string>Default quick view</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
+      <item row="5" column="1">
        <widget class="QComboBox" name="comboBox"/>
       </item>
-      <item row="4" column="0">
+      <item row="6" column="0">
        <widget class="QLabel" name="label_3">
         <property name="text">
          <string>Analyte sorting</string>
         </property>
        </widget>
       </item>
-      <item row="4" column="1">
+      <item row="6" column="1">
        <widget class="QComboBox" name="comboBox_2">
         <item>
          <property name="text">
@@ -142,13 +139,14 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="analyteListsLineEdit"/>
-      </item>
       <item row="1" column="1">
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <widget class="QLineEdit" name="colormapsLineEdit"/>
+         <widget class="QLineEdit" name="colormapsLineEdit">
+          <property name="text">
+           <string>resources/app_data/custom_colormaps.csv</string>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QToolButton" name="toolButton">
@@ -181,6 +179,147 @@
         </item>
        </layout>
       </item>
+      <item row="0" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QLineEdit" name="analyteListsLineEdit">
+          <property name="text">
+           <string>data/</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="toolButton_2">
+          <property name="minimumSize">
+           <size>
+            <width>24</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>24</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../resources.qrc">
+            <normaloff>:/icons/resources/icons/icon-add-directory-64.png</normaloff>:/icons/resources/icons/icon-add-directory-64.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>18</width>
+            <height>18</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="2" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QLineEdit" name="abundanceModelsLineEdit">
+          <property name="text">
+           <string>resources/app_data/earthref.xlsx</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="toolButton_3">
+          <property name="minimumSize">
+           <size>
+            <width>24</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>24</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../resources.qrc">
+            <normaloff>:/icons/resources/icons/icon-add-directory-64.png</normaloff>:/icons/resources/icons/icon-add-directory-64.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>18</width>
+            <height>18</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="3" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QLineEdit" name="lineEdit">
+          <property name="text">
+           <string>resources/app_data/calculator.txt</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="toolButton_4">
+          <property name="minimumSize">
+           <size>
+            <width>24</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>24</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../resources.qrc">
+            <normaloff>:/icons/resources/icons/icon-add-directory-64.png</normaloff>:/icons/resources/icons/icon-add-directory-64.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>18</width>
+            <height>18</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Custom calculated fields</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Precalculate</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QCheckBox" name="checkBox">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </widget>
@@ -188,14 +327,14 @@
     <widget class="QWidget" name="formLayoutWidget_2">
      <property name="geometry">
       <rect>
-       <x>20</x>
-       <y>35</y>
+       <x>10</x>
+       <y>10</y>
        <width>279</width>
-       <height>301</height>
+       <height>337</height>
       </rect>
      </property>
      <layout class="QFormLayout" name="formLayout_2">
-      <item row="0" column="1">
+      <item row="1" column="1">
        <widget class="QComboBox" name="comboBoxAnalyteScale">
         <item>
          <property name="text">
@@ -209,14 +348,14 @@
         </item>
        </widget>
       </item>
-      <item row="1" column="0">
+      <item row="2" column="0">
        <widget class="QLabel" name="labelDefaultSort">
         <property name="text">
          <string>Sort analytes by</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item row="2" column="1">
        <widget class="QComboBox" name="comboBoxDefaultSort">
         <item>
          <property name="text">
@@ -250,14 +389,14 @@
         </item>
        </widget>
       </item>
-      <item row="0" column="0">
+      <item row="1" column="0">
        <widget class="QLabel" name="LabelAnalyteScale">
         <property name="text">
          <string>Analyte Scale</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
+      <item row="3" column="0">
        <widget class="QLabel" name="labelAnalyteUnits">
         <property name="font">
          <font>
@@ -270,7 +409,7 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
+      <item row="3" column="1">
        <widget class="QLineEdit" name="lineEditAnalyteUnits">
         <property name="maximumSize">
          <size>
@@ -292,7 +431,7 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="0">
+      <item row="4" column="0">
        <widget class="QLabel" name="labelScaleUnits">
         <property name="font">
          <font>
@@ -305,7 +444,7 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
+      <item row="4" column="1">
        <widget class="QLineEdit" name="lineEditScaleUnits">
         <property name="maximumSize">
          <size>
@@ -327,14 +466,14 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="0">
+      <item row="5" column="0">
        <widget class="QLabel" name="labelPressure">
         <property name="text">
          <string>Pressure</string>
         </property>
        </widget>
       </item>
-      <item row="4" column="1">
+      <item row="5" column="1">
        <widget class="QComboBox" name="comboBoxPUnits">
         <property name="maximumSize">
          <size>
@@ -362,14 +501,14 @@
         </item>
        </widget>
       </item>
-      <item row="5" column="0">
+      <item row="6" column="0">
        <widget class="QLabel" name="labelTemperature">
         <property name="text">
          <string>Temperature</string>
         </property>
        </widget>
       </item>
-      <item row="5" column="1">
+      <item row="6" column="1">
        <widget class="QComboBox" name="comboBoxTUnits">
         <property name="maximumSize">
          <size>
@@ -392,14 +531,14 @@
         </item>
        </widget>
       </item>
-      <item row="6" column="0">
+      <item row="7" column="0">
        <widget class="QLabel" name="labelDate">
         <property name="text">
          <string>Date</string>
         </property>
        </widget>
       </item>
-      <item row="6" column="1">
+      <item row="7" column="1">
        <widget class="QComboBox" name="comboBoxDateUnits">
         <property name="maximumSize">
          <size>
@@ -427,24 +566,24 @@
         </item>
        </widget>
       </item>
-      <item row="7" column="1">
+      <item row="8" column="1">
        <widget class="QFontComboBox" name="fontComboBox"/>
       </item>
-      <item row="7" column="0">
+      <item row="8" column="0">
        <widget class="QLabel" name="label">
         <property name="text">
          <string>Figure font</string>
         </property>
        </widget>
       </item>
-      <item row="8" column="0">
+      <item row="9" column="0">
        <widget class="QLabel" name="labelFontSize">
         <property name="text">
          <string>Font size</string>
         </property>
        </widget>
       </item>
-      <item row="8" column="1">
+      <item row="9" column="1">
        <widget class="QDoubleSpinBox" name="fontSizeDoubleSpinBox">
         <property name="minimum">
          <double>4.000000000000000</double>
@@ -457,6 +596,22 @@
         </property>
        </widget>
       </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="labelDefaultTheme">
+        <property name="text">
+         <string>Default theme</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="comboBoxDefaultTheme">
+        <item>
+         <property name="text">
+          <string>default</string>
+         </property>
+        </item>
+       </widget>
+      </item>
      </layout>
     </widget>
    </widget>
@@ -466,7 +621,7 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>141</width>
+     <width>96</width>
      <height>126</height>
     </rect>
    </property>

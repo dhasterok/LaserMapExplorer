@@ -990,6 +990,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Calculator tab
         #-------------------------
+        self.calc_filename = os.path.join(basedir,f'resources/app_data/calculator.txt')
+        self.calc_load_dict()
+        self.precalculate_custom_fields = False
+        self.labelCalcMessage.setWordWrap(True)
         buttons = [
                 ('+', self.pushButtonAdd, self.calc_insert_operator),
                 ('-', self.pushButtonSubtract, self.calc_insert_operator),
@@ -1017,7 +1021,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 (' not ', self.pushButtonNot, self.calc_insert_operator),
                 (None, self.toolButtonCalcHelp, self.calc_help),
                 (None, self.toolButtonCalcAddField, self.calc_add_field),
-                (None, self.toolButtonCalcSave, self.calc_save_formula),
                 (None, self.toolButtonCalcDelete, self.calc_delete_formula),
                 (None, self.toolButtonCalculate, self.calculate_new_field)
             ]
@@ -1031,6 +1034,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         for text, button, handler in buttons:
             button.clicked.connect(create_handler(handler, text))
 
+        self.toolButtonCalcSave.clicked.connect(lambda: self.calculate_new_field(save=True))
         self.comboBoxCalcFormula.activated.connect(self.calc_load_formula)
         self.comboBoxCalcFieldType.currentIndexChanged.connect(lambda: self.update_field_combobox(self.comboBoxCalcFieldType, self.comboBoxCalcField))
         self.toolButtonCalcClear.clicked.connect(self.textEditCalcScreen.clear)
@@ -1326,7 +1330,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.selected_analytes = self.data[sample_id]['raw_data'].columns[5:].tolist()
             self.data[sample_id]['computed_data'] = {
                 'Ratio':pd.DataFrame(),
-                'Calculated Field': self.add_ree(sample_df),
+                'Calculated': self.add_ree(sample_df),
                 'PCA Score':pd.DataFrame(),
                 'Cluster':pd.DataFrame(columns = ['fuzzy c-means', 'k-means']),
                 'Cluster Score':pd.DataFrame(),
@@ -1422,6 +1426,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_cluster_flag = True
         self.update_pca_flag = True
         self.plot_flag = False
+
+        # precalculate custom fields
+        if self.precalculate_custom_fields:
+            for name in self.calc_dict.keys():
+                if name in self.data[self.sample_id]['computed_data']['Calculated'].columns:
+                    self.comboBoxCalcFormula.setCurrentText(name)
+                    self.calculate_new_field(save=False)
 
         self.update_all_field_comboboxes()
         self.update_filter_values()
@@ -1752,10 +1763,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if ok:
             # update colormap structure
             self.ternary_colormaps.append({'scheme': name,
-                                            'top': self.get_hex_color(self.toolButtonTCmapXColor.palette().button().color()),
-                                            'left': self.get_hex_color(self.toolButtonTCmapYColor.palette().button().color()),
-                                            'right': self.get_hex_color(self.toolButtonTCmapZColor.palette().button().color()),
-                                            'center': self.get_hex_color(self.toolButtonTCmapMColor.palette().button().color())})
+                    'top': self.get_hex_color(self.toolButtonTCmapXColor.palette().button().color()),
+                    'left': self.get_hex_color(self.toolButtonTCmapYColor.palette().button().color()),
+                    'right': self.get_hex_color(self.toolButtonTCmapZColor.palette().button().color()),
+                    'center': self.get_hex_color(self.toolButtonTCmapMColor.palette().button().color())})
             # update comboBox
             self.comboBoxTernaryColormap.addItem(name)
             self.comboBoxTernaryColormap.setText(name)
@@ -1765,7 +1776,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             # throw a warning that name is not saved
             return
-
+        
     def swap_xy(self):
         """Swaps X and Y coordinates of sample map
 
@@ -1876,7 +1887,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.data[sample_id]['cropped_raw_data'] = copy.deepcopy(self.data[sample_id]['raw_data'])
         self.data[sample_id]['computed_data'] = {
             'Ratio':None,
-            'Calculated Field':None,
+            'Calculated':None,
             'Special':None,
             'PCA Score':None,
             'Cluster':None,
@@ -2614,6 +2625,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.update_cluster_flag = True
 
+    def mask_changed_callback(self):
+        """Updates mask for current sample
+
+        Updates mask for the current sample whenever the crop (axis), filter, polygon, or cluster mask changes.
+        Updates figure if the *Single View* canvas is active.
+        """        
+        self.data[self.sample_id]['mask'] = \
+            self.data[self.sample_id]['axis_mask'].value & \
+            self.data[self.sample_id]['filter_mask'].value & \
+            self.data[self.sample_id]['polygon_mask'].value & \
+            self.data[self.sample_id]['cluster_mask'].value
+        
+        if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
+            self.update_SV()
+
 
     def oround(self, val, order=2, dir=None):
         """Rounds a single of value to n digits
@@ -2931,193 +2957,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     del child_layout
 
         layout.update()
-
-    # def plot_laser_map(self, current_plot_df, plot_info):
-    #     """Plots laser map
-
-    #     :param current_plot_df: Current dataframe
-    #     :type current_plot_df: pandas.DataFrame
-    #     :param plot_information: contains plot name, sample id and plot type
-    #     :type plot_information: dict
-    #     """
-    #     print('plot_laser_map')
-    #     plot_name = plot_info['plot_name']
-    #     sample_id = plot_info['sample_id']
-    #     plot_type = plot_info['plot_type']
-
-    #     style = plot_info['style']
-
-    #     view = self.canvasWindow.currentIndex()
-
-    #     # self.x_range = current_plot_df['X'].max() - current_plot_df['X'].min()
-    #     # self.y_range = current_plot_df['Y'].max() - current_plot_df['Y'].min()
-    #     # self.x = current_plot_df['X'].values
-    #     # self.y = current_plot_df['Y'].values
-    #     # self.array_size = (current_plot_df['Y'].nunique(),current_plot_df['X'].nunique())
-
-    #     if sample_id != self.sample_id:
-    #         mask = mask = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool) #do not use mask if plotting analyte which isnt from default sample
-    #     else:
-    #         mask = self.data[self.sample_id]['mask']
-
-    #     duplicate = False
-    #     plot_exist = False
-    #     if plot_name in self.plot_widget_dict[plot_type][sample_id]:
-    #         plot_exist = True
-    #         duplicate = len(self.plot_widget_dict[plot_type][sample_id][plot_name]['view'])==1 and self.plot_widget_dict[plot_type][sample_id][plot_name]['view'][0] != self.canvasWindow.currentIndex()
-
-    #     if plot_exist and not duplicate:
-    #         widget_info = self.plot_widget_dict[plot_type][sample_id][plot_name]
-    #         for widgetLaserMap, view in zip(widget_info['widget'],widget_info['view']):
-
-    #             rgba_array = self.array_to_image(current_plot_df)
-
-    #             glw = widgetLaserMap.findChild(GraphicsLayoutWidget, 'plotLaserMap')
-    #             p1 = glw.getItem(0, 0)  # Assuming ImageItem is the first item in the plot
-    #             img = p1.items[0]
-    #             img.setImage(image=rgba_array)
-    #             p1.invertY(True)   # vertical axis counts top to bottom
-
-    #             #set aspect ratio of rectangle
-    #             img.setRect(self.x.min(),self.y.min(),self.x_range,self.y_range)
-    #             p1.setRange( yRange=[self.y.min(), self.y.max()])
-    #             # To further prevent zooming or panning outside the default view,
-    #             p1.setLimits( yMin=self.y.min(), yMax = self.y.max())
-    #             cm = colormap.get(style['Colors']['Colormap'], source = 'matplotlib')
-    #             # img.setColorMap(cm)
-
-    #             ## histogram - removed for now as is not working as expected
-    #             # histogram = widgetLaserMap.findChild(HistogramLUTWidget, 'histogram')
-    #             ## end removal
-
-    #             if view ==0:
-    #                 # update variables which stores current plot in SV
-    #                 self.plot = p1
-    #                 self.array = array
-
-    #             ## histogram - removed for now as is not working as expected
-    #             # if histogram:
-    #             #     histogram.gradient.setColorMap(cm)
-    #             #     histogram.setImageItem(img)
-    #             ## end removal
-
-    #             for i in reversed(range(p1.layout.count())):  # Reverse to avoid skipping due to layout change
-    #                 item = p1.layout.itemAt(i)
-    #                 if isinstance(item, ColorBarItem):#find colorbar
-    #                     item.setColorMap(cm)
-    #                     item.setLevels([array.min(), array.max()])
-
-    #             layout = widgetLaserMap.layout()
-    #             # self.plot_laser_map_cont(layout,array,img,p1,cm,view)
-    #     else:
-    #         widgetLaserMap = QtWidgets.QWidget()
-    #         layoutLaserMap = QtWidgets.QGridLayout()
-    #         widgetLaserMap.setLayout(layoutLaserMap)
-    #         layoutLaserMap.setSpacing(0)
-
-    #         if duplicate:
-    #             self.plot_widget_dict[plot_type][sample_id][plot_name]['widget'].append(widgetLaserMap)
-    #             self.plot_widget_dict[plot_type][sample_id][plot_name]['view'].append(view)
-
-    #         else:
-    #             self.plot_widget_dict[plot_type][sample_id][plot_name] = {'widget':[widgetLaserMap],
-    #                                                   'info':plot_info, 'view':[view]}
-
-    #         #Change transparency of values outside mask
-    #         rgba_array = self.array_to_image(current_plot_df)
-
-    #         # self.array = array[:, ::-1]
-    #         layout = widgetLaserMap.layout()
-    #         glw = GraphicsLayoutWidget(show=True)
-    #         glw.setObjectName('plotLaserMap')
-    #         # Create the ImageItem
-    #         img = ImageItem(image=rgba_array)
-
-    #         #set aspect ratio of rectangle
-    #         img.setRect(self.x.min(),self.y.min(),self.x_range,self.y_range)
-    #         # img.setAs
-    #         cm = colormap.get(style['Colors']['Colormap'], source = 'matplotlib')
-    #         # img.setColorMap(cm)
-
-    #         # img.setLookupTable(cm.getLookupTable())
-    #         #--- add non-interactive image with integrated color ------------------
-    #         p1 = glw.addPlot(0,0,title=plot_name.replace('_',' '))
-    #         # p1.setRange(padding=0)
-    #         p1.showAxes(False, showValues=(True,False,False,True) )
-    #         p1.invertY(True)
-    #         #supress right click menu
-    #         p1.setMenuEnabled(False)
-
-    #         p1.addItem(img)
-    #         p1.setAspectLocked()
-    #         # p1.setRange( yRange=[self.y.min(), self.y.max()])
-    #         # To further prevent zooming or panning outside the default view,
-    #         p1.setLimits( yMin=self.y.min(), yMax = self.y.max())
-
-    #         # ... Inside your plotting function
-    #         target = TargetItem(symbol = '+', )
-    #         target.setZValue(1e9)
-    #         p1.addItem(target)
-
-    #         # Optionally, configure the appearance
-    #         # For example, set the size of the crosshair
-    #         name = sample_id + plot_name + str(view)
-    #         self.lasermaps[name] = (target, p1, view, array)
-
-    #         #hide pointer
-    #         target.hide()
-
-    #         p1.scene().sigMouseClicked.connect(lambda event,array=array, k=name, plot=p1: self.plot_clicked(event,array, k, p1))
-
-    #         if view == 1:
-    #             #create label with analyte name
-    #             #create another label for value of the corresponding plot
-    #             labelInfoVL = QtWidgets.QLabel(self.groupBoxMVInfo)
-    #             # labelInfoVL.setMaximumSize(QtCore.QSize(20, 16777215))
-    #             labelInfoVL.setObjectName("labelInfoVL"+name)
-    #             labelInfoVL.setText(plot_name)
-    #             font = QtGui.QFont()
-    #             font.setPointSize(9)
-    #             labelInfoVL.setFont(font)
-    #             verticalLayout = QtWidgets.QVBoxLayout()
-    #             # Naming the verticalLayout
-    #             verticalLayout.setObjectName(plot_name + str(view))
-    #             verticalLayout.addWidget(labelInfoVL)
-
-    #             labelInfoV = QtWidgets.QLabel(self.groupBoxMVInfo)
-    #             labelInfoV.setObjectName("labelInfoV"+name)
-    #             labelInfoV.setFont(font)
-    #             verticalLayout.addWidget(labelInfoV)
-    #             self.gridLayoutInfoM.addLayout(verticalLayout, 0, self.gridLayoutInfoM.count()+1, 1, 1)
-    #             # Store the reference to verticalLayout in a dictionary
-    #             self.multiview_info_label[name] = (labelInfoVL, labelInfoV)
-    #         else:
-    #             #remove previous plot in single view
-    #             if self.prev_plot:
-    #                 del self.lasermaps[self.prev_plot]
-    #             # update variables which stores current plot in SV
-    #             self.plot = p1
-    #             self.array = array
-    #             self.prev_plot = name
-    #             self.init_zoom_view()
-    #             # uncheck edge detection
-    #             self.toolButtonEdgeDetect.setChecked(False)
-
-    #         # Create a SignalProxy to handle mouse movement events
-    #         # self.proxy = SignalProxy(p1.scene().sigMouseMoved, rateLimit=60, slot=self.mouseMoved)
-    #         # Create a SignalProxy for this plot and connect it to mouseMoved
-
-    #         p1.scene().sigMouseMoved.connect(lambda event,plot=p1: self.mouse_moved_pg(event,plot))
-    #         # proxy = SignalProxy(p1.scene().sigMouseMoved, rateLimit=60, slot=self.mouse_moved_pg)
-    #         # self.proxies.append(proxy)  # Assuming self.proxies is a list to store proxies
-
-    #         # p1.autoRange()
-    #         layout.addWidget(glw, 0, 0, 3, 2)
-    #         glw.setBackground('w')
-    #         #add zoom window
-    #         # self.setup_zoom_window(layout)
-    #         self.plot_laser_map_cont(layout,array,img,p1,cm,view)
-    #     p1.getViewBox().autoRange()
 
 
     # -------------------------------
@@ -3951,6 +3790,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 pickle.dump(self.styles, file, protocol=pickle.HIGHEST_PROTOCOL)
         else:
             # throw a warning that name is not saved
+            QMessageBox.error(None,'Error','could not save theme.')
+
             return
 
     # general style functions
@@ -5670,78 +5511,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------
     # General plot functions
     # -------------------------------------
-    # def update_all_plots(self):
-    #     print('update_all_plots')
-    #     """Updates all plots in plot widget dictionary"""
-    #     style = self.styles[self.comboBoxPlotType.currentText()]
-    #     for plot_type,sample_ids in self.plot_widget_dict.items():
-    #         if plot_type == 'analyte' or 'histogram' or 'analyte_norm':
-    #             for sample_id, plots in sample_ids.items():
-    #                 for plot_name, plot in plots.items():
-    #                     info = plot['info']
-    #                     if not info['analyte_2']:
-    #                         current_plot_df = self.get_map_data(sample_id=info['sample_id'], field=info['analyte_1'],field_type = 'Analyte')
-    #                     else: #if ratio
-    #                         current_plot_df = self.get_map_data(sample_id=info['sample_id'], field=info['analyte_1']+'/'+info['analyte_2'], field_type = 'Ratio')
-
-    #                     # self.plot_laser_map(current_plot_df,info)
-
-    #                     self.create_plot(current_plot_df, info['sample_id'], plot_type = plot_type, analyte_1=info['analyte_1'], analyte_2=info['analyte_2'], plot=False)
-    #         else:
-    #             for sample_id, plots in sample_ids.items():
-    #                 for plot_name, plot in plots.items():
-    #                     # Retrieve the widget and figure for the specified plot
-    #                     plot_widget = plot['widget'][0]
-    #                     figure_canvas = plot_widget.layout().itemAt(0).widget()
-    #                     fig = figure_canvas.figure
-    #                     if plot_type == 'clustering':
-    #                                 n_clusters = int(plot['info']['n_clusters'])
-    #                                 # Get the new colormap from the comboBox
-    #                                 new_cmap = self.get_colormap(N=5)
-    #                                 img = []
-    #                                 for ax in fig.get_axes():
-    #                                     # Retrieve the image object from the axes
-    #                                     # Recalculate boundaries and normalization based on the new colormap and clusters
-
-    #                                     boundaries = np.arange(-0.5, n_clusters, 1)
-    #                                     norm = colors.BoundaryNorm(boundaries, n_clusters, clip=True)
-    #                                     images = ax.get_images()
-    #                                     if len(images)>0:
-    #                                         im = images[0]
-    #                                         img.append([ax,im]) #store image and axis in list
-    #                                         # Update image with the new colormap and normalization
-    #                                         im.set_cmap(new_cmap)
-    #                                         im.set_norm(norm)
-    #                                 for (ax, im) in img:
-    #                                     #remove colobar axis
-
-    #                                     cb = im.colorbar
-
-    #                                     # Do any actions on the colorbar object (e.g. remove it)
-    #                                     cb.remove()
-    #                                     # Redraw the canvas to reflect the updates
-    #                                     #plot new colorbar
-    #                                     fig.colorbar(im, ax=ax, boundaries=boundaries[:-1], ticks=np.arange(n_clusters), orientation=self.comboBoxCbarDirection.currentText().lower())
-    #                                     figure_canvas.draw()
-    #                                 # Redraw the figure layout to adjust for any changes
-    #                                 fig.tight_layout()
-    #                                 # Redraw the canvas to reflect the updates
-    #                                 figure_canvas.draw()
-    #                     elif plot_type == 'scatter':
-    #                         # Retrieve the plot information
-    #                         plot_info = plot['info']
-    #                         #remove colorbar
-    #                         fig.axes[1].clear()
-    #                         fig.axes[1].remove()
-    #                         # fig.axes[1].clear()
-    #                         fig.subplots_adjust(bottom=0)  #default right padding
-    #                         # figure_canvas.draw()
-    #                         # fig.tight_layout()  # Automatically adjust layout
-    #                         #self.plot_scatter(update= True, values = plot_info['values'], plot_type = plot_info['plot_type'], fig =plot_info['fig'], ternary_plot = plot_info['ternary_plot'] )
-    #                         self.plot_scatter(values=plot_info['values'], fig=plot_info['figure'], save=True)
-    #                         fig.tight_layout()
-    #                         figure_canvas.draw()
-
     def update_SV(self):
         """Updates current plot (not saved to plot selector)
 
@@ -6098,53 +5867,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             # add canvas to quickView grid layout
             self.widgetQuickView.layout().addWidget(canvas,row,col)
-
-    # def create_plot(self,current_plot_df, sample_id = None, plot_type = 'analyte', analyte_1 = None, analyte_2 = None, plot = True):
-    #     # creates plot information and send to relevant plotting method
-    #     # adds plot to canvas if specified by user
-    #     if not sample_id:
-    #         sample_id = self.sample_id
-
-    #     if not analyte_2: #not a ratio
-    #         current_plot_df['array'] = self.data[sample_id]['processed_data'][analyte_1].values
-    #         parameters = self.data[sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['analytes']==analyte_1)].iloc[0]
-    #         analyte_str = analyte_1
-    #     else:
-    #         # Get the index of the row that matches the criteria
-    #         index_to_update = self.data[sample_id]['ratio_info'].loc[
-    #             (self.data[sample_id]['ratio_info']['analyte_1'] == analyte_1) &
-    #             (self.data[sample_id]['ratio_info']['analyte_2'] == analyte_2)
-    #         ].index
-    #         idx = index_to_update[0]
-    #         parameters  = self.data[sample_id]['ratio_info'].iloc[idx]
-    #         analyte_str = analyte_1 +' / '+ analyte_2
-    #         current_plot_df['array'] = self.data[sample_id]['computed_data']['Ratio'][analyte_str].values
-
-    #     if plot_type=='analyte':
-    #         plot_information={'plot_name':analyte_str,'sample_id':sample_id,
-    #                           'analyte_1':analyte_1, 'analyte_2':analyte_2,
-    #                           'plot_type':plot_type,
-    #                           'style': self.styles['analyte map']}
-
-    #         self.plot_laser_map(current_plot_df,plot_information)
-    #         self.update_spinboxes(parameters)
-    #     elif plot_type == 'analyte_norm':
-    #         ref_data_chem = self.ref_data.iloc[self.comboBoxRefMaterial.currentIndex()]
-    #         ref_data_chem.index = [col.replace('_ppm', '') for col in ref_data_chem.index]
-    #         ref_series = ref_data_chem[re.sub(r'\d', '', analyte_1).lower()]
-    #         current_plot_df['array']= current_plot_df['array'] / ref_series
-    #         plot_information={'plot_name':analyte_str,'sample_id':sample_id,
-    #                           'analyte_1':analyte_1, 'analyte_2':analyte_2,
-    #                           'plot_type':plot_type}
-    #         self.plot_laser_map(current_plot_df,plot_information)
-    #         self.update_spinboxes(parameters)
-    #     else:
-    #         # Return df for analysis
-    #         ## filter current_plot_df based on active filters
-    #         current_plot_df['array'] = np.where(self.data[self.sample_id]['mask'], current_plot_df['array'], np.nan)
-    #         return current_plot_df
-    #     if plot:
-    #         self.add_laser_map(plot_information, current_plot_df)
 
     def toggle_distance_tool(self):
         canvas = self.get_SV_widget(1)
@@ -9740,6 +9462,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             item.setData(plot_info, role=Qt.UserRole)
             
             # self.item_refs[(tree, sample_id, leaf)] = item
+ 
     def unhighlight_tree(self, tree):
         """Reset the highlight of all items in the tree.
         
@@ -9840,7 +9563,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # Load the selected HTML file into the QWebEngineView
             self.browser.setUrl(QUrl.fromLocalFile(filename))
         
-
     def calc_insert_operator(self, operator):
         """Inserts an operator into the calculator
 
@@ -9877,7 +9599,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 cursor.insertText(f"{function}({cursor.selectedText()})")
         else:
             if function == 'case':
-                cursor.insertText(f"{function}(cond, expr) | ")
+                cursor.insertText(f"{function}(cond, expr); ")
             else:
                 cursor.insertText(f"{function}()")
     
@@ -9897,7 +9619,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 fieldname = f'Analyte.{field}_N'
             case 'Ratio (normalized)':
                 fieldname = f'Ratio.{field}_N'
-            case 'Calculated Field':
+            case 'Calculated':
                 fieldname = f'Calculated.{field}'
             case _:
                 if field != '':
@@ -9910,31 +9632,74 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     #def calc_clear_text(self):
     #    self.textEditCalcScreen.clear()
 
-    def calc_save_formula(self):
-        """Saves the formula in ``MainWindow.textEditCalcScreen``
+    def calc_load_dict(self):
+        """Loads saved calculated fields
 
-        Saves the formula to a file so it can be recalled and used at a future time or in another sample.
-        Pushing ``MainWindow.toolButtonCalcSave``, opens a dialog prompting the user to input the name for
-        the newly calculated field.
+        Loads the file saved in ``self.calc_filename``, unless the file is overridden by user preferences.  The file
+        should be formatted as *name: expression*.  The expression may contain mulitple *case(cond, expr)* separated by a ``;``.
         """        
-        pass
+        self.calc_dict = {}
+        try:
+            with open(self.calc_filename, 'r') as file:
+                # read file with name: expression
+                for line in file:
+                    line = line.strip()  # Remove leading/trailing whitespace, including newline characters
+                    if ':' in line:  # Check if the line contains a ':'
+                        name, expression = line.split(':', 1)  # Split only on the first ':'
+                        name = name.strip()  # Remove any leading/trailing whitespace from name
+                        expression = expression.strip()  # Remove any leading/trailing whitespace from expression
+                        self.calc_dict[name] = expression
+
+                # update comboBoxCalcFormula
+                self.comboBoxCalcFormula.clear()
+                name_list = list(self.calc_dict.keys())
+                self.comboBoxCalcFormula.addItems(name_list)
+        except FileNotFoundError:
+            # Return an empty dictionary if the file does not exist
+            QMessageBox.warning(None,'Warning','Could not load custom calculated fields.\n Starting with empty custom field dictionary.')
 
     def calc_delete_formula(self):
-        """Deletes a previously stored formula"""
-        f_name = self.comboBoxCalcFormula.currentText()
+        """Deletes a previously stored formula
+        
+        Removes the formula from ``MainWindow.comboBoxCalcFormula``, the file given by ``MainWindow.calc_filename`` and 
+        ``MainWindow.data[MainWindow.sample_id]['computed_data']['Calculated']``.
+        """
+        # get name of formula
+        name = self.comboBoxCalcFormula.currentText()
+
+        # remove name from comboBoxCalcFormula
         self.comboBoxCalcFormula.removeItem(self.comboBoxCalcFormula.currentIndex())
 
-        # remove line with f_name from calculator formula file
-        pass
+        # remove line with name from calculator formula file
+        try:
+            # Read all lines from the file
+            with open(self.calc_filename, 'r') as file:
+                lines = file.readlines()
+
+            # Filter out the lines that contain the name_to_remove
+            lines_to_keep = [line for line in lines if not line.startswith(f'{name}:')]
+
+            # Write the remaining lines back to the file
+            with open(file_path, 'w') as file:
+                file.writelines(lines_to_keep)
+
+        except FileNotFoundError:
+            pass
+
+        # remove field from Calculated dataframe
+        self.data[self.sample_id]['computed_data']['Calculated'].drop([name], axis=1, inplace=True)
     
     def calc_load_formula(self):
         """Loads a predefined formula to use in the calculator"""        
-        pass
+        name = self.comboBoxCalcFormula.currentText()
+
+        self.textEditCalcScreen.clear()
+        self.textEditCalcScreen.setText(self.calc_dict[name])
         
     def calc_parse(self, txt=None):
-        """Parses ``MainWindow.textEditCalcScreen`` to produce an expression that can be evaluated by python ``eval``.
+        """Prepares expression for calculating a custom field 
 
-        _extended_summary_
+        Parses ``MainWindow.textEditCalcScreen`` to produce an expression that can be evaluated.
         """
         # Get text 
         if txt is None:
@@ -9942,10 +9707,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             txt = ''.join(txt.split())
         print(txt)
 
+        txt = txt.replace('^','**')
+        txt = txt.replace('abs(','np.abs(')
+        txt = txt.replace('log(','np.log10(')
+        txt = txt.replace('ln(','np.log(')
+
         cond = []
         expr = []
         if 'case' in txt:
-            cases = txt.split('|')
+            cases = txt.split(';')
             for c in cases:
                 c = c.replace('case','')
                 # separate conditional from expression
@@ -9972,8 +9742,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return None
         
         field_list = re.findall(r'\{.*?\}', txt)
+        print(field_list)
         var = {}
         for field_str in field_list:
+            field_str = field_str.replace('{','')
+            field_str = field_str.replace('}','')
             field_type, field = field_str.split('.')
             if field[-2:] == '_N':
                 field = field[:-2]
@@ -9991,22 +9764,39 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         return cond, expr
 
-
-    def calculate_new_field(self):
+    def calculate_new_field(self, save=False):
         """Calculates a new field from ``MainWindow.textEditCalcScreen``
 
         When ``MainWindow.toolButtonCalculate`` is clicked, ...
+
+        If ``save == True``, the formula to ``resources/app_data/calculator.txt`` file so it can be recalled
+        and used at a future time or in another sample.  Pushing ``MainWindow.toolButtonCalcSave``,
+        opens a dialog prompting the user to input the name for the newly calculated field.
+
+        Parameters
+        ----------
+        save: bool, optional
+            Determines whether to save upon successful calculation, by default ``False``
         """        
         # open dialog to get new field
-        #new_field = 
+        new_field, ok = QInputDialog.getText(self, 'Save expression', 'Enter custon field name:')
+        if ok:
+            # check for valid field name
+            if self.partial_match_in_list(['_N',':'],new_field):
+                self.labelCalcMessage.setText(f"Error: new field name cannot have an '_N' or ':' in the name")
+                ok = False
+                
+        if not ok:
+            return
 
+        # parse the expression
         cond, expr = self.calc_parse()
-        if cond is None:
+        if cond is None:    # no conditionals
             result = self.calc_evaluate_expr(expr)
             if result is None:
                 return
             self.data[self.sample_id]['computed_data']['Calculated'][new_field] = result
-        else:
+        else:   # conditionals
             result = pd.DataFrame({new_field: [None]*len(self.data[self.sample_id]['computed_data']['Calculated'])})
             for cond_i, expr_i in zip(cond, expr):
                 keep = self.calc_evaluate_expr(cond_i)
@@ -10020,8 +9810,25 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             self.data[self.sample_id]['computed_data']['Calculated'][new_field] = result
 
-        self.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
+        # update comboBoxCalcFormula
+        self.comboBoxCalcFormula.addItem(new_field)
+        self.comboBoxCalcFormula.setCurrentText(new_field)
 
+        if self.comboBoxCalcFieldType.currentText == 'Calculated':
+            self.update_field_combobox(self.comboBoxCalcFieldType, self.comboBoxCalcField)
+
+        # get the formula and add to custom field dictionary
+        formula = self.textEditCalcScreen.toPlainText()
+        self.calc_dict.update = {'field':new_field, 'expr':formula}
+
+        # append theme to file of saved themes
+        try:
+            with open(self.calc_filename, 'a') as file:
+                file.write(f"{new_field}: {formula}\n")
+        except:
+            # throw a warning that nam
+            QMessageBox.error(None,'Error','could not save expression, problem with write.')
+            return
 
     def calc_evaluate_expr(self, expr, keep=None):
         """Evaluates an expression and returns the result
@@ -10040,12 +9847,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         np.ndarray of float or bool
             Result of evaluated expression.
         """        
-        # variables = {element: self.isotope_df[element].values for element in self.isotopes}
-        # try:
-        #     result = ne.evaluate(expression, local_dict=variables)
         try:
-            # Safe evaluation of the expression using DataFrame's eval method
-            result = self.df.eval(expr)
+            result = ne.evaluate(expr[0], local_dict=expr[1])
             self.labelCalcMessage.setText(f'Success')
             return result
         except Exception as e:
@@ -10418,21 +10221,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Return the sorted list of analytes as (symbol, mass) tuples
         return analytes.to_list()
 
-    def mask_changed_callback(self):
-        """Updates mask for current sample
+    def partial_match_in_list(lst, string):
+        """Checks whether values in a list partially match a string
 
-        Updates mask for the current sample whenever the crop (axis), filter, polygon, or cluster mask changes.
-        Updates figure if the *Single View* canvas is active.
-        """        
-        self.data[self.sample_id]['mask'] = \
-            self.data[self.sample_id]['axis_mask'].value & \
-            self.data[self.sample_id]['filter_mask'].value & \
-            self.data[self.sample_id]['polygon_mask'].value & \
-            self.data[self.sample_id]['cluster_mask'].value
-        
-        if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
-            self.update_SV()
-
+        Returns
+        -------
+        bool
+            ``True`` if a match exists, ``False`` if no items match.
+        """    
+        for test_string in lst:
+            if test_string in string:
+                return True
+        return False
 
 # -------------------------------
 # Classes

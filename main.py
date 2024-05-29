@@ -369,7 +369,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         layout_single_view.setContentsMargins(0, 0, 0, 0)
         self.widgetSingleView.setLayout(layout_single_view)
         self.widgetSingleView.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        self.mpl_toolbar = NavigationToolbar(MplCanvas())
+        self.mpl_toolbar = None
+        #self.mpl_toolbar = NavigationToolbar(MplCanvas())
         # for button show hide
         #self.toolButtonPopFigure.setVisible(False)
         #self.toolButtonPopFigure.raise_()
@@ -10340,11 +10341,16 @@ class MplCanvas(FigureCanvas):
         self.saved_line = []
         self.saved_dtext = []
         self.array = None
+        if self.main_window is not None:
+            if self.main_window.comboBoxPlotType.currentText() in self.main_window.map_plot_types:
+                self.map_flag = True
+            else:
+                self.map_flag = False
 
-        # Connect the button and canvas events
-        self.mpl_connect('button_press_event', self.distanceOnClick)
-        self.mpl_connect('motion_notify_event', self.distanceOnMove)
-        self.mpl_connect('motion_notify_event', self.mouseLocation)
+            # Connect the button and canvas events
+            self.mpl_connect('button_press_event', self.distanceOnClick)
+            self.mpl_connect('motion_notify_event', self.distanceOnMove)
+            self.mpl_connect('motion_notify_event', self.mouseLocation)
 
     def enterEvent(self, event):
         # Set cursor to cross when the mouse enters the window
@@ -10364,30 +10370,37 @@ class MplCanvas(FigureCanvas):
         event : event data
             Includes the location of mouse pointer.
         """        
-        if (not event.inaxes) or (self.array is None) or (event.xdata is None) or (event.ydata is None):
+        if (not event.inaxes) or (event.xdata is None) or (event.ydata is None):
             return
 
-        # pixel location on current MplCanvas
-        x_i = round(event.xdata)
-        if x_i < 0:
-            x_i = 0
-        elif x_i > self.array.shape[1]-1:
-            x_i = self.array.shape[1]
-        
-        y_i = round(event.ydata)
-        if y_i < 0:
-            y_i = 0
-        elif y_i > self.array.shape[0]-1:
-            y_i = self.array.shape[0]
-        
-        x = x_i*self.main_window.dx
-        y = y_i*self.main_window.dy
+        if self.map_flag:
+            if self.array is None:
+                return
+            # pixel location on current MplCanvas
+            x_i = round(event.xdata)
+            if x_i < 0:
+                x_i = 0
+            elif x_i > self.array.shape[1]-1:
+                x_i = self.array.shape[1]
+            
+            y_i = round(event.ydata)
+            if y_i < 0:
+                y_i = 0
+            elif y_i > self.array.shape[0]-1:
+                y_i = self.array.shape[0]
+            
+            x = x_i*self.main_window.dx
+            y = y_i*self.main_window.dy
 
-        value = self.array[y_i][x_i]
+            value = self.array[y_i][x_i]
+            self.main_window.labelSVInfoValue.setText(f"V: {value:.4g} {self.main_window.preferences['Units']['Concentration']}")
+        else:
+            x = event.xdata
+            y = event.ydata
+            self.main_window.labelSVInfoValue.setText(f"V: N/A")
 
-        self.main_window.labelSVInfoX.setText('X: '+str(round(x)))
-        self.main_window.labelSVInfoY.setText('Y: '+str(round(y)))
-        self.main_window.labelSVInfoValue.setText(f"V: {round(value,2)} {self.main_window.preferences['Units']['Concentration']}")
+        self.main_window.labelSVInfoX.setText(f'X: {x:.4g}')
+        self.main_window.labelSVInfoY.setText(f'Y: {y:.4g}')
 
     def set_initial_extent(self):
         """Initial extent of the plot
@@ -10468,9 +10481,13 @@ class MplCanvas(FigureCanvas):
         -------
         float
             Distance between two given points.
-        """        
-        dx = self.main_window.dx
-        dy = self.main_window.dy
+        """
+        if self.map_flag:
+            dx = self.main_window.dx
+            dy = self.main_window.dy
+        else:
+            dx = 1
+            dy = 1
 
         return np.sqrt(((p2[0] - p1[0])*dx)**2 + ((p2[1] - p1[1])*dy)**2)
 
@@ -10520,12 +10537,21 @@ class MplCanvas(FigureCanvas):
         distance = self.calculate_distance(p1, p2)
 
         # Update distance label in widget 
-        distance_text = f"{distance:.2f} {self.main_window.preferences['Units']['Distance']}"
+        distance_text = f"{distance:.4g} {self.main_window.preferences['Units']['Distance']}"
         self.main_window.labelSVInfoDistance.setText(f"D: {distance_text}")
 
         # Update distance label on map
+        if self.map_flag:
+            xrange = self.main_window.x.nunique()*self.main_window.aspect_ratio
+            yrange = self.main_window.y.nunique()
+        else:
+            xl = self.axes.get_xlim
+            xrange = xl[1] - xl[0]
+            yl = self.axes.get_ylim
+            xrange = yl[1] - yl[0]
+
         # x-shift for text
-        dx = 0.03*self.main_window.x.nunique()*self.main_window.aspect_ratio
+        dx = 0.03*xrange
         if p2[0] > p1[0]:
             halign = 'left'
         else:
@@ -10533,7 +10559,7 @@ class MplCanvas(FigureCanvas):
             halign = 'right'
 
         # y-shift for text
-        dy = 0.03*self.main_window.y.nunique()
+        dy = 0.03*yrange
         if p2[1] > p1[1]:
             valign = 'bottom'
         else:

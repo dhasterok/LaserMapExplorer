@@ -11223,7 +11223,7 @@
               <item>
                <widget class="QToolButton" name="toolButtonBack">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="minimumSize">
                  <size>
@@ -11255,7 +11255,7 @@
               <item>
                <widget class="QToolButton" name="toolButtonForward">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="minimumSize">
                  <size>

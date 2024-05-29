@@ -1087,6 +1087,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.open_browser()
         self.toolButtonBrowserHome.clicked.connect(self.browser_home_callback)
         self.lineEditBrowserLocation.editingFinished.connect(self.browser_location_callback)
+        self.toolButtonBack.clicked.connect(self.browser.back)
+        self.toolButtonForward.clicked.connect(self.browser.forward)
 
 
         # Plot toolbars
@@ -11154,123 +11156,19 @@ class quickView(QDialog, Ui_QuickViewDialog):
 
         QMessageBox.information(self, "Save Successful", f"Analytes view saved under '{self.view_name}' successfully.")
         
-    # def mousePressEvent(self, event):
-    #     print('mousePressEvent')
-    #     if event.buttons() == Qt.LeftButton:
-    #         self.drag_start_position = event.pos()
-    #     else:
-    #         super(quickView, self).mousePressEvent(event)
-
-    # def mouseMoveEvent(self, event):
-    #     print('mouseEvent')
-    #     if not event.buttons() & Qt.LeftButton:
-    #         return
-    #     if (event.pos() - self.drag_start_position).manhattanLength() < QApplication.startDragDistance():
-    #         return
-    #     item = self.tableWidget.itemAt(self.drag_start_position)
-    #     if item is None:
-    #         return
-    #     drag = QDrag(self)
-    #     mime_data = self.tableWidget.mimeData(self.tableWidget.selectedIndexes())
-    #     drag.setMimeData(mime_data)
-    #     drag.exec_(Qt.MoveAction)
-    #     #super(quickView, self).mouseMoveEvent(event)
-
-    # def dropEvent(self, event):
-    #     if event.source() == self.table_widget:
-    #         super().dropEvent(event)
-    #     else:
-    #         dropped_index = self.table_widget.indexAt(event.pos())
-    #         if not dropped_index.isValid():
-    #             return
-    #         selected_rows = sorted(set(index.row() for index in self.table_widget.selectedIndexes()))
-    #         if dropped_index.row() > selected_rows[-1]:
-    #             dropped_index = self.table_widget.indexFromItem(self.table_widget.item(dropped_index.row() - len(selected_rows), 0))
-    #         for row in selected_rows:
-    #             self.move_row(row, dropped_index.row())
-    #             if row < dropped_index.row():
-    #                 dropped_index = self.table_widget.indexFromItem(self.table_widget.item(dropped_index.row() + 1, 0))
-    #     super(quickView, self).mouseMoveEvent(event)
-
-    # # def dropEvent(self, event):
-    # #     print('dropEvent')
-
-    # #     # Get the target row where the item was dropped
-    # #     target_row = self.dropIndicatorPosition()
-    # #     if target_row == -1:
-    # #         target_row = self.rowCount() - 1
-
-    # #     # Get the selected rows
-    # #     selected_rows = sorted(set(index.row() for index in self.selectedIndexes()))
-
-    # #     # Adjust the target row if dropping below selected rows
-    # #     if target_row > selected_rows[-1]:
-    # #         target_row = max(target_row - len(selected_rows) + 1, 0)
-
-    # #     # Move the selected rows to the target row
-    # #     for row in selected_rows:
-    # #         self.move_row(row, target_row)
-    # #         if row < target_row:
-    # #             target_row += 1
-
-    # #     # Call the default dropEvent to complete the operation
-    # #     super(quickView, self).dropEvent(event)
-
-    # def move_row(self, source_row, target_row):
-    #     print('move_row')
-    #     items = []
-    #     for column in range(self.columnCount()):
-    #         items.append(self.takeItem(source_row, column))
-    #     for column in range(self.columnCount()):
-    #         self.setItem(target_row, column, items[column])
-
-    # def button_save(self):
-    #     """Gets list of analytes and group name when Save button is clicked
-
-    #     Retrieves the user defined name from ``quickView.lineEditViewName`` and list of analytes using ``quickView.column_to_list()``
-    #     and adds them to a dictionary item with the name defined as the key.
-
-    #     Raises
-    #     ------
-    #         A warning is raised if the user does not provide a name.  The list is not added to the dictionary in this case.
-    #     """        
-    #     name = self.lineEditViewName.currentText()
-    #     if not name:
-    #         QMessageBox.warning(self.quickView, "QuickView: Warning", "Enter a name for the new list.")
-    #         return
-    #     elif name in list(self.quickview_list.keys()):
-    #         # ask user if they wish to overwite the list item
-    #         # if no, return
-    #         pass
-    #     self.quickview_list.update({name: self.column_to_list()})
-
-    #     self.main_window.comboBoxQVList.clear()
-    #     self.main_window.comboBoxQVList.addItems(self.quickview_list.keys())
-
-    #     # append theme to file of saved themes
-    #     self.main_window.export_dict_to_csv(self.quickview_list, 'resources/styles/qv_lists.csv')
-        
-    # def column_to_list(self):
-    #     """Extracts selected analytes from the table into a list
-
-    #     Analytes from column 0 of the table with checked boxes in column 1 are added to a list for use with plotting
-    #     maps in ``MainWindow.layoutQuickView``.  The order is set by the user dragging and droping to swap rows.
-
-    #     Returns
-    #     -------
-    #     list
-    #         Analytes for display in ``MainWindow.layoutQuickView``
-    #     """        
-    #     quickview_list = []
-    #     for row in range(self.tableWidget.rowCount()):
-    #         # get analyte
-    #         item = self.tableWidget.item(row, 0)
-    #         # get checkbox
-    #         checkbox = self.tableWidget.cellWidget(row, 1)
-    #         if item is not None and checkbox.isChecked():
-    #             quickview_list.append(item.text())
-    #     return quickview_list         
+       
+# WebEngineView - Web engine for viewing userguide help pages
+# -------------------------------
 class WebEngineView(QWebEngineView):
+    """Creates a web engine widget to display user guide
+
+    _extended_summary_
+
+    Parameters
+    ----------
+    QWebEngineView : QWebEngine
+        A web engine widget
+    """    
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -11300,6 +11198,13 @@ class WebEngineView(QWebEngineView):
 
     @pyqtSlot(int)
     def on_load_progress(self, progress):
+        """Adds a loading progress message to the MainWindow.statusBar 
+
+        Parameters
+        ----------
+        progress : int
+            Loading fraction
+        """        
         self.main_window.statusBar.showMessage(f"Loading progress: {progress}%")
 
     def show_error_page(self):

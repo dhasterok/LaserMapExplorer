@@ -9752,16 +9752,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         expr = []
         if 'case' in txt:
             cases = txt.split(';')
+            # if last case includes a ';', there will be an extra blank in cases list, remove it
+            if cases[-1] == '':
+                cases.pop()
+
             for c in cases:
                 c = c[5:-1]
                 # separate conditional from expression
                 try:
                     cond_temp, expr_temp = c.split(',')
                 except Exception as e:
-                    "a case statement must include a conditional and an expression separated by a comma, ',' and end with a ';'."
+                    err = "a case statement must include a conditional and an expression separated by a comma, ',' and end with a ';'."
                     self.calc_error(func, err, e)
                     return None, None
-
 
                 # parse conditional and expression
                 _, cond_temp = self.calc_parse(txt=cond_temp)
@@ -9791,17 +9794,26 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         for field_str in field_list:
             field_str = field_str.replace('{','')
             field_str = field_str.replace('}','')
-            field_type, field = field_str.split('.')
+            try:
+                field_type, field = field_str.split('.')
+            except Exception as e:
+                err = "field type and field must be separated by a '.'"
+                self.calc_error(func, err, e)
             if field[-2:] == '_N':
                 field = field[:-2]
                 if field_type in ['Analyte', 'Ratio']:
                     field_type = f"{field_type} (normalized)"
+
+            if field in list(var.keys()):
+                continue
 
             df = self.get_map_data(self.sample_id, field, field_type)
             var.update({field: df['array']})
 
             txt = txt.replace(f"{{{field_str}}}", f"{field}")
         
+        if len(var) == 0:
+            var = None
         expr = [txt, var]
 
         print(expr)
@@ -9851,17 +9863,41 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.calc_error(func, err, '')
             return
         else:   # conditionals
+            # start with empty dataFrame
             result = pd.DataFrame({new_field: [None]*len(self.data[self.sample_id]['computed_data']['Calculated'])})
-            for cond_i, expr_i in zip(cond, expr):
-                keep = self.calc_evaluate_expr(cond_i)
-                if (not np.issubdtype(keep.dtype, np.bool_)) or (keep is None):
+
+            # loop over cases (cond, expr)
+            for i in range(0,len(cond),2):
+                # conditional yields boolean numpy.ndarray keep
+                keep = self.calc_evaluate_expr(cond[i], val_dict=cond[i+1])
+
+                # check for missing or incorrectly type for conditional
+                if keep is None:
                     err = 'conditional did not return boolean result.'
                     self.calc_error(func, err, '')
                     return
-                res = self.calc_evaluate_expr(expr_i,keep)
-                if res is None:
+                elif not isinstance(keep, np.ndarray):
+                    if not np.issubdtype(keep.dtype, np.bool_):
+                        err = 'conditional did not return boolean result.\n  Did you swap the conditional and expression?'
+                        self.calc_error(func, err, '')
+                        return
+
+                # check for size error
+                if keep.shape[0] != result.shape[0]:
+                    err = 'the conditional size does not match the size of expected computed array.'
+                    self.calc_error(func, err, '')
                     return
-                result.loc[keep,0] = res
+
+                res = self.calc_evaluate_expr(expr[i], val_dict=expr[i+1], keep=keep)
+                if res is None:
+                    err = 'the expression failed to return an array of values.'
+                    self.calc_error(func, err, '')
+                    return
+
+                if res.shape[0] == 1
+                    result.loc[keep] = res
+                else:
+                    result[keep] = res
 
             self.data[self.sample_id]['computed_data']['Calculated'][new_field] = result
 
@@ -9887,7 +9923,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.calc_error(func, err, e)
                 return
 
-    def calc_evaluate_expr(self, expr, keep=None):
+    def calc_evaluate_expr(self, expr, val_dict=None, keep=None):
         """Evaluates an expression and returns the result
 
         Parameters
@@ -9895,6 +9931,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         expr : string
             Expression to be evaluated.  The expression can be a conditional expression, which results
             in returning a np.ndarray of bool, otherwise, generally np.ndarray of float
+        val_dict : dict
+            Dictionary with variable names as the key and values taken from the data, generally np.ndarray, by default ``None``
         keep : np.ndarray of bool or None, optional
             An array of True/False values that are used to evaluate the expression of limited values,
             i.e., generally when cases are involved.
@@ -9906,9 +9944,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """        
         func = 'calc_evaluate_expr'
         try:
-            result = ne.evaluate(expr[0], local_dict=expr[1])
+            if val_dict is None:
+                result = ne.evaluate(expr)
+            else:
+                result = ne.evaluate(expr, local_dict=val_dict)
             self.labelCalcMessage.setText(f'Success')
-            return result
+            if keep is None:
+                return result
+            else:
+                return result[keep]
         except Exception as e:
             err = 'unable to evaluate expression.'
             self.calc_error(func, err, e)

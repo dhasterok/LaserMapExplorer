@@ -3806,7 +3806,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 pickle.dump(self.styles, file, protocol=pickle.HIGHEST_PROTOCOL)
         else:
             # throw a warning that name is not saved
-            QMessageBox.error(None,'Error','could not save theme.')
+            QMessageBox.warning(None,'Error','could not save theme.')
 
             return
 
@@ -9682,7 +9682,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.comboBoxCalcFormula.clear()
                 name_list = list(self.calc_dict.keys())
                 self.comboBoxCalcFormula.addItems(name_list)
-        except FileNotFoundError:
+        except FileNotFoundError as e:
             # Return an empty dictionary if the file does not exist
             QMessageBox.warning(None,'Warning','Could not load custom calculated fields.\n Starting with empty custom field dictionary.')
 
@@ -9692,6 +9692,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Removes the formula from ``MainWindow.comboBoxCalcFormula``, the file given by ``MainWindow.calc_filename`` and 
         ``MainWindow.data[MainWindow.sample_id]['computed_data']['Calculated']``.
         """
+        func = 'calc_delete_formula'
+
         # get name of formula
         name = self.comboBoxCalcFormula.currentText()
 
@@ -9711,7 +9713,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             with open(file_path, 'w') as file:
                 file.writelines(lines_to_keep)
 
-        except FileNotFoundError:
+        except FileNotFoundError as e:
+            err = 'could not find file'
+            self.calc_error(func, err, e)
             pass
 
         # remove field from Calculated dataframe
@@ -9731,6 +9735,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         Parses ``MainWindow.textEditCalcScreen`` to produce an expression that can be evaluated.
         """
+        func = 'calc_parse'
+
         # Get text 
         if txt is None:
             txt = self.textEditCalcScreen.toPlainText()
@@ -9747,28 +9753,36 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if 'case' in txt:
             cases = txt.split(';')
             for c in cases:
-                c = c.replace('case','')
+                c = c[5:-1]
                 # separate conditional from expression
-                cond_temp, expr_temp = c.split(',')
+                try:
+                    cond_temp, expr_temp = c.split(',')
+                except Exception as e:
+                    "a case statement must include a conditional and an expression separated by a comma, ',' and end with a ';'."
+                    self.calc_error(func, err, e)
+                    return None, None
+
 
                 # parse conditional and expression
                 _, cond_temp = self.calc_parse(txt=cond_temp)
                 _, expr_temp = self.calc_parse(txt=expr_temp)
 
                 # append list
-                cond.append(cond_temp)
-                expr.append(expr_temp)
+                cond = cond + cond_temp
+                expr = expr + expr_temp
 
             return cond, expr
         else:
             cond = None
 
         if txt.count('(') != txt.count(')'):
-            self.labelCalcMessage.setText(f'Error: mismatched parentheses in expr')
+            'mismatched parentheses in expr'
+            self.calc_error(func, err, '')
             return None
 
         if txt.count('{') != txt.count('}'):
-            self.labelCalcMessage.setText(f'Error: mismatched braces in expr')
+            'mismatched braces in expr'
+            self.calc_error(func, err, '')
             return None
         
         field_list = re.findall(r'\{.*?\}', txt)
@@ -9808,13 +9822,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         save: bool, optional
             Determines whether to save upon successful calculation, by default ``False``
         """
+        func = 'calculate_new_field'
+
         # open dialog to get new field
         if self.add_formula:
             new_field, ok = QInputDialog.getText(self, 'Save expression', 'Enter custon field name:')
             if ok:
                 # check for valid field name
                 if self.partial_match_in_list(['_N',':'],new_field):
-                    self.labelCalcMessage.setText(f"Error: new field name cannot have an '_N' or ':' in the name")
+                    err = "new field name cannot have an '_N' or ':' in the name"
+                    self.calc_error(func, err, '')
                     ok = False
                     
             if not ok:
@@ -9829,12 +9846,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if result is None:
                 return
             self.data[self.sample_id]['computed_data']['Calculated'][new_field] = result
+        elif expr is None:
+            err = "expr returned 'None' could not evaluate formula. Check syntax."
+            self.calc_error(func, err, '')
+            return
         else:   # conditionals
             result = pd.DataFrame({new_field: [None]*len(self.data[self.sample_id]['computed_data']['Calculated'])})
             for cond_i, expr_i in zip(cond, expr):
                 keep = self.calc_evaluate_expr(cond_i)
                 if (not np.issubdtype(keep.dtype, np.bool_)) or (keep is None):
-                    self.labelCalcMessage.setText(f'Error: conditional did not return boolean result.')
+                    err = 'conditional did not return boolean result.'
+                    self.calc_error(func, err, '')
                     return
                 res = self.calc_evaluate_expr(expr_i,keep)
                 if res is None:
@@ -9859,9 +9881,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             try:
                 with open(self.calc_filename, 'a') as file:
                     file.write(f"{new_field}: {formula}\n")
-            except:
+            except Exception as e:
                 # throw a warning that nam
-                QMessageBox.error(None,'Error','could not save expression, problem with write.')
+                err = 'could not save expression, problem with write.'
+                self.calc_error(func, err, e)
                 return
 
     def calc_evaluate_expr(self, expr, keep=None):
@@ -9881,14 +9904,31 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         np.ndarray of float or bool
             Result of evaluated expression.
         """        
+        func = 'calc_evaluate_expr'
         try:
             result = ne.evaluate(expr[0], local_dict=expr[1])
             self.labelCalcMessage.setText(f'Success')
             return result
         except Exception as e:
-            self.labelCalcMessage.setText(f'Error: unable to evaluate expression.')
-            QMessageBox.error(self.main_window,"Error", f"Error: {e}")
+            err = 'unable to evaluate expression.'
+            self.calc_error(func, err, e)
             return None
+
+    def calc_error(self, func, err, addinfo):
+        """Raise a calculator-related error
+
+        Parameters
+        ----------
+        func : str
+            Function that threw the error
+        err : str
+            Error string
+        addinfo : str
+            Additional info (generally exception raised)
+        """        
+        self.labelCalcMessage.setText(f"Error: {err}")
+        QMessageBox.warning(self,'Calculation Error',f"Error: {err}\n\n({func}) {addinfo}")
+
         
 
     # -------------------------------
@@ -10104,7 +10144,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             os.system(f"cat {filename} | rst2pdf -o --use-floating-images {os.path.splitext(filename)[0]+'.pdf'}")
         except:
             # if it doesn't work
-            QMessageBox.error(self.main_window,"Error", "Could not save to pdf.")
+            QMessageBox.warning(self.main_window,"Error", "Could not save to pdf.")
 
     def to_rst_table(self, df):
         """Converts a Pandas DataFrame to a reST table string.
@@ -11215,6 +11255,9 @@ class WebEngineView(QWebEngineView):
         pass
         #print(f"JavaScript Console: {message} at line {line} in {source_id}")
 
+
+# TableWidgetDragRows
+# -------------------------------
 class TableWidgetDragRows(QTableWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -11299,48 +11342,50 @@ class TableWidgetDragRows(QTableWidget):
 # Excel concatenator gui
 # -------------------------------
 class excelConcatenator(QtWidgets.QMainWindow, Ui_ExcelConcatenator):       
+    """Data import tool for LA-ICP-MS data
+
+    Loads data that is processed and exported by Iolite, XMapTools and LADr.
+
+    Parameters
+    ----------
+    QtWidgets : QMainWindow
+        Window for import tool
+    Ui_ExcelConcatenator : class
+        Import window design
+    """    
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
         
+        # list of standards (files to ignore)
         self.standard_list = ['STDGL', 'NiS', 'NIST610']
         self.sample_ids = []
         self.paths = []
         
-        self.statusBar = self.statusBar()
         # Set a message that will be displayed in the status bar
+        self.statusBar = self.statusBar()
         self.statusBar.showMessage('Ready')
-        # Adding a progress bar to the status bar
-        
         
         # Adding a progress bar to the status bar
         self.progressBar = QProgressBar()
         self.statusBar.addPermanentWidget(self.progressBar)
         
-        
         self.pushButtonSaveMetaData.setEnabled(False)
-        self.pushButtonLoadMetaData.setEnabled(False)
-        
         self.pushButtonSaveMetaData.clicked.connect(self.save_meta_data)
-       
+        self.pushButtonLoadMetaData.setEnabled(False)
         self.pushButtonLoadMetaData.clicked.connect(self.load_meta_data)
-
         self.pushButtonOpenDirectory.clicked.connect(self.open_directory)
-        
-
-        # self.pushButtonDone.clicked.connect(self.accept)
-        
-        # self.pushButtonCancel.clicked.connect(self.reject)
-        
         self.pushButtonImport.clicked.connect(self.import_data)
-        
-        
         self.tableWidgetMetaData.currentItemChanged.connect(self.on_item_changed)
         
-        
-        
+        # self.pushButtonDone.clicked.connect(self.accept)
+        # self.pushButtonCancel.clicked.connect(self.reject)
         
     def load_meta_data(self):
+        """Loads table with sample metadata
+
+        Save time by prepreparing the metadata as you collect them.  Open the csv, and then update the UI table for the user to make any modifications prior to importing data.
+        """        
         file_name, _ = QFileDialog.getOpenFileName(self, "Open File", "", "CSV Files (*.csv);;All Files (*)")
         status = True
         if file_name:
@@ -13044,6 +13089,11 @@ class Profiling:
         self.edit_mode_enabled = not self.edit_mode_enabled
 
     def toggle_point_visibility(self):
+        """Toggles visibility of individual profile points
+
+        Toggled points are still retained in the data, but an associated boolean field indicates
+        whether they should be displayed or not.
+        """        
         for profile_key in self.selected_points.keys():
             # Retrieve the scatter object using its profile key
             scatter, barlinecol = self.get_scatter_errorbar_by_gid(profile_key)
@@ -13057,15 +13107,12 @@ class Profiling:
             if len(facecolors) == 1 and num_points > 1:
                 facecolors = np.tile(facecolors, (num_points, 1))
 
-
             # Get the current array of colors (RGBA) for the LineCollection
             line_colors = barlinecol.get_colors().copy()
 
             # Ensure the color array is not a single color by expanding it if necessary
             if len(line_colors) == 1 and len(barlinecol.get_segments()) > 1:
                 line_colors = np.tile(line_colors, (num_points, 1))
-
-
 
             # Iterate through each point to adjust visibility based on selection state
             for idx, selected in enumerate(self.selected_points[profile_key]):

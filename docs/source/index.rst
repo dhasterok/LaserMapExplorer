@@ -3,6 +3,9 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 .. sphinx-build -b html docs/source/ docs/build/html
+.. raw:: html
+
+   <script type="text/javascript" src="_static/custom.js"></script>
 
 Welcome to Laser Map Explorer (LaME)!
 *************************************

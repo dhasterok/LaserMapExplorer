@@ -9710,7 +9710,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             lines_to_keep = [line for line in lines if not line.startswith(f'{name}:')]
 
             # Write the remaining lines back to the file
-            with open(file_path, 'w') as file:
+            with open(self.calc_filename, 'w') as file:
                 file.writelines(lines_to_keep)
 
         except FileNotFoundError as e:
@@ -9744,9 +9744,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         print(txt)
 
         txt = txt.replace('^','**')
-        txt = txt.replace('abs(','np.abs(')
-        txt = txt.replace('log(','np.log10(')
-        txt = txt.replace('ln(','np.log(')
+        txt = txt.replace('abs(','abs(')
+        txt = txt.replace('log(','log10(')
+        txt = txt.replace('ln(','log(')
 
         cond = []
         expr = []
@@ -9864,7 +9864,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return
         else:   # conditionals
             # start with empty dataFrame
-            result = pd.DataFrame({new_field: [None]*len(self.data[self.sample_id]['computed_data']['Calculated'])})
+            result = pd.DataFrame({new_field: np.nan*np.zeros_like(self.data[self.sample_id]['computed_data']['Calculated'].iloc[:,0])})
 
             # loop over cases (cond, expr)
             for i in range(0,len(cond),2):
@@ -9894,10 +9894,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.calc_error(func, err, '')
                     return
 
-                if res.shape[0] == 1
-                    result.loc[keep] = res
-                else:
-                    result[keep] = res
+                result.loc[keep,new_field] = res
 
             self.data[self.sample_id]['computed_data']['Calculated'][new_field] = result
 
@@ -9949,7 +9946,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             else:
                 result = ne.evaluate(expr, local_dict=val_dict)
             self.labelCalcMessage.setText(f'Success')
-            if keep is None:
+            if keep is None or result.ndim == 0:
                 return result
             else:
                 return result[keep]

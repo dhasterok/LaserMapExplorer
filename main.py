@@ -2849,13 +2849,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     d_ub = parameters['d_u_bound']
                     if auto_scale:
 
-                        self.data[sample_id]['processed_data'].loc[:,analyte_1] = self.outlier_detection(filtered_data.reshape(-1, 1),lq, uq, d_lb,d_ub)
+                        self.data[sample_id]['processed_data'][analyte_1] = self.outlier_detection(filtered_data.reshape(-1, 1),lq, uq, d_lb,d_ub)
                     else:
                         #clip data using ub and lb
                         lq_val = np.nanpercentile(filtered_data, lq, axis=0)
                         uq_val = np.nanpercentile(filtered_data, uq, axis=0)
                         filtered_data = np.clip(filtered_data, lq_val, uq_val)
-                        self.data[sample_id]['processed_data'].loc[:,analyte_1] = filtered_data
+                        self.data[sample_id]['processed_data'][analyte_1] = filtered_data
 
                     # update v_min and v_max in self.data[sample_id]['analyte_info']
                     self.data[sample_id]['analyte_info'].loc[
@@ -5649,8 +5649,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.widgetMultiView.layout().addWidget( dup_widget, row, col )
                 dup_widget.show()
                 self.duplicate_plot_info = None #reset to avoid plotting previous duplicates
-            self.widgetSingleView.layout().insertWidget(1,widget)
-            
+            self.widgetSingleView.layout().insertWidget(0,widget)
+            widget.show()
         # add figure to MultiView canvas
         elif self.canvasWindow.currentIndex() == self.canvas_tab['mv']:
             #print('add_plotwidget_to_canvas: MV')
@@ -6315,7 +6315,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.mpl_toolbar.hide()
         self.widgetSingleView.layout().addWidget(canvas)
 
-        #self.add_tree_item(self.plot_info)
+        self.add_tree_item(self.plot_info)
 
     def plot_map_pg(self, sample_id, field_type, field):
         """Create a graphic widget for plotting a map
@@ -9305,10 +9305,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #     self.add_plotwidget_to_canvas(widget_dict['info'], view=widget_dict['view'], position=widget_dict['position'])
             self.initialize_axis_values(tree, leaf)
             if plot_info:
-                #print('tree_double_click: add_plotwidget_to_canvas')
+                print('tree_double_click: add_plotwidget_to_canvas')
                 self.add_plotwidget_to_canvas(plot_info)
             else:
-                #print('tree_double_click: plot_map_pg')
+                print('tree_double_click: plot_map_pg')
                 if self.toolBox.currentIndex() not in [self.left_tab['sample'], self.left_tab['process'], self.left_tab['filter'], self.left_tab['profile']]:
                     self.toolBox.setCurrentIndex(self.left_tab['sample'])
                 
@@ -9323,6 +9323,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 
                 if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
                     self.plot_map_mpl(sample_id=branch, field_type=tree, field=leaf)
+                    # self.plot_map_pg(sample_id=branch, field_type=tree, field=leaf)
+
                 else:
                     self.plot_map_pg(sample_id=branch, field_type=tree, field=leaf)
 
@@ -9367,19 +9369,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.update_ratio_df(self.sample_id, analyte_1, analyte_2, norm)
                 ratio_name = f"{analyte_1} / {analyte_2}"
                 # Populate ratios_items if the pair doesn't already exist
-
+                item1,check = self.find_leaf('Ratio', branch = self.sample_id, leaf = ratio_name)
 
                 if norm_update:
                     item1,check = self.find_leaf('Ratio', branch = self.sample_id, leaf = ratio_name)
                     item2,check = self.find_leaf('Ratio (normalized)', branch = self.sample_id, leaf = ratio_name)
-                else:
-                    item1,check = self.find_leaf('Ratio', branch = self.sample_id, leaf = ratio_name)
-                    item2,check = self.find_leaf('Ratio (normalized)', branch = self.sample_id, leaf = ratio_name)
+                # else:
+                #     item1,check = self.find_leaf('Ratio', branch = self.sample_id, leaf = ratio_name)
+                #     item2,check = self.find_leaf('Ratio (normalized)', branch = self.sample_id, leaf = ratio_name)
 
                 if not check: #if ratio doesn't exist
                     # ratio
                     child_item = StandardItem(ratio_name)
-                    child_item.setBackground(QBrush(QColor(hexcolor)))
+                    # child_item.setBackground(QBrush(QColor(hexcolor)))
                     item1.appendRow(child_item)
 
                     # ratio normalized
@@ -9392,7 +9394,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     #print([analyte, refval_1, refval_2, ratio_flag])
 
                     child_item2 = StandardItem(ratio_name)
-                    child_item2.setBackground(QBrush(QColor(hexcolor)))
+                    # child_item2.setBackground(QBrush(QColor(hexcolor)))
                     # if normization cannot be done, make text italic and disable item
                     if not ratio_flag:
                         font = child_item2.font()
@@ -9400,18 +9402,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         child_item2.setFont(font)
                         child_item2.setEnabled(False)
                     item2.appendRow(child_item2)
-                else:
-                    item.setBackground(QBrush(QColor(hexcolor)))
-                    item2.setBackground(QBrush(QColor(hexcolor)))
+                # else:
+                #     item1.setBackground(QBrush(QColor(hexcolor)))
+                #     item2.setBackground(QBrush(QColor(hexcolor)))
 
             else: #single analyte
                 analyte_1 = analyte
                 analyte_2 = None
-            
-                if norm_update:
-                    item,check = self.find_leaf('Analyte (normalized)', branch = sample_id, leaf = analyte)
-                else:
-                    item,check = self.find_leaf('Analyte', branch = sample_id, leaf = analyte)
+                item,check = self.find_leaf('Analyte', branch = sample_id, leaf = analyte)
+                # if norm_update:
+                #     item,check = self.find_leaf('Analyte (normalized)', branch = sample_id, leaf = analyte)
+                # else:
+                #     item,check = self.find_leaf('Analyte', branch = sample_id, leaf = analyte)
 
                 item.setBackground(QBrush(QColor(hexcolor)))
 

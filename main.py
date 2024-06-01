@@ -560,19 +560,30 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionSavePlotToTree.triggered.connect(self.add_plotwidget_to_tree)
         self.actionSelectAnalytes.triggered.connect(self.open_select_analyte_dialog)
         self.actionSpotData.triggered.connect(lambda: self.open_tab('spot data'))
-        self.actionFilter_Tools.triggered.connect(lambda: self.open_tab('filter'))
+
+        self.actionFullMap.triggered.connect(self.reset_to_full_view)
+        self.actionFullMap.triggered.connect(lambda: self.actionCrop.setChecked(False))
+
+        #apply filters
+        self.actionClearFilters.triggered.connect(lambda: self.apply_filters(fullmap=True))
+        self.actionFilterToggle.triggered.connect(lambda: self.apply_filters(fullmap=False))
+        self.actionPolygonMask.triggered.connect(lambda: self.apply_filters(fullmap=False))
+        self.actionClusterMask.triggered.connect(lambda: self.apply_filters(fullmap=False))
+        #self.actionNoiseReduction.triggered.connect()
+
         self.actionCorrelation.triggered.connect(lambda: self.open_tab('samples'))
         self.actionHistograms.triggered.connect(lambda: self.open_tab('preprocess'))
         self.actionBiPlot.triggered.connect(lambda: self.open_tab('scatter'))
         self.actionTernary.triggered.connect(self.open_ternary)
         self.actionTEC.triggered.connect(lambda: self.open_tab('ndim'))
-        self.actionPolygon.triggered.connect(lambda: self.open_tab('filter'))
         self.actionProfiles.triggered.connect(lambda: self.open_tab('profiles'))
         self.actionCluster.triggered.connect(lambda: self.open_tab('clustering'))
         self.actionReset.triggered.connect(lambda: self.reset_analysis())
         self.actionImportFiles.triggered.connect(lambda: self.import_files())
         self.actionLoadAnalysis.triggered.connect(lambda: self.load_analysis())
         self.actionSaveAnalysis.triggered.connect(lambda: self.save_analysis())
+        self.actionSwapAxes.triggered.connect(self.swap_xy)
+
 
         # Select analyte Tab
         #-------------------------
@@ -622,8 +633,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonHistogramReset.clicked.connect(self.histogram_reset_bins)
         self.comboBoxHistType.activated.connect(self.update_SV)
 
-        self.toolButtonSwapXY.clicked.connect(self.swap_xy)
-
         self.doubleSpinBoxUB.setMaximum(100)
         self.doubleSpinBoxUB.setMinimum(0)
         self.doubleSpinBoxLB.setMaximum(100)
@@ -638,9 +647,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.doubleSpinBoxDUB.valueChanged.connect(lambda: self.auto_scale(True))
         self.doubleSpinBoxDUB.valueChanged.connect(lambda: self.auto_scale(True))
 
-        self.toolButtonFullView.clicked.connect(self.reset_to_full_view)
         #uncheck crop is checked
-        self.toolButtonFullView.clicked.connect(lambda: self.toolButtonCrop.setChecked(False))
         self.toolBox.currentChanged.connect(lambda: self.canvasWindow.setCurrentIndex(self.canvas_tab['sv']))
         self.toolBox.currentChanged.connect(self.toolbox_changed)
         #auto scale
@@ -670,7 +677,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Initiate crop tool
         self.crop_tool = Crop_tool(self)
-        self.toolButtonCrop.clicked.connect(self.crop_tool.init_crop)
+        self.actionCrop.triggered.connect(self.crop_tool.init_crop)
 
         # Spot Data Tab
         #-------------------------
@@ -712,12 +719,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.edge_img = None
         self.toolButtonEdgeDetect.clicked.connect(self.add_edge_detection)
         self.comboBoxEdgeDetectMethod.activated.connect(self.add_edge_detection)
-
-        #apply filters
-        self.toolButtonMapViewable.toggled.connect(lambda: self.apply_filters(fullmap=True))
-        self.toolButtonPolygonMask.toggled.connect(lambda: self.apply_filters(fullmap=False))
-        self.toolButtonFilterToggle.toggled.connect(lambda: self.apply_filters(fullmap=False))
-        self.toolButtonClusterMask.toggled.connect(lambda: self.apply_filters(fullmap=False))
 
         # Scatter and Ternary Tab
         #-------------------------
@@ -829,12 +830,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxNDimAnalyteSet.addItems(analyte_set)
         #self.comboBoxNDimRefMaterial.addItems(ref_list.values) This is done with the Set analyte tab initialization above.
         self.toolButtonNDimAnalyteAdd.clicked.connect(lambda: self.update_ndim_table('analyteAdd'))
+        self.toolButtonNDimAnalyteAdd.clicked.connect(self.update_SV)
         self.toolButtonNDimAnalyteSetAdd.clicked.connect(lambda: self.update_ndim_table('analytesetAdd'))
-        self.toolButtonNDimPlot.clicked.connect(self.plot_ndim)
+        self.toolButtonNDimAnalyteSetAdd.clicked.connect(self.update_SV)
         self.toolButtonNDimUp.clicked.connect(lambda: self.table_fcn.move_row_up(self.tableWidgetNDim))
+        self.toolButtonNDimUp.clicked.connect(self.update_SV)
         self.toolButtonNDimDown.clicked.connect(lambda: self.table_fcn.move_row_down(self.tableWidgetNDim))
+        self.toolButtonNDimDown.clicked.connect(self.update_SV)
         self.toolButtonNDimSelectAll.clicked.connect(self.tableWidgetNDim.selectAll)
         self.toolButtonNDimRemove.clicked.connect(lambda: self.table_fcn.delete_row(self.tableWidgetNDim))
+        self.toolButtonNDimRemove.clicked.connect(self.update_SV)
         #self.toolButtonNDimSaveList.clicked.connect(self.ndim_table.save_list)
 
         # N-dim table
@@ -869,6 +874,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Connect toolButtonProfilePointToggle's clicked signal to toggle point visibility
         self.toolButtonProfilePointToggle.clicked.connect(self.profiling.toggle_point_visibility)
+
+        # -------
+        # These tools are for setting profile plot controls
+        self.groupBoxProfilePlotControl.setVisible(False)
+        # -------
 
         # Special Tab
         #------------------------
@@ -933,7 +943,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.checkBoxReverseColormap.stateChanged.connect(self.colormap_direction_callback)
 
         # callback functions
-        self.comboBoxPlotType.currentIndexChanged.connect(self.plot_type_callback)
+        self.comboBoxPlotType.currentIndexChanged.connect(lambda: self.plot_type_callback(update=True))
         self.toolButtonUpdatePlot.clicked.connect(self.update_SV)
         self.toolButtonSaveTheme.clicked.connect(self.input_theme_name_dlg)
         # axes
@@ -965,9 +975,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.lineEditAspectRatio.editingFinished.connect(self.aspect_ratio_callback)
         self.comboBoxTickDirection.activated.connect(self.tickdir_callback)
         # annotations
-
         self.fontComboBox.activated.connect(self.font_callback)
         self.doubleSpinBoxFontSize.valueChanged.connect(self.font_size_callback)
+        # ---------
+        # These are tools are for future use, when individual annotations can be added
+        self.tableWidgetAnnotation.setVisible(False)
+        self.toolButtonAnnotationDelete.setVisible(False)
+        self.toolButtonAnnotationSelectAll.setVisible(False)
+        # ---------
+
         # scales
         self.lineEditScaleLength.setValidator(QDoubleValidator())
         self.comboBoxScaleDirection.activated.connect(self.scale_direction_callback)
@@ -1007,13 +1023,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 ('^2', self.pushButtonSquare, self.calc_insert_operator),
                 ('^-1', self.pushButtonInverse, self.calc_insert_operator),
                 ('10^()', self.pushButtonPower10, self.calc_insert_operator),
-                ('()^(1/2)', self.pushButtonSqrt, self.calc_insert_operator),
                 ('()', self.pushButtonBrackets, self.calc_insert_operator),
+                ('sqrt', self.pushButtonSqrt, self.calc_insert_function),
                 ('exp', self.pushButtonExp, self.calc_insert_function),
                 ('ln', self.pushButtonLn, self.calc_insert_function),
                 ('log', self.pushButtonLog, self.calc_insert_function),
                 ('abs', self.pushButtonAbs, self.calc_insert_function),
                 ('case', self.pushButtonCase, self.calc_insert_function),
+                ('otherwise', self.pushButtonOtherwise, self.calc_insert_function),
+                ('grad', self.pushButtonCalcGrad, self.calc_insert_function),
+                ('area', self.pushButtonCalcArea, self.calc_insert_function),
                 (' < ', self.pushButtonLessThan, self.calc_insert_operator),
                 (' > ', self.pushButtonGreaterThan, self.calc_insert_operator),
                 (' <= ', self.pushButtonLessThanEqualTo, self.calc_insert_operator),
@@ -1109,7 +1128,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionCalculator.triggered.connect(lambda: self.toolBoxTreeView.currentIndex(self.right_tab['calculator']))
 
         #reset check boxes to prevent incorrect behaviour during plot click
-        self.toolButtonCrop.clicked.connect(lambda: self.reset_checked_items('crop'))
         self.toolButtonPlotProfile.clicked.connect(lambda: self.reset_checked_items('profiling'))
         self.toolButtonPointMove.clicked.connect(lambda: self.reset_checked_items('profiling'))
         self.toolButtonPolyCreate.clicked.connect(lambda: self.reset_checked_items('polygon'))
@@ -1877,7 +1895,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def reset_to_full_view(self):
         """Reset the map to full view (i.e., remove crop)
 
-        Executes on ``MainWindow.toolButtonFullView`` is clicked.
+        Executes on ``MainWindow.actionFullMap`` is clicked.
         """
 
         sample_id = self.plot_info['sample_id']
@@ -2380,7 +2398,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # replot after cropping 
         self.plot_map_pg(sample_id, field_type, field)
         
-        self.toolButtonCrop.setChecked(False)
+        self.actionCrop.setChecked(False)
         self.data[self.sample_id]['crop'] = True
 
 
@@ -2496,7 +2514,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     'norm':scale ,'f_min': f_min,'f_max':f_max, 'operator':operator, 'use':True}
             self.data[self.sample_id]['filter_info'].loc[len(self.data[self.sample_id]['filter_info'])]=filter_info
 
-            self.toolButtonFilterToggle.setChecked(True)
+            self.actionFilterToggle.setChecked(True)
 
     def remove_selected_rows(self):
         """Remove selected rows from filter table.
@@ -2540,12 +2558,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # remove all masks
         if fullmap:
             #user clicked on Map viewable
-            self.toolButtonFilterToggle.setChecked(False)
-            self.toolButtonPolygonMask.setChecked(False)
-            self.toolButtonClusterMask.setChecked(False)
+            self.actionFilterToggle.setChecked(False)
+            self.actionPolygonMask.setChecked(False)
+            self.actionClusterMask.setChecked(False)
 
         # apply interval filters
-        elif self.toolButtonFilterToggle.isChecked():
+        elif self.actionFilterToggle.isChecked():
             #print(self.data[sample_id]['filter_info'])
 
             # Check if rows in self.data[sample_id]['filter_info'] exist and filter array in current_plot_df
@@ -2566,7 +2584,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         self.data[sample_id]['filter_mask'] = self.data[sample_id]['filter_mask'] | ((filter_row['f_min'] <= analyte_df['array'].values) & (analyte_df['array'].values <= filter_row['f_max']))
 
         # apply polygon filters
-        elif self.toolButtonPolygonMask.isChecked():
+        elif self.actionPolygonMask.isChecked():
             # apply polygon mask
             # Iterate through each polygon in self.polygons[self.main_window.sample_id]
             for row in range(self.tableWidgetPolyPoints.rowCount()):
@@ -2600,7 +2618,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.polygon.clear_lines()
 
         # apply cluster mask
-        elif self.toolButtonClusterMask.isChecked():
+        elif self.actionClusterMask.isChecked():
             # apply map mask
             pass
 
@@ -2618,7 +2636,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         Uses selected clusters in ``MainWindow.tableWidgetViewGroups`` to create a mask (or inverse mask).  Masking is controlled
         clicking either ``MainWindow.toolButtonGroupMask`` or ``MainWindow.toolButtonGroupMaskInverse``.  The masking can be turned
-        on or off by changing the checked state of ``MainWindow.toolButtonClusterMask`` on the *Left Toolbox \> Filter Page*.
+        on or off by changing the checked state of ``MainWindow.actionClusterMask`` on the *Left Toolbox \> Filter Page*.
 
         Parameters
         ----------
@@ -2637,7 +2655,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         ind = np.isin(cluster_group, selected_clusters)
         self.data[self.sample_id]['cluster_mask'] = ind
         
-        self.toolButtonClusterMask.setChecked(True)
+        self.actionClusterMask.setChecked(True)
 
         self.update_cluster_flag = True
 
@@ -2995,7 +3013,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # if hover within lasermap array
                 if 0 <= x_i < array.shape[1] and 0 <= y_i < array.shape[0] :
-                    if not self.cursor and not self.toolButtonCrop.isChecked():
+                    if not self.cursor and not self.actionCrop.isChecked():
                         QtWidgets.QApplication.setOverrideCursor(Qt.BlankCursor)
                         self.cursor = True
                     any_plot_hovered = True
@@ -3007,7 +3025,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                             self.update_zoom_view_position(x, y)
                             self.zoomViewBox.show()
                             self.polygon.show_polygon_lines(x,y)
-                        # elif self.toolButtonCrop.isChecked() and self.crop_tool.start_pos:
+                        # elif self.actionCrop.isChecked() and self.crop_tool.start_pos:
                         #     self.crop_tool.expand_rect(pos_view)
                         else:
                             # hide zoom view
@@ -3021,14 +3039,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         self.labelMVInfoY.setText('Y: '+str(round(y)))
 
                     for k, (target, _,array) in self.lasermaps.items():
-                        if not self.toolButtonCrop.isChecked():
+                        if not self.actionCrop.isChecked():
                             target.setPos(mouse_point)
                             target.show()
                             value = array[y_i, x_i]
                             if k in self.multiview_info_label:
                                 self.multiview_info_label[k][1].setText('v: '+str(round(value,2)))
                 # break
-        if not any_plot_hovered and not self.toolButtonCrop.isChecked():
+        if not any_plot_hovered and not self.actionCrop.isChecked():
             QtWidgets.QApplication.restoreOverrideCursor()
             self.cursor = False
             for target, _, _ in self.lasermaps.values():
@@ -3053,7 +3071,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #do nothing
             return
 
-        # elif self.toolButtonCrop.isChecked():
+        # elif self.actionCrop.isChecked():
         #     self.crop_tool.create_rect(event, click_pos)
         # if event.button() == QtCore.Qt.LeftButton and self.main_window.pushButtonStartProfile.isChecked():
        #apply profiles
@@ -3064,7 +3082,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.polygon.plot_polygon_scatter(event, k, x, y,x_i, y_i)
 
         #apply crop
-        elif self.toolButtonCrop.isChecked() and event.button() == QtCore.Qt.RightButton:
+        elif self.actionCrop.isChecked() and event.button() == QtCore.Qt.RightButton:
             self.crop_tool.apply_crop()
 
     def plot_laser_map_cont(self,layout,array,img,p1,cm, view):
@@ -3865,7 +3883,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 #    self.comboBoxLineWidth.setEnabled(True)
                 #else:
                 #    self.comboBoxLineWidth.setEnabled(False)
-                self.comboBoxLineWidth.setEnabled(False)
+                self.comboBoxLineWidth.setEnabled(True)
+                self.toolButtonLineColor.setEnabled(True)
                 self.lineEditLengthMultiplier.setEnabled(False)
 
                 # color properties
@@ -3910,6 +3929,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # line properties
                 self.comboBoxLineWidth.setEnabled(False)
                 self.lineEditLengthMultiplier.setEnabled(False)
+                self.toolButtonLineColor.setEnabled(False)
 
                 # color properties
                 self.toolButtonMarkerColor.setEnabled(False)
@@ -3959,6 +3979,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # line properties
                 self.comboBoxLineWidth.setEnabled(True)
+                self.toolButtonLineColor.setEnabled(True)
                 self.lineEditLengthMultiplier.setEnabled(False)
 
                 # color properties
@@ -4022,8 +4043,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # line properties
                 if self.comboBoxFieldZ.currentText() == '':
                     self.comboBoxLineWidth.setEnabled(True)
+                    self.toolButtonLineColor.setEnabled(True)
                 else:
                     self.comboBoxLineWidth.setEnabled(False)
+                    self.toolButtonLineColor.setEnabled(False)
 
                 if plot_type == 'pca scatter':
                     self.lineEditLengthMultiplier.setEnabled(True)
@@ -4107,8 +4130,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # line properties
                 if self.comboBoxFieldZ.currentText() == '':
                     self.comboBoxLineWidth.setEnabled(True)
+                    self.toolButtonLineColor.setEnabled(True)
                 else:
                     self.comboBoxLineWidth.setEnabled(False)
+                    self.toolButtonLineColor.setEnabled(False)
 
                 if plot_type == 'pca heatmap':
                     self.lineEditLengthMultiplier.setEnabled(True)
@@ -4139,7 +4164,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.lineEditYLabel.setEnabled(True)
                 self.lineEditZLabel.setEnabled(True)
                 self.lineEditAspectRatio.setEnabled(False)
-                self.comboBoxTickDirection(False)
+                self.comboBoxTickDirection.setEnabled(False)
 
                 # scalebar properties
                 self.comboBoxScaleDirection.setEnabled(True)
@@ -4166,6 +4191,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # line properties
                 self.comboBoxLineWidth.setEnabled(False)
                 self.lineEditLengthMultiplier.setEnabled(False)
+                self.toolButtonLineColor.setEnabled(False)
 
                 # color properties
                 self.comboBoxColorByField.setEnabled(False)
@@ -4209,6 +4235,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # line properties
                 self.comboBoxLineWidth.setEnabled(True)
+                self.toolButtonLineColor.setEnabled(True)
                 self.lineEditLengthMultiplier.setEnabled(False)
 
                 # color properties
@@ -4255,6 +4282,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # line properties
                 self.comboBoxLineWidth.setEnabled(True)
+                self.toolButtonLineColor.setEnabled(True)
                 self.lineEditLengthMultiplier.setEnabled(False)
 
                 # color properties
@@ -4302,7 +4330,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.toolButtonMarkerColor.setEnabled(False)
 
                 # line properties
-                self.comboBoxLineWidth.setEnabled(False)
+                self.comboBoxLineWidth.setEnabled(True)
+                self.toolButtonLineColor.setEnabled(True)
                 self.lineEditLengthMultiplier.setEnabled(False)
 
                 # color properties
@@ -4351,6 +4380,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # line properties
                 self.comboBoxLineWidth.setEnabled(True)
+                self.toolButtonLineColor.setEnabled(True)
                 self.lineEditLengthMultiplier.setEnabled(False)
 
                 # color properties
@@ -4395,6 +4425,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # line properties
         self.labelLineWidth.setEnabled(self.comboBoxLineWidth.isEnabled())
+        self.labelLineColor.setEnabled(self.toolButtonLineColor.isEnabled())
+        self.labelLengthMultiplier.setEnabled(self.lineEditLengthMultiplier.isEnabled())
 
         # color properties
         if self.toolButtonMarkerColor.isEnabled():
@@ -4611,12 +4643,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # style widget callbacks
     # -------------------------------------
-    def plot_type_callback(self):
+    def plot_type_callback(self, update=False):
         """Updates styles when plot type is changed
 
         Executes on change of ``MainWindow.comboBoxPlotType``.  Updates ``MainWindow.plot_type[0]`` to the current index of the 
         combobox, then updates the style widgets to match the dictionary entries and updates the plot.
         """
+        print('plot_type_callback')
         # set plot flag to false
         plot_type = self.comboBoxPlotType.currentText()
         self.plot_types[self.toolBox.currentIndex()][0] = self.comboBoxPlotType.currentIndex()
@@ -4628,7 +4661,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 if self.comboBoxCorrelationMethod.currentText() == 'None':
                     self.comboBoxCorrelationMethod.setCurrentText('Pearson')
 
-        self.update_SV()
+        if update:
+            self.update_SV()
 
     # axes
     # -------------------------------------
@@ -5536,7 +5570,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             save plot to plot selector, Defaults to False.
         """
         #print('update_SV, self.plot_flag: '+str(self.plot_flag)+'   sample_id: '+self.sample_id+'   field_type: '+self.comboBoxColorByField.currentText()+'   field: '+self.comboBoxColorField.currentText())
-        if self.sample_id == '' or not self.comboBoxPlotType.currentText() or not self.plot_flag:
+        #if self.sample_id == '' or not self.comboBoxPlotType.currentText() or not self.plot_flag:
+        if self.sample_id == '' or not self.comboBoxPlotType.currentText():
             return
 
         match self.comboBoxPlotType.currentText():
@@ -6516,6 +6551,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case 'Kendall':
                 self.styles['correlation']['Colors']['CLabel'] = method + "'s $\\tau" + power + "$"
 
+        if self.comboBoxPlotType.currentText() != 'correlation':
+            self.comboBoxPlotType.setCurrentText('correlation')
+            self.set_style_widgets('correlation')
+
         self.update_SV()
 
     def correlation_squared_callback(self):
@@ -7299,6 +7338,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def plot_ternarymap(self, canvas):
         """Creates map colored by ternary coordinate positions"""
+        if self.comboBoxPlotType.currentText() != 'ternary map':
+            self.comboBoxPlotType.setCurrentText('ternary map')
+            self.set_style_widgets('ternary map')
+
         style = self.styles['ternary map']
 
         canvas = MplCanvas(sub=121,parent=self)
@@ -7415,7 +7458,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if self.spinBoxPCY.value() == 1:
                 self.spinBoxPCY.setValue(int(2))
 
-        self.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
+        self.update_field_type_combobox(self.comboBoxColorByField, addNone=False, plot_type='PCA Score')
+        self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
         self.update_pca_flag = False
 
     def plot_pca(self):
@@ -7855,7 +7899,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.statusbar.showMessage('Clustering successful')
 
-        self.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
+        self.update_field_type_combobox(self.comboBoxColorByField, addNone=False, plot_type='Cluster')
+        self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
         self.update_cluster_flag = False
 
     def plot_clusters(self):
@@ -9621,15 +9666,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         print('calc_insert_function')
         cursor = self.textEditCalcScreen.textCursor()
         if cursor.hasSelection():
-            if function == 'case':
-                cursor.insertText(f"{function}(cond, {cursor.selectedText()}) | ")
-            else:
-                cursor.insertText(f"{function}({cursor.selectedText()})")
+            cursor.insertText(f"{function}({cursor.selectedText()})")
+            # add semicolon to end of case and otherwise functions
+            if function in ['case', 'otherwise']:
+                cursor.insertText(f"; ")
         else:
+            # case should have conditional and expression
             if function == 'case':
                 cursor.insertText(f"{function}(cond, expr); ")
             else:
                 cursor.insertText(f"{function}()")
+                # if otherwise add semicolon to end
+                if function == 'otherwise':
+                    cursor.insertText(f"; ")
     
     def calc_add_field(self):
         """Adds the selected field to the calculator
@@ -9744,17 +9793,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         print(txt)
 
         txt = txt.replace('^','**')
-        txt = txt.replace('abs(','abs(')
         txt = txt.replace('log(','log10(')
         txt = txt.replace('ln(','log(')
+        txt = txt.replace('grad(','gradient(')
 
         cond = []
         expr = []
-        if 'case' in txt:
+        if ('case' in txt) or ('otherwise' in txt):
             cases = txt.split(';')
             # if last case includes a ';', there will be an extra blank in cases list, remove it
             if cases[-1] == '':
                 cases.pop()
+
+            # deal with otherwise first as it will be used to set all the values and then cases will reset them
+            idx = [i for i, j in enumerate(['foo', 'bar', 'baz']) if j == 'bar']
+            if idx is not None:
+                cond[0] = 'any'
+                expr[0] = cases.index(idx)[10:-1]
+                cases.pop(idx)
 
             for c in cases:
                 c = c[5:-1]
@@ -9854,7 +9910,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # parse the expression
         cond, expr = self.calc_parse()
         if cond is None:    # no conditionals
-            result = self.calc_evaluate_expr(expr)
+            result = self.calc_evaluate_expr(expr[0], val_dict=expr[1])
             if result is None:
                 return
             self.data[self.sample_id]['computed_data']['Calculated'][new_field] = result
@@ -9868,8 +9924,23 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             # loop over cases (cond, expr)
             for i in range(0,len(cond),2):
+                if (i == 0) and (cond[i] == 'any'):
+                    try:
+                        res = self.calc_evaluate_expr(expr[0], val_dict=expr[1])
+                    except Exception as e:
+                        err = "could not evaluate otherwise expression. Check syntax."
+                        self.calc_error(func, err, e)
+                        return
+                    self.data[self.sample_id]['computed_data']['Calculated'][new_field] = result
+                    continue
+
                 # conditional yields boolean numpy.ndarray keep
-                keep = self.calc_evaluate_expr(cond[i], val_dict=cond[i+1])
+                try:
+                    keep = self.calc_evaluate_expr(cond[i], val_dict=cond[i+1])
+                except Exception as e:
+                    err = "could not evaluate conditional statement. Check syntax."
+                    self.calc_error(func, err, e)
+                    return
 
                 # check for missing or incorrectly type for conditional
                 if keep is None:
@@ -9888,7 +9959,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.calc_error(func, err, '')
                     return
 
-                res = self.calc_evaluate_expr(expr[i], val_dict=expr[i+1], keep=keep)
+                # compute expression for indexes where keep==`True`
+                try:
+                    res = self.calc_evaluate_expr(expr[i], val_dict=expr[i+1], keep=keep)
+                except Exception as e:
+                    err = "could not evaluate expression. Check syntax."
+                    self.calc_error(func, err, e)
+                    return
+
                 if res is None:
                     err = 'the expression failed to return an array of values.'
                     self.calc_error(func, err, '')
@@ -10273,13 +10351,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.toolButtonPolyAddPoint.setChecked(False)
                 self.toolButtonPolyRemovePoint.setChecked(False)
             case 'profiling':
-                self.toolButtonCrop.setChecked(False)
+                self.actionCrop.setChecked(False)
                 self.toolButtonPolyCreate.setChecked(False)
                 self.toolButtonPolyMovePoint.setChecked(False)
                 self.toolButtonPolyAddPoint.setChecked(False)
                 self.toolButtonPolyRemovePoint.setChecked(False)
             case 'polygon':
-                self.toolButtonCrop.setChecked(False)
+                self.actionCrop.setChecked(False)
                 self.toolButtonPlotProfile.setChecked(False)
                 self.toolButtonPointMove.setChecked(False)
 
@@ -11996,7 +12074,7 @@ class Crop_tool:
         """Sets intial crop region as full map extent."""
 
 
-        if self.main_window.toolButtonCrop.isChecked():
+        if self.main_window.actionCrop.isChecked():
             if self.main_window.data[self.main_window.sample_id]['crop']:
                 # reset to full view and remove overlays if user unselects crop tool
                 self.main_window.reset_to_full_view()
@@ -12029,7 +12107,7 @@ class Crop_tool:
         else:
             # reset to full view and remove overlays if user unselects crop tool
             self.main_window.reset_to_full_view()
-            self.main_window.toolButtonCrop.setChecked(False)
+            self.main_window.actionCrop.setChecked(False)
 
     def remove_overlays(self):
         """Removes darkened overlay following completion of crop."""

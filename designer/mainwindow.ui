@@ -272,7 +272,7 @@
         <widget class="QToolButton" name="toolButtonSave">
          <property name="minimumSize">
           <size>
-           <width>28</width>
+           <width>32</width>
            <height>28</height>
           </size>
          </property>
@@ -294,6 +294,12 @@
            <width>20</width>
            <height>20</height>
           </size>
+         </property>
+         <property name="popupMode">
+          <enum>QToolButton::MenuButtonPopup</enum>
+         </property>
+         <property name="autoRaise">
+          <bool>true</bool>
          </property>
         </widget>
        </item>

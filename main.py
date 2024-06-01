@@ -1117,11 +1117,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonHome.clicked.connect(lambda: self.toolbar_plotting('home', 'SV'))
         self.toolButtonPan.clicked.connect(lambda: self.toolbar_plotting('pan', 'SV', self.toolButtonPan.isChecked()))
         self.toolButtonZoom.clicked.connect(lambda: self.toolbar_plotting('zoom', 'SV', self.toolButtonZoom.isChecked()))
-        self.toolButtonSave.clicked.connect(lambda: self.toolbar_plotting('save', 'SV', self.toolButtonSave.isChecked()))
         self.toolButtonAnnotate.clicked.connect(lambda: self.toolbar_plotting('annotate', 'SV'))
         self.toolButtonDistance.toggled.connect(self.toggle_distance_tool)
         self.toolButtonDistance.clicked.connect(lambda: self.toolbar_plotting('distance', 'SV'))
         self.toolButtonPopFigure.clicked.connect(lambda: self.toolbar_plotting('pop', 'SV'))
+        # self.toolButtonSave.clicked.connect(lambda: self.toolbar_plotting('save', 'SV', self.toolButtonSave.isChecked()))
+        SaveMenu_items = ['Figure', 'Data']
+        SaveMenu = QMenu()
+        SaveMenu.triggered.connect(self.save_plot)
+        self.toolButtonSave.setMenu(SaveMenu)
+        for item in SaveMenu_items:
+            SaveMenu.addAction(item)
         self.canvas_changed()
 
         # multi-view tools
@@ -2203,32 +2209,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             
             self.statusBar.showMessage("Analysis saved successfully")    
         
-    def save_analysis(self):
-        file_name, _ = QFileDialog.getSaveFileName(self, "Save File", "", "Pickle Files (*.pkl);;All Files (*)")
-        if file_name:
-            data_dict = {}
-            data_dict['data'] = self.data
-            data_dict['profiling'] =self.profiling.profiles
-            data_dict['polygons'] =self.polygon.polygons
-            data_dict['styles'] =self.styles
-            data_dict['axis_dict'] =self.axis_dict 
-            data_dict['plot_infos'] =  self.get_plot_info_from_tree(self.treeModel)
-            
-            
-            
-            data_dict['sample_ids'] = self.sample_ids
-            data_dict['sample_id'] = self.sample_id
-            
-            data_dict['selected_directory'] = self.selected_directory
-            # data_dict['plot_widget_dict'] = self.plot_widget_dict
-            
-                
-            with open(file_name, 'wb') as file:
-                pickle.dump(data_dict, file)
-            
-            self.statusBar.showMessage("Analysis saved successfully")    
-        
-        # pass
 
     def load_analysis(self):
         if self.data:
@@ -2867,13 +2847,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     d_ub = parameters['d_u_bound']
                     if auto_scale:
 
-                        self.data[sample_id]['processed_data'].loc[:,analyte_1] = self.outlier_detection(filtered_data.reshape(-1, 1),lq, uq, d_lb,d_ub)
+                        self.data[sample_id]['processed_data'][analyte_1] = self.outlier_detection(filtered_data.reshape(-1, 1),lq, uq, d_lb,d_ub)
                     else:
                         #clip data using ub and lb
                         lq_val = np.nanpercentile(filtered_data, lq, axis=0)
                         uq_val = np.nanpercentile(filtered_data, uq, axis=0)
                         filtered_data = np.clip(filtered_data, lq_val, uq_val)
-                        self.data[sample_id]['processed_data'].loc[:,analyte_1] = filtered_data
+                        self.data[sample_id]['processed_data'][analyte_1] = filtered_data
 
                     # update v_min and v_max in self.data[sample_id]['analyte_info']
                     self.data[sample_id]['analyte_info'].loc[
@@ -5684,8 +5664,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.widgetMultiView.layout().addWidget( dup_widget, row, col )
                 dup_widget.show()
                 self.duplicate_plot_info = None #reset to avoid plotting previous duplicates
-            self.widgetSingleView.layout().insertWidget(1,widget)
-            
+            self.widgetSingleView.layout().insertWidget(0,widget)
+            widget.show()
         # add figure to MultiView canvas
         elif self.canvasWindow.currentIndex() == self.canvas_tab['mv']:
             #print('add_plotwidget_to_canvas: MV')
@@ -6036,6 +6016,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.update_SV()
 
         if function == 'save':
+            
             if isinstance(canvas,MplCanvas):
                 self.mpl_toolbar.save_figure()
             if self.pyqtgraph_widget:
@@ -6043,6 +6024,31 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 export = exportDialog.ExportDialog(self.pyqtgraph_widget.getItem(0, 0).scene())
                 export.show(self.pyqtgraph_widget.getItem(0, 0).getViewBox())
                 export.exec_()
+                
+    def save_plot(self, action):
+        """Sorts analyte table in dialog"""        
+        # get save method (Figure/Data)
+        canvas = self.get_SV_widget(1)
+        method = action.text()
+        if method == 'Figure':
+            
+            if isinstance(canvas, MplCanvas):
+                self.mpl_toolbar.save_figure()
+            if self.pyqtgraph_widget:
+                # Save functionality for pyqtgraph
+                export = exportDialog.ExportDialog(self.pyqtgraph_widget.getItem(0, 0).scene())
+                export.show(self.pyqtgraph_widget.getItem(0, 0).getViewBox())
+                export.exec_()
+        elif method == 'Data':
+            #open dialog to get name of file
+            file_name, _ = QFileDialog.getSaveFileName(self, "Save File", "", "CSV Files (*.csv);;All Files (*)")
+            if file_name:
+                with open(file_name, 'wb') as file:
+                    # self.save_data holds data used for current plot 
+                    self.save_data.to_csv(file,index = False)
+                
+                self.statusBar.showMessage("Plot Data saved successfully")
+                
 
     def default_scale_length(self):
         """Sets default length of a scale bar for map-type plots
@@ -6290,6 +6296,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # get data for current map
         self.map_df = self.get_map_data(self.sample_id, field, field_type=field_type)
 
+        # store map_df to save_data if data needs to be exported
+        self.save_data = self.map_df
         # plot map
         reshaped_array = np.reshape(self.map_df['array'].values, self.array_size, order=self.order)
         norm = self.color_norm(style)
@@ -6350,7 +6358,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.mpl_toolbar.hide()
         self.widgetSingleView.layout().addWidget(canvas)
 
-        #self.add_tree_item(self.plot_info)
+        self.add_tree_item(self.plot_info)
 
     def plot_map_pg(self, sample_id, field_type, field):
         """Create a graphic widget for plotting a map
@@ -6375,6 +6383,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # get data for current map
         map_df = self.get_map_data(sample_id, field, field_type=field_type)
 
+        # store map_df to save_data if data needs to be exported
+        self.save_data = self.map_df
+        
         #Change transparency of values outside mask
         self.array, rgba_array = self.array_to_image(map_df)
 
@@ -6599,6 +6610,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             ind = np.isin(cluster_group, selected_clusters)
 
             correlation_matrix = df_filtered[ind].corr(method=method)
+        
+        # store correlation_matrix to save_data if data needs to be exported
+        self.save_data = correlation_matrix
+        
         columns = correlation_matrix.columns
 
         style = self.styles['correlation']
@@ -9350,10 +9365,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #     self.add_plotwidget_to_canvas(widget_dict['info'], view=widget_dict['view'], position=widget_dict['position'])
             self.initialize_axis_values(tree, leaf)
             if plot_info:
-                #print('tree_double_click: add_plotwidget_to_canvas')
+                # print('tree_double_click: add_plotwidget_to_canvas')
                 self.add_plotwidget_to_canvas(plot_info)
             else:
-                #print('tree_double_click: plot_map_pg')
+                # print('tree_double_click: plot_map_pg')
                 if self.toolBox.currentIndex() not in [self.left_tab['sample'], self.left_tab['process'], self.left_tab['filter'], self.left_tab['profile']]:
                     self.toolBox.setCurrentIndex(self.left_tab['sample'])
                 
@@ -9412,19 +9427,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.update_ratio_df(self.sample_id, analyte_1, analyte_2, norm)
                 ratio_name = f"{analyte_1} / {analyte_2}"
                 # Populate ratios_items if the pair doesn't already exist
-
+                item1,check = self.find_leaf('Ratio', branch = self.sample_id, leaf = ratio_name)
 
                 if norm_update:
                     item1,check = self.find_leaf('Ratio', branch = self.sample_id, leaf = ratio_name)
                     item2,check = self.find_leaf('Ratio (normalized)', branch = self.sample_id, leaf = ratio_name)
-                else:
-                    item1,check = self.find_leaf('Ratio', branch = self.sample_id, leaf = ratio_name)
-                    item2,check = self.find_leaf('Ratio (normalized)', branch = self.sample_id, leaf = ratio_name)
+                # else:
+                #     item1,check = self.find_leaf('Ratio', branch = self.sample_id, leaf = ratio_name)
+                #     item2,check = self.find_leaf('Ratio (normalized)', branch = self.sample_id, leaf = ratio_name)
 
                 if not check: #if ratio doesn't exist
                     # ratio
                     child_item = StandardItem(ratio_name)
-                    child_item.setBackground(QBrush(QColor(hexcolor)))
+                    # child_item.setBackground(QBrush(QColor(hexcolor)))
                     item1.appendRow(child_item)
 
                     # ratio normalized
@@ -9437,7 +9452,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     #print([analyte, refval_1, refval_2, ratio_flag])
 
                     child_item2 = StandardItem(ratio_name)
-                    child_item2.setBackground(QBrush(QColor(hexcolor)))
+                    # child_item2.setBackground(QBrush(QColor(hexcolor)))
                     # if normization cannot be done, make text italic and disable item
                     if not ratio_flag:
                         font = child_item2.font()
@@ -9445,18 +9460,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         child_item2.setFont(font)
                         child_item2.setEnabled(False)
                     item2.appendRow(child_item2)
-                else:
-                    item.setBackground(QBrush(QColor(hexcolor)))
-                    item2.setBackground(QBrush(QColor(hexcolor)))
+                # else:
+                #     item1.setBackground(QBrush(QColor(hexcolor)))
+                #     item2.setBackground(QBrush(QColor(hexcolor)))
 
             else: #single analyte
                 analyte_1 = analyte
                 analyte_2 = None
-            
-                if norm_update:
-                    item,check = self.find_leaf('Analyte (normalized)', branch = sample_id, leaf = analyte)
-                else:
-                    item,check = self.find_leaf('Analyte', branch = sample_id, leaf = analyte)
+                item,check = self.find_leaf('Analyte', branch = sample_id, leaf = analyte)
+                # if norm_update:
+                #     item,check = self.find_leaf('Analyte (normalized)', branch = sample_id, leaf = analyte)
+                # else:
+                #     item,check = self.find_leaf('Analyte', branch = sample_id, leaf = analyte)
 
                 item.setBackground(QBrush(QColor(hexcolor)))
 

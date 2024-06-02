@@ -296,9 +296,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 | 'Alpha' : (int) -- marker transparency, set by ``horizontalSliderMarkerAlpha``
             ['Lines'] -- associated with widgets in the toolBoxTreeView > Styling > Lines tab
                 | 'LineWidth' : (float) -- width of line objects, varies between plot types, set by ``comboBoxLineWidth``
-                | 'Multiplier' : (float) -- multiplier for the length of vectors on pca scatter/heatmaps, set by ``lineEditLengthMultiplier``
+                | 'LineColor' : (float) -- width of line objects, varies between plot types, set by ``comboBoxLineWidth``
+                | 'Multiplier' : (hex str) -- color of markers, set by ``toolButtonLineColor``
             ['Colors'] -- associated with widgets in the toolBoxTreeView > Styling > Colors tab
-                | 'Color' : (hex str) -- color of markers, set by ``toolButtonOverlayColor``
+                | 'Color' : (hex str) -- color of markers, set by ``toolButtonMarkerColor``
                 | 'ColorByField' : (str) -- field type used to set colors in a figure, set by ``comboBoxColorByField``
                 | 'Field' : (str) -- field used to set colors in a figure, set by ``comboBoxColorField``
                 | 'Colormap' : (str) -- colormap used in figure, set by ``comboBoxFieldColormap``
@@ -898,6 +899,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # overlay and annotation properties
         self.toolButtonOverlayColor.clicked.connect(self.overlay_color_callback)
         self.toolButtonMarkerColor.clicked.connect(self.marker_color_callback)
+        self.toolButtonLineColor.clicked.connect(self.line_color_callback)
         self.toolButtonClusterColor.clicked.connect(self.cluster_color_callback)
         self.toolButtonXAxisReset.clicked.connect(lambda: self.axis_reset_callback('x'))
         self.toolButtonYAxisReset.clicked.connect(lambda: self.axis_reset_callback('y'))
@@ -3659,7 +3661,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                'Text': {'Font': '', 'FontSize': 11.0},
                                'Scale': {'Direction': 'none', 'Location': 'northeast', 'Length': None, 'OverlayColor': '#ffffff'},
                                'Markers': {'Symbol': 'circle', 'Size': 6, 'Alpha': 30},
-                               'Lines': {'LineWidth': 1.5, 'Multiplier': 1},
+                               'Lines': {'LineWidth': 1.5, 'Multiplier': 1, 'Color': '#1c75bc'},
                                'Colors': {'Color': '#1c75bc', 'ColorByField': 'None', 'Field': '', 'Colormap': 'viridis', 'Reverse': False, 'CLim':[0,1], 'CScale':'linear', 'Direction': 'vertical', 'CLabel': '', 'Resolution': 10}
                                }
 
@@ -3735,10 +3737,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.styles['heatmap']['Colors']['CScale'] = 'log'
         self.styles['TEC']['Axes']['AspectRatio'] = 0.62
         self.styles['variance']['Axes']['AspectRatio'] = 0.62
-        self.styles['pca scatter']['Scale']['OverlayColor'] = '#4d4d4d'
+        self.styles['pca scatter']['Lines']['Color'] = '#4d4d4d'
         self.styles['pca scatter']['Lines']['LineWidth'] = 0.5
         self.styles['pca scatter']['Axes']['AspectRatio'] = 1
         self.styles['pca heatmap']['Axes']['AspectRatio'] = 1
+        self.styles['pca heatmap']['Lines']['Color'] = '#ffffff'
 
         self.styles['variance']['Text']['FontSize'] = 8
 
@@ -3749,6 +3752,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.styles['profile']['Lines']['LineWidth'] = 1.0
         self.styles['profile']['Markers']['Size'] = 12
         self.styles['profile']['Colors']['Color'] = '#d3d3d3'
+        self.styles['profile']['Lines']['Color'] = '#d3d3d3'
 
     # Themes
     # -------------------------------------
@@ -4524,6 +4528,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # line properties
         self.comboBoxLineWidth.setCurrentText(str(style['Lines']['LineWidth']))
         self.lineEditLengthMultiplier.setText(str(style['Lines']['Multiplier']))
+        self.toolButtonLineColor.setStyleSheet("background-color: %s;" % style['Lines']['Color'])
 
         # color properties
         self.toolButtonMarkerColor.setStyleSheet("background-color: %s;" % style['Colors']['Color'])
@@ -4607,7 +4612,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     'Alpha': float(self.horizontalSliderMarkerAlpha.value())}
 
         # update line properties
-        self.styles[plot_type]['Lines']['LineWidth'] = float(self.comboBoxLineWidth.currentText())
+        self.styles[plot_type]['Lines'] = {'LineWidth': float(self.comboBoxLineWidth.currentText()),
+                    'Multiplier': float(self.lineEditLengthMultiplier.text()),
+                    'Color': self.get_hex_color(self.toolButtonMarkerColor.palette().button().color())}
 
         # update color properties
         self.styles[plot_type]['Colors'] = {'Color': self.get_hex_color(self.toolButtonMarkerColor.palette().button().color()),
@@ -5240,6 +5247,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return
 
         self.styles[plot_type]['Lines']['Multiplier'] = value
+        self.update_SV()
+
+    def line_color_callback(self):
+        """Updates color of plot markers
+
+        Uses ``QColorDialog`` to select new marker color and then updates plot on change of backround ``MainWindow.toolButtonLineColor`` color.
+        """
+        plot_type = self.comboBoxPlotType.currentText()
+        # change color
+        self.button_color_select(self.toolButtonLineColor)
+        color = self.get_hex_color(self.toolButtonLineColor.palette().button().color())
+        if self.styles[plot_type]['Lines']['Color'] == color:
+            return
+
+        # update style
+        self.styles[plot_type]['Lines']['Color'] = color
+
+        # update plot
         self.update_SV()
 
     # colors
@@ -6763,12 +6788,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.update_SV()
 
     def plot_small_histogram(self, current_plot_df, field):
-        """Creates a small histogram in the Samples and Fields page
+        """Creates a small histogram on the Samples and Fields tab associated with the selected map
 
-        :param current_plot_df: current data for plotting
-        :type current_plot_df: dict
-        :param field: name of field to plot
-        "type field: str
+        Parameters
+        ----------
+        current_plot_df : dict
+            Current data for plotting
+        field : str
+            Name of field to plot
         """
         #print('plot_small_histogram')
         # create Mpl canvas
@@ -6823,14 +6850,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #self.widgetHistView.show()
 
     def plot_histogram(self):
-        """Plots a histogram"""
+        """Plots a histogramn the canvas window"""
         #print('plot histogram')
         # create Mpl canvas
         canvas = MplCanvas(parent=self)
 
         style = self.styles['histogram']
 
-        bin_width = int(self.spinBoxBinWidth.value())
+        nbins = int(self.spinBoxNBins.value())
 
         analysis = self.comboBoxHistFieldType.currentText()
         field = self.comboBoxHistField.currentText()
@@ -6840,20 +6867,32 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         x, _, _, _, = self.get_scatter_values('histogram')
 
-        #remove by mask and drop rows with n
-        edges = np.arange(x['array'].min(), x['array'].max() + bin_width, bin_width)
+        # determine edges
+        xmin,xmax,xscale,xlbl = self.get_axis_values(x['type'],x['field'])
+        style['Axes']['XLim'] = [xmin, xmax]
+        style['Axes']['XScale'] = xscale
+        #if xscale == 'log':
+        #    x['array'] = np.log10(x['array'])
+        #    xmin = np.log10(xmin)
+        #    xmax = np.log10(xmax)
 
-        # Clear previous histogram
-        #canvas.axes.clear()
+        #bin_width = (xmax - xmin) / nbins
+        #print(nbins)
+        #print(bin_width)
+
+        if xscale == 'linear':
+            edges = np.linspace(xmin, xmax, nbins)
+        else:
+            edges = 10**np.linspace(np.log10(xmin), np.log10(xmax), nbins)
+            
+        print(edges)
 
         # histogram style
         lw = style['Lines']['LineWidth']
         if lw > 0:
-            type = 'step'
-            ecolor = style['Colors']['Color']
+            htype = 'step'
         else:
-            type = 'bar'
-            ecolor = None
+            htype = 'bar'
 
         # CDF or PDF
         match self.comboBoxHistType.currentText():
@@ -6878,12 +6917,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # color = self.group_cmap(i)[:-1]  # Create a new RGBA tuple with a
                 #color = self.group_cmap[f'Cluster {i}'][:-1] + (0.6,)
                 #color = tuple(float(c)/255 for c in self.get_rgb_color(cluster_color[i])) + (0.6,)
-                color = cluster_color[int(i)]
+                bar_color = cluster_color[int(i)]
+                if htype == 'step':
+                    ecolor = bar_color
+                else:
+                    ecolor = None
+
                 canvas.axes.hist( cluster_data,
                         cumulative=cumflag,
-                        histtype=type,
+                        histtype=htype,
                         bins=edges,
-                        color=color, edgecolor=ecolor,
+                        color=bar_color, edgecolor=ecolor,
                         linewidth=lw,
                         label=cluster_label[int(i)],
                         alpha=style['Markers']['Alpha']/100,
@@ -6896,12 +6940,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             clusters = None
             # Regular histogram
+            bar_color = style['Colors']['Color']
+            if htype == 'step':
+                ecolor = style['Lines']['Color']
+            else:
+                ecolor = None
+
             canvas.axes.hist( x['array'],
                     cumulative=cumflag,
-                    histtype=type,
+                    histtype=htype,
                     bins=edges,
-                    color=style['Colors']['Color'],
-                    edgecolor=ecolor,
+                    color=bar_color, edgecolor=ecolor,
                     linewidth=lw,
                     alpha=style['Markers']['Alpha']/100,
                     density=True
@@ -6921,8 +6970,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.axis_dict[x['field']].update(d)
             self.set_axis_widgets('y', x['field'])
 
-        # grab axes limits
-        xmin, xmax, xscale, xlbl, ymin, ymax = self.get_axis_values(x['type'],x['field'],ax='p')
+        # grab probablility axes limits
+        _, _, _, _, ymin, ymax = self.get_axis_values(x['type'],x['field'],ax='p')
 
         # label font
         if 'font' == '':
@@ -6933,18 +6982,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # x-axis
         canvas.axes.set_xlabel(xlbl, fontdict=font)
-        canvas.axes.set_xlim(xmin,xmax)
         if xscale == 'log':
+        #    self.logax(canvas.axes, [xmin,xmax], axis='x', label=xlbl)
             canvas.axes.set_xscale(xscale,base=10)
         # if style['Axes']['Scale'] == 'linear':
         # else:
         #     canvas.axes.set_xlim(xmin,xmax)
+        canvas.axes.set_xlim(xmin,xmax)
 
         # y-axis
         canvas.axes.set_ylabel(self.comboBoxHistType.currentText(), fontdict=font)
         canvas.axes.set_ylim(ymin,ymax)
 
-        canvas.axes.tick_params(labelsize=style['Text']['FontSize'])
+        canvas.axes.tick_params(labelsize=style['Text']['FontSize'],direction=style['Axes']['TickDir'])
         canvas.axes.set_box_aspect(style['Axes']['AspectRatio'])
 
         self.update_figure_font(canvas, style['Text']['Font'])
@@ -6959,7 +7009,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'field': field,
             'plot_type': 'histogram',
             'type': self.comboBoxHistType.currentText(),
-            'bin_width': bin_width,
+            'nbins': nbins,
             'figure': canvas,
             'style': style,
             'cluster_groups': clusters,

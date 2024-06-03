@@ -454,8 +454,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.left_tab.update({'process': tid})
                 case 'spot data':
                     self.left_tab.update({'spot': tid})
-                case 'filter':
-                    self.left_tab.update({'filter': tid})
+                case 'polygons':
+                    self.left_tab.update({'polygons': tid})
                 case 'scatter and heatmaps':
                     self.left_tab.update({'scatter': tid})
                 case 'n-dim':
@@ -515,7 +515,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.plot_types = {self.left_tab['sample']: [0, 'analyte map', 'correlation'],
             self.left_tab['spot']: [0, 'analyte map', 'gradient map'],
             self.left_tab['process']: [0, 'analyte map', 'gradient map', 'histogram'],
-            self.left_tab['filter']: [0, 'analyte map'],
+            self.left_tab['polygons']: [0, 'analyte map'],
             self.left_tab['scatter']: [0, 'scatter', 'heatmap', 'ternary map'],
             self.left_tab['ndim']: [0, 'TEC', 'Radar'],
             self.left_tab['multidim']: [0, 'variance','vectors','pca scatter','pca heatmap','PCA Score'],
@@ -550,7 +550,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.SelectAnalytePage.setEnabled(False)
         self.PreprocessPage.setEnabled(False)
         self.SpotDataPage.setEnabled(False)
-        self.FilterPage.setEnabled(False)
+        self.PolygonPage.setEnabled(False)
         self.ScatterPage.setEnabled(False)
         self.NDIMPage.setEnabled(False)
         self.MultidimensionalPage.setEnabled(False)
@@ -1293,7 +1293,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.SelectAnalytePage.setEnabled(True)
         self.PreprocessPage.setEnabled(True)
         self.SpotDataPage.setEnabled(True)
-        self.FilterPage.setEnabled(True)
+        self.PolygonPage.setEnabled(True)
         self.ScatterPage.setEnabled(True)
         self.NDIMPage.setEnabled(True)
         self.MultidimensionalPage.setEnabled(True)
@@ -1604,8 +1604,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.toolBox.setCurrentIndex(self.left_tab['process'])
             case 'spot data':
                 self.toolBox.setCurrentIndex(self.left_tab['spot'])
-            case 'filter':
-                self.toolBox.setCurrentIndex(self.left_tab['filter'])
+            case 'polygons':
+                self.toolBox.setCurrentIndex(self.left_tab['polygons'])
                 self.tabWidget.setCurrentIndex(self.bottom_tab['note'])
             case 'scatter':
                 self.toolBox.setCurrentIndex(self.left_tab['scatter'])
@@ -1667,7 +1667,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.SelectAnalytePage.setEnabled(True)
             self.PreprocessPage.setEnabled(True)
             self.SpotDataPage.setEnabled(True)
-            self.FilterPage.setEnabled(True)
+            self.PolygonPage.setEnabled(True)
             self.ScatterPage.setEnabled(True)
             self.NDIMPage.setEnabled(True)
             self.MultidimensionalPage.setEnabled(True)
@@ -1710,7 +1710,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.SelectAnalytePage.setEnabled(False)
             self.PreprocessPage.setEnabled(False)
             self.SpotDataPage.setEnabled(False)
-            self.FilterPage.setEnabled(False)
+            self.PolygonPage.setEnabled(False)
             self.ScatterPage.setEnabled(False)
             self.NDIMPage.setEnabled(False)
             self.MultidimensionalPage.setEnabled(False)
@@ -1747,7 +1747,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.SelectAnalytePage.setEnabled(False)
             self.PreprocessPage.setEnabled(False)
             self.SpotDataPage.setEnabled(False)
-            self.FilterPage.setEnabled(False)
+            self.PolygonPage.setEnabled(False)
             self.ScatterPage.setEnabled(False)
             self.NDIMPage.setEnabled(False)
             self.MultidimensionalPage.setEnabled(False)
@@ -1957,6 +1957,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # reapply existing filters
         if self.actionFilterToggle.isChecked():
             self.apply_field_filters(update_plot=False)
+            # should look for filters built on computed fields and remove them
         if self.actionPolygonMask.isChecked():
             self.apply_polygon_mask(update_plot=False)
 
@@ -2673,9 +2674,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             checkBox = self.tableWidgetPolyPoints.cellWidget(row, 4)
 
             if checkBox.isChecked():
-                p_id = int(self.tableWidgetPolyPoints.item(row,0).text())
+                pid = int(self.tableWidgetPolyPoints.item(row,0).text())
 
-                polygon_points = self.polygon.polygons[sample_id][p_id]
+                polygon_points = self.polygon.polygons[sample_id][pid]
                 polygon_points = [(x,y) for x,y,_ in polygon_points]
 
                 # Convert the list of (x, y) tuples to a list of points acceptable by Path
@@ -2684,7 +2685,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # Create a grid of points covering the entire array
                 # x, y = np.meshgrid(np.arange(self.array.shape[1]), np.arange(self.array.shape[0]))
 
-                points = np.vstack((self.x.flatten(), self.y.flatten())).T
+                points = np.vstack((self.x, self.y)).T
 
                 # Use the path to determine which points are inside the polygon
                 inside_polygon = path.contains_points(points)
@@ -5688,7 +5689,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 if not field_type or not field:
                     return
 
-                if self.toolBox.currentIndex() in [self.left_tab['filter'], self.left_tab['profile']]:
+                if self.toolBox.currentIndex() in [self.left_tab['polygons'], self.left_tab['profile']]:
                     self.plot_map_pg(sample_id, field_type, field)
                 else:
                     self.plot_map_mpl(sample_id, field_type, field)
@@ -6213,6 +6214,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.dx = self.x_range/self.x.nunique()
         self.dy = self.y_range/self.y.nunique()
+
+        units = self.preferences['Units']['Distance']
+        self.lineEditDX.setText(f'{self.dx:.2f} {units}')
+        self.lineEditDY.setText(f'{self.dy:.2f} {units}')
 
         self.aspect_ratio = self.dy / self.dx
 
@@ -6910,6 +6915,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         mask = mask & current_plot_df['array'].notna()
 
         array = current_plot_df['array'][mask].values
+        len(array)
 
         logflag = False
         if self.styles['analyte map']['Colors']['CScale'] == 'log':
@@ -6920,7 +6926,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         bin_width = (array.max() - array.min()) / self.default_bins
         edges = np.arange(array.min(), array.max() + bin_width, bin_width)
 
-        _, _, patches = canvas.axes.hist(array, bins=edges, color=style['Colors']['Color'], edgecolor=None, linewidth=style['Lines']['LineWidth'], log=logflag, alpha=0.6)
+        if sum(mask) != len(mask):
+            canvas.axes.hist(current_plot_df['array'], bins=edges, density=True, color='#b3b3b3', edgecolor=None, linewidth=style['Lines']['LineWidth'], log=logflag, alpha=0.6, label='unmasked')
+        _, _, patches = canvas.axes.hist(array, bins=edges, density=True, color=style['Colors']['Color'], edgecolor=None, linewidth=style['Lines']['LineWidth'], log=logflag, alpha=0.6)
         # color histogram bins by analyte colormap?
         if self.checkBoxShowHistCmap.isChecked():
             cmap = self.get_colormap()
@@ -9519,7 +9527,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.add_plotwidget_to_canvas(plot_info)
             else:
                 # print('tree_double_click: plot_map_pg')
-                if self.toolBox.currentIndex() not in [self.left_tab['sample'], self.left_tab['process'], self.left_tab['filter'], self.left_tab['profile']]:
+                if self.toolBox.currentIndex() not in [self.left_tab['sample'], self.left_tab['process'], self.left_tab['polygons'], self.left_tab['profile']]:
                     self.toolBox.setCurrentIndex(self.left_tab['sample'])
                 
                 if branch == self.sample_id:
@@ -12682,32 +12690,37 @@ class Polygon:
                             break
 
     def update_table_widget(self):
-        if self.main_window.sample_id in self.polygons: #if profiles for that sample if exists
+        """Update polygon table
+
+        Updates ``MainWindow.tableWidgetPolyPoints`` with 
+        """        
+        if self.main_window.sample_id in self.polygons: #if polygons for that sample if exists
 
             self.main_window.tableWidgetPolyPoints.clearContents()  # Clear existing rows
             self.main_window.tableWidgetPolyPoints.setRowCount(0)
 
-            for p_id, val in self.polygons[self.main_window.sample_id].items():
+            for pid, val in self.polygons[self.main_window.sample_id].items():
                 row_position = self.main_window.tableWidgetPolyPoints.rowCount()
                 self.main_window.tableWidgetPolyPoints.insertRow(row_position)
 
                 # Fill in the data
-                self.main_window.tableWidgetPolyPoints.setItem(row_position, 0, QTableWidgetItem(str(p_id)))
-                self.main_window.tableWidgetPolyPoints.setItem(row_position, 1, QTableWidgetItem(str('')))
+                self.main_window.tableWidgetPolyPoints.setItem(row_position, 0, QTableWidgetItem(str(pid)))
+                self.main_window.tableWidgetPolyPoints.setItem(row_position, 1, QTableWidgetItem(f'poly {pid}'))
                 self.main_window.tableWidgetPolyPoints.setItem(row_position, 2, QTableWidgetItem(str('')))
                 self.main_window.tableWidgetPolyPoints.setItem(row_position, 3, QTableWidgetItem(str('In')))
 
                 # Create a QCheckBox
                 checkBox = QCheckBox()
-
-                # Set its checked state
-                checkBox.setChecked(True)
+                checkBox.setChecked(True) # Set its checked state
 
                 # Connect the stateChanged signal
-                checkBox.stateChanged.connect(lambda state: self.main_window.apply_polygon_mask(update_plot=True))
+                checkBox.stateChanged.connect(lambda: self.main_window.apply_polygon_mask(update_plot=True))
 
                 # Add the checkbox to the table
                 self.main_window.tableWidgetPolyPoints.setCellWidget(row_position, 4, checkBox)
+
+        # update polygon mask
+        self.main_window.apply_polygon_mask(update_plot=True)
 
     def clear_lines(self):
         if self.p_id in self.polygons[self.main_window.sample_id]:

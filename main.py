@@ -703,20 +703,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #-------------------------
         # left pane
         self.toolButtonAddFilter.clicked.connect(self.update_filter_table)
-        self.toolButtonAddFilter.clicked.connect(lambda: self.apply_filters(fullmap=False))
-        self.toolButtonAddFilter.clicked.connect(lambda: self.actionClearFilters.setEnabled(True))
+        self.toolButtonAddFilter.clicked.connect(lambda: self.apply_field_filters())
 
         self.comboBoxFilterFieldType.activated.connect(lambda: self.update_field_combobox(self.comboBoxFilterFieldType, self.comboBoxFilterField))
         self.comboBoxFilterField.activated.connect(self.update_filter_values)
 
         # central-bottom pane
         self.toolButtonFilterUp.clicked.connect(lambda: self.table_fcn.move_row_up(self.tableWidgetFilters))
-        self.toolButtonFilterUp.clicked.connect(lambda: self.apply_filters(fullmap=False))
+        self.toolButtonFilterUp.clicked.connect(lambda: self.apply_field_filters(update_plot=True))
         self.toolButtonFilterDown.clicked.connect(lambda: self.table_fcn.move_row_down(self.tableWidgetFilters))
-        self.toolButtonFilterDown.clicked.connect(lambda: self.apply_filters(fullmap=False))
+        self.toolButtonFilterDown.clicked.connect(lambda: self.apply_field_filters(update_plot=True))
         # There is currently a special function for removing rows, convert to table_fcn.delete_row
         self.toolButtonFilterRemove.clicked.connect(self.remove_selected_rows)
         self.toolButtonFilterRemove.clicked.connect(lambda: self.table_fcn.delete_row(self.tableWidgetFilters))
+        self.toolButtonFilterRemove.clicked.connect(lambda: self.apply_field_filters(update_plot=True))
         self.toolButtonFilterSelectAll.clicked.connect(self.tableWidgetFilters.selectAll)
 
         # initiate Polygon class
@@ -1409,13 +1409,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             # set mask of size of analyte array
             # self.data[self.sample_id]['axis_mask'] = MaskObj( np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool) )
-            # self.data[self.sample_id]['axis_mask'].register_callback(self.mask_changed_callback)
+            # self.data[self.sample_id]['axis_mask'].register_callback(self.apply_filters(fullmap=False))
             # self.data[self.sample_id]['filter_mask'] = MaskObj( np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool) )
-            # self.data[self.sample_id]['filter_mask'].register_callback(self.mask_changed_callback)
+            # self.data[self.sample_id]['filter_mask'].register_callback(self.apply_filters(fullmap=False))
             # self.data[self.sample_id]['polygon_mask'] = MaskObj( np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool) )
-            # self.data[self.sample_id]['polygon_mask'].register_callback(self.mask_changed_callback)
+            # self.data[self.sample_id]['polygon_mask'].register_callback(self.apply_filters(fullmap=False))
             # self.data[self.sample_id]['cluster_mask'] = MaskObj( np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool) )
-            # self.data[self.sample_id]['cluster_mask'].register_callback(self.mask_changed_callback)
+            # self.data[self.sample_id]['cluster_mask'].register_callback(self.apply_filters(fullmap=False))
             self.data[self.sample_id]['axis_mask'] = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
             self.data[self.sample_id]['filter_mask'] = np.ones_like( self.data[sample_id]['raw_data']['X'].values, dtype=bool)
             self.data[self.sample_id]['polygon_mask'] = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
@@ -1953,7 +1953,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.prep_data()
         # re-compute aspect ratio
         self.compute_map_aspect_ratio()
+
         # reapply existing filters
+        if self.actionFilterToggle.isChecked():
+            self.apply_field_filters(update_plot=False)
+        if self.actionPolygonMask.isChecked():
+            self.apply_polygon_mask(update_plot=False)
+
+        # reset cluster mask (no valid clustering exists)
+        self.actionClusterMask.setEnabled(False)
+        self.actionClusterMask.setChecked(False)
+        self.data[sample_id]['cluster_mask'] = np.ones_like(self.data[sample_id]['mask'], dtype=bool)
+
         self.apply_filters(fullmap=False)
 
         self.data[self.sample_id]['crop'] = False
@@ -2403,6 +2414,63 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------
     # Filter functions
     # -------------------------------
+    def apply_filters(self, fullmap=False):
+        """Applies filter to map data
+
+        Applies user specified data filters to mask data for analysis and calls ``MainWindow.update_SV`` to update the current figure.
+        Updates mask for the current sample whenever the crop (axis), filter, polygon, or cluster mask changes.
+        Updates figure if the *Single View* canvas is active.
+
+        Parameters
+        ----------
+        fullmap : bool, optional
+            If ``True``, filters are ignored, otherwise the map is filtered, by default ``False``
+        """
+        #reset all masks in current sample id
+        sample_id = self.sample_id
+
+        # remove all masks
+        if fullmap:
+            #user clicked on Map viewable
+            self.actionFilterToggle.setChecked(False)
+            self.actionPolygonMask.setChecked(False)
+            self.actionClusterMask.setChecked(False)
+
+            self.actionClearFilters.setEnabled(False)
+            self.actionFilterToggle.setEnabled(False)
+            self.actionPolygonMask.setEnabled(False)
+            self.actionClusterMask.setEnabled(False)
+
+            self.data[sample_id]['mask'] = np.ones_like(self.data[sample_id]['mask'], dtype=bool)
+            return
+
+        # apply interval filters
+        if self.actionFilterToggle.isChecked():
+            filter_mask = self.data[sample_id]['filter_mask']
+        else:
+            filter_mask = np.ones_like( self.data[sample_id]['mask'], dtype=bool)
+
+        # apply polygon filters
+        if self.actionPolygonMask.isChecked():
+            polygon_mask = self.data[sample_id]['polygon_mask']
+        else:
+            polygon_mask = np.ones_like( self.data[sample_id]['mask'], dtype=bool)
+
+        # apply cluster mask
+        if self.actionClusterMask.isChecked():
+            # apply map mask
+            cluster_mask = self.data[sample_id]['cluster_mask']
+        else:
+            cluster_mask = np.ones_like( self.data[sample_id]['mask'], dtype=bool)
+
+        self.data[sample_id]['mask'] = self.data[sample_id]['axis_mask'] & filter_mask & polygon_mask & cluster_mask
+
+        # if single view is active
+        if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
+            self.update_SV()
+
+    # Field filter functions
+    # -------------------------------
     def update_filter_values(self):
         field_type = self.comboBoxFilterFieldType.currentText()
         field = self.comboBoxFilterField.currentText()
@@ -2512,8 +2580,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     'norm':scale ,'f_min': f_min,'f_max':f_max, 'operator':operator, 'use':True}
             self.data[self.sample_id]['filter_info'].loc[len(self.data[self.sample_id]['filter_info'])]=filter_info
 
-            self.actionFilterToggle.setEnabled(True)
-            self.actionFilterToggle.setChecked(True)
+        self.apply_field_filters()
 
     def remove_selected_rows(self):
         """Remove selected rows from filter table.
@@ -2537,158 +2604,146 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 else:
                     pass
 
-        self.apply_filters(sample_id)
+        self.apply_field_filters(sample_id)
 
-    def apply_filters(self, fullmap=False):
-        """Applies filter to map data
+    def apply_field_filters(self, update_plot=True):
+        """Creates the field filter for masking data
 
-        Applies user specified data filters to mask data for analysis
+        Updates ``MainWindow.data[sample_id]['filter_mask']`` and if ``update_plot==True``, updates ``MainWindow.data[sample_id]['mask']``.
 
         Parameters
         ----------
-        fullmap : bool, optional
-            If True, filters are ignored, otherwise the map is filtered, by default False
-        """
-        #reset all masks in current sample id
+        update_plot : bool, optional
+            If true, calls ``MainWindow.apply_filters`` which also calls ``MainWindow.update_SV``, by default True
+        """        
         sample_id = self.sample_id
-        self.data[sample_id]['polygon_mask'] = np.ones_like(self.data[sample_id]['mask'], dtype=bool)
+
+        # create array of all true
         self.data[sample_id]['filter_mask'] = np.ones_like(self.data[sample_id]['mask'], dtype=bool)
 
         # remove all masks
-        if fullmap:
-            #user clicked on Map viewable
-            self.actionFilterToggle.setChecked(False)
-            self.actionPolygonMask.setChecked(False)
-            self.actionClusterMask.setChecked(False)
-
-            self.actionClearFilters.setEnabled(False)
-            self.actionFilterToggle.setEnabled(False)
-            self.actionPolygonMask.setEnabled(False)
-            self.actionClusterMask.setEnabled(False)
+        self.actionClearFilters.setEnabled(True)
+        self.actionFilterToggle.setEnabled(True)
+        self.actionFilterToggle.setChecked(True)
 
         # apply interval filters
-        if self.actionFilterToggle.isChecked():
-            #print(self.data[sample_id]['filter_info'])
+        #print(self.data[sample_id]['filter_info'])
 
-            # Check if rows in self.data[sample_id]['filter_info'] exist and filter array in current_plot_df
-            # by creating a mask based on f_min and f_max of the corresponding filter analytes
-            for index, filter_row in self.data[sample_id]['filter_info'].iterrows():
-                if filter_row['use']:
-                    if 'Analyte' in filter_row['field_type']:
-                        analyte_df = self.get_map_data(sample_id=sample_id, field=filter_row['analyte_1'], field_type=filter_row['field_type'])
-                    elif 'Row' in filter_row['field_type']:
-                        analyte_df = self.get_map_data(sample_id=sample_id, field=filter_row['analyte_1']+'/'+filter_row['analyte_2'], field_type=filter_row['field_type'])
-                    else:
-                        pass
-                    
-                    operator = filter_row['operator']
-                    if operator == 'and':
-                        self.data[sample_id]['filter_mask'] = self.data[sample_id]['filter_mask'] & ((filter_row['f_min'] <= analyte_df['array'].values) & (analyte_df['array'].values <= filter_row['f_max']))
-                    elif operator == 'or':
-                        self.data[sample_id]['filter_mask'] = self.data[sample_id]['filter_mask'] | ((filter_row['f_min'] <= analyte_df['array'].values) & (analyte_df['array'].values <= filter_row['f_max']))
-            filter_mask = self.data[sample_id]['filter_mask']
-        else:
-            filter_mask = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
+        # Check if rows in self.data[sample_id]['filter_info'] exist and filter array in current_plot_df
+        # by creating a mask based on f_min and f_max of the corresponding filter analytes
+        for index, filter_row in self.data[sample_id]['filter_info'].iterrows():
+            if filter_row['use']:
+                analyte_df = self.get_map_data(sample_id=sample_id, field=filter_row['analyte_1'], field_type=filter_row['field_type'])
+                
+                operator = filter_row['operator']
+                if operator == 'and':
+                    self.data[sample_id]['filter_mask'] = self.data[sample_id]['filter_mask'] & ((filter_row['f_min'] <= analyte_df['array'].values) & (analyte_df['array'].values <= filter_row['f_max']))
+                elif operator == 'or':
+                    self.data[sample_id]['filter_mask'] = self.data[sample_id]['filter_mask'] | ((filter_row['f_min'] <= analyte_df['array'].values) & (analyte_df['array'].values <= filter_row['f_max']))
 
-        # apply polygon filters
-        if self.actionPolygonMask.isChecked():
-            # apply polygon mask
-            # Iterate through each polygon in self.polygons[self.main_window.sample_id]
-            for row in range(self.tableWidgetPolyPoints.rowCount()):
-                #check if checkbox is checked
-                checkBox = self.tableWidgetPolyPoints.cellWidget(row, 4)
+        if update_plot:
+            self.apply_filters(fullmap=False)
 
-                if checkBox.isChecked():
-                    p_id = int(self.tableWidgetPolyPoints.item(row,0).text())
-
-                    polygon_points = self.polygon.polygons[sample_id][p_id]
-                    polygon_points = [(x,y) for x,y,_ in polygon_points]
-
-                    # Convert the list of (x, y) tuples to a list of points acceptable by Path
-                    path = Path(polygon_points)
-
-                    # Create a grid of points covering the entire array
-                    # x, y = np.meshgrid(np.arange(self.array.shape[1]), np.arange(self.array.shape[0]))
-
-                    points = np.vstack((self.x.flatten(), self.y.flatten())).T
-
-                    # Use the path to determine which points are inside the polygon
-                    inside_polygon = path.contains_points(points)
-
-                    # Reshape the result back to the shape of self.array
-                    # inside_polygon_mask = inside_polygon.reshape(self.array.shape)
-
-                    # Update the polygon mask - include points that are inside this polygon
-                    self.data[sample_id]['polygon_mask'] &= inside_polygon
-
-                    #clear existing polygon lines
-                    self.polygon.clear_lines()
-            polygon_mask = self.data[sample_id]['polygon_mask']
-        else:
-            polygon_mask = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
-
-        # apply cluster mask
-        if self.actionClusterMask.isChecked():
-            # apply map mask
-            cluster_mask = self.data[sample_id]['cluster mask']
-        else:
-            cluster_mask = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
-
-        self.data[sample_id]['mask'] = self.data[sample_id]['axis_mask'] & filter_mask & polygon_mask & cluster_mask
-
-        self.update_SV()
-        #self.update_all_plots()
-
-
+    # Polygon mask functions
     # -------------------------------
+    def apply_polygon_mask(self, update_plot=True):
+        """Creates the polygon mask for masking data
+
+        Updates ``MainWindow.data[sample_id]['polygon_mask']`` and if ``update_plot==True``, updates ``MainWindow.data[sample_id]['mask']``.
+
+        Parameters
+        ----------
+        update_plot : bool, optional
+            If true, calls ``MainWindow.apply_filters`` which also calls ``MainWindow.update_SV``, by default True
+        """        
+        sample_id = self.sample_id
+
+        # create array of all true
+        self.data[sample_id]['polygon_mask'] = np.ones_like(self.data[sample_id]['mask'], dtype=bool)
+
+        # remove all masks
+        self.actionClearFilters.setEnabled(True)
+        self.actionPolygonMask.setEnabled(True)
+        self.actionPolygonMask.setChecked(True)
+
+        # apply polygon mask
+        # Iterate through each polygon in self.polygons[self.main_window.sample_id]
+        for row in range(self.tableWidgetPolyPoints.rowCount()):
+            #check if checkbox is checked
+            checkBox = self.tableWidgetPolyPoints.cellWidget(row, 4)
+
+            if checkBox.isChecked():
+                p_id = int(self.tableWidgetPolyPoints.item(row,0).text())
+
+                polygon_points = self.polygon.polygons[sample_id][p_id]
+                polygon_points = [(x,y) for x,y,_ in polygon_points]
+
+                # Convert the list of (x, y) tuples to a list of points acceptable by Path
+                path = Path(polygon_points)
+
+                # Create a grid of points covering the entire array
+                # x, y = np.meshgrid(np.arange(self.array.shape[1]), np.arange(self.array.shape[0]))
+
+                points = np.vstack((self.x.flatten(), self.y.flatten())).T
+
+                # Use the path to determine which points are inside the polygon
+                inside_polygon = path.contains_points(points)
+
+                # Reshape the result back to the shape of self.array
+                # inside_polygon_mask = inside_polygon.reshape(self.array.shape)
+
+                # Update the polygon mask - include points that are inside this polygon
+                self.data[sample_id]['polygon_mask'] &= inside_polygon
+
+                #clear existing polygon lines
+                self.polygon.clear_lines()
+
+        if update_plot:
+            self.apply_filters(fullmap=False)
+
     # Cluster mask functions
     # -------------------------------
-    def apply_cluster_mask(self, inverse=False):
+    def apply_cluster_mask(self, inverse=False, update_plot=True):
         """Creates a mask from selected clusters
 
         Uses selected clusters in ``MainWindow.tableWidgetViewGroups`` to create a mask (or inverse mask).  Masking is controlled
         clicking either ``MainWindow.toolButtonGroupMask`` or ``MainWindow.toolButtonGroupMaskInverse``.  The masking can be turned
         on or off by changing the checked state of ``MainWindow.actionClusterMask`` on the *Left Toolbox \> Filter Page*.
 
+        Updates ``MainWindow.data[sample_id]['cluster_mask']`` and if ``update_plot==True``, updates ``MainWindow.data[sample_id]['mask']``.
+
         Parameters
         ----------
         inverse : bool, optional
             Inverts selected clusters to define the mask when ``MainWindow.toolButtonGroupMaskInverse`` is clicked, otherwise
             the selected clusers are used to define the mask when ``MainWindow.toolButtonGroupMask`` is clicked, by default False
-        """        
+        update_plot : bool, optional
+            If true, calls ``MainWindow.apply_filters`` which also calls ``MainWindow.update_SV``, by default True
+        """
+        sample_id = self.sample_id
+
+        #self.data[sample_id]['cluster_mask'] = np.ones_like(self.data[sample_id]['mask'], dtype=bool)
+
         method = self.cluster_dict['active method']
         selected_clusters = self.cluster_dict[method]['selected_clusters']
 
         # Invert list of selected clusters
         if not inverse:
             selected_clusters = [cluster_idx for cluster_idx in range(self.cluster_dict[method]['n_clusters']) if cluster_idx not in selected_clusters]
-        print(selected_clusters)
 
-        cluster_group = self.data[self.sample_id]['computed_data']['Cluster'].loc[:,method]
+        # create boolean array with selected_clusters == True
+        cluster_group = self.data[sample_id]['computed_data']['Cluster'].loc[:,method]
         ind = np.isin(cluster_group, selected_clusters)
-        self.data[self.sample_id]['cluster_mask'] = ind
+        self.data[sample_id]['cluster_mask'] = ind
 
+        self.actionClearFilters.setEnabled(True)
         self.actionClusterMask.setEnabled(True)
         self.actionClusterMask.setChecked(True)
-        self.actionClearFilters.setEnabled(True)
 
         self.update_cluster_flag = True
-        self.apply_filters(fullmap=False)
 
-    def mask_changed_callback(self):
-        """Updates mask for current sample
-
-        Updates mask for the current sample whenever the crop (axis), filter, polygon, or cluster mask changes.
-        Updates figure if the *Single View* canvas is active.
-        """        
-        self.data[self.sample_id]['mask'] = \
-            self.data[self.sample_id]['axis_mask'].value & \
-            self.data[self.sample_id]['filter_mask'].value & \
-            self.data[self.sample_id]['polygon_mask'].value & \
-            self.data[self.sample_id]['cluster_mask'].value
-        
-        if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
-            self.update_SV()
+        if update_plot:
+            self.apply_filters(fullmap=False)
 
 
     def oround(self, val, order=2, dir=None):
@@ -6454,7 +6509,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         map_df = self.get_map_data(sample_id, field, field_type=field_type)
 
         # store map_df to save_data if data needs to be exported
-        self.save_data = self.map_df
+        self.save_data = map_df
         
         #Change transparency of values outside mask
         self.array, rgba_array = self.array_to_image(map_df)
@@ -12390,7 +12445,9 @@ class Polygon:
         self.main_window.toolButtonPolyCreate.isChecked()
         self.p_id_gen += 1
         self.p_id = self.p_id_gen
+        self.main_window.actionClearFilters.setEnabled(True)
         self.main_window.actionPolygonMask.setEnabled(True)
+        self.main_window.actionPolygonMask.setChecked(True)
 
     def plot_polygon_scatter(self, event,k, x, y, x_i, y_i):
         #create profile dict particular sample if it doesnt exisist
@@ -12508,8 +12565,6 @@ class Polygon:
             # Redraw the polygon with the new point
             self.show_polygon_lines(x, y, complete=True)
 
-
-
         elif event.button() == QtCore.Qt.LeftButton and not(self.main_window.toolButtonPolyCreate.isChecked()) and self.main_window.toolButtonPolyRemovePoint.isChecked():
             # remove point
             # draw polygon without selected point
@@ -12532,8 +12587,6 @@ class Polygon:
             self.show_polygon_lines(x, y, complete=True)
 
             self.main_window.toolButtonPolyRemovePoint.setChecked(False)
-
-
 
         elif event.button() == QtCore.Qt.LeftButton:
             # Create a scatter self.main_window.plot item at the clicked position
@@ -12651,7 +12704,7 @@ class Polygon:
                 checkBox.setChecked(True)
 
                 # Connect the stateChanged signal
-                checkBox.stateChanged.connect(lambda state: self.main_window.apply_filters(fullmap=False))
+                checkBox.stateChanged.connect(lambda state: self.main_window.apply_polygon_mask(update_plot=True))
 
                 # Add the checkbox to the table
                 self.main_window.tableWidgetPolyPoints.setCellWidget(row_position, 4, checkBox)

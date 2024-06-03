@@ -1025,7 +1025,7 @@
               <x>0</x>
               <y>0</y>
               <width>300</width>
-              <height>465</height>
+              <height>498</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_41">
@@ -1249,6 +1249,45 @@
                    </widget>
                   </item>
                  </layout>
+                </item>
+                <item row="4" column="1">
+                 <layout class="QHBoxLayout" name="horizontalLayout_42">
+                  <item>
+                   <widget class="QLabel" name="labelDX">
+                    <property name="text">
+                     <string>dx:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="lineEditDX">
+                    <property name="toolTip">
+                     <string>X pixel width</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="labelDY">
+                    <property name="text">
+                     <string>dy:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="lineEditDY">
+                    <property name="toolTip">
+                     <string>Y pixel width</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item row="4" column="0">
+                 <widget class="QLabel" name="label_4">
+                  <property name="text">
+                   <string>Dimensions</string>
+                  </property>
+                 </widget>
                 </item>
                </layout>
               </widget>
@@ -1517,7 +1556,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>195</height>
+          <height>512</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -1557,7 +1596,7 @@
               <x>0</x>
               <y>0</y>
               <width>300</width>
-              <height>355</height>
+              <height>512</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_48">
@@ -2110,7 +2149,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>195</height>
+          <height>512</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -2150,7 +2189,7 @@
               <x>0</x>
               <y>0</y>
               <width>294</width>
-              <height>189</height>
+              <height>506</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_45">
@@ -2483,7 +2522,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>195</height>
+          <height>512</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -2523,7 +2562,7 @@
               <x>0</x>
               <y>0</y>
               <width>305</width>
-              <height>400</height>
+              <height>512</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_49">
@@ -3383,7 +3422,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>195</height>
+          <height>512</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -3423,7 +3462,7 @@
               <x>0</x>
               <y>0</y>
               <width>300</width>
-              <height>341</height>
+              <height>512</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_52">
@@ -4037,7 +4076,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>195</height>
+          <height>512</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -4077,7 +4116,7 @@
               <x>0</x>
               <y>0</y>
               <width>300</width>
-              <height>402</height>
+              <height>512</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_54">
@@ -4641,7 +4680,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>195</height>
+          <height>512</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -4681,7 +4720,7 @@
               <x>0</x>
               <y>0</y>
               <width>301</width>
-              <height>195</height>
+              <height>512</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_57">
@@ -4868,7 +4907,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>195</height>
+          <height>512</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -4908,7 +4947,7 @@
               <x>0</x>
               <y>0</y>
               <width>300</width>
-              <height>362</height>
+              <height>512</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_60">
@@ -5488,7 +5527,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>195</height>
+          <height>512</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5528,7 +5567,7 @@
               <x>0</x>
               <y>0</y>
               <width>300</width>
-              <height>502</height>
+              <height>512</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_63">
@@ -6204,7 +6243,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>195</height>
+          <height>512</height>
          </rect>
         </property>
         <attribute name="label">
@@ -6240,7 +6279,7 @@
               <x>0</x>
               <y>0</y>
               <width>300</width>
-              <height>195</height>
+              <height>512</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_64">
@@ -6990,7 +7029,7 @@
           <x>0</x>
           <y>0</y>
           <width>241</width>
-          <height>377</height>
+          <height>694</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7128,7 +7167,7 @@
               <x>0</x>
               <y>0</y>
               <width>233</width>
-              <height>149</height>
+              <height>466</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -7168,7 +7207,7 @@
                   <x>0</x>
                   <y>0</y>
                   <width>233</width>
-                  <height>354</height>
+                  <height>466</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -9288,7 +9327,7 @@
           <x>0</x>
           <y>0</y>
           <width>241</width>
-          <height>377</height>
+          <height>694</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -9328,7 +9367,7 @@
               <x>0</x>
               <y>0</y>
               <width>241</width>
-              <height>688</height>
+              <height>694</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_40">
@@ -10589,7 +10628,7 @@
    <property name="minimumSize">
     <size>
      <width>774</width>
-     <height>367</height>
+     <height>280</height>
     </size>
    </property>
    <property name="maximumSize">
@@ -10645,7 +10684,7 @@
         <string>Pop the figure out into a separate window</string>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="tabNotes">
         <property name="sizePolicy">

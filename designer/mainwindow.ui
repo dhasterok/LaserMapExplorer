@@ -52,7 +52,7 @@
        <string/>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="documentMode">
        <bool>false</bool>
@@ -985,7 +985,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>196</height>
+          <height>195</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -1517,7 +1517,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>196</height>
+          <height>195</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -1557,7 +1557,7 @@
               <x>0</x>
               <y>0</y>
               <width>300</width>
-              <height>374</height>
+              <height>355</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_48">
@@ -1767,6 +1767,9 @@
                 </item>
                 <item row="3" column="0">
                  <widget class="QLabel" name="labelApplySmoothing">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
                   <property name="font">
                    <font>
                     <pointsize>11</pointsize>
@@ -1779,7 +1782,10 @@
                  </widget>
                 </item>
                 <item row="3" column="1">
-                 <widget class="QComboBox" name="comboBox_2">
+                 <widget class="QComboBox" name="comboBoxApplyNoiseReduction">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
                   <property name="maximumSize">
                    <size>
                     <width>150</width>
@@ -1809,6 +1815,9 @@
                 </item>
                 <item row="4" column="0">
                  <widget class="QLabel" name="labelGradient">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
                   <property name="font">
                    <font>
                     <pointsize>11</pointsize>
@@ -1821,43 +1830,12 @@
                  </widget>
                 </item>
                 <item row="4" column="1">
-                 <widget class="QToolButton" name="toolButtonGradient">
-                  <property name="minimumSize">
-                   <size>
-                    <width>32</width>
-                    <height>32</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>32</width>
-                    <height>32</height>
-                   </size>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <pointsize>11</pointsize>
-                    <stylestrategy>PreferDefault</stylestrategy>
-                   </font>
-                  </property>
-                  <property name="toolTip">
-                   <string>Show gradient map</string>
+                 <widget class="QCheckBox" name="checkBoxGradient">
+                  <property name="enabled">
+                   <bool>false</bool>
                   </property>
                   <property name="text">
-                   <string>...</string>
-                  </property>
-                  <property name="icon">
-                   <iconset resource="../resources.qrc">
-                    <normaloff>:/icons/resources/icons/icon-gradient-64.png</normaloff>:/icons/resources/icons/icon-gradient-64.png</iconset>
-                  </property>
-                  <property name="iconSize">
-                   <size>
-                    <width>24</width>
-                    <height>24</height>
-                   </size>
-                  </property>
-                  <property name="checkable">
-                   <bool>true</bool>
+                   <string/>
                   </property>
                  </widget>
                 </item>
@@ -2132,7 +2110,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>196</height>
+          <height>195</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -2172,7 +2150,7 @@
               <x>0</x>
               <y>0</y>
               <width>294</width>
-              <height>190</height>
+              <height>189</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_45">
@@ -2505,7 +2483,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>196</height>
+          <height>195</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -2545,7 +2523,7 @@
               <x>0</x>
               <y>0</y>
               <width>305</width>
-              <height>404</height>
+              <height>400</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_49">
@@ -2618,15 +2596,54 @@
                   </property>
                  </widget>
                 </item>
-                <item row="2" column="0">
-                 <widget class="QCheckBox" name="checkBoxPersistentFilter">
-                  <property name="toolTip">
-                   <string>Select persistent to keep filters when samples are changed</string>
-                  </property>
-                  <property name="text">
-                   <string>Persistent</string>
-                  </property>
-                 </widget>
+                <item row="2" column="3">
+                 <layout class="QHBoxLayout" name="horizontalLayout_41">
+                  <item>
+                   <spacer name="horizontalSpacer_12">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item>
+                   <widget class="QToolButton" name="toolButtonAddFilter">
+                    <property name="minimumSize">
+                     <size>
+                      <width>28</width>
+                      <height>28</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>28</width>
+                      <height>28</height>
+                     </size>
+                    </property>
+                    <property name="toolTip">
+                     <string>Click to add filter</string>
+                    </property>
+                    <property name="text">
+                     <string>Add filter</string>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="../resources.qrc">
+                      <normaloff>:/icons/resources/icons/icon-filter-64.png</normaloff>:/icons/resources/icons/icon-filter-64.png</iconset>
+                    </property>
+                    <property name="iconSize">
+                     <size>
+                      <width>20</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
                 </item>
                 <item row="0" column="2">
                  <widget class="QLineEdit" name="lineEditFMin">
@@ -2746,6 +2763,20 @@
                   </item>
                  </widget>
                 </item>
+                <item row="2" column="0">
+                 <layout class="QHBoxLayout" name="horizontalLayout_25">
+                  <item>
+                   <widget class="QCheckBox" name="checkBoxPersistentFilter">
+                    <property name="toolTip">
+                     <string>Select persistent to keep filters when samples are changed</string>
+                    </property>
+                    <property name="text">
+                     <string>Persistent</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
                 <item row="1" column="0">
                  <widget class="QComboBox" name="comboBoxFilterField">
                   <property name="sizePolicy">
@@ -2765,56 +2796,6 @@
                    <string>Min</string>
                   </property>
                  </widget>
-                </item>
-                <item row="2" column="3">
-                 <layout class="QHBoxLayout" name="horizontalLayout_25">
-                  <item>
-                   <spacer name="horizontalSpacer_12">
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>40</width>
-                      <height>20</height>
-                     </size>
-                    </property>
-                   </spacer>
-                  </item>
-                  <item>
-                   <widget class="QToolButton" name="toolButtonAddFilter">
-                    <property name="minimumSize">
-                     <size>
-                      <width>32</width>
-                      <height>32</height>
-                     </size>
-                    </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>32</width>
-                      <height>32</height>
-                     </size>
-                    </property>
-                    <property name="toolTip">
-                     <string>Click to add filter</string>
-                    </property>
-                    <property name="text">
-                     <string>Add filter</string>
-                    </property>
-                    <property name="icon">
-                     <iconset>
-                      <normaloff>:/icons/resources/icons/icons8-filter-50.png</normaloff>
-                      <normalon>:/icons/resources/icons/icon-filter2-64.png</normalon>:/icons/resources/icons/icons8-filter-50.png</iconset>
-                    </property>
-                    <property name="iconSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
                 </item>
                </layout>
               </widget>
@@ -3402,7 +3383,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>196</height>
+          <height>195</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -4056,7 +4037,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>196</height>
+          <height>195</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -4660,9 +4641,13 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>196</height>
+          <height>195</height>
          </rect>
         </property>
+        <attribute name="icon">
+         <iconset resource="../resources.qrc">
+          <normaloff>:/icons/resources/icons/icon-dimensional-analysis-64.png</normaloff>:/icons/resources/icons/icon-dimensional-analysis-64.png</iconset>
+        </attribute>
         <attribute name="label">
          <string>Dimensional Reduction</string>
         </attribute>
@@ -4696,7 +4681,7 @@
               <x>0</x>
               <y>0</y>
               <width>301</width>
-              <height>196</height>
+              <height>195</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_57">
@@ -4883,7 +4868,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>196</height>
+          <height>195</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5503,7 +5488,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>196</height>
+          <height>195</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6219,7 +6204,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>196</height>
+          <height>195</height>
          </rect>
         </property>
         <attribute name="label">
@@ -6255,7 +6240,7 @@
               <x>0</x>
               <y>0</y>
               <width>300</width>
-              <height>196</height>
+              <height>195</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_64">
@@ -9130,6 +9115,9 @@
                   <layout class="QHBoxLayout" name="horizontalLayout_14">
                    <item>
                     <widget class="QToolButton" name="toolButtonClusterLink">
+                     <property name="enabled">
+                      <bool>false</bool>
+                     </property>
                      <property name="maximumSize">
                       <size>
                        <width>32</width>
@@ -9163,6 +9151,9 @@
                    </item>
                    <item>
                     <widget class="QToolButton" name="toolButtonClusterDelink">
+                     <property name="enabled">
+                      <bool>false</bool>
+                     </property>
                      <property name="maximumSize">
                       <size>
                        <width>32</width>
@@ -11131,213 +11122,217 @@
             <number>1</number>
            </property>
            <item>
-            <widget class="QGroupBox" name="groupBox_7">
-             <property name="minimumSize">
-              <size>
-               <width>40</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>32</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="title">
-              <string/>
-             </property>
-             <layout class="QVBoxLayout" name="verticalLayout_2">
-              <property name="leftMargin">
-               <number>0</number>
-              </property>
-              <property name="rightMargin">
-               <number>0</number>
-              </property>
-              <item>
-               <widget class="QToolButton" name="toolButtonFilterSelectAll">
-                <property name="minimumSize">
-                 <size>
-                  <width>28</width>
-                  <height>28</height>
-                 </size>
+            <layout class="QVBoxLayout" name="verticalLayout_71">
+             <item>
+              <widget class="QGroupBox" name="groupBox_7">
+               <property name="minimumSize">
+                <size>
+                 <width>40</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>32</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="title">
+                <string/>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_2">
+                <property name="leftMargin">
+                 <number>0</number>
                 </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>28</width>
-                  <height>28</height>
-                 </size>
+                <property name="rightMargin">
+                 <number>0</number>
                 </property>
-                <property name="toolTip">
-                 <string>Select all filters</string>
-                </property>
-                <property name="text">
-                 <string>Select All</string>
-                </property>
-                <property name="icon">
-                 <iconset resource="../resources.qrc">
-                  <normaloff>:/icons/resources/icons/icon-select-all-64.png</normaloff>:/icons/resources/icons/icon-select-all-64.png</iconset>
-                </property>
-                <property name="iconSize">
-                 <size>
-                  <width>20</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QToolButton" name="toolButtonFilterUp">
-                <property name="minimumSize">
-                 <size>
-                  <width>32</width>
-                  <height>32</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>28</width>
-                  <height>28</height>
-                 </size>
-                </property>
-                <property name="toolTip">
-                 <string>Move filter up</string>
-                </property>
-                <property name="text">
-                 <string>...</string>
-                </property>
-                <property name="icon">
-                 <iconset resource="../resources.qrc">
-                  <normaloff>:/icons/resources/icons/icon-up-arrow-64.png</normaloff>:/icons/resources/icons/icon-up-arrow-64.png</iconset>
-                </property>
-                <property name="iconSize">
-                 <size>
-                  <width>20</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QToolButton" name="toolButtonFilterDown">
-                <property name="minimumSize">
-                 <size>
-                  <width>32</width>
-                  <height>32</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>28</width>
-                  <height>28</height>
-                 </size>
-                </property>
-                <property name="toolTip">
-                 <string>Move filter down</string>
-                </property>
-                <property name="text">
-                 <string>...</string>
-                </property>
-                <property name="icon">
-                 <iconset resource="../resources.qrc">
-                  <normaloff>:/icons/resources/icons/icon-down-64.png</normaloff>:/icons/resources/icons/icon-down-64.png</iconset>
-                </property>
-                <property name="iconSize">
-                 <size>
-                  <width>20</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QToolButton" name="toolButtonFilterSave">
-                <property name="minimumSize">
-                 <size>
-                  <width>32</width>
-                  <height>32</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>28</width>
-                  <height>28</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>11</pointsize>
-                  <stylestrategy>PreferDefault</stylestrategy>
-                 </font>
-                </property>
-                <property name="toolTip">
-                 <string>Save filters as *.csv</string>
-                </property>
-                <property name="text">
-                 <string>Save profile</string>
-                </property>
-                <property name="icon">
-                 <iconset resource="../resources.qrc">
-                  <normaloff>:/icons/resources/icons/icon-save-file-64.png</normaloff>:/icons/resources/icons/icon-save-file-64.png</iconset>
-                </property>
-                <property name="iconSize">
-                 <size>
-                  <width>20</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QToolButton" name="toolButtonFilterRemove">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>32</width>
-                  <height>32</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>28</width>
-                  <height>28</height>
-                 </size>
-                </property>
-                <property name="toolTip">
-                 <string>Delete selected filter</string>
-                </property>
-                <property name="text">
-                 <string>Remove </string>
-                </property>
-                <property name="icon">
-                 <iconset resource="../resources.qrc">
-                  <normaloff>:/icons/resources/icons/icon-delete-64.png</normaloff>:/icons/resources/icons/icon-delete-64.png</iconset>
-                </property>
-                <property name="iconSize">
-                 <size>
-                  <width>20</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <spacer name="verticalSpacer_2">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>20</width>
-                  <height>40</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-             </layout>
-            </widget>
+                <item>
+                 <widget class="QToolButton" name="toolButtonFilterSelectAll">
+                  <property name="minimumSize">
+                   <size>
+                    <width>28</width>
+                    <height>28</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>28</width>
+                    <height>28</height>
+                   </size>
+                  </property>
+                  <property name="toolTip">
+                   <string>Select all filters</string>
+                  </property>
+                  <property name="text">
+                   <string>Select All</string>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="../resources.qrc">
+                    <normaloff>:/icons/resources/icons/icon-select-all-64.png</normaloff>:/icons/resources/icons/icon-select-all-64.png</iconset>
+                  </property>
+                  <property name="iconSize">
+                   <size>
+                    <width>20</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QToolButton" name="toolButtonFilterUp">
+                  <property name="minimumSize">
+                   <size>
+                    <width>28</width>
+                    <height>28</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>28</width>
+                    <height>28</height>
+                   </size>
+                  </property>
+                  <property name="toolTip">
+                   <string>Move filter up</string>
+                  </property>
+                  <property name="text">
+                   <string>...</string>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="../resources.qrc">
+                    <normaloff>:/icons/resources/icons/icon-up-arrow-64.png</normaloff>:/icons/resources/icons/icon-up-arrow-64.png</iconset>
+                  </property>
+                  <property name="iconSize">
+                   <size>
+                    <width>20</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QToolButton" name="toolButtonFilterDown">
+                  <property name="minimumSize">
+                   <size>
+                    <width>28</width>
+                    <height>28</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>28</width>
+                    <height>28</height>
+                   </size>
+                  </property>
+                  <property name="toolTip">
+                   <string>Move filter down</string>
+                  </property>
+                  <property name="text">
+                   <string>...</string>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="../resources.qrc">
+                    <normaloff>:/icons/resources/icons/icon-down-64.png</normaloff>:/icons/resources/icons/icon-down-64.png</iconset>
+                  </property>
+                  <property name="iconSize">
+                   <size>
+                    <width>20</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QToolButton" name="toolButtonFilterSave">
+                  <property name="minimumSize">
+                   <size>
+                    <width>28</width>
+                    <height>28</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>28</width>
+                    <height>28</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                    <stylestrategy>PreferDefault</stylestrategy>
+                   </font>
+                  </property>
+                  <property name="toolTip">
+                   <string>Save filters as *.csv</string>
+                  </property>
+                  <property name="text">
+                   <string>Save profile</string>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="../resources.qrc">
+                    <normaloff>:/icons/resources/icons/icon-save-file-64.png</normaloff>:/icons/resources/icons/icon-save-file-64.png</iconset>
+                  </property>
+                  <property name="iconSize">
+                   <size>
+                    <width>20</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QToolButton" name="toolButtonFilterRemove">
+                  <property name="enabled">
+                   <bool>true</bool>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>28</width>
+                    <height>28</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>28</width>
+                    <height>28</height>
+                   </size>
+                  </property>
+                  <property name="toolTip">
+                   <string>Delete selected filter</string>
+                  </property>
+                  <property name="text">
+                   <string>Remove </string>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="../resources.qrc">
+                    <normaloff>:/icons/resources/icons/icon-delete-64.png</normaloff>:/icons/resources/icons/icon-delete-64.png</iconset>
+                  </property>
+                  <property name="iconSize">
+                   <size>
+                    <width>20</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <spacer name="verticalSpacer_2">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
            </item>
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -11436,6 +11431,11 @@
                <column>
                 <property name="text">
                  <string>Operator</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>Persistent</string>
                 </property>
                </column>
                <column>

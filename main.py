@@ -564,13 +564,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.actionFullMap.triggered.connect(self.reset_to_full_view)
         self.actionFullMap.triggered.connect(lambda: self.actionCrop.setChecked(False))
+        self.actionFullMap.setEnabled(False)
 
         #apply filters
         self.actionClearFilters.triggered.connect(lambda: self.apply_filters(fullmap=True))
+        self.actionClearFilters.setEnabled(False)
         self.actionFilterToggle.triggered.connect(lambda: self.apply_filters(fullmap=False))
+        self.actionFilterToggle.setEnabled(False)
         self.actionPolygonMask.triggered.connect(lambda: self.apply_filters(fullmap=False))
+        self.actionPolygonMask.setEnabled(False)
         self.actionClusterMask.triggered.connect(lambda: self.apply_filters(fullmap=False))
+        self.actionClusterMask.setEnabled(False)
         #self.actionNoiseReduction.triggered.connect()
+        self.actionNoiseReduction.setEnabled(False)
 
         self.actionCorrelation.triggered.connect(lambda: self.open_tab('samples'))
         self.actionHistograms.triggered.connect(lambda: self.open_tab('preprocess'))
@@ -584,6 +590,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionLoadAnalysis.triggered.connect(lambda: self.load_analysis())
         self.actionSaveAnalysis.triggered.connect(lambda: self.save_analysis())
         self.actionSwapAxes.triggered.connect(self.swap_xy)
+        self.actionSwapAxes.setEnabled(False)
 
 
         # Select analyte Tab
@@ -674,7 +681,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.doubleSpinBoxNoiseOption2.valueChanged.connect(self.noise_reduction_option2_callback)
         self.doubleSpinBoxNoiseOption2.setEnabled(False)
         self.labelNoiseOption2.setEnabled(False)
-        self.toolButtonGradient.clicked.connect(self.noise_reduction_method_callback)
+        self.checkBoxGradient.stateChanged.connect(self.noise_reduction_method_callback)
 
         # Initiate crop tool
         self.crop_tool = Crop_tool(self)
@@ -697,6 +704,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # left pane
         self.toolButtonAddFilter.clicked.connect(self.update_filter_table)
         self.toolButtonAddFilter.clicked.connect(lambda: self.apply_filters(fullmap=False))
+        self.toolButtonAddFilter.clicked.connect(lambda: self.actionClearFilters.setEnabled(True))
 
         self.comboBoxFilterFieldType.activated.connect(lambda: self.update_field_combobox(self.comboBoxFilterFieldType, self.comboBoxFilterField))
         self.comboBoxFilterField.activated.connect(self.update_filter_values)
@@ -1450,6 +1458,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #current_plot_df = self.get_map_data(sample_id=self.sample_id, field=self.selected_analytes[0], analysis_type='Analyte')
             #create plot
             #self.create_plot(current_plot_df, sample_id=self.sample_id, plot_type='lasermap', analyte_1=self.selected_analytes[0])
+
+        # reset filters
+        self.actionClusterMask.setEnabled(False)
+        self.actionPolygonMask.setEnabled(False)
+        if not self.checkBoxPersistentFilter.isChecked():
+            self.actionClearFilters.setEnabled(False)
+            self.actionFilterToggle.setEnabled(False)
+        self.actionNoiseReduction.setEnabled(False)
 
         # sort data
         self.apply_sort(None, method=self.sort_method)
@@ -2496,6 +2512,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     'norm':scale ,'f_min': f_min,'f_max':f_max, 'operator':operator, 'use':True}
             self.data[self.sample_id]['filter_info'].loc[len(self.data[self.sample_id]['filter_info'])]=filter_info
 
+            self.actionFilterToggle.setEnabled(True)
             self.actionFilterToggle.setChecked(True)
 
     def remove_selected_rows(self):
@@ -2544,8 +2561,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.actionPolygonMask.setChecked(False)
             self.actionClusterMask.setChecked(False)
 
+            self.actionClearFilters.setEnabled(False)
+            self.actionFilterToggle.setEnabled(False)
+            self.actionPolygonMask.setEnabled(False)
+            self.actionClusterMask.setEnabled(False)
+
         # apply interval filters
-        elif self.actionFilterToggle.isChecked():
+        if self.actionFilterToggle.isChecked():
             #print(self.data[sample_id]['filter_info'])
 
             # Check if rows in self.data[sample_id]['filter_info'] exist and filter array in current_plot_df
@@ -2564,9 +2586,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         self.data[sample_id]['filter_mask'] = self.data[sample_id]['filter_mask'] & ((filter_row['f_min'] <= analyte_df['array'].values) & (analyte_df['array'].values <= filter_row['f_max']))
                     elif operator == 'or':
                         self.data[sample_id]['filter_mask'] = self.data[sample_id]['filter_mask'] | ((filter_row['f_min'] <= analyte_df['array'].values) & (analyte_df['array'].values <= filter_row['f_max']))
+            filter_mask = self.data[sample_id]['filter_mask']
+        else:
+            filter_mask = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
 
         # apply polygon filters
-        elif self.actionPolygonMask.isChecked():
+        if self.actionPolygonMask.isChecked():
             # apply polygon mask
             # Iterate through each polygon in self.polygons[self.main_window.sample_id]
             for row in range(self.tableWidgetPolyPoints.rowCount()):
@@ -2598,13 +2623,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                     #clear existing polygon lines
                     self.polygon.clear_lines()
+            polygon_mask = self.data[sample_id]['polygon_mask']
+        else:
+            polygon_mask = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
 
         # apply cluster mask
-        elif self.actionClusterMask.isChecked():
+        if self.actionClusterMask.isChecked():
             # apply map mask
-            pass
+            cluster_mask = self.data[sample_id]['cluster mask']
+        else:
+            cluster_mask = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
 
-        self.data[sample_id]['mask'] = self.data[sample_id]['axis_mask'] & self.data[sample_id]['filter_mask'] & self.data[sample_id]['polygon_mask'] & self.data[sample_id]['cluster_mask']
+        self.data[sample_id]['mask'] = self.data[sample_id]['axis_mask'] & filter_mask & polygon_mask & cluster_mask
 
         self.update_SV()
         #self.update_all_plots()
@@ -2632,14 +2662,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Invert list of selected clusters
         if not inverse:
             selected_clusters = [cluster_idx for cluster_idx in range(self.cluster_dict[method]['n_clusters']) if cluster_idx not in selected_clusters]
+        print(selected_clusters)
 
         cluster_group = self.data[self.sample_id]['computed_data']['Cluster'].loc[:,method]
         ind = np.isin(cluster_group, selected_clusters)
         self.data[self.sample_id]['cluster_mask'] = ind
-        
+
+        self.actionClusterMask.setEnabled(True)
         self.actionClusterMask.setChecked(True)
+        self.actionClearFilters.setEnabled(True)
 
         self.update_cluster_flag = True
+        self.apply_filters(fullmap=False)
 
     def mask_changed_callback(self):
         """Updates mask for current sample
@@ -3292,6 +3326,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.doubleSpinBoxNoiseOption2.setEnabled(False)
 
                 self.noise_reduction(algorithm)
+                self.comboBoxApplyNoiseReduction.setEnabled(False)
+                self.labelApplySmoothing.setEnabled(False)
+                self.checkBoxGradient.setEnabled(False)
+                self.labelGradient.setEnabled(False)
+
+                self.actionNoiseReduction.setEnabled(False)
             case _:
                 # set option 1
                 self.spinBoxNoiseOption1.blockSignals(True)
@@ -3314,6 +3354,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 self.spinBoxNoiseOption1.setValue(int(self.noise_red_options[algorithm]['value1']))
                 self.spinBoxNoiseOption1.blockSignals(False)
+                #self.comboBoxApplyNoiseReduction.setEnabled(True)
+                #self.labelApplySmoothing.setEnabled(True)
+                self.checkBoxGradient.setEnabled(True)
+                self.labelGradient.setEnabled(True)
+                self.actionNoiseReduction.setEnabled(True)
 
                 val1 = self.spinBoxNoiseOption1.value()
 
@@ -3487,7 +3532,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Update or create the image item for displaying the filtered image
         self.noise_red_array = filtered_image
 
-        if self.toolButtonGradient.isChecked():
+        if self.checkBoxGradient.isChecked():
             self.plot_gradient()
             return
 
@@ -8434,7 +8479,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.spinBoxClusterGroup.blockSignals(True)
 
         # Clear the list widget
-        self.tableWidgetViewGroups.clear()
+        self.tableWidgetViewGroups.clearContents()
         self.tableWidgetViewGroups.setHorizontalHeaderLabels(['Name','Link','Color'])
 
         method = self.comboBoxClusterMethod.currentText()
@@ -12169,10 +12214,12 @@ class Crop_tool:
 
             self.update_overlay(self.crop_rect.rect())
 
+            self.actionFullMap.setEnabled(True)
         else:
             # reset to full view and remove overlays if user unselects crop tool
             self.main_window.reset_to_full_view()
             self.main_window.actionCrop.setChecked(False)
+            self.main_window.actionFullMap.setEnabled(False)
 
     def remove_overlays(self):
         """Removes darkened overlay following completion of crop."""
@@ -12343,6 +12390,7 @@ class Polygon:
         self.main_window.toolButtonPolyCreate.isChecked()
         self.p_id_gen += 1
         self.p_id = self.p_id_gen
+        self.main_window.actionPolygonMask.setEnabled(True)
 
     def plot_polygon_scatter(self, event,k, x, y, x_i, y_i):
         #create profile dict particular sample if it doesnt exisist
@@ -12583,7 +12631,8 @@ class Polygon:
     def update_table_widget(self):
         if self.main_window.sample_id in self.polygons: #if profiles for that sample if exists
 
-            self.main_window.tableWidgetPolyPoints.setRowCount(0)  # Clear existing rows
+            self.main_window.tableWidgetPolyPoints.clearContents()  # Clear existing rows
+            self.main_window.tableWidgetPolyPoints.setRowCount(0)
 
             for p_id, val in self.polygons[self.main_window.sample_id].items():
                 row_position = self.main_window.tableWidgetPolyPoints.rowCount()

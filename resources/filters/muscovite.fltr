@@ -1,2 +1,2 @@
-use,field_type,field,norm,f_min,f_max,operator,use,persistent
-True,Analyte,Na23,linear,,,and,True,True
+use,field_type,field,norm,min,max,operator,use,persistent
+True,Analyte,Na23,linear,9.962e-05,4500.0,and,True,True

@@ -1356,7 +1356,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #set info dataframes for each sample
             self.data[self.sample_id]['analyte_info'] = pd.DataFrame(columns = ['analytes', 'norm', 'upper_bound', 'lower_bound', 'd_l_bound', 'd_u_bound', 'use'])
             self.data[self.sample_id]['ratio_info'] = pd.DataFrame(columns = [ 'analyte_1', 'analyte_2', 'norm', 'upper_bound', 'lower_bound', 'd_l_bound', 'd_u_bound', 'use', 'auto_scale'])
-            self.data[self.sample_id]['filter_info'] = pd.DataFrame(columns = [ 'use', 'field_type', 'field', 'norm', 'f_min', 'f_max', 'operator', 'use', 'persistent'])
+            self.data[self.sample_id]['filter_info'] = pd.DataFrame(columns = [ 'use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'use', 'persistent'])
 
             #Set crop to false
             self.data[self.sample_id]['crop'] = False
@@ -2518,8 +2518,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.tableWidgetFilters.setItem(current_row, 1, QtWidgets.QTableWidgetItem(row['field_type']))
                 self.tableWidgetFilters.setItem(current_row, 2, QtWidgets.QTableWidgetItem(row['field']))
                 self.tableWidgetFilters.setItem(current_row, 3, QtWidgets.QTableWidgetItem(row['scale']))
-                self.tableWidgetFilters.setItem(current_row, 4, QtWidgets.QTableWidgetItem(self.dynamic_format(row['f_min'])))
-                self.tableWidgetFilters.setItem(current_row, 5, QtWidgets.QTableWidgetItem(self.dynamic_format(row['f_max'])))
+                self.tableWidgetFilters.setItem(current_row, 4, QtWidgets.QTableWidgetItem(self.dynamic_format(row['min'])))
+                self.tableWidgetFilters.setItem(current_row, 5, QtWidgets.QTableWidgetItem(self.dynamic_format(row['max'])))
                 self.tableWidgetFilters.setItem(current_row, 6, QtWidgets.QTableWidgetItem(row['operator']))
 
                 # Create and set the checkbox for selection (assuming this is a checkbox similar to 'use')
@@ -2684,7 +2684,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #print(self.data[sample_id]['filter_info'])
 
         # Check if rows in self.data[sample_id]['filter_info'] exist and filter array in current_plot_df
-        # by creating a mask based on f_min and f_max of the corresponding filter analytes
+        # by creating a mask based on min and max of the corresponding filter analytes
         for index, filter_row in self.data[sample_id]['filter_info'].iterrows():
             if filter_row['use']:
                 analyte_df = self.get_map_data(sample_id=sample_id, field=filter_row['field'], field_type=filter_row['field_type'])
@@ -7922,20 +7922,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         m = style['Lines']['Multiplier'] #np.min(np.abs(np.sqrt(x**2 + y**2)))
 
         # arrows
-        canvas.axes.quiver(np.zeros(nfields), np.zeros(nfields), m*x, m*y, color=style['Scale']['OverlayColor'],
+        canvas.axes.quiver(np.zeros(nfields), np.zeros(nfields), m*x, m*y, color=style['Lines']['Color'],
             angles='xy', scale_units='xy', scale=1, # arrow angle and scale set relative to the data
             linewidth=style['Lines']['LineWidth'], headlength=2, headaxislength=2) # arrow properties
 
         # labels
         for i, analyte in enumerate(analytes):
             if x[i] > 0 and y[i] > 0:
-                canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='left', va='bottom', color=style['Scale']['OverlayColor'])
+                canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='left', va='bottom', color=style['Lines']['Color'])
             elif x[i] < 0 and y[i] > 0:
-                canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='left', va='top', color=style['Scale']['OverlayColor'])
+                canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='left', va='top', color=style['Lines']['Color'])
             elif x[i] > 0 and y[i] < 0:
-                canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='right', va='bottom', color=style['Scale']['OverlayColor'])
+                canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='right', va='bottom', color=style['Lines']['Color'])
             elif x[i] < 0 and y[i] < 0:
-                canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='right', va='top', color=style['Scale']['OverlayColor'])
+                canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='right', va='top', color=style['Lines']['Color'])
 
 
     # -------------------------------------
@@ -11631,7 +11631,6 @@ class TableWidgetDragRows(QTableWidget):
                         else:
                             row_data.append(None)
                 rows_to_move.append(row_data)
-            
             
             for row_index in reversed(rows):
                 self.removeRow(row_index)

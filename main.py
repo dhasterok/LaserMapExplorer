@@ -589,7 +589,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionSwapAxes.triggered.connect(self.swap_xy)
         self.actionSwapAxes.setEnabled(False)
 
-
         # Select analyte Tab
         #-------------------------
         self.ref_data = pd.read_excel(os.path.join(basedir,'resources/app_data/earthref.xlsx'))
@@ -1008,11 +1007,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxLineWidth.activated.connect(self.line_width_callback)
         self.lineEditLengthMultiplier.editingFinished.connect(self.length_multiplier_callback)
         # colors
-        #marker color
+        # marker color
         self.comboBoxColorByField.activated.connect(self.color_by_field_callback)
         self.comboBoxColorField.activated.connect(self.color_field_callback)
         self.comboBoxFieldColormap.activated.connect(self.field_colormap_callback)
         self.comboBoxCbarDirection.activated.connect(self.cbar_direction_callback)
+        # resolution
+        self.spinBoxHeatmapResolution.valueChanged.connect(lambda: self.resolution_callback(update_plot=True))
         # clusters
         self.spinBoxClusterGroup.valueChanged.connect(self.select_cluster_group_callback)
 
@@ -1829,20 +1830,56 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         Executes on ``MainWindow.toolButtonSwapXY.clicked``.  Updates data dictionary and other map related derived results.
         """
-        self.swap_xy_val = not self.swap_xy_val
 
-        if self.swap_xy_val:
-            self.order = 'C'
-        else:
-            self.order = 'F'
+        match self.comboBoxPlotType.currentText():
+            case 'analyte map':
+                self.swap_xy_val = not self.swap_xy_val
 
-        # swap x and y
-        # print(self.data[self.sample_id][['X','Y']])
-        self.swap_xy_data(self.data[self.sample_id]['raw_data'])
+                if self.swap_xy_val:
+                    self.order = 'C'
+                else:
+                    self.order = 'F'
 
-        self.swap_xy_data(self.data[self.sample_id]['processed_data']) #this rotates processed data as well
+                # swap x and y
+                # print(self.data[self.sample_id][['X','Y']])
+                self.swap_xy_data(self.data[self.sample_id]['raw_data'])
 
-        # self.swap_xy_data(self.data[self.sample_id]['computed_data']['Cluster'])
+                self.swap_xy_data(self.data[self.sample_id]['processed_data']) #this rotates processed data as well
+
+                # self.swap_xy_data(self.data[self.sample_id]['computed_data']['Cluster'])
+            case 'scatter' | 'heatmap':
+                if self.comboBoxFieldZ.currentText() != '':
+                    y_field_type = self.comboBoxFieldTypeX.currentText()
+                    y_field = self.comboBoxFieldX.currentText()
+
+                    z_field_type = self.comboBoxFieldTypeY.currentText()
+                    z_field = self.comboBoxFieldY.currentText()
+
+                    x_field_type = self.comboBoxFieldTypeZ.currentText()
+                    x_field = self.comboBoxFieldZ.currentText()
+
+                    self.comboBoxFieldTypeX.setCurrentText(x_field_type)
+                    self.comboBoxFieldX.setCurrentText(x_field)
+
+                    self.comboBoxFieldTypeY.setCurrentText(y_field_type)
+                    self.comboBoxFieldY.setCurrentText(y_field)
+
+                    self.comboBoxFieldTypeZ.setCurrentText(z_field_type)
+                    self.comboBoxFieldZ.setCurrentText(z_field)
+                else:
+                    y_field_type = self.comboBoxFieldTypeX.currentText()
+                    y_field = self.comboBoxFieldX.currentText()
+
+                    x_field_type = self.comboBoxFieldTypeY.currentText()
+                    x_field = self.comboBoxFieldY.currentText()
+
+                    self.comboBoxFieldTypeX.setCurrentText(x_field_type)
+                    self.comboBoxFieldX.setCurrentText(x_field)
+
+                    self.comboBoxFieldTypeY.setCurrentText(y_field_type)
+                    self.comboBoxFieldY.setCurrentText(y_field)
+            case _:
+                return
 
         # update plots
         self.update_SV()
@@ -1861,7 +1898,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         df['X'] = xtemp
 
     # toolbar functions
-
     def change_ref_material(self, comboBox1, comboBox2):
         """Changes reference computing normalized analytes
 
@@ -4602,6 +4638,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         elif plot_type == '':
             return
 
+        # toggle actionSwapAxes
+        match plot_type:
+            case 'analyte map':
+                self.actionSwapAxes.setEnabled(True)
+            case 'scatter' | 'heatmap':
+                self.actionSwapAxes.setEnabled(True)
+            case _:
+                self.actionSwapAxes.setEnabled(False)
+
         if style is None:
             style = self.styles[plot_type]
 
@@ -4794,13 +4839,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # set plot flag to false
         plot_type = self.comboBoxPlotType.currentText()
         self.plot_types[self.toolBox.currentIndex()][0] = self.comboBoxPlotType.currentIndex()
-        self.set_style_widgets(plot_type=plot_type)
-        self.check_analysis_type()
-
         match plot_type:
+            case 'analyte map':
+                self.actionSwapAxes.setEnabled(True)
+            case 'scatter' | 'heatmap':
+                self.actionSwapAxes.setEnabled(True)
             case 'correlation':
+                self.actionSwapAxes.setEnabled(False)
                 if self.comboBoxCorrelationMethod.currentText() == 'None':
                     self.comboBoxCorrelationMethod.setCurrentText('Pearson')
+            case _:
+                self.actionSwapAxes.setEnabled(False)
+
+        self.set_style_widgets(plot_type=plot_type)
+        self.check_analysis_type()
 
         if update:
             self.update_SV()
@@ -5440,6 +5492,23 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # update plot
         self.update_SV()
+
+    def resolution_callback(self, update_plot=False):
+        """Updates heatmap resolution
+
+        Updates the resolution of heatmaps when ``MainWindow.spinBoxHeatmapResolution`` is changed.
+
+        Parameters
+        ----------
+        update_plot : bool, optional
+            Sets the resolution of a heatmap for either Cartesian or ternary plots and both *heatmap* and *pca heatmap*, by default ``False``
+        """        
+        style = self.styles[self.comboBoxPlotType.currentText()]
+
+        style['Colors']['Resolution'] = self.spinBoxHeatmapResolution.value()
+
+        if update_plot:
+            self.update_SV()
 
     # updates scatter styles when ColorByField comboBox is changed
     def color_by_field_callback(self):
@@ -10758,6 +10827,9 @@ class MplCanvas(FigureCanvas):
         if (not event.inaxes) or (event.xdata is None) or (event.ydata is None):
             return
 
+        if event.inaxes.get_label() == '<colorbar>':
+            return
+
         if self.map_flag:
             if self.array is None:
                 return
@@ -10792,10 +10864,13 @@ class MplCanvas(FigureCanvas):
 
         if self.array is not None:
             value = self.array[y_i][x_i]
-            self.main_window.labelSVInfoValue.setText(f"V: {value:.4g}{label}")
+            txt = f"V: {value:.4g}{label}"
+            self.main_window.labelSVInfoValue.setText(txt)
 
-        self.main_window.labelSVInfoX.setText(f'X: {x:.4g}')
-        self.main_window.labelSVInfoY.setText(f'Y: {y:.4g}')
+        txt = f'X: {x:.4g}'
+        self.main_window.labelSVInfoX.setText(txt)
+        txt = f'Y: {y:.4g}'
+        self.main_window.labelSVInfoY.setText(txt)
 
     def set_initial_extent(self):
         """Initial extent of the plot

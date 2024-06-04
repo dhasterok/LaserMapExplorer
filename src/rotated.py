@@ -12,6 +12,13 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import QHeaderView
 
 class RotatedHeaderView(QHeaderView):
+    """Rotates the column header of a table by 90 degrees
+
+    Parameters
+    ----------
+    parent : obj, optional
+        Parent table object
+    """    
     def __init__(self, parent=None):
         super(RotatedHeaderView, self).__init__(Qt.Horizontal, parent)
         self.setMinimumSectionSize(20)

@@ -13,7 +13,7 @@ from scipy.interpolate import LinearNDInterpolator
 from scipy.special import erfinv,erf
 from gausscensor import gausscensor
 
-def adjby_quantile2(x_v, y_v, xref=None, x=None, y=None):
+def adjby_quantile(x_v, y_v, xref=None, x=None, y=None):
     """_summary_
 
     _extended_summary_

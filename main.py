@@ -121,44 +121,30 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             with relevant data.  The dictionary is nested with the first level keys defined by the sample ID.
             
             [*sample_id*] : (str) -- sample identifier
-                | 'analyte_info' : (dataframe) -- holds information regarding each iolite in sample id,
-                columns:
-                    /'analytes' (str) -- name of iolite
-                    /'sample_id' (str) -- sample id
-                    /'norm' (str) -- type of normalisation used(linear,log,logit)
-                    /'upper_bound' (float) --  upper bound for autoscaling/scaling
-                    /'lower_bound' (float) --  lower bound for autoscaling/scaling
-                    /'d_l_bound' (float) --  difference lower bound for autoscaling
-                    /'d_u_bound' (float) --  difference upper bound for autoscaling
-                    /'v_min' (float) -- max value of iolite
-                    /'v_max' (float) -- min value of iolite
-                    /'auto_scale' (bool) -- indicates whether auto_scaling is switched on for that iolite, use percentile bounds if False
-                    /'use' (bool) -- indicates whether the iolite is being used in the analys
+                | 'analyte_info' : (dataframe) -- holds information regarding each analyte in sample id,
+                    | 'analytes' (str) -- name of analyte
+                    | 'sample_id' (str) -- sample id
+                    | 'norm' (str) -- type of normalisation used(linear,log,logit)
+                    | 'upper_bound' (float) -- upper bound for autoscaling/scaling
+                    | 'lower_bound' (float) -- lower bound for autoscaling/scaling
+                    | 'd_l_bound' (float) -- difference lower bound for autoscaling
+                    | 'd_u_bound' (float) -- difference upper bound for autoscaling
+                    | 'v_min' (float) -- max value of analyte
+                    | 'v_max' (float) -- min value of analyte
+                    | 'auto_scale' (bool) -- indicates whether auto_scaling is switched on for that iolite, use percentile bounds if False
+                    | 'use' (bool) -- indicates whether the iolite is being used in the analys
                 | 'ratio_info' : (dataframe) -- holds information  regarding computerd ratios 
-                columns:
-                    /'analyte_1' (str) -- name of iolite at numerator of ratio
-                    /'analyte_2' (str) -- name of iolite at denominator of ratio
-                    /'norm' (str) -- type of normalisation used(linear,log,logit)
-                    /'upper_bound' (float) --  upper bound for autoscaling/scaling
-                    /'lower_bound' (float) --  lower bound for autoscaling/scaling
-                    /'d_l_bound' (float) --  difference lower bound for autoscaling
-                    /'d_u_bound' (float) --  difference upper bound for autoscaling
-                    /'v_min' (float) -- max value of iolite
-                    /'v_max' (float) -- min value of iolite
-                    /'auto_scale' (bool) -- indicates whether auto_scaling is switched on for that iolite, use percentile bounds if False
-                    /'use' (bool) -- indicates whether the iolite is being used in the analysis
-                
-                | 'filter_info' : (dataframe) --
-                columns:
-                    /'analyte_1' (str) -- name of iolite used for filtering
-                    /'analyte_2' (str) -- name of iolite in denominator if Ratio is used for filtering 
-                    /'Ratio' (bool) -- name of iolite
-                    /'norm' (str) -- type of normalisation used(linear,log,logit)
-                    /'f_min' (float) --  upper bound for autoscaling/scaling
-                    /'f_max' (float) --  lower bound for autoscaling/scaling
-                    /'use' (bool) -- indicates whether the iolite is being used in the analysis
-                
-                | 'filter_info' : (dataframe) --
+                    | 'analyte_1' (str) -- name of iolite at numerator of ratio
+                    | 'analyte_2' (str) -- name of iolite at denominator of ratio
+                    | 'norm' (str) -- type of normalisation used(linear,log,logit)
+                    | 'upper_bound' (float) --  upper bound for autoscaling/scaling
+                    | 'lower_bound' (float) --  lower bound for autoscaling/scaling
+                    | 'd_l_bound' (float) --  difference lower bound for autoscaling
+                    | 'd_u_bound' (float) --  difference upper bound for autoscaling
+                    | 'v_min' (float) -- max value of iolite
+                    | 'v_max' (float) -- min value of iolite
+                    | 'auto_scale' (bool) -- indicates whether auto_scaling is switched on for that iolite, use percentile bounds if False
+                    | 'use' (bool) -- indicates whether the iolite is being used in the analysis
                 
                 | 'crop' : () --
                 | 'x_max' : () --
@@ -196,41 +182,44 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             | 'crop_x_min' : (float) -- minimum y of cropped data
             | 'crop_x_max' : (float) -- maximum y of cropped data
             | 'norm' : () --
-            | 'analysis data' : () --
-            | 'cropped_raw_data'
+            | 'analysis data' : (pandas.DataFrame) --
+            | 'cropped_raw_data' : (pandas.DataFrame) --
             | 'computed_data' : (dict) --
                 | 'PCA Score' : (pandas.DataFrame) --
                 | 'Cluster' : (pandas.DataFrame) --
                 | 'Cluster Score' : (pandas.DataFrame) --
-            | 'processed_data'
-
-            ['filer_info'] : (pandas.DataFrame) -- stores filters for each sample
+            | 'processed_data' : (pandas.DataFrame) --
+            ['filter_info'] : (pandas.DataFrame) -- stores filters for each sample
                 | 'field_type' : (str) -- field type
-                | 'analyte_1' : (str) -- most fields
-                | 'analyte_2' : (str) -- for ratios
+                | 'field' : (str) -- name of field
                 | 'norm' : (str) -- scale normalization function, ``linear`` or ``log``
                 | 'min' : (float) -- minimum value for filtering
                 | 'max' : (float) -- maximum value for filtering
                 | 'operator' : (str) -- boolean operator for combining filters, ``and`` or ``or``
+                | 'use' : (bool) -- ``True`` indicates the filter should be used to filter data
+                | 'persistent' : (bool) -- ``True`` retains the filter when the sample is changed
 
             | 'axis_mask' : (MaskObj) -- mask created from cropped data.
             | 'filter_mask' : (MaskObj) -- mask created by a combination of filters.  Filters are displayed for the user in ``tableWidgetFilters``.
             | 'polygon_mask' : (MaskObj) -- mask created from selected polygons.
             | 'cluster_mask' : (MaskObj) -- mask created from selected or inverse selected cluster groups.  Once this mask is set, it cannot be reset unless it is turned off, clustering is recomputed, and selected clusters are used to produce a new mask.
             | 'mask' : () -- combined mask, derived from filter_mask & 'polygon_mask' & 'axis_mask'
-        widgetSingleView : QVBoxLayout
-            Widget holding layout for Single View tab of ``canvasWindow``
-        widgetMultiView : QGridLayout
-            Widget holding layout for Multi View tab of ``canvasWindow``
-        widgetQuickView : QGridLayout
-            Widget holding layout for Quick View tab of ``canvasWindow``
         left_tab : dict
             Holds the indices for pages in ``toolBox``
         map_plot_types : list
             A list of plots that result in a map, i.e., ['analyte map', 'ternary map', 'PCA Score', 'Cluster', 'Cluster Score'].  This list is generally used as a check when setting certain styles or other plotting behavior related to maps.
         marker_dict : dict
-            Dictionary of marker names used to translate ``comboBoxMarker`` to a matplotlib maker symbol, though not all matplotlib markers
+            Dictionary of marker names used to translate ``comboBoxMarker`` to a subset of matplotlib makers symbol, though not all matplotlib markers
             are used.
+
+            - o : circle
+            - s : square
+            - d : diamond
+            - ^ : triangle (up)
+            - v : triangle (down)
+            - h : hexagon
+            - p : pentagon
+
         ndim_list: (list)
             Fields used to for ``TEC`` and ``radar`` style plots.
         plot_info : dict
@@ -257,6 +246,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             .. seealso::
                 :ref:`add_plotwidget_to_tree` for details about saving *plot_info* to the tree (Plot Selector)
+        QVAnalyteList : list of str
+            ordered set of analytes to display in on the Quick View tab
         right_tab : dict
             Holds the indices for pages in ``toolBoxTreeView``
         sample_id : str
@@ -264,7 +255,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         sort_method : str
             Method used to sort the analytes.  This is changed by choosing a different sorting method for the analytes by pushing the ``toolButtonSortAnalyte``.
             However, only the analytes for the current sample with be sorted.  Other samples will be sorted when when they are reselected.  To ensure that all samples
-            use the same sorting algorithm, change the default preferences using the PreferencesDialog.
+            use the same sorting algorithm, change the default preferences using the PreferencesDialog.  Sort methods include
+            - alphabetical
+            - atomic number
+            - mass
+            - radius
+            - compatibility
         styles : dict of dict
             Dictionary with plot style information that saves the properties of style widgets.  There is a keyword
             for each plot type listed in ``comboBoxPlotType``.  The exact behavior of each style item may vary depending upon the
@@ -309,8 +305,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 | 'Direction' : (str) -- colorbar direction, options include ``none``, ``vertical``, and ``horizontal``, set by ``comboBoxCbarDirection``
                 | 'CLabel' : (str) -- colorbar label, set in ``lineEditCbarLabel``
                 | 'Resolution' : (int) -- used to set discritization in 2D and ternary heatmaps, set by ``spinBoxHeatmapResolution``
-        QVAnalyteList : list of str
-            ordered set of analytes to display in on the Quick View tab
+        widgetSingleView : QVBoxLayout
+            Widget holding layout for Single View tab of ``canvasWindow``
+        widgetMultiView : QGridLayout
+            Widget holding layout for Multi View tab of ``canvasWindow``
+        widgetQuickView : QGridLayout
+            Widget holding layout for Quick View tab of ``canvasWindow``
         """
         super(MainWindow, self).__init__(*args, **kwargs)
 
@@ -341,12 +341,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #self.data = {}
         self.selected_analytes = []
         self.ndim_list = []
-        self.group_cmap = {}
         self.lasermaps = {}
-        self.proxies = []
         self.prev_plot = ''
         self.order = 'F'
-        self.current_group = {'algorithm':None,'clusters': None}
         self.pyqtgraph_widget = None
         self.isUpdatingTable = False
         self.cursor = False
@@ -702,6 +699,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Filter Tabs
         #-------------------------
         # left pane
+        self.load_filter_tables()
         self.toolButtonAddFilter.clicked.connect(self.update_filter_table)
         self.toolButtonAddFilter.clicked.connect(lambda: self.apply_field_filters())
 
@@ -718,6 +716,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonFilterRemove.clicked.connect(lambda: self.table_fcn.delete_row(self.tableWidgetFilters))
         self.toolButtonFilterRemove.clicked.connect(lambda: self.apply_field_filters(update_plot=True))
         self.toolButtonFilterSelectAll.clicked.connect(self.tableWidgetFilters.selectAll)
+
+        self.toolButtonFilterSave.clicked.connect(self.save_filter_table)
+        self.comboBoxFilterPresets.activated.connect(self.read_filter_table)
 
         # initiate Polygon class
         self.polygon = Polygon(self)
@@ -1179,9 +1180,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.multiview_info_label = {}
             self.selected_analytes = []
             self.ndim_list = []
-            self.group_cmap = {}
             self.lasermaps = {}
-            self.proxies = []
             self.treeModel.clear()
             self.prev_plot = ''
             self.create_tree()
@@ -1304,8 +1303,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def change_sample(self, index):
         """Changes sample and plots first map
 
-        Parameter
-        ---------
+        Parameters
+        ----------
         index: int
             index of sample name for identifying data.  The values are based on the
             comboBoxSampleID
@@ -1357,7 +1356,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #set info dataframes for each sample
             self.data[self.sample_id]['analyte_info'] = pd.DataFrame(columns = ['analytes', 'norm', 'upper_bound', 'lower_bound', 'd_l_bound', 'd_u_bound', 'use'])
             self.data[self.sample_id]['ratio_info'] = pd.DataFrame(columns = [ 'analyte_1', 'analyte_2', 'norm', 'upper_bound', 'lower_bound', 'd_l_bound', 'd_u_bound', 'use', 'auto_scale'])
-            self.data[self.sample_id]['filter_info'] = pd.DataFrame(columns = [ 'field_type', 'analyte_1', 'analyte_2', 'norm', 'f_min', 'f_max', 'operator', 'use'])
+            self.data[self.sample_id]['filter_info'] = pd.DataFrame(columns = [ 'field_type', 'analyte_1', 'analyte_2', 'norm', 'f_min', 'f_max', 'operator', 'use', 'persistent'])
 
             #Set crop to false
             self.data[self.sample_id]['crop'] = False
@@ -2577,9 +2576,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.tableWidgetFilters.setItem(row, 6, QtWidgets.QTableWidgetItem(operator))
             self.tableWidgetFilters.setItem(row, 7, chkBoxItem_select)
 
-            filter_info = {'field_type': field_type, 'analyte_1': analyte_1, 'analyte_2': analyte_2,
-                    'norm':scale ,'f_min': f_min,'f_max':f_max, 'operator':operator, 'use':True}
-            self.data[self.sample_id]['filter_info'].loc[len(self.data[self.sample_id]['filter_info'])]=filter_info
+            filter_info = {'use':True, 'field_type': field_type, 'field': field, 'norm':scale ,'min': f_min,'max':f_max, 'operator':operator, 'persistent':True}
+            self.data[self.sample_id]['filter_info'].loc[len(self.data[self.sample_id]['filter_info'])] = filter_info
 
         self.apply_field_filters()
 
@@ -2589,6 +2587,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Removes selected rows from ``MainWindow.tableWidgetFilter``.
         """
         sample_id = self.sample_id
+
+        print(self.tableWidgetFilters.selectedIndexes())
+
         # We loop in reverse to avoid issues when removing rows
         for row in range(self.tableWidgetFilters.rowCount()-1, -1, -1):
             chkBoxItem = self.tableWidgetFilters.item(row, 7)
@@ -2596,16 +2597,70 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             field = self.tableWidgetFilters.item(row, 2).text()
             if chkBoxItem.checkState() == QtCore.Qt.Checked:
                 self.tableWidgetFilters.removeRow(row)
-                if 'Analyte' in field_type:
-                    self.data[sample_id]['filter_info'].drop(self.data[sample_id]['filter_info'][(self.data[sample_id]['filter_info']['analyte_1'] == field)].index, inplace=True)
-                elif 'Ratio' in field_type:
-                    analyte_1, analyte_2 = field.split(' / ')
-                    # Remove corresponding row from filter_df
-                    self.data[sample_id]['filter_info'].drop(self.data[sample_id]['filter_info'][(self.data[sample_id]['filter_info']['analyte_1'] == analyte_1) & (self.data[sample_id]['filter_info']['analyte_2'] == analyte_2)].index, inplace=True)
-                else:
-                    pass
+                self.data[sample_id]['filter_info'].drop(self.data[sample_id]['filter_info'][(self.data[sample_id]['filter_info']['field'] == field)].index, inplace=True)
 
         self.apply_field_filters(sample_id)
+
+    def save_filter_table(self):
+        """Opens a dialog to save filter table
+
+        Executes on ``MainWindow.toolButtonFilterSave`` is clicked.  The filter is added to
+        ``MainWindow.tableWidgetFilters`` and save into a dictionary to a file with a ``.fltr`` extension.
+        """
+        name, ok = QInputDialog.getText(self, 'Save filter table', 'Enter filter table name:')
+        if ok:
+            filter_info = self.data[self.sample_id]['filter_info']
+
+            # append theme to file of saved themes
+            with open(os.path.join(basedir,f'resources/filters/{name}.fltr'), 'wb') as file:
+                pickle.dump(filter_info, file, protocol=pickle.HIGHEST_PROTOCOL)
+
+            # update comboBox
+            self.comboBoxFilterPresets.addItem(name)
+            self.comboBoxFilterPresets.setCurrentText(name)
+
+            self.statusBar.QMessage
+        else:
+            # throw a warning that name is not saved
+            QMessageBox.warning(None,'Error','could not save filter table.')
+
+            return
+
+    def load_filter_tables(self):
+        """Loads filter names and adds them to the filter presets comboBox
+        
+        Looks for saved filter tables (*.fltr) in ``resources/filters/`` directory and adds them to
+        ``MainWindow.comboBoxFilterPresets``.
+        """
+        # read filenames with *.sty
+        file_list = os.listdir(os.path.join(basedir,'resources/filters/'))
+        filter_list = [file.replace('.fltr','') for file in file_list if file.endswith('.fltr')]
+
+        # add default to list
+        filter_list.insert(0,'')
+
+        # update theme comboBox
+        self.comboBoxFilterPresets.clear()
+        self.comboBoxFilterPresets.addItems(filter_list)
+        self.comboBoxFilterPresets.setCurrentIndex(0)
+
+    def read_filter_table(self):
+        filter_name = self.comboBoxFilterPresets.currentText()
+
+        # If no filter_name is chosen, return
+        if filter_name == '':
+            return
+
+        # open filter with name filter_name
+        with open(os.path.join(basedir,f'resources/filters/{filter_name}.fltr'), 'rb') as file:
+            filter_info = pickle.load(file)
+
+        # put filter_info into data and table
+        self.data[self.sample_id]['filter_info'] = filter_info
+
+        for row in filter_info:
+            for col in row:
+                pass
 
     def apply_field_filters(self, update_plot=True):
         """Creates the field filter for masking data
@@ -2634,13 +2689,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # by creating a mask based on f_min and f_max of the corresponding filter analytes
         for index, filter_row in self.data[sample_id]['filter_info'].iterrows():
             if filter_row['use']:
-                analyte_df = self.get_map_data(sample_id=sample_id, field=filter_row['analyte_1'], field_type=filter_row['field_type'])
+                analyte_df = self.get_map_data(sample_id=sample_id, field=filter_row['field'], field_type=filter_row['field_type'])
                 
                 operator = filter_row['operator']
                 if operator == 'and':
-                    self.data[sample_id]['filter_mask'] = self.data[sample_id]['filter_mask'] & ((filter_row['f_min'] <= analyte_df['array'].values) & (analyte_df['array'].values <= filter_row['f_max']))
+                    self.data[sample_id]['filter_mask'] = self.data[sample_id]['filter_mask'] & ((filter_row['min'] <= analyte_df['array'].values) & (analyte_df['array'].values <= filter_row['max']))
                 elif operator == 'or':
-                    self.data[sample_id]['filter_mask'] = self.data[sample_id]['filter_mask'] | ((filter_row['f_min'] <= analyte_df['array'].values) & (analyte_df['array'].values <= filter_row['f_max']))
+                    self.data[sample_id]['filter_mask'] = self.data[sample_id]['filter_mask'] | ((filter_row['min'] <= analyte_df['array'].values) & (analyte_df['array'].values <= filter_row['max']))
 
         if update_plot:
             self.apply_filters(fullmap=False)
@@ -7021,10 +7076,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # Plot histogram for all clusters
             for i in clusters:
                 cluster_data = x['array'][cluster_group == i]
-                # Create RGBA color with transparency by directly indexing the colormap
-                # color = self.group_cmap(i)[:-1]  # Create a new RGBA tuple with a
-                #color = self.group_cmap[f'Cluster {i}'][:-1] + (0.6,)
-                #color = tuple(float(c)/255 for c in self.get_rgb_color(cluster_color[i])) + (0.6,)
+
                 bar_color = cluster_color[int(i)]
                 if htype == 'step':
                     ecolor = bar_color
@@ -8349,7 +8401,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 axes_interval = 5
                 if cluster_flag and method in self.data[self.sample_id]['computed_data']['Cluster']:
                     # Get the cluster labels for the data
-                    #cluster_labels = self.data[self.sample_id]['computed_data']['Cluster'][self.current_group['algorithm']][self.data[self.sample_id]['mask']]
                     cluster_group = self.data[self.sample_id]['computed_data']['Cluster'][method][self.data[self.sample_id]['mask']]
 
                     df_filtered['clusters'] = cluster_group
@@ -8639,8 +8690,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # Update these rows with the new name
                 self.data[self.sample_id]['computed_data']['Cluster'].loc[rows_to_update, self.cluster_dict['active method']] = new_name
-                #self.group_cmap[new_name] = self.group_cmap[cluster_id]
-                #del self.group_cmap[cluster_id]
 
             # update current_group to reflect the new cluster name
             self.cluster_dict[self.cluster_dict['active method']][cluster_id]['name'] = new_name
@@ -8750,8 +8799,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         sample_df : pandas.DataFrame
             Sample data
         
-        Return
-        ------
+        Returns
+        -------
         pandas.DataFrame
             REE dataframe
         """
@@ -8857,8 +8906,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def toggle_color_widgets(self, switch):
         """Toggles enabled state of color related widgets
 
-        Parameter
-        ---------
+        Parameters
+        ----------
         switch : bool
             Toggles enabled state of color widgets
         """
@@ -9073,8 +9122,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             Field type for plotting, options include: 'Analyte', 'Ratio', 'pca', 'Cluster', 'Cluster Score',
             'Special', 'computed'. Some options require a field. Defaults to 'Analyte'
 
-        Return
-        ------
+        Returns
+        -------
         pandas.DataFrame
             Processed data for plotting. This is only returned if analysis_type is not 'laser' or 'hist'.
         """
@@ -9221,7 +9270,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """Gets the processed data for analysis
 
         Returns
-        ------
+        -------
         pandas.DataFrame
             Filtered data frame 
         bool
@@ -9301,8 +9350,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         ``Analyte`` its normalized counterpart are initialized with the full list of analytes.  Table
         data are stored in ``MainWindow.treeModel``.
         
-        Parameter
-        ---------
+        Parameters
+        ----------
         sample_id : str
             Sample name, Defaults to None
         """
@@ -9460,8 +9509,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         leaf : str
             Lowest level of tree, associated with an individual plot
         
-        Return
-        ------
+        Returns
+        -------
         dict
             Plot_info dictionary with plot widget and information about the plot construction
         """
@@ -9499,8 +9548,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
         When the user double-clicks on the ``Plot Selector``, the stored plot is placed on the current canvas.
 
-        Parameter
-        ---------
+        Parameters
+        ----------
         val : PyQt5.QtCore.QModelIndex
             Item selected in ``Plot Selector``
         """
@@ -9553,8 +9602,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Updates the tree with the list of analytes in ``MainWindow.data[sample_id]['norm']`` and background color
         to light yellow for analytes used in analyses.
         
-        Parameter
-        ---------
+        Parameters
+        ----------
         analyte_df : pandas.DataFrame
             Data frame with information about analytes, scales, limits and use in analysis
         norm_update : bool
@@ -9641,8 +9690,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def add_tree_item(self, plot_info):
         """Updates plot selector list and adds plot information data to tree item
         
-        Parameter
-        ---------
+        Parameters
+        ----------
         plot_info : dict
             Plot related data (including plot widget) to tree item associated with the plot.
         """
@@ -9704,8 +9753,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def unhighlight_tree(self, tree):
         """Reset the highlight of all items in the tree.
         
-        Parameter
-        ---------
+        Parameters
+        ----------
         tree : str
             Highest level of tree with branches to unhighlight
         """
@@ -9730,8 +9779,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         tree : str
             Name of tree in ``MainWindow.treeView``
 
-        Return
-        ------
+        Returns
+        -------
         Qt.AbstractModelItem
             The set of items under *tree*
         """
@@ -9767,8 +9816,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         leaf : str
             Lowest level of tree, ``plot_info['plot_name']``
 
-        Return
-        ------
+        Returns
+        -------
         tuple
             (item, flag), item is a branch (``flag==False``) or leaf (``flag==True``), if item neither return is ``(None, None)``.
         """
@@ -10281,8 +10330,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         Places a symbol consistent with the heading level below the selected text line.
 
-        Parameter
-        ---------
+        Parameters
+        ----------
         level : str
             The header level is determined from a context menu associated with ``MainWindow.toolButtonNotesHeading``
         """
@@ -10313,8 +10362,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         Formats selected text as bold, italic or literal in restructured text format.
 
-        Parameter
-        ---------
+        Parameters
+        ----------
         style : str
             Type of formatting
         """
@@ -10334,8 +10383,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def add_info_note(self, infotype):
         """Adds preformatted notes
 
-        Parameter
-        ---------
+        Parameters
+        ----------
         infotype : str
             Name of preformatted information
         """
@@ -10383,8 +10432,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         Adds a table to the note tab, including row lables and column headers.
 
-        Parameter
-        ---------
+        Parameters
+        ----------
         matrix : 2D array
             Data for printing
         row_labels : str, optional
@@ -12067,15 +12116,6 @@ class Table_Fcn:
     """Common table operations class
 
     For moving and deleting rows in QTableWidgets
-
-    Methods
-    -------
-    move_row_up(table)
-        moves a single row of table up one position
-    move_row_down(table)
-        moves a single row of table down one position
-    delete_row(table)
-        deletes selected rows from table
     """
     def __init__(self,main_window):
         self.main_window = main_window
@@ -12083,11 +12123,11 @@ class Table_Fcn:
     def move_row_up(self, table):
         """Moves a row up one position in a table
 
-        Parameter
-        ---------
-        table: QTableWidget
-            Moves the selected row in a table up one position. If multiple are selected
-            only the top row is moved.
+        Moves the selected row in a table up one position. If multiple are selected only the top row is moved.
+
+        Parameters
+        ----------
+        table : QTableWidget
         """
 
         # Get selected row
@@ -12124,11 +12164,11 @@ class Table_Fcn:
     def move_row_down(self,table):
         """Moves a row down one position in a table
 
-        Parameter
-        ---------
-        table: QTableWidget
-            Moves the selected row in a table down one position. If multiple are selected
-            only the top row is moved.
+        Moves the selected row in a table down one position. If multiple are selected only the top row is moved.
+
+        Parameters
+        ----------
+        table : QTableWidget
         """
 
         # Similar to move_row_up, but moving the row down
@@ -12157,9 +12197,9 @@ class Table_Fcn:
     def delete_row(self,table):
         """Deletes selected rows in a table
 
-        Parameter
-        ---------
-        table: QTableWidget
+        Parameters
+        ----------
+        table : QTableWidget
         """
         rows = [index.row() for index in table.selectionModel().selectedRows()][::-1] #sort descending to pop in order
         match table.accessibleName():
@@ -12227,17 +12267,6 @@ class Crop_tool:
     ----------
     overlays: QGraphicsRectItem()
         contains data for the figure overlay showing crop region
-
-    Methods
-    -------
-    init_crop()
-        sets intial crop region as full map extent
-    remove_overlays()
-        removes darkened overlay following completion of crop
-    update_overlay(rect)
-        updates the overlay after user moves a boundary
-    apply_crop()
-        uses selected crop extent to set viewable area and map region for analysis
     """
     def __init__(self, main_window):
         self.main_window = main_window
@@ -12295,8 +12324,8 @@ class Crop_tool:
     def update_overlay(self, rect):
         """Updates the overlay after user moves a boundary.
 
-        Parameter
-        ---------
+        Parameters
+        ----------
         rect:
         """
         # Adjust the overlay rectangles based on the new crop_rect

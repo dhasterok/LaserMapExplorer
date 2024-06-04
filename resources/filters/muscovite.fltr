@@ -1,0 +1,2 @@
+use,field_type,field,norm,f_min,f_max,operator,use,persistent
+True,Analyte,Na23,linear,,,and,True,True

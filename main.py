@@ -1356,7 +1356,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #set info dataframes for each sample
             self.data[self.sample_id]['analyte_info'] = pd.DataFrame(columns = ['analytes', 'norm', 'upper_bound', 'lower_bound', 'd_l_bound', 'd_u_bound', 'use'])
             self.data[self.sample_id]['ratio_info'] = pd.DataFrame(columns = [ 'analyte_1', 'analyte_2', 'norm', 'upper_bound', 'lower_bound', 'd_l_bound', 'd_u_bound', 'use', 'auto_scale'])
-            self.data[self.sample_id]['filter_info'] = pd.DataFrame(columns = [ 'field_type', 'analyte_1', 'analyte_2', 'norm', 'f_min', 'f_max', 'operator', 'use', 'persistent'])
+            self.data[self.sample_id]['filter_info'] = pd.DataFrame(columns = [ 'use', 'field_type', 'field', 'norm', 'f_min', 'f_max', 'operator', 'use', 'persistent'])
 
             #Set crop to false
             self.data[self.sample_id]['crop'] = False
@@ -2609,17 +2609,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         name, ok = QInputDialog.getText(self, 'Save filter table', 'Enter filter table name:')
         if ok:
-            filter_info = self.data[self.sample_id]['filter_info']
+            # file name for saving
+            filter_file = os.path.join(basedir,f'resources/filters/{name}.fltr')
 
-            # append theme to file of saved themes
-            with open(os.path.join(basedir,f'resources/filters/{name}.fltr'), 'wb') as file:
-                pickle.dump(filter_info, file, protocol=pickle.HIGHEST_PROTOCOL)
+            # save dictionary to file
+            self.data[self.sample_id]['filter_info'].to_csv(filter_file, index=False)
 
             # update comboBox
             self.comboBoxFilterPresets.addItem(name)
             self.comboBoxFilterPresets.setCurrentText(name)
 
-            self.statusBar.QMessage
+            self.statusBar.showMessage(f'Filters successfully saved as {filter_file}')
         else:
             # throw a warning that name is not saved
             QMessageBox.warning(None,'Error','could not save filter table.')
@@ -2652,15 +2652,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return
 
         # open filter with name filter_name
-        with open(os.path.join(basedir,f'resources/filters/{filter_name}.fltr'), 'rb') as file:
-            filter_info = pickle.load(file)
+        filter_file = os.path.join(basedir,f'resources/filters/{filter_name}.fltr')
+        filter_info = pd.read_csv(filter_file)
 
         # put filter_info into data and table
         self.data[self.sample_id]['filter_info'] = filter_info
 
-        for row in filter_info:
-            for col in row:
-                pass
+        self.update_filter_table()
 
     def apply_field_filters(self, update_plot=True):
         """Creates the field filter for masking data

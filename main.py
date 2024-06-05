@@ -874,7 +874,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonPointDown.clicked.connect(lambda: self.table_fcn.move_row_down(self.tableWidgetProfilePoints))
         self.toolButtonPointDelete.clicked.connect(lambda: self.table_fcn.delete_row(self.tableWidgetProfilePoints))
         self.comboBoxProfileSort.currentIndexChanged.connect(self.plot_profile_and_table)
-        self.toolButtonIPProfile.clicked.connect(lambda: self.profiling.interpolate_points(interpolation_distance=int(self.lineEditIntDist.text()), radius= int(self.lineEditPointRadius.text())))
+        self.toolButtonProfileInterpolate.clicked.connect(lambda: self.profiling.interpolate_points(interpolation_distance=int(self.lineEditIntDist.text()), radius= int(self.lineEditPointRadius.text())))
         self.comboBoxPointType.currentIndexChanged.connect(lambda: self.profiling.plot_profiles())
         # self.toolButtonPlotProfile.clicked.connect(lambda:self.profiling.plot_profiles())
         self.toolButtonPointSelectAll.clicked.connect(self.tableWidgetProfilePoints.selectAll)
@@ -12223,7 +12223,7 @@ class Table_Fcn:
                         if row >0:
                             profile[row], profile[row -1 ] = profile[row - 1], profile[row]
                     self.plot_profiles(sort_axis = False)
-                    if self.main_window.toolButtonIPProfile.isChecked(): #reset interpolation if selected
+                    if self.main_window.toolButtonProfileInterpolate.isChecked(): #reset interpolation if selected
                         self.clear_interpolation()
                         self.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
                 #case 'NDim':
@@ -12262,7 +12262,7 @@ class Table_Fcn:
                         if row < len(profile) - 1:
                             profile[row], profile[row + 1] = profile[row + 1], profile[row]
                     self.plot_profiles(sort_axis = False)
-                    if self.main_window.toolButtonIPProfile.isChecked(): #reset interpolation if selected
+                    if self.main_window.toolButtonProfileInterpolate.isChecked(): #reset interpolation if selected
                         self.clear_interpolation()
                         self.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
 
@@ -12291,7 +12291,7 @@ class Table_Fcn:
 
                 self.main_window.profiling.plot_profiles(sort_axis = False)
 
-                if self.main_window.toolButtonIPProfile.isChecked(): #reset interpolation if selected
+                if self.main_window.toolButtonProfileInterpolate.isChecked(): #reset interpolation if selected
                     self.main_window.profiling.clear_interpolation()
                     self.main_window.profiling.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
 
@@ -12932,7 +12932,7 @@ class Profiling:
                 #update plot and table widget
                 self.main_window.plot_profiles()
                 self.update_table_widget()
-                if self.main_window.toolButtonIPProfile.isChecked(): #reset interpolation if selected
+                if self.main_window.toolButtonProfileInterpolate.isChecked(): #reset interpolation if selected
                     self.clear_interpolation()
                     self.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
             else:
@@ -12996,7 +12996,7 @@ class Profiling:
         """
         Interpolate linear points between each pair of points in the profiles.
         """
-        if self.main_window.toolButtonIPProfile.isChecked():
+        if self.main_window.toolButtonProfileInterpolate.isChecked():
             interpolate = True
             for (k,v), points in self.profiles[self.main_window.sample_id].items():
                 for i in range(len(points) - 1):

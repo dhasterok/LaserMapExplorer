@@ -112,7 +112,7 @@ def plot_spider_norm(data, ref_data, norm_ref_data, layer,el_list=None, style='Q
     ax, yl = plot_data(ax,result_df,c, style,el_list,Q=quantiles, label = label) 
     
     
-    return ax, yl
+    return ax, yl, result_df
     # df = pd.DataFrame(results, columns=['N', 'mu', 'mu_norm', 'sigma', 'sigma_norm'] if style != 'Quanta' else ['Q' + str(int(q*100)) for q in Q] + ['N'])
     
 def logax(ax, lim, axis='y', label='', tick_label_rotation=0):

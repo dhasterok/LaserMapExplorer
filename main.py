@@ -6288,12 +6288,40 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 export.show(self.pyqtgraph_widget.getItem(0, 0).getViewBox())
                 export.exec_()
         elif method == 'Data':
+            if self.plot_info:
+                sample_id = self.plot_info['sample_id']
+                plot_type = self.plot_info['plot_type']
+                field_type = self.plot_info['field_type']
+                field = self.plot_info['field']
+                
+                match plot_type:
+                    case 'analyte map':
+                        save_data = self.get_map_data(self.sample_id, field, field_type=field_type)
+                    case 'gradient map':
+                        save_data = self.get_map_data(self.sample_id, field, field_type=field_type)
+                        filtered_image = self.noise_red_array
+                    case 'Cluster':
+                        save_data= self.data[self.sample_id]['computed_data'][plot_type][method].values
+                        
+                    case 'Cluster Score'| 'PCA Score':
+                        
+                        
+                        save_data = self.data[self.sample_id]['computed_data'][plot_type][field].values
+                    
+                    case _:
+                        save_data = self.plot_info['data']
+                    
+                
+                
+                
+                
+                
             #open dialog to get name of file
             file_name, _ = QFileDialog.getSaveFileName(self, "Save File", "", "CSV Files (*.csv);;All Files (*)")
             if file_name:
                 with open(file_name, 'wb') as file:
                     # self.save_data holds data used for current plot 
-                    self.save_data.to_csv(file,index = False)
+                    save_data.to_csv(file,index = False)
                 
                 self.statusBar.showMessage("Plot Data saved successfully")
                 
@@ -6863,8 +6891,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             correlation_matrix = df_filtered[ind].corr(method=method)
         
-        # store correlation_matrix to save_data if data needs to be exported
-        self.save_data = correlation_matrix
+        
         
         columns = correlation_matrix.columns
 
@@ -6886,6 +6913,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             cax = canvas.axes.imshow(correlation_matrix, cmap=self.get_colormap(), norm=norm)
             canvas.array = correlation_matrix
+            
+        # store correlation_matrix to save_data if data needs to be exported
+        self.save_data = canvas.array
 
         canvas.axes.spines['top'].set_visible(False)
         canvas.axes.spines['bottom'].set_visible(False)
@@ -6934,7 +6964,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'style': style,
             'cluster_groups': [],
             'view': [True,False],
-            'position': []
+            'position': [],
+            'data': correlation_matrix,
         }
 
         self.clear_layout(self.widgetSingleView.layout())
@@ -7081,6 +7112,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def plot_histogram(self):
         """Plots a histogramn the canvas window"""
+        
+        plot_data = None
         #print('plot histogram')
         # create Mpl canvas
         canvas = MplCanvas(parent=self)
@@ -7150,7 +7183,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 else:
                     ecolor = None
 
-                canvas.axes.hist( cluster_data,
+                plot_data = canvas.axes.hist( cluster_data,
                         cumulative=cumflag,
                         histtype=htype,
                         bins=edges,
@@ -7173,7 +7206,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             else:
                 ecolor = None
 
-            canvas.axes.hist( x['array'],
+            plot_data = canvas.axes.hist( x['array'],
                     cumulative=cumflag,
                     histtype=htype,
                     bins=edges,
@@ -7241,7 +7274,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'style': style,
             'cluster_groups': clusters,
             'view': [True,False],
-            'position': []
+            'position': [],
+            'data': plot_data
         }
 
         self.clear_layout(self.widgetSingleView.layout())
@@ -7329,6 +7363,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 edgecolors='none',
                 alpha=style['Markers']['Alpha']/100)
             cb = None
+            
+            plot_data = pd.DataFrame(np.vstack((x['array'], y['array'])).T, columns = ['x','y'])
+            
         elif style['Colors']['ColorByField'] == 'Cluster':
             # color by cluster
             method = self.comboBoxColorField.currentText()
@@ -7355,6 +7392,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 norm=norm)
 
             self.add_colorbar(canvas, cb, style, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color)
+            plot_data = pd.DataFrame(np.vstack((x['array'][ind],y['array'][ind], c['array'][ind], cluster_group[ind])).T, columns = ['x','y','c','cluster_group'])
         else:
             # color by field
             norm = self.color_norm(style)
@@ -7367,6 +7405,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 norm=norm)
 
             self.add_colorbar(canvas, cb, style)
+            plot_data = pd.DataFrame(np.vstack((x['array'], y['array'], c['array'])).T, columns = ['x','y','c'])
+            
 
         # axes
         xmin, xmax, xscale, xlbl = self.get_axis_values(x['type'],x['field'])
@@ -7409,7 +7449,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'style': style,
             'cluster_groups': [],
             'view': [True,False],
-            'position': []
+            'position': [],
+            'data':  plot_data
         }
 
     def ternary_scatter(self, canvas, x, y, z, c, style):
@@ -7443,6 +7484,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     alpha=style['Markers']['Alpha']/100,
                 )
             cb = None
+            plot_data = pd.DataFrame(np.vstack((x['array'],y['array'], z['array'])).T, columns = ['x','y','z'])
+            
         elif style['Colors']['ColorByField'] == 'Cluster':
             # color by cluster
             method = self.comboBoxColorField.currentText()
@@ -7472,6 +7515,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 )
 
             self.add_colorbar(canvas, cb, style, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color)
+            plot_data = pd.DataFrame(np.vstack((x['array'][ind],y['array'][ind], z['array'][ind], cluster_group[ind])).T, columns = ['x','y','z','cluster_group'])
         else:
             # color field
             norm = self.color_norm(style)
@@ -7487,7 +7531,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             if cb:
                 cb.set_label(c['label'])
-
+                plot_data = pd.DataFrame(np.vstack((x['array'], y['array'], c['array'])).T, columns = ['x','y','c'])
         plot_name = f"{x['field']}_{y['field']}_{z['field']}_{'ternscatter'}"
         self.plot_info = {
             'tree': 'Geochemistry',
@@ -7500,7 +7544,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'style': style,
             'cluster_groups': [],
             'view': [True,False],
-            'position': []
+            'position': [],
+            'data': plot_data
         }
 
     def hist2dbiplot(self, canvas, x, y, style):
@@ -7563,7 +7608,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'style': style,
             'cluster_groups': [],
             'view': [True,False],
-            'position': []
+            'position': [],
+            'data': pd.concat([x['array'],y['array']])
         }
 
     def hist2dternplot(self, canvas, x, y, z, style, c=None):
@@ -7625,7 +7671,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'style': style,
             'cluster_groups': [],
             'view': [True,False],
-            'position': []
+            'position': [],
+            'data' : pd.concat([x['array'],y['array'], z['array']])
         }
 
     def plot_ternarymap(self, canvas):
@@ -7886,8 +7933,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # aspect ratio
         canvas.axes.set_box_aspect(style['Axes']['AspectRatio'])
-
-        return canvas
+        
+        plot_data = pd.DataFrame([n_components, variances, cumulative_variances], columns = ['Components','Variance','Cumulative Variance'])
+        return canvas, plot_data
 
     def plot_pca_vectors(self):
         """Displays a heat map of PCA vector components
@@ -7957,8 +8005,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         canvas.axes.set_yticklabels(self.toggle_mass(analytes), ha='right', va='center')
 
         canvas.fig.tight_layout()
-
-        return canvas
+        plot_data = pd.DataFrame([components], columns = str(range(0, n_variables,1)))
+        return canvas, plot_data
 
     def plot_pca_components(self, canvas):
         """Adds vector components to PCA scatter and heatmaps
@@ -8006,7 +8054,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             elif x[i] < 0 and y[i] < 0:
                 canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='right', va='top', color=style['Lines']['Color'])
 
-
+        plot_data = pd.DataFrame([pc_x,pc_y], columns = ['PC x', 'PC Y'])
+        return plot_data
     # -------------------------------------
     # Cluster functions
     # -------------------------------------
@@ -8050,7 +8099,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # add scalebar
         self.add_scalebar(canvas.axes)
 
-        return canvas
+        return canvas, self.data[self.sample_id]['computed_data'][plot_type][field]
 
     def plot_cluster_map(self):
         """Produces a map of cluster categories
@@ -8097,7 +8146,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         return canvas
 
-    def compute_clusters(self):
+    def  compute_clusters(self):
         """Computes cluster results
         
         Cluster properties are defined in the ``MainWindow.toolBox.ClusterPage``."""
@@ -8486,8 +8535,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     canvas.axes.legend(loc='upper right', frameon='False')
                 else:
                     radar = Radar(canvas.axes, df_filtered, fields=self.ndim_list, fieldlabels=labels, quantiles=quantiles, axes_interval=axes_interval, group_field='', groups=None)
-
+                        
                     radar.plot()
+                    
+                    plot_data = radar.vals
+                    
             case 'TEC':
                 canvas = MplCanvas(parent=self)
 
@@ -8524,7 +8576,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                     canvas.axes.set_xticklabels(labels, rotation=angle)
                 else:
-                    canvas.axes,yl = plot_spider_norm(data=df_filtered, ref_data=self.ref_data, norm_ref_data=self.ref_data['model'][ref_i], layer=self.ref_data['layer'][ref_i], el_list=self.ndim_list, style='Quanta', quantiles=quantiles, ax=canvas.axes)
+                    canvas.axes,yl, plot_data = plot_spider_norm(data=df_filtered, ref_data=self.ref_data, norm_ref_data=self.ref_data['model'][ref_i], layer=self.ref_data['layer'][ref_i], el_list=self.ndim_list, style='Quanta', quantiles=quantiles, ax=canvas.axes)
 
                     canvas.axes.set_xticklabels(labels, rotation=angle)
                 canvas.axes.set_ylabel('Abundance / ['+self.ref_data['model'][ref_i]+', '+self.ref_data['layer'][ref_i]+']')
@@ -8548,7 +8600,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'style': style,
             'cluster_groups': cluster_dict,
             'view': [True,False],
-            'position': []
+            'position': [],
+            'data': plot_data
         }
 
         self.clear_layout(self.widgetSingleView.layout())
@@ -9621,7 +9674,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             Item selected in ``Plot Selector``
         """
         # get double-click result
-        plot_info, flag = self.retrieve_plotinfo_from_tree(tree_index=tree_index)
+        self.plot_info, flag = self.retrieve_plotinfo_from_tree(tree_index=tree_index)
 
         if not flag:
             return
@@ -9638,9 +9691,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #     widget_dict = self.plot_widget_dict[tree][branch][leaf]
             #     self.add_plotwidget_to_canvas(widget_dict['info'], view=widget_dict['view'], position=widget_dict['position'])
             self.initialize_axis_values(tree, leaf)
-            if plot_info:
+            if self.plot_info:
                 # print('tree_double_click: add_plotwidget_to_canvas')
-                self.add_plotwidget_to_canvas(plot_info)
+                self.add_plotwidget_to_canvas(self.plot_info)
             else:
                 # print('tree_double_click: plot_map_pg')
                 if self.toolBox.currentIndex() not in [self.left_tab['sample'], self.left_tab['process'], self.left_tab['polygons'], self.left_tab['profile']]:
@@ -9661,7 +9714,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.plot_map_pg(sample_id=branch, field_type=tree, field=leaf)
 
         elif tree in ['Histogram', 'Correlation', 'Geochemistry', 'Multidimensional', 'Calculated']:
-            self.add_plotwidget_to_canvas(plot_info)
+            self.add_plotwidget_to_canvas(self.plot_info)
 
     def update_tree(self, analyte_df, norm_update=False):
         """Updates plot selector list and data

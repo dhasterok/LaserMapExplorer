@@ -1,6 +1,5 @@
 {
     "files": [
-        "designer/CalculatorWindow.ui",
         "designer/AnalyteSelectionDialog.ui",
         "designer/form.ui",
         "designer/mainwindow.ui",
@@ -8,7 +7,7 @@
         "resources.qrc",
         "designer/toggleswitch.cpp",
         "designer/toggleswitch.h",
-        "designer/ExcelConcatenator.ui",
+        "designer/ImportDialog.ui",
         "designer/QuickViewDialog.ui",
         "designer/ImageImportDialog.ui"
     ]

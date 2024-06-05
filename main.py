@@ -2,7 +2,7 @@ import sys, os, re, copy, csv, random, pickle, darkdetect
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QRectF, QPointF, QUrl, pyqtSlot, QSize
 from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QVBoxLayout, QGridLayout, QMessageBox, QHeaderView, QMenu, QGraphicsRectItem
-from PyQt5.QtWidgets import QFileDialog, QWidget, QDialog, QLabel, QTableWidget, QInputDialog, QAbstractItemView, QProgressBar, QApplication, QSplashScreen, QDialogButtonBox
+from PyQt5.QtWidgets import QFileDialog, QWidget, QDialog, QLabel, QTableWidget, QInputDialog, QAbstractItemView, QProgressBar, QApplication, QSplashScreen, QDialogButtonBox, QStatusBar
 from PyQt5.QtGui import QIntValidator, QDoubleValidator, QColor, QImage, QPainter, QPixmap, QFont, QPen, QCursor, QBrush, QStandardItemModel, QStandardItem, QTextCursor, QDropEvent, QFontDatabase
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
 import pyqtgraph as pg
@@ -43,7 +43,7 @@ from src.radar import Radar
 from src.ui.MainWindow import Ui_MainWindow
 from src.ui.AnalyteSelectionDialog import Ui_Dialog
 from src.ui.PreferencesWindow import Ui_PreferencesWindow
-from src.ui.ExcelConcatenator import Ui_ExcelConcatenator
+from src.ui.ImportDialog import Ui_ImportDialog
 from src.ui.QuickViewDialog import Ui_QuickViewDialog
 # __file__ holds full path of current python file
 basedir = os.path.dirname(__file__)
@@ -55,6 +55,7 @@ setConfigOption('imageAxisOrder', 'row-major') # best performance
 ## !pyuic5 -x designer/AnalyteSelectionDialog.ui -o src/ui/AnalyteSelectionDialog.py
 ## !pyuic5 -x designer/PreferencesWindow.ui -o src/ui/PreferencesWindow.py
 ## !pyuic5 -x designer/ExcelConcatenator.ui -o src/ui/ExcelConcatenator.py
+## !pyuic5 -x designer/ImportDialog.ui -o src/ui/ImportDialog.py
 # pylint: disable=fixme, line-too-long, no-name-in-module, trailing-whitespace
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     """MainWindow
@@ -1506,8 +1507,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         pass
 
     def import_files(self):
-        self.analyteDialog = excelConcatenator(self)
-        self.analyteDialog.show()
+        self.importDialog = ImportTool(self)
+        self.importDialog.show()
 
     def export_dict_to_csv(self,dictionary, filename):
         """Exports a dictionary to csv file
@@ -11754,16 +11755,25 @@ class TableWidgetDragRows(QTableWidget):
 
 # Excel concatenator gui
 # -------------------------------
-class excelConcatenator(QtWidgets.QMainWindow, Ui_ExcelConcatenator):       
-    """Data import tool for LA-ICP-MS data
+class ImportTool(QDialog, Ui_ImportDialog):       
+    """Data import tool for map-form geochemical and mineral data
 
     Loads data that is processed and exported by Iolite, XMapTools and LADr.
+
+    Attributes
+    ----------
+    standard_list : list
+        Standards used to calibrate CPS data.
+    sample_ids : list
+        Sample IDs (directory names) with sample data.
+    paths : list
+        Path to each data file.
 
     Parameters
     ----------
     QtWidgets : QMainWindow
         Window for import tool
-    Ui_ExcelConcatenator : class
+    Ui_ImportDialog : Ui_ImportDialog
         Import window design
     """    
     def __init__(self, parent=None):
@@ -11776,25 +11786,69 @@ class excelConcatenator(QtWidgets.QMainWindow, Ui_ExcelConcatenator):
         self.paths = []
         
         # Set a message that will be displayed in the status bar
-        self.statusBar = self.statusBar()
         self.statusBar.showMessage('Ready')
         
         # Adding a progress bar to the status bar
         self.progressBar = QProgressBar()
         self.statusBar.addPermanentWidget(self.progressBar)
+
+        self.toolButtonOpenDirectory.clicked.connect(self.open_directory)
+        self.checkBoxSaveToRoot.setChecked(True)
+
+        #self.toolButtonPrevSample.clicked.connect()
+        #self.toolButtonNextSample.clicked.connect()
+
+        self.labelResolution.setText('')
         
-        self.pushButtonSaveMetaData.setEnabled(False)
-        self.pushButtonSaveMetaData.clicked.connect(self.save_meta_data)
-        self.pushButtonLoadMetaData.setEnabled(False)
-        self.pushButtonLoadMetaData.clicked.connect(self.load_meta_data)
-        self.pushButtonOpenDirectory.clicked.connect(self.open_directory)
         self.pushButtonImport.clicked.connect(self.import_data)
-        self.tableWidgetMetaData.currentItemChanged.connect(self.on_item_changed)
-        
+        self.pushButtonImport.setEnabled(False)
+        self.pushButtonLoad.clicked.connect(self.load_metadata)
+        self.pushButtonSave.clicked.connect(self.save_metadata)
+        self.pushButtonSave.setEnabled(False)
+        self.pushButtonCancel.clicked.connect(self.reject)
+
+        self.tableWidgetMetadata.currentItemChanged.connect(self.on_item_changed)
+
+        header = self.tableWidgetMetadata.horizontalHeader()
+        for col in range(self.tableWidgetMetadata.columnCount()):
+            if self.tableWidgetMetadata.horizontalHeaderItem(col).text() == 'Sample_ID':
+                header.setSectionResizeMode(col,QHeaderView.Stretch)
+            else:
+                header.setSectionResizeMode(col,QHeaderView.ResizeToContents)
+
         # self.pushButtonDone.clicked.connect(self.accept)
         # self.pushButtonCancel.clicked.connect(self.reject)
+        self.comboBoxDataType.currentIndexChanged.connect(self.data_type_changed)
+        self.comboBoxMethod.currentIndexChanged.connect(self.method_changed)
+
+    def data_type_changed(self):
+        data_type = self.comboBoxDataType.currentText()
+        match data_type:
+            case 'LA-ICP-MS':
+                methods = ['quadrapole','time of flight (TOF)','sector field (SF)']
+                pass
+            case 'MLA':
+                methods = ['']
+                pass
+            case 'XRF':
+                methods = ['']
+                pass
+            case 'petrography':
+                methods = ['']
+                pass
+            case 'SEM':
+                methods = ['']
+                pass
+
+        self.comboBoxMethod.clear()
+        self.comboBoxMethod.addItems(methods)
+        self.populate_table()
+
+    def method_changed(self):
+        self.populate_table()
+        pass
         
-    def load_meta_data(self):
+    def load_metadata(self):
         """Loads table with sample metadata
 
         Save time by prepreparing the metadata as you collect them.  Open the csv, and then update the UI table for the user to make any modifications prior to importing data.
@@ -11820,15 +11874,15 @@ class excelConcatenator(QtWidgets.QMainWindow, Ui_ExcelConcatenator):
     
     def update_table_row(self, row_pos, row_data):
         # Ensure the table has enough rows
-        if self.tableWidgetMetaData.rowCount() <= row_pos:
-            self.tableWidgetMetaData.insertRow(row_pos)
+        if self.tableWidgetMetadata.rowCount() <= row_pos:
+            self.tableWidgetMetadata.insertRow(row_pos)
     
         for col_index, (col_name, value) in enumerate(row_data.items()):
             if col_name == 'Sample ID':
                 continue  # Skip the sample ID since it's just a reference, not to be edited
     
             # Handling different widget types in the table
-            cell_widget = self.tableWidgetMetaData.cellWidget(row_pos, col_index)
+            cell_widget = self.tableWidgetMetadata.cellWidget(row_pos, col_index)
             if isinstance(cell_widget, QComboBox):
                 # Set the current index for combo box if the value exists in its options
                 index = cell_widget.findText(str(value), Qt.MatchFixedString)
@@ -11839,46 +11893,27 @@ class excelConcatenator(QtWidgets.QMainWindow, Ui_ExcelConcatenator):
             else:
                 # For QTableWidgetItem, just set the text
                 item = QTableWidgetItem(str(value))
-                self.tableWidgetMetaData.setItem(row_pos, col_index, item)
+                self.tableWidgetMetadata.setItem(row_pos, col_index, item)
                         
-    def save_meta_data(self):
-        file_name, _ = QFileDialog.getSaveFileName(self, "Save File", "", "CSV Files (*.csv);;All Files (*)")
+    def save_metadata(self):
+        """Save table widget metadata to a csv file
+
+        Opens a dialog, prompting the user to provide a filename for saving a copy data from ``ImportTool.tableWidgetMetadata`` to a csv file.
+        """        
+        file_name, _ = QFileDialog.getSaveFileName(self, "Save sample metadata", "", "CSV Files (*.csv);;All Files (*)")
         if file_name:
-            # Collect data from QTableWidget
-            data = []
-            headers = []
+            # read data from QTableWidget and place in DataFrame
+            table_df = self.qtablewidget_to_dataframe(self.tableWidgetMetadata)
             
-            # Retrieve headers
-            for column in range(self.tableWidgetMetaData.columnCount()):
-                header = self.tableWidgetMetaData.horizontalHeaderItem(column)
-                if header is not None:
-                    headers.append(header.text())
-                else:
-                    headers.append(f"Column{column}")
-            
-            # Retrieve cell data
-            for row in range(self.tableWidgetMetaData.rowCount()):
-                row_data = []
-                for column in range(self.tableWidgetMetaData.columnCount()):
-                    item = self.tableWidgetMetaData.item(row, column)
-                    if item:
-                        row_data.append(item.text())
-                    else:
-                        # Try to fetch the QComboBox if QTableWidgetItem is not found
-                        cell_widget = self.tableWidgetMetaData.cellWidget(row, column)
-                        if isinstance(cell_widget, QComboBox):
-                            row_data.append(cell_widget.currentText())
-                        else:
-                            row_data.append('')
-                data.append(row_data)
-            
-            # Create a DataFrame and save to CSV
-            df = pd.DataFrame(data, columns=headers)
-            df.to_csv(file_name, index=False)  # Save DataFrame to CSV without the index
+            # save DataFrame to CSV
+            table_df.to_csv(file_name, index=False)  # Save DataFrame to CSV without the index
             self.statusBar.showMessage("Metadata saved successfully")
 
     def open_directory(self):
-        
+        """Reads sample IDs for import from directory list
+
+        Assumes directories within selected directory are sample available for opening.
+        """        
         root_path = QFileDialog.getExistingDirectory(None, "Select a folder", options=QFileDialog.ShowDirsOnly)
         if not root_path:
             return
@@ -11886,27 +11921,34 @@ class excelConcatenator(QtWidgets.QMainWindow, Ui_ExcelConcatenator):
         self.root_path = root_path 
         self.lineEditRootDirectory.setText(root_path)  # Set the directory path in the QTextEdit
         
-        #clear existing contents in tableWidgetMetaData
-        self.tableWidgetMetaData.clearContents()
-        self.tableWidgetMetaData.setRowCount(0)
+        #clear existing contents in tableWidgetMetadata
+        self.tableWidgetMetadata.clearContents()
+        self.tableWidgetMetadata.setRowCount(0)
         
         self.fill_sample_id_path(root_path)
         
-        self.pushButtonSaveMetaData.setEnabled(True)
-        self.pushButtonLoadMetaData.setEnabled(True)
+        self.pushButtonImport.setEnabled(True)
+        self.pushButtonSave.setEnabled(True)
         
-        for sample_id in self.sample_ids:
-            #fill column with column name 'Sample ID' of  self.tableMetaData with sample ids
-            self.populate_table()
+        #fill column with column name 'Sample ID' of  self.tableMetaData with sample ids
+        self.populate_table()
         
         self.raise_()
         self.activateWindow()
     
     def fill_sample_id_path(self,root_path):
+        """Gets sample ids and path names from a root directory
+
+        Adds subdirectory names to ``ImportTool.sample_ids`` and full paths to ``ImportTool.paths``
+
+        Parameters
+        ----------
+        root_path : str
+            Generates path name for each sample directory within *root_path*
+        """        
         # List all entries in the directory given by root_path
         entries = os.listdir(root_path)
         subdirectories = [name for name in entries if os.path.isdir(os.path.join(root_path, name))]
-        
         
         if subdirectories:
             # If there are subdirectories, use them as sample IDs
@@ -11918,37 +11960,96 @@ class excelConcatenator(QtWidgets.QMainWindow, Ui_ExcelConcatenator):
             self.paths = [root_path]
 
     def populate_table(self):
-        self.tableWidgetMetaData.setRowCount(len(self.sample_ids))
-        for i, sample_id in enumerate(self.sample_ids):
-            item = QTableWidgetItem(sample_id)
-            item.setFlags(item.flags() & ~Qt.ItemIsEditable)
-            self.tableWidgetMetaData.setItem(i, 0, item)
-            self.add_combobox(i, 1, ['XMap','Iolite','LADr'])
-            self.add_combobox(i, 2, ['left to right', 'right to left', 'bottom to top', 'top to bottom'])
-            self.add_combobox(i, 3, ['left to right', 'right to left', 'bottom to top', 'top to bottom'])
-            self.add_combobox(i, 5, ['first','last'])
+        """Wrapper function for populates metadata table of different data types
+
+        Calls various functions for pupulating ``ImportTool.tableWidgetMetadata`` depending on the data type and method.
+        """
+        if not self.sample_ids:
+            return
+
+        data_type = self.comboBoxDataType.currentText()
+        match data_type:
+            case 'LA-ICP-MS':
+                self.populate_la_icp_ms_table()
+            case 'MLA':
+                pass
+            case 'XRF':
+                pass
+            case 'petrography':
+                pass
+            case 'SEM':
+                pass
+
+        # resize the table
+        header = self.tableWidgetMetadata.horizontalHeader()
+        for col in range(self.tableWidgetMetadata.columnCount()):
+            if self.tableWidgetMetadata.horizontalHeaderItem(col).text() == 'Sample_ID':
+                header.setSectionResizeMode(col,QHeaderView.Stretch)
+            else:
+                header.setSectionResizeMode(col,QHeaderView.ResizeToContents)
             
         self.table_update = True
+    
+    def populate_la_icp_ms_table(self):
+        """Populates table with LA-ICP-MS sample metadata
 
-    def add_combobox(self, row, column, items):
+        Several fields are made into checkboxes.
+        """    
+        self.tableWidgetMetadata.setRowCount(len(self.sample_ids))
+        for col in range(self.tableWidgetMetadata.columnCount()):
+            col_name = self.tableWidgetMetadata.horizontalHeaderItem(col).text()
+            for row, sample_id in enumerate(self.sample_ids):
+                match col_name:
+                    case 'Import':
+                        self.add_checkbox(row, col, True)
+                    case 'X\nreverse' | 'Y\nreverse' | 'Swap XY':
+                        self.add_checkbox(row, col, False)
+                    case 'Sample ID':
+                        item = QTableWidgetItem(sample_id)
+                        item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+                        self.tableWidgetMetadata.setItem(row, col, item)
+                    case 'Filename\nformat':
+                        self.add_combobox(row, col, ['SampleID-LineNum','LineNum-SampleID'], 0)
+
+    def add_checkbox(self, row, column, state):
+        """Adds a check box to a QTableWidget
+
+        _extended_summary_
+
+        Parameters
+        ----------
+        row : int
+            _description_
+        column : int
+            _description_
+        state : bool
+            Variable used to set check state
+        """        
+        cb = QCheckBox()
+        cb.setChecked(state)
+        cb.setStyleSheet("text-align: center; margin-left:25%; margin-right:25%;")
+        self.tableWidgetMetadata.setCellWidget(row, column, cb)
+
+    def add_combobox(self, row, column, items, default_index=0):
         combo = QComboBox()
         combo.addItems(items)
+        combo.setCurrentIndex(default_index)
         combo.currentIndexChanged.connect(lambda _, r=row, c=column: self.on_combobox_changed(r, c))
-        self.tableWidgetMetaData.setCellWidget(row, column, combo)
+        self.tableWidgetMetadata.setCellWidget(row, column, combo)
 
     def on_item_changed(self , curr_item, prev_item):
         if prev_item:
             if self.checkBoxApplyAll.isChecked() and prev_item.column() != 0:
                 column = prev_item.column()
-                for row in range(self.tableWidgetMetaData.rowCount()):
+                for row in range(self.tableWidgetMetadata.rowCount()):
                     if row != prev_item.row():
                         new_item = QTableWidgetItem(prev_item.text())
-                        self.tableWidgetMetaData.setItem(row, column, new_item)
+                        self.tableWidgetMetadata.setItem(row, column, new_item)
             
             # Always check and compute intraline distance when columns 7 or 8 change
             row = prev_item.row()
-            sweep_time_item = self.tableWidgetMetaData.item(row, 8)
-            sweep_speed_item = self.tableWidgetMetaData.item(row, 9)
+            sweep_time_item = self.tableWidgetMetadata.item(row, 8)
+            sweep_speed_item = self.tableWidgetMetadata.item(row, 9)
         
             if sweep_time_item and sweep_speed_item and sweep_time_item.text().isdigit() and sweep_speed_item.text().isdigit():
                 sweep_time = float(sweep_time_item.text())
@@ -11956,50 +12057,171 @@ class excelConcatenator(QtWidgets.QMainWindow, Ui_ExcelConcatenator):
                 if sweep_time > 0 and sweep_speed > 0:
                     intraline_dist = sweep_time * sweep_speed
                     if self.checkBoxApplyAll.isChecked():
-                        for row in range(self.tableWidgetMetaData.rowCount()):
-                                self.tableWidgetMetaData.setItem(row, 10, QTableWidgetItem(str(intraline_dist)))
+                        for row in range(self.tableWidgetMetadata.rowCount()):
+                                self.tableWidgetMetadata.setItem(row, 10, QTableWidgetItem(str(intraline_dist)))
                     else:
-                        self.tableWidgetMetaData.setItem(row, 10, QTableWidgetItem(str(intraline_dist)))
+                        self.tableWidgetMetadata.setItem(row, 10, QTableWidgetItem(str(intraline_dist)))
             elif sweep_time_item and sweep_speed_item:
                 self.statusBar.showMessage('Sweep time and sweep speed should be postive')
 
     def on_combobox_changed(self, row, column):
         if self.checkBoxApplyAll.isChecked():
-            combo = self.tableWidgetMetaData.cellWidget(row, column)
+            combo = self.tableWidgetMetadata.cellWidget(row, column)
             selected_text = combo.currentText()
-            for r in range(self.tableWidgetMetaData.rowCount()):
+            for r in range(self.tableWidgetMetadata.rowCount()):
                 if r != row:
-                    self.tableWidgetMetaData.cellWidget(r, column).setCurrentText(selected_text)
+                    self.tableWidgetMetadata.cellWidget(r, column).setCurrentText(selected_text)
             
+    def read_metadata_table(self):
+        ### READ TABLE DATA ###
+
+        cols = self.tableWidgetMetadata.columnCount()
+        table_data = {self.tableWidgetMetadata.horizontalHeaderItem(col).text(): [] for col in range(cols)}
+
+        for col in range(cols):
+            col_name = self.tableWidgetMetadata.horizontalHeaderItem(col).text()
+            for row in range(self.tableWidgetMetadata.rowCount()):
+                
+                match col_name:
+                    case 'Import':
+                        self.add_checkbox(row, col, True)
+                    case 'X\nreverse' | 'Y\nreverse' | 'Swap XY':
+                        self.add_checkbox(row, col, False)
+                    case 'Sample ID':
+                        item = QTableWidgetItem(sample_id)
+                        item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+                        self.tableWidgetMetadata.setItem(row, col, item)
+                    case 'Filename\nformat':
+                        self.add_combobox(row, col, ['SampleID-LineNum','LineNum-SampleID'], 0)
+
+    def extract_widget_data(self, widget: QWidget):
+        """Extracts relevant information from a widget for placing in a DataFrame
+
+        _extended_summary_
+
+        Parameters
+        ----------
+        widget : QWidget
+            A widget stored in ``ImportTool.tableWidgetMetadata``
+
+        Returns
+        -------
+        str or bool
+            Returns key value of widget item to be added to a DataFrame
+        """        
+        if isinstance(widget, QCheckBox):
+            return widget.isChecked()
+        elif isinstance(widget, QComboBox):
+            return widget.currentText()
+        # Add more widget types as needed
+        else:
+            return None
+
+    def qtablewidget_to_dataframe(self, table_widget: QTableWidget) -> pd.DataFrame:
+        """Takes the data from a tableWidget and places it into a DataFrame
+
+        _extended_summary_
+
+        Parameters
+        ----------
+        table_widget : QTableWidget
+            Table with data for copying to dataframe.
+            
+        Returns
+        -------
+        pd.DataFrame
+            Data frame with data from ``ImportTool.tableWidgetMetadata``
+        """        
+        # Get number of rows and columns in the QTableWidget
+        row_count = table_widget.rowCount()
+        column_count = table_widget.columnCount()
+        
+        # Create a dictionary to store the data with column headers
+        table_data = {table_widget.horizontalHeaderItem(col).text(): [] for col in range(column_count)}
+        
+        # Iterate over all rows and columns to retrieve the data
+        for row in range(row_count):
+            for col in range(column_count):
+                item = table_widget.item(row, col)
+                if item is not None:
+                    table_data[table_widget.horizontalHeaderItem(col).text()].append(item.text())
+                else:
+                    # Check for a widget in the cell
+                    widget = table_widget.cellWidget(row, col)
+                    if widget is not None:
+                        table_data[table_widget.horizontalHeaderItem(col).text()].append(self.extract_widget_data(widget))
+                    else:
+                        table_data[table_widget.horizontalHeaderItem(col).text()].append(None)
+        
+        # Convert the dictionary to a pandas DataFrame
+        df = pd.DataFrame(table_data)
+        
+        return df
+
     def import_data(self): 
-        if not self.checkBoxSaveAtRoot.isChecked():
+        """Import data associated with each *Sample Id* using metadata to define important structural parameters
+
+        A wrapper for importing data associated with different data types, instruments and other file types.
+        """        
+        data_type = self.comboBoxDataType.currentText()
+        table_df = self.qtablewidget_to_dataframe(self.tableWidgetMetadata)
+
+        if not self.checkBoxSaveToRoot.isChecked():
             save_path = QFileDialog.getExistingDirectory(None, "Select a folder to Save imports", options=QFileDialog.ShowDirsOnly)
             if not save_path:
                 return
         else:
             save_path = self.root_path
+
+        match data_type:
+            case 'LA-ICP-MS':
+                self.import_la_icp_ms_data(table_df, save_path)
+            case 'MLA':
+                pass
+            case 'XRF':
+                pass
+            case 'petrography':
+                pass
+            case 'SEM':
+                pass
+
+    def import_la_icp_ms_data(self, table_df, save_path):
+        """Reads LA-ICP-MS data into a DataFrame
+
+        _extended_summary_
+
+        Parameters
+        ----------
+        table_df : pandas.DataFrame
+            Input parameters and options
+        save_path : str
+            Location to save DataFrame reformatted into CSV for use in LaME
+        """        
+        method = self.comboBoxMethod.currentText()
+
         total_files = sum(len(files) for path in self.paths for r, d, files in os.walk(path))
         current_progress = 0
         self.progressBar.setMaximum(total_files)
         
         final_data = pd.DataFrame([])
+        data_type = self.comboBoxDataType.currentText().lower()
+        method = self.comboBoxMethod.currentText().lower()
         try:
             for i,path in enumerate(self.paths):
-                data_type = self.tableWidgetMetaData.cellWidget(i,1).currentText().lower()
-                file_direction   = self.tableWidgetMetaData.cellWidget(i,2).currentText().lower()
-                scan_direction   = self.tableWidgetMetaData.cellWidget(i,3).currentText().lower()
+                x_direction = self.tableWidgetMetadata.cellWidget(i,2).isChecked()
+                y_direction = self.tableWidgetMetadata.cellWidget(i,3).isChecked()
+                swap_xy = self.tableWidgetMetadata.cellWidget(i,3).isChecked()
                 
-                delimiter   = self.tableWidgetMetaData.item(i,4)
+                delimiter   = self.tableWidgetMetadata.item(i,4)
                 if delimiter:
                     delimiter = delimiter.text().strip().lower()
-                scan_no_pos   = self.tableWidgetMetaData.cellWidget(i,5).currentText().lower()
-                spot_size = float(self.tableWidgetMetaData.item(i,6).text().lower())
-                interline_dist = float(self.tableWidgetMetaData.item(i,7).text().lower())
+                scan_no_pos   = self.tableWidgetMetadata.cellWidget(i,5).currentText().lower()
+                spot_size = float(self.tableWidgetMetadata.item(i,6).text().lower())
+                interline_dist = float(self.tableWidgetMetadata.item(i,7).text().lower())
     
-                intraline_dist = float(self.tableWidgetMetaData.item(i,10).text().lower())
+                intraline_dist = float(self.tableWidgetMetadata.item(i,10).text().lower())
                 line_sep =20
                 line_dir = 'x'
-                
                 
                 for subdir, dirs, files in os.walk(path):
                     data_frames = []
@@ -12027,11 +12249,10 @@ class excelConcatenator(QtWidgets.QMainWindow, Ui_ExcelConcatenator):
                 
                         
                         
-                    if data_type == 'iolite':
+                    if method == 'raw':
                         final_data = pd.concat(data_frames, ignore_index=True)
                         final_data.insert(2,'X',final_data['ScanNum'] * float(interline_dist))
                         final_data.insert(3,'Y',final_data['SpotNum'] * float(intraline_dist))
-                        
                         
                         #determine read direction
                         x_dir = self.orientation(file_direction)
@@ -12054,7 +12275,7 @@ class excelConcatenator(QtWidgets.QMainWindow, Ui_ExcelConcatenator):
                                 final_data['Y'] = Xtmp;
                         
                         
-                    elif data_type == 'xmap':
+                    elif data_type == 'map':
                         final_data = pd.concat(data_frames, axis = 1)
                         
                         # Create scanNum array

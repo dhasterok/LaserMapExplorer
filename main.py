@@ -11833,8 +11833,9 @@ class ImportTool(QDialog, Ui_ImportDialog):
         super().__init__(parent)
         self.setupUi(self)
         
-        # list of standards (files to ignore)
-        self.standard_list = ['STDGL', 'NiS', 'NIST610']
+        # list of standards (files to ignore or use as calibration...once we add that capability)
+        self.standards_df = pd.read_csv(os.path.join(basedir,'resources/app_data/standards_list.csv'))
+        self.toolButtonAddStandard.clicked.connect(self.add_standard)
         self.sample_ids = []
         self.paths = []
         
@@ -11874,6 +11875,16 @@ class ImportTool(QDialog, Ui_ImportDialog):
         self.comboBoxDataType.currentIndexChanged.connect(self.data_type_changed)
         self.comboBoxMethod.currentIndexChanged.connect(self.method_changed)
 
+    def add_standard(self):
+        data_type = self.comboBoxDataType.currentText()
+        
+        standard_name, ok = QInputDialog.getText(self, 'Add standard', f'Enter new standard name to {data_type}:')
+
+        if not ok:
+            return
+        
+        
+
     def data_type_changed(self):
         data_type = self.comboBoxDataType.currentText()
         match data_type:
@@ -11892,6 +11903,9 @@ class ImportTool(QDialog, Ui_ImportDialog):
             case 'SEM':
                 methods = ['']
                 pass
+
+        # used to populate table
+        self.standard_list = self.standard_df[data_type].to_list()
 
         self.comboBoxMethod.clear()
         self.comboBoxMethod.addItems(methods)
@@ -12055,12 +12069,14 @@ class ImportTool(QDialog, Ui_ImportDialog):
                 match col_name:
                     case 'Import':
                         self.add_checkbox(row, col, True)
-                    case 'X\nreverse' | 'Y\nreverse' | 'Swap XY':
-                        self.add_checkbox(row, col, False)
                     case 'Sample ID':
                         item = QTableWidgetItem(sample_id)
                         item.setFlags(item.flags() & ~Qt.ItemIsEditable)
                         self.tableWidgetMetadata.setItem(row, col, item)
+                    case 'Standard':
+                        self.add_combobox(row, col, self.standard_list, 0)
+                    case 'X\nreverse' | 'Y\nreverse' | 'Swap XY':
+                        self.add_checkbox(row, col, False)
                     case 'Filename\nformat':
                         self.add_combobox(row, col, ['SampleID-LineNum','LineNum-SampleID'], 0)
 

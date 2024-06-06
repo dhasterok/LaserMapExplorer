@@ -204,22 +204,6 @@
        </widget>
       </item>
       <item>
-       <spacer name="horizontalSpacer_3">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Fixed</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
        <widget class="QToolButton" name="toolButtonOpenDirectory">
         <property name="minimumSize">
          <size>
@@ -247,6 +231,58 @@
          <size>
           <width>20</width>
           <height>20</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="labelAddStandard">
+        <property name="text">
+         <string>Add standard</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="toolButtonAddStandard">
+        <property name="minimumSize">
+         <size>
+          <width>28</width>
+          <height>28</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>28</width>
+          <height>28</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../resources.qrc">
+          <normaloff>:/icons/resources/icons/icon-accept-64.png</normaloff>:/icons/resources/icons/icon-accept-64.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>18</width>
+          <height>18</height>
          </size>
         </property>
        </widget>
@@ -320,6 +356,16 @@ format</string>
           </column>
           <column>
            <property name="text">
+            <string>Standard</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Swap XY</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
             <string>X
 reverse</string>
            </property>
@@ -328,11 +374,6 @@ reverse</string>
            <property name="text">
             <string>Y
 reverse</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Swap XY</string>
            </property>
           </column>
           <column>

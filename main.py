@@ -1116,11 +1116,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Browser
         #-------------------------
-        self.open_browser()
-        self.toolButtonBrowserHome.clicked.connect(self.browser_home_callback)
-        self.lineEditBrowserLocation.editingFinished.connect(self.browser_location_callback)
-        self.toolButtonBack.clicked.connect(self.browser.back)
-        self.toolButtonForward.clicked.connect(self.browser.forward)
+        # self.open_browser()
+        # self.toolButtonBrowserHome.clicked.connect(self.browser_home_callback)
+        # self.lineEditBrowserLocation.editingFinished.connect(self.browser_location_callback)
+        # self.toolButtonBack.clicked.connect(self.browser.back)
+        # self.toolButtonForward.clicked.connect(self.browser.forward)
 
 
         # Plot toolbars
@@ -6098,6 +6098,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             # clear plot list in comboBox
             self.comboBoxMVPlots.clear()
+            
+    def update_canvas(self, new_canvas):
+        # Clear the existing layout
+        self.clear_layout(self.widgetSingleView.layout())
+
+        # Add the new canvas to the layout
+        self.widgetSingleView.layout().addWidget(new_canvas)
+
+        # Recreate the NavigationToolbar with the new canvas
+        self.mpl_toolbar = NavigationToolbar(new_canvas, self.widgetSingleView)
+        #hide the toolbar
+        self.mpl_toolbar.hide()
+        self.widgetSingleView.layout().addWidget(self.mpl_toolbar)
 
     def display_QV(self):
         """Plots selected maps to the Quick View tab
@@ -6292,23 +6305,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if self.plot_info:
                 sample_id = self.plot_info['sample_id']
                 plot_type = self.plot_info['plot_type']
-                field_type = self.plot_info['field_type']
-                field = self.plot_info['field']
+                
                 
                 match plot_type:
                     case 'analyte map':
+                        
+                        field_type = self.plot_info['field_type']
+                        field = self.plot_info['field']
                         save_data = self.get_map_data(self.sample_id, field, field_type=field_type)
                     case 'gradient map':
+                        field_type = self.plot_info['field_type']
+                        field = self.plot_info['field']
                         save_data = self.get_map_data(self.sample_id, field, field_type=field_type)
                         filtered_image = self.noise_red_array
                     case 'Cluster':
-                        save_data= self.data[self.sample_id]['computed_data'][plot_type][method].values
+                        save_data= self.data[self.sample_id]['computed_data'][plot_type]
                         
-                    case 'Cluster Score'| 'PCA Score':
-                        
-                        
-                        save_data = self.data[self.sample_id]['computed_data'][plot_type][field].values
-                    
                     case _:
                         save_data = self.plot_info['data']
                     
@@ -6632,12 +6644,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'position': None
             }
 
-        self.clear_layout(self.widgetSingleView.layout())
+        # self.clear_layout(self.widgetSingleView.layout())
 
-        self.mpl_toolbar = NavigationToolbar(canvas, self)
-        self.widgetSingleView.layout().addWidget(self.mpl_toolbar)
-        self.mpl_toolbar.hide()
-        self.widgetSingleView.layout().addWidget(canvas)
+        # self.mpl_toolbar = NavigationToolbar(canvas, self)
+        # self.widgetSingleView.layout().addWidget(self.mpl_toolbar)
+        # self.mpl_toolbar.hide()
+        #remove current canvas and add toolbar
+        self.update_canvas(canvas)
+        
+        self.add_plotwidget_to_canvas( self.plot_info)
+        # self.widgetSingleView.layout().addWidget(canvas)
 
         self.add_tree_item(self.plot_info)
 
@@ -7610,7 +7626,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'cluster_groups': [],
             'view': [True,False],
             'position': [],
-            'data': pd.concat([x['array'],y['array']])
+            'data': pd.DataFrame(np.vstack((x['array'],y['array'])).T, columns = ['x','y'])
         }
 
     def hist2dternplot(self, canvas, x, y, z, style, c=None):
@@ -7673,7 +7689,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'cluster_groups': [],
             'view': [True,False],
             'position': [],
-            'data' : pd.concat([x['array'],y['array'], z['array']])
+            'data' : pd.DataFrame(np.vstack((x['array'],y['array'], z['array'])).T, columns = ['x','y','z'])
         }
 
     def plot_ternarymap(self, canvas):
@@ -7757,7 +7773,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'style': style,
             'cluster_groups': [],
             'view': [True,False],
-            'position': []
+            'position': [],
+            'data': pd.DataFrame(map_data)
         }
 
         self.clear_layout(self.widgetSingleView.layout())
@@ -7827,12 +7844,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         match plot_type.lower():
             # make a plot of explained variance
             case 'variance':
-                canvas = self.plot_pca_variance()
+                canvas, plot_data = self.plot_pca_variance()
                 plot_name = plot_type
 
             # make an image of the PC vectors and their components
             case 'vectors':
-                canvas = self.plot_pca_vectors()
+                canvas, plot_data = self.plot_pca_vectors()
                 plot_name = plot_type
 
             # make a scatter plot or heatmap of the data... add PC component vectors
@@ -7849,7 +7866,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 canvas = MplCanvas(parent=self)
                 self.plot_scatter(canvas=canvas)
 
-                self.plot_pca_components(canvas)
+                plot_data= self.plot_pca_components(canvas)
 
             # make a map of a principal component score
             case 'pca score':
@@ -7857,7 +7874,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     return
 
                 # Assuming pca_df contains scores for the principal components
-                canvas = self.plot_score_map()
+                canvas, plot_data = self.plot_score_map()
                 plot_name = plot_type+f'_{self.comboBoxColorField.currentText()}'
             case _:
                 print(f'Unknown PCA plot type: {plot_type}')
@@ -7874,12 +7891,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'style': self.styles[plot_type],
             'cluster_groups': [],
             'view': [True,False],
-            'position': []
+            'position': [],
+            'data': plot_data
         }
 
-        self.clear_layout(self.widgetSingleView.layout())
-        self.widgetSingleView.layout().addWidget(canvas)
-
+        self.update_canvas(canvas)
         self.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
 
     def plot_pca_variance(self):
@@ -7935,7 +7951,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # aspect ratio
         canvas.axes.set_box_aspect(style['Axes']['AspectRatio'])
         
-        plot_data = pd.DataFrame([n_components, variances, cumulative_variances], columns = ['Components','Variance','Cumulative Variance'])
+        plot_data = pd.DataFrame(np.vstack((n_components, variances, cumulative_variances)).T, columns = ['Components','Variance','Cumulative Variance'])
         return canvas, plot_data
 
     def plot_pca_vectors(self):
@@ -7951,9 +7967,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         style = self.styles['vectors']
 
         # pca_dict contains 'components_' from PCA analysis with columns for each variable
-        components = self.pca_results.components_  # No need to transpose for heatmap representation
+        # No need to transpose for heatmap representation
         analytes = self.data[self.sample_id]['analyte_info'].loc[:,'analytes']
 
+        components = self.pca_results.components_
         # Number of components and variables
         n_components = components.shape[0]
         n_variables = components.shape[1]
@@ -8006,7 +8023,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         canvas.axes.set_yticklabels(self.toggle_mass(analytes), ha='right', va='center')
 
         canvas.fig.tight_layout()
-        plot_data = pd.DataFrame([components], columns = str(range(0, n_variables,1)))
+        plot_data = pd.DataFrame(components, columns = list(map(str, range(n_variables))))
         return canvas, plot_data
 
     def plot_pca_components(self, canvas):
@@ -8055,7 +8072,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             elif x[i] < 0 and y[i] < 0:
                 canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='right', va='top', color=style['Lines']['Color'])
 
-        plot_data = pd.DataFrame([pc_x,pc_y], columns = ['PC x', 'PC Y'])
+        plot_data = pd.DataFrame(np.vstack((x,y)).T, columns = ['PC x', 'PC Y'])
         return plot_data
     # -------------------------------------
     # Cluster functions
@@ -8145,7 +8162,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # add scalebar
         self.add_scalebar(canvas.axes)
 
-        return canvas
+        return canvas, self.data[self.sample_id]['computed_data'][plot_type][method]
 
     def  compute_clusters(self):
         """Computes cluster results
@@ -8269,10 +8286,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case 'Cluster':
                 self.comboBoxColorField.setCurrentText(method)
                 plot_name = f"{plot_type}_{method}_map"
-                canvas = self.plot_cluster_map()
+                canvas, plot_data = self.plot_cluster_map()
             case 'Cluster Score':
                 plot_name = f"{plot_type}_{method}_{self.comboBoxColorField.currentText()}_score_map"
-                canvas = self.plot_score_map()
+                canvas, plot_data = self.plot_score_map()
             case _:
                 print(f'Unknown PCA plot type: {plot_type}')
                 return
@@ -8288,7 +8305,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'style': self.styles[plot_type],
             'cluster_groups': self.cluster_dict[method],
             'view': [True,False],
-            'position': []
+            'position': [],
+            'data': plot_data
             }
 
         self.clear_layout(self.widgetSingleView.layout())

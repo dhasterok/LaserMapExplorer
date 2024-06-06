@@ -107,10 +107,13 @@ def plot_spider_norm(data, ref_data, norm_ref_data, layer,el_list=None, style='Q
         plot_inf ['variable_names'] = result_df.columns[:-1]
     
     result_df['elid'] = range(0, len(result_df))
+    
     # fig = Figure()
     # ax = fig.add_subplot(111)
     ax, yl = plot_data(ax,result_df,c, style,el_list,Q=quantiles, label = label) 
     
+    # add element list to results to add more information to export
+    result_df['element'] = el_list
     
     return ax, yl, result_df
     # df = pd.DataFrame(results, columns=['N', 'mu', 'mu_norm', 'sigma', 'sigma_norm'] if style != 'Quanta' else ['Q' + str(int(q*100)) for q in Q] + ['N'])
@@ -132,7 +135,7 @@ def logax(ax, lim, axis='y', label='', tick_label_rotation=0):
     tick_labels = []
     for i in range(int(lim[0]), int(lim[1]) + 1):
         ticks.extend([i + m for m in mt])
-        tick_labels.extend([f'{10**i}'] + [''] * (len(mt) - 1))
+        tick_labels.extend([f'{10 ** i}'] + [''] * (len(mt) - 1))
 
     # Apply settings based on the axis
     if axis.lower() == 'x':

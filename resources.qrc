@@ -94,6 +94,8 @@
         <file>resources/icons/icon-marker-and-lines-64.png</file>
         <file>resources/icons/icon-text-and-scales-64.png</file>
         <file>resources/icons/icon-dimensional-analysis-64.png</file>
+        <file>resources/icons/icon-back-arrow-64.png</file>
+        <file>resources/icons/icon-forward-arrow-64.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

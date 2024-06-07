@@ -592,6 +592,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionSwapAxes.triggered.connect(self.swap_xy)
         self.actionSwapAxes.setEnabled(False)
 
+        self.actionReportBug.triggered.connect(lambda: self.browser.setUrl(QUrl('https://github.com/dhasterok/LaserMapExplorer/issues')))
+
         # Select analyte Tab
         #-------------------------
         self.ref_data = pd.read_excel(os.path.join(basedir,'resources/app_data/earthref.xlsx'))
@@ -12488,6 +12490,7 @@ class ImportTool(QDialog, Ui_ImportDialog):
                     self.statusBar.showMessage(f"{sample_id}: {current_progress}/{total_files} files imported.")
                     QtWidgets.QApplication.processEvents()  # Process GUI events to update the progress bar
 
+                self.statusBar.showMessage(f'Formatting {sample_id}...')
                 if ftype == 'lines':
                     final_data = pd.concat(data_frames, ignore_index=True)
                     
@@ -12509,7 +12512,7 @@ class ImportTool(QDialog, Ui_ImportDialog):
                 if not data_frames:
                     continue
 
-                file_name = os.path.join(save_path, self.sample_ids[i]+'.lame.csv')
+                file_name = os.path.join(save_path, sample_id+'.lame.csv')
                 self.statusBar.showMessage(f'Saving {file_name}...')
                 final_data.to_csv(file_name, index= False)
                 num_imported += 1

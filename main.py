@@ -543,7 +543,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Menu and Toolbar
         #-------------------------
         # Connect the "Open" action to a function
-        self.actionOpenDirectory.triggered.connect(self.open_directory)
+        self.actionOpenDirectory.triggered.connect(lambda: self.open_directory(dir_name=None))
         self.actionOpenSample.triggered.connect(self.open_sample)
 
         # Intialize Tabs as not enabled
@@ -591,6 +591,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionSaveAnalysis.triggered.connect(lambda: self.save_analysis())
         self.actionSwapAxes.triggered.connect(self.swap_xy)
         self.actionSwapAxes.setEnabled(False)
+
+        self.actionReportBug.triggered.connect(lambda: self.browser.setUrl(QUrl('https://github.com/dhasterok/LaserMapExplorer/issues')))
 
         # Select analyte Tab
         #-------------------------
@@ -1239,7 +1241,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.comboBoxSampleId.clear()
 
             #print(self.csv_files)
-            self.comboBoxSampleId.addItems([os.path.splitext(file)[0] for file in self.csv_files])
+            self.comboBoxSampleId.addItems([os.path.splitext(file)[0].replace('.lame','') for file in self.csv_files])
             # Populate the sampleidcomboBox with the file names
             self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
             self.change_sample(0)
@@ -1248,7 +1250,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.init_tabs()
 
-    def open_directory(self):
+    def open_directory(self, dir_name=None):
         """Open directory with samples
 
         Executes on self.toolBar.actionOpen and self.menuFile.action.OpenDirectory.  self.toolBox
@@ -1258,25 +1260,31 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         ``MainWindow.comboBoxSampleID`` and comboBoxes associated with analyte lists.  The first sample
         in list is loaded by default.
         """
-        dialog = QFileDialog()
-        dialog.setFileMode(QFileDialog.Directory)
-        # Set the default directory to the current working directory
-        # dialog.setDirectory(os.getcwd())
-        dialog.setDirectory(basedir)
-        if dialog.exec_():
-            self.selected_directory = dialog.selectedFiles()[0]
-            file_list = os.listdir(self.selected_directory)
-            self.csv_files = [file for file in file_list if file.endswith('.lame.csv')]
-            if self.csv_files == []:
-                # warning dialog
+        print(dir_name)
+        if dir_name is None:
+            dialog = QFileDialog()
+            dialog.setFileMode(QFileDialog.Directory)
+            # Set the default directory to the current working directory
+            # dialog.setDirectory(os.getcwd())
+            dialog.setDirectory(basedir)
+            if dialog.exec_():
+                self.selected_directory = dialog.selectedFiles()[0]
+            else:
                 return
-            self.comboBoxSampleId.clear()
-            self.comboBoxSampleId.addItems([os.path.splitext(file)[0] for file in self.csv_files])
-            # Populate the sampleidcomboBox with the file names
-            self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
-            self.change_sample(0)
         else:
+            self.selected_directory = dir_name
+
+        file_list = os.listdir(self.selected_directory)
+        self.csv_files = [file for file in file_list if file.endswith('.lame.csv')]
+        if self.csv_files == []:
+            # warning dialog
             return
+        self.comboBoxSampleId.clear()
+        self.comboBoxSampleId.addItems([os.path.splitext(file)[0].replace('.lame','') for file in self.csv_files])
+        # Populate the sampleidcomboBox with the file names
+        self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
+        self.change_sample(0)
+
         # self.selected_directory='/Users/a1904121/LaserMapExplorer/laser_mapping/Alex_garnet_maps/processed data'
         # self.selected_directory='/Users/shavinkalu/Library/CloudStorage/GoogleDrive-a1904121@adelaide.edu.au/.shortcut-targets-by-id/1r_MeSExALnv9lHE58GoG7pbtC8TOwSk4/laser_mapping/Alex_garnet_maps/processed data'
         # self.selected_directory=''
@@ -1341,7 +1349,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 return
 
         file_path = os.path.join(self.selected_directory, self.csv_files[index])
-        self.sample_id = os.path.splitext(self.csv_files[index])[0]
+        self.sample_id = os.path.splitext(self.csv_files[index])[0].replace('.lame','')
 
         # notes and autosave timer
         self.notes_file = self.selected_directory + '/' + self.sample_id + '.rst'
@@ -1509,9 +1517,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         pass
 
     def import_files(self):
+        # import data dialog
         self.importDialog = ImportTool(self)
         self.importDialog.show()
 
+        # read directory
+        if self.importDialog.ok:
+            self.open_directory(dir_name=self.importDialog.root_path)
+        # change sample
 
     # Other windows/dialogs
     # -------------------------------------
@@ -9422,7 +9435,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         for csv_file in csv_files:
             file_path = os.path.join(path, csv_file)
             df = pd.read_csv(file_path, engine='c')
-            file_name = os.path.splitext(csv_file)[0]
+            file_name = os.path.splitext(csv_file)[0].replace('.lame','')
             # Get the file name without extension
             data_dict[file_name] = df
             i += 1
@@ -11855,6 +11868,8 @@ class ImportTool(QDialog, Ui_ImportDialog):
         # self.pushButtonCancel.clicked.connect(self.reject)
         self.comboBoxDataType.currentIndexChanged.connect(self.data_type_changed)
         self.comboBoxMethod.currentIndexChanged.connect(self.method_changed)
+
+        self.ok = False
     
     def change_preview(self,next=True):
         # Get indexes of samples that are selected for analysis
@@ -12390,7 +12405,9 @@ class ImportTool(QDialog, Ui_ImportDialog):
         """Import data associated with each *Sample Id* using metadata to define important structural parameters
 
         A wrapper for importing data associated with different data types, instruments and other file types.
-        """        
+        """
+        self.ok = False
+
         data_type = self.comboBoxDataType.currentText()
         table_df = self.qtablewidget_to_dataframe(self.tableWidgetMetadata)
 
@@ -12420,7 +12437,7 @@ class ImportTool(QDialog, Ui_ImportDialog):
                 pass
             case 'SEM':
                 pass
-
+        
     def import_la_icp_ms_data(self, table_df, save_path):
         """Reads LA-ICP-MS data into a DataFrame
 
@@ -12506,6 +12523,7 @@ class ImportTool(QDialog, Ui_ImportDialog):
                     self.statusBar.showMessage(f"{sample_id}: {current_progress}/{total_files} files imported.")
                     QtWidgets.QApplication.processEvents()  # Process GUI events to update the progress bar
 
+                self.statusBar.showMessage(f'Formatting {sample_id}...')
                 if ftype == 'lines':
                     final_data = pd.concat(data_frames, ignore_index=True)
                     
@@ -12527,8 +12545,8 @@ class ImportTool(QDialog, Ui_ImportDialog):
                 if not data_frames:
                     continue
 
-                file_name = os.path.join(save_path, self.sample_ids[i]+'.lame.csv')
-                self.statusBar.showMessage(f'Saving {file_name}...')
+                file_name = os.path.join(save_path, sample_id+'.lame.csv')
+                self.statusBar.showMessage(f'Saving {sample_id}.lame.csv...')
                 final_data.to_csv(file_name, index= False)
                 num_imported += 1
 
@@ -12541,6 +12559,8 @@ class ImportTool(QDialog, Ui_ImportDialog):
         self.pushButtonCancel.setText('Close')
         self.pushButtonCancel.setDefault(True)
         self.progressBar.setValue(total_files)  # Ensure the progress bar reaches full upon completion
+
+        self.ok = True
             
     def read_raw_folder(self,line_no,file_path, swap_xy, dx, dy):
         df = pd.read_csv(file_path, skiprows=3)
@@ -12578,13 +12598,18 @@ class ImportTool(QDialog, Ui_ImportDialog):
         # if match:
         #     analyte_name =  match.group(1)  # Returns the captured group, which is the text of interest
         # elif  match2:
-        #     name = match2.group(2)  # First group: iolite name
-        #     number = match2.group(1)  # Second group: iolite number
+        #     name = match2.group(2)  # First group: analyte name
+        #     number = match2.group(1)  # Second group: analyte number
         #     # Create the variable combining name and number
         #     analyte_name = f"{name}{number}"
         # else:
         #     self.statusBar.showMessage('Analyte name not part of filename')
         #     return []
+
+        # if analyte has isotope mass first and symbol second, swap order
+        test = re.search(r'(\d+)(\D+)', analyte)
+        if test:
+            analyte = f"{test.group(2)}{test.group(1)}"
         
         # drop rows and columns with all nans 
         df = pd.read_csv(file_path, header=None).dropna(how='all', axis=0).dropna(how='all', axis=1)
@@ -12611,10 +12636,10 @@ class ImportTool(QDialog, Ui_ImportDialog):
 
             # swap x and y
             if dx is not None: 
-                X = row_values
-                Y = col_values
+                Y = row_values
+                X = col_values
 
-            new_df = pd(df.values.T.flatten(), columns=[analyte])
+            new_df = pd.DataFrame(df.values.T.flatten(), columns=[analyte])
         else:
             # reverse x-direction
             if reverse_x:
@@ -12624,8 +12649,8 @@ class ImportTool(QDialog, Ui_ImportDialog):
                 df = df[df.columns[::-1]]
             
             if dx is not None: 
-                X = col_values
-                Y = row_values
+                Y = col_values
+                X = row_values
 
             new_df = pd.DataFrame(df.values.flatten(), columns=[analyte])
 

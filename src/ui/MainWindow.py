@@ -4875,6 +4875,12 @@ class Ui_MainWindow(object):
         self.actionClearFilters.setIcon(icon78)
         self.actionClearFilters.setMenuRole(QtWidgets.QAction.ApplicationSpecificRole)
         self.actionClearFilters.setObjectName("actionClearFilters")
+        self.actionReportBug = QtWidgets.QAction(MainWindow)
+        icon79 = QtGui.QIcon()
+        icon79.addPixmap(QtGui.QPixmap(":/icons/resources/icons/icon-bugs-64.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionReportBug.setIcon(icon79)
+        self.actionReportBug.setMenuRole(QtWidgets.QAction.ApplicationSpecificRole)
+        self.actionReportBug.setObjectName("actionReportBug")
         self.menuFile.addAction(self.actionOpenSample)
         self.menuFile.addAction(self.actionOpenDirectory)
         self.menuFile.addAction(self.actionSpotData)
@@ -4932,6 +4938,7 @@ class Ui_MainWindow(object):
         self.toolBar.addAction(self.actionProfiles)
         self.toolBar.addAction(self.actionCalculator)
         self.toolBar.addSeparator()
+        self.toolBar.addAction(self.actionReportBug)
         self.toolBar.addAction(self.actionReset)
 
         self.retranslateUi(MainWindow)
@@ -5700,4 +5707,6 @@ class Ui_MainWindow(object):
         self.actionClearFilters.setText(_translate("MainWindow", "Clear Filters"))
         self.actionClearFilters.setIconText(_translate("MainWindow", "Clear"))
         self.actionClearFilters.setToolTip(_translate("MainWindow", "Clear all filters"))
+        self.actionReportBug.setText(_translate("MainWindow", "Report Bug"))
+        self.actionReportBug.setToolTip(_translate("MainWindow", "Report bug or request new feature"))
 import src.ui.resources_rc

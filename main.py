@@ -2969,24 +2969,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # shifts analyte values so that all values are postive
             adj_data = pd.DataFrame(self.transform_plots(self.data[sample_id]['cropped_raw_data'][analytes].values), columns= analytes)
 
-            #perform scaling for groups of analytes with same norm parameter
-            for norm in analyte_info['norm'].unique():
-                filtered_analytes = analyte_info[(analyte_info['norm'] == norm)]['analytes']
-                filtered_data = adj_data[filtered_analytes].values
-                if norm == 'log':
+            # #perform scaling for groups of analytes with same norm parameter
+            # for norm in analyte_info['norm'].unique():
+            #     filtered_analytes = analyte_info[(analyte_info['norm'] == norm)]['analytes']
+            #     filtered_data = adj_data[filtered_analytes].values
+            #     if norm == 'log':
 
-                    # np.nanlog handles NaN value
-                    self.data[sample_id]['processed_data'].loc[:,filtered_analytes] = np.log10(filtered_data, where=~np.isnan(filtered_data))
-                    # print(self.processed_analyte_data[sample_id].loc[:10,analytes])
-                    # print(self.data[sample_id]['processed_data'].loc[:10,analytes])
-                elif norm == 'logit':
-                    # Handle division by zero and NaN values
-                    with np.errstate(divide='ignore', invalid='ignore'):
-                        analyte_array = np.log10(filtered_data / (10**6 - filtered_data), where=~np.isnan(filtered_data))
-                        self.data[sample_id]['processed_data'].loc[:,filtered_analytes] = analyte_array
-                else:
-                    # set to clipped data with original values if linear normalisation
-                    self.data[sample_id]['processed_data'].loc[:,filtered_analytes] = filtered_data
+            #         # np.nanlog handles NaN value
+            #         self.data[sample_id]['processed_data'].loc[:,filtered_analytes] = np.log10(filtered_data, where=~np.isnan(filtered_data))
+            #         # print(self.processed_analyte_data[sample_id].loc[:10,analytes])
+            #         # print(self.data[sample_id]['processed_data'].loc[:10,analytes])
+            #     elif norm == 'logit':
+            #         # Handle division by zero and NaN values
+            #         with np.errstate(divide='ignore', invalid='ignore'):
+            #             analyte_array = np.log10(filtered_data / (10**6 - filtered_data), where=~np.isnan(filtered_data))
+            #             self.data[sample_id]['processed_data'].loc[:,filtered_analytes] = analyte_array
+            #     else:
+            #         # set to clipped data with original values if linear normalisation
+            #         self.data[sample_id]['processed_data'].loc[:,filtered_analytes] = filtered_data
 
             # perform autoscaling on columns where auto_scale is set to true
             for auto_scale in analyte_info['auto_scale'].unique():
@@ -2995,7 +2995,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 for analyte_1 in filtered_analytes:
                     parameters = analyte_info.loc[(analyte_info['sample_id']==sample_id)
                                           & (analyte_info['analytes']==analyte_1)].iloc[0]
-                    filtered_data = self.data[sample_id]['processed_data'][analyte_1].values
+                    filtered_data = adj_data[analyte_1].values
                     lq = parameters['lower_bound']
                     uq = parameters['upper_bound']
                     d_lb = parameters['d_l_bound']
@@ -3065,19 +3065,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     d_ub = self.data[sample_id]['ratio_info'].at[idx, 'd_u_bound']
                     auto_scale = self.data[sample_id]['ratio_info'].at[idx, 'auto_scale']
 
-                if norm == 'log':
+                # if norm == 'log':
 
-                    # np.nanlog handles NaN value
-                    ratio_array = np.log10(ratio_array, where=~np.isnan(ratio_array))
-                    # print(self.processed_analyte_data[sample_id].loc[:10,analytes])
-                    # print(self.data[sample_id]['processed_data'].loc[:10,analytes])
-                elif norm == 'logit':
-                    # Handle division by zero and NaN values
-                    with np.errstate(divide='ignore', invalid='ignore'):
-                        ratio_array = np.log10(ratio_array / (10**6 - ratio_array), where=~np.isnan(ratio_array))
-                else:
-                    # set to clipped data with original values if linear normalisation
-                    pass
+                #     # np.nanlog handles NaN value
+                #     ratio_array = np.log10(ratio_array, where=~np.isnan(ratio_array))
+                #     # print(self.processed_analyte_data[sample_id].loc[:10,analytes])
+                #     # print(self.data[sample_id]['processed_data'].loc[:10,analytes])
+                # elif norm == 'logit':
+                #     # Handle division by zero and NaN values
+                #     with np.errstate(divide='ignore', invalid='ignore'):
+                #         ratio_array = np.log10(ratio_array / (10**6 - ratio_array), where=~np.isnan(ratio_array))
+                # else:
+                #     # set to clipped data with original values if linear normalisation
+                #     pass
 
                 if auto_scale:
 
@@ -9243,12 +9243,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # print('[get_map_data] sample_id: '+sample_id+'   field_type: '+field_type+'   field: '+field)
         # ----end debugging----
 
-        if sample_id != self.sample_id:
-            #axis mask is not used when plot analytes of a different sample
-            axis_mask  = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
-        else:
-            axis_mask = self.data[self.sample_id]['axis_mask']
-
+        # if sample_id != self.sample_id:
+        #     #axis mask is not used when plot analytes of a different sample
+        #     axis_mask  = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
+        # else:
+        #     axis_mask = self.data[self.sample_id]['axis_mask']
+        
+        # retrieve axis mask for that sample
+        axis_mask = self.data[self.sample_id]['axis_mask']
+        
         #crop plot if filter applied
         df = self.data[sample_id]['raw_data'][['X','Y']][axis_mask].reset_index(drop=True)
 
@@ -9256,7 +9259,23 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             case 'Analyte' | 'Analyte (normalized)':
                 # unnormalized
                 df ['array'] = self.data[sample_id]['processed_data'].loc[:,field].values
+                #get analyte info
+                norm = self.data[sample_id]['analyte_info'].loc[self.data[sample_id]['analyte_info']['analytes']==field,'norm'].iloc[0]
+                
+                #perform scaling for groups of analytes with same norm parameter
+                
+                if norm == 'log':
 
+                    df ['array'] = np.log10(df ['array'], where=~np.isnan(df ['array']))
+                    # print(self.processed_analyte_data[sample_id].loc[:10,analytes])
+                    # print(self.data[sample_id]['processed_data'].loc[:10,analytes])
+                elif norm == 'logit':
+                    # Handle division by zero and NaN values
+                    with np.errstate(divide='ignore', invalid='ignore'):
+                        df ['array'] = np.log10(df ['array'] / (10**6 - df ['array']), where=~np.isnan(df ['array']))
+                        
+                
+                
                 # normalize
                 if 'normalized' in field_type:
                     refval = self.ref_chem[re.sub(r'\d', '', field).lower()]
@@ -9269,7 +9288,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # unnormalized
                 #df['array'] = self.data[sample_id]['computed_data'].loc[:,field_1].values / self.data[sample_id]['processed_data'].loc[:,field_2].values
                 df['array'] = self.data[sample_id]['computed_data']['Ratio'].loc[:,field].values
+                
+                #get norm value
+                norm = self.data[sample_id]['ratio_info'].loc['norm',(self.data[sample_id]['ratio_info']['analyte_1']==field_1 & self.data[sample_id]['ratio_info']['analyte_2']==field_2)].iloc[0]
 
+                if norm == 'log':
+               
+                    df ['array'] = np.log10(df ['array'], where=~np.isnan(df ['array']))
+                    # print(self.processed_analyte_data[sample_id].loc[:10,analytes])
+                    # print(self.data[sample_id]['processed_data'].loc[:10,analytes])
+                elif norm == 'logit':
+                    # Handle division by zero and NaN values
+                    with np.errstate(divide='ignore', invalid='ignore'):
+                        df ['array'] = np.log10(df ['array'] / (10**6 - df ['array']), where=~np.isnan(df ['array']))               
                 # normalize
                 if 'normalized' in field_type:
                     refval_1 = self.ref_chem[re.sub(r'\d', '', field_1).lower()]
@@ -9278,7 +9309,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             case _:#'PCA Score' | 'Cluster' | 'Cluster Score' | 'Special' | 'Computed':
                 df['array'] = self.data[sample_id]['computed_data'][field_type].loc[:,field].values
-
+                
+        
+        
+        
+        
+            
         # ----begin debugging----
         # print(df.columns)
         # ----end debugging----
@@ -9394,13 +9430,33 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # return normalised, filtered data with that will be used for analysis
         use_analytes = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['use']==True), 'analytes'].values
 
-        # Combine the two masks to create a final mask
-        nan_mask = self.data[self.sample_id]['processed_data'][use_analytes].notna().all(axis=1)
+        df_filtered = self.data[self.sample_id]['processed_data'][use_analytes]
 
+        #get analyte info to extract choice of scale
+        analyte_info = self.data[self.sample_id]['analyte_info'].loc[
+                                 (self.data[self.sample_id]['analyte_info']['analytes'].isin(use_analytes))]
+        
+        #perform scaling for groups of analytes with same norm parameter
+        for norm in analyte_info['norm'].unique():
+            filtered_analytes = analyte_info[(analyte_info['norm'] == norm)]['analytes']
+            filtered_data = df_filtered[filtered_analytes].values
+            if norm == 'log':
+
+                # np.nanlog handles NaN value
+                df_filtered[filtered_analytes] = np.log10(filtered_data, where=~np.isnan(filtered_data))
+                # print(self.processed_analyte_data[sample_id].loc[:10,analytes])
+                # print(self.data[sample_id]['processed_data'].loc[:10,analytes])
+            elif norm == 'logit':
+                # Handle division by zero and NaN values
+                with np.errstate(divide='ignore', invalid='ignore'):
+                    df_filtered[filtered_analytes] = np.log10(filtered_data / (10**6 - filtered_data), where=~np.isnan(filtered_data))
+
+        # Combine the two masks to create a final mask
+        nan_mask = df_filtered.notna().all(axis=1)
+        
+        
         # mask nan values and add to self.data[self.sample_id]['mask']
         self.data[self.sample_id]['mask'] = self.data[self.sample_id]['mask']  & nan_mask.values
-
-        df_filtered = self.data[self.sample_id]['processed_data'][use_analytes]
 
         return df_filtered, use_analytes
 

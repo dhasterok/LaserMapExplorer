@@ -1,7 +1,7 @@
 import sys, os, re, copy, random, pickle, darkdetect
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QRectF, QPointF, QUrl, pyqtSlot, QSize
-from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QVBoxLayout, QGridLayout, QMessageBox, QHeaderView, QMenu, QGraphicsRectItem
+from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QVBoxLayout, QGridLayout, QMessageBox, QHeaderView, QMenu, QGraphicsRectItem, QLineEdit
 from PyQt5.QtWidgets import QFileDialog, QWidget, QDialog, QLabel, QTableWidget, QInputDialog, QAbstractItemView, QProgressBar, QApplication, QSplashScreen, QDialogButtonBox, QStatusBar
 from PyQt5.QtGui import QIntValidator, QDoubleValidator, QColor, QImage, QPainter, QPixmap, QFont, QPen, QCursor, QBrush, QStandardItemModel, QStandardItem, QTextCursor, QDropEvent, QFontDatabase
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
@@ -11810,8 +11810,10 @@ class ImportTool(QDialog, Ui_ImportDialog):
         self.toolButtonOpenDirectory.clicked.connect(self.open_directory)
         self.checkBoxSaveToRoot.setChecked(True)
 
-        #self.toolButtonPrevSample.clicked.connect()
-        #self.toolButtonNextSample.clicked.connect()
+        self.toolButtonPrevSample.clicked.connect(lambda: self.change_preview(next=False))
+        self.toolButtonNextSample.clicked.connect(lambda: self.change_preview(next=True))
+        self.toolButtonPrevSample.setEnabled(False)
+        self.toolButtonNextSample.setEnabled(False)
 
         self.labelResolution.setText('')
         
@@ -11835,6 +11837,40 @@ class ImportTool(QDialog, Ui_ImportDialog):
         # self.pushButtonCancel.clicked.connect(self.reject)
         self.comboBoxDataType.currentIndexChanged.connect(self.data_type_changed)
         self.comboBoxMethod.currentIndexChanged.connect(self.method_changed)
+    
+    def change_preview(self,next=True):
+        # Get indexes of samples that are selected for analysis
+        selected = []
+        for i in range(len(self.sample_ids)):
+            if self.tableWidgetMetadata.cellWidget(i,0).isChecked():
+                selected.append(i)
+
+        if not selected:
+            self.labelSampleID.setText("None selected")
+            return
+
+        selected = np.array(selected)
+
+        # next
+        if next:
+            test = selected > self.preview_index
+            # next
+            if any(test):
+                self.preview_index = min(selected[test])
+            # start back at beginning
+            else:
+                self.preview_index = selected[0]
+
+        # previous
+        else:
+            test = selected < self.preview_index
+            if any(test):
+                self.preview_index = max(selected[test])
+            # go back to end
+            else:
+                self.preview_index = selected[-1]
+
+        self.labelSampleID.setText(self.sample_ids[self.preview_index])
 
     def add_standard(self):
         """Adds a standard to the standard dictionary
@@ -12051,6 +12087,20 @@ class ImportTool(QDialog, Ui_ImportDialog):
                 header.setSectionResizeMode(col,QHeaderView.ResizeToContents)
             
         self.table_update = True
+        for i in range(len(self.sample_ids)):
+            if self.tableWidgetMetadata.cellWidget(i,0).isChecked():
+                self.preview_index = i
+                break
+            self.preview_index = None
+
+        if self.preview_index is None:
+            self.labelSampleID.setText("None selected")
+        else: 
+            self.labelSampleID.setText(self.sample_ids[self.preview_index])
+            self.toolButtonPrevSample.setEnabled(True)
+            self.toolButtonNextSample.setEnabled(True)
+        
+        self.pushButtonImport.setDefault(True)
     
     def populate_la_icp_ms_table(self):
         """Populates table with LA-ICP-MS sample metadata
@@ -12072,8 +12122,25 @@ class ImportTool(QDialog, Ui_ImportDialog):
                         self.add_combobox(row, col, self.standard_list, 0)
                     case 'X\nreverse' | 'Y\nreverse' | 'Swap XY':
                         self.add_checkbox(row, col, False)
-                    case 'Filename\nformat':
-                        self.add_combobox(row, col, ['SampleID-LineNum','LineNum-SampleID'], 0)
+                    # case _:
+                    #     self.add_lineedit(row, col)
+                    # case 'Filename\nformat':
+                    #     self.add_combobox(row, col, ['SampleID-LineNum','LineNum-SampleID'], 0)
+
+    # def add_lineedit(self, row, col):
+    #     """Adds a line edit to a QTableWidget
+        
+    #     Adds lineEdit to ``ImportTool.tableWidgetMetadata``
+
+    #     Parameters
+    #     ----------
+    #     row, col : int
+    #         Row and column indices
+    #     """
+    #     le = QLineEdit()
+    #     le.setValidator(QDoubleValidator)
+    #     le.setStyleSheet("text-align: right;")
+    #     self.tableWidgetMetadata.setCellWidget(row,col,cb)
 
     def add_checkbox(self, row, col, state):
         """Adds a check box to a QTableWidget
@@ -12082,10 +12149,8 @@ class ImportTool(QDialog, Ui_ImportDialog):
 
         Parameters
         ----------
-        row : int
-            Row index
-        col : int
-            Column index
+        row, col : int
+            Row and column indices
         state : bool
             Variable used to set check state
         """        
@@ -12170,8 +12235,8 @@ class ImportTool(QDialog, Ui_ImportDialog):
                         item = QTableWidgetItem(self.sample_ids[row])
                         item.setFlags(item.flags() & ~Qt.ItemIsEditable)
                         self.tableWidgetMetadata.setItem(row, col, item)
-                    case 'Filename\nformat':
-                        self.add_combobox(row, col, ['SampleID-LineNum','LineNum-SampleID'], 0)
+                    #case 'Filename\nformat':
+                    #    self.add_combobox(row, col, ['SampleID-LineNum','LineNum-SampleID'], 0)
 
     def extract_widget_data(self, widget: QWidget):
         """Extracts relevant information from a widget for placing in a DataFrame
@@ -12192,14 +12257,14 @@ class ImportTool(QDialog, Ui_ImportDialog):
             return widget.isChecked()
         elif isinstance(widget, QComboBox):
             return widget.currentText()
+        elif isinstance(widget, QLineEdit):
+            return widget.text()
         # Add more widget types as needed
         else:
             return None
 
     def qtablewidget_to_dataframe(self, table_widget: QTableWidget) -> pd.DataFrame:
         """Takes the data from a tableWidget and places it into a DataFrame
-
-        _extended_summary_
 
         Parameters
         ----------
@@ -12325,7 +12390,8 @@ class ImportTool(QDialog, Ui_ImportDialog):
                     case 'quadrapole':
                         self.import_la_icp_ms_data(table_df, save_path)
                     case 'TOF':
-                        df = pd.read_hdf(file_path, key='dataset_1')
+                        #df = pd.read_hdf(file_path, key='dataset_1')
+                        pass
                     case 'SF':
                         pass
             case 'MLA':
@@ -12356,8 +12422,8 @@ class ImportTool(QDialog, Ui_ImportDialog):
         self.progressBar.setMaximum(total_files)
         
         final_data = pd.DataFrame([])
-        data_type = self.comboBoxDataType.currentText()
-        method = self.comboBoxMethod.currentText().lower()
+        num_imported = 0
+
 #        try:
         for i,path in enumerate(self.paths):
             # if Import is False, skip sample
@@ -12376,15 +12442,15 @@ class ImportTool(QDialog, Ui_ImportDialog):
             dx = table_df['Spot size\n(µm)'][i]
             if dx is None:
                 dx = 1
+            else:
+                dx = float(dx)
             sweep_time = table_df['Sweep\n(s)'][i]
             speed = table_df['Speed\n(µm/s)'][i]
             if speed is None or sweep_time is None:
                 dy = dx
             else:
-                dy = speed*sweep_time
+                dy = float(speed)*float(sweep_time)
 
-            line_sep = 20
-            
             first = True
             for subdir, dirs, files in os.walk(path):
 
@@ -12402,7 +12468,7 @@ class ImportTool(QDialog, Ui_ImportDialog):
                         
                         match ftype:
                             case 'line':
-                                df = self.read_raw_folder(fid, file_path, reverse_x)
+                                df = self.read_raw_folder(fid, file_path, swap_xy, reverse_x, reverse_y)
                                 data_frames.append(df)
                             case 'matrix':
                                 if first:
@@ -12421,74 +12487,74 @@ class ImportTool(QDialog, Ui_ImportDialog):
                     self.progressBar.setValue(current_progress)
                     self.statusBar.showMessage(f"{sample_id}: {current_progress}/{total_files} files imported.")
                     QtWidgets.QApplication.processEvents()  # Process GUI events to update the progress bar
-            
+
                 if ftype == 'lines':
                     final_data = pd.concat(data_frames, ignore_index=True)
-                    final_data.insert(2,'X',final_data['ScanNum'] * float(interline_dist))
-                    final_data.insert(3,'Y',final_data['SpotNum'] * float(intraline_dist))
                     
-                    #determine read direction
-                    x_dir = self.orientation(file_direction)
-                    y_dir = self.orientation(scan_direction)
+                    # reverse x and/or y if needed
+                    if reverse_x:
+                        final_data['X'] = -final_data['X']
+                    if reverse_y:
+                        final_data['Y'] = -final_data['Y']
                     
                     # Adjust coordinates based on the reading direction and make upper left corner as (0,0)
-                    
-                    final_data['X'] = final_data['X'] * x_dir
                     final_data['X'] = final_data['X'] - final_data['X'].min()
-            
-                    final_data['Y'] = final_data['Y'] * y_dir
                     final_data['Y'] = final_data['Y'] - final_data['Y'].min()
-                    
-                    match file_direction:
-                        case 'top to bottom'| 'bottom to top':
-                            pass
-                        case 'left to right' | 'right to left':
-                            Xtmp = final_data['X'];
-                            final_data['X'] =final_data['Y'];
-                            final_data['Y'] = Xtmp;
-                    
                 elif ftype == 'matrix':
                     final_data = pd.concat(data_frames, axis = 1)
 
                 else:
                     final_data = pd.concat(data_frames, ignore_index=True)
                 
+                if not data_frames:
+                    continue
+
                 file_name = os.path.join(save_path, self.sample_ids[i]+'.lame.csv')
-                print(file_name)
-                #print(final_data.head())
+                self.statusBar.showMessage(f'Saving {file_name}...')
                 final_data.to_csv(file_name, index= False)
-                
+                num_imported += 1
+
         # except Exception as e:
         #     self.statusBar.showMessage(f"Error during import: {str(e)}")
         #     return
         # self.statusBar.showMessage("Import completed successfully!")
-        # self.progressBar.setValue(total_files)  # Ensure the progress bar reaches full upon completion
+
+        self.statusBar.showMessage(f'Successfully imported {num_imported} samples.')
+        self.pushButtonCancel.setText('Close')
+        self.pushButtonCancel.setDefault(True)
+        self.progressBar.setValue(total_files)  # Ensure the progress bar reaches full upon completion
             
-    def orientation(self,readdir):
-   
-        match readdir:
-            case 'top to bottom'|'left to right' :
-                direction = 1
-            case 'bottom to top'| 'right to left':
-                direction = -1
-            case _:
-                print('Unknown read direction.')
-        
-        return direction
-        
-    def read_raw_folder(self,file_name,file_path, delimiter, delimiter_position):
-        if delimiter_position == 'first':
-            scan_num = file_name.split(delimiter)[0].strip()
-        elif delimiter_position == 'last':
-            scan_num = file_name.split(delimiter)[-1].split('.')[0].strip()
-   
+    def read_raw_folder(self,line_no,file_path, swap_xy, dx, dy):
         df = pd.read_csv(file_path, skiprows=3)
-        df.insert(0,'ScanNum',int(scan_num))
-        df.insert(1,'SpotNum',range(1, len(df) + 1))
+        if swap_xy:
+            df.insert(1,'Y',(int(line_no)-1)*dy)
+            df.insert(0,'X',range(0, len(df))*dx)
+        else:
+            df.insert(0,'X',(int(line_no)-1)*dx)
+            df.insert(1,'Y',range(0, len(df))*dy)
         return df
    
     def read_matrix_folder(self, analyte, file_path, swap_xy, reverse_x, reverse_y, dx=None, dy=None):
-        
+        """Reads analyte data in matrix form
+
+        Parameters
+        ----------
+        analyte : str
+            Analyte of current file
+        file_path : str
+            File to open
+        swap_xy : bool
+            ``True`` indicates whether x and y dimensions should be swapped
+        reverse_x, reverse_y : bool
+            ``True`` indicates whether to reverse the direction of x and y dimensions
+        dx, dy : float, optional
+            Dimensions in x and y directions, by default None
+
+        Returns
+        -------
+        pandas.DataFrame
+            Results from a single analyte with X and Y values if dx and dy are not None
+        """        
         #match = re.search(r' (\w+)_ppm', file_name)
         #match2 = re.search(r'(\D+)(\d+).csv', file_name) or re.search(r'(\d+)(\D+).csv', file_name)
         # if match:

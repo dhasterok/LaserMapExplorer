@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1024</width>
-    <height>647</height>
+    <height>637</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -28,7 +28,7 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>620</y>
+     <y>610</y>
      <width>1024</width>
      <height>27</height>
     </rect>
@@ -46,7 +46,7 @@
      <x>12</x>
      <y>12</y>
      <width>1001</width>
-     <height>606</height>
+     <height>591</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -148,12 +148,17 @@
         </item>
         <item>
          <property name="text">
-          <string>Petrography photo</string>
+          <string>CL</string>
          </property>
         </item>
         <item>
          <property name="text">
           <string>SEM</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Petrography photo</string>
          </property>
         </item>
        </widget>
@@ -359,12 +364,6 @@
           </column>
           <column>
            <property name="text">
-            <string>Filename
-format</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
             <string>Standard</string>
            </property>
           </column>
@@ -383,11 +382,6 @@ reverse</string>
            <property name="text">
             <string>Y
 reverse</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Delimiter</string>
            </property>
           </column>
           <column>

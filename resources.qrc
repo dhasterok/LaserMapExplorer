@@ -97,6 +97,7 @@
         <file>resources/icons/icon-back-arrow-64.png</file>
         <file>resources/icons/icon-forward-arrow-64.png</file>
         <file>resources/icons/icon-import-directory-64.png</file>
+        <file>resources/icons/icon-bugs-64.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

@@ -12564,6 +12564,7 @@
    <addaction name="actionProfiles"/>
    <addaction name="actionCalculator"/>
    <addaction name="separator"/>
+   <addaction name="actionReportBug"/>
    <addaction name="actionReset"/>
   </widget>
   <action name="actionOpenDirectory">
@@ -13136,6 +13137,21 @@
    </property>
    <property name="toolTip">
     <string>Clear all filters</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::ApplicationSpecificRole</enum>
+   </property>
+  </action>
+  <action name="actionReportBug">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/resources/icons/icon-bugs-64.png</normaloff>:/icons/resources/icons/icon-bugs-64.png</iconset>
+   </property>
+   <property name="text">
+    <string>Report Bug</string>
+   </property>
+   <property name="toolTip">
+    <string>Report bug or request new feature</string>
    </property>
    <property name="menuRole">
     <enum>QAction::ApplicationSpecificRole</enum>

@@ -1,4 +1,4 @@
-import sys, os, re, copy, csv, random, pickle, darkdetect
+import sys, os, re, copy, random, pickle, darkdetect
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QRectF, QPointF, QUrl, pyqtSlot, QSize
 from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QVBoxLayout, QGridLayout, QMessageBox, QHeaderView, QMenu, QGraphicsRectItem
@@ -38,13 +38,15 @@ from src.rotated import RotatedHeaderView
 from src.ternary_plot import ternary
 from src.plot_spider import plot_spider_norm
 from src.scalebar import scalebar
-import src.radar_factory
+import src.lame_fileio as lameio
+#import src.radar_factory
 from src.radar import Radar
 from src.ui.MainWindow import Ui_MainWindow
 from src.ui.AnalyteSelectionDialog import Ui_Dialog
 from src.ui.PreferencesWindow import Ui_PreferencesWindow
 from src.ui.ImportDialog import Ui_ImportDialog
 from src.ui.QuickViewDialog import Ui_QuickViewDialog
+
 # __file__ holds full path of current python file
 basedir = os.path.dirname(__file__)
 setConfigOption('imageAxisOrder', 'row-major') # best performance
@@ -396,7 +398,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.widgetQuickView.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
         try:
-            self.QV_analyte_list = self.import_csv_to_dict(os.path.join(basedir,'resources/styles/qv_lists.csv'))
+            self.QV_analyte_list = lameio.import_csv_to_dict(os.path.join(basedir,'resources/styles/qv_lists.csv'))
         except:
             self.QV_analyte_list = {'default':['Si29','Ti47','Al27','Cr52','Fe56','Mn55','Mg24','Ca43','K39','Na23','P31',
                 'Ba137','Th232','U238','La139','Ce140','Pb206','Pr141','Sr88','Zr90','Hf178','Nd146','Eu153',
@@ -943,7 +945,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 del self.mpl_colormaps[i]
 
         # custom colormaps
-        self.custom_color_dict = self.import_csv_to_dict(os.path.join(basedir,'resources/app_data/custom_colormaps.csv'))
+        self.custom_color_dict = lameio.import_csv_to_dict(os.path.join(basedir,'resources/app_data/custom_colormaps.csv'))
         for key in self.custom_color_dict:
             self.custom_color_dict[key] = [h for h in self.custom_color_dict[key] if h]
 
@@ -1264,7 +1266,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if dialog.exec_():
             self.selected_directory = dialog.selectedFiles()[0]
             file_list = os.listdir(self.selected_directory)
-            self.csv_files = [file for file in file_list if file.endswith('.csv')]
+            self.csv_files = [file for file in file_list if file.endswith('.lame.csv')]
             if self.csv_files == []:
                 # warning dialog
                 return
@@ -1509,48 +1511,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def import_files(self):
         self.importDialog = ImportTool(self)
         self.importDialog.show()
-
-    def export_dict_to_csv(self,dictionary, filename):
-        """Exports a dictionary to csv file
-
-        Explorts a simple dictionary that includes a set of keyword associated with lists to a csv.
-        The first column are the dictionary keys and all subsequent columns are values associated with the key.
-
-        Parameters
-        ----------
-        dictionary : dict
-            Dictionary to save.
-        filename : str
-            Name of file used to save dictionary.  Include path in the filename.
-        """        
-        with open(filename, 'w', newline='') as csvfile:
-            csv_writer = csv.writer(csvfile)
-            for key, values in dictionary.items():
-                csv_writer.writerow([key] + values)
-
-    def import_csv_to_dict(self,filename):
-        """Imports a csv to a dictionary
-
-        Imports a csv in the format produced by ``MainWindow.export_dict_to_csv``
-
-        Parameters
-        ----------
-        filename : str
-            File for import, include path name.
-
-        Returns
-        -------
-        dict
-            Contents of filename as a dictionary.
-        """        
-        dictionary = {}
-        with open(filename, 'r', newline='') as csvfile:
-            csv_reader = csv.reader(csvfile)
-            for row in csv_reader:
-                key = row[0]
-                values = row[1:]
-                dictionary[key] = values
-        return dictionary
 
 
     # Other windows/dialogs
@@ -11677,7 +11637,7 @@ class quickView(QDialog, Ui_QuickViewDialog):
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
         # append dictionary to file of saved qv_lists
-        self.main_window.export_dict_to_csv(self.main_window.QV_analyte_list, file_path)
+        lameio.export_dict_to_csv(self.main_window.QV_analyte_list, file_path)
         
 
         QMessageBox.information(self, "Save Successful", f"Analytes view saved under '{self.view_name}' successfully.")
@@ -11851,8 +11811,9 @@ class ImportTool(QDialog, Ui_ImportDialog):
         super().__init__(parent)
         self.setupUi(self)
         
-        # list of standards (files to ignore or use as calibration...once we add that capability)
-        self.standards_df = pd.read_csv(os.path.join(basedir,'resources/app_data/standards_list.csv'))
+        # dictionary with standards (files to ignore or use as calibration...once we add that capability)
+        self.standards_dict = lameio.import_csv_to_dict(os.path.join(basedir,'resources/app_data/standards_list.csv'))
+
         self.toolButtonAddStandard.clicked.connect(self.add_standard)
         self.sample_ids = []
         self.paths = []
@@ -11894,36 +11855,70 @@ class ImportTool(QDialog, Ui_ImportDialog):
         self.comboBoxMethod.currentIndexChanged.connect(self.method_changed)
 
     def add_standard(self):
+        """Adds a standard to the standard dictionary
+
+        Updates standard dictionary and associated file.  If ``ImportTool.tableWidgetMetadata`` has data, then it needs
+        to update the comboBoxes within the *Standards* column
+        """        
         data_type = self.comboBoxDataType.currentText()
         
+        # get new standard name
         standard_name, ok = QInputDialog.getText(self, 'Add standard', f'Enter new standard name to {data_type}:')
-
         if not ok:
             return
         
-        
+        # add new standard to list
+        self.standards_dict[data_type].append(standard_name)
+        self.standard_list = self.standards_dict[data_type]
+
+        # save updated standards dictionary
+        lameio.export_dict_to_csv(self.standards_dict,os.path.join(basedir,'resources/app_data/standards_list.csv'))
+
+        # if tableWidgetMetadata has information and a Standards column, update with new standards list
+        n_rows = self.tableWidgetMetadata.rowCount()
+        if n_rows == 0:
+            return
+    
+        # find column index with name Standard
+        col = next((c for c in range(self.tableWidgetMetadata.columnCount()) 
+                if self.tableWidgetMetadata.horizontalHeaderItem(c).text() == 'Standard'), None)
+
+        if col is None:
+            return
+        else:
+            self.statusBar.showMessage("Failed to add new standard, no 'Standard' column")
+
+        # update standard comboboxes
+        for row in range(n_rows):
+            widget = self.tableWidgetMetadata.cellWidget(row,col)
+            if isinstance(widget, QComboBox):
+                widget.addItem(standard_name)
+            else:
+                self.statusBar.showMessage("Failed to add new standard, wrong column or missing comboBox?")
 
     def data_type_changed(self):
         data_type = self.comboBoxDataType.currentText()
         match data_type:
             case 'LA-ICP-MS':
-                methods = ['quadrapole','time of flight (TOF)','sector field (SF)']
-                pass
+                methods = ['quadrapole','TOF','SF']
             case 'MLA':
                 methods = ['']
                 pass
             case 'XRF':
                 methods = ['']
                 pass
-            case 'petrography':
+            case 'SEM':
                 methods = ['']
                 pass
-            case 'SEM':
+            case 'CL':
+                methods = ['']
+                pass
+            case 'petrography':
                 methods = ['']
                 pass
 
         # used to populate table
-        self.standard_list = self.standard_df[data_type].to_list()
+        self.standard_list = self.standards_dict[data_type]
 
         self.comboBoxMethod.clear()
         self.comboBoxMethod.addItems(methods)
@@ -12098,31 +12093,46 @@ class ImportTool(QDialog, Ui_ImportDialog):
                     case 'Filename\nformat':
                         self.add_combobox(row, col, ['SampleID-LineNum','LineNum-SampleID'], 0)
 
-    def add_checkbox(self, row, column, state):
+    def add_checkbox(self, row, col, state):
         """Adds a check box to a QTableWidget
 
-        _extended_summary_
+        Adds checkBox to ``ImportTool.tableWidgetMetadata``
 
         Parameters
         ----------
         row : int
-            _description_
-        column : int
-            _description_
+            Row index
+        col : int
+            Column index
         state : bool
             Variable used to set check state
         """        
         cb = QCheckBox()
         cb.setChecked(state)
         cb.setStyleSheet("text-align: center; margin-left:25%; margin-right:25%;")
-        self.tableWidgetMetadata.setCellWidget(row, column, cb)
+        self.tableWidgetMetadata.setCellWidget(row, col, cb)
 
-    def add_combobox(self, row, column, items, default_index=0):
+    def add_combobox(self, row, col, items, default_index=0):
+        """Adds a combo box to QTableWidget
+
+        Adds comboBox to ``ImportTool.tableWidgetMetadata``
+
+        Parameters
+        ----------
+        row : int
+            Row index
+        col : int
+            Column index
+        items : list
+            Item text to add to comboBox
+        default_index : int, optional
+            Default comboBox index, by default 0
+        """        
         combo = QComboBox()
         combo.addItems(items)
         combo.setCurrentIndex(default_index)
-        combo.currentIndexChanged.connect(lambda _, r=row, c=column: self.on_combobox_changed(r, c))
-        self.tableWidgetMetadata.setCellWidget(row, column, combo)
+        combo.currentIndexChanged.connect(lambda _, r=row, c=col: self.on_combobox_changed(r, c))
+        self.tableWidgetMetadata.setCellWidget(row, col, combo)
 
     def on_item_changed(self , curr_item, prev_item):
         if prev_item:
@@ -12175,7 +12185,7 @@ class ImportTool(QDialog, Ui_ImportDialog):
                     case 'X\nreverse' | 'Y\nreverse' | 'Swap XY':
                         self.add_checkbox(row, col, False)
                     case 'Sample ID':
-                        item = QTableWidgetItem(sample_id)
+                        item = QTableWidgetItem(self.sample_ids[row])
                         item.setFlags(item.flags() & ~Qt.ItemIsEditable)
                         self.tableWidgetMetadata.setItem(row, col, item)
                     case 'Filename\nformat':
@@ -12245,6 +12255,72 @@ class ImportTool(QDialog, Ui_ImportDialog):
         
         return df
 
+    def parse_filenames(self, sample_id, file):
+        """Cleans file names to determine file type and identifier for reading
+
+        Removes sample names, file types, units and delimiters from file names.  If a valid file type, then
+        the remaining string should be the line number, element or isotope symbol.
+
+        Parameters
+        ----------
+        sample_id : str
+            Current sample ID
+        files : list of str
+            List of file names for *sample_id*
+
+        Returns
+        -------
+        list, list, list
+            Returns a list of boolean values ``True`` is believed to be a valid file format and ``False`` is thought to be invalid.
+            The second list includes the type of file that it expects to read, either ``line`` for all analytes for each scan line or
+            ``matrix`` for each analyte stored as a matrix in a separate file.  The third list is the file name stripped down to line
+            numbers or analytes.
+        """        
+        el_list =['H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne', 'Na', 'Mg',
+                'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr',
+                'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se', 'Br',
+                'Kr', 'Rb', 'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd',
+                'Ag', 'Cd', 'In', 'Sn', 'Sb', 'Te', 'I', 'Xe', 'Cs', 'Ba', 'La',
+                'Ce', 'Pr', 'Nd', 'Pm', 'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 'Ho', 'Er',
+                'Tm', 'Yb', 'Lu', 'Hf', 'Ta', 'W', 'Re', 'Os', 'Ir', 'Pt', 'Au',
+                'Hg', 'Tl', 'Pb', 'Bi', 'Po', 'At', 'Rn', 'Fr', 'Ra', 'Ac', 'Th',
+                'Pa', 'U', 'Np', 'Pu']
+
+        delimiters = [' ','-','_','.']
+        units = ['CPS','cps','PPM','ppm']
+        formats = ['matrix','csv','xls','xlsx']
+
+        # remove sample_id from filename
+        fid = file.replace(sample_id,'')
+
+        # remove delimiters
+        for d in delimiters:
+            fid = fid.replace(d,'')
+
+        # remove units
+        for u in units:
+            fid = fid.replace(u,'')
+
+        for fmt in formats:
+            fid = fid.replace(fmt,'')
+
+        text = ''.join(re.findall('[a-zA-Z]',fid))
+        # if all numbers, probably a line number
+        if fid.isdigit():
+            ftype = 'line'            
+            valid = True
+        # if includes text, see if it matches the list of element symbols
+        elif text in el_list:
+            ftype = 'matrix'
+            valid = True
+        # probably not a valid file name
+        else:
+            ftype = None
+            fid = None
+            valid = False
+
+        return valid, ftype, fid
+
     def import_data(self): 
         """Import data associated with each *Sample Id* using metadata to define important structural parameters
 
@@ -12262,7 +12338,14 @@ class ImportTool(QDialog, Ui_ImportDialog):
 
         match data_type:
             case 'LA-ICP-MS':
-                self.import_la_icp_ms_data(table_df, save_path)
+                method = self.comboBoxMethod.currentText()
+                match method:
+                    case 'quadrapole':
+                        self.import_la_icp_ms_data(table_df, save_path)
+                    case 'TOF':
+                        df = pd.read_hdf(file_path, key='dataset_1')
+                    case 'SF':
+                        pass
             case 'MLA':
                 pass
             case 'XRF':
@@ -12291,108 +12374,113 @@ class ImportTool(QDialog, Ui_ImportDialog):
         self.progressBar.setMaximum(total_files)
         
         final_data = pd.DataFrame([])
-        data_type = self.comboBoxDataType.currentText().lower()
+        data_type = self.comboBoxDataType.currentText()
         method = self.comboBoxMethod.currentText().lower()
-        try:
-            for i,path in enumerate(self.paths):
-                x_direction = self.tableWidgetMetadata.cellWidget(i,2).isChecked()
-                y_direction = self.tableWidgetMetadata.cellWidget(i,3).isChecked()
-                swap_xy = self.tableWidgetMetadata.cellWidget(i,3).isChecked()
-                
-                delimiter   = self.tableWidgetMetadata.item(i,4)
-                if delimiter:
-                    delimiter = delimiter.text().strip().lower()
-                scan_no_pos   = self.tableWidgetMetadata.cellWidget(i,5).currentText().lower()
-                spot_size = float(self.tableWidgetMetadata.item(i,6).text().lower())
-                interline_dist = float(self.tableWidgetMetadata.item(i,7).text().lower())
-    
-                intraline_dist = float(self.tableWidgetMetadata.item(i,10).text().lower())
-                line_sep =20
-                line_dir = 'x'
-                
-                for subdir, dirs, files in os.walk(path):
-                    data_frames = []
-                    for file in files:
-                        if file.endswith('.csv') or file.endswith('.xls') or file.endswith('.xlsx'):
-                            file_path = os.path.join(subdir, file)
-                            save_prefix = os.path.basename(subdir)
-                            if any(std in file for std in self.standard_list):
-                                continue  # skip standard files
-                            
-                            if data_type == 'iolite':
-                                df = self.read_raw_folder(file,file_path, delimiter, scan_no_pos)
+#        try:
+        for i,path in enumerate(self.paths):
+            # if Import is False, skip sample
+            if not table_df['Import'][i]:
+                continue
+
+            sample_id = self.sample_ids[i]
+
+            # swapping x and y is handled at end
+            swap_xy = table_df['Swap XY'][i]
+            
+            # reversing is handled at end
+            reverse_x = table_df['X\nreverse'][i]
+            reverse_y = table_df['Y\nreverse'][i]
+
+            dx = table_df['Spot size\n(µm)'][i]
+            if dx is None:
+                dx = 1
+            sweep_time = table_df['Sweep\n(s)'][i]
+            speed = table_df['Speed\n(µm/s)'][i]
+            if speed is None or sweep_time is None:
+                dy = dx
+            else:
+                dy = speed*sweep_time
+
+            line_sep = 20
+            
+            first = True
+            for subdir, dirs, files in os.walk(path):
+
+                data_frames = []
+                for file in files:
+                    valid, ftype, fid = self.parse_filenames(sample_id, file)
+                    if not valid:
+                        continue
+
+                    if file.endswith('.csv') or file.endswith('.xls') or file.endswith('.xlsx'):
+                        file_path = os.path.join(subdir, file)
+                        save_prefix = os.path.basename(subdir)
+                        if any(std in file for std in self.standard_list):
+                            continue  # skip standard files
+                        
+                        match ftype:
+                            case 'line':
+                                df = self.read_raw_folder(fid, file_path, reverse_x)
                                 data_frames.append(df)
-                            elif data_type == 'xmap':
-                                df,nr,nc = self.read_ppm_folder(file,file_path, spot_size, line_sep, line_dir)
+                            case 'matrix':
+                                if first:
+                                    df = self.read_matrix_folder(fid, file_path, swap_xy, reverse_x, reverse_y,dx,dy)
+                                    first = False
+                                else:
+                                    df = self.read_matrix_folder(fid, file_path, swap_xy, reverse_x, reverse_y)
                                 
                                 data_frames.append(df)
-                            elif data_type == 'ladr':
-                                df = self.read_ladr_ppm_folder(file_path)
-                                data_frames.append(df)
-                        current_progress += 1
-                        self.progressBar.setValue(current_progress)
-                        self.statusBar.showMessage(f" {current_progress}/{total_files} files imported.")
-                        QtWidgets.QApplication.processEvents()  # Process GUI events to update the progress bar
-                
-                        
-                        
-                    if method == 'raw':
-                        final_data = pd.concat(data_frames, ignore_index=True)
-                        final_data.insert(2,'X',final_data['ScanNum'] * float(interline_dist))
-                        final_data.insert(3,'Y',final_data['SpotNum'] * float(intraline_dist))
-                        
-                        #determine read direction
-                        x_dir = self.orientation(file_direction)
-                        y_dir = self.orientation(scan_direction)
-                        
-                        # Adjust coordinates based on the reading direction and make upper left corner as (0,0)
-                        
-                        final_data['X'] = final_data['X'] * x_dir
-                        final_data['X'] = final_data['X'] - final_data['X'].min()
-                
-                        final_data['Y'] = final_data['Y'] * y_dir
-                        final_data['Y'] = final_data['Y'] - final_data['Y'].min()
-                        
-                        match file_direction:
-                            case 'top to bottom'| 'bottom to top':
-                                pass
-                            case 'left to right' | 'right to left':
-                                Xtmp = final_data['X'];
-                                final_data['X'] =final_data['Y'];
-                                final_data['Y'] = Xtmp;
-                        
-                        
-                    elif data_type == 'map':
-                        final_data = pd.concat(data_frames, axis = 1)
-                        
-                        # Create scanNum array
-                        scanNum = np.tile(np.arange(1, nc + 1), (nr, 1))  # Tile the sequence horizontally
-                        
-                        # Create spotNum array
-                        spotNum = np.tile(np.arange(1, nr + 1).reshape(nr, 1), (1, nc))  # Tile the sequence vertically
-                       
-                        final_data.insert(0,'ScanNum',scanNum.flatten('F'))
-                        final_data.insert(1,'SpotNum', spotNum.flatten('F'))
-                        
-                        
-                        final_data.insert(2,'X',final_data['SpotNum'] * line_sep)
-                        final_data.insert(3,'Y',final_data['SpotNum'] * spot_size)
-                        
-                        final_data.insert(3,'Time_Sec_',np.nan)
-                        
-                    else:
-                        final_data = pd.concat(data_frames, ignore_index=True)
+                            case _:
+                                #df = self.read_ladr_ppm_folder(file_path)
+                                #data_frames.append(df)
+                                Exception('Unknown file type for import.')
+
+                    current_progress += 1
+                    self.progressBar.setValue(current_progress)
+                    self.statusBar.showMessage(f"{sample_id}: {current_progress}/{total_files} files imported.")
+                    QtWidgets.QApplication.processEvents()  # Process GUI events to update the progress bar
+            
+                if ftype == 'lines':
+                    final_data = pd.concat(data_frames, ignore_index=True)
+                    final_data.insert(2,'X',final_data['ScanNum'] * float(interline_dist))
+                    final_data.insert(3,'Y',final_data['SpotNum'] * float(intraline_dist))
                     
-                    file_name = os.path.join(save_path, self.sample_ids[i]+'.csv')
-                    #print(file_name)
-                    #print(final_data.head())
-                    # final_data.to_csv(file_name, index= False)
+                    #determine read direction
+                    x_dir = self.orientation(file_direction)
+                    y_dir = self.orientation(scan_direction)
+                    
+                    # Adjust coordinates based on the reading direction and make upper left corner as (0,0)
+                    
+                    final_data['X'] = final_data['X'] * x_dir
+                    final_data['X'] = final_data['X'] - final_data['X'].min()
+            
+                    final_data['Y'] = final_data['Y'] * y_dir
+                    final_data['Y'] = final_data['Y'] - final_data['Y'].min()
+                    
+                    match file_direction:
+                        case 'top to bottom'| 'bottom to top':
+                            pass
+                        case 'left to right' | 'right to left':
+                            Xtmp = final_data['X'];
+                            final_data['X'] =final_data['Y'];
+                            final_data['Y'] = Xtmp;
+                    
+                elif ftype == 'matrix':
+                    final_data = pd.concat(data_frames, axis = 1)
+
+                else:
+                    final_data = pd.concat(data_frames, ignore_index=True)
                 
-        except Exception as e:
-            self.statusBar.showMessage(f"Error during import: {str(e)}")
-            return
-        self.statusBar.showMessage("Import completed successfully!")
-        self.progressBar.setValue(total_files)  # Ensure the progress bar reaches full upon completion
+                file_name = os.path.join(save_path, self.sample_ids[i]+'.lame.csv')
+                print(file_name)
+                #print(final_data.head())
+                final_data.to_csv(file_name, index= False)
+                
+        # except Exception as e:
+        #     self.statusBar.showMessage(f"Error during import: {str(e)}")
+        #     return
+        # self.statusBar.showMessage("Import completed successfully!")
+        # self.progressBar.setValue(total_files)  # Ensure the progress bar reaches full upon completion
             
     def orientation(self,readdir):
    
@@ -12417,33 +12505,69 @@ class ImportTool(QDialog, Ui_ImportDialog):
         df.insert(1,'SpotNum',range(1, len(df) + 1))
         return df
    
-    def read_ppm_folder(self,file_name, file_path, spot_size, line_sep, line_dir):
+    def read_matrix_folder(self, analyte, file_path, swap_xy, reverse_x, reverse_y, dx=None, dy=None):
         
-        match = re.search(r' (\w+)_ppm', file_name)
-        
-        match2 = re.search(r'(\D+)(\d+).csv', file_name) or re.search(r'(\d+)(\D+).csv', file_name)
-        
-        if match:
-            iolite_name =  match.group(1)  # Returns the captured group, which is the text of interest
-        elif  match2:
-            name = match2.group(2)  # First group: iolite name
-            number = match2.group(1)  # Second group: iolite number
-            # Create the variable combining name and number
-            iolite_name = f"{name}{number}"
-        else:
-            self.statusBar.showMessage('Iolite name not part of filename')
-            return []
+        #match = re.search(r' (\w+)_ppm', file_name)
+        #match2 = re.search(r'(\D+)(\d+).csv', file_name) or re.search(r'(\d+)(\D+).csv', file_name)
+        # if match:
+        #     analyte_name =  match.group(1)  # Returns the captured group, which is the text of interest
+        # elif  match2:
+        #     name = match2.group(2)  # First group: iolite name
+        #     number = match2.group(1)  # Second group: iolite number
+        #     # Create the variable combining name and number
+        #     analyte_name = f"{name}{number}"
+        # else:
+        #     self.statusBar.showMessage('Analyte name not part of filename')
+        #     return []
         
         # drop rows and columns with all nans 
         df = pd.read_csv(file_path, header=None).dropna(how='all', axis=0).dropna(how='all', axis=1)
        
         #print(df.shape)
-        if line_dir =='x':
-            new_df= pd.DataFrame(df.values.flatten(), columns = [iolite_name])
-        elif line_dir =='y':
-            new_df= pd(df.values.T.flatten(), columns = [iolite_name])
-        r,c = df.shape
-        return new_df, r,c
+        # produce X and Y values
+        if dx is not None:
+            M, N = df.shape
+
+            # Create an array with constant column values from 1 to N
+            col_values = np.tile(np.arange(1, N + 1), (M, 1))*dx
+
+            # Create an array with constant row values from 1 to M, multiply by dy
+            row_values = np.tile(np.arange(1, M + 1).reshape(M, 1), (1, N))*dy
+
+        # swap x and y (transpose matrix)
+        if swap_xy:
+            # reverse x-direction
+            if reverse_x:
+                df = df[df.columns[::-1]]
+            # reverse y-direction
+            if reverse_y:
+                df = df.iloc[::-1].reset_index(drop=True)
+
+            # swap x and y
+            if dx is not None: 
+                X = row_values
+                Y = col_values
+
+            new_df = pd(df.values.T.flatten(), columns=[analyte])
+        else:
+            # reverse x-direction
+            if reverse_x:
+                df = df.iloc[::-1].reset_index(drop=True)
+            # reverse y-direction
+            if reverse_y:
+                df = df[df.columns[::-1]]
+            
+            if dx is not None: 
+                X = col_values
+                Y = row_values
+
+            new_df = pd.DataFrame(df.values.flatten(), columns=[analyte])
+
+        if dx is not None:
+            new_df.insert(0,'X', X.flatten('F'))
+            new_df.insert(1,'Y', Y.flatten('F'))
+
+        return new_df
    
     def read_ladr_ppm_folder(self,file_name,file_path):
         match = re.search(r' (\w+)_ppm', file_name)

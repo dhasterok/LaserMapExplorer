@@ -506,7 +506,7 @@ reverse</string>
             </property>
             <property name="icon">
              <iconset resource="../resources.qrc">
-              <normaloff>:/icons/resources/icons/icon-left-arrow-64.png</normaloff>:/icons/resources/icons/icon-left-arrow-64.png</iconset>
+              <normaloff>:/icons/resources/icons/icon-back-arrow-64.png</normaloff>:/icons/resources/icons/icon-back-arrow-64.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -563,7 +563,7 @@ reverse</string>
             </property>
             <property name="icon">
              <iconset resource="../resources.qrc">
-              <normaloff>:/icons/resources/icons/icon-right-arrow-64.png</normaloff>:/icons/resources/icons/icon-right-arrow-64.png</iconset>
+              <normaloff>:/icons/resources/icons/icon-forward-arrow-64.png</normaloff>:/icons/resources/icons/icon-forward-arrow-64.png</iconset>
             </property>
             <property name="iconSize">
              <size>

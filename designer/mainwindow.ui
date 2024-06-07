@@ -182,6 +182,9 @@
          <property name="layoutDirection">
           <enum>Qt::LeftToRight</enum>
          </property>
+         <property name="styleSheet">
+          <string notr="true">border : none;</string>
+         </property>
          <property name="text">
           <string>Remove</string>
          </property>
@@ -191,8 +194,8 @@
          </property>
          <property name="iconSize">
           <size>
-           <width>18</width>
-           <height>18</height>
+           <width>24</width>
+           <height>24</height>
           </size>
          </property>
         </widget>
@@ -227,14 +230,17 @@
          <property name="toolTip">
           <string>Add annotation</string>
          </property>
+         <property name="styleSheet">
+          <string notr="true">border : none;</string>
+         </property>
          <property name="icon">
           <iconset resource="../resources.qrc">
            <normaloff>:/icons/resources/icons/icon-annotate-64.png</normaloff>:/icons/resources/icons/icon-annotate-64.png</iconset>
          </property>
          <property name="iconSize">
           <size>
-           <width>20</width>
-           <height>20</height>
+           <width>24</width>
+           <height>24</height>
           </size>
          </property>
          <property name="checkable">
@@ -259,6 +265,9 @@
          <property name="toolTip">
           <string>Pop the figure out into a separate window</string>
          </property>
+         <property name="styleSheet">
+          <string notr="true">border : none;</string>
+         </property>
          <property name="text">
           <string>...</string>
          </property>
@@ -268,8 +277,8 @@
          </property>
          <property name="iconSize">
           <size>
-           <width>20</width>
-           <height>20</height>
+           <width>22</width>
+           <height>22</height>
           </size>
          </property>
         </widget>
@@ -291,14 +300,17 @@
          <property name="toolTip">
           <string>Save plot</string>
          </property>
+         <property name="styleSheet">
+          <string notr="true">border : none;</string>
+         </property>
          <property name="icon">
           <iconset resource="../resources.qrc">
            <normaloff>:/icons/resources/icons/icon-save-file-64.png</normaloff>:/icons/resources/icons/icon-save-file-64.png</iconset>
          </property>
          <property name="iconSize">
           <size>
-           <width>20</width>
-           <height>20</height>
+           <width>24</width>
+           <height>24</height>
           </size>
          </property>
          <property name="popupMode">
@@ -323,14 +335,17 @@
          <property name="toolTip">
           <string>Zoom In/Out</string>
          </property>
+         <property name="styleSheet">
+          <string notr="true">border : none;</string>
+         </property>
          <property name="icon">
           <iconset resource="../resources.qrc">
            <normaloff>:/icons/resources/icons/icon-zoom-64.png</normaloff>:/icons/resources/icons/icon-zoom-64.png</iconset>
          </property>
          <property name="iconSize">
           <size>
-           <width>20</width>
-           <height>20</height>
+           <width>24</width>
+           <height>24</height>
           </size>
          </property>
          <property name="checkable">
@@ -368,14 +383,17 @@
          <property name="toolTip">
           <string>Measure distance</string>
          </property>
+         <property name="styleSheet">
+          <string notr="true">border : none;</string>
+         </property>
          <property name="icon">
           <iconset resource="../resources.qrc">
            <normaloff>:/icons/resources/icons/icon-distance-64.png</normaloff>:/icons/resources/icons/icon-distance-64.png</iconset>
          </property>
          <property name="iconSize">
           <size>
-           <width>20</width>
-           <height>20</height>
+           <width>24</width>
+           <height>24</height>
           </size>
          </property>
          <property name="checkable">
@@ -400,14 +418,17 @@
          <property name="toolTip">
           <string>Shift plot</string>
          </property>
+         <property name="styleSheet">
+          <string notr="true">border : none;</string>
+         </property>
          <property name="icon">
           <iconset resource="../resources.qrc">
            <normaloff>:/icons/resources/icons/icon-move-64.png</normaloff>:/icons/resources/icons/icon-move-64.png</iconset>
          </property>
          <property name="iconSize">
           <size>
-           <width>20</width>
-           <height>20</height>
+           <width>24</width>
+           <height>24</height>
           </size>
          </property>
          <property name="checkable">
@@ -432,6 +453,9 @@
          <property name="layoutDirection">
           <enum>Qt::LeftToRight</enum>
          </property>
+         <property name="styleSheet">
+          <string notr="true">border : none;</string>
+         </property>
          <property name="text">
           <string>Remove</string>
          </property>
@@ -441,8 +465,8 @@
          </property>
          <property name="iconSize">
           <size>
-           <width>18</width>
-           <height>18</height>
+           <width>24</width>
+           <height>24</height>
           </size>
          </property>
         </widget>
@@ -464,14 +488,17 @@
          <property name="toolTip">
           <string>Return to home view</string>
          </property>
+         <property name="styleSheet">
+          <string notr="true">border : none;</string>
+         </property>
          <property name="icon">
           <iconset resource="../resources.qrc">
            <normaloff>:/icons/resources/icons/icon-home-64.png</normaloff>:/icons/resources/icons/icon-home-64.png</iconset>
          </property>
          <property name="iconSize">
           <size>
-           <width>20</width>
-           <height>20</height>
+           <width>24</width>
+           <height>24</height>
           </size>
          </property>
         </widget>
@@ -522,6 +549,9 @@
            <height>28</height>
           </size>
          </property>
+         <property name="styleSheet">
+          <string notr="true">border : none;</string>
+         </property>
          <property name="text">
           <string>...</string>
          </property>
@@ -531,8 +561,8 @@
          </property>
          <property name="iconSize">
           <size>
-           <width>20</width>
-           <height>20</height>
+           <width>24</width>
+           <height>24</height>
           </size>
          </property>
         </widget>
@@ -983,7 +1013,7 @@
         <string/>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>8</number>
        </property>
        <widget class="QWidget" name="SelectAnalytePage">
         <property name="enabled">
@@ -2343,6 +2373,9 @@
                     <property name="toolTip">
                      <string>Load spot file</string>
                     </property>
+                    <property name="styleSheet">
+                     <string notr="true">border : none;</string>
+                    </property>
                     <property name="text">
                      <string>...</string>
                     </property>
@@ -2374,6 +2407,9 @@
                     </property>
                     <property name="toolTip">
                      <string>Place spot on map</string>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">border : none;</string>
                     </property>
                     <property name="text">
                      <string>...</string>
@@ -2410,6 +2446,9 @@
                     <property name="toolTip">
                      <string>Adjust spot location</string>
                     </property>
+                    <property name="styleSheet">
+                     <string notr="true">border : none;</string>
+                    </property>
                     <property name="text">
                      <string>...</string>
                     </property>
@@ -2444,6 +2483,9 @@
                     </property>
                     <property name="toolTip">
                      <string>Show hide/spots</string>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">border : none;</string>
                     </property>
                     <property name="text">
                      <string>...</string>
@@ -2480,6 +2522,9 @@
                     <property name="toolTip">
                      <string>Select all spots</string>
                     </property>
+                    <property name="styleSheet">
+                     <string notr="true">border : none;</string>
+                    </property>
                     <property name="text">
                      <string>Select All</string>
                     </property>
@@ -2512,6 +2557,9 @@
                     <property name="toolTip">
                      <string>Compare spots with map data</string>
                     </property>
+                    <property name="styleSheet">
+                     <string notr="true">border : none;</string>
+                    </property>
                     <property name="text">
                      <string>...</string>
                     </property>
@@ -2543,6 +2591,9 @@
                     </property>
                     <property name="toolTip">
                      <string>Remove selected spot(s)</string>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">border : none;</string>
                     </property>
                     <property name="text">
                      <string>...</string>
@@ -2619,7 +2670,7 @@
               <x>0</x>
               <y>0</y>
               <width>300</width>
-              <height>266</height>
+              <height>263</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_49">
@@ -2780,6 +2831,9 @@
                     </property>
                     <property name="toolTip">
                      <string>Load polygon file</string>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">border : none;</string>
                     </property>
                     <property name="text">
                      <string>...</string>
@@ -3317,6 +3371,9 @@
                     <property name="toolTip">
                      <string>Load profile</string>
                     </property>
+                    <property name="styleSheet">
+                     <string notr="true">border : none;</string>
+                    </property>
                     <property name="text">
                      <string>...</string>
                     </property>
@@ -3695,6 +3752,9 @@
                       </property>
                       <property name="toolTip">
                        <string>Delete profile</string>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">border : none;</string>
                       </property>
                       <property name="text">
                        <string>Delete profiile</string>
@@ -4274,6 +4334,9 @@
                         <height>32</height>
                        </size>
                       </property>
+                      <property name="styleSheet">
+                       <string notr="true">border : none;</string>
+                      </property>
                       <property name="text">
                        <string>...</string>
                       </property>
@@ -4830,6 +4893,9 @@
                       <property name="toolTip">
                        <string>Add analyte to series</string>
                       </property>
+                      <property name="styleSheet">
+                       <string notr="true">border : none;</string>
+                      </property>
                       <property name="text">
                        <string>Add</string>
                       </property>
@@ -4962,6 +5028,9 @@
                       <property name="toolTip">
                        <string>Add predefined analyte series</string>
                       </property>
+                      <property name="styleSheet">
+                       <string notr="true">border : none;</string>
+                      </property>
                       <property name="text">
                        <string>Add</string>
                       </property>
@@ -4971,8 +5040,8 @@
                       </property>
                       <property name="iconSize">
                        <size>
-                        <width>24</width>
-                        <height>24</height>
+                        <width>28</width>
+                        <height>28</height>
                        </size>
                       </property>
                      </widget>
@@ -6224,8 +6293,8 @@
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>282</width>
-                      <height>201</height>
+                      <width>151</width>
+                      <height>38</height>
                      </rect>
                     </property>
                     <layout class="QFormLayout" name="formLayout_17">
@@ -6297,8 +6366,8 @@
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>282</width>
-                      <height>201</height>
+                      <width>141</width>
+                      <height>38</height>
                      </rect>
                     </property>
                     <layout class="QFormLayout" name="formLayout_18">
@@ -6375,7 +6444,7 @@
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>282</width>
+                      <width>236</width>
                       <height>234</height>
                      </rect>
                     </property>
@@ -6691,6 +6760,9 @@
          <property name="toolTip">
           <string>Update plot</string>
          </property>
+         <property name="styleSheet">
+          <string notr="true">border : none;</string>
+         </property>
          <property name="text">
           <string>Plot</string>
          </property>
@@ -6700,8 +6772,8 @@
          </property>
          <property name="iconSize">
           <size>
-           <width>20</width>
-           <height>20</height>
+           <width>28</width>
+           <height>28</height>
           </size>
          </property>
         </widget>
@@ -6736,14 +6808,14 @@
         </font>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="PlotSelectorPage">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>241</width>
+          <width>268</width>
           <height>360</height>
          </rect>
         </property>
@@ -6799,6 +6871,9 @@
                <height>32</height>
               </size>
              </property>
+             <property name="styleSheet">
+              <string notr="true">border : none;</string>
+             </property>
              <property name="text">
               <string>...</string>
              </property>
@@ -6847,6 +6922,9 @@
              <property name="toolTip">
               <string>Remove selected plot</string>
              </property>
+             <property name="styleSheet">
+              <string notr="true">border : none;</string>
+             </property>
              <property name="text">
               <string>...</string>
              </property>
@@ -6871,7 +6949,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>241</width>
+          <width>343</width>
           <height>360</height>
          </rect>
         </property>
@@ -7002,15 +7080,15 @@
             <enum>QFrame::Raised</enum>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>4</number>
            </property>
            <widget class="QWidget" name="StyleAxes">
             <property name="geometry">
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>233</width>
-              <height>132</height>
+              <width>335</width>
+              <height>138</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -7049,7 +7127,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>233</width>
+                  <width>335</width>
                   <height>354</height>
                  </rect>
                 </property>
@@ -7108,6 +7186,9 @@
                        </property>
                        <property name="accessibleName">
                         <string>axis reset</string>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">border : none;</string>
                        </property>
                        <property name="text">
                         <string>Reset</string>
@@ -7227,6 +7308,9 @@
                        </property>
                        <property name="accessibleName">
                         <string>axis reset</string>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">border : none;</string>
                        </property>
                        <property name="text">
                         <string>Reset</string>
@@ -7410,8 +7494,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>233</width>
-              <height>132</height>
+              <width>335</width>
+              <height>138</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -7450,7 +7534,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>233</width>
+                  <width>335</width>
                   <height>374</height>
                  </rect>
                 </property>
@@ -7783,6 +7867,9 @@
                      <property name="toolTip">
                       <string>Select all filters</string>
                      </property>
+                     <property name="styleSheet">
+                      <string notr="true">border : none;</string>
+                     </property>
                      <property name="text">
                       <string>Select All</string>
                      </property>
@@ -7792,8 +7879,8 @@
                      </property>
                      <property name="iconSize">
                       <size>
-                       <width>20</width>
-                       <height>20</height>
+                       <width>24</width>
+                       <height>24</height>
                       </size>
                      </property>
                     </widget>
@@ -7809,6 +7896,9 @@
                      <property name="toolTip">
                       <string>Save profile data</string>
                      </property>
+                     <property name="styleSheet">
+                      <string notr="true">border : none;</string>
+                     </property>
                      <property name="text">
                       <string>...</string>
                      </property>
@@ -7818,8 +7908,8 @@
                      </property>
                      <property name="iconSize">
                       <size>
-                       <width>20</width>
-                       <height>20</height>
+                       <width>24</width>
+                       <height>24</height>
                       </size>
                      </property>
                     </widget>
@@ -7837,8 +7927,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>233</width>
-              <height>149</height>
+              <width>100</width>
+              <height>72</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -8319,8 +8409,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>233</width>
-              <height>132</height>
+              <width>335</width>
+              <height>138</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -8359,7 +8449,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>254</width>
+                  <width>335</width>
                   <height>312</height>
                  </rect>
                 </property>
@@ -8799,8 +8889,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>233</width>
-              <height>149</height>
+              <width>335</width>
+              <height>138</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -8839,8 +8929,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>233</width>
-                  <height>163</height>
+                  <width>335</width>
+                  <height>162</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_39">
@@ -8945,6 +9035,9 @@
                      <property name="toolTip">
                       <string>Reset cluster color to default colormap</string>
                      </property>
+                     <property name="styleSheet">
+                      <string notr="true">border : none;</string>
+                     </property>
                      <property name="text">
                       <string>Reset</string>
                      </property>
@@ -9022,6 +9115,9 @@
                      <property name="toolTip">
                       <string>Link selected polygons</string>
                      </property>
+                     <property name="styleSheet">
+                      <string notr="true">border : none;</string>
+                     </property>
                      <property name="text">
                       <string>...</string>
                      </property>
@@ -9031,8 +9127,8 @@
                      </property>
                      <property name="iconSize">
                       <size>
-                       <width>24</width>
-                       <height>24</height>
+                       <width>28</width>
+                       <height>28</height>
                       </size>
                      </property>
                     </widget>
@@ -9058,6 +9154,9 @@
                      <property name="toolTip">
                       <string>Delink selected polygons</string>
                      </property>
+                     <property name="styleSheet">
+                      <string notr="true">border : none;</string>
+                     </property>
                      <property name="text">
                       <string>...</string>
                      </property>
@@ -9067,8 +9166,8 @@
                      </property>
                      <property name="iconSize">
                       <size>
-                       <width>24</width>
-                       <height>24</height>
+                       <width>28</width>
+                       <height>28</height>
                       </size>
                      </property>
                     </widget>
@@ -9104,6 +9203,9 @@
                      <property name="toolTip">
                       <string>Create mask from selection</string>
                      </property>
+                     <property name="styleSheet">
+                      <string notr="true">border : none;</string>
+                     </property>
                      <property name="text">
                       <string>On</string>
                      </property>
@@ -9113,8 +9215,8 @@
                      </property>
                      <property name="iconSize">
                       <size>
-                       <width>24</width>
-                       <height>24</height>
+                       <width>28</width>
+                       <height>28</height>
                       </size>
                      </property>
                      <property name="checkable">
@@ -9140,6 +9242,9 @@
                      <property name="toolTip">
                       <string>Create mask from inverse selection</string>
                      </property>
+                     <property name="styleSheet">
+                      <string notr="true">border : none;</string>
+                     </property>
                      <property name="text">
                       <string>Off</string>
                      </property>
@@ -9149,8 +9254,8 @@
                      </property>
                      <property name="iconSize">
                       <size>
-                       <width>24</width>
-                       <height>24</height>
+                       <width>28</width>
+                       <height>28</height>
                       </size>
                      </property>
                      <property name="checkable">
@@ -9175,7 +9280,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>241</width>
+          <width>290</width>
           <height>360</height>
          </rect>
         </property>
@@ -9215,8 +9320,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>241</width>
-              <height>688</height>
+              <width>290</width>
+              <height>687</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_40">
@@ -9300,6 +9405,9 @@
                      <height>28</height>
                     </size>
                    </property>
+                   <property name="styleSheet">
+                    <string notr="true">border : none;</string>
+                   </property>
                    <property name="text">
                     <string>...</string>
                    </property>
@@ -9309,8 +9417,8 @@
                    </property>
                    <property name="iconSize">
                     <size>
-                     <width>20</width>
-                     <height>20</height>
+                     <width>24</width>
+                     <height>24</height>
                     </size>
                    </property>
                   </widget>
@@ -9323,6 +9431,9 @@
                      <height>28</height>
                     </size>
                    </property>
+                   <property name="styleSheet">
+                    <string notr="true">border : none;</string>
+                   </property>
                    <property name="text">
                     <string>Remove</string>
                    </property>
@@ -9332,8 +9443,8 @@
                    </property>
                    <property name="iconSize">
                     <size>
-                     <width>20</width>
-                     <height>20</height>
+                     <width>24</width>
+                     <height>24</height>
                     </size>
                    </property>
                   </widget>
@@ -9352,6 +9463,9 @@
                      <height>28</height>
                     </size>
                    </property>
+                   <property name="styleSheet">
+                    <string notr="true">border : none;</string>
+                   </property>
                    <property name="text">
                     <string>...</string>
                    </property>
@@ -9361,8 +9475,8 @@
                    </property>
                    <property name="iconSize">
                     <size>
-                     <width>20</width>
-                     <height>20</height>
+                     <width>24</width>
+                     <height>24</height>
                     </size>
                    </property>
                   </widget>
@@ -9391,6 +9505,9 @@
                    <property name="toolTip">
                     <string>Save profile data</string>
                    </property>
+                   <property name="styleSheet">
+                    <string notr="true">border : none;</string>
+                   </property>
                    <property name="text">
                     <string>...</string>
                    </property>
@@ -9400,8 +9517,8 @@
                    </property>
                    <property name="iconSize">
                     <size>
-                     <width>20</width>
-                     <height>20</height>
+                     <width>24</width>
+                     <height>24</height>
                     </size>
                    </property>
                   </widget>
@@ -9430,6 +9547,9 @@
                    <property name="toolTip">
                     <string>Save profile data</string>
                    </property>
+                   <property name="styleSheet">
+                    <string notr="true">border : none;</string>
+                   </property>
                    <property name="text">
                     <string>...</string>
                    </property>
@@ -9439,8 +9559,8 @@
                    </property>
                    <property name="iconSize">
                     <size>
-                     <width>20</width>
-                     <height>20</height>
+                     <width>24</width>
+                     <height>24</height>
                     </size>
                    </property>
                   </widget>
@@ -9528,6 +9648,9 @@
                      <height>28</height>
                     </size>
                    </property>
+                   <property name="styleSheet">
+                    <string notr="true">border : none;</string>
+                   </property>
                    <property name="text">
                     <string>Add</string>
                    </property>
@@ -9537,8 +9660,8 @@
                    </property>
                    <property name="iconSize">
                     <size>
-                     <width>20</width>
-                     <height>20</height>
+                     <width>24</width>
+                     <height>24</height>
                     </size>
                    </property>
                   </widget>
@@ -10604,6 +10727,9 @@
                 <property name="toolTip">
                  <string>Format the heading level</string>
                 </property>
+                <property name="styleSheet">
+                 <string notr="true">border : none;</string>
+                </property>
                 <property name="text">
                  <string>Format heading</string>
                 </property>
@@ -10613,8 +10739,8 @@
                 </property>
                 <property name="iconSize">
                  <size>
-                  <width>20</width>
-                  <height>20</height>
+                  <width>24</width>
+                  <height>24</height>
                  </size>
                 </property>
                 <property name="popupMode">
@@ -10645,6 +10771,9 @@
                 <property name="toolTip">
                  <string>Bold selected text</string>
                 </property>
+                <property name="styleSheet">
+                 <string notr="true">border : none;</string>
+                </property>
                 <property name="text">
                  <string>Format text</string>
                 </property>
@@ -10654,8 +10783,8 @@
                 </property>
                 <property name="iconSize">
                  <size>
-                  <width>20</width>
-                  <height>20</height>
+                  <width>24</width>
+                  <height>24</height>
                  </size>
                 </property>
                </widget>
@@ -10683,6 +10812,9 @@
                 <property name="toolTip">
                  <string>Italicize selected text</string>
                 </property>
+                <property name="styleSheet">
+                 <string notr="true">border : none;</string>
+                </property>
                 <property name="text">
                  <string>Format text</string>
                 </property>
@@ -10692,8 +10824,8 @@
                 </property>
                 <property name="iconSize">
                  <size>
-                  <width>20</width>
-                  <height>20</height>
+                  <width>24</width>
+                  <height>24</height>
                  </size>
                 </property>
                </widget>
@@ -10737,6 +10869,9 @@
                 <property name="toolTip">
                  <string>Format bulleted list</string>
                 </property>
+                <property name="styleSheet">
+                 <string notr="true">border : none;</string>
+                </property>
                 <property name="text">
                  <string>Format list</string>
                 </property>
@@ -10746,8 +10881,8 @@
                 </property>
                 <property name="iconSize">
                  <size>
-                  <width>20</width>
-                  <height>20</height>
+                  <width>24</width>
+                  <height>24</height>
                  </size>
                 </property>
                </widget>
@@ -10775,6 +10910,9 @@
                 <property name="toolTip">
                  <string>Format enumerated list</string>
                 </property>
+                <property name="styleSheet">
+                 <string notr="true">border : none;</string>
+                </property>
                 <property name="text">
                  <string>Format list</string>
                 </property>
@@ -10784,8 +10922,8 @@
                 </property>
                 <property name="iconSize">
                  <size>
-                  <width>20</width>
-                  <height>20</height>
+                  <width>24</width>
+                  <height>24</height>
                  </size>
                 </property>
                </widget>
@@ -10829,6 +10967,9 @@
                 <property name="toolTip">
                  <string>Insert figure</string>
                 </property>
+                <property name="styleSheet">
+                 <string notr="true">border : none;</string>
+                </property>
                 <property name="text">
                  <string>Insert image</string>
                 </property>
@@ -10838,8 +10979,8 @@
                 </property>
                 <property name="iconSize">
                  <size>
-                  <width>20</width>
-                  <height>20</height>
+                  <width>24</width>
+                  <height>24</height>
                  </size>
                 </property>
                </widget>
@@ -10867,6 +11008,9 @@
                 <property name="toolTip">
                  <string>Insert formatted info</string>
                 </property>
+                <property name="styleSheet">
+                 <string notr="true">border : none;</string>
+                </property>
                 <property name="text">
                  <string>Insert info</string>
                 </property>
@@ -10876,8 +11020,8 @@
                 </property>
                 <property name="iconSize">
                  <size>
-                  <width>20</width>
-                  <height>20</height>
+                  <width>24</width>
+                  <height>24</height>
                  </size>
                 </property>
                 <property name="popupMode">
@@ -10924,6 +11068,9 @@
                 <property name="toolTip">
                  <string>Save notes as PDF (must have rst2pdf installed)</string>
                 </property>
+                <property name="styleSheet">
+                 <string notr="true">border : none;</string>
+                </property>
                 <property name="text">
                  <string>Save PDF</string>
                 </property>
@@ -10933,8 +11080,8 @@
                 </property>
                 <property name="iconSize">
                  <size>
-                  <width>20</width>
-                  <height>20</height>
+                  <width>24</width>
+                  <height>24</height>
                  </size>
                 </property>
                </widget>
@@ -11188,6 +11335,9 @@
                       <property name="toolTip">
                        <string>Click to add filter</string>
                       </property>
+                      <property name="styleSheet">
+                       <string notr="true">border : none;</string>
+                      </property>
                       <property name="text">
                        <string>Add filter</string>
                       </property>
@@ -11197,8 +11347,8 @@
                       </property>
                       <property name="iconSize">
                        <size>
-                        <width>20</width>
-                        <height>20</height>
+                        <width>24</width>
+                        <height>24</height>
                        </size>
                       </property>
                      </widget>
@@ -11530,6 +11680,9 @@
                   <property name="toolTip">
                    <string>Select all filters</string>
                   </property>
+                  <property name="styleSheet">
+                   <string notr="true">border : none;</string>
+                  </property>
                   <property name="text">
                    <string>Select All</string>
                   </property>
@@ -11539,8 +11692,8 @@
                   </property>
                   <property name="iconSize">
                    <size>
-                    <width>20</width>
-                    <height>20</height>
+                    <width>24</width>
+                    <height>24</height>
                    </size>
                   </property>
                  </widget>
@@ -11562,6 +11715,9 @@
                   <property name="toolTip">
                    <string>Move filter up</string>
                   </property>
+                  <property name="styleSheet">
+                   <string notr="true">border : none;</string>
+                  </property>
                   <property name="text">
                    <string>...</string>
                   </property>
@@ -11571,8 +11727,8 @@
                   </property>
                   <property name="iconSize">
                    <size>
-                    <width>20</width>
-                    <height>20</height>
+                    <width>24</width>
+                    <height>24</height>
                    </size>
                   </property>
                  </widget>
@@ -11594,6 +11750,9 @@
                   <property name="toolTip">
                    <string>Move filter down</string>
                   </property>
+                  <property name="styleSheet">
+                   <string notr="true">border : none;</string>
+                  </property>
                   <property name="text">
                    <string>...</string>
                   </property>
@@ -11603,8 +11762,8 @@
                   </property>
                   <property name="iconSize">
                    <size>
-                    <width>20</width>
-                    <height>20</height>
+                    <width>24</width>
+                    <height>24</height>
                    </size>
                   </property>
                  </widget>
@@ -11632,6 +11791,9 @@
                   <property name="toolTip">
                    <string>Save filters as *.csv</string>
                   </property>
+                  <property name="styleSheet">
+                   <string notr="true">border : none;</string>
+                  </property>
                   <property name="text">
                    <string>Save profile</string>
                   </property>
@@ -11641,8 +11803,8 @@
                   </property>
                   <property name="iconSize">
                    <size>
-                    <width>20</width>
-                    <height>20</height>
+                    <width>24</width>
+                    <height>24</height>
                    </size>
                   </property>
                  </widget>
@@ -11667,6 +11829,9 @@
                   <property name="toolTip">
                    <string>Delete selected filter</string>
                   </property>
+                  <property name="styleSheet">
+                   <string notr="true">border : none;</string>
+                  </property>
                   <property name="text">
                    <string>Remove </string>
                   </property>
@@ -11676,8 +11841,8 @@
                   </property>
                   <property name="iconSize">
                    <size>
-                    <width>20</width>
-                    <height>20</height>
+                    <width>24</width>
+                    <height>24</height>
                    </size>
                   </property>
                  </widget>
@@ -11781,6 +11946,9 @@
                   <property name="toolTip">
                    <string>Toggle profile point masking</string>
                   </property>
+                  <property name="styleSheet">
+                   <string notr="true">border : none;</string>
+                  </property>
                   <property name="text">
                    <string>...</string>
                   </property>
@@ -11790,8 +11958,8 @@
                   </property>
                   <property name="iconSize">
                    <size>
-                    <width>20</width>
-                    <height>20</height>
+                    <width>24</width>
+                    <height>24</height>
                    </size>
                   </property>
                   <property name="checkable">
@@ -11816,6 +11984,9 @@
                   <property name="toolTip">
                    <string>View/hide profile points</string>
                   </property>
+                  <property name="styleSheet">
+                   <string notr="true">border : none;</string>
+                  </property>
                   <property name="text">
                    <string>...</string>
                   </property>
@@ -11838,18 +12009,21 @@
                  <widget class="QToolButton" name="toolButtonProfileExport">
                   <property name="minimumSize">
                    <size>
-                    <width>32</width>
-                    <height>32</height>
+                    <width>28</width>
+                    <height>28</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>32</width>
-                    <height>32</height>
+                    <width>28</width>
+                    <height>28</height>
                    </size>
                   </property>
                   <property name="toolTip">
                    <string>Save profile data</string>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">border : none;</string>
                   </property>
                   <property name="text">
                    <string>...</string>
@@ -12042,6 +12216,9 @@
                     <height>28</height>
                    </size>
                   </property>
+                  <property name="styleSheet">
+                   <string notr="true">border : none;</string>
+                  </property>
                   <property name="text">
                    <string>...</string>
                   </property>
@@ -12051,8 +12228,8 @@
                   </property>
                   <property name="iconSize">
                    <size>
-                    <width>20</width>
-                    <height>20</height>
+                    <width>24</width>
+                    <height>24</height>
                    </size>
                   </property>
                  </widget>
@@ -12097,6 +12274,9 @@
                     <height>28</height>
                    </size>
                   </property>
+                  <property name="styleSheet">
+                   <string notr="true">border : none;</string>
+                  </property>
                   <property name="text">
                    <string>...</string>
                   </property>
@@ -12106,8 +12286,8 @@
                   </property>
                   <property name="iconSize">
                    <size>
-                    <width>20</width>
-                    <height>20</height>
+                    <width>24</width>
+                    <height>24</height>
                    </size>
                   </property>
                  </widget>
@@ -12216,14 +12396,17 @@
                 <property name="toolTip">
                  <string>Return to home view</string>
                 </property>
+                <property name="styleSheet">
+                 <string notr="true">border : none;</string>
+                </property>
                 <property name="icon">
                  <iconset resource="../resources.qrc">
                   <normaloff>:/icons/resources/icons/icon-home-64.png</normaloff>:/icons/resources/icons/icon-home-64.png</iconset>
                 </property>
                 <property name="iconSize">
                  <size>
-                  <width>20</width>
-                  <height>20</height>
+                  <width>28</width>
+                  <height>28</height>
                  </size>
                 </property>
                </widget>
@@ -12245,12 +12428,15 @@
                   <height>28</height>
                  </size>
                 </property>
+                <property name="styleSheet">
+                 <string notr="true">border : none;</string>
+                </property>
                 <property name="text">
                  <string>...</string>
                 </property>
                 <property name="icon">
                  <iconset resource="../resources.qrc">
-                  <normaloff>:/icons/resources/icons/icon-left-arrow-64.png</normaloff>:/icons/resources/icons/icon-left-arrow-64.png</iconset>
+                  <normaloff>:/icons/resources/icons/icon-back-arrow-64.png</normaloff>:/icons/resources/icons/icon-back-arrow-64.png</iconset>
                 </property>
                 <property name="iconSize">
                  <size>
@@ -12277,12 +12463,15 @@
                   <height>28</height>
                  </size>
                 </property>
+                <property name="styleSheet">
+                 <string notr="true">border : none;</string>
+                </property>
                 <property name="text">
                  <string>...</string>
                 </property>
                 <property name="icon">
                  <iconset resource="../resources.qrc">
-                  <normaloff>:/icons/resources/icons/icon-right-arrow-64.png</normaloff>:/icons/resources/icons/icon-right-arrow-64.png</iconset>
+                  <normaloff>:/icons/resources/icons/icon-forward-arrow-64.png</normaloff>:/icons/resources/icons/icon-forward-arrow-64.png</iconset>
                 </property>
                 <property name="iconSize">
                  <size>

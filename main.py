@@ -3,7 +3,7 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QRectF, QPointF, QUrl, pyqtSlot, QSize
 from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QVBoxLayout, QGridLayout, QMessageBox, QHeaderView, QMenu, QGraphicsRectItem, QLineEdit
 from PyQt5.QtWidgets import QFileDialog, QWidget, QDialog, QLabel, QTableWidget, QInputDialog, QAbstractItemView, QProgressBar, QApplication, QSplashScreen, QDialogButtonBox, QStatusBar
-from PyQt5.QtGui import QIntValidator, QDoubleValidator, QColor, QImage, QPainter, QPixmap, QFont, QPen, QCursor, QBrush, QStandardItemModel, QStandardItem, QTextCursor, QDropEvent, QFontDatabase
+from PyQt5.QtGui import QIntValidator, QDoubleValidator, QColor, QImage, QPainter, QPixmap, QFont, QPen, QCursor, QBrush, QStandardItemModel, QStandardItem, QTextCursor, QDropEvent, QFontDatabase, QIcon
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
 import pyqtgraph as pg
 from pyqtgraph.GraphicsScene import exportDialog
@@ -325,6 +325,25 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #darkdetect.theme()
         # Returns 'Dark'
         if darkdetect.isDark():
+            self.actionSelectAnalytes.setIcon(QIcon('resources/icons/icon-atom-dark-64.png'))
+            self.toolButtonNotesHeading.setIcon(QIcon('resources/icons/icon-heading-dark-64.png'))
+            self.toolButtonNotesBold.setIcon(QIcon('resources/icons/icon-bold-dark-64.png'))
+            self.toolButtonNotesItalic.setIcon(QIcon('resources/icons/icon-italics-dark-64.png'))
+            self.toolButtonNotesBulletList.setIcon(QIcon('resources/icons/icon-bullet-list-dark-64.png'))
+            self.toolButtonNotesNumList.setIcon(QIcon('resources/icons/icon-numbered-list-dark-64.png'))
+            self.toolButtonXAxisReset.setIcon(QIcon('resources/icons/icon-reset-dark-64.png'))
+            self.toolButtonYAxisReset.setIcon(QIcon('resources/icons/icon-reset-dark-64.png'))
+            self.toolButtonCAxisReset.setIcon(QIcon('resources/icons/icon-reset-dark-64.png'))
+            self.toolButtonClusterColorReset.setIcon(QIcon('resources/icons/icon-reset-dark-64.png'))
+            self.toolButtonHistogramReset.setIcon(QIcon('resources/icons/icon-reset-dark-64.png'))
+            self.toolButtonRemoveAllMVPlots.setIcon(QIcon('resources/icons/icon-delete-dark-64.png'))
+            self.toolButtonRemovePlot.setIcon(QIcon('resources/icons/icon-delete-dark-64.png'))
+            self.toolButtonNDimRemove.setIcon(QIcon('resources/icons/icon-delete-dark-64.png'))
+            self.toolButtonPolyDelete.setIcon(QIcon('resources/icons/icon-delete-dark-64.png'))
+            self.toolButtonSpotRemove.setIcon(QIcon('resources/icons/icon-delete-dark-64.png'))
+            self.toolButtonFilterRemove.setIcon(QIcon('resources/icons/icon-delete-dark-64.png'))
+            self.toolButtonClearProfile.setIcon(QIcon('resources/icons/icon-delete-dark-64.png'))
+            self.toolButtonProfileRemove.setIcon(QIcon('resources/icons/icon-delete-dark-64.png'))
             print('Dark Mode')
         else:
             print('Light Mode')
@@ -1120,11 +1139,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Browser
         #-------------------------
-        # self.open_browser()
-        # self.toolButtonBrowserHome.clicked.connect(self.browser_home_callback)
-        # self.lineEditBrowserLocation.editingFinished.connect(self.browser_location_callback)
-        # self.toolButtonBack.clicked.connect(self.browser.back)
-        # self.toolButtonForward.clicked.connect(self.browser.forward)
+        self.open_browser()
+        self.toolButtonBrowserHome.clicked.connect(self.browser_home_callback)
+        self.lineEditBrowserLocation.editingFinished.connect(self.browser_location_callback)
+        self.toolButtonBack.clicked.connect(self.browser.back)
+        self.toolButtonForward.clicked.connect(self.browser.forward)
 
 
         # Plot toolbars
@@ -14167,6 +14186,38 @@ app = None
 def main():
     global app
     app = QtWidgets.QApplication(sys.argv)
+
+    # Define the stylesheet
+    light_stylesheet = """
+            QToolButton {
+                border: none;
+                border-radius: 6px;
+            }
+            QToolButton::menu-indicator {
+                image: none;
+            }
+            QToolButton:hover {
+                background-color: #f1f1f1; /* Change background color on hover */
+            }
+         """
+
+    dark_stylesheet = """
+            QToolButton {
+                border: none;
+                border-radius: 6px;
+            }
+            QToolButton::menu-indicator {
+                image: none;
+            }
+            QToolButton:hover {
+                background-color: #545454; /* Change background color on hover */
+            }
+         """
+
+    if darkdetect.isDark():
+        app.setStyleSheet(dark_stylesheet)
+    else:
+        app.setStyleSheet(light_stylesheet)
 
     pixmap = QPixmap("lame_splash.png")
     splash = QSplashScreen(pixmap)

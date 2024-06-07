@@ -134,20 +134,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     | 'd_u_bound' (float) -- difference upper bound for autoscaling
                     | 'v_min' (float) -- max value of analyte
                     | 'v_max' (float) -- min value of analyte
-                    | 'auto_scale' (bool) -- indicates whether auto_scaling is switched on for that iolite, use percentile bounds if False
-                    | 'use' (bool) -- indicates whether the iolite is being used in the analys
+                    | 'auto_scale' (bool) -- indicates whether auto_scaling is switched on for that analyte, use percentile bounds if False
+                    | 'use' (bool) -- indicates whether the analyte is being used in the analysis
                 | 'ratio_info' : (dataframe) -- holds information  regarding computerd ratios 
-                    | 'analyte_1' (str) -- name of iolite at numerator of ratio
-                    | 'analyte_2' (str) -- name of iolite at denominator of ratio
+                    | 'analyte_1' (str) -- name of analyte at numerator of ratio
+                    | 'analyte_2' (str) -- name of analyte at denominator of ratio
                     | 'norm' (str) -- type of normalisation used(linear,log,logit)
                     | 'upper_bound' (float) --  upper bound for autoscaling/scaling
                     | 'lower_bound' (float) --  lower bound for autoscaling/scaling
                     | 'd_l_bound' (float) --  difference lower bound for autoscaling
                     | 'd_u_bound' (float) --  difference upper bound for autoscaling
-                    | 'v_min' (float) -- max value of iolite
-                    | 'v_max' (float) -- min value of iolite
-                    | 'auto_scale' (bool) -- indicates whether auto_scaling is switched on for that iolite, use percentile bounds if False
-                    | 'use' (bool) -- indicates whether the iolite is being used in the analysis
+                    | 'v_min' (float) -- max value of analyte
+                    | 'v_max' (float) -- min value of analyte
+                    | 'auto_scale' (bool) -- indicates whether auto_scaling is switched on for that analyte, use percentile bounds if False
+                    | 'use' (bool) -- indicates whether the analyte is being used in the analysis
                 
                 | 'crop' : () --
                 | 'x_max' : () --
@@ -1253,14 +1253,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def open_directory(self, dir_name=None):
         """Open directory with samples
 
-        Executes on self.toolBar.actionOpen and self.menuFile.action.OpenDirectory.  self.toolBox
-        pages are enabled upon successful load.
+        Executes on ``MainWindow.actionOpen`` and ``MainWindow.actionOpenDirectory``.  Opening a directory, enables
+        the toolboxes.
+
+        Alternatively, *open_dicrectory* is called after ``ImportTool`` successfully completes an import and the tool
+        is closed.
 
         Opens a dialog to select directory filled with samples.  Updates sample list in
         ``MainWindow.comboBoxSampleID`` and comboBoxes associated with analyte lists.  The first sample
         in list is loaded by default.
+
+        Parameters
+        ----------
+        dir_name : str
+            Path to datafiles, if ``None``, an open directory dialog is openend, by default ``None``
         """
-        print(dir_name)
         if dir_name is None:
             dialog = QFileDialog()
             dialog.setFileMode(QFileDialog.Directory)
@@ -1462,7 +1469,29 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         else:
             #update filters, polygon, profiles with existing data
+            self.compute_map_aspect_ratio()
+
+            self.actionClearFilters.setEnabled(False)
+            if np.all(self.data[self.sample_id]['filter_mask']):
+                self.actionFilterToggle.setEnabled(False)
+            else:
+                self.actionFilterToggle.setEnabled(True)
+                self.actionClearFilters.setEnabled(True)
+
+            if np.all(self.data[self.sample_id]['polygon_mask']):
+                self.actionPolygonMask.setEnabled(False)
+            else:
+                self.actionPolygonMask.setEnabled(True)
+                self.actionClearFilters.setEnabled(True)
+
+            if np.all(self.data[self.sample_id]['cluster_mask']):
+                self.actionClusterMask.setEnabled(False)
+            else:
+                self.actionClusterMask.setEnabled(True)
+                self.actionClearFilters.setEnabled(True)
+
             self.update_tables()
+
             return
 
             #get plot array
@@ -10564,6 +10593,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.textEditNotes.insertPlainText(table)
 
+
+    # CSV tables
+    # .. csv-table:: Table Title
+    #     :file: CSV file path and name
+    #     :widths: 30, 70       # percentage widths
+    #     :header-rows: 1
+
     #def convert_to_string(self, array):
     #    return np.array2string(array, formatter={'all': lambda x: f'{x:02f}'})
 
@@ -11933,7 +11969,7 @@ class ImportTool(QDialog, Ui_ImportDialog):
         data_type = self.comboBoxDataType.currentText()
         match data_type:
             case 'LA-ICP-MS':
-                methods = ['quadrapole','TOF','SF']
+                methods = ['quadrupole','TOF','SF']
             case 'MLA':
                 methods = ['']
                 pass
@@ -12404,7 +12440,7 @@ class ImportTool(QDialog, Ui_ImportDialog):
             case 'LA-ICP-MS':
                 method = self.comboBoxMethod.currentText()
                 match method:
-                    case 'quadrapole':
+                    case 'quadrupole':
                         self.import_la_icp_ms_data(table_df, save_path)
                     case 'TOF':
                         #df = pd.read_hdf(file_path, key='dataset_1')
@@ -12482,8 +12518,11 @@ class ImportTool(QDialog, Ui_ImportDialog):
                         save_prefix = os.path.basename(subdir)
                         if any(std in file for std in self.standard_list):
                             continue  # skip standard files
+
+                        if first:
+                            self.ftype = ftype
                         
-                        match ftype:
+                        match self.ftype:
                             case 'line':
                                 df = self.read_raw_folder(fid, file_path, swap_xy, reverse_x, reverse_y)
                                 data_frames.append(df)
@@ -12505,30 +12544,35 @@ class ImportTool(QDialog, Ui_ImportDialog):
                     self.statusBar.showMessage(f"{sample_id}: {current_progress}/{total_files} files imported.")
                     QtWidgets.QApplication.processEvents()  # Process GUI events to update the progress bar
 
-                self.statusBar.showMessage(f'Formatting {sample_id}...')
-                if ftype == 'lines':
-                    final_data = pd.concat(data_frames, ignore_index=True)
-                    
-                    # reverse x and/or y if needed
-                    if reverse_x:
-                        final_data['X'] = -final_data['X']
-                    if reverse_y:
-                        final_data['Y'] = -final_data['Y']
-                    
-                    # Adjust coordinates based on the reading direction and make upper left corner as (0,0)
-                    final_data['X'] = final_data['X'] - final_data['X'].min()
-                    final_data['Y'] = final_data['Y'] - final_data['Y'].min()
-                elif ftype == 'matrix':
-                    final_data = pd.concat(data_frames, axis = 1)
+                if not data_frames:
+                    continue
 
-                else:
-                    final_data = pd.concat(data_frames, ignore_index=True)
+                self.statusBar.showMessage(f'Formatting {sample_id}...')
+                QtWidgets.QApplication.processEvents()  # Process GUI events to update the progress bar
+                match self.ftype:
+                    case 'lines':
+                        final_data = pd.concat(data_frames, ignore_index=True)
+                        
+                        # reverse x and/or y if needed
+                        if reverse_x:
+                            final_data['X'] = -final_data['X']
+                        if reverse_y:
+                            final_data['Y'] = -final_data['Y']
+                        
+                        # Adjust coordinates based on the reading direction and make upper left corner as (0,0)
+                        final_data['X'] = final_data['X'] - final_data['X'].min()
+                        final_data['Y'] = final_data['Y'] - final_data['Y'].min()
+                    case 'matrix':
+                        final_data = pd.concat(data_frames, axis = 1)
+                    case _:
+                        Exception('Unknown file type format. Submit bug request and sample file for testing.')
                 
                 if not data_frames:
                     continue
 
                 file_name = os.path.join(save_path, sample_id+'.lame.csv')
                 self.statusBar.showMessage(f'Saving {sample_id}.lame.csv...')
+                QtWidgets.QApplication.processEvents()  # Process GUI events to update the progress bar
                 final_data.to_csv(file_name, index= False)
                 num_imported += 1
 
@@ -12645,7 +12689,7 @@ class ImportTool(QDialog, Ui_ImportDialog):
     def read_ladr_ppm_folder(self,file_name,file_path):
         match = re.search(r' (\w+)_ppm', file_name)
         if match:
-            iolite_name =  match.group(1)  # Returns the captured group, which is the text of interest
+            analyte_name =  match.group(1)  # Returns the captured group, which is the text of interest
         else:
             self.statusBar.showMessage('Iolite name not part of filename')
             return []

@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools", "wheel", "versioningit"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["LaME"]
+
+[tool.versioningit]
+vcs = "git"
+
+[project]
+name = "LaserMapExplorer"
+version = "0.0.1"
+description = "An app for analyzing map-form geochemical data"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy",
+    "scikit-learn",
+    "scikit-learn-extra",
+    "PyQt5",
+    "darkdetect",
+    "
+]
+
+[project.scripts]
+main = "your_package.main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+your_package = ["resources/*"]
+
+[tool.setuptools.data-files]
+"docs" = ["docs/*"]
+
+[tool.versioningit.version]
+# Configuration for versioningit, if needed
+
+[tool.versioningit]
+style = "pep440"
+vcs = "git"

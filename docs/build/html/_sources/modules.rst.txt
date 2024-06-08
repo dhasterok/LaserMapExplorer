@@ -4,7 +4,6 @@ LaserMapExplorer
 .. toctree::
    :maxdepth: 4
 
-   CalculatorWindow
    IsotopeSelectionDialog
    MainWindow
    MolecularWeightCalculator

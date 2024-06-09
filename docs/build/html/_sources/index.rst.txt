@@ -7,12 +7,14 @@
 
    <script type="text/javascript" src="_static/custom.js"></script>
 
-Welcome to Laser Map Explorer (LaME)!
-*************************************
+Welcome to Laser Map Explorer (*LaME*)!
+***************************************
 
-LaME is a graphical user interface for rapidly diplaying and analyzing data generated from LA-ICP-MS.  The app allows users to simply and quickly filter data, produce standard geochemical plots, perform multi-dimensional analyses, and computations relevant to geoscientific interpretation.
+Laser Map Explorer (*LaME*) is an innovative software tool developed by researchers in the University of Adelaide, Earth Sciences Department.  The work is supported by the MinEx CRC.  *LaME* is designed for processing and visualizing multi-analyte maps of minerals, whether it be LA-ICP-MS maps of isotopes, XRF maps of elements, or some other imaging method. The software aims to simplify the complex task of handling large volumes of map-form data via an intuitive graphical user interface.
 
-The penultimate goal is to allow users to intuitively analyze multi-analyte data, and produce publication ready figures with minimal effort.  The program is currently in beta release.  There are plenty of bugs and some features that have yet to be partially or fully implemented.  Release notes below detail the progress and future plans.
+The app allows users to simply and quickly filter data, produce standard geochemical plots, perform multi-dimensional analyses, and computations relevant to geoscientific interpretation.  Produce publication-ready figures with ease and rapidly produce supplemental information with minimal effort, potentially saving days of work.
+
+The program is currently in beta release.  There are plenty of bugs and some features that have yet to be partially or fully implemented.  Release notes below detail the progress and future plans.
 
 .. figure:: _static/screenshots/LaME_quickview.png
     :align: center
@@ -30,21 +32,19 @@ The penultimate goal is to allow users to intuitively analyze multi-analyte data
 Release notes:
 ==============
 
-As this program is currently in beta, there are still some features that need to be completed/fixed.  Most plot functions are working.  Analyte maps, noise reduction, scatter and heatmaps, PCA and clustering are all working properly.  Histograms and correlation plots are also working.  Most plot types can be customized by selecting/filtering the data.  Masking and filtering are functional, but have not been extensively tested.  Profiling works, but is not yet displayed in an easy to customize format.  There are a few buttons that have planned functionality, but have yet to be implemented wholly or in part.  Note taking functions, figure saving, spot data, and the custom field calculator are places where fuctionality are not at 100%.  
+As *LaME* is currently in beta, there are still some features that need to be completed/fixed.  Most plot functions are working.  Analyte maps, noise reduction, scatter and heatmaps, PCA and clustering are all working properly.  Histograms and correlation plots are also working.  Most plot types can be customized by selecting/filtering the data.  Masking and filtering are functional, but have not been extensively tested.  Profiling works, but is not yet displayed in an easy to customize format.  There are a few buttons that have planned functionality, but have yet to be implemented wholly or in part.  Note taking functions, figure saving, spot data, and the custom field calculator are places where fuctionality are not at 100%.  
 
-We can use your help to identify bugs, places where the program is not intuitive, and/or layout can be improved.  We would also like to know what features you would like to see.  For instance, are there types of analyses, plots, or auto-generated note capabilites that you might like to see?
+*LaME*'s documentation can be accessed through the help browser in the bottom dock.  Since the documentation is integrated with the program it should be viewable when offline.  The documentation is not yet complete.
 
-The documentation can be accessed through the help browser in the bottom dock.  Since the documentation is integrated with the program it should be viewable when offline.  The documentation is not yet complete.
+If you aren't a fan of the name, pronounce it in French as the word lamé.
 
-Know issues:
-============
+Known issues:
+=============
 
-- Ratios are not currently being added to the plot selector, but are at the top of the list to correct.
-- Log scaling may not be implemented properly in all cases yet (e.g., maps, PCA, Clustering).
-- Not all buttons are set up yet.
-- Crop tool does not allow adjustment.
+We can use your help to identify bugs, places where the program is not intuitive, and/or layout can be improved.  We would also like to know what new features you would like to see implemented.  For instance, are there types of analyses, plots, or auto-generated note capabilites that you might like to see?
+
+Check the `GitHub Issues <https://github.com/dhasterok/LaserMapExplorer/issues>`_ page for a current list of documented issues and feature requests.
 
 If you would like to contribute in any way to the improvement of the program, have feature requests or would like to help with documentation, please contact us via the GitHub project page or using the email link on the :doc:`contact` page.
 
-Funding for this app has been provided by the `MinEx CRC <https://minexcrc.com.au/>`_ by developers at
-the `University of Adelaide <https://www.adelaide.edu.au/>`_.
+Funding for this app has been provided by the `MinEx CRC <https://minexcrc.com.au/>`_ by developers at the `University of Adelaide <https://www.adelaide.edu.au/>`_.

@@ -1,3 +1,6 @@
+The Basics
+**********
+
 GUI Layout
 ==========
 LaME's user interface is organized into four panels:
@@ -7,7 +10,7 @@ LaME's user interface is organized into four panels:
 * center, plot viewer tabs for single plots, multiple plots, and a quick view of all fields
 * bottom, tabs for notes, selected filters, and profile plots
 
-Once LaME starts, you will need to load a directory, either from the file menu or toolbar ( |icon-add-directory| ).  You can load a directory with a single sample or a directory with multiple samples, each in their own subdirectory.  See `import formats`_ for file specifications that LaME can handle.
+Once LaME starts, you will need to load a directory, either from the file menu or toolbar ( |icon-add-directory| ).  You can load a directory with a single sample or a directory with multiple samples, each in their own subdirectory.  See import formats :doc:`import` for file specifications that LaME can handle.
 
 .. figure:: _static/screenshots/LaME_Initial_Window.png
     :align: center
@@ -15,16 +18,19 @@ Once LaME starts, you will need to load a directory, either from the file menu o
 
     The LaME interface on start-up and labeled panels.
 
-Samples and Fields
-==================
+Loading Data
+============
+
+Where to Start
+==============
 
 Once a directory is loaded, changing samples is easy.  From the *Sample and Field* tab, use the sample dropdown to select the desired sample.  All work on previous samples will be stored and any images can be recalled from the *Plot Selector* in the right panel.
 
-Use Isotope Selector ( |icon-atom| ) to choose the fields to be used for analysis, including ratios between elements/isotopes.  Generally the more isotopes selected for analysis, the better.  To aid selection of ratios, the background of the *Isotoope Selector* tool are the correlation coefficients between every pair of fields (Figure 1).  When the sample first loads, all isotopes are selected (highlighted in yellow).  To select or deselect an isotope, click on the diagonal corresponding to the isotope.  To select or deselect a ratios, simply by click on the row and column corresponding to the pair.  The column corresponds to the numerator and the row to the denominator of the ratio.  Once selected, the ratio will be highlighed in yellow in the table and be added to the selection list on the right.  When finished, click *Done*.
+Use Isotope Selector ( |icon-atom| ) to choose the fields to be used for analysis, including ratios between elements/isotopes.  Generally the more isotopes selected for analysis, the better.  To aid selection of ratios, the background of the *Analyte Selector* tool are the correlation coefficients between every pair of fields (Figure 1).  When the sample first loads, all isotopes are selected (highlighted in yellow).  To select or deselect an isotope, click on the diagonal corresponding to the isotope.  To select or deselect a ratios, simply by click on the row and column corresponding to the pair.  The column corresponds to the numerator and the row to the denominator of the ratio.  Once selected, the ratio will be highlighed in yellow in the table and be added to the selection list on the right.  When finished, click *Done*.
 
 To load a previously saved set of isotopes and ratios, click *Load Selection*.
 
-.. figure:: _static/screenshots/LaME_Isotope_Selector.png
+.. figure:: _static/screenshots/LaME_Analyte_Selector.png
     :align: center
     :alt: isotope selection tool
 
@@ -45,7 +51,7 @@ Cropping ( |icon-crop| ) is applied to the *raw data*, reducing the area analyze
 Clipped data
 ------------
 
-The *clipped data* refers to data that are preprocessed.  The preprocessing steps include several potential operations meant to reduce issues with analyses including autoscaling ( |icon-autoscale| ) and rescaling to remove negative values.  While it may alter the values of some data points, it does so by improving stability of some processing methods (e.g., PCA and clustering) that are otherwise skewed by extreme outliers or cannot handle negative values.  These outliers often result from point measurement errors or incorrect calibrations related to differences in mineral ablation properties.  These preprocessing data steps are described in greater detail in the preprocessing_ subsection.
+The *clipped data* refers to data that are preprocessed.  The preprocessing steps include several potential operations meant to reduce issues with analyses including autoscaling ( |icon-autoscale| ) and rescaling to remove negative values.  While it may alter the values of some data points, it does so by improving stability of some processing methods (e.g., PCA and clustering) that are otherwise skewed by extreme outliers or cannot handle negative values.  These outliers often result from point measurement errors or incorrect calibrations related to differences in mineral ablation properties.  These preprocessing data steps are described in greater detail in the preprocessing subsection (:doc:`left_toolbox`).
 
 Analysis data
 -------------

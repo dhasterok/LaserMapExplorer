@@ -1,5 +1,5 @@
-Creating Custom Fields
-**********************
+Custom Fields
+*************
 
 The calculator can be used to create custom fields that can be used in almost any plot.  The user can enter the expression from the keyboard or use the calculator buttons to help build an expresion for evaluation.  These custom fields are saved for use with other samples or can be saved to a file for any future session.
 

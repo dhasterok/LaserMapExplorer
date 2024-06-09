@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Import Formats &#8212; Laser Map Explorer  documentation</title>
+    <title>Import Formats &#8212; Laser Map Explorer 0.1 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/documentation_options.js?v=2709fde1"></script>
     <script src="_static/doctools.js?v=888ff710"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/custom.js"></script>
@@ -45,7 +45,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Control (Left) Toolbox" href="left_toolbox.html" />
-    <link rel="prev" title="GUI Layout" href="basics.html" />
+    <link rel="prev" title="The Basics" href="basics.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -363,9 +363,7 @@ document.write(`
   <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="basics.html">GUI Layout</a></li>
-
-
+<li class="toctree-l1"><a class="reference internal" href="basics.html">The Basics</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Import Formats</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">The Interface</span></p>
@@ -377,9 +375,12 @@ document.write(`
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Figures &amp; Analyses</span></p>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_fields.html">Custom Fields</a></li>
 <li class="toctree-l1"><a class="reference internal" href="profiles.html">Profiles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multidimensional.html">Multidimensional Methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="special_functions.html">Special Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="additional_functions.html">Additional Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notes.html">Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="export.html">Export Formats</a></li>
 </ul>
 </div>
@@ -442,14 +443,52 @@ document.write(`
 <h1>Import Formats<a class="headerlink" href="#import-formats" title="Link to this heading">#</a></h1>
 <p>Import formats vary by data type, and can vary by machine manufacturer or depending on the program that is used to processes the data.  The formats for the various input files are described below.  If you have a file type that is not included, feel free to contact us (<a class="reference internal" href="contact.html"><span class="doc">Contact</span></a>) to see if we can write a method to suit your particular needs.</p>
 <p>At present, we only handle LA-ICP-MS data, though we have a number of additional data we plan to include in the comming months.</p>
+<p>Importing data into <em>LaME</em> is relatively simple using the <em>Import Tool</em> as seen below.  Imported files for each sample are saved into a single file for more rapid loading, with the name <em>[sample_id].lame.[ftype]</em>.  In most cases the file type is a *.csv, though in some cases where color is appropriate it may be stored as a *.png.</p>
+<p>Start by selecting the type of data and the method (if applicable).  Then select the directory with the samples. Each sample’s files should be in its own subdirectory.  The table will appear with different options depending on the data type and method chosen.  To the right of the table is a preview frame, which will display an analyte map from the sample when the preview checkbox is selected. <em>The preview feature is not currently implemented.</em></p>
+<figure class="align-center" id="id1">
+<img alt="LaME Import Tool, shown importing LA-ICP-MS data." src="_images/LaME_Import_Tool.png" />
+<figcaption>
+<p><span class="caption-text"><em>LaME Import Tool</em>, shown importing LA-ICP-MS data.</span><a class="headerlink" href="#id1" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
 <section id="la-icp-ms">
 <h2>LA-ICP-MS<a class="headerlink" href="#la-icp-ms" title="Link to this heading">#</a></h2>
 <section id="quadrupole">
 <h3>Quadrupole<a class="headerlink" href="#quadrupole" title="Link to this heading">#</a></h3>
 <p>For a single sample, the data are often stored in a collection of *.csv or *.xlsx files.  There are two formats.  <em>LaME</em> can read either, which it attempts to autodetect from the filename patterns.  While its ability to handle filename formats are limited, it will probably handle most reasonable naming schemes.  In both cases the collection of files should be stored in a directory given by the sample ID.  Once read in, the data are exported in a single file, common data format with a <em>.lame.csv</em> suffix and extension.</p>
-<ol class="arabic simple">
-<li><p>Files include all recorded analytes for a single scan line in each individual file.  This file format is typically used for raw data in CPS. Filenames for this format often include a sample number and a line number separated by a delimiter.  These can come in any order and a variety of delimeters may used.  <em>LaME</em> strips away these common elements to identify the line numbers.</p></li>
-</ol>
+<p>For data collected on quadrupole mass spectrometers, the only requirement for import is the sample ID.  The columns in the table are as follows:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Import<span class="colon">:</span></dt>
+<dd class="field-odd"><p>checkbox indicating whether to include the directory for import.</p>
+</dd>
+<dt class="field-even">Sample ID<span class="colon">:</span></dt>
+<dd class="field-even"><p>sample identifier and name of the directory which holds the files associated with the sample</p>
+</dd>
+<dt class="field-odd">Standard<span class="colon">:</span></dt>
+<dd class="field-odd"><p>select the standard used to calibrate the data or standard to calibrate the data (once we implement calibration).  Note additional calibration files may be added to the standard list.  Standards analyses should follow similar file naming conventions as described below:</p>
+</dd>
+<dt class="field-even">Swap XY<span class="colon">:</span></dt>
+<dd class="field-even"><p>swap the <em>X</em> and <em>Y</em> dimensions,</p>
+</dd>
+<dt class="field-odd">Reverse X<span class="colon">:</span></dt>
+<dd class="field-odd"><p>reverse the direction of the <em>X</em> data,</p>
+</dd>
+<dt class="field-even">Reverse Y<span class="colon">:</span></dt>
+<dd class="field-even"><p>reverse the direction of the <em>Y</em> data,</p>
+</dd>
+<dt class="field-odd">Spot size (µm)<span class="colon">:</span></dt>
+<dd class="field-odd"><p>laser spot size, used to determine distance between scan lines,</p>
+</dd>
+<dt class="field-even">Sweep (s)<span class="colon">:</span></dt>
+<dd class="field-even"><p>time to complete a full suite of analytes,</p>
+</dd>
+<dt class="field-odd">Speed (µm/s)<span class="colon">:</span></dt>
+<dd class="field-odd"><p>rate of travel of the laser.</p>
+</dd>
+</dl>
+<p>The distance along the scan line is given by <em>sweep</em> * <em>speed</em>.  Though if these parameters are no entered, then the pixels are assumed to be equidimensional (i.e., <em>dx</em> = <em>dy</em>).  Note this can be updated after uploading in the <em>dx</em> and <em>dy</em> edit fields of the <em>Sample and Fields</em> tab.</p>
+<ol class="arabic">
+<li><p>Files include all recorded analytes for a single scan line in each individual file.  This file format is typically used for raw data in CPS. Filenames for this format often include a sample number and a line number separated by a delimiter.  These can come in any order and a variety of delimeters may used.  <em>LaME</em> strips away these common elements to identify the line numbers.</p>
 <p>Example filenames include:</p>
 <ul class="simple">
 <li><p>RM03-3.csv</p></li>
@@ -459,29 +498,208 @@ document.write(`
 <li><p>90-75B-PY-3.csv</p></li>
 <li><p>121.csv</p></li>
 </ul>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
 <p>In all but the last two cases above, the line number came last.  However, the order doesn’t matter as LaME will strip away the common patterns to reveal the line number, which it needs along with spot size to determine distance between lines.  This distance is defined as the <em>X</em>-direction.</p>
-<p>Each file should include several metadata lines followed by a header and the table of values with results from each analyte in a separate column.  The first column is the time along the line.  The difference in times are the sweep time and should be constant from measurement to measurement.  The sweep time along with the rate of travel of the laser is used to determine the distance along the line.  This distance is the <em>Y</em>-direction.  A snippet is shown in the table below.</p>
-<blockquote>
-<div></div></blockquote>
-<p><em>Note:</em> scan line data may include files with standards.  These standards will sit between scan lines of the sample resulting in non-sequential line numbers for the sample, which is accounted for by <em>LaME</em> when converting to distance.</p>
-<ol class="arabic simple" start="2">
-<li><p>An alternative format reports each analyte in a separate file as a matrix (map-form) and may be produced after calibration and/or processing in Iolite or XMapTools, generally used to report data in PPM, though they may still be in CPS.  The filenames are generally constructed from the sample name and the analyte and often include the units and matrix, though the only important component is the analyte, which is use to define the column in the output data.  The order of the mass and symbol can be either mass first or mass last conventions.</p></li>
+<p>Each file should include several metadata lines followed by a header and the table of values with results from each analyte in a separate column.  The first column is the time along the line.  The difference in times are the sweep time and should be constant from measurement to measurement.  The sweep time along with the rate of travel of the laser is used to determine the distance along the line.  This distance is the <em>Y</em>-direction.  A snippet is shown in the table below, with the first three lines removed.  These three lines do not provide metadata useful to LaME.</p>
+</li>
 </ol>
+<blockquote>
+<div><table class="table" id="id2">
+<caption><span class="caption-text">Scan-line file from LA-ICP-MS quadrupole</span><a class="headerlink" href="#id2" title="Link to this table">#</a></caption>
+<colgroup>
+<col style="width: 11.1%" />
+<col style="width: 11.1%" />
+<col style="width: 11.1%" />
+<col style="width: 11.1%" />
+<col style="width: 11.1%" />
+<col style="width: 11.1%" />
+<col style="width: 11.1%" />
+<col style="width: 11.1%" />
+<col style="width: 11.1%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Time [Sec]</p></th>
+<th class="head"><p>Mg24</p></th>
+<th class="head"><p>Al27</p></th>
+<th class="head"><p>Si29</p></th>
+<th class="head"><p>P31</p></th>
+<th class="head"><p>Ca43</p></th>
+<th class="head"><p>Ti49</p></th>
+<th class="head"><p>Cr53</p></th>
+<th class="head"><p>Mn55</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0.3502</p></td>
+<td><p>1000.03</p></td>
+<td><p>7001.64</p></td>
+<td><p>4000.54</p></td>
+<td><p>3500.41</p></td>
+<td><p>600.01</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>2500.21</p></td>
+</tr>
+<tr class="row-odd"><td><p>0.6292</p></td>
+<td><p>1000.03</p></td>
+<td><p>6001.21</p></td>
+<td><p>6001.21</p></td>
+<td><p>3500.41</p></td>
+<td><p>200</p></td>
+<td><p>0</p></td>
+<td><p>200</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>0.9082</p></td>
+<td><p>1000.03</p></td>
+<td><p>5000.84</p></td>
+<td><p>8002.15</p></td>
+<td><p>3000.3</p></td>
+<td><p>800.02</p></td>
+<td><p>0</p></td>
+<td><p>200</p></td>
+<td><p>1500.08</p></td>
+</tr>
+<tr class="row-odd"><td><p>1.1872</p></td>
+<td><p>500.01</p></td>
+<td><p>6001.21</p></td>
+<td><p>6001.21</p></td>
+<td><p>7001.65</p></td>
+<td><p>200</p></td>
+<td><p>0</p></td>
+<td><p>200</p></td>
+<td><p>1500.08</p></td>
+</tr>
+<tr class="row-even"><td><p>1.4663</p></td>
+<td><p>0</p></td>
+<td><p>4500.68</p></td>
+<td><p>5501.02</p></td>
+<td><p>3000.3</p></td>
+<td><p>0</p></td>
+<td><p>200</p></td>
+<td><p>0</p></td>
+<td><p>1000.03</p></td>
+</tr>
+<tr class="row-odd"><td><p>1.7453</p></td>
+<td><p>0</p></td>
+<td><p>6001.21</p></td>
+<td><p>4000.54</p></td>
+<td><p>2500.21</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>400.01</p></td>
+<td><p>1000.03</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p><em>Note:</em> scan line data may include files with standards.  These standards will sit between scan lines of the sample resulting in non-sequential line numbers for the sample, which is accounted for by <em>LaME</em> when converting to distance.</p>
+<ol class="arabic" start="2">
+<li><p>An alternative format reports each analyte in a separate file as a matrix (map-form) and may be produced after calibration and/or processing in Iolite or XMapTools, generally used to report data in PPM, though they may still be in CPS.  The filenames are generally constructed from the sample name and the analyte and often include the units and matrix, though the only important component is the analyte, which is use to define the column in the output data.  The order of the mass and symbol can be either mass first or mass last conventions.</p>
 <p>Example filenames:</p>
 <ul class="simple">
 <li><p>23Na.csv</p></li>
 <li><p>RM03 Dy163_ppm matrix.csv</p></li>
-<li><p>B10B_SMALL_ppm K39_ppm matrix.csv</p></li>
 <li><p>4337064_grt03 Ba137_CPS matrix.csv</p></li>
+<li><p>B10B_SMALL_ppm K39_ppm matrix.csv</p></li>
 </ul>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
 <p>Each file should include a matrix of data without headers, line numbers, distances, or times.  The default reads columns as the <em>X</em> coordinate and rows as the <em>Y</em>.  A snippet is shown in the table below.</p>
+</li>
+</ol>
 <blockquote>
-<div></div></blockquote>
+<div><table class="table" id="id3">
+<caption><span class="caption-text">Analyte-matrix file from LA-ICP-MS quadrupole</span><a class="headerlink" href="#id3" title="Link to this table">#</a></caption>
+<colgroup>
+<col style="width: 16.2%" />
+<col style="width: 17.2%" />
+<col style="width: 16.2%" />
+<col style="width: 17.2%" />
+<col style="width: 16.2%" />
+<col style="width: 17.2%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>27.47755814</p></td>
+<td><p>28.35434914</p></td>
+<td><p>29.24432755</p></td>
+<td><p>29.26236916</p></td>
+<td><p>24.34915352</p></td>
+<td><p>34.00336075</p></td>
+</tr>
+<tr class="row-even"><td><p>28.89650345</p></td>
+<td><p>26.69813347</p></td>
+<td><p>28.00343323</p></td>
+<td><p>20.67309189</p></td>
+<td><p>26.80846024</p></td>
+<td><p>29.86347008</p></td>
+</tr>
+<tr class="row-odd"><td><p>33.31843948</p></td>
+<td><p>25.74724579</p></td>
+<td><p>26.39938354</p></td>
+<td><p>21.68505096</p></td>
+<td><p>23.35252953</p></td>
+<td><p>28.08089638</p></td>
+</tr>
+<tr class="row-even"><td><p>26.46435547</p></td>
+<td><p>29.39105225</p></td>
+<td><p>29.75415039</p></td>
+<td><p>17.94776535</p></td>
+<td><p>30.61988258</p></td>
+<td><p>28.63180351</p></td>
+</tr>
+<tr class="row-odd"><td><p>29.55771446</p></td>
+<td><p>25.78630829</p></td>
+<td><p>27.16788673</p></td>
+<td><p>34.81604004</p></td>
+<td><p>32.61590576</p></td>
+<td><p>24.40778923</p></td>
+</tr>
+<tr class="row-even"><td><p>25.06282234</p></td>
+<td><p>27.19464493</p></td>
+<td><p>29.44797325</p></td>
+<td><p>24.21431351</p></td>
+<td><p>27.61714745</p></td>
+<td><p>26.06579208</p></td>
+</tr>
+<tr class="row-odd"><td><p>24.85611343</p></td>
+<td><p>25.47626495</p></td>
+<td><p>25.33795166</p></td>
+<td><p>22.52223778</p></td>
+<td><p>24.35085297</p></td>
+<td><p>26.57423019</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
 </section>
 <section id="tof">
 <h3>TOF<a class="headerlink" href="#tof" title="Link to this heading">#</a></h3>
 <p>HDF5 format files…to be added soon</p>
 </section>
+</section>
+<section id="mla">
+<h2>MLA<a class="headerlink" href="#mla" title="Link to this heading">#</a></h2>
+<p>Not currently implemented.</p>
+</section>
+<section id="xrf">
+<h2>XRF<a class="headerlink" href="#xrf" title="Link to this heading">#</a></h2>
+<p>Not currently implemented.  XRF data are formatted as images (*.png, *.tif) and include the analyte name.</p>
+</section>
+<section id="sem">
+<h2>SEM<a class="headerlink" href="#sem" title="Link to this heading">#</a></h2>
+<p>Not currently implemented.</p>
+</section>
+<section id="cl">
+<h2>CL<a class="headerlink" href="#cl" title="Link to this heading">#</a></h2>
+<p>Not currently implemented.</p>
+</section>
+<section id="petrography">
+<h2>petrography<a class="headerlink" href="#petrography" title="Link to this heading">#</a></h2>
+<p>Not currently implemented.  Image data (*.png, *.jpg, *.tif)</p>
 </section>
 </section>
 
@@ -501,7 +719,7 @@ document.write(`
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">GUI Layout</p>
+        <p class="prev-next-title">The Basics</p>
       </div>
     </a>
     <a class="right-next"
@@ -536,6 +754,11 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tof">TOF</a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mla">MLA</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#xrf">XRF</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#sem">SEM</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cl">CL</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#petrography">petrography</a></li>
 </ul>
   </nav></div>
 

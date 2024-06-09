@@ -1,13 +1,25 @@
 import sys, os, re, copy, random, pickle, darkdetect
-from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QRectF, QPointF, QUrl, pyqtSlot, QSize
-from PyQt5.QtWidgets import QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QVBoxLayout, QGridLayout, QMessageBox, QHeaderView, QMenu, QGraphicsRectItem, QLineEdit
-from PyQt5.QtWidgets import QFileDialog, QWidget, QDialog, QLabel, QTableWidget, QInputDialog, QAbstractItemView, QProgressBar, QApplication, QSplashScreen, QDialogButtonBox, QStatusBar
-from PyQt5.QtGui import QIntValidator, QDoubleValidator, QColor, QImage, QPainter, QPixmap, QFont, QPen, QCursor, QBrush, QStandardItemModel, QStandardItem, QTextCursor, QDropEvent, QFontDatabase, QIcon
+from PyQt5 import QtCore, QtGui
+from PyQt5.QtCore import (
+    Qt, QTimer, pyqtSignal, QRectF, QPointF, QUrl, pyqtSlot, QSize, QEvent
+)
+from PyQt5.QtWidgets import (
+    QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QVBoxLayout, QGridLayout,
+    QMessageBox, QHeaderView, QMenu, QGraphicsRectItem, QLineEdit, QFileDialog, QWidget,
+    QDialog, QLabel, QTableWidget, QInputDialog, QAbstractItemView, QProgressBar,
+    QSplashScreen, QDialogButtonBox, QApplication, QMainWindow, QSizePolicy
+)
+from PyQt5.QtGui import (
+    QIntValidator, QDoubleValidator, QColor, QImage, QPainter, QPixmap, QFont, QPen,
+    QCursor, QBrush, QStandardItemModel, QStandardItem, QTextCursor, QDropEvent, QFontDatabase, QIcon
+)
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
 import pyqtgraph as pg
 from pyqtgraph.GraphicsScene import exportDialog
-from pyqtgraph import setConfigOption, colormap, ColorBarItem,ViewBox, TargetItem, ImageItem, GraphicsLayoutWidget, ScatterPlotItem, AxisItem, PlotDataItem
+from pyqtgraph import (
+    setConfigOption, colormap, ColorBarItem,ViewBox, TargetItem, ImageItem,
+    GraphicsLayoutWidget, ScatterPlotItem, AxisItem, PlotDataItem
+)
 from datetime import datetime
 import numpy as np
 import numexpr as ne
@@ -46,6 +58,8 @@ from src.ui.AnalyteSelectionDialog import Ui_Dialog
 from src.ui.PreferencesWindow import Ui_PreferencesWindow
 from src.ui.ImportDialog import Ui_ImportDialog
 from src.ui.QuickViewDialog import Ui_QuickViewDialog
+from rst2pdf.createpdf import RstToPdf
+from docutils.core import publish_string
 
 # __file__ holds full path of current python file
 basedir = os.path.dirname(__file__)
@@ -59,7 +73,7 @@ setConfigOption('imageAxisOrder', 'row-major') # best performance
 ## !pyuic5 -x designer/ExcelConcatenator.ui -o src/ui/ExcelConcatenator.py
 ## !pyuic5 -x designer/ImportDialog.ui -o src/ui/ImportDialog.py
 # pylint: disable=fixme, line-too-long, no-name-in-module, trailing-whitespace
-class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
+class MainWindow(QMainWindow, Ui_MainWindow):
     """MainWindow
 
     _extended_summary_
@@ -319,7 +333,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.setupUi(self)
         # Add this line to set the size policy
-        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.buttons_layout = None  # create a reference to your layout
 
         #darkdetect.theme()
@@ -344,6 +358,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.toolButtonFilterRemove.setIcon(QIcon('resources/icons/icon-delete-dark-64.png'))
             self.toolButtonClearProfile.setIcon(QIcon('resources/icons/icon-delete-dark-64.png'))
             self.toolButtonProfileRemove.setIcon(QIcon('resources/icons/icon-delete-dark-64.png'))
+            self.toolButtonForward.setIcon(QIcon('resources/icons/icon-forward-arrow-dark-64.png'))
+            self.toolButtonBack.setIcon(QIcon('resources/icons/icon-back-arrow-dark-64.png'))
+            self.toolButtonPopFigure.setIcon(QIcon('resources/icons/icon-popout-dark-64.png'))
+            self.toolButtonAnnotate.setIcon(QIcon('resources/icons/icon-annotate-64.png'))
+            self.toolButtonPan.setIcon(QIcon('resources/icons/icon-move-64.png'))
+            self.toolButtonZoom.setIcon(QIcon('resources/icons/icon-zoom-64.png'))
             print('Dark Mode')
         else:
             print('Light Mode')
@@ -385,11 +405,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #-------------------------
         # Central widget plot view layouts
         # single view
-        layout_single_view = QtWidgets.QVBoxLayout()
+        layout_single_view = QVBoxLayout()
         layout_single_view.setSpacing(0)
         layout_single_view.setContentsMargins(0, 0, 0, 0)
         self.widgetSingleView.setLayout(layout_single_view)
-        self.widgetSingleView.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.widgetSingleView.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.mpl_toolbar = None
         #self.mpl_toolbar = NavigationToolbar(MplCanvas())
         # for button show hide
@@ -401,20 +421,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # multi-view
         self.multi_view_index = []
         self.multiview_info_label = {}
-        layout_multi_view = QtWidgets.QGridLayout()
+        layout_multi_view = QGridLayout()
         layout_multi_view.setSpacing(0) # Set margins to 0 if you want to remove margins as well
         layout_multi_view.setContentsMargins(0, 0, 0, 0)
         self.widgetMultiView.setLayout(layout_multi_view)
-        self.widgetMultiView.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.widgetMultiView.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.toolButtonRemoveMVPlot.clicked.connect(lambda: self.remove_multi_plot(self.comboBoxPlots.currentText()))
         self.toolButtonRemoveAllMVPlots.clicked.connect(lambda: self.clear_layout(self.widgetMultiView.layout()))
 
         # quick view
-        layout_quick_view = QtWidgets.QGridLayout()
+        layout_quick_view = QGridLayout()
         layout_quick_view.setSpacing(0) # Set margins to 0 if you want to remove margins as well
         layout_quick_view.setContentsMargins(0, 0, 0, 0)
         self.widgetQuickView.setLayout(layout_quick_view)
-        self.widgetQuickView.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.widgetQuickView.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         try:
             self.QV_analyte_list = lameio.import_csv_to_dict(os.path.join(basedir,'resources/styles/qv_lists.csv'))
@@ -427,18 +447,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBoxQVList.activated.connect(lambda: self.display_QV())
         # right toolbar plot layout
         # histogram view
-        layout_histogram_view = QtWidgets.QVBoxLayout()
+        layout_histogram_view = QVBoxLayout()
         layout_histogram_view.setSpacing(0)
         layout_histogram_view.setContentsMargins(0, 0, 0, 0)
         self.widgetHistView.setLayout(layout_histogram_view)
 
         # bottom tab plot layout
         # profile view
-        layout_profile_view = QtWidgets.QVBoxLayout()
+        layout_profile_view = QVBoxLayout()
         layout_profile_view.setSpacing(0)
         layout_profile_view.setContentsMargins(0, 0, 0, 0)
         self.widgetProfilePlot.setLayout(layout_profile_view)
-        self.widgetProfilePlot.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.widgetProfilePlot.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
 
         #Flags to prevent plotting when widgets change
@@ -1137,6 +1157,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # compile rst
         self.toolButtonNotesSave.clicked.connect(self.save_notes_to_pdf)
 
+        # autosave notes
+        self.autosaveTimer = QTimer()
+        self.autosaveTimer.setInterval(300000)
+        self.autosaveTimer.timeout.connect(self.save_notes_file)
+        
         # Browser
         #-------------------------
         self.open_browser()
@@ -1177,10 +1202,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolButtonPolyAddPoint.clicked.connect(lambda: self.reset_checked_items('polygon'))
         self.toolButtonPolyRemovePoint.clicked.connect(lambda: self.reset_checked_items('polygon'))
 
-        self.autosaveTimer = QTimer()
-        self.autosaveTimer.setInterval(300000)
-        self.autosaveTimer.timeout.connect(self.save_notes_file)
-        
+
+        # Setup Help
+        #-------------------------
+        self.actionHelp.triggered.connect(self.toggle_help_mode)
+        self.centralwidget.installEventFilter(self)
+        self.canvasWindow.installEventFilter(self)
+        self.dockWidgetLeftToolbox.installEventFilter(self)
+        self.dockWidgetRightToolbox.installEventFilter(self)
+        self.dockWidgetBottomTabs.installEventFilter(self)
+
+
         # ----start debugging----
         # self.test_get_field_list()
         # ----end debugging----
@@ -1189,6 +1221,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # Reset to start
     # -------------------------------------
     def reset_analysis(self, selection='full'):
+        if self.sample_id == '':
+            return
+
         if selection =='full':
             #reset self.data
             self.data = {}
@@ -2567,21 +2602,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.tableWidgetFilters.insertRow(current_row)
 
                 # Create and set the checkbox for 'use'
-                chkBoxItem_use = QtWidgets.QCheckBox()
+                chkBoxItem_use = QCheckBox()
                 chkBoxItem_use.setCheckState(QtCore.Qt.Checked if row['use'] else QtCore.Qt.Unchecked)
                 chkBoxItem_use.stateChanged.connect(lambda state, row=current_row: on_use_checkbox_state_changed(row, state))
                 self.tableWidgetFilters.setCellWidget(current_row, 0, chkBoxItem_use)
 
                 # Add other items from the row
-                self.tableWidgetFilters.setItem(current_row, 1, QtWidgets.QTableWidgetItem(row['field_type']))
-                self.tableWidgetFilters.setItem(current_row, 2, QtWidgets.QTableWidgetItem(row['field']))
-                self.tableWidgetFilters.setItem(current_row, 3, QtWidgets.QTableWidgetItem(row['scale']))
-                self.tableWidgetFilters.setItem(current_row, 4, QtWidgets.QTableWidgetItem(self.dynamic_format(row['min'])))
-                self.tableWidgetFilters.setItem(current_row, 5, QtWidgets.QTableWidgetItem(self.dynamic_format(row['max'])))
-                self.tableWidgetFilters.setItem(current_row, 6, QtWidgets.QTableWidgetItem(row['operator']))
+                self.tableWidgetFilters.setItem(current_row, 1, QTableWidgetItem(row['field_type']))
+                self.tableWidgetFilters.setItem(current_row, 2, QTableWidgetItem(row['field']))
+                self.tableWidgetFilters.setItem(current_row, 3, QTableWidgetItem(row['scale']))
+                self.tableWidgetFilters.setItem(current_row, 4, QTableWidgetItem(self.dynamic_format(row['min'])))
+                self.tableWidgetFilters.setItem(current_row, 5, QTableWidgetItem(self.dynamic_format(row['max'])))
+                self.tableWidgetFilters.setItem(current_row, 6, QTableWidgetItem(row['operator']))
 
                 # Create and set the checkbox for selection (assuming this is a checkbox similar to 'use')
-                chkBoxItem_select = QtWidgets.QCheckBox()
+                chkBoxItem_select = QCheckBox()
                 chkBoxItem_select.setCheckState(QtCore.Qt.Checked if row.get('select', False) else QtCore.Qt.Unchecked)
                 self.tableWidgetFilters.setCellWidget(current_row, 7, chkBoxItem_select)
 
@@ -2603,7 +2638,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.tableWidgetFilters.insertRow(row)
 
             # Create a QCheckBox for the 'use' column
-            chkBoxItem_use = QtWidgets.QCheckBox()
+            chkBoxItem_use = QCheckBox()
             chkBoxItem_use.setCheckState(QtCore.Qt.Checked)
             chkBoxItem_use.stateChanged.connect(lambda state, row=row: on_use_checkbox_state_changed(row, state))
 
@@ -2626,12 +2661,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 scale = 'linear'
 
             self.tableWidgetFilters.setCellWidget(row, 0, chkBoxItem_use)
-            self.tableWidgetFilters.setItem(row, 1, QtWidgets.QTableWidgetItem(field_type))
-            self.tableWidgetFilters.setItem(row, 2, QtWidgets.QTableWidgetItem(field))
-            self.tableWidgetFilters.setItem(row, 3, QtWidgets.QTableWidgetItem(scale))
-            self.tableWidgetFilters.setItem(row, 4, QtWidgets.QTableWidgetItem(self.dynamic_format(f_min)))
-            self.tableWidgetFilters.setItem(row, 5, QtWidgets.QTableWidgetItem(self.dynamic_format(f_max)))
-            self.tableWidgetFilters.setItem(row, 6, QtWidgets.QTableWidgetItem(operator))
+            self.tableWidgetFilters.setItem(row, 1, QTableWidgetItem(field_type))
+            self.tableWidgetFilters.setItem(row, 2, QTableWidgetItem(field))
+            self.tableWidgetFilters.setItem(row, 3, QTableWidgetItem(scale))
+            self.tableWidgetFilters.setItem(row, 4, QTableWidgetItem(self.dynamic_format(f_min)))
+            self.tableWidgetFilters.setItem(row, 5, QTableWidgetItem(self.dynamic_format(f_max)))
+            self.tableWidgetFilters.setItem(row, 6, QTableWidgetItem(operator))
             self.tableWidgetFilters.setItem(row, 7, chkBoxItem_select)
 
             filter_info = {'use':True, 'field_type': field_type, 'field': field, 'norm':scale ,'min': f_min,'max':f_max, 'operator':operator, 'persistent':True}
@@ -3197,7 +3232,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # if hover within lasermap array
                 if 0 <= x_i < array.shape[1] and 0 <= y_i < array.shape[0] :
                     if not self.cursor and not self.actionCrop.isChecked():
-                        QtWidgets.QApplication.setOverrideCursor(Qt.BlankCursor)
+                        QApplication.setOverrideCursor(Qt.BlankCursor)
                         self.cursor = True
                     any_plot_hovered = True
                     value = array[y_i, x_i]  # assuming self.array is numpy self.array
@@ -3230,7 +3265,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                 self.multiview_info_label[k][1].setText('v: '+str(round(value,2)))
                 # break
         if not any_plot_hovered and not self.actionCrop.isChecked():
-            QtWidgets.QApplication.restoreOverrideCursor()
+            QApplication.restoreOverrideCursor()
             self.cursor = False
             for target, _, _ in self.lasermaps.values():
                 target.hide() # Hide crosshairs if no plot is hovered
@@ -6707,7 +6742,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #Change transparency of values outside mask
         self.array, rgba_array = self.array_to_image(map_df)
 
-        # plotWidget = QtWidgets.QWidget()
+        # plotWidget = QWidget()
         # layout = QVBoxLayout()
         # layout.setSpacing(0)
         # plotWidget.setLayout(layout)
@@ -8687,7 +8722,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.tableWidgetNDim.insertRow(row)
 
             # Create a QCheckBox for the 'use' column
-            chkBoxItem_use = QtWidgets.QCheckBox()
+            chkBoxItem_use = QCheckBox()
             chkBoxItem_use.setCheckState(QtCore.Qt.Checked)
             chkBoxItem_use.stateChanged.connect(lambda state, row=row: on_use_checkbox_state_changed(row, state))
 
@@ -8700,12 +8735,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             self.tableWidgetNDim.setCellWidget(row, 0, chkBoxItem_use)
             self.tableWidgetNDim.setItem(row, 1,
-                                     QtWidgets.QTableWidgetItem(self.sample_id))
+                                     QTableWidgetItem(self.sample_id))
             self.tableWidgetNDim.setItem(row, 2,
-                                     QtWidgets.QTableWidgetItem(analyte))
+                                     QTableWidgetItem(analyte))
 
             self.tableWidgetNDim.setItem(row, 3,
-                                     QtWidgets.QTableWidgetItem(norm))
+                                     QTableWidgetItem(norm))
             self.tableWidgetNDim.setItem(row, 4,
                                      chkBoxItem_select)
 
@@ -10705,7 +10740,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         filename = self.notes_file.replace(' ','\ ')
         try:
             # use rst2pdf on the command line to export the file as a pdf
-            os.system(f"cat {filename} | rst2pdf -o --use-floating-images {os.path.splitext(filename)[0]+'.pdf'}")
+            #os.system(f"cat {filename} | rst2pdf -o --use-floating-images {os.path.splitext(filename)[0]+'.pdf'}")
+
+            with open(filename, 'r') as file:
+                rst_content = file.read()
+            
+            pdf = RstToPdf()
+            pdf_content = pdf.createPdf(text=rst_content, output=None)
+            
+            pdf_file_path = filename.replace('.rst', '.pdf')
+            with open(pdf_file_path, 'wb') as pdf_file:
+                pdf_file.write(pdf_content)
+            
+            self.main_window.statusBar.showMessage("PDF successfully generated...")
         except:
             # if it doesn't work
             QMessageBox.warning(self.main_window,"Error", "Could not save to pdf.")
@@ -10762,9 +10809,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # Load the selected HTML file into the QWebEngineView
             self.browser.setUrl(QUrl.fromLocalFile(filename))
         
-    def browser_location_callback(self):
-        """Tries to load the page given in ``MainWindow.lineEditBrowserLocation``"""        
-        location = self.lineEditBrowserLocation.text()
+    def browser_location_callback(self, location=None):
+        """Tries to load the page given in ``MainWindow.lineEditBrowserLocation``
+
+        Parameters
+        ----------
+        location : str, optional
+            Name of webpage (excluding base directory and .html)
+        """
+        if not location:
+            location = self.lineEditBrowserLocation.text()
+        else:
+            location = os.path.join(basedir,"docs/build/html/"+location+".html")
 
         self.lineEditBrowserLocation.setText(location)
 
@@ -10774,6 +10830,52 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         except:
             pass
             #self.browser.setUrl(QUrl(os.path.abspath('docs/build/html/404.html')))
+
+    def toggle_help_mode(self):
+        """Toggles help mode
+
+        Toggles ``MainWindow.actionHelp``, when checked, the cursor will change so indicates help tool is active.
+        """        
+        if self.actionHelp.isChecked():
+            self.setCursor(Qt.WhatsThisCursor)
+        else:
+            self.setCursor(Qt.ArrowCursor)
+
+    def eventFilter(self, source, event):
+        """Event filter to capture mouse press events
+
+        If help mode is active, the clicked widget opens the help browser.
+
+        Parameters
+        ----------
+        source : any
+            Calling application or dialog
+        event : 
+            Mouse click.
+
+        Returns
+        -------
+        bool
+            ``True`` if help is opened, otherwise ``False``
+        """        
+        if event.type() == QEvent.MouseButtonPress and self.actionHelp.isChecked():
+            self.actionHelp.setChecked(False)
+            self.setCursor(Qt.ArrowCursor)
+            match source:
+                case self.centralwidget | self.canvasWindow:
+                    self.browser_location_callback('center_pane')
+                case self.toolBox | self.dockWidgetLeftToolbox:
+                    self.browser_location_callback('left_toolbox')
+                case self.toolBoxTreeView | self.dockWidgetRightToolbox:
+                    self.browser_location_callback('right_toolbox')
+                case self.dockWidgetBottomTabs | self.tabWidget:
+                    self.browser_location_callback('lower_tabs')
+                case _:
+                    return False
+            self.tabWidget.setCurrentIndex(self.bottom_tab['help'])
+            return True
+        return super().eventFilter(source, event)
+
 
     # -------------------------------
     # Unclassified functions
@@ -11381,8 +11483,8 @@ class analyteSelectionWindow(QDialog, Ui_Dialog):
         self.tableWidgetAnalytes.setColumnCount(len(analytes))
         self.tableWidgetAnalytes.setHorizontalHeaderLabels(list(analytes))
         self.tableWidgetAnalytes.setHorizontalHeader(RotatedHeaderView(self.tableWidgetAnalytes))
-        self.tableWidgetAnalytes.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
-        self.tableWidgetAnalytes.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
+        self.tableWidgetAnalytes.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.tableWidgetAnalytes.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.comboBoxScale.currentIndexChanged.connect(self.update_all_combos)
 
         self.tableWidgetAnalytes.setVerticalHeaderLabels(analytes)
@@ -11957,8 +12059,10 @@ class ImportTool(QDialog, Ui_ImportDialog):
         self.toolButtonPrevSample.setEnabled(False)
         self.toolButtonNextSample.setEnabled(False)
 
+        # image resolution
         self.labelResolution.setText('')
         
+        # connect bottom buttons
         self.pushButtonImport.clicked.connect(self.import_data)
         self.pushButtonImport.setEnabled(False)
         self.pushButtonLoad.clicked.connect(self.load_metadata)
@@ -11968,6 +12072,7 @@ class ImportTool(QDialog, Ui_ImportDialog):
 
         self.tableWidgetMetadata.currentItemChanged.connect(self.on_item_changed)
 
+        # size columns
         header = self.tableWidgetMetadata.horizontalHeader()
         for col in range(self.tableWidgetMetadata.columnCount()):
             if self.tableWidgetMetadata.horizontalHeaderItem(col).text() == 'Sample_ID':
@@ -11975,12 +12080,20 @@ class ImportTool(QDialog, Ui_ImportDialog):
             else:
                 header.setSectionResizeMode(col,QHeaderView.ResizeToContents)
 
-        # self.pushButtonDone.clicked.connect(self.accept)
-        # self.pushButtonCancel.clicked.connect(self.reject)
         self.comboBoxDataType.currentIndexChanged.connect(self.data_type_changed)
         self.comboBoxMethod.currentIndexChanged.connect(self.method_changed)
 
         self.ok = False
+    
+    def help(self):
+        """Loads the help webpage associated with the ImportTool in the Help tab"""
+        filename = os.path.join(basedir,"docs/build/html/import.html")
+
+        self.lineEditBrowserLocation.setText(filename)
+
+        if filename:
+            # Load the selected HTML file into the QWebEngineView
+            self.browser.setUrl(QUrl.fromLocalFile(filename))
     
     def change_preview(self,next=True):
         # Get indexes of samples that are selected for analysis
@@ -12635,13 +12748,13 @@ class ImportTool(QDialog, Ui_ImportDialog):
                     current_progress += 1
                     self.progressBar.setValue(current_progress)
                     self.statusBar.showMessage(f"{sample_id}: {current_progress}/{total_files} files imported.")
-                    QtWidgets.QApplication.processEvents()  # Process GUI events to update the progress bar
+                    QApplication.processEvents()  # Process GUI events to update the progress bar
 
                 if not data_frames:
                     continue
 
                 self.statusBar.showMessage(f'Formatting {sample_id}...')
-                QtWidgets.QApplication.processEvents()  # Process GUI events to update the progress bar
+                QApplication.processEvents()  # Process GUI events to update the progress bar
                 match self.ftype:
                     case 'lines':
                         final_data = pd.concat(data_frames, ignore_index=True)
@@ -12665,7 +12778,7 @@ class ImportTool(QDialog, Ui_ImportDialog):
 
                 file_name = os.path.join(save_path, sample_id+'.lame.csv')
                 self.statusBar.showMessage(f'Saving {sample_id}.lame.csv...')
-                QtWidgets.QApplication.processEvents()  # Process GUI events to update the progress bar
+                QApplication.processEvents()  # Process GUI events to update the progress bar
                 final_data.to_csv(file_name, index= False)
                 num_imported += 1
 
@@ -13406,7 +13519,7 @@ class Polygon:
                         x_points = [p[0] for p in points] + [x, points[0][0]]
                         y_points = [p[1] for p in points] + [y, points[0][1]]
                     # Draw shaded polygon + lines to cursor
-                    poly_item = QtWidgets.QGraphicsPolygonItem(QtGui.QPolygonF([QtCore.QPointF(x, y) for x, y in zip(x_points, y_points)]))
+                    poly_item = QGraphicsPolygonItem(QtGui.QPolygonF([QtCore.QPointF(x, y) for x, y in zip(x_points, y_points)]))
                     poly_item.setBrush(QtGui.QColor(100, 100, 150, 100))
                     self.main_window.plot.addItem(poly_item)
                     self.lines[self.p_id].append(poly_item)
@@ -13419,7 +13532,7 @@ class Polygon:
                 elif complete and len(points) > 2:
                     points = [QtCore.QPointF(x, y) for x, y, _ in self.polygons[self.main_window.sample_id][self.p_id]]
                     polygon = QtGui.QPolygonF(points)
-                    poly_item = QtWidgets.QGraphicsPolygonItem(polygon)
+                    poly_item = QGraphicsPolygonItem(polygon)
                     poly_item.setBrush(QtGui.QColor(100, 100, 150, 100))
                     self.main_window.plot.addItem(poly_item)
                     self.lines[self.p_id].append(poly_item)
@@ -14185,7 +14298,7 @@ class Profiling:
 app = None
 def main():
     global app
-    app = QtWidgets.QApplication(sys.argv)
+    app = QApplication(sys.argv)
 
     # Define the stylesheet
     light_stylesheet = """
@@ -14197,7 +14310,10 @@ def main():
                 image: none;
             }
             QToolButton:hover {
-                background-color: #f1f1f1; /* Change background color on hover */
+                background-color: #c8c8c8; /* Change background color on hover */
+            }
+            QToolButton:checked {
+                background-color: #c8c8c8; /* Change background color on hover */
             }
          """
 
@@ -14210,6 +14326,9 @@ def main():
                 image: none;
             }
             QToolButton:hover {
+                background-color: #545454; /* Change background color on hover */
+            }
+            QToolButton:checked {
                 background-color: #545454; /* Change background color on hover */
             }
          """

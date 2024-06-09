@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>User Guide &#8212; Laser Map Explorer  documentation</title>
+    <title>User Guide &#8212; Laser Map Explorer 0.1 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/documentation_options.js?v=2709fde1"></script>
     <script src="_static/doctools.js?v=888ff710"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/custom.js"></script>
@@ -363,9 +363,7 @@ document.write(`
   <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="basics.html">GUI Layout</a></li>
-
-
+<li class="toctree-l1"><a class="reference internal" href="basics.html">The Basics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="import.html">Import Formats</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">The Interface</span></p>
@@ -377,9 +375,12 @@ document.write(`
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Figures &amp; Analyses</span></p>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_fields.html">Custom Fields</a></li>
 <li class="toctree-l1"><a class="reference internal" href="profiles.html">Profiles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multidimensional.html">Multidimensional Methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="special_functions.html">Special Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="additional_functions.html">Additional Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notes.html">Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="export.html">Export Formats</a></li>
 </ul>
 </div>
@@ -437,6 +438,8 @@ document.write(`
                   
   <section id="user-guide">
 <h1>User Guide<a class="headerlink" href="#user-guide" title="Link to this heading">#</a></h1>
+<p><em>LaME</em> is built in <a class="reference external" href="https://www.python.org/downloads/">Python3.11</a> using <a class="reference external" href="https://pypi.org/project/PyQt5/">PyQt5</a> for the user interface.  Most of the plotting is handled by <a class="reference external" href="https://matplotlib.org">matplotlib</a>, with some of the more dynamic plots using <a class="reference external" href="https://www.pyqtgraph.org">pyqtgraph</a>.</p>
+<p>There are two ways to use <em>LaME</em>, either as a precompiled executable or using the source code.  The latter will always be up to date, but may occasionally break as we improve the code, implement new features, or experiment with new tools.  If you do use the source, we suggest you download a distribution manager such as <a class="reference external" href="https://docs.github.com/en/desktop/overview/about-github-desktop">GitHub Desktop</a> which can be used to monitor changes and easily download new versions.</p>
 <div class="toctree-wrapper compound">
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
@@ -445,16 +448,20 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="installation.html#mac">Mac</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="basics.html">GUI Layout</a></li>
-<li class="toctree-l1"><a class="reference internal" href="basics.html#samples-and-fields">Samples and Fields</a></li>
-<li class="toctree-l1"><a class="reference internal" href="basics.html#stucture-of-stored-data">Stucture of stored data</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="basics.html#raw-data">Raw data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="basics.html#clipped-data">Clipped data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="basics.html#analysis-data">Analysis data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basics.html">The Basics</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="basics.html#gui-layout">GUI Layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basics.html#loading-data">Loading Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basics.html#where-to-start">Where to Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basics.html#stucture-of-stored-data">Stucture of stored data</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="import.html">Import Formats</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="import.html#la-icp-ms">LA-ICP-MS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="import.html#mla">MLA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="import.html#xrf">XRF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="import.html#sem">SEM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="import.html#cl">CL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="import.html#petrography">petrography</a></li>
 </ul>
 </li>
 </ul>
@@ -496,19 +503,30 @@ document.write(`
 <div class="toctree-wrapper compound">
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Figures &amp; Analyses</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="plotting.html#map-form-plots">Map-form plots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plotting.html#correlation">Correlation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plotting.html#histograms">Histograms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plotting.html#biplot-and-ternary">Biplot and Ternary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plotting.html#multidimensional">Multidimensional</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plotting.html#profile">Profile</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="custom_fields.html">Custom Fields</a></li>
 <li class="toctree-l1"><a class="reference internal" href="profiles.html">Profiles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multidimensional.html">Multidimensional Methods</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="multidimensional.html#principal-component-analysis">Principal Component Analysis</a></li>
 <li class="toctree-l2"><a class="reference internal" href="multidimensional.html#clustering">Clustering</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="special_functions.html">Special Functions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="special_functions.html#thermometry">Thermometry</a></li>
-<li class="toctree-l2"><a class="reference internal" href="special_functions.html#barometry">Barometry</a></li>
-<li class="toctree-l2"><a class="reference internal" href="special_functions.html#dating">Dating</a></li>
-<li class="toctree-l2"><a class="reference internal" href="special_functions.html#diffusion">Diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="additional_functions.html">Additional Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="additional_functions.html#thermometry">Thermometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="additional_functions.html#barometry">Barometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="additional_functions.html#dating">Dating</a></li>
+<li class="toctree-l2"><a class="reference internal" href="additional_functions.html#diffusion">Diffusion</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="notes.html">Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="export.html">Export Formats</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="export.html#polygon-data">Polygon Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="export.html#profile-data">Profile Data</a></li>
@@ -534,7 +552,7 @@ document.write(`
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Welcome to Laser Map Explorer (LaME)!</p>
+        <p class="prev-next-title">Welcome to Laser Map Explorer (<em>LaME</em>)!</p>
       </div>
     </a>
     <a class="right-next"

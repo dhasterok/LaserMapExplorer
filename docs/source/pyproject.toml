@@ -18,13 +18,22 @@ dependencies = [
     "numpy",
     "scikit-learn",
     "scikit-learn-extra",
+    "scikit-fuzzy",
+    "pandas",
+    "matplotlib",
+    "numexpr",
+    "cmcrameri",
     "PyQt5",
+    "opencv-python",
+    "openpyxl",
+    "rst2pdf",
+    "PyQtWebEngine",
+    "pyqtgraph",
     "darkdetect",
-    "
 ]
 
 [project.scripts]
-main = "your_package.main:main"
+main = "lame.main:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

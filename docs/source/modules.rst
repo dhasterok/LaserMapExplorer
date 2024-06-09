@@ -7,9 +7,6 @@ LaserMapExplorer
    IsotopeSelectionDialog
    MainWindow
    MolecularWeightCalculator
-   adjbyquantile
-   calculator
-   crop_tool
    gausscensor
    kmeans
    main
@@ -21,4 +18,3 @@ LaserMapExplorer
    ternary_colormap
    ternary_heatmap
    ternary_plot
-   terncmap_test

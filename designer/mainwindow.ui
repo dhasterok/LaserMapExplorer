@@ -875,17 +875,6 @@
     <addaction name="actionProfiles"/>
     <addaction name="actionBatch_Process"/>
    </widget>
-   <widget class="QMenu" name="menuHelp">
-    <property name="font">
-     <font>
-      <pointsize>12</pointsize>
-      <stylestrategy>PreferDefault</stylestrategy>
-     </font>
-    </property>
-    <property name="title">
-     <string>Help</string>
-    </property>
-   </widget>
    <widget class="QMenu" name="menuLaME">
     <property name="font">
      <font>
@@ -907,7 +896,6 @@
    <addaction name="menuFile"/>
    <addaction name="menuPlot"/>
    <addaction name="menuAnalyze"/>
-   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar">
    <property name="font">
@@ -989,7 +977,7 @@
         <string/>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="SelectAnalytePage">
         <property name="enabled">
@@ -1000,7 +988,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>178</height>
+          <height>182</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -1613,7 +1601,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>178</height>
+          <height>182</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -2212,7 +2200,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>178</height>
+          <height>182</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -2252,7 +2240,7 @@
               <x>0</x>
               <y>0</y>
               <width>294</width>
-              <height>172</height>
+              <height>176</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_45">
@@ -2585,7 +2573,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>178</height>
+          <height>182</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -3224,7 +3212,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>178</height>
+          <height>182</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -3990,7 +3978,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>178</height>
+          <height>182</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -4644,7 +4632,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>178</height>
+          <height>182</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5248,7 +5236,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>178</height>
+          <height>182</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5288,7 +5276,7 @@
               <x>0</x>
               <y>0</y>
               <width>301</width>
-              <height>178</height>
+              <height>182</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_57">
@@ -5475,7 +5463,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>178</height>
+          <height>182</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6092,7 +6080,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>178</height>
+          <height>182</height>
          </rect>
         </property>
         <attribute name="label">
@@ -6128,7 +6116,7 @@
               <x>0</x>
               <y>0</y>
               <width>300</width>
-              <height>178</height>
+              <height>182</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_64">
@@ -6590,7 +6578,7 @@
    <property name="minimumSize">
     <size>
      <width>245</width>
-     <height>539</height>
+     <height>543</height>
     </size>
    </property>
    <property name="maximumSize">
@@ -6755,8 +6743,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>255</width>
-          <height>356</height>
+          <width>268</width>
+          <height>360</height>
          </rect>
         </property>
         <attribute name="label">
@@ -6883,7 +6871,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>255</width>
+          <width>276</width>
           <height>360</height>
          </rect>
         </property>
@@ -7021,8 +7009,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>247</width>
-              <height>138</height>
+              <width>100</width>
+              <height>72</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -7061,7 +7049,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>247</width>
+                  <width>183</width>
                   <height>354</height>
                  </rect>
                 </property>
@@ -7428,8 +7416,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>247</width>
-              <height>138</height>
+              <width>100</width>
+              <height>72</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -7468,7 +7456,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>247</width>
+                  <width>203</width>
                   <height>374</height>
                  </rect>
                 </property>
@@ -7861,8 +7849,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>247</width>
-              <height>138</height>
+              <width>100</width>
+              <height>72</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -7901,7 +7889,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>247</width>
+                  <width>242</width>
                   <height>256</height>
                  </rect>
                 </property>
@@ -8343,8 +8331,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>247</width>
-              <height>138</height>
+              <width>100</width>
+              <height>72</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -8823,7 +8811,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>247</width>
+              <width>268</width>
               <height>138</height>
              </rect>
             </property>
@@ -8863,7 +8851,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>247</width>
+                  <width>268</width>
                   <height>163</height>
                  </rect>
                 </property>
@@ -9223,7 +9211,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>255</width>
+          <width>290</width>
           <height>360</height>
          </rect>
         </property>
@@ -9263,7 +9251,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>255</width>
+              <width>290</width>
               <height>687</height>
              </rect>
             </property>
@@ -12445,6 +12433,7 @@
    <addaction name="separator"/>
    <addaction name="actionReportBug"/>
    <addaction name="actionReset"/>
+   <addaction name="actionHelp"/>
   </widget>
   <action name="actionOpenDirectory">
    <property name="icon">
@@ -12910,15 +12899,14 @@
     <string>Add Plot to Tree</string>
    </property>
    <property name="iconText">
-    <string>Add to Tree</string>
+    <string>Add Plot
+to Tree</string>
    </property>
    <property name="toolTip">
     <string>Save the current plot to the plot selector</string>
    </property>
    <property name="font">
-    <font>
-     <pointsize>13</pointsize>
-    </font>
+    <font/>
    </property>
    <property name="shortcut">
     <string>Ctrl+T</string>
@@ -13029,6 +13017,10 @@
    <property name="text">
     <string>Report Bug</string>
    </property>
+   <property name="iconText">
+    <string>Report
+Bug</string>
+   </property>
    <property name="toolTip">
     <string>Report bug or request new feature</string>
    </property>
@@ -13069,6 +13061,24 @@ Session</string>
    </property>
    <property name="toolTip">
     <string>Open a previously saved session</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::ApplicationSpecificRole</enum>
+   </property>
+  </action>
+  <action name="actionHelp">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/resources/icons/icon-question-64.png</normaloff>:/icons/resources/icons/icon-question-64.png</iconset>
+   </property>
+   <property name="text">
+    <string>Help</string>
+   </property>
+   <property name="toolTip">
+    <string>Click once to active and a second time on a tool to open a help page.</string>
    </property>
    <property name="menuRole">
     <enum>QAction::ApplicationSpecificRole</enum>

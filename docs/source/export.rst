@@ -20,5 +20,5 @@ X, Y, Distance, Analyte1 average, Analyte1 uncertainty, ..., AnalyteN average, A
 
 The value for the average and uncertainty are determined by the ``Point & error type`` dropdown.
 
-.. |icon-save| image:: _static/icons/icon-save-64.png
+.. |icon-save| image:: _static/icons/icon-save-file-64.png
     :height: 2ex

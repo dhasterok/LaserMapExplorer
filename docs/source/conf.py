@@ -14,6 +14,7 @@ sys.path.insert(0, os.path.abspath('../../src/ui'))
 project = 'Laser Map Explorer'
 copyright = '2024, Shavin Kaluthantri and Derrick Hasterok'
 author = 'Shavin Kaluthantri and Derrick Hasterok'
+release = '0.1'
 
 print(sys.executable)
 
@@ -25,6 +26,7 @@ extensions = ['sphinx.ext.autodoc',
     'sphinx.ext.inheritance_diagram',
     'sphinx.ext.intersphinx',
     'sphinx.ext.autosectionlabel',
+    'sphinx.ext.viewcode',
     'numpydoc']
 
 templates_path = ['_templates']
@@ -51,17 +53,18 @@ html_static_path = ['_static']
 html_logo = "_static/LaME-logo-64.png"
 
 intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
     'dateutil': ('https://dateutil.readthedocs.io/en/stable/', None),
     'matplotlib': ('https://matplotlib.org/stable/', None),
-    'pyqtgraph': ('https://www.pyqtgraph.org', None),
+    'pyqtgraph': ('http://pyqtgraph.org/documentation/', None),
     'numpy': ('https://numpy.org/doc/stable/', None),
     'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),
     'python': ('https://docs.python.org/3/', None),
     'scipy': ('https://docs.scipy.org/doc/scipy/', None),
-    'scikit-learn': ('https://scikit-learn.org/stable/', None),
-    'pyqt5': ('https://pypi.org/project/PyQt5/', None),
+    'scikit-learn': ('https://scikit-learn.org/stable/api/', None),
+    'pyqt5': ('https://www.riverbankcomputing.com/static/Docs/PyQt5', None),
     'darkdetect': ('https://pypi.org/project/darkdetect/', None),
-    'rst2pdf': ('https://rst2pdf.org', None)
+    'rst2pdf': ('https://github.com/rst2pdf/rst2pdf/tree/main/doc', None)
 }
 
 html_theme_options = {

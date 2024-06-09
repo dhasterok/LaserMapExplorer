@@ -1,6 +1,10 @@
 User Guide
 ***********
 
+*LaME* is built in `Python3.11 <https://www.python.org/downloads/>`_ using `PyQt5 <https://pypi.org/project/PyQt5/>`_ for the user interface.  Most of the plotting is handled by `matplotlib <https://matplotlib.org>`_, with some of the more dynamic plots using `pyqtgraph <https://www.pyqtgraph.org>`_.
+
+There are two ways to use *LaME*, either as a precompiled executable or using the source code.  The latter will always be up to date, but may occasionally break as we improve the code, implement new features, or experiment with new tools.  If you do use the source, we suggest you download a distribution manager such as `GitHub Desktop <https://docs.github.com/en/desktop/overview/about-github-desktop>`_ which can be used to monitor changes and easily download new versions.
+
 .. toctree::
     :maxdepth: 2
     :caption: Getting Started
@@ -23,7 +27,9 @@ User Guide
     :caption: Figures & Analyses
 
     plotting
+    custom_fields
     profiles
     multidimensional
-    special_functions
+    additional_functions
+    notes
     export

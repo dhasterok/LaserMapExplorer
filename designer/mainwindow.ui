@@ -526,8 +526,8 @@
           <string>...</string>
          </property>
          <property name="icon">
-          <iconset>
-           <normaloff>:/icons/resources/icons/icon-add-list-64.png</normaloff>:/icons/resources/icons/icon-add-list-64.png</iconset>
+          <iconset resource="../resources.qrc">
+           <normaloff>:/resources/icons/icon-add-list-64.svg</normaloff>:/resources/icons/icon-add-list-64.svg</iconset>
          </property>
          <property name="iconSize">
           <size>
@@ -977,7 +977,7 @@
         <string/>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>4</number>
        </property>
        <widget class="QWidget" name="SelectAnalytePage">
         <property name="enabled">
@@ -2341,8 +2341,8 @@
                      <string>...</string>
                     </property>
                     <property name="icon">
-                     <iconset>
-                      <normaloff>:/icons/resources/icons/icon-open-file-64.png</normaloff>:/icons/resources/icons/icon-open-file-64.png</iconset>
+                     <iconset resource="../resources.qrc">
+                      <normaloff>:/resources/icons/icon-open-file-64.svg</normaloff>:/resources/icons/icon-open-file-64.svg</iconset>
                     </property>
                     <property name="iconSize">
                      <size>
@@ -2373,8 +2373,8 @@
                      <string>...</string>
                     </property>
                     <property name="icon">
-                     <iconset>
-                      <normaloff>:/icons/resources/icons/icon-spot-64.svg</normaloff>:/icons/resources/icons/icon-spot-64.svg</iconset>
+                     <iconset resource="../resources.qrc">
+                      <normaloff>:/resources/icons/icon-spot-64.svg</normaloff>:/resources/icons/icon-spot-64.svg</iconset>
                     </property>
                     <property name="iconSize">
                      <size>
@@ -2408,8 +2408,8 @@
                      <string>...</string>
                     </property>
                     <property name="icon">
-                     <iconset>
-                      <normaloff>:/icons/resources/icons/icon-move-point-64.png</normaloff>:/icons/resources/icons/icon-move-point-64.png</iconset>
+                     <iconset resource="../resources.qrc">
+                      <normaloff>:/resources/icons/icon-move-point-64.svg</normaloff>:/resources/icons/icon-move-point-64.svg</iconset>
                     </property>
                     <property name="iconSize">
                      <size>
@@ -2423,7 +2423,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QToolButton" name="toolButtonSpotToggleView">
+                   <widget class="QToolButton" name="toolButtonSpotToggle">
                     <property name="minimumSize">
                      <size>
                       <width>32</width>
@@ -2443,8 +2443,8 @@
                      <string>...</string>
                     </property>
                     <property name="icon">
-                     <iconset>
-                      <normaloff>:/icons/resources/icons/icon-show-hide-64.png</normaloff>:/icons/resources/icons/icon-show-hide-64.png</iconset>
+                     <iconset resource="../resources.qrc">
+                      <normaloff>:/resources/icons/icon-show-hide-64.svg</normaloff>:/resources/icons/icon-show-hide-64.svg</iconset>
                     </property>
                     <property name="iconSize">
                      <size>
@@ -2478,8 +2478,8 @@
                      <string>Select All</string>
                     </property>
                     <property name="icon">
-                     <iconset>
-                      <normaloff>:/icons/resources/icons/icon-select-all-64.png</normaloff>:/icons/resources/icons/icon-select-all-64.png</iconset>
+                     <iconset resource="../resources.qrc">
+                      <normaloff>:/resources/icons/icon-select-all-64.svg</normaloff>:/resources/icons/icon-select-all-64.svg</iconset>
                     </property>
                     <property name="iconSize">
                      <size>
@@ -2490,7 +2490,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QToolButton" name="toolButton">
+                   <widget class="QToolButton" name="toolButtonSpotAnalysis">
                     <property name="minimumSize">
                      <size>
                       <width>32</width>
@@ -2510,8 +2510,8 @@
                      <string>...</string>
                     </property>
                     <property name="icon">
-                     <iconset>
-                      <normaloff>:/icons/resources/icons/icon-analysis-64.png</normaloff>:/icons/resources/icons/icon-analysis-64.png</iconset>
+                     <iconset resource="../resources.qrc">
+                      <normaloff>:/resources/icons/icon-analysis-64.svg</normaloff>:/resources/icons/icon-analysis-64.svg</iconset>
                     </property>
                     <property name="iconSize">
                      <size>
@@ -2542,8 +2542,8 @@
                      <string>...</string>
                     </property>
                     <property name="icon">
-                     <iconset>
-                      <normaloff>:/icons/resources/icons/icon-delete-64.png</normaloff>:/icons/resources/icons/icon-delete-64.png</iconset>
+                     <iconset resource="../resources.qrc">
+                      <normaloff>:/resources/icons/icon-delete-64.svg</normaloff>:/resources/icons/icon-delete-64.svg</iconset>
                     </property>
                     <property name="iconSize">
                      <size>
@@ -6740,7 +6740,7 @@
         </font>
        </property>
        <property name="currentIndex">
-        <number>2</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="PlotSelectorPage">
         <property name="geometry">
@@ -7006,7 +7006,7 @@
             <enum>QFrame::Raised</enum>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>4</number>
            </property>
            <widget class="QWidget" name="StyleAxes">
             <property name="geometry">
@@ -10621,7 +10621,7 @@
         <string>Pop the figure out into a separate window</string>
        </property>
        <property name="currentIndex">
-        <number>4</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="tabNotes">
         <property name="sizePolicy">
@@ -13025,7 +13025,7 @@ to Tree</string>
   <action name="actionReportBug">
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/resources/icons/icon-bugs-64.svg</normaloff>:/resources/icons/icon-bugs-64.svg</iconset>
+     <normaloff>:/resources/icons/icon-bugs-64.png</normaloff>:/resources/icons/icon-bugs-64.png</iconset>
    </property>
    <property name="text">
     <string>Report Bug</string>

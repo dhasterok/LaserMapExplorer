@@ -24,7 +24,6 @@
         <file>resources/icons/icon-bold-64.svg</file>
         <file>resources/icons/icon-bold-dark-64.svg</file>
         <file>resources/icons/icon-bookmark-64.svg</file>
-        <file>resources/icons/icon-bugs-64.svg</file>
         <file>resources/icons/icon-bullet-list-64.svg</file>
         <file>resources/icons/icon-bullet-list-dark-64.svg</file>
         <file>resources/icons/icon-calculator-64.svg</file>
@@ -151,5 +150,7 @@
         <file>resources/icons/LaME-green-64.svg</file>
         <file>resources/icons/icon-crop-dark-64.svg</file>
         <file>resources/icons/icon-add-point-dark-64.svg</file>
+        <file>resources/icons/icon-bugs-64.svg</file>
+        <file>resources/icons/icon-bugs-64.png</file>
     </qresource>
 </RCC>

@@ -542,11 +542,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.toolButtonCAxisReset.setIcon(QIcon('resources/icons/icon-reset-dark-64.svg'))
             self.toolButtonClusterColorReset.setIcon(QIcon('resources/icons/icon-reset-dark-64.svg'))
             self.toolButtonHistogramReset.setIcon(QIcon('resources/icons/icon-reset-dark-64.svg'))
-            #
-            self.toolButtonNDimRemove.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
-            self.toolButtonPolyDelete.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
-            self.toolButtonSpotRemove.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
-            #
+            # Plot Tree
             self.toolButtonSortAnalyte.setIcon(QIcon('resources/icons/icon-sort-dark-64.svg'))
             self.toolButtonRemovePlot.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
             # Samples
@@ -556,6 +552,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.toolBox.setItemIcon(self.left_tab['process'],QIcon('resources/icons/icon-histogram-dark-64.svg'))
             self.toolBox.setItemIcon(self.left_tab['multidim'],QIcon('resources/icons/icon-dimensional-analysis-dark-64.svg'))
             self.toolBox.setItemIcon(self.left_tab['cluster'],QIcon('resources/icons/icon-cluster-dark-64.svg'))
+            self.toolBox.setItemIcon(self.left_tab['scatter'],QIcon('resources/icons/icon-ternary-dark-64.svg'))
+            # Spot Data
+            self.toolButtonSpotMove.setIcon(QIcon('resources/icons/icon-move-point-dark-64.svg'))
+            self.toolButtonSpotToggle.setIcon(QIcon('resources/icons/icon-show-hide-dark-64.svg'))
+            self.toolButtonSpotSelectAll.setIcon(QIcon('resources/icons/icon-select-all-dark-64.svg'))
+            self.toolButtonSpotAnalysis.setIcon(QIcon('resources/icons/icon-analysis-dark-64.svg'))
+            self.toolButtonSpotRemove.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
+            # N-Dim
+            self.toolBox.setItemIcon(self.left_tab['ndim'],QIcon('resources/icons/icon-TEC-dark-64.svg'))
+            self.toolButtonNDimDown.setIcon(QIcon('resources/icons/icon-down-arrow-dark-64.svg'))
+            self.toolButtonNDimUp.setIcon(QIcon('resources/icons/icon-up-arrow-dark-64.svg'))
+            self.toolButtonNDimSelectAll.setIcon(QIcon('resources/icons/icon-select-all-dark-64.svg'))
+            self.toolButtonNDimRemove.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
             # Filter
             self.toolButtonFilterSelectAll.setIcon(QIcon('resources/icons/icon-select-all-dark-64.svg'))
             self.toolButtonFilterUp.setIcon(QIcon('resources/icons/icon-up-arrow-dark-64.svg'))
@@ -569,11 +578,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.toolButtonPolyMovePoint.setIcon(QIcon('resources/icons/icon-move-point-dark-64.svg'))
             self.toolButtonPolyLink.setIcon(QIcon('resources/icons/icon-link-dark-64.svg'))
             self.toolButtonPolyDelink.setIcon(QIcon('resources/icons/icon-unlink-dark-64.svg'))
+            self.toolButtonPolyDelete.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
             # Profile
+            self.toolBox.setItemIcon(self.left_tab['profile'],QIcon('resources/icons/icon-profile-dark-64.svg'))
             self.toolButtonClearProfile.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
-            self.toolButtonProfileRemove.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
-            self.toolButtonProfileEditToggle.setIcon(QIcon('resources/icons/icon-edit-dark-64.svg'))
-            self.toolButtonProfilePointToggle.setIcon(QIcon('resources/icons/icon-show-hide-dark-64.svg'))
+            self.toolButtonPointDelete.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
+            self.toolButtonPointSelectAll.setIcon(QIcon('resources/icons/icon-select-all-dark-64.svg'))
+            self.toolButtonPointMove.setIcon(QIcon('resources/icons/icon-move-point-dark-64.svg'))
+            self.toolButtonProfileInterpolate.setIcon(QIcon('resources/icons/icon-interpolate-dark-64.svg'))
+            self.toolButtonPlotProfile.setIcon(QIcon('resources/icons/icon-profile-dark-64.svg'))
+            self.toolButtonPointDown.setIcon(QIcon('resources/icons/icon-down-arrow-dark-64.svg'))
+            self.toolButtonPointUp.setIcon(QIcon('resources/icons/icon-up-arrow-dark-64.svg'))
             # Browser
             self.toolButtonBrowserHome.setIcon(QIcon('resources/icons/icon-home-dark-64.svg'))
             self.toolButtonForward.setIcon(QIcon('resources/icons/icon-forward-arrow-dark-64.svg'))
@@ -11944,6 +11959,10 @@ class quickView(QDialog, Ui_QuickViewDialog):
         self.main_window = parent
         self.analyte_list = self.main_window.data[self.main_window.sample_id]['analyte_info']['analytes']
 
+        if darkdetect.isDark():
+            self.toolButtonSort.setIcon(QIcon('resources/icons/icon-sort-dark-64.svg'))
+            self.toolButtonSave.setIcon(QIcon('resources/icons/icon-save-dark-64.svg'))
+
         self.tableWidget = TableWidgetDragRows()  # Assuming TableWidgetDragRows is defined elsewhere
         self.setup_table()
         
@@ -12206,6 +12225,10 @@ class ImportTool(QDialog, Ui_ImportDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
+
+        if darkdetect.isDark():
+            self.toolButtonNextSample.setIcon(QIcon('resources/icons/icon-forward-arrow-dark-64.svg'))
+            self.toolButtonPrevSample.setIcon(QIcon('resources/icons/icon-back-arrow-dark-64.svg'))
         
         # dictionary with standards (files to ignore or use as calibration...once we add that capability)
         self.standards_dict = lameio.import_csv_to_dict(os.path.join(basedir,'resources/app_data/standards_list.csv'))

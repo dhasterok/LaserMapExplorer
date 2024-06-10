@@ -112,6 +112,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 | 'pmax' : (float) -- maximum probability value
         bottom_tab : dict
             Holds the indices for tabs in ``tabWidget``
+        calc_dict : dict
+            Holds the custom field names and formulas set by the user in the calculator
         canvas_tab : dict
             Holds the indices for tabs in ``canvasWindow``
         cluster_dict : dict of dict
@@ -336,41 +338,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.buttons_layout = None  # create a reference to your layout
 
-        #darkdetect.theme()
-        # Returns 'Dark'
-        if darkdetect.isDark():
-            self.actionSelectAnalytes.setIcon(QIcon('resources/icons/icon-atom-dark-64.png'))
-            self.toolButtonNotesHeading.setIcon(QIcon('resources/icons/icon-heading-dark-64.png'))
-            self.toolButtonNotesBold.setIcon(QIcon('resources/icons/icon-bold-dark-64.png'))
-            self.toolButtonNotesItalic.setIcon(QIcon('resources/icons/icon-italics-dark-64.png'))
-            self.toolButtonNotesBulletList.setIcon(QIcon('resources/icons/icon-bullet-list-dark-64.png'))
-            self.toolButtonNotesNumList.setIcon(QIcon('resources/icons/icon-numbered-list-dark-64.png'))
-            self.toolButtonXAxisReset.setIcon(QIcon('resources/icons/icon-reset-dark-64.png'))
-            self.toolButtonYAxisReset.setIcon(QIcon('resources/icons/icon-reset-dark-64.png'))
-            self.toolButtonCAxisReset.setIcon(QIcon('resources/icons/icon-reset-dark-64.png'))
-            self.toolButtonClusterColorReset.setIcon(QIcon('resources/icons/icon-reset-dark-64.png'))
-            self.toolButtonHistogramReset.setIcon(QIcon('resources/icons/icon-reset-dark-64.png'))
-            self.toolButtonRemoveAllMVPlots.setIcon(QIcon('resources/icons/icon-delete-dark-64.png'))
-            self.toolButtonRemovePlot.setIcon(QIcon('resources/icons/icon-delete-dark-64.png'))
-            self.toolButtonNDimRemove.setIcon(QIcon('resources/icons/icon-delete-dark-64.png'))
-            self.toolButtonPolyDelete.setIcon(QIcon('resources/icons/icon-delete-dark-64.png'))
-            self.toolButtonSpotRemove.setIcon(QIcon('resources/icons/icon-delete-dark-64.png'))
-            self.toolButtonFilterRemove.setIcon(QIcon('resources/icons/icon-delete-dark-64.png'))
-            self.toolButtonClearProfile.setIcon(QIcon('resources/icons/icon-delete-dark-64.png'))
-            self.toolButtonProfileRemove.setIcon(QIcon('resources/icons/icon-delete-dark-64.png'))
-            self.toolButtonForward.setIcon(QIcon('resources/icons/icon-forward-arrow-dark-64.png'))
-            self.toolButtonBack.setIcon(QIcon('resources/icons/icon-back-arrow-dark-64.png'))
-            self.toolButtonPopFigure.setIcon(QIcon('resources/icons/icon-popout-dark-64.png'))
-            self.toolButtonAnnotate.setIcon(QIcon('resources/icons/icon-annotate-64.png'))
-            self.toolButtonPan.setIcon(QIcon('resources/icons/icon-move-64.png'))
-            self.toolButtonZoom.setIcon(QIcon('resources/icons/icon-zoom-64.png'))
-            print('Dark Mode')
-        else:
-            print('Light Mode')
-
-        #darkdetect.isLight()
-        # Returns False
-
         #Initialise nested data which will hold the main sets of data for analysis
         self.data = {}
         
@@ -390,6 +357,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.isUpdatingTable = False
         self.cursor = False
         self.duplicate_plot_info= None
+
+        self.calc_dict = {}
 
         self.laser_map_dict = {}
 
@@ -505,7 +474,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     self.left_tab.update({'cluster': tid})
                 case 'profiling':
                     self.left_tab.update({'profile': tid})
-                case 'special functions':
+                case 'p-t-t functions':
                     self.left_tab.update({'special': tid})
 
         # right toolbox
@@ -543,6 +512,102 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 case 'quick view':
                     self.canvas_tab.update({'qv': tid})
 
+        # Set initial view
+        self.toolBox.setCurrentIndex(self.left_tab['sample'])
+        self.tabWidget.setCurrentIndex(self.bottom_tab['notes'])
+        self.toolBoxStyle.setCurrentIndex(0)
+        self.toolBoxTreeView.setCurrentIndex(self.right_tab['tree'])
+        self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
+
+        #darkdetect.theme()
+        # Returns 'Dark'
+        if darkdetect.isDark():
+            self.actionSelectAnalytes.setIcon(QIcon('resources/icons/icon-atom-dark-64.svg'))
+            self.actionOpenSession.setIcon(QIcon('resources/icons/icon-open-session-dark-64.svg'))
+            self.actionSaveSession.setIcon(QIcon('resources/icons/icon-save-session-dark-64.svg'))
+            self.actionFullMap.setIcon(QIcon('resources/icons/icon-fit-to-width-dark-64.svg'))
+            self.actionCrop.setIcon(QIcon('resources/icons/icon-crop-dark-64.svg'))
+            self.actionSwapAxes.setIcon(QIcon('resources/icons/icon-swap-dark-64.svg'))
+            # Notes
+            self.toolButtonNotesHeading.setIcon(QIcon('resources/icons/icon-heading-dark-64.svg'))
+            self.toolButtonNotesBold.setIcon(QIcon('resources/icons/icon-bold-dark-64.svg'))
+            self.toolButtonNotesItalic.setIcon(QIcon('resources/icons/icon-italics-dark-64.svg'))
+            self.toolButtonNotesBulletList.setIcon(QIcon('resources/icons/icon-bullet-list-dark-64.svg'))
+            self.toolButtonNotesNumList.setIcon(QIcon('resources/icons/icon-numbered-list-dark-64.svg'))
+            self.toolButtonNotesImage.setIcon(QIcon('resources/icons/icon-image-64.svg'))
+            self.toolButtonNotesSave.setIcon(QIcon('resources/icons/icon-pdf-dark-64.svg'))
+            # Reset Buttons
+            self.toolButtonXAxisReset.setIcon(QIcon('resources/icons/icon-reset-dark-64.svg'))
+            self.toolButtonYAxisReset.setIcon(QIcon('resources/icons/icon-reset-dark-64.svg'))
+            self.toolButtonCAxisReset.setIcon(QIcon('resources/icons/icon-reset-dark-64.svg'))
+            self.toolButtonClusterColorReset.setIcon(QIcon('resources/icons/icon-reset-dark-64.svg'))
+            self.toolButtonHistogramReset.setIcon(QIcon('resources/icons/icon-reset-dark-64.svg'))
+            #
+            self.toolButtonNDimRemove.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
+            self.toolButtonPolyDelete.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
+            self.toolButtonSpotRemove.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
+            #
+            self.toolButtonSortAnalyte.setIcon(QIcon('resources/icons/icon-sort-dark-64.svg'))
+            self.toolButtonRemovePlot.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
+            # Samples
+            self.toolBox.setItemIcon(self.left_tab['sample'],QIcon('resources/icons/icon-atom-dark-64.svg'))
+            self.toolButtonScaleEqualize.setIcon(QIcon('resources/icons/icon-histeq-dark-64.svg'))
+            self.toolButtonAutoScale.setIcon(QIcon('resources/icons/icon-autoscale-dark-64.svg'))
+            self.toolBox.setItemIcon(self.left_tab['process'],QIcon('resources/icons/icon-histogram-dark-64.svg'))
+            self.toolBox.setItemIcon(self.left_tab['multidim'],QIcon('resources/icons/icon-dimensional-analysis-dark-64.svg'))
+            self.toolBox.setItemIcon(self.left_tab['cluster'],QIcon('resources/icons/icon-cluster-dark-64.svg'))
+            # Filter
+            self.toolButtonFilterSelectAll.setIcon(QIcon('resources/icons/icon-select-all-dark-64.svg'))
+            self.toolButtonFilterUp.setIcon(QIcon('resources/icons/icon-up-arrow-dark-64.svg'))
+            self.toolButtonFilterDown.setIcon(QIcon('resources/icons/icon-down-arrow-dark-64.svg'))
+            self.toolButtonFilterRemove.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
+            # Polygons
+            self.toolBox.setItemIcon(self.left_tab['polygons'],QIcon('resources/icons/icon-polygon-new-dark-64.svg'))
+            self.toolButtonPolyCreate.setIcon(QIcon('resources/icons/icon-polygon-new-dark-64.svg'))
+            self.toolButtonPolyAddPoint.setIcon(QIcon('resources/icons/icon-add-point-dark-64.svg'))
+            self.toolButtonPolyRemovePoint.setIcon(QIcon('resources/icons/icon-remove-point-dark-64.svg'))
+            self.toolButtonPolyMovePoint.setIcon(QIcon('resources/icons/icon-move-point-dark-64.svg'))
+            self.toolButtonPolyLink.setIcon(QIcon('resources/icons/icon-link-dark-64.svg'))
+            self.toolButtonPolyDelink.setIcon(QIcon('resources/icons/icon-unlink-dark-64.svg'))
+            # Profile
+            self.toolButtonClearProfile.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
+            self.toolButtonProfileRemove.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
+            self.toolButtonProfileEditToggle.setIcon(QIcon('resources/icons/icon-edit-dark-64.svg'))
+            self.toolButtonProfilePointToggle.setIcon(QIcon('resources/icons/icon-show-hide-dark-64.svg'))
+            # Browser
+            self.toolButtonBrowserHome.setIcon(QIcon('resources/icons/icon-home-dark-64.svg'))
+            self.toolButtonForward.setIcon(QIcon('resources/icons/icon-forward-arrow-dark-64.svg'))
+            self.toolButtonBack.setIcon(QIcon('resources/icons/icon-back-arrow-dark-64.svg'))
+            # Group Box Plot Tools
+            self.toolButtonHome.setIcon(QIcon('resources/icons/icon-home-dark-64.svg'))
+            self.toolButtonRemoveAllMVPlots.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
+            self.toolButtonPopFigure.setIcon(QIcon('resources/icons/icon-popout-dark-64.svg'))
+            self.toolButtonAnnotate.setIcon(QIcon('resources/icons/icon-annotate-dark-64.svg'))
+            self.toolButtonPan.setIcon(QIcon('resources/icons/icon-move-dark-64.svg'))
+            self.toolButtonZoom.setIcon(QIcon('resources/icons/icon-zoom-dark-64.svg'))
+            self.toolButtonDistance.setIcon(QIcon('resources/icons/icon-distance-dark-64.svg'))
+            # Calculator
+            self.toolButtonCalculate.setIcon(QIcon('resources/icons/icon-calculator-dark-64.svg'))
+            self.actionCalculator.setIcon(QIcon('resources/icons/icon-calculator-dark-64.svg'))
+            self.toolBoxTreeView.setItemIcon(self.right_tab['calculator'],QIcon('resources/icons/icon-calculator-dark-64.svg'))
+            self.toolButtonCalcDelete.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
+            # Style Toolbox
+            self.toolBoxStyle.setItemIcon(0,QIcon('resources/icons/icon-axes-dark-64.svg'))
+            self.toolBoxStyle.setItemIcon(1,QIcon('resources/icons/icon-text-and-scales-dark-64.svg'))
+            self.toolBoxStyle.setItemIcon(2,QIcon('resources/icons/icon-marker-and-lines-dark-64.svg'))
+            self.toolBoxStyle.setItemIcon(3,QIcon('resources/icons/icon-rgb-dark-64.svg'))
+            # Cluster tab
+            self.toolBoxStyle.setItemIcon(4,QIcon('resources/icons/icon-cluster-dark-64.svg'))
+            self.toolButtonClusterLink.setIcon(QIcon('resources/icons/icon-link-dark-64.svg'))
+            self.toolButtonClusterDelink.setIcon(QIcon('resources/icons/icon-unlink-dark-64.svg'))
+            
+            print('Dark Mode')
+        else:
+            print('Light Mode')
+
+        #darkdetect.isLight()
+        # Returns False
+
 
         # create dictionaries for default plot styles
         #-------------------------
@@ -552,14 +617,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.map_plot_types = ['analyte map', 'ternary map', 'PCA Score', 'Cluster', 'Cluster Score']
 
         self.plot_types = {self.left_tab['sample']: [0, 'analyte map', 'correlation'],
-            self.left_tab['spot']: [0, 'analyte map', 'gradient map'],
             self.left_tab['process']: [0, 'analyte map', 'gradient map', 'histogram'],
+            self.left_tab['spot']: [0, 'analyte map', 'gradient map'],
             self.left_tab['polygons']: [0, 'analyte map'],
+            self.left_tab['profile']: [0, 'analyte map'],
             self.left_tab['scatter']: [0, 'scatter', 'heatmap', 'ternary map'],
             self.left_tab['ndim']: [0, 'TEC', 'Radar'],
             self.left_tab['multidim']: [0, 'variance','vectors','pca scatter','pca heatmap','PCA Score'],
             self.left_tab['cluster']: [0, 'Cluster', 'Cluster Score'],
-            self.left_tab['profile']: [0, 'analyte map'],
             self.left_tab['special']: [0, 'profile', 'analyte map', 'gradient map', 'Cluster Score', 'PCA Score']}
 
         self.styles = {}
@@ -584,6 +649,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Connect the "Open" action to a function
         self.actionOpenDirectory.triggered.connect(lambda: self.open_directory(dir_name=None))
         self.actionOpenSample.triggered.connect(self.open_sample)
+        self.actionQuit_LaME.triggered.connect(self.quit)
 
         # Intialize Tabs as not enabled
         self.SelectAnalytePage.setEnabled(False)
@@ -595,7 +661,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.MultidimensionalPage.setEnabled(False)
         self.ClusteringPage.setEnabled(False)
         self.ProfilingPage.setEnabled(False)
-        self.SpecialFunctionPage.setEnabled(False)
+        self.PTtFunctionPage.setEnabled(False)
 
         self.actionSavePlotToTree.triggered.connect(self.add_plotwidget_to_tree)
         self.actionSelectAnalytes.triggered.connect(self.open_select_analyte_dialog)
@@ -626,8 +692,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionCluster.triggered.connect(lambda: self.open_tab('clustering'))
         self.actionReset.triggered.connect(lambda: self.reset_analysis())
         self.actionImportFiles.triggered.connect(lambda: self.import_files())
-        self.actionLoadAnalysis.triggered.connect(lambda: self.load_analysis())
-        self.actionSaveAnalysis.triggered.connect(lambda: self.save_analysis())
+        self.actionOpenSession.triggered.connect(lambda: self.load_analysis())
+        self.actionSaveSession.triggered.connect(lambda: self.save_analysis())
         self.actionSwapAxes.triggered.connect(self.swap_xy)
         self.actionSwapAxes.setEnabled(False)
 
@@ -697,9 +763,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         #uncheck crop is checked
         self.toolBox.currentChanged.connect(lambda: self.canvasWindow.setCurrentIndex(self.canvas_tab['sv']))
-        self.toolBox.currentChanged.connect(self.toolbox_changed)
         #auto scale
         self.toolButtonAutoScale.clicked.connect(lambda: self.auto_scale(False) )
+        self.toolButtonAutoScale.clicked.connect(self.update_SV)
         self.toolButtonAutoScale.setChecked(True)
         self.toolButtonHistogramReset.clicked.connect(self.plot_histogram)
 
@@ -1161,6 +1227,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.autosaveTimer = QTimer()
         self.autosaveTimer.setInterval(300000)
         self.autosaveTimer.timeout.connect(self.save_notes_file)
+
+        # Browser
+        #-------------------------
+        self.textEditPlotInfo.setReadOnly(True)
+
+
         
         # Browser
         #-------------------------
@@ -1211,6 +1283,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.dockWidgetLeftToolbox.installEventFilter(self)
         self.dockWidgetRightToolbox.installEventFilter(self)
         self.dockWidgetBottomTabs.installEventFilter(self)
+
+        self.toolBox.currentChanged.connect(self.toolbox_changed)
 
 
         # ----start debugging----
@@ -1331,6 +1405,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if dialog.exec_():
                 self.selected_directory = dialog.selectedFiles()[0]
             else:
+                self.statusBar.showMessage("Open directory canceled.")
                 return
         else:
             self.selected_directory = dir_name
@@ -1339,6 +1414,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.csv_files = [file for file in file_list if file.endswith('.lame.csv')]
         if self.csv_files == []:
             # warning dialog
+            self.statusBar.showMessage("No valid csv files found.")
             return
         self.comboBoxSampleId.clear()
         self.comboBoxSampleId.addItems([os.path.splitext(file)[0].replace('.lame','') for file in self.csv_files])
@@ -1390,7 +1466,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # Create and configure the QMessageBox
             messageBoxChangeSample = QMessageBox()
             iconWarning = QtGui.QIcon()
-            iconWarning.addPixmap(QtGui.QPixmap(":/icons/resources/icons/icon-warning-64.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            iconWarning.addPixmap(QtGui.QPixmap(":/icons/resources/icons/icon-warning-64.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
 
             messageBoxChangeSample.setWindowIcon(iconWarning)  # Set custom icon
             messageBoxChangeSample.setText("Do you want to save current analysis")
@@ -1439,7 +1515,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             sample_df = sample_df.loc[:, ~sample_df .columns.str.contains('^Unnamed')]
             # self.data[sample_id] = pd.read_csv(file_path, engine='c')
             self.data[sample_id]['raw_data'] = sample_df
-            self.selected_analytes = self.data[sample_id]['raw_data'].columns[5:].tolist()
+            ######
+            # BUG?
+            self.selected_analytes = self.data[sample_id]['raw_data'].columns[2:].tolist()
+            # The columns used to read [5:] here, but that is from the matlab ExcelConcatenator files
+            # The ones from the new import tool should only include an X and Y so only the first two
+            # columns should be skipped.  But there may be other cases where other columns can slip
+            # in, which should be excluded for LA-ICP-MS data, but may not be for other file types?
+            # May need to future proof this line.
+            ######
             self.data[sample_id]['computed_data'] = {
                 'Ratio':pd.DataFrame(),
                 'Calculated': self.add_ree(sample_df),
@@ -1572,28 +1656,42 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # precalculate custom fields
         if self.precalculate_custom_fields:
             for name in self.calc_dict.keys():
-                if name in self.data[self.sample_id]['computed_data']['Calculated'].columns:
+                if name not in self.data[self.sample_id]['computed_data']['Calculated'].columns:
                     self.comboBoxCalcFormula.setCurrentText(name)
                     self.calculate_new_field(save=False)
 
-        self.update_all_field_comboboxes()
-        self.update_filter_values()
+        # reset all plot types on change of tab to the first option
+        for key in self.plot_types.keys():
+            self.plot_types[key][0] = 0
+        # set to single-view, tree view, and sample and fields tab
+        self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
+        self.toolBoxStyle.setCurrentIndex(0)
+        self.toolBoxTreeView.setCurrentIndex(self.right_tab['tree'])
+        self.toolBox.setCurrentIndex(self.left_tab['sample'])
+        self.toolbox_changed(update=False)
 
+        self.styles['analyte map']['Colors']['ColorByField'] = 'Analyte'
+        self.styles['analyte map']['Colors']['Color'] = self.analyte_list[0] 
+        if self.comboBoxPlotType.currentText() != 'analyte map':
+            self.comboBoxPlotType.setCurrentText('analyte map')
+        self.update_all_field_comboboxes()
+        self.update_field_combobox(self.comboBoxColorByField,self.comboBoxColorField)
+
+        self.update_filter_values()
         self.histogram_update_bin_width()
 
         # plot first analyte as lasermap
-        self.styles['analyte map']['Colors']['ColorByField'] = 'Analyte'
-        self.comboBoxColorByField.setCurrentText(self.styles['analyte map']['Colors']['ColorByField'])
-        self.color_by_field_callback()
-        fields = self.get_field_list('Analyte')
-        self.styles['analyte map']['Colors']['Field'] = fields[0]
-        self.comboBoxColorField.setCurrentText(fields[0])
-        self.initialize_axis_values('Analyte', fields[0])
-        self.color_field_callback()
-        self.set_style_widgets('analyte map')
-        self.canvas_changed()
+        # self.comboBoxColorByField.setCurrentText(self.styles['analyte map']['Colors']['ColorByField'])
+        # self.color_by_field_callback()
+        # fields = self.get_field_list('Analyte')
+        # self.styles['analyte map']['Colors']['Field'] = fields[0]
+        # self.comboBoxColorField.setCurrentText(fields[0])
+        # self.initialize_axis_values('Analyte', fields[0])
+        # self.color_field_callback()
+        # self.set_style_widgets('analyte map')
+        # self.canvas_changed()
 
-        self.plot_flag = True
+        self.update_plot = True
         self.update_SV()
 
     def open_preferences_dialog(self):
@@ -1643,6 +1741,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     # -------------------------------
     # User interface functions
     # -------------------------------
+    def quit(self):
+        """Shutdown function
+
+        Saves necessary files and then executes close() function.
+        """        
+        # save files
+
+        self.close()
+
     def open_tab(self, tab_name):
         """Opens specified toolBox tab
 
@@ -1818,27 +1925,36 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             self.display_QV()
 
-    def toolbox_changed(self):
+    def toolbox_changed(self, update=True):
         """Updates styles associated with toolbox page
 
         Executes on change of ``MainWindow.toolBox.currentIndex()``.  Updates style related widgets.
+
+        Parameters
+        ----------
+        update_plot : bool
+            ``True`` forces update plot, when the canavas window tab is on single view, by default ``True``
         """
         if self.sample_id == '':
             return
 
         tab_id = self.toolBox.currentIndex()
 
+        # update the plot type comboBox options
         self.comboBoxPlotType.blockSignals(True)
         self.comboBoxPlotType.clear()
         self.comboBoxPlotType.addItems(self.plot_types[tab_id][1:])
-        self.comboBoxPlotType.setCurrentIndex(self.plot_types[tab_id][0])
         self.comboBoxPlotType.blockSignals(False)
 
-        plot_type = self.comboBoxPlotType.currentText()
-        self.set_style_widgets(plot_type=plot_type, style=self.styles[plot_type])
+        # set to most used plot type on selected tab
+        self.comboBoxPlotType.setCurrentIndex(self.plot_types[tab_id][0])
+
+        # get the current plot type
+        #plot_type = self.comboBoxPlotType.currentText()
+        #self.set_style_widgets(plot_type=plot_type, style=self.styles[plot_type])
 
         # If canvasWindow is set to SingleView, update the plot
-        if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
+        if self.canvasWindow.currentIndex() == self.canvas_tab['sv'] and update:
             self.update_SV()
 
     def open_ternary(self):
@@ -2337,7 +2453,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # Create and configure the QMessageBox
             messageBoxChangeSample = QMessageBox()
             iconWarning = QtGui.QIcon()
-            iconWarning.addPixmap(QtGui.QPixmap(":/icons/resources/icons/icon-warning-64.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            iconWarning.addPixmap(QtGui.QPixmap(":/icons/resources/icons/icon-warning-64.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
 
             messageBoxChangeSample.setWindowIcon(iconWarning)  # Set custom icon
             messageBoxChangeSample.setText("Do you want to save current analysis")
@@ -5917,7 +6033,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             case 'Cluster' | 'Cluster Score':
                 self.plot_clusters()
 
-        # 'profile'
+        self.update_plot_info_tab(self.plot_info)
 
     def add_plotwidget_to_canvas(self, plot_info, position=None):
         """Adds plot to selected view
@@ -9078,11 +9194,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.comboBoxCbarDirection.setEnabled(True)
             case _:
                 field_list = ['Analyte', 'Analyte (normalized)']
-                # add check for ratios
 
+                # add check for ratios
                 for field in self.data[self.sample_id]['computed_data']:
                     if not (self.data[self.sample_id]['computed_data'][field].empty):
                         field_list.append(field)
+                        if field == 'Ratio':
+                            field_list.append('Ratio (normalized)')
                 self.toggle_style_widgets()
 
         # add None to list?
@@ -9194,7 +9312,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # colors
         addNone = True
-        if self.comboBoxPlotType.currentText() in ['PCA Score','Cluster','Cluster Score']:
+        if self.comboBoxPlotType.currentText() in ['analyte map','PCA Score','Cluster','Cluster Score']:
             addNone = False
         self.update_field_type_combobox(self.comboBoxColorByField, addNone=addNone, plot_type=self.comboBoxPlotType.currentText())
         self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
@@ -10878,6 +10996,58 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 
     # -------------------------------
+    # Plot Info Tab functions
+    # -------------------------------
+    def update_plot_info_tab(self, plot_info, write_info=True, level=0):
+        """Prints plot info in the information tab
+        
+        Prints ``plot_info`` into the bottom information tab ``MainWindow.textEditPlotInfo``.
+
+        Parameters
+        ----------
+        plot_info : dict
+            Plot information dictionary.
+        write_info : bool
+            Flag to write dictionary contents when ``True``. When calling ``update_plot_info`` is used
+            recursively to handle dictionaries within dictionaries, the flag is set to ``False``. By default ``True``
+        level : int
+            Indent level, by default ``0``
+
+        Returns
+        -------
+        str
+            When called recursively, a string is returned
+        """
+        content = ''
+        if level > 0:
+            indent = '&nbsp;'*(4*level)
+        else:
+            indent = ''
+
+        for key, value in plot_info.items():
+            if isinstance(value,str):
+                if value == '':
+                    content += f"{indent}<b>{key}:</b> ''<br>"
+                else:
+                    content += f"{indent}<b>{key}:</b> {value}<br>"
+            elif isinstance(value,list) | isinstance(value,int) | isinstance(value,float):
+                content += f"{indent}<b>{key}:</b> {value}<br>"
+            elif isinstance(value,dict):
+                content += f"{indent}<b>{key}:</b><br>"
+                content += self.update_plot_info_tab(value, write_info=False, level=level+1)
+            elif value is None:
+                content += f"{indent}<b>{key}:</b> None<br>"
+            else:
+                content += f"{indent}<b>{key}:</b> {str(type(value))}<br>"
+            
+        if write_info: 
+            self.textEditPlotInfo.clear()
+            self.textEditPlotInfo.setText(content)
+        else:
+            return content
+
+
+    # -------------------------------
     # Unclassified functions
     # -------------------------------
     def reset_checked_items(self,item):
@@ -11403,10 +11573,10 @@ class MplDialog(QDialog):
         unwanted_buttons = ["Back", "Forward", "Customize", "Subplots"]
 
         icons_buttons = {
-            "Home": QtGui.QIcon("resources/icons/icon-home-64.png"),
-            "Pan": QtGui.QIcon("resources/icons/icon-move-64.png"),
-            "Zoom": QtGui.QIcon("resources/icons/icon-zoom-64.png"),
-            "Save": QtGui.QIcon("resources/icons/icon-save-file-64.png")
+            "Home": QtGui.QIcon("resources/icons/icon-home-64.svg"),
+            "Pan": QtGui.QIcon("resources/icons/icon-move-64.svg"),
+            "Zoom": QtGui.QIcon("resources/icons/icon-zoom-64.svg"),
+            "Save": QtGui.QIcon("resources/icons/icon-save-file-64.svg")
         }
         for action in self.toolbar.actions():
             if action.text() in unwanted_buttons:
@@ -12010,7 +12180,7 @@ class TableWidgetDragRows(QTableWidget):
         return rect.contains(pos, True) and not (int(self.model().flags(index)) & Qt.ItemIsDropEnabled) and pos.y() >= rect.center().y()
 
 
-# Excel concatenator gui
+# Import Tool Dialog
 # -------------------------------
 class ImportTool(QDialog, Ui_ImportDialog):       
     """Data import tool for map-form geochemical and mineral data
@@ -14300,6 +14470,10 @@ def main():
     global app
     app = QApplication(sys.argv)
 
+    # Enable high-DPI scaling
+    app.setAttribute(Qt.AA_EnableHighDpiScaling)
+    app.setAttribute(Qt.AA_UseHighDpiPixmaps)
+
     # Define the stylesheet
     light_stylesheet = """
             QToolButton {
@@ -14338,7 +14512,7 @@ def main():
     else:
         app.setStyleSheet(light_stylesheet)
 
-    pixmap = QPixmap("lame_splash.png")
+    pixmap = QPixmap("lame_splash.svg")
     splash = QSplashScreen(pixmap)
     splash.setMask(pixmap.mask())
     splash.show()
@@ -14346,7 +14520,7 @@ def main():
     QTimer.singleShot(3000, splash.close)
 
     # Uncomment this line to set icon to App
-    app.setWindowIcon(QtGui.QIcon(os.path.join(basedir, '/resources/icons/LaME-64.png')))
+    app.setWindowIcon(QtGui.QIcon(os.path.join(basedir, 'resources/icons/LaME-64.svg')))
     main = MainWindow()
 
     # Set the main window to fullscreen

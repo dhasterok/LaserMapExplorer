@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 64 64">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #868583;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6, .cls-7, .cls-8, .cls-9, .cls-10, .cls-11, .cls-12, .cls-13, .cls-14, .cls-15, .cls-16, .cls-17, .cls-18, .cls-19, .cls-20, .cls-21, .cls-22 {
+        stroke-width: 0px;
+      }
+
+      .cls-23 {
+        clip-path: url(#clippath);
+      }
+
+      .cls-2 {
+        fill: none;
+      }
+
+      .cls-3 {
+        fill: #8f747d;
+      }
+
+      .cls-4 {
+        fill: #5f4e54;
+      }
+
+      .cls-5 {
+        fill: url(#radial-gradient);
+      }
+
+      .cls-6 {
+        fill: #5f5254;
+      }
+
+      .cls-7 {
+        fill: #645d5d;
+      }
+
+      .cls-8 {
+        fill: #9c8c8f;
+      }
+
+      .cls-9 {
+        fill: #986f7f;
+      }
+
+      .cls-10 {
+        fill: #95717e;
+      }
+
+      .cls-11 {
+        fill: #a5a4a4;
+      }
+
+      .cls-12 {
+        fill: #262a2b;
+      }
+
+      .cls-13 {
+        fill: url(#radial-gradient-2);
+      }
+
+      .cls-14 {
+        fill: #be202f;
+      }
+
+      .cls-15 {
+        fill: #9ba0a6;
+      }
+
+      .cls-16 {
+        fill: #c3c5c4;
+      }
+
+      .cls-17 {
+        fill: #b094a3;
+      }
+
+      .cls-18 {
+        fill: #8e7b7f;
+      }
+
+      .cls-19 {
+        fill: #cec5c8;
+      }
+
+      .cls-20 {
+        fill: #414342;
+      }
+
+      .cls-21 {
+        fill: #a8cfdd;
+      }
+
+      .cls-22 {
+        fill: #451b27;
+      }
+    </style>
+    <clipPath id="clippath">
+      <rect class="cls-2" y="0" width="64" height="64"/>
+    </clipPath>
+    <radialGradient id="radial-gradient" cx="15.2" cy="20.1" fx="15.2" fy="20.1" r="10.7" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff"/>
+      <stop offset=".1" stop-color="#faccc7"/>
+      <stop offset=".2" stop-color="#f79f96"/>
+      <stop offset=".4" stop-color="#f47a6d"/>
+      <stop offset=".5" stop-color="#f25e4d"/>
+      <stop offset=".6" stop-color="#f04937"/>
+      <stop offset=".7" stop-color="#ef3d29"/>
+      <stop offset=".8" stop-color="#ef3925"/>
+    </radialGradient>
+    <radialGradient id="radial-gradient-2" cx="18" cy="21.1" fx="18" fy="21.1" r="2.3" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff"/>
+      <stop offset=".2" stop-color="#fefefa"/>
+      <stop offset=".3" stop-color="#fefbee"/>
+      <stop offset=".5" stop-color="#fef7da"/>
+      <stop offset=".7" stop-color="#fef2bd"/>
+      <stop offset=".8" stop-color="#feeb98"/>
+      <stop offset="1" stop-color="#fee26b"/>
+      <stop offset="1" stop-color="#fee26a"/>
+    </radialGradient>
+  </defs>
+  <g class="cls-23">
+    <rect class="cls-21" y="0" width="64" height="64" rx="12" ry="12"/>
+    <path class="cls-14" d="M-6.4,2.6c-1.5,2.3-.7,4.8-.7,4.8l23.2,14.7,2.2-3.6L-6.4,2.6Z"/>
+    <path class="cls-5" d="M20.1,19.9h0v2.3h0c0,.1-1.9,1.3-1.9,1.3h-.1l-6.7,8.2-3.1-3.6,7.9-5.8h0c0-.1-10.7,1.2-10.7,1.2v-4.9l10.6,1.4h0c0-.1-6.8-8.9-6.8-8.9l4.4-2.5,4.5,10h.1l2.4-10.1,4.3,1.5"/>
+    <polygon class="cls-16" points="26 15.2 24.5 16.1 37.7 15.2 42.2 14.2 40.8 13.6 32.5 14.2 26 15.2"/>
+    <polygon class="cls-20" points="37.7 15.2 44.8 18.5 48.5 17.6 42.2 14.2 37.7 15.2"/>
+    <polygon class="cls-9" points="44.8 18.5 44.8 27 51.3 33.9 58 32 60.2 24.5 48.5 17.6 44.8 18.5"/>
+    <polygon class="cls-17" points="58 32 56.6 43.5 57.3 48.1 59.9 44.5 61.7 35.8 61.7 32 61.2 27.5 60.2 24.5 58 32"/>
+    <polygon class="cls-10" points="56.6 43.5 49.1 46 41.4 52.7 40.3 55.1 41.8 56.6 53.2 53.3 57.3 48.1 56.6 43.5"/>
+    <polygon class="cls-11" points="37.7 60.3 41.8 56.6 53.2 53.3 48.5 57.7 37.7 60.3"/>
+    <polygon class="cls-1" points="38.1 54.3 40.3 55.1 41.8 56.6 37.7 60.3 34.2 60.7 27.3 58.2 28.8 55.4 38.1 54.3"/>
+    <polygon class="cls-4" points="51.3 33.9 49.1 46 56.6 43.5 58 32 51.3 33.9"/>
+    <polygon class="cls-7" points="41.4 52.7 38.2 53.3 38.1 54.3 40.3 55.1 41.4 52.7"/>
+    <polygon class="cls-12" points="38.2 53.3 31 40.3 33.4 32 44.8 27 51.3 33.9 49.1 46 41.4 52.7 38.2 53.3"/>
+    <polygon class="cls-18" points="28.8 55.4 18.9 48.9 16.3 51.3 27.3 58.2 28.8 55.4"/>
+    <polygon class="cls-8" points="17.2 40.1 18.9 48.9 16.3 51.3 14.4 50 12.1 44.9 12.1 39 13.7 36.6 17.2 40.1"/>
+    <polygon class="cls-13" points="20.1 22.4 20.1 20.1 18.2 18.6 16 19.9 16 22.2 18 23.6 20.1 22.4"/>
+    <polygon class="cls-19" points="15.5 28 13.7 36.6 12.1 39 14.1 30.1 15.5 28"/>
+    <polygon class="cls-6" points="17.2 40.1 24.3 37 31 40.3 38.2 53.3 38.1 54.3 28.8 55.4 18.9 48.9 17.2 40.1"/>
+    <polygon class="cls-3" points="26 27 23 17.6 15.5 28 13.7 36.6 17.2 40.1 24.3 37 26 27"/>
+    <polygon class="cls-22" points="26 27 23 17.6 24.5 16.1 37.7 15.2 44.8 18.5 44.8 27 33.4 32 26 27"/>
+    <polygon class="cls-15" points="26 27 24.3 37 31 40.3 33.4 32 26 27"/>
+  </g>
+</svg>

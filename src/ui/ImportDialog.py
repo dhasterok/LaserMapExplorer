@@ -53,7 +53,7 @@ class Ui_ImportDialog(object):
         self.toolButton.setMaximumSize(QtCore.QSize(28, 28))
         self.toolButton.setStyleSheet("border : none;")
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(":/icons/resources/icons/icon-question-64.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(":/resources/icons/icon-question-64.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.toolButton.setIcon(icon)
         self.toolButton.setIconSize(QtCore.QSize(24, 24))
         self.toolButton.setObjectName("toolButton")
@@ -108,7 +108,7 @@ class Ui_ImportDialog(object):
         self.toolButtonOpenDirectory.setMaximumSize(QtCore.QSize(28, 28))
         self.toolButtonOpenDirectory.setStyleSheet("border : none;")
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(":/icons/resources/icons/icon-add-directory-64.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap(":/resources/icons/icon-add-directory-64.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.toolButtonOpenDirectory.setIcon(icon1)
         self.toolButtonOpenDirectory.setIconSize(QtCore.QSize(24, 24))
         self.toolButtonOpenDirectory.setObjectName("toolButtonOpenDirectory")
@@ -123,7 +123,7 @@ class Ui_ImportDialog(object):
         self.toolButtonAddStandard.setMaximumSize(QtCore.QSize(28, 28))
         self.toolButtonAddStandard.setStyleSheet("border : none;")
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(":/icons/resources/icons/icon-accept-64.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon2.addPixmap(QtGui.QPixmap(":/resources/icons/icon-accept-64.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.toolButtonAddStandard.setIcon(icon2)
         self.toolButtonAddStandard.setIconSize(QtCore.QSize(24, 24))
         self.toolButtonAddStandard.setObjectName("toolButtonAddStandard")
@@ -205,7 +205,7 @@ class Ui_ImportDialog(object):
         self.toolButtonPrevSample.setMaximumSize(QtCore.QSize(28, 28))
         self.toolButtonPrevSample.setStyleSheet("border : none;")
         icon3 = QtGui.QIcon()
-        icon3.addPixmap(QtGui.QPixmap(":/icons/resources/icons/icon-back-arrow-64.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon3.addPixmap(QtGui.QPixmap(":/resources/icons/icon-back-arrow-64.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.toolButtonPrevSample.setIcon(icon3)
         self.toolButtonPrevSample.setIconSize(QtCore.QSize(24, 24))
         self.toolButtonPrevSample.setObjectName("toolButtonPrevSample")
@@ -222,7 +222,7 @@ class Ui_ImportDialog(object):
         self.toolButtonNextSample.setMaximumSize(QtCore.QSize(28, 28))
         self.toolButtonNextSample.setStyleSheet("border : none;")
         icon4 = QtGui.QIcon()
-        icon4.addPixmap(QtGui.QPixmap(":/icons/resources/icons/icon-forward-arrow-64.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon4.addPixmap(QtGui.QPixmap(":/resources/icons/icon-forward-arrow-64.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.toolButtonNextSample.setIcon(icon4)
         self.toolButtonNextSample.setIconSize(QtCore.QSize(24, 24))
         self.toolButtonNextSample.setObjectName("toolButtonNextSample")
@@ -326,7 +326,7 @@ class Ui_ImportDialog(object):
         self.pushButtonCancel.setText(_translate("ImportDialog", "Cancel"))
         self.pushButtonImport.setToolTip(_translate("ImportDialog", "Import selected data"))
         self.pushButtonImport.setText(_translate("ImportDialog", "Import"))
-import resources_rc
+import src.ui.resources_rc
 
 
 if __name__ == "__main__":

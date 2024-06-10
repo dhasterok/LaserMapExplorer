@@ -61,7 +61,7 @@
        </property>
        <property name="icon">
         <iconset resource="../resources.qrc">
-         <normaloff>:/icons/resources/icons/icon-sort-64.png</normaloff>:/icons/resources/icons/icon-sort-64.png</iconset>
+         <normaloff>:/resources/icons/icon-sort-64.svg</normaloff>:/resources/icons/icon-sort-64.svg</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -93,7 +93,7 @@
        </property>
        <property name="icon">
         <iconset resource="../resources.qrc">
-         <normaloff>:/icons/resources/icons/icon-save-file-64.png</normaloff>:/icons/resources/icons/icon-save-file-64.png</iconset>
+         <normaloff>:/resources/icons/icon-save-file-64.svg</normaloff>:/resources/icons/icon-save-file-64.svg</iconset>
        </property>
        <property name="iconSize">
         <size>

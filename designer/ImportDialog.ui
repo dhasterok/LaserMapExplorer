@@ -103,7 +103,7 @@
         </property>
         <property name="icon">
          <iconset resource="../resources.qrc">
-          <normaloff>:/icons/resources/icons/icon-question-64.png</normaloff>:/icons/resources/icons/icon-question-64.png</iconset>
+          <normaloff>:/resources/icons/icon-question-64.svg</normaloff>:/resources/icons/icon-question-64.svg</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -251,7 +251,7 @@
         </property>
         <property name="icon">
          <iconset resource="../resources.qrc">
-          <normaloff>:/icons/resources/icons/icon-add-directory-64.png</normaloff>:/icons/resources/icons/icon-add-directory-64.png</iconset>
+          <normaloff>:/resources/icons/icon-add-directory-64.svg</normaloff>:/resources/icons/icon-add-directory-64.svg</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -309,7 +309,7 @@
         </property>
         <property name="icon">
          <iconset resource="../resources.qrc">
-          <normaloff>:/icons/resources/icons/icon-accept-64.png</normaloff>:/icons/resources/icons/icon-accept-64.png</iconset>
+          <normaloff>:/resources/icons/icon-accept-64.svg</normaloff>:/resources/icons/icon-accept-64.svg</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -521,7 +521,7 @@ reverse</string>
             </property>
             <property name="icon">
              <iconset resource="../resources.qrc">
-              <normaloff>:/icons/resources/icons/icon-back-arrow-64.png</normaloff>:/icons/resources/icons/icon-back-arrow-64.png</iconset>
+              <normaloff>:/resources/icons/icon-back-arrow-64.svg</normaloff>:/resources/icons/icon-back-arrow-64.svg</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -581,7 +581,7 @@ reverse</string>
             </property>
             <property name="icon">
              <iconset resource="../resources.qrc">
-              <normaloff>:/icons/resources/icons/icon-forward-arrow-64.png</normaloff>:/icons/resources/icons/icon-forward-arrow-64.png</iconset>
+              <normaloff>:/resources/icons/icon-forward-arrow-64.svg</normaloff>:/resources/icons/icon-forward-arrow-64.svg</iconset>
             </property>
             <property name="iconSize">
              <size>

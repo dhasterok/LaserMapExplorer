@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 64 64">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: url(#radial-gradient);
+      }
+
+      .cls-1, .cls-2 {
+        stroke-width: 0px;
+      }
+
+      .cls-3 {
+        fill: #fff;
+        stroke: #414042;
+      }
+
+      .cls-3, .cls-4 {
+        stroke-miterlimit: 10;
+        stroke-width: 2.1px;
+      }
+
+      .cls-2 {
+        fill: #414042;
+      }
+
+      .cls-4 {
+        fill: none;
+        stroke: #e6e7e8;
+      }
+    </style>
+    <radialGradient id="radial-gradient" cx="32" cy="33.9" fx="32" fy="33.9" r="5.8" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2a5baa"/>
+      <stop offset=".2" stop-color="#2b5ba8"/>
+      <stop offset=".3" stop-color="#305ea1"/>
+      <stop offset=".3" stop-color="#396295"/>
+      <stop offset=".4" stop-color="#476884"/>
+      <stop offset=".4" stop-color="#58706e"/>
+      <stop offset=".5" stop-color="#6d7a54"/>
+      <stop offset=".5" stop-color="#858534"/>
+      <stop offset=".5" stop-color="#868634"/>
+      <stop offset=".7" stop-color="#848536"/>
+      <stop offset=".8" stop-color="#7e813d"/>
+      <stop offset=".8" stop-color="#747c49"/>
+      <stop offset=".9" stop-color="#66735b"/>
+      <stop offset=".9" stop-color="#546972"/>
+      <stop offset="1" stop-color="#3d5c8d"/>
+      <stop offset="1" stop-color="#2c52a4"/>
+    </radialGradient>
+  </defs>
+  <image width="251" height="218" transform="translate(1.9 5.8) scale(.2)" xlink:href="icon-illuminati-dark-64-1.png"/>
+  <polygon class="cls-4" points="32 6 2 58 62 58 32 6"/>
+  <path class="cls-3" d="M46.9,33.9s-6.6,7.4-14.9,7.4-14.9-7.4-14.9-7.4c0,0,6.6-7.4,14.9-7.4s14.9,7.4,14.9,7.4Z"/>
+  <circle class="cls-1" cx="32" cy="33.9" r="5.8"/>
+  <circle class="cls-2" cx="32" cy="33.9" r="2.1"/>
+</svg>

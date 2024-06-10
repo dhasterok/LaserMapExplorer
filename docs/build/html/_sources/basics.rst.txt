@@ -10,7 +10,7 @@ LaME's user interface is organized into four panels:
 * center, plot viewer tabs for single plots, multiple plots, and a quick view of all fields
 * bottom, tabs for notes, selected filters, and profile plots
 
-Once LaME starts, you will need to load a directory, either from the file menu or toolbar ( |icon-add-directory| ).  You can load a directory with a single sample or a directory with multiple samples, each in their own subdirectory.  See import formats :doc:`import` for file specifications that LaME can handle.
+Once LaME starts, you will need to load a directory, either from the file menu or toolbar ( |icon-add-directory| ).  You can load a directory with a single sample or a directory with multiple samples, each in their own subdirectory.  See :doc:`import` for file specifications that LaME can handle.
 
 .. figure:: _static/screenshots/LaME_Initial_Window.png
     :align: center
@@ -21,10 +21,12 @@ Once LaME starts, you will need to load a directory, either from the file menu o
 Loading Data
 ============
 
+Data can be loaded into *LaME* using a variety of methods.  If you haven't loaded a sample previously, you will need to use the :doc:`import`.  The imported sample should be automatically added to the *Samples and Fields* sample list combobox.  If you have previously loaded the data, you can load a saved session, a single sample, or a directory of samples from the *Menubar* or *File* menu.
+
 Where to Start
 ==============
 
-Once a directory is loaded, changing samples is easy.  From the *Sample and Field* tab, use the sample dropdown to select the desired sample.  All work on previous samples will be stored and any images can be recalled from the *Plot Selector* in the right panel.
+Once a directory is loaded, changing samples is easy.  From the *Samples sand Fields* tab, use the sample dropdown to select the desired sample.  All work on previous samples will be stored and any images can be recalled from the *Plot Selector* in the right panel.
 
 Use Isotope Selector ( |icon-atom| ) to choose the fields to be used for analysis, including ratios between elements/isotopes.  Generally the more isotopes selected for analysis, the better.  To aid selection of ratios, the background of the *Analyte Selector* tool are the correlation coefficients between every pair of fields (Figure 1).  When the sample first loads, all isotopes are selected (highlighted in yellow).  To select or deselect an isotope, click on the diagonal corresponding to the isotope.  To select or deselect a ratios, simply by click on the row and column corresponding to the pair.  The column corresponds to the numerator and the row to the denominator of the ratio.  Once selected, the ratio will be highlighed in yellow in the table and be added to the selection list on the right.  When finished, click *Done*.
 

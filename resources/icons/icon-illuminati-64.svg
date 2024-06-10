@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 64 64">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: url(#linear-gradient);
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5 {
+        stroke-width: 0px;
+      }
+
+      .cls-2 {
+        fill: url(#linear-gradient-3);
+        opacity: .3;
+      }
+
+      .cls-3 {
+        fill: #231f20;
+      }
+
+      .cls-6 {
+        fill: none;
+      }
+
+      .cls-6, .cls-7 {
+        stroke: #414042;
+        stroke-miterlimit: 10;
+        stroke-width: 2.1px;
+      }
+
+      .cls-7 {
+        fill: #fff;
+      }
+
+      .cls-4 {
+        fill: #009444;
+        opacity: .7;
+      }
+
+      .cls-5 {
+        fill: url(#linear-gradient-2);
+        opacity: .5;
+      }
+    </style>
+    <linearGradient id="linear-gradient" x1="52.5" y1="26.5" x2="11.5" y2="67.5" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff"/>
+      <stop offset="1" stop-color="#3b57a7"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient-2" x1="17" y1="32" x2="62" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff"/>
+      <stop offset="1" stop-color="#2bb673"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient-3" x1="32" y1="58" x2="32" y2="6" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff"/>
+      <stop offset="1" stop-color="#ffcd05"/>
+    </linearGradient>
+  </defs>
+  <polygon class="cls-1" points="32 6 2 58 62 58 32 6"/>
+  <polygon class="cls-5" points="32 6 2 58 62 58 32 6"/>
+  <polygon class="cls-2" points="32 6 2 58 62 58 32 6"/>
+  <polygon class="cls-6" points="32 6 2 58 62 58 32 6"/>
+  <path class="cls-7" d="M46.9,33.9s-6.6,7.4-14.9,7.4-14.9-7.4-14.9-7.4c0,0,6.6-7.4,14.9-7.4s14.9,7.4,14.9,7.4Z"/>
+  <circle class="cls-4" cx="32" cy="33.9" r="5.8"/>
+  <circle class="cls-3" cx="32" cy="33.9" r="2.1"/>
+</svg>

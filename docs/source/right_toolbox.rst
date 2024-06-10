@@ -212,11 +212,23 @@ Use the calculator ( |icon-calculator| ) to create custom fields.  These custom 
 .. |icon-launch| image:: _static/icons/icon-launch-64.png
     :height: 2ex
 
-.. |icon-save| image:: _static/icons/icon-save-64.png
+.. |icon-save| image:: _static/icons/icon-save-file-64.png
     :height: 2ex
 
 .. |icon-trash| image:: _static/icons/icon-delete-64.png
     :height: 2ex
 
 .. |icon-calculator| image:: _static/icons/icon-calculator-64.png
+    :height: 2ex
+
+.. |icon-link| image:: _static/icons/icon-link-64.png
+    :height: 2ex
+
+.. |icon-unlink| image:: _static/icons/icon-unlink-64.png
+    :height: 2ex
+
+.. |icon-mask-light| image:: _static/icons/icon-mask-light-64.png
+    :height: 2ex
+
+.. |icon-mask-dark| image:: _static/icons/icon-mask-dark-64.png
     :height: 2ex

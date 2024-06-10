@@ -19,7 +19,7 @@
    <string>Dialog</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../resources.qrc">
+   <iconset>
     <normaloff>:/icons/resources/icons/icon-gear-64.png</normaloff>:/icons/resources/icons/icon-gear-64.png</iconset>
   </property>
   <widget class="QDialogButtonBox" name="buttonBox">
@@ -47,16 +47,10 @@
      <height>581</height>
     </rect>
    </property>
-   <property name="frameShape">
-    <enum>QFrame::StyledPanel</enum>
-   </property>
-   <property name="frameShadow">
-    <enum>QFrame::Raised</enum>
-   </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
-   <widget class="QWidget" name="Files">
+   <widget class="QWidget" name="stackedWidgetPage1" native="true">
     <widget class="QWidget" name="formLayoutWidget">
      <property name="geometry">
       <rect>
@@ -166,7 +160,7 @@
            <string>...</string>
           </property>
           <property name="icon">
-           <iconset resource="../resources.qrc">
+           <iconset>
             <normaloff>:/icons/resources/icons/icon-add-directory-64.png</normaloff>:/icons/resources/icons/icon-add-directory-64.png</iconset>
           </property>
           <property name="iconSize">
@@ -206,7 +200,7 @@
            <string>...</string>
           </property>
           <property name="icon">
-           <iconset resource="../resources.qrc">
+           <iconset>
             <normaloff>:/icons/resources/icons/icon-add-directory-64.png</normaloff>:/icons/resources/icons/icon-add-directory-64.png</iconset>
           </property>
           <property name="iconSize">
@@ -246,7 +240,7 @@
            <string>...</string>
           </property>
           <property name="icon">
-           <iconset resource="../resources.qrc">
+           <iconset>
             <normaloff>:/icons/resources/icons/icon-add-directory-64.png</normaloff>:/icons/resources/icons/icon-add-directory-64.png</iconset>
           </property>
           <property name="iconSize">
@@ -286,7 +280,7 @@
            <string>...</string>
           </property>
           <property name="icon">
-           <iconset resource="../resources.qrc">
+           <iconset>
             <normaloff>:/icons/resources/icons/icon-add-directory-64.png</normaloff>:/icons/resources/icons/icon-add-directory-64.png</iconset>
           </property>
           <property name="iconSize">
@@ -323,7 +317,7 @@
      </layout>
     </widget>
    </widget>
-   <widget class="QWidget" name="Startup">
+   <widget class="QWidget" name="stackedWidgetPage2" native="true">
     <widget class="QWidget" name="formLayoutWidget_2">
      <property name="geometry">
       <rect>
@@ -633,7 +627,7 @@
       </property>
       <property name="icon">
        <iconset resource="../resources.qrc">
-        <normaloff>:/icons/resources/icons/icon-gear-64.png</normaloff>:/icons/resources/icons/icon-gear-64.png</iconset>
+        <normaloff>:/resources/icons/icon-gear-64.svg</normaloff>:/resources/icons/icon-gear-64.svg</iconset>
       </property>
       <property name="default">
        <bool>false</bool>
@@ -650,7 +644,7 @@
       </property>
       <property name="icon">
        <iconset resource="../resources.qrc">
-        <normaloff>:/icons/resources/icons/icon-style-pallette-64.png</normaloff>:/icons/resources/icons/icon-style-pallette-64.png</iconset>
+        <normaloff>:/resources/icons/icon-style-pallette-64.svg</normaloff>:/resources/icons/icon-style-pallette-64.svg</iconset>
       </property>
       <property name="default">
        <bool>false</bool>
@@ -667,7 +661,7 @@
       </property>
       <property name="icon">
        <iconset resource="../resources.qrc">
-        <normaloff>:/icons/resources/icons/icon-scatter-64.png</normaloff>:/icons/resources/icons/icon-scatter-64.png</iconset>
+        <normaloff>:/resources/icons/icon-scatter-64.svg</normaloff>:/resources/icons/icon-scatter-64.svg</iconset>
       </property>
       <property name="autoDefault">
        <bool>true</bool>

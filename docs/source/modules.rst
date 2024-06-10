@@ -16,5 +16,4 @@ LaserMapExplorer
    rotated
    scalebar
    ternary_colormap
-   ternary_heatmap
    ternary_plot

@@ -50,7 +50,7 @@ html_theme_options = {"navbar_start": ["navbar-logo"],
 
 html_static_path = ['_static']
 
-html_logo = "_static/LaME-logo-64.png"
+html_logo = "_static/LaME-wide-64.svg"
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
@@ -70,7 +70,7 @@ intersphinx_mapping = {
 html_theme_options = {
     "logo": {
         "text": "LaME v.0.0 beta",
-        "image_dark": "_static/LaME-logo-64.png",
+        "image_dark": "_static/LaME-wide-green-64.svg",
     },
     "icon_links": [
         {

@@ -10816,8 +10816,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.save_notes_file()
 
         # replace all spaces with \ space
-        filename = self.notes_file.replace(' ','\ ')
+        filename = self.notes_file
         try:
+            pdf_file_path = filename.replace('.rst', '.pdf')
+
             # use rst2pdf on the command line to export the file as a pdf
             #os.system(f"cat {filename} | rst2pdf -o --use-floating-images {os.path.splitext(filename)[0]+'.pdf'}")
 
@@ -10825,16 +10827,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 rst_content = file.read()
             
             pdf = RstToPdf()
-            pdf_content = pdf.createPdf(text=rst_content, output=None)
+            pdf_content = pdf.createPdf(text=rst_content, output=pdf_file_path)
             
-            pdf_file_path = filename.replace('.rst', '.pdf')
-            with open(pdf_file_path, 'wb') as pdf_file:
-                pdf_file.write(pdf_content)
+            #with open(pdf_file_path, 'wb') as pdf_file:
+            #    pdf_file.write(pdf_content)
             
-            self.main_window.statusBar.showMessage("PDF successfully generated...")
-        except:
+            self.statusBar.showMessage("PDF successfully generated...")
+        except Exception as e:
             # if it doesn't work
-            QMessageBox.warning(self.main_window,"Error", "Could not save to pdf.")
+            QMessageBox.warning(self,"Error", "Could not save to pdf.\n"+e)
 
     def to_rst_table(self, df):
         """Converts a Pandas DataFrame to a reST table string.

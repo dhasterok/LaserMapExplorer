@@ -152,5 +152,8 @@
         <file>resources/icons/icon-add-point-dark-64.svg</file>
         <file>resources/icons/icon-bugs-64.svg</file>
         <file>resources/icons/icon-bugs-64.png</file>
+        <file>resources/icons/icon-moon-64.svg</file>
+        <file>resources/icons/icon-sun-64.svg</file>
+        <file>resources/icons/icon-sun-and-moon-64.svg</file>
     </qresource>
 </RCC>

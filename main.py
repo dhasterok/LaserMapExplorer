@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import (
     QSplashScreen, QDialogButtonBox, QApplication, QMainWindow, QSizePolicy, QGraphicsPolygonItem
 )
 from PyQt5.QtGui import (
-    QIntValidator, QDoubleValidator, QColor, QImage, QPainter, QPixmap, QFont, QPen,
+    QIntValidator, QDoubleValidator, QColor, QImage, QPainter, QPixmap, QFont, QPen, QPalette,
     QCursor, QBrush, QStandardItemModel, QStandardItem, QTextCursor, QDropEvent, QFontDatabase, QIcon
 )
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
@@ -375,11 +375,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Add this line to set the size policy
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.buttons_layout = None  # create a reference to your layout
-        self.view_mode = 0
-        self.actionViewMode.triggered.connect(lambda: self.switch_view_mode(self.view_mode+1))
 
         #Initialise nested data which will hold the main sets of data for analysis
         self.data = {}
+
+        # this does not work
+        #darkdetect.listener(lambda: self.switch_view_mode(0))
         
         self.clipped_ratio_data = pd.DataFrame()
         self.analyte_data = {}  #stores orginal analyte data
@@ -559,109 +560,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolBoxTreeView.setCurrentIndex(self.right_tab['tree'])
         self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
 
-        #darkdetect.theme()
-        # Returns 'Dark'
-        if darkdetect.isDark():
-            self.actionSelectAnalytes.setIcon(QIcon('resources/icons/icon-atom-dark-64.svg'))
-            self.actionOpenSession.setIcon(QIcon('resources/icons/icon-open-session-dark-64.svg'))
-            self.actionSaveSession.setIcon(QIcon('resources/icons/icon-save-session-dark-64.svg'))
-            self.actionFullMap.setIcon(QIcon('resources/icons/icon-fit-to-width-dark-64.svg'))
-            self.actionCrop.setIcon(QIcon('resources/icons/icon-crop-dark-64.svg'))
-            self.actionSwapAxes.setIcon(QIcon('resources/icons/icon-swap-dark-64.svg'))
-            # Notes
-            self.toolButtonNotesHeading.setIcon(QIcon('resources/icons/icon-heading-dark-64.svg'))
-            self.toolButtonNotesBold.setIcon(QIcon('resources/icons/icon-bold-dark-64.svg'))
-            self.toolButtonNotesItalic.setIcon(QIcon('resources/icons/icon-italics-dark-64.svg'))
-            self.toolButtonNotesBulletList.setIcon(QIcon('resources/icons/icon-bullet-list-dark-64.svg'))
-            self.toolButtonNotesNumList.setIcon(QIcon('resources/icons/icon-numbered-list-dark-64.svg'))
-            self.toolButtonNotesImage.setIcon(QIcon('resources/icons/icon-image-64.svg'))
-            self.toolButtonNotesSave.setIcon(QIcon('resources/icons/icon-pdf-dark-64.svg'))
-            # Reset Buttons
-            self.toolButtonXAxisReset.setIcon(QIcon('resources/icons/icon-reset-dark-64.svg'))
-            self.toolButtonYAxisReset.setIcon(QIcon('resources/icons/icon-reset-dark-64.svg'))
-            self.toolButtonCAxisReset.setIcon(QIcon('resources/icons/icon-reset-dark-64.svg'))
-            self.toolButtonClusterColorReset.setIcon(QIcon('resources/icons/icon-reset-dark-64.svg'))
-            self.toolButtonHistogramReset.setIcon(QIcon('resources/icons/icon-reset-dark-64.svg'))
-            # Plot Tree
-            self.toolButtonSortAnalyte.setIcon(QIcon('resources/icons/icon-sort-dark-64.svg'))
-            self.toolButtonRemovePlot.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
-            # Samples
-            self.toolBox.setItemIcon(self.left_tab['sample'],QIcon('resources/icons/icon-atom-dark-64.svg'))
-            self.toolButtonScaleEqualize.setIcon(QIcon('resources/icons/icon-histeq-dark-64.svg'))
-            self.toolButtonAutoScale.setIcon(QIcon('resources/icons/icon-autoscale-dark-64.svg'))
-            self.toolBox.setItemIcon(self.left_tab['process'],QIcon('resources/icons/icon-histogram-dark-64.svg'))
-            self.toolBox.setItemIcon(self.left_tab['multidim'],QIcon('resources/icons/icon-dimensional-analysis-dark-64.svg'))
-            self.toolBox.setItemIcon(self.left_tab['cluster'],QIcon('resources/icons/icon-cluster-dark-64.svg'))
-            self.toolBox.setItemIcon(self.left_tab['scatter'],QIcon('resources/icons/icon-ternary-dark-64.svg'))
-            # Spot Data
-            self.toolButtonSpotMove.setIcon(QIcon('resources/icons/icon-move-point-dark-64.svg'))
-            self.toolButtonSpotToggle.setIcon(QIcon('resources/icons/icon-show-hide-dark-64.svg'))
-            self.toolButtonSpotSelectAll.setIcon(QIcon('resources/icons/icon-select-all-dark-64.svg'))
-            self.toolButtonSpotAnalysis.setIcon(QIcon('resources/icons/icon-analysis-dark-64.svg'))
-            self.toolButtonSpotRemove.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
-            # N-Dim
-            self.toolBox.setItemIcon(self.left_tab['ndim'],QIcon('resources/icons/icon-TEC-dark-64.svg'))
-            self.toolButtonNDimDown.setIcon(QIcon('resources/icons/icon-down-arrow-dark-64.svg'))
-            self.toolButtonNDimUp.setIcon(QIcon('resources/icons/icon-up-arrow-dark-64.svg'))
-            self.toolButtonNDimSelectAll.setIcon(QIcon('resources/icons/icon-select-all-dark-64.svg'))
-            self.toolButtonNDimRemove.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
-            # Filter
-            self.toolButtonFilterSelectAll.setIcon(QIcon('resources/icons/icon-select-all-dark-64.svg'))
-            self.toolButtonFilterUp.setIcon(QIcon('resources/icons/icon-up-arrow-dark-64.svg'))
-            self.toolButtonFilterDown.setIcon(QIcon('resources/icons/icon-down-arrow-dark-64.svg'))
-            self.toolButtonFilterRemove.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
-            # Polygons
-            self.toolBox.setItemIcon(self.left_tab['polygons'],QIcon('resources/icons/icon-polygon-new-dark-64.svg'))
-            self.toolButtonPolyCreate.setIcon(QIcon('resources/icons/icon-polygon-new-dark-64.svg'))
-            self.toolButtonPolyAddPoint.setIcon(QIcon('resources/icons/icon-add-point-dark-64.svg'))
-            self.toolButtonPolyRemovePoint.setIcon(QIcon('resources/icons/icon-remove-point-dark-64.svg'))
-            self.toolButtonPolyMovePoint.setIcon(QIcon('resources/icons/icon-move-point-dark-64.svg'))
-            self.toolButtonPolyLink.setIcon(QIcon('resources/icons/icon-link-dark-64.svg'))
-            self.toolButtonPolyDelink.setIcon(QIcon('resources/icons/icon-unlink-dark-64.svg'))
-            self.toolButtonPolyDelete.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
-            # Profile
-            self.toolBox.setItemIcon(self.left_tab['profile'],QIcon('resources/icons/icon-profile-dark-64.svg'))
-            self.toolButtonClearProfile.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
-            self.toolButtonPointDelete.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
-            self.toolButtonPointSelectAll.setIcon(QIcon('resources/icons/icon-select-all-dark-64.svg'))
-            self.toolButtonPointMove.setIcon(QIcon('resources/icons/icon-move-point-dark-64.svg'))
-            self.toolButtonProfileInterpolate.setIcon(QIcon('resources/icons/icon-interpolate-dark-64.svg'))
-            self.toolButtonPlotProfile.setIcon(QIcon('resources/icons/icon-profile-dark-64.svg'))
-            self.toolButtonPointDown.setIcon(QIcon('resources/icons/icon-down-arrow-dark-64.svg'))
-            self.toolButtonPointUp.setIcon(QIcon('resources/icons/icon-up-arrow-dark-64.svg'))
-            # Browser
-            self.toolButtonBrowserHome.setIcon(QIcon('resources/icons/icon-home-dark-64.svg'))
-            self.toolButtonForward.setIcon(QIcon('resources/icons/icon-forward-arrow-dark-64.svg'))
-            self.toolButtonBack.setIcon(QIcon('resources/icons/icon-back-arrow-dark-64.svg'))
-            # Group Box Plot Tools
-            self.toolButtonHome.setIcon(QIcon('resources/icons/icon-home-dark-64.svg'))
-            self.toolButtonRemoveAllMVPlots.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
-            self.toolButtonPopFigure.setIcon(QIcon('resources/icons/icon-popout-dark-64.svg'))
-            self.toolButtonAnnotate.setIcon(QIcon('resources/icons/icon-annotate-dark-64.svg'))
-            self.toolButtonPan.setIcon(QIcon('resources/icons/icon-move-dark-64.svg'))
-            self.toolButtonZoom.setIcon(QIcon('resources/icons/icon-zoom-dark-64.svg'))
-            self.toolButtonDistance.setIcon(QIcon('resources/icons/icon-distance-dark-64.svg'))
-            # Calculator
-            self.toolButtonCalculate.setIcon(QIcon('resources/icons/icon-calculator-dark-64.svg'))
-            self.actionCalculator.setIcon(QIcon('resources/icons/icon-calculator-dark-64.svg'))
-            self.toolBoxTreeView.setItemIcon(self.right_tab['calculator'],QIcon('resources/icons/icon-calculator-dark-64.svg'))
-            self.toolButtonCalcDelete.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
-            # Style Toolbox
-            self.toolBoxStyle.setItemIcon(0,QIcon('resources/icons/icon-axes-dark-64.svg'))
-            self.toolBoxStyle.setItemIcon(1,QIcon('resources/icons/icon-text-and-scales-dark-64.svg'))
-            self.toolBoxStyle.setItemIcon(2,QIcon('resources/icons/icon-marker-and-lines-dark-64.svg'))
-            self.toolBoxStyle.setItemIcon(3,QIcon('resources/icons/icon-rgb-dark-64.svg'))
-            # Cluster tab
-            self.toolBoxStyle.setItemIcon(4,QIcon('resources/icons/icon-cluster-dark-64.svg'))
-            self.toolButtonClusterLink.setIcon(QIcon('resources/icons/icon-link-dark-64.svg'))
-            self.toolButtonClusterDelink.setIcon(QIcon('resources/icons/icon-unlink-dark-64.svg'))
-            
-            print('Dark Mode')
-        else:
-            print('Light Mode')
+        # set theme
+        self.view_mode = 0
+        self.switch_view_mode(self.view_mode)
+        self.actionViewMode.triggered.connect(lambda: self.switch_view_mode(self.view_mode+1))
 
-        #darkdetect.isLight()
-        # Returns False
 
 
         # create dictionaries for default plot styles
@@ -11213,20 +11116,219 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def switch_view_mode(self, view_mode):
         if view_mode > 2:
             view_mode = 0
+        self.view_mode = view_mode
 
-        match view_mode:
+        match self.view_mode:
             case 0: # auto
-                self.actionViewMode.setIcon(QIcon('resources/icons/icon-sun-and-moon-64.svg'), 'Auto')
+                self.actionViewMode.setIcon(QIcon('resources/icons/icon-sun-and-moon-64.svg'))
+                self.actionViewMode.setIconText('Auto')
                 if darkdetect.isDark():
-                    self.setStyleSheet(dark_stylesheet)
+                    self.set_dark_theme()
                 else:
-                    self.setStyleSheet(light_stylesheet)
+                    self.set_light_theme()
+                self.actionViewMode.setIconText('Auto')
             case 1: # dark
-                self.actionViewMode.setIcon(QIcon('resources/icons/icon-moon-64.svg'), 'Dark')
-                self.setStyleSheet(dark_stylesheet)
+                self.set_dark_theme()
             case 2: # light
-                self.actionViewMode.setIcon(QIcon('resources/icons/icon-sun-64.svg'), 'Light')
-                self.setStyleSheet(light_stylesheet)
+                self.set_light_theme()
+
+    def set_dark_theme(self):
+        self.actionViewMode.setIcon(QIcon('resources/icons/icon-moon-64.svg'))
+        self.actionViewMode.setIconText('Dark')
+        self.setStyleSheet(dark_stylesheet)
+
+        self.actionSelectAnalytes.setIcon(QIcon('resources/icons/icon-atom-dark-64.svg'))
+        self.actionOpenSession.setIcon(QIcon('resources/icons/icon-open-session-dark-64.svg'))
+        self.actionSaveSession.setIcon(QIcon('resources/icons/icon-save-session-dark-64.svg'))
+        self.actionFullMap.setIcon(QIcon('resources/icons/icon-fit-to-width-dark-64.svg'))
+        self.actionCrop.setIcon(QIcon('resources/icons/icon-crop-dark-64.svg'))
+        self.actionSwapAxes.setIcon(QIcon('resources/icons/icon-swap-dark-64.svg'))
+        # Notes
+        self.toolButtonNotesHeading.setIcon(QIcon('resources/icons/icon-heading-dark-64.svg'))
+        self.toolButtonNotesBold.setIcon(QIcon('resources/icons/icon-bold-dark-64.svg'))
+        self.toolButtonNotesItalic.setIcon(QIcon('resources/icons/icon-italics-dark-64.svg'))
+        self.toolButtonNotesBulletList.setIcon(QIcon('resources/icons/icon-bullet-list-dark-64.svg'))
+        self.toolButtonNotesNumList.setIcon(QIcon('resources/icons/icon-numbered-list-dark-64.svg'))
+        self.toolButtonNotesImage.setIcon(QIcon('resources/icons/icon-image-64.svg'))
+        self.toolButtonNotesSave.setIcon(QIcon('resources/icons/icon-pdf-dark-64.svg'))
+        # Reset Buttons
+        self.toolButtonXAxisReset.setIcon(QIcon('resources/icons/icon-reset-dark-64.svg'))
+        self.toolButtonYAxisReset.setIcon(QIcon('resources/icons/icon-reset-dark-64.svg'))
+        self.toolButtonCAxisReset.setIcon(QIcon('resources/icons/icon-reset-dark-64.svg'))
+        self.toolButtonClusterColorReset.setIcon(QIcon('resources/icons/icon-reset-dark-64.svg'))
+        self.toolButtonHistogramReset.setIcon(QIcon('resources/icons/icon-reset-dark-64.svg'))
+        # Plot Tree
+        self.toolButtonSortAnalyte.setIcon(QIcon('resources/icons/icon-sort-dark-64.svg'))
+        self.toolButtonRemovePlot.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
+        # Samples
+        self.toolBox.setItemIcon(self.left_tab['sample'],QIcon('resources/icons/icon-atom-dark-64.svg'))
+        self.toolButtonScaleEqualize.setIcon(QIcon('resources/icons/icon-histeq-dark-64.svg'))
+        self.toolButtonAutoScale.setIcon(QIcon('resources/icons/icon-autoscale-dark-64.svg'))
+        self.toolBox.setItemIcon(self.left_tab['process'],QIcon('resources/icons/icon-histogram-dark-64.svg'))
+        self.toolBox.setItemIcon(self.left_tab['multidim'],QIcon('resources/icons/icon-dimensional-analysis-dark-64.svg'))
+        self.toolBox.setItemIcon(self.left_tab['cluster'],QIcon('resources/icons/icon-cluster-dark-64.svg'))
+        self.toolBox.setItemIcon(self.left_tab['scatter'],QIcon('resources/icons/icon-ternary-dark-64.svg'))
+        # Spot Data
+        self.toolButtonSpotMove.setIcon(QIcon('resources/icons/icon-move-point-dark-64.svg'))
+        self.toolButtonSpotToggle.setIcon(QIcon('resources/icons/icon-show-hide-dark-64.svg'))
+        self.toolButtonSpotSelectAll.setIcon(QIcon('resources/icons/icon-select-all-dark-64.svg'))
+        self.toolButtonSpotAnalysis.setIcon(QIcon('resources/icons/icon-analysis-dark-64.svg'))
+        self.toolButtonSpotRemove.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
+        # N-Dim
+        self.toolBox.setItemIcon(self.left_tab['ndim'],QIcon('resources/icons/icon-TEC-dark-64.svg'))
+        self.toolButtonNDimDown.setIcon(QIcon('resources/icons/icon-down-arrow-dark-64.svg'))
+        self.toolButtonNDimUp.setIcon(QIcon('resources/icons/icon-up-arrow-dark-64.svg'))
+        self.toolButtonNDimSelectAll.setIcon(QIcon('resources/icons/icon-select-all-dark-64.svg'))
+        self.toolButtonNDimRemove.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
+        # Filter
+        self.toolButtonFilterSelectAll.setIcon(QIcon('resources/icons/icon-select-all-dark-64.svg'))
+        self.toolButtonFilterUp.setIcon(QIcon('resources/icons/icon-up-arrow-dark-64.svg'))
+        self.toolButtonFilterDown.setIcon(QIcon('resources/icons/icon-down-arrow-dark-64.svg'))
+        self.toolButtonFilterRemove.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
+        # Polygons
+        self.toolBox.setItemIcon(self.left_tab['polygons'],QIcon('resources/icons/icon-polygon-new-dark-64.svg'))
+        self.toolButtonPolyCreate.setIcon(QIcon('resources/icons/icon-polygon-new-dark-64.svg'))
+        self.toolButtonPolyAddPoint.setIcon(QIcon('resources/icons/icon-add-point-dark-64.svg'))
+        self.toolButtonPolyRemovePoint.setIcon(QIcon('resources/icons/icon-remove-point-dark-64.svg'))
+        self.toolButtonPolyMovePoint.setIcon(QIcon('resources/icons/icon-move-point-dark-64.svg'))
+        self.toolButtonPolyLink.setIcon(QIcon('resources/icons/icon-link-dark-64.svg'))
+        self.toolButtonPolyDelink.setIcon(QIcon('resources/icons/icon-unlink-dark-64.svg'))
+        self.toolButtonPolyDelete.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
+        # Profile
+        self.toolBox.setItemIcon(self.left_tab['profile'],QIcon('resources/icons/icon-profile-dark-64.svg'))
+        self.toolButtonClearProfile.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
+        self.toolButtonPointDelete.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
+        self.toolButtonPointSelectAll.setIcon(QIcon('resources/icons/icon-select-all-dark-64.svg'))
+        self.toolButtonPointMove.setIcon(QIcon('resources/icons/icon-move-point-dark-64.svg'))
+        self.toolButtonProfileInterpolate.setIcon(QIcon('resources/icons/icon-interpolate-dark-64.svg'))
+        self.toolButtonPlotProfile.setIcon(QIcon('resources/icons/icon-profile-dark-64.svg'))
+        self.toolButtonPointDown.setIcon(QIcon('resources/icons/icon-down-arrow-dark-64.svg'))
+        self.toolButtonPointUp.setIcon(QIcon('resources/icons/icon-up-arrow-dark-64.svg'))
+        # Browser
+        self.toolButtonBrowserHome.setIcon(QIcon('resources/icons/icon-home-dark-64.svg'))
+        self.toolButtonForward.setIcon(QIcon('resources/icons/icon-forward-arrow-dark-64.svg'))
+        self.toolButtonBack.setIcon(QIcon('resources/icons/icon-back-arrow-dark-64.svg'))
+        # Group Box Plot Tools
+        self.toolButtonHome.setIcon(QIcon('resources/icons/icon-home-dark-64.svg'))
+        self.toolButtonRemoveAllMVPlots.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
+        self.toolButtonPopFigure.setIcon(QIcon('resources/icons/icon-popout-dark-64.svg'))
+        self.toolButtonAnnotate.setIcon(QIcon('resources/icons/icon-annotate-dark-64.svg'))
+        self.toolButtonPan.setIcon(QIcon('resources/icons/icon-move-dark-64.svg'))
+        self.toolButtonZoom.setIcon(QIcon('resources/icons/icon-zoom-dark-64.svg'))
+        self.toolButtonDistance.setIcon(QIcon('resources/icons/icon-distance-dark-64.svg'))
+        # Calculator
+        self.toolButtonCalculate.setIcon(QIcon('resources/icons/icon-calculator-dark-64.svg'))
+        self.actionCalculator.setIcon(QIcon('resources/icons/icon-calculator-dark-64.svg'))
+        self.toolBoxTreeView.setItemIcon(self.right_tab['calculator'],QIcon('resources/icons/icon-calculator-dark-64.svg'))
+        self.toolButtonCalcDelete.setIcon(QIcon('resources/icons/icon-delete-dark-64.svg'))
+        # Style Toolbox
+        self.toolBoxStyle.setItemIcon(0,QIcon('resources/icons/icon-axes-dark-64.svg'))
+        self.toolBoxStyle.setItemIcon(1,QIcon('resources/icons/icon-text-and-scales-dark-64.svg'))
+        self.toolBoxStyle.setItemIcon(2,QIcon('resources/icons/icon-marker-and-lines-dark-64.svg'))
+        self.toolBoxStyle.setItemIcon(3,QIcon('resources/icons/icon-rgb-dark-64.svg'))
+        # Cluster tab
+        self.toolBoxStyle.setItemIcon(4,QIcon('resources/icons/icon-cluster-dark-64.svg'))
+        self.toolButtonClusterLink.setIcon(QIcon('resources/icons/icon-link-dark-64.svg'))
+        self.toolButtonClusterDelink.setIcon(QIcon('resources/icons/icon-unlink-dark-64.svg'))
+
+    def set_light_theme(self):
+        self.actionViewMode.setIcon(QIcon('resources/icons/icon-sun-64.svg'))
+        self.actionViewMode.setIconText('Light')
+        self.setStyleSheet(light_stylesheet)
+
+        self.actionSelectAnalytes.setIcon(QIcon('resources/icons/icon-atom-64.svg'))
+        self.actionOpenSession.setIcon(QIcon('resources/icons/icon-open-session-64.svg'))
+        self.actionSaveSession.setIcon(QIcon('resources/icons/icon-save-session-64.svg'))
+        self.actionFullMap.setIcon(QIcon('resources/icons/icon-fit-to-width-64.svg'))
+        self.actionCrop.setIcon(QIcon('resources/icons/icon-crop-64.svg'))
+        self.actionSwapAxes.setIcon(QIcon('resources/icons/icon-swap-64.svg'))
+        # Notes
+        self.toolButtonNotesHeading.setIcon(QIcon('resources/icons/icon-heading-64.svg'))
+        self.toolButtonNotesBold.setIcon(QIcon('resources/icons/icon-bold-64.svg'))
+        self.toolButtonNotesItalic.setIcon(QIcon('resources/icons/icon-italics-64.svg'))
+        self.toolButtonNotesBulletList.setIcon(QIcon('resources/icons/icon-bullet-list-64.svg'))
+        self.toolButtonNotesNumList.setIcon(QIcon('resources/icons/icon-numbered-list-64.svg'))
+        self.toolButtonNotesImage.setIcon(QIcon('resources/icons/icon-image-dark-64.svg'))
+        self.toolButtonNotesSave.setIcon(QIcon('resources/icons/icon-pdf-64.svg'))
+        # Reset Buttons
+        self.toolButtonXAxisReset.setIcon(QIcon('resources/icons/icon-reset-64.svg'))
+        self.toolButtonYAxisReset.setIcon(QIcon('resources/icons/icon-reset-64.svg'))
+        self.toolButtonCAxisReset.setIcon(QIcon('resources/icons/icon-reset-64.svg'))
+        self.toolButtonClusterColorReset.setIcon(QIcon('resources/icons/icon-reset-64.svg'))
+        self.toolButtonHistogramReset.setIcon(QIcon('resources/icons/icon-reset-64.svg'))
+        # Plot Tree
+        self.toolButtonSortAnalyte.setIcon(QIcon('resources/icons/icon-sort-64.svg'))
+        self.toolButtonRemovePlot.setIcon(QIcon('resources/icons/icon-delete-64.svg'))
+        # Samples
+        self.toolBox.setItemIcon(self.left_tab['sample'],QIcon('resources/icons/icon-atom-64.svg'))
+        self.toolButtonScaleEqualize.setIcon(QIcon('resources/icons/icon-histeq-64.svg'))
+        self.toolButtonAutoScale.setIcon(QIcon('resources/icons/icon-autoscale-64.svg'))
+        self.toolBox.setItemIcon(self.left_tab['process'],QIcon('resources/icons/icon-histogram-64.svg'))
+        self.toolBox.setItemIcon(self.left_tab['multidim'],QIcon('resources/icons/icon-dimensional-analysis-64.svg'))
+        self.toolBox.setItemIcon(self.left_tab['cluster'],QIcon('resources/icons/icon-cluster-64.svg'))
+        self.toolBox.setItemIcon(self.left_tab['scatter'],QIcon('resources/icons/icon-ternary-64.svg'))
+        # Spot Data
+        self.toolButtonSpotMove.setIcon(QIcon('resources/icons/icon-move-point-64.svg'))
+        self.toolButtonSpotToggle.setIcon(QIcon('resources/icons/icon-show-hide-64.svg'))
+        self.toolButtonSpotSelectAll.setIcon(QIcon('resources/icons/icon-select-all-64.svg'))
+        self.toolButtonSpotAnalysis.setIcon(QIcon('resources/icons/icon-analysis-64.svg'))
+        self.toolButtonSpotRemove.setIcon(QIcon('resources/icons/icon-delete-64.svg'))
+        # N-Dim
+        self.toolBox.setItemIcon(self.left_tab['ndim'],QIcon('resources/icons/icon-TEC-64.svg'))
+        self.toolButtonNDimDown.setIcon(QIcon('resources/icons/icon-down-arrow-64.svg'))
+        self.toolButtonNDimUp.setIcon(QIcon('resources/icons/icon-up-arrow-64.svg'))
+        self.toolButtonNDimSelectAll.setIcon(QIcon('resources/icons/icon-select-all-64.svg'))
+        self.toolButtonNDimRemove.setIcon(QIcon('resources/icons/icon-delete-64.svg'))
+        # Filter
+        self.toolButtonFilterSelectAll.setIcon(QIcon('resources/icons/icon-select-all-64.svg'))
+        self.toolButtonFilterUp.setIcon(QIcon('resources/icons/icon-up-arrow-64.svg'))
+        self.toolButtonFilterDown.setIcon(QIcon('resources/icons/icon-down-arrow-64.svg'))
+        self.toolButtonFilterRemove.setIcon(QIcon('resources/icons/icon-delete-64.svg'))
+        # Polygons
+        self.toolBox.setItemIcon(self.left_tab['polygons'],QIcon('resources/icons/icon-polygon-new-64.svg'))
+        self.toolButtonPolyCreate.setIcon(QIcon('resources/icons/icon-polygon-new-64.svg'))
+        self.toolButtonPolyAddPoint.setIcon(QIcon('resources/icons/icon-add-point-64.svg'))
+        self.toolButtonPolyRemovePoint.setIcon(QIcon('resources/icons/icon-remove-point-64.svg'))
+        self.toolButtonPolyMovePoint.setIcon(QIcon('resources/icons/icon-move-point-64.svg'))
+        self.toolButtonPolyLink.setIcon(QIcon('resources/icons/icon-link-64.svg'))
+        self.toolButtonPolyDelink.setIcon(QIcon('resources/icons/icon-unlink-64.svg'))
+        self.toolButtonPolyDelete.setIcon(QIcon('resources/icons/icon-delete-64.svg'))
+        # Profile
+        self.toolBox.setItemIcon(self.left_tab['profile'],QIcon('resources/icons/icon-profile-64.svg'))
+        self.toolButtonClearProfile.setIcon(QIcon('resources/icons/icon-delete-64.svg'))
+        self.toolButtonPointDelete.setIcon(QIcon('resources/icons/icon-delete-64.svg'))
+        self.toolButtonPointSelectAll.setIcon(QIcon('resources/icons/icon-select-all-64.svg'))
+        self.toolButtonPointMove.setIcon(QIcon('resources/icons/icon-move-point-64.svg'))
+        self.toolButtonProfileInterpolate.setIcon(QIcon('resources/icons/icon-interpolate-64.svg'))
+        self.toolButtonPlotProfile.setIcon(QIcon('resources/icons/icon-profile-64.svg'))
+        self.toolButtonPointDown.setIcon(QIcon('resources/icons/icon-down-arrow-64.svg'))
+        self.toolButtonPointUp.setIcon(QIcon('resources/icons/icon-up-arrow-64.svg'))
+        # Browser
+        self.toolButtonBrowserHome.setIcon(QIcon('resources/icons/icon-home-64.svg'))
+        self.toolButtonForward.setIcon(QIcon('resources/icons/icon-forward-arrow-64.svg'))
+        self.toolButtonBack.setIcon(QIcon('resources/icons/icon-back-arrow-64.svg'))
+        # Group Box Plot Tools
+        self.toolButtonHome.setIcon(QIcon('resources/icons/icon-home-64.svg'))
+        self.toolButtonRemoveAllMVPlots.setIcon(QIcon('resources/icons/icon-delete-64.svg'))
+        self.toolButtonPopFigure.setIcon(QIcon('resources/icons/icon-popout-64.svg'))
+        self.toolButtonAnnotate.setIcon(QIcon('resources/icons/icon-annotate-64.svg'))
+        self.toolButtonPan.setIcon(QIcon('resources/icons/icon-move-64.svg'))
+        self.toolButtonZoom.setIcon(QIcon('resources/icons/icon-zoom-64.svg'))
+        self.toolButtonDistance.setIcon(QIcon('resources/icons/icon-distance-64.svg'))
+        # Calculator
+        self.toolButtonCalculate.setIcon(QIcon('resources/icons/icon-calculator-64.svg'))
+        self.actionCalculator.setIcon(QIcon('resources/icons/icon-calculator-64.svg'))
+        self.toolBoxTreeView.setItemIcon(self.right_tab['calculator'],QIcon('resources/icons/icon-calculator-64.svg'))
+        self.toolButtonCalcDelete.setIcon(QIcon('resources/icons/icon-delete-64.svg'))
+        # Style Toolbox
+        self.toolBoxStyle.setItemIcon(0,QIcon('resources/icons/icon-axes-64.svg'))
+        self.toolBoxStyle.setItemIcon(1,QIcon('resources/icons/icon-text-and-scales-64.svg'))
+        self.toolBoxStyle.setItemIcon(2,QIcon('resources/icons/icon-marker-and-lines-64.svg'))
+        self.toolBoxStyle.setItemIcon(3,QIcon('resources/icons/icon-rgb-64.svg'))
+        # Cluster tab
+        self.toolBoxStyle.setItemIcon(4,QIcon('resources/icons/icon-cluster-64.svg'))
+        self.toolButtonClusterLink.setIcon(QIcon('resources/icons/icon-link-64.svg'))
+        self.toolButtonClusterDelink.setIcon(QIcon('resources/icons/icon-unlink-64.svg'))
 
 # -------------------------------
 # Classes

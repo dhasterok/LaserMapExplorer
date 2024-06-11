@@ -4842,6 +4842,12 @@ class Ui_MainWindow(object):
         self.actionLoadAnalysis = QtWidgets.QAction(MainWindow)
         self.actionLoadAnalysis.setMenuRole(QtWidgets.QAction.ApplicationSpecificRole)
         self.actionLoadAnalysis.setObjectName("actionLoadAnalysis")
+        self.actionViewMode = QtWidgets.QAction(MainWindow)
+        icon84 = QtGui.QIcon()
+        icon84.addPixmap(QtGui.QPixmap(":/resources/icons/icon-sun-and-moon-64.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionViewMode.setIcon(icon84)
+        self.actionViewMode.setMenuRole(QtWidgets.QAction.ApplicationSpecificRole)
+        self.actionViewMode.setObjectName("actionViewMode")
         self.menuFile.addAction(self.actionOpenSample)
         self.menuFile.addAction(self.actionOpenDirectory)
         self.menuFile.addAction(self.actionOpenSession)
@@ -4902,6 +4908,7 @@ class Ui_MainWindow(object):
         self.toolBar.addAction(self.actionReportBug)
         self.toolBar.addAction(self.actionReset)
         self.toolBar.addAction(self.actionHelp)
+        self.toolBar.addAction(self.actionViewMode)
 
         self.retranslateUi(MainWindow)
         self.canvasWindow.setCurrentIndex(0)
@@ -5694,4 +5701,7 @@ class Ui_MainWindow(object):
         self.actionHelp.setText(_translate("MainWindow", "Help"))
         self.actionHelp.setToolTip(_translate("MainWindow", "Click once to active and a second time on a tool to open a help page."))
         self.actionLoadAnalysis.setText(_translate("MainWindow", "Load Analysis"))
+        self.actionViewMode.setText(_translate("MainWindow", "ViewMode"))
+        self.actionViewMode.setIconText(_translate("MainWindow", "Auto"))
+        self.actionViewMode.setToolTip(_translate("MainWindow", "Switch between light, dark, and auto modes"))
 import src.ui.resources_rc

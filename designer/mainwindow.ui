@@ -12457,6 +12457,7 @@
    <addaction name="actionReportBug"/>
    <addaction name="actionReset"/>
    <addaction name="actionHelp"/>
+   <addaction name="actionViewMode"/>
   </widget>
   <action name="actionOpenDirectory">
    <property name="icon">
@@ -13100,6 +13101,24 @@ Session</string>
   <action name="actionLoadAnalysis">
    <property name="text">
     <string>Load Analysis</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::ApplicationSpecificRole</enum>
+   </property>
+  </action>
+  <action name="actionViewMode">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/resources/icons/icon-sun-and-moon-64.svg</normaloff>:/resources/icons/icon-sun-and-moon-64.svg</iconset>
+   </property>
+   <property name="text">
+    <string>ViewMode</string>
+   </property>
+   <property name="iconText">
+    <string>Auto</string>
+   </property>
+   <property name="toolTip">
+    <string>Switch between light, dark, and auto modes</string>
    </property>
    <property name="menuRole">
     <enum>QAction::ApplicationSpecificRole</enum>

@@ -73,6 +73,41 @@ setConfigOption('imageAxisOrder', 'row-major') # best performance
 ## !pyuic5 -x designer/ExcelConcatenator.ui -o src/ui/ExcelConcatenator.py
 ## !pyuic5 -x designer/ImportDialog.ui -o src/ui/ImportDialog.py
 # pylint: disable=fixme, line-too-long, no-name-in-module, trailing-whitespace
+
+# Define the stylesheet
+light_stylesheet = """
+    QToolButton {
+        border: none;
+        border-radius: 6px;
+    }
+    QToolButton::menu-indicator {
+        image: none;
+    }
+    QToolButton:hover {
+        background-color: #c8c8c8; /* Change background color on hover */
+    }
+    QToolButton:checked {
+        background-color: #c8c8c8; /* Change background color on hover */
+    }
+"""
+
+dark_stylesheet = """
+    QToolButton {
+        border: none;
+        border-radius: 6px;
+    }
+    QToolButton::menu-indicator {
+        image: none;
+    }
+    QToolButton:hover {
+        background-color: #545454; /* Change background color on hover */
+    }
+    QToolButton:checked {
+        background-color: #545454; /* Change background color on hover */
+    }
+"""
+
+
 class MainWindow(QMainWindow, Ui_MainWindow):
     """MainWindow
 
@@ -324,6 +359,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 | 'Direction' : (str) -- colorbar direction, options include ``none``, ``vertical``, and ``horizontal``, set by ``comboBoxCbarDirection``
                 | 'CLabel' : (str) -- colorbar label, set in ``lineEditCbarLabel``
                 | 'Resolution' : (int) -- used to set discritization in 2D and ternary heatmaps, set by ``spinBoxHeatmapResolution``
+        view_mode : int
+            Keeps track of viewing mode.  ``0`` for auto, ``1`` for dark and ``2`` for ``light``
+
         widgetSingleView : QVBoxLayout
             Widget holding layout for Single View tab of ``canvasWindow``
         widgetMultiView : QGridLayout
@@ -337,6 +375,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Add this line to set the size policy
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.buttons_layout = None  # create a reference to your layout
+        self.view_mode = 0
+        self.actionViewMode.triggered.connect(lambda: self.switch_view_mode(self.view_mode+1))
 
         #Initialise nested data which will hold the main sets of data for analysis
         self.data = {}
@@ -1243,11 +1283,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.autosaveTimer.setInterval(300000)
         self.autosaveTimer.timeout.connect(self.save_notes_file)
 
-        # Browser
+        # Plot Info
         #-------------------------
         self.textEditPlotInfo.setReadOnly(True)
-
-
         
         # Browser
         #-------------------------
@@ -1256,7 +1294,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.lineEditBrowserLocation.editingFinished.connect(self.browser_location_callback)
         self.toolButtonBack.clicked.connect(self.browser.back)
         self.toolButtonForward.clicked.connect(self.browser.forward)
-
 
         # Plot toolbars
         #-------------------------
@@ -11172,6 +11209,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 return True
         return False
 
+
+    def switch_view_mode(self, view_mode):
+        if view_mode > 2:
+            view_mode = 0
+
+        match view_mode:
+            case 0: # auto
+                self.actionViewMode.setIcon(QIcon('resources/icons/icon-sun-and-moon-64.svg'), 'Auto')
+                if darkdetect.isDark():
+                    self.setStyleSheet(dark_stylesheet)
+                else:
+                    self.setStyleSheet(light_stylesheet)
+            case 1: # dark
+                self.actionViewMode.setIcon(QIcon('resources/icons/icon-moon-64.svg'), 'Dark')
+                self.setStyleSheet(dark_stylesheet)
+            case 2: # light
+                self.actionViewMode.setIcon(QIcon('resources/icons/icon-sun-64.svg'), 'Light')
+                self.setStyleSheet(light_stylesheet)
+
 # -------------------------------
 # Classes
 # -------------------------------
@@ -14502,39 +14558,6 @@ def main():
     # Enable high-DPI scaling
     app.setAttribute(Qt.AA_EnableHighDpiScaling)
     app.setAttribute(Qt.AA_UseHighDpiPixmaps)
-
-    # Define the stylesheet
-    light_stylesheet = """
-            QToolButton {
-                border: none;
-                border-radius: 6px;
-            }
-            QToolButton::menu-indicator {
-                image: none;
-            }
-            QToolButton:hover {
-                background-color: #c8c8c8; /* Change background color on hover */
-            }
-            QToolButton:checked {
-                background-color: #c8c8c8; /* Change background color on hover */
-            }
-         """
-
-    dark_stylesheet = """
-            QToolButton {
-                border: none;
-                border-radius: 6px;
-            }
-            QToolButton::menu-indicator {
-                image: none;
-            }
-            QToolButton:hover {
-                background-color: #545454; /* Change background color on hover */
-            }
-            QToolButton:checked {
-                background-color: #545454; /* Change background color on hover */
-            }
-         """
 
     if darkdetect.isDark():
         app.setStyleSheet(dark_stylesheet)

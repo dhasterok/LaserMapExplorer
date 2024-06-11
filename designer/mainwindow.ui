@@ -160,6 +160,12 @@
        </property>
        <item row="0" column="14">
         <widget class="QLabel" name="labelMaxRows">
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+           <stylestrategy>PreferDefault</stylestrategy>
+          </font>
+         </property>
          <property name="text">
           <string>Max rows</string>
          </property>
@@ -178,6 +184,12 @@
            <width>28</width>
            <height>28</height>
           </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+           <stylestrategy>PreferDefault</stylestrategy>
+          </font>
          </property>
          <property name="layoutDirection">
           <enum>Qt::LeftToRight</enum>
@@ -199,6 +211,12 @@
        </item>
        <item row="0" column="15">
         <widget class="QSpinBox" name="spinBoxMaxRows">
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+           <stylestrategy>PreferDefault</stylestrategy>
+          </font>
+         </property>
          <property name="minimum">
           <number>1</number>
          </property>
@@ -223,6 +241,12 @@
            <width>28</width>
            <height>28</height>
           </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+           <stylestrategy>PreferDefault</stylestrategy>
+          </font>
          </property>
          <property name="toolTip">
           <string>Add annotation</string>
@@ -256,6 +280,12 @@
            <height>28</height>
           </size>
          </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+           <stylestrategy>PreferDefault</stylestrategy>
+          </font>
+         </property>
          <property name="toolTip">
           <string>Pop the figure out into a separate window</string>
          </property>
@@ -288,6 +318,12 @@
            <height>28</height>
           </size>
          </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+           <stylestrategy>PreferDefault</stylestrategy>
+          </font>
+         </property>
          <property name="toolTip">
           <string>Save plot</string>
          </property>
@@ -319,6 +355,12 @@
            <width>28</width>
            <height>28</height>
           </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+           <stylestrategy>PreferDefault</stylestrategy>
+          </font>
          </property>
          <property name="toolTip">
           <string>Zoom In/Out</string>
@@ -365,6 +407,12 @@
            <height>28</height>
           </size>
          </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+           <stylestrategy>PreferDefault</stylestrategy>
+          </font>
+         </property>
          <property name="toolTip">
           <string>Measure distance</string>
          </property>
@@ -396,6 +444,12 @@
            <width>28</width>
            <height>28</height>
           </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+           <stylestrategy>PreferDefault</stylestrategy>
+          </font>
          </property>
          <property name="toolTip">
           <string>Shift plot</string>
@@ -429,6 +483,12 @@
            <height>28</height>
           </size>
          </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+           <stylestrategy>PreferDefault</stylestrategy>
+          </font>
+         </property>
          <property name="layoutDirection">
           <enum>Qt::LeftToRight</enum>
          </property>
@@ -461,6 +521,12 @@
            <height>28</height>
           </size>
          </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+           <stylestrategy>PreferDefault</stylestrategy>
+          </font>
+         </property>
          <property name="toolTip">
           <string>Return to home view</string>
          </property>
@@ -490,10 +556,22 @@
            <height>16777215</height>
           </size>
          </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+           <stylestrategy>PreferDefault</stylestrategy>
+          </font>
+         </property>
         </widget>
        </item>
        <item row="0" column="10">
         <widget class="QComboBox" name="comboBoxQVList">
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+           <stylestrategy>PreferDefault</stylestrategy>
+          </font>
+         </property>
          <item>
           <property name="text">
            <string>default</string>
@@ -503,6 +581,12 @@
        </item>
        <item row="0" column="16">
         <widget class="QLabel" name="labelMaxCols">
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+           <stylestrategy>PreferDefault</stylestrategy>
+          </font>
+         </property>
          <property name="text">
           <string>Max cols</string>
          </property>
@@ -521,6 +605,12 @@
            <width>28</width>
            <height>28</height>
           </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+           <stylestrategy>PreferDefault</stylestrategy>
+          </font>
          </property>
          <property name="text">
           <string>...</string>
@@ -562,7 +652,7 @@
             </property>
             <property name="font">
              <font>
-              <pointsize>11</pointsize>
+              <pointsize>9</pointsize>
               <stylestrategy>PreferDefault</stylestrategy>
              </font>
             </property>
@@ -784,6 +874,12 @@
        </item>
        <item row="0" column="17">
         <widget class="QSpinBox" name="spinBoxMaxCols">
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+           <stylestrategy>PreferDefault</stylestrategy>
+          </font>
+         </property>
          <property name="minimum">
           <number>1</number>
          </property>
@@ -1028,7 +1124,7 @@
               <x>0</x>
               <y>0</y>
               <width>300</width>
-              <height>498</height>
+              <height>531</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_41">
@@ -1259,7 +1355,7 @@
                   </item>
                  </layout>
                 </item>
-                <item row="4" column="1">
+                <item row="5" column="1">
                  <layout class="QHBoxLayout" name="horizontalLayout_42">
                   <item>
                    <widget class="QLabel" name="labelDX">
@@ -1321,8 +1417,8 @@
                   </item>
                  </layout>
                 </item>
-                <item row="4" column="0">
-                 <widget class="QLabel" name="label_4">
+                <item row="5" column="0">
+                 <widget class="QLabel" name="labelPixelResolution">
                   <property name="font">
                    <font>
                     <pointsize>11</pointsize>
@@ -1333,6 +1429,81 @@
                    <string>Dimensions</string>
                   </property>
                  </widget>
+                </item>
+                <item row="4" column="0">
+                 <widget class="QLabel" name="labelSampleResolution">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                    <stylestrategy>PreferDefault</stylestrategy>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Resolution</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="1">
+                 <layout class="QHBoxLayout" name="horizontalLayout_25">
+                  <item>
+                   <widget class="QLabel" name="labelResolutionNx">
+                    <property name="font">
+                     <font>
+                      <pointsize>11</pointsize>
+                      <stylestrategy>PreferDefault</stylestrategy>
+                     </font>
+                    </property>
+                    <property name="text">
+                     <string>Nx:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="lineEditResolutionNx">
+                    <property name="font">
+                     <font>
+                      <pointsize>11</pointsize>
+                      <stylestrategy>PreferDefault</stylestrategy>
+                     </font>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    </property>
+                    <property name="readOnly">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="labelResolutionNy">
+                    <property name="font">
+                     <font>
+                      <pointsize>11</pointsize>
+                      <stylestrategy>PreferDefault</stylestrategy>
+                     </font>
+                    </property>
+                    <property name="text">
+                     <string>Ny:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="lineEditResolutionNy">
+                    <property name="font">
+                     <font>
+                      <pointsize>11</pointsize>
+                      <stylestrategy>PreferDefault</stylestrategy>
+                     </font>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    </property>
+                    <property name="readOnly">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
                 </item>
                </layout>
               </widget>
@@ -3499,7 +3670,7 @@
                    <widget class="QComboBox" name="comboBoxProfileSort">
                     <property name="maximumSize">
                      <size>
-                      <width>110</width>
+                      <width>16777215</width>
                       <height>16777215</height>
                      </size>
                     </property>
@@ -3534,7 +3705,7 @@
                    <widget class="QLineEdit" name="lineEditPointRadius">
                     <property name="maximumSize">
                      <size>
-                      <width>110</width>
+                      <width>16777215</width>
                       <height>16777215</height>
                      </size>
                     </property>
@@ -3560,7 +3731,7 @@
                    <widget class="QLineEdit" name="lineEditYThresh">
                     <property name="maximumSize">
                      <size>
-                      <width>110</width>
+                      <width>16777215</width>
                       <height>16777215</height>
                      </size>
                     </property>
@@ -3583,7 +3754,7 @@
                    <widget class="QLineEdit" name="lineEditIntDist">
                     <property name="maximumSize">
                      <size>
-                      <width>110</width>
+                      <width>16777215</width>
                       <height>16777215</height>
                      </size>
                     </property>
@@ -3639,7 +3810,7 @@
                      <widget class="QComboBox" name="comboBoxProfileList">
                       <property name="maximumSize">
                        <size>
-                        <width>110</width>
+                        <width>16777215</width>
                         <height>16777215</height>
                        </size>
                       </property>
@@ -4675,6 +4846,12 @@
               <height>402</height>
              </rect>
             </property>
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+              <stylestrategy>PreferDefault</stylestrategy>
+             </font>
+            </property>
             <layout class="QVBoxLayout" name="verticalLayout_54">
              <property name="leftMargin">
               <number>6</number>
@@ -4774,7 +4951,7 @@
                      <widget class="QComboBox" name="comboBoxNDimAnalyte">
                       <property name="maximumSize">
                        <size>
-                        <width>150</width>
+                        <width>16777215</width>
                         <height>16777215</height>
                        </size>
                       </property>
@@ -4871,7 +5048,7 @@
                    <widget class="QComboBox" name="comboBoxNDimQuantiles">
                     <property name="maximumSize">
                      <size>
-                      <width>150</width>
+                      <width>16777215</width>
                       <height>16777215</height>
                      </size>
                     </property>
@@ -4906,7 +5083,7 @@
                      <widget class="QComboBox" name="comboBoxNDimAnalyteSet">
                       <property name="maximumSize">
                        <size>
-                        <width>150</width>
+                        <width>16777215</width>
                         <height>16777215</height>
                        </size>
                       </property>
@@ -5261,6 +5438,12 @@
          </property>
          <item>
           <widget class="QScrollArea" name="scrollAreaMultiDim">
+           <property name="font">
+            <font>
+             <pointsize>11</pointsize>
+             <stylestrategy>PreferDefault</stylestrategy>
+            </font>
+           </property>
            <property name="frameShape">
             <enum>QFrame::NoFrame</enum>
            </property>
@@ -5386,7 +5569,7 @@
                  <widget class="QSpinBox" name="spinBoxPCX">
                   <property name="maximumSize">
                    <size>
-                    <width>150</width>
+                    <width>16777215</width>
                     <height>16777215</height>
                    </size>
                   </property>
@@ -5411,7 +5594,7 @@
                  <widget class="QSpinBox" name="spinBoxPCY">
                   <property name="maximumSize">
                    <size>
-                    <width>150</width>
+                    <width>16777215</width>
                     <height>16777215</height>
                    </size>
                   </property>
@@ -5525,7 +5708,7 @@
                 <string>Open profile style options</string>
                </property>
                <property name="currentIndex">
-                <number>0</number>
+                <number>1</number>
                </property>
                <widget class="QWidget" name="pageClustering">
                 <layout class="QVBoxLayout" name="verticalLayout_58">
@@ -5719,6 +5902,12 @@
                           <height>32</height>
                          </size>
                         </property>
+                        <property name="font">
+                         <font>
+                          <pointsize>11</pointsize>
+                          <stylestrategy>PreferDefault</stylestrategy>
+                         </font>
+                        </property>
                         <property name="text">
                          <string>...</string>
                         </property>
@@ -5851,6 +6040,12 @@
                     </item>
                     <item row="5" column="1">
                      <widget class="QCheckBox" name="checkBoxWithPCA">
+                      <property name="font">
+                       <font>
+                        <pointsize>11</pointsize>
+                        <stylestrategy>PreferDefault</stylestrategy>
+                       </font>
+                      </property>
                       <property name="text">
                        <string/>
                       </property>
@@ -5858,6 +6053,12 @@
                     </item>
                     <item row="5" column="0">
                      <widget class="QLabel" name="labelClusterWithPCA">
+                      <property name="font">
+                       <font>
+                        <pointsize>11</pointsize>
+                        <stylestrategy>PreferDefault</stylestrategy>
+                       </font>
+                      </property>
                       <property name="text">
                        <string>PCA</string>
                       </property>
@@ -5881,6 +6082,12 @@
                    <layout class="QFormLayout" name="formLayout_5">
                     <item row="0" column="0">
                      <widget class="QLabel" name="labelTSNEPlotType">
+                      <property name="font">
+                       <font>
+                        <pointsize>11</pointsize>
+                        <stylestrategy>PreferDefault</stylestrategy>
+                       </font>
+                      </property>
                       <property name="text">
                        <string>Plot type</string>
                       </property>
@@ -5891,6 +6098,12 @@
                     </item>
                     <item row="0" column="1">
                      <widget class="QComboBox" name="comboBox_3">
+                      <property name="font">
+                       <font>
+                        <pointsize>11</pointsize>
+                        <stylestrategy>PreferDefault</stylestrategy>
+                       </font>
+                      </property>
                       <item>
                        <property name="text">
                         <string>Coordinates</string>
@@ -5905,6 +6118,12 @@
                     </item>
                     <item row="1" column="0">
                      <widget class="QLabel" name="labelPerplexity">
+                      <property name="font">
+                       <font>
+                        <pointsize>11</pointsize>
+                        <stylestrategy>PreferDefault</stylestrategy>
+                       </font>
+                      </property>
                       <property name="text">
                        <string>Perplexity</string>
                       </property>
@@ -5915,6 +6134,12 @@
                     </item>
                     <item row="1" column="1">
                      <widget class="QSlider" name="horizontalSlidertSNEPerplexity">
+                      <property name="font">
+                       <font>
+                        <pointsize>11</pointsize>
+                        <stylestrategy>PreferDefault</stylestrategy>
+                       </font>
+                      </property>
                       <property name="orientation">
                        <enum>Qt::Horizontal</enum>
                       </property>
@@ -5928,6 +6153,12 @@
                     </item>
                     <item row="2" column="0">
                      <widget class="QLabel" name="labelExaggeration">
+                      <property name="font">
+                       <font>
+                        <pointsize>11</pointsize>
+                        <stylestrategy>PreferDefault</stylestrategy>
+                       </font>
+                      </property>
                       <property name="text">
                        <string>Exaggeration</string>
                       </property>
@@ -5938,6 +6169,12 @@
                     </item>
                     <item row="2" column="1">
                      <widget class="QSlider" name="horizontalSlidertSNEExaggeration">
+                      <property name="font">
+                       <font>
+                        <pointsize>11</pointsize>
+                        <stylestrategy>PreferDefault</stylestrategy>
+                       </font>
+                      </property>
                       <property name="orientation">
                        <enum>Qt::Horizontal</enum>
                       </property>
@@ -5951,6 +6188,12 @@
                     </item>
                     <item row="3" column="0">
                      <widget class="QLabel" name="labelDistance">
+                      <property name="font">
+                       <font>
+                        <pointsize>11</pointsize>
+                        <stylestrategy>PreferDefault</stylestrategy>
+                       </font>
+                      </property>
                       <property name="text">
                        <string>Distance</string>
                       </property>
@@ -5961,6 +6204,12 @@
                     </item>
                     <item row="3" column="1">
                      <widget class="QComboBox" name="comboBoxtSNEDistance_2">
+                      <property name="font">
+                       <font>
+                        <pointsize>11</pointsize>
+                        <stylestrategy>PreferDefault</stylestrategy>
+                       </font>
+                      </property>
                       <item>
                        <property name="text">
                         <string>Euclidean</string>
@@ -5970,6 +6219,12 @@
                     </item>
                     <item row="4" column="0">
                      <widget class="QLabel" name="labelThreshold">
+                      <property name="font">
+                       <font>
+                        <pointsize>11</pointsize>
+                        <stylestrategy>PreferDefault</stylestrategy>
+                       </font>
+                      </property>
                       <property name="text">
                        <string>Threshold</string>
                       </property>
@@ -5980,6 +6235,12 @@
                     </item>
                     <item row="4" column="1">
                      <widget class="QSpinBox" name="spinBoxtSNEThreshold">
+                      <property name="font">
+                       <font>
+                        <pointsize>11</pointsize>
+                        <stylestrategy>PreferDefault</stylestrategy>
+                       </font>
+                      </property>
                       <property name="keyboardTracking">
                        <bool>false</bool>
                       </property>
@@ -5987,6 +6248,12 @@
                     </item>
                     <item row="5" column="0">
                      <widget class="QLabel" name="labelGridSize">
+                      <property name="font">
+                       <font>
+                        <pointsize>11</pointsize>
+                        <stylestrategy>PreferDefault</stylestrategy>
+                       </font>
+                      </property>
                       <property name="text">
                        <string>Grid size</string>
                       </property>
@@ -5997,6 +6264,12 @@
                     </item>
                     <item row="5" column="1">
                      <widget class="QSpinBox" name="spinBoxtSNEGridSize">
+                      <property name="font">
+                       <font>
+                        <pointsize>11</pointsize>
+                        <stylestrategy>PreferDefault</stylestrategy>
+                       </font>
+                      </property>
                       <property name="keyboardTracking">
                        <bool>false</bool>
                       </property>
@@ -6004,6 +6277,12 @@
                     </item>
                     <item row="6" column="0">
                      <widget class="QLabel" name="labelAssignGroups">
+                      <property name="font">
+                       <font>
+                        <pointsize>11</pointsize>
+                        <stylestrategy>PreferDefault</stylestrategy>
+                       </font>
+                      </property>
                       <property name="text">
                        <string>Assign Groups</string>
                       </property>
@@ -6014,6 +6293,12 @@
                     </item>
                     <item row="6" column="1">
                      <widget class="QPushButton" name="pushButton_47">
+                      <property name="font">
+                       <font>
+                        <pointsize>11</pointsize>
+                        <stylestrategy>PreferDefault</stylestrategy>
+                       </font>
+                      </property>
                       <property name="text">
                        <string>No</string>
                       </property>
@@ -6035,6 +6320,12 @@
                      <width>32</width>
                      <height>32</height>
                     </size>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>11</pointsize>
+                     <stylestrategy>PreferDefault</stylestrategy>
+                    </font>
                    </property>
                    <property name="text">
                     <string>Run tSNE</string>
@@ -6105,6 +6396,12 @@
          </property>
          <item>
           <widget class="QScrollArea" name="scrollAreaSpecial">
+           <property name="font">
+            <font>
+             <pointsize>11</pointsize>
+             <stylestrategy>PreferDefault</stylestrategy>
+            </font>
+           </property>
            <property name="frameShape">
             <enum>QFrame::NoFrame</enum>
            </property>
@@ -6151,7 +6448,7 @@
                 </font>
                </property>
                <property name="currentIndex">
-                <number>3</number>
+                <number>0</number>
                </property>
                <widget class="QWidget" name="tabThermometry">
                 <attribute name="title">
@@ -6222,8 +6519,8 @@
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>151</width>
-                      <height>38</height>
+                      <width>282</width>
+                      <height>146</height>
                      </rect>
                     </property>
                     <layout class="QFormLayout" name="formLayout_17">
@@ -6295,8 +6592,8 @@
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>141</width>
-                      <height>38</height>
+                      <width>282</width>
+                      <height>146</height>
                      </rect>
                     </property>
                     <layout class="QFormLayout" name="formLayout_18">
@@ -6803,6 +7100,13 @@
                <height>32</height>
               </size>
              </property>
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+               <bold>false</bold>
+               <stylestrategy>PreferDefault</stylestrategy>
+              </font>
+             </property>
              <property name="text">
               <string>...</string>
              </property>
@@ -6848,6 +7152,13 @@
                <height>32</height>
               </size>
              </property>
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+               <bold>false</bold>
+               <stylestrategy>PreferDefault</stylestrategy>
+              </font>
+             </property>
              <property name="toolTip">
               <string>Remove selected plot</string>
              </property>
@@ -6888,16 +7199,16 @@
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_30">
          <property name="leftMargin">
-          <number>3</number>
+          <number>0</number>
          </property>
          <property name="topMargin">
-          <number>3</number>
+          <number>0</number>
          </property>
          <property name="rightMargin">
-          <number>3</number>
+          <number>0</number>
          </property>
          <property name="bottomMargin">
-          <number>3</number>
+          <number>0</number>
          </property>
          <item>
           <layout class="QGridLayout" name="gridLayoutStyleTheme">
@@ -7013,8 +7324,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>233</width>
-              <height>138</height>
+              <width>239</width>
+              <height>144</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -7053,11 +7364,23 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>233</width>
-                  <height>354</height>
+                  <width>239</width>
+                  <height>342</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_4">
+                 <property name="leftMargin">
+                  <number>6</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>6</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>6</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>6</number>
+                 </property>
                  <item>
                   <layout class="QFormLayout" name="formLayout_11">
                    <item row="0" column="0">
@@ -7420,8 +7743,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>268</width>
-              <height>138</height>
+              <width>239</width>
+              <height>144</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -7460,7 +7783,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>268</width>
+                  <width>239</width>
                   <height>374</height>
                  </rect>
                 </property>
@@ -7790,6 +8113,13 @@
                        <height>28</height>
                       </size>
                      </property>
+                     <property name="font">
+                      <font>
+                       <pointsize>11</pointsize>
+                       <bold>false</bold>
+                       <stylestrategy>PreferDefault</stylestrategy>
+                      </font>
+                     </property>
                      <property name="toolTip">
                       <string>Select all filters</string>
                      </property>
@@ -7818,6 +8148,13 @@
                        <width>28</width>
                        <height>28</height>
                       </size>
+                     </property>
+                     <property name="font">
+                      <font>
+                       <pointsize>11</pointsize>
+                       <bold>false</bold>
+                       <stylestrategy>PreferDefault</stylestrategy>
+                      </font>
                      </property>
                      <property name="toolTip">
                       <string>Save profile data</string>
@@ -7853,8 +8190,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>233</width>
-              <height>138</height>
+              <width>239</width>
+              <height>144</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -7893,7 +8230,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>242</width>
+                  <width>244</width>
                   <height>256</height>
                  </rect>
                 </property>
@@ -8077,7 +8414,7 @@
                        </property>
                        <property name="font">
                         <font>
-                         <pointsize>10</pointsize>
+                         <pointsize>11</pointsize>
                          <bold>false</bold>
                          <stylestrategy>PreferDefault</stylestrategy>
                         </font>
@@ -8335,8 +8672,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>233</width>
-              <height>138</height>
+              <width>239</width>
+              <height>144</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -8357,7 +8694,7 @@
               <number>0</number>
              </property>
              <property name="bottomMargin">
-              <number>0</number>
+              <number>3</number>
              </property>
              <item>
               <widget class="QScrollArea" name="scrollAreaColors">
@@ -8394,6 +8731,9 @@
                  </property>
                  <item>
                   <layout class="QFormLayout" name="formLayout_19">
+                   <property name="fieldGrowthPolicy">
+                    <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+                   </property>
                    <item row="0" column="0">
                     <widget class="QLabel" name="labelColorByField">
                      <property name="font">
@@ -8451,7 +8791,12 @@
                      </item>
                      <item>
                       <property name="text">
-                       <string>Calculated Field</string>
+                       <string>Ratio (normalized)</string>
+                      </property>
+                     </item>
+                     <item>
+                      <property name="text">
+                       <string>Computed</string>
                       </property>
                      </item>
                      <item>
@@ -8681,9 +9026,6 @@
                      </item>
                     </widget>
                    </item>
-                   <item row="4" column="1">
-                    <widget class="QCheckBox" name="checkBoxReverseColormap"/>
-                   </item>
                    <item row="3" column="1">
                     <widget class="QComboBox" name="comboBoxFieldColormap">
                      <property name="maximumSize">
@@ -8751,7 +9093,7 @@
                       <bool>true</bool>
                      </property>
                      <property name="sizePolicy">
-                      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                      <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                        <horstretch>0</horstretch>
                        <verstretch>0</verstretch>
                       </sizepolicy>
@@ -8789,6 +9131,13 @@
                      </property>
                     </widget>
                    </item>
+                   <item row="4" column="1">
+                    <widget class="QCheckBox" name="checkBoxReverseColormap">
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
                   </layout>
                  </item>
                  <item>
@@ -8815,8 +9164,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>268</width>
-              <height>138</height>
+              <width>239</width>
+              <height>144</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -8855,7 +9204,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>268</width>
+                  <width>239</width>
                   <height>163</height>
                  </rect>
                 </property>
@@ -9340,6 +9689,13 @@
                      <height>28</height>
                     </size>
                    </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>11</pointsize>
+                     <bold>false</bold>
+                     <stylestrategy>PreferDefault</stylestrategy>
+                    </font>
+                   </property>
                    <property name="toolTip">
                     <string>Calculate field</string>
                    </property>
@@ -9368,6 +9724,13 @@
                      <width>28</width>
                      <height>28</height>
                     </size>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>11</pointsize>
+                     <bold>false</bold>
+                     <stylestrategy>PreferDefault</stylestrategy>
+                    </font>
                    </property>
                    <property name="toolTip">
                     <string>Clear current formula</string>
@@ -9403,6 +9766,13 @@
                      <width>28</width>
                      <height>28</height>
                     </size>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>11</pointsize>
+                     <bold>false</bold>
+                     <stylestrategy>PreferDefault</stylestrategy>
+                    </font>
                    </property>
                    <property name="toolTip">
                     <string>Get help calculating custom fields</string>
@@ -9446,6 +9816,13 @@
                      <height>28</height>
                     </size>
                    </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>11</pointsize>
+                     <bold>false</bold>
+                     <stylestrategy>PreferDefault</stylestrategy>
+                    </font>
+                   </property>
                    <property name="toolTip">
                     <string>Save formula and save field</string>
                    </property>
@@ -9473,6 +9850,13 @@
                 <layout class="QHBoxLayout" name="horizontalLayout_35">
                  <item>
                   <widget class="QComboBox" name="comboBoxCalcFormula">
+                   <property name="font">
+                    <font>
+                     <pointsize>11</pointsize>
+                     <bold>false</bold>
+                     <stylestrategy>PreferDefault</stylestrategy>
+                    </font>
+                   </property>
                    <property name="toolTip">
                     <string>Select a saved formula</string>
                    </property>
@@ -9490,6 +9874,13 @@
                      <width>28</width>
                      <height>28</height>
                     </size>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>11</pointsize>
+                     <bold>false</bold>
+                     <stylestrategy>PreferDefault</stylestrategy>
+                    </font>
                    </property>
                    <property name="toolTip">
                     <string>Delete formula</string>
@@ -9516,6 +9907,13 @@
                </item>
                <item>
                 <widget class="QComboBox" name="comboBoxCalcFieldType">
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                   <bold>false</bold>
+                   <stylestrategy>PreferDefault</stylestrategy>
+                  </font>
+                 </property>
                  <property name="toolTip">
                   <string>Select field type</string>
                  </property>
@@ -9600,6 +9998,13 @@
                      <width>28</width>
                      <height>28</height>
                     </size>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>11</pointsize>
+                     <bold>false</bold>
+                     <stylestrategy>PreferDefault</stylestrategy>
+                    </font>
                    </property>
                    <property name="toolTip">
                     <string>Insert field in formula</string>

@@ -1444,7 +1444,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.sample_id = os.path.splitext(self.csv_files[index])[0].replace('.lame','')
 
         # notes and autosave timer
-        self.notes_file = self.selected_directory + '/' + self.sample_id + '.rst'
+        self.notes_file = os.path.join(self.selected_directory,self.sample_id+'.rst')
         # open notes file if it exists
         if os.path.exists(self.notes_file):
             with open(self.notes_file,'r') as file:
@@ -1959,7 +1959,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Executes on ``MainWindow.toolButtonSwapXY.clicked``.  Updates data dictionary and other map related derived results.
         """
-
         match self.comboBoxPlotType.currentText():
             case 'analyte map':
                 self.swap_xy_val = not self.swap_xy_val
@@ -2025,6 +2024,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         xtemp = df['Y']
         df['Y'] = df['X']
         df['X'] = xtemp
+
+        # resort values, should be ascending in Y then X
+        df = df.sort_values(['Y','X'])
+
+        self.compute_map_aspect_ratio()
 
     # toolbar functions
     def change_ref_material(self, comboBox1, comboBox2):
@@ -6514,6 +6518,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.aspect_ratio = self.dy / self.dx
 
         self.array_size = (self.y.nunique(), self.x.nunique())
+        
+        self.lineEditResolutionNx.setText(str(self.array_size[1]))
+        self.lineEditResolutionNy.setText(str(self.array_size[0]))
 
     def add_scalebar(self, ax):
         """Add a scalebar to a map

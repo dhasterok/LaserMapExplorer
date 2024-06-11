@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import (
     QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QVBoxLayout, QGridLayout,
     QMessageBox, QHeaderView, QMenu, QGraphicsRectItem, QLineEdit, QFileDialog, QWidget,
     QDialog, QLabel, QTableWidget, QInputDialog, QAbstractItemView, QProgressBar,
-    QSplashScreen, QDialogButtonBox, QApplication, QMainWindow, QSizePolicy
+    QSplashScreen, QDialogButtonBox, QApplication, QMainWindow, QSizePolicy, QGraphicsPolygonItem
 )
 from PyQt5.QtGui import (
     QIntValidator, QDoubleValidator, QColor, QImage, QPainter, QPixmap, QFont, QPen,
@@ -676,7 +676,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.MultidimensionalPage.setEnabled(False)
         self.ClusteringPage.setEnabled(False)
         self.ProfilingPage.setEnabled(False)
-        self.PTtFunctionPage.setEnabled(False)
+        self.PTtPage.setEnabled(False)
 
         self.actionSavePlotToTree.triggered.connect(self.add_plotwidget_to_tree)
         self.actionSelectAnalytes.triggered.connect(self.open_select_analyte_dialog)
@@ -1462,7 +1462,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.MultidimensionalPage.setEnabled(True)
         self.ClusteringPage.setEnabled(True)
         self.ProfilingPage.setEnabled(True)
-        self.SpecialFunctionPage.setEnabled(True)
+        self.PTtPage.setEnabled(True)
 
     def change_sample(self, index):
         """Changes sample and plots first map
@@ -1683,12 +1683,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolBoxStyle.setCurrentIndex(0)
         self.toolBoxTreeView.setCurrentIndex(self.right_tab['tree'])
         self.toolBox.setCurrentIndex(self.left_tab['sample'])
-        self.toolbox_changed(update=False)
+        self.set_style_widgets(self.comboBoxPlotType.currentText())
 
         self.styles['analyte map']['Colors']['ColorByField'] = 'Analyte'
-        self.styles['analyte map']['Colors']['Color'] = self.analyte_list[0] 
+        self.styles['analyte map']['Colors']['Field'] = self.analyte_list[0] 
         if self.comboBoxPlotType.currentText() != 'analyte map':
             self.comboBoxPlotType.setCurrentText('analyte map')
+        self.toolbox_changed(update=False)
         self.update_all_field_comboboxes()
         self.update_field_combobox(self.comboBoxColorByField,self.comboBoxColorField)
 
@@ -1852,7 +1853,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.MultidimensionalPage.setEnabled(True)
             self.ClusteringPage.setEnabled(True)
             self.ProfilingPage.setEnabled(True)
-            self.SpecialFunctionPage.setEnabled(True)
+            self.PTtPage.setEnabled(True)
 
             self.toolBoxStyle.setEnabled(True)
             self.comboBoxPlotType.setEnabled(True)
@@ -1895,7 +1896,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.MultidimensionalPage.setEnabled(False)
             self.ClusteringPage.setEnabled(False)
             self.ProfilingPage.setEnabled(True)
-            self.SpecialFunctionPage.setEnabled(False)
+            self.PTtPage.setEnabled(False)
 
             self.toolBoxTreeView.setCurrentIndex(self.right_tab['tree'])
             self.StylingPage.setEnabled(False)
@@ -1932,7 +1933,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.MultidimensionalPage.setEnabled(False)
             self.ClusteringPage.setEnabled(False)
             self.ProfilingPage.setEnabled(False)
-            self.SpecialFunctionPage.setEnabled(False)
+            self.PTtPage.setEnabled(False)
 
             self.toolBoxTreeView.setCurrentIndex(self.right_tab['tree'])
             self.StylingPage.setEnabled(False)
@@ -2163,7 +2164,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             'PCA Score':None,
             'Cluster':None,
             'Cluster Score':None
-            }
+        }
 
         # reset axis mask and mask
         self.data[self.sample_id]['axis_mask'] = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
@@ -4814,6 +4815,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         :param plot_type: dictionary key into ``MainWindow.style``
         :type plot_type: str, optional
         """
+        print('set_style_widgets')
         tab_id = self.toolBox.currentIndex()
 
         if plot_type is None:
@@ -6771,7 +6773,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         canvas = MplCanvas(parent=self)
 
         style = self.styles['analyte map']
-        clb,cub,cscale,clabel = self.get_axis_values(field_type,field)
+
+        # set color limits
+        if field not in self.axis_dict:
+            self.initialize_axis_values(field_type,field)
+            self.set_style_widgets(plot_type='analyte map',style=style)
 
         # get data for current map
         self.map_df = self.get_map_data(self.sample_id, field, field_type=field_type)
@@ -6784,7 +6790,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         cax = canvas.axes.imshow(reshaped_array, cmap=self.get_colormap(),  aspect=self.aspect_ratio, interpolation='none', norm=norm)
 
-        # set color limits
+
         self.add_colorbar(canvas, cax, style)
         cax.set_clim(style['Colors']['CLim'][0], style['Colors']['CLim'][1])
 

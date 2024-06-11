@@ -977,7 +977,7 @@
         <string/>
        </property>
        <property name="currentIndex">
-        <number>4</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="SelectAnalytePage">
         <property name="enabled">
@@ -6074,7 +6074,7 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="PTtFunctionPage">
+       <widget class="QWidget" name="PTtPage">
         <property name="geometry">
          <rect>
           <x>0</x>
@@ -6740,14 +6740,14 @@
         </font>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="PlotSelectorPage">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>268</width>
+          <width>241</width>
           <height>360</height>
          </rect>
         </property>
@@ -6875,7 +6875,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>276</width>
+          <width>241</width>
           <height>360</height>
          </rect>
         </property>
@@ -7006,14 +7006,14 @@
             <enum>QFrame::Raised</enum>
            </property>
            <property name="currentIndex">
-            <number>4</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="StyleAxes">
             <property name="geometry">
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>268</width>
+              <width>233</width>
               <height>138</height>
              </rect>
             </property>
@@ -7053,7 +7053,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>268</width>
+                  <width>233</width>
                   <height>354</height>
                  </rect>
                 </property>
@@ -7853,7 +7853,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>268</width>
+              <width>233</width>
               <height>138</height>
              </rect>
             </property>
@@ -7893,7 +7893,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>268</width>
+                  <width>242</width>
                   <height>256</height>
                  </rect>
                 </property>
@@ -8335,7 +8335,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>268</width>
+              <width>233</width>
               <height>138</height>
              </rect>
             </property>
@@ -8375,7 +8375,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>268</width>
+                  <width>254</width>
                   <height>312</height>
                  </rect>
                 </property>
@@ -9215,7 +9215,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>290</width>
+          <width>241</width>
           <height>360</height>
          </rect>
         </property>
@@ -9255,7 +9255,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>290</width>
+              <width>241</width>
               <height>687</height>
              </rect>
             </property>
@@ -10621,7 +10621,7 @@
         <string>Pop the figure out into a separate window</string>
        </property>
        <property name="currentIndex">
-        <number>2</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="tabNotes">
         <property name="sizePolicy">

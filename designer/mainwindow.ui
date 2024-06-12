@@ -1656,54 +1656,6 @@
                 </item>
                 <item>
                  <layout class="QGridLayout" name="gridLayout_11">
-                  <item row="1" column="2">
-                   <widget class="QDoubleSpinBox" name="doubleSpinBoxUB">
-                    <property name="font">
-                     <font>
-                      <pointsize>11</pointsize>
-                      <stylestrategy>PreferDefault</stylestrategy>
-                     </font>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                    </property>
-                    <property name="keyboardTracking">
-                     <bool>false</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="1">
-                   <widget class="QDoubleSpinBox" name="doubleSpinBoxLB">
-                    <property name="font">
-                     <font>
-                      <pointsize>11</pointsize>
-                      <stylestrategy>PreferDefault</stylestrategy>
-                     </font>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                    </property>
-                    <property name="keyboardTracking">
-                     <bool>false</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="1">
-                   <widget class="QDoubleSpinBox" name="doubleSpinBoxDLB">
-                    <property name="font">
-                     <font>
-                      <pointsize>11</pointsize>
-                      <stylestrategy>PreferDefault</stylestrategy>
-                     </font>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                    </property>
-                    <property name="keyboardTracking">
-                     <bool>false</bool>
-                    </property>
-                   </widget>
-                  </item>
                   <item row="1" column="0">
                    <widget class="QLabel" name="labelQuantileBounds">
                     <property name="font">
@@ -1720,22 +1672,6 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="2" column="2">
-                   <widget class="QDoubleSpinBox" name="doubleSpinBoxDUB">
-                    <property name="font">
-                     <font>
-                      <pointsize>11</pointsize>
-                      <stylestrategy>PreferDefault</stylestrategy>
-                     </font>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                    </property>
-                    <property name="keyboardTracking">
-                     <bool>false</bool>
-                    </property>
-                   </widget>
-                  </item>
                   <item row="2" column="0">
                    <widget class="QLabel" name="labelDifferenceBounds">
                     <property name="font">
@@ -1746,6 +1682,58 @@
                     </property>
                     <property name="text">
                      <string>Difference bound</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="1">
+                   <widget class="QLineEdit" name="lineEditLowerQuantile">
+                    <property name="font">
+                     <font>
+                      <pointsize>11</pointsize>
+                      <stylestrategy>PreferDefault</stylestrategy>
+                     </font>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="2">
+                   <widget class="QLineEdit" name="lineEditUpperQuantile">
+                    <property name="font">
+                     <font>
+                      <pointsize>11</pointsize>
+                      <stylestrategy>PreferDefault</stylestrategy>
+                     </font>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="1">
+                   <widget class="QLineEdit" name="lineEditDifferenceLowerQuantile">
+                    <property name="font">
+                     <font>
+                      <pointsize>11</pointsize>
+                      <stylestrategy>PreferDefault</stylestrategy>
+                     </font>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="2">
+                   <widget class="QLineEdit" name="lineEditDifferenceUpperQuantile">
+                    <property name="font">
+                     <font>
+                      <pointsize>11</pointsize>
+                      <stylestrategy>PreferDefault</stylestrategy>
+                     </font>
                     </property>
                     <property name="alignment">
                      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -6878,7 +6866,7 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>245</width>
+     <width>255</width>
      <height>543</height>
     </size>
    </property>
@@ -7044,7 +7032,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>241</width>
+          <width>251</width>
           <height>360</height>
          </rect>
         </property>
@@ -7186,7 +7174,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>241</width>
+          <width>251</width>
           <height>360</height>
          </rect>
         </property>
@@ -7324,7 +7312,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>239</width>
+              <width>249</width>
               <height>144</height>
              </rect>
             </property>
@@ -7364,7 +7352,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>239</width>
+                  <width>249</width>
                   <height>342</height>
                  </rect>
                 </property>
@@ -7385,6 +7373,13 @@
                   <layout class="QFormLayout" name="formLayout_11">
                    <item row="0" column="0">
                     <widget class="QLabel" name="labelXLabel">
+                     <property name="font">
+                      <font>
+                       <pointsize>11</pointsize>
+                       <bold>false</bold>
+                       <stylestrategy>PreferDefault</stylestrategy>
+                      </font>
+                     </property>
                      <property name="text">
                       <string>X Label</string>
                      </property>
@@ -7392,6 +7387,13 @@
                    </item>
                    <item row="0" column="1">
                     <widget class="QLineEdit" name="lineEditXLabel">
+                     <property name="font">
+                      <font>
+                       <pointsize>11</pointsize>
+                       <bold>false</bold>
+                       <stylestrategy>PreferDefault</stylestrategy>
+                      </font>
+                     </property>
                      <property name="toolTip">
                       <string>Type x label</string>
                      </property>
@@ -7404,6 +7406,13 @@
                     <layout class="QHBoxLayout" name="horizontalLayout_31">
                      <item>
                       <widget class="QLabel" name="labelXLim">
+                       <property name="font">
+                        <font>
+                         <pointsize>11</pointsize>
+                         <bold>false</bold>
+                         <stylestrategy>PreferDefault</stylestrategy>
+                        </font>
+                       </property>
                        <property name="text">
                         <string>X Limits</string>
                        </property>
@@ -7460,6 +7469,13 @@
                     <layout class="QHBoxLayout" name="horizontalLayout_23">
                      <item>
                       <widget class="QLineEdit" name="lineEditXLB">
+                       <property name="font">
+                        <font>
+                         <pointsize>11</pointsize>
+                         <bold>false</bold>
+                         <stylestrategy>PreferDefault</stylestrategy>
+                        </font>
+                       </property>
                        <property name="alignment">
                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                        </property>
@@ -7467,6 +7483,13 @@
                      </item>
                      <item>
                       <widget class="QLineEdit" name="lineEditXUB">
+                       <property name="font">
+                        <font>
+                         <pointsize>11</pointsize>
+                         <bold>false</bold>
+                         <stylestrategy>PreferDefault</stylestrategy>
+                        </font>
+                       </property>
                        <property name="alignment">
                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                        </property>
@@ -7483,6 +7506,13 @@
                    </item>
                    <item row="2" column="1">
                     <widget class="QComboBox" name="comboBoxXScale">
+                     <property name="font">
+                      <font>
+                       <pointsize>11</pointsize>
+                       <bold>false</bold>
+                       <stylestrategy>PreferDefault</stylestrategy>
+                      </font>
+                     </property>
                      <item>
                       <property name="text">
                        <string>linear</string>
@@ -7526,6 +7556,13 @@
                     <layout class="QHBoxLayout" name="horizontalLayout_32">
                      <item>
                       <widget class="QLabel" name="labelYLim">
+                       <property name="font">
+                        <font>
+                         <pointsize>11</pointsize>
+                         <bold>false</bold>
+                         <stylestrategy>PreferDefault</stylestrategy>
+                        </font>
+                       </property>
                        <property name="text">
                         <string>Y Limits</string>
                        </property>
@@ -7603,6 +7640,13 @@
                     <layout class="QHBoxLayout" name="horizontalLayout_24">
                      <item>
                       <widget class="QLineEdit" name="lineEditYLB">
+                       <property name="font">
+                        <font>
+                         <pointsize>11</pointsize>
+                         <bold>false</bold>
+                         <stylestrategy>PreferDefault</stylestrategy>
+                        </font>
+                       </property>
                        <property name="alignment">
                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                        </property>
@@ -7610,6 +7654,13 @@
                      </item>
                      <item>
                       <widget class="QLineEdit" name="lineEditYUB">
+                       <property name="font">
+                        <font>
+                         <pointsize>11</pointsize>
+                         <bold>false</bold>
+                         <stylestrategy>PreferDefault</stylestrategy>
+                        </font>
+                       </property>
                        <property name="alignment">
                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                        </property>
@@ -7684,6 +7735,13 @@
                        <width>115</width>
                        <height>16777215</height>
                       </size>
+                     </property>
+                     <property name="font">
+                      <font>
+                       <pointsize>11</pointsize>
+                       <bold>false</bold>
+                       <stylestrategy>PreferDefault</stylestrategy>
+                      </font>
                      </property>
                      <property name="toolTip">
                       <string>Choose tick directions for most plots</string>
@@ -8190,7 +8248,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>239</width>
+              <width>249</width>
               <height>144</height>
              </rect>
             </property>
@@ -8230,7 +8288,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>244</width>
+                  <width>249</width>
                   <height>256</height>
                  </rect>
                 </property>
@@ -8672,7 +8730,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>239</width>
+              <width>249</width>
               <height>144</height>
              </rect>
             </property>
@@ -8739,7 +8797,6 @@
                      <property name="font">
                       <font>
                        <pointsize>11</pointsize>
-                       <bold>false</bold>
                        <stylestrategy>PreferDefault</stylestrategy>
                       </font>
                      </property>
@@ -8762,7 +8819,6 @@
                      <property name="font">
                       <font>
                        <pointsize>11</pointsize>
-                       <bold>false</bold>
                        <stylestrategy>PreferDefault</stylestrategy>
                       </font>
                      </property>
@@ -8826,7 +8882,6 @@
                      <property name="font">
                       <font>
                        <pointsize>11</pointsize>
-                       <bold>false</bold>
                        <stylestrategy>PreferDefault</stylestrategy>
                       </font>
                      </property>
@@ -8849,7 +8904,6 @@
                      <property name="font">
                       <font>
                        <pointsize>11</pointsize>
-                       <bold>false</bold>
                        <stylestrategy>PreferDefault</stylestrategy>
                       </font>
                      </property>
@@ -8886,7 +8940,6 @@
                        <property name="font">
                         <font>
                          <pointsize>11</pointsize>
-                         <bold>false</bold>
                          <stylestrategy>PreferDefault</stylestrategy>
                         </font>
                        </property>
@@ -8915,7 +8968,6 @@
                        <property name="font">
                         <font>
                          <pointsize>11</pointsize>
-                         <bold>false</bold>
                          <stylestrategy>PreferDefault</stylestrategy>
                         </font>
                        </property>
@@ -8979,7 +9031,6 @@
                      <property name="font">
                       <font>
                        <pointsize>11</pointsize>
-                       <bold>false</bold>
                        <stylestrategy>PreferDefault</stylestrategy>
                       </font>
                      </property>
@@ -9002,7 +9053,6 @@
                      <property name="font">
                       <font>
                        <pointsize>11</pointsize>
-                       <bold>false</bold>
                        <stylestrategy>PreferDefault</stylestrategy>
                       </font>
                      </property>
@@ -9037,7 +9087,6 @@
                      <property name="font">
                       <font>
                        <pointsize>11</pointsize>
-                       <bold>false</bold>
                        <stylestrategy>PreferDefault</stylestrategy>
                       </font>
                      </property>
@@ -9058,7 +9107,6 @@
                      <property name="font">
                       <font>
                        <pointsize>11</pointsize>
-                       <bold>false</bold>
                        <stylestrategy>PreferDefault</stylestrategy>
                       </font>
                      </property>
@@ -9075,7 +9123,6 @@
                      <property name="font">
                       <font>
                        <pointsize>11</pointsize>
-                       <bold>false</bold>
                        <stylestrategy>PreferDefault</stylestrategy>
                       </font>
                      </property>
@@ -9107,7 +9154,6 @@
                      <property name="font">
                       <font>
                        <pointsize>11</pointsize>
-                       <bold>false</bold>
                        <stylestrategy>PreferDefault</stylestrategy>
                       </font>
                      </property>
@@ -9564,7 +9610,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>241</width>
+          <width>251</width>
           <height>360</height>
          </rect>
         </property>
@@ -9604,7 +9650,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>241</width>
+              <width>251</width>
               <height>687</height>
              </rect>
             </property>

@@ -473,7 +473,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         #Flags to prevent plotting when widgets change
         self.point_selected = False
-        self.update_spinboxes_bool = False
         self.check_analysis = True
         self.update_bins = True
         self.update_cluster_flag = True
@@ -657,6 +656,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.actionReportBug.triggered.connect(lambda: self.browser.setUrl(QUrl('https://github.com/dhasterok/LaserMapExplorer/issues')))
 
+        #create plot tree
+        self.create_tree()
+        # self.open_directory()
+
+        #init table_fcn
+        self.table_fcn = Table_Fcn(self)
+
         # Select analyte Tab
         #-------------------------
         self.ref_data = pd.read_excel(os.path.join(basedir,'resources/app_data/earthref.xlsx'))
@@ -679,17 +685,45 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxSampleId.activated.connect(lambda: self.change_sample(self.comboBoxSampleId.currentIndex()))
         self.canvasWindow.currentChanged.connect(self.canvas_changed)
 
-        #create plot tree
-        self.create_tree()
-        # self.open_directory()
-
         #normalising
         self.comboBoxNorm.clear()
         self.comboBoxNorm.addItems(['linear','log','logit'])
         self.comboBoxNorm.activated.connect(lambda: self.update_norm(self.sample_id, self.comboBoxNorm.currentText(), update = True))
 
-        #init table_fcn
-        self.table_fcn = Table_Fcn(self)
+
+        pixelwidthvalidator = QDoubleValidator()
+        pixelwidthvalidator.setBottom(0.0)
+        self.lineEditDX.setValidator(pixelwidthvalidator)
+        self.lineEditDY.setValidator(pixelwidthvalidator)
+
+        # auto scale
+        quantilevalidator = QDoubleValidator(0.0, 100, 3)
+        self.lineEditLowerQuantile.setValidator(quantilevalidator)
+        self.lineEditUpperQuantile.setValidator(quantilevalidator)
+        self.lineEditDifferenceLowerQuantile.setValidator(quantilevalidator)
+        self.lineEditDifferenceUpperQuantile.setValidator(quantilevalidator)
+        self.lineEditLowerQuantile.editingFinished.connect(lambda: self.auto_scale(True))
+        self.lineEditUpperQuantile.editingFinished.connect(lambda: self.auto_scale(True))
+        self.lineEditDifferenceLowerQuantile.editingFinished.connect(lambda: self.auto_scale(True))
+        self.lineEditDifferenceUpperQuantile.editingFinished.connect(lambda: self.auto_scale(True))
+        # self.doubleSpinBoxUB.setMaximum(100)
+        # self.doubleSpinBoxUB.setMinimum(0)
+        # self.doubleSpinBoxLB.setMaximum(100)
+        # self.doubleSpinBoxLB.setMinimum(0)
+        # self.doubleSpinBoxDUB.setMaximum(100)
+        # self.doubleSpinBoxDUB.setMinimum(0)
+        # self.doubleSpinBoxDLB.setMaximum(100)
+        # self.doubleSpinBoxDLB.setMinimum(0)
+
+        # self.doubleSpinBoxLB.valueChanged.connect(lambda: self.auto_scale(True))
+        # self.doubleSpinBoxUB.valueChanged.connect(lambda: self.auto_scale(True))
+        # self.doubleSpinBoxDUB.valueChanged.connect(lambda: self.auto_scale(True))
+        # self.doubleSpinBoxDUB.valueChanged.connect(lambda: self.auto_scale(True))
+
+        # auto scale controls
+        self.toolButtonAutoScale.clicked.connect(lambda: self.auto_scale(False))
+        self.toolButtonAutoScale.clicked.connect(self.update_SV)
+        self.toolButtonAutoScale.setChecked(True)
 
         # Preprocess Tab
         #-------------------------
@@ -704,28 +738,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.spinBoxBinWidth.valueChanged.connect(self.histogram_update_n_bins)
         self.toolButtonHistogramReset.clicked.connect(self.histogram_reset_bins)
         self.comboBoxHistType.activated.connect(self.update_SV)
-
-        self.doubleSpinBoxUB.setMaximum(100)
-        self.doubleSpinBoxUB.setMinimum(0)
-        self.doubleSpinBoxLB.setMaximum(100)
-        self.doubleSpinBoxLB.setMinimum(0)
-        self.doubleSpinBoxDUB.setMaximum(100)
-        self.doubleSpinBoxDUB.setMinimum(0)
-        self.doubleSpinBoxDLB.setMaximum(100)
-        self.doubleSpinBoxDLB.setMinimum(0)
-
-        self.doubleSpinBoxLB.valueChanged.connect(lambda: self.auto_scale(True))
-        self.doubleSpinBoxUB.valueChanged.connect(lambda: self.auto_scale(True))
-        self.doubleSpinBoxDUB.valueChanged.connect(lambda: self.auto_scale(True))
-        self.doubleSpinBoxDUB.valueChanged.connect(lambda: self.auto_scale(True))
+        self.toolButtonHistogramReset.clicked.connect(self.plot_histogram)
 
         #uncheck crop is checked
         self.toolBox.currentChanged.connect(lambda: self.canvasWindow.setCurrentIndex(self.canvas_tab['sv']))
-        #auto scale
-        self.toolButtonAutoScale.clicked.connect(lambda: self.auto_scale(False) )
-        self.toolButtonAutoScale.clicked.connect(self.update_SV)
-        self.toolButtonAutoScale.setChecked(True)
-        self.toolButtonHistogramReset.clicked.connect(self.plot_histogram)
 
         # Noise reduction
         self.noise_red_img = None
@@ -877,6 +893,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.horizontalSliderClusterExponent.sliderReleased.connect(self.cluster_exponent_callback)
 
         # starting seed
+        self.lineEditSeed.setValidator(QIntValidator(0,1000000000))
         self.lineEditSeed.editingFinished.connect(self.cluster_seed_callback)
         self.toolButtonRandomSeed.clicked.connect(self.generate_random_seed)
 
@@ -1465,7 +1482,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             #Set crop to false
             self.data[self.sample_id]['crop'] = False
 
-            self.update_spinboxes_bool = False #prevent update plot from runing
             sample_df = pd.read_csv(file_path, engine='c')
             sample_df = sample_df.loc[:, ~sample_df .columns.str.contains('^Unnamed')]
             # self.data[sample_id] = pd.read_csv(file_path, engine='c')
@@ -1502,9 +1518,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.data[sample_id]['x_min'] = self.data[sample_id]['crop_x_min'] = self.data[sample_id]['raw_data']['X'].min()
             self.data[sample_id]['y_max'] = self.data[sample_id]['crop_y_max'] = self.data[sample_id]['raw_data']['Y'].max()
             self.data[sample_id]['y_min'] = self.data[sample_id]['crop_y_min'] = self.data[sample_id]['raw_data']['Y'].min()
-            analytes['upper_bound'] = 99.5
             analytes['lower_bound'] = 0.05
-            analytes['d_l_bound'] = 99
+            analytes['upper_bound'] = 99.5
+            analytes['d_l_bound'] = 0.05 
             analytes['d_u_bound'] = 99
             self.data[self.sample_id]['processed_data'] = copy.deepcopy(self.data[self.sample_id]['raw_data'][self.selected_analytes])
             self.data[self.sample_id]['cropped_raw_data'] = copy.deepcopy(self.data[self.sample_id]['raw_data'])
@@ -1557,9 +1573,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # self.clear_analysis()
             self.update_tree(self.data[sample_id]['norm'])
             #print(self.data[sample_id]['norm'])
-
-            self.update_spinboxes_bool = True  # Place this line at end of method
-
         else:
             #update filters, polygon, profiles with existing data
             self.compute_map_aspect_ratio()
@@ -1611,9 +1624,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # precalculate custom fields
         if self.precalculate_custom_fields:
             for name in self.calc_dict.keys():
-                if name not in self.data[self.sample_id]['computed_data']['Calculated'].columns:
-                    self.comboBoxCalcFormula.setCurrentText(name)
-                    self.calculate_new_field(save=False)
+                if name in self.data[self.sample_id]['computed_data']['Calculated'].columns:
+                    continue
+                self.comboBoxCalcFormula.setCurrentText(name)
+                self.calculate_new_field(save=False)
+
+        parameters = self.data[self.sample_id]['analyte_info'].loc[self.data[self.sample_id]['analyte_info']['analytes'] == self.analyte_list[0]].iloc[0]
+        self.update_spinboxes(parameters)
 
         # reset all plot types on change of tab to the first option
         for key in self.plot_types.keys():
@@ -2244,51 +2261,61 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         update : bool
             Update auto scale parameters, by default, False
         """
-        if self.update_spinboxes_bool: # spinboxes are not being updated
-            sample_id = self.plot_info['sample_id']
-            field = self.plot_info['field']
-            if '/' in field:
-                analyte_1, analyte_2 = field.split(' / ')
-            else:
-                analyte_1 = field
-                analyte_2 = None
-            plot_type = self.plot_info['plot_type']
-            lb = self.doubleSpinBoxLB.value()
-            ub = self.doubleSpinBoxUB.value()
-            d_lb = self.doubleSpinBoxDLB.value()
-            d_ub = self.doubleSpinBoxDUB.value()
-            auto_scale = self.toolButtonAutoScale.isChecked()
+        sample_id = self.plot_info['sample_id']
+        field = self.plot_info['field']
+        if '/' in field:
+            analyte_1, analyte_2 = field.split(' / ')
+        else:
+            analyte_1 = field
+            analyte_2 = None
 
-            if auto_scale and not update:
-                #reset to default auto scale values
-                lb = 0.05
-                ub = 99.5
-                d_lb = 99
-                d_ub = 99
+        lb = float(self.lineEditLowerQuantile.text())
+        ub = float(self.lineEditUpperQuantile.text())
+        d_lb = float(self.lineEditDifferenceLowerQuantile.text())
+        d_ub = float(self.lineEditDifferenceUpperQuantile.text())
+        auto_scale = self.toolButtonAutoScale.isChecked()
 
-            elif not auto_scale and not update:
-                # show unbounded plot when auto scale switched off
-                lb = 0
-                ub = 100
+        if auto_scale and not update:
+            #reset to default auto scale values
+            lb = 0.05
+            ub = 99.5
+            d_lb = 99
+            d_ub = 99
 
-            if analyte_1 and not analyte_2:
+            self.lineEditLowerQuantile.setText(str(lb))
+            self.lineEditUpperQuantile.setText(str(ub))
+            self.lineEditDiffereneLowerQuantile.setText(str(d_lb))
+            self.lineEditDifferenceUppereuantile.setText(str(d_ub))
+            self.lineEditDifferenceLowerQuantile.setEnabled(True)
+            self.lineEditDifferenceUpperQuantile.setEnabled(True)
 
-                self.data[sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['sample_id']==self.sample_id)
-                                  & (self.data[sample_id]['analyte_info']['analytes']==analyte_1),'auto_scale']  = auto_scale
-                self.data[sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['sample_id']==self.sample_id)
-                                         & (self.data[sample_id]['analyte_info']['analytes']==analyte_1),
-                                         ['upper_bound','lower_bound','d_l_bound', 'd_u_bound']] = [ub,lb,d_lb, d_ub]
+        elif not auto_scale and not update:
+            # show unbounded plot when auto scale switched off
+            lb = 0
+            ub = 100
+            self.lineEditLowerQuantile.setText(str(lb))
+            self.lineEditUpperQuantile.setText(str(ub))
+            self.lineEditDifferenceLowerQuantile.setEnabled(False)
+            self.lineEditDifferenceUpperQuantile.setEnabled(False)
 
-            else:
-                self.data[sample_id]['ratio_info'].loc[ (self.data[sample_id]['ratio_info']['analyte_1']==analyte_1)
-                                         & (self.data[sample_id]['ratio_info']['analyte_2']==analyte_2),'auto_scale']  = auto_scale
-                self.data[sample_id]['ratio_info'].loc[ (self.data[sample_id]['ratio_info']['analyte_1']==analyte_1)
-                                          & (self.data[sample_id]['ratio_info']['analyte_2']==analyte_2),
-                                          ['upper_bound','lower_bound','d_l_bound', 'd_u_bound']] = [ub,lb,d_lb, d_ub]
+        if analyte_1 and not analyte_2:
 
-            self.prep_data(sample_id, analyte_1,analyte_2)
-            self.update_filter_values()
-            self.update_SV()
+            self.data[sample_id]['analyte_info'].loc[self.data[sample_id]['analyte_info']['analytes']==analyte_1,
+                'auto_scale'] = auto_scale
+            self.data[sample_id]['analyte_info'].loc[self.data[sample_id]['analyte_info']['analytes']==analyte_1,
+                ['upper_bound', 'lower_bound', 'd_l_bound', 'd_u_bound']] = [ub, lb, d_lb, d_ub]
+
+        else:
+            self.data[sample_id]['ratio_info'].loc[ (self.data[sample_id]['ratio_info']['analyte_1']==analyte_1)
+                                        & (self.data[sample_id]['ratio_info']['analyte_2']==analyte_2),'auto_scale']  = auto_scale
+            self.data[sample_id]['ratio_info'].loc[ (self.data[sample_id]['ratio_info']['analyte_1']==analyte_1)
+                                        & (self.data[sample_id]['ratio_info']['analyte_2']==analyte_2),
+                                        ['upper_bound','lower_bound','d_l_bound', 'd_u_bound']] = [ub,lb,d_lb, d_ub]
+
+        self.prep_data(sample_id, analyte_1,analyte_2)
+        self.update_filter_values()
+        self.update_SV()
+        self.show()
 
     def update_plot(self,bin_s=True, axis=False, reset=False):
         """"Update plot
@@ -9338,17 +9365,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def update_spinboxes(self, parameters):
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
-            self.update_spinboxes_bool = False
             auto_scale = parameters['auto_scale']
             #self.spinBoxX.setValue(int(parameters['x_max']))
 
             self.toolButtonAutoScale.setChecked(bool(auto_scale))
             if auto_scale:
-                self.doubleSpinBoxDUB.setEnabled(True)
-                self.doubleSpinBoxDLB.setEnabled(True)
+                self.lineEditDifferenceLowerQuantile.setEnabled(True)
+                self.lineEditDifferenceUpperQuantile.setEnabled(True)
+                #self.doubleSpinBoxDUB.setEnabled(True)
+                #self.doubleSpinBoxDLB.setEnabled(True)
             else:
-                self.doubleSpinBoxDUB.setEnabled(False)
-                self.doubleSpinBoxDLB.setEnabled(False)
+                self.lineEditDifferenceLowerQuantile.setEnabled(False)
+                self.lineEditDifferenceUpperQuantile.setEnabled(False)
+                #self.doubleSpinBoxDUB.setEnabled(False)
+                #self.doubleSpinBoxDLB.setEnabled(False)
+
             # self.spinBox_X.setMinimum(int(parameters['x_max']))
             # self.spinBox_X.setMaximum(int(parameters['x_min']))
             # self.spinBox_X.setValue(int(parameters['x_min']))
@@ -9362,15 +9393,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # self.spinBox_Y.setMinimum(int(parameters['y_min']))
             # self.spinBox_Y.setValue(int(parameters['y_min']))
 
-            self.doubleSpinBoxUB.setValue(parameters['upper_bound'])
-            self.doubleSpinBoxLB.setValue(parameters['lower_bound'])
-            self.doubleSpinBoxDLB.setValue(parameters['d_l_bound'])
-            self.doubleSpinBoxDUB.setValue(parameters['d_u_bound'])
+            self.lineEditLowerQuantile.setText(str(parameters['lower_bound']))
+            self.lineEditUpperQuantile.setText(str(parameters['upper_bound']))
+            self.lineEditDifferenceLowerQuantile.setText(str(parameters['d_l_bound']))
+            self.lineEditDifferenceUpperQuantile.setText(str(parameters['d_u_bound']))
+            # self.doubleSpinBoxUB.setValue(parameters['upper_bound'])
+            # self.doubleSpinBoxLB.setValue(parameters['lower_bound'])
+            # self.doubleSpinBoxDLB.setValue(parameters['d_l_bound'])
+            # self.doubleSpinBoxDUB.setValue(parameters['d_u_bound'])
 
             self.lineEditFMin.setText(self.dynamic_format(parameters['v_min'],dir=0))
             self.lineEditFMax.setText(self.dynamic_format(parameters['v_max'],dir=1))
-
-            self.update_spinboxes_bool = True
 
     # ----start debugging----
     # def test_get_field_list(self):

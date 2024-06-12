@@ -2284,8 +2284,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             self.lineEditLowerQuantile.setText(str(lb))
             self.lineEditUpperQuantile.setText(str(ub))
-            self.lineEditDiffereneLowerQuantile.setText(str(d_lb))
-            self.lineEditDifferenceUppereuantile.setText(str(d_ub))
+            self.lineEditDifferenceLowerQuantile.setText(str(d_lb))
+            self.lineEditDifferenceUpperQuantile.setText(str(d_ub))
             self.lineEditDifferenceLowerQuantile.setEnabled(True)
             self.lineEditDifferenceUpperQuantile.setEnabled(True)
 
@@ -2315,7 +2315,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.prep_data(sample_id, analyte_1,analyte_2)
         self.update_filter_values()
         self.update_SV()
-        self.show()
+        #self.show()
 
     def update_plot(self,bin_s=True, axis=False, reset=False):
         """"Update plot
@@ -11154,6 +11154,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         return False
 
 
+    # -------------------------------
+    # Unclassified functions
+    # -------------------------------
     def switch_view_mode(self, view_mode):
         if view_mode > 2:
             view_mode = 0

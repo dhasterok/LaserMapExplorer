@@ -742,7 +742,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # auto scale controls
         self.toolButtonAutoScale.clicked.connect(lambda: self.auto_scale(False))
-        self.toolButtonAutoScale.clicked.connect(self.update_SV)
+        # self.toolButtonAutoScale.clicked.connect(self.update_SV)
         self.toolButtonAutoScale.setChecked(True)
 
         # Preprocess Tab
@@ -1779,6 +1779,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.toolBox.setCurrentIndex(self.left_tab['special'])
 
     def canvas_changed(self):
+        print('canvas_changed')
         if self.sample_id == '':
             self.toolButtonHome.setVisible(False)
             self.toolButtonPan.setVisible(False)
@@ -3173,8 +3174,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         if not analyte_2: #not a ratio
             # shifts analyte values so that all values are postive
-            adj_data = pd.DataFrame(self.transform_plots(self.data[sample_id]['cropped_raw_data'][analytes].values), columns= analytes)
-
+            # adj_data = pd.DataFrame(self.transform_plots(self.data[sample_id]['cropped_raw_data'][analytes].values), columns= analytes)
+            adj_data = self.data[sample_id]['cropped_raw_data'][analytes]
+            
             # #perform scaling for groups of analytes with same norm parameter
             # for norm in analyte_info['norm'].unique():
             #     filtered_analytes = analyte_info[(analyte_info['norm'] == norm)]['analytes']
@@ -3232,7 +3234,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             ratio_name = analyte_1+' / '+analyte_2
 
             # shifts analyte values so that all values are postive
-            ratio_array = self.transform_plots(ratio_df.values)
+            # ratio_array = self.transform_plots(ratio_df.values)
+            ratio_array= ratio_df.values
             ratio_df = pd.DataFrame(ratio_array, columns= [analyte_1,analyte_2])
 
             mask = (ratio_df[analyte_1] > 0) & (ratio_df[analyte_2] > 0)
@@ -6041,7 +6044,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             case 'Cluster' | 'Cluster Score':
                 self.plot_clusters()
 
-        self.update_plot_info_tab(self.plot_info)
+        # self.update_plot_info_tab(self.plot_info)
 
     def add_plotwidget_to_canvas(self, plot_info, position=None):
         """Adds plot to selected view
@@ -6058,7 +6061,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         plot_name = plot_info['plot_name']
         sample_id = plot_info['sample_id']
         tree = plot_info['tree']
-
         # widget_dict = self.plot_widget_dict[tree][sample_id][plot_name]
 
         # if on QuickView canvas, then set to SingleView canvas
@@ -6070,7 +6072,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             #print('add_plotwidget_to_canvas: SV')
             self.clear_layout(self.widgetSingleView.layout())
             widget = plot_info['figure']
-
+            
+            
             plot_info['view'][0] = True
             
             self.SV_plot_name = f"{plot_info['sample_id']}:{plot_info['plot_type']}:{plot_info['plot_name']}"
@@ -6093,7 +6096,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.widgetMultiView.layout().addWidget( dup_widget, row, col )
                 dup_widget.show()
                 self.duplicate_plot_info = None #reset to avoid plotting previous duplicates
-            self.widgetSingleView.layout().insertWidget(0,widget)
+            else:
+                #update toolbar and SV canvas
+                self.update_canvas(widget)
             widget.show()
         # add figure to MultiView canvas
         elif self.canvasWindow.currentIndex() == self.canvas_tab['mv']:
@@ -6174,8 +6179,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 data = [row, col, tree, sample_id, name]
                 self.comboBoxMVPlots.addItem(name, userData=data)
 
-        self.hide()
-        self.show()
+        # self.hide()
+        # self.show()
 
         # put plot_info back into table
         #print(plot_info)
@@ -6282,16 +6287,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def update_canvas(self, new_canvas):
         # Clear the existing layout
         self.clear_layout(self.widgetSingleView.layout())
-
+        
+        
         # Add the new canvas to the layout
         self.widgetSingleView.layout().addWidget(new_canvas)
-
-        # Recreate the NavigationToolbar with the new canvas
-        self.mpl_toolbar = NavigationToolbar(new_canvas, self.widgetSingleView)
-        #hide the toolbar
-        self.mpl_toolbar.hide()
-        self.widgetSingleView.layout().addWidget(self.mpl_toolbar)
-
+        
+        try:
+            # Recreate the NavigationToolbar with the new canvas
+            self.mpl_toolbar = NavigationToolbar(new_canvas, self.widgetSingleView)
+            #hide the toolbar
+            self.mpl_toolbar.hide()
+            self.widgetSingleView.layout().addWidget(self.mpl_toolbar)
+        except:
+            pass
     def display_QV(self):
         """Plots selected maps to the Quick View tab
 
@@ -6836,8 +6844,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # self.mpl_toolbar = NavigationToolbar(canvas, self)
         # self.widgetSingleView.layout().addWidget(self.mpl_toolbar)
         # self.mpl_toolbar.hide()
-        #remove current canvas and add toolbar
-        self.update_canvas(canvas)
+        
         
         self.add_plotwidget_to_canvas( self.plot_info)
         # self.widgetSingleView.layout().addWidget(canvas)
@@ -9983,7 +9990,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 else:
                     self.plot_map_pg(sample_id=branch, field_type=tree, field=leaf)
 
-        elif tree in ['Histogram', 'Correlation', 'Geochemistry', 'Multidimensional', 'Calculated']:
+        elif tree in ['Histogram', 'Correlation', 'Geochemistry', 'Multidimensional Analysis', 'Calculated']:
             self.add_plotwidget_to_canvas(self.plot_info)
 
     def update_tree(self, analyte_df, norm_update=False):

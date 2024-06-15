@@ -76,8 +76,8 @@
           <widget class="QWidget" name="widgetSampleSelect" native="true">
            <property name="geometry">
             <rect>
-             <x>45</x>
-             <y>125</y>
+             <x>15</x>
+             <y>85</y>
              <width>211</width>
              <height>45</height>
             </rect>
@@ -984,6 +984,9 @@
      <stylestrategy>PreferDefault</stylestrategy>
     </font>
    </property>
+   <property name="nativeMenuBar">
+    <bool>true</bool>
+   </property>
    <widget class="QMenu" name="menuFile">
     <property name="font">
      <font>
@@ -1146,7 +1149,7 @@
         <string/>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>8</number>
        </property>
        <widget class="QWidget" name="SelectAnalytePage">
         <property name="enabled">
@@ -1157,7 +1160,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>181</height>
+          <height>182</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -1197,7 +1200,7 @@
               <x>0</x>
               <y>0</y>
               <width>300</width>
-              <height>495</height>
+              <height>511</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_41">
@@ -1850,6 +1853,19 @@
                </layout>
               </widget>
              </item>
+             <item>
+              <spacer name="verticalSpacer_15">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
             </layout>
            </widget>
           </widget>
@@ -1865,7 +1881,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>181</height>
+          <height>182</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -2464,7 +2480,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>181</height>
+          <height>182</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -2504,7 +2520,7 @@
               <x>0</x>
               <y>0</y>
               <width>294</width>
-              <height>175</height>
+              <height>176</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_45">
@@ -2837,7 +2853,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>181</height>
+          <height>182</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -3476,7 +3492,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>181</height>
+          <height>182</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -4242,7 +4258,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>181</height>
+          <height>182</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -4282,7 +4298,7 @@
               <x>0</x>
               <y>0</y>
               <width>300</width>
-              <height>343</height>
+              <height>341</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_52">
@@ -4920,7 +4936,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>181</height>
+          <height>182</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5530,7 +5546,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>181</height>
+          <height>182</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5576,7 +5592,7 @@
               <x>0</x>
               <y>0</y>
               <width>301</width>
-              <height>181</height>
+              <height>182</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_57">
@@ -5763,7 +5779,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>181</height>
+          <height>182</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5803,7 +5819,7 @@
               <x>0</x>
               <y>0</y>
               <width>300</width>
-              <height>362</height>
+              <height>284</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_60">
@@ -5820,647 +5836,346 @@
               <number>6</number>
              </property>
              <item>
-              <widget class="QStackedWidget" name="stackedWidget">
-               <property name="toolTip">
-                <string>Open profile style options</string>
+              <widget class="QGroupBox" name="groupBoxClustering">
+               <property name="title">
+                <string/>
                </property>
-               <property name="currentIndex">
-                <number>0</number>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
                </property>
-               <widget class="QWidget" name="pageClustering">
-                <layout class="QVBoxLayout" name="verticalLayout_58">
-                 <property name="leftMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="topMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="rightMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="bottomMargin">
-                  <number>0</number>
-                 </property>
-                 <item>
-                  <widget class="QGroupBox" name="groupBoxClustering">
-                   <property name="title">
-                    <string/>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignCenter</set>
-                   </property>
-                   <layout class="QFormLayout" name="formLayout_7">
-                    <item row="1" column="0">
-                     <widget class="QLabel" name="labelClusterMethod">
-                      <property name="font">
-                       <font>
-                        <pointsize>11</pointsize>
-                        <stylestrategy>PreferDefault</stylestrategy>
-                       </font>
-                      </property>
-                      <property name="text">
-                       <string>Method</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="1" column="1">
-                     <widget class="QComboBox" name="comboBoxClusterMethod">
-                      <property name="maximumSize">
-                       <size>
-                        <width>150</width>
-                        <height>16777215</height>
-                       </size>
-                      </property>
-                      <property name="font">
-                       <font>
-                        <pointsize>11</pointsize>
-                        <stylestrategy>PreferDefault</stylestrategy>
-                       </font>
-                      </property>
-                      <property name="toolTip">
-                       <string>Select clustering method</string>
-                      </property>
-                      <item>
-                       <property name="text">
-                        <string>k-means</string>
-                       </property>
-                      </item>
-                      <item>
-                       <property name="text">
-                        <string>fuzzy c-means</string>
-                       </property>
-                      </item>
-                     </widget>
-                    </item>
-                    <item row="2" column="0">
-                     <widget class="QLabel" name="labelExponent">
-                      <property name="font">
-                       <font>
-                        <pointsize>11</pointsize>
-                        <stylestrategy>PreferDefault</stylestrategy>
-                       </font>
-                      </property>
-                      <property name="text">
-                       <string>Exponent</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="2" column="1">
-                     <layout class="QHBoxLayout" name="horizontalLayout">
-                      <item>
-                       <widget class="QLabel" name="labelClusterExponent">
-                        <property name="font">
-                         <font>
-                          <pointsize>11</pointsize>
-                          <stylestrategy>PreferDefault</stylestrategy>
-                         </font>
-                        </property>
-                        <property name="text">
-                         <string>0</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item>
-                       <widget class="QSlider" name="horizontalSliderClusterExponent">
-                        <property name="maximumSize">
-                         <size>
-                          <width>150</width>
-                          <height>16777215</height>
-                         </size>
-                        </property>
-                        <property name="font">
-                         <font>
-                          <pointsize>11</pointsize>
-                          <stylestrategy>PreferDefault</stylestrategy>
-                         </font>
-                        </property>
-                        <property name="minimum">
-                         <number>1</number>
-                        </property>
-                        <property name="maximum">
-                         <number>3</number>
-                        </property>
-                        <property name="orientation">
-                         <enum>Qt::Horizontal</enum>
-                        </property>
-                        <property name="tickPosition">
-                         <enum>QSlider::NoTicks</enum>
-                        </property>
-                        <property name="tickInterval">
-                         <number>5</number>
-                        </property>
-                       </widget>
-                      </item>
-                     </layout>
-                    </item>
-                    <item row="3" column="0">
-                     <widget class="QLabel" name="labelClusterDistance">
-                      <property name="font">
-                       <font>
-                        <pointsize>11</pointsize>
-                        <stylestrategy>PreferDefault</stylestrategy>
-                       </font>
-                      </property>
-                      <property name="text">
-                       <string>Distance</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="3" column="1">
-                     <widget class="QComboBox" name="comboBoxClusterDistance">
-                      <property name="maximumSize">
-                       <size>
-                        <width>150</width>
-                        <height>16777215</height>
-                       </size>
-                      </property>
-                      <property name="font">
-                       <font>
-                        <pointsize>11</pointsize>
-                        <stylestrategy>PreferDefault</stylestrategy>
-                       </font>
-                      </property>
-                      <property name="toolTip">
-                       <string>Change the multidimensional distance metric for clustering</string>
-                      </property>
-                      <item>
-                       <property name="text">
-                        <string>New Item</string>
-                       </property>
-                      </item>
-                     </widget>
-                    </item>
-                    <item row="4" column="0">
-                     <widget class="QLabel" name="labelClusterStartingSeed">
-                      <property name="font">
-                       <font>
-                        <pointsize>11</pointsize>
-                        <stylestrategy>PreferDefault</stylestrategy>
-                       </font>
-                      </property>
-                      <property name="text">
-                       <string>Starting seed</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="4" column="1">
-                     <layout class="QHBoxLayout" name="horizontalLayout_5">
-                      <item>
-                       <widget class="QToolButton" name="toolButtonRandomSeed">
-                        <property name="minimumSize">
-                         <size>
-                          <width>32</width>
-                          <height>32</height>
-                         </size>
-                        </property>
-                        <property name="maximumSize">
-                         <size>
-                          <width>32</width>
-                          <height>32</height>
-                         </size>
-                        </property>
-                        <property name="font">
-                         <font>
-                          <pointsize>11</pointsize>
-                          <stylestrategy>PreferDefault</stylestrategy>
-                         </font>
-                        </property>
-                        <property name="text">
-                         <string>...</string>
-                        </property>
-                        <property name="icon">
-                         <iconset resource="../resources.qrc">
-                          <normaloff>:/resources/icons/icon-randomize-64.svg</normaloff>:/resources/icons/icon-randomize-64.svg</iconset>
-                        </property>
-                        <property name="iconSize">
-                         <size>
-                          <width>24</width>
-                          <height>24</height>
-                         </size>
-                        </property>
-                       </widget>
-                      </item>
-                      <item>
-                       <widget class="QLineEdit" name="lineEditSeed">
-                        <property name="maximumSize">
-                         <size>
-                          <width>150</width>
-                          <height>16777215</height>
-                         </size>
-                        </property>
-                        <property name="font">
-                         <font>
-                          <pointsize>11</pointsize>
-                          <stylestrategy>PreferDefault</stylestrategy>
-                         </font>
-                        </property>
-                        <property name="toolTip">
-                         <string>Change the starting seed</string>
-                        </property>
-                        <property name="text">
-                         <string>23</string>
-                        </property>
-                        <property name="alignment">
-                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                        </property>
-                       </widget>
-                      </item>
-                     </layout>
-                    </item>
-                    <item row="0" column="0">
-                     <widget class="QLabel" name="labelNClusters">
-                      <property name="font">
-                       <font>
-                        <pointsize>11</pointsize>
-                        <stylestrategy>PreferDefault</stylestrategy>
-                       </font>
-                      </property>
-                      <property name="text">
-                       <string>No. clusters</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="0" column="1">
-                     <widget class="QSpinBox" name="spinBoxNClusters">
-                      <property name="maximumSize">
-                       <size>
-                        <width>150</width>
-                        <height>16777215</height>
-                       </size>
-                      </property>
-                      <property name="font">
-                       <font>
-                        <pointsize>11</pointsize>
-                        <stylestrategy>PreferDefault</stylestrategy>
-                       </font>
-                      </property>
-                      <property name="toolTip">
-                       <string>Change the number of clusters</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                      </property>
-                      <property name="keyboardTracking">
-                       <bool>false</bool>
-                      </property>
-                      <property name="minimum">
-                       <number>1</number>
-                      </property>
-                      <property name="maximum">
-                       <number>500</number>
-                      </property>
-                      <property name="value">
-                       <number>5</number>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="6" column="0">
-                     <widget class="QLabel" name="labelPCANumBasis">
-                      <property name="font">
-                       <font>
-                        <pointsize>11</pointsize>
-                        <stylestrategy>PreferDefault</stylestrategy>
-                       </font>
-                      </property>
-                      <property name="text">
-                       <string>No. basis</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="6" column="1">
-                     <widget class="QSpinBox" name="spinBoxPCANumBasis">
-                      <property name="maximumSize">
-                       <size>
-                        <width>150</width>
-                        <height>16777215</height>
-                       </size>
-                      </property>
-                      <property name="font">
-                       <font>
-                        <pointsize>11</pointsize>
-                        <stylestrategy>PreferDefault</stylestrategy>
-                       </font>
-                      </property>
-                      <property name="toolTip">
-                       <string>Number of basis vectors for dimensional reduction</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                      </property>
-                      <property name="keyboardTracking">
-                       <bool>false</bool>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="5" column="1">
-                     <widget class="QCheckBox" name="checkBoxWithPCA">
-                      <property name="font">
-                       <font>
-                        <pointsize>11</pointsize>
-                        <stylestrategy>PreferDefault</stylestrategy>
-                       </font>
-                      </property>
-                      <property name="text">
-                       <string/>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="5" column="0">
-                     <widget class="QLabel" name="labelClusterWithPCA">
-                      <property name="font">
-                       <font>
-                        <pointsize>11</pointsize>
-                        <stylestrategy>PreferDefault</stylestrategy>
-                       </font>
-                      </property>
-                      <property name="text">
-                       <string>PCA</string>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
-                  </widget>
-                 </item>
-                </layout>
-               </widget>
-               <widget class="QWidget" name="pagetSNE">
-                <layout class="QVBoxLayout" name="verticalLayout_59">
-                 <item>
-                  <widget class="QGroupBox" name="groupBoxtSNE">
-                   <property name="title">
-                    <string>tSNE</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                   </property>
-                   <layout class="QFormLayout" name="formLayout_5">
-                    <item row="0" column="0">
-                     <widget class="QLabel" name="labelTSNEPlotType">
-                      <property name="font">
-                       <font>
-                        <pointsize>11</pointsize>
-                        <stylestrategy>PreferDefault</stylestrategy>
-                       </font>
-                      </property>
-                      <property name="text">
-                       <string>Plot type</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignCenter</set>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="0" column="1">
-                     <widget class="QComboBox" name="comboBox_3">
-                      <property name="font">
-                       <font>
-                        <pointsize>11</pointsize>
-                        <stylestrategy>PreferDefault</stylestrategy>
-                       </font>
-                      </property>
-                      <item>
-                       <property name="text">
-                        <string>Coordinates</string>
-                       </property>
-                      </item>
-                      <item>
-                       <property name="text">
-                        <string>Map</string>
-                       </property>
-                      </item>
-                     </widget>
-                    </item>
-                    <item row="1" column="0">
-                     <widget class="QLabel" name="labelPerplexity">
-                      <property name="font">
-                       <font>
-                        <pointsize>11</pointsize>
-                        <stylestrategy>PreferDefault</stylestrategy>
-                       </font>
-                      </property>
-                      <property name="text">
-                       <string>Perplexity</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignCenter</set>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="1" column="1">
-                     <widget class="QSlider" name="horizontalSlidertSNEPerplexity">
-                      <property name="font">
-                       <font>
-                        <pointsize>11</pointsize>
-                        <stylestrategy>PreferDefault</stylestrategy>
-                       </font>
-                      </property>
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="tickPosition">
-                       <enum>QSlider::TicksAbove</enum>
-                      </property>
-                      <property name="tickInterval">
-                       <number>2</number>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="2" column="0">
-                     <widget class="QLabel" name="labelExaggeration">
-                      <property name="font">
-                       <font>
-                        <pointsize>11</pointsize>
-                        <stylestrategy>PreferDefault</stylestrategy>
-                       </font>
-                      </property>
-                      <property name="text">
-                       <string>Exaggeration</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignCenter</set>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="2" column="1">
-                     <widget class="QSlider" name="horizontalSlidertSNEExaggeration">
-                      <property name="font">
-                       <font>
-                        <pointsize>11</pointsize>
-                        <stylestrategy>PreferDefault</stylestrategy>
-                       </font>
-                      </property>
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="tickPosition">
-                       <enum>QSlider::TicksAbove</enum>
-                      </property>
-                      <property name="tickInterval">
-                       <number>2</number>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="3" column="0">
-                     <widget class="QLabel" name="labelDistance">
-                      <property name="font">
-                       <font>
-                        <pointsize>11</pointsize>
-                        <stylestrategy>PreferDefault</stylestrategy>
-                       </font>
-                      </property>
-                      <property name="text">
-                       <string>Distance</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignCenter</set>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="3" column="1">
-                     <widget class="QComboBox" name="comboBoxtSNEDistance_2">
-                      <property name="font">
-                       <font>
-                        <pointsize>11</pointsize>
-                        <stylestrategy>PreferDefault</stylestrategy>
-                       </font>
-                      </property>
-                      <item>
-                       <property name="text">
-                        <string>Euclidean</string>
-                       </property>
-                      </item>
-                     </widget>
-                    </item>
-                    <item row="4" column="0">
-                     <widget class="QLabel" name="labelThreshold">
-                      <property name="font">
-                       <font>
-                        <pointsize>11</pointsize>
-                        <stylestrategy>PreferDefault</stylestrategy>
-                       </font>
-                      </property>
-                      <property name="text">
-                       <string>Threshold</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignCenter</set>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="4" column="1">
-                     <widget class="QSpinBox" name="spinBoxtSNEThreshold">
-                      <property name="font">
-                       <font>
-                        <pointsize>11</pointsize>
-                        <stylestrategy>PreferDefault</stylestrategy>
-                       </font>
-                      </property>
-                      <property name="keyboardTracking">
-                       <bool>false</bool>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="5" column="0">
-                     <widget class="QLabel" name="labelGridSize">
-                      <property name="font">
-                       <font>
-                        <pointsize>11</pointsize>
-                        <stylestrategy>PreferDefault</stylestrategy>
-                       </font>
-                      </property>
-                      <property name="text">
-                       <string>Grid size</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignCenter</set>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="5" column="1">
-                     <widget class="QSpinBox" name="spinBoxtSNEGridSize">
-                      <property name="font">
-                       <font>
-                        <pointsize>11</pointsize>
-                        <stylestrategy>PreferDefault</stylestrategy>
-                       </font>
-                      </property>
-                      <property name="keyboardTracking">
-                       <bool>false</bool>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="6" column="0">
-                     <widget class="QLabel" name="labelAssignGroups">
-                      <property name="font">
-                       <font>
-                        <pointsize>11</pointsize>
-                        <stylestrategy>PreferDefault</stylestrategy>
-                       </font>
-                      </property>
-                      <property name="text">
-                       <string>Assign Groups</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignCenter</set>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="6" column="1">
-                     <widget class="QPushButton" name="pushButton_47">
-                      <property name="font">
-                       <font>
-                        <pointsize>11</pointsize>
-                        <stylestrategy>PreferDefault</stylestrategy>
-                       </font>
-                      </property>
-                      <property name="text">
-                       <string>No</string>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QToolButton" name="toolButton_37">
-                   <property name="minimumSize">
-                    <size>
-                     <width>32</width>
-                     <height>32</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>32</width>
-                     <height>32</height>
-                    </size>
-                   </property>
-                   <property name="font">
-                    <font>
-                     <pointsize>11</pointsize>
-                     <stylestrategy>PreferDefault</stylestrategy>
-                    </font>
-                   </property>
+               <layout class="QFormLayout" name="formLayout_7">
+                <item row="0" column="0">
+                 <widget class="QLabel" name="labelNClusters">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                    <stylestrategy>PreferDefault</stylestrategy>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>No. clusters</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QSpinBox" name="spinBoxNClusters">
+                  <property name="maximumSize">
+                   <size>
+                    <width>150</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                    <stylestrategy>PreferDefault</stylestrategy>
+                   </font>
+                  </property>
+                  <property name="toolTip">
+                   <string>Change the number of clusters</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  </property>
+                  <property name="keyboardTracking">
+                   <bool>false</bool>
+                  </property>
+                  <property name="minimum">
+                   <number>1</number>
+                  </property>
+                  <property name="maximum">
+                   <number>500</number>
+                  </property>
+                  <property name="value">
+                   <number>5</number>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QLabel" name="labelClusterMethod">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                    <stylestrategy>PreferDefault</stylestrategy>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Method</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QComboBox" name="comboBoxClusterMethod">
+                  <property name="maximumSize">
+                   <size>
+                    <width>150</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                    <stylestrategy>PreferDefault</stylestrategy>
+                   </font>
+                  </property>
+                  <property name="toolTip">
+                   <string>Select clustering method</string>
+                  </property>
+                  <item>
                    <property name="text">
-                    <string>Run tSNE</string>
+                    <string>k-means</string>
                    </property>
-                   <property name="icon">
-                    <iconset>
-                     <normaloff>:/icons/resources/icons/icon-launch-64.png</normaloff>:/icons/resources/icons/icon-launch-64.png</iconset>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>fuzzy c-means</string>
                    </property>
-                   <property name="iconSize">
-                    <size>
-                     <width>24</width>
-                     <height>24</height>
-                    </size>
+                  </item>
+                 </widget>
+                </item>
+                <item row="2" column="0">
+                 <widget class="QLabel" name="labelExponent">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                    <stylestrategy>PreferDefault</stylestrategy>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Exponent</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <layout class="QHBoxLayout" name="horizontalLayout">
+                  <item>
+                   <widget class="QLabel" name="labelClusterExponent">
+                    <property name="font">
+                     <font>
+                      <pointsize>11</pointsize>
+                      <stylestrategy>PreferDefault</stylestrategy>
+                     </font>
+                    </property>
+                    <property name="text">
+                     <string>0</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QSlider" name="horizontalSliderClusterExponent">
+                    <property name="maximumSize">
+                     <size>
+                      <width>150</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
+                    <property name="font">
+                     <font>
+                      <pointsize>11</pointsize>
+                      <stylestrategy>PreferDefault</stylestrategy>
+                     </font>
+                    </property>
+                    <property name="minimum">
+                     <number>1</number>
+                    </property>
+                    <property name="maximum">
+                     <number>3</number>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="tickPosition">
+                     <enum>QSlider::NoTicks</enum>
+                    </property>
+                    <property name="tickInterval">
+                     <number>5</number>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item row="3" column="0">
+                 <widget class="QLabel" name="labelClusterDistance">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                    <stylestrategy>PreferDefault</stylestrategy>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Distance</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="1">
+                 <widget class="QComboBox" name="comboBoxClusterDistance">
+                  <property name="maximumSize">
+                   <size>
+                    <width>150</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                    <stylestrategy>PreferDefault</stylestrategy>
+                   </font>
+                  </property>
+                  <property name="toolTip">
+                   <string>Change the multidimensional distance metric for clustering</string>
+                  </property>
+                  <item>
+                   <property name="text">
+                    <string>New Item</string>
                    </property>
-                  </widget>
-                 </item>
-                </layout>
-               </widget>
+                  </item>
+                 </widget>
+                </item>
+                <item row="4" column="0">
+                 <widget class="QLabel" name="labelClusterStartingSeed">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                    <stylestrategy>PreferDefault</stylestrategy>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Starting seed</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="1">
+                 <layout class="QHBoxLayout" name="horizontalLayout_5">
+                  <item>
+                   <widget class="QToolButton" name="toolButtonRandomSeed">
+                    <property name="minimumSize">
+                     <size>
+                      <width>32</width>
+                      <height>32</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>32</width>
+                      <height>32</height>
+                     </size>
+                    </property>
+                    <property name="font">
+                     <font>
+                      <pointsize>11</pointsize>
+                      <stylestrategy>PreferDefault</stylestrategy>
+                     </font>
+                    </property>
+                    <property name="text">
+                     <string>...</string>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="../resources.qrc">
+                      <normaloff>:/resources/icons/icon-randomize-64.svg</normaloff>:/resources/icons/icon-randomize-64.svg</iconset>
+                    </property>
+                    <property name="iconSize">
+                     <size>
+                      <width>24</width>
+                      <height>24</height>
+                     </size>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="lineEditSeed">
+                    <property name="maximumSize">
+                     <size>
+                      <width>150</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
+                    <property name="font">
+                     <font>
+                      <pointsize>11</pointsize>
+                      <stylestrategy>PreferDefault</stylestrategy>
+                     </font>
+                    </property>
+                    <property name="toolTip">
+                     <string>Change the starting seed</string>
+                    </property>
+                    <property name="text">
+                     <string>23</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item row="5" column="0">
+                 <widget class="QLabel" name="labelClusterWithPCA">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                    <stylestrategy>PreferDefault</stylestrategy>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>PCA</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="5" column="1">
+                 <widget class="QCheckBox" name="checkBoxWithPCA">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                    <stylestrategy>PreferDefault</stylestrategy>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+                <item row="6" column="0">
+                 <widget class="QLabel" name="labelPCANumBasis">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                    <stylestrategy>PreferDefault</stylestrategy>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>No. basis</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item row="6" column="1">
+                 <widget class="QSpinBox" name="spinBoxPCANumBasis">
+                  <property name="maximumSize">
+                   <size>
+                    <width>150</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                    <stylestrategy>PreferDefault</stylestrategy>
+                   </font>
+                  </property>
+                  <property name="toolTip">
+                   <string>Number of basis vectors for dimensional reduction</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  </property>
+                  <property name="keyboardTracking">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </widget>
              </item>
              <item>
@@ -6488,7 +6203,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>181</height>
+          <height>182</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6534,7 +6249,7 @@
               <x>0</x>
               <y>0</y>
               <width>300</width>
-              <height>181</height>
+              <height>182</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_64">
@@ -6636,8 +6351,8 @@
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>282</width>
-                      <height>146</height>
+                      <width>151</width>
+                      <height>38</height>
                      </rect>
                     </property>
                     <layout class="QFormLayout" name="formLayout_17">
@@ -6709,8 +6424,8 @@
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>282</width>
-                      <height>146</height>
+                      <width>141</width>
+                      <height>38</height>
                      </rect>
                     </property>
                     <layout class="QFormLayout" name="formLayout_18">
@@ -6787,7 +6502,7 @@
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>282</width>
+                      <width>236</width>
                       <height>234</height>
                      </rect>
                     </property>
@@ -7133,15 +6848,15 @@
         </font>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="PlotSelectorPage">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>251</width>
-          <height>360</height>
+          <width>268</width>
+          <height>361</height>
          </rect>
         </property>
         <attribute name="label">
@@ -7282,8 +6997,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>251</width>
-          <height>360</height>
+          <width>296</width>
+          <height>361</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7420,8 +7135,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>249</width>
-              <height>144</height>
+              <width>294</width>
+              <height>145</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -7460,7 +7175,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>249</width>
+                  <width>294</width>
                   <height>342</height>
                  </rect>
                 </property>
@@ -7825,8 +7540,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>249</width>
-              <height>144</height>
+              <width>100</width>
+              <height>72</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -7865,7 +7580,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>249</width>
+                  <width>203</width>
                   <height>374</height>
                  </rect>
                 </property>
@@ -8223,8 +7938,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>249</width>
-              <height>144</height>
+              <width>100</width>
+              <height>72</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -8263,7 +7978,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>249</width>
+                  <width>244</width>
                   <height>256</height>
                  </rect>
                 </property>
@@ -8649,8 +8364,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>249</width>
-              <height>144</height>
+              <width>100</width>
+              <height>75</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -8689,7 +8404,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>249</width>
+                  <width>247</width>
                   <height>312</height>
                  </rect>
                 </property>
@@ -9064,8 +8779,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>249</width>
-              <height>144</height>
+              <width>100</width>
+              <height>72</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -9104,7 +8819,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>249</width>
+                  <width>178</width>
                   <height>163</height>
                  </rect>
                 </property>
@@ -9408,8 +9123,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>251</width>
-          <height>360</height>
+          <width>290</width>
+          <height>361</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -9448,7 +9163,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>251</width>
+              <width>290</width>
               <height>687</height>
              </rect>
             </property>
@@ -10870,7 +10585,7 @@
         <string>Pop the figure out into a separate window</string>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="tabNotes">
         <property name="sizePolicy">
@@ -12844,6 +12559,9 @@
      <pointsize>12</pointsize>
     </font>
    </property>
+   <property name="iconVisibleInMenu">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="actionCluster">
    <property name="icon">
@@ -13038,6 +12756,9 @@
    <property name="menuRole">
     <enum>QAction::ApplicationSpecificRole</enum>
    </property>
+   <property name="iconVisibleInMenu">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="actionClusterMask">
    <property name="checkable">
@@ -13194,6 +12915,9 @@ to Tree</string>
    </property>
    <property name="iconText">
     <string>Import</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>false</bool>
    </property>
   </action>
   <action name="actionSwapAxes">

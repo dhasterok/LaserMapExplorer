@@ -109,23 +109,6 @@ setConfigOption('imageAxisOrder', 'row-major') # best performance
 #     }
 
 
-dark_stylesheet = """
-    QToolButton {
-        border: none;
-        border-radius: 6px;
-    }
-    QToolButton::menu-indicator {
-        image: none;
-    }
-    QToolButton:hover {
-        background-color: #545454; /* Change background color on hover */
-    }
-    QToolButton:checked {
-        background-color: #545454; /* Change background color on hover */
-    }
-"""
-
-
 class MainWindow(QMainWindow, Ui_MainWindow):
     """MainWindow
 
@@ -686,6 +669,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Select analyte Tab
         #-------------------------
         self.ref_data = pd.read_excel(os.path.join(basedir,'resources/app_data/earthref.xlsx'))
+        self.ref_data = self.ref_data[self.ref_data['sigma']!=1]
         self.sort_data = pd.read_excel(os.path.join(basedir,'resources/app_data/element_info.xlsx'))
         ref_list = self.ref_data['layer']+' ['+self.ref_data['model']+'] '+ self.ref_data['reference']
 

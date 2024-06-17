@@ -24,16 +24,17 @@ QDockWidget::float {
     color: #414042;
 }
 QPushButton, QCommandLinkButton {
-    padding: 2px 10px 2px 10px;
+    padding: 6px 12px 6px 12px;
+    margin-left: 5 px;
     border: none;
     border-radius: 4px;
-    color: #616161;
+    color: #282828;
     font-weight: bold 11px;
     background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #e9873a, stop:1 #f7ca89);
 }
 QPushButton::default, QCommandLinkButton::default {
     border: 2px solid transparent;
-    color: #FFFFFF;
+    color: #ffffff;
     background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #e9873a, stop:1 #f7ca89);
 }
 QPushButton:hover, QCommandLinkButton:hover {
@@ -521,6 +522,17 @@ QGroupBox#groupBoxPlotToolBar {
 QTabWidget#groupBoxPlotToolBar:title {
     padding: 0 0;
     background-color: #282828;
+}
+
+QGroupBox#groupBoxCalcFunctions > QPushButton {
+    color: #282828;
+    margin-left: 0px;
+    margin-right: 0px;
+    font: bold 10px;
+    padding: 0;
+}
+QGroupBox#groupBoxCalcFunctions > QPushButton:hover {
+    color: #ffffff;
 }
 
 QToolBar {

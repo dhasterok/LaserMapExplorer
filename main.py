@@ -40,6 +40,7 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 import cmcrameri as cmc
 from scipy import ndimage
 from scipy.signal import convolve2d, wiener, decimate
+from scipy.stats import yeojohnson
 from sklearn.cluster import KMeans
 #from sklearn_extra.cluster import KMedoids
 import skfuzzy as fuzz
@@ -683,6 +684,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxCorrelationMethod.activated.connect(self.correlation_method_callback)
         self.checkBoxCorrelationSquared.stateChanged.connect(self.correlation_squared_callback)
 
+        self.comboBoxNegativeMethod.addItems(['Ignore negative values', 'Minimum positive value', 'Gradual shift', 'Yeo-Johnson transformation'])
+        self.comboBoxNegativeMethod.activated.connect(self.prep_data)
+
         # Selecting analytes
         #-------------------------
         # Connect the currentIndexChanged signal of comboBoxSampleId to load_data method
@@ -710,19 +714,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.lineEditUpperQuantile.editingFinished.connect(lambda: self.auto_scale(True))
         self.lineEditDifferenceLowerQuantile.editingFinished.connect(lambda: self.auto_scale(True))
         self.lineEditDifferenceUpperQuantile.editingFinished.connect(lambda: self.auto_scale(True))
-        # self.doubleSpinBoxUB.setMaximum(100)
-        # self.doubleSpinBoxUB.setMinimum(0)
-        # self.doubleSpinBoxLB.setMaximum(100)
-        # self.doubleSpinBoxLB.setMinimum(0)
-        # self.doubleSpinBoxDUB.setMaximum(100)
-        # self.doubleSpinBoxDUB.setMinimum(0)
-        # self.doubleSpinBoxDLB.setMaximum(100)
-        # self.doubleSpinBoxDLB.setMinimum(0)
-
-        # self.doubleSpinBoxLB.valueChanged.connect(lambda: self.auto_scale(True))
-        # self.doubleSpinBoxUB.valueChanged.connect(lambda: self.auto_scale(True))
-        # self.doubleSpinBoxDUB.valueChanged.connect(lambda: self.auto_scale(True))
-        # self.doubleSpinBoxDUB.valueChanged.connect(lambda: self.auto_scale(True))
 
         # auto scale controls
         self.toolButtonAutoScale.clicked.connect(lambda: self.auto_scale(False))
@@ -773,7 +764,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Spot Data Tab
         #-------------------------
-        self.spotdata = {}
+        self.spotdata = pd.DataFrame()
+        self.toolButtonSpotLoad.clicked.connect(self.open_spots)
 
         # spot table
         header = self.tableWidgetSpots.horizontalHeader()
@@ -1410,6 +1402,59 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # self.sample_ids = [os.path.splitext(file)[0] for file in self.csv_files]
         # self.comboBoxSampleId.addItems(self.sample_ids)
         self.init_tabs()
+
+    def open_spots(self):
+        """Open file(s) with spot data
+
+        Prompts user to select spot data file with dialog after ``MainWindow.toolButtonSpots`` is clicked.
+        """        
+        dialog = QFileDialog()
+        dialog.setFileMode(QFileDialog.ExistingFiles)
+        dialog.setNameFilter("CSV (*.csv *.xls *.xlsx)")
+        if dialog.exec_():
+            file_list = dialog.selectedFiles()
+            csv_files = [os.path.split(file)[1] for file in file_list if (file.endswith('.csv') | file.endswith('.xls') | file.endswith('.xlsx'))]
+            if csv_files == []:
+                return
+        else:
+            return
+            
+        for filename in csv_files:
+            tempdata = pd.read_csv(filename, engine='c')
+            if not('Sample' in tempdata.columns):
+                tempdata['Sample'] = os.path.splitext(filename)[0]
+
+            pd.concat([self.spotdata, tempdata], axis=0, ignore_index=True)
+
+        if not('X' in self.spotdata.columns):
+            self.spotdata['X'] = None
+        if not('Y' in self.spotdata.columns):
+            self.spotdata['Y'] = None
+        if not('visible' in self.spotdata.columns):
+            self.spotdata['visible'] = False
+        if not('annotation' in self.spotdata.columns):
+            self.spotdata['annotation'] = ''
+        
+        self.populate_spot_table()
+
+    def populate_spot_table(self):
+        """Populates spot table when spot file is opened or sample is changed
+
+        Populates ``MainWindow.tableWidgetSpots``.
+        """        
+        if self.sample_id == '':
+            return
+        
+        filtered_df = self.spotdata[self.sample_id==self.spotdata['Sample']]
+        filtered_df = filtered_df['Sample','X','Y','visible','annotation']
+
+        self.tableWidgetSpots.clearContents()
+        self.tableWidgetSpots.setRowCount(len(filtered_df))
+        header = self.tableWidgetSpots.horizontalHeader()
+
+        for row_index, row in filtered_df.iterrows():
+            for col_index, value in enumerate(row):
+                self.tableWidgetSpots.setItem(row_index, col_index, QTableWidgetItem(str(value)))
         
     def init_tabs(self):
         self.toolBox.setCurrentIndex(self.left_tab['sample'])
@@ -1517,22 +1562,29 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             for analyte in self.selected_analytes:
                 self.data[sample_id]['norm'][analyte] = 'linear'
-            #obtain axis bounds for plotting and cropping
-            self.data[sample_id]['x_max']= self.data[sample_id]['crop_x_max'] = self.data[sample_id]['raw_data']['X'].max()
+
+            # obtain axis bounds for plotting and cropping, initially the entire map
+            self.data[sample_id]['x_max'] = self.data[sample_id]['crop_x_max'] = self.data[sample_id]['raw_data']['X'].max()
             self.data[sample_id]['x_min'] = self.data[sample_id]['crop_x_min'] = self.data[sample_id]['raw_data']['X'].min()
             self.data[sample_id]['y_max'] = self.data[sample_id]['crop_y_max'] = self.data[sample_id]['raw_data']['Y'].max()
             self.data[sample_id]['y_min'] = self.data[sample_id]['crop_y_min'] = self.data[sample_id]['raw_data']['Y'].min()
+
+            # setup a dataframe with parameters for autoscaling and handling negative values for each analyte
             analytes['lower_bound'] = 0.05
             analytes['upper_bound'] = 99.5
             analytes['d_l_bound'] = 0.05 
             analytes['d_u_bound'] = 99
-            self.data[self.sample_id]['processed_data'] = copy.deepcopy(self.data[self.sample_id]['raw_data'][self.selected_analytes])
-            self.data[self.sample_id]['cropped_raw_data'] = copy.deepcopy(self.data[self.sample_id]['raw_data'])
             analytes['v_min'] = None
             analytes['v_max'] = None
             analytes['auto_scale'] = True
             analytes['use'] = True
+            analytes['negative_method'] = self.comboBoxNegativeMethod.currentText()
+            analytes['min_positive_value'] = 0
             self.data[sample_id]['analyte_info'] = analytes
+
+            # create dataframes for cropped data and processed data
+            self.data[self.sample_id]['cropped_raw_data'] = copy.deepcopy(self.data[self.sample_id]['raw_data'])
+            self.data[self.sample_id]['processed_data'] = copy.deepcopy(self.data[self.sample_id]['raw_data'][self.selected_analytes])
 
             # for plot_type in self.plot_widget_dict.keys():
             #     if sample_id not in self.plot_widget_dict[plot_type]:
@@ -1557,26 +1609,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.data[self.sample_id]['polygon_mask'] & \
                 self.data[self.sample_id]['cluster_mask']
 
+            # autoscale and negative handling
             self.prep_data()
 
+            # determine aspect ratio
             self.compute_map_aspect_ratio()
-
-            # self.checkBoxViewRatio.setChecked(False)
 
             #get plot array
             current_plot_df = self.get_map_data(sample_id=sample_id, field=self.selected_analytes[0], field_type='Analyte')
             #set
-            #self.comboBoxColorField.setCurrentText(self.selected_analytes[0])
             self.styles['analyte map']['Colors']['Field'] = self.selected_analytes[0]
 
-            #create plot
-            #self.create_plot(current_plot_df,sample_id=sample_id, plot_type='lasermap', analyte_1=self.selected_analytes[0])
-
-
             self.create_tree(sample_id)
-            # self.clear_analysis()
             self.update_tree(self.data[sample_id]['norm'])
-            #print(self.data[sample_id]['norm'])
         else:
             #update filters, polygon, profiles with existing data
             self.compute_map_aspect_ratio()
@@ -1603,11 +1648,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.update_tables()
 
             return
-
-            #get plot array
-            #current_plot_df = self.get_map_data(sample_id=self.sample_id, field=self.selected_analytes[0], analysis_type='Analyte')
-            #create plot
-            #self.create_plot(current_plot_df, sample_id=self.sample_id, plot_type='lasermap', analyte_1=self.selected_analytes[0])
 
         # reset filters
         self.actionClusterMask.setEnabled(False)
@@ -9061,7 +9101,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         return clipped_data
 
     def transform_plots(self, array):
-        """Removes zero values and clips extreme values
+        """Negative and zero handling
 
         Parameters
         ----------
@@ -9072,34 +9112,51 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         -------
         numpy.ndarray
             Transformed data
-        """        
-        if array.ndim == 2:
-            # Calculate min and max values for each column and adjust their shapes for broadcasting
-            min_val = np.nanmin(array, axis=0, keepdims=True) - 0.0001
-            max_val = np.nanmax(array, axis=0, keepdims=True)
+        """
 
-            # Adjust the shape of min_val and max_val for broadcasting
-            adjusted_min_val = min_val
-            adjusted_max_val = max_val
 
-            # Check if min values are less than 0
-            min_less_than_zero = adjusted_min_val < 0
-
-            # Perform transformation with broadcasting
-            t_array = np.where(
-                min_less_than_zero,
-                (adjusted_max_val * (array - adjusted_min_val)) / (adjusted_max_val - adjusted_min_val),
-                np.copy(array)
-            )
-        else:
-            # 1D array case, similar to original logic
-            min_val = np.nanmin(array) - 0.0001
-            max_val = np.nanmax(array)
-            if min_val < 0:
-                t_array = (max_val * (array - min_val)) / (max_val - min_val)
-            else:
+        #negative_method = should come from analyte info
+        match negative_method.lower():
+            case 'ignore negative values':
                 t_array = np.copy(array)
-        return t_array
+                t_array = t_array[t_array <= 0] = np.nan
+                return t_array
+            case 'minimum positive value':
+                min_positive_value = np.nanmin(array[array > 0])
+                t_array = np.where(array < 0, min_positive_value, array)
+                return t_array
+            case 'gradual shift':
+                if array.ndim == 2:
+                    # Calculate min and max values for each column and adjust their shapes for broadcasting
+                    min_val = np.nanmin(array, axis=0, keepdims=True) - 0.0001
+                    max_val = np.nanmax(array, axis=0, keepdims=True)
+
+                    # Adjust the shape of min_val and max_val for broadcasting
+                    adjusted_min_val = min_val
+                    adjusted_max_val = max_val
+
+                    # Check if min values are less than or equal 0
+                    min_leq_zero = adjusted_min_val <= 0
+
+                    # Perform transformation with broadcasting
+                    t_array = np.where(
+                        min_leq_zero,
+                        (adjusted_max_val * (array - adjusted_min_val)) / (adjusted_max_val - adjusted_min_val),
+                        array
+                    )
+                else:
+                    # 1D array case, similar to original logic
+                    min_val = np.nanmin(array) - 0.0001
+                    max_val = np.nanmax(array)
+                    if min_val < 0:
+                        t_array = (max_val * (array - min_val)) / (max_val - min_val)
+                    else:
+                        t_array = np.copy(array)
+                return t_array
+            case 'yeo-johnson transformation':
+                # Apply Yeo-Johnson transformation
+                t_array, lambda_yeojohnson = yeojohnson(array)
+                return t_array
 
     # make this part of the calculated fields
     def add_ree(self, sample_df):
@@ -9522,11 +9579,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             case _:#'PCA Score' | 'Cluster' | 'Cluster Score' | 'Special' | 'Computed':
                 df['array'] = self.data[sample_id]['computed_data'][field_type].loc[:,field].values
-                
-        
-        
-        
-        
             
         # ----begin debugging----
         # print(df.columns)

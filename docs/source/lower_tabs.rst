@@ -38,10 +38,9 @@ Titles, sections and subsections can be created by including a line of \*, \=, a
 .. _reference: 
     reference
 
-Filters
-=======
+Polygons
+========
 
-User defined filters are shown in the *Filter Table*.  Edit filters, turn them on/off, change boolean operations, and remove them directly from the table.
 
 Profiles
 ========

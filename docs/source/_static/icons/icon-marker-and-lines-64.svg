@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+        stroke: #4d4d4f;
+        stroke-miterlimit: 10;
+        stroke-width: 6px;
+      }
+
+      .cls-2 {
+        fill: #1c75bc;
+        stroke-width: 0px;
+      }
+    </style>
+  </defs>
+  <circle class="cls-2" cx="18" cy="18" r="15"/>
+  <polygon class="cls-2" points="44 31 26.7 61 61.3 61 44 31"/>
+  <line class="cls-1" x1="5.5" y1="59.8" x2="60.5" y2="6.2"/>
+</svg>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 64 64">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: url(#linear-gradient);
+        stroke-linejoin: bevel;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4 {
+        stroke: #4d4d4f;
+        stroke-width: 2.1px;
+      }
+
+      .cls-2 {
+        fill: #bcbec0;
+      }
+
+      .cls-2, .cls-3, .cls-4 {
+        stroke-miterlimit: 10;
+      }
+
+      .cls-3 {
+        fill: none;
+      }
+
+      .cls-4 {
+        fill: #fff;
+      }
+
+      .cls-5 {
+        fill: #4d4d4f;
+        stroke-width: 0px;
+      }
+    </style>
+    <linearGradient id="linear-gradient" x1="46.1" y1="-2.2" x2="18.9" y2="25" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff"/>
+      <stop offset="1" stop-color="#939598"/>
+    </linearGradient>
+  </defs>
+  <polygon class="cls-2" points="50.4 2.2 61.9 13.6 61.8 61.5 2.5 61.5 2.5 2.2 50.4 2.2"/>
+  <path class="cls-4" d="M18.1,38.8h28.1c2.2,0,4,1.8,4,4v18.7H14.1v-18.7c0-2.2,1.8-4,4-4Z"/>
+  <rect class="cls-1" x="14.5" y="2.2" width="36.1" height="18.5"/>
+  <rect class="cls-5" x="40.4" y="5.8" width="3.5" height="10.4"/>
+  <rect class="cls-5" x="6.7" y="54" width="3.8" height="3.8"/>
+  <line class="cls-3" x1="20.1" y1="44.7" x2="44.3" y2="44.7"/>
+  <line class="cls-3" x1="20.1" y1="55.3" x2="44.3" y2="55.3"/>
+  <line class="cls-3" x1="20.1" y1="50" x2="44.3" y2="50"/>
+</svg>

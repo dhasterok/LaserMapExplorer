@@ -94,6 +94,11 @@ QLineEdit:disabled, QTextEdit:disabled, QPlainTextEdit:disabled, QSpinBox:disabl
     color: #525252;
 }
 
+QTextEdit#textEditNotes {
+    font-family: "Monaco";
+    font-size: 10px;
+}
+
 QSpinBox, QDoubleSpinBox {
     border-radius: 3px;
 }

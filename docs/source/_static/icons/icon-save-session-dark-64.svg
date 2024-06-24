@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 64 64">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #92278f;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4 {
+        stroke: #e6e7e8;
+        stroke-width: 3px;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6, .cls-7 {
+        stroke-miterlimit: 10;
+      }
+
+      .cls-8 {
+        fill: url(#linear-gradient);
+        stroke-linejoin: bevel;
+      }
+
+      .cls-8, .cls-5, .cls-6, .cls-7 {
+        stroke: #4d4d4f;
+        stroke-width: .9px;
+      }
+
+      .cls-2 {
+        fill: #262262;
+      }
+
+      .cls-3 {
+        fill: #9e1f63;
+      }
+
+      .cls-4 {
+        fill: #662d91;
+      }
+
+      .cls-5 {
+        fill: none;
+      }
+
+      .cls-9 {
+        fill: #e6e7e8;
+      }
+
+      .cls-9, .cls-10 {
+        stroke-width: 0px;
+      }
+
+      .cls-6 {
+        fill: #bcbec0;
+      }
+
+      .cls-7 {
+        fill: #fff;
+      }
+
+      .cls-10 {
+        fill: #4d4d4f;
+      }
+    </style>
+    <linearGradient id="linear-gradient" x1="52.4" y1="31.4" x2="40.3" y2="43.6" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff"/>
+      <stop offset="1" stop-color="#939598"/>
+    </linearGradient>
+  </defs>
+  <path class="cls-1" d="M47.4,21.9v-10h0c0,4.3-9.4,7.7-21,7.7s-21-3.4-21-7.7h0c0,0,0,10,0,10h0c0,4.3,9.4,7.7,21,7.7s21-3.4,21-7.7h0Z"/>
+  <ellipse class="cls-3" cx="26.4" cy="11.9" rx="21" ry="7.7"/>
+  <path class="cls-2" d="M5.4,31.9v10c0,4.2,9.4,7.7,21,7.7s21-3.4,21-7.7v-10c0,4.2-9.4,7.7-21,7.7s-21-3.4-21-7.7h0Z"/>
+  <path class="cls-4" d="M5.4,21.9v10h0c0,4.2,9.4,7.7,21,7.7s21-3.4,21-7.7v-10c0,4.2-9.4,7.7-21,7.7s-21-3.4-21-7.7Z"/>
+  <circle class="cls-9" cx="10.6" cy="21.7" r="1.5"/>
+  <circle class="cls-9" cx="10.6" cy="31.9" r="1.5"/>
+  <circle class="cls-9" cx="10.6" cy="42.1" r="1.5"/>
+  <g>
+    <polygon class="cls-6" points="54.3 33.4 59.4 38.5 59.4 59.8 33 59.8 33 33.4 54.3 33.4"/>
+    <path class="cls-7" d="M42.2,49.7h8.1c2.2,0,4,1.8,4,4v6.1h-16.1v-6.1c0-2.2,1.8-4,4-4Z"/>
+    <rect class="cls-8" x="38.3" y="33.4" width="16.1" height="8.2"/>
+    <rect class="cls-10" x="49.9" y="35" width="1.5" height="4.6"/>
+    <rect class="cls-10" x="34.9" y="56.5" width="1.7" height="1.7"/>
+    <line class="cls-5" x1="40.8" y1="52.3" x2="51.6" y2="52.3"/>
+    <line class="cls-5" x1="40.8" y1="57" x2="51.6" y2="57"/>
+    <line class="cls-5" x1="40.8" y1="54.7" x2="51.6" y2="54.7"/>
+  </g>
+</svg>

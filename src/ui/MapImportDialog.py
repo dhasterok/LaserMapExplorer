@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'designer/ImportDialog.ui'
+# Form implementation generated from reading ui file 'designer/MapImportDialog.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.10
 #
@@ -11,19 +11,19 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-class Ui_ImportDialog(object):
-    def setupUi(self, ImportDialog):
-        ImportDialog.setObjectName("ImportDialog")
-        ImportDialog.resize(1024, 637)
+class Ui_MapImportDialog(object):
+    def setupUi(self, MapImportDialog):
+        MapImportDialog.setObjectName("MapImportDialog")
+        MapImportDialog.resize(1024, 637)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(ImportDialog.sizePolicy().hasHeightForWidth())
-        ImportDialog.setSizePolicy(sizePolicy)
+        sizePolicy.setHeightForWidth(MapImportDialog.sizePolicy().hasHeightForWidth())
+        MapImportDialog.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setPointSize(11)
-        ImportDialog.setFont(font)
-        self.statusBar = QtWidgets.QStatusBar(ImportDialog)
+        MapImportDialog.setFont(font)
+        self.statusBar = QtWidgets.QStatusBar(MapImportDialog)
         self.statusBar.setGeometry(QtCore.QRect(0, 610, 1024, 27))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -31,7 +31,7 @@ class Ui_ImportDialog(object):
         sizePolicy.setHeightForWidth(self.statusBar.sizePolicy().hasHeightForWidth())
         self.statusBar.setSizePolicy(sizePolicy)
         self.statusBar.setObjectName("statusBar")
-        self.layoutWidget = QtWidgets.QWidget(ImportDialog)
+        self.layoutWidget = QtWidgets.QWidget(MapImportDialog)
         self.layoutWidget.setGeometry(QtCore.QRect(12, 12, 1001, 597))
         self.layoutWidget.setObjectName("layoutWidget")
         self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.layoutWidget)
@@ -255,85 +255,85 @@ class Ui_ImportDialog(object):
         self.horizontalLayout.addWidget(self.pushButtonImport)
         self.verticalLayout_3.addLayout(self.horizontalLayout)
 
-        self.retranslateUi(ImportDialog)
-        QtCore.QMetaObject.connectSlotsByName(ImportDialog)
+        self.retranslateUi(MapImportDialog)
+        QtCore.QMetaObject.connectSlotsByName(MapImportDialog)
 
-    def retranslateUi(self, ImportDialog):
+    def retranslateUi(self, MapImportDialog):
         _translate = QtCore.QCoreApplication.translate
-        ImportDialog.setWindowTitle(_translate("ImportDialog", "MainWindow"))
-        self.label.setText(_translate("ImportDialog", "Step 1 – Select data type for import"))
-        self.toolButton.setToolTip(_translate("ImportDialog", "Open help page"))
-        self.toolButton.setText(_translate("ImportDialog", "..."))
-        self.labelDataType.setText(_translate("ImportDialog", "Data type"))
-        self.comboBoxDataType.setToolTip(_translate("ImportDialog", "Select data type"))
-        self.comboBoxDataType.setItemText(1, _translate("ImportDialog", "LA-ICP-MS"))
-        self.comboBoxDataType.setItemText(2, _translate("ImportDialog", "MLA"))
-        self.comboBoxDataType.setItemText(3, _translate("ImportDialog", "XRF"))
-        self.comboBoxDataType.setItemText(4, _translate("ImportDialog", "CL"))
-        self.comboBoxDataType.setItemText(5, _translate("ImportDialog", "SEM"))
-        self.comboBoxDataType.setItemText(6, _translate("ImportDialog", "Petrography photo"))
-        self.labelMethod.setText(_translate("ImportDialog", "Method"))
-        self.comboBoxMethod.setToolTip(_translate("ImportDialog", "Select method of collection for data type"))
-        self.labelRootDirectory.setText(_translate("ImportDialog", "Root directory"))
-        self.lineEditRootDirectory.setToolTip(_translate("ImportDialog", "Base directory filled with sample directories"))
-        self.toolButtonOpenDirectory.setToolTip(_translate("ImportDialog", "Open directory"))
-        self.toolButtonOpenDirectory.setText(_translate("ImportDialog", "..."))
-        self.labelAddStandard.setText(_translate("ImportDialog", "Add standard"))
-        self.toolButtonAddStandard.setToolTip(_translate("ImportDialog", "Add standard"))
-        self.toolButtonAddStandard.setText(_translate("ImportDialog", "..."))
-        self.label_2.setText(_translate("ImportDialog", "Step 2 – Set import metadata"))
-        self.checkBoxPreview.setToolTip(_translate("ImportDialog", "Show preview map"))
-        self.checkBoxPreview.setText(_translate("ImportDialog", "Show preview"))
-        self.tableWidgetMetadata.setToolTip(_translate("ImportDialog", "Add missing metadata.  If left blank, quick import assumes square pixel dimensions"))
+        MapImportDialog.setWindowTitle(_translate("MapImportDialog", "MainWindow"))
+        self.label.setText(_translate("MapImportDialog", "Step 1 – Select data type for import"))
+        self.toolButton.setToolTip(_translate("MapImportDialog", "Open help page"))
+        self.toolButton.setText(_translate("MapImportDialog", "..."))
+        self.labelDataType.setText(_translate("MapImportDialog", "Data type"))
+        self.comboBoxDataType.setToolTip(_translate("MapImportDialog", "Select data type"))
+        self.comboBoxDataType.setItemText(1, _translate("MapImportDialog", "LA-ICP-MS"))
+        self.comboBoxDataType.setItemText(2, _translate("MapImportDialog", "MLA"))
+        self.comboBoxDataType.setItemText(3, _translate("MapImportDialog", "XRF"))
+        self.comboBoxDataType.setItemText(4, _translate("MapImportDialog", "CL"))
+        self.comboBoxDataType.setItemText(5, _translate("MapImportDialog", "SEM"))
+        self.comboBoxDataType.setItemText(6, _translate("MapImportDialog", "Petrography photo"))
+        self.labelMethod.setText(_translate("MapImportDialog", "Method"))
+        self.comboBoxMethod.setToolTip(_translate("MapImportDialog", "Select method of collection for data type"))
+        self.labelRootDirectory.setText(_translate("MapImportDialog", "Root directory"))
+        self.lineEditRootDirectory.setToolTip(_translate("MapImportDialog", "Base directory filled with sample directories"))
+        self.toolButtonOpenDirectory.setToolTip(_translate("MapImportDialog", "Open directory"))
+        self.toolButtonOpenDirectory.setText(_translate("MapImportDialog", "..."))
+        self.labelAddStandard.setText(_translate("MapImportDialog", "Add standard"))
+        self.toolButtonAddStandard.setToolTip(_translate("MapImportDialog", "Add standard"))
+        self.toolButtonAddStandard.setText(_translate("MapImportDialog", "..."))
+        self.label_2.setText(_translate("MapImportDialog", "Step 2 – Set import metadata"))
+        self.checkBoxPreview.setToolTip(_translate("MapImportDialog", "Show preview map"))
+        self.checkBoxPreview.setText(_translate("MapImportDialog", "Show preview"))
+        self.tableWidgetMetadata.setToolTip(_translate("MapImportDialog", "Add missing metadata.  If left blank, quick import assumes square pixel dimensions"))
         item = self.tableWidgetMetadata.horizontalHeaderItem(0)
-        item.setText(_translate("ImportDialog", "Import"))
+        item.setText(_translate("MapImportDialog", "Import"))
         item = self.tableWidgetMetadata.horizontalHeaderItem(1)
-        item.setText(_translate("ImportDialog", "Sample ID"))
+        item.setText(_translate("MapImportDialog", "Sample ID"))
         item = self.tableWidgetMetadata.horizontalHeaderItem(2)
-        item.setText(_translate("ImportDialog", "Standard"))
+        item.setText(_translate("MapImportDialog", "Standard"))
         item = self.tableWidgetMetadata.horizontalHeaderItem(3)
-        item.setText(_translate("ImportDialog", "Swap XY"))
+        item.setText(_translate("MapImportDialog", "Swap XY"))
         item = self.tableWidgetMetadata.horizontalHeaderItem(4)
-        item.setText(_translate("ImportDialog", "X\n"
+        item.setText(_translate("MapImportDialog", "X\n"
 "reverse"))
         item = self.tableWidgetMetadata.horizontalHeaderItem(5)
-        item.setText(_translate("ImportDialog", "Y\n"
+        item.setText(_translate("MapImportDialog", "Y\n"
 "reverse"))
         item = self.tableWidgetMetadata.horizontalHeaderItem(6)
-        item.setText(_translate("ImportDialog", "Spot size\n"
+        item.setText(_translate("MapImportDialog", "Spot size\n"
 "(µm)"))
         item = self.tableWidgetMetadata.horizontalHeaderItem(7)
-        item.setText(_translate("ImportDialog", "Sweep\n"
+        item.setText(_translate("MapImportDialog", "Sweep\n"
 "(s)"))
         item = self.tableWidgetMetadata.horizontalHeaderItem(8)
-        item.setText(_translate("ImportDialog", "Speed\n"
+        item.setText(_translate("MapImportDialog", "Speed\n"
 "(µm/s)"))
-        self.checkBoxApplyAll.setToolTip(_translate("ImportDialog", "<html><head/><body><p>Apply changes to a single row in a column to all rows in the column</p></body></html>"))
-        self.checkBoxApplyAll.setText(_translate("ImportDialog", "Apply to all rows"))
-        self.checkBoxSaveToRoot.setToolTip(_translate("ImportDialog", "Save import files to root directory, otherwise files are saved in $basedir/data/datatype"))
-        self.checkBoxSaveToRoot.setText(_translate("ImportDialog", "Save import to root directory"))
-        self.toolButtonPrevSample.setToolTip(_translate("ImportDialog", "Previous sample"))
-        self.toolButtonPrevSample.setText(_translate("ImportDialog", "left"))
-        self.labelSampleID.setText(_translate("ImportDialog", "No data"))
-        self.toolButtonNextSample.setToolTip(_translate("ImportDialog", "Next sample"))
-        self.toolButtonNextSample.setText(_translate("ImportDialog", "right"))
-        self.labelResolution.setText(_translate("ImportDialog", "Resolution: x x y"))
-        self.pushButtonLoad.setToolTip(_translate("ImportDialog", "Load metadata"))
-        self.pushButtonLoad.setText(_translate("ImportDialog", "Load"))
-        self.pushButtonSave.setToolTip(_translate("ImportDialog", "Save metadata"))
-        self.pushButtonSave.setText(_translate("ImportDialog", "Save"))
-        self.pushButtonCancel.setToolTip(_translate("ImportDialog", "Cancel/Close window"))
-        self.pushButtonCancel.setText(_translate("ImportDialog", "Cancel"))
-        self.pushButtonImport.setToolTip(_translate("ImportDialog", "Import selected data"))
-        self.pushButtonImport.setText(_translate("ImportDialog", "Import"))
-import src.ui.resources_rc
+        self.checkBoxApplyAll.setToolTip(_translate("MapImportDialog", "<html><head/><body><p>Apply changes to a single row in a column to all rows in the column</p></body></html>"))
+        self.checkBoxApplyAll.setText(_translate("MapImportDialog", "Apply to all rows"))
+        self.checkBoxSaveToRoot.setToolTip(_translate("MapImportDialog", "Save import files to root directory, otherwise files are saved in $basedir/data/datatype"))
+        self.checkBoxSaveToRoot.setText(_translate("MapImportDialog", "Save import to root directory"))
+        self.toolButtonPrevSample.setToolTip(_translate("MapImportDialog", "Previous sample"))
+        self.toolButtonPrevSample.setText(_translate("MapImportDialog", "left"))
+        self.labelSampleID.setText(_translate("MapImportDialog", "No data"))
+        self.toolButtonNextSample.setToolTip(_translate("MapImportDialog", "Next sample"))
+        self.toolButtonNextSample.setText(_translate("MapImportDialog", "right"))
+        self.labelResolution.setText(_translate("MapImportDialog", "Resolution: x x y"))
+        self.pushButtonLoad.setToolTip(_translate("MapImportDialog", "Load metadata"))
+        self.pushButtonLoad.setText(_translate("MapImportDialog", "Load"))
+        self.pushButtonSave.setToolTip(_translate("MapImportDialog", "Save metadata"))
+        self.pushButtonSave.setText(_translate("MapImportDialog", "Save"))
+        self.pushButtonCancel.setToolTip(_translate("MapImportDialog", "Cancel/Close window"))
+        self.pushButtonCancel.setText(_translate("MapImportDialog", "Cancel"))
+        self.pushButtonImport.setToolTip(_translate("MapImportDialog", "Import selected data"))
+        self.pushButtonImport.setText(_translate("MapImportDialog", "Import"))
+import resources_rc
 
 
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    ImportDialog = QtWidgets.QDialog()
-    ui = Ui_ImportDialog()
-    ui.setupUi(ImportDialog)
-    ImportDialog.show()
+    MapImportDialog = QtWidgets.QDialog()
+    ui = Ui_MapImportDialog()
+    ui.setupUi(MapImportDialog)
+    MapImportDialog.show()
     sys.exit(app.exec_())

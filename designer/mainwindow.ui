@@ -1007,6 +1007,7 @@
     <addaction name="separator"/>
     <addaction name="actionReset"/>
     <addaction name="actionImportFiles"/>
+    <addaction name="actionImportSpots"/>
    </widget>
    <widget class="QMenu" name="menuPlot">
     <property name="font">
@@ -1149,7 +1150,7 @@
         <string/>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="SelectAnalytePage">
         <property name="enabled">
@@ -2621,38 +2622,6 @@
                 <item>
                  <layout class="QHBoxLayout" name="horizontalLayout_15">
                   <item>
-                   <widget class="QToolButton" name="toolButtonSpotLoad">
-                    <property name="minimumSize">
-                     <size>
-                      <width>32</width>
-                      <height>32</height>
-                     </size>
-                    </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>32</width>
-                      <height>32</height>
-                     </size>
-                    </property>
-                    <property name="toolTip">
-                     <string>Load spot file</string>
-                    </property>
-                    <property name="text">
-                     <string>...</string>
-                    </property>
-                    <property name="icon">
-                     <iconset resource="../resources.qrc">
-                      <normaloff>:/resources/icons/icon-open-file-64.svg</normaloff>:/resources/icons/icon-open-file-64.svg</iconset>
-                    </property>
-                    <property name="iconSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
                    <widget class="QToolButton" name="toolButtonSpotLocate">
                     <property name="minimumSize">
                      <size>
@@ -2674,7 +2643,7 @@
                     </property>
                     <property name="icon">
                      <iconset resource="../resources.qrc">
-                      <normaloff>:/resources/icons/icon-spot-64.svg</normaloff>:/resources/icons/icon-spot-64.svg</iconset>
+                      <normaloff>:/resources/icons/icon-spot-locate-64.svg</normaloff>:/resources/icons/icon-spot-locate-64.svg</iconset>
                     </property>
                     <property name="iconSize">
                      <size>
@@ -2820,6 +2789,19 @@
                      </size>
                     </property>
                    </widget>
+                  </item>
+                  <item>
+                   <spacer name="horizontalSpacer_17">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
                   </item>
                   <item>
                    <widget class="QToolButton" name="toolButtonSpotRemove">
@@ -6795,6 +6777,12 @@
        </item>
        <item row="0" column="1">
         <widget class="QComboBox" name="comboBoxPlotType">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="maximumSize">
           <size>
            <width>16777215</width>
@@ -12420,6 +12408,7 @@
    <addaction name="actionOpenSample"/>
    <addaction name="actionOpenDirectory"/>
    <addaction name="actionImportFiles"/>
+   <addaction name="actionImportSpots"/>
    <addaction name="actionOpenSession"/>
    <addaction name="actionSaveSession"/>
    <addaction name="separator"/>
@@ -12931,7 +12920,7 @@ to Tree</string>
      <normaloff>:/resources/icons/icon-import-directory-64.svg</normaloff>:/resources/icons/icon-import-directory-64.svg</iconset>
    </property>
    <property name="text">
-    <string>Import files</string>
+    <string>Import Map Data</string>
    </property>
    <property name="iconText">
     <string>Import</string>
@@ -13037,7 +13026,7 @@ Bug</string>
      <normaloff>:/resources/icons/icon-save-session-64.svg</normaloff>:/resources/icons/icon-save-session-64.svg</iconset>
    </property>
    <property name="text">
-    <string>Save session</string>
+    <string>Save Session</string>
    </property>
    <property name="iconText">
     <string>Save
@@ -13056,7 +13045,7 @@ Session</string>
      <normaloff>:/resources/icons/icon-open-session-64.svg</normaloff>:/resources/icons/icon-open-session-64.svg</iconset>
    </property>
    <property name="text">
-    <string>Open session</string>
+    <string>Open Session</string>
    </property>
    <property name="iconText">
     <string>Open
@@ -13108,6 +13097,25 @@ Session</string>
    </property>
    <property name="toolTip">
     <string>Switch between light, dark, and auto modes</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::ApplicationSpecificRole</enum>
+   </property>
+  </action>
+  <action name="actionImportSpots">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/resources/icons/icon-import-spots-64.svg</normaloff>:/resources/icons/icon-import-spots-64.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Import Spots</string>
+   </property>
+   <property name="iconText">
+    <string>Import
+Spots</string>
+   </property>
+   <property name="toolTip">
+    <string>Import spot data</string>
    </property>
    <property name="menuRole">
     <enum>QAction::ApplicationSpecificRole</enum>

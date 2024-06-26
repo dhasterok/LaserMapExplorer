@@ -413,6 +413,7 @@ QRadioButton::indicator:!checked {
 }
 QStatusBar {
     color:#000000;
+    font: 11px;
     background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #f0f0f0, stop:1 #c8c8c8);
 }
 
@@ -488,6 +489,7 @@ QTableWidget {
 }
 
 QHeaderView::section {
+    font: 11px;
     background-color:#ececec;
     color:#000000;
 }

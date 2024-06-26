@@ -7,8 +7,9 @@
         "resources.qrc",
         "designer/toggleswitch.cpp",
         "designer/toggleswitch.h",
-        "designer/ImportDialog.ui",
+        "designer/MapImportDialog.ui",
         "designer/QuickViewDialog.ui",
-        "designer/ImageImportDialog.ui"
+        "designer/ImageImportDialog.ui",
+        "designer/SpotImportDialog.ui"
     ]
 }

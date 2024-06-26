@@ -1,6 +1,10 @@
 QMainWindow {
     background-color: #323232;
 }
+QDialog {
+    background-color: #323232;
+}
+
 QMenu {
     background-color: #323232;
     color: #414042;

@@ -669,7 +669,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.checkBoxCorrelationSquared.stateChanged.connect(self.correlation_squared_callback)
 
         self.comboBoxNegativeMethod.addItems(['Ignore negative values', 'Minimum positive value', 'Gradual shift', 'Yeo-Johnson transformation'])
-        self.comboBoxNegativeMethod.activated.connect(self.prep_data)
+        self.comboBoxNegativeMethod.activated.connect(self.update_neg_handling)
 
         # Selecting analytes
         #-------------------------
@@ -1564,7 +1564,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             analytes['auto_scale'] = True
             analytes['use'] = True
             analytes['negative_method'] = self.comboBoxNegativeMethod.currentText()
-            analytes['min_positive_value'] = 0
+            
+            df = self.data[sample_id]['raw_data'][self.selected_analytes]
+            # # Replace non-positive values with NaN
+            # df_positive = df.where(df > 0, np.nan)
+            # # Get the minimum positive values
+            # min_positive_values = df_positive.min()
+            
+            # analytes['min_positive_value'] = min_positive_values
             self.data[sample_id]['analyte_info'] = analytes
 
             # create dataframes for cropped data and processed data
@@ -2354,6 +2361,38 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_filter_values()
         self.update_SV()
         #self.show()
+        
+    def update_neg_handling(self):
+        """Auto-scales pixel values in map
+
+        Executes when the value ``MainWindow.comboBoxNegativeMethod`` is changed.
+
+        Changes how negative values are handled for each analyte, the followinf options are available:
+            Ignore negative values, Minimum positive value, Gradual shift, Yeo-Johnson transformation
+
+
+        """
+        sample_id = self.plot_info['sample_id']
+        field = self.plot_info['field']
+        if '/' in field:
+            analyte_1, analyte_2 = field.split(' / ')
+        else:
+            analyte_1 = field
+            analyte_2 = None
+            
+        if analyte_1 and not analyte_2:
+
+            self.data[sample_id]['analyte_info'].loc[self.data[sample_id]['analyte_info']['analytes']==analyte_1,
+                'negative_method'] = self.comboBoxNegativeMethod.currentText()
+
+        else:
+            self.data[sample_id]['ratio_info'].loc[ (self.data[sample_id]['ratio_info']['analyte_1']==analyte_1)
+                                        & (self.data[sample_id]['ratio_info']['analyte_2']==analyte_2),'negative_method']  = self.comboBoxNegativeMethod.currentText()
+            
+        self.prep_data(sample_id, analyte_1,analyte_2)
+        self.update_filter_values()
+        self.update_SV()
+        
 
     def update_plot(self,bin_s=True, axis=False, reset=False):
         """"Update plot
@@ -2715,7 +2754,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if 'Analyte' in field_type:
             f_val =  self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes'] == field)].iloc[0][['v_min', 'v_max']]
         elif 'Ratio' in field_type:
-            if '/' in analyte_1:
+            if '/' in field:
                 analyte_1, analyte_2 = field.split(' / ')
                 f_val = self.data[self.sample_id]['ratio_info'].loc[(self.data[self.sample_id]['ratio_info']['analyte_1'] == analyte_1) & (self.data[self.sample_id]['ratio_info']['analyte_2'] == analyte_2)].iloc[0][['v_min', 'v_max']]
         else:
@@ -3172,7 +3211,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """Prepares data to be used in analysis
 
         1. Obtains raw DataFrame
-        2. Shifts analyte values so that all values are postive
+        2. Handles negative values based on option chosen
         3. Scale data  (linear,log, loggit)
         4. Autoscales data if choosen by user
 
@@ -3188,11 +3227,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         analyte_info = self.data[sample_id]['analyte_info'].loc[
                                  (self.data[sample_id]['analyte_info']['analytes'].isin(analytes))]
-
+        
+        
+        
+            
+            
+            
         if not analyte_2: #not a ratio
+            
+            # perform negative value handling
+            for neg_method in analyte_info['negative_method'].unique():
+                filtered_analytes = analyte_info[analyte_info['negative_method'] == neg_method]['analytes']
+                filtered_data = self.data[sample_id]['cropped_raw_data'][filtered_analytes].values
+                self.data[sample_id]['processed_data'].loc[:,filtered_analytes] = self.transform_array(filtered_data,neg_method)
+                
+                
             # shifts analyte values so that all values are postive
             # adj_data = pd.DataFrame(self.transform_plots(self.data[sample_id]['cropped_raw_data'][analytes].values), columns= analytes)
-            adj_data = self.data[sample_id]['cropped_raw_data'][analytes]
+            
             
             # #perform scaling for groups of analytes with same norm parameter
             # for norm in analyte_info['norm'].unique():
@@ -3220,7 +3272,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 for analyte_1 in filtered_analytes:
                     parameters = analyte_info.loc[(analyte_info['sample_id']==sample_id)
                                           & (analyte_info['analytes']==analyte_1)].iloc[0]
-                    filtered_data = adj_data[analyte_1].values
+                    filtered_data =  self.data[sample_id]['processed_data'][analytes][analyte_1].values
                     lq = parameters['lower_bound']
                     uq = parameters['upper_bound']
                     d_lb = parameters['d_l_bound']
@@ -3254,8 +3306,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # ratio_array = self.transform_plots(ratio_df.values)
             ratio_array= ratio_df.values
             ratio_df = pd.DataFrame(ratio_array, columns= [analyte_1,analyte_2])
-
-            mask = (ratio_df[analyte_1] > 0) & (ratio_df[analyte_2] > 0)
+            
+            # mask = (ratio_df[analyte_1] > 0) & (ratio_df[analyte_2] > 0)
+            
+            mask =   (ratio_df[analyte_2] == 0)
 
             ratio_array = np.where(mask, ratio_array[:,0] / ratio_array[:,1], np.nan)
 
@@ -3282,7 +3336,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     self.data[sample_id]['ratio_info'].at[idx, 'd_l_bound'] = d_lb
                     self.data[sample_id]['ratio_info'].at[idx, 'd_u_bound'] = d_ub
                     self.data[sample_id]['ratio_info'].at[idx, 'auto_scale'] = auto_scale
-
+                    neg_method = self.comboBoxNegativeMethod.currentText()
+                    min_positive_value = min(ratio_array[ratio_array>0])
+                    self.data[sample_id]['ratio_info'].at[idx, 'negative_method'] = neg_method
+                    # self.data[sample_id]['ratio_info'].at[idx, 'min_positive_value'] = min_positive_value
                 else: #if bounds exist in ratios_df
                     norm = self.data[sample_id]['ratio_info'].at[idx, 'norm']
                     lb = self.data[sample_id]['ratio_info'].at[idx, 'lower_bound']
@@ -3290,7 +3347,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     d_lb = self.data[sample_id]['ratio_info'].at[idx, 'd_l_bound']
                     d_ub = self.data[sample_id]['ratio_info'].at[idx, 'd_u_bound']
                     auto_scale = self.data[sample_id]['ratio_info'].at[idx, 'auto_scale']
-
+                    neg_method = self.data[sample_id]['ratio_info'].at[idx, 'negative_method']
+                    # min_positive_value = self.data[sample_id]['ratio_info'].at[idx, 'min_positive_value']
+                    
+                    
                 # if norm == 'log':
 
                 #     # np.nanlog handles NaN value
@@ -3304,6 +3364,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 # else:
                 #     # set to clipped data with original values if linear normalisation
                 #     pass
+
+                # perform negative value handling
+                ratio_array = self.transform_array(ratio_array,neg_method)     
 
                 if auto_scale:
 
@@ -9093,14 +9156,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         return clipped_data
 
-    def transform_plots(self, array):
+    def transform_array(self, array, negative_method):
         """Negative and zero handling
 
         Parameters
         ----------
         array : numpy.ndarray
             Input data
-
+        negative_method : str
+            negative_method obtained from analyte info
         Returns
         -------
         numpy.ndarray
@@ -9108,11 +9172,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
 
 
-        #negative_method = should come from analyte info
+        #n
         match negative_method.lower():
             case 'ignore negative values':
                 t_array = np.copy(array)
-                t_array = t_array[t_array <= 0] = np.nan
+                t_array = np.where(t_array > 0, t_array, np.nan)
                 return t_array
             case 'minimum positive value':
                 min_positive_value = np.nanmin(array[array > 0])
@@ -10018,6 +10082,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     self.plot_map_mpl(sample_id=branch, field_type=tree, field=leaf)
                 else:
                     self.plot_map_pg(sample_id=branch, field_type=tree, field=leaf)
+            
+               
 
         elif tree in ['Histogram', 'Correlation', 'Geochemistry', 'Multidimensional Analysis', 'Calculated']:
             self.add_plotwidget_to_canvas(self.plot_info)

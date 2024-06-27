@@ -177,8 +177,14 @@
       <layout class="QVBoxLayout" name="verticalLayoutMetadataTable">
        <item>
         <widget class="QTableWidget" name="tableWidgetSpotData">
+         <property name="contextMenuPolicy">
+          <enum>Qt::CustomContextMenu</enum>
+         </property>
          <property name="toolTip">
           <string>Add missing metadata.  If left blank, quick import assumes square pixel dimensions</string>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::NoSelection</enum>
          </property>
         </widget>
        </item>

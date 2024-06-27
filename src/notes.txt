@@ -1,0 +1,22 @@
+--
+27 Jun 2024 (Derrick, discussion with Alex)
+
+Spot data files may have different formats whether they come from iolite or ladr.  Alex will send versions with as many possible columns so we know what to import.
+
+--
+27 Jun 2024 (Derrick)
+
+I've been working on importing spot data.  The spot data come in with averages and uncertainties.  The units on each analyte may be different, making bookkeeping a bit more difficult.  So,  I've created a new class ExtendedDF, which allows for a dataframe that can have attributes added and some methods for easily accessing them.  While many of our maps do not have uncertainties yet, I know it is possible to produce uncertainty maps, which will be needed for computing age maps in the future.  We could of course just handle this within the analyte_info dataframe, but it may be worth writing some methods into the data frame.
+
+It may take quite a bit of refactoring to get the code to handle uncertainty maps so I don't want to add it to everything yet.  For now we'll stick to adding it to spots.
+
+--
+26 Jun 2024 (Derrick, meeting with Alex)
+
+For age calculations, need to simulate spots.  Since spots ablate deeper they have better stats, so maps need to average points.  Alex currently uses points along lines by index, leads to non-contiguous averages and long groups.  Better to produce an average grouped in a contiguous more circular way.  Procedure might be something like this:
+
+- Mask all but mineral of interest
+- Apply clustering to data into different zones within mineral
+- Collect data within R pixels,
+- Only keep collections with more than N pixels
+- Weight points proportional to individual pixel errors, compute mean and stdev/sderr as needed

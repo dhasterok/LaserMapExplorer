@@ -654,10 +654,12 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                     case 'quadrupole':
                         self.import_la_icp_ms_data(table_df, save_path)
                     case 'TOF':
+                        # for now, require iolite or xmaptools output.  In future, allow for 
+                        # TOF raw format.
+                        self.import_la_icp_ms_data(table_df, save_path)
                         #df = pd.read_hdf(file_path, key='dataset_1')
-                        pass
                     case 'SF':
-                        pass
+                        self.import_la_icp_ms_data(table_df, save_path)
             case 'MLA':
                 pass
             case 'XRF':

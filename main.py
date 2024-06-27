@@ -10083,8 +10083,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 else:
                     self.plot_map_pg(sample_id=branch, field_type=tree, field=leaf)
             
-               
-
         elif tree in ['Histogram', 'Correlation', 'Geochemistry', 'Multidimensional Analysis', 'Calculated']:
             self.add_plotwidget_to_canvas(self.plot_info)
 

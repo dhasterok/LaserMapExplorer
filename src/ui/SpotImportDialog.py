@@ -81,6 +81,8 @@ class Ui_SpotImportDialog(object):
         self.verticalLayoutMetadataTable = QtWidgets.QVBoxLayout()
         self.verticalLayoutMetadataTable.setObjectName("verticalLayoutMetadataTable")
         self.tableWidgetSpotData = QtWidgets.QTableWidget(SpotImportDialog)
+        self.tableWidgetSpotData.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.tableWidgetSpotData.setSelectionMode(QtWidgets.QAbstractItemView.NoSelection)
         self.tableWidgetSpotData.setObjectName("tableWidgetSpotData")
         self.tableWidgetSpotData.setColumnCount(0)
         self.tableWidgetSpotData.setRowCount(0)

@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QDialog, QFileDialog, QTableWidgetItem, QMenu, QInpu
 from PyQt5.QtCore import Qt
 from src.ui.SpotImportDialog import Ui_SpotImportDialog
 from lame_helper import basedir, iconpath
-from ExtendedDF import AttributeDataFrame
+from src.ExtendedDF import AttributeDataFrame
 
 class SpotImporter(QDialog, Ui_SpotImportDialog):
     """A dialog for importing spot data into LaME

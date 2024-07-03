@@ -106,20 +106,23 @@ class SpotImporter(QDialog, Ui_SpotImportDialog):
         self.update_spot_table()
 
     def update_spot_table(self):
-        """Update the ``tableWidgetSpotData`` with data from csv file(s).
-        """        
+        """Update the ``tableWidgetSpotData`` with data from csv file(s) now in ``spot_data``."""        
+        # initialize table (add row for combobox in row 1)
         self.tableWidgetSpotData.clear()
         self.tableWidgetSpotData.setColumnCount(len(self.spotdata.columns))
         self.tableWidgetSpotData.setRowCount(len(self.spotdata) + 1)
         
+        # set header
         self.tableWidgetSpotData.setHorizontalHeaderLabels(list(self.spotdata.columns))
         self.tableWidgetSpotData.update()
         
-        for j in range(len(self.spotdata.columns)):
-            self.add_combobox(j)
+        for col in range(len(self.spotdata.columns)):
+            # add combobox to column
+            self.add_combobox(col)
         
-            for i in range(1, len(self.spotdata) + 1):
-                self.tableWidgetSpotData.setItem(i, j, QTableWidgetItem(str(self.spotdata.iat[i-1, j])))
+            # add spot_data column to tableWidgetSpotData
+            for row in range(1, len(self.spotdata) + 1):
+                self.tableWidgetSpotData.setItem(row, col, QTableWidgetItem(str(self.spotdata.iat[row-1, col])))
 
         # enable importing of data
         self.pushButtonImport.setEnabled(True)
@@ -137,15 +140,17 @@ class SpotImporter(QDialog, Ui_SpotImportDialog):
             Column to add the combobox to
         """        
         combobox = QComboBox()
-        combobox.addItems(['analyte', 'annotation', 'ignore', 'metadata', 'sample id', 'spot id', 'x coordinate', 'y coordinate', 'uncertainty', 'units'])
+        combobox.addItems(['analyte', 'annotation', 'ignore', 'metadata', 'sample id', 'spot size', 'spot id', 'x coordinate', 'y coordinate', 'uncertainty', 'units'])
 
         # check column data type
         header = self.tableWidgetSpotData.horizontalHeaderItem(col).text()
         if header not in self.spotdata.columns:
+            # initialize unknown columns as metadata
             col_type = 'metadata'
         else:
             col_dtype = self.spotdata[header].dtype
             if col_dtype == 'object':
+                # initalize str columns
                 if 'sample' in header.lower():
                     col_type = 'sample id'
                 elif 'analysis' in header.lower():
@@ -153,12 +158,15 @@ class SpotImporter(QDialog, Ui_SpotImportDialog):
                 else:
                     col_type = 'metadata'
             else:
+                # initialize numeric columns
                 if 'x' == header.lower():
                     col_type = 'x coordinate'
                 elif 'y' == header.lower():
                     col_type = 'y coordinate'
                 elif (('sd' in header.lower()) or ('se' in header.lower()) or ('sigma' in header.lower())) and ('Se' not in header):
                     col_type = 'uncertainty'
+                elif 'spot size' in header.lower():
+                    col_type = 'spot size'
                 else:
                     col_type = 'analyte'
         combobox.setCurrentText(col_type)
@@ -235,59 +243,90 @@ class SpotImporter(QDialog, Ui_SpotImportDialog):
         """
         # need to tweak header names, put into AttributeDataFrame
         # separate units from names, determine analytes, statistic, set column types etc.
-        new_columns = [self.tableWidgetSpotData.horizontalHeaderItem(i).text() for i in range(self.tableWidgetSpotData.columnCount())]
+        columns = [self.tableWidgetSpotData.horizontalHeaderItem(i).text() for i in range(self.tableWidgetSpotData.columnCount())]
         data = []
         
-        for i in range(1, self.tableWidgetSpotData.rowCount()):
+        # combobox column types
+        # 'analyte', 'annotation', 'ignore', 'metadata', 'sample id', 'spot size', 'spot id', 'x coordinate', 'y coordinate', 'uncertainty', 'units'
+        
+        ignore = []
+        ianalyte = []
+        iuncertainty = []
+        for row in range(1, self.tableWidgetSpotData.rowCount()+1):
             row_data = []
-            for j in range(self.tableWidgetSpotData.columnCount()):
-                item = self.tableWidgetSpotData.item(i, j)
+            for col in range(self.tableWidgetSpotData.columnCount()):
+                if row == 1:
+                    # read combobox
+                    widget_text = self.tableWidgetSpotData.cellWidget(0,col).currentText()
+
+                    match widget_text:
+                        case 'analyte':
+                            ianalyte.append(col)
+                        case 'annotation':
+                            columns[col] = 'display_text'
+                        case 'ignore':
+                            ignore.append(col)
+                        case 'metadata':
+                            pass
+                        case 'sample id':
+                            columns[col] = 'sample_id'
+                        case 'spot id':
+                            columns[col] = 'spot_id'
+                        case 'spot size':
+                            columns[col] = 'spot_size'
+                        case 'x coordinate':
+                            columns[col] = 'X'
+                        case 'y coordinate':
+                            columns[col] = 'Y'
+                        case 'uncertainty':
+                            iuncertainty.append(col)
+                        case 'units':
+                            columns[col] = 'units'
+
+                item = self.tableWidgetSpotData.item(row, col)
                 row_data.append(item.text() if item else '')
             data.append(row_data)
-        
-        self.import_df = AttributeDataFrame(data, columns=new_columns)
-
-        if not('X' in self.import_df.columns):
-            self.import_df['X'] = None
-        if not('Y' in self.import_df.columns):
-            self.import_df['Y'] = None
-        if not('visible' in self.import_df.columns):
-            self.import_df['visible'] = False
-        if not('annotation' in self.import_df.columns):
-            self.import_df['annotation'] = ''
 
         columns = list(self.spotdata.columns.str.lower())
-        if 'cps' in columns:
-            self.spotdata.columns = self.spotdata.columns.str.replace('_CPS','')
-            self.spotdata.columns = self.spotdata.columns.str.replace('_cps','')
-            self.spotdata.columns = self.spotdata.columns.str.replace('CPS','')
-            self.spotdata.columns = self.spotdata.columns.str.replace('cps','')
-            self.spotdata.insert(1, 'Units', 'cps')
-        elif 'ppm' in columns:
-            self.spotdata.columns = self.spotdata.columns.str.replace('_PPM','')
-            self.spotdata.columns = self.spotdata.columns.str.replace('_ppm','')
-            self.spotdata.columns = self.spotdata.columns.str.replace('PPM','')
-            self.spotdata.columns = self.spotdata.columns.str.replace('ppm','')
-            self.spotdata.insert(1, 'Units', 'ppm')
-        elif 'ppb' in columns:
-            self.spotdata.columns = self.spotdata.columns.str.replace('_PPB','')
-            self.spotdata.columns = self.spotdata.columns.str.replace('_ppb','')
-            self.spotdata.columns = self.spotdata.columns.str.replace('PPB','')
-            self.spotdata.columns = self.spotdata.columns.str.replace('ppb','')
-            self.spotdata.insert(1, 'Units', 'ppb')
-        elif 'ppt' in columns:
-            self.spotdata.columns = self.spotdata.columns.str.replace('_PPT','')
-            self.spotdata.columns = self.spotdata.columns.str.replace('_ppt','')
-            self.spotdata.columns = self.spotdata.columns.str.replace('PPT','')
-            self.spotdata.columns = self.spotdata.columns.str.replace('ppt','')
-            self.spotdata.insert(1, 'Units', 'ppt')
-        if 'mean' in self.spotdata.columns.str.lower():
-            self.spotdata.columns = self.spotdata.columns.str.replace('_mean','')
-            self.spotdata.columns = self.spotdata.columns.str.replace('mean','')
-            self.spotdata.insert(1, 'average', 'mean')
-        elif 'median' in self.spotdata.columns.str.lower():
-            self.spotdata.columns = self.spotdata.columns.str.replace('_median','')
-            self.spotdata.columns = self.spotdata.columns.str.replace('median','')
-            self.spotdata.insert(1, 'average', 'median')
+        
+        self.import_df = AttributeDataFrame(data, columns=columns)
+
+        # insert missing columns
+        if 'X' not in self.import_df.columns:
+            self.import_df['X'] = None
+        if 'Y' not in self.import_df.columns:
+            self.import_df['Y'] = None
+        if 'visible' not in self.import_df.columns:
+            self.import_df['visible'] = False
+        if 'display_text' not in self.import_df.columns:
+            if 'spot_id' in self.import_df.columns:
+                self.import_df['display_text'] = self.import_df['spot_id']
+            else:
+                self.import_df['display_text'] = ''
+
+        for i in ianalyte + iuncertainty:
+            if 'cps' in columns[i]:
+                unit_text = 'cps'
+            elif 'ppm' in columns:
+                unit_text = 'ppm'
+            elif 'ppb' in columns:
+                unit_text = 'ppb'
+            elif 'ppt' in columns:
+                unit_text = 'ppt'
+
+            self.import_df.setattribute(i, 'unit', unit_text)
+            
+            if i in ianalyte:
+                if 'mean' in self.import_df.columns.str.lower():
+                    self.import_df.setattribute(i, 'average', 'mean')
+                elif 'median' in self.spotdata.columns.str.lower():
+                    self.import_df.setattribute(i, 'average', 'median')
+            if i in iuncertainty:
+                if 'sd' in self.import_df.columns.str.lower():
+                    self.import_df.setattribute(i, 'uncertainty', 'sd')
+                elif 'se' in self.import_df.columns.str.lower():
+                    self.import_df.setattribute(i, 'uncertainty', 'se')
+
+        self.main_window.spot_data = self.import_df
 
         self.ok = True

@@ -2621,7 +2621,7 @@
                   </column>
                   <column>
                    <property name="text">
-                    <string>Annotate</string>
+                    <string>Text</string>
                    </property>
                   </column>
                  </widget>

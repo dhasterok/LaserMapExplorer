@@ -1665,8 +1665,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.comboBoxCalcFormula.setCurrentText(name)
                 self.calculate_new_field(save=False)
 
-        parameters = self.data[self.sample_id]['analyte_info'].loc[self.data[self.sample_id]['analyte_info']['analytes'] == self.analyte_list[0]].iloc[0]
-        self.update_spinboxes(parameters)
+        #update UI with auto scale and neg handling parameters from 'Analyte Info'
+        
+        self.update_spinboxes(sample_id=self.sample_id, field_type='Analyte', field = self.analyte_list[0])
 
         # reset all plot types on change of tab to the first option
         for key in self.plot_types.keys():
@@ -2342,22 +2343,45 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.lineEditUpperQuantile.setText(str(ub))
             self.lineEditDifferenceLowerQuantile.setEnabled(False)
             self.lineEditDifferenceUpperQuantile.setEnabled(False)
-
+        # if update is true
         if analyte_1 and not analyte_2:
-
-            self.data[sample_id]['analyte_info'].loc[self.data[sample_id]['analyte_info']['analytes']==analyte_1,
-                'auto_scale'] = auto_scale
-            self.data[sample_id]['analyte_info'].loc[self.data[sample_id]['analyte_info']['analytes']==analyte_1,
-                ['upper_bound', 'lower_bound', 'd_l_bound', 'd_u_bound']] = [ub, lb, d_lb, d_ub]
-
+            if self.checkBoxApplyAll.isChecked():
+                # Apply to all iolites in sample
+                self.data[sample_id]['analyte_info']['auto_scale'] = auto_scale
+                self.data[sample_id]['analyte_info']['upper_bound']= ub
+                self.data[sample_id]['analyte_info']['lower_bound'] = lb
+                self.data[sample_id]['analyte_info']['d_l_bound'] = d_lb
+                self.data[sample_id]['analyte_info']['d_u_bound'] = d_ub
+                # clear existing plot info from tree to ensure saved plots using most recent data
+                for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
+                    self.clear_tree_data(tree)
+                self.prep_data(sample_id)
+            else:
+                self.data[sample_id]['analyte_info'].loc[self.data[sample_id]['analyte_info']['analytes']==analyte_1,
+                    'auto_scale'] = auto_scale
+                self.data[sample_id]['analyte_info'].loc[self.data[sample_id]['analyte_info']['analytes']==analyte_1,
+                    ['upper_bound', 'lower_bound', 'd_l_bound', 'd_u_bound']] = [ub, lb, d_lb, d_ub]
+                self.prep_data(sample_id, analyte_1,analyte_2)
         else:
-            self.data[sample_id]['ratio_info'].loc[ (self.data[sample_id]['ratio_info']['analyte_1']==analyte_1)
-                                        & (self.data[sample_id]['ratio_info']['analyte_2']==analyte_2),'auto_scale']  = auto_scale
-            self.data[sample_id]['ratio_info'].loc[ (self.data[sample_id]['ratio_info']['analyte_1']==analyte_1)
-                                        & (self.data[sample_id]['ratio_info']['analyte_2']==analyte_2),
-                                        ['upper_bound','lower_bound','d_l_bound', 'd_u_bound']] = [ub,lb,d_lb, d_ub]
-
-        self.prep_data(sample_id, analyte_1,analyte_2)
+            if self.checkBoxApplyAll.isChecked():
+                # Apply to all ratios in sample
+                self.data[sample_id]['ratio_info']['auto_scale'] = auto_scale
+                self.data[sample_id]['ratio_info']['upper_bound']= ub
+                self.data[sample_id]['ratio_info']['lower_bound'] = lb
+                self.data[sample_id]['ratio_info']['d_l_bound'] = d_lb
+                self.data[sample_id]['ratio_info']['d_u_bound'] = d_ub
+                # clear existing plot info from tree to ensure saved plots using most recent data
+                for tree in ['Ratio', 'Ratio (normalized)']:
+                    self.clear_tree_data(tree)
+                self.prep_data(sample_id)
+            else:
+                self.data[sample_id]['ratio_info'].loc[ (self.data[sample_id]['ratio_info']['analyte_1']==analyte_1)
+                                            & (self.data[sample_id]['ratio_info']['analyte_2']==analyte_2),'auto_scale']  = auto_scale
+                self.data[sample_id]['ratio_info'].loc[ (self.data[sample_id]['ratio_info']['analyte_1']==analyte_1)
+                                            & (self.data[sample_id]['ratio_info']['analyte_2']==analyte_2),
+                                            ['upper_bound','lower_bound','d_l_bound', 'd_u_bound']] = [ub,lb,d_lb, d_ub]
+                self.prep_data(sample_id, analyte_1,analyte_2)
+        
         self.update_filter_values()
         self.update_SV()
         #self.show()
@@ -2381,15 +2405,29 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             analyte_2 = None
             
         if analyte_1 and not analyte_2:
-
-            self.data[sample_id]['analyte_info'].loc[self.data[sample_id]['analyte_info']['analytes']==analyte_1,
+            if self.checkBoxApplyAll.isChecked():
+                # Apply to all iolties
+                self.data[sample_id]['analyte_info']['negative_method'] = self.comboBoxNegativeMethod.currentText()
+                # clear existing plot info from tree to ensure saved plots using most recent data
+                for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
+                    self.clear_tree_data(tree)
+                self.prep_data(sample_id)
+            else:
+                self.data[sample_id]['analyte_info'].loc[self.data[sample_id]['analyte_info']['analytes']==analyte_1,
                 'negative_method'] = self.comboBoxNegativeMethod.currentText()
-
+                self.prep_data(sample_id, analyte_1,analyte_2)
         else:
-            self.data[sample_id]['ratio_info'].loc[ (self.data[sample_id]['ratio_info']['analyte_1']==analyte_1)
+            if self.checkBoxApplyAll.isChecked():
+                # Apply to all ratios
+                self.data[sample_id]['ratio_info']['negative_method'] = self.comboBoxNegativeMethod.currentText()
+                for tree in ['Ratio', 'Ratio (normalized)']:
+                    self.clear_tree_data(tree)
+                self.prep_data(sample_id)
+            else:
+                self.data[sample_id]['ratio_info'].loc[ (self.data[sample_id]['ratio_info']['analyte_1']==analyte_1)
                                         & (self.data[sample_id]['ratio_info']['analyte_2']==analyte_2),'negative_method']  = self.comboBoxNegativeMethod.currentText()
-            
-        self.prep_data(sample_id, analyte_1,analyte_2)
+                self.prep_data(sample_id, analyte_1,analyte_2)
+        
         self.update_filter_values()
         self.update_SV()
         
@@ -2682,6 +2720,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         self.actionCrop.setChecked(False)
         self.data[self.sample_id]['crop'] = True
+
+        # clear existing plot info from tree to ensure plot is using most recent data
+        for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
+            self.clear_tree_data(tree)
 
 
     # -------------------------------
@@ -6079,6 +6121,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     self.plot_map_pg(sample_id, field_type, field)
                 else:
                     self.plot_map_mpl(sample_id, field_type, field)
+                
+                #update UI with auto scale and neg handling parameters from 'Analyte/Ratio Info'
+                self.update_spinboxes(sample_id, field, field_type)
+                
                 # if not self.comboBoxColorField.currentText():
                 #     return
 
@@ -9488,7 +9534,32 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
         self.check_analysis = False
 
-    def update_spinboxes(self, parameters):
+    def update_spinboxes(self, sample_id, field, field_type='Analyte'):
+        """
+        Retrieves Auto scale parameters and neg handling method from Analyte/Ratio Info and updates UI.
+
+        Parameters
+        ----------
+        sample_id : str
+            Sample identifier
+        field : str, optional
+            Name of field to plot, Defaults to None
+        analysis_type : str, optional
+            Field type for plotting, options include: 'Analyte', 'Ratio', 'pca', 'Cluster', 'Cluster Score',
+            'Special', 'computed'. Some options require a field. Defaults to 'Analyte'
+        """
+        match field_type:
+            case 'Analyte' | 'Analyte (normalized)':
+                # get Auto scale parameters and neg handling from analyte info
+                parameters = self.data[sample_id]['analyte_info'].loc[self.data[sample_id]['analyte_info']['analytes']==field].iloc[0]
+            
+            case 'Ratio' | 'Ratio (normalized)':
+                field_1 = field.split(' / ')[0]
+                field_2 = field.split(' / ')[1]
+                # get Auto scale parameters and neg handling from Ratio info
+                parameters = self.data[sample_id]['ratio_info'].loc[self.data[sample_id]['analyte_info']['analytes']==field].iloc[0]  
+            case _:
+                return
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
             auto_scale = parameters['auto_scale']
             #self.spinBoxX.setValue(int(parameters['x_max']))
@@ -9497,36 +9568,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if auto_scale:
                 self.lineEditDifferenceLowerQuantile.setEnabled(True)
                 self.lineEditDifferenceUpperQuantile.setEnabled(True)
-                #self.doubleSpinBoxDUB.setEnabled(True)
-                #self.doubleSpinBoxDLB.setEnabled(True)
+            
             else:
                 self.lineEditDifferenceLowerQuantile.setEnabled(False)
                 self.lineEditDifferenceUpperQuantile.setEnabled(False)
-                #self.doubleSpinBoxDUB.setEnabled(False)
-                #self.doubleSpinBoxDLB.setEnabled(False)
 
-            # self.spinBox_X.setMinimum(int(parameters['x_max']))
-            # self.spinBox_X.setMaximum(int(parameters['x_min']))
-            # self.spinBox_X.setValue(int(parameters['x_min']))
-
-            # self.spinBoxY.setMaximum(int(parameters['y_max']))
-            # self.spinBoxY.setMinimum(int(parameters['y_min']))
-            # self.spinBoxY.setValue(int(parameters['y_max']))
-
-
-            # self.spinBox_Y.setMaximum(int(parameters['y_max']))
-            # self.spinBox_Y.setMinimum(int(parameters['y_min']))
-            # self.spinBox_Y.setValue(int(parameters['y_min']))
-
+            # update Auto scale UI
             self.lineEditLowerQuantile.setText(str(parameters['lower_bound']))
             self.lineEditUpperQuantile.setText(str(parameters['upper_bound']))
             self.lineEditDifferenceLowerQuantile.setText(str(parameters['d_l_bound']))
             self.lineEditDifferenceUpperQuantile.setText(str(parameters['d_u_bound']))
-            # self.doubleSpinBoxUB.setValue(parameters['upper_bound'])
-            # self.doubleSpinBoxLB.setValue(parameters['lower_bound'])
-            # self.doubleSpinBoxDLB.setValue(parameters['d_l_bound'])
-            # self.doubleSpinBoxDUB.setValue(parameters['d_u_bound'])
 
+            # Update Neg Value handling combobox 
+            index = self.comboBoxNegativeMethod.findText(str(parameters['negative_method']))
+            if index != -1:  # If the text is found in the combobox
+                self.comboBoxNegativeMethod.setCurrentIndex(index)
+            
+            # Update filter UI 
             self.lineEditFMin.setText(self.dynamic_format(parameters['v_min'],dir=0))
             self.lineEditFMax.setText(self.dynamic_format(parameters['v_max'],dir=1))
 
@@ -10062,8 +10120,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             #     self.add_plotwidget_to_canvas(widget_dict['info'], view=widget_dict['view'], position=widget_dict['position'])
             self.initialize_axis_values(tree, leaf)
             if self.plot_info:
-                # print('tree_double_click: add_plotwidget_to_canvas')
+                print('tree_double_click: add_plotwidget_to_canvas')
                 self.add_plotwidget_to_canvas(self.plot_info)
+                #update UI with auto scale and neg handling parameters from 'Analyte/Ratio Info'
+                self.update_spinboxes(self.plot_info['sample_id'],self.plot_info['field'],self.plot_info['field_type'])
             else:
                 # print('tree_double_click: plot_map_pg')
                 if self.toolBox.currentIndex() not in [self.left_tab['sample'], self.left_tab['process'], self.left_tab['polygons'], self.left_tab['profile']]:
@@ -10082,7 +10142,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     self.plot_map_mpl(sample_id=branch, field_type=tree, field=leaf)
                 else:
                     self.plot_map_pg(sample_id=branch, field_type=tree, field=leaf)
-            
+                
+                #update UI with auto scale and neg handling parameters from 'Analyte/Ratio Info'
+                self.update_spinboxes(sample_id=branch, field=leaf, field_type = tree)
+
         elif tree in ['Histogram', 'Correlation', 'Geochemistry', 'Multidimensional Analysis', 'Calculated']:
             self.add_plotwidget_to_canvas(self.plot_info)
 
@@ -10326,6 +10389,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 return (branch_item,False)
         return (None,None)
 
+    def clear_tree_data(self, tree):
+        """Removes item data from all items in a given tree
+        
+        Parameters
+        ----------
+        tree : str
+            Name of tree in ``MainWindow.treeView``
+        """
+        tree_items = self.get_tree_items(tree)
+
+        def clear_item_data(item):
+            """Recursively clear data from the item and its children"""
+            item.setData(None, role=Qt.UserRole)
+            for index in range(item.rowCount()):
+                child_item = item.child(index)
+                clear_item_data(child_item)
+        
+        for index in range(tree_items.rowCount()):
+            branch_item = tree_items.child(index)
+            clear_item_data(branch_item)
 
     # -------------------------------
     # Calculator

@@ -1188,11 +1188,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         # Browser
         #-------------------------
-        self.open_browser()
-        self.toolButtonBrowserHome.clicked.connect(self.browser_home_callback)
-        self.lineEditBrowserLocation.editingFinished.connect(self.browser_location_callback)
-        self.toolButtonBack.clicked.connect(self.browser.back)
-        self.toolButtonForward.clicked.connect(self.browser.forward)
+        # self.open_browser()
+        # self.toolButtonBrowserHome.clicked.connect(self.browser_home_callback)
+        # self.lineEditBrowserLocation.editingFinished.connect(self.browser_location_callback)
+        # self.toolButtonBack.clicked.connect(self.browser.back)
+        # self.toolButtonForward.clicked.connect(self.browser.forward)
 
         # Plot toolbars
         #-------------------------
@@ -3504,7 +3504,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         self.labelMVInfoX.setText('X: '+str(round(x)))
                         self.labelMVInfoY.setText('Y: '+str(round(y)))
 
-                    for k, (target, _,array) in self.lasermaps.items():
+                    for (k,v), (target, _,array) in self.lasermaps.items():
                         if not self.actionCrop.isChecked():
                             target.setPos(mouse_point)
                             target.show()
@@ -7067,7 +7067,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         target.setZValue(1e9)
         plotWindow.addItem(target)
 
-        # store plots in self.lasermap to be used in profiling store view at end of name
+        # store plots in self.lasermap to be used in profiling. self.lasermaps is a multi index dictionary with index: (field, view)
         self.lasermaps[field,view] = (target, plotWindow, self.array)
 
         #hide pointer
@@ -7101,9 +7101,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             #print(self.lasermaps)
             #print(self.prev_plot)
-            if self.prev_plot and self.prev_plot in self.lasermaps:
+            if self.prev_plot and (self.prev_plot,0) in self.lasermaps:
                 self.plot_info['view'][0] = False
-                del self.lasermaps[self.prev_plot]
+                del self.lasermaps[(self.prev_plot,0)]
             # update variables which stores current plot in SV
             self.plot = plotWindow
             self.prev_plot = field
@@ -12667,7 +12667,7 @@ class Table_Fcn:
                     self.main_window.comboBoxProfileSort.setCurrentIndex(0) #set dropdown sort to no
 
                     # Update self.profiles[self.main_window.sample_id] here accordingly
-                    for key, profile in self.main_window.profiling.profiles.items():
+                    for key, profile in self.main_window.profiling.profiles[self.main_window.sample_id].items():
                         if row >0:
                             profile[row], profile[row -1 ] = profile[row - 1], profile[row]
                     self.plot_profiles(sort_axis = False)
@@ -12706,7 +12706,7 @@ class Table_Fcn:
             match table.accesibleName():
                 case 'Profiling':
                     # update point order of each profile
-                    for key, profile in self.main_window.profiling.profiles.items():
+                    for key, profile in self.main_window.profiling.profiles[self.main_window.sample_id].items():
                         if row < len(profile) - 1:
                             profile[row], profile[row + 1] = profile[row + 1], profile[row]
                     self.plot_profiles(sort_axis = False)
@@ -12730,10 +12730,10 @@ class Table_Fcn:
                     # remove point from each profile and its corresponding scatter plot item
 
 
-                    for key, profile in self.main_window.profiling.profiles.items():
+                    for key, profile in self.main_window.profiling.profiles[self.main_window.sample_id].items():
                         if row < len(profile):
                             scatter_item = profile[row][3]  # Access the scatter plot item
-                            for _, (_, plot, _, _) in self.main_window.lasermaps.items():
+                            for _, (_, plot, _) in self.main_window.lasermaps.items():
                                 plot.removeItem(scatter_item)
                             profile.pop(row) #index starts at 0
 
@@ -12763,17 +12763,17 @@ class Table_Fcn:
                     table.removeRow(row)
 
                     # remove point from each profile and its corresponding scatter plot item
-                    for p in self.main_window.polygon.polygons[p_id]:
+                    for p in self.main_window.polygon.polygons[self.main_window.sample_id][p_id]:
                         scatter_item = p[2]  # Access the scatter plot item
-                        for _, (_, plot, _, _) in self.main_window.lasermaps.items():
+                        for _, (_, plot, _) in self.main_window.lasermaps.items():
                             plot.removeItem(scatter_item)
                     # delete polygon from list
-                    del self.main_window.polygon.polygons[p_id]
+                    del self.main_window.polygon.polygons[self.main_window.sample_id][p_id]
                     # Remove existing temporary line(s) if any
-                    if p_id in self.main_window.polygon.lines:
-                        for line in self.main_window.polygon.lines[p_id]:
+                    if p_id in self.main_window.polygon.lines[self.main_window.sample_id]:
+                        for line in self.main_window.polygon.lines[self.main_window.sample_id][p_id]:
                             plot.removeItem(line)
-                        self.main_window.polygon.lines[p_id] = []
+                        self.main_window.polygon.lines[self.main_window.sample_id][p_id] = []
 
 
 # Cropping
@@ -13007,9 +13007,10 @@ class Polygon:
         self.main_window.actionPolygonMask.setChecked(True)
 
     def plot_polygon_scatter(self, event,k, x, y, x_i, y_i):
-        #create profile dict particular sample if it doesnt exisist
+        #create profile dict for this sample if it doesnt exisist
         if self.main_window.sample_id not in self.polygons:
             self.polygons[self.main_window.sample_id] = {}
+            self.lines[self.main_window.sample_id] = {}
 
         self.array_x = self.main_window.array.shape[1]
         self.array_y = self.main_window.array.shape[0]
@@ -13186,17 +13187,17 @@ class Polygon:
         if self.main_window.sample_id in self.polygons:
             if self.p_id in self.polygons[self.main_window.sample_id]:
                 # Remove existing temporary line(s) if any
-                if self.p_id in self.lines:
-                    for line in self.lines[self.p_id]:
+                if self.p_id in self.lines[self.main_window.sample_id]:
+                    for line in self.lines[self.main_window.sample_id][self.p_id]:
                         self.main_window.plot.removeItem(line)
-                self.lines[self.p_id] = []
+                self.lines[self.main_window.sample_id][self.p_id] = []
 
                 points = self.polygons[self.main_window.sample_id][self.p_id]
                 if len(points) == 1:
                     # Draw line from the first point to cursor
                     line = PlotDataItem([points[0][0], x], [points[0][1], y], pen='r')
                     self.main_window.plot.addItem(line)
-                    self.lines[self.p_id].append(line)
+                    self.lines[self.main_window.sample_id][self.p_id].append(line)
                 elif not complete and len(points) > 1:
 
                     if self.main_window.point_selected:
@@ -13215,12 +13216,12 @@ class Polygon:
                     poly_item = QGraphicsPolygonItem(QtGui.QPolygonF([QtCore.QPointF(x, y) for x, y in zip(x_points, y_points)]))
                     poly_item.setBrush(QtGui.QColor(100, 100, 150, 100))
                     self.main_window.plot.addItem(poly_item)
-                    self.lines[self.p_id].append(poly_item)
+                    self.lines[self.main_window.sample_id][self.p_id].append(poly_item)
 
                     # Draw line from last point to cursor
                     # line = PlotDataItem([points[-1][0], x], [points[-1][1], y], pen='r')
                     # self.main_window.plot.addItem(line)
-                    # self.lines[self.p_id].append(line)
+                    # self.lines[self.main_window.sample_id][self.p_id].append(line)
 
                 elif complete and len(points) > 2:
                     points = [QtCore.QPointF(x, y) for x, y, _ in self.polygons[self.main_window.sample_id][self.p_id]]
@@ -13228,7 +13229,7 @@ class Polygon:
                     poly_item = QGraphicsPolygonItem(polygon)
                     poly_item.setBrush(QtGui.QColor(100, 100, 150, 100))
                     self.main_window.plot.addItem(poly_item)
-                    self.lines[self.p_id].append(poly_item)
+                    self.lines[self.main_window.sample_id][self.p_id].append(poly_item)
 
                     self.update_table_widget()
                     # Find the row where the first column matches self.p_id and select it
@@ -13274,17 +13275,17 @@ class Polygon:
     def clear_lines(self):
         if self.p_id in self.polygons[self.main_window.sample_id]:
             # Remove existing temporary line(s) if any
-            if self.p_id in self.lines:
-                for line in self.lines[self.p_id]:
+            if self.p_id in self.lines[self.main_window.sample_id]:
+                for line in self.lines[self.main_window.sample_id][self.p_id]:
                     self.main_window.plot.removeItem(line)
-            self.lines[self.p_id] = []
+            self.lines[self.main_window.sample_id][self.p_id] = []
 
     def clear_polygons(self):
         if self.main_window.sample_id in self.polygons:
             self.main_window.tableWidgetPolyPoints.clearContents()
             self.main_window.tableWidgetPolyPoints.setRowCount(0)
             self.clear_lines()
-            self.lines ={}              #temp dict for lines in polygon
+            self.lines[self.main_window.sample_id] ={}              #temp dict for lines in polygon
             self.point_index = None             # index for move point
             self.p_id = None           # polygon ID
             self.p_id_gen = 0 #Polygon_id generator

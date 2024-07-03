@@ -10,6 +10,14 @@ class AttributeDataFrame(pd.DataFrame):
     pandas.DataFrame : 
         Input dataframe, if none provided an empty dataframe can be created, defaults to None
 
+    Methods
+    -------
+    get_attribute :
+        Get an attribute from an AttributeDataFrame
+
+    set_attribute :
+        Get an attribute from an AttributeDataFrame
+
     Returns
     -------
     AttributeDataFrame

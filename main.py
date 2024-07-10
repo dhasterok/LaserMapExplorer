@@ -1604,7 +1604,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             self.update_tables()
 
-            return
+            #return
 
         # add spot data
         if not self.spotdata.empty:
@@ -1668,7 +1668,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # self.initialize_axis_values('Analyte', fields[0])
         # self.color_field_callback()
         # self.set_style_widgets('analyte map')
-        # self.canvas_changed()
+        
+        # update toolbar
+        self.canvas_changed()
 
         self.update_plot = True
         self.update_SV()
@@ -6171,7 +6173,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
             #print('add_plotwidget_to_canvas: SV')
             self.clear_layout(self.widgetSingleView.layout())
-            widget = plot_info['figure']
+            self.sv_widget = plot_info['figure']
             
             
             plot_info['view'][0] = True
@@ -6181,7 +6183,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             for index in range(self.comboBoxMVPlots.count()):
                 if self.comboBoxMVPlots.itemText(index) == self.SV_plot_name:
-                    #plot exists in MV
+                    #plot exists in MVself.pyqtgraph_widget
                     self.move_widget_between_layouts(self.widgetMultiView.layout(), self.widgetSingleView.layout(),widget)
                     self.duplicate_plot_info = plot_info
                     self.hide()
@@ -6198,8 +6200,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.duplicate_plot_info = None #reset to avoid plotting previous duplicates
             else:
                 #update toolbar and SV canvas
-                self.update_canvas(widget)
-            widget.show()
+                self.update_canvas(self.sv_widget)
+            self.sv_widget.show()
         # add figure to MultiView canvas
         elif self.canvasWindow.currentIndex() == self.canvas_tab['mv']:
             #print('add_plotwidget_to_canvas: MV')
@@ -6399,6 +6401,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.mpl_toolbar.hide()
             self.widgetSingleView.layout().addWidget(self.mpl_toolbar)
         except:
+            # canvas is not a mplcanvas  
             pass
     def display_QV(self):
         """Plots selected maps to the Quick View tab
@@ -6480,7 +6483,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         match view:
             case 'SV':
-                canvas = self.get_SV_widget(1)
+                canvas = self.sv_widget
             case 'MV':
                 pass
             case 'QV':
@@ -6492,8 +6495,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.toolButtonAnnotate.setChecked(False)
             if isinstance(canvas,MplCanvas):
                 canvas.restore_view()
-            elif self.pyqtgraph_widget:
-                self.pyqtgraph_widget.getItem(0, 0).getViewBox().autoRange()
+            elif isinstance(canvas,GraphicsLayoutWidget):
+                canvas.getItem(0, 0).getViewBox().autoRange()
 
         if function == 'pan':
             self.toolButtonZoom.setChecked(False)
@@ -6503,9 +6506,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.mpl_toolbar.pan()
                 print(self.mpl_toolbar)
                 #canvas.figure.canvas.toolbar.pan()
-            elif self.pyqtgraph_widget:
+            elif isinstance(canvas,GraphicsLayoutWidget):
                 # Enable or disable panning
-                self.pyqtgraph_widget.getItem(0, 0).getViewBox().setMouseMode(ViewBox.PanMode if enable else ViewBox.RectMode)
+                canvas.getItem(0, 0).getViewBox().setMouseMode(ViewBox.PanMode if enable else ViewBox.RectMode)
 
         if function == 'zoom':
             self.toolButtonPan.setChecked(False)
@@ -6513,13 +6516,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if isinstance(canvas,MplCanvas):
                 # Toggle zoom mode in Matplotlib
                 self.mpl_toolbar.zoom()  # Assuming your Matplotlib canvas has a toolbar with a zoom function
-            elif self.pyqtgraph_widget:
+            elif isinstance(canvas,GraphicsLayoutWidget):
                 # Assuming pyqtgraph_widget is a GraphicsLayoutWidget or similar
                 if enable:
 
-                    self.pyqtgraph_widget.getItem(0, 0).getViewBox().setMouseMode(ViewBox.RectMode)
+                    canvas.getItem(0, 0).getViewBox().setMouseMode(ViewBox.RectMode)
                 else:
-                    self.pyqtgraph_widget.getItem(0, 0).getViewBox().setMouseMode(ViewBox.PanMode)
+                    canvas.getItem(0, 0).getViewBox().setMouseMode(ViewBox.PanMode)
 
         if function == 'annotate':
             self.toolButtonPan.setChecked(False)
@@ -6533,26 +6536,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if function == 'preference':
             if isinstance(canvas,MplCanvas):
                 self.mpl_toolbar.edit_parameters()
-            if self.pyqtgraph_widget:
+            elif isinstance(canvas,GraphicsLayoutWidget):
                 # Assuming it's about showing/hiding axes
                 if enable:
-                    self.pyqtgraph_widget.showAxis('left', True)
-                    self.pyqtgraph_widget.showAxis('bottom', True)
+                    canvas.showAxis('left', True)
+                    canvas.showAxis('bottom', True)
                 else:
-                    self.pyqtgraph_widget.showAxis('left', False)
-                    self.pyqtgraph_widget.showAxis('bottom', False)
+                    canvas.showAxis('left', False)
+                    canvas.showAxis('bottom', False)
 
         if function == 'axes':
             if isinstance(canvas,MplCanvas):
                 self.mpl_toolbar.configure_subplots()
-            if self.pyqtgraph_widget:
+            elif isinstance(canvas,GraphicsLayoutWidget):
                 # Assuming it's about showing/hiding axes
                 if enable:
-                    self.pyqtgraph_widget.showAxis('left', True)
-                    self.pyqtgraph_widget.showAxis('bottom', True)
+                    canvas.showAxis('left', True)
+                    canvas.showAxis('bottom', True)
                 else:
-                    self.pyqtgraph_widget.showAxis('left', False)
-                    self.pyqtgraph_widget.showAxis('bottom', False)
+                    canvas.showAxis('left', False)
+                    canvas.showAxis('bottom', False)
         
         if function == 'pop':
             self.toolButtonPan.setChecked(False)
@@ -6569,26 +6572,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             
             if isinstance(canvas,MplCanvas):
                 self.mpl_toolbar.save_figure()
-            if self.pyqtgraph_widget:
+            elif isinstance(canvas,GraphicsLayoutWidget):
                 # Save functionality for pyqtgraph
-                export = exportDialog.ExportDialog(self.pyqtgraph_widget.getItem(0, 0).scene())
-                export.show(self.pyqtgraph_widget.getItem(0, 0).getViewBox())
+                export = exportDialog.ExportDialog(canvas.getItem(0, 0).scene())
+                export.show(canvas.getItem(0, 0).getViewBox())
                 export.exec_()
                 
     def save_plot(self, action):
         """Sorts analyte table in dialog"""        
         # get save method (Figure/Data)
-        canvas = self.get_SV_widget(1)
+        canvas = self.sv_widget #get the widget in SV layout
         method = action.text()
         if method == 'Figure':
             
             if isinstance(canvas, MplCanvas):
                 self.mpl_toolbar.save_figure()
-            if self.pyqtgraph_widget:
+            elif isinstance(canvas,GraphicsLayoutWidget):
                 # Save functionality for pyqtgraph
-                export = exportDialog.ExportDialog(self.pyqtgraph_widget.getItem(0, 0).scene())
-                export.show(self.pyqtgraph_widget.getItem(0, 0).getViewBox())
-                export.exec_()
+                export = exportDialog.ExportDialog(canvas.getItem(0, 0).scene())
+                export.show(canvas.getItem(0, 0).getViewBox())
         elif method == 'Data':
             if self.plot_info:
                 sample_id = self.plot_info['sample_id']
@@ -6938,13 +6940,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             'view': [True,False],
             'position': None
             }
-
-        # self.clear_layout(self.widgetSingleView.layout())
-
-        # self.mpl_toolbar = NavigationToolbar(canvas, self)
-        # self.widgetSingleView.layout().addWidget(self.mpl_toolbar)
-        # self.mpl_toolbar.hide()
-        
         
         self.add_plotwidget_to_canvas( self.plot_info)
         # self.widgetSingleView.layout().addWidget(canvas)

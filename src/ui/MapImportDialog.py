@@ -150,7 +150,7 @@ class Ui_MapImportDialog(object):
         self.verticalLayoutMetadataTable.setObjectName("verticalLayoutMetadataTable")
         self.tableWidgetMetadata = QtWidgets.QTableWidget(self.layoutWidget)
         self.tableWidgetMetadata.setObjectName("tableWidgetMetadata")
-        self.tableWidgetMetadata.setColumnCount(9)
+        self.tableWidgetMetadata.setColumnCount(10)
         self.tableWidgetMetadata.setRowCount(0)
         item = QtWidgets.QTableWidgetItem()
         self.tableWidgetMetadata.setHorizontalHeaderItem(0, item)
@@ -170,6 +170,8 @@ class Ui_MapImportDialog(object):
         self.tableWidgetMetadata.setHorizontalHeaderItem(7, item)
         item = QtWidgets.QTableWidgetItem()
         self.tableWidgetMetadata.setHorizontalHeaderItem(8, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidgetMetadata.setHorizontalHeaderItem(9, item)
         self.verticalLayoutMetadataTable.addWidget(self.tableWidgetMetadata)
         self.horizontalLayout_4 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_4.setObjectName("horizontalLayout_4")
@@ -303,9 +305,11 @@ class Ui_MapImportDialog(object):
         item.setText(_translate("MapImportDialog", "Spot size\n"
 "(µm)"))
         item = self.tableWidgetMetadata.horizontalHeaderItem(7)
+        item.setText(_translate("MapImportDialog", "Line Dim."))
+        item = self.tableWidgetMetadata.horizontalHeaderItem(8)
         item.setText(_translate("MapImportDialog", "Sweep\n"
 "(s)"))
-        item = self.tableWidgetMetadata.horizontalHeaderItem(8)
+        item = self.tableWidgetMetadata.horizontalHeaderItem(9)
         item.setText(_translate("MapImportDialog", "Speed\n"
 "(µm/s)"))
         self.checkBoxApplyAll.setToolTip(_translate("MapImportDialog", "<html><head/><body><p>Apply changes to a single row in a column to all rows in the column</p></body></html>"))

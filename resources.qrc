@@ -159,5 +159,7 @@
         <file>resources/icons/icon-spot-locate-64.svg</file>
         <file>resources/icons/icon-run-64.svg</file>
         <file>resources/icons/icon-stop-64.svg</file>
+        <file>resources/icons/icon-swap-resolution-64.svg</file>
+        <file>resources/icons/icon-swap-resolution-dark-64.svg</file>
     </qresource>
 </RCC>

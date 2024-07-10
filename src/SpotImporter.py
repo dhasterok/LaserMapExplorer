@@ -298,9 +298,10 @@ class SpotImporter(QDialog, Ui_SpotImportDialog):
                 row_data.append(item.text() if item else '')
             data.append(row_data)
 
-        columns = list(self.spotdata.columns)
+        #columns = list(self.spotdata.columns)
 
-        self.import_df = AttributeDataFrame(data, columns=columns)
+        self.import_df = AttributeDataFrame(data)
+        self.import_df.columns = columns
 
         # insert missing columns
         if 'X' not in self.import_df.columns:
@@ -308,7 +309,7 @@ class SpotImporter(QDialog, Ui_SpotImportDialog):
         if 'Y' not in self.import_df.columns:
             self.import_df['Y'] = None
         if 'visible' not in self.import_df.columns:
-            self.import_df['visible'] = False
+            self.import_df['visible'] = True
         if 'display_text' not in self.import_df.columns:
             if 'spot_id' in self.import_df.columns:
                 self.import_df['display_text'] = self.import_df['spot_id']
@@ -342,6 +343,7 @@ class SpotImporter(QDialog, Ui_SpotImportDialog):
 
             self.import_df.set_attribute(i, 'analyte', analyte[0])
 
-        self.main_window.spotdata = self.import_df
+        if self.main_window:
+            self.main_window.spotdata = self.import_df
 
         self.ok = True

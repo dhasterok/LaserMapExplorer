@@ -382,6 +382,8 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                         self.tableWidgetMetadata.setItem(row, col, item)
                     case 'Standard':
                         self.add_combobox(row, col, self.standard_list, 0)
+                    case 'Line Dir.':
+                        self.add_combobox(row,col, ['X', 'Y'], 0)
                     case 'X\nreverse' | 'Y\nreverse' | 'Swap XY':
                         self.add_checkbox(row, col, False)
                     # case _:
@@ -497,6 +499,8 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                         item = QTableWidgetItem(self.sample_ids[row])
                         item.setFlags(item.flags() & ~Qt.ItemIsEditable)
                         self.tableWidgetMetadata.setItem(row, col, item)
+                    case 'Line Dir.':
+                        item = QTableWidgetItem(self.line_dir[row])
                     #case 'Filename\nformat':
                     #    self.add_combobox(row, col, ['SampleID-LineNum','LineNum-SampleID'], 0)
 

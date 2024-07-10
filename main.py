@@ -11361,6 +11361,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionFullMap.setIcon(QIcon(os.path.join(iconpath,'icon-fit-to-width-dark-64.svg')))
         self.actionCrop.setIcon(QIcon(os.path.join(iconpath,'icon-crop-dark-64.svg')))
         self.actionSwapAxes.setIcon(QIcon(os.path.join(iconpath,'icon-swap-dark-64.svg')))
+        self.toolButtonSwapResolution.setIcon(QIcon(os.path.join(iconpath,'icon-swap-resolution-dark-64.svg')))
         # Notes
         self.toolButtonNotesHeading.setIcon(QIcon(os.path.join(iconpath,'icon-heading-dark-64.svg')))
         self.toolButtonNotesBold.setIcon(QIcon(os.path.join(iconpath,'icon-bold-dark-64.svg')))
@@ -11462,6 +11463,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionFullMap.setIcon(QIcon(os.path.join(iconpath,'icon-fit-to-width-64.svg')))
         self.actionCrop.setIcon(QIcon(os.path.join(iconpath,'icon-crop-64.svg')))
         self.actionSwapAxes.setIcon(QIcon(os.path.join(iconpath,'icon-swap-64.svg')))
+        self.toolButtonSwapResolution.setIcon(QIcon(os.path.join(iconpath,'icon-swap-resolution-64.svg')))
         # Notes
         self.toolButtonNotesHeading.setIcon(QIcon(os.path.join(iconpath,'icon-heading-64.svg')))
         self.toolButtonNotesBold.setIcon(QIcon(os.path.join(iconpath,'icon-bold-64.svg')))

@@ -410,6 +410,11 @@ reverse</string>
           </column>
           <column>
            <property name="text">
+            <string>Line Dim.</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
             <string>Sweep
 (s)</string>
            </property>

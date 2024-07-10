@@ -157,5 +157,7 @@
         <file>resources/icons/icon-sun-and-moon-64.svg</file>
         <file>resources/icons/icon-import-spots-64.svg</file>
         <file>resources/icons/icon-spot-locate-64.svg</file>
+        <file>resources/icons/icon-run-64.svg</file>
+        <file>resources/icons/icon-stop-64.svg</file>
     </qresource>
 </RCC>

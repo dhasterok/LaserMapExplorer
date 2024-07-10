@@ -1,6 +1,6 @@
-import os
+import os, re
 import pandas as pd
-from PyQt5.QtWidgets import QDialog, QFileDialog, QTableWidgetItem, QMenu, QInputDialog, QComboBox, QAction, QHeaderView
+from PyQt5.QtWidgets import QDialog, QFileDialog, QTableWidgetItem, QMenu, QInputDialog, QComboBox, QAction, QHeaderView, QMessageBox
 from PyQt5.QtCore import Qt
 from src.ui.SpotImportDialog import Ui_SpotImportDialog
 from lame_helper import basedir, iconpath
@@ -72,12 +72,23 @@ class SpotImporter(QDialog, Ui_SpotImportDialog):
         else:
             return
             
+        success = True
         for filename in csv_files:
-            tempdata = pd.read_csv(os.path.join(file_path,filename), engine='c')
+            if filename.endswith('.csv'):
+                tempdata = pd.read_csv(os.path.join(file_path,filename), engine='c')
+            elif filename.endswith('.xlsx') or filepath.endswith('.xls'):
+                tempdata = pd.read_excel(os.path.join(file_path,filename), engine='c')
+            else:
+                success = False
+                continue
+
             if 'Sample' not in tempdata.columns:
                 tempdata.insert(0, 'Sample', os.path.splitext(filename)[0])
 
             self.spotdata = pd.concat([self.spotdata, tempdata], axis=0, ignore_index=True)
+        
+        if not success:
+            QMessageBox.warning(self,'Error','One or more spot files could not load. Files must be a *.csv, *.xls, or *.xlsx.')
 
         # clean the spot data column names
         self.spotdata.columns = self.spotdata.columns.str.replace('(int)','')
@@ -287,8 +298,8 @@ class SpotImporter(QDialog, Ui_SpotImportDialog):
                 row_data.append(item.text() if item else '')
             data.append(row_data)
 
-        columns = list(self.spotdata.columns.str.lower())
-        
+        columns = list(self.spotdata.columns)
+
         self.import_df = AttributeDataFrame(data, columns=columns)
 
         # insert missing columns
@@ -305,28 +316,32 @@ class SpotImporter(QDialog, Ui_SpotImportDialog):
                 self.import_df['display_text'] = ''
 
         for i in ianalyte + iuncertainty:
-            if 'cps' in columns[i]:
+            analyte = re.split(r'[ _]',columns[i])
+            if 'cps' == analyte[1].lower():
                 unit_text = 'cps'
-            elif 'ppm' in columns:
+            elif 'ppm' == analyte[1].lower():
                 unit_text = 'ppm'
-            elif 'ppb' in columns:
+            elif 'ppb' == analyte[1].lower():
                 unit_text = 'ppb'
-            elif 'ppt' in columns:
+            elif 'ppt' == analyte[1].lower():
                 unit_text = 'ppt'
 
-            self.import_df.setattribute(i, 'unit', unit_text)
-            
-            if i in ianalyte:
-                if 'mean' in self.import_df.columns.str.lower():
-                    self.import_df.setattribute(i, 'average', 'mean')
-                elif 'median' in self.spotdata.columns.str.lower():
-                    self.import_df.setattribute(i, 'average', 'median')
-            if i in iuncertainty:
-                if 'sd' in self.import_df.columns.str.lower():
-                    self.import_df.setattribute(i, 'uncertainty', 'sd')
-                elif 'se' in self.import_df.columns.str.lower():
-                    self.import_df.setattribute(i, 'uncertainty', 'se')
+            self.import_df.set_attribute(i, 'unit', unit_text)
 
-        self.main_window.spot_data = self.import_df
+            if i in ianalyte:
+                if 'mean' == analyte[2].lower():
+                    self.import_df.set_attribute(i, 'average', 'mean')
+                elif 'median' == analyte[2].lower():
+                    self.import_df.set_attribute(i, 'average', 'median')
+
+            if i in iuncertainty:
+                if 'sd' == analyte[2].lower():
+                    self.import_df.set_attribute(i, 'uncertainty', 'sd')
+                elif 'se' == analyte[2].lower():
+                    self.import_df.set_attribute(i, 'uncertainty', 'se')
+
+            self.import_df.set_attribute(i, 'analyte', analyte[0])
+
+        self.main_window.spotdata = self.import_df
 
         self.ok = True

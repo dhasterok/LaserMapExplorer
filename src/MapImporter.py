@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from PyQt5.QtWidgets import (
     QApplication, QDialog, QFileDialog, QTableWidget, QTableWidgetItem, QInputDialog, QComboBox,
-    QWidget, QCheckBox, QHeaderView, QProgressBar, QLineEdit
+    QWidget, QCheckBox, QHeaderView, QProgressBar, QLineEdit, QMessageBox
 )
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt, QUrl
@@ -597,7 +597,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
 
         delimiters = [' ','-','_','.']
         units = ['CPS','cps','PPM','ppm']
-        formats = ['matrix','csv','xls','xlsx']
+        formats = ['matrix','csv','xlsx','xls']
 
         # remove sample_id from filename
         fid = file.replace(sample_id,'')
@@ -851,7 +851,12 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             analyte = f"{test.group(2)}{test.group(1)}"
         
         # drop rows and columns with all nans 
-        df = pd.read_csv(file_path, header=None).dropna(how='all', axis=0).dropna(how='all', axis=1)
+        if file_path.endswith('.csv'):
+            df = pd.read_csv(file_path, header=None).dropna(how='all', axis=0).dropna(how='all', axis=1)
+        elif file_path.endswith('.xlsx') or file_path.endswith('.xls'):
+            df = pd.read_excel(file_path, header=None).dropna(how='all', axis=0).dropna(how='all', axis=1)
+        else:
+            QMessageBox.warning(self,'Error','Could not load file, must be a *.csv, *.xls, or *.xlsx file type.')
        
         #print(df.shape)
         # produce X and Y values

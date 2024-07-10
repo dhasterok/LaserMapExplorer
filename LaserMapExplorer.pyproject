@@ -10,6 +10,7 @@
         "designer/MapImportDialog.ui",
         "designer/QuickViewDialog.ui",
         "designer/ImageImportDialog.ui",
-        "designer/SpotImportDialog.ui"
+        "designer/SpotImportDialog.ui",
+        "designer/WorkflowDesigner.ui"
     ]
 }

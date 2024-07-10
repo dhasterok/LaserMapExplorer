@@ -63,6 +63,7 @@ from src.ui.QuickViewDialog import Ui_QuickViewDialog
 from rst2pdf.createpdf import RstToPdf
 from docutils.core import publish_string
 from lame_helper import basedir, iconpath, sspath, load_stylesheet
+from src.ExtendedDF import AttributeDataFrame
 
 setConfigOption('imageAxisOrder', 'row-major') # best performance
 ## sphinx-build -b html docs/source/ docs/build/html
@@ -748,7 +749,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Spot Data Tab
         #-------------------------
-        self.spotdata = pd.DataFrame()
+        self.spotdata = AttributeDataFrame()
 
         # spot table
         header = self.tableWidgetSpots.horizontalHeader()
@@ -1386,42 +1387,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # self.comboBoxSampleId.addItems(self.sample_ids)
         self.init_tabs()
 
-    def open_spots(self):
-        """Open file(s) with spot data
-
-        Prompts user to select spot data file with dialog after ``MainWindow.toolButtonSpots`` is clicked.
-        """        
-        dialog = QFileDialog()
-        dialog.setFileMode(QFileDialog.ExistingFiles)
-        dialog.setNameFilter("CSV (*.csv *.xls *.xlsx)")
-        if dialog.exec_():
-            file_list = dialog.selectedFiles()
-            csv_files = [os.path.split(file)[1] for file in file_list if (file.endswith('.csv') | file.endswith('.xls') | file.endswith('.xlsx'))]
-            if csv_files == []:
-                return
-
-            file_path = os.path.split(file_list[0])[0]
-        else:
-            return
-            
-        for filename in csv_files:
-            tempdata = pd.read_csv(os.path.join(file_path,filename), engine='c')
-            if 'Sample' not in tempdata.columns:
-                tempdata['Sample'] = os.path.splitext(filename)[0]
-
-            pd.concat([self.spotdata, tempdata], axis=0, ignore_index=True)
-
-        if not('X' in self.spotdata.columns):
-            self.spotdata['X'] = None
-        if not('Y' in self.spotdata.columns):
-            self.spotdata['Y'] = None
-        if not('visible' in self.spotdata.columns):
-            self.spotdata['visible'] = False
-        if not('annotation' in self.spotdata.columns):
-            self.spotdata['annotation'] = ''
-        
-        self.populate_spot_table()
-
     def populate_spot_table(self):
         """Populates spot table when spot file is opened or sample is changed
 
@@ -1430,8 +1395,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.sample_id == '':
             return
         
-        filtered_df = self.spotdata[self.sample_id==self.spotdata['Sample']]
-        filtered_df = filtered_df['Sample','X','Y','visible','annotation']
+        filtered_df = self.spotdata[self.sample_id==self.spotdata['sample_id']]
+        filtered_df = filtered_df['sample_id','X','Y','visible','display_text']
 
         self.tableWidgetSpots.clearContents()
         self.tableWidgetSpots.setRowCount(len(filtered_df))
@@ -1641,6 +1606,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             return
 
+        # add spot data
+        if not self.spotdata.empty:
+            self.populate_spot_table()
+
         # reset filters
         self.actionClusterMask.setEnabled(False)
         self.actionPolygonMask.setEnabled(False)
@@ -1708,6 +1677,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         pass
 
     def import_files(self):
+        """Import selected map files."""
         # import data dialog
         self.importDialog = MapImporter.MapImporter(self)
         self.importDialog.show()
@@ -1718,12 +1688,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # change sample
     
     def import_spots(self):
+        """Import a data file with spot data."""
         # import spot dialog
         self.spotDialog = SpotImporter.SpotImporter(self)
         self.spotDialog.show()
 
-        if self.spotDialog.ok:
-            self.spot_data = self.spotDialog.import_df
+        if not self.spotDialog.ok:
+            return
+
+        self.populate_spot_table()
+
 
     # Other windows/dialogs
     # -------------------------------------

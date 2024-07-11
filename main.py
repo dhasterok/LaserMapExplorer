@@ -688,6 +688,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         pixelwidthvalidator.setBottom(0.0)
         self.lineEditDX.setValidator(pixelwidthvalidator)
         self.lineEditDY.setValidator(pixelwidthvalidator)
+        self.toolButtonSwapResolution.clicked.connect(self.swap_resolution)
 
         # auto scale
         quantilevalidator = QDoubleValidator(0.0, 100, 3)
@@ -2068,6 +2069,35 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         df = df.sort_values(['Y','X'])
 
         self.compute_map_aspect_ratio()
+
+    def swap_resolution(self):
+        """Swaps DX and DY for a dataframe
+
+        Recalculates X and Y for a dataframe
+        """
+        X = round(self.data[self.sample_id]['raw_data']['X']/self.dx)
+        Y = round(self.data[self.sample_id]['raw_data']['Y']/self.dy)
+
+        Xp = round(self.data[self.sample_id]['processed_data']['X']/self.dx)
+        Yp = round(self.data[self.sample_id]['processed_data']['Y']/self.dy)
+
+        dx = self.dx
+        self.dx = self.dy
+        self.dy = dx
+
+        units = self.preferences['Units']['Distance']
+        self.lineEditDX.setText(f'{self.dx:.2f} {units}')
+        self.lineEditDY.setText(f'{self.dy:.2f} {units}')
+
+        self.data[self.sample_id]['raw_data']['X'] = self.dx*X
+        self.data[self.sample_id]['raw_data']['Y'] = self.dy*Y
+
+        self.data[self.sample_id]['processed_data']['X'] = self.dx*Xp
+        self.data[self.sample_id]['processed_data']['Y'] = self.dy*Yp
+
+        self.compute_map_aspect_ratio()
+
+        self.update_SV()
 
     # toolbar functions
     def change_ref_material(self, comboBox1, comboBox2):

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1024</width>
-    <height>542</height>
+    <height>551</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -20,7 +20,7 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>5</x>
@@ -61,23 +61,30 @@
          <number>2</number>
         </property>
         <item>
-         <widget class="QToolButton" name="toolButton">
+         <widget class="QToolButton" name="toolButtonActions">
           <property name="text">
-           <string>...</string>
+           <string>Actions</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QToolButton" name="toolButton_2">
+         <widget class="QToolButton" name="toolButtonFilters">
           <property name="text">
-           <string>...</string>
+           <string>Filters</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QToolButton" name="toolButton_3">
+         <widget class="QToolButton" name="toolButtonControls">
           <property name="text">
-           <string>...</string>
+           <string>Controls</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="toolButtonStyles">
+          <property name="text">
+           <string>Styles</string>
           </property>
          </widget>
         </item>
@@ -187,7 +194,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>383</width>
+             <width>367</width>
              <height>410</height>
             </rect>
            </property>
@@ -201,6 +208,9 @@
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <property name="spacing">
         <number>0</number>
+       </property>
+       <property name="sizeConstraint">
+        <enum>QLayout::SetDefaultConstraint</enum>
        </property>
        <item>
         <widget class="QFrame" name="frame_4">
@@ -237,6 +247,12 @@
        </item>
        <item>
         <widget class="QFrame" name="frame_5">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="maximumSize">
           <size>
            <width>250</width>
@@ -262,6 +278,20 @@
           <property name="bottomMargin">
            <number>2</number>
           </property>
+          <item>
+           <widget class="QTableWidget" name="tableWidget">
+            <column>
+             <property name="text">
+              <string>Attribute</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Value</string>
+             </property>
+            </column>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -269,16 +299,6 @@
      </item>
     </layout>
    </widget>
-  </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>1024</width>
-     <height>24</height>
-    </rect>
-   </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
@@ -300,10 +320,21 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionOpen"/>
    <addaction name="actionSave"/>
    <addaction name="separator"/>
    <addaction name="actionRun"/>
    <addaction name="actionStop"/>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1024</width>
+     <height>37</height>
+    </rect>
+   </property>
   </widget>
   <action name="actionRun">
    <property name="icon">
@@ -357,6 +388,24 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+T</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::ApplicationSpecificRole</enum>
+   </property>
+  </action>
+  <action name="actionOpen">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/resources/icons/icon-open-file-64.svg</normaloff>:/resources/icons/icon-open-file-64.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Open</string>
+   </property>
+   <property name="toolTip">
+    <string>Open workflow</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
    </property>
    <property name="menuRole">
     <enum>QAction::ApplicationSpecificRole</enum>

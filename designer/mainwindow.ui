@@ -975,7 +975,7 @@
      <x>0</x>
      <y>0</y>
      <width>1123</width>
-     <height>24</height>
+     <height>37</height>
     </rect>
    </property>
    <property name="font">
@@ -1161,7 +1161,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>181</height>
+          <height>169</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -1937,8 +1937,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>300</width>
-          <height>181</height>
+          <width>98</width>
+          <height>72</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -1977,7 +1977,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>300</width>
+              <width>257</width>
               <height>355</height>
              </rect>
             </property>
@@ -2536,8 +2536,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>300</width>
-          <height>181</height>
+          <width>98</width>
+          <height>78</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -2576,8 +2576,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>294</width>
-              <height>175</height>
+              <width>258</width>
+              <height>131</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_45">
@@ -2890,8 +2890,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>300</width>
-          <height>181</height>
+          <width>98</width>
+          <height>72</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -2930,7 +2930,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>300</width>
+              <width>225</width>
               <height>263</height>
              </rect>
             </property>
@@ -3529,8 +3529,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>300</width>
-          <height>181</height>
+          <width>98</width>
+          <height>72</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -3569,7 +3569,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>300</width>
+              <width>274</width>
               <height>484</height>
              </rect>
             </property>
@@ -4295,8 +4295,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>300</width>
-          <height>181</height>
+          <width>98</width>
+          <height>72</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -4335,7 +4335,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>300</width>
+              <width>293</width>
               <height>341</height>
              </rect>
             </property>
@@ -4973,8 +4973,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>300</width>
-          <height>181</height>
+          <width>98</width>
+          <height>72</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5013,7 +5013,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>300</width>
+              <width>276</width>
               <height>402</height>
              </rect>
             </property>
@@ -5583,8 +5583,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>300</width>
-          <height>181</height>
+          <width>98</width>
+          <height>72</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5630,7 +5630,7 @@
               <x>0</x>
               <y>0</y>
               <width>301</width>
-              <height>181</height>
+              <height>128</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_57">
@@ -5816,8 +5816,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>300</width>
-          <height>181</height>
+          <width>98</width>
+          <height>72</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5856,7 +5856,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>300</width>
+              <width>246</width>
               <height>284</height>
              </rect>
             </property>
@@ -6240,8 +6240,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>300</width>
-          <height>181</height>
+          <width>98</width>
+          <height>72</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6286,8 +6286,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>300</width>
-              <height>181</height>
+              <width>209</width>
+              <height>109</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_64">
@@ -7041,8 +7041,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>296</width>
-          <height>360</height>
+          <width>169</width>
+          <height>273</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7179,8 +7179,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>294</width>
-              <height>144</height>
+              <width>98</width>
+              <height>72</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -7219,7 +7219,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>294</width>
+                  <width>171</width>
                   <height>342</height>
                  </rect>
                 </property>
@@ -7584,7 +7584,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>100</width>
+              <width>98</width>
               <height>72</height>
              </rect>
             </property>
@@ -7982,7 +7982,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>100</width>
+              <width>98</width>
               <height>72</height>
              </rect>
             </property>
@@ -8408,7 +8408,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>100</width>
+              <width>98</width>
               <height>75</height>
              </rect>
             </property>
@@ -8823,7 +8823,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>100</width>
+              <width>98</width>
               <height>72</height>
              </rect>
             </property>
@@ -9167,8 +9167,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>290</width>
-          <height>360</height>
+          <width>98</width>
+          <height>72</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -9207,8 +9207,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>290</width>
-              <height>687</height>
+              <width>222</width>
+              <height>686</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_40">
@@ -10572,8 +10572,8 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>1019</width>
-     <height>367</height>
+     <width>600</width>
+     <height>280</height>
     </size>
    </property>
    <property name="maximumSize">

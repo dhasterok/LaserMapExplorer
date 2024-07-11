@@ -139,7 +139,7 @@ class Ui_SpotImportDialog(object):
         self.pushButtonCancel.setText(_translate("SpotImportDialog", "Cancel"))
         self.pushButtonImport.setToolTip(_translate("SpotImportDialog", "Import selected data"))
         self.pushButtonImport.setText(_translate("SpotImportDialog", "Import"))
-import resources_rc
+import src.ui.resources_rc
 
 
 if __name__ == "__main__":

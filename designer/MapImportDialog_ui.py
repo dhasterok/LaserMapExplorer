@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'designer/MapImportDialog.ui'
+# Form implementation generated from reading ui file '/Users/a1638626/Documents/GitHub/LaserMapExplorer/designer/MapImportDialog.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.10
 #
@@ -331,13 +331,3 @@ class Ui_MapImportDialog(object):
         self.pushButtonImport.setToolTip(_translate("MapImportDialog", "Import selected data"))
         self.pushButtonImport.setText(_translate("MapImportDialog", "Import"))
 import src.ui.resources_rc
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MapImportDialog = QtWidgets.QDialog()
-    ui = Ui_MapImportDialog()
-    ui.setupUi(MapImportDialog)
-    MapImportDialog.show()
-    sys.exit(app.exec_())

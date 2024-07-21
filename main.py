@@ -544,7 +544,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolBox.setCurrentIndex(self.left_tab['sample'])
         self.tabWidget.setCurrentIndex(self.bottom_tab['notes'])
         self.toolBoxStyle.setCurrentIndex(0)
-        self.toolBoxTreeView.setCurrentIndex(self.right_tab['tree'])
+        self.toolBoxTreeView.seactionOpenSampletCurrentIndex(self.right_tab['tree'])
         self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
 
         # set theme
@@ -13991,7 +13991,7 @@ class Profiling:
 # Sure doesn't look like much
 # -------------------------------
 app = None
-def main():
+def create_app():
     global app
     app = QApplication(sys.argv)
 
@@ -14006,12 +14006,18 @@ def main():
         ss = load_stylesheet('light.qss')
         app.setStyleSheet(ss)
 
+    return app
+
+def show_splash():
     pixmap = QPixmap("lame_splash.svg")
     splash = QSplashScreen(pixmap)
     splash.setMask(pixmap.mask())
     splash.show()
-
     QTimer.singleShot(3000, splash.close)
+
+def main():
+    app = create_app()
+    show_splash()
 
     # Uncomment this line to set icon to App
     app.setWindowIcon(QtGui.QIcon(os.path.join(basedir, os.path.join(iconpath,'LaME-64.svg'))))

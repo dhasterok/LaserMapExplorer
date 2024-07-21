@@ -82,6 +82,7 @@ QLineEdit, QTextEdit, QPlainTextEdit, QSpinBox, QDoubleSpinBox, QTimeEdit, QDate
     border-left-color: qlineargradient(spread:pad, x1:1, y1:0, x2:0, y2:0, stop:0 #525252, stop:1 #727272);
     background-color: #1e1e1e;
     color: #ffffff;
+    font-size: 11px;
 }
 QLineEdit:focus, QTextEdit:focus, QPlainTextEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus, QTimeEdit:focus, QDateEdit:focus, QDateTimeEdit:focus {
     border-width: 2px;
@@ -100,7 +101,7 @@ QLineEdit:disabled, QTextEdit:disabled, QPlainTextEdit:disabled, QSpinBox:disabl
 
 QTextEdit#textEditNotes {
     font-family: "Monaco";
-    font-size: 10px;
+    font-size: 11px;
 }
 
 QSpinBox, QDoubleSpinBox {

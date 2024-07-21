@@ -10129,8 +10129,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     self.toolBox.setCurrentIndex(self.left_tab['sample'])
                 
                 if branch == self.sample_id:
-                    self.styles['analyte map']['Colors']['ColorByField'] = tree
-                    self.styles['analyte map']['Colors']['Field'] = leaf
+                    if tree != self.comboBoxColorByField.currentText():
+                        self.styles['analyte map']['Colors']['ColorByField'] = tree
+                        self.comboBoxColorByField.setCurrentText(tree)
+
+                    if leaf != self.comboBoxColorField.currentText():
+                        self.styles['analyte map']['Colors']['Field'] = leaf
+                        self.comboBoxColorField.setCurrentText(leaf)
+                        self.color_field_callback()
+
                     style = self.styles['analyte map']
                 else:
                     pass

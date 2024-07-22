@@ -1,0 +1,34 @@
+# .github/workflows/pytest.yml
+name: Run tests
+
+on:
+  push:
+    branches:
+      - test-github-actions
+  pull_request:
+    branches:
+      - test-github-actions
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.11.9'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest pytest-qt pytest-mock
+        pip install PyQt5 darkdetect  # Add other dependencies your project requires
+
+    - name: Run tests
+      run: |
+        tests/pytest test_main.py
+

@@ -32,10 +32,8 @@ jobs:
 
     - name: Install dependencies
       run: |
-        conda create --name pyqt python=3.11 -y
         conda init bash
         source ~/.bashrc
-        conda activate pyqt
         conda install -y pyqt pyqtgraph PyQtWebEngine pandas matplotlib scikit-learn scikit-learn-extra openpyxl numexpr pytest pytest-qt pytest-mock
         conda install -y conda-forge/label/cf201901::scikit-fuzzy
         python -m pip install --upgrade pip
@@ -43,6 +41,5 @@ jobs:
     - name: Run tests
       run: |
         source ~/.bashrc
-        conda activate pyqt
         pytest
 

@@ -20,11 +20,11 @@ def main_window(qtbot,app):
 
 def test_import_sample(qtbot, main_window, mocker):
     # Mock the file dialog to return the desired directory
-    mocker.patch.object(QFileDialog, 'getExistingDirectory', return_value='/Users/shavinkalu/Adelaide Uni/Derrick/Work/laser_mapping/Alex_garnet_maps/processed data')
+    mocker.patch.object(QFileDialog, 'getExistingDirectory', return_value='maps/Alex_garnet_maps/processed data')
 
     # Mock the exec_ method of QFileDialog to simulate the dialog being accepted
     mocker.patch.object(QFileDialog, 'exec_', return_value=QFileDialog.Accepted)
-    mocker.patch.object(QFileDialog, 'selectedFiles', return_value=['/Users/shavinkalu/Adelaide Uni/Derrick/Work/laser_mapping/Alex_garnet_maps/processed data'])
+    mocker.patch.object(QFileDialog, 'selectedFiles', return_value=['maps/Alex_garnet_maps/processed data'])
 
     # Find the action and trigger it
     action_open_sample = main_window.findChild(QAction, 'actionOpenDirectory')

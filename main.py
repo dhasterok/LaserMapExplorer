@@ -544,7 +544,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolBox.setCurrentIndex(self.left_tab['sample'])
         self.tabWidget.setCurrentIndex(self.bottom_tab['notes'])
         self.toolBoxStyle.setCurrentIndex(0)
-        self.toolBoxTreeView.seactionOpenSampletCurrentIndex(self.right_tab['tree'])
+        self.toolBoxTreeView.setCurrentIndex(self.right_tab['tree'])
         self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
 
         # set theme

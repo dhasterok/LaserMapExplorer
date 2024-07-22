@@ -4,7 +4,6 @@ from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtWidgets import QAction, QDialog, QTableWidgetItem, QComboBox, QFileDialog
 from tests.conftest import import_sample, MainWindow
 from src.ui.AnalyteSelectionDialog import Ui_Dialog  # type: ignore # Import the UI class
-import ipdb
 
 
 def test_import_directory(qtbot, main_window, mocker):
@@ -80,3 +79,5 @@ def test_select_analytes(qtbot, main_window, mocker):
     expected_norm_dict = {analyte: scale for analyte, scale in items_to_select}
     for k,v in expected_norm_dict.items():
         assert main_window.analyteDialog.norm_dict[k] == expected_norm_dict[k]
+
+    

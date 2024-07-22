@@ -22,6 +22,7 @@ jobs:
       with:
         auto-update-conda: true
         python-version: 3.11
+        channels: conda-forge  # Add conda-forge channel
 
     - name: Install dependencies
       run: |
@@ -31,6 +32,8 @@ jobs:
         conda activate pyqt
         conda install -y pyqt pyqtgraph PyQtWebEngine pandas matplotlib scikit-learn scikit-learn-extra opencv openpyxl numexpr pytest pytest-qt pytest-mock
         conda install -y conda-forge/label/cf201901::scikit-fuzzy
+        conda install conda-forge::scikit-learn-extra
+        conda install conda-forge::pytest-qt
         python -m pip install --upgrade pip
         pip install darkdetect cmcrameri
         pip install PyQt5 darkdetect

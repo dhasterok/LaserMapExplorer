@@ -20,10 +20,8 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-          sudo apt-get install -y xvfb libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xinput0 libxcb-xfixes0 libxcb-shape0 libglib2.0-0 libgl1-mesa-dev
-          sudo apt-get install '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev
-          # start xvfb in the background
-          sudo /usr/bin/Xvfb $DISPLAY -screen 0 1280x1024x24 &
+        sudo apt install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils
+        /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 -ac +extension GLX
     - name: Set up Miniconda
       uses: conda-incubator/setup-miniconda@v2
       with:
@@ -37,7 +35,7 @@ jobs:
         conda init bash
         source ~/.bashrc
         conda activate pyqt
-        conda install -y pyqt pyqtgraph PyQtWebEngine pandas matplotlib scikit-learn scikit-learn-extra opencv openpyxl numexpr pytest pytest-qt pytest-mock
+        conda install -y pyqt pyqtgraph PyQtWebEngine pandas matplotlib scikit-learn scikit-learn-extra opencv-python-headless openpyxl numexpr pytest pytest-qt pytest-mock
         conda install -y conda-forge/label/cf201901::scikit-fuzzy
         python -m pip install --upgrade pip
         pip install darkdetect cmcrameri rst2pdf

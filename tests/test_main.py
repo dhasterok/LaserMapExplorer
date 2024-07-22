@@ -41,15 +41,15 @@ def test_import_sample(qtbot, main_window, mocker):
     
     assert combo_box_sample_id.currentText() == 'RM02'
     
-@pytest.fixture
-def another_widget(qtbot):
-    widget = AnotherWidget()
-    qtbot.addWidget(widget)
-    return widget
+# @pytest.fixture
+# def another_widget(qtbot):
+#     widget = AnotherWidget()
+#     qtbot.addWidget(widget)
+#     return widget
 
-def test_another_widget_initial_state(another_widget):
-    assert another_widget.some_property == expected_initial_value  # Adjust the expected initial value
+# def test_another_widget_initial_state(another_widget):
+#     assert another_widget.some_property == expected_initial_value  # Adjust the expected initial value
 
-def test_another_widget_interaction(qtbot, another_widget):
-    qtbot.keyClicks(another_widget.some_input, "text")
-    assert another_widget.some_output == expected_output  # Adjust the expected outcome
+# def test_another_widget_interaction(qtbot, another_widget):
+#     qtbot.keyClicks(another_widget.some_input, "text")
+#     assert another_widget.some_output == expected_output  # Adjust the expected outcome

@@ -25,8 +25,6 @@ jobs:
 
     - name: Create and activate conda environment
       run: |
-        conda create --name pyqt python=3.11 -y
-        conda activate pyqt
         conda install -y pyqt pyqtgraph PyQtWebEngine pandas matplotlib scikit-learn scikit-learn-extra opencv openpyxl numexpr pytest pytest-qt pytest-mock
         conda install -y conda-forge/label/cf201901::scikit-fuzzy
         python -m pip install --upgrade pip

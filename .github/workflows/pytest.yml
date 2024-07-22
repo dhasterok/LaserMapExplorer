@@ -25,6 +25,7 @@ jobs:
 
     - name: Install dependencies
       run: |
+        conda init
         conda activate test
         conda install -y pyqt pyqtgraph PyQtWebEngine pandas matplotlib scikit-learn scikit-learn-extra opencv openpyxl numexpr pytest pytest-qt pytest-mock
         conda install -y conda-forge/label/cf201901::scikit-fuzzy

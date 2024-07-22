@@ -35,10 +35,10 @@ jobs:
         conda init bash
         source ~/.bashrc
         conda activate pyqt
-        conda install -y pyqt pyqtgraph PyQtWebEngine pandas matplotlib scikit-learn scikit-learn-extra opencv-python-headless openpyxl numexpr pytest pytest-qt pytest-mock
+        conda install -y pyqt pyqtgraph PyQtWebEngine pandas matplotlib scikit-learn scikit-learn-extra openpyxl numexpr pytest pytest-qt pytest-mock
         conda install -y conda-forge/label/cf201901::scikit-fuzzy
         python -m pip install --upgrade pip
-        pip install darkdetect cmcrameri rst2pdf
+        pip install darkdetect cmcrameri rst2pdf opencv-python-headless
     - name: Run tests
       run: |
         source ~/.bashrc

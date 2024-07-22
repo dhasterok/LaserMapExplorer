@@ -17,16 +17,19 @@ jobs:
     - name: Check out the repository
       uses: actions/checkout@v2
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
+    - name: Set up Miniconda
+      uses: conda-incubator/setup-miniconda@v2
       with:
-        python-version: '3.11.9'
+        auto-update-conda: true
+        python-version: 3.11
 
-    - name: Install dependencies
+    - name: Create and activate conda environment
       run: |
-        python -m pip install --upgrade pip
-        pip install pytest pytest-qt pytest-mock
-        pip install PyQt5 darkdetect  # Add other dependencies your project requires
+        conda create --name pyqt python=3.11 -y
+        conda activate pyqt
+        conda install -y pyqt pyqtgraph PyQtWebEngine pandas matplotlib scikit-learn scikit-learn-extra opencv openpyxl numexpr
+        conda install -y conda-forge/label/cf201901::scikit-fuzzy
+        pip install darkdetect cmcrameri
 
     - name: Run tests
       run: |

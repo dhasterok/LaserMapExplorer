@@ -1686,8 +1686,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.importDialog.show()
 
         # read directory
-        if self.importDialog.ok:
-            self.open_directory(dir_name=self.importDialog.root_path)
+        #if self.importDialog.ok:
+        #    self.open_directory(dir_name=self.importDialog.root_path)
+
         # change sample
     
     def import_spots(self):
@@ -1781,7 +1782,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.toolBox.setCurrentIndex(self.left_tab['special'])
 
     def canvas_changed(self):
-        print('canvas_changed')
+        """Sets visibility of canvas tools and updates canvas plots"""        
         if self.sample_id == '':
             self.toolButtonHome.setVisible(False)
             self.toolButtonPan.setVisible(False)
@@ -6915,6 +6916,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # get data for current map
         self.map_df = self.get_map_data(self.sample_id, field, field_type=field_type)
+
+        # equalized color bins to CDF function
         if self.toolButtonScaleEqualize.isChecked():
             sorted_data = self.map_df['array'].sort_values()
             cum_sum = sorted_data.cumsum()

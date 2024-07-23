@@ -672,6 +672,9 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                 pass
             case 'SEM':
                 pass
+
+        if self.ok:
+            self.main_window.open_directory(dir_name=self.root_path)
         
     def import_la_icp_ms_data(self, table_df, save_path):
         """Reads LA-ICP-MS data into a DataFrame

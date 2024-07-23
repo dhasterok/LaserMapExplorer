@@ -137,11 +137,12 @@
               <property name="statusTip">
                <string/>
               </property>
-              <item>
-               <property name="text">
-                <string>Load samples to start</string>
-               </property>
-              </item>
+              <property name="currentText">
+               <string/>
+              </property>
+              <property name="placeholderText">
+               <string>Load samples to start</string>
+              </property>
              </widget>
             </item>
            </layout>
@@ -975,7 +976,7 @@
      <x>0</x>
      <y>0</y>
      <width>1123</width>
-     <height>37</height>
+     <height>24</height>
     </rect>
    </property>
    <property name="font">
@@ -1150,7 +1151,7 @@
         <string/>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>6</number>
        </property>
        <widget class="QWidget" name="SelectAnalytePage">
         <property name="enabled">
@@ -1161,7 +1162,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>169</height>
+          <height>181</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -1270,6 +1271,9 @@
                   </property>
                   <property name="statusTip">
                    <string/>
+                  </property>
+                  <property name="placeholderText">
+                   <string>Error: earthref.xlsx not found</string>
                   </property>
                  </widget>
                 </item>
@@ -1937,8 +1941,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>72</height>
+          <width>300</width>
+          <height>181</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -1977,7 +1981,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>257</width>
+              <width>300</width>
               <height>355</height>
              </rect>
             </property>
@@ -2536,8 +2540,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>78</height>
+          <width>300</width>
+          <height>181</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -2576,8 +2580,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>258</width>
-              <height>131</height>
+              <width>294</width>
+              <height>175</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_45">
@@ -2890,8 +2894,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>72</height>
+          <width>300</width>
+          <height>181</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -2930,7 +2934,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>225</width>
+              <width>300</width>
               <height>263</height>
              </rect>
             </property>
@@ -3529,8 +3533,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>72</height>
+          <width>300</width>
+          <height>181</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -3569,7 +3573,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>274</width>
+              <width>300</width>
               <height>484</height>
              </rect>
             </property>
@@ -4295,8 +4299,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>72</height>
+          <width>300</width>
+          <height>181</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -4335,7 +4339,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>293</width>
+              <width>300</width>
               <height>341</height>
              </rect>
             </property>
@@ -4389,6 +4393,9 @@
                     <property name="toolTip">
                      <string>Select field for right ternary vertex</string>
                     </property>
+                    <property name="placeholderText">
+                     <string>None</string>
+                    </property>
                    </widget>
                   </item>
                   <item row="0" column="0">
@@ -4408,7 +4415,11 @@
                    </widget>
                   </item>
                   <item row="3" column="1">
-                   <widget class="QComboBox" name="comboBoxScatterPreset"/>
+                   <widget class="QComboBox" name="comboBoxScatterPreset">
+                    <property name="placeholderText">
+                     <string>Select predefined plot</string>
+                    </property>
+                   </widget>
                   </item>
                   <item row="3" column="0">
                    <widget class="QLabel" name="labelScatterPreset">
@@ -4437,11 +4448,12 @@
                     <property name="toolTip">
                      <string>Select field for y-axis or left ternary vertex</string>
                     </property>
-                    <item>
-                     <property name="text">
-                      <string>New Item</string>
-                     </property>
-                    </item>
+                    <property name="currentText">
+                     <string/>
+                    </property>
+                    <property name="placeholderText">
+                     <string>None</string>
+                    </property>
                    </widget>
                   </item>
                   <item row="2" column="0">
@@ -4487,11 +4499,12 @@
                     <property name="toolTip">
                      <string>Select field for x-axis or top ternary vertex</string>
                     </property>
-                    <item>
-                     <property name="text">
-                      <string>New Item</string>
-                     </property>
-                    </item>
+                    <property name="currentText">
+                     <string/>
+                    </property>
+                    <property name="placeholderText">
+                     <string>None</string>
+                    </property>
                    </widget>
                   </item>
                   <item row="1" column="1">
@@ -4973,8 +4986,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>72</height>
+          <width>300</width>
+          <height>181</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5013,7 +5026,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>276</width>
+              <width>300</width>
               <height>402</height>
              </rect>
             </property>
@@ -5098,6 +5111,9 @@
                     <property name="toolTip">
                      <string>Select reference for normalizing series</string>
                     </property>
+                    <property name="placeholderText">
+                     <string>Error: earthref.xlsx not found</string>
+                    </property>
                    </widget>
                   </item>
                   <item row="1" column="0">
@@ -5135,11 +5151,9 @@
                       <property name="toolTip">
                        <string>Select analyte to add</string>
                       </property>
-                      <item>
-                       <property name="text">
-                        <string>New Item</string>
-                       </property>
-                      </item>
+                      <property name="placeholderText">
+                       <string>None</string>
+                      </property>
                      </widget>
                     </item>
                     <item>
@@ -5225,6 +5239,9 @@
                     </property>
                     <property name="toolTip">
                      <string>Select quantiles for statistics</string>
+                    </property>
+                    <property name="currentIndex">
+                     <number>2</number>
                     </property>
                     <item>
                      <property name="text">
@@ -5583,8 +5600,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>72</height>
+          <width>300</width>
+          <height>181</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5630,7 +5647,7 @@
               <x>0</x>
               <y>0</y>
               <width>301</width>
-              <height>128</height>
+              <height>181</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_57">
@@ -5816,8 +5833,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>72</height>
+          <width>300</width>
+          <height>181</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5856,7 +5873,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>246</width>
+              <width>300</width>
               <height>284</height>
              </rect>
             </property>
@@ -6062,11 +6079,6 @@
                   <property name="toolTip">
                    <string>Change the multidimensional distance metric for clustering</string>
                   </property>
-                  <item>
-                   <property name="text">
-                    <string>New Item</string>
-                   </property>
-                  </item>
                  </widget>
                 </item>
                 <item row="4" column="0">
@@ -6240,8 +6252,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>72</height>
+          <width>300</width>
+          <height>181</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6286,8 +6298,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>209</width>
-              <height>109</height>
+              <width>300</width>
+              <height>181</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_64">
@@ -6892,7 +6904,7 @@
         </font>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="PlotSelectorPage">
         <property name="geometry">
@@ -7041,8 +7053,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>169</width>
-          <height>273</height>
+          <width>296</width>
+          <height>360</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7172,15 +7184,15 @@
             <enum>QFrame::Raised</enum>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>4</number>
            </property>
            <widget class="QWidget" name="StyleAxes">
             <property name="geometry">
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>98</width>
-              <height>72</height>
+              <width>294</width>
+              <height>144</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -7219,7 +7231,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>171</width>
+                  <width>294</width>
                   <height>342</height>
                  </rect>
                 </property>
@@ -7584,8 +7596,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>98</width>
-              <height>72</height>
+              <width>294</width>
+              <height>144</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -7624,7 +7636,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>203</width>
+                  <width>294</width>
                   <height>374</height>
                  </rect>
                 </property>
@@ -7982,8 +7994,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>98</width>
-              <height>72</height>
+              <width>294</width>
+              <height>144</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -8022,7 +8034,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>244</width>
+                  <width>294</width>
                   <height>256</height>
                  </rect>
                 </property>
@@ -8408,8 +8420,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>98</width>
-              <height>75</height>
+              <width>294</width>
+              <height>144</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -8448,7 +8460,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>247</width>
+                  <width>294</width>
                   <height>312</height>
                  </rect>
                 </property>
@@ -8823,8 +8835,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>98</width>
-              <height>72</height>
+              <width>294</width>
+              <height>144</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -8863,7 +8875,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>178</width>
+                  <width>294</width>
                   <height>163</height>
                  </rect>
                 </property>
@@ -9167,8 +9179,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>72</height>
+          <width>290</width>
+          <height>360</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -9207,8 +9219,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>222</width>
-              <height>686</height>
+              <width>290</width>
+              <height>687</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_40">
@@ -10572,8 +10584,8 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>600</width>
-     <height>280</height>
+     <width>823</width>
+     <height>367</height>
     </size>
    </property>
    <property name="maximumSize">

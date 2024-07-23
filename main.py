@@ -6915,11 +6915,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # get data for current map
         self.map_df = self.get_map_data(self.sample_id, field, field_type=field_type)
+        if self.toolButtonScaleEqualize.isChecked():
+            sorted_data = self.map_df['array'].sort_values()
+            cum_sum = sorted_data.cumsum()
+            cdf = cum_sum / cum_sum.iloc[-1]
+            self.map_df.loc[sorted_data.index, 'array'] = cdf.values
 
         # store map_df to save_data if data needs to be exported
         self.save_data = self.map_df
         # plot map
         reshaped_array = np.reshape(self.map_df['array'].values, self.array_size, order=self.order)
+            
         norm = self.color_norm(style)
 
         cax = canvas.axes.imshow(reshaped_array, cmap=self.get_colormap(),  aspect=self.aspect_ratio, interpolation='none', norm=norm)

@@ -46,14 +46,14 @@ jobs:
         conda activate pyqt
         pytest --junitxml=reports/junit.xml
 
-    - name: Publish test results
-      uses: actions/upload-artifact@v3
-      with:
-        name: test-results
-        path: reports/junit.xml
-
     - name: Test Summary
       uses: test-summary/action@v2
       with:
         paths: reports/junit.xml
       if: always()
+    
+    - name: Publish test results
+      uses: actions/upload-artifact@v2
+      with:
+        name: test-results
+        path: reports/junit.xml

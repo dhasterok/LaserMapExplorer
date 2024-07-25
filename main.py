@@ -14025,7 +14025,7 @@ def create_app():
     return app
 
 def show_splash():
-    pixmap = QPixmap("lame_splash.svg")
+    pixmap = QPixmap("lame_splash.png")
     splash = QSplashScreen(pixmap)
     splash.setMask(pixmap.mask())
     splash.show()

@@ -25,6 +25,7 @@ import numpy as np
 import numexpr as ne
 import pandas as pd
 pd.options.mode.copy_on_write = True
+
 import matplotlib
 matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -64,6 +65,7 @@ from rst2pdf.createpdf import RstToPdf
 from docutils.core import publish_string
 from lame_helper import basedir, iconpath, sspath, load_stylesheet
 from src.ExtendedDF import AttributeDataFrame
+import src.CustomWidgets
 
 setConfigOption('imageAxisOrder', 'row-major') # best performance
 ## sphinx-build -b html docs/source/ docs/build/html
@@ -688,6 +690,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         pixelwidthvalidator.setBottom(0.0)
         self.lineEditDX.setValidator(pixelwidthvalidator)
         self.lineEditDY.setValidator(pixelwidthvalidator)
+        self.lineEditDX.editingFinished.connect(self.update_resolution)
+        self.lineEditDY.editingFinished.connect(self.update_resolution)
         self.toolButtonSwapResolution.clicked.connect(self.swap_resolution)
 
         # auto scale
@@ -2087,8 +2091,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.dy = dx
 
         units = self.preferences['Units']['Distance']
-        self.lineEditDX.setText(f'{self.dx:.2f} {units}')
-        self.lineEditDY.setText(f'{self.dy:.2f} {units}')
+        self.labelDX.setText(f'dx {units}')
+        self.labelDY.setText(f'dy {units}')
+        self.lineEditDX.value = self.dx
+        self.lineEditDY.value = self.dy
 
         self.data[self.sample_id]['raw_data']['X'] = self.dx*X
         self.data[self.sample_id]['raw_data']['Y'] = self.dy*Y
@@ -2099,6 +2105,31 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.compute_map_aspect_ratio()
 
         self.update_SV()
+
+    def update_resolution(self):
+        """Updates DX and DY for a dataframe
+
+        Recalculates X and Y for a dataframe
+        """
+        X = round(self.data[self.sample_id]['raw_data']['X']/self.dx)
+        Y = round(self.data[self.sample_id]['raw_data']['Y']/self.dy)
+
+        Xp = round(self.data[self.sample_id]['processed_data']['X']/self.dx)
+        Yp = round(self.data[self.sample_id]['processed_data']['Y']/self.dy)
+
+        self.dx = self.lineEditDX.value
+        self.dy = self.lineEditDY.value
+
+        self.data[self.sample_id]['raw_data']['X'] = self.dx*X
+        self.data[self.sample_id]['raw_data']['Y'] = self.dy*Y
+
+        self.data[self.sample_id]['processed_data']['X'] = self.dx*Xp
+        self.data[self.sample_id]['processed_data']['Y'] = self.dy*Yp
+
+        self.compute_map_aspect_ratio()
+
+        self.update_SV()
+
 
     # toolbar functions
     def change_ref_material(self, comboBox1, comboBox2):
@@ -6700,8 +6731,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.dy = self.y_range/self.y.nunique()
 
         units = self.preferences['Units']['Distance']
-        self.lineEditDX.setText(f'{self.dx:.2f} {units}')
-        self.lineEditDY.setText(f'{self.dy:.2f} {units}')
+        self.labelDX.setText(f'dx {units}')
+        self.labelDY.setText(f'dy {units}')
+        self.lineEditDX.value = self.dx
+        self.lineEditDY.value = self.dy
 
         self.aspect_ratio = self.dy / self.dx
 
@@ -6915,19 +6948,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.set_style_widgets(plot_type='analyte map',style=style)
 
         # get data for current map
-        self.map_df = self.get_map_data(self.sample_id, field, field_type=field_type)
+        map_df = self.get_map_data(self.sample_id, field, field_type=field_type)
+
+        # store map_df to save_data if data needs to be exported
+        self.save_data = map_df.copy()
 
         # equalized color bins to CDF function
         if self.toolButtonScaleEqualize.isChecked():
-            sorted_data = self.map_df['array'].sort_values()
+            sorted_data = map_df['array'].sort_values()
             cum_sum = sorted_data.cumsum()
             cdf = cum_sum / cum_sum.iloc[-1]
-            self.map_df.loc[sorted_data.index, 'array'] = cdf.values
+            map_df.loc[sorted_data.index, 'array'] = cdf.values
 
-        # store map_df to save_data if data needs to be exported
-        self.save_data = self.map_df
         # plot map
-        reshaped_array = np.reshape(self.map_df['array'].values, self.array_size, order=self.order)
+        reshaped_array = np.reshape(map_df['array'].values, self.array_size, order=self.order)
             
         norm = self.color_norm(style)
 
@@ -6964,7 +6998,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # add small histogram
         if (self.toolBox.currentIndex() == self.left_tab['sample']) and (self.canvasWindow.currentIndex() == self.canvas_tab['sv']):
-            self.plot_small_histogram(self.map_df,field)
+            self.plot_small_histogram(map_df,field)
 
         self.plot_info = {
             'tree': 'Analyte',

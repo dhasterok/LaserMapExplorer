@@ -976,7 +976,7 @@
      <x>0</x>
      <y>0</y>
      <width>1123</width>
-     <height>24</height>
+     <height>14</height>
     </rect>
    </property>
    <property name="font">
@@ -1148,10 +1148,10 @@
         </font>
        </property>
        <property name="toolTip">
-        <string/>
+        <string>Swap X and Y resolution</string>
        </property>
        <property name="currentIndex">
-        <number>6</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="SelectAnalytePage">
         <property name="enabled">
@@ -1389,6 +1389,9 @@
                       <stylestrategy>PreferDefault</stylestrategy>
                      </font>
                     </property>
+                    <property name="toolTip">
+                     <string>Switch between correlation and correlation squared</string>
+                    </property>
                     <property name="text">
                      <string>C²</string>
                     </property>
@@ -1444,6 +1447,9 @@
                       <stylestrategy>PreferDefault</stylestrategy>
                      </font>
                     </property>
+                    <property name="statusTip">
+                     <string>Number of pixels in X-direction</string>
+                    </property>
                     <property name="alignment">
                      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                     </property>
@@ -1484,6 +1490,9 @@
                       <pointsize>11</pointsize>
                       <stylestrategy>PreferDefault</stylestrategy>
                      </font>
+                    </property>
+                    <property name="statusTip">
+                     <string>Number of pixels in Y-direction</string>
                     </property>
                     <property name="alignment">
                      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1546,6 +1555,9 @@
                     <property name="toolTip">
                      <string>X pixel width</string>
                     </property>
+                    <property name="statusTip">
+                     <string>Width of pixel in X-direction</string>
+                    </property>
                     <property name="alignment">
                      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                     </property>
@@ -1564,6 +1576,9 @@
                       <width>24</width>
                       <height>24</height>
                      </size>
+                    </property>
+                    <property name="toolTip">
+                     <string>Swap X and Y resolution</string>
                     </property>
                     <property name="text">
                      <string>...</string>
@@ -1614,7 +1629,10 @@
                      </font>
                     </property>
                     <property name="toolTip">
-                     <string>Y pixel width</string>
+                     <string>Switch between correlation and correlation squared</string>
+                    </property>
+                    <property name="statusTip">
+                     <string>Width of pixel in Y-direction</string>
                     </property>
                     <property name="alignment">
                      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -4339,7 +4357,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>300</width>
+              <width>351</width>
               <height>341</height>
              </rect>
             </property>
@@ -6903,8 +6921,11 @@
          <stylestrategy>PreferDefault</stylestrategy>
         </font>
        </property>
+       <property name="toolTip">
+        <string>Select method for sorting analytes</string>
+       </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="PlotSelectorPage">
         <property name="geometry">
@@ -6973,6 +6994,9 @@
                <bold>false</bold>
                <stylestrategy>PreferDefault</stylestrategy>
               </font>
+             </property>
+             <property name="toolTip">
+              <string>Select method for sorting analytes</string>
              </property>
              <property name="text">
               <string>...</string>
@@ -7053,7 +7077,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>296</width>
+          <width>270</width>
           <height>360</height>
          </rect>
         </property>
@@ -7184,14 +7208,14 @@
             <enum>QFrame::Raised</enum>
            </property>
            <property name="currentIndex">
-            <number>4</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="StyleAxes">
             <property name="geometry">
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>294</width>
+              <width>268</width>
               <height>144</height>
              </rect>
             </property>
@@ -7231,7 +7255,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>294</width>
+                  <width>268</width>
                   <height>342</height>
                  </rect>
                 </property>
@@ -7596,7 +7620,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>294</width>
+              <width>268</width>
               <height>144</height>
              </rect>
             </property>
@@ -7636,7 +7660,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>294</width>
+                  <width>268</width>
                   <height>374</height>
                  </rect>
                 </property>
@@ -7994,7 +8018,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>294</width>
+              <width>268</width>
               <height>144</height>
              </rect>
             </property>
@@ -8034,7 +8058,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>294</width>
+                  <width>268</width>
                   <height>256</height>
                  </rect>
                 </property>
@@ -8420,7 +8444,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>294</width>
+              <width>268</width>
               <height>144</height>
              </rect>
             </property>
@@ -8460,7 +8484,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>294</width>
+                  <width>268</width>
                   <height>312</height>
                  </rect>
                 </property>
@@ -8835,7 +8859,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>294</width>
+              <width>268</width>
               <height>144</height>
              </rect>
             </property>
@@ -8875,7 +8899,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>294</width>
+                  <width>268</width>
                   <height>163</height>
                  </rect>
                 </property>
@@ -10641,7 +10665,7 @@
         <string>Pop the figure out into a separate window</string>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="tabNotes">
         <property name="sizePolicy">
@@ -12055,6 +12079,9 @@
                 </item>
                 <item row="0" column="1">
                  <widget class="QSpinBox" name="spinBoxProfileNumSubplots">
+                  <property name="toolTip">
+                   <string>Select number of subplots to use for profiles</string>
+                  </property>
                   <property name="minimum">
                    <number>1</number>
                   </property>
@@ -12072,6 +12099,9 @@
                 </item>
                 <item row="1" column="1">
                  <widget class="QSpinBox" name="spinBoxProfileSelectedSubplot">
+                  <property name="toolTip">
+                   <string>Choose active subplot</string>
+                  </property>
                   <property name="minimum">
                    <number>1</number>
                   </property>
@@ -12084,6 +12114,9 @@
               </item>
               <item>
                <widget class="QComboBox" name="comboBoxProfileFieldType">
+                <property name="toolTip">
+                 <string>Select profile field type</string>
+                </property>
                 <item>
                  <property name="text">
                   <string>Analyte</string>
@@ -12134,7 +12167,11 @@
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_36">
                 <item>
-                 <widget class="QComboBox" name="comboBoxProfileField"/>
+                 <widget class="QComboBox" name="comboBoxProfileField">
+                  <property name="toolTip">
+                   <string>Select profile field</string>
+                  </property>
+                 </widget>
                 </item>
                 <item>
                  <widget class="QToolButton" name="toolButtonProfileAddField">
@@ -12171,7 +12208,11 @@
                </layout>
               </item>
               <item>
-               <widget class="QListView" name="listViewProfile"/>
+               <widget class="QListView" name="listViewProfile">
+                <property name="toolTip">
+                 <string>List of fields on current subplot</string>
+                </property>
+               </widget>
               </item>
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_37">
@@ -12209,7 +12250,7 @@
                    </size>
                   </property>
                   <property name="toolTip">
-                   <string>Delete field</string>
+                   <string>Remove selected field from profile plot</string>
                   </property>
                   <property name="text">
                    <string>...</string>

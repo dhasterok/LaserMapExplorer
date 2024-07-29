@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Define the file to be updated
+file="src/ui/MainWindow.py"
+
+# update MainWindow.py
+pyuic5 designer/mainwindow.ui -o $file
+
+# Define the file containing the list of object names
+object_names_file="src/CustomLineEdit_widget_list.txt"
+
+# Check if the files exist
+if [[ ! -f "$file" ]]; then
+  echo "File $file not found!"
+  exit 1
+fi
+
+if [[ ! -f "$object_names_file" ]]; then
+  echo "File $object_names_file not found!"
+  exit 1
+fi
+
+# Add the import for CustomWidgets as cw if it doesn't exist
+if ! grep -q "import src.CustomWidgets as cw" "$file"; then
+  echo "Adding import for src.CustomWidgets as cw..."
+  sed -i '' "1i\\
+import src.CustomWidgets as cw
+" "$file"
+fi
+
+# Replace 'QtWidgets.QLineEdit' with 'cw.CustomLineEdit' for specified object names
+echo "Replacing 'QtWidgets.QLineEdit' with 'cw.CustomLineEdit' for specified object names..."
+while IFS= read -r object_name; do
+  sed -i '' "s/${object_name} = QtWidgets.QLineEdit/${object_name} = cw.CustomLineEdit/g" "$file"
+done < "$object_names_file"
+
+# Replace 'import resources_rc' with 'import src.ui.resources_rc'
+echo "Replacing 'import resources_rc' with 'import src.ui.resources_rc'..."
+sed -i '' "s/import resources_rc/import src.ui.resources_rc/g" "$file"
+
+echo "Updates complete!"

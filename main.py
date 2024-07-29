@@ -932,12 +932,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.lineEditPointRadius.setValidator(QIntValidator())
         self.lineEditYThresh.setValidator(QIntValidator())
         self.profiling = Profiling(self)
-        # self.toolButtonPlotProfile.clicked.connect(lambda: self.plot_profiles(self.comboBoxProfile1.currentText(), self.comboBoxProfile2.currentText()))
-        # self.comboBoxProfile1.activated.connect(lambda: self.update_profile_comboboxes(False) )
-        # self.toolButtonClearProfile.clicked.connect(self.profiling.clear_profiles)
-        # self.toolButtonStartProfile.clicked.connect(lambda :self.toolButtonStartProfile.setChecked(True))
-        # self.toolButtonStartProfile.setCheckable(True)
-        # self.comboBoxProfile2.activated.connect(self.update_profile_comboboxes)
+
         #select entire row
         self.tableWidgetProfilePoints.setSelectionBehavior(QTableWidget.SelectRows)
         self.toolButtonPointUp.clicked.connect(lambda: self.table_fcn.move_row_up(self.tableWidgetProfilePoints))
@@ -946,6 +941,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxProfileSort.currentIndexChanged.connect(self.plot_profile_and_table)
         self.toolButtonProfileInterpolate.clicked.connect(lambda: self.profiling.interpolate_points(interpolation_distance=int(self.lineEditIntDist.text()), radius= int(self.lineEditPointRadius.text())))
         self.comboBoxPointType.currentIndexChanged.connect(lambda: self.profiling.plot_profiles())
+        # below line is commented because plot_profiles is automatically triggered when user clicks on map once they are in profiling tab
         # self.toolButtonPlotProfile.clicked.connect(lambda:self.profiling.plot_profiles())
         self.toolButtonPointSelectAll.clicked.connect(self.tableWidgetProfilePoints.selectAll)
         # Connect toolButtonProfileEditToggle's clicked signal to toggle edit mode
@@ -956,7 +952,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # -------
         # These tools are for setting profile plot controls
-        self.groupBoxProfilePlotControl.setVisible(False)
+        self.groupBoxProfilePlotControl.setVisible(True)
         # -------
 
         # Special Tab
@@ -6157,6 +6153,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
                 if self.toolBox.currentIndex() in [self.left_tab['polygons'], self.left_tab['profile']]:
                     self.plot_map_pg(sample_id, field_type, field)
+                    # show created profiles if exists
+                    if self.toolBox.currentIndex() == self.left_tab['profile'] and (self.sample_id in self.profiling.profiles):
+                        print('p')
+                        self.profiling.plot_existing_profile(self.plot)
+                    else:    
+                        pass
+                        #self.polygon.
                 else:
                     self.plot_map_mpl(sample_id, field_type, field)
                 
@@ -12721,10 +12724,10 @@ class Table_Fcn:
                     for key, profile in self.main_window.profiling.profiles[self.main_window.sample_id].items():
                         if row >0:
                             profile[row], profile[row -1 ] = profile[row - 1], profile[row]
-                    self.plot_profiles(sort_axis = False)
-                    if self.main_window.toolButtonProfileInterpolate.isChecked(): #reset interpolation if selected
-                        self.clear_interpolation()
-                        self.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
+                    self.main_window.profiling.plot_profiles()
+                    if self.main_window.profiling.main_window.toolButtonProfileInterpolate.isChecked(): #reset interpolation if selected
+                        self.main_window.profiling.clear_interpolation()
+                        self.main_window.profiling.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
                 #case 'NDim':
                     # update plot
 
@@ -12760,10 +12763,10 @@ class Table_Fcn:
                     for key, profile in self.main_window.profiling.profiles[self.main_window.sample_id].items():
                         if row < len(profile) - 1:
                             profile[row], profile[row + 1] = profile[row + 1], profile[row]
-                    self.plot_profiles(sort_axis = False)
+                    self.main_window.profiling.plot_profiles()
                     if self.main_window.toolButtonProfileInterpolate.isChecked(): #reset interpolation if selected
-                        self.clear_interpolation()
-                        self.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
+                        self.main_window.profiling.clear_interpolation()
+                        self.main_window.profiling.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
 
     def delete_row(self,table):
         """Deletes selected rows in a table
@@ -13357,13 +13360,68 @@ class Profiling:
         self.selected_points = {}  # Track selected points, e.g., {point_index: selected_state}
         self.edit_mode_enabled = False  # Track if edit mode is enabled
         self.original_colors = {}
+        self.profile_name = None
+        self.path = os.path.join(basedir,f'resources/profiles/')
+        self.load_profiles_from_directory()
+
+        #update combobox with profiles
+        self.main_window.comboBoxProfileList
+
+        self.populate_combobox()
+
+        self.main_window.comboBoxProfileList.currentTextChanged.connect(self.on_profile_selected)
+
+    def save_profiles(self):
+        file_name =  self.path +f'{self.profile_name}.prfl'
+        with open(file_name, 'wb') as file:
+            if self.profile_name in self.profiles:
+                pickle.dump(self.profiles[self.profile_name], file)
+                print("Profile saved successfully.")
+    
+    def populate_combobox(self):
+        self.main_window.comboBoxProfileList.clear()
+        self.main_window.comboBoxProfileList.addItem('Create New Profile')
+        for profile_name in self.profiles.keys():
+            self.main_window.comboBoxProfileList.addItem(profile_name)
+
+    def load_profiles_from_directory(self):
+        directory = self.path
+        for file_name in os.listdir(directory):
+            if file_name.endswith(".prfl"):
+                file_path = os.path.join(directory, file_name)
+                with open(file_path, 'rb') as file:
+                    profile_name = os.path.basename(file_path).split('.')[0]
+                    self.profiles[profile_name] = pickle.load(file)
+        print("All profiles loaded successfully.")
+
+    def on_profile_selected(self, profile_name):
+        if profile_name == 'Create New Profile':
+            new_profile_name, ok = QInputDialog.getText(self.main_window, 'New Profile', 'Enter new profile name:')
+            if ok and new_profile_name:
+                if new_profile_name in self.profiles:
+                    QMessageBox.warning(self.main_window, 'Error', 'Profile name already exists!')
+                else:
+                    self.clear_profiles()
+                    self.profiles[new_profile_name] = {}
+                    self.i_profiles[new_profile_name] = {}
+                    self.main_window.comboBoxProfileList.addItem(new_profile_name)
+                    self.main_window.comboBoxProfileList.setCurrentText(new_profile_name)
+                    self.profile_name = new_profile_name
+            else:
+                self.main_window.comboBoxProfileList.setCurrentIndex(0)  # Reset to 'Create New Profile'
+        else:
+            self.profile_name = profile_name
+            self.plot_existing_profile(self.main_window.plot)
 
     def plot_profile_scatter(self, event, array,k,v, plot, x, y, x_i, y_i):
         #k is key (name of Iolite)
         #create profile dict particular sample if it doesnt exisist
-        if self.main_window.sample_id not in self.profiles:
-            self.profiles[self.main_window.sample_id] = {}
-            self.i_profiles[self.main_window.sample_id] = {}
+        # if self.main_window.sample_id not in self.profiles:
+        #     self.profiles[self.main_window.sample_id] = {}
+        #     self.i_profiles[self.main_window.sample_id] = {}
+        
+        # create new profile or update existing
+        self.on_profile_selected(self.main_window.comboBoxProfileList.currentText())
         self.array_x = array.shape[1]
         self.array_y = array.shape[0]
 
@@ -13390,7 +13448,7 @@ class Profiling:
             # move point
             if self.point_selected:
                 #remove selected point
-                prev_scatter = self.profiles[self.main_window.sample_id][k,v][self.point_index][3]
+                prev_scatter = self.profiles[self.profile_name][k,v][self.point_index][3]
                 plot.removeItem(prev_scatter)
 
 
@@ -13408,14 +13466,14 @@ class Profiling:
                             circ_cord.append([i, j])
                             circ_val.append( value)
 
-                #update self.point_index index of self.profiles[self.main_window.sample_id] with new point data
-                if (k,v) in self.profiles[self.main_window.sample_id]:
+                #update self.point_index index of self.profiles[self.self.profile_name] with new point data
+                if (k,v) in self.profiles[self.profile_name]:
 
-                    self.profiles[self.main_window.sample_id][k,v][self.point_index] = (x,y, circ_val,scatter, interpolate)
+                    self.profiles[self.profile_name][k,v][self.point_index] = (x,y, circ_val, interpolate)
 
 
                 if self.main_window.canvasWindow.currentIndex() == self.main_window.canvas_tab['mv']:
-                    # Add the scatter item to all other plots and save points in self.profiles[self.main_window.sample_id]
+                    # Add the scatter item to all other plots and save points in self.profiles[self.profile_name]
                     for (k,v), (_, p, array) in self.main_window.lasermaps.items():
                         circ_val = []
                         if p != plot and v==1 and self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #only add scatters to other lasermaps of same sample
@@ -13426,8 +13484,8 @@ class Profiling:
                             for c in circ_cord:
                                 value = array[c[0], c[1]]
                                 circ_val.append( value)
-                            if (k,v) in self.profiles[self.main_window.sample_id]:
-                                self.profiles[self.main_window.sample_id][k,v][self.point_index] = (x,y, circ_val,scatter, interpolate)
+                            if (k,v) in self.profiles[self.profile_name]:
+                                self.profiles[self.profile_name][k,v][self.point_index] = (x,y, circ_val, interpolate)
 
                 #update plot and table widget
                 self.main_window.plot_profiles()
@@ -13438,7 +13496,7 @@ class Profiling:
             else:
                 # find nearest profile point
                 mindist = 10**12
-                for i, (x_p,y_p,_,_,interpolate) in enumerate(self.profiles[self.main_window.sample_id][k]):
+                for i, (x_p,y_p,_,_,interpolate) in enumerate(self.profiles[self.profile_name][k]):
                     dist = (x_p - x)**2 + (y_p - y)**2
                     if mindist > dist:
                         mindist = dist
@@ -13465,15 +13523,15 @@ class Profiling:
                         circ_cord.append([i, j])
                         circ_val.append( value)
 
-            #add values within circle of radius in self.profiles[self.main_window.sample_id]
-            if (k,v) in self.profiles[self.main_window.sample_id]:
-                self.profiles[self.main_window.sample_id][(k,v)].append((x,y,circ_val,scatter, interpolate))
+            #add values within circle of radius in self.profiles[self.profile_name]
+            if (k,v) in self.profiles[self.profile_name]:
+                self.profiles[self.profile_name][(k,v)].append((x,y,circ_val, interpolate))
             else:
-                self.profiles[self.main_window.sample_id][(k,v)] = [(x,y, circ_val,scatter, interpolate)]
+                self.profiles[self.profile_name][(k,v)] = [(x,y, circ_val, interpolate)]
 
 
             if self.main_window.canvasWindow.currentIndex() == self.main_window.canvas_tab['mv']:
-                # Add the scatter item to all other plots and save points in self.profiles[self.main_window.sample_id]
+                # Add the scatter item to all other plots and save points in self.profiles[self.profile_name]
                 for (k,v), (_, p,  array) in self.main_window.lasermaps.items():
                     circ_val = []
                     if p != plot and v==1 and self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #only add scatters to other lasermaps of same sample
@@ -13484,13 +13542,22 @@ class Profiling:
                         for c in circ_cord:
                             value = array[c[0], c[1]]
                             circ_val.append( value)
-                        if (k,v) in self.profiles[self.main_window.sample_id]:
-                            self.profiles[self.main_window.sample_id][k,v].append((x,y,circ_val, scatter, interpolate))
+                        if (k,v) in self.profiles[self.profile_name]:
+                            self.profiles[self.profile_name][k,v].append((x,y,circ_val, interpolate))
                         else:
-                            self.profiles[self.main_window.sample_id][k,v] = [(x,y, circ_val,scatter, interpolate)]
+                            self.profiles[self.profile_name][k,v] = [(x,y, circ_val, interpolate)]
 
             self.plot_profiles()
             self.update_table_widget()
+            self.save_profiles()
+    
+    def plot_existing_profile(self,plot):
+        for (k,v) in self.profiles[self.profile_name]:
+            for x,y,_,_ in self.profiles[self.profile_name][k,v]:
+                # Create a scatter plot items
+                scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
+                scatter.setZValue(1e9)
+                plot.addItem(scatter)
 
     def interpolate_points(self, interpolation_distance,radius):
         """
@@ -13498,14 +13565,14 @@ class Profiling:
         """
         if self.main_window.toolButtonProfileInterpolate.isChecked():
             interpolate = True
-            for (k,v), points in self.profiles[self.main_window.sample_id].items():
+            for (k,v), points in self.profiles[self.profile_name].items():
                 for i in range(len(points) - 1):
                     start_point = points[i]
                     end_point = points[i + 1]
                     if i==0:
-                        self.i_profiles[self.main_window.sample_id][(k,v)] = [start_point]
+                        self.i_profiles[self.profile_name][(k,v)] = [start_point]
                     else:
-                        self.i_profiles[self.main_window.sample_id][(k,v)].append(start_point)
+                        self.i_profiles[self.profile_name][(k,v)].append(start_point)
 
                     # Calculate the distance between start and end points
                     dist = self.calculate_distance(start_point, end_point)
@@ -13520,7 +13587,7 @@ class Profiling:
 
                         x_i = round(x*self.array_x /self.main_window.x_range) #index points
                         y_i = round(y*self.array_y/self.main_window.y_range)
-                        # Add the scatter item to all other plots and save points in self.profiles[self.main_window.sample_id]
+                        # Add the scatter item to all other plots and save points in self.profiles[self.profile_name]
                         _, p, array= self.main_window.lasermaps[(k,v)]
                         if v==self.main_window.canvasWindow.currentIndex() and self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #only add scatters to other lasermaps of same sample
                             # Create a scatter plot item at the clicked position
@@ -13534,10 +13601,10 @@ class Profiling:
                                     if np.sqrt((x_i - j)**2 + (y_i - i)**2) <= radius:
                                         value = array[i, j]
                                         circ_val.append(value)
-                            if (k,v) in self.i_profiles[self.main_window.sample_id]:
-                                self.i_profiles[self.main_window.sample_id][(k,v)].append((x,y,circ_val, scatter, interpolate))
+                            if (k,v) in self.i_profiles[self.profile_name]:
+                                self.i_profiles[self.profile_name][(k,v)].append((x,y,circ_val, scatter, interpolate))
 
-                    self.i_profiles[self.main_window.sample_id][(k,v)].append(end_point)
+                    self.i_profiles[self.profile_name][(k,v)].append(end_point)
             # After interpolation, update the plot and table widget
             self.plot_profiles(interpolate= interpolate)
         else:
@@ -13548,8 +13615,8 @@ class Profiling:
 
     def clear_interpolation(self):
             # remove interpolation
-            if len(self.i_profiles[self.main_window.sample_id])>0:
-                for (k,v), profile in self.i_profiles[self.main_window.sample_id].items():
+            if len(self.i_profiles[self.profile_name])>0:
+                for (k,v), profile in self.i_profiles[self.profile_name].items():
                     for point in profile:
                         scatter_item = point[3]  # Access the scatter plot item
                         interpolate =point[4]
@@ -13557,7 +13624,7 @@ class Profiling:
                             _, plot, _, _ = self.main_window.lasermaps[(k,v)]
                             plot.removeItem(scatter_item)
 
-    def plot_profiles(self,interpolate= False, sort_axis='x'):
+    def plot_profiles(self,interpolate= False, sort_axis=None):
         def process_points( points, sort_axis):
             # Sort the points based on the user-specified axis
             if sort_axis == 'x':
@@ -13588,9 +13655,9 @@ class Profiling:
 
         def group_profiles_by_range(sort_axis, range_threshold,interpolate,point_type):
             if not interpolate:
-                profiles = self.profiles[self.main_window.sample_id]
+                profiles = self.profiles[self.profile_name]
             else:
-                profiles = self.i_profiles[self.main_window.sample_id]
+                profiles = self.i_profiles[self.profile_name]
             # Group profiles based on range similarity
             profile_groups = {}
             keys = []
@@ -13637,13 +13704,13 @@ class Profiling:
 
 
         if not interpolate:
-            profiles = self.profiles[self.main_window.sample_id]
+            profiles = self.profiles[self.profile_name]
         else:
-            profiles = self.i_profiles[self.main_window.sample_id]
+            profiles = self.i_profiles[self.profile_name]
 
         style = self.main_window.styles['profile']
 
-        if len(list(profiles.values())[0])>0: #if self.profiles[self.main_window.sample_id] has values
+        if len(list(profiles.values())[0])>0: #if self.profiles[self.profile_name] has values
             self.main_window.tabWidget.setCurrentIndex(self.main_window.bottom_tab['profile']) #show profile plot tab
             sort_axis=self.main_window.comboBoxProfileSort.currentText()
             range_threshold=int(self.main_window.lineEditYThresh.text())
@@ -13894,15 +13961,15 @@ class Profiling:
 
     def clear_profiles(self):
 
-        if self.main_window.sample_id in self.profiles: #if profiles for that sample if exists
+        if self.profile_name in self.profiles: #if profiles for that sample if exists
             # Clear all scatter plot items from the lasermaps
-            for _, (_, plot, _, _) in self.main_window.lasermaps.items():
+            for _, (_, plot, _) in self.main_window.lasermaps.items():
                 items_to_remove = [item for item in plot.listDataItems() if isinstance(item, ScatterPlotItem)]
                 for item in items_to_remove:
                     plot.removeItem(item)
 
             # Clear the profiles data
-            # self.profiles[self.main_window.sample_id].clear()
+            # self.profiles[self.profile_name].clear()
 
             # Clear all data from the table
             self.main_window.tableWidgetProfilePoints.clearContents()
@@ -13923,12 +13990,12 @@ class Profiling:
 
     def update_table_widget(self, update = False):
 
-        if self.main_window.sample_id in self.profiles: #if profiles for that sample if exists
+        if self.profile_name in self.profiles: #if profiles for that sample if exists
             self.main_window.tableWidgetProfilePoints.setRowCount(0)  # Clear existing rows
             point_number = 0
-            first_data_point = list(self.profiles[self.main_window.sample_id].values())[0]
+            first_data_point = list(self.profiles[self.profile_name].values())[0]
             for data_point in first_data_point:
-                x, y, _,_,_ = data_point  # Assuming data_point structure
+                x, y, _,_ = data_point  # Assuming data_point structure
                 row_position = self.main_window.tableWidgetProfilePoints.rowCount()
                 self.main_window.tableWidgetProfilePoints.insertRow(row_position)
 

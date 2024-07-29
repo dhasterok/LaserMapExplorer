@@ -1190,11 +1190,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         # Browser
         #-------------------------
-        # self.open_browser()
-        # self.toolButtonBrowserHome.clicked.connect(self.browser_home_callback)
-        # self.lineEditBrowserLocation.editingFinished.connect(self.browser_location_callback)
-        # self.toolButtonBack.clicked.connect(self.browser.back)
-        # self.toolButtonForward.clicked.connect(self.browser.forward)
+        self.open_browser()
+        self.toolButtonBrowserHome.clicked.connect(self.browser_home_callback)
+        self.lineEditBrowserLocation.editingFinished.connect(self.browser_location_callback)
+        self.toolButtonBack.clicked.connect(self.browser.back)
+        self.toolButtonForward.clicked.connect(self.browser.forward)
 
         # Plot toolbars
         #-------------------------
@@ -8102,7 +8102,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             'cluster_groups': [],
             'view': [True,False],
             'position': [],
-            'data': pd.DataFrame(map_data)
+            'data': map_data
         }
 
         self.clear_layout(self.widgetSingleView.layout())

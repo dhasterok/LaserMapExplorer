@@ -13066,13 +13066,12 @@ class Profiling:
         self.edit_mode_enabled = False  # Track if edit mode is enabled
         self.original_colors = {}
         self.profile_name = None
-        self.path = os.path.join(basedir,f'resources/profiles/')
-        self.load_profiles_from_directory()
 
-        #update combobox with profiles
-        self.main_window.comboBoxProfileList
-
-        self.populate_combobox()
+        #update combobox with profiles from project
+        if self.main_window.project_dir:
+            self.path = os.path.join(basedir,f'projects/{self.main_window.project_dir}/{self.main_window.sample_id}/profiles/')
+            self.load_profiles_from_directory()
+            self.populate_combobox()
 
         self.main_window.comboBoxProfileList.currentTextChanged.connect(self.on_profile_selected)
 

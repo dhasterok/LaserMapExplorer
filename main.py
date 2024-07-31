@@ -1,7 +1,7 @@
 import sys, os, re, copy, random, pickle, darkdetect
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import (
-    Qt, QTimer, pyqtSignal, QRectF, QPointF, QUrl, pyqtSlot, QSize, QEvent
+    Qt, QTimer, QRectF, QPointF, QUrl, pyqtSlot, QSize, QEvent
 )
 from PyQt5.QtWidgets import (
     QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QVBoxLayout, QGridLayout,
@@ -28,7 +28,7 @@ pd.options.mode.copy_on_write = True
 
 import matplotlib
 matplotlib.use('Qt5Agg')
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.projections.polar import PolarAxes
 from matplotlib.collections import PathCollection
@@ -37,18 +37,17 @@ import matplotlib.pyplot as plt
 from matplotlib.path import Path
 from matplotlib.patches import Patch
 import matplotlib.colors as colors
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToolbar
 import cmcrameri as cmc
 from scipy import ndimage
 from scipy.signal import convolve2d, wiener, decimate
-from scipy.stats import yeojohnson
+from scipy.stats import yeojohnson, percentileofscore
 from sklearn.cluster import KMeans
 #from sklearn_extra.cluster import KMedoids
 import skfuzzy as fuzz
 import cv2
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-from src.rotated import RotatedHeaderView
 from src.ternary_plot import ternary
 from src.plot_spider import plot_spider_norm
 from src.scalebar import scalebar
@@ -56,8 +55,9 @@ import src.lame_fileio as lameio
 #import src.radar_factory
 from src.radar import Radar
 from src.ui.MainWindow import Ui_MainWindow
-from src.ui.AnalyteSelectionDialog import Ui_Dialog
 from src.ui.PreferencesWindow import Ui_PreferencesWindow
+from src.AnalyteSelectionWindow import AnalyteDialog
+#from src.WebEngineView import WebEngine
 import src.MapImporter as MapImporter
 import src.SpotImporter as SpotImporter
 from src.ui.QuickViewDialog import Ui_QuickViewDialog
@@ -66,6 +66,7 @@ from docutils.core import publish_string
 from lame_helper import basedir, iconpath, sspath, load_stylesheet
 from src.ExtendedDF import AttributeDataFrame
 import src.CustomWidgets
+import src.format as fmt
 
 setConfigOption('imageAxisOrder', 'row-major') # best performance
 ## sphinx-build -b html docs/source/ docs/build/html
@@ -685,6 +686,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxNorm.addItems(['linear','log','logit'])
         self.comboBoxNorm.activated.connect(lambda: self.update_norm(self.sample_id, self.comboBoxNorm.currentText(), update = True))
 
+        self.lineEditResolutionNx.precision = None
+        self.lineEditResolutionNy.precision = None
 
         pixelwidthvalidator = QDoubleValidator()
         pixelwidthvalidator.setBottom(0.0)
@@ -696,13 +699,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # auto scale
         quantilevalidator = QDoubleValidator(0.0, 100, 3)
+
+        self.lineEditLowerQuantile.precision = 3
         self.lineEditLowerQuantile.setValidator(quantilevalidator)
-        self.lineEditUpperQuantile.setValidator(quantilevalidator)
-        self.lineEditDifferenceLowerQuantile.setValidator(quantilevalidator)
-        self.lineEditDifferenceUpperQuantile.setValidator(quantilevalidator)
         self.lineEditLowerQuantile.editingFinished.connect(lambda: self.auto_scale(True))
+
+        self.lineEditUpperQuantile.precision = 3
+        self.lineEditUpperQuantile.setValidator(quantilevalidator)
         self.lineEditUpperQuantile.editingFinished.connect(lambda: self.auto_scale(True))
+
+        self.lineEditDifferenceLowerQuantile.precision = 3
+        self.lineEditDifferenceLowerQuantile.setValidator(quantilevalidator)
         self.lineEditDifferenceLowerQuantile.editingFinished.connect(lambda: self.auto_scale(True))
+
+        self.lineEditDifferenceUpperQuantile.precision = 3
+        self.lineEditDifferenceUpperQuantile.setValidator(quantilevalidator)
         self.lineEditDifferenceUpperQuantile.editingFinished.connect(lambda: self.auto_scale(True))
 
         # auto scale controls
@@ -766,15 +777,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Filter Tabs
         #-------------------------
-        # left pane
         self.load_filter_tables()
+        self.lineEditFMin.precision = 8
+        self.lineEditFMin.toward = 0
+        self.lineEditFMax.precision = 8
+        self.lineEditFMax.toward = 1
+
+        self.lineEditFMin.editingFinished.connect(self.callback_lineEditFMin)
+        self.lineEditFMax.editingFinished.connect(self.callback_lineEditFMax)
+        self.doubleSpinBoxFMinQ.valueChanged.connect(self.callback_doubleSpinBoxFMinQ)
+        self.doubleSpinBoxFMaxQ.valueChanged.connect(self.callback_doubleSpinBoxFMaxQ)
+
         self.toolButtonAddFilter.clicked.connect(self.update_filter_table)
         self.toolButtonAddFilter.clicked.connect(lambda: self.apply_field_filters())
 
         self.comboBoxFilterFieldType.activated.connect(lambda: self.update_field_combobox(self.comboBoxFilterFieldType, self.comboBoxFilterField))
         self.comboBoxFilterField.activated.connect(self.update_filter_values)
 
-        # central-bottom pane
         self.toolButtonFilterUp.clicked.connect(lambda: self.table_fcn.move_row_up(self.tableWidgetFilters))
         self.toolButtonFilterUp.clicked.connect(lambda: self.apply_field_filters(update_plot=True))
         self.toolButtonFilterDown.clicked.connect(lambda: self.table_fcn.move_row_down(self.tableWidgetFilters))
@@ -1034,11 +1053,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxColorScale.activated.connect(lambda: self.axis_scale_callback(self.comboBoxColorScale,'c'))
 
         self.lineEditXLB.setValidator(QDoubleValidator())
+        self.lineEditXLB.precision = 3
+        self.lineEditXLB.toward = 0
         self.lineEditXUB.setValidator(QDoubleValidator())
+        self.lineEditXUB.precision = 3
+        self.lineEditXUB.toward = 1
         self.lineEditYLB.setValidator(QDoubleValidator())
+        self.lineEditYLB.precision = 3
+        self.lineEditYLB.toward = 0
         self.lineEditYUB.setValidator(QDoubleValidator())
+        self.lineEditYUB.precision = 3
+        self.lineEditYUB.toward = 1
         self.lineEditColorLB.setValidator(QDoubleValidator())
+        self.lineEditColorLB.precision = 3
+        self.lineEditColorLB.toward = 0
         self.lineEditColorUB.setValidator(QDoubleValidator())
+        self.lineEditColorUB.precision = 3
+        self.lineEditColorUB.toward = 1
         self.lineEditAspectRatio.setValidator(QDoubleValidator())
 
         self.lineEditXLB.editingFinished.connect(lambda: self.axis_limit_edit_callback('x', 0, float(self.lineEditXLB.text())))
@@ -1711,14 +1742,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         Opens a dialog to select analytes for analysis either graphically or in a table.  Selection updates the list of analytes, and ratios in plot selector and comboBoxes.
         
         .. seealso::
-            :ref:`analyteSelectionWindow` for the dialog
+            :ref:`AnalyteSelectionWindow` for the dialog
         """
         if self.sample_id == '':
             return
 
         analytes_list = self.data[self.sample_id]['analyte_info']['analytes'].values
 
-        self.analyteDialog = analyteSelectionWindow(analytes_list,self.data[self.sample_id]['norm'], self.data[self.sample_id]['processed_data'], self)
+        self.analyteDialog = AnalyteDialog(analytes_list,self.data[self.sample_id]['norm'], self.data[self.sample_id]['processed_data'], self)
         self.analyteDialog.show()
 
         result = self.analyteDialog.exec_()  # Store the result here
@@ -2087,8 +2118,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.dy = dx
 
         units = self.preferences['Units']['Distance']
-        self.labelDX.setText(f'dx {units}')
-        self.labelDY.setText(f'dy {units}')
         self.lineEditDX.value = self.dx
         self.lineEditDY.value = self.dy
 
@@ -2349,10 +2378,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             analyte_1 = field
             analyte_2 = None
 
-        lb = float(self.lineEditLowerQuantile.text())
-        ub = float(self.lineEditUpperQuantile.text())
-        d_lb = float(self.lineEditDifferenceLowerQuantile.text())
-        d_ub = float(self.lineEditDifferenceUpperQuantile.text())
+        lb = self.lineEditLowerQuantile.value
+        ub = self.lineEditUpperQuantile.value
+        d_lb = self.lineEditDifferenceLowerQuantile.value
+        d_ub = self.lineEditDifferenceUpperQuantile.value
         auto_scale = self.toolButtonAutoScale.isChecked()
 
         if auto_scale and not update:
@@ -2362,10 +2391,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             d_lb = 99
             d_ub = 99
 
-            self.lineEditLowerQuantile.setText(str(lb))
-            self.lineEditUpperQuantile.setText(str(ub))
-            self.lineEditDifferenceLowerQuantile.setText(str(d_lb))
-            self.lineEditDifferenceUpperQuantile.setText(str(d_ub))
+            self.lineEditLowerQuantile.value = lb
+            self.lineEditUpperQuantile.value = ub
+            self.lineEditDifferenceLowerQuantile.value = d_lb
+            self.lineEditDifferenceUpperQuantile.value = d_ub
             self.lineEditDifferenceLowerQuantile.setEnabled(True)
             self.lineEditDifferenceUpperQuantile.setEnabled(True)
 
@@ -2373,14 +2402,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # show unbounded plot when auto scale switched off
             lb = 0
             ub = 100
-            self.lineEditLowerQuantile.setText(str(lb))
-            self.lineEditUpperQuantile.setText(str(ub))
+            self.lineEditLowerQuantile.value = lb
+            self.lineEditUpperQuantile.value = ub
             self.lineEditDifferenceLowerQuantile.setEnabled(False)
             self.lineEditDifferenceUpperQuantile.setEnabled(False)
+
         # if update is true
         if analyte_1 and not analyte_2:
             if self.checkBoxApplyAll.isChecked():
-                # Apply to all iolites in sample
+                # Apply to all analytes in sample
                 self.data[sample_id]['analyte_info']['auto_scale'] = auto_scale
                 self.data[sample_id]['analyte_info']['upper_bound']= ub
                 self.data[sample_id]['analyte_info']['lower_bound'] = lb
@@ -2836,8 +2866,49 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             pass
 
-        self.lineEditFMin.setText(self.dynamic_format(f_val['v_min']))
-        self.lineEditFMax.setText(self.dynamic_format(f_val['v_max']))
+        self.lineEditFMin.value = f_val['v_min']
+        self.callback_lineEditFMin()
+        self.lineEditFMax.value = f_val['v_max']
+        self.callback_lineEditFMax()
+
+    def callback_lineEditFMin(self):
+        """Updates ``MainWindow.doubleSpinBoxFMinQ.value`` when ``MainWindow.lineEditFMin.value`` is changed"""        
+        if self.sample_id == '':
+            return
+        try:
+            array = self.get_map_data(self.sample_id, self.comboBoxFilterField.currentText(), field_type=self.comboBoxFilterFieldType.currentText())['array'].dropna()
+        except:
+            return
+
+        self.doubleSpinBoxFMinQ.blockSignals(True)
+        self.doubleSpinBoxFMinQ.setValue(percentileofscore(array, self.lineEditFMin.value))
+        self.doubleSpinBoxFMinQ.blockSignals(False)
+
+    def callback_lineEditFMax(self):
+        """Updates ``MainWindow.doubleSpinBoxFMaxQ.value`` when ``MainWindow.lineEditFMax.value`` is changed"""        
+        if self.sample_id == '':
+            return
+
+        try:
+            array = self.get_map_data(self.sample_id, self.comboBoxFilterField.currentText(), field_type=self.comboBoxFilterFieldType.currentText())['array'].dropna()
+        except:
+            return
+
+        self.doubleSpinBoxFMaxQ.blockSignals(True)
+        self.doubleSpinBoxFMaxQ.setValue(percentileofscore(array, self.lineEditFMax.value))
+        self.doubleSpinBoxFMaxQ.blockSignals(False)
+
+    def callback_doubleSpinBoxFMinQ(self):
+        """Updates ``MainWindow.lineEditFMin.value`` when ``MainWindow.doubleSpinBoxFMinQ.value`` is changed"""        
+        array = self.get_map_data(self.sample_id, self.comboBoxFilterField.currentText(), field_type=self.comboBoxFilterFieldType.currentText())['array'].dropna()
+
+        self.lineEditFMin.value = np.percentile(array, self.doubleSpinBoxFMinQ.value())
+
+    def callback_doubleSpinBoxFMaxQ(self):
+        """Updates ``MainWindow.lineEditFMax.value`` when ``MainWindow.doubleSpinBoxFMaxQ.value`` is changed"""        
+        array = self.get_map_data(self.sample_id, self.comboBoxFilterField.currentText(), field_type=self.comboBoxFilterFieldType.currentText())['array'].dropna()
+
+        self.lineEditFMax.value = np.percentile(array, self.doubleSpinBoxFMaxQ.value())
 
     def update_filter_table(self, reload = False):
         """Update data for analysis when fiter table is updated.
@@ -2867,8 +2938,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.tableWidgetFilters.setItem(current_row, 1, QTableWidgetItem(row['field_type']))
                 self.tableWidgetFilters.setItem(current_row, 2, QTableWidgetItem(row['field']))
                 self.tableWidgetFilters.setItem(current_row, 3, QTableWidgetItem(row['scale']))
-                self.tableWidgetFilters.setItem(current_row, 4, QTableWidgetItem(self.dynamic_format(row['min'])))
-                self.tableWidgetFilters.setItem(current_row, 5, QTableWidgetItem(self.dynamic_format(row['max'])))
+                self.tableWidgetFilters.setItem(current_row, 4, QTableWidgetItem(fmt.dynamic_format(row['min'])))
+                self.tableWidgetFilters.setItem(current_row, 5, QTableWidgetItem(fmt.dynamic_format(row['max'])))
                 self.tableWidgetFilters.setItem(current_row, 6, QTableWidgetItem(row['operator']))
 
                 # Create and set the checkbox for selection (assuming this is a checkbox similar to 'use')
@@ -2886,8 +2957,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             field_type = self.comboBoxFilterFieldType.currentText()
             field = self.comboBoxFilterField.currentText()
-            f_min = float(self.lineEditFMin.text())
-            f_max = float(self.lineEditFMax.text())
+            f_min = self.lineEditFMin.value
+            f_max = self.lineEditFMax.value
             operator = self.comboBoxFilterOperator.currentText()
             # Add a new row at the end of the table
             row = self.tableWidgetFilters.rowCount()
@@ -2920,8 +2991,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.tableWidgetFilters.setItem(row, 1, QTableWidgetItem(field_type))
             self.tableWidgetFilters.setItem(row, 2, QTableWidgetItem(field))
             self.tableWidgetFilters.setItem(row, 3, QTableWidgetItem(scale))
-            self.tableWidgetFilters.setItem(row, 4, QTableWidgetItem(self.dynamic_format(f_min)))
-            self.tableWidgetFilters.setItem(row, 5, QTableWidgetItem(self.dynamic_format(f_max)))
+            self.tableWidgetFilters.setItem(row, 4, QTableWidgetItem(fmt.dynamic_format(f_min)))
+            self.tableWidgetFilters.setItem(row, 5, QTableWidgetItem(fmt.dynamic_format(f_max)))
             self.tableWidgetFilters.setItem(row, 6, QTableWidgetItem(operator))
             self.tableWidgetFilters.setItem(row, 7, chkBoxItem_select)
 
@@ -3149,97 +3220,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.apply_filters(fullmap=False)
 
 
-    def oround(self, val, order=2, dir=None):
-        """Rounds a single of value to n digits
-
-        Round a single number to the first n digits.
-
-        Parameters
-        ----------
-        val : float
-            number to round
-        order : int, optional
-            number of orders to retain, by default 2
-        dir : int, optional
-            direction for rounding, ``0`` for down, ``1`` for up, and ``None`` for nearest, by default None
-
-        Returns
-        -------
-        float
-            rounded matrix values
-        """        
-        if val == 0:
-            return 0
-
-        power = np.floor(np.log10(abs(val)))
-        if dir == 0:
-            return np.floor(val / 10**(power-order)) * 10**(power - order)
-        elif dir == 1:
-            return np.ceil(val / 10**(power-order)) * 10**(power - order)
-        else:
-            return np.round(val / 10**(power-order)) * 10**(power - order)
-
-    def oround_matrix(self, val, order=2, dir=None):
-        """Rounds a matrix of values to n digits
-
-        Rounds all numbers in a matrix to the first n digits.
-
-        Parameters
-        ----------
-        val : float
-            number to round
-        order : int, optional
-            number of orders to retain, by default 2
-        dir : int, optional
-            direction for rounding, ``0`` for down, ``1`` for up, and ``None`` for nearest, by default None
-
-        Returns
-        -------
-        float
-            rounded matrix values
-        """        
-        newval = np.zeros(np.shape(val))
-
-        idx = (val != 0)
-        power = np.floor(np.log10(abs(val[idx])))
-        if dir == 0:
-            newval[idx] = np.floor(val[idx] / 10**(power-order)) * 10**(power - order)
-        elif dir == 1:
-            newval[idx] = np.ceil(val[idx] / 10**(power-order)) * 10**(power - order)
-        else:
-            newval[idx] = np.round(val[idx] / 10**(power-order)) * 10**(power - order)
-
-        return newval
-
-    def dynamic_format(self, value, threshold=1e4, order=4, dir=None):
-        """Prepares number for display as *str*
-
-        Formats a number of display as a *str*, typically in a *lineEdit* widget.
-
-        Parameters
-        ----------
-        value : float
-            number to round
-        threshold : float, optional
-            order of magnitude for determining display as floating point or expressing in engineering nootation, by default 1e4
-        order : int, optional
-            number of orders to keep, by default 4
-        dir : int, optional
-            direction for rounding, ``0`` for down, ``1`` for up, and ``None`` for nearest, by default None
-
-        Returns
-        -------
-        str
-            number formatted as a string
-        """        
-        if dir is not None:
-            value = self.oround(value, order=order, dir=dir)
-
-        if abs(value) > threshold:
-            return f'{{:.{order-1}e}}'.format(value)  # Scientific notation with order decimal places
-        else:
-            return f'{{:.{order}g}}'.format(value)
-
     def update_norm(self,sample_id, norm=None, analyte_1=None, analyte_2=None, update=False):
         """Update the norm of the data.
 
@@ -3365,9 +3345,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
                     # update v_min and v_max in self.data[sample_id]['analyte_info']
                     self.data[sample_id]['analyte_info'].loc[
-                                             (self.data[sample_id]['analyte_info']['analytes']==analyte_1),'v_max'] = filtered_data.max()
+                                             (self.data[sample_id]['analyte_info']['analytes']==analyte_1),'v_max'] = np.nanmax(filtered_data)
                     self.data[sample_id]['analyte_info'].loc[
-                                             (self.data[sample_id]['analyte_info']['analytes']==analyte_1), 'v_min'] = filtered_data.min()
+                                             (self.data[sample_id]['analyte_info']['analytes']==analyte_1), 'v_min'] = np.nanmin(filtered_data)
 
             #add x and y columns from raw data
             self.data[sample_id]['processed_data']['X'] = self.data[sample_id]['cropped_raw_data']['X']
@@ -3458,8 +3438,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
                 self.data[sample_id]['computed_data']['Ratio'][ratio_name] = ratio_array
 
-                self.data[sample_id]['ratio_info'].at[idx, 'v_min'] = ratio_array.min()
-                self.data[sample_id]['ratio_info'].at[idx, 'v_max'] = ratio_array.max()
+                self.data[sample_id]['ratio_info'].at[idx, 'v_min'] = np.nanmin(ratio_array)
+                self.data[sample_id]['ratio_info'].at[idx, 'v_max'] = np.nanmax(ratio_array)
 
     def remove_widgets_from_layout(self, layout, object_names_to_remove):
         """
@@ -3613,7 +3593,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             cbar = ColorBarItem(orientation = 'h',colorMap = cm)
             cbar.setObjectName('colorbar')
             cbar.setImageItem(img, insert_in=p1)
-            cbar.setLevels([array.min(), array.max()])
+            cbar.setLevels([np.nanmin(array), np.nanmax(array)])
 
     def init_zoom_view(self):
         # Set the initial zoom level
@@ -3702,7 +3682,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             elif algorithm == 'canny':
 
                 # Normalize the array to [0, 1]
-                normalized_array = (self.array - np.min(self.array)) / (np.max(self.array) - np.min(self.array))
+                normalized_array = (self.array - np.nanmin(self.array)) / (np.nanmax(self.array) - np.nanmin(self.array))
 
                 # Scale to [0, 255] and convert to uint8
                 scaled_array = (normalized_array * 255).astype(np.uint8)
@@ -3719,8 +3699,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # Assuming you have a way to display this edge_detected_image on your plot.
             # This could be an update to an existing ImageItem or creating a new one if necessary.
             self.edge_array = edge_detected_image
-            if (np.min(self.edge_array) < 0) or (np.max(self.edge_array) > 255):
-                self.edge_array = (self.edge_array - np.min(self.edge_array)) / (np.max(self.edge_array) - np.min(self.edge_array))
+            if (np.nanmin(self.edge_array) < 0) or (np.nanmax(self.edge_array) > 255):
+                self.edge_array = (self.edge_array - np.nanmin(self.edge_array)) / (np.nanmax(self.edge_array) - np.nanmin(self.edge_array))
 
                 # Scale to [0, 255] and convert to uint8
                 self.edge_array = (self.edge_array * 255).astype(np.uint8)
@@ -3755,7 +3735,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         :return: Edge-detected image using the zero crossing method.
         """
         # Normalize the array to [0, 1]
-        normalized_array = (array - np.min(array)) / (np.max(array) - np.min(array))
+        normalized_array = (array - np.nanmin(array)) / (np.nanmax(array) - np.nanmin(array))
 
         # Scale to [0, 255] and convert to uint8
         image = (normalized_array * 255).astype(np.uint8)
@@ -3999,14 +3979,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             case 'edge-preserving':
                 # Apply Edge-Preserving filter (RECURSIVE_FILTER or NORMCONV_FILTER)
                 # Normalize the array to [0, 1]
-                normalized_array = (self.array - np.min(self.array)) / (np.max(self.array) - np.min(self.array))
+                normalized_array = (self.array - np.nanmin(self.array)) / (np.nanmax(self.array) - np.nanmin(self.array))
 
                 # Scale to [0, 255] and convert to uint8
                 image = (normalized_array * 255).astype(np.uint8)
                 filtered_image = cv2.edgePreservingFilter(image, flags=1, sigma_s=float(val1), sigma_r=float(val2))
 
                 # convert back to original units
-                filtered_image = (filtered_image.astype(np.float32) / 255) * (np.max(self.array) - np.min(self.array)) + np.min(self.array)
+                filtered_image = (filtered_image.astype(np.float32) / 255) * (np.nanmax(self.array) - np.nanmin(self.array)) + np.nanmin(self.array)
                 
             case 'bilateral':
                 # Apply Bilateral filter
@@ -5011,18 +4991,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             style['Axes']['AspectRatio'] = self.aspect_ratio
 
             # do not round axes limits for maps
-            self.lineEditXLB.setText(str(style['Axes']['XLim'][0]))
-            self.lineEditXUB.setText(str(style['Axes']['XLim'][1]))
+            self.lineEditXLB.precision = None
+            self.lineEditXUB.precision = None
+            self.lineEditXLB.value = style['Axes']['XLim'][0]
+            self.lineEditXUB.value = style['Axes']['XLim'][1]
 
-            self.lineEditYLB.setText(str(style['Axes']['YLim'][0]))
-            self.lineEditYUB.setText(str(style['Axes']['YLim'][1]))
+            self.lineEditYLB.value = style['Axes']['YLim'][0]
+            self.lineEditYUB.value = style['Axes']['YLim'][1]
         else:
             # round axes limits for everything that isn't a map
-            self.lineEditXLB.setText(self.dynamic_format(style['Axes']['XLim'][0],order=3,dir=0))
-            self.lineEditXUB.setText(self.dynamic_format(style['Axes']['XLim'][1],order=3,dir=1))
+            self.lineEditXLB.value = style['Axes']['XLim'][0]
+            self.lineEditXUB.value = style['Axes']['XLim'][1]
 
-            self.lineEditYLB.setText(self.dynamic_format(style['Axes']['YLim'][0],order=3,dir=0))
-            self.lineEditYUB.setText(self.dynamic_format(style['Axes']['YLim'][1],order=3,dir=1))
+            self.lineEditYLB.value = style['Axes']['YLim'][0]
+            self.lineEditYUB.value = style['Axes']['YLim'][1]
 
         self.comboBoxXScale.setCurrentText(style['Axes']['XScale'])
         self.lineEditXLabel.setText(style['Axes']['XLabel'])
@@ -5045,12 +5027,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if (style['Scale']['Length'] is None) and (plot_type in self.map_plot_types):
             style['Scale']['Length'] = self.default_scale_length()
 
-            if style['Scale']['Length'] is not None:
-                self.lineEditScaleLength.setText(f"{style['Scale']['Length']}")
-            else:
-                self.lineEditScaleLength.setText('')
+            self.lineEditScaleLength.value = style['Scale']['Length']
         else:
-            self.lineEditScaleLength.setText('')
+            self.lineEditScaleLength.value = None
             
         self.toolButtonOverlayColor.setStyleSheet("background-color: %s;" % style['Scale']['OverlayColor'])
 
@@ -5066,7 +5045,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # line properties
         self.comboBoxLineWidth.setCurrentText(str(style['Lines']['LineWidth']))
-        self.lineEditLengthMultiplier.setText(str(style['Lines']['Multiplier']))
+        self.lineEditLengthMultiplier.value = style['Lines']['Multiplier']
         self.toolButtonLineColor.setStyleSheet("background-color: %s;" % style['Lines']['Color'])
 
         # color properties
@@ -5091,8 +5070,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if style['Colors']['Field'] in list(self.axis_dict.keys()):
             style['Colors']['CLim'] = [self.axis_dict[style['Colors']['Field']]['min'], self.axis_dict[style['Colors']['Field']]['max']]
             style['Colors']['CLabel'] = self.axis_dict[style['Colors']['Field']]['label']
-        self.lineEditColorLB.setText(self.dynamic_format(style['Colors']['CLim'][0],order=3,dir=0))
-        self.lineEditColorUB.setText(self.dynamic_format(style['Colors']['CLim'][1],order=3,dir=1))
+        self.lineEditColorLB.value = style['Colors']['CLim'][0]
+        self.lineEditColorUB.value = style['Colors']['CLim'][1]
         if style['Colors']['ColorByField'] == 'Cluster':
             # set ColorField to active cluster method
             self.comboBoxColorField.setCurrentText(self.cluster_dict['active method'])
@@ -5336,8 +5315,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         field = self.comboBoxColorField.currentText()
         if field == '':
             return
-        self.lineEditColorLB.setText(self.dynamic_format(self.axis_dict[field]['min'], order=3,dir=0))
-        self.lineEditColorUB.setText(self.dynamic_format(self.axis_dict[field]['max'], order=3,dir=1))
+        self.lineEditColorLB.value = self.axis_dict[field]['min']
+        self.lineEditColorUB.value = self.axis_dict[field]['max']
         self.comboBoxColorScale.setCurrentText(self.axis_dict[field]['scale'])
 
     def set_axis_widgets(self, ax, field):
@@ -5354,26 +5333,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         match ax:
             case 'x':
                 if field == 'X':
-                    self.lineEditXLB.setText(str(self.axis_dict[field]['min']))
-                    self.lineEditXUB.setText(str(self.axis_dict[field]['max']))
+                    self.lineEditXLB.value = self.axis_dict[field]['min']
+                    self.lineEditXUB.value = self.axis_dict[field]['max']
                 else:
-                    self.lineEditXLB.setText(self.dynamic_format(self.axis_dict[field]['min'],order=3,dir=0))
-                    self.lineEditXUB.setText(self.dynamic_format(self.axis_dict[field]['max'],order=3,dir=1))
+                    self.lineEditXLB.value = self.axis_dict[field]['min']
+                    self.lineEditXUB.value = self.axis_dict[field]['max']
                 self.lineEditXLabel.setText(self.axis_dict[field]['label'])
                 self.comboBoxXScale.setCurrentText(self.axis_dict[field]['scale'])
             case 'y':
                 if self.comboBoxPlotType.currentText() == 'histogram':
-                    self.lineEditYLB.setText(self.dynamic_format(self.axis_dict[field]['pmin'],order=3,dir=0))
-                    self.lineEditYUB.setText(self.dynamic_format(self.axis_dict[field]['pmax'],order=3,dir=1))
+                    self.lineEditYLB.value = self.axis_dict[field]['pmin']
+                    self.lineEditYUB.value = self.axis_dict[field]['pmax']
                     self.lineEditYLabel.setText(self.comboBoxHistType.currentText())
                     self.comboBoxYScale.setCurrentText('linear')
                 else:
                     if field == 'X':
-                        self.lineEditYLB.setText(str(self.axis_dict[field]['min']))
-                        self.lineEditYUB.setText(str(self.axis_dict[field]['max']))
+                        self.lineEditYLB.value = self.axis_dict[field]['min']
+                        self.lineEditYUB.value = self.axis_dict[field]['max']
                     else:
-                        self.lineEditYLB.setText(self.dynamic_format(self.axis_dict[field]['min'],order=3,dir=0))
-                        self.lineEditYUB.setText(self.dynamic_format(self.axis_dict[field]['max'],order=3,dir=1))
+                        self.lineEditYLB.value = self.axis_dict[field]['min']
+                        self.lineEditYUB.value = self.axis_dict[field]['max']
                     self.lineEditYLabel.setText(self.axis_dict[field]['label'])
                     self.comboBoxYScale.setCurrentText(self.axis_dict[field]['scale'])
             case 'z':
@@ -5517,8 +5496,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     #amax = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes']==field),'v_max'].values[0]
                     scale = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes']==field),'norm'].values[0]
 
-                amin = array.min()
-                amax = array.max()
+                amin = np.nanmin(array)
+                amax = np.nanmax(array)
             case 'Ratio' | 'Ratio (normalized)':
                 field_1 = field.split(' / ')[0]
                 field_2 = field.split(' / ')[1]
@@ -5529,8 +5508,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 else:
                     self.axis_dict[field]['label'] = f"$^{{{mass_1}}}${symbol_1}$_N$ / $^{{{mass_2}}}${symbol_2}$_N$"
 
-                amin = array.min()
-                amax = array.max()
+                amin = np.nanmin(array)
+                amax = np.nanmax(array)
                 scale = self.data[self.sample_id]['ratio_info'].loc[
                     (self.data[self.sample_id]['ratio_info']['analyte_1']==field_1) & (self.data[self.sample_id]['ratio_info']['analyte_2']==field_2),
                     'norm'].values[0]
@@ -5538,13 +5517,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 #current_plot_df = self.data[self.sample_id]['computed_data'][field_type].loc[:,field].values
                 scale = 'linear'
 
-                amin = array.min()
-                amax = array.max()
+                amin = np.nanmin(array)
+                amax = np.nanmax(array)
 
         # do not round 'X' and 'Y' so full extent of map is viewable
         if field not in ['X','Y']:
-            amin = self.oround(amin, order=2, dir=0)
-            amax = self.oround(amax, order=2, dir=1)
+            amin = fmt.oround(amin, order=2, toward=0)
+            amax = fmt.oround(amax, order=2, toward=1)
 
         d = {'status':'auto', 'min':amin, 'max':amax, 'scale':scale}
 
@@ -5638,7 +5617,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.comboBoxScaleLocation.setEnabled(False)
             self.labelScaleLength.setEnabled(False)
             self.lineEditScaleLength.setEnabled(False)
-            self.lineEditScaleLength.setText('')
+            self.lineEditScaleLength.value = None
         else:
             self.labelScaleLocation.setEnabled(True)
             self.comboBoxScaleLocation.setEnabled(True)
@@ -5653,9 +5632,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 else:
                     scale_length = self.styles[plot_type]['Scale']['Length']
                 self.styles[plot_type]['Scale']['Length'] = scale_length
-                self.lineEditScaleLength.setText(f'{scale_length}')
+                self.lineEditScaleLength.value = scale_length
             else:
-                self.lineEditScaleLength.setText('')
+                self.lineEditScaleLength.value = None
 
         self.update_SV()
 
@@ -5689,14 +5668,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # make sure user input is within bounds, do not change
             if ((self.comboBoxScaleDirection.currentText() == 'horizontal') and (scale_length > self.x_range)) or (scale_length <= 0):
                 scale_length = self.styles[plot_type]['Scale']['Length']
-                self.lineEditScaleLength.setText(f'{scale_length}')
+                self.lineEditScaleLength.value = scale_length
                 return
             elif ((self.comboBoxScaleDirection.currentText() == 'vertical') and (scale_length > self.y_range)) or (scale_length <= 0):
                 scale_length = self.styles[plot_type]['Scale']['Length']
-                self.lineEditScaleLength.setText(f'{scale_length}')
+                self.lineEditScaleLength.value = scale_length
                 return
         else:
-            self.lineEditScaleLength.setText('')
+            self.lineEditScaleLength.value = None
             return
 
         # update style dictionary
@@ -5783,13 +5762,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         plot_type = self.comboBoxPlotType.currentText()
         if not float(self.lineEditLengthMultiplier.text()):
-            self.lineEditLengthMultiplier.setText(self.styles[plot_type]['Lines']['Multiplier'])
+            self.lineEditLengthMultiplier.values = self.styles[plot_type]['Lines']['Multiplier']
 
         value = float(self.lineEditLengthMultiplier.text())
         if self.styles[plot_type]['Lines']['Multiplier'] == value:
             return
         elif (value < 0) or (value >= 100):
-            self.lineEditLengthMultiplier.setText(str(self.styles[plot_type]['Lines']['Multiplier']))
+            self.lineEditLengthMultiplier.values = self.styles[plot_type]['Lines']['Multiplier']
             return
 
         self.styles[plot_type]['Lines']['Multiplier'] = value
@@ -6734,8 +6713,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.dy = self.y_range/self.y.nunique()
 
         units = self.preferences['Units']['Distance']
-        self.labelDX.setText(f'dx {units}')
-        self.labelDY.setText(f'dy {units}')
         self.lineEditDX.value = self.dx
         self.lineEditDY.value = self.dy
 
@@ -6743,8 +6720,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.array_size = (self.y.nunique(), self.x.nunique())
         
-        self.lineEditResolutionNx.setText(str(self.array_size[1]))
-        self.lineEditResolutionNy.setText(str(self.array_size[0]))
+        self.lineEditResolutionNx.value = self.array_size[1]
+        self.lineEditResolutionNy.value = self.array_size[0]
 
     def add_scalebar(self, ax):
         """Add a scalebar to a map
@@ -6910,7 +6887,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         array = np.reshape(map_df['array'].values, self.array_size, order=self.order)
 
         # Step 1: Normalize your data array for colormap application
-        norm = colors.Normalize(vmin=array.min(), vmax=array.max())
+        norm = colors.Normalize(vmin=np.nanmin(array), vmax=np.nanmax(array))
         cmap = self.get_colormap()
 
         # Step 2: Apply the colormap to get RGB values, then normalize to [0, 255] for QImage
@@ -7078,7 +7055,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         img_item = ImageItem(image=self.array, antialias=False)
 
         #set aspect ratio of rectangle
-        img_item.setRect(self.x.min(),self.y.min(),self.x_range,self.y_range)
+        img_item.setRect(self.x.nanmin(),self.y.nanmin(),self.x_range,self.y_range)
 
         #--- add non-interactive image with integrated color ------------------
         plotWindow = graphicWidget.addPlot(0,0,title=field.replace('_',' '))
@@ -7458,8 +7435,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             logflag = True
             array = np.log10(array)
 
-        bin_width = (array.max() - array.min()) / self.default_bins
-        edges = np.arange(array.min(), array.max() + bin_width, bin_width)
+        bin_width = (np.nanmax(array) - np.nanmin(array)) / self.default_bins
+        edges = np.arange(np.nanmin(array), np.nanmax(array) + bin_width, bin_width)
 
         if sum(mask) != len(mask):
             canvas.axes.hist(current_plot_df['array'], bins=edges, density=True, color='#b3b3b3', edgecolor=None, linewidth=style['Lines']['LineWidth'], log=logflag, alpha=0.6, label='unmasked')
@@ -7608,7 +7585,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         if pflag:
             ymin, ymax = canvas.axes.get_ylim()
-            d = {'pstatus':'auto', 'pmin':self.oround(ymin,order=2,dir=0), 'pmax':self.oround(ymax,order=2,dir=1)}
+            d = {'pstatus':'auto', 'pmin':fmt.oround(ymin,order=2,toward=0), 'pmax':fmt.oround(ymax,order=2,toward=1)}
             self.axis_dict[x['field']].update(d)
             self.set_axis_widgets('y', x['field'])
 
@@ -8723,7 +8700,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         Updates ``MainWindow.cluster_dict[*method*]['seed'] using a random number generator with one of 10**9 integers. 
         """        
         r = random.randint(0,1000000000)
-        self.lineEditSeed.setText(str(r))
+        self.lineEditSeed.value = r
         self.cluster_dict[self.comboBoxClusterMethod.currentText()]['seed'] = r
 
         self.update_cluster_flag = True
@@ -8767,7 +8744,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 # Seed
                 self.labelClusterStartingSeed.setEnabled(True)
                 self.lineEditSeed.setEnabled(True)
-                self.lineEditSeed.setText(str(self.cluster_dict[method]['seed']))
+                self.lineEditSeed.value = self.cluster_dict[method]['seed']
 
             case 'fuzzy c-means':
                 # Enable parameters relevant to Fuzzy Clustering
@@ -8785,7 +8762,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 # Seed
                 self.labelClusterStartingSeed.setEnabled(True)
                 self.lineEditSeed.setEnabled(True)
-                self.lineEditSeed.setText(str(self.cluster_dict[method]['seed']))
+                self.lineEditSeed.value = self.cluster_dict[method]['seed']
 
         if self.update_cluster_flag:
             self.update_SV()
@@ -9619,10 +9596,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.lineEditDifferenceUpperQuantile.setEnabled(False)
 
             # update Auto scale UI
-            self.lineEditLowerQuantile.setText(str(parameters['lower_bound']))
-            self.lineEditUpperQuantile.setText(str(parameters['upper_bound']))
-            self.lineEditDifferenceLowerQuantile.setText(str(parameters['d_l_bound']))
-            self.lineEditDifferenceUpperQuantile.setText(str(parameters['d_u_bound']))
+            self.lineEditLowerQuantile.value = parameters['lower_bound']
+            self.lineEditUpperQuantile.value = parameters['upper_bound']
+            self.lineEditDifferenceLowerQuantile.value = parameters['d_l_bound']
+            self.lineEditDifferenceUpperQuantile.value = parameters['d_u_bound']
 
             # Update Neg Value handling combobox 
             index = self.comboBoxNegativeMethod.findText(str(parameters['negative_method']))
@@ -9630,8 +9607,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.comboBoxNegativeMethod.setCurrentIndex(index)
             
             # Update filter UI 
-            self.lineEditFMin.setText(self.dynamic_format(parameters['v_min'],dir=0))
-            self.lineEditFMax.setText(self.dynamic_format(parameters['v_max'],dir=1))
+            self.lineEditFMin.value = parameters['v_min']
+            self.lineEditFMax.value = parameters['v_max']
+            self.callback_lineEditFMin()
+            self.callback_lineEditFMax()
 
     # ----start debugging----
     # def test_get_field_list(self):
@@ -10870,7 +10849,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 result = ne.evaluate(expr)
             else:
                 result = ne.evaluate(expr, local_dict=val_dict)
-            self.labelCalcMessage.setText(f'Success')
+            self.labelCalcMessage.setText("Success")
             if keep is None or result.ndim == 0:
                 return result
             else:
@@ -11070,7 +11049,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return ''
 
         #matrix = self.convert_to_string(matrix)
-        matrix = self.oround_matrix(matrix, order=3)
+        matrix = fmt.oround_matrix(matrix, order=3)
 
         # Add row labels to the matrix if provided
         if row_labels is not None:
@@ -12086,7 +12065,7 @@ class MplDialog(QDialog):
 
 
 class StandardItem(QStandardItem):
-    def __init__(self, txt = '', font_size = 11, set_bold= False):
+    def __init__(self, txt='', font_size=11, set_bold=False):
         super().__init__()
 
         fnt  = QFont()
@@ -12121,280 +12100,6 @@ class MaskObj:
     def register_callback(self, callback):
         self._callbacks.append(callback)
 
-# Analyte GUI
-# -------------------------------
-class analyteSelectionWindow(QDialog, Ui_Dialog):
-    listUpdated = pyqtSignal()
-    def __init__(self, analytes,norm_dict, clipped_data, parent=None):
-        super().__init__(parent)
-        self.setupUi(self)
-
-        self.analytes = list(analytes)
-        self.norm_dict = norm_dict
-        self.clipped_data = clipped_data
-        self.correlation_matrix = None
-        self.tableWidgetAnalytes.setRowCount(len(analytes))
-        self.tableWidgetAnalytes.setColumnCount(len(analytes))
-        self.tableWidgetAnalytes.setHorizontalHeaderLabels(list(analytes))
-        self.tableWidgetAnalytes.setHorizontalHeader(RotatedHeaderView(self.tableWidgetAnalytes))
-        self.tableWidgetAnalytes.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-        self.tableWidgetAnalytes.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-        self.comboBoxScale.currentIndexChanged.connect(self.update_all_combos)
-
-        self.tableWidgetAnalytes.setVerticalHeaderLabels(analytes)
-        self.correlation_methods = ["Pearson", "Spearman"]
-
-        for method in self.correlation_methods:
-            self.comboBoxCorrelation.addItem(method)
-
-        self.calculate_correlation()
-
-        self.tableWidgetAnalytes.cellClicked.connect(self.toggle_cell_selection)
-
-        self.tableWidgetSelected.setColumnCount(2)
-        self.tableWidgetSelected.setHorizontalHeaderLabels(['analyte Pair', 'normalisation'])
-
-        self.pushButtonSaveSelection.clicked.connect(self.save_selection)
-
-        self.pushButtonLoadSelection.clicked.connect(self.load_selection)
-
-        self.pushButtonDone.clicked.connect(self.done_selection)
-
-        self.pushButtonCancel.clicked.connect(self.reject)
-        self.comboBoxCorrelation.activated.connect(self.calculate_correlation)
-        self.tableWidgetAnalytes.setStyleSheet("QTableWidget::item:selected {background-color: yellow;}")
-        if len(self.norm_dict.keys())>0:
-            for analyte,norm in self.norm_dict.items():
-                self.populate_analyte_list(analyte,norm)
-        else:
-            # Select diagonal pairs by default
-            for i in range(len(self.analytes)):
-                row=column = i
-                item = self.tableWidgetAnalytes.item(row, column)
-
-                # If the item doesn't exist, create it
-                if not item:
-                    item = QTableWidgetItem()
-                    self.tableWidgetAnalytes.setItem(row, column, item)
-                    self.add_analyte_to_list(row, column)
-                # If the cell is already selected, deselect it
-                elif not item.isSelected():
-                    item.setSelected(True)
-                    self.add_analyte_to_list(row, column)
-                else:
-                    item.setSelected(False)
-                    self.remove_analyte_from_list(row, column)
-
-    def done_selection(self):
-        self.update_list()
-        self.accept()
-
-    def update_all_combos(self):
-        # Get the currently selected value in comboBoxScale
-        selected_scale = self.comboBoxScale.currentText()
-
-        # Iterate through all rows in tableWidgetSelected to update combo boxes
-        for row in range(self.tableWidgetSelected.rowCount()):
-            combo = self.tableWidgetSelected.cellWidget(row, 1)
-            if combo is not None:  # Make sure there is a combo box in this cell
-                combo.setCurrentText(selected_scale)  # Update the combo box value
-
-    def update_scale(self):
-        # Initialize a variable to store the first combo box's selection
-        first_selection = None
-        mixed = False  # Flag to indicate mixed selections
-
-        # Iterate through all rows in tableWidgetSelected to check combo boxes
-        for row in range(self.tableWidgetSelected.rowCount()):
-            combo = self.tableWidgetSelected.cellWidget(row, 1)
-            if combo is not None:  # Make sure there is a combo box in this cell
-                # If first_selection has not been set, store the current combo box's selection
-                if first_selection is None:
-                    first_selection = combo.currentText()
-                # If the current combo box's selection does not match first_selection, set mixed to True
-                elif combo.currentText() != first_selection:
-                    mixed = True
-                    break  # No need to check further
-
-        # If selections are mixed, set comboBoxScale to 'mixed', else set it to match first_selection
-        if mixed:
-            self.comboBoxScale.setCurrentText('mixed')
-        else:
-            self.comboBoxScale.setCurrentText(first_selection)
-
-    def calculate_correlation(self):
-        selected_method = self.comboBoxCorrelation.currentText().lower()
-        # Compute the correlation matrix
-        self.correlation_matrix = self.clipped_data.corr(method=selected_method)
-        for i, row_analyte in enumerate(self.analytes):
-            for j, col_analyte in enumerate(self.analytes):
-
-                correlation = self.correlation_matrix.loc[row_analyte, col_analyte]
-                self.color_cell(i, j, correlation)
-        self.create_colorbar()  # Call this to create and display the colorbar
-
-    def color_cell(self, row, column, correlation):
-        """Colors cells in the correlation table"""
-        color = self.get_color_for_correlation(correlation)
-        item = self.tableWidgetAnalytes.item(row, column)
-        if not item:
-            item = QTableWidgetItem()
-            self.tableWidgetAnalytes.setItem(row, column, item)
-        item.setBackground(color)
-
-    def get_color_for_correlation(self, correlation):
-        #cmap = plt.get_cmap('RdBu')
-        #c = cmap((1 + correlation)/2)
-        #r = c[1]
-        #g = c[2]
-        #b = c[3]
-
-        # Map correlation to RGB color
-        r = 255 * (1 - (correlation > 0) * ( abs(correlation)))
-        g = 255 * (1 - abs(correlation))
-        b = 255 * (1 - (correlation < 0) * ( abs(correlation)))
-        return QColor(int(r), int(g),int(b))
-
-    def create_colorbar(self):
-        colorbar_image = self.generate_colorbar_image(40, 200)  # Width, Height of colorbar
-        colorbar_label = QLabel(self)
-        colorbar_pixmap = QPixmap.fromImage(colorbar_image)
-        self.labelColorbar.setPixmap(colorbar_pixmap)
-
-    def generate_colorbar_image(self, width, height):
-        image = QImage(width, height, QImage.Format_RGB32)
-        painter = QPainter(image)
-        painter.fillRect(0, 0, width, height, Qt.white)  # Fill background with white
-        pad =20
-        # Draw color gradient
-        for i in range(pad,height-pad):
-            correlation = 1 - (2 * i / height)  # Map pixel position to correlation value
-            color = self.get_color_for_correlation(correlation)
-            painter.setPen(color)
-            painter.drawLine(10, i, width-20, i) # Leave space for ticks
-        # Draw tick marks
-        tick_positions = [pad, height // 2, height-pad - 1]  # Top, middle, bottom
-        tick_labels = ['1', '0', '-1']
-        painter.setPen(Qt.black)
-        for pos, label in zip(tick_positions, tick_labels):
-            painter.drawLine(width - 20, pos, width-18 , pos)  # Draw tick mark
-            painter.drawText(width-15 , pos + 5, label)   # Draw tick label
-        painter.end()
-        return image
-
-    def toggle_cell_selection(self, row, column):
-        item = self.tableWidgetAnalytes.item(row, column)
-
-        # If the item doesn't exist, create it
-        if not item:
-            item = QTableWidgetItem()
-            self.tableWidgetAnalytes.setItem(row, column, item)
-            self.add_analyte_to_list(row, column)
-        # If the cell is already selected, deselect it
-        elif item.isSelected():
-            item.setSelected(True)
-            self.add_analyte_to_list(row, column)
-        else:
-            item.setSelected(False)
-            self.remove_analyte_from_list(row, column)
-
-    def add_analyte_to_list(self, row, column):
-        row_header = self.tableWidgetAnalytes.verticalHeaderItem(row).text()
-        col_header = self.tableWidgetAnalytes.horizontalHeaderItem(column).text()
-
-        newRow = self.tableWidgetSelected.rowCount()
-        self.tableWidgetSelected.insertRow(newRow)
-        if row == column:
-            self.tableWidgetSelected.setItem(newRow, 0, QTableWidgetItem(f"{row_header}"))
-        else:
-            # Add analyte pair to the first column
-            self.tableWidgetSelected.setItem(newRow, 0, QTableWidgetItem(f"{row_header} / {col_header}"))
-
-        # Add dropdown to the second column
-        combo = QComboBox()
-        combo.addItems(['linear', 'log'])
-        self.tableWidgetSelected.setCellWidget(newRow, 1, combo)
-        self.update_list()
-
-    def remove_analyte_from_list(self, row, column):
-        row_header = self.tableWidgetAnalytes.verticalHeaderItem(row).text()
-        col_header = self.tableWidgetAnalytes.horizontalHeaderItem(column).text()
-        if row == column:
-            item_text = f"{row_header}"
-        else:
-            item_text = f"{row_header} / {col_header}"
-
-        # Find the row with the corresponding text and remove it
-        for i in range(self.tableWidgetSelected.rowCount()):
-            if self.tableWidgetSelected.item(i, 0).text() == item_text:
-                self.tableWidgetSelected.removeRow(i)
-                self.update_list()
-                break
-
-    def get_selected_data(self):
-        data = []
-        for i in range(self.tableWidgetSelected.rowCount()):
-            analyte_pair = self.tableWidgetSelected.item(i, 0).text()
-            combo = self.tableWidgetSelected.cellWidget(i, 1)
-            selection = combo.currentText()
-            data.append((analyte_pair, selection))
-        return data
-
-    def save_selection(self):
-        file_name, _ = QFileDialog.getSaveFileName(self, "Save File", "", "Text Files (*.txt);;All Files (*)")
-        if file_name:
-            with open(file_name, 'w') as f:
-                for i in range(self.tableWidgetSelected.rowCount()):
-                    analyte_pair = self.tableWidgetSelected.item(i, 0).text()
-                    combo = self.tableWidgetSelected.cellWidget(i, 1)
-                    selection = combo.currentText()
-                    f.write(f"{analyte_pair},{selection}\n")
-
-    def load_selection(self):
-        file_name, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Text Files (*.txt);;All Files (*)")
-        if file_name:
-            with open(file_name, 'r') as f:
-                for line in f.readlines():
-                    self.populate_analyte_list(line)
-            self.update_list()
-            self.raise_()
-            self.activateWindow()
-
-    def update_list(self):
-        self.norm_dict={}
-        for i in range(self.tableWidgetSelected.rowCount()):
-            analyte_pair = self.tableWidgetSelected.item(i, 0).text()
-            combo = self.tableWidgetSelected.cellWidget(i, 1)
-            selection = combo.currentText()
-            self.norm_dict[analyte_pair] = selection
-        self.listUpdated.emit()
-
-    def populate_analyte_list(self, analyte_pair, norm):
-        if '/' in analyte_pair:
-            row_header, col_header = analyte_pair.split(' / ')
-        else:
-            row_header = col_header = analyte_pair
-        # Select the cell in tableWidgetanalyte
-        if row_header in self.analytes:
-            row_index = self.analytes.index(row_header)
-            col_index = self.analytes.index(col_header)
-
-            item = self.tableWidgetAnalytes.item(row_index, col_index)
-            if not item:
-                item = QTableWidgetItem()
-                self.tableWidgetAnalytes.setItem(row_index, col_index, item)
-            item.setSelected(True)
-
-            # Add the loaded data to tableWidgetSelected
-            newRow = self.tableWidgetSelected.rowCount()
-            self.tableWidgetSelected.insertRow(newRow)
-            self.tableWidgetSelected.setItem(newRow, 0, QTableWidgetItem(analyte_pair))
-            combo = QComboBox()
-            combo.addItems(['linear', 'log'])
-            combo.setCurrentText(norm)
-            self.tableWidgetSelected.setCellWidget(newRow, 1, combo)
-            combo.currentIndexChanged.connect(self.update_scale)
-
 
 # QuickViewDialog gui
 # -------------------------------
@@ -12425,8 +12130,7 @@ class quickView(QDialog, Ui_QuickViewDialog):
         """        
         super().__init__(parent)
         self.setupUi(self)
-        self.main_window = parent
-        self.analyte_list = self.main_window.data[self.main_window.sample_id]['analyte_info']['analytes']
+        self.analyte_list = self.data[self.sample_id]['analyte_info']['analytes']
 
         if darkdetect.isDark():
             self.toolButtonSort.setIcon(QIcon(os.path.join(iconpath,'icon-sort-dark-64.svg')))
@@ -12506,10 +12210,10 @@ class quickView(QDialog, Ui_QuickViewDialog):
             return
 
         selected_analytes = [self.tableWidget.item(row, 0).text() for row in range(self.tableWidget.rowCount()) if self.tableWidget.cellWidget(row, 1).isChecked()]
-        self.main_window.QV_analyte_list[self.view_name] = selected_analytes
+        self.QV_analyte_list[self.view_name] = selected_analytes
 
         # update self.comboBoxQVList combo box with view_name
-        self.main_window.comboBoxQVList.addItem(self.view_name)
+        self.comboBoxQVList.addItem(self.view_name)
         
         # Save to CSV
         self.save_to_csv()
@@ -12521,7 +12225,7 @@ class quickView(QDialog, Ui_QuickViewDialog):
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
         # append dictionary to file of saved qv_lists
-        lameio.export_dict_to_csv(self.main_window.QV_analyte_list, file_path)
+        lameio.export_dict_to_csv(self.QV_analyte_list, file_path)
         
 
         QMessageBox.information(self, "Save Successful", f"Analytes view saved under '{self.view_name}' successfully.")
@@ -12564,7 +12268,7 @@ class WebEngineView(QWebEngineView):
 
     @pyqtSlot()
     def on_load_started(self):
-        self.main_window.statusBar.showMessage("Loading started...")
+        self.statusBar.showMessage("Loading started...")
 
     @pyqtSlot(int)
     def on_load_progress(self, progress):
@@ -12575,7 +12279,7 @@ class WebEngineView(QWebEngineView):
         progress : int
             Loading fraction
         """        
-        self.main_window.statusBar.showMessage(f"Loading progress: {progress}%")
+        self.statusBar.showMessage(f"Loading progress: {progress}%")
 
     def show_error_page(self):
         html = f"<html><body><img src={os.path.abspath('docs/build/html/404.html')} /></html>"
@@ -13414,7 +13118,7 @@ class Profiling:
             self.plot_existing_profile(self.main_window.plot)
 
     def plot_profile_scatter(self, event, array,k,v, plot, x, y, x_i, y_i):
-        #k is key (name of Iolite)
+        #k is key (name of Analyte)
         #create profile dict particular sample if it doesnt exisist
         # if self.main_window.sample_id not in self.profiles:
         #     self.profiles[self.main_window.sample_id] = {}
@@ -13675,30 +13379,30 @@ class Profiling:
                 points =  profiles[(k,v)]
                 distances, medians, lowers, uppers, mean,s_error  = process_points(points, sort_axis)
                 if point_type == 'mean':
-                    range_value = np.max(mean)- np.min(mean)
+                    range_value = np.nanmax(mean) - np.nanmin(mean)
 
                     similar_group_found = False
 
                     for group_key, _ in profile_groups.items():
                         if abs(range_value - group_key) <= range_threshold:
-                            profile_groups[group_key].append((k, distances, mean, s_error, np.min(mean)))
+                            profile_groups[group_key].append((k, distances, mean, s_error, np.nanmin(mean)))
                             similar_group_found = True
                             break
                     if not similar_group_found:
-                        profile_groups[range_value] = [(k, distances, mean, s_error, np.min(mean, np.max(mean)))]
+                        profile_groups[range_value] = [(k, distances, mean, s_error, np.nanmin(mean, np.nanmax(mean)))]
                 else:
 
-                    range_value = np.max(medians)- np.min(medians)
+                    range_value = np.nanmax(medians)- np.nanmin(medians)
 
                     similar_group_found = False
 
                     for group_key, _ in profile_groups.items():
                         if abs(range_value - group_key) <= range_threshold:
-                            profile_groups[group_key].append((k, distances, medians, lowers, uppers, np.min(medians), np.max(medians)))
+                            profile_groups[group_key].append((k, distances, medians, lowers, uppers, np.nanmin(medians), np.nanmax(medians)))
                             similar_group_found = True
                             break
                     if not similar_group_found:
-                        profile_groups[range_value] = [(k, distances, medians, lowers, uppers, np.min(medians), np.max(medians))]
+                        profile_groups[range_value] = [(k, distances, medians, lowers, uppers, np.nanmin(medians), np.nanmax(medians))]
 
             return profile_groups, colors
 

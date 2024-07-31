@@ -36,9 +36,11 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints"]
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 import pydata_sphinx_theme
-import mpl_sphinx_theme
+#import mpl_sphinx_theme
 
-html_theme = 'pydata_sphinx_theme'
+#html_theme = 'pydata_sphinx_theme'
+html_theme = 'mpl_sphinx_theme'
+
 html_css_files = [
     "mpl.css",
 ]

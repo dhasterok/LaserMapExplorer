@@ -1162,7 +1162,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>181</height>
+          <height>192</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -1925,7 +1925,7 @@
                 <item>
                  <widget class="QCheckBox" name="checkBoxApplyAll">
                   <property name="text">
-                   <string>Apply to all Iolites in sample</string>
+                   <string>Apply to all analytes</string>
                   </property>
                  </widget>
                 </item>
@@ -1960,7 +1960,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>181</height>
+          <height>192</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -2559,7 +2559,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>181</height>
+          <height>192</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -2599,7 +2599,7 @@
               <x>0</x>
               <y>0</y>
               <width>294</width>
-              <height>175</height>
+              <height>186</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_45">
@@ -2913,7 +2913,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>181</height>
+          <height>192</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -3552,7 +3552,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>181</height>
+          <height>192</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -4318,7 +4318,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>181</height>
+          <height>192</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5005,7 +5005,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>181</height>
+          <height>192</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5619,7 +5619,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>181</height>
+          <height>192</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5665,7 +5665,7 @@
               <x>0</x>
               <y>0</y>
               <width>301</width>
-              <height>181</height>
+              <height>192</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_57">
@@ -5852,7 +5852,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>181</height>
+          <height>192</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6271,7 +6271,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>181</height>
+          <height>192</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6317,7 +6317,7 @@
               <x>0</x>
               <y>0</y>
               <width>300</width>
-              <height>181</height>
+              <height>192</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_64">
@@ -6933,7 +6933,7 @@
           <x>0</x>
           <y>0</y>
           <width>268</width>
-          <height>360</height>
+          <height>371</height>
          </rect>
         </property>
         <attribute name="label">
@@ -7078,7 +7078,7 @@
           <x>0</x>
           <y>0</y>
           <width>270</width>
-          <height>360</height>
+          <height>371</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7621,7 +7621,7 @@
               <x>0</x>
               <y>0</y>
               <width>268</width>
-              <height>144</height>
+              <height>155</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -9204,7 +9204,7 @@
           <x>0</x>
           <y>0</y>
           <width>290</width>
-          <height>360</height>
+          <height>371</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -10665,7 +10665,7 @@
         <string>Pop the figure out into a separate window</string>
        </property>
        <property name="currentIndex">
-        <number>2</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="tabNotes">
         <property name="sizePolicy">
@@ -11144,7 +11144,7 @@
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_72">
              <item>
-              <widget class="QGroupBox" name="groupBoxElemental">
+              <widget class="QGroupBox" name="groupBoxFilter">
                <property name="maximumSize">
                 <size>
                  <width>350</width>
@@ -11158,7 +11158,7 @@
                 </font>
                </property>
                <property name="title">
-                <string>Filter by value</string>
+                <string/>
                </property>
                <property name="alignment">
                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -11637,13 +11637,13 @@
                  <number>3</number>
                 </property>
                 <property name="topMargin">
-                 <number>3</number>
+                 <number>6</number>
                 </property>
                 <property name="rightMargin">
                  <number>3</number>
                 </property>
                 <property name="bottomMargin">
-                 <number>3</number>
+                 <number>6</number>
                 </property>
                 <item>
                  <widget class="QToolButton" name="toolButtonFilterSelectAll">
@@ -11888,13 +11888,13 @@
                  <number>3</number>
                 </property>
                 <property name="topMargin">
-                 <number>3</number>
+                 <number>6</number>
                 </property>
                 <property name="rightMargin">
                  <number>3</number>
                 </property>
                 <property name="bottomMargin">
-                 <number>3</number>
+                 <number>6</number>
                 </property>
                 <item>
                  <widget class="QToolButton" name="toolButtonProfileEditToggle">

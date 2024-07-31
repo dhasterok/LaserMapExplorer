@@ -11147,7 +11147,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """        
         # Open a file dialog to select a local HTML file
         # Create a QWebEngineView widget
-        self.browser = WebEngineView(parent=self)
+        self.browser = WebEngineView(self)
         self.verticalLayoutBrowser.addWidget(self.browser)
 
         #file_name, _ = QFileDialog.getOpenFileName(self, "Open HTML File", "", "HTML Files (*.html *.htm)")
@@ -12268,7 +12268,7 @@ class WebEngineView(QWebEngineView):
 
     @pyqtSlot()
     def on_load_started(self):
-        self.statusBar.showMessage("Loading started...")
+        self.main_window.statusBar.showMessage("Loading started...")
 
     @pyqtSlot(int)
     def on_load_progress(self, progress):
@@ -12279,7 +12279,7 @@ class WebEngineView(QWebEngineView):
         progress : int
             Loading fraction
         """        
-        self.statusBar.showMessage(f"Loading progress: {progress}%")
+        self.main_window.statusBar.showMessage(f"Loading progress: {progress}%")
 
     def show_error_page(self):
         html = f"<html><body><img src={os.path.abspath('docs/build/html/404.html')} /></html>"

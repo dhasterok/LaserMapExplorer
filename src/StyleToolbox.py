@@ -1,3 +1,10 @@
+import re
+import src.format as fmt
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.colors as colors
+from PyQt5.QtWidgets import ( QTableWidgetItem ) 
+
 class StyleToolbox():
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -621,12 +628,8 @@ class StyleToolbox():
     def set_style_widgets(self, plot_type=None, style=None):
         """Sets values in right toolbox style page
 
-        Parameters
-        ----------
-        plot_type : str, optional
-            dictionary key into ``MainWindow.style``
-        style : dict, optional
-            style dictionary
+        :param plot_type: dictionary key into ``MainWindow.style``
+        :type plot_type: str, optional
         """
         print('set_style_widgets')
         tab_id = self.toolBox.currentIndex()
@@ -683,11 +686,11 @@ class StyleToolbox():
             self.lineEditYUB.value = style['Axes']['YLim'][1]
         else:
             # round axes limits for everything that isn't a map
-            self.lineEditXLB.setText(fmt.dynamic_format(style['Axes']['XLim'][0],order=3,toward=0))
-            self.lineEditXUB.setText(fmt.dynamic_format(style['Axes']['XLim'][1],order=3,toward=1))
+            self.lineEditXLB.value = style['Axes']['XLim'][0]
+            self.lineEditXUB.value = style['Axes']['XLim'][1]
 
-            self.lineEditYLB.setText(fmt.dynamic_format(style['Axes']['YLim'][0],order=3,toward=0))
-            self.lineEditYUB.setText(fmt.dynamic_format(style['Axes']['YLim'][1],order=3,toward=1))
+            self.lineEditYLB.value = style['Axes']['YLim'][0]
+            self.lineEditYUB.value = style['Axes']['YLim'][1]
 
         self.comboBoxXScale.setCurrentText(style['Axes']['XScale'])
         self.lineEditXLabel.setText(style['Axes']['XLabel'])
@@ -753,8 +756,8 @@ class StyleToolbox():
         if style['Colors']['Field'] in list(self.axis_dict.keys()):
             style['Colors']['CLim'] = [self.axis_dict[style['Colors']['Field']]['min'], self.axis_dict[style['Colors']['Field']]['max']]
             style['Colors']['CLabel'] = self.axis_dict[style['Colors']['Field']]['label']
-        self.lineEditColorLB.setText(fmt.dynamic_format(style['Colors']['CLim'][0],order=3,toward=0))
-        self.lineEditColorUB.setText(fmt.dynamic_format(style['Colors']['CLim'][1],order=3,toward=1))
+        self.lineEditColorLB.value = style['Colors']['CLim'][0]
+        self.lineEditColorUB.value = style['Colors']['CLim'][1]
         if style['Colors']['ColorByField'] == 'Cluster':
             # set ColorField to active cluster method
             self.comboBoxColorField.setCurrentText(self.cluster_dict['active method'])
@@ -865,11 +868,8 @@ class StyleToolbox():
         """Grabs the field name from a given axis
 
         The field name for a given axis comes from a comboBox, and depends upon the plot type.
-
-        Parameters
-        ----------
-        ax : str
-            axis, options include ``x``, ``y``, ``z``, and ``c``
+        :param ax: axis, options include ``x``, ``y``, ``z``, and ``c``
+        :type ax: str
         """
         plot_type = self.comboBoxPlotType.currentText()
         if ax == 'c':
@@ -900,12 +900,10 @@ class StyleToolbox():
     def axis_label_edit_callback(self, ax, new_label):
         """Updates axis label in dictionaries from widget
 
-        Parameters
-        ----------
-        ax : str
-            axis, options include ``x``, ``y``, ``z``, and ``c``
-        new_label : str
-            new label set by user
+        :param ax: axis, options include ``x``, ``y``, ``z``, and ``c``
+        :type ax: str
+        :param new_label: new label set by user
+        :type new_label: str
         """
         plot_type = self.comboBoxPlotType.currentText()
 
@@ -926,14 +924,12 @@ class StyleToolbox():
     def axis_limit_edit_callback(self, ax, bound, new_value):
         """Updates axis limit in dictionaries from widget
 
-        Parameters
-        ----------
-        ax : str
-            axis, options include ``x``, ``y``, ``z``, and ``c``
-        bound : int
-            ``0`` for lower and ``1`` for upper
-        new_value : float
-            new value set by user
+        :param ax: axis, options include ``x``, ``y``, ``z``, and ``c``
+        :type ax: str
+        :param bound: ``0`` for lower and ``1`` for upper
+        :type bound: int
+        :param new_value: new value set by user
+        :type new_value: float
         """
         plot_type = self.comboBoxPlotType.currentText()
 
@@ -976,17 +972,6 @@ class StyleToolbox():
         self.update_SV()
 
     def axis_scale_callback(self, comboBox, ax):
-        """_summary_
-
-        _extended_summary_
-
-        Parameters
-        ----------
-        comboBox : QComboBox
-            Field comboBox 
-        ax : str
-            Axis, options include ``x``, ``y``, ``z``, and ``c``
-        """        
         plot_type = self.comboBoxPlotType.currentText()
 
         new_value = comboBox.currentText()
@@ -1016,8 +1001,8 @@ class StyleToolbox():
         field = self.comboBoxColorField.currentText()
         if field == '':
             return
-        self.lineEditColorLB.setText(fmt.dynamic_format(self.axis_dict[field]['min'], order=3,toward=0))
-        self.lineEditColorUB.setText(fmt.dynamic_format(self.axis_dict[field]['max'], order=3,toward=1))
+        self.lineEditColorLB.value = self.axis_dict[field]['min']
+        self.lineEditColorUB.value = self.axis_dict[field]['max']
         self.comboBoxColorScale.setCurrentText(self.axis_dict[field]['scale'])
 
     def set_axis_widgets(self, ax, field):
@@ -1025,12 +1010,10 @@ class StyleToolbox():
 
         Updates axes limits and labels.
 
-        Parameters
-        ----------
-        ax : str
-            Axis 'x', 'y', or 'z'
-        field : str
-            Field plotted on axis, used as key to ``MainWindow.axis_dict``
+        :param ax: axis 'x', 'y', or 'z'
+        :type ax: str
+        :param field: field plotted on axis, used as key to ``MainWindow.axis_dict``
+        :type field: str
         """
         #print('set_axis_widgets')
         match ax:
@@ -1039,14 +1022,14 @@ class StyleToolbox():
                     self.lineEditXLB.value = self.axis_dict[field]['min']
                     self.lineEditXUB.value = self.axis_dict[field]['max']
                 else:
-                    self.lineEditXLB.setText(fmt.dynamic_format(self.axis_dict[field]['min'],order=3,toward=0))
-                    self.lineEditXUB.setText(fmt.dynamic_format(self.axis_dict[field]['max'],order=3,toward=1))
+                    self.lineEditXLB.value = self.axis_dict[field]['min']
+                    self.lineEditXUB.value = self.axis_dict[field]['max']
                 self.lineEditXLabel.setText(self.axis_dict[field]['label'])
                 self.comboBoxXScale.setCurrentText(self.axis_dict[field]['scale'])
             case 'y':
                 if self.comboBoxPlotType.currentText() == 'histogram':
-                    self.lineEditYLB.setText(fmt.dynamic_format(self.axis_dict[field]['pmin'],order=3,toward=0))
-                    self.lineEditYUB.setText(fmt.dynamic_format(self.axis_dict[field]['pmax'],order=3,toward=1))
+                    self.lineEditYLB.value = self.axis_dict[field]['pmin']
+                    self.lineEditYUB.value = self.axis_dict[field]['pmax']
                     self.lineEditYLabel.setText(self.comboBoxHistType.currentText())
                     self.comboBoxYScale.setCurrentText('linear')
                 else:
@@ -1054,8 +1037,8 @@ class StyleToolbox():
                         self.lineEditYLB.value = self.axis_dict[field]['min']
                         self.lineEditYUB.value = self.axis_dict[field]['max']
                     else:
-                        self.lineEditYLB.setText(fmt.dynamic_format(self.axis_dict[field]['min'],order=3,toward=0))
-                        self.lineEditYUB.setText(fmt.dynamic_format(self.axis_dict[field]['max'],order=3,toward=1))
+                        self.lineEditYLB.value = self.axis_dict[field]['min']
+                        self.lineEditYUB.value = self.axis_dict[field]['max']
                     self.lineEditYLabel.setText(self.axis_dict[field]['label'])
                     self.comboBoxYScale.setCurrentText(self.axis_dict[field]['scale'])
             case 'z':
@@ -1071,7 +1054,7 @@ class StyleToolbox():
         Parameters
         ----------
         ax : str
-            Axis to reset values, can be ``x``, ``y``, and ``c``
+            axis to reset values, can be ``x``, ``y``, and ``c``
 
         .. seealso::
             :ref: `initialize_axis_values` for initializing the axis dictionary
@@ -1143,7 +1126,7 @@ class StyleToolbox():
         field : str
             Field name of axis data
         ax : str, optional
-            Stored axis: ``p`` for probability axis, otherwise all are same, by default None
+            stored axis: ``p`` for probability axis, otherwise all are same, by default None
 
         Returns
         -------
@@ -1169,15 +1152,6 @@ class StyleToolbox():
         return amin, amax, scale, label
 
     def initialize_axis_values(self, field_type, field):
-        """Initializes dictionary ``axis_dict`` values 
-
-        Parameters
-        ----------
-        field_type : str
-            Field type set by a comboBox associated with data type on an axis
-        field : str
-            Field set by a comboBox assocaiated with data on an axis
-        """        
         #print('initialize_axis_values')
         # initialize variables
         if field not in self.axis_dict.keys():
@@ -1208,8 +1182,8 @@ class StyleToolbox():
                     #amax = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes']==field),'v_max'].values[0]
                     scale = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes']==field),'norm'].values[0]
 
-                amin = array.min()
-                amax = array.max()
+                amin = np.nanmin(array)
+                amax = np.nanmax(array)
             case 'Ratio' | 'Ratio (normalized)':
                 field_1 = field.split(' / ')[0]
                 field_2 = field.split(' / ')[1]
@@ -1220,8 +1194,8 @@ class StyleToolbox():
                 else:
                     self.axis_dict[field]['label'] = f"$^{{{mass_1}}}${symbol_1}$_N$ / $^{{{mass_2}}}${symbol_2}$_N$"
 
-                amin = array.min()
-                amax = array.max()
+                amin = np.nanmin(array)
+                amax = np.nanmax(array)
                 scale = self.data[self.sample_id]['ratio_info'].loc[
                     (self.data[self.sample_id]['ratio_info']['analyte_1']==field_1) & (self.data[self.sample_id]['ratio_info']['analyte_2']==field_2),
                     'norm'].values[0]
@@ -1229,8 +1203,8 @@ class StyleToolbox():
                 #current_plot_df = self.data[self.sample_id]['computed_data'][field_type].loc[:,field].values
                 scale = 'linear'
 
-                amin = array.min()
-                amax = array.max()
+                amin = np.nanmin(array)
+                amax = np.nanmax(array)
 
         # do not round 'X' and 'Y' so full extent of map is viewable
         if field not in ['X','Y']:
@@ -1241,3 +1215,577 @@ class StyleToolbox():
 
         self.axis_dict[field].update(d)
         #print(self.axis_dict[field])
+
+    def parse_field(self,field):
+
+        match = re.match(r"([A-Za-z]+)(\d*)", field)
+        symbol = match.group(1) if match else field
+        mass = int(match.group(2)) if match.group(2) else None
+
+        return symbol, mass
+
+    def aspect_ratio_callback(self):
+        """Update aspect ratio
+
+        Updates ``MainWindow.style`` dictionary after user change
+        """
+        plot_type = self.comboBoxPlotType.currentText()
+        if self.styles[plot_type]['Axes']['AspectRatio'] == self.lineEditAspectRatio.text():
+            return
+
+        self.styles[plot_type]['Axes']['AspectRatio'] = self.lineEditAspectRatio.text()
+        self.update_SV()
+
+    def tickdir_callback(self):
+        plot_type = self.comboBoxPlotType.currentText()
+        if self.styles[plot_type]['Axes']['TickDir'] == self.comboBoxTickDirection.currentText():
+            return
+
+        self.styles[plot_type]['Axes']['TickDir'] = self.comboBoxTickDirection.currentText()
+        self.update_SV()
+
+    # text and annotations
+    # -------------------------------------
+    def font_callback(self):
+        plot_type = self.comboBoxPlotType.currentText()
+        if self.styles[plot_type]['Text']['Font'] == self.fontComboBox.currentFont().family():
+            return
+
+        self.styles[plot_type]['Text']['Font'] = self.fontComboBox.currentFont().family()
+        self.update_SV()
+
+    def font_size_callback(self):
+        plot_type = self.comboBoxPlotType.currentText()
+        if self.styles[plot_type]['Text']['FontSize'] == self.doubleSpinBoxFontSize.value():
+            return
+
+        self.styles[plot_type]['Text']['FontSize'] = self.doubleSpinBoxFontSize.value()
+        self.update_SV()
+
+    def update_figure_font(self, canvas, font_name):
+        if font_name == '':
+            return
+
+        # Update font of all text elements in the figure
+        try:
+            for text_obj in canvas.fig.findobj(match=plt.Text):
+                text_obj.set_fontname(font_name)
+        except:
+            print('Unable to update figure font.')
+
+    def toggle_mass(self, labels):
+        """Removes mass from labels
+
+        Removes mass if ``MainWindow.checkBoxShowMass.isChecked()`` is False
+
+        :param labels: input labels
+        :type labels: str
+
+        :return: output labels with or without mass
+        :rtype: list
+        """
+        if not self.checkBoxShowMass.isChecked():
+            labels = [re.sub(r'\d', '', col) for col in labels]
+
+        return labels
+
+    # scales
+    # -------------------------------------
+    def scale_direction_callback(self):
+        plot_type = self.comboBoxPlotType.currentText()
+        direction = self.comboBoxScaleDirection.currentText()
+        if self.styles[plot_type]['Scale']['Direction'] == direction:
+            return
+
+        self.styles[plot_type]['Scale']['Direction'] = direction
+        if direction == 'none':
+            self.labelScaleLocation.setEnabled(False)
+            self.comboBoxScaleLocation.setEnabled(False)
+            self.labelScaleLength.setEnabled(False)
+            self.lineEditScaleLength.setEnabled(False)
+            self.lineEditScaleLength.value = None
+        else:
+            self.labelScaleLocation.setEnabled(True)
+            self.comboBoxScaleLocation.setEnabled(True)
+            self.labelScaleLength.setEnabled(True)
+            self.lineEditScaleLength.setEnabled(True)
+            # set scalebar length if plot is a map type
+            if plot_type in self.map_plot_types:
+                if self.styles[plot_type]['Scale']['Length'] is None:
+                    scale_length = self.default_scale_length()
+                elif ((direction == 'horizontal') and (self.styles[plot_type]['Scale']['Length'] > self.x_range)) or ((direction == 'vertical') and (self.styles[plot_type]['Scale']['Length'] > self.y_range)):
+                    scale_length = self.default_scale_length()
+                else:
+                    scale_length = self.styles[plot_type]['Scale']['Length']
+                self.styles[plot_type]['Scale']['Length'] = scale_length
+                self.lineEditScaleLength.value = scale_length
+            else:
+                self.lineEditScaleLength.value = None
+
+        self.update_SV()
+
+    def scale_location_callback(self):
+        plot_type = self.comboBoxPlotType.currentText()
+
+        if self.styles[plot_type]['Scale']['Location'] == self.comboBoxScaleLocation.currentText():
+            return
+
+        self.styles[plot_type]['Scale']['Location'] = self.comboBoxScaleLocation.currentText()
+        self.update_SV()
+
+    def scale_length_callback(self):
+        """Updates length of scalebar on map-type plots
+        
+        Executes on change of ``MainWindow.lineEditScaleLength``, updates length if within bounds set by plot dimensions, then updates plot.
+        """        
+        plot_type = self.comboBoxPlotType.currentText()
+
+        # if length is changed to None
+        if self.lineEditScaleLength.text() == '':
+            if self.styles[plot_type]['Scale']['Length'] is None:
+                return
+            else:
+                self.styles[plot_type]['Scale']['Length'] = None
+                self.update_SV()
+                return
+
+        scale_length = float(self.lineEditScaleLength.text())
+        if plot_type in self.map_plot_types:
+            # make sure user input is within bounds, do not change
+            if ((self.comboBoxScaleDirection.currentText() == 'horizontal') and (scale_length > self.x_range)) or (scale_length <= 0):
+                scale_length = self.styles[plot_type]['Scale']['Length']
+                self.lineEditScaleLength.value = scale_length
+                return
+            elif ((self.comboBoxScaleDirection.currentText() == 'vertical') and (scale_length > self.y_range)) or (scale_length <= 0):
+                scale_length = self.styles[plot_type]['Scale']['Length']
+                self.lineEditScaleLength.value = scale_length
+                return
+        else:
+            self.lineEditScaleLength.value = None
+            return
+
+        # update style dictionary
+        if scale_length == self.styles[plot_type]['Scale']['Length']:
+            return
+        self.styles[plot_type]['Scale']['Length'] = scale_length
+
+        # update plot
+        self.update_SV()
+
+    def overlay_color_callback(self):
+        """Updates color of overlay markers
+
+        Uses ``QColorDialog`` to select new marker color and then updates plot on change of backround ``MainWindow.toolButtonOverlayColor`` color.
+        """
+        plot_type = self.comboBoxPlotType.currentText()
+        # change color
+        self.button_color_select(self.toolButtonOverlayColor)
+
+        color = self.get_hex_color(self.toolButtonOverlayColor.palette().button().color())
+        # update style
+        if self.styles[plot_type]['Scale']['OverlayColor'] == color:
+            return
+
+        self.styles[plot_type]['Scale']['OverlayColor'] = color
+        # update plot
+        self.update_SV()
+
+    # markers
+    # -------------------------------------
+    def marker_symbol_callback(self):
+        """Updates marker symbol
+
+        Updates marker symbols on current plot on change of ``MainWindow.comboBoxMarker.currentText()``.
+        """
+        plot_type = self.comboBoxPlotType.currentText()
+        if self.styles[plot_type]['Markers']['Symbol'] == self.comboBoxMarker.currentText():
+            return
+        self.styles[plot_type]['Markers']['Symbol'] = self.comboBoxMarker.currentText()
+
+        self.update_SV()
+
+    def marker_size_callback(self):
+        """Updates marker size
+
+        Updates marker size on current plot on change of ``MainWindow.doubleSpinBoxMarkerSize.value()``.
+        """
+        plot_type = self.comboBoxPlotType.currentText()
+        if self.styles[plot_type]['Markers']['Size'] == self.doubleSpinBoxMarkerSize.value():
+            return
+        self.styles[plot_type]['Markers']['Size'] = self.doubleSpinBoxMarkerSize.value()
+
+        self.update_SV()
+
+    def slider_alpha_changed(self):
+        """Updates transparency on scatter plots.
+
+        Executes on change of ``MainWindow.horizontalSliderMarkerAlpha.value()``.
+        """
+        plot_type = self.comboBoxPlotType.currentText()
+        self.labelMarkerAlpha.setText(str(self.horizontalSliderMarkerAlpha.value()))
+
+        if self.horizontalSliderMarkerAlpha.isEnabled():
+            self.styles[plot_type]['Markers']['Alpha'] = float(self.horizontalSliderMarkerAlpha.value())
+            self.update_SV()
+
+    # lines
+    # -------------------------------------
+    def line_width_callback(self):
+        """Updates line width
+
+        Updates line width on current plot on change of ``MainWindow.comboBoxLineWidth.currentText()."""
+        plot_type = self.comboBoxPlotType.currentText()
+        if self.styles[plot_type]['Lines']['LineWidth'] == float(self.comboBoxLineWidth.currentText()):
+            return
+
+        self.styles[plot_type]['Lines']['LineWidth'] = float(self.comboBoxLineWidth.currentText())
+        self.update_SV()
+
+    def length_multiplier_callback(self):
+        """Updates line length multiplier
+
+        Used when plotting vector components in multidimensional plots.  Values entered by the user must be (0,10]
+        """
+        plot_type = self.comboBoxPlotType.currentText()
+        if not float(self.lineEditLengthMultiplier.text()):
+            self.lineEditLengthMultiplier.values = self.styles[plot_type]['Lines']['Multiplier']
+
+        value = float(self.lineEditLengthMultiplier.text())
+        if self.styles[plot_type]['Lines']['Multiplier'] == value:
+            return
+        elif (value < 0) or (value >= 100):
+            self.lineEditLengthMultiplier.values = self.styles[plot_type]['Lines']['Multiplier']
+            return
+
+        self.styles[plot_type]['Lines']['Multiplier'] = value
+        self.update_SV()
+
+    def line_color_callback(self):
+        """Updates color of plot markers
+
+        Uses ``QColorDialog`` to select new marker color and then updates plot on change of backround ``MainWindow.toolButtonLineColor`` color.
+        """
+        plot_type = self.comboBoxPlotType.currentText()
+        # change color
+        self.button_color_select(self.toolButtonLineColor)
+        color = self.get_hex_color(self.toolButtonLineColor.palette().button().color())
+        if self.styles[plot_type]['Lines']['Color'] == color:
+            return
+
+        # update style
+        self.styles[plot_type]['Lines']['Color'] = color
+
+        # update plot
+        self.update_SV()
+
+    # colors
+    # -------------------------------------
+    def marker_color_callback(self):
+        """Updates color of plot markers
+
+        Uses ``QColorDialog`` to select new marker color and then updates plot on change of backround ``MainWindow.toolButtonMarkerColor`` color.
+        """
+        plot_type = self.comboBoxPlotType.currentText()
+        # change color
+        self.button_color_select(self.toolButtonMarkerColor)
+        color = self.get_hex_color(self.toolButtonMarkerColor.palette().button().color())
+        if self.styles[plot_type]['Colors']['Color'] == color:
+            return
+
+        # update style
+        self.styles[plot_type]['Colors']['Color'] = color
+
+        # update plot
+        self.update_SV()
+
+    def resolution_callback(self, update_plot=False):
+        """Updates heatmap resolution
+
+        Updates the resolution of heatmaps when ``MainWindow.spinBoxHeatmapResolution`` is changed.
+
+        Parameters
+        ----------
+        update_plot : bool, optional
+            Sets the resolution of a heatmap for either Cartesian or ternary plots and both *heatmap* and *pca heatmap*, by default ``False``
+        """        
+        style = self.styles[self.comboBoxPlotType.currentText()]
+
+        style['Colors']['Resolution'] = self.spinBoxHeatmapResolution.value()
+
+        if update_plot:
+            self.update_SV()
+
+    # updates scatter styles when ColorByField comboBox is changed
+    def color_by_field_callback(self):
+        """Executes on change to *ColorByField* combobox
+        
+        Updates style associated with ``MainWindow.comboBoxColorByField``.  Also updates
+        ``MainWindow.comboBoxColorField`` and ``MainWindow.comboBoxColorScale``."""
+        #print('color_by_field_callback')
+        #self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
+        plot_type = self.comboBoxPlotType.currentText()
+        if plot_type == '':
+            return
+
+        style = self.styles[plot_type]
+        if style['Colors']['ColorByField'] == self.comboBoxColorByField.currentText():
+            return
+
+        style['Colors']['ColorByField'] = self.comboBoxColorByField.currentText()
+        if self.comboBoxColorByField.currentText() != '':
+            self.set_style_widgets(plot_type)
+
+        if self.comboBoxPlotType.isEnabled() == False | self.comboBoxColorByField.isEnabled() == False:
+            return
+
+        # only run update current plot if color field is selected or the color by field is clusters
+        if self.comboBoxColorByField.currentText() != 'None' or self.comboBoxColorField.currentText() != '' or self.comboBoxColorByField.currentText() in ['Cluster']:
+            self.update_SV()
+
+    def color_field_callback(self):
+        """Updates color field and plot
+
+        Executes on change of ``MainWindow.comboBoxColorField``
+        """
+        #print('color_field_callback')
+        plot_type = self.comboBoxPlotType.currentText()
+        field = self.comboBoxColorField.currentText()
+        if self.styles[plot_type]['Colors']['Field'] == field:
+            return
+
+        self.styles[plot_type]['Colors']['Field'] = field
+
+        if field != '' and field is not None:
+            if field not in self.axis_dict.keys():
+                self.initialize_axis_values(self.comboBoxColorByField.currentText(), field)
+
+            self.set_color_axis_widgets()
+            if plot_type not in ['correlation']:
+                self.styles[plot_type]['Colors']['CLim'] = [self.axis_dict[field]['min'], self.axis_dict[field]['max']]
+                self.styles[plot_type]['Colors']['CLabel'] = self.axis_dict[field]['label']
+        else:
+            self.lineEditCbarLabel.setText('')
+
+        self.update_SV()
+
+    def field_colormap_callback(self):
+        """Sets the color map
+
+        Sets the colormap in ``MainWindow.styles`` for the current plot type, set from ``MainWindow.comboBoxFieldColormap``.
+        """
+        plot_type = self.comboBoxPlotType.currentText()
+        if self.styles[plot_type]['Colors']['Colormap'] == self.comboBoxFieldColormap.currentText():
+            return
+
+        self.toggle_style_widgets()
+        self.styles[self.comboBoxPlotType.currentText()]['Colors']['Colormap'] = self.comboBoxFieldColormap.currentText()
+
+        self.update_SV()
+
+    def colormap_direction_callback(self):
+        """Set colormap direction (normal/reverse)
+
+        Reverses colormap if ``MainWindow.checkBoxReverseColormap.isChecked()`` is ``True``."""
+        plot_type = self.comboBoxPlotType.currentText()
+        if self.styles[plot_type]['Colors']['Reverse'] == self.checkBoxReverseColormap.isChecked():
+            return
+
+        self.styles[plot_type]['Colors']['Reverse'] = self.checkBoxReverseColormap.isChecked()
+
+        self.update_SV()
+
+    def get_cluster_colormap(self, cluster_dict, alpha=100):
+        """Converts hex colors to a colormap
+
+        Creates a discrete colormap given a list of hex color strings.  The colors in cluster_dict are set/changed in the ``MainWindow.tableWidgetViewGroups``.
+
+        Parameters
+        ----------
+        cluster_dict : dict
+            Dictionary with cluster information    
+        alpha : int, optional
+            Transparency to be added to color, by default 100
+
+        Returns
+        -------
+        matplotlib.colormap
+            A discrete (colors.ListedColormap) colormap
+        """
+        n = cluster_dict['n_clusters']
+        cluster_color = [None]*n
+        cluster_label = [None]*n
+        
+        # convert colors from hex to rgb and add to cluster_color list
+        for i in range(n):
+            color = self.get_rgb_color(cluster_dict[i]['color'])
+            cluster_color[i] = tuple(float(c)/255 for c in color) + (float(alpha)/100,)
+            cluster_label[i] = cluster_dict[i]['name']
+
+        # mask
+        if 99 in list(cluster_dict.keys()):
+            color = self.get_rgb_color(cluster_dict[99]['color'])
+            cluster_color.append(tuple(float(c)/255 for c in color) + (float(alpha)/100,))
+            cluster_label.append(cluster_dict[99]['name'])
+            cmap = colors.ListedColormap(cluster_color, N=n+1)
+        else:
+            cmap = colors.ListedColormap(cluster_color, N=n)
+
+        return cluster_color, cluster_label, cmap
+
+    def get_colormap(self, N=None):
+        """Gets the color map
+
+        Gets the colormap from ``MainWindow.styles`` for the current plot type and reverses or sets as discrete in needed.
+
+        Parameters
+        ----------
+        N : int, optional
+            Creates a discrete color map, if not supplied, the colormap is continuous, Defaults to None.
+
+        Returns
+        -------
+        matplotlib.colormap.ListedColormap : colormap
+        """
+        if self.canvasWindow.currentIndex() == self.canvas_tab['qv']:
+            plot_type = 'analyte map'
+        else:
+            plot_type = self.comboBoxPlotType.currentText()
+
+        name = self.styles[plot_type]['Colors']['Colormap']
+        if name in self.mpl_colormaps:
+            if N is not None:
+                cmap = plt.get_cmap(name, N)
+            else:
+                cmap = plt.get_cmap(name)
+        else:
+            cmap = self.create_custom_colormap(name, N)
+
+        if self.styles[plot_type]['Colors']['Reverse']:
+            cmap = cmap.reversed()
+
+        return cmap
+
+    def create_custom_colormap(self, name, N=None):
+        """Creates custom colormaps
+
+        Custom colormaps as found in ``resources/appdata/custom_colormaps.xlsx``.
+
+        Parameters
+        ----------
+        name : str
+            Name of colormap
+        N : int, optional
+            Number of colors to compute using colormap, by default None
+
+        Returns
+        -------
+        matplotlib.LinearSegmentedColormap
+            Colormap
+        """
+        if N is None:
+            N = 256
+
+        color_list = self.get_rgb_color(self.custom_color_dict[name])
+
+        cmap = colors.LinearSegmentedColormap.from_list(name, color_list, N=N)
+
+        return cmap
+
+    def clim_callback(self):
+        """Sets the color limits
+
+        Sets the color limits in ``MainWindow.styles`` for the current plot type.
+        """
+        plot_type = self.comboBoxPlotType.currentText()
+        if self.styles[plot_type]['Colors']['CLim'][0] == float(self.lineEditColorLB.text()) and self.styles[plot_type]['Colors']['CLim'][1] == float(self.lineEditColorUB.text()):
+            return
+
+        self.styles[plot_type]['Colors']['CLim'] = [float(self.lineEditColorLB.text()), float(self.lineEditColorUB.text())]
+
+        self.update_SV()
+
+    def cbar_direction_callback(self):
+        """Sets the colorbar direction
+
+        Sets the colorbar direction in ``MainWindow.styles`` for the current plot type.
+        """
+        plot_type = self.comboBoxPlotType.currentText()
+        if self.styles[plot_type]['Colors']['Direction'] == self.comboBoxCbarDirection.currentText():
+            return
+        self.styles[plot_type]['Colors']['Direction'] = self.comboBoxCbarDirection.currentText()
+
+        self.update_SV()
+
+    def cbar_label_callback(self):
+        """Sets color label
+
+        Sets the color label in ``MainWindow.styles`` for the current plot type.
+        """
+        plot_type = self.comboBoxPlotType.currentText()
+        if self.styles[plot_type]['Colors']['CLabel'] == self.lineEditCbarLabel.text():
+            return
+        self.styles[plot_type]['Colors']['CLabel'] = self.lineEditCbarLabel.text()
+
+        if self.comboBoxCbarLabel.isEnabled():
+            self.update_SV()
+
+    # cluster styles
+    # -------------------------------------
+    def cluster_color_callback(self):
+        """Updates color of a cluster
+
+        Uses ``QColorDialog`` to select new cluster color and then updates plot on change of
+        backround ``MainWindow.toolButtonClusterColor`` color.  Also updates ``MainWindow.tableWidgetViewGroups``
+        color associated with selected cluster.  The selected cluster is determined by ``MainWindow.spinBoxClusterGroup.value()``
+        """
+        #print('cluster_color_callback')
+        if self.tableWidgetViewGroups.rowCount() == 0:
+            return
+
+        selected_cluster = self.spinBoxClusterGroup.value()-1
+
+        # change color
+        self.button_color_select(self.toolButtonClusterColor)
+        color = self.get_hex_color(self.toolButtonClusterColor.palette().button().color())
+        self.cluster_dict[self.cluster_dict['active method']][selected_cluster]['color'] = color
+        if self.tableWidgetViewGroups.item(selected_cluster,2).text() == color:
+            return
+
+        # update_table
+        self.tableWidgetViewGroups.setItem(selected_cluster,2,QTableWidgetItem(color))
+
+        # update plot
+        if self.comboBoxColorByField.currentText() == 'Cluster':
+            self.update_SV()
+
+    def set_default_cluster_colors(self, mask=False):
+        """Sets cluster group to default colormap
+
+        Sets the colors in ``MainWindow.tableWidgetViewGroups`` to the default colormap in
+        ``MainWindow.styles['Cluster']['Colors']['Colormap'].  Change the default colormap
+        by changing ``MainWindow.comboBoxColormap``, when ``MainWindow.comboBoxColorByField.currentText()`` is ``Cluster``.
+
+        Returns
+        -------
+            str : hexcolor
+        """
+        #print('set_default_cluster_colors')
+        # cluster colormap
+        cmap = self.get_colormap(N=self.tableWidgetViewGroups.rowCount())
+
+        # set color for each cluster and place color in table
+        colors = [cmap(i) for i in range(cmap.N)]
+
+        hexcolor = []
+        for i in range(self.tableWidgetViewGroups.rowCount()):
+            hexcolor.append(self.get_hex_color(colors[i]))
+            self.tableWidgetViewGroups.blockSignals(True)
+            self.tableWidgetViewGroups.setItem(i,2,QTableWidgetItem(hexcolor[i]))
+            self.tableWidgetViewGroups.blockSignals(False)
+
+        if mask:
+            hexcolor.append(self.styles['Cluster']['Scale']['OverlayColor'])
+
+        self.toolButtonClusterColor.setStyleSheet("background-color: %s;" % self.tableWidgetViewGroups.item(self.spinBoxClusterGroup.value()-1,2).text())
+
+        return hexcolor

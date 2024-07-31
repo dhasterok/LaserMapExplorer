@@ -18,6 +18,8 @@ class WebEngineView(QWebEngineView):
     def __init__(self, parent=None):
         super().__init__(parent)
 
+        self.main_window = parent
+
         # Connect signals
         self.loadFinished.connect(self.on_load_finished)
         self.loadStarted.connect(self.on_load_started)
@@ -30,8 +32,7 @@ class WebEngineView(QWebEngineView):
         self.page().setFeaturePermission(QUrl(), QWebEnginePage.Notifications, QWebEnginePage.PermissionGrantedByUser)
         self.page().javaScriptConsoleMessage = self.handle_console_message
 
-        self.browser = WebEngineView(parent=self)
-        self.verticalLayoutBrowser.addWidget(self.browser)
+        self.verticalLayoutBrowser.addWidget(self.main_window.browser)
 
         #file_name, _ = QFileDialog.getOpenFileName(self, "Open HTML File", "", "HTML Files (*.html *.htm)")
         self.browser_home_callback()
@@ -69,11 +70,11 @@ class WebEngineView(QWebEngineView):
         """The browser returns to the documentation index.html file"""        
         filename = os.path.join(basedir,"docs/build/html/index.html")
 
-        self.lineEditBrowserLocation.setText(filename)
+        self.main_window.lineEditBrowserLocation.setText(filename)
 
         if filename:
             # Load the selected HTML file into the QWebEngineView
-            self.browser.setUrl(QUrl.fromLocalFile(filename))
+            self.main_window.browser.setUrl(QUrl.fromLocalFile(filename))
         
     def browser_location_callback(self, location=None):
         """Tries to load the page given in ``MainWindow.lineEditBrowserLocation``
@@ -84,15 +85,15 @@ class WebEngineView(QWebEngineView):
             Name of webpage (excluding base directory and .html)
         """
         if not location:
-            location = self.lineEditBrowserLocation.text()
+            location = self.main_window.lineEditBrowserLocation.text()
         else:
             location = os.path.join(basedir,"docs/build/html/"+location+".html")
 
-        self.lineEditBrowserLocation.setText(location)
+        self.main_window.lineEditBrowserLocation.setText(location)
 
         try:
             if location:
-                self.browser.setUrl(QUrl.fromLocalFile(location))
+                self.main_window.browser.setUrl(QUrl.fromLocalFile(location))
         except:
             pass
             #self.browser.setUrl(QUrl(os.path.abspath('docs/build/html/404.html')))

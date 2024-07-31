@@ -1222,6 +1222,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Browser
         #-------------------------
         self.open_browser()
+        #self.browser = WebEngine(self)
         self.toolButtonBrowserHome.clicked.connect(self.browser_home_callback)
         self.lineEditBrowserLocation.editingFinished.connect(self.browser_location_callback)
         self.toolButtonBack.clicked.connect(self.browser.back)
@@ -5171,7 +5172,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.actionSwapAxes.setEnabled(False)
 
         self.set_style_widgets(plot_type=plot_type)
-        self.check_analysis_type()
+        #self.check_analysis_type()
 
         if update:
             self.update_SV()

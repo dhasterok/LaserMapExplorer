@@ -387,7 +387,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.isUpdatingTable = False
         self.cursor = False
         self.duplicate_plot_info= None
-
+        
+        self.project_dir = None
         self.calc_dict = {}
 
         self.laser_map_dict = {}
@@ -399,7 +400,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #-------------------------
         self.sort_method = 'mass'
 
-
+        
         # Plot Layouts
         #-------------------------
         # Central widget plot view layouts
@@ -13061,7 +13062,7 @@ class Profiling:
         self.i_profiles = {}        #interpolated profiles
         self.point_selected = False  # move point button selected
         self.point_index = -1              # index for move point
-        self.all_errorbars = []      #stores points of profiles
+        self.all_errorbars = []       #stores points of profiles
         self.selected_points = {}  # Track selected points, e.g., {point_index: selected_state}
         self.edit_mode_enabled = False  # Track if edit mode is enabled
         self.original_colors = {}

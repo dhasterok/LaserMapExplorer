@@ -63,7 +63,7 @@ import src.SpotImporter as SpotImporter
 from src.ui.QuickViewDialog import Ui_QuickViewDialog
 from rst2pdf.createpdf import RstToPdf
 from docutils.core import publish_string
-from lame_helper import basedir, iconpath, sspath, load_stylesheet
+from lame_helper import BASEDIR, ICONPATH, SSPATH, load_stylesheet
 from src.ExtendedDF import AttributeDataFrame
 import src.CustomWidgets
 import src.format as fmt
@@ -388,7 +388,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.cursor = False
         self.duplicate_plot_info= None
         
-        self.project_dir = None
+        self.project_name = None
         self.calc_dict = {}
 
         self.laser_map_dict = {}
@@ -437,7 +437,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.widgetQuickView.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         try:
-            self.QV_analyte_list = lameio.import_csv_to_dict(os.path.join(basedir,'resources/styles/qv_lists.csv'))
+            self.QV_analyte_list = lameio.import_csv_to_dict(os.path.join(BASEDIR,'resources/styles/qv_lists.csv'))
         except:
             self.QV_analyte_list = {'default':['Si29','Ti47','Al27','Cr52','Fe56','Mn55','Mg24','Ca43','K39','Na23','P31',
                 'Ba137','Th232','U238','La139','Ce140','Pb206','Pr141','Sr88','Zr90','Hf178','Nd146','Eu153',
@@ -642,8 +642,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionCluster.triggered.connect(lambda: self.open_tab('clustering'))
         self.actionReset.triggered.connect(lambda: self.reset_analysis())
         self.actionImportFiles.triggered.connect(lambda: self.import_files())
-        self.actionOpenSession.triggered.connect(lambda: self.load_analysis())
-        self.actionSaveSession.triggered.connect(lambda: self.save_analysis())
+        self.actionOpenProject.triggered.connect(lambda: self.open_project())
+        self.actionSaveProject.triggered.connect(lambda: self.save_project())
         self.actionSwapAxes.triggered.connect(self.swap_xy)
         self.actionSwapAxes.setEnabled(False)
 
@@ -658,9 +658,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Select analyte Tab
         #-------------------------
-        self.ref_data = pd.read_excel(os.path.join(basedir,'resources/app_data/earthref.xlsx'))
+        self.ref_data = pd.read_excel(os.path.join(BASEDIR,'resources/app_data/earthref.xlsx'))
         self.ref_data = self.ref_data[self.ref_data['sigma']!=1]
-        self.sort_data = pd.read_excel(os.path.join(basedir,'resources/app_data/element_info.xlsx'))
+        self.sort_data = pd.read_excel(os.path.join(BASEDIR,'resources/app_data/element_info.xlsx'))
         ref_list = self.ref_data['layer']+' ['+self.ref_data['model']+'] '+ self.ref_data['reference']
 
         self.comboBoxRefMaterial.addItems(ref_list.values)          # Select analyte Tab
@@ -831,7 +831,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # ternary colormaps
         # create ternary colors dictionary
-        df = pd.read_csv(os.path.join(basedir,'resources/styles/ternary_colormaps.csv'))
+        df = pd.read_csv(os.path.join(BASEDIR,'resources/styles/ternary_colormaps.csv'))
         self.ternary_colormaps = df.to_dict(orient='records')
         self.comboBoxTernaryColormap.clear()
         schemes = []
@@ -1028,7 +1028,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 del self.mpl_colormaps[i]
 
         # custom colormaps
-        self.custom_color_dict = lameio.import_csv_to_dict(os.path.join(basedir,'resources/app_data/custom_colormaps.csv'))
+        self.custom_color_dict = lameio.import_csv_to_dict(os.path.join(BASEDIR,'resources/app_data/custom_colormaps.csv'))
         for key in self.custom_color_dict:
             self.custom_color_dict[key] = [h for h in self.custom_color_dict[key] if h]
 
@@ -1118,7 +1118,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Calculator tab
         #-------------------------
-        self.calc_filename = os.path.join(basedir,f'resources/app_data/calculator.txt')
+        self.calc_filename = os.path.join(BASEDIR,f'resources/app_data/calculator.txt')
         self.calc_load_dict()
         self.add_formula = True
         self.precalculate_custom_fields = False
@@ -1222,12 +1222,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         # Browser
         #-------------------------
-        self.open_browser()
-        #self.browser = WebEngine(self)
-        self.toolButtonBrowserHome.clicked.connect(self.browser_home_callback)
-        self.lineEditBrowserLocation.editingFinished.connect(self.browser_location_callback)
-        self.toolButtonBack.clicked.connect(self.browser.back)
-        self.toolButtonForward.clicked.connect(self.browser.forward)
+        # self.open_browser()
+        # self.browser = WebEngine(self)
+        # self.toolButtonBrowserHome.clicked.connect(self.browser_home_callback)
+        # self.lineEditBrowserLocation.editingFinished.connect(self.browser_location_callback)
+        # self.toolButtonBack.clicked.connect(self.browser.back)
+        # self.toolButtonForward.clicked.connect(self.browser.forward)
 
         # Plot toolbars
         #-------------------------
@@ -1387,7 +1387,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             dialog.setFileMode(QFileDialog.Directory)
             # Set the default directory to the current working directory
             # dialog.setDirectory(os.getcwd())
-            dialog.setDirectory(basedir)
+            dialog.setDirectory(BASEDIR)
             if dialog.exec_():
                 self.selected_directory = dialog.selectedFiles()[0]
             else:
@@ -1482,7 +1482,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             response = messageBoxChangeSample.exec_()
 
             if response == QMessageBox.Save:
-                self.save_analysis()
+                self.save_project()
                 self.reset_analysis('sample')
             elif response == QMessageBox.Discard:
                 self.reset_analysis('sample')
@@ -2597,7 +2597,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxPlots.clear()
         self.comboBoxPlots.addItems(self.multi_view_index)
 
-    def save_analysis(self):
+    def save_project(self):
         file_name, _ = QFileDialog.getSaveFileName(self, "Save File", "", "Pickle Files (*.pkl);;All Files (*)")
         if file_name:
             data_dict = {}
@@ -2614,9 +2614,84 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 pickle.dump(data_dict, file)
             
             self.statusBar.showMessage("Analysis saved successfully")    
+    
+    def save_project(self):
+        projects_dir = os.path.join(BASEDIR, "projects")
         
+        # Ensure the projects directory exists
+        if not os.path.exists(projects_dir):
+            os.makedirs(projects_dir)
+        
+        # Open QFileDialog to enter a new project name
+        file_dialog = QFileDialog(self, "Save Project", projects_dir)
+        file_dialog.setAcceptMode(QFileDialog.AcceptSave)
+        file_dialog.setFileMode(QFileDialog.AnyFile)
+        file_dialog.setOption(QFileDialog.ShowDirsOnly, True)
+        
+        if file_dialog.exec_() == QFileDialog.Accepted:
+            selected_dir = file_dialog.selectedFiles()[0]
+            
+            # Ensure a valid directory name is selected
+            if selected_dir:
+                self.project_name = os.path.basename(selected_dir)
+                project_dir = os.path.join(projects_dir, self.project_name)
+                
+                # Creating the required directory structure and store raw data
+                if not os.path.exists(project_dir):
+                    os.makedirs(project_dir)
+                    for sample_id in self.data.keys():
+                        # create directory for each sample in self.data
+                        os.makedirs(os.path.join(project_dir, sample_id))
+                        # store raw data
+                        self.data[sample_id]['raw_data'].to_csv(os.path.join(project_dir, sample_id, 'lame.csv'), index = False)
+                        # create rest of directories
+                        os.makedirs(os.path.join(project_dir, sample_id, 'figure_data'))
+                        os.makedirs(os.path.join(project_dir, sample_id, 'figures'))
+                        os.makedirs(os.path.join(project_dir, sample_id, 'tables'))
+                
+                # Paths for different files
+                # csv_path = os.path.join(project_dir, f'{project_name}.lame.csv')
+                # rst_path = os.path.join(project_dir, f'{project_name}.lame.rst')
+                # poly_path = os.path.join(project_dir, 'polygon.poly')
+                # prfl_path = os.path.join(project_dir, 'profiles.prfl')
+                
+                # store the lame.csv, lame.rst and lame.pdf files 
+                
 
-    def load_analysis(self):
+
+
+                # Saving data to the directory structure
+                data_dict = {
+                    'data': self.data,
+                    'profiling': self.profiling.profiles,
+                    'polygons': self.polygon.polygons,
+                    'styles': self.styles,
+                    'axis_dict': self.axis_dict,
+                    'plot_infos': self.get_plot_info_from_tree(self.treeModel),
+                    'sample_id': self.sample_id
+                }
+                
+                # Save the main data dictionary as a pickle file
+                pickle_path = os.path.join(project_dir, f'{self.project_name}.pkl')
+                with open(pickle_path, 'wb') as file:
+                    pickle.dump(data_dict, file)
+                
+                for sample_id in self.data.keys():
+                    self.profiling.save_profiles(project_dir, sample_id)
+
+
+                # Saving additional files
+                # pd.DataFrame(self.data).to_csv(csv_path, index=False)
+                # with open(rst_path, 'w') as rst_file:
+                #     rst_file.write(str(self.get_plot_info_from_tree(self.treeModel)))  # Convert to string or use appropriate format
+                # with open(poly_path, 'w') as poly_file:
+                #     poly_file.write(str(self.polygon.polygons))  # Convert to string or use appropriate format
+                # with open(prfl_path, 'w') as prfl_file:
+                #     prfl_file.write(str(self.profiling.profiles))  # Convert to string or use appropriate format
+                
+                self.statusBar.showMessage("Analysis saved successfully")
+
+    def open_project(self):
         if self.data:
             # Create and configure the QMessageBox
             messageBoxChangeSample = QMessageBox()
@@ -2632,7 +2707,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             response = messageBoxChangeSample.exec_()
 
             if response == QMessageBox.Save:
-                self.save_analysis()
+                self.save_project()
                 self.reset_analysis('sample')
             elif response == QMessageBox.Discard:
                 self.reset_analysis('sample')
@@ -3032,7 +3107,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         name, ok = QInputDialog.getText(self, 'Save filter table', 'Enter filter table name:')
         if ok:
             # file name for saving
-            filter_file = os.path.join(basedir,f'resources/filters/{name}.fltr')
+            filter_file = os.path.join(BASEDIR,f'resources/filters/{name}.fltr')
 
             # save dictionary to file
             self.data[self.sample_id]['filter_info'].to_csv(filter_file, index=False)
@@ -3055,7 +3130,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ``MainWindow.comboBoxFilterPresets``.
         """
         # read filenames with *.sty
-        file_list = os.listdir(os.path.join(basedir,'resources/filters/'))
+        file_list = os.listdir(os.path.join(BASEDIR,'resources/filters/'))
         filter_list = [file.replace('.fltr','') for file in file_list if file.endswith('.fltr')]
 
         # add default to list
@@ -3074,7 +3149,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return
 
         # open filter with name filter_name
-        filter_file = os.path.join(basedir,f'resources/filters/{filter_name}.fltr')
+        filter_file = os.path.join(BASEDIR,f'resources/filters/{filter_name}.fltr')
         filter_info = pd.read_csv(filter_file)
 
         # put filter_info into data and table
@@ -4274,7 +4349,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ``MainWindow.comboBoxStyleTheme``.  After setting list, the comboBox is set to default style.
         """
         # read filenames with *.sty
-        file_list = os.listdir(os.path.join(basedir,'resources/styles/'))
+        file_list = os.listdir(os.path.join(BASEDIR,'resources/styles/'))
         style_list = [file.replace('.sty','') for file in file_list if file.endswith('.sty')]
 
         # add default to list
@@ -4298,7 +4373,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.reset_default_styles()
             return
 
-        with open(os.path.join(basedir,f'resources/styles/{name}.sty'), 'rb') as file:
+        with open(os.path.join(BASEDIR,f'resources/styles/{name}.sty'), 'rb') as file:
             self.styles = pickle.load(file)
 
     def input_theme_name_dlg(self):
@@ -4315,7 +4390,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.comboBoxStyleTheme.setCurrentText(name)
 
             # append theme to file of saved themes
-            with open(os.path.join(basedir,f'resources/styles/{name}.sty'), 'wb') as file:
+            with open(os.path.join(BASEDIR,f'resources/styles/{name}.sty'), 'wb') as file:
                 pickle.dump(self.styles, file, protocol=pickle.HIGHEST_PROTOCOL)
         else:
             # throw a warning that name is not saved
@@ -10456,7 +10531,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def calc_help(self):
         """Loads the help webpage associated with the calculator in the Help tab"""
-        filename = os.path.join(basedir,"docs/build/html/custom_fields.html")
+        filename = os.path.join(BASEDIR,"docs/build/html/custom_fields.html")
 
         self.lineEditBrowserLocation.setText(filename)
 
@@ -11157,7 +11232,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def browser_home_callback(self):
         """The browser returns to the documentation index.html file"""        
-        filename = os.path.join(basedir,"docs/build/html/index.html")
+        filename = os.path.join(BASEDIR,"docs/build/html/index.html")
 
         self.lineEditBrowserLocation.setText(filename)
 
@@ -11176,7 +11251,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if not location:
             location = self.lineEditBrowserLocation.text()
         else:
-            location = os.path.join(basedir,"docs/build/html/"+location+".html")
+            location = os.path.join(BASEDIR,"docs/build/html/"+location+".html")
 
         self.lineEditBrowserLocation.setText(location)
 
@@ -11405,7 +11480,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 else:
                     self.set_light_theme()
 
-                self.actionViewMode.setIcon(QIcon(os.path.join(iconpath,'icon-sun-and-moon-64.svg')))
+                self.actionViewMode.setIcon(QIcon(os.path.join(ICONPATH,'icon-sun-and-moon-64.svg')))
                 self.actionViewMode.setIconText('Auto')
             case 1: # dark
                 self.set_dark_theme()
@@ -11416,205 +11491,205 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ss = load_stylesheet('dark.qss')
         app.setStyleSheet(ss)
 
-        self.actionViewMode.setIcon(QIcon(os.path.join(iconpath,'icon-moon-64.svg')))
+        self.actionViewMode.setIcon(QIcon(os.path.join(ICONPATH,'icon-moon-64.svg')))
         self.actionViewMode.setIconText('Dark')
 
-        self.actionSelectAnalytes.setIcon(QIcon(os.path.join(iconpath,'icon-atom-dark-64.svg')))
-        self.actionOpenSession.setIcon(QIcon(os.path.join(iconpath,'icon-open-session-dark-64.svg')))
-        self.actionSaveSession.setIcon(QIcon(os.path.join(iconpath,'icon-save-session-dark-64.svg')))
-        self.actionFullMap.setIcon(QIcon(os.path.join(iconpath,'icon-fit-to-width-dark-64.svg')))
-        self.actionCrop.setIcon(QIcon(os.path.join(iconpath,'icon-crop-dark-64.svg')))
-        self.actionSwapAxes.setIcon(QIcon(os.path.join(iconpath,'icon-swap-dark-64.svg')))
-        self.toolButtonSwapResolution.setIcon(QIcon(os.path.join(iconpath,'icon-swap-resolution-dark-64.svg')))
+        self.actionSelectAnalytes.setIcon(QIcon(os.path.join(ICONPATH,'icon-atom-dark-64.svg')))
+        self.actionOpenProject.setIcon(QIcon(os.path.join(ICONPATH,'icon-open-session-dark-64.svg')))
+        self.actionSaveProject.setIcon(QIcon(os.path.join(ICONPATH,'icon-save-session-dark-64.svg')))
+        self.actionFullMap.setIcon(QIcon(os.path.join(ICONPATH,'icon-fit-to-width-dark-64.svg')))
+        self.actionCrop.setIcon(QIcon(os.path.join(ICONPATH,'icon-crop-dark-64.svg')))
+        self.actionSwapAxes.setIcon(QIcon(os.path.join(ICONPATH,'icon-swap-dark-64.svg')))
+        self.toolButtonSwapResolution.setIcon(QIcon(os.path.join(ICONPATH,'icon-swap-resolution-dark-64.svg')))
         # Notes
-        self.toolButtonNotesHeading.setIcon(QIcon(os.path.join(iconpath,'icon-heading-dark-64.svg')))
-        self.toolButtonNotesBold.setIcon(QIcon(os.path.join(iconpath,'icon-bold-dark-64.svg')))
-        self.toolButtonNotesItalic.setIcon(QIcon(os.path.join(iconpath,'icon-italics-dark-64.svg')))
-        self.toolButtonNotesBulletList.setIcon(QIcon(os.path.join(iconpath,'icon-bullet-list-dark-64.svg')))
-        self.toolButtonNotesNumList.setIcon(QIcon(os.path.join(iconpath,'icon-numbered-list-dark-64.svg')))
-        self.toolButtonNotesImage.setIcon(QIcon(os.path.join(iconpath,'icon-image-64.svg')))
-        self.toolButtonNotesSave.setIcon(QIcon(os.path.join(iconpath,'icon-pdf-dark-64.svg')))
+        self.toolButtonNotesHeading.setIcon(QIcon(os.path.join(ICONPATH,'icon-heading-dark-64.svg')))
+        self.toolButtonNotesBold.setIcon(QIcon(os.path.join(ICONPATH,'icon-bold-dark-64.svg')))
+        self.toolButtonNotesItalic.setIcon(QIcon(os.path.join(ICONPATH,'icon-italics-dark-64.svg')))
+        self.toolButtonNotesBulletList.setIcon(QIcon(os.path.join(ICONPATH,'icon-bullet-list-dark-64.svg')))
+        self.toolButtonNotesNumList.setIcon(QIcon(os.path.join(ICONPATH,'icon-numbered-list-dark-64.svg')))
+        self.toolButtonNotesImage.setIcon(QIcon(os.path.join(ICONPATH,'icon-image-64.svg')))
+        self.toolButtonNotesSave.setIcon(QIcon(os.path.join(ICONPATH,'icon-pdf-dark-64.svg')))
         # Reset Buttons
-        self.toolButtonXAxisReset.setIcon(QIcon(os.path.join(iconpath,'icon-reset-dark-64.svg')))
-        self.toolButtonYAxisReset.setIcon(QIcon(os.path.join(iconpath,'icon-reset-dark-64.svg')))
-        self.toolButtonCAxisReset.setIcon(QIcon(os.path.join(iconpath,'icon-reset-dark-64.svg')))
-        self.toolButtonClusterColorReset.setIcon(QIcon(os.path.join(iconpath,'icon-reset-dark-64.svg')))
-        self.toolButtonHistogramReset.setIcon(QIcon(os.path.join(iconpath,'icon-reset-dark-64.svg')))
+        self.toolButtonXAxisReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-dark-64.svg')))
+        self.toolButtonYAxisReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-dark-64.svg')))
+        self.toolButtonCAxisReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-dark-64.svg')))
+        self.toolButtonClusterColorReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-dark-64.svg')))
+        self.toolButtonHistogramReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-dark-64.svg')))
         # Plot Tree
-        self.toolButtonSortAnalyte.setIcon(QIcon(os.path.join(iconpath,'icon-sort-dark-64.svg')))
-        self.toolButtonRemovePlot.setIcon(QIcon(os.path.join(iconpath,'icon-delete-dark-64.svg')))
+        self.toolButtonSortAnalyte.setIcon(QIcon(os.path.join(ICONPATH,'icon-sort-dark-64.svg')))
+        self.toolButtonRemovePlot.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-dark-64.svg')))
         # Samples
-        self.toolBox.setItemIcon(self.left_tab['sample'],QIcon(os.path.join(iconpath,'icon-atom-dark-64.svg')))
-        self.toolButtonScaleEqualize.setIcon(QIcon(os.path.join(iconpath,'icon-histeq-dark-64.svg')))
-        self.toolButtonAutoScale.setIcon(QIcon(os.path.join(iconpath,'icon-autoscale-dark-64.svg')))
-        self.toolBox.setItemIcon(self.left_tab['process'],QIcon(os.path.join(iconpath,'icon-histogram-dark-64.svg')))
-        self.toolBox.setItemIcon(self.left_tab['multidim'],QIcon(os.path.join(iconpath,'icon-dimensional-analysis-dark-64.svg')))
-        self.toolBox.setItemIcon(self.left_tab['cluster'],QIcon(os.path.join(iconpath,'icon-cluster-dark-64.svg')))
-        self.toolBox.setItemIcon(self.left_tab['scatter'],QIcon(os.path.join(iconpath,'icon-ternary-dark-64.svg')))
+        self.toolBox.setItemIcon(self.left_tab['sample'],QIcon(os.path.join(ICONPATH,'icon-atom-dark-64.svg')))
+        self.toolButtonScaleEqualize.setIcon(QIcon(os.path.join(ICONPATH,'icon-histeq-dark-64.svg')))
+        self.toolButtonAutoScale.setIcon(QIcon(os.path.join(ICONPATH,'icon-autoscale-dark-64.svg')))
+        self.toolBox.setItemIcon(self.left_tab['process'],QIcon(os.path.join(ICONPATH,'icon-histogram-dark-64.svg')))
+        self.toolBox.setItemIcon(self.left_tab['multidim'],QIcon(os.path.join(ICONPATH,'icon-dimensional-analysis-dark-64.svg')))
+        self.toolBox.setItemIcon(self.left_tab['cluster'],QIcon(os.path.join(ICONPATH,'icon-cluster-dark-64.svg')))
+        self.toolBox.setItemIcon(self.left_tab['scatter'],QIcon(os.path.join(ICONPATH,'icon-ternary-dark-64.svg')))
         # Spot Data
-        self.toolButtonSpotMove.setIcon(QIcon(os.path.join(iconpath,'icon-move-point-dark-64.svg')))
-        self.toolButtonSpotToggle.setIcon(QIcon(os.path.join(iconpath,'icon-show-hide-dark-64.svg')))
-        self.toolButtonSpotSelectAll.setIcon(QIcon(os.path.join(iconpath,'icon-select-all-dark-64.svg')))
-        self.toolButtonSpotAnalysis.setIcon(QIcon(os.path.join(iconpath,'icon-analysis-dark-64.svg')))
-        self.toolButtonSpotRemove.setIcon(QIcon(os.path.join(iconpath,'icon-delete-dark-64.svg')))
+        self.toolButtonSpotMove.setIcon(QIcon(os.path.join(ICONPATH,'icon-move-point-dark-64.svg')))
+        self.toolButtonSpotToggle.setIcon(QIcon(os.path.join(ICONPATH,'icon-show-hide-dark-64.svg')))
+        self.toolButtonSpotSelectAll.setIcon(QIcon(os.path.join(ICONPATH,'icon-select-all-dark-64.svg')))
+        self.toolButtonSpotAnalysis.setIcon(QIcon(os.path.join(ICONPATH,'icon-analysis-dark-64.svg')))
+        self.toolButtonSpotRemove.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-dark-64.svg')))
         # N-Dim
-        self.toolBox.setItemIcon(self.left_tab['ndim'],QIcon(os.path.join(iconpath,'icon-TEC-dark-64.svg')))
-        self.toolButtonNDimDown.setIcon(QIcon(os.path.join(iconpath,'icon-down-arrow-dark-64.svg')))
-        self.toolButtonNDimUp.setIcon(QIcon(os.path.join(iconpath,'icon-up-arrow-dark-64.svg')))
-        self.toolButtonNDimSelectAll.setIcon(QIcon(os.path.join(iconpath,'icon-select-all-dark-64.svg')))
-        self.toolButtonNDimRemove.setIcon(QIcon(os.path.join(iconpath,'icon-delete-dark-64.svg')))
+        self.toolBox.setItemIcon(self.left_tab['ndim'],QIcon(os.path.join(ICONPATH,'icon-TEC-dark-64.svg')))
+        self.toolButtonNDimDown.setIcon(QIcon(os.path.join(ICONPATH,'icon-down-arrow-dark-64.svg')))
+        self.toolButtonNDimUp.setIcon(QIcon(os.path.join(ICONPATH,'icon-up-arrow-dark-64.svg')))
+        self.toolButtonNDimSelectAll.setIcon(QIcon(os.path.join(ICONPATH,'icon-select-all-dark-64.svg')))
+        self.toolButtonNDimRemove.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-dark-64.svg')))
         # Filter
-        self.toolButtonFilterSelectAll.setIcon(QIcon(os.path.join(iconpath,'icon-select-all-dark-64.svg')))
-        self.toolButtonFilterUp.setIcon(QIcon(os.path.join(iconpath,'icon-up-arrow-dark-64.svg')))
-        self.toolButtonFilterDown.setIcon(QIcon(os.path.join(iconpath,'icon-down-arrow-dark-64.svg')))
-        self.toolButtonFilterRemove.setIcon(QIcon(os.path.join(iconpath,'icon-delete-dark-64.svg')))
+        self.toolButtonFilterSelectAll.setIcon(QIcon(os.path.join(ICONPATH,'icon-select-all-dark-64.svg')))
+        self.toolButtonFilterUp.setIcon(QIcon(os.path.join(ICONPATH,'icon-up-arrow-dark-64.svg')))
+        self.toolButtonFilterDown.setIcon(QIcon(os.path.join(ICONPATH,'icon-down-arrow-dark-64.svg')))
+        self.toolButtonFilterRemove.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-dark-64.svg')))
         # Polygons
-        self.toolBox.setItemIcon(self.left_tab['polygons'],QIcon(os.path.join(iconpath,'icon-polygon-new-dark-64.svg')))
-        self.toolButtonPolyCreate.setIcon(QIcon(os.path.join(iconpath,'icon-polygon-new-dark-64.svg')))
-        self.toolButtonPolyAddPoint.setIcon(QIcon(os.path.join(iconpath,'icon-add-point-dark-64.svg')))
-        self.toolButtonPolyRemovePoint.setIcon(QIcon(os.path.join(iconpath,'icon-remove-point-dark-64.svg')))
-        self.toolButtonPolyMovePoint.setIcon(QIcon(os.path.join(iconpath,'icon-move-point-dark-64.svg')))
-        self.toolButtonPolyLink.setIcon(QIcon(os.path.join(iconpath,'icon-link-dark-64.svg')))
-        self.toolButtonPolyDelink.setIcon(QIcon(os.path.join(iconpath,'icon-unlink-dark-64.svg')))
-        self.toolButtonPolyDelete.setIcon(QIcon(os.path.join(iconpath,'icon-delete-dark-64.svg')))
+        self.toolBox.setItemIcon(self.left_tab['polygons'],QIcon(os.path.join(ICONPATH,'icon-polygon-new-dark-64.svg')))
+        self.toolButtonPolyCreate.setIcon(QIcon(os.path.join(ICONPATH,'icon-polygon-new-dark-64.svg')))
+        self.toolButtonPolyAddPoint.setIcon(QIcon(os.path.join(ICONPATH,'icon-add-point-dark-64.svg')))
+        self.toolButtonPolyRemovePoint.setIcon(QIcon(os.path.join(ICONPATH,'icon-remove-point-dark-64.svg')))
+        self.toolButtonPolyMovePoint.setIcon(QIcon(os.path.join(ICONPATH,'icon-move-point-dark-64.svg')))
+        self.toolButtonPolyLink.setIcon(QIcon(os.path.join(ICONPATH,'icon-link-dark-64.svg')))
+        self.toolButtonPolyDelink.setIcon(QIcon(os.path.join(ICONPATH,'icon-unlink-dark-64.svg')))
+        self.toolButtonPolyDelete.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-dark-64.svg')))
         # Profile
-        self.toolBox.setItemIcon(self.left_tab['profile'],QIcon(os.path.join(iconpath,'icon-profile-dark-64.svg')))
-        self.toolButtonClearProfile.setIcon(QIcon(os.path.join(iconpath,'icon-delete-dark-64.svg')))
-        self.toolButtonPointDelete.setIcon(QIcon(os.path.join(iconpath,'icon-delete-dark-64.svg')))
-        self.toolButtonPointSelectAll.setIcon(QIcon(os.path.join(iconpath,'icon-select-all-dark-64.svg')))
-        self.toolButtonPointMove.setIcon(QIcon(os.path.join(iconpath,'icon-move-point-dark-64.svg')))
-        self.toolButtonProfileInterpolate.setIcon(QIcon(os.path.join(iconpath,'icon-interpolate-dark-64.svg')))
-        self.toolButtonPlotProfile.setIcon(QIcon(os.path.join(iconpath,'icon-profile-dark-64.svg')))
-        self.toolButtonPointDown.setIcon(QIcon(os.path.join(iconpath,'icon-down-arrow-dark-64.svg')))
-        self.toolButtonPointUp.setIcon(QIcon(os.path.join(iconpath,'icon-up-arrow-dark-64.svg')))
+        self.toolBox.setItemIcon(self.left_tab['profile'],QIcon(os.path.join(ICONPATH,'icon-profile-dark-64.svg')))
+        self.toolButtonClearProfile.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-dark-64.svg')))
+        self.toolButtonPointDelete.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-dark-64.svg')))
+        self.toolButtonPointSelectAll.setIcon(QIcon(os.path.join(ICONPATH,'icon-select-all-dark-64.svg')))
+        self.toolButtonPointMove.setIcon(QIcon(os.path.join(ICONPATH,'icon-move-point-dark-64.svg')))
+        self.toolButtonProfileInterpolate.setIcon(QIcon(os.path.join(ICONPATH,'icon-interpolate-dark-64.svg')))
+        self.toolButtonPlotProfile.setIcon(QIcon(os.path.join(ICONPATH,'icon-profile-dark-64.svg')))
+        self.toolButtonPointDown.setIcon(QIcon(os.path.join(ICONPATH,'icon-down-arrow-dark-64.svg')))
+        self.toolButtonPointUp.setIcon(QIcon(os.path.join(ICONPATH,'icon-up-arrow-dark-64.svg')))
         # Browser
-        self.toolButtonBrowserHome.setIcon(QIcon(os.path.join(iconpath,'icon-home-dark-64.svg')))
-        self.toolButtonForward.setIcon(QIcon(os.path.join(iconpath,'icon-forward-arrow-dark-64.svg')))
-        self.toolButtonBack.setIcon(QIcon(os.path.join(iconpath,'icon-back-arrow-dark-64.svg')))
+        self.toolButtonBrowserHome.setIcon(QIcon(os.path.join(ICONPATH,'icon-home-dark-64.svg')))
+        self.toolButtonForward.setIcon(QIcon(os.path.join(ICONPATH,'icon-forward-arrow-dark-64.svg')))
+        self.toolButtonBack.setIcon(QIcon(os.path.join(ICONPATH,'icon-back-arrow-dark-64.svg')))
         # Group Box Plot Tools
-        self.toolButtonHome.setIcon(QIcon(os.path.join(iconpath,'icon-home-dark-64.svg')))
-        self.toolButtonRemoveAllMVPlots.setIcon(QIcon(os.path.join(iconpath,'icon-delete-dark-64.svg')))
-        self.toolButtonPopFigure.setIcon(QIcon(os.path.join(iconpath,'icon-popout-dark-64.svg')))
-        self.toolButtonAnnotate.setIcon(QIcon(os.path.join(iconpath,'icon-annotate-dark-64.svg')))
-        self.toolButtonPan.setIcon(QIcon(os.path.join(iconpath,'icon-move-dark-64.svg')))
-        self.toolButtonZoom.setIcon(QIcon(os.path.join(iconpath,'icon-zoom-dark-64.svg')))
-        self.toolButtonDistance.setIcon(QIcon(os.path.join(iconpath,'icon-distance-dark-64.svg')))
+        self.toolButtonHome.setIcon(QIcon(os.path.join(ICONPATH,'icon-home-dark-64.svg')))
+        self.toolButtonRemoveAllMVPlots.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-dark-64.svg')))
+        self.toolButtonPopFigure.setIcon(QIcon(os.path.join(ICONPATH,'icon-popout-dark-64.svg')))
+        self.toolButtonAnnotate.setIcon(QIcon(os.path.join(ICONPATH,'icon-annotate-dark-64.svg')))
+        self.toolButtonPan.setIcon(QIcon(os.path.join(ICONPATH,'icon-move-dark-64.svg')))
+        self.toolButtonZoom.setIcon(QIcon(os.path.join(ICONPATH,'icon-zoom-dark-64.svg')))
+        self.toolButtonDistance.setIcon(QIcon(os.path.join(ICONPATH,'icon-distance-dark-64.svg')))
         # Calculator
-        self.toolButtonCalculate.setIcon(QIcon(os.path.join(iconpath,'icon-calculator-dark-64.svg')))
-        self.actionCalculator.setIcon(QIcon(os.path.join(iconpath,'icon-calculator-dark-64.svg')))
-        self.toolBoxTreeView.setItemIcon(self.right_tab['calculator'],QIcon(os.path.join(iconpath,'icon-calculator-dark-64.svg')))
-        self.toolButtonCalcDelete.setIcon(QIcon(os.path.join(iconpath,'icon-delete-dark-64.svg')))
+        self.toolButtonCalculate.setIcon(QIcon(os.path.join(ICONPATH,'icon-calculator-dark-64.svg')))
+        self.actionCalculator.setIcon(QIcon(os.path.join(ICONPATH,'icon-calculator-dark-64.svg')))
+        self.toolBoxTreeView.setItemIcon(self.right_tab['calculator'],QIcon(os.path.join(ICONPATH,'icon-calculator-dark-64.svg')))
+        self.toolButtonCalcDelete.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-dark-64.svg')))
         # Style Toolbox
-        self.toolBoxStyle.setItemIcon(0,QIcon(os.path.join(iconpath,'icon-axes-dark-64.svg')))
-        self.toolBoxStyle.setItemIcon(1,QIcon(os.path.join(iconpath,'icon-text-and-scales-dark-64.svg')))
-        self.toolBoxStyle.setItemIcon(2,QIcon(os.path.join(iconpath,'icon-marker-and-lines-dark-64.svg')))
-        self.toolBoxStyle.setItemIcon(3,QIcon(os.path.join(iconpath,'icon-rgb-dark-64.svg')))
+        self.toolBoxStyle.setItemIcon(0,QIcon(os.path.join(ICONPATH,'icon-axes-dark-64.svg')))
+        self.toolBoxStyle.setItemIcon(1,QIcon(os.path.join(ICONPATH,'icon-text-and-scales-dark-64.svg')))
+        self.toolBoxStyle.setItemIcon(2,QIcon(os.path.join(ICONPATH,'icon-marker-and-lines-dark-64.svg')))
+        self.toolBoxStyle.setItemIcon(3,QIcon(os.path.join(ICONPATH,'icon-rgb-dark-64.svg')))
         # Cluster tab
-        self.toolBoxStyle.setItemIcon(4,QIcon(os.path.join(iconpath,'icon-cluster-dark-64.svg')))
-        self.toolButtonClusterLink.setIcon(QIcon(os.path.join(iconpath,'icon-link-dark-64.svg')))
-        self.toolButtonClusterDelink.setIcon(QIcon(os.path.join(iconpath,'icon-unlink-dark-64.svg')))
+        self.toolBoxStyle.setItemIcon(4,QIcon(os.path.join(ICONPATH,'icon-cluster-dark-64.svg')))
+        self.toolButtonClusterLink.setIcon(QIcon(os.path.join(ICONPATH,'icon-link-dark-64.svg')))
+        self.toolButtonClusterDelink.setIcon(QIcon(os.path.join(ICONPATH,'icon-unlink-dark-64.svg')))
 
     def set_light_theme(self):
         ss = load_stylesheet('light.qss')
         app.setStyleSheet(ss)
 
-        self.actionViewMode.setIcon(QIcon(os.path.join(iconpath,'icon-sun-64.svg')))
+        self.actionViewMode.setIcon(QIcon(os.path.join(ICONPATH,'icon-sun-64.svg')))
         self.actionViewMode.setIconText('Light')
 
-        self.actionSelectAnalytes.setIcon(QIcon(os.path.join(iconpath,'icon-atom-64.svg')))
-        self.actionOpenSession.setIcon(QIcon(os.path.join(iconpath,'icon-open-session-64.svg')))
-        self.actionSaveSession.setIcon(QIcon(os.path.join(iconpath,'icon-save-session-64.svg')))
-        self.actionFullMap.setIcon(QIcon(os.path.join(iconpath,'icon-fit-to-width-64.svg')))
-        self.actionCrop.setIcon(QIcon(os.path.join(iconpath,'icon-crop-64.svg')))
-        self.actionSwapAxes.setIcon(QIcon(os.path.join(iconpath,'icon-swap-64.svg')))
-        self.toolButtonSwapResolution.setIcon(QIcon(os.path.join(iconpath,'icon-swap-resolution-64.svg')))
+        self.actionSelectAnalytes.setIcon(QIcon(os.path.join(ICONPATH,'icon-atom-64.svg')))
+        self.actionOpenProject.setIcon(QIcon(os.path.join(ICONPATH,'icon-open-session-64.svg')))
+        self.actionSaveProject.setIcon(QIcon(os.path.join(ICONPATH,'icon-save-session-64.svg')))
+        self.actionFullMap.setIcon(QIcon(os.path.join(ICONPATH,'icon-fit-to-width-64.svg')))
+        self.actionCrop.setIcon(QIcon(os.path.join(ICONPATH,'icon-crop-64.svg')))
+        self.actionSwapAxes.setIcon(QIcon(os.path.join(ICONPATH,'icon-swap-64.svg')))
+        self.toolButtonSwapResolution.setIcon(QIcon(os.path.join(ICONPATH,'icon-swap-resolution-64.svg')))
         # Notes
-        self.toolButtonNotesHeading.setIcon(QIcon(os.path.join(iconpath,'icon-heading-64.svg')))
-        self.toolButtonNotesBold.setIcon(QIcon(os.path.join(iconpath,'icon-bold-64.svg')))
-        self.toolButtonNotesItalic.setIcon(QIcon(os.path.join(iconpath,'icon-italics-64.svg')))
-        self.toolButtonNotesBulletList.setIcon(QIcon(os.path.join(iconpath,'icon-bullet-list-64.svg')))
-        self.toolButtonNotesNumList.setIcon(QIcon(os.path.join(iconpath,'icon-numbered-list-64.svg')))
-        self.toolButtonNotesImage.setIcon(QIcon(os.path.join(iconpath,'icon-image-dark-64.svg')))
-        self.toolButtonNotesSave.setIcon(QIcon(os.path.join(iconpath,'icon-pdf-64.svg')))
+        self.toolButtonNotesHeading.setIcon(QIcon(os.path.join(ICONPATH,'icon-heading-64.svg')))
+        self.toolButtonNotesBold.setIcon(QIcon(os.path.join(ICONPATH,'icon-bold-64.svg')))
+        self.toolButtonNotesItalic.setIcon(QIcon(os.path.join(ICONPATH,'icon-italics-64.svg')))
+        self.toolButtonNotesBulletList.setIcon(QIcon(os.path.join(ICONPATH,'icon-bullet-list-64.svg')))
+        self.toolButtonNotesNumList.setIcon(QIcon(os.path.join(ICONPATH,'icon-numbered-list-64.svg')))
+        self.toolButtonNotesImage.setIcon(QIcon(os.path.join(ICONPATH,'icon-image-dark-64.svg')))
+        self.toolButtonNotesSave.setIcon(QIcon(os.path.join(ICONPATH,'icon-pdf-64.svg')))
         # Reset Buttons
-        self.toolButtonXAxisReset.setIcon(QIcon(os.path.join(iconpath,'icon-reset-64.svg')))
-        self.toolButtonYAxisReset.setIcon(QIcon(os.path.join(iconpath,'icon-reset-64.svg')))
-        self.toolButtonCAxisReset.setIcon(QIcon(os.path.join(iconpath,'icon-reset-64.svg')))
-        self.toolButtonClusterColorReset.setIcon(QIcon(os.path.join(iconpath,'icon-reset-64.svg')))
-        self.toolButtonHistogramReset.setIcon(QIcon(os.path.join(iconpath,'icon-reset-64.svg')))
+        self.toolButtonXAxisReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-64.svg')))
+        self.toolButtonYAxisReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-64.svg')))
+        self.toolButtonCAxisReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-64.svg')))
+        self.toolButtonClusterColorReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-64.svg')))
+        self.toolButtonHistogramReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-64.svg')))
         # Plot Tree
-        self.toolButtonSortAnalyte.setIcon(QIcon(os.path.join(iconpath,'icon-sort-64.svg')))
-        self.toolButtonRemovePlot.setIcon(QIcon(os.path.join(iconpath,'icon-delete-64.svg')))
+        self.toolButtonSortAnalyte.setIcon(QIcon(os.path.join(ICONPATH,'icon-sort-64.svg')))
+        self.toolButtonRemovePlot.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
         # Samples
-        self.toolBox.setItemIcon(self.left_tab['sample'],QIcon(os.path.join(iconpath,'icon-atom-64.svg')))
-        self.toolButtonScaleEqualize.setIcon(QIcon(os.path.join(iconpath,'icon-histeq-64.svg')))
-        self.toolButtonAutoScale.setIcon(QIcon(os.path.join(iconpath,'icon-autoscale-64.svg')))
-        self.toolBox.setItemIcon(self.left_tab['process'],QIcon(os.path.join(iconpath,'icon-histogram-64.svg')))
-        self.toolBox.setItemIcon(self.left_tab['multidim'],QIcon(os.path.join(iconpath,'icon-dimensional-analysis-64.svg')))
-        self.toolBox.setItemIcon(self.left_tab['cluster'],QIcon(os.path.join(iconpath,'icon-cluster-64.svg')))
-        self.toolBox.setItemIcon(self.left_tab['scatter'],QIcon(os.path.join(iconpath,'icon-ternary-64.svg')))
+        self.toolBox.setItemIcon(self.left_tab['sample'],QIcon(os.path.join(ICONPATH,'icon-atom-64.svg')))
+        self.toolButtonScaleEqualize.setIcon(QIcon(os.path.join(ICONPATH,'icon-histeq-64.svg')))
+        self.toolButtonAutoScale.setIcon(QIcon(os.path.join(ICONPATH,'icon-autoscale-64.svg')))
+        self.toolBox.setItemIcon(self.left_tab['process'],QIcon(os.path.join(ICONPATH,'icon-histogram-64.svg')))
+        self.toolBox.setItemIcon(self.left_tab['multidim'],QIcon(os.path.join(ICONPATH,'icon-dimensional-analysis-64.svg')))
+        self.toolBox.setItemIcon(self.left_tab['cluster'],QIcon(os.path.join(ICONPATH,'icon-cluster-64.svg')))
+        self.toolBox.setItemIcon(self.left_tab['scatter'],QIcon(os.path.join(ICONPATH,'icon-ternary-64.svg')))
         # Spot Data
-        self.toolButtonSpotMove.setIcon(QIcon(os.path.join(iconpath,'icon-move-point-64.svg')))
-        self.toolButtonSpotToggle.setIcon(QIcon(os.path.join(iconpath,'icon-show-hide-64.svg')))
-        self.toolButtonSpotSelectAll.setIcon(QIcon(os.path.join(iconpath,'icon-select-all-64.svg')))
-        self.toolButtonSpotAnalysis.setIcon(QIcon(os.path.join(iconpath,'icon-analysis-64.svg')))
-        self.toolButtonSpotRemove.setIcon(QIcon(os.path.join(iconpath,'icon-delete-64.svg')))
+        self.toolButtonSpotMove.setIcon(QIcon(os.path.join(ICONPATH,'icon-move-point-64.svg')))
+        self.toolButtonSpotToggle.setIcon(QIcon(os.path.join(ICONPATH,'icon-show-hide-64.svg')))
+        self.toolButtonSpotSelectAll.setIcon(QIcon(os.path.join(ICONPATH,'icon-select-all-64.svg')))
+        self.toolButtonSpotAnalysis.setIcon(QIcon(os.path.join(ICONPATH,'icon-analysis-64.svg')))
+        self.toolButtonSpotRemove.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
         # N-Dim
-        self.toolBox.setItemIcon(self.left_tab['ndim'],QIcon(os.path.join(iconpath,'icon-TEC-64.svg')))
-        self.toolButtonNDimDown.setIcon(QIcon(os.path.join(iconpath,'icon-down-arrow-64.svg')))
-        self.toolButtonNDimUp.setIcon(QIcon(os.path.join(iconpath,'icon-up-arrow-64.svg')))
-        self.toolButtonNDimSelectAll.setIcon(QIcon(os.path.join(iconpath,'icon-select-all-64.svg')))
-        self.toolButtonNDimRemove.setIcon(QIcon(os.path.join(iconpath,'icon-delete-64.svg')))
+        self.toolBox.setItemIcon(self.left_tab['ndim'],QIcon(os.path.join(ICONPATH,'icon-TEC-64.svg')))
+        self.toolButtonNDimDown.setIcon(QIcon(os.path.join(ICONPATH,'icon-down-arrow-64.svg')))
+        self.toolButtonNDimUp.setIcon(QIcon(os.path.join(ICONPATH,'icon-up-arrow-64.svg')))
+        self.toolButtonNDimSelectAll.setIcon(QIcon(os.path.join(ICONPATH,'icon-select-all-64.svg')))
+        self.toolButtonNDimRemove.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
         # Filter
-        self.toolButtonFilterSelectAll.setIcon(QIcon(os.path.join(iconpath,'icon-select-all-64.svg')))
-        self.toolButtonFilterUp.setIcon(QIcon(os.path.join(iconpath,'icon-up-arrow-64.svg')))
-        self.toolButtonFilterDown.setIcon(QIcon(os.path.join(iconpath,'icon-down-arrow-64.svg')))
-        self.toolButtonFilterRemove.setIcon(QIcon(os.path.join(iconpath,'icon-delete-64.svg')))
+        self.toolButtonFilterSelectAll.setIcon(QIcon(os.path.join(ICONPATH,'icon-select-all-64.svg')))
+        self.toolButtonFilterUp.setIcon(QIcon(os.path.join(ICONPATH,'icon-up-arrow-64.svg')))
+        self.toolButtonFilterDown.setIcon(QIcon(os.path.join(ICONPATH,'icon-down-arrow-64.svg')))
+        self.toolButtonFilterRemove.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
         # Polygons
-        self.toolBox.setItemIcon(self.left_tab['polygons'],QIcon(os.path.join(iconpath,'icon-polygon-new-64.svg')))
-        self.toolButtonPolyCreate.setIcon(QIcon(os.path.join(iconpath,'icon-polygon-new-64.svg')))
-        self.toolButtonPolyAddPoint.setIcon(QIcon(os.path.join(iconpath,'icon-add-point-64.svg')))
-        self.toolButtonPolyRemovePoint.setIcon(QIcon(os.path.join(iconpath,'icon-remove-point-64.svg')))
-        self.toolButtonPolyMovePoint.setIcon(QIcon(os.path.join(iconpath,'icon-move-point-64.svg')))
-        self.toolButtonPolyLink.setIcon(QIcon(os.path.join(iconpath,'icon-link-64.svg')))
-        self.toolButtonPolyDelink.setIcon(QIcon(os.path.join(iconpath,'icon-unlink-64.svg')))
-        self.toolButtonPolyDelete.setIcon(QIcon(os.path.join(iconpath,'icon-delete-64.svg')))
+        self.toolBox.setItemIcon(self.left_tab['polygons'],QIcon(os.path.join(ICONPATH,'icon-polygon-new-64.svg')))
+        self.toolButtonPolyCreate.setIcon(QIcon(os.path.join(ICONPATH,'icon-polygon-new-64.svg')))
+        self.toolButtonPolyAddPoint.setIcon(QIcon(os.path.join(ICONPATH,'icon-add-point-64.svg')))
+        self.toolButtonPolyRemovePoint.setIcon(QIcon(os.path.join(ICONPATH,'icon-remove-point-64.svg')))
+        self.toolButtonPolyMovePoint.setIcon(QIcon(os.path.join(ICONPATH,'icon-move-point-64.svg')))
+        self.toolButtonPolyLink.setIcon(QIcon(os.path.join(ICONPATH,'icon-link-64.svg')))
+        self.toolButtonPolyDelink.setIcon(QIcon(os.path.join(ICONPATH,'icon-unlink-64.svg')))
+        self.toolButtonPolyDelete.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
         # Profile
-        self.toolBox.setItemIcon(self.left_tab['profile'],QIcon(os.path.join(iconpath,'icon-profile-64.svg')))
-        self.toolButtonClearProfile.setIcon(QIcon(os.path.join(iconpath,'icon-delete-64.svg')))
-        self.toolButtonPointDelete.setIcon(QIcon(os.path.join(iconpath,'icon-delete-64.svg')))
-        self.toolButtonPointSelectAll.setIcon(QIcon(os.path.join(iconpath,'icon-select-all-64.svg')))
-        self.toolButtonPointMove.setIcon(QIcon(os.path.join(iconpath,'icon-move-point-64.svg')))
-        self.toolButtonProfileInterpolate.setIcon(QIcon(os.path.join(iconpath,'icon-interpolate-64.svg')))
-        self.toolButtonPlotProfile.setIcon(QIcon(os.path.join(iconpath,'icon-profile-64.svg')))
-        self.toolButtonPointDown.setIcon(QIcon(os.path.join(iconpath,'icon-down-arrow-64.svg')))
-        self.toolButtonPointUp.setIcon(QIcon(os.path.join(iconpath,'icon-up-arrow-64.svg')))
+        self.toolBox.setItemIcon(self.left_tab['profile'],QIcon(os.path.join(ICONPATH,'icon-profile-64.svg')))
+        self.toolButtonClearProfile.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
+        self.toolButtonPointDelete.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
+        self.toolButtonPointSelectAll.setIcon(QIcon(os.path.join(ICONPATH,'icon-select-all-64.svg')))
+        self.toolButtonPointMove.setIcon(QIcon(os.path.join(ICONPATH,'icon-move-point-64.svg')))
+        self.toolButtonProfileInterpolate.setIcon(QIcon(os.path.join(ICONPATH,'icon-interpolate-64.svg')))
+        self.toolButtonPlotProfile.setIcon(QIcon(os.path.join(ICONPATH,'icon-profile-64.svg')))
+        self.toolButtonPointDown.setIcon(QIcon(os.path.join(ICONPATH,'icon-down-arrow-64.svg')))
+        self.toolButtonPointUp.setIcon(QIcon(os.path.join(ICONPATH,'icon-up-arrow-64.svg')))
         # Browser
-        self.toolButtonBrowserHome.setIcon(QIcon(os.path.join(iconpath,'icon-home-64.svg')))
-        self.toolButtonForward.setIcon(QIcon(os.path.join(iconpath,'icon-forward-arrow-64.svg')))
-        self.toolButtonBack.setIcon(QIcon(os.path.join(iconpath,'icon-back-arrow-64.svg')))
+        self.toolButtonBrowserHome.setIcon(QIcon(os.path.join(ICONPATH,'icon-home-64.svg')))
+        self.toolButtonForward.setIcon(QIcon(os.path.join(ICONPATH,'icon-forward-arrow-64.svg')))
+        self.toolButtonBack.setIcon(QIcon(os.path.join(ICONPATH,'icon-back-arrow-64.svg')))
         # Group Box Plot Tools
-        self.toolButtonHome.setIcon(QIcon(os.path.join(iconpath,'icon-home-64.svg')))
-        self.toolButtonRemoveAllMVPlots.setIcon(QIcon(os.path.join(iconpath,'icon-delete-64.svg')))
-        self.toolButtonPopFigure.setIcon(QIcon(os.path.join(iconpath,'icon-popout-64.svg')))
-        self.toolButtonAnnotate.setIcon(QIcon(os.path.join(iconpath,'icon-annotate-64.svg')))
-        self.toolButtonPan.setIcon(QIcon(os.path.join(iconpath,'icon-move-64.svg')))
-        self.toolButtonZoom.setIcon(QIcon(os.path.join(iconpath,'icon-zoom-64.svg')))
-        self.toolButtonDistance.setIcon(QIcon(os.path.join(iconpath,'icon-distance-64.svg')))
+        self.toolButtonHome.setIcon(QIcon(os.path.join(ICONPATH,'icon-home-64.svg')))
+        self.toolButtonRemoveAllMVPlots.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
+        self.toolButtonPopFigure.setIcon(QIcon(os.path.join(ICONPATH,'icon-popout-64.svg')))
+        self.toolButtonAnnotate.setIcon(QIcon(os.path.join(ICONPATH,'icon-annotate-64.svg')))
+        self.toolButtonPan.setIcon(QIcon(os.path.join(ICONPATH,'icon-move-64.svg')))
+        self.toolButtonZoom.setIcon(QIcon(os.path.join(ICONPATH,'icon-zoom-64.svg')))
+        self.toolButtonDistance.setIcon(QIcon(os.path.join(ICONPATH,'icon-distance-64.svg')))
         # Calculator
-        self.toolButtonCalculate.setIcon(QIcon(os.path.join(iconpath,'icon-calculator-64.svg')))
-        self.actionCalculator.setIcon(QIcon(os.path.join(iconpath,'icon-calculator-64.svg')))
-        self.toolBoxTreeView.setItemIcon(self.right_tab['calculator'],QIcon(os.path.join(iconpath,'icon-calculator-64.svg')))
-        self.toolButtonCalcDelete.setIcon(QIcon(os.path.join(iconpath,'icon-delete-64.svg')))
+        self.toolButtonCalculate.setIcon(QIcon(os.path.join(ICONPATH,'icon-calculator-64.svg')))
+        self.actionCalculator.setIcon(QIcon(os.path.join(ICONPATH,'icon-calculator-64.svg')))
+        self.toolBoxTreeView.setItemIcon(self.right_tab['calculator'],QIcon(os.path.join(ICONPATH,'icon-calculator-64.svg')))
+        self.toolButtonCalcDelete.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
         # Style Toolbox
-        self.toolBoxStyle.setItemIcon(0,QIcon(os.path.join(iconpath,'icon-axes-64.svg')))
-        self.toolBoxStyle.setItemIcon(1,QIcon(os.path.join(iconpath,'icon-text-and-scales-64.svg')))
-        self.toolBoxStyle.setItemIcon(2,QIcon(os.path.join(iconpath,'icon-marker-and-lines-64.svg')))
-        self.toolBoxStyle.setItemIcon(3,QIcon(os.path.join(iconpath,'icon-rgb-64.svg')))
+        self.toolBoxStyle.setItemIcon(0,QIcon(os.path.join(ICONPATH,'icon-axes-64.svg')))
+        self.toolBoxStyle.setItemIcon(1,QIcon(os.path.join(ICONPATH,'icon-text-and-scales-64.svg')))
+        self.toolBoxStyle.setItemIcon(2,QIcon(os.path.join(ICONPATH,'icon-marker-and-lines-64.svg')))
+        self.toolBoxStyle.setItemIcon(3,QIcon(os.path.join(ICONPATH,'icon-rgb-64.svg')))
         # Cluster tab
-        self.toolBoxStyle.setItemIcon(4,QIcon(os.path.join(iconpath,'icon-cluster-64.svg')))
-        self.toolButtonClusterLink.setIcon(QIcon(os.path.join(iconpath,'icon-link-64.svg')))
-        self.toolButtonClusterDelink.setIcon(QIcon(os.path.join(iconpath,'icon-unlink-64.svg')))
+        self.toolBoxStyle.setItemIcon(4,QIcon(os.path.join(ICONPATH,'icon-cluster-64.svg')))
+        self.toolButtonClusterLink.setIcon(QIcon(os.path.join(ICONPATH,'icon-link-64.svg')))
+        self.toolButtonClusterDelink.setIcon(QIcon(os.path.join(ICONPATH,'icon-unlink-64.svg')))
 
 # -------------------------------
 # Classes
@@ -12135,8 +12210,8 @@ class quickView(QDialog, Ui_QuickViewDialog):
         self.analyte_list = self.data[self.sample_id]['analyte_info']['analytes']
 
         if darkdetect.isDark():
-            self.toolButtonSort.setIcon(QIcon(os.path.join(iconpath,'icon-sort-dark-64.svg')))
-            self.toolButtonSave.setIcon(QIcon(os.path.join(iconpath,'icon-save-dark-64.svg')))
+            self.toolButtonSort.setIcon(QIcon(os.path.join(ICONPATH,'icon-sort-dark-64.svg')))
+            self.toolButtonSave.setIcon(QIcon(os.path.join(ICONPATH,'icon-save-dark-64.svg')))
 
         self.tableWidget = TableWidgetDragRows()  # Assuming TableWidgetDragRows is defined elsewhere
         self.setup_table()
@@ -12222,7 +12297,7 @@ class quickView(QDialog, Ui_QuickViewDialog):
 
     def save_to_csv(self):
         """Opens a message box, prompting user to in put a file to save the table list"""
-        file_path = os.path.join(basedir,'resources', 'styles', 'qv_lists.csv')
+        file_path = os.path.join(BASEDIR,'resources', 'styles', 'qv_lists.csv')
         # Ensure directory exists
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
@@ -13051,6 +13126,18 @@ class Polygon:
             self.p_id_gen = 0 #Polygon_id generator
 
 
+class Profile:
+    def __init__(self,name,sort,radius,thresh,int_dist, point_error):
+        self.name = name
+        self.points = []
+        self.i_points = []
+        self.sort = sort
+        self.radius = radius
+        self.y_axis_thresh = thresh
+        self.int_dist = int_dist
+        self.point_error = point_error
+
+
 # Profiles
 # -------------------------------
 class Profiling:
@@ -13059,7 +13146,6 @@ class Profiling:
         # Initialize other necessary attributes
         # Initialize variables and states as needed
         self.profiles = {}
-        self.i_profiles = {}        #interpolated profiles
         self.point_selected = False  # move point button selected
         self.point_index = -1              # index for move point
         self.all_errorbars = []       #stores points of profiles
@@ -13068,47 +13154,51 @@ class Profiling:
         self.original_colors = {}
         self.profile_name = None
 
-        #update combobox with profiles from project
-        if self.main_window.project_dir:
-            self.path = os.path.join(basedir,f'projects/{self.main_window.project_dir}/{self.main_window.sample_id}/profiles/')
-            self.load_profiles_from_directory()
-            self.populate_combobox()
-
         self.main_window.comboBoxProfileList.currentTextChanged.connect(self.on_profile_selected)
 
-    def save_profiles(self):
-        file_name =  self.path +f'{self.profile_name}.prfl'
-        with open(file_name, 'wb') as file:
-            if self.profile_name in self.profiles:
-                pickle.dump(self.profiles[self.profile_name], file)
-                print("Profile saved successfully.")
+    def save_profiles(self,project_dir, sample_id):
+        if sample_id in self.profiles:
+            for profile_name, profile in self.profiles[sample_id].items():
+                file_name =  os.path.join(project_dir,sample_id,f'{profile_name}.prfl')
+                with open(file_name, 'wb') as file:
+                    pickle.dump(profile, file)
+            print("Profile saved successfully.")
     
     def populate_combobox(self):
         self.main_window.comboBoxProfileList.clear()
         self.main_window.comboBoxProfileList.addItem('Create New Profile')
-        for profile_name in self.profiles.keys():
+        for profile_name in self.profiles[self.main_window.sample_id].keys():
             self.main_window.comboBoxProfileList.addItem(profile_name)
 
-    def load_profiles_from_directory(self):
-        directory = self.path
+    def load_profiles_from_directory(self, project_dir, sample_id):
+        directory = os.path.join(project_dir,sample_id)
         for file_name in os.listdir(directory):
             if file_name.endswith(".prfl"):
                 file_path = os.path.join(directory, file_name)
                 with open(file_path, 'rb') as file:
                     profile_name = os.path.basename(file_path).split('.')[0]
-                    self.profiles[profile_name] = pickle.load(file)
+                    self.profiles[sample_id][profile_name] = pickle.load(file)
+
+        self.populate_combobox()
         print("All profiles loaded successfully.")
 
     def on_profile_selected(self, profile_name):
         if profile_name == 'Create New Profile':
             new_profile_name, ok = QInputDialog.getText(self.main_window, 'New Profile', 'Enter new profile name:')
             if ok and new_profile_name:
-                if new_profile_name in self.profiles:
+                if new_profile_name in self.profiles[self.main_window.sample_id]:
                     QMessageBox.warning(self.main_window, 'Error', 'Profile name already exists!')
                 else:
                     self.clear_profiles()
-                    self.profiles[new_profile_name] = {}
-                    self.i_profiles[new_profile_name] = {}
+                    sort = self.main_window.comboBoxProfileSort.getCurrentText(),
+                    radius = self.main_window.lineEditPointRadius.text() 
+                    thresh = self.main_window.lineEditPointRadius.text()
+                    int_dist = self.main_window.lineEditIntDist.text()
+                    point_error = self.main_window.comboBoxPointType.getCurrentText()
+
+                    # create new profile instance
+                    self.profiles[self.main_window.sample_id][new_profile_name] = Profile(new_profile_name,sort,radius,thresh,int_dist, point_error)
+                    # self.i_profiles[self.main_window.sample_id][new_profile_name] = {}
                     self.main_window.comboBoxProfileList.addItem(new_profile_name)
                     self.main_window.comboBoxProfileList.setCurrentText(new_profile_name)
                     self.profile_name = new_profile_name
@@ -13131,9 +13221,10 @@ class Profiling:
         self.array_y = array.shape[0]
 
         interpolate = False
-
-
         radius= int(self.main_window.lineEditPointRadius.text())
+
+        profile = self.profiles[self.main_window.sample_id][self.profile_name].points
+        
         # turn off profile (need to suppress context menu on right click)
         if event.button() == QtCore.Qt.RightButton and self.main_window.toolButtonPlotProfile.isChecked():
             self.main_window.toolButtonPlotProfile.setChecked(False)
@@ -13153,7 +13244,7 @@ class Profiling:
             # move point
             if self.point_selected:
                 #remove selected point
-                prev_scatter = self.profiles[self.profile_name][k,v][self.point_index][3]
+                prev_scatter = profile[k,v][self.point_index][3]
                 plot.removeItem(prev_scatter)
 
 
@@ -13172,13 +13263,13 @@ class Profiling:
                             circ_val.append( value)
 
                 #update self.point_index index of self.profiles[self.self.profile_name] with new point data
-                if (k,v) in self.profiles[self.profile_name]:
+                if (k,v) in profile:
 
-                    self.profiles[self.profile_name][k,v][self.point_index] = (x,y, circ_val, interpolate)
+                    profile[k,v][self.point_index] = (x,y, circ_val, interpolate)
 
 
                 if self.main_window.canvasWindow.currentIndex() == self.main_window.canvas_tab['mv']:
-                    # Add the scatter item to all other plots and save points in self.profiles[self.profile_name]
+                    # Add the scatter item to all other plots and save points in profile
                     for (k,v), (_, p, array) in self.main_window.lasermaps.items():
                         circ_val = []
                         if p != plot and v==1 and self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #only add scatters to other lasermaps of same sample
@@ -13189,8 +13280,8 @@ class Profiling:
                             for c in circ_cord:
                                 value = array[c[0], c[1]]
                                 circ_val.append( value)
-                            if (k,v) in self.profiles[self.profile_name]:
-                                self.profiles[self.profile_name][k,v][self.point_index] = (x,y, circ_val, interpolate)
+                            if (k,v) in profile:
+                                profile[k,v][self.point_index] = (x,y, circ_val, interpolate)
 
                 #update plot and table widget
                 self.main_window.plot_profiles()
@@ -13201,7 +13292,7 @@ class Profiling:
             else:
                 # find nearest profile point
                 mindist = 10**12
-                for i, (x_p,y_p,_,_,interpolate) in enumerate(self.profiles[self.profile_name][k]):
+                for i, (x_p,y_p,_,_,interpolate) in enumerate(profile[k]):
                     dist = (x_p - x)**2 + (y_p - y)**2
                     if mindist > dist:
                         mindist = dist
@@ -13228,15 +13319,15 @@ class Profiling:
                         circ_cord.append([i, j])
                         circ_val.append( value)
 
-            #add values within circle of radius in self.profiles[self.profile_name]
-            if (k,v) in self.profiles[self.profile_name]:
-                self.profiles[self.profile_name][(k,v)].append((x,y,circ_val, interpolate))
+            #add values within circle of radius in profile
+            if (k,v) in profile:
+                profile[(k,v)].append((x,y,circ_val, interpolate))
             else:
-                self.profiles[self.profile_name][(k,v)] = [(x,y, circ_val, interpolate)]
+                profile[(k,v)] = [(x,y, circ_val, interpolate)]
 
 
             if self.main_window.canvasWindow.currentIndex() == self.main_window.canvas_tab['mv']:
-                # Add the scatter item to all other plots and save points in self.profiles[self.profile_name]
+                # Add the scatter item to all other plots and save points in profile
                 for (k,v), (_, p,  array) in self.main_window.lasermaps.items():
                     circ_val = []
                     if p != plot and v==1 and self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #only add scatters to other lasermaps of same sample
@@ -13247,37 +13338,41 @@ class Profiling:
                         for c in circ_cord:
                             value = array[c[0], c[1]]
                             circ_val.append( value)
-                        if (k,v) in self.profiles[self.profile_name]:
-                            self.profiles[self.profile_name][k,v].append((x,y,circ_val, interpolate))
+                        if (k,v) in profile:
+                            profile[k,v].append((x,y,circ_val, interpolate))
                         else:
-                            self.profiles[self.profile_name][k,v] = [(x,y, circ_val, interpolate)]
+                            profile[k,v] = [(x,y, circ_val, interpolate)]
 
             self.plot_profiles()
             self.update_table_widget()
-            self.save_profiles()
     
     def plot_existing_profile(self,plot):
-        for (k,v) in self.profiles[self.profile_name]:
-            for x,y,_,_ in self.profiles[self.profile_name][k,v]:
+        profile = self.profiles[self.main_window.sample_id][self.profile_name].points        
+        for (k,v) in profile:
+            for x,y,_,_ in profile[k,v]:
                 # Create a scatter plot items
                 scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
                 scatter.setZValue(1e9)
                 plot.addItem(scatter)
 
     def interpolate_points(self, interpolation_distance,radius):
+        
         """
         Interpolate linear points between each pair of points in the profiles.
         """
+        profile = self.profiles[self.main_window.sample_id][self.profile_name].points
+        i_profile = self.profiles[self.main_window.sample_id][self.profile_name].i_points
+
         if self.main_window.toolButtonProfileInterpolate.isChecked():
             interpolate = True
-            for (k,v), points in self.profiles[self.profile_name].items():
+            for (k,v), points in profile.items():
                 for i in range(len(points) - 1):
                     start_point = points[i]
                     end_point = points[i + 1]
                     if i==0:
-                        self.i_profiles[self.profile_name][(k,v)] = [start_point]
+                        i_profile[(k,v)] = [start_point]
                     else:
-                        self.i_profiles[self.profile_name][(k,v)].append(start_point)
+                        i_profile[(k,v)].append(start_point)
 
                     # Calculate the distance between start and end points
                     dist = self.calculate_distance(start_point, end_point)
@@ -13292,7 +13387,7 @@ class Profiling:
 
                         x_i = round(x*self.array_x /self.main_window.x_range) #index points
                         y_i = round(y*self.array_y/self.main_window.y_range)
-                        # Add the scatter item to all other plots and save points in self.profiles[self.profile_name]
+                        # Add the scatter item to all other plots and save points in profile
                         _, p, array= self.main_window.lasermaps[(k,v)]
                         if v==self.main_window.canvasWindow.currentIndex() and self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #only add scatters to other lasermaps of same sample
                             # Create a scatter plot item at the clicked position
@@ -13306,10 +13401,10 @@ class Profiling:
                                     if np.sqrt((x_i - j)**2 + (y_i - i)**2) <= radius:
                                         value = array[i, j]
                                         circ_val.append(value)
-                            if (k,v) in self.i_profiles[self.profile_name]:
-                                self.i_profiles[self.profile_name][(k,v)].append((x,y,circ_val, scatter, interpolate))
+                            if (k,v) in i_profile:
+                                i_profile[(k,v)].append((x,y,circ_val, scatter, interpolate))
 
-                    self.i_profiles[self.profile_name][(k,v)].append(end_point)
+                    i_profile[(k,v)].append(end_point)
             # After interpolation, update the plot and table widget
             self.plot_profiles(interpolate= interpolate)
         else:
@@ -13319,9 +13414,10 @@ class Profiling:
         # self.update_table_widget(interpolate= True)
 
     def clear_interpolation(self):
+            i_profile = self.profiles[self.main_window.sample_id][self.profile_name].i_points
             # remove interpolation
-            if len(self.i_profiles[self.profile_name])>0:
-                for (k,v), profile in self.i_profiles[self.profile_name].items():
+            if len(i_profile)>0:
+                for (k,v), profile in i_profile.items():
                     for point in profile:
                         scatter_item = point[3]  # Access the scatter plot item
                         interpolate =point[4]
@@ -13330,6 +13426,8 @@ class Profiling:
                             plot.removeItem(scatter_item)
 
     def plot_profiles(self,interpolate= False, sort_axis=None):
+        profile = self.profiles[self.main_window.sample_id][self.profile_name].points
+        i_profile = self.profiles[self.main_window.sample_id][self.profile_name].i_points
         def process_points( points, sort_axis):
             # Sort the points based on the user-specified axis
             if sort_axis == 'x':
@@ -13360,9 +13458,9 @@ class Profiling:
 
         def group_profiles_by_range(sort_axis, range_threshold,interpolate,point_type):
             if not interpolate:
-                profiles = self.profiles[self.profile_name]
+                profiles = profile
             else:
-                profiles = self.i_profiles[self.profile_name]
+                profiles = i_profile
             # Group profiles based on range similarity
             profile_groups = {}
             keys = []
@@ -13409,13 +13507,13 @@ class Profiling:
 
 
         if not interpolate:
-            profiles = self.profiles[self.profile_name]
+            profiles = profile
         else:
-            profiles = self.i_profiles[self.profile_name]
+            profiles = i_profile
 
         style = self.main_window.styles['profile']
 
-        if len(list(profiles.values())[0])>0: #if self.profiles[self.profile_name] has values
+        if len(list(profiles.values())[0])>0: #if profile has values
             self.main_window.tabWidget.setCurrentIndex(self.main_window.bottom_tab['profile']) #show profile plot tab
             sort_axis=self.main_window.comboBoxProfileSort.currentText()
             range_threshold=int(self.main_window.lineEditYThresh.text())
@@ -13666,7 +13764,7 @@ class Profiling:
 
     def clear_profiles(self):
 
-        if self.profile_name in self.profiles: #if profiles for that sample if exists
+        if self.profile_name in self.profiles[self.main_window.sample_id]: #if profiles for that sample if exists
             # Clear all scatter plot items from the lasermaps
             for _, (_, plot, _) in self.main_window.lasermaps.items():
                 items_to_remove = [item for item in plot.listDataItems() if isinstance(item, ScatterPlotItem)]
@@ -13674,7 +13772,7 @@ class Profiling:
                     plot.removeItem(item)
 
             # Clear the profiles data
-            # self.profiles[self.profile_name].clear()
+            # profile.clear()
 
             # Clear all data from the table
             self.main_window.tableWidgetProfilePoints.clearContents()
@@ -13694,11 +13792,11 @@ class Profiling:
         return np.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
 
     def update_table_widget(self, update = False):
-
+        profile = self.profiles[self.main_window.sample_id][self.profile_name].points
         if self.profile_name in self.profiles: #if profiles for that sample if exists
             self.main_window.tableWidgetProfilePoints.setRowCount(0)  # Clear existing rows
             point_number = 0
-            first_data_point = list(self.profiles[self.profile_name].values())[0]
+            first_data_point = list(profile.values())[0]
             for data_point in first_data_point:
                 x, y, _,_ = data_point  # Assuming data_point structure
                 row_position = self.main_window.tableWidgetProfilePoints.rowCount()
@@ -13842,7 +13940,7 @@ def main():
     show_splash()
 
     # Uncomment this line to set icon to App
-    app.setWindowIcon(QtGui.QIcon(os.path.join(basedir, os.path.join(iconpath,'LaME-64.svg'))))
+    app.setWindowIcon(QtGui.QIcon(os.path.join(BASEDIR, os.path.join(ICONPATH,'LaME-64.svg'))))
     main = MainWindow()
 
     # Set the main window to fullscreen

@@ -3,7 +3,6 @@ import pandas as pd
 from PyQt5.QtWidgets import QDialog, QFileDialog, QTableWidgetItem, QMenu, QInputDialog, QComboBox, QAction, QHeaderView, QMessageBox
 from PyQt5.QtCore import Qt
 from src.ui.SpotImportDialog import Ui_SpotImportDialog
-from lame_helper import basedir, iconpath
 from src.ExtendedDF import AttributeDataFrame
 
 class SpotImporter(QDialog, Ui_SpotImportDialog):

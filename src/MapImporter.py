@@ -9,7 +9,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt, QUrl
 import src.lame_fileio as lameio
 from src.ui.MapImportDialog import Ui_MapImportDialog
-from lame_helper import basedir, iconpath
+from lame_helper import BASEDIR, ICONPATH
 
 # Import Tool Dialog
 # -------------------------------
@@ -39,11 +39,11 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         self.setupUi(self)
 
         if darkdetect.isDark():
-            self.toolButtonNextSample.setIcon(QIcon(os.path.join(iconpath,'icon-forward-arrow-dark-64.svg')))
-            self.toolButtonPrevSample.setIcon(QIcon(os.path.join(iconpath,'icon-back-arrow-dark-64.svg')))
+            self.toolButtonNextSample.setIcon(QIcon(os.path.join(ICONPATH,'icon-forward-arrow-dark-64.svg')))
+            self.toolButtonPrevSample.setIcon(QIcon(os.path.join(ICONPATH,'icon-back-arrow-dark-64.svg')))
         
         # dictionary with standards (files to ignore or use as calibration...once we add that capability)
-        self.standards_dict = lameio.import_csv_to_dict(os.path.join(basedir,'resources/app_data/standards_list.csv'))
+        self.standards_dict = lameio.import_csv_to_dict(os.path.join(BASEDIR,'resources/app_data/standards_list.csv'))
 
         self.toolButtonAddStandard.clicked.connect(self.add_standard)
         self.sample_ids = []
@@ -92,7 +92,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
     
     def help(self):
         """Loads the help webpage associated with the ImportTool in the Help tab"""
-        filename = os.path.join(basedir,"docs/build/html/import.html")
+        filename = os.path.join(BASEDIR,"docs/build/html/import.html")
 
         self.lineEditBrowserLocation.setText(filename)
 
@@ -152,7 +152,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         self.standard_list = self.standards_dict[data_type]
 
         # save updated standards dictionary
-        lameio.export_dict_to_csv(self.standards_dict,os.path.join(basedir,'resources/app_data/standards_list.csv'))
+        lameio.export_dict_to_csv(self.standards_dict,os.path.join(BASEDIR,'resources/app_data/standards_list.csv'))
 
         # if tableWidgetMetadata has information and a Standards column, update with new standards list
         n_rows = self.tableWidgetMetadata.rowCount()

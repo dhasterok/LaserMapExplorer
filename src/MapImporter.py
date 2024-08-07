@@ -38,6 +38,8 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         super().__init__(parent)
         self.setupUi(self)
 
+        self.main_window = parent
+
         if darkdetect.isDark():
             self.toolButtonNextSample.setIcon(QIcon(os.path.join(ICONPATH,'icon-forward-arrow-dark-64.svg')))
             self.toolButtonPrevSample.setIcon(QIcon(os.path.join(ICONPATH,'icon-back-arrow-dark-64.svg')))

@@ -1151,7 +1151,7 @@
         <string>Swap X and Y resolution</string>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>4</number>
        </property>
        <widget class="QWidget" name="SelectAnalytePage">
         <property name="enabled">
@@ -1162,7 +1162,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>182</height>
+          <height>181</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -1959,8 +1959,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>69</height>
+          <width>300</width>
+          <height>181</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -1999,7 +1999,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>257</width>
+              <width>285</width>
               <height>355</height>
              </rect>
             </property>
@@ -2558,8 +2558,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>75</height>
+          <width>300</width>
+          <height>181</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -2598,8 +2598,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>258</width>
-              <height>128</height>
+              <width>294</width>
+              <height>175</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_45">
@@ -2912,8 +2912,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>69</height>
+          <width>300</width>
+          <height>181</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -2952,7 +2952,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>225</width>
+              <width>285</width>
               <height>260</height>
              </rect>
             </property>
@@ -3551,8 +3551,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>69</height>
+          <width>300</width>
+          <height>181</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -3590,8 +3590,8 @@
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>0</y>
-              <width>274</width>
+              <y>-105</y>
+              <width>285</width>
               <height>484</height>
              </rect>
             </property>
@@ -4317,8 +4317,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>69</height>
+          <width>300</width>
+          <height>181</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5004,8 +5004,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>69</height>
+          <width>300</width>
+          <height>181</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5618,8 +5618,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>69</height>
+          <width>300</width>
+          <height>181</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5665,7 +5665,7 @@
               <x>0</x>
               <y>0</y>
               <width>301</width>
-              <height>128</height>
+              <height>166</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_57">
@@ -5851,8 +5851,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>69</height>
+          <width>300</width>
+          <height>181</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5891,7 +5891,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>246</width>
+              <width>285</width>
               <height>284</height>
              </rect>
             </property>
@@ -6270,8 +6270,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>69</height>
+          <width>300</width>
+          <height>181</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6316,8 +6316,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>209</width>
-              <height>106</height>
+              <width>300</width>
+              <height>181</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_64">
@@ -6348,7 +6348,7 @@
                 </font>
                </property>
                <property name="currentIndex">
-                <number>0</number>
+                <number>3</number>
                </property>
                <widget class="QWidget" name="tabThermometry">
                 <attribute name="title">
@@ -6570,7 +6570,7 @@
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>236</width>
+                      <width>267</width>
                       <height>231</height>
                      </rect>
                     </property>
@@ -6933,7 +6933,7 @@
           <x>0</x>
           <y>0</y>
           <width>268</width>
-          <height>361</height>
+          <height>360</height>
          </rect>
         </property>
         <attribute name="label">
@@ -7077,8 +7077,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>169</width>
-          <height>270</height>
+          <width>286</width>
+          <height>360</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7215,7 +7215,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>98</width>
+              <width>85</width>
               <height>69</height>
              </rect>
             </property>
@@ -7620,8 +7620,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>98</width>
-              <height>69</height>
+              <width>284</width>
+              <height>144</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -7660,7 +7660,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>203</width>
+                  <width>269</width>
                   <height>371</height>
                  </rect>
                 </property>
@@ -8018,7 +8018,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>98</width>
+              <width>85</width>
               <height>69</height>
              </rect>
             </property>
@@ -8444,7 +8444,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>98</width>
+              <width>85</width>
               <height>72</height>
              </rect>
             </property>
@@ -8859,7 +8859,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>98</width>
+              <width>85</width>
               <height>69</height>
              </rect>
             </property>
@@ -9203,8 +9203,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>69</height>
+          <width>290</width>
+          <height>360</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -9243,8 +9243,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>222</width>
-              <height>686</height>
+              <width>275</width>
+              <height>687</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_40">
@@ -10665,7 +10665,7 @@
         <string>Pop the figure out into a separate window</string>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="tabNotes">
         <property name="sizePolicy">
@@ -13119,7 +13119,7 @@ Bug</string>
    </property>
    <property name="iconText">
     <string>Save
-Session</string>
+Project</string>
    </property>
    <property name="toolTip">
     <string>Save current Project</string>
@@ -13138,7 +13138,7 @@ Session</string>
    </property>
    <property name="iconText">
     <string>Open
-Session</string>
+Project</string>
    </property>
    <property name="toolTip">
     <string>Open a previously saved project</string>

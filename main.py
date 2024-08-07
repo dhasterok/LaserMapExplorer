@@ -664,7 +664,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ref_list = self.ref_data['layer']+' ['+self.ref_data['model']+'] '+ self.ref_data['reference']
 
         self.comboBoxRefMaterial.addItems(ref_list.values)          # Select analyte Tab
+        self.comboBoxRefMaterial.setCurrentIndex(0)
         self.comboBoxNDimRefMaterial.addItems(ref_list.values)      # NDim Tab
+        self.comboBoxNDimRefMaterial.setCurrentIndex(0)
         self.comboBoxRefMaterial.activated.connect(lambda: self.change_ref_material(self.comboBoxRefMaterial, self.comboBoxNDimRefMaterial))
         self.comboBoxNDimRefMaterial.activated.connect(lambda: self.change_ref_material(self.comboBoxNDimRefMaterial, self.comboBoxRefMaterial))
         self.ref_chem = None
@@ -1347,15 +1349,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if dialog.exec_():
             file_list = dialog.selectedFiles()
             self.selected_directory = os.path.dirname(os.path.abspath(file_list[0]))
-
+            
             self.csv_files = [os.path.split(file)[1] for file in file_list if file.endswith('.csv')]
             if self.csv_files == []:
                 # warning dialog
                 return
             self.comboBoxSampleId.clear()
-
+            self.sample_ids = [os.path.splitext(file)[0].replace('.lame','') for file in self.csv_files]
             #print(self.csv_files)
-            self.comboBoxSampleId.addItems([os.path.splitext(file)[0].replace('.lame','') for file in self.csv_files])
+            self.comboBoxSampleId.addItems(self.sample_ids)
+            self.comboBoxSampleId.setCurrentIndex(0)
             # Populate the sampleidcomboBox with the file names
             self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
             self.change_sample(0)
@@ -1403,7 +1406,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.statusBar.showMessage("No valid csv files found.")
             return
         self.comboBoxSampleId.clear()
-        self.comboBoxSampleId.addItems([os.path.splitext(file)[0].replace('.lame','') for file in self.csv_files])
+        self.sample_ids = [os.path.splitext(file)[0].replace('.lame','') for file in self.csv_files]
+        self.comboBoxSampleId.addItems(self.sample_ids)
+        # set first sample id as default
+        self.comboBoxSampleId.setCurrentIndex(0)
         # Populate the sampleidcomboBox with the file names
         self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
         self.change_sample(0)
@@ -1463,6 +1469,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             index of sample name for identifying data.  The values are based on the
             comboBoxSampleID
         """
+
+        if self.sample_id == self.sample_ids[index]:
+            # if selected sample id is same as previous
+            return
+
         # stop autosave timer
         self.save_notes_file()
         self.autosaveTimer.stop()
@@ -1491,7 +1502,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 return
 
         file_path = os.path.join(self.selected_directory, self.csv_files[index])
-        self.sample_id = os.path.splitext(self.csv_files[index])[0].replace('.lame','')
+        self.sample_id = self.sample_ids[index]
 
         # notes and autosave timer
         self.notes_file = os.path.join(self.selected_directory,self.sample_id+'.rst')
@@ -2597,23 +2608,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxPlots.clear()
         self.comboBoxPlots.addItems(self.multi_view_index)
 
-    def save_project(self):
-        file_name, _ = QFileDialog.getSaveFileName(self, "Save File", "", "Pickle Files (*.pkl);;All Files (*)")
-        if file_name:
-            data_dict = {}
-            data_dict['data'] = self.data
-            data_dict['profiling'] =self.profiling.profiles
-            data_dict['polygons'] =self.polygon.polygons
-            data_dict['styles'] =self.styles
-            data_dict['axis_dict'] =self.axis_dict 
-            data_dict['plot_infos'] =  self.get_plot_info_from_tree(self.treeModel)
-            data_dict['sample_ids'] = self.sample_ids
-            data_dict['sample_id'] = self.sample_id
-                            
-            with open(file_name, 'wb') as file:
-                pickle.dump(data_dict, file)
-            
-            self.statusBar.showMessage("Analysis saved successfully")    
     
     def save_project(self):
         projects_dir = os.path.join(BASEDIR, "projects")
@@ -2679,17 +2673,91 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 for sample_id in self.data.keys():
                     self.profiling.save_profiles(project_dir, sample_id)
 
-
-                # Saving additional files
-                # pd.DataFrame(self.data).to_csv(csv_path, index=False)
-                # with open(rst_path, 'w') as rst_file:
-                #     rst_file.write(str(self.get_plot_info_from_tree(self.treeModel)))  # Convert to string or use appropriate format
-                # with open(poly_path, 'w') as poly_file:
-                #     poly_file.write(str(self.polygon.polygons))  # Convert to string or use appropriate format
-                # with open(prfl_path, 'w') as prfl_file:
-                #     prfl_file.write(str(self.profiling.profiles))  # Convert to string or use appropriate format
                 
                 self.statusBar.showMessage("Analysis saved successfully")
+
+    # def open_project(self):
+    #     if self.data:
+    #         # Create and configure the QMessageBox
+    #         messageBoxChangeSample = QMessageBox()
+    #         iconWarning = QtGui.QIcon()
+    #         iconWarning.addPixmap(QtGui.QPixmap(":/icons/resources/icons/icon-warning-64.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+
+    #         messageBoxChangeSample.setWindowIcon(iconWarning)  # Set custom icon
+    #         messageBoxChangeSample.setText("Do you want to save current analysis")
+    #         messageBoxChangeSample.setWindowTitle("Save analysis")
+    #         messageBoxChangeSample.setStandardButtons(QMessageBox.Discard | QMessageBox.Cancel | QMessageBox.Save)
+
+    #         # Display the dialog and wait for user action
+    #         response = messageBoxChangeSample.exec_()
+
+    #         if response == QMessageBox.Save:
+    #             self.save_project()
+    #             self.reset_analysis('sample')
+    #         elif response == QMessageBox.Discard:
+    #             self.reset_analysis('sample')
+    #         else: #user pressed cancel
+    #             self.comboBoxSampleId.setCurrentText(self.sample_id)
+    #             return
+    #     file_name, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Pickle Files (*.pkl);;All Files (*)")
+    #     if file_name:
+    #         with open(file_name, 'rb') as file:
+    #             data_dict = pickle.load(file)
+    #         if data_dict:
+    #             self.data = data_dict['data']
+    #             self.profiling.profiles = data_dict['profiling'] 
+    #             self.polygon.polygons = data_dict['polygons'] 
+    #             self.styles = data_dict['styles']
+    #             self.axis_dict = data_dict['axis_dict']
+    #             self.sample_ids = data_dict['sample_ids']
+    #             self.sample_id = data_dict['sample_id'] 
+    #             self.selected_dirctory= data_dict['selected_directory'] 
+    #             self.create_tree(self.sample_id)
+    #             #update tree with selected analytes
+    #             self.update_tree(self.data[self.sample_id]['norm'], norm_update = False)
+    #             #print(data_dict['plot_infos'])
+    #             #add plot info to tree
+    #             for plot_info in data_dict['plot_infos']:
+    #                 if plot_info:
+    #                     canvas = MplCanvas(fig=plot_info['figure'])
+    #                     plot_info['figure'] = canvas
+    #                     self.add_tree_item(plot_info)
+            
+    #             self.sample_ids = data_dict['sample_ids']
+    #             # update sample id combo
+    #             self.comboBoxSampleId.clear()
+    #             self.comboBoxSampleId.addItems(self.sample_ids)
+    #             self.sample_id = data_dict['sample_id']
+    #             #compute aspect ratio
+    #             self.compute_map_aspect_ratio()
+                
+    #             #inilialise tabs
+    #             self.init_tabs()
+    #             self.statusBar.showMessage("Analysis loaded successfully")  
+                
+                
+    #             # reset flags
+    #             self.update_cluster_flag = True
+    #             self.update_pca_flag = True
+    #             self.plot_flag = False
+
+    #             self.update_all_field_comboboxes()
+    #             self.update_filter_values()
+
+    #             self.histogram_update_bin_width()
+
+    #             # plot first analyte as lasermap
+    #             self.styles['analyte map']['Colors']['ColorByField'] = 'Analyte'
+    #             self.comboBoxColorByField.setCurrentText(self.styles['analyte map']['Colors']['ColorByField'])
+    #             self.color_by_field_callback()
+    #             fields = self.get_field_list('Analyte')
+    #             self.styles['analyte map']['Colors']['Field'] = fields[0]
+    #             self.comboBoxColorField.setCurrentText(fields[0])
+    #             self.color_field_callback()
+
+    #             self.plot_flag = True
+    #             self.update_SV()
+
 
     def open_project(self):
         if self.data:
@@ -2699,7 +2767,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             iconWarning.addPixmap(QtGui.QPixmap(":/icons/resources/icons/icon-warning-64.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
 
             messageBoxChangeSample.setWindowIcon(iconWarning)  # Set custom icon
-            messageBoxChangeSample.setText("Do you want to save current analysis")
+            messageBoxChangeSample.setText("Do you want to save current analysis?")
             messageBoxChangeSample.setWindowTitle("Save analysis")
             messageBoxChangeSample.setStandardButtons(QMessageBox.Discard | QMessageBox.Cancel | QMessageBox.Save)
 
@@ -2711,67 +2779,87 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.reset_analysis('sample')
             elif response == QMessageBox.Discard:
                 self.reset_analysis('sample')
-            else: #user pressed cancel
+            else:  # user pressed cancel
                 self.comboBoxSampleId.setCurrentText(self.sample_id)
                 return
-        file_name, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Pickle Files (*.pkl);;All Files (*)")
-        if file_name:
-            with open(file_name, 'rb') as file:
-                data_dict = pickle.load(file)
-            if data_dict:
-                self.data = data_dict['data']
-                self.profiling.profiles = data_dict['profiling'] 
-                self.polygon.polygons = data_dict['polygons'] 
-                self.styles = data_dict['styles']
-                self.axis_dict = data_dict['axis_dict']
-                self.sample_ids = data_dict['sample_ids']
-                self.sample_id = data_dict['sample_id'] 
-                self.selected_dirctory= data_dict['selected_directory'] 
-                self.create_tree(self.sample_id)
-                #update tree with selected analytes
-                self.update_tree(self.data[self.sample_id]['norm'], norm_update = False)
-                #print(data_dict['plot_infos'])
-                #add plot info to tree
-                for plot_info in data_dict['plot_infos']:
-                    if plot_info:
-                        canvas = MplCanvas(fig=plot_info['figure'])
-                        plot_info['figure'] = canvas
-                        self.add_tree_item(plot_info)
+        
+        projects_dir = os.path.join(BASEDIR, "projects")
+        
+        # Open QFileDialog to select the project folder
+        file_dialog = QFileDialog(self, "Open Project", projects_dir)
+        file_dialog.setFileMode(QFileDialog.Directory)
+        file_dialog.setOption(QFileDialog.ShowDirsOnly, True)
+        
+        if file_dialog.exec_() == QFileDialog.Accepted:
+            selected_dir = file_dialog.selectedFiles()[0]
             
-                self.sample_ids = data_dict['sample_ids']
-                # update sample id combo
-                self.comboBoxSampleId.clear()
-                self.comboBoxSampleId.addItems(self.sample_ids)
-                self.sample_id = data_dict['sample_id']
-                #compute aspect ratio
-                self.compute_map_aspect_ratio()
+            # Ensure a valid directory is selected
+            if selected_dir:
+                project_name = os.path.basename(selected_dir)
+                project_dir = os.path.join(projects_dir, project_name)
                 
-                #inilialise tabs
-                self.init_tabs()
-                self.statusBar.showMessage("Analysis loaded successfully")  
-                
-                
-                # reset flags
-                self.update_cluster_flag = True
-                self.update_pca_flag = True
-                self.plot_flag = False
+                # Path to the pickle file
+                pickle_path = os.path.join(project_dir, f'{project_name}.pkl')
+                if os.path.exists(pickle_path):
+                    with open(pickle_path, 'rb') as file:
+                        data_dict = pickle.load(file)
+                    if data_dict:
+                        self.data = data_dict['data']
+                        self.profiling.profiles = data_dict['profiling']
+                        self.polygon.polygons = data_dict['polygons']
+                        self.styles = data_dict['styles']
+                        self.axis_dict = data_dict['axis_dict']
+                        self.sample_id = data_dict['sample_id']
+                        self.project_name = project_name
+                        
+                        self.create_tree(self.sample_id)
+                        # Update tree with selected analytes
+                        self.update_tree(self.data[self.sample_id]['norm'], norm_update=False)
+                        # Add plot info to tree
+                        for plot_info in data_dict['plot_infos']:
+                            if plot_info:
+                                canvas = MplCanvas(fig=plot_info['figure'])
+                                plot_info['figure'] = canvas
+                                self.add_tree_item(plot_info)
+                        
+                        # Update sample id combo
+                        self.comboBoxSampleId.clear()
+                        self.comboBoxSampleId.addItems(self.data.keys())
+                        self.sample_id = data_dict['sample_id']
+                        
+                        # set the comboBoxSampleId with the correct sample id
 
-                self.update_all_field_comboboxes()
-                self.update_filter_values()
 
-                self.histogram_update_bin_width()
+                        # Compute aspect ratio
+                        self.compute_map_aspect_ratio()
+                        
+                        # Initialize tabs
+                        self.init_tabs()
+                        
+                        
+                        # Reset flags
+                        self.update_cluster_flag = True
+                        self.update_pca_flag = True
+                        self.plot_flag = False
 
-                # plot first analyte as lasermap
-                self.styles['analyte map']['Colors']['ColorByField'] = 'Analyte'
-                self.comboBoxColorByField.setCurrentText(self.styles['analyte map']['Colors']['ColorByField'])
-                self.color_by_field_callback()
-                fields = self.get_field_list('Analyte')
-                self.styles['analyte map']['Colors']['Field'] = fields[0]
-                self.comboBoxColorField.setCurrentText(fields[0])
-                self.color_field_callback()
+                        self.update_all_field_comboboxes()
+                        self.update_filter_values()
 
-                self.plot_flag = True
-                self.update_SV()
+                        self.histogram_update_bin_width()
+
+                        # Plot first analyte as lasermap
+                        self.styles['analyte map']['Colors']['ColorByField'] = 'Analyte'
+                        self.comboBoxColorByField.setCurrentText(self.styles['analyte map']['Colors']['ColorByField'])
+                        self.color_by_field_callback()
+                        fields = self.get_field_list('Analyte')
+                        self.styles['analyte map']['Colors']['Field'] = fields[0]
+                        self.comboBoxColorField.setCurrentText(fields[0])
+                        self.color_field_callback()
+
+                        self.plot_flag = True
+                        self.update_SV()
+
+                        self.statusBar.showMessage("Project loaded successfully")
     
     def extract_plot_info(self, item):
         """
@@ -7132,7 +7220,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         img_item = ImageItem(image=self.array, antialias=False)
 
         #set aspect ratio of rectangle
-        img_item.setRect(self.x.nanmin(),self.y.nanmin(),self.x_range,self.y_range)
+        img_item.setRect(self.x.min(),self.y.min(),self.x_range,self.y_range)
 
         #--- add non-interactive image with integrated color ------------------
         plotWindow = graphicWidget.addPlot(0,0,title=field.replace('_',' '))
@@ -11736,8 +11824,12 @@ class MplCanvas(FigureCanvas):
     proj : str, optional
         Projection, by default None
     """    
-    def __init__(self, sub=111, parent=None, width=5, height=4, proj=None):
-        self.fig = Figure(figsize=(width, height))
+    def __init__(self,fig=None, sub=111, parent=None, width=5, height=4, proj=None):
+        #create MPLCanvas with existing figure (required when loading saved projects)
+        if fig:
+            self.fig = fig
+        else:
+            self.fig = Figure(figsize=(width, height))
         if proj is not None:
             self.axes = self.fig.add_subplot(sub, projection='radar')
         else:
@@ -13763,53 +13855,54 @@ class Profiling:
             self.clear_profiles()
 
     def clear_profiles(self):
+        if self.main_window.sample_id in self.profiles: #if profiles have been initiated for the samples
+            if self.profile_name in self.profiles[self.main_window.sample_id]: #if profiles for that sample if exists
+                # Clear all scatter plot items from the lasermaps
+                for _, (_, plot, _) in self.main_window.lasermaps.items():
+                    items_to_remove = [item for item in plot.listDataItems() if isinstance(item, ScatterPlotItem)]
+                    for item in items_to_remove:
+                        plot.removeItem(item)
 
-        if self.profile_name in self.profiles[self.main_window.sample_id]: #if profiles for that sample if exists
-            # Clear all scatter plot items from the lasermaps
-            for _, (_, plot, _) in self.main_window.lasermaps.items():
-                items_to_remove = [item for item in plot.listDataItems() if isinstance(item, ScatterPlotItem)]
-                for item in items_to_remove:
-                    plot.removeItem(item)
+                # Clear the profiles data
+                # profile.clear()
 
-            # Clear the profiles data
-            # profile.clear()
+                # Clear all data from the table
+                self.main_window.tableWidgetProfilePoints.clearContents()
 
-            # Clear all data from the table
-            self.main_window.tableWidgetProfilePoints.clearContents()
+                # Remove all rows
+                self.main_window.tableWidgetProfilePoints.setRowCount(0)
 
-            # Remove all rows
-            self.main_window.tableWidgetProfilePoints.setRowCount(0)
-
-            # Clear the profile plot widget
-            layout = self.main_window.widgetProfilePlot.layout()
-            while layout.count():
-                child = layout.takeAt(0)
-                if child.widget():
-                    child.widget().deleteLater()
+                # Clear the profile plot widget
+                layout = self.main_window.widgetProfilePlot.layout()
+                while layout.count():
+                    child = layout.takeAt(0)
+                    if child.widget():
+                        child.widget().deleteLater()
 
     def calculate_distance(self, point1, point2):
         # Simple Euclidean distance
         return np.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
 
     def update_table_widget(self, update = False):
-        profile = self.profiles[self.main_window.sample_id][self.profile_name].points
-        if self.profile_name in self.profiles: #if profiles for that sample if exists
-            self.main_window.tableWidgetProfilePoints.setRowCount(0)  # Clear existing rows
-            point_number = 0
-            first_data_point = list(profile.values())[0]
-            for data_point in first_data_point:
-                x, y, _,_ = data_point  # Assuming data_point structure
-                row_position = self.main_window.tableWidgetProfilePoints.rowCount()
-                self.main_window.tableWidgetProfilePoints.insertRow(row_position)
+        if self.main_window.sample_id in self.profiles:
+            if self.profile_name in self.profiles[self.main_window.sample_id]: #if profiles for that sample if exists
+                profile = self.profiles[self.main_window.sample_id][self.profile_name].points
+                self.main_window.tableWidgetProfilePoints.setRowCount(0)  # Clear existing rows
+                point_number = 0
+                first_data_point = list(profile.values())[0]
+                for data_point in first_data_point:
+                    x, y, _,_ = data_point  # Assuming data_point structure
+                    row_position = self.main_window.tableWidgetProfilePoints.rowCount()
+                    self.main_window.tableWidgetProfilePoints.insertRow(row_position)
 
-                # Fill in the data
-                self.main_window.tableWidgetProfilePoints.setItem(row_position, 0, QTableWidgetItem(str(point_number)))
-                self.main_window.tableWidgetProfilePoints.setItem(row_position, 1, QTableWidgetItem(str(round(x))))
-                self.main_window.tableWidgetProfilePoints.setItem(row_position, 2, QTableWidgetItem(str(round(y))))
-                point_number += 1
+                    # Fill in the data
+                    self.main_window.tableWidgetProfilePoints.setItem(row_position, 0, QTableWidgetItem(str(point_number)))
+                    self.main_window.tableWidgetProfilePoints.setItem(row_position, 1, QTableWidgetItem(str(round(x))))
+                    self.main_window.tableWidgetProfilePoints.setItem(row_position, 2, QTableWidgetItem(str(round(y))))
+                    point_number += 1
 
-            # Enable or disable buttons based on the presence of points
-            self.toggle_buttons(self.main_window.tableWidgetProfilePoints.rowCount() > 0)
+                # Enable or disable buttons based on the presence of points
+                self.toggle_buttons(self.main_window.tableWidgetProfilePoints.rowCount() > 0)
 
     def toggle_buttons(self, enable):
         self.main_window.toolButtonPointUp.setEnabled(enable)

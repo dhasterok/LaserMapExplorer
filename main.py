@@ -954,6 +954,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.lineEditPointRadius.setValidator(QIntValidator())
         self.lineEditYThresh.setValidator(QIntValidator())
         self.profiling = Profiling(self)
+        self.comboBoxProfileList.addItem('Create New Profile')
+        self.comboBoxProfileList.activated.connect(lambda: self.profiling.on_profile_selected(self.comboBoxProfileList.currentText()))
+        # create new profile or update existing
+        self.toolButtonPlotProfile.clicked.connect(lambda: self.profiling.on_profile_selected(self.comboBoxProfileList.currentText()))
 
         #select entire row
         self.tableWidgetProfilePoints.setSelectionBehavior(QTableWidget.SelectRows)
@@ -1327,7 +1331,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             # make the first plot
             self.plot_flag = True
-            self.update_SV()
+            # self.update_SV()
         elif selection == 'sample': #sample is changed
 
             #clear filter table
@@ -1342,10 +1346,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         pass
 
-    def clear_analysis(self):
-        # clears analysis
-
-        pass
+    def initialise_samples_and_tabs(self):
+        #clear the current analysis
+        self.reset_analysis()
+        self.sample_ids = [os.path.splitext(file)[0].replace('.lame','') for file in self.csv_files]
+        # set first sample id as default
+        self.comboBoxSampleId.addItems(self.sample_ids)
+        self.comboBoxSampleId.setCurrentIndex(0)
+        # Populate the sampleidcomboBox with the file names
+        self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
+        self.change_sample(0)
+        self.init_tabs()
+        self.profiling.add_samples()
+        self.polygon.add_samples()
 
     # -------------------------------------
     # File I/O related functions
@@ -1361,19 +1374,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.csv_files = [os.path.split(file)[1] for file in file_list if file.endswith('.csv')]
             if self.csv_files == []:
                 # warning dialog
+                self.statusBar.showMessage("No valid csv files found.")
                 return
-            self.comboBoxSampleId.clear()
-            self.sample_ids = [os.path.splitext(file)[0].replace('.lame','') for file in self.csv_files]
-            #print(self.csv_files)
-            self.comboBoxSampleId.addItems(self.sample_ids)
-            self.comboBoxSampleId.setCurrentIndex(0)
-            # Populate the sampleidcomboBox with the file names
-            self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
-            self.change_sample(0)
         else:
             return
+        self.initialise_samples_and_tabs()
 
-        self.init_tabs()
 
     def open_directory(self, dir_name=None):
         """Open directory with samples
@@ -1413,27 +1419,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # warning dialog
             self.statusBar.showMessage("No valid csv files found.")
             return
-        self.comboBoxSampleId.clear()
-        self.sample_ids = [os.path.splitext(file)[0].replace('.lame','') for file in self.csv_files]
-        self.comboBoxSampleId.addItems(self.sample_ids)
-        # set first sample id as default
-        self.comboBoxSampleId.setCurrentIndex(0)
-        # Populate the sampleidcomboBox with the file names
-        self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
-        self.change_sample(0)
 
-        # self.selected_directory='/Users/a1904121/LaserMapExplorer/laser_mapping/Alex_garnet_maps/processed data'
-        # self.selected_directory='/Users/shavinkalu/Library/CloudStorage/GoogleDrive-a1904121@adelaide.edu.au/.shortcut-targets-by-id/1r_MeSExALnv9lHE58GoG7pbtC8TOwSk4/laser_mapping/Alex_garnet_maps/processed data'
-        # self.selected_directory=''
-        # try:
-        #     file_list = os.listdir(self.selected_directory)
-        # except:
-        #     return
-        # self.csv_files = [file for file in file_list if file.endswith('.csv')]
-        # self.comboBoxSampleId.clear()
-        # self.sample_ids = [os.path.splitext(file)[0] for file in self.csv_files]
-        # self.comboBoxSampleId.addItems(self.sample_ids)
-        self.init_tabs()
+        self.initialise_samples_and_tabs()
 
     def populate_spot_table(self):
         """Populates spot table when spot file is opened or sample is changed
@@ -2665,12 +2652,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 # Saving data to the directory structure
                 data_dict = {
                     'data': self.data,
-                    'profiling': self.profiling.profiles,
-                    'polygons': self.polygon.polygons,
                     'styles': self.styles,
                     'axis_dict': self.axis_dict,
                     'plot_infos': self.get_plot_info_from_tree(self.treeModel),
-                    'sample_id': self.sample_id
+                    'sample_id': self.sample_id,
+                    'sample_ids': self.sample_ids
                 }
                 
                 # Save the main data dictionary as a pickle file
@@ -2784,9 +2770,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             if response == QMessageBox.Save:
                 self.save_project()
-                self.reset_analysis('sample')
+                self.reset_analysis('full')
             elif response == QMessageBox.Discard:
-                self.reset_analysis('sample')
+                self.reset_analysis('full')
             else:  # user pressed cancel
                 self.comboBoxSampleId.setCurrentText(self.sample_id)
                 return
@@ -2813,10 +2799,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         data_dict = pickle.load(file)
                     if data_dict:
                         self.data = data_dict['data']
-                        self.profiling.profiles = data_dict['profiling']
-                        self.polygon.polygons = data_dict['polygons']
                         self.styles = data_dict['styles']
                         self.axis_dict = data_dict['axis_dict']
+                        self.sample_ids = data_dict['sample_ids']
                         self.sample_id = data_dict['sample_id']
                         self.project_name = project_name
                         
@@ -2833,9 +2818,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         # Update sample id combo
                         self.comboBoxSampleId.clear()
                         self.comboBoxSampleId.addItems(self.data.keys())
+                        # set the comboBoxSampleId with the correct sample id
+                        self.comboBoxSampleId.setCurrentIndex(0)
                         self.sample_id = data_dict['sample_id']
                         
-                        # set the comboBoxSampleId with the correct sample id
+                        
 
 
                         # Compute aspect ratio
@@ -2854,6 +2841,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         self.update_filter_values()
 
                         self.histogram_update_bin_width()
+
+                        # sample id to self.profiles and load profiles
+                        for sample_id in self.data.keys():
+                            self.profiling.add_samples()
+                            self.profiling.load_profiles(project_dir, sample_id)
 
                         # Plot first analyte as lasermap
                         self.styles['analyte map']['Colors']['ColorByField'] = 'Analyte'
@@ -12985,6 +12977,12 @@ class Polygon:
         self.p_id = None           # polygon ID
         self.p_id_gen = 0 #Polygon_id generator
 
+    def add_samples(self):
+        #add sample id to dictionary
+        for sample_id in self.main_window.sample_ids:
+            if sample_id not in self.polygons:
+                self.polygons[sample_id] = {}
+
     # Method to increment p_id_gen
     def increment_pid(self):
         """Creates new polygon pid
@@ -13286,8 +13284,8 @@ class Polygon:
 class Profile:
     def __init__(self,name,sort,radius,thresh,int_dist, point_error):
         self.name = name
-        self.points = []
-        self.i_points = []
+        self.points = {}
+        self.i_points = {}
         self.sort = sort
         self.radius = radius
         self.y_axis_thresh = thresh
@@ -13311,21 +13309,117 @@ class Profiling:
         self.original_colors = {}
         self.profile_name = None
 
-        self.main_window.comboBoxProfileList.currentTextChanged.connect(self.on_profile_selected)
+    def add_samples(self):
+        #add sample id to dictionary
+        for sample_id in self.main_window.sample_ids:
+            if sample_id not in self.profiles:
+                self.profiles[sample_id] = {}
+        
 
-    def save_profiles(self,project_dir, sample_id):
+    # def save_profiles(self,project_dir, sample_id):
+    #     if sample_id in self.profiles:
+    #         for profile_name, profile in self.profiles[sample_id].items():
+    #             file_name =  os.path.join(project_dir,sample_id,f'{profile_name}.prfl')
+    #             with open(file_name, 'wb') as file:
+    #                 pickle.dump(profile, file)
+    #         print("Profile saved successfully.")
+
+
+
+    def save_profiles(self, project_dir, sample_id):
         if sample_id in self.profiles:
             for profile_name, profile in self.profiles[sample_id].items():
-                file_name =  os.path.join(project_dir,sample_id,f'{profile_name}.prfl')
+                file_name = os.path.join(project_dir, sample_id, f'{profile_name}.prfl')
+                serializable_profile = self.transform_profile_for_pickling(profile)
                 with open(file_name, 'wb') as file:
-                    pickle.dump(profile, file)
+                    pickle.dump(serializable_profile, file)
             print("Profile saved successfully.")
+
+    def load_profiles(self, project_dir, sample_id):
+        directory = os.path.join(project_dir, sample_id)
+        for file_name in os.listdir(directory):
+            if file_name.endswith(".prfl"):
+                file_path = os.path.join(directory, file_name)
+                with open(file_path, 'rb') as file:
+                    profile_name = os.path.basename(file_path).split('.')[0]
+                    serializable_profile = pickle.load(file)
+                    profile = self.reconstruct_profile(serializable_profile)
+                    self.profiles[sample_id][profile_name] = profile
+        self.populate_combobox()
+        print("All profiles loaded successfully.")
+
+    def transform_profile_for_pickling(self, profile):
+        serializable_profile = {
+            'name': profile.name,
+            'sort': profile.sort,
+            'radius': profile.radius,
+            'y_axis_thresh': profile.y_axis_thresh,
+            'int_dist': profile.int_dist,
+            'point_error': profile.point_error,
+            'points': {},
+            'i_points': {}
+        }
+        for (k, v), points in profile.points.items():
+            serializable_points = []
+            for point in points:
+                x, y, circ_val, scatter, interpolate = point
+                scatter_state = self.extract_scatter_plot_state(scatter)
+                serializable_points.append((x, y, circ_val, scatter_state, interpolate))
+            serializable_profile['points'][(k, v)] = serializable_points
+        for (k, v), i_points in profile.i_points.items():
+            serializable_i_points = []
+            for point in i_points:
+                x, y, circ_val, scatter, interpolate = point
+                scatter_state = self.extract_scatter_plot_state(scatter)
+                serializable_i_points.append((x, y, circ_val, scatter_state, interpolate))
+            serializable_profile['i_points'][(k, v)] = serializable_i_points
+        return serializable_profile
+
+    def extract_scatter_plot_state(self, scatter):
+        data = scatter.getData()
+        symbol = scatter.opts['symbol']
+        size = scatter.opts['size']
+        z_value = scatter.zValue()
+        return {'data': data, 'symbol': symbol, 'size': size, 'z_value': z_value}
+
+    def recreate_scatter_plot(self, state):
+        scatter = ScatterPlotItem(state['data'][0], state['data'][1], symbol=state['symbol'], size=state['size'])
+        scatter.setZValue(state['z_value'])
+        return scatter
+
+
+
+    def reconstruct_profile(self, serializable_profile):
+        profile = Profile(
+            serializable_profile['name'],
+            serializable_profile['sort'],
+            serializable_profile['radius'],
+            serializable_profile['y_axis_thresh'],
+            serializable_profile['int_dist'],
+            serializable_profile['point_error']
+        )
+        for (k, v), points in serializable_profile['points'].items():
+            reconstructed_points = []
+            for point in points:
+                x, y, circ_val, scatter_state, interpolate = point
+                scatter = self.recreate_scatter_plot(scatter_state)
+                reconstructed_points.append((x, y, circ_val, scatter, interpolate))
+            profile.points[(k, v)] = reconstructed_points
+        for (k, v), i_points in serializable_profile['i_points'].items():
+            reconstructed_i_points = []
+            for point in i_points:
+                x, y, circ_val, scatter_state, interpolate = point
+                scatter = self.recreate_scatter_plot(scatter_state)
+                reconstructed_i_points.append((x, y, circ_val, scatter, interpolate))
+            profile.i_points[(k, v)] = reconstructed_i_points
+        return profile
     
     def populate_combobox(self):
         self.main_window.comboBoxProfileList.clear()
         self.main_window.comboBoxProfileList.addItem('Create New Profile')
         for profile_name in self.profiles[self.main_window.sample_id].keys():
             self.main_window.comboBoxProfileList.addItem(profile_name)
+        
 
     def load_profiles_from_directory(self, project_dir, sample_id):
         directory = os.path.join(project_dir,sample_id)
@@ -13347,11 +13441,11 @@ class Profiling:
                     QMessageBox.warning(self.main_window, 'Error', 'Profile name already exists!')
                 else:
                     self.clear_profiles()
-                    sort = self.main_window.comboBoxProfileSort.getCurrentText(),
+                    sort = self.main_window.comboBoxProfileSort.currentText()
                     radius = self.main_window.lineEditPointRadius.text() 
                     thresh = self.main_window.lineEditPointRadius.text()
                     int_dist = self.main_window.lineEditIntDist.text()
-                    point_error = self.main_window.comboBoxPointType.getCurrentText()
+                    point_error = self.main_window.comboBoxPointType.currentText()
 
                     # create new profile instance
                     self.profiles[self.main_window.sample_id][new_profile_name] = Profile(new_profile_name,sort,radius,thresh,int_dist, point_error)
@@ -13364,6 +13458,14 @@ class Profiling:
         else:
             self.profile_name = profile_name
             self.plot_existing_profile(self.main_window.plot)
+            profile = self.profiles[self.main_window.sample_id][self.profile_name]
+            self.main_window.comboBoxProfileSort.setCurrentText(profile.sort)
+            self.main_window.lineEditPointRadius.setText(profile.radius) 
+            self.main_window.lineEditPointRadius.setText(profile.y_axis_thresh)
+            self.main_window.lineEditIntDist.setText(profile.int_dist)
+            self.main_window.comboBoxPointType.setCurrentText(profile.point_error)
+            self.plot_profiles()
+            self.update_table_widget()
 
     def plot_profile_scatter(self, event, array,k,v, plot, x, y, x_i, y_i):
         #k is key (name of Analyte)
@@ -13372,8 +13474,6 @@ class Profiling:
         #     self.profiles[self.main_window.sample_id] = {}
         #     self.i_profiles[self.main_window.sample_id] = {}
         
-        # create new profile or update existing
-        self.on_profile_selected(self.main_window.comboBoxProfileList.currentText())
         self.array_x = array.shape[1]
         self.array_y = array.shape[0]
 
@@ -13422,7 +13522,7 @@ class Profiling:
                 #update self.point_index index of self.profiles[self.self.profile_name] with new point data
                 if (k,v) in profile:
 
-                    profile[k,v][self.point_index] = (x,y, circ_val, interpolate)
+                    profile[k,v][self.point_index] = (x,y, circ_val,scatter, interpolate)
 
 
                 if self.main_window.canvasWindow.currentIndex() == self.main_window.canvas_tab['mv']:
@@ -13438,7 +13538,7 @@ class Profiling:
                                 value = array[c[0], c[1]]
                                 circ_val.append( value)
                             if (k,v) in profile:
-                                profile[k,v][self.point_index] = (x,y, circ_val, interpolate)
+                                profile[k,v][self.point_index] = (x,y, circ_val,scatter, interpolate)
 
                 #update plot and table widget
                 self.main_window.plot_profiles()
@@ -13478,9 +13578,9 @@ class Profiling:
 
             #add values within circle of radius in profile
             if (k,v) in profile:
-                profile[(k,v)].append((x,y,circ_val, interpolate))
+                profile[(k,v)].append((x,y,circ_val,scatter, interpolate))
             else:
-                profile[(k,v)] = [(x,y, circ_val, interpolate)]
+                profile[(k,v)] = [(x,y, circ_val,scatter, interpolate)]
 
 
             if self.main_window.canvasWindow.currentIndex() == self.main_window.canvas_tab['mv']:
@@ -13498,19 +13598,20 @@ class Profiling:
                         if (k,v) in profile:
                             profile[k,v].append((x,y,circ_val, interpolate))
                         else:
-                            profile[k,v] = [(x,y, circ_val, interpolate)]
+                            profile[k,v] = [(x,y, circ_val,scatter, interpolate)]
 
             self.plot_profiles()
             self.update_table_widget()
     
     def plot_existing_profile(self,plot):
-        profile = self.profiles[self.main_window.sample_id][self.profile_name].points        
-        for (k,v) in profile:
-            for x,y,_,_ in profile[k,v]:
-                # Create a scatter plot items
-                scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
-                scatter.setZValue(1e9)
-                plot.addItem(scatter)
+        if self.profile_name in self.profiles[self.main_window.sample_id]:
+            profile = self.profiles[self.main_window.sample_id][self.profile_name].points        
+            for (k,v) in profile:
+                for x,y,_,_,_ in profile[k,v]:
+                    # Create a scatter plot items
+                    scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
+                    scatter.setZValue(1e9)
+                    plot.addItem(scatter)
 
     def interpolate_points(self, interpolation_distance,radius):
         
@@ -13948,7 +14049,7 @@ class Profiling:
         # Simple Euclidean distance
         return np.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
 
-    def update_table_widget(self, update = False):
+    def  update_table_widget(self, update = False):
         if self.main_window.sample_id in self.profiles:
             if self.profile_name in self.profiles[self.main_window.sample_id]: #if profiles for that sample if exists
                 profile = self.profiles[self.main_window.sample_id][self.profile_name].points
@@ -13956,7 +14057,7 @@ class Profiling:
                 point_number = 0
                 first_data_point = list(profile.values())[0]
                 for data_point in first_data_point:
-                    x, y, _,_ = data_point  # Assuming data_point structure
+                    x, y, _,_,_ = data_point  # Assuming data_point structure
                     row_position = self.main_window.tableWidgetProfilePoints.rowCount()
                     self.main_window.tableWidgetProfilePoints.insertRow(row_position)
 

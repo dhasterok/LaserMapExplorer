@@ -21,3 +21,5 @@ self.lineEditIntDist
 self.lineEditSeed
 self.lineEditFMin
 self.lineEditFMax
+self.lineEditDecayConstant
+self.lineEditDecayConstantUncertainty

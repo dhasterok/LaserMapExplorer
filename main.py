@@ -984,6 +984,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolButtonZoom.setCheckable(True)
         self.toolButtonZoom.setCheckable(True)
 
+        self.comboBoxDatingMethod.activated.connect(self.callback_dating_method)
+
+        self.comboBoxIsotopeAgeFieldType1.activated.connect(lambda: self.update_field_combobox(self.comboBoxIsotopeAgeFieldType1, self.comboBoxIsotopeAgeField1))
+        self.comboBoxIsotopeAgeFieldType2.activated.connect(lambda: self.update_field_combobox(self.comboBoxIsotopeAgeFieldType2, self.comboBoxIsotopeAgeField2))
+        self.comboBoxIsotopeAgeFieldType3.activated.connect(lambda: self.update_field_combobox(self.comboBoxIsotopeAgeFieldType3, self.comboBoxIsotopeAgeField3))
+
+        self.pushButtonComputeAge.clicked.connect(self.compute_date_map)
+
         # Styling Tab
         #-------------------------
         # set style theme
@@ -9585,6 +9593,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # calculator
         self.update_field_combobox(self.comboBoxCalcFieldType, self.comboBoxCalcField)
 
+        # dating
+        self.update_field_combobox(self.comboBoxIsotopeAgeFieldType1, self.comboBoxIsotopeAgeField1)
+        self.update_field_combobox(self.comboBoxIsotopeAgeFieldType2, self.comboBoxIsotopeAgeField2)
+        self.update_field_combobox(self.comboBoxIsotopeAgeFieldType3, self.comboBoxIsotopeAgeField3)
+
     # gets the set of fields
     def get_field_list(self, set_name='Analyte'):
         """Gets the fields associated with a defined set
@@ -9894,6 +9907,58 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # self.lineEditCbarLabel.setText(value_dict['c']['label'])
 
         return value_dict['x'], value_dict['y'], value_dict['z'], value_dict['c']
+
+    def callback_dating_method(self):
+        """Updates isotopes and decay constants when dating method changes.
+
+        Default decay constants are as follows:
+        * Lu-Hf : :math:`1.867 \pm 0.008 \times 10^{-5}` Ma (Sonderlund et al., EPSL, 2004, https://doi.org/10.1016/S0012-821X(04)00012-3)
+        * Re-Os : :math:`1.666 \pm 0.005 \times 10^{-5}` Ma (Selby et al., GCA, 2007, https://doi.org/10.1016/j.gca.2007.01.008)
+        """        
+        match self.comboBoxDatingMethod.currentText():
+            case "Lu-Hf":
+                self.labelIsotope1.setText("Lu175")
+                self.labelIsotope2.setText("Hf176")
+                self.labelIsotope3.setText("Hf178")
+                # Sonderlund et al., EPSL, 2004, https://doi.org/10.1016/S0012-821X(04)00012-3
+                self.lineEditDecayConstant.value = 1.867e-5 # Ma
+                self.lineEditDecayConstantUncertainty.value = 0.008e-5 # Ma
+            case "Re-Os":
+                self.labelIsotope1.setText("Re187")
+                self.labelIsotope2.setText("Os187")
+                self.labelIsotope3.setText("Os188")
+                # Selby et al., GCA, 2007, https://doi.org/10.1016/j.gca.2007.01.008
+                self.lineEditDecayConstant.value = 1.666e-5 # Ma
+                self.lineEditDecayConstantUncertainty.value = 0.005e-5 # Ma
+
+    def compute_date_map(self):
+        """Compute one of several date maps"""
+        decay_constant = self.lineEditDecayConstant.value
+        method = self.comboBoxDatingMethod.currentText()
+        match method:
+            case "Lu-Hf":
+                Lu175 = self.get_map_data(self.sample_id, self.comboBoxIsotopeAgeField1.currentText(), self.comboBoxIsotopeAgeFieldType1.currentText())
+                Hf176 = self.get_map_data(self.sample_id, self.comboBoxIsotopeAgeField2.currentText(), self.comboBoxIsotopeAgeFieldType2.currentText())
+                Hf178 = self.get_map_data(self.sample_id, self.comboBoxIsotopeAgeField3.currentText(), self.comboBoxIsotopeAgeFieldType3.currentText())
+
+                if self.data[self.sample_id]['computed_data']['Calculated'].empty:
+                    self.data[self.sample_id]['computed_data']['Calculated'][['X','Y']] = self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
+
+                date_map = np.log((Hf176['array'].values/Hf178['array'].values - 3.55)/(Lu175['array'].values/Hf178['array'].values) + 1) / decay_constant 
+
+            case "Re-Os":
+                pass
+
+        # save date_map to Calculated dataframe
+        self.data[self.sample_id]['computed_data']['Calculated'].loc[self.data[self.sample_id]['mask'],method] = date_map
+        
+        # update styles and plot
+        self.comboBoxColorByField.setCurrentText('Calculated')
+        self.color_by_field_callback()
+        self.comboBoxColorField.setCurrentText(method)
+        self.set_style_widgets(plot_type='analyte map')
+
+        self.update_SV()
 
     def get_processed_data(self):
         """Gets the processed data for analysis

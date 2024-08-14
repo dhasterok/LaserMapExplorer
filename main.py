@@ -13774,7 +13774,7 @@ class PolygonManager:
 # -------------------------------
 class Profile:
     def __init__(self,name,sort,radius,thresh,int_dist, point_error):
-        self.name = name
+        self.name = name  
         self.points = {}
         self.i_points = {}
         self.sort = sort
@@ -13956,6 +13956,18 @@ class Profiling:
             self.plot_profiles()
             self.update_table_widget()
 
+    def cart_to_dist(self,pixel:int,direction = 'y') -> float:
+        if direction == 'x':
+            return pixel*self.main_window.array_size[1]/self.main_window.x_range
+        else:
+            return pixel*self.main_window.array_size[0]/self.main_window.y_range
+    
+    def dist_to_cart(self,dist:float, direction = 'y')-> int:
+        if direction == 'x':
+            return round(dist*self.main_window.dx)
+        else:
+            return round(dist*self.main_window.dy)
+
     def plot_profile_scatter(self, event, array,k,v, plot, x, y, x_i, y_i):
         #k is key (name of Analyte)
         #create profile dict particular sample if it doesnt exisist
@@ -13963,9 +13975,8 @@ class Profiling:
         #     self.profiles[self.main_window.sample_id] = {}
         #     self.i_profiles[self.main_window.sample_id] = {}
         
-        self.array_x = array.shape[1]
-        self.array_y = array.shape[0]
-
+        self.array_x = array.shape[1] #no of colmns
+        self.array_y = array.shape[0] #no of rows
         interpolate = False
         radius= int(self.main_window.lineEditPointRadius.text())
 
@@ -14001,12 +14012,24 @@ class Profiling:
                 # Find all points within the specified radius
                 circ_val = []
                 circ_cord = []
-                for i in range(max(0, y_i - radius), min(self.array_y, y_i + radius + 1)):
-                    for j in range(max(0, x_i - radius), min(self.array_x , x_i + radius + 1)):
-                        if np.sqrt((x_i - j)**2 + (y_i - i)**2) <= radius:
+
+                p_radius_y = self.dist_to_cart(radius, 'y') # pixel radius in pixels y direction
+                p_radius_x = self.dist_to_cart(radius, 'x') # pixel radius in pixels x direction
+                
+                for i in range(max(0, y_i - p_radius_y), min(self.array_y, y_i + p_radius_y + 1)):
+                    for j in range(max(0, x_i - p_radius_x), min(self.array_x , x_i + p_radius_x + 1)):
+                        if self.calculate_distance(self.cart_to_dist(y_i - i)**2 , self.cart_to_dist(x_i - j)**2) <= radius:
                             value = array[i, j]
                             circ_cord.append([i, j])
                             circ_val.append( value)
+
+
+                # for i in range(max(0, y_i - radius), min(self.array_y, y_i + radius + 1)):
+                #     for j in range(max(0, x_i - radius), min(self.array_x , x_i + radius + 1)):
+                #         if np.sqrt((x_i - j)**2 + (y_i - i)**2) <= radius:
+                #             value = array[i, j]
+                #             circ_cord.append([i, j])
+                #             circ_val.append( value)
 
                 #update self.point_index index of self.profiles[self.self.profile_name] with new point data
                 if (k,v) in profile:
@@ -14058,9 +14081,12 @@ class Profiling:
             # Find all points within the specified radius
             circ_val = []
             circ_cord = []
-            for i in range(max(0, y_i - radius), min(self.array_y, y_i + radius + 1)):
-                for j in range(max(0, x_i - radius), min(self.array_x , x_i + radius + 1)):
-                    if np.sqrt((x_i - j)**2 + (y_i - i)**2) <= radius:
+            p_radius_y = self.dist_to_cart(radius, 'y') # pixel radius in pixels y direction
+            p_radius_x = self.dist_to_cart(radius, 'x') # pixel radius in pixels x direction
+            
+            for i in range(max(0, y_i - p_radius_y), min(self.array_y, y_i + p_radius_y + 1)):
+                for j in range(max(0, x_i - p_radius_x), min(self.array_x , x_i + p_radius_x + 1)):
+                    if self.calculate_distance(self.cart_to_dist(y_i - i) , self.cart_to_dist(x_i - j)) <= radius: # filter values that lies within radius
                         value = array[i, j]
                         circ_cord.append([i, j])
                         circ_val.append( value)
@@ -14127,15 +14153,24 @@ class Profiling:
                     dist = self.calculate_distance(start_point, end_point)
 
                     # Determine the number of interpolations based on the distance
-                    num_interpolations = max(int(dist / interpolation_distance) - 1, 0)
+                    num_interpolations = max(int(dist / interpolation_distance), 0)
 
-                    # Generate linearly spaced points between start_point and end_point
-                    for t in np.linspace(0, 1, num_interpolations + 2)[1:-1]:  # Exclude the endpoints
-                        x = start_point[0] + t * (end_point[0] - start_point[0])
-                        y = start_point[1] + t * (end_point[1] - start_point[1])
+                    # Calculate the unit vector in the direction from start_point to end_point
+                    dx = (end_point[0] - start_point[0]) / dist
+                    dy = (end_point[1] - start_point[1]) / dist
 
-                        x_i = round(x*self.array_x /self.main_window.x_range) #index points
-                        y_i = round(y*self.array_y/self.main_window.y_range)
+                    # # Generate linearly spaced points between start_point and end_point
+                    # for t in np.linspace(0, 1, num_interpolations + 2)[1:-1]:  # Exclude the endpoints
+                    #     x = start_point[0] + t * (end_point[0] - start_point[0])
+                    #     y = start_point[1] + t * (end_point[1] - start_point[1])
+
+                    for t in range(0, num_interpolations+1):
+                        x = start_point[0] + t * interpolation_distance * dx
+                        y = start_point[1] + t * interpolation_distance * dy
+
+                        x_i = self.dist_to_cart(x,'x') #index points
+                        y_i = self.dist_to_cart(y,'y')
+
                         # Add the scatter item to all other plots and save points in profile
                         _, p, array= self.main_window.lasermaps[(k,v)]
                         if v==self.main_window.canvasWindow.currentIndex() and self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #only add scatters to other lasermaps of same sample
@@ -14145,11 +14180,21 @@ class Profiling:
                             p.addItem(scatter)
                             # Find all points within the specified radius
                             circ_val = []
-                            for i in range(max(0, y_i - radius), min(self.array_y, y_i + radius + 1)):
-                                for j in range(max(0, x_i - radius), min(self.array_x , x_i + radius + 1)):
-                                    if np.sqrt((x_i - j)**2 + (y_i - i)**2) <= radius:
+
+                            p_radius_y = self.dist_to_cart(radius, 'y') # pixel radius in pixels y direction
+                            p_radius_x = self.dist_to_cart(radius, 'x') # pixel radius in pixels x direction
+                            
+                            for i in range(max(0, y_i - p_radius_y), min(self.array_y, y_i + p_radius_y + 1)):
+                                for j in range(max(0, x_i - p_radius_x), min(self.array_x , x_i + p_radius_x + 1)):
+                                    if self.calculate_distance(self.cart_to_dist(y_i - i)**2 , self.cart_to_dist(x_i - j)**2) <= radius:
                                         value = array[i, j]
-                                        circ_val.append(value)
+                                        circ_val.append( value)
+
+                            # for i in range(max(0, y_i - radius), min(self.array_y, y_i + radius + 1)):
+                            #     for j in range(max(0, x_i - radius), min(self.array_x , x_i + radius + 1)):
+                            #         if np.sqrt((x - j * self.main_window.x_range / self.array_x)**2 + (y - i * self.main_window.y_range / self.array_y)**2)  <= radius:
+                            #             value = array[i, j]
+                            #             circ_val.append(value)
                             if (k,v) in i_profile:
                                 i_profile[(k,v)].append((x,y,circ_val, scatter, interpolate))
 
@@ -14185,10 +14230,10 @@ class Profiling:
                         scatter_item = point[3]  # Access the scatter plot item
                         interpolate =point[4]
                         if interpolate:
-                            _, plot, _, _ = self.main_window.lasermaps[(k,v)]
+                            _, plot, _ = self.main_window.lasermaps[(k,v)]
                             plot.removeItem(scatter_item)
 
-    def plot_profiles(self,interpolate= False, sort_axis=None):
+    def plot_profiles(self, interpolate= False, sort_axis=None):
         profile = self.profiles[self.main_window.sample_id][self.profile_name].points
         i_profile = self.profiles[self.main_window.sample_id][self.profile_name].i_points
         def process_points( points, sort_axis):
@@ -14552,7 +14597,12 @@ class Profiling:
 
     def calculate_distance(self, point1, point2):
         # Simple Euclidean distance
-        return np.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
+        if isinstance(point1, (tuple, list)) and isinstance(point2, (tuple, list)):
+        # Simple Euclidean distance for 2D points
+            return np.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
+        else:
+            return np.sqrt((point1**2 + point2**2))
+        
 
     def  update_table_widget(self, update = False):
         if self.main_window.sample_id in self.profiles:

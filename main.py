@@ -3402,7 +3402,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             Denominator of ratio, by default None
         update : bool, optional
             Update the scal information of the data, by default False
-        """        
+        """
+        print('update_norm')
         if analyte_1: #if normalising single analyte
             if not analyte_2: #not a ratio
                 self.data[sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['sample_id']==sample_id)
@@ -9846,16 +9847,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 #perform scaling for groups of analytes with same norm parameter
                 
                 if norm == 'log':
+                    df['array'] = np.where(~np.isnan(df['array']), np.log10(df['array']), df['array'])
 
-                    df ['array'] = np.log10(df ['array'], where=~np.isnan(df ['array']))
                     # print(self.processed_analyte_data[sample_id].loc[:10,analytes])
                     # print(self.data[sample_id]['processed_data'].loc[:10,analytes])
                 elif norm == 'logit':
                     # Handle division by zero and NaN values
                     with np.errstate(divide='ignore', invalid='ignore'):
-                        df ['array'] = np.log10(df ['array'] / (10**6 - df ['array']), where=~np.isnan(df ['array']))
-                        
-                
+                        df['array'] = np.where(~np.isnan(df['array']), np.log10(df['array'] / (10**6 - df['array'])))
                 
                 # normalize
                 if 'normalized' in field_type:
@@ -9874,14 +9873,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 norm = self.data[sample_id]['ratio_info'].loc['norm',(self.data[sample_id]['ratio_info']['analyte_1']==field_1 & self.data[sample_id]['ratio_info']['analyte_2']==field_2)].iloc[0]
 
                 if norm == 'log':
-               
-                    df ['array'] = np.log10(df ['array'], where=~np.isnan(df ['array']))
+                    df ['array'] = np.where(~np.isnan(df['array']), np.log10(df ['array']))
                     # print(self.processed_analyte_data[sample_id].loc[:10,analytes])
                     # print(self.data[sample_id]['processed_data'].loc[:10,analytes])
                 elif norm == 'logit':
                     # Handle division by zero and NaN values
                     with np.errstate(divide='ignore', invalid='ignore'):
-                        df ['array'] = np.log10(df ['array'] / (10**6 - df ['array']), where=~np.isnan(df ['array']))               
+                        df['array'] = np.where(~np.isnan(df['array']), np.log10(df['array'] / (10**6 - df['array'])))
                 # normalize
                 if 'normalized' in field_type:
                     refval_1 = self.ref_chem[re.sub(r'\d', '', field_1).lower()]
@@ -10071,13 +10069,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if norm == 'log':
 
                 # np.nanlog handles NaN value
-                df_filtered[filtered_analytes] = np.log10(filtered_data, where=~np.isnan(filtered_data))
+                df_filtered[filtered_analytes] = np.where(~np.isnan(filtered_data), np.log10(filtered_data))
                 # print(self.processed_analyte_data[sample_id].loc[:10,analytes])
                 # print(self.data[sample_id]['processed_data'].loc[:10,analytes])
             elif norm == 'logit':
                 # Handle division by zero and NaN values
                 with np.errstate(divide='ignore', invalid='ignore'):
-                    df_filtered[filtered_analytes] = np.log10(filtered_data / (10**6 - filtered_data), where=~np.isnan(filtered_data))
+                    df_filtered[filtered_analytes] = np.where(~np.isnan(filtered_data), np.log10(filtered_data / (10**6 - filtered_data)))
 
         # Combine the two masks to create a final mask
         nan_mask = df_filtered.notna().all(axis=1)

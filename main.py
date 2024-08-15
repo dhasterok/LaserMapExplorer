@@ -574,7 +574,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.left_tab['ndim']: [0, 'TEC', 'Radar'],
             self.left_tab['multidim']: [0, 'variance','vectors','pca scatter','pca heatmap','PCA Score'],
             self.left_tab['cluster']: [0, 'Cluster', 'Cluster Score'],
-            self.left_tab['special']: [0, 'profile', 'analyte map', 'gradient map', 'Cluster Score', 'PCA Score']}
+            self.left_tab['special']: [0,'analyte map', 'gradient map', 'Cluster Score', 'PCA Score', 'profile']}
 
         self.styles = {}
         self.load_theme_names()
@@ -669,8 +669,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxNDimRefMaterial.setCurrentIndex(0)
         self.comboBoxRefMaterial.activated.connect(lambda: self.change_ref_material(self.comboBoxRefMaterial, self.comboBoxNDimRefMaterial))
         self.comboBoxNDimRefMaterial.activated.connect(lambda: self.change_ref_material(self.comboBoxNDimRefMaterial, self.comboBoxRefMaterial))
+        self.comboBoxRefMaterial.setCurrentIndex(0)
         self.ref_chem = None
         self.change_ref_material(self.comboBoxRefMaterial, self.comboBoxNDimRefMaterial)
+        
 
         self.comboBoxCorrelationMethod.activated.connect(self.correlation_method_callback)
         self.checkBoxCorrelationSquared.stateChanged.connect(self.correlation_squared_callback)
@@ -3402,8 +3404,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             Denominator of ratio, by default None
         update : bool, optional
             Update the scal information of the data, by default False
-        """
-        print('update_norm')
+        """        
         if analyte_1: #if normalising single analyte
             if not analyte_2: #not a ratio
                 self.data[sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['sample_id']==sample_id)
@@ -3964,6 +3965,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.labelGradient.setEnabled(False)
 
                 self.actionNoiseReduction.setEnabled(False)
+
+                self.update_SV()
             case _:
                 # set option 1
                 self.spinBoxNoiseOption1.blockSignals(True)
@@ -6942,6 +6945,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if style['Colors']['Direction'] == 'none':
             return
 
+        if grouplabels is None or groupcolors is None:
+            return
+
         # discrete colormap - plot as a legend
         if cbartype == 'discrete':
             # create patches for legend items
@@ -6993,6 +6999,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         fraction=0.1,
                         alpha=1
                     )
+            else:
+                # should never reach this point
+                assert style['Colors']['Direction'] == 'none', "Colorbar direction is set to none, but is trying to generate anyway."
+                return
 
             cbar.set_label(style['Colors']['CLabel'], size=style['Text']['FontSize'])
             cbar.ax.tick_params(labelsize=style['Text']['FontSize'])
@@ -7007,7 +7017,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #else:
         #    print('(add_colorbar) Unknown type: '+cbartype)
 
-    def color_norm(self, style, n=None):
+    def color_norm(self, style, N=None):
         """Normalize colors for colormap
 
         Parameters
@@ -7030,8 +7040,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             case 'log':
                 norm = colors.LogNorm(vmin=style['Colors']['CLim'][0], vmax=style['Colors']['CLim'][1])
             case 'discrete':
-                boundaries = np.arange(-0.5, n, 1)
-                norm = colors.BoundaryNorm(boundaries, n, clip=True)
+                if N is None:
+                    QMessageBox(self,"Warning","N must not be None when color scale is discrete.")
+                    return
+                boundaries = np.arange(-0.5, N, 1)
+                norm = colors.BoundaryNorm(boundaries, N, clip=True)
 
         #scalarMappable = plt.cm.ScalarMappable(cmap=self.get_colormap(), norm=norm)
 
@@ -7827,6 +7840,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #print('plot_scatter')
         plot_type = self.comboBoxPlotType.currentText()
         style = self.styles[plot_type]
+
+        if self.comboBoxFieldX.currentText() == "" or self.comboBoxFieldY.currentText() == "":
+            return
 
         if canvas is None:
             plot_flag = True
@@ -9837,6 +9853,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #crop plot if filter applied
         df = self.data[sample_id]['raw_data'][['X','Y']][axis_mask].reset_index(drop=True)
 
+        print(field_type)
+
         match field_type:
             case 'Analyte' | 'Analyte (normalized)':
                 # unnormalized
@@ -9919,12 +9937,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             case 'histogram':
                 value_dict['x']['field'] = self.comboBoxHistField.currentText()
                 value_dict['x']['type'] = self.comboBoxHistFieldType.currentText()
-                value_dict['y']['field'] = ''
-                value_dict['y']['type'] = ''
-                value_dict['z']['field'] = ''
-                value_dict['z']['type'] = ''
-                value_dict['c']['field'] = ''
-                value_dict['c']['type'] = ''
+                value_dict['y']['field'] = None
+                value_dict['y']['type'] = None
+                value_dict['z']['field'] = None
+                value_dict['z']['type'] = None
+                value_dict['c']['field'] = None
+                value_dict['c']['type'] = None
             case 'scatter' | 'heatmap' | 'ternary map':
                 value_dict['x']['field'] = self.comboBoxFieldX.currentText()
                 value_dict['x']['type'] = self.comboBoxFieldTypeX.currentText()
@@ -9940,8 +9958,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 value_dict['y']['field'] = f'PC{self.spinBoxPCY.value()}'
                 value_dict['y']['type'] = 'PCA Score'
 
-                value_dict['z']['field'] = ''
-                value_dict['z']['type'] = ''
+                value_dict['z']['field'] = None
+                value_dict['z']['type'] = None
                 value_dict['c']['field'] = self.comboBoxColorField.currentText()
                 value_dict['c']['type'] = self.comboBoxColorByField.currentText()
             case _:
@@ -9949,6 +9967,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 return
 
         for k, v in value_dict.items():
+            # only need to setup when fields exist
+            if v['field'] is None:
+                continue
+
             match v['type']:
                 case 'Analyte' | 'Analyte (normalized)':
                     df = self.get_map_data(self.sample_id, field=v['field'], field_type=v['type'])
@@ -9969,9 +9991,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             value_dict[k]['array'] = df['array'][self.data[self.sample_id]['mask']].values if not df.empty else []
 
             # set axes widgets
-            if v['field'] == '':
-                continue
-
             if v['field'] not in self.axis_dict.keys():
                 self.initialize_axis_values(v['type'], v['field'])
 
@@ -9998,18 +10017,42 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         match self.comboBoxDatingMethod.currentText():
             case "Lu-Hf":
                 self.labelIsotope1.setText("Lu175")
+                if "Lu175" in self.analyte_list and self.comboBoxIsotopeAgeFieldType1.currentText() == "Analyte":
+                    self.comboBoxIsotopeAgeField1.setCurrentText("Lu175")
                 self.labelIsotope2.setText("Hf176")
+                if "Hf176" in self.analyte_list and self.comboBoxIsotopeAgeFieldType2.currentText() == "Analyte":
+                    self.comboBoxIsotopeAgeField2.setCurrentText("Hf176")
                 self.labelIsotope3.setText("Hf178")
+                if "Hf178" in self.analyte_list and self.comboBoxIsotopeAgeFieldType3.currentText() == "Analyte":
+                    self.comboBoxIsotopeAgeField3.setCurrentText("Hf178")
+
                 # Sonderlund et al., EPSL, 2004, https://doi.org/10.1016/S0012-821X(04)00012-3
                 self.lineEditDecayConstant.value = 1.867e-5 # Ma
                 self.lineEditDecayConstantUncertainty.value = 0.008e-5 # Ma
             case "Re-Os":
                 self.labelIsotope1.setText("Re187")
+                if "Re187" in self.analyte_list and self.comboBoxIsotopeAgeFieldType1.currentText() == "Analyte":
+                    self.comboBoxIsotopeAgeField1.setCurrentText("Re187")
                 self.labelIsotope2.setText("Os187")
+                if "Os187" in self.analyte_list and self.comboBoxIsotopeAgeFieldType2.currentText() == "Analyte":
+                    self.comboBoxIsotopeAgeField2.setCurrentText("Os187")
                 self.labelIsotope3.setText("Os188")
+                if "Os188" in self.analyte_list and self.comboBoxIsotopeAgeFieldType3.currentText() == "Analyte":
+                    self.comboBoxIsotopeAgeField3.setCurrentText("Os188")
+
                 # Selby et al., GCA, 2007, https://doi.org/10.1016/j.gca.2007.01.008
                 self.lineEditDecayConstant.value = 1.666e-5 # Ma
                 self.lineEditDecayConstantUncertainty.value = 0.005e-5 # Ma
+            case "Sm-Nd":
+                pass
+            case "Rb-Sr":
+                pass
+            case "U-Pb":
+                pass
+            case "Th-Pb":
+                pass
+            case "Pb-Pb":
+                pass
 
     def compute_date_map(self):
         """Compute one of several date maps"""
@@ -10036,9 +10079,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxColorByField.setCurrentText('Calculated')
         self.color_by_field_callback()
         self.comboBoxColorField.setCurrentText(method)
-        self.set_style_widgets(plot_type='analyte map')
+        self.color_field_callback()
+        #self.set_style_widgets(plot_type='analyte map')
 
-        self.update_SV()
+        #self.update_SV()
 
     def get_processed_data(self):
         """Gets the processed data for analysis

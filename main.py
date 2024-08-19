@@ -5257,7 +5257,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # set color scale options to linear/log
             self.comboBoxColorScale.clear()
             self.comboBoxColorScale.addItems(['linear','log'])
+            self.styles[plot_type]['Colors']['CScale'] = 'linear'
             self.comboBoxColorScale.setCurrentText(self.styles[plot_type]['Colors']['CScale'])
+            
         self.comboBoxColorScale.setCurrentText(style['Colors']['CScale'])
         self.comboBoxCbarDirection.setCurrentText(style['Colors']['Direction'])
         self.lineEditCbarLabel.setText(style['Colors']['CLabel'])
@@ -6551,7 +6553,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #print('add_plotwidget_to_tree')
 
         # if the current plot is a standard map type, then it should be added automatically
-        if self.plot_info['field_type'] in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
+        if self.plot_info['tree'] in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
             return
 
         # add plot to dictionary for tree
@@ -10417,6 +10419,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             #     widget_dict = self.plot_widget_dict[tree][branch][leaf]
             #     self.add_plotwidget_to_canvas(widget_dict['info'], view=widget_dict['view'], position=widget_dict['position'])
             self.initialize_axis_values(tree, leaf)
+            style = self.styles['analyte map']
+            self.set_style_widgets('analyte map', style)
             if self.plot_info:
                 print('tree_double_click: add_plotwidget_to_canvas')
                 self.add_plotwidget_to_canvas(self.plot_info)
@@ -10429,18 +10433,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 if self.toolBox.currentIndex() not in [self.left_tab['sample'], self.left_tab['process'], self.left_tab['polygons'], self.left_tab['profile']]:
                     self.toolBox.setCurrentIndex(self.left_tab['sample'])
 
-                    style = self.styles['analyte map']
-                    self.set_style_widgets('analyte map', style)
-                else:
-                    pass
+
+                # else:
+                #     pass
 
                 
                 
-                if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
-                    self.plot_map_mpl(sample_id=branch, field_type=tree, field=leaf)
-                else:
-                    self.plot_map_pg(sample_id=branch, field_type=tree, field=leaf)
-                
+                # if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
+                #     self.plot_map_mpl(sample_id=branch, field_type=tree, field=leaf)
+                # else:
+                #     self.plot_map_pg(sample_id=branch, field_type=tree, field=leaf)
+
+                # updates comboBoxColorByField and comboBoxColorField comboboxes and creates new plot
+                self.update_fields(branch,'analyte map',tree, leaf, plot=True)
+                #set styles
+
                 #update UI with auto scale and neg handling parameters from 'Analyte/Ratio Info'
                 self.update_spinboxes(sample_id=branch, field=leaf, field_type = tree)
 
@@ -10451,19 +10458,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.update_fields(self.plot_info['sample_id'], self.plot_info['plot_type'],self.plot_info['field_type'], self.plot_info['field'])
 
     def update_fields(self, sample_id, plot_type, field_type, field,  plot=False):
-        # updates comboBoxColorByField and comboBoxColorField comboboxes using tree, branch and leaf
+        # updates comboBoxPlotType,comboBoxColorByField and comboBoxColorField comboboxes using tree, branch and leaf
         if sample_id == self.sample_id:
-            if plot_type != self.comboBoxColorByField.currentText():
-                self.comboBoxColorField.setCurrentText(plot_type)
+            if plot_type != self.comboBoxPlotType.currentText():
+                self.comboBoxPlotType.setCurrentText(plot_type)
             if field_type != self.comboBoxColorByField.currentText():
                 if field_type =='Calculated Map':  # correct name 
                     self.comboBoxColorByField.setCurrentText('Calculated')
                 else:
                     self.comboBoxColorByField.setCurrentText(field_type)
-                self.styles['analyte map']['Colors']['ColorByField'] = field_type
                 self.color_by_field_callback() # added color by field callback to update color field
             if field != self.comboBoxColorField.currentText():
-                self.styles['analyte map']['Colors']['Field'] = field
                 self.comboBoxColorField.setCurrentText(field)
                 self.color_field_callback(plot)
             

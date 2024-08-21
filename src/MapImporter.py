@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from PyQt5.QtWidgets import (
     QApplication, QDialog, QFileDialog, QTableWidget, QTableWidgetItem, QInputDialog, QComboBox,
-    QWidget, QCheckBox, QHeaderView, QProgressBar, QLineEdit, QMessageBox
+    QWidget, QCheckBox, QHeaderView, QProgressBar, QLineEdit, QMessageBox, QVBoxLayout, QPushButton, QHBoxLayout
 )
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt, QUrl
@@ -939,4 +939,60 @@ class MapImporter(QDialog, Ui_MapImportDialog):
     
         # Insert a NaN column for Time_Sec_ after 'Y'
         data.insert(data.columns.get_loc('Y') + 1, 'Time_Sec_', pd.Series([float('nan')] * len(data)))
+        return data
+
+class FileImportDialog(QDialog):
+    def __init__(self, file_list, analyte_guesses, parent=None):
+        super(FileImportDialog, self).__init__(parent)
+
+        # Initialize the table widget
+        self.table = QTableWidget(len(file_list), 4, self)
+        self.table.setHorizontalHeaderLabels(["Import?", "Filename", "Analyte", "Units"])
+
+        # Populate the table with data
+        for row, filename in enumerate(file_list):
+            # Checkbox for import
+            import_checkbox = QCheckBox()
+            import_checkbox.setChecked(True)
+            self.table.setCellWidget(row, 4, import_checkbox)
+
+            # Filename (non-editable)
+            filename_item = QTableWidgetItem(filename)
+            filename_item.setFlags(filename_item.flags() & ~Qt.ItemIsEditable)
+            self.table.setItem(row, 1, filename_item)
+
+            # Guessed analyte (editable)
+            analyte_item = QTableWidgetItem(analyte_guesses[row])
+            self.table.setItem(row, 2, analyte_item)
+
+            # Units (editable)
+            units_item = QTableWidgetItem("Unit")  # Default or guessed units
+            self.table.setItem(row, 3, units_item)
+
+        # Add buttons for OK and Cancel
+        button_box = QHBoxLayout()
+        self.ok_button = QPushButton("OK")
+        self.cancel_button = QPushButton("Cancel")
+        button_box.addWidget(self.ok_button)
+        button_box.addWidget(self.cancel_button)
+
+        # Connect buttons to actions
+        self.ok_button.clicked.connect(self.accept)
+        self.cancel_button.clicked.connect(self.reject)
+
+        # Layout the dialog
+        layout = QVBoxLayout(self)
+        layout.addWidget(self.table)
+        layout.addLayout(button_box)
+        self.setLayout(layout)
+
+    def get_data(self):
+        """Return the updated information from the table."""
+        data = []
+        for row in range(self.table.rowCount()):
+            filename = self.table.item(row, 0).text()
+            analyte = self.table.item(row, 1).text()
+            units = self.table.item(row, 2).text()
+            import_file = self.table.cellWidget(row, 3).isChecked()
+            data.append((filename, analyte, units, import_file))
         return data

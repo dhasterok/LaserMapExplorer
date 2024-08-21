@@ -58,9 +58,10 @@ from src.ui.MainWindow import Ui_MainWindow
 from src.ui.PreferencesWindow import Ui_PreferencesWindow
 from src.AnalyteSelectionWindow import AnalyteDialog
 #from src.WebEngineView import WebEngine
+import src.CustomMplCanvas as mplc
 import src.MapImporter as MapImporter
 import src.SpotImporter as SpotImporter
-from src.ui.QuickViewDialog import Ui_QuickViewDialog
+import src.QuickView as QV
 from rst2pdf.createpdf import RstToPdf
 from docutils.core import publish_string
 from lame_helper import BASEDIR, ICONPATH, SSPATH, load_stylesheet
@@ -275,7 +276,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             | 'plot_type' : (str) -- type of plot (e.g., ``analyte map``, ``scatter``, ``Cluster Score``)
             | 'field_type' : (list of str) -- type of field(s) used to create plot
             | 'field' : (list of str) -- analyte or other field(s) used to create plot
-            | 'figure' : (pgGraphicsWidget or MplCanvas) -- object holding figure for display
+            | 'figure' : (pgGraphicsWidget or mplc.MplCanvas) -- object holding figure for display
             | 'style' : (dict) -- dictionary associated with ``styles[*plot_type*]``
             | 'cluster_groups' : (list) -- cluster groups used to generate plot
             | 'view' : (bool,bool) -- indicates whether ``plot_info['figure']`` is displayed in SingleView and/or MultiView
@@ -411,7 +412,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.widgetSingleView.setLayout(layout_single_view)
         self.widgetSingleView.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.mpl_toolbar = None
-        #self.mpl_toolbar = NavigationToolbar(MplCanvas())
+        #self.mpl_toolbar = NavigationToolbar(mplc.MplCanvas())
         # for button show hide
         #self.toolButtonPopFigure.setVisible(False)
         #self.toolButtonPopFigure.raise_()
@@ -443,7 +444,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 'Ba137','Th232','U238','La139','Ce140','Pb206','Pr141','Sr88','Zr90','Hf178','Nd146','Eu153',
                 'Gd157','Tb159','Dy163','Ho165','Y89','Er166','Tm169','Yb172','Lu175']}
 
-        self.toolButtonNewList.clicked.connect(lambda: quickView(self))
+        self.toolButtonNewList.clicked.connect(lambda: QV.QuickView(self))
         self.comboBoxQVList.activated.connect(lambda: self.display_QV())
         # right toolbar plot layout
         # histogram view
@@ -992,7 +993,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolButtonZoom.setCheckable(True)
         self.toolButtonZoom.setCheckable(True)
 
+        # Dating
         self.comboBoxDatingMethod.activated.connect(self.callback_dating_method)
+        self.checkBoxComputeRatios.stateChanged.connect(self.callback_dating_ratios)
 
         self.comboBoxIsotopeAgeFieldType1.activated.connect(lambda: self.update_field_combobox(self.comboBoxIsotopeAgeFieldType1, self.comboBoxIsotopeAgeField1))
         self.comboBoxIsotopeAgeFieldType2.activated.connect(lambda: self.update_field_combobox(self.comboBoxIsotopeAgeFieldType2, self.comboBoxIsotopeAgeField2))
@@ -1615,7 +1618,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.compute_map_aspect_ratio()
 
             #get plot array
-            current_plot_df = self.get_map_data(sample_id=sample_id, field=self.selected_analytes[0], field_type='Analyte')
+            #current_plot_df = self.get_map_data(sample_id=sample_id, field=self.selected_analytes[0], field_type='Analyte')
             #set
             self.styles['analyte map']['Colors']['Field'] = self.selected_analytes[0]
 
@@ -2715,7 +2718,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     #             #add plot info to tree
     #             for plot_info in data_dict['plot_infos']:
     #                 if plot_info:
-    #                     canvas = MplCanvas(fig=plot_info['figure'])
+    #                     canvas = mplc.MplCanvas(fig=plot_info['figure'])
     #                     plot_info['figure'] = canvas
     #                     self.add_tree_item(plot_info)
             
@@ -2813,7 +2816,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         # Add plot info to tree
                         for plot_info in data_dict['plot_infos']:
                             if plot_info:
-                                canvas = MplCanvas(fig=plot_info['figure'])
+                                canvas = mplc.MplCanvas(fig=plot_info['figure'])
                                 plot_info['figure'] = canvas
                                 self.add_tree_item(plot_info)
                         
@@ -2872,9 +2875,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Retrieve the plot_info from the UserRole data
         plot_info = item.data(Qt.UserRole)
         if isinstance(plot_info, dict) and 'figure' in plot_info:
-            # Check if it contains an MplCanvas object
-            if isinstance(plot_info['figure'], MplCanvas):
-                # Create a copy of plot_info and replace the MplCanvas object with its Figure
+            # Check if it contains an mplc.MplCanvas object
+            if isinstance(plot_info['figure'], mplc.MplCanvas):
+                # Create a copy of plot_info and replace the mplc.MplCanvas object with its Figure
                 plot_info_copy = plot_info.copy()
                 plot_info_copy['figure'] = plot_info['figure'].fig
                 self.plot_info_list.append(plot_info_copy)
@@ -2900,7 +2903,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         item = QStandardItem(data['text'])
         if 'plot_info' in data.keys():
             #create new matplotlib canvas and save fig
-            canvas = MplCanvas(fig=data['plot_info']['figure'])
+            canvas = mplc.MplCanvas(fig=data['plot_info']['figure'])
             data['plot_info']['figure'] = canvas
             #store plot dictionary in tree
             item.setData(data['plot_info'], role=Qt.UserRole)
@@ -4188,7 +4191,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # uncomment for matplotlib version
         # -----------
-        canvas = MplCanvas(parent=self)
+        canvas = mplc.MplCanvas(parent=self)
 
         style = self.styles['analyte map']
 
@@ -4279,7 +4282,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # uncomment for matplotlib version
         # -----------
-        canvas = MplCanvas(parent=self)
+        canvas = mplc.MplCanvas(parent=self)
 
         style = self.styles['analyte map']
 
@@ -5597,6 +5600,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 case _:
                     return
 
+        self.set_style_widgets()
         self.update_SV()
 
     def get_axis_values(self, field_type, field, ax=None):
@@ -6618,7 +6622,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.mpl_toolbar.hide()
             self.widgetSingleView.layout().addWidget(self.mpl_toolbar)
         except:
-            # canvas is not a mplcanvas  
+            # canvas is not a mplc.MplCanvas  
             pass
     def display_QV(self):
         """Plots selected maps to the Quick View tab
@@ -6648,7 +6652,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 continue
 
             # create plot canvas
-            canvas = MplCanvas()
+            canvas = mplc.MplCanvas()
 
             # determine location of plot
             col = i % ncol
@@ -6671,7 +6675,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def toggle_distance_tool(self):
         canvas = self.get_SV_widget(1)
-        if not isinstance(canvas, MplCanvas):
+        if not isinstance(canvas, mplc.MplCanvas):
             return
 
         if not self.toolButtonDistance.isChecked():
@@ -6710,7 +6714,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.toolButtonPan.setChecked(False)
             self.toolButtonZoom.setChecked(False)
             self.toolButtonAnnotate.setChecked(False)
-            if isinstance(canvas,MplCanvas):
+            if isinstance(canvas,mplc.MplCanvas):
                 canvas.restore_view()
             elif isinstance(canvas,GraphicsLayoutWidget):
                 canvas.getItem(0, 0).getViewBox().autoRange()
@@ -6718,7 +6722,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if function == 'pan':
             self.toolButtonZoom.setChecked(False)
             self.toolButtonAnnotate.setChecked(False)
-            if isinstance(canvas,MplCanvas):
+            if isinstance(canvas,mplc.MplCanvas):
                 # Toggle pan mode in Matplotlib
                 self.mpl_toolbar.pan()
                 print(self.mpl_toolbar)
@@ -6730,7 +6734,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if function == 'zoom':
             self.toolButtonPan.setChecked(False)
             self.toolButtonAnnotate.setChecked(False)
-            if isinstance(canvas,MplCanvas):
+            if isinstance(canvas,mplc.MplCanvas):
                 # Toggle zoom mode in Matplotlib
                 self.mpl_toolbar.zoom()  # Assuming your Matplotlib canvas has a toolbar with a zoom function
             elif isinstance(canvas,GraphicsLayoutWidget):
@@ -6751,7 +6755,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 
         if function == 'preference':
-            if isinstance(canvas,MplCanvas):
+            if isinstance(canvas,mplc.MplCanvas):
                 self.mpl_toolbar.edit_parameters()
             elif isinstance(canvas,GraphicsLayoutWidget):
                 # Assuming it's about showing/hiding axes
@@ -6763,7 +6767,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     canvas.showAxis('bottom', False)
 
         if function == 'axes':
-            if isinstance(canvas,MplCanvas):
+            if isinstance(canvas,mplc.MplCanvas):
                 self.mpl_toolbar.configure_subplots()
             elif isinstance(canvas,GraphicsLayoutWidget):
                 # Assuming it's about showing/hiding axes
@@ -6778,8 +6782,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.toolButtonPan.setChecked(False)
             self.toolButtonZoom.setChecked(False)
             self.toolButtonAnnotate.setChecked(False)
-            if isinstance(canvas,MplCanvas):
-                self.pop_figure = MplDialog(self,canvas,self.plot_info['plot_name'])
+            if isinstance(canvas,mplc.MplCanvas):
+                self.pop_figure = mplc.MplDialog(self,canvas,self.plot_info['plot_name'])
                 self.pop_figure.show()
 
             # since the canvas is moved to the dialog, the figure needs to be recreated in the main window
@@ -6787,7 +6791,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         if function == 'save':
             
-            if isinstance(canvas,MplCanvas):
+            if isinstance(canvas,mplc.MplCanvas):
                 self.mpl_toolbar.save_figure()
             elif isinstance(canvas,GraphicsLayoutWidget):
                 # Save functionality for pyqtgraph
@@ -6802,7 +6806,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         method = action.text()
         if method == 'Figure':
             
-            if isinstance(canvas, MplCanvas):
+            if isinstance(canvas, mplc.MplCanvas):
                 self.mpl_toolbar.save_figure()
             elif isinstance(canvas,GraphicsLayoutWidget):
                 # Save functionality for pyqtgraph
@@ -6931,7 +6935,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Parameters
         ----------
-        canvas : MplCanvas
+        canvas : mplc.MplCanvas
             canvas object
         cax : axes
             color axes object
@@ -6942,16 +6946,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         grouplabels : list of str, optional
             category/group labels for tick marks
         """
+        print("add_colorbar")
         # Add a colorbar
         cbar = None
         if style['Colors']['Direction'] == 'none':
             return
 
-        if grouplabels is None or groupcolors is None:
-            return
-
         # discrete colormap - plot as a legend
         if cbartype == 'discrete':
+
+            if grouplabels is None or groupcolors is None:
+                return
+
             # create patches for legend items
             p = [None]*len(grouplabels)
             for i, label in enumerate(grouplabels):
@@ -7089,7 +7095,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def plot_map_mpl(self, sample_id, field_type, field):
         """Create a matplotlib canvas for plotting a map
 
-        Create a map using ``MplCanvas``.
+        Create a map using ``mplc.MplCanvas``.
 
         Parameters
         ----------
@@ -7101,7 +7107,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             Field for plotting
         """        
         # create plot canvas
-        canvas = MplCanvas(parent=self)
+        canvas = mplc.MplCanvas(parent=self)
 
         style = self.styles['analyte map']
 
@@ -7111,7 +7117,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.set_style_widgets(plot_type='analyte map',style=style)
 
         # get data for current map
-        map_df = self.get_map_data(self.sample_id, field, field_type=field_type)
+        map_df = self.get_map_data(self.sample_id, field, field_type=field_type, scale_data=True)
 
         # store map_df to save_data if data needs to be exported
         self.save_data = map_df.copy()
@@ -7205,7 +7211,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         style = self.styles['analyte map']
 
         # get data for current map
-        map_df = self.get_map_data(sample_id, field, field_type=field_type)
+        map_df = self.get_map_data(sample_id, field, field_type=field_type, scale_data=False)
 
         # store map_df to save_data if data needs to be exported
         self.save_data = map_df
@@ -7416,7 +7422,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """Creates an image of the correlation matrix"""
         #print('plot_correlation')
 
-        canvas = MplCanvas(parent=self)
+        canvas = mplc.MplCanvas(parent=self)
         canvas.axes.clear()
 
         # get the data for computing correlations
@@ -7601,7 +7607,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         #print('plot_small_histogram')
         # create Mpl canvas
-        canvas = SimpleMplCanvas()
+        canvas = mplc.SimpleMplCanvas()
         #canvas.axes.clear()
 
         style = self.styles['histogram']
@@ -7612,7 +7618,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         mask = mask & current_plot_df['array'].notna()
 
         array = current_plot_df['array'][mask].values
-        len(array)
 
         logflag = False
         if self.styles['analyte map']['Colors']['CScale'] == 'log':
@@ -7660,7 +7665,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         plot_data = None
         #print('plot histogram')
         # create Mpl canvas
-        canvas = MplCanvas(parent=self)
+        canvas = mplc.MplCanvas(parent=self)
 
         style = self.styles['histogram']
 
@@ -7686,12 +7691,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #bin_width = (xmax - xmin) / nbins
         #print(nbins)
         #print(bin_width)
-
+        
+        dscale = temp = self.data[self.sample_id]['analyte_info'].loc[self.data[self.sample_id]['analyte_info']['analytes'] == field,'norm'].values.item()
         if xscale == 'linear':
             edges = np.linspace(xmin, xmax, nbins)
         else:
-            edges = 10**np.linspace(np.log10(xmin), np.log10(xmax), nbins)
-            
+            edges = np.linspace(10**xmin, 10**xmax, nbins)
+
         print(edges)
 
         # histogram style
@@ -7850,7 +7856,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         if canvas is None:
             plot_flag = True
-            canvas = MplCanvas(parent=self)
+            canvas = mplc.MplCanvas(parent=self)
         else:
             plot_flag = False
 
@@ -8230,7 +8236,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         style = self.styles['ternary map']
 
-        canvas = MplCanvas(sub=121,parent=self)
+        canvas = mplc.MplCanvas(sub=121,parent=self)
 
         afield = self.comboBoxFieldX.currentText()
         bfield = self.comboBoxFieldY.currentText()
@@ -8393,7 +8399,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 plot_name = plot_type+f'_PC{pc_x}_PC{pc_y}'
                 # Assuming pca_df contains scores for the principal components
                 # uncomment to use plot scatter instead of ax.scatter
-                canvas = MplCanvas(parent=self)
+                canvas = mplc.MplCanvas(parent=self)
                 self.plot_scatter(canvas=canvas)
 
                 plot_data= self.plot_pca_components(canvas)
@@ -8435,10 +8441,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Returns
         -------
-        MplCanvas
+        mplc.MplCanvas
             
         """        
-        canvas = MplCanvas(parent=self)
+        canvas = mplc.MplCanvas(parent=self)
 
         # pca_dict contains variance ratios for the principal components
         variances = self.pca_results.explained_variance_ratio_
@@ -8491,10 +8497,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Returns
         -------
-        MplCanvas
-            Creates figure on MplCanvas
+        mplc.MplCanvas
+            Creates figure on mplc.MplCanvas
         """        
-        canvas = MplCanvas(parent=self)
+        canvas = mplc.MplCanvas(parent=self)
 
         style = self.styles['vectors']
 
@@ -8563,7 +8569,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Parameters
         ----------
-        canvas : MplCanvas
+        canvas : mplc.MplCanvas
             Canvas object for plotting
 
         .. seealso::
@@ -8612,9 +8618,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def plot_score_map(self):
         """Plots score maps
 
-        Creates a score map for PCA and clusters.  Maps are displayed on an ``MplCanvas``.
+        Creates a score map for PCA and clusters.  Maps are displayed on an ``mplc.MplCanvas``.
         """
-        canvas = MplCanvas(parent=self)
+        canvas = mplc.MplCanvas(parent=self)
 
         plot_type = self.comboBoxPlotType.currentText()
         style = self.styles[plot_type]
@@ -8654,10 +8660,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def plot_cluster_map(self):
         """Produces a map of cluster categories
         
-        Creates the map on an ``MplCanvas``.  Each cluster category is assigned a unique color.
+        Creates the map on an ``mplc.MplCanvas``.  Each cluster category is assigned a unique color.
         """
         print('plot_cluster_map')
-        canvas = MplCanvas(parent=self)
+        canvas = mplc.MplCanvas(parent=self)
 
         plot_type = self.comboBoxPlotType.currentText()
         method = self.comboBoxClusterMethod.currentText()
@@ -9006,7 +9012,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         arranged by compatibility.  Radar plots show data displayed on a set of radial spokes (axes), giving the appearance of a radar screen
         or spider web.
         
-        The function updates ``MainWindow.plot_info`` with the displayed plot metadata and figure ``MplCanvas`` for display in the centralWidget views.
+        The function updates ``MainWindow.plot_info`` with the displayed plot metadata and figure ``mplc.MplCanvas`` for display in the centralWidget views.
         """
         if not self.ndim_list:
             return
@@ -9065,7 +9071,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         match plot_type:
             case 'Radar':
-                canvas = MplCanvas(parent=self, proj='radar')
+                canvas = mplc.MplCanvas(parent=self, proj='radar')
 
                 axes_interval = 5
                 if cluster_flag and method in self.data[self.sample_id]['computed_data']['Cluster']:
@@ -9094,7 +9100,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     plot_data = radar.vals
                     
             case 'TEC':
-                canvas = MplCanvas(parent=self)
+                canvas = mplc.MplCanvas(parent=self)
 
                 yl = [np.inf, -np.inf]
                 if cluster_flag and method in self.data[self.sample_id]['computed_data']['Cluster']:
@@ -9823,7 +9829,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     # -------------------------------------
     # Data functions functions
     # -------------------------------------
-    def get_map_data(self, sample_id, field, field_type='Analyte'):
+    def get_map_data(self, sample_id, field, field_type='Analyte', scale_data=False):
         """
         Retrieves and processes the mapping data for the given sample and analytes, then plots the result if required.
 
@@ -9872,12 +9878,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 
                 #perform scaling for groups of analytes with same norm parameter
                 
-                if norm == 'log':
+                if norm == 'log' and scale_data:
                     df['array'] = np.where(~np.isnan(df['array']), np.log10(df['array']), df['array'])
 
                     # print(self.processed_analyte_data[sample_id].loc[:10,analytes])
                     # print(self.data[sample_id]['processed_data'].loc[:10,analytes])
-                elif norm == 'logit':
+                elif norm == 'logit' and scale_data:
                     # Handle division by zero and NaN values
                     with np.errstate(divide='ignore', invalid='ignore'):
                         df['array'] = np.where(~np.isnan(df['array']), np.log10(df['array'] / (10**6 - df['array'])))
@@ -9895,22 +9901,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 #df['array'] = self.data[sample_id]['computed_data'].loc[:,field_1].values / self.data[sample_id]['processed_data'].loc[:,field_2].values
                 df['array'] = self.data[sample_id]['computed_data']['Ratio'].loc[:,field].values
                 
-                #get norm value
-                norm = self.data[sample_id]['ratio_info'].loc['norm',(self.data[sample_id]['ratio_info']['analyte_1']==field_1 & self.data[sample_id]['ratio_info']['analyte_2']==field_2)].iloc[0]
-
-                if norm == 'log':
-                    df ['array'] = np.where(~np.isnan(df['array']), np.log10(df ['array']))
-                    # print(self.processed_analyte_data[sample_id].loc[:10,analytes])
-                    # print(self.data[sample_id]['processed_data'].loc[:10,analytes])
-                elif norm == 'logit':
-                    # Handle division by zero and NaN values
-                    with np.errstate(divide='ignore', invalid='ignore'):
-                        df['array'] = np.where(~np.isnan(df['array']), np.log10(df['array'] / (10**6 - df['array'])))
                 # normalize
                 if 'normalized' in field_type:
                     refval_1 = self.ref_chem[re.sub(r'\d', '', field_1).lower()]
                     refval_2 = self.ref_chem[re.sub(r'\d', '', field_2).lower()]
                     df['array'] = df['array'] * (refval_2 / refval_1)
+
+                #get norm value
+                norm = self.data[sample_id]['ratio_info'].loc['norm',(self.data[sample_id]['ratio_info']['analyte_1']==field_1 & self.data[sample_id]['ratio_info']['analyte_2']==field_2)].iloc[0]
+
+                if norm == 'log' and scale_data:
+                    df ['array'] = np.where(~np.isnan(df['array']), np.log10(df ['array']))
+                    # print(self.processed_analyte_data[sample_id].loc[:10,analytes])
+                    # print(self.data[sample_id]['processed_data'].loc[:10,analytes])
+                elif norm == 'logit' and scale_data:
+                    # Handle division by zero and NaN values
+                    with np.errstate(divide='ignore', invalid='ignore'):
+                        df['array'] = np.where(~np.isnan(df['array']), np.log10(df['array'] / (10**6 - df['array'])))
 
             case _:#'PCA Score' | 'Cluster' | 'Cluster Score' | 'Special' | 'Computed':
                 df['array'] = self.data[sample_id]['computed_data'][field_type].loc[:,field].values
@@ -9981,17 +9988,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             match v['type']:
                 case 'Analyte' | 'Analyte (normalized)':
-                    df = self.get_map_data(self.sample_id, field=v['field'], field_type=v['type'])
+                    df = self.get_map_data(self.sample_id, field=v['field'], field_type=v['type'], scale_data=False)
                     v['label'] = v['field'] + ' (' + self.preferences['Units']['Concentration'] + ')'
                 case 'Ratio':
                     #analyte_1, analyte_2 = v['field'].split('/')
-                    df = self.get_map_data(self.sample_id, field=v['field'], field_type=v['type'])
+                    df = self.get_map_data(self.sample_id, field=v['field'], field_type=v['type'], scale_data=False)
                     v['label'] = v['field']
                 case 'PCA Score' | 'Cluster' | 'Cluster Score':
-                    df = self.get_map_data(self.sample_id, field=v['field'], field_type=v['type'])
+                    df = self.get_map_data(self.sample_id, field=v['field'], field_type=v['type'], scale_data=False)
                     v['label'] = v['field']
                 case 'Special':
-                    df = self.get_map_data(self.sample_id, field=v['field'], field_type=v['type'])
+                    df = self.get_map_data(self.sample_id, field=v['field'], field_type=v['type'], scale_data=False)
                     v['label'] = v['field']
                 case _:
                     df = pd.DataFrame({'array': []})  # Or however you want to handle this case
@@ -10015,6 +10022,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         return value_dict['x'], value_dict['y'], value_dict['z'], value_dict['c']
 
+    def callback_dating_ratios(self):
+        self.callback_dating_method()
+
     def callback_dating_method(self):
         """Updates isotopes and decay constants when dating method changes.
 
@@ -10024,15 +10034,41 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """        
         match self.comboBoxDatingMethod.currentText():
             case "Lu-Hf":
-                self.labelIsotope1.setText("Lu175")
-                if "Lu175" in self.analyte_list and self.comboBoxIsotopeAgeFieldType1.currentText() == "Analyte":
-                    self.comboBoxIsotopeAgeField1.setCurrentText("Lu175")
-                self.labelIsotope2.setText("Hf176")
-                if "Hf176" in self.analyte_list and self.comboBoxIsotopeAgeFieldType2.currentText() == "Analyte":
-                    self.comboBoxIsotopeAgeField2.setCurrentText("Hf176")
-                self.labelIsotope3.setText("Hf178")
-                if "Hf178" in self.analyte_list and self.comboBoxIsotopeAgeFieldType3.currentText() == "Analyte":
-                    self.comboBoxIsotopeAgeField3.setCurrentText("Hf178")
+                if self.checkBoxComputeRatios.isChecked():
+                    self.labelIsotope1.setText("Lu175")
+                    self.comboBoxIsotopeAgeFieldType1.setCurrentText("Analyte")
+                    if ("Lu175" in self.analyte_list) and (self.comboBoxIsotopeAgeFieldType1.currentText() == "Analyte"):
+                        self.comboBoxIsotopeAgeField1.setCurrentText("Lu175")
+
+                    self.labelIsotope2.setText("Hf176")
+                    self.comboBoxIsotopeAgeFieldType2.setCurrentText("Analyte")
+                    if ("Hf176" in self.analyte_list) and (self.comboBoxIsotopeAgeFieldType2.currentText() == "Analyte"):
+                        self.comboBoxIsotopeAgeField2.setCurrentText("Hf176")
+
+                    self.labelIsotope3.setEnabled(True)
+                    self.comboBoxIsotopeAgeField3.setEnabled(True)
+                    self.labelIsotope3.setText("Hf178")
+                    self.comboBoxIsotopeAgeFieldType3.setCurrentText("Analyte")
+                    if ("Hf178" in self.analyte_list) and (self.comboBoxIsotopeAgeFieldType3.currentText() == "Analyte"):
+                        self.comboBoxIsotopeAgeField3.setCurrentText("Hf178")
+                else:
+                    ratio_list = (self.data[self.sample_id]['ratio_info']['analyte_1'] + '/' + self.data[self.sample_id]['ratio_info']['analyte_2']).tolist()
+                    self.labelIsotope1.setText("Hf176/Hf178")
+                    self.comboBoxIsotopeAgeFieldType1.setCurrentText("Ratio")
+                    if ("Hf176/Hf178" in ratio_list) and (self.comboBoxIsotopeAgeFieldType1.currentText() == "Ratio"):
+                        self.comboBoxIsotopeAgeField1.setCurrentText("Hf176/Hf178")
+
+                    self.labelIsotope2.setText("Lu175/Hf178")
+                    self.comboBoxIsotopeAgeFieldType2.currentText("Ratio")
+                    if ("Lu175/Hf178" in ratio_list) and (self.comboBoxIsotopeAgeFieldType2.currentText() == "Ratio"):
+                        self.comboBoxIsotopeAgeField2.setCurrentText("Lu175/Hf178")
+
+                    self.labelIsotope3.setText("")
+                    self.comboBoxIsotopeAgeFieldType3.currentText("Ratio")
+                    self.labelIsotope3.setEnabled(False)
+                    self.comboBoxIsotopeAgeFieldType3.setEnabled(False)
+                    self.comboBoxIsotopeAgeField3.setEnabled(False)
+                    
 
                 # Sonderlund et al., EPSL, 2004, https://doi.org/10.1016/S0012-821X(04)00012-3
                 self.lineEditDecayConstant.value = 1.867e-5 # Ma
@@ -10068,14 +10104,32 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         method = self.comboBoxDatingMethod.currentText()
         match method:
             case "Lu-Hf":
-                Lu175 = self.get_map_data(self.sample_id, self.comboBoxIsotopeAgeField1.currentText(), self.comboBoxIsotopeAgeFieldType1.currentText())
-                Hf176 = self.get_map_data(self.sample_id, self.comboBoxIsotopeAgeField2.currentText(), self.comboBoxIsotopeAgeFieldType2.currentText())
-                Hf178 = self.get_map_data(self.sample_id, self.comboBoxIsotopeAgeField3.currentText(), self.comboBoxIsotopeAgeFieldType3.currentText())
+                if self.checkBoxComputeRatios.isChecked():
+                    try:
+                        Lu175 = self.get_map_data(self.sample_id, self.comboBoxIsotopeAgeField1.currentText(), self.comboBoxIsotopeAgeFieldType1.currentText())
+                        Hf176 = self.get_map_data(self.sample_id, self.comboBoxIsotopeAgeField2.currentText(), self.comboBoxIsotopeAgeFieldType2.currentText())
+                        Hf178 = self.get_map_data(self.sample_id, self.comboBoxIsotopeAgeField3.currentText(), self.comboBoxIsotopeAgeFieldType3.currentText())
+
+                        Hf176_Hf178 = Hf176['array'].values / Hf178['array'].values
+                        Lu175_Hf178 = Lu175['array'].values / Hf178['array'].values
+                    except:
+                        QMessageBox.warning(self,'Warning','Could not compute ratios, check selected fields.')
+                        return
+                else:
+                    try:
+                        Hf176_Hf178 = self.get_map_data(self.sample_id, self.comboBoxIsotopeAgeField1.currentText(), self.comboBoxIsotopeAgeFieldType1.currentText())
+                        Lu175_Hf178 = self.get_map_data(self.sample_id, self.comboBoxIsotopeAgeField2.currentText(), self.comboBoxIsotopeAgeFieldType2.currentText())
+                    except:
+                        QMessageBox.warning(self,'Warning','Could not locate ratios, check selected fields.')
+                        return
 
                 if self.data[self.sample_id]['computed_data']['Calculated'].empty:
                     self.data[self.sample_id]['computed_data']['Calculated'][['X','Y']] = self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
 
-                date_map = np.log((Hf176['array'].values/Hf178['array'].values - 3.55)/(Lu175['array'].values/Hf178['array'].values) + 1) / decay_constant 
+                try:
+                    date_map = np.log((Hf176_Hf178 - 3.55)/Lu175_Hf178 + 1) / decay_constant 
+                except:
+                    QMessageBox.warning(self,'Error','Something went wrong. Could not compute date map.')
 
             case "Re-Os":
                 pass
@@ -10986,7 +11040,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if field in list(var.keys()):
                 continue
 
-            df = self.get_map_data(self.sample_id, field, field_type)
+            df = self.get_map_data(self.sample_id, field, field_type, scale_data=False)
             var.update({field: df['array']})
 
             txt = txt.replace(f"{{{field_str}}}", f"{field}")
@@ -11914,457 +11968,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 # -------------------------------
 # Classes
 # -------------------------------
-# Matplotlib Canvas object
-# -------------------------------
-class SimpleMplCanvas(FigureCanvas):
-    """Matplotlib canvas object for non-interactive plots
-
-    Parameters
-    ----------
-    sub : int, optional
-        Subplot location, by default 111
-    parent : object, optional
-        Parent calling MplCanvas, by default None
-    width : int, optional
-        Width in inches, by default 5
-    height : int, optional
-        Height in inches, by default 4
-    proj : str, optional
-        Projection, by default None
-    """    
-    def __init__(self, sub=111, parent=None, width=5, height=4, proj=None):
-        self.fig = Figure(figsize=(width, height))
-        if proj is not None:
-            self.axes = self.fig.add_subplot(sub, projection='radar')
-        else:
-            self.axes = self.fig.add_subplot(sub)
-        super(SimpleMplCanvas, self).__init__(self.fig)
-
-class MplCanvas(FigureCanvas):
-    """Matplotlib canvas object for interactive plots
-
-    Parameters
-    ----------
-    sub : int, optional
-        Subplot location, by default 111
-    parent : object, optional
-        Parent calling MplCanvas, by default None
-    width : int, optional
-        Width in inches, by default 5
-    height : int, optional
-        Height in inches, by default 4
-    proj : str, optional
-        Projection, by default None
-    """    
-    def __init__(self,fig=None, sub=111, parent=None, width=5, height=4, proj=None):
-        #create MPLCanvas with existing figure (required when loading saved projects)
-        if fig:
-            self.fig = fig
-        else:
-            self.fig = Figure(figsize=(width, height))
-        if proj is not None:
-            self.axes = self.fig.add_subplot(sub, projection='radar')
-        else:
-            self.axes = self.fig.add_subplot(sub)
-        super(MplCanvas, self).__init__(self.fig)
-
-        self.main_window = parent
-
-        # for placing text annotations
-        # --------------------
-        self.setCursorPosition()
-
-        # restoring initial axes
-        # --------------------
-        self.initial_extent = None
-
-        # distance measurement
-        # --------------------
-        # Variables to store points and line
-        self.first_point = None
-        self.line = None
-        self.dtext = None
-        self.saved_line = []
-        self.saved_dtext = []
-        self.array = None
-        if self.main_window is not None:
-            if self.main_window.comboBoxPlotType.currentText() in self.main_window.map_plot_types:
-                self.map_flag = True
-            else:
-                self.map_flag = False
-
-            # Connect the button and canvas events
-            self.mpl_connect('button_press_event', self.distanceOnClick)
-            self.mpl_connect('motion_notify_event', self.distanceOnMove)
-            self.mpl_connect('motion_notify_event', self.mouseLocation)
-
-    def enterEvent(self, event):
-        # Set cursor to cross when the mouse enters the window
-        self.setCursor(Qt.CrossCursor)
-
-    def leaveEvent(self, event):
-        # Reset cursor to default when the mouse leaves the window
-        self.unsetCursor()
-
-    def mouseLocation(self,event):
-        """Get mouse location on axes for display
-
-        Displays the location and value of a map in ``MainWindow.widgetPlotInfoSV``.
-
-        Parameters
-        ----------
-        event : event data
-            Includes the location of mouse pointer.
-        """        
-        if (not event.inaxes) or (event.xdata is None) or (event.ydata is None):
-            return
-
-        if event.inaxes.get_label() == '<colorbar>':
-            return
-
-        if self.map_flag:
-            if self.array is None:
-                return
-            # pixel location on current MplCanvas
-            x_i = round(event.xdata)
-            if x_i < 0:
-                x_i = 0
-            elif x_i > self.array.shape[1]-1:
-                x_i = self.array.shape[1]
-            
-            y_i = round(event.ydata)
-            if y_i < 0:
-                y_i = 0
-            elif y_i > self.array.shape[0]-1:
-                y_i = self.array.shape[0]
-            
-            x = x_i*self.main_window.dx
-            y = y_i*self.main_window.dy
-
-            label =  f" {self.main_window.preferences['Units']['Concentration']}"
-        else:
-            x = event.xdata
-            y = event.ydata
-            self.main_window.labelSVInfoValue.setText(f"V: N/A")
-
-            if self.array is not None:
-                x_i = round(x)
-                y_i = round(y)
-
-                label = ''
-        
-
-        if self.array is not None:
-            value = self.array[y_i][x_i]
-            txt = f"V: {value:.4g}{label}"
-            self.main_window.labelSVInfoValue.setText(txt)
-
-        txt = f'X: {x:.4g}'
-        self.main_window.labelSVInfoX.setText(txt)
-        txt = f'Y: {y:.4g}'
-        self.main_window.labelSVInfoY.setText(txt)
-
-    def set_initial_extent(self):
-        """Initial extent of the plot
-
-        Sets the initital extent of the plot.
-        """
-        xlim = self.axes.get_xlim()
-        ylim = self.axes.get_ylim()
-        self.initial_extent = [xlim[0], xlim[1], ylim[0], ylim[1]]
-        #print(f"Initial extent set to: {self.initial_extent}")
-
-    def restore_view(self):
-        """Restores the initial extent
-
-        Restores the initial extent when ``MainWindow.toolButtonHome`` is clicked.
-        """
-        if self.initial_extent:
-            self.axes.set_xlim(self.initial_extent[:2])
-            self.axes.set_ylim(self.initial_extent[2:])
-        else:
-            self.axes.set_xlim(auto=True)
-            self.axes.set_ylim(auto=True)
-        self.draw()
-
-    def load_figure(self, fig):
-        """Load existing figure
-        
-        Parameters
-        ----------
-        fig : matplotlib.Figure
-            Matplotlib figure.
-        """
-        self.fig = fig
-        self.axes = self.fig.gca()  # Get current axes
-        self.draw()  # Redraw the canvas with the loaded figure
-
-    def setCursorPosition(self):
-        """Gets the cursor position on an MplCanvas
-
-        Mouse listener
-        """        
-        self.cid = self.mpl_connect('button_press_event', self.textOnClick)
-
-    def textOnClick(self, event):
-        """Adds text to plot at clicked position
-
-        Only adds a text to a plot when the Annotate button is checked.
-
-        Parameters
-        ----------
-        event : MouseEvent
-            Mouse click event.
-        """        
-        if (self.main_window.canvasWindow.currentIndex() != self.main_window.canvas_tab['sv']) or (not self.main_window.toolButtonAnnotate.isChecked()):
-            return
-
-        x,y = event.xdata, event.ydata
-        # get text
-        txt, ok = QInputDialog.getText(self, 'Figure', 'Enter text:')
-        if not ok:
-            return
-
-        style = self.main_window.styles[self.main_window.comboBoxPlotType.currentText()]
-        self.axes.text(x,y,txt, color=style['Scale']['OverlayColor'], fontsize=style['Text']['FontSize'])
-        self.draw()
-
-    def calculate_distance(self,p1,p2):
-        """Calculuates distance on a figure
-
-        Parameters
-        ----------
-        p1 : _type_
-            _description_
-        p2 : _type_
-            _description_
-
-        Returns
-        -------
-        float
-            Distance between two given points.
-        """
-        if self.map_flag:
-            dx = self.main_window.dx
-            dy = self.main_window.dy
-        else:
-            dx = 1
-            dy = 1
-
-        return np.sqrt(((p2[0] - p1[0])*dx)**2 + ((p2[1] - p1[1])*dy)**2)
-
-    def plot_line(self, p1, p2):
-        """Plots line from distance calculation
-
-        Parameters
-        ----------
-        p1, p2 : tuple
-            Endpoints of line.
-
-        Returns
-        -------
-        matplotlib.plot
-            Handle to line
-        """        
-        plot_type = self.main_window.plot_info['plot_type']
-        style = self.main_window.styles[plot_type]
-
-        # plot line (keep only first returned handle)
-        p = self.axes.plot([p1[0], p2[0]], [p1[1], p2[1]],
-                ':', c=style['Scale']['OverlayColor'], lw=style['Lines']['LineWidth']
-            )[0]
-
-        return p
- 
-    def plot_text(self, p1,p2):
-        """Adds distance to plot and updates distance label
-
-        Updates distance in ``MainWindow.labelSVInfoDistance`` and adds distance
-        at the end of the measuring line.
-
-        Parameters
-        ----------
-        p1, p2 : tuple
-            Endpoints of line.
-
-        Returns
-        -------
-        matplotlib.text
-            Handle to text.
-        """        
-        plot_type = self.main_window.plot_info['plot_type']
-        style = self.main_window.styles[plot_type]
-
-        # compute distance
-        distance = self.calculate_distance(p1, p2)
-
-        # Update distance label in widget 
-        distance_text = f"{distance:.4g} {self.main_window.preferences['Units']['Distance']}"
-        self.main_window.labelSVInfoDistance.setText(f"D: {distance_text}")
-
-        # Update distance label on map
-        if self.map_flag:
-            xrange = self.main_window.x.nunique()*self.main_window.aspect_ratio
-            yrange = self.main_window.y.nunique()
-        else:
-            xl = self.axes.get_xlim
-            xrange = xl[1] - xl[0]
-            yl = self.axes.get_ylim
-            xrange = yl[1] - yl[0]
-
-        # x-shift for text
-        dx = 0.03*xrange
-        if p2[0] > p1[0]:
-            halign = 'left'
-        else:
-            dx = -dx
-            halign = 'right'
-
-        # y-shift for text
-        dy = 0.03*yrange
-        if p2[1] > p1[1]:
-            valign = 'bottom'
-        else:
-            dy = -dy
-            valign = 'top'
-
-        # text on plot
-        font = {'family':style['Text']['Font'], 'size':style['Text']['FontSize']-2}
-        t = self.axes.text(p2[0]+dx, p2[1]+dy, distance_text, ha=halign, va=valign, fontdict=font, c=style['Scale']['OverlayColor'])
-
-        return t
-
-    def distanceOnClick(self, event):
-        """Updates static endpoints of distance measuring line.
-
-        Updates the endpoint of the distance measuring line and calls methods that 
-        update the line and text.  Updates ``MplCanvas.first_point`` if it is the start of the line
-        and ``MplCanvas.line_saved`` and ``MplCanvas.dtext_saved`` if it is the end of the line.
-
-        Parameters
-        ----------
-        event : MouseEvent
-            Mouse click event.
-        """        
-        self.setCursor(Qt.CrossCursor)
-        if self.main_window.toolButtonDistance.isChecked():
-            if event.inaxes:
-                if self.first_point is None:
-                    # First click
-                    self.first_point = (event.xdata, event.ydata)
-                    self.main_window.labelSVInfoDistance.setText(f"D: 0 {self.main_window.preferences['Units']['Distance']}")
-                else:
-                    # Second click
-                    second_point = (event.xdata, event.ydata)
-
-                    self.saved_line.append(self.plot_line(self.first_point, second_point))
-                    self.saved_dtext.append(self.plot_text(self.first_point, second_point))
-                    
-                    self.distance_reset()
-
-            self.draw()
-
-    def distanceOnMove(self, event):
-        """Updates dynamic second point of distance measuring line.
-
-        Updates the second endpoint of the distance measuring line and calls methods that 
-        update the line and text.  Updates ``MplCanvas.line`` and ``MplCanvas.dtext``.
-
-        Parameters
-        ----------
-        event : MouseEvent
-            Mouse click event.
-        """        
-        self.setCursor(Qt.CrossCursor)
-        if (self.main_window.toolButtonDistance.isChecked()) and (self.first_point is not None) and event.inaxes:
-            if self.line:
-                self.line.remove()
-            if self.dtext:
-                self.dtext.remove()
-
-            second_point = (event.xdata,event.ydata)
-            self.line = self.plot_line(self.first_point, second_point)
-            self.dtext = self.plot_text(self.first_point, second_point)
-
-            self.draw()
-
-    def distance_reset(self):
-        """Resets distance variables and clears plot
-
-        Sets ``MplCanvas.first_point`` to ``None``, ``MplCanvas.line`` and ``MplCanvas.dtext``.
-        If ``MainWindow.toolButtonDistance`` is not checked, then ``MainWindow.labelSVInfoDistance`` is 
-        also reset.
-        """        
-        self.first_point = None
-        if self.line:
-            self.line.remove()
-            self.line = None
-        if self.dtext:
-            self.dtext.remove()
-            self.dtext = None
-        self.draw()
-        if not self.main_window.toolButtonDistance.isChecked():
-            self.main_window.labelSVInfoDistance.setText("D: N/A")
-
-class MplDialog(QDialog):
-    def __init__(self, parent, canvas, title=''):
-        """A plot dialog
-
-        This dialog is used to plot a matplotlib figure.  In general the dialog is used when a figure popped out from ``MainWindow.canvasWindow`` using ``MainWindow.toolButtonPopFigure``.
-
-        Parameters
-        ----------
-        parent : MainWindow
-            Calling class.
-        canvas : MplCanvas
-            Matplotlib plot canvas.
-        title : str, optional
-            Dialog title, by default ''
-        """        
-        super(MplDialog, self).__init__(parent)
-
-        self.main_window = parent
-
-        self.setWindowTitle(title)
-
-        # Create a QVBoxLayout to hold the canvas and toolbar
-        layout = QVBoxLayout(self)
-
-        # Create a NavigationToolbar and add it to the layout
-        self.toolbar = NavigationToolbar(canvas, self)
-
-        # use custom buttons
-        unwanted_buttons = ["Back", "Forward", "Customize", "Subplots"]
-
-        icons_buttons = {
-            "Home": QtGui.QIcon("resources/icons/icon-home-64.svg"),
-            "Pan": QtGui.QIcon("resources/icons/icon-move-64.svg"),
-            "Zoom": QtGui.QIcon("resources/icons/icon-zoom-64.svg"),
-            "Save": QtGui.QIcon("resources/icons/icon-save-file-64.svg")
-        }
-        for action in self.toolbar.actions():
-            if action.text() in unwanted_buttons:
-                self.toolbar.removeAction(action)
-            if action.text() in icons_buttons:
-                action.setIcon(icons_buttons.get(action.text(), QtGui.QIcon()))
-
-        self.toolbar.setMaximumHeight(int(32))
-        self.toolbar.setIconSize(QSize(24,24))
-
-        # Add toolbar to self.layout
-        layout.addWidget(self.toolbar,0)
-
-        # Add a matplotlib canvas to self.layout
-        layout.addWidget(canvas,1)
-
-        # Create a button box for OK and Cancel buttons
-        button_box = QDialogButtonBox(QDialogButtonBox.Close)
-        button_box.rejected.connect(self.reject)
-        layout.addWidget(button_box,2)
-
-        self.main_window.clear_layout(self.main_window.widgetSingleView.layout())
-
-
 class StandardItem(QStandardItem):
     def __init__(self, txt='', font_size=11, set_bold=False):
         super().__init__()
@@ -12402,134 +12005,7 @@ class MaskObj:
         self._callbacks.append(callback)
 
 
-# QuickViewDialog gui
-# -------------------------------
-class quickView(QDialog, Ui_QuickViewDialog):
-    """Creates a dialog for the user to select and order analytes for Quick View
 
-    Opens an instance of QuickViewDialog for the user to select and order analytes for Quick View.
-    The lists are automatically saved for future use.
-
-    Parameters
-    ----------
-    QDialog : QDialog
-        
-    Ui_QuickViewDialog : QuickViewDialog
-        User interface design.
-    """    
-    def __init__(self, parent=None):
-        """Initializes quickView
-
-        Parameters
-        ----------
-        analyte_list : list
-            List of analytes to populate column 0 of  ``quickView.tableWidget``.
-        quickview_list : dict
-            Dictionary to be updated with an ordered list of analytes to be added to the ``MainWindow.layoutQuickView``.
-        parent : None, optional
-            Parent UI, by default None
-        """        
-        super().__init__(parent)
-        self.setupUi(self)
-        self.analyte_list = self.data[self.sample_id]['analyte_info']['analytes']
-
-        if darkdetect.isDark():
-            self.toolButtonSort.setIcon(QIcon(os.path.join(ICONPATH,'icon-sort-dark-64.svg')))
-            self.toolButtonSave.setIcon(QIcon(os.path.join(ICONPATH,'icon-save-dark-64.svg')))
-
-        self.tableWidget = TableWidgetDragRows()  # Assuming TableWidgetDragRows is defined elsewhere
-        self.setup_table()
-        
-        # Setup sort menu and associated toolButton
-        self.setup_sort_menu()
-        
-        # Save functionality
-        self.toolButtonSave.clicked.connect(self.save_selected_analytes)
-        # Close dialog signal
-        self.pushButtonClose.clicked.connect(lambda: self.done(0))
-        self.layout().insertWidget(0, self.tableWidget)
-        self.show()
-
-    def setup_table(self):
-        """Sets up analyte selection table in dialog"""
-        self.tableWidget.setRowCount(len(self.analyte_list))
-        self.tableWidget.setColumnCount(2)
-        self.tableWidget.setHorizontalHeaderLabels(['Analyte', 'Show'])
-        header = self.tableWidget.horizontalHeader()
-        header.setSectionResizeMode(0, QHeaderView.Stretch)
-        header.setSectionResizeMode(1, QHeaderView.ResizeToContents)
-        self.populate_table()
-
-    def populate_table(self):
-        """Populates dialog table with analytes"""
-        # Before repopulating, save the current state of checkboxes
-        checkbox_states = {}
-        for row in range(self.tableWidget.rowCount()):
-            checkbox = self.tableWidget.cellWidget(row, 1)
-            if checkbox:
-                analyte = self.tableWidget.item(row, 0).text()
-                checkbox_states[analyte] = checkbox.isChecked()
-
-        # Clear the table and repopulate
-        self.tableWidget.setRowCount(len(self.analyte_list))
-        for row, analyte in enumerate(self.analyte_list):
-            item = QTableWidgetItem(analyte)
-            self.tableWidget.setItem(row, 0, item)
-            checkbox = QCheckBox()
-            # Restore the checkbox state based on the previous state if available
-            checkbox.setChecked(checkbox_states.get(analyte, True))
-            self.tableWidget.setCellWidget(row, 1, checkbox)
-
-    def setup_sort_menu(self):
-        """Adds options to sort menu"""
-        sortmenu_items = ['alphabetical', 'atomic number', 'mass', 'compatibility', 'radius']
-        SortMenu = QMenu()
-        SortMenu.triggered.connect(self.apply_sort)
-        self.toolButtonSort.setMenu(SortMenu)
-        for item in sortmenu_items:
-            SortMenu.addAction(item)
-
-    def apply_sort(self, action):
-        """Sorts analyte table in dialog"""        
-        method = action.text()
-        self.analyte_list = self.main_window.sort_analytes(method, self.analyte_list)
-        self.populate_table()  # Refresh table with sorted data
-
-    def save_selected_analytes(self):
-        """Gets list of analytes and group name when Save button is clicked
-
-        #     Retrieves the user defined name from ``quickView.lineEditViewName`` and list of analytes using ``quickView.column_to_list()``
-        #     and adds them to a dictionary item with the name defined as the key.
-
-        #     Raises
-        #     ------
-        #         A warning is raised if the user does not provide a name.  The list is not added to the dictionary in this case.
-        #     """        
-        self.view_name = self.lineEditViewName.text().strip()
-        if not self.view_name:
-            QMessageBox.warning(self, "Invalid Input", "Please enter a valid view name.")
-            return
-
-        selected_analytes = [self.tableWidget.item(row, 0).text() for row in range(self.tableWidget.rowCount()) if self.tableWidget.cellWidget(row, 1).isChecked()]
-        self.QV_analyte_list[self.view_name] = selected_analytes
-
-        # update self.comboBoxQVList combo box with view_name
-        self.comboBoxQVList.addItem(self.view_name)
-        
-        # Save to CSV
-        self.save_to_csv()
-
-    def save_to_csv(self):
-        """Opens a message box, prompting user to in put a file to save the table list"""
-        file_path = os.path.join(BASEDIR,'resources', 'styles', 'qv_lists.csv')
-        # Ensure directory exists
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-
-        # append dictionary to file of saved qv_lists
-        lameio.export_dict_to_csv(self.QV_analyte_list, file_path)
-        
-
-        QMessageBox.information(self, "Save Successful", f"Analytes view saved under '{self.view_name}' successfully.")
         
        
 # WebEngineView - Web engine for viewing userguide help pages
@@ -12591,86 +12067,7 @@ class WebEngineView(QWebEngineView):
         #print(f"JavaScript Console: {message} at line {line} in {source_id}")
 
 
-# TableWidgetDragRows
-# -------------------------------
-class TableWidgetDragRows(QTableWidget):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
 
-        self.setDragEnabled(True)
-        self.setAcceptDrops(True)
-        self.viewport().setAcceptDrops(True)
-        self.setDragDropOverwriteMode(False)
-        self.setDropIndicatorShown(True)
-
-        self.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.setDragDropMode(QAbstractItemView.InternalMove)
-
-    def dropEvent(self, event: QDropEvent):
-        if not event.isAccepted() and event.source() == self:
-            drop_row = self.drop_on(event)
-
-            rows = sorted(set(item.row() for item in self.selectedItems()))
-            rows_to_move = []
-            for row_index in rows:
-                row_data = []
-                for column_index in range(self.columnCount()):
-                    item = self.item(row_index, column_index)
-                    if item:
-                        row_data.append(QTableWidgetItem(item))
-                    else:
-                        widget = self.cellWidget(row_index, column_index)
-                        if isinstance(widget, QCheckBox):
-                            state = widget.isChecked()
-                            row_data.append(state)
-                        else:
-                            row_data.append(None)
-                rows_to_move.append(row_data)
-            
-            for row_index in reversed(rows):
-                self.removeRow(row_index)
-                if row_index < drop_row:
-                    drop_row -= 1
-
-            for row_index, data in enumerate(rows_to_move):
-                row_pos = row_index + drop_row
-                self.insertRow(row_pos)
-                for column_index, value in enumerate(data):
-                    if isinstance(value, QTableWidgetItem):
-                        self.setItem(row_pos, column_index, value)
-                    elif isinstance(value, bool):  # It's a checkbox state
-                        checkbox = QCheckBox()
-                        checkbox.setChecked(value)
-                        self.setCellWidget(row_pos, column_index, checkbox)
-            event.accept()
-            #select the chosen row
-            self.select_rows(drop_row, len(rows_to_move))
-        super().dropEvent(event)
-    
-    def select_rows(self, start_row, num_rows):
-        for row in range(start_row, start_row + num_rows):
-            for column in range(self.columnCount()):
-                item = self.item(row, column)
-                if item:
-                    item.setSelected(True)
-
-    def drop_on(self, event):
-        index = self.indexAt(event.pos())
-        if not index.isValid():
-            return self.rowCount()
-
-        return index.row() + 1 if self.is_below(event.pos(), index) else index.row()
-
-    def is_below(self, pos, index):
-        rect = self.visualRect(index)
-        margin = 2
-        if pos.y() - rect.top() < margin:
-            return False
-        elif rect.bottom() - pos.y() < margin:
-            return True
-        # noinspection PyTypeChecker
-        return rect.contains(pos, True) and not (int(self.model().flags(index)) & Qt.ItemIsDropEnabled) and pos.y() >= rect.center().y()
 
 
 # Classes

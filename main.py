@@ -4142,8 +4142,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 filtered_image = cv2.medianBlur(self.array.astype(np.float32), int(val1))  # Kernel size is 5
             case 'gaussian':
                 # Apply Median filter
-                filtered_image = cv2.GaussianBlur(self.array.astype(np.float32),
-                        int(val1), sigmaX=float(val2), sigmaY=float(val2))  # Kernel size is 5
+                filtered_image = cv2.GaussianBlur(self.array.astype(np.float32), ksize = (int(val1),int(val1)), sigmaX=float(val2), sigmaY=float(val2))  # Kernel size is 5
             case 'wiener':
                 # Apply Wiener filter
                 # Wiener filter in scipy expects the image in double precision
@@ -7528,11 +7527,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def histogram_field_type_callback(self):
         """"Executes when the histogram field type is changed"""
         self.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
-
+        self.comboBoxPlotType.setCurrentText('histogram')
         self.histogram_update_bin_width()
 
     def histogram_field_callback(self):
         """Executes when the histogram field is changed"""
+        self.comboBoxPlotType.setCurrentText('histogram')
         self.histogram_update_bin_width()
 
     def histogram_update_bin_width(self):
@@ -7692,7 +7692,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #print(nbins)
         #print(bin_width)
         
-        dscale = temp = self.data[self.sample_id]['analyte_info'].loc[self.data[self.sample_id]['analyte_info']['analytes'] == field,'norm'].values.item()
+        # dscale = temp = self.data[self.sample_id]['analyte_info'].loc[self.data[self.sample_id]['analyte_info']['analytes'] == field,'norm'].values.item()
         if xscale == 'linear':
             edges = np.linspace(xmin, xmax, nbins)
         else:

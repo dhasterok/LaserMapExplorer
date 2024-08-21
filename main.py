@@ -3278,7 +3278,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Check if rows in self.data[sample_id]['filter_info'] exist and filter array in current_plot_df
         # by creating a mask based on min and max of the corresponding filter analytes
         for index, filter_row in self.data[sample_id]['filter_info'].iterrows():
-            if filter_row['use']:
+            if filter_row['use'].any():
                 analyte_df = self.get_map_data(sample_id=sample_id, field=filter_row['field'], field_type=filter_row['field_type'])
                 
                 operator = filter_row['operator']
@@ -3330,14 +3330,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 # Create a grid of points covering the entire array
                 # x, y = np.meshgrid(np.arange(self.array.shape[1]), np.arange(self.array.shape[0]))
 
-                points = np.vstack((self.x, self.y)).T
-
+                points = pd.concat([self.x, self.y] , axis=1).values
                 # Use the path to determine which points are inside the polygon
                 inside_polygon = path.contains_points(points)
 
                 # Reshape the result back to the shape of self.array
-                # inside_polygon_mask = inside_polygon.reshape(self.array.shape)
-
+                inside_polygon_mask = np.array(inside_polygon).reshape(self.array_size, order =  'C')
+                inside_polygon = inside_polygon_mask.flatten('F')
                 # Update the polygon mask - include points that are inside this polygon
                 self.data[sample_id]['polygon_mask'] &= inside_polygon
 
@@ -12797,9 +12796,7 @@ class PolygonManager:
         self.p_id = self.p_id_gen
         # Create new polygon instance
         self.polygons[self.main_window.sample_id][self.p_id] = Polygon(self.p_id)
-        self.main_window.actionClearFilters.setEnabled(True)
-        self.main_window.actionPolygonMask.setEnabled(True)
-        self.main_window.actionPolygonMask.setChecked(True)
+
 
     def save_polygons(self, project_dir, sample_id):
         """Save polygons to a file"""
@@ -12900,7 +12897,12 @@ class PolygonManager:
 
             # Finalize and draw the polygon
             self.show_polygon_lines(x,y, complete = True)
-
+            # Enable filter and polygon actions
+            self.main_window.actionClearFilters.setEnabled(True)
+            self.main_window.actionPolygonMask.setEnabled(True)
+            self.main_window.actionPolygonMask.setChecked(True)
+            # apply polygon filter
+            self.main_window.apply_filters(fullmap=False)
             return
         elif event.button() == QtCore.Qt.RightButton and self.main_window.toolButtonPolyMovePoint.isChecked():
             self.main_window.toolButtonPolyMovePoint.setChecked(False)
@@ -13531,7 +13533,7 @@ class Profiling:
             else:
                 # find nearest profile point
                 mindist = 10**12
-                for i, (x_p,y_p,_,_,interpolate) in enumerate(profile[k]):
+                for i, (x_p,y_p,_,_,interpolate) in enumerate(profile[k,v]):
                     dist = (x_p - x)**2 + (y_p - y)**2
                     if mindist > dist:
                         mindist = dist

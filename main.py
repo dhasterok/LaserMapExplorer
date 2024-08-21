@@ -12431,7 +12431,8 @@ class quickView(QDialog, Ui_QuickViewDialog):
         """        
         super().__init__(parent)
         self.setupUi(self)
-        self.analyte_list = self.data[self.sample_id]['analyte_info']['analytes']
+        self.main_window = parent
+        self.analyte_list = self.main_window.data[self.main_window.sample_id]['analyte_info']['analytes']
 
         if darkdetect.isDark():
             self.toolButtonSort.setIcon(QIcon(os.path.join(ICONPATH,'icon-sort-dark-64.svg')))
@@ -12511,10 +12512,10 @@ class quickView(QDialog, Ui_QuickViewDialog):
             return
 
         selected_analytes = [self.tableWidget.item(row, 0).text() for row in range(self.tableWidget.rowCount()) if self.tableWidget.cellWidget(row, 1).isChecked()]
-        self.QV_analyte_list[self.view_name] = selected_analytes
+        self.main_window.QV_analyte_list[self.view_name] = selected_analytes
 
         # update self.comboBoxQVList combo box with view_name
-        self.comboBoxQVList.addItem(self.view_name)
+        self.main_window.comboBoxQVList.addItem(self.view_name)
         
         # Save to CSV
         self.save_to_csv()
@@ -12526,7 +12527,7 @@ class quickView(QDialog, Ui_QuickViewDialog):
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
         # append dictionary to file of saved qv_lists
-        lameio.export_dict_to_csv(self.QV_analyte_list, file_path)
+        lameio.export_dict_to_csv(self.main_window.QV_analyte_list, file_path)
         
 
         QMessageBox.information(self, "Save Successful", f"Analytes view saved under '{self.view_name}' successfully.")

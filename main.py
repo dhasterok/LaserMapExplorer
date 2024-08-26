@@ -75,6 +75,7 @@ setConfigOption('imageAxisOrder', 'row-major') # best performance
 ## !pyuic5 designer/mainwindow.ui -o src/ui/MainWindow.py
 ## !pyuic5 designer/QuickViewDialog.ui -o src/ui/QuickViewDialog.py
 ## !pyuic5 -x designer/AnalyteSelectionDialog.ui -o src/ui/AnalyteSelectionDialog.py
+## !pyuic5 -x designer/FileImportDialog.ui -o src/ui/FileImportDialog.py
 ## !pyuic5 -x designer/PreferencesWindow.ui -o src/ui/PreferencesWindow.py
 ## !pyuic5 -x designer/MapImportDialog.ui -o src/ui/MapImportDialog.py
 ## !pyuic5 -x designer/SpotImportDialog.ui -o src/ui/SpotImportDialog.py

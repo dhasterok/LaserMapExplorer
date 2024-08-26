@@ -1089,7 +1089,7 @@
    <property name="minimumSize">
     <size>
      <width>300</width>
-     <height>448</height>
+     <height>468</height>
     </size>
    </property>
    <property name="maximumSize">
@@ -1151,7 +1151,7 @@
         <string>Swap X and Y resolution</string>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>7</number>
        </property>
        <widget class="QWidget" name="SelectAnalytePage">
         <property name="enabled">
@@ -1162,7 +1162,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>169</height>
+          <height>135</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -1960,7 +1960,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>169</height>
+          <height>135</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -2559,7 +2559,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>169</height>
+          <height>135</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -2599,7 +2599,7 @@
               <x>0</x>
               <y>0</y>
               <width>294</width>
-              <height>163</height>
+              <height>131</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_45">
@@ -2913,7 +2913,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>169</height>
+          <height>135</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -3552,7 +3552,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>169</height>
+          <height>135</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -4318,7 +4318,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>169</height>
+          <height>135</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5005,7 +5005,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>169</height>
+          <height>135</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5610,6 +5610,78 @@
          </item>
         </layout>
        </widget>
+       <widget class="QWidget" name="BatchPage">
+        <attribute name="icon">
+         <iconset resource="../resources.qrc">
+          <normaloff>:/resources/icons/icon-batch-64.svg</normaloff>:/resources/icons/icon-batch-64.svg</iconset>
+        </attribute>
+        <attribute name="label">
+         <string>Batch Processing</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_59">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QScrollArea" name="scrollArea">
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="widgetResizable">
+            <bool>true</bool>
+           </property>
+           <widget class="QWidget" name="scrollAreaWidgetContents_3">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>300</width>
+              <height>135</height>
+             </rect>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_75">
+             <item>
+              <layout class="QFormLayout" name="formLayout_5">
+               <item row="0" column="0">
+                <widget class="QLabel" name="batchDataLabel">
+                 <property name="text">
+                  <string>Batch Data?</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QCheckBox" name="batchDataCheckBox"/>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <spacer name="verticalSpacer_17">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>81</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </widget>
+          </widget>
+         </item>
+        </layout>
+       </widget>
        <widget class="QWidget" name="MultidimensionalPage">
         <property name="enabled">
          <bool>true</bool>
@@ -5619,7 +5691,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>169</height>
+          <height>135</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5665,7 +5737,7 @@
               <x>0</x>
               <y>0</y>
               <width>301</width>
-              <height>169</height>
+              <height>135</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_57">
@@ -5852,7 +5924,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>169</height>
+          <height>135</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6271,7 +6343,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>169</height>
+          <height>135</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6317,7 +6389,7 @@
               <x>0</x>
               <y>0</y>
               <width>300</width>
-              <height>169</height>
+              <height>135</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_64">
@@ -10905,7 +10977,7 @@
         <string>Pop the figure out into a separate window</string>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>4</number>
        </property>
        <widget class="QWidget" name="tabNotes">
         <property name="sizePolicy">
@@ -12534,6 +12606,11 @@
           <widget class="QTextEdit" name="textEditPlotInfo"/>
          </item>
         </layout>
+       </widget>
+       <widget class="QWidget" name="tabWorkflow">
+        <attribute name="title">
+         <string>Workflow</string>
+        </attribute>
        </widget>
        <widget class="QWidget" name="tabBrowser">
         <attribute name="title">

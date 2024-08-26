@@ -1,7 +1,6 @@
 {
     "files": [
         "designer/AnalyteSelectionDialog.ui",
-        "designer/form.ui",
         "designer/mainwindow.ui",
         "designer/PreferencesWindow.ui",
         "resources.qrc",
@@ -11,6 +10,7 @@
         "designer/QuickViewDialog.ui",
         "designer/ImageImportDialog.ui",
         "designer/SpotImportDialog.ui",
-        "designer/WorkflowDesigner.ui"
+        "designer/WorkflowDesigner.ui",
+        "designer/FileImportDialog.ui"
     ]
 }

@@ -9,6 +9,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt, QUrl
 import src.lame_fileio as lameio
 from src.ui.MapImportDialog import Ui_MapImportDialog
+from src.ui.FileImportDialog import Ui_FileImportDialog
 from lame_helper import BASEDIR, ICONPATH
 
 # Import Tool Dialog
@@ -570,28 +571,91 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         
         return df
 
-    def parse_filenames(self, sample_id, file):
-        """Cleans file names to determine file type and identifier for reading
+    # def parse_filenames(self, sample_id, file):
+    #     """Cleans file names to determine file type and identifier for reading
 
-        Removes sample names, file types, units and delimiters from file names.  If a valid file type, then
-        the remaining string should be the line number, element or isotope symbol.
+    #     Removes sample names, file types, units and delimiters from file names.  If a valid file type, then
+    #     the remaining string should be the line number, element or isotope symbol.
+
+    #     Parameters
+    #     ----------
+    #     sample_id : str
+    #         Current sample ID
+    #     files : list of str
+    #         List of file names for *sample_id*
+
+    #     Returns
+    #     -------
+    #     list, list, list
+    #         Returns a list of boolean values ``True`` is believed to be a valid file format and ``False`` is thought to be invalid.
+    #         The second list includes the type of file that it expects to read, either ``line`` for all analytes for each scan line or
+    #         ``matrix`` for each analyte stored as a matrix in a separate file.  The third list is the file name stripped down to line
+    #         numbers or analytes.
+    #     """        
+    #     el_list =['H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne', 'Na', 'Mg',
+    #             'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr',
+    #             'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se', 'Br',
+    #             'Kr', 'Rb', 'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd',
+    #             'Ag', 'Cd', 'In', 'Sn', 'Sb', 'Te', 'I', 'Xe', 'Cs', 'Ba', 'La',
+    #             'Ce', 'Pr', 'Nd', 'Pm', 'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 'Ho', 'Er',
+    #             'Tm', 'Yb', 'Lu', 'Hf', 'Ta', 'W', 'Re', 'Os', 'Ir', 'Pt', 'Au',
+    #             'Hg', 'Tl', 'Pb', 'Bi', 'Po', 'At', 'Rn', 'Fr', 'Ra', 'Ac', 'Th',
+    #             'Pa', 'U', 'Np', 'Pu']
+
+    #     delimiters = [' ','-','_','.']
+    #     units = ['CPS','cps','PPM','ppm','PPB','ppb','PPT','ppt','Ma','MA']
+    #     formats = ['matrix','csv','xlsx','xls']
+
+    #     # remove sample_id from filename
+    #     fid = file.replace(sample_id,'')
+
+    #     # remove delimiters
+    #     for d in delimiters:
+    #         fid = fid.replace(d,'')
+
+    #     # remove units
+    #     for u in units:
+    #         fid = fid.replace(u,'')
+
+    #     for fmt in formats:
+    #         fid = fid.replace(fmt,'')
+
+    #     text = ''.join(re.findall('[a-zA-Z]',fid))
+    #     # if all numbers, probably a line number
+    #     if fid.isdigit():
+    #         ftype = 'line'            
+    #         valid = True
+    #     # if includes text, see if it matches the list of element symbols
+    #     elif text in el_list:
+    #         ftype = 'matrix'
+    #         valid = True
+    #     # probably not a valid file name
+    #     else:
+    #         ftype = None
+    #         fid = None
+    #         valid = False
+
+    #     return valid, ftype, fid
+
+    def parse_filenames(self, sample_id, files):
+        """Parses a list of filenames to predict file type and extract analyte, unit, and line number information.
 
         Parameters
         ----------
         sample_id : str
-            Current sample ID
+            The sample ID to remove from filenames.
         files : list of str
-            List of file names for *sample_id*
+            List of file paths to be parsed.
 
         Returns
         -------
-        list, list, list
-            Returns a list of boolean values ``True`` is believed to be a valid file format and ``False`` is thought to be invalid.
-            The second list includes the type of file that it expects to read, either ``line`` for all analytes for each scan line or
-            ``matrix`` for each analyte stored as a matrix in a separate file.  The third list is the file name stripped down to line
-            numbers or analytes.
-        """        
-        el_list =['H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne', 'Na', 'Mg',
+        list of tuples
+            A list where each tuple contains:
+            - boolean indicating if the file is valid
+            - file type (either 'matrix', 'line', or None)
+            - the extracted analyte, ratio, or line number
+        """
+        el_list = ['H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne', 'Na', 'Mg',
                 'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr',
                 'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se', 'Br',
                 'Kr', 'Rb', 'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd',
@@ -601,40 +665,85 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                 'Hg', 'Tl', 'Pb', 'Bi', 'Po', 'At', 'Rn', 'Fr', 'Ra', 'Ac', 'Th',
                 'Pa', 'U', 'Np', 'Pu']
 
-        delimiters = [' ','-','_','.']
-        units = ['CPS','cps','PPM','ppm']
-        formats = ['matrix','csv','xlsx','xls']
+        delimiters = [' ', '-', '_', '.']
+        units = ['CPS', 'cps', 'PPM', 'ppm', 'PPB', 'ppb']
+        valid_extensions = ['csv', 'xlsx', 'xls']
 
-        # remove sample_id from filename
-        fid = file.replace(sample_id,'')
+        results = []
 
-        # remove delimiters
-        for d in delimiters:
-            fid = fid.replace(d,'')
-
-        # remove units
-        for u in units:
-            fid = fid.replace(u,'')
-
-        for fmt in formats:
-            fid = fid.replace(fmt,'')
-
-        text = ''.join(re.findall('[a-zA-Z]',fid))
-        # if all numbers, probably a line number
-        if fid.isdigit():
-            ftype = 'line'            
-            valid = True
-        # if includes text, see if it matches the list of element symbols
-        elif text in el_list:
-            ftype = 'matrix'
-            valid = True
-        # probably not a valid file name
-        else:
-            ftype = None
-            fid = None
+        for file in files:
             valid = False
+            filetype = None
+            fieldtype = None
+            field = None
+            unit = None
 
-        return valid, ftype, fid
+            # Extract the filename without the directory path
+            file = file.split('/')[-1].lower()
+
+            # determine file extension
+            extension = file.split('.')[-1]
+
+            # determine if valid file type
+            for ve in valid_extensions:
+                if ve == extension:
+                    valid = True
+
+            if not valid:
+                results.append((valid,extension,filetype,fieldtype,field,unit))
+                continue
+
+            # remove extension
+            filename = file.replace('.'+extension,'')
+
+            # Remove the sample_id from the filename so it doesn't interfere with parsing other portions
+            filename = filename.replace(sample_id, '')
+
+            # Remove units
+            unit = None
+            for u in units:
+                if u in filename:
+                    unit = u
+                    filename = filename.replace(u, '')
+
+            # Check if matrix file type
+            if 'matrix' in filename:
+                filetype = 'matrix'
+                filename = filename.replace(filetype,'')
+
+            # At this point, the only additional data we need is a line number for filetype == 'line' or
+            # an analyte for filetype == 'matrix'.  There could still be other things, but we'll ignore them.
+
+            # Remove delimiters
+            for d in delimiters:
+                filename = filename.replace(d, '')
+
+            text = ''.join(re.findall('[a-zA-Z]', filename))
+            
+            # If all numbers, probably a line number
+            if filename.isdigit():
+                filetype = 'line'
+                valid = True
+                parsed_value = fid
+            
+            # If it includes text, see if it matches the list of element symbols
+            elif text in el_list or '/' in filename.lower():
+                filetype = 'matrix'
+                valid = True
+                parsed_value = text
+            
+            # If it matches neither, it's probably not a valid file
+            else:
+                valid = False
+                filetype = None
+                fieldtype = None
+                field = None
+                unit = None
+
+            results.append((valid,extension,filetype,fieldtype,field,unit))
+        
+        return results
+
 
     def import_data(self): 
         """Import data associated with each *Sample Id* using metadata to define important structural parameters
@@ -700,6 +809,35 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         num_imported = 0
 
 #        try:
+        for i, directory in enumerate(self.paths):
+            # Get a list of files in the directory
+            file_list = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
+
+            # Guess analytes from filenames (implement your logic here)
+            #analyte_guesses = [self.guess_analyte_from_filename(f) for f in file_list]
+
+            # Use a list comprehension to apply the parse_filenames method to each file in the file_list
+            #parsed_results = [self.parse_filenames(self.sample_ids[i], f) for f in file_list]
+
+            results = self.parse_filenames(self.sample_ids[i], file_list)
+
+            # Extract the results
+            valid_list, ftype_list, fid_list = zip(*parsed_results)  # This will give you three lists
+
+            # Show the dialog to confirm or edit the file import details
+            dialog = FileImportData(file_list, analyte_guesses)
+            if dialog.exec_() == QDialog.Accepted:
+                # Retrieve the updated data from the dialog
+                import_data = dialog.get_data()
+
+                # Process the selected files
+                for filename, analyte, units, import_file in import_data:
+                    if import_file:
+                        # Update the paths and file import logic here
+                        file_path = os.path.join(directory, filename)
+                        self.process_file(file_path, analyte, units)
+                        num_imported += 1
+
         for i,path in enumerate(self.paths):
             # if Import is False, skip sample
             if not table_df['Import'][i]:
@@ -759,7 +897,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                             case _:
                                 #df = self.read_ladr_ppm_folder(file_path)
                                 #data_frames.append(df)
-                                Exception('Unknown file type for import.')
+                                raise Exception('Unknown file type for import.')
 
                     current_progress += 1
                     self.progressBar.setValue(current_progress)
@@ -791,6 +929,18 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                 
                 if not data_frames:
                     continue
+
+                self.statusBar.showMessage(f'Formatting {sample_id}...')
+                QApplication.processEvents()
+                match self.ftype:
+                    case 'lines':
+                        final_data = pd.concat(data_frames, ignore_index=True)
+                        final_data['X'] -= final_data['X'].min() if reverse_x else 0
+                        final_data['Y'] -= final_data['Y'].min() if reverse_y else 0
+                    case 'matrix':
+                        final_data = pd.concat(data_frames, axis=1)
+                    case _:
+                        raise Exception('Unknown file type format. Submit bug request and sample file for testing.')
 
                 file_name = os.path.join(save_path, sample_id+'.lame.csv')
                 self.statusBar.showMessage(f'Saving {sample_id}.lame.csv...')
@@ -941,50 +1091,58 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         data.insert(data.columns.get_loc('Y') + 1, 'Time_Sec_', pd.Series([float('nan')] * len(data)))
         return data
 
-class FileImportDialog(QDialog):
+    def guess_analyte_from_filename(self, filename):
+        # Implement your logic to guess the analyte from the filename
+        # Example: Extract a portion of the filename as the guessed analyte
+        return filename.split("_")[0]  # A simple placeholder example
+
+    def process_file(self, filepath, analyte, units):
+        # Implement the logic to process each file according to your specific needs
+        print(f"Processing file: {filepath} with analyte {analyte} and units {units}")
+        # Implement your file handling logic here
+
+class FileImportData(QDialog, Ui_FileImportDialog):
     def __init__(self, file_list, analyte_guesses, parent=None):
-        super(FileImportDialog, self).__init__(parent)
+        super().__init__(parent)
+        self.setupUi(self)
+
+        self.main_window = parent
 
         # Initialize the table widget
-        self.table = QTableWidget(len(file_list), 4, self)
-        self.table.setHorizontalHeaderLabels(["Import?", "Filename", "Analyte", "Units"])
+        self.tableWidget.setRowCount(len(file_list))
 
         # Populate the table with data
         for row, filename in enumerate(file_list):
             # Checkbox for import
             import_checkbox = QCheckBox()
             import_checkbox.setChecked(True)
-            self.table.setCellWidget(row, 4, import_checkbox)
+            self.tableWidget.setCellWidget(row, 0, import_checkbox)
 
             # Filename (non-editable)
             filename_item = QTableWidgetItem(filename)
             filename_item.setFlags(filename_item.flags() & ~Qt.ItemIsEditable)
-            self.table.setItem(row, 1, filename_item)
+            self.tableWidget.setItem(row, 1, filename_item)
+
+            # Analyte Type ComboBox (editable)
+            analyte_type_combo = QComboBox()
+            analyte_type_combo.addItems(['Analyte', 'Ratio', 'Computed'])
+            self.tableWidget.setCellWidget(row, 2, analyte_type_combo)
 
             # Guessed analyte (editable)
             analyte_item = QTableWidgetItem(analyte_guesses[row])
-            self.table.setItem(row, 2, analyte_item)
+            self.tableWidget.setItem(row, 3, analyte_item)
 
             # Units (editable)
             units_item = QTableWidgetItem("Unit")  # Default or guessed units
-            self.table.setItem(row, 3, units_item)
+            self.tableWidget.setItem(row, 4, units_item)
 
         # Add buttons for OK and Cancel
-        button_box = QHBoxLayout()
-        self.ok_button = QPushButton("OK")
-        self.cancel_button = QPushButton("Cancel")
-        button_box.addWidget(self.ok_button)
-        button_box.addWidget(self.cancel_button)
+        self.buttonBox.ok_button = QPushButton("OK")
+        self.buttonBox.cancel_button = QPushButton("Cancel")
 
         # Connect buttons to actions
-        self.ok_button.clicked.connect(self.accept)
-        self.cancel_button.clicked.connect(self.reject)
-
-        # Layout the dialog
-        layout = QVBoxLayout(self)
-        layout.addWidget(self.table)
-        layout.addLayout(button_box)
-        self.setLayout(layout)
+        self.buttonBox.ok_button.clicked.connect(self.accept)
+        self.buttonBox.cancel_button.clicked.connect(self.reject)
 
     def get_data(self):
         """Return the updated information from the table."""

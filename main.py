@@ -11447,7 +11447,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             # use rst2pdf on the command line to export the file as a pdf
             #os.system(f"cat {filename} | rst2pdf -o --use-floating-images {os.path.splitext(filename)[0]+'.pdf'}")
-
+       
             with open(filename, 'r') as file:
                 rst_content = file.read()
             

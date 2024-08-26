@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Blockly Demo</title>
+    <script src="blockly/blockly_compressed.js"></script>
+    <script src="blockly/blocks_compressed.js"></script>
+    <script src="blockly/javascript_compressed.js"></script>
+    <script src="blockly/msg/js/en.js"></script>
+</head>
+<body>
+    <h1>Scratch-like Environment</h1>
+    <div id="blocklyDiv" style="height: 600px; width: 1000px;"></div>
+    <xml id="toolbox" style="display: none">
+        <block type="controls_if"></block>
+        <block type="logic_compare"></block>
+        <block type="math_number"></block>
+        <block type="math_arithmetic"></block>
+        <block type="text"></block>
+        <block type="text_print"></block>
+    </xml>
+    <script>
+        var workspace = Blockly.inject('blocklyDiv',
+            {toolbox: document.getElementById('toolbox')});
+
+        function runCode() {
+            // Generate JavaScript code and execute
+            var code = Blockly.JavaScript.workspaceToCode(workspace);
+            console.log(code);
+        }
+    </script>
+</body>
+</html>

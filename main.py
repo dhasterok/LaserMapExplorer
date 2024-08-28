@@ -1,13 +1,11 @@
 import sys, os, re, copy, random, pickle, darkdetect
 from PyQt5 import QtCore, QtGui
-from PyQt5.QtCore import (
-    Qt, QTimer, QRectF, QPointF, QUrl, pyqtSlot, QSize, QEvent
-)
+from PyQt5.QtCore import ( Qt, QTimer, QUrl )
 from PyQt5.QtWidgets import (
-    QColorDialog, QCheckBox, QComboBox,  QTableWidgetItem, QVBoxLayout, QGridLayout,
-    QMessageBox, QHeaderView, QMenu, QGraphicsRectItem, QLineEdit, QFileDialog, QWidget,
+    QColorDialog, QCheckBox, QTableWidgetItem, QVBoxLayout, QGridLayout,
+    QMessageBox, QHeaderView, QMenu, QFileDialog, QWidget,
     QDialog, QLabel, QTableWidget, QInputDialog, QAbstractItemView, QProgressBar,
-    QSplashScreen, QDialogButtonBox, QApplication, QMainWindow, QSizePolicy, QGraphicsPolygonItem
+    QSplashScreen, QApplication, QMainWindow, QSizePolicy
 )
 from PyQt5.QtGui import (
     QIntValidator, QDoubleValidator, QColor, QImage, QPainter, QPixmap, QFont, QPen, QPalette,
@@ -54,6 +52,7 @@ from src.ui.MainWindow import Ui_MainWindow
 from src.ui.PreferencesWindow import Ui_PreferencesWindow
 from src.AnalyteSelectionWindow import AnalyteDialog
 #from src.WebEngineView import WebEngine
+from src.TableFunctions import TableFcn as TableFcn
 import src.CustomMplCanvas as mplc
 import src.MapImporter as MapImporter
 import src.SpotImporter as SpotImporter
@@ -63,9 +62,9 @@ from src.Profile import Profiling
 from src.Polygon import PolygonManager
 from src.Calculator import CustomFieldCalculator as cfc
 from src.SpecialFunctions import SpecialFunctions as specfun
+from src.NoteTaking import Notes
+from src.Browser import Browser
 import src.QuickView as QV
-from rst2pdf.createpdf import RstToPdf
-from docutils.core import publish_string
 from lame_helper import BASEDIR, ICONPATH, SSPATH, load_stylesheet
 from src.ExtendedDF import AttributeDataFrame
 import src.format as fmt
@@ -650,6 +649,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionSwapAxes.triggered.connect(self.swap_xy)
         self.actionSwapAxes.setEnabled(False)
 
+        self.browser = Browser(self)
         self.actionReportBug.triggered.connect(lambda: self.browser.setUrl(QUrl('https://github.com/dhasterok/LaserMapExplorer/issues')))
 
         #create plot tree
@@ -657,7 +657,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # self.open_directory()
 
         #init table_fcn
-        self.table_fcn = Table_Fcn(self)
+        self.table_fcn = TableFcn(self)
 
         # Select analyte Tab
         #-------------------------
@@ -1131,34 +1131,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Notes tab
         #-------------------------
-        self.notes_file = None
-        self.textEditNotes.setFont(QFont("Monaco", 10))
-        self.toolButtonNotesImage.clicked.connect(self.notes_add_image)
-
-        # heading menu
-        hmenu_items = ['H1','H2','H3']
-        formatHeadingMenu = QMenu()
-        formatHeadingMenu.triggered.connect(lambda x:self.add_header_line(x.text()))
-        self.add_menu(hmenu_items,formatHeadingMenu)
-        self.toolButtonNotesHeading.setMenu(formatHeadingMenu)
-
-        # info menu
-        infomenu_items = ['Sample info','List analytes used','Current plot details','Filter table','PCA results','Cluster results']
-        notesInfoMenu = QMenu()
-        notesInfoMenu.triggered.connect(lambda x:self.add_info_note(x.text()))
-        self.add_menu(infomenu_items,notesInfoMenu)
-        self.toolButtonNotesInfo.setMenu(notesInfoMenu)
-
-        self.toolButtonNotesBold.clicked.connect(lambda: self.format_note_text('bold'))
-        self.toolButtonNotesItalic.clicked.connect(lambda: self.format_note_text('italics'))
-
-        # compile rst
-        self.toolButtonNotesSave.clicked.connect(self.save_notes_to_pdf)
-
-        # autosave notes
-        self.autosaveTimer = QTimer()
-        self.autosaveTimer.setInterval(300000)
-        self.autosaveTimer.timeout.connect(self.save_notes_file)
+        self.notes = Notes(self)
 
         # Plot Info
         #-------------------------
@@ -1166,12 +1139,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         # Browser
         #-------------------------
-        # self.open_browser()
-        # self.browser = WebEngine(self)
-        # self.toolButtonBrowserHome.clicked.connect(self.browser_home_callback)
-        # self.lineEditBrowserLocation.editingFinished.connect(self.browser_location_callback)
-        # self.toolButtonBack.clicked.connect(self.browser.back)
-        # self.toolButtonForward.clicked.connect(self.browser.forward)
 
         # Plot toolbars
         #-------------------------
@@ -1400,8 +1367,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return
 
         # stop autosave timer
-        self.save_notes_file()
-        self.autosaveTimer.stop()
+        self.notes.save_notes_file()
+        self.notes.autosaveTimer.stop()
 
         if self.data:
             # Create and configure the QMessageBox
@@ -1436,7 +1403,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             with open(self.notes_file,'r') as file:
                 self.textEditNotes.setText(file.read())
         # put current notes into self.textEditNotes
-        self.autosaveTimer.start()
+        self.notes.autosaveTimer.start()
 
         # add sample to sample dictionary
         if self.sample_id not in self.data:
@@ -10089,315 +10056,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     
 
-    # -------------------------------
-    # Notes functions
-    # -------------------------------
-    def add_menu(self, menu_items, menu_obj):
-        """Adds items to a context menu
 
-        :param menu_items: Names of the menu text to add
-        :type menu_items: list
-        :param menu_obj: context menu object
-        :type menu_obj: QMenu
-        """
-        for item in menu_items:
-            action = menu_obj.addAction(item)
-            action.setIconVisibleInMenu(False)
-
-    def save_notes_file(self):
-        """Saves notes to an *.rst file
-
-        Autosaves the notes to a file ``[sample_id].rst``
-        """
-        if self.notes_file is None:
-            return
-
-        self.statusbar.showMessage('Saving notes...')
-
-        # write file
-        with open(self.notes_file,'w') as file:
-            file.write(str(self.textEditNotes.toPlainText()))
-
-        self.statusbar.clearMessage()
-
-    def notes_add_image(self):
-        """Adds placeholder image to notes
-
-        Uses the reStructured Text figure format
-        """
-        dialog = QFileDialog()
-        dialog.setFileMode(QFileDialog.ExistingFiles)
-        dialog.setNameFilter("Image Files (*.jpg *.png *.tif)")
-        filenames = []
-
-        if dialog.exec_():
-            filenames = dialog.selectedFiles()
-        else:
-            return
-
-        for fn in filenames:
-            self.textEditNotes.insertPlainText(f"\n\n.. figure:: {fn}\n")
-            self.textEditNotes.insertPlainText("    :align: center\n")
-            self.textEditNotes.insertPlainText("    :alt: alternate text\n")
-            self.textEditNotes.insertPlainText("    :width: 150mm\n")
-            self.textEditNotes.insertPlainText("\n    Caption goes here.\n")
-
-    def add_header_line(self, level):
-        """Formats a selected line as a header
-
-        Places a symbol consistent with the heading level below the selected text line.
-
-        Parameters
-        ----------
-        level : str
-            The header level is determined from a context menu associated with ``MainWindow.toolButtonNotesHeading``
-        """
-        # define symbols for heading level
-        match level:
-            case 'H1':
-                symbol = '*'
-            case 'H2':
-                symbol = '='
-            case 'H3':
-                symbol = '-'
-
-        # Get the current text cursor
-        cursor = self.textEditNotes.textCursor()
-
-        # Get the current line number and position
-        line_number = cursor.blockNumber()
-
-        # Move the cursor to the end of the selected line
-        cursor.movePosition(QTextCursor.EndOfLine)
-        #cursor.movePosition(QTextCursor.NextBlock)
-
-        # Insert the line of "="
-        cursor.insertText('\n' + f'{symbol}' * (cursor.block().length() - 1))
-
-    def format_note_text(self, style):
-        """Formats the text
-
-        Formats selected text as bold, italic or literal in restructured text format.
-
-        Parameters
-        ----------
-        style : str
-            Type of formatting
-        """
-        cursor = self.textEditNotes.textCursor()
-        selected_text = cursor.selectedText()
-
-        match style:
-            case 'italics':
-                modified_text = f"*{selected_text}*"
-            case 'bold':
-                modified_text = f"**{selected_text}**"
-            case 'literal':
-                modified_text = f"``{selected_text}``"
-
-        cursor.insertText(modified_text)
-
-    def add_info_note(self, infotype):
-        """Adds preformatted notes
-
-        Parameters
-        ----------
-        infotype : str
-            Name of preformatted information
-        """
-        match infotype:
-            case 'Sample info':
-                self.textEditNotes.insertPlainText(f'**Sample ID: {self.sample_id}**\n')
-                self.textEditNotes.insertPlainText('*' * (len(self.sample_id) + 15) + '\n')
-                self.textEditNotes.insertPlainText(f'\n:Date: {datetime.today().strftime("%Y-%m-%d")}\n')
-                # width/height
-                # list of all analytes
-                self.textEditNotes.insertPlainText(':User: Your name here\n')
-                pass
-            case 'List analytes used':
-                fields = self.get_field_list()
-                self.textEditNotes.insertPlainText('\n\n:analytes used: '+', '.join(fields))
-            case 'Current plot details':
-                text = ['\n\n:plot type: '+self.plot_info['plot_type'],
-                        ':plot name: '+self.plot_info['plot_name']+'\n']
-                self.textEditNotes.insertPlainText('\n'.join(text))
-            case 'Filter table':
-                filter_table = self.data[self.sample_id]['filter_info']
-                rst_table = self.to_rst_table(filter_table)
-
-                self.textEditNotes.insertPlainText(rst_table)
-            case 'PCA results':
-                if not self.pca_results:
-                    return
-                analytes = self.data[self.sample_id]['analyte_info'].loc[:,'analytes'].values
-                analytes = np.insert(analytes,0,'lambda')
-
-                matrix = np.vstack([self.pca_results.explained_variance_ratio_, self.pca_results.components_])
-
-                header = self.data[self.sample_id]['computed_data']['PCA Score'].columns[2:].to_numpy()
-
-                #print(type(analytes))
-                #print(type(header))
-                #print(type(matrix))
-                self.add_table_note(matrix, row_labels=analytes, col_labels=header)
-            case 'Cluster results':
-                if not self.cluster_results:
-                    return
-
-    def add_table_note(self, matrix, row_labels=None, col_labels=None):
-        """Convert matrix to restructured text
-
-        Adds a table to the note tab, including row lables and column headers.
-
-        Parameters
-        ----------
-        matrix : 2D array
-            Data for printing
-        row_labels : str, optional
-            Row labels
-        col_labels : str, optional
-            Column header
-        """
-        if matrix is None:
-            return ''
-
-        #matrix = self.convert_to_string(matrix)
-        matrix = fmt.oround_matrix(matrix, order=3)
-
-        # Add row labels to the matrix if provided
-        if row_labels is not None:
-            matrix = np.column_stack((row_labels, matrix))
-            if col_labels is not None:
-                col_labels = np.insert(col_labels,0,' ')
-
-        # Add column headings to the matrix if provided
-        if col_labels is not None:
-            matrix = np.vstack((col_labels, matrix))
-
-        # Calculate column widths
-        col_widths = np.max([np.vectorize(len)(matrix.astype(str))], axis=0)
-
-        # Generate the reST table
-        table = ""
-        for i, row in enumerate(matrix):
-            table += "|"
-            for col, width in zip(row, col_widths[i,:]):
-                table += f" {col:{int(width)}} |"
-            table += "\n"
-
-        self.textEditNotes.insertPlainText(table)
-
-
-    # CSV tables
-    # .. csv-table:: Table Title
-    #     :file: CSV file path and name
-    #     :widths: 30, 70       # percentage widths
-    #     :header-rows: 1
-
-    #def convert_to_string(self, array):
-    #    return np.array2string(array, formatter={'all': lambda x: f'{x:02f}'})
-
-    def save_notes_to_pdf(self):
-        """Converts notes *.rst file to *.pdf"""
-        # save note file first to ensure all changes have been recorded
-        self.save_notes_file()
-
-        # replace all spaces with \ space
-        filename = self.notes_file
-        try:
-            pdf_file_path = filename.replace('.rst', '.pdf')
-
-            # use rst2pdf on the command line to export the file as a pdf
-            #os.system(f"cat {filename} | rst2pdf -o --use-floating-images {os.path.splitext(filename)[0]+'.pdf'}")
-       
-            with open(filename, 'r') as file:
-                rst_content = file.read()
-            
-            pdf = RstToPdf()
-            pdf_content = pdf.createPdf(text=rst_content, output=pdf_file_path)
-            
-            #with open(pdf_file_path, 'wb') as pdf_file:
-            #    pdf_file.write(pdf_content)
-            
-            self.statusBar.showMessage("PDF successfully generated...")
-        except Exception as e:
-            # if it doesn't work
-            QMessageBox.warning(self,"Error", "Could not save to pdf.\n"+e)
-
-    def to_rst_table(self, df):
-        """Converts a Pandas DataFrame to a reST table string.
-
-        Parameters
-        ----------
-        df : pandas.DataFrame
-            Data table to convert to restructured text
-
-        Returns
-        -------
-        str
-            Table in restructred text format
-        """
-        def rst_row(row):
-            return ' '.join(f'{str(item):^10}' for item in row)
-
-        # Extracting column names and data as lists
-        columns = df.columns.tolist()
-        data = df.values.tolist()
-        
-        # Creating reST table components
-        header = rst_row(columns)
-        separator = ' '.join(['-'*10]*len(columns))
-        rows = [rst_row(row) for row in data]
-        
-        # Combining components into the reST table format
-        rst_table = '\n'.join([header, separator] + rows)
-        return rst_table
-
-    def open_browser(self):
-        """Creates and opens a browser in the bottom tabWidget
-
-        A browser for the LaME documentation.  It can access some external sites, but the browser is primarily for help data.
-        """        
-        # Open a file dialog to select a local HTML file
-        # Create a QWebEngineView widget
-        self.browser = WebEngineView(self)
-        self.verticalLayoutBrowser.addWidget(self.browser)
-
-        #file_name, _ = QFileDialog.getOpenFileName(self, "Open HTML File", "", "HTML Files (*.html *.htm)")
-        self.browser_home_callback()
-
-    def browser_home_callback(self):
-        """The browser returns to the documentation index.html file"""        
-        filename = os.path.join(BASEDIR,"docs/build/html/index.html")
-
-        self.lineEditBrowserLocation.setText(filename)
-
-        if filename:
-            # Load the selected HTML file into the QWebEngineView
-            self.browser.setUrl(QUrl.fromLocalFile(filename))
-        
-    def browser_location_callback(self, location=None):
-        """Tries to load the page given in ``MainWindow.lineEditBrowserLocation``
-
-        Parameters
-        ----------
-        location : str, optional
-            Name of webpage (excluding base directory and .html)
-        """
-        if not location:
-            location = self.lineEditBrowserLocation.text()
-        else:
-            location = os.path.join(BASEDIR,"docs/build/html/"+location+".html")
-
-        self.lineEditBrowserLocation.setText(location)
-
-        try:
-            if location:
-                self.browser.setUrl(QUrl.fromLocalFile(location))
-        except:
-            pass
-            #self.browser.setUrl(QUrl(os.path.abspath('docs/build/html/404.html')))
-
+    
     def toggle_help_mode(self):
         """Toggles help mode
 
@@ -10407,41 +10067,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.setCursor(Qt.WhatsThisCursor)
         else:
             self.setCursor(Qt.ArrowCursor)
-
-    def eventFilter(self, source, event):
-        """Event filter to capture mouse press events
-
-        If help mode is active, the clicked widget opens the help browser.
-
-        Parameters
-        ----------
-        source : any
-            Calling application or dialog
-        event : 
-            Mouse click.
-
-        Returns
-        -------
-        bool
-            ``True`` if help is opened, otherwise ``False``
-        """        
-        if event.type() == QEvent.MouseButtonPress and self.actionHelp.isChecked():
-            self.actionHelp.setChecked(False)
-            self.setCursor(Qt.ArrowCursor)
-            match source:
-                case self.centralwidget | self.canvasWindow:
-                    self.browser_location_callback('center_pane')
-                case self.toolBox | self.dockWidgetLeftToolbox:
-                    self.browser_location_callback('left_toolbox')
-                case self.toolBoxTreeView | self.dockWidgetRightToolbox:
-                    self.browser_location_callback('right_toolbox')
-                case self.dockWidgetBottomTabs | self.tabWidget:
-                    self.browser_location_callback('lower_tabs')
-                case _:
-                    return False
-            self.tabWidget.setCurrentIndex(self.bottom_tab['help'])
-            return True
-        return super().eventFilter(source, event)
 
 
     # -------------------------------
@@ -10870,63 +10495,6 @@ class MaskObj:
 
         
        
-# WebEngineView - Web engine for viewing userguide help pages
-# -------------------------------
-class WebEngineView(QWebEngineView):
-    """Creates a web engine widget to display user guide
-
-    _extended_summary_
-
-    Parameters
-    ----------
-    QWebEngineView : QWebEngine
-        A web engine widget
-    """    
-    def __init__(self, parent=None):
-        super().__init__(parent)
-
-        self.main_window = parent
-
-        # Connect signals
-        self.loadFinished.connect(self.on_load_finished)
-        self.loadStarted.connect(self.on_load_started)
-        self.loadProgress.connect(self.on_load_progress)
-        self.page().profile().setHttpAcceptLanguage("en-US,en;q=0.9")
-        self.page().profile().setHttpUserAgent("MyBrowser 1.0")
-
-        # Set up a JavaScript console message handler
-        self.page().setWebChannel(None)
-        self.page().setFeaturePermission(QUrl(), QWebEnginePage.Notifications, QWebEnginePage.PermissionGrantedByUser)
-        self.page().javaScriptConsoleMessage = self.handle_console_message
-
-    @pyqtSlot(bool)
-    def on_load_finished(self, success):
-        if not success:
-            self.setUrl(QUrl(os.path.abspath('docs/build/html/404.html')))
-            #self.show_error_page()
-
-    @pyqtSlot()
-    def on_load_started(self):
-        self.main_window.statusBar.showMessage("Loading started...")
-
-    @pyqtSlot(int)
-    def on_load_progress(self, progress):
-        """Adds a loading progress message to the MainWindow.statusBar 
-
-        Parameters
-        ----------
-        progress : int
-            Loading fraction
-        """        
-        self.main_window.statusBar.showMessage(f"Loading progress: {progress}%")
-
-    def show_error_page(self):
-        html = f"<html><body><img src={os.path.abspath('docs/build/html/404.html')} /></html>"
-        self.setHtml(html)
-
-    def handle_console_message(self, level, message, line, source_id):
-        pass
-        #print(f"JavaScript Console: {message} at line {line} in {source_id}")
 
 
 
@@ -10946,152 +10514,6 @@ class WebEngineView(QWebEngineView):
 #         # Format the tick strings as you want them to appear
 #         return ['{:.2f}'.format(v) for v in scaled_values]
 
-# Functions for tables
-# -------------------------------
-class Table_Fcn:
-    """Common table operations class
-
-    For moving and deleting rows in QTableWidgets
-    """
-    def __init__(self,main_window):
-        self.main_window = main_window
-
-    def move_row_up(self, table):
-        """Moves a row up one position in a table
-
-        Moves the selected row in a table up one position. If multiple are selected only the top row is moved.
-
-        Parameters
-        ----------
-        table : QTableWidget
-        """
-
-        # Get selected row
-        row = table.currentRow()
-        if len(table.selectedItems()) > 0:
-            return
-
-        if row > 0:
-            table.insertRow(row - 1)
-            for i in range(table.columnCount()):
-                table.setItem(row - 1, i, table.takeItem(row + 1, i))
-            table.removeRow(row + 1)
-            table.setCurrentCell(row - 1, 0)
-
-            match table.accessibleName():
-                case 'Profiling':
-                    self.main_window.comboBoxProfileSort.setCurrentIndex(0) #set dropdown sort to no
-
-                    # Update self.profiles[self.main_window.sample_id] here accordingly
-                    for key, profile in self.main_window.profiling.profiles[self.main_window.sample_id].items():
-                        if row >0:
-                            profile[row], profile[row -1 ] = profile[row - 1], profile[row]
-                    self.main_window.profiling.plot_profiles()
-                    if self.main_window.profiling.main_window.toolButtonProfileInterpolate.isChecked(): #reset interpolation if selected
-                        self.main_window.profiling.clear_interpolation()
-                        self.main_window.profiling.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
-                #case 'NDim':
-                    # update plot
-
-                #case 'Filters':
-                    # update filters
-                    # update plots
-
-    def move_row_down(self,table):
-        """Moves a row down one position in a table
-
-        Moves the selected row in a table down one position. If multiple are selected only the top row is moved.
-
-        Parameters
-        ----------
-        table : QTableWidget
-        """
-
-        # Similar to move_row_up, but moving the row down
-        row = table.currentRow()
-        if len(table.selectedItems()) > 0:
-            return
-
-        max_row = table.rowCount() - 1
-        if row < max_row:
-            table.insertRow(row + 2)
-            for i in range(table.columnCount()):
-                table.setItem(row + 2, i, table.takeItem(row, i))
-            table.removeRow(row)
-            table.setCurrentCell(row + 1, 0)
-            match table.accesibleName():
-                case 'Profiling':
-                    # update point order of each profile
-                    for key, profile in self.main_window.profiling.profiles[self.main_window.sample_id].items():
-                        if row < len(profile) - 1:
-                            profile[row], profile[row + 1] = profile[row + 1], profile[row]
-                    self.main_window.profiling.plot_profiles()
-                    if self.main_window.toolButtonProfileInterpolate.isChecked(): #reset interpolation if selected
-                        self.main_window.profiling.clear_interpolation()
-                        self.main_window.profiling.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
-
-    def delete_row(self,table):
-        """Deletes selected rows in a table
-
-        Parameters
-        ----------
-        table : QTableWidget
-        """
-        rows = [index.row() for index in table.selectionModel().selectedRows()][::-1] #sort descending to pop in order
-        match table.accessibleName():
-            case 'Profiling':
-                for row in rows:
-                    # Get selected row and delete it
-                    table.removeRow(row)
-                    # remove point from each profile and its corresponding scatter plot item
-
-
-                    for key, profile in self.main_window.profiling.profiles[self.main_window.sample_id].items():
-                        if row < len(profile):
-                            scatter_item = profile[row][3]  # Access the scatter plot item
-                            for _, (_, plot, _) in self.main_window.lasermaps.items():
-                                plot.removeItem(scatter_item)
-                            profile.pop(row) #index starts at 0
-
-                self.main_window.profiling.plot_profiles(sort_axis = False)
-
-                if self.main_window.toolButtonProfileInterpolate.isChecked(): #reset interpolation if selected
-                    self.main_window.profiling.clear_interpolation()
-                    self.main_window.profiling.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius= int(self.main_window.lineEditPointRadius.text()))
-
-            case 'NDim':
-                for row in rows:
-                    # Get selected row and delete it
-                    table.removeRow(row)
-                    self.main_window.ndim_list.pop(row)
-
-            case 'Filters':
-                for row in rows:
-                    # Get selected row and delete it
-                    table.removeRow(row)
-
-            case 'Polygon':
-                for row in rows:
-                    # Get p_id
-                    item = self.main_window.tableWidgetPolyPoints.item(row, 0)
-                    p_id = int(item.text())
-                    # Get selected row and delete it
-                    table.removeRow(row)
-                    if p_id in self.main_window.polygon.lines[self.main_window.sample_id]:
-                        # remove point from each profile and its corresponding scatter plot item
-                        for p in self.main_window.polygon.polygons[self.main_window.sample_id][p_id].points:
-                            scatter_item = p[2]  # Access the scatter plot item
-                            for _, (_, plot, _) in self.main_window.lasermaps.items():
-                                plot.removeItem(scatter_item)
-                        # Remove existing temporary line(s) if any
-                        for line in self.main_window.polygon.lines[self.main_window.sample_id][p_id].lines:
-                            for _, (_, plot, _) in self.main_window.lasermaps.items():
-                                plot.removeItem(line)
-                    
-
-                        
-                    # delete polygon from list
-                    del self.main_window.polygon.polygons[self.main_window.sample_id][p_id]
 
 
 # -------------------------------

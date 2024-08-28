@@ -39,7 +39,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         super().__init__(parent)
         self.setupUi(self)
 
-        self.main_window = parent
+        self.parent = parent
 
         if darkdetect.isDark():
             self.toolButtonNextSample.setIcon(QIcon(os.path.join(ICONPATH,'icon-forward-arrow-dark-64.svg')))
@@ -785,7 +785,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                 pass
 
         if self.ok:
-            self.main_window.open_directory(dir_name=self.root_path)
+            self.parent.open_directory(dir_name=self.root_path)
         
     def import_la_icp_ms_data(self, table_df, save_path):
         """Reads LA-ICP-MS data into a DataFrame
@@ -1106,7 +1106,7 @@ class FileImportData(QDialog, Ui_FileImportDialog):
         super().__init__(parent)
         self.setupUi(self)
 
-        self.main_window = parent
+        self.parent = parent
 
         # Initialize the table widget
         self.tableWidget.setRowCount(len(file_list))

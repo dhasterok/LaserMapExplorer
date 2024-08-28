@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import ( QMessageBox, QInputDialog )
 # -------------------------------
 # Calculator
 # -------------------------------
-class CustomFieldCalculator:
+class CustomFieldCalculator():
     def __init__(self, parent=None):
         # super().__init__(self, parent=None)
 

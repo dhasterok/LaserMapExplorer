@@ -40,7 +40,7 @@ class SimpleMplCanvas(FigureCanvas):
             self.axes = self.fig.add_subplot(sub)
         super(SimpleMplCanvas, self).__init__(self.fig)
 
-        self.main_window = parent
+        self.parent = parent
 
 
 class MplCanvas(FigureCanvas):
@@ -71,7 +71,7 @@ class MplCanvas(FigureCanvas):
             self.axes = self.fig.add_subplot(sub)
         super(MplCanvas, self).__init__(self.fig)
 
-        self.main_window = parent
+        self.parent = parent
 
         # for placing text annotations
         # --------------------
@@ -90,8 +90,8 @@ class MplCanvas(FigureCanvas):
         self.saved_line = []
         self.saved_dtext = []
         self.array = None
-        if self.main_window is not None:
-            if self.main_window.comboBoxPlotType.currentText() in self.main_window.map_plot_types:
+        if self.parent is not None:
+            if self.parent.comboBoxPlotType.currentText() in self.parent.map_plot_types:
                 self.map_flag = True
             else:
                 self.map_flag = False
@@ -141,14 +141,14 @@ class MplCanvas(FigureCanvas):
             elif y_i > self.array.shape[0]-1:
                 y_i = self.array.shape[0]
             
-            x = x_i*self.main_window.dx
-            y = y_i*self.main_window.dy
+            x = x_i*self.parent.dx
+            y = y_i*self.parent.dy
 
-            label =  f" {self.main_window.preferences['Units']['Concentration']}"
+            label =  f" {self.parent.preferences['Units']['Concentration']}"
         else:
             x = event.xdata
             y = event.ydata
-            self.main_window.labelSVInfoValue.setText(f"V: N/A")
+            self.parent.labelSVInfoValue.setText(f"V: N/A")
 
             if self.array is not None:
                 x_i = round(x)
@@ -160,12 +160,12 @@ class MplCanvas(FigureCanvas):
         if self.array is not None:
             value = self.array[y_i][x_i]
             txt = f"V: {value:.4g}{label}"
-            self.main_window.labelSVInfoValue.setText(txt)
+            self.parent.labelSVInfoValue.setText(txt)
 
         txt = f'X: {x:.4g}'
-        self.main_window.labelSVInfoX.setText(txt)
+        self.parent.labelSVInfoX.setText(txt)
         txt = f'Y: {y:.4g}'
-        self.main_window.labelSVInfoY.setText(txt)
+        self.parent.labelSVInfoY.setText(txt)
 
     def set_initial_extent(self):
         """Initial extent of the plot
@@ -219,7 +219,7 @@ class MplCanvas(FigureCanvas):
         event : MouseEvent
             Mouse click event.
         """        
-        if (self.main_window.canvasWindow.currentIndex() != self.main_window.canvas_tab['sv']) or (not self.main_window.toolButtonAnnotate.isChecked()):
+        if (self.parent.canvasWindow.currentIndex() != self.parent.canvas_tab['sv']) or (not self.parent.toolButtonAnnotate.isChecked()):
             return
 
         x,y = event.xdata, event.ydata
@@ -228,7 +228,7 @@ class MplCanvas(FigureCanvas):
         if not ok:
             return
 
-        style = self.main_window.styles[self.main_window.comboBoxPlotType.currentText()]
+        style = self.parent.styles[self.parent.comboBoxPlotType.currentText()]
         self.axes.text(x,y,txt, color=style['Scale']['OverlayColor'], fontsize=style['Text']['FontSize'])
         self.draw()
 
@@ -248,8 +248,8 @@ class MplCanvas(FigureCanvas):
             Distance between two given points.
         """
         if self.map_flag:
-            dx = self.main_window.dx
-            dy = self.main_window.dy
+            dx = self.parent.dx
+            dy = self.parent.dy
         else:
             dx = 1
             dy = 1
@@ -269,8 +269,8 @@ class MplCanvas(FigureCanvas):
         matplotlib.plot
             Handle to line
         """        
-        plot_type = self.main_window.plot_info['plot_type']
-        style = self.main_window.styles[plot_type]
+        plot_type = self.parent.plot_info['plot_type']
+        style = self.parent.styles[plot_type]
 
         # plot line (keep only first returned handle)
         p = self.axes.plot([p1[0], p2[0]], [p1[1], p2[1]],
@@ -295,20 +295,20 @@ class MplCanvas(FigureCanvas):
         matplotlib.text
             Handle to text.
         """        
-        plot_type = self.main_window.plot_info['plot_type']
-        style = self.main_window.styles[plot_type]
+        plot_type = self.parent.plot_info['plot_type']
+        style = self.parent.styles[plot_type]
 
         # compute distance
         distance = self.calculate_distance(p1, p2)
 
         # Update distance label in widget 
-        distance_text = f"{distance:.4g} {self.main_window.preferences['Units']['Distance']}"
-        self.main_window.labelSVInfoDistance.setText(f"D: {distance_text}")
+        distance_text = f"{distance:.4g} {self.parent.preferences['Units']['Distance']}"
+        self.parent.labelSVInfoDistance.setText(f"D: {distance_text}")
 
         # Update distance label on map
         if self.map_flag:
-            xrange = self.main_window.x.nunique()*self.main_window.aspect_ratio
-            yrange = self.main_window.y.nunique()
+            xrange = self.parent.x.nunique()*self.parent.aspect_ratio
+            yrange = self.parent.y.nunique()
         else:
             xl = self.axes.get_xlim
             xrange = xl[1] - xl[0]
@@ -350,12 +350,12 @@ class MplCanvas(FigureCanvas):
             Mouse click event.
         """        
         self.setCursor(Qt.CrossCursor)
-        if self.main_window.toolButtonDistance.isChecked():
+        if self.parent.toolButtonDistance.isChecked():
             if event.inaxes:
                 if self.first_point is None:
                     # First click
                     self.first_point = (event.xdata, event.ydata)
-                    self.main_window.labelSVInfoDistance.setText(f"D: 0 {self.main_window.preferences['Units']['Distance']}")
+                    self.parent.labelSVInfoDistance.setText(f"D: 0 {self.parent.preferences['Units']['Distance']}")
                 else:
                     # Second click
                     second_point = (event.xdata, event.ydata)
@@ -379,7 +379,7 @@ class MplCanvas(FigureCanvas):
             Mouse click event.
         """        
         self.setCursor(Qt.CrossCursor)
-        if (self.main_window.toolButtonDistance.isChecked()) and (self.first_point is not None) and event.inaxes:
+        if (self.parent.toolButtonDistance.isChecked()) and (self.first_point is not None) and event.inaxes:
             if self.line:
                 self.line.remove()
             if self.dtext:
@@ -406,8 +406,8 @@ class MplCanvas(FigureCanvas):
             self.dtext.remove()
             self.dtext = None
         self.draw()
-        if not self.main_window.toolButtonDistance.isChecked():
-            self.main_window.labelSVInfoDistance.setText("D: N/A")
+        if not self.parent.toolButtonDistance.isChecked():
+            self.parent.labelSVInfoDistance.setText("D: N/A")
 
 
 class MplDialog(QDialog):
@@ -427,7 +427,7 @@ class MplDialog(QDialog):
         """        
         super(MplDialog, self).__init__(parent)
 
-        self.main_window = parent
+        self.parent = parent
 
         self.setWindowTitle(title)
 
@@ -466,6 +466,6 @@ class MplDialog(QDialog):
         button_box.rejected.connect(self.reject)
         layout.addWidget(button_box,2)
 
-        self.main_window.clear_layout(self.main_window.widgetSingleView.layout())
+        self.parent.clear_layout(self.parent.widgetSingleView.layout())
 
 

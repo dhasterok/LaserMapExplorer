@@ -1,0 +1,137 @@
+import numpy as np
+from PyQt5.QtWidgets import ( QMessageBox )
+
+class SpecialFunctions():
+    def __init__(self, parent=None):
+        self.parent = parent
+
+        self.parent.comboBoxDatingMethod.activated.connect(self.callback_dating_method)
+        self.parent.checkBoxComputeRatios.stateChanged.connect(self.callback_dating_ratios)
+
+        
+        self.parent.pushButtonComputeAge.clicked.connect(self.compute_date_map)
+
+
+    def callback_dating_ratios(self):
+        self.callback_dating_method()
+
+    def callback_dating_method(self):
+        """Updates isotopes and decay constants when dating method changes.
+
+        Default decay constants are as follows:
+        * Lu-Hf : :math:`1.867 \pm 0.008 \times 10^{-5}` Ma (Sonderlund et al., EPSL, 2004, https://doi.org/10.1016/S0012-821X(04)00012-3)
+        * Re-Os : :math:`1.666 \pm 0.005 \times 10^{-5}` Ma (Selby et al., GCA, 2007, https://doi.org/10.1016/j.gca.2007.01.008)
+        """        
+        match self.parent.comboBoxDatingMethod.currentText():
+            case "Lu-Hf":
+                if self.parent.checkBoxComputeRatios.isChecked():
+                    self.parent.labelIsotope1.setText("Lu175")
+                    self.parent.comboBoxIsotopeAgeFieldType1.setCurrentText("Analyte")
+                    if ("Lu175" in self.parent.analyte_list) and (self.parent.parent.comboBoxIsotopeAgeFieldType1.currentText() == "Analyte"):
+                        self.parent.comboBoxIsotopeAgeField1.setCurrentText("Lu175")
+
+                    self.parent.labelIsotope2.setText("Hf176")
+                    self.parent.comboBoxIsotopeAgeFieldType2.setCurrentText("Analyte")
+                    if ("Hf176" in self.parent.analyte_list) and (self.parent.comboBoxIsotopeAgeFieldType2.currentText() == "Analyte"):
+                        self.parent.comboBoxIsotopeAgeField2.setCurrentText("Hf176")
+
+                    self.parent.labelIsotope3.setEnabled(True)
+                    self.parent.comboBoxIsotopeAgeField3.setEnabled(True)
+                    self.parent.labelIsotope3.setText("Hf178")
+                    self.parent.comboBoxIsotopeAgeFieldType3.setCurrentText("Analyte")
+                    if ("Hf178" in self.parent.analyte_list) and (self.parent.comboBoxIsotopeAgeFieldType3.currentText() == "Analyte"):
+                        self.parent.comboBoxIsotopeAgeField3.setCurrentText("Hf178")
+                else:
+                    ratio_list = (self.parent.data[self.parent.sample_id]['ratio_info']['analyte_1'] + '/' + self.parent.data[self.parent.sample_id]['ratio_info']['analyte_2']).tolist()
+                    self.parent.labelIsotope1.setText("Hf176/Hf178")
+                    self.parent.comboBoxIsotopeAgeFieldType1.setCurrentText("Ratio")
+                    if ("Hf176/Hf178" in ratio_list) and (self.parent.comboBoxIsotopeAgeFieldType1.currentText() == "Ratio"):
+                        self.parent.comboBoxIsotopeAgeField1.setCurrentText("Hf176/Hf178")
+
+                    self.parent.labelIsotope2.setText("Lu175/Hf178")
+                    self.parent.comboBoxIsotopeAgeFieldType2.currentText("Ratio")
+                    if ("Lu175/Hf178" in ratio_list) and (self.parent.comboBoxIsotopeAgeFieldType2.currentText() == "Ratio"):
+                        self.parent.comboBoxIsotopeAgeField2.setCurrentText("Lu175/Hf178")
+
+                    self.parent.labelIsotope3.setText("")
+                    self.parent.comboBoxIsotopeAgeFieldType3.currentText("Ratio")
+                    self.parent.labelIsotope3.setEnabled(False)
+                    self.parent.comboBoxIsotopeAgeFieldType3.setEnabled(False)
+                    self.parent.comboBoxIsotopeAgeField3.setEnabled(False)
+                    
+
+                # Sonderlund et al., EPSL, 2004, https://doi.org/10.1016/S0012-821X(04)00012-3
+                self.parent.lineEditDecayConstant.value = 1.867e-5 # Ma
+                self.parent.lineEditDecayConstantUncertainty.value = 0.008e-5 # Ma
+            case "Re-Os":
+                self.parent.labelIsotope1.setText("Re187")
+                if "Re187" in self.parent.analyte_list and self.parent.comboBoxIsotopeAgeFieldType1.currentText() == "Analyte":
+                    self.parent.comboBoxIsotopeAgeField1.setCurrentText("Re187")
+                self.parent.labelIsotope2.setText("Os187")
+                if "Os187" in self.parent.analyte_list and self.parent.comboBoxIsotopeAgeFieldType2.currentText() == "Analyte":
+                    self.parent.comboBoxIsotopeAgeField2.setCurrentText("Os187")
+                self.parent.labelIsotope3.setText("Os188")
+                if "Os188" in self.parent.analyte_list and self.parent.comboBoxIsotopeAgeFieldType3.currentText() == "Analyte":
+                    self.parent.comboBoxIsotopeAgeField3.setCurrentText("Os188")
+
+                # Selby et al., GCA, 2007, https://doi.org/10.1016/j.gca.2007.01.008
+                self.parent.lineEditDecayConstant.value = 1.666e-5 # Ma
+                self.parent.lineEditDecayConstantUncertainty.value = 0.005e-5 # Ma
+            case "Sm-Nd":
+                pass
+            case "Rb-Sr":
+                pass
+            case "U-Pb":
+                pass
+            case "Th-Pb":
+                pass
+            case "Pb-Pb":
+                pass
+
+    def compute_date_map(self):
+        """Compute one of several date maps"""
+        decay_constant = self.parent.lineEditDecayConstant.value
+        method = self.parent.comboBoxDatingMethod.currentText()
+        match method:
+            case "Lu-Hf":
+                if self.parent.checkBoxComputeRatios.isChecked():
+                    try:
+                        Lu175 = self.parent.get_map_data(self.parent.sample_id, self.parent.comboBoxIsotopeAgeField1.currentText(), self.parent.comboBoxIsotopeAgeFieldType1.currentText())
+                        Hf176 = self.parent.get_map_data(self.parent.sample_id, self.parent.comboBoxIsotopeAgeField2.currentText(), self.parent.comboBoxIsotopeAgeFieldType2.currentText())
+                        Hf178 = self.parent.get_map_data(self.parent.sample_id, self.parent.comboBoxIsotopeAgeField3.currentText(), self.parent.comboBoxIsotopeAgeFieldType3.currentText())
+
+                        Hf176_Hf178 = Hf176['array'].values / Hf178['array'].values
+                        Lu175_Hf178 = Lu175['array'].values / Hf178['array'].values
+                    except:
+                        QMessageBox.warning(self.parent,'Warning','Could not compute ratios, check selected fields.')
+                        return
+                else:
+                    try:
+                        Hf176_Hf178 = self.parent.get_map_data(self.parent.sample_id, self.parent.comboBoxIsotopeAgeField1.currentText(), self.parent.comboBoxIsotopeAgeFieldType1.currentText())
+                        Lu175_Hf178 = self.parent.get_map_data(self.parent.sample_id, self.parent.comboBoxIsotopeAgeField2.currentText(), self.parent.comboBoxIsotopeAgeFieldType2.currentText())
+                    except:
+                        QMessageBox.warning(self.parent,'Warning','Could not locate ratios, check selected fields.')
+                        return
+
+                if self.parent.data[self.parent.sample_id]['computed_data']['Calculated'].empty:
+                    self.parent.data[self.parent.sample_id]['computed_data']['Calculated'][['X','Y']] = self.parent.data[self.parent.sample_id]['cropped_raw_data'][['X','Y']]
+
+                try:
+                    date_map = np.log((Hf176_Hf178 - 3.55)/Lu175_Hf178 + 1) / decay_constant 
+                except:
+                    QMessageBox.warning(self,'Error','Something went wrong. Could not compute date map.')
+
+            case "Re-Os":
+                pass
+
+        # save date_map to Calculated dataframe
+        self.parent.data[self.parent.sample_id]['computed_data']['Calculated'].loc[self.parent.data[self.parent.sample_id]['mask'],method] = date_map
+        
+        # update styles and plot
+        self.parent.comboBoxColorByField.setCurrentText('Calculated')
+        self.parent.color_by_field_callback()
+        self.parent.comboBoxColorField.setCurrentText(method)
+        self.parent.color_field_callback()
+        #self.set_style_widgets(plot_type='analyte map')
+
+        #self.update_SV()

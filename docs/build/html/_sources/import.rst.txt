@@ -1,13 +1,13 @@
 Import Formats
 **************
 
-Import formats vary by data type, and can vary by machine manufacturer or depending on the program that is used to processes the data.  The formats for the various input files are described below.  If you have a file type that is not included, feel free to contact us (:doc:`contact`) to see if we can write a method to suit your particular needs.
+Import formats vary by data type, and can differ based on machine manufacturer or the program used to processes the data.  The formats for the various input files are described below.  If you have a file type that is not included, feel free to `contact us <contact.html>`_ to see if we can write a method to suit your particular needs.
 
-At present, we only handle LA-ICP-MS data, though we have a number of additional data we plan to include in the comming months.
+At present, we only handle LA-ICP-MS data, though we plan to include additional data types in the comming months.
 
 Importing data into *LaME* is relatively simple using the *Import Tool* as seen below.  Imported files for each sample are saved into a single file for more rapid loading, with the name *[sample_id].lame.[ftype]*.  In most cases the file type is a \*.csv, though in some cases where color is appropriate it may be stored as a \*.png.
 
-Start by selecting the type of data and the method (if applicable).  Then select the directory with the samples. Each sample's files should be in its own subdirectory.  The table will appear with different options depending on the data type and method chosen.  To the right of the table is a preview frame, which will display an analyte map from the sample when the preview checkbox is selected. *The preview feature is not currently implemented.*
+Start by selecting the type of data and the method (if applicable).  Then select the directory with the samples. Each sample's files should be in its own subdirectory.  A table will appear with options depending on the data type and method chosen.  To the right of the table is a preview frame, which will display an analyte map from the sample when the preview checkbox is selected. *The preview feature is not currently implemented.*
 
 .. figure:: _static/screenshots/LaME_Import_Tool.png
     :align: center
@@ -21,7 +21,7 @@ LA-ICP-MS
 Quadrupole
 ----------
 
-For a single sample, the data are often stored in a collection of \*.csv or \*.xlsx files.  There are two formats.  *LaME* can read either, which it attempts to autodetect from the filename patterns.  While its ability to handle filename formats are limited, it will probably handle most reasonable naming schemes.  In both cases the collection of files should be stored in a directory given by the sample ID.  Once read in, the data are exported in a single file, common data format with a *.lame.csv* suffix and extension.
+For a single sample, the data are often stored in a collection of \*.csv or \*.xlsx files.  *LaME* can read two formats, which it attempts to autodetect from the filename patterns.  While its ability to handle filename formats are limited, it will probably handle most reasonable naming schemes.  In both cases the collection of files should be stored in a directory given by the sample ID.  Once read in, the data are exported in a single file, common data format with a *.lame.csv* suffix and extension.
 
 For data collected on quadrupole mass spectrometers, the only requirement for import is the sample ID.  The columns in the table are as follows:
 
@@ -33,10 +33,11 @@ For data collected on quadrupole mass spectrometers, the only requirement for im
 :Reverse X: reverse the direction of the *X* data,
 :Reverse Y: reverse the direction of the *Y* data,
 :Spot size (µm): laser spot size, used to determine distance between scan lines,
+:Line Dim.:
 :Sweep (s): time to complete a full suite of analytes,
 :Speed (µm/s): rate of travel of the laser.
 
-The distance along the scan line is given by *sweep* \* *speed*.  Though if these parameters are no entered, then the pixels are assumed to be equidimensional (i.e., *dx* = *dy*).  Note this can be updated after uploading in the *dx* and *dy* edit fields of the *Sample and Fields* tab.
+The distance along the scan line is given by *sweep* \* *speed*.  Though if these parameters are no entered, then the pixels are assumed to be equidimensional (i.e., *dx* = *dy*).  This can be updated after uploading in the *dx* and *dy* edit fields of the *Sample and Fields* tab.
 
 1. Files include all recorded analytes for a single scan line in each individual file.  This file format is typically used for raw data in CPS. Filenames for this format often include a sample number and a line number separated by a delimiter.  These can come in any order and a variety of delimeters may used.  *LaME* strips away these common elements to identify the line numbers.
 

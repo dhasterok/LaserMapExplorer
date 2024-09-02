@@ -38,8 +38,8 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints"]
 import pydata_sphinx_theme
 #import mpl_sphinx_theme
 
-#html_theme = 'pydata_sphinx_theme'
-html_theme = 'mpl_sphinx_theme'
+html_theme = 'pydata_sphinx_theme'
+#html_theme = 'mpl_sphinx_theme'
 
 html_css_files = [
     "mpl.css",

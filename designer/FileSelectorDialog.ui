@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>FileImportDialog</class>
- <widget class="QDialog" name="FileImportDialog">
+ <class>FileSelectorDialog</class>
+ <widget class="QDialog" name="FileSelectorDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -49,6 +49,9 @@
      </item>
      <item>
       <widget class="QLineEdit" name="lineEditDirectory">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="font">
         <font>
          <pointsize>11</pointsize>
@@ -59,7 +62,7 @@
     </layout>
    </item>
    <item>
-    <widget class="QTableWidget" name="tableWidget">
+    <widget class="QTableWidget" name="tableWidgetFileMetadata">
      <property name="font">
       <font>
        <pointsize>11</pointsize>
@@ -67,7 +70,7 @@
      </property>
      <column>
       <property name="text">
-       <string>Import?</string>
+       <string>Import</string>
       </property>
      </column>
      <column>
@@ -82,7 +85,12 @@
      </column>
      <column>
       <property name="text">
-       <string>Field</string>
+       <string>Analyte 1</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Analyte 2</string>
       </property>
      </column>
      <column>
@@ -114,7 +122,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>FileImportDialog</receiver>
+   <receiver>FileSelectorDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -130,7 +138,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>FileImportDialog</receiver>
+   <receiver>FileSelectorDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

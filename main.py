@@ -1,9 +1,9 @@
 import sys, os, re, copy, random, pickle, darkdetect
 from PyQt5 import QtCore, QtGui
-from PyQt5.QtCore import ( Qt, QTimer, QUrl )
+from PyQt5.QtCore import ( Qt, QTimer, QUrl, QSize )
 from PyQt5.QtWidgets import (
     QColorDialog, QCheckBox, QTableWidgetItem, QVBoxLayout, QGridLayout,
-    QMessageBox, QHeaderView, QMenu, QFileDialog, QWidget,
+    QMessageBox, QHeaderView, QMenu, QFileDialog, QWidget, QPushButton, QToolButton,
     QDialog, QLabel, QTableWidget, QInputDialog, QAbstractItemView, QProgressBar,
     QSplashScreen, QApplication, QMainWindow, QSizePolicy
 )
@@ -75,7 +75,7 @@ setConfigOption('imageAxisOrder', 'row-major') # best performance
 ## !pyuic5 designer/mainwindow.ui -o src/ui/MainWindow.py
 ## !pyuic5 designer/QuickViewDialog.ui -o src/ui/QuickViewDialog.py
 ## !pyuic5 -x designer/AnalyteSelectionDialog.ui -o src/ui/AnalyteSelectionDialog.py
-## !pyuic5 -x designer/FileImportDialog.ui -o src/ui/FileImportDialog.py
+## !pyuic5 -x designer/FileSelectorDialog.ui -o src/ui/FileSelectorDialog.py
 ## !pyuic5 -x designer/PreferencesWindow.ui -o src/ui/PreferencesWindow.py
 ## !pyuic5 -x designer/MapImportDialog.ui -o src/ui/MapImportDialog.py
 ## !pyuic5 -x designer/SpotImportDialog.ui -o src/ui/SpotImportDialog.py
@@ -1181,6 +1181,37 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.dockWidgetRightToolbox.installEventFilter(self)
         self.dockWidgetBottomTabs.installEventFilter(self)
 
+        # Create a button to hide/show the dock
+        self.toolButtonLeftDock = QToolButton(self)
+        self.toolButtonLeftDock.setFixedSize(24, 24)
+        self.toolButtonLeftDock.setIconSize(QSize(18, 18))
+        self.toolButtonLeftDock.setCheckable(True)
+        self.toolButtonLeftDock.setIcon(QIcon(':/icons/resources/icons/icon-left_toolbar_show-64.svg'))
+        self.toolButtonLeftDock.toggled.connect(lambda checked: self.toolButtonLeftDock.setIcon(QIcon(':/icons/resources/icons/icon-left_toolbar_show-64.svg') if checked else QIcon(':/icons/resources/icons/icon-left_toolbar_hide-64.svg')))
+
+        self.toolButtonRightDock = QToolButton(self)
+        self.toolButtonRightDock.setFixedSize(24, 24)
+        self.toolButtonRightDock.setIconSize(QSize(18, 18))
+        self.toolButtonRightDock.setCheckable(True)
+        self.toolButtonRightDock.setIcon(QIcon(':/icons/resources/icons/icon-right_toolbar_show-64.svg'))
+        self.toolButtonRightDock.toggled.connect(lambda checked: self.toolButtonRightDock.setIcon(QIcon(':/icons/resources/icons/icon-right_toolbar_show-64.svg') if checked else QIcon(':/icons/resources/icons/icon-right_toolbar_hide-64.svg')))
+
+        self.toolButtonBottomDock = QToolButton(self)
+        self.toolButtonBottomDock.setFixedSize(24, 24)
+        self.toolButtonBottomDock.setIconSize(QSize(18, 18))
+        self.toolButtonBottomDock.setCheckable(True)
+        self.toolButtonBottomDock.setIcon(QIcon(':/icons/resources/icons/icon-bottom_toolbar_show-64.svg'))
+        self.toolButtonBottomDock.toggled.connect(lambda checked: self.toolButtonBottomDock.setIcon(QIcon(':/icons/resources/icons/icon-bottom_toolbar_show-64.svg') if checked else QIcon(':/icons/resources/icons/icon-bottom_toolbar_hide-64.svg')))
+
+        self.toolButtonLeftDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.dockWidgetLeftToolbox, button=self.toolButtonLeftDock))
+        self.toolButtonRightDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.dockWidgetRightToolbox, button=self.toolButtonRightDock))
+        self.toolButtonBottomDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.dockWidgetBottomTabs, button=self.toolButtonBottomDock))
+
+        # Add the button to the status bar
+        self.statusbar.addPermanentWidget(self.toolButtonLeftDock)
+        self.statusbar.addPermanentWidget(self.toolButtonBottomDock)
+        self.statusbar.addPermanentWidget(self.toolButtonRightDock)
+
         self.toolBox.currentChanged.connect(self.toolbox_changed)
 
 
@@ -1242,6 +1273,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.polygon.clear_polygons()
 
         pass
+
+    def toggle_dock_visibility(self, dock, button):
+        if dock.isVisible():
+            dock.hide()
+            button.setChecked(False)
+        else:
+            dock.show()
+            button.setChecked(True)
+
 
     def initialise_samples_and_tabs(self):
         #clear the current analysis

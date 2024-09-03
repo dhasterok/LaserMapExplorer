@@ -12,8 +12,8 @@ sys.path.insert(0, os.path.abspath('../../src'))
 sys.path.insert(0, os.path.abspath('../../src/ui'))
 
 project = 'Laser Map Explorer'
-copyright = '2024, Shavin Kaluthantri and Derrick Hasterok'
-author = 'Shavin Kaluthantri and Derrick Hasterok'
+copyright = '2024, Shavin Kaluthantri, Maggie Li and Derrick Hasterok'
+author = 'Shavin Kaluthantri, Maggie Li and Derrick Hasterok'
 release = '0.1'
 
 print(sys.executable)
@@ -38,8 +38,8 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints"]
 import pydata_sphinx_theme
 #import mpl_sphinx_theme
 
-#html_theme = 'pydata_sphinx_theme'
-html_theme = 'mpl_sphinx_theme'
+html_theme = 'pydata_sphinx_theme'
+#html_theme = 'mpl_sphinx_theme'
 
 html_css_files = [
     "mpl.css",

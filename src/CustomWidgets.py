@@ -1,5 +1,6 @@
-from PyQt5.QtWidgets import QLineEdit
+from PyQt5.QtWidgets import QLineEdit, QTableWidget, QComboBox, QCheckBox, QWidget, QAbstractItemView, QTableWidgetItem
 import src.format as fmt
+import pandas as pd
 
 class CustomLineEdit(QLineEdit):
     def __init__(self, parent=None, value=0.0, precision=4, threshold=1e4, toward=None):
@@ -61,3 +62,79 @@ class CustomLineEdit(QLineEdit):
             self._value = float(self.text())
         except ValueError:
             pass
+
+class CustomTableWidget(QTableWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+    def extract_widget_data(self, widget: QWidget):
+        """Extracts relevant information from a widget for placing in a DataFrame
+
+        _extended_summary_
+
+        Parameters
+        ----------
+        widget : QWidget
+            A widget stored in ``ImportTool.tableWidgetMetadata``
+
+        Returns
+        -------
+        str or bool
+            Returns key value of widget item to be added to a DataFrame
+        """        
+        if isinstance(widget, QCheckBox):
+            return widget.isChecked()
+        elif isinstance(widget, QComboBox):
+            return widget.currentText()
+        elif isinstance(widget, QLineEdit):
+            return widget.text()
+        elif isinstance(widget, CustomLineEdit):
+            return widget.value
+        # Add more widget types as needed
+        else:
+            return None
+
+    def to_dataframe(self) -> pd.DataFrame:
+        """Converts the table data to a pandas DataFrame.
+
+        Returns
+        -------
+        pd.DataFrame
+            Data frame with data from the CustomTableWidget.
+        """
+        # Get the number of rows and columns in the QTableWidget
+        row_count = self.rowCount()
+        column_count = self.columnCount()
+
+        
+        # Create a dictionary to store the data with column headers
+        column_headers = [self.horizontalHeaderItem(col).text() if self.horizontalHeaderItem(col) is not None else f'Column {col+1}' 
+                          for col in range(column_count)]
+        
+        table_data = {
+            column_headers[col]: [
+                self.item(row, col).text() if self.item(row, col) is not None else self.extract_widget_data(self.cellWidget(row, col)) 
+                for row in range(row_count)
+            ] for col in range(column_count)
+        }
+
+        # table_data = {self.horizontalHeaderItem(col).text(): [] for col in range(column_count)}
+        
+        # # Iterate over all rows and columns to retrieve the data
+        # for row in range(row_count):
+        #     for col in range(column_count):
+        #         item = self.item(row, col)
+        #         if item is not None:
+        #             table_data[self.horizontalHeaderItem(col).text()].append(item.text())
+        #         else:
+        #             # Check for a widget in the cell
+        #             widget = self.cellWidget(row, col)
+        #             if widget is not None:
+        #                 table_data[self.horizontalHeaderItem(col).text()].append(self.extract_widget_data(widget))
+        #             else:
+        #                 table_data[self.horizontalHeaderItem(col).text()].append(None)
+        
+        # Convert the dictionary to a pandas DataFrame
+        df = pd.DataFrame(table_data)
+        
+        return df

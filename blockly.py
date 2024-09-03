@@ -2,10 +2,12 @@ import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QTextEdit
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWebChannel import QWebChannel
-from PyQt5.QtCore import pyqtSlot, QObject, QUrl
+from PyQt5.QtCore import pyqtSlot, QObject, QUrl, QFile, QIODevice
 from lame_helper import BASEDIR
 from PyQt5.QtWebEngineWidgets import QWebEngineSettings
-
+import os
+# export QTWEBENGINE_REMOTE_DEBUGGING=9222  
+os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
 
 class BlocklyBridge(QObject):
     def __init__(self, output_text_edit):
@@ -16,7 +18,9 @@ class BlocklyBridge(QObject):
     def runCode(self, code):
         # Display the received code in the QTextEdit
         self.output_text_edit.setPlainText(code)
-
+        # This method will be called with the generated code as a string
+        print("Received code:")
+        print(code)
 class ScratchLikeApp(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -35,15 +39,16 @@ class ScratchLikeApp(QMainWindow):
         self.output_text_edit = QTextEdit(self)
         self.output_text_edit.setReadOnly(True)
         self.layout.addWidget(self.output_text_edit)
-
+        
         # Create a web engine view
         self.web_view = QWebEngineView()
-
+        # Enable developer tools
+        # self.web_view.settings().setAttribute(QWebEngineSettings.DeveloperExtrasEnabled, True)
         # Enable developer tools in the QWebEngineView
-        self.web_view.settings().setAttribute(QWebEngineSettings.JavascriptEnabled, True)
-        self.web_view.settings().setAttribute(QWebEngineSettings.LocalContentCanAccessRemoteUrls, True)
-        self.web_view.settings().setAttribute(QWebEngineSettings.ErrorPageEnabled, True)
-        self.web_view.settings().setAttribute(QWebEngineSettings.PluginsEnabled, True)
+        # self.web_view.settings().setAttribute(QWebEngineSettings.JavascriptEnabled, True)
+        # self.web_view.settings().setAttribute(QWebEngineSettings.LocalContentCanAccessRemoteUrls, True)
+        # self.web_view.settings().setAttribute(QWebEngineSettings.ErrorPageEnabled, True)
+        # self.web_view.settings().setAttribute(QWebEngineSettings.PluginsEnabled, True)
 
         # Setup the WebChannel for communication
         self.channel = QWebChannel()
@@ -51,7 +56,14 @@ class ScratchLikeApp(QMainWindow):
         self.channel.registerObject('blocklyBridge', self.bridge)
         self.web_view.page().setWebChannel(self.channel)
 
-        # Load the Blockly HTML page
+        # Load the qwebchannel.js file and inject it into the page
+        api_file = QFile(":/qtwebchannel/qwebchannel.js")
+        if not api_file.open(QIODevice.ReadOnly):
+            print("Couldn't load Qt's QWebChannel API!")
+        api_script = str(api_file.readAll(), 'utf-8')
+        api_file.close()
+        self.web_view.page().runJavaScript(api_script)
+        #Load the Blockly HTML page
         self.web_view.setUrl(QUrl.fromLocalFile(BASEDIR + '/blockly/blockly.html'))
 
         # Add the web view to the layout

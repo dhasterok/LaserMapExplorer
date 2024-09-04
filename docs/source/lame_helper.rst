@@ -1,4 +1,4 @@
-lame\_helper module
+lame_helper module
 ===================
 
 .. automodule:: lame_helper

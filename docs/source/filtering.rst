@@ -4,11 +4,7 @@ Filter
 *LaME* offers three types of filters to exclude data from analyses and geochemical plots: 
 
 * Filters by value (|icon-filter2|): Created in the *Filter* tab of the *Lower Tab*.
-<<<<<<< HEAD
-* Polygon masking (|icon-polygon-new|): Managed in the *Polygo*n table of the right toolbox.
-=======
 * Polygon masking (|icon-polygon-new|): Managed in the *Polygon* table of the right toolbox.
->>>>>>> temp-branch
 * Cluster masking (|icon-mask-dark|): Set from *Styling > Clusters* in the left toolbox.
 
 It's possible to use any combination of these filters and masks. You can easily toggle them on or off using the top toolbar for quick access. To disable all filters and masks at once, click the |icon-map| button in the top toolbar.
@@ -34,11 +30,7 @@ Polygons can be used to filter specific regions of your data. For details on how
 
 *LaME* allows you to create multiple polygons, which can be analyzed as separate regions or linked for combined analysis. To link or delink polygons, select multiple entries in the *Polygon Table* and click the |icon-link| or |icon-unlink| button. You can toggle the use of individual polygons in analyses by clicking the associated checkbox in the *Polygon Table*.
 
-<<<<<<< HEAD
-The polygons within the table can be stored by clicking the |icon-save| button and recalled using the |icon-open-file| button.  See a description of `file specifications`_ for more information.
-=======
 The polygons within the table can be stored by clicking the |icon-save| button and recalled using the |icon-open-file| button.  See a description of :doc:`file specifications` for more information.
->>>>>>> temp-branch
 
 Cluster Masking |icon-mask-light|
 =================================

@@ -204,11 +204,7 @@ Calculator
 
     The *Calculator* can be used to compute custom fields.  Expressions can be typed directly into the edit box, by clicking the buttons.
 
-<<<<<<< HEAD
-Use the calculator ( |icon-calculator| ) to create `custom fields<custom_fields.html>`_.  These custom fields can be used to as dimensions on plots or to set marker color values.  Once created, custom fields will be added to associated drop downs.
-=======
 Use the calculator ( |icon-calculator| ) to create :doc:`custom_fields`.  These custom fields can be used to as dimensions on plots or to set marker color values.  Once created, custom fields will be added to associated drop downs.
->>>>>>> temp-branch
 
 .. |icon-sort| image:: _static/icons/icon-sort-64.png
     :height: 2ex

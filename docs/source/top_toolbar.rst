@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-Main (Top) Toolbar
-=======
 Main Toolbar (Top)
->>>>>>> temp-branch
 ******************
 
 The main toolbar provides quick access to essential functions and is divided into six sections:
@@ -21,13 +17,10 @@ Here you'll find:
 
 - Sample selector: Choose which sample to work with
 - Analyte selector: Select specific analytes for analysis
-<<<<<<< HEAD
-=======
 * Change Analytes:
 * updates *Plot Selector*
 * clear clusters, pca, removes masks
 * recompute correlations
->>>>>>> temp-branch
 
 Data Manipulation
 =================

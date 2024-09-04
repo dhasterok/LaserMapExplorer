@@ -193,21 +193,6 @@
         </div>
       
       
-<<<<<<< HEAD
-        <div class="navbar-item">
-
-<script>
-document.write(`
-  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
-  </button>
-`);
-</script></div>
-      
-=======
->>>>>>> temp-branch
         <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
         <li class="nav-item">
@@ -321,21 +306,6 @@ document.write(`
     
       <div class="sidebar-header-items__end">
         
-<<<<<<< HEAD
-          <div class="navbar-item">
-
-<script>
-document.write(`
-  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
-  </button>
-`);
-</script></div>
-        
-=======
->>>>>>> temp-branch
           <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
         <li class="nav-item">
@@ -380,17 +350,10 @@ document.write(`
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">The Interface</span></p>
 <ul class="nav bd-sidenav">
-<<<<<<< HEAD
-<li class="toctree-l1"><a class="reference internal" href="top_toolbar.html">Main (Top) Toolbar</a></li>
-<li class="toctree-l1"><a class="reference internal" href="left_toolbox.html">Control (Left) Toolbox</a></li>
-<li class="toctree-l1"><a class="reference internal" href="right_toolbox.html">Plot and Property (Right) Toolbox</a></li>
-<li class="toctree-l1"><a class="reference internal" href="center_pane.html">Plot Window (Center Pane)</a></li>
-=======
 <li class="toctree-l1"><a class="reference internal" href="top_toolbar.html">Main Toolbar (Top)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="left_toolbox.html">Control Toolbox (Left)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="right_toolbox.html">Plot and Property Toolbox (Right)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="center_pane.html">Plot Window (Center)</a></li>
->>>>>>> temp-branch
 <li class="toctree-l1"><a class="reference internal" href="lower_tabs.html">Lower Tabs</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Figures &amp; Analyses</span></p>
@@ -462,11 +425,91 @@ document.write(`
                   
   <section id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h1>
-<section id="windows">
-<h2>Windows<a class="headerlink" href="#windows" title="Link to this heading">#</a></h2>
+<section id="using-a-precompiled-executable">
+<h2>Using a Precompiled Executable<a class="headerlink" href="#using-a-precompiled-executable" title="Link to this heading">#</a></h2>
 </section>
-<section id="mac">
-<h2>Mac<a class="headerlink" href="#mac" title="Link to this heading">#</a></h2>
+<section id="using-the-source-code">
+<h2>Using the Source Code<a class="headerlink" href="#using-the-source-code" title="Link to this heading">#</a></h2>
+<p>This method always provides you with the most up-to-date version of <em>LaME</em>. However, please note that this method may occasionally encounter issues as we improve the code, implement new features, or experiment with new tools.</p>
+<section id="step-1-install-anaconda">
+<h3>Step 1: Install Anaconda<a class="headerlink" href="#step-1-install-anaconda" title="Link to this heading">#</a></h3>
+<p>Download and install Anaconda from <a class="reference external" href="https://www.anaconda.com/download">https://www.anaconda.com/download</a></p>
+</section>
+<section id="step-2-install-git-or-visual-studio-code">
+<h3>Step 2: Install Git or Visual Studio Code<a class="headerlink" href="#step-2-install-git-or-visual-studio-code" title="Link to this heading">#</a></h3>
+<p>You have two options for managing the <em>LaME</em> repository: Git or Visual Studio Code (VSC). Choose the option that best suits your needs.</p>
+<section id="option-a-install-git">
+<h4>Option A: Install Git<a class="headerlink" href="#option-a-install-git" title="Link to this heading">#</a></h4>
+<ul class="simple">
+<li><p>Windows: Open Anaconda Prompt</p></li>
+<li><p>Mac/Linux: Open Terminal</p></li>
+</ul>
+<p>Run the following command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>install<span class="w"> </span>git
+</pre></div>
+</div>
+</section>
+<section id="option-b-install-visual-studio-code">
+<h4>Option B: Install Visual Studio Code<a class="headerlink" href="#option-b-install-visual-studio-code" title="Link to this heading">#</a></h4>
+<p>Download and install Visual Studio Code from <a class="reference external" href="https://code.visualstudio.com/">https://code.visualstudio.com/</a>
+Install the following extensions in VSC:</p>
+<ul class="simple">
+<li><p>Python</p></li>
+</ul>
+<p>Run the following command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>install<span class="w"> </span>git
+</pre></div>
+</div>
+</section>
+</section>
+<section id="step-3-clone-repository">
+<h3>Step 3: Clone Repository<a class="headerlink" href="#step-3-clone-repository" title="Link to this heading">#</a></h3>
+<p>Clone the <em>LaME</em> repository to your local directory:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/dhasterok/LaserMapExplorer.git
+<span class="nb">cd</span><span class="w"> </span>LaserMapExplorer
+</pre></div>
+</div>
+</section>
+<section id="step-4-create-and-activate-virtual-environment">
+<h3>Step 4: Create and Activate Virtual Environment<a class="headerlink" href="#step-4-create-and-activate-virtual-environment" title="Link to this heading">#</a></h3>
+<p>Create a new Anaconda virtual environment:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>--name<span class="w"> </span>pyqt<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.11<span class="w"> </span>--file<span class="w"> </span>req.txt
+conda<span class="w"> </span>activate<span class="w"> </span>pyqt
+</pre></div>
+</div>
+<p>If the above step fails, try the following alternative:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>--name<span class="w"> </span>pyqt<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.11
+conda<span class="w"> </span>activate<span class="w"> </span>pyqt
+conda<span class="w"> </span>install<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.11<span class="w"> </span>pyqt<span class="w"> </span>pyqtgraph<span class="w"> </span>PyQtWebEngine<span class="w"> </span>pandas<span class="w"> </span>matplotlib<span class="w"> </span>scikit-learn<span class="w"> </span>scikit-learn-extra<span class="w"> </span>opencv<span class="w"> </span>openpyxl<span class="w"> </span>numexpr
+conda<span class="w"> </span>install<span class="w"> </span>conda-forge/label/cf201901::scikit-fuzzy
+pip<span class="w"> </span>install<span class="w"> </span>darkdetect<span class="w"> </span>cmcrameri<span class="w"> </span>rst2pdf
+</pre></div>
+</div>
+</section>
+<section id="step-5-run-lame">
+<h3>Step 5: Run <em>LaME</em><a class="headerlink" href="#step-5-run-lame" title="Link to this heading">#</a></h3>
+<p>Using Terminal Prompt:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>main.py
+</pre></div>
+</div>
+</section>
+<section id="troubleshooting">
+<h3>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading">#</a></h3>
+<p>If you encounter any issues during the installation process, please refer to the project’s documentation or <a class="reference internal" href="contact.html"><span class="doc">contact us</span></a>.</p>
+</section>
+<section id="updating-lame">
+<h3>Updating <em>LaME</em><a class="headerlink" href="#updating-lame" title="Link to this heading">#</a></h3>
+<p>To update <em>LaME</em> in the future, navigate to the LaserMapExplorer directory and run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>pull<span class="w"> </span>origin<span class="w"> </span>main
+</pre></div>
+</div>
+<p>Then, activate your virtual environment and update dependencies if necessary:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>activate<span class="w"> </span>pyqt
+conda<span class="w"> </span>update<span class="w"> </span>--all
+</pre></div>
+</div>
+<p>Remember to check the project’s documentation for any additional steps that might be required after updating.</p>
+</section>
 </section>
 </section>
 
@@ -516,8 +559,21 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#windows">Windows</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mac">Mac</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-a-precompiled-executable">Using a Precompiled Executable</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-the-source-code">Using the Source Code</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-install-anaconda">Step 1: Install Anaconda</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-install-git-or-visual-studio-code">Step 2: Install Git or Visual Studio Code</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#option-a-install-git">Option A: Install Git</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#option-b-install-visual-studio-code">Option B: Install Visual Studio Code</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-clone-repository">Step 3: Clone Repository</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-4-create-and-activate-virtual-environment">Step 4: Create and Activate Virtual Environment</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-5-run-lame">Step 5: Run <em>LaME</em></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#troubleshooting">Troubleshooting</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#updating-lame">Updating <em>LaME</em></a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 

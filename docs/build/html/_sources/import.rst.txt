@@ -1,15 +1,9 @@
 Import Formats
 **************
 
-<<<<<<< HEAD
-Import formats vary by data type, and can differ based on machine manufacturer or the program used to processes the data.  The formats for the various input files are described below.  If you have a file type that is not included, feel free to `contact us <contact.html>`_ to see if we can write a method to suit your particular needs.
-
-At present, we only handle LA-ICP-MS data, though we plan to include additional data types in the comming months.
-=======
-Import formats vary by data type, and can differ based on machine manufacturer or the program used to processes the data.  The formats for the various input files are described below.  If you have a file type that is not included, feel free to :doc:`contact` to see if we can write a method to suit your particular needs.
+Import formats vary by data type, and can differ based on machine manufacturer or the program used to processes the data.  The formats for the various input files are described below.  If you have a file type that is not included, feel free to :doc:`contact us <contact>` to see if we can write a method to suit your particular needs.
 
 At present, we only handle LA-ICP-MS data, though we plan to include additional data types in the coming months.
->>>>>>> temp-branch
 
 Importing data into *LaME* is relatively simple using the *Import Tool* from *Main Toolbar* as seen below.  Imported files for each sample are saved into a single file for more rapid loading, with the name *[sample_id].lame.[ftype]*.  In most cases the file type is a \*.csv, though in some cases where color is appropriate it may be stored as a \*.png.
 
@@ -38,11 +32,7 @@ For data collected on quadrupole mass spectrometers, the only requirement for im
 :Reverse X: reverse the direction of the *X* data,
 :Reverse Y: reverse the direction of the *Y* data,
 :Spot size (µm): laser spot size, used to determine distance between scan lines,
-<<<<<<< HEAD
-:Line Dim.:
-=======
 :Line Dim.: number of data points along each scan line
->>>>>>> temp-branch
 :Sweep (s): time to complete a full suite of analytes,
 :Speed (µm/s): rate of travel of the laser.
 

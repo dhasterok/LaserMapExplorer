@@ -64,11 +64,13 @@ from src.Calculator import CustomFieldCalculator as cfc
 from src.SpecialFunctions import SpecialFunctions as specfun
 from src.NoteTaking import Notes
 from src.Browser import Browser
+from src.Workflow import Workflow
 import src.QuickView as QV
 from lame_helper import BASEDIR, ICONPATH, SSPATH, load_stylesheet
 from src.ExtendedDF import AttributeDataFrame
 import src.format as fmt
-
+# to prevent segmentation error at startup
+os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
 setConfigOption('imageAxisOrder', 'row-major') # best performance
 ## sphinx-build -b html docs/source/ docs/build/html
 ## !pyrcc5 resources.qrc -o src/ui/resources_rc.py
@@ -651,6 +653,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.browser = Browser(self)
         self.actionReportBug.triggered.connect(lambda: self.browser.setUrl(QUrl('https://github.com/dhasterok/LaserMapExplorer/issues')))
+
+        # initiate Workflow 
+        self.workflow = Workflow(self)
 
         #create plot tree
         self.create_tree()

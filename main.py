@@ -1284,6 +1284,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 
     def initialise_samples_and_tabs(self):
+        """
+        Initialize samples and tabs in the application.
+
+        This method performs the following tasks:
+        - Clears the current analysis
+        - Sets up sample IDs
+        - Populates the sample ID combobox
+        - Changes to the first sample
+        - Initializes tabs
+        - Sets up profiling and polygon samples
+        
+        Initializes ``MainWindow.treeView``.  The ``tree`` is intialized for each of the plot groups.
+        ``Analyte`` its normalized counterpart are initialized with the full list of analytes.  Table
+        data are stored in ``MainWindow.treeModel``.
+        """
+
+        ###
         #clear the current analysis
         self.reset_analysis()
         self.sample_ids = [os.path.splitext(file)[0].replace('.lame','') for file in self.csv_files]

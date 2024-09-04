@@ -8,44 +8,44 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Control (Left) Toolbox &#8212; Laser Map Explorer 0.1 documentation</title>
+    <title>Control Toolbox (Left) &#8212; Laser Map Explorer 0.1 documentation</title>
   
   
   
   <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-<link href="_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
 
   
-  <link href="_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=eafc0fe6" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="_static/mpl.css?v=369bd9d1" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
-  <script src="_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="_static/documentation_options.js?v=2709fde1"></script>
-    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/custom.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'left_toolbox';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Plot and Property (Right) Toolbox" href="right_toolbox.html" />
-    <link rel="prev" title="Import Formats" href="import.html" />
+    <link rel="next" title="Plot and Property Toolbox (Right)" href="right_toolbox.html" />
+    <link rel="prev" title="Main Toolbar (Top)" href="top_toolbar.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -55,27 +55,23 @@
 
   
   
-  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
   
   <div id="pst-scroll-pixel-helper"></div>
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>
-    Back to top
-  </button>
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
   <input type="checkbox"
           class="sidebar-toggle"
-          name="__primary"
-          id="__primary"/>
-  <label class="overlay overlay-primary" for="__primary"></label>
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
   
   <input type="checkbox"
           class="sidebar-toggle"
-          name="__secondary"
-          id="__secondary"/>
-  <label class="overlay overlay-secondary" for="__secondary"></label>
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
   
   <div class="search-button__wrapper">
     <div class="search-button__overlay"></div>
@@ -97,18 +93,25 @@
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
 </form></div>
   </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
   
-    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <label class="sidebar-toggle primary-toggle" for="__primary">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
-  </label>
+  </button>
   
   
   <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
 
+  
+    
   
 
 <a class="navbar-brand logo" href="index.html">
@@ -137,36 +140,36 @@
     <div class="me-auto navbar-header-items__center">
       
         <div class="navbar-item">
-<nav class="navbar-nav">
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="userguide.html">
-                        User Guide
-                      </a>
-                    </li>
-                
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="userguide.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="tutorials.html">
-                        Tutorials
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="documentation.html">
-                        Documentation
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tutorials.html">
+    Tutorials
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="contact.html">
-                        Contact
-                      </a>
-                    </li>
-                
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="documentation.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="contact.html">
+    Contact
+  </a>
+</li>
+
   </ul>
 </nav></div>
       
@@ -180,7 +183,7 @@
 
  <script>
  document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
     <span class="search-button__default-text">Search</span>
     <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -190,19 +193,7 @@
         </div>
       
       
-        <div class="navbar-item">
-
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
-    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
-    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
-  </button>
-`);
-</script></div>
-      
-        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+        <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
         <li class="nav-item">
           
@@ -213,7 +204,7 @@ document.write(`
           
           
           
-          <a href="https://github.com/shavinkalu23/LaserMapExplorer" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i></span>
+          <a href="https://github.com/shavinkalu23/LaserMapExplorer" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
             <span class="sr-only">GitHub</span></a>
         </li>
         <li class="nav-item">
@@ -225,7 +216,7 @@ document.write(`
           
           
           
-          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
+          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
         </li>
 </ul></div>
       
@@ -238,7 +229,7 @@ document.write(`
 
  <script>
  document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
     <span class="search-button__default-text">Search</span>
     <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -249,9 +240,9 @@ document.write(`
   
 
   
-    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
       <span class="fa-solid fa-outdent"></span>
-    </label>
+    </button>
   
 </div>
 
@@ -272,39 +263,42 @@ document.write(`
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item">
-<nav class="navbar-nav">
+          
+          
+            <div class="navbar-item">
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="userguide.html">
-                        User Guide
-                      </a>
-                    </li>
-                
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="userguide.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="tutorials.html">
-                        Tutorials
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="documentation.html">
-                        Documentation
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tutorials.html">
+    Tutorials
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="contact.html">
-                        Contact
-                      </a>
-                    </li>
-                
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="documentation.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="contact.html">
+    Contact
+  </a>
+</li>
+
   </ul>
 </nav></div>
+          
         
       </div>
     
@@ -312,19 +306,7 @@ document.write(`
     
       <div class="sidebar-header-items__end">
         
-          <div class="navbar-item">
-
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
-    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
-    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
-  </button>
-`);
-</script></div>
-        
-          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+          <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
         <li class="nav-item">
           
@@ -335,7 +317,7 @@ document.write(`
           
           
           
-          <a href="https://github.com/shavinkalu23/LaserMapExplorer" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i></span>
+          <a href="https://github.com/shavinkalu23/LaserMapExplorer" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
             <span class="sr-only">GitHub</span></a>
         </li>
         <li class="nav-item">
@@ -347,7 +329,7 @@ document.write(`
           
           
           
-          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
+          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
         </li>
 </ul></div>
         
@@ -368,9 +350,10 @@ document.write(`
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">The Interface</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Control (Left) Toolbox</a></li>
-<li class="toctree-l1"><a class="reference internal" href="right_toolbox.html">Plot and Property (Right) Toolbox</a></li>
-<li class="toctree-l1"><a class="reference internal" href="center_pane.html">Plot Window (Center Pane)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="top_toolbar.html">Main Toolbar (Top)</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Control Toolbox (Left)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="right_toolbox.html">Plot and Property Toolbox (Right)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="center_pane.html">Plot Window (Center)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lower_tabs.html">Lower Tabs</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Figures &amp; Analyses</span></p>
@@ -397,13 +380,13 @@ document.write(`
 
       </div>
       
-      <main id="main-content" class="bd-main">
+      <main id="main-content" class="bd-main" role="main">
         
         
           <div class="bd-content">
             <div class="bd-article-container">
               
-              <div class="bd-header-article">
+              <div class="bd-header-article d-print-none">
 <div class="header-article-items header-article__inner">
   
     <div class="header-article-items__start">
@@ -412,7 +395,7 @@ document.write(`
 
 
 
-<nav aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
@@ -440,149 +423,77 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="control-left-toolbox">
-<h1>Control (Left) Toolbox<a class="headerlink" href="#control-left-toolbox" title="Link to this heading">#</a></h1>
-<p>The control toolbox includes the controls for changing and processing samples, producing plots, and performing analyses.</p>
+  <section id="control-toolbox-left">
+<h1>Control Toolbox (Left)<a class="headerlink" href="#control-toolbox-left" title="Link to this heading">#</a></h1>
+<p>The control toolbox includes the controls for processing samples, producing plots, and performing analyses.</p>
 <section id="samples-and-fields">
 <h2>Samples and Fields<a class="headerlink" href="#samples-and-fields" title="Link to this heading">#</a></h2>
 <figure class="align-center" id="id1">
-<a class="reference internal image-reference" href="_images/LaME_Samples_and_Fields.png"><img alt="LaME interface: left toolbox, samples and fields tab" src="_images/LaME_Samples_and_Fields.png" style="width: 315px;" /></a>
+<a class="reference internal image-reference" href="_images/LaME_Samples_and_Fields.png"><img alt="LaME interface: left toolbox, samples and fields tab" src="_images/LaME_Samples_and_Fields.png" style="width: 315px;" />
+</a>
 <figcaption>
 <p><span class="caption-text">The <em>Samples and Fields</em> tab contains tools for choosing analytes and plotting correlations.</span><a class="headerlink" href="#id1" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
-<p>Change sample:</p>
 <ul class="simple">
-<li><p>prompt to save analysis - saves to disk</p></li>
-<li><p>clears polygons, profiles, delete filters in table</p></li>
+<li><p>Change ref value: update anything with norm data (plots, calculated fields, n-Dim plots, clustering?, filters?)</p></li>
+<li><p>Change data scaling: same as crop and clears filters</p></li>
+<li><p>Change Correlation Method: update correlation plots</p></li>
 </ul>
-<p>Crop or reset map extent:</p>
-<ul class="simple">
-<li><p>resets data</p></li>
-<li><p>recompute clipped and analysis data</p></li>
-<li><p>deletes all figures</p></li>
-<li><p>clears masks, polygons, profiles and special function calculations</p></li>
-<li><p>refilters the data based on existing filters</p></li>
-<li><p>recomputes calculated fields</p></li>
-</ul>
-<p>Swap X-Y:</p>
-<ul class="simple">
-<li><p>swaps x-y coordinates on maps, polygons and profiles</p></li>
-<li><p>recomputes maps</p></li>
-</ul>
-<p>Change Analytes:</p>
-<ul class="simple">
-<li><p>updates <em>Plot Selector</em></p></li>
-<li><p>clear clusters, pca, removes masks</p></li>
-<li><p>recompute correlations</p></li>
-</ul>
-<p>Change ref value:</p>
-<ul class="simple">
-<li><p>update anything with norm data (plots, calculated fields, n-Dim plots, clustering?, filters?)</p></li>
-</ul>
-<p>Change data scaling:</p>
-<ul class="simple">
-<li><p>same as crop and clears filters</p></li>
-</ul>
-<p>Change Correlation Method:</p>
-<ul class="simple">
-<li><p>update correlation plots</p></li>
-</ul>
+<section id="autoscaling-icon-autoscale">
+<h3>Autoscaling <a class="reference internal" href="_images/icon-autoscale-64.png"><img alt="icon-autoscale" src="_images/icon-autoscale-64.png" style="height: 2.5ex;" /></a><a class="headerlink" href="#autoscaling-icon-autoscale" title="Link to this heading">#</a></h3>
+<p>One common calibration issue is the conversion of low counts to negative concentrations after calibration.  These are almost certainly due to difference between the ablation properties of the mineral used to calibrate the map applied and another mineral.  Negative values are particularly an issue when the data are log-scaled.  To reduce the effect of negatives, we rescale the data by bringing applying a linear compression of the data, fixing the upper end and moving the lower end to a small positive value.  While this does change the concentration, it has a small effect on large concentrations.  We also perform an autoscaling, performed by default, to clip the high and low ends of the concentrations.  These values are not removed, rather set to the top or bottom of the scale.  Autoscaling can skew statistics as a result; however, it generally improves estimates of the mean as values that are several orders of magnitude higher than reasonable no longer have a massive effect.  Autoscaling can be toggled on or off by pressing the <a class="reference internal" href="_images/icon-autoscale-64.png"><img alt="icon-autoscale" src="_images/icon-autoscale-64.png" style="height: 2.5ex;" /></a> button.</p>
+</section>
+<section id="histogram-equalization">
+<h3>Histogram Equalization<a class="headerlink" href="#histogram-equalization" title="Link to this heading">#</a></h3>
+<p>An alternative to auto scaling that does not alter the data, histogram equalization ( <a class="reference internal" href="_images/icon-histeq-64.png"><img alt="icon-histeq" src="_images/icon-histeq-64.png" style="height: 2.5ex;" /></a> ) ensures that colors are assigned by equal quantiles.  This method is particularly useful when the histogram covers a relatively large range of values often bi- or multi-modal with large regions of few data between.  A potential disadvantage is an amplification of noise at the expense of real features.</p>
+</section>
 </section>
 <section id="preprocess">
 <h2>Preprocess<a class="headerlink" href="#preprocess" title="Link to this heading">#</a></h2>
 <p>Preprocessing, alters the data to improve performance, stability and visual characteristics.</p>
 <p>These changes can have an impact on certain statistical calculations, such as mean values and standard deviations.</p>
 <figure class="align-center" id="id2">
-<a class="reference internal image-reference" href="_images/LaME_Preprocess.png"><img alt="LaME interface: left toolbox, preprocessing tab" src="_images/LaME_Preprocess.png" style="width: 315px;" /></a>
+<a class="reference internal image-reference" href="_images/LaME_Preprocess.png"><img alt="LaME interface: left toolbox, preprocessing tab" src="_images/LaME_Preprocess.png" style="width: 315px;" />
+</a>
 <figcaption>
 <p><span class="caption-text">The <em>Preprocessing</em> tab contains tools for autoscaling histograms, equalization, and noise reduction.</span><a class="headerlink" href="#id2" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
-<section id="autoscaling-icon-autoscale">
-<h3>Autoscaling <a class="reference internal" href="_images/icon-autoscale-64.png"><img alt="icon-autoscale" src="_images/icon-autoscale-64.png" style="height: 2.5ex;" /></a><a class="headerlink" href="#autoscaling-icon-autoscale" title="Link to this heading">#</a></h3>
-<p>One common calibration issue is the conversion of low counts to negative concentrations after calibration.  These are almost certainly due to difference between the ablation properties of the mineral used to calibrate the map applied and another mineral.  Negative values are particularly an issue when the data are log-scaled.  To reduce the effect of negatives, we rescale the data by bringing applying a linear compression of the data, fixing the upper end and moving the lower end to a small positive value.  While this does change the concentration, it has a small affect on large concentrations.  We also perform an autoscaling, performed by default, to clip the high and low ends of the concentrations.  These values are not removed, rather set to the top or bottom of the scale.  Autoscaling can skew statistics as a result; however, it generally improves estimates of the mean as values that are several orders of magnitude higher than reasonable no longer have a massive effect.  Autoscaling can be toggled on or off by pressing the <a class="reference internal" href="_images/icon-autoscale-64.png"><img alt="icon-autoscale" src="_images/icon-autoscale-64.png" style="height: 2.5ex;" /></a> button.</p>
-</section>
-<section id="histogram-equalization">
-<h3>Histogram Equalization<a class="headerlink" href="#histogram-equalization" title="Link to this heading">#</a></h3>
-<p>An alternative to auto scaling that does not alter the data, histogram equalization ( <a class="reference internal" href="_images/icon-histeq-64.png"><img alt="icon-histeq" src="_images/icon-histeq-64.png" style="height: 2.5ex;" /></a> ) ensures that colors are assigned by equal quantiles.  This method is particularly useful when the histogram covers a relatively large range of values often bi- or multi-modal with large regions of few data between.  A potential disadvantage is an amplification of noise at the expense of real features.</p>
+<section id="noise-reduction">
+<h3>Noise Reduction<a class="headerlink" href="#noise-reduction" title="Link to this heading">#</a></h3>
+<p>Noise reduction ( <a class="reference internal" href="_images/icon-noise-reduction-64.png"><img alt="icon-noise-reduction" src="_images/icon-noise-reduction-64.png" style="height: 2.5ex;" /></a> ) involves smoothing data.  It may be applied to maps only for viewing, or can be applied to <em>Analysis Data</em> before producing other plots and analyses (set from the <em>Apply to analysis</em> drop down).  There are five noise reduction methods available:</p>
+<ul class="simple">
+<li><p>Median, smooths the data by computing the median value over a specified kernel (window) size, assigning the result to the center pixel. The results smooth across the entire image;</p></li>
+<li><p>Gaussian, smooths the data using a Gaussian weighting with a specified sigma computed over a specified kernel size, assigning the result to the center pixel. The results smooth across the entire image;</p></li>
+<li><p>Wiener, smooths the data using a Fourier domain low-pass filter;</p></li>
+<li><p>Edge-preserving, smooths the data while preserving sharp edges, this is the suggested option for most cases, though it may oversmooth inside grains; and</p></li>
+<li><p>Bilateral, Gaussian smoothing and edge-preserving, this filter differs from edge-preserving as it does not as strongly smooth the data.</p></li>
+</ul>
 </section>
 <section id="histograms">
 <h3>Histograms<a class="headerlink" href="#histograms" title="Link to this heading">#</a></h3>
-</section>
-<section id="noise-reduction">
-<h3>Noise Reduction<a class="headerlink" href="#noise-reduction" title="Link to this heading">#</a></h3>
-<p>Noise reduction ( <a class="reference internal" href="_images/icon-noise-reduction-64.png"><img alt="icon-noise-reduction" src="_images/icon-noise-reduction-64.png" style="height: 2.5ex;" /></a> ) involves the smoothing of data.  It may be applied to maps only for viewing, or can be applied to <em>Analysis Data</em> before producing other plots and analyses (set from the <em>Apply to analysis</em> drop down).  There are four noise reduction methods available:</p>
-<ul class="simple">
-<li><p>median, smooths the data by computing the median value over a specified kernel (window) size, assigning the result to the center pixel. The results smooth across the entire image;</p></li>
-<li><p>Gaussian, smooths the data using a Gaussian weighting with a specified sigma computed over a specified kernel size, assigning the result to the center pixel. The results smooth across the entire image;</p></li>
-<li><p>Wiener, smooths the data using a Fourier domain low-pass filter;</p></li>
-<li><p>edge-preserving, smooths the data while preserving sharp edges, this is the suggested option for most cases, though it may oversmooth inside grains; and</p></li>
-<li><p>bilateral, Gaussian smoothing and edge-preserving, this filter differs from edge-preserving as it does not as strongly smooth the data.</p></li>
-</ul>
 </section>
 </section>
 <section id="spot-data">
 <h2>Spot Data<a class="headerlink" href="#spot-data" title="Link to this heading">#</a></h2>
 <p>Spot data is not currently available.</p>
 <figure class="align-center" id="id3">
-<a class="reference internal image-reference" href="_images/LaME_Spot_Data.png"><img alt="LaME interface: left toolbox, preprocessing tab" src="_images/LaME_Spot_Data.png" style="width: 315px;" /></a>
+<a class="reference internal image-reference" href="_images/LaME_Spot_Data.png"><img alt="LaME interface: left toolbox, preprocessing tab" src="_images/LaME_Spot_Data.png" style="width: 315px;" />
+</a>
 <figcaption>
 <p><span class="caption-text">The <em>Spot Data</em> tab contains tools for loading and displaying and analyzing spot data.</span><a class="headerlink" href="#id3" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 </section>
-<section id="scatter-and-heatmaps">
-<h2>Scatter and Heatmaps<a class="headerlink" href="#scatter-and-heatmaps" title="Link to this heading">#</a></h2>
-<p>The creation of</p>
-<figure class="align-center" id="id4">
-<a class="reference internal image-reference" href="_images/LaME_Scatter_and_Heatmaps.png"><img alt="LaME interface: left toolbox, scatter and heatmaps tab" src="_images/LaME_Scatter_and_Heatmaps.png" style="width: 315px;" /></a>
-<figcaption>
-<p><span class="caption-text">The <em>Scatter and Heatmaps</em> tab contains tools for plotting scatter maps and heat maps in 2 (biplots) and 3 (ternary) dimensions.  Scatter data may be colored by a field set in the <em>Styling</em> tab.  A map may also be produced with color defined by pixel position within a ternary diagram.</span><a class="headerlink" href="#id4" title="Link to this image">#</a></p>
-</figcaption>
-</figure>
-</section>
-<section id="n-dim">
-<h2>n-Dim<a class="headerlink" href="#n-dim" title="Link to this heading">#</a></h2>
-<figure class="align-center" id="id5">
-<a class="reference internal image-reference" href="_images/LaME_n-Dim.png"><img alt="LaME interface: left toolbox, n-Dim tab" src="_images/LaME_n-Dim.png" style="width: 315px;" /></a>
-<figcaption>
-<p><span class="caption-text">The <em>n-Dim</em> tab contains tools for plotting multidimensional data as either radar plots or trace element compatibility diagrams (a.k.a. spider diagrams).</span><a class="headerlink" href="#id5" title="Link to this image">#</a></p>
-</figcaption>
-</figure>
-<p>This tab is used to produce trace element compatibility diagrams (spider plots) with data normalized to a set of reference concentrations.  This tab is also used to produce radar plots (that look more like spider webs).</p>
-</section>
-<section id="principal-component-analysis-pca">
-<h2>Principal Component Analysis (PCA)<a class="headerlink" href="#principal-component-analysis-pca" title="Link to this heading">#</a></h2>
-<figure class="align-center" id="id6">
-<a class="reference internal image-reference" href="_images/LaME_PCA.png"><img alt="LaME interface: left toolbox, pca tab" src="_images/LaME_PCA.png" style="width: 315px;" /></a>
-<figcaption>
-<p><span class="caption-text">The <em>PCA</em> tab contains tools for displaying a variety of plots relevant to principal component analysis, inclucing maps of PCA dimension scores.</span><a class="headerlink" href="#id6" title="Link to this image">#</a></p>
-</figcaption>
-</figure>
-<p>Select from a range of plots relevant to principal component analyses using the <em>Plot type</em> dropdown, including:</p>
-<ul class="simple">
-<li><p>variance - individual and cumulative explained variance for the principal components</p></li>
-<li><p>vectors - a heatmap showing vector components, useful for observing the influence of input fields on the variance (spread) in the data along each principal component axis</p></li>
-<li><p>2-D score plots - shows both the scores of individal data points along two principal component axes (<em>PC X</em> and <em>PC Y</em>) and the field components along each axis</p></li>
-<li><p>score maps - produces a score map for a single principal component, change the map by changing the value of <em>PC X</em> field.</p></li>
-</ul>
-<p>2-D score plots can also be displayed as a scatter or heatmap by selecting the corresponding from the <em>Plot type</em> dropdown.</p>
-<p>To save to the plot tree by clicking the <a class="reference internal" href="_images/icon-launch-64.png"><img alt="icon-launch" src="_images/icon-launch-64.png" style="height: 2.5ex;" /></a> button.</p>
-</section>
-<section id="clustering">
-<h2>Clustering<a class="headerlink" href="#clustering" title="Link to this heading">#</a></h2>
-<p>Clustering employs unsupervised machine learning to identify subsets of the data that contain similar characteristics in multidimensional space (i.e., similar geochemical characteristics).  It is often a more efficient way to filter data when the goal is to isolate or exclude specific minerals from analyses.  Two methods are currently implmented, <em>k-means</em> and <em>fuzzy c-means</em>, which are chosen from the <em>Method</em> dropdown.  K-means is the simpler of the two algorithms, which optimizes the centroids of clusters by minimizing the distance of points nearest to each respective centroid.  Fuzzy c-means differs in that it assumes that the clusters can overlap allowing for an additional score to be provided for each cluster in addition to map assigning each point to the cluster with the highest score.</p>
-<figure class="align-center" id="id7">
-<a class="reference internal image-reference" href="_images/LaME_Clustering.png"><img alt="LaME interface: left toolbox, clustering tab" src="_images/LaME_Clustering.png" style="width: 315px;" /></a>
-<figcaption>
-<p><span class="caption-text">The <em>Clustering</em> tab contains tools for calculating and displaying multianalyte data classified into clusters based on similarities in properties.  Clustering needs to be performed prior to creating a cluster mask.</span><a class="headerlink" href="#id7" title="Link to this image">#</a></p>
-</figcaption>
-</figure>
+<section id="polygons">
+<h2>Polygons<a class="headerlink" href="#polygons" title="Link to this heading">#</a></h2>
+<p>Creating a polygon for filtering is a straightforward process. First, select a map from the plot selector. Then, click the <a class="reference internal" href="_images/icon-polygon-new-64.png"><img alt="icon-polygon-new" src="_images/icon-polygon-new-64.png" style="height: 2.5ex;" /></a> button in the <em>Control Toolbox</em> to begin. As you move your mouse over the map, left-click to add vertices. You’ll notice a zoom tool appear, showing a small region of the map around your cursor for precision. Once you’ve added all desired points, right-click on the map to finish. Your new polygon will appear in the Polygon Table, where you can assign it a name.</p>
+<p>Editing existing polygons is equally intuitive. To move a point, click the <a class="reference internal" href="_images/icon-move-point-64.png"><img alt="icon-move-point" src="_images/icon-move-point-64.png" style="height: 2.5ex;" /></a> button, then left-click near the point you want to move, and left-click again at its new location. Adding a vertex is done by clicking the <a class="reference internal" href="_images/icon-add-point-64.png"><img alt="icon-add-point" src="_images/icon-add-point-64.png" style="height: 2.5ex;" /></a> button, selecting the line segment for the new point, and clicking where you want it placed. Removing points is as simple as clicking the <a class="reference internal" href="_images/icon-remove-point-64.png"><img alt="icon-remove-point" src="_images/icon-remove-point-64.png" style="height: 2.5ex;" /></a> button and then clicking the point you wish to remove.</p>
 </section>
 <section id="profiling">
 <h2>Profiling<a class="headerlink" href="#profiling" title="Link to this heading">#</a></h2>
-<p>Create profiles across the across the map.
+<p>Create profiles across the map.
 .. figure:: _static/screenshots/LaME_Profiling.png</p>
 <blockquote>
 <div><dl class="field-list simple">
@@ -599,6 +510,58 @@ document.write(`
 <p>The <em>Profiling</em> tab contains tools for creating cross sections of analytes across the maps.</p>
 </div></blockquote>
 </section>
+<section id="scatter-and-heatmaps">
+<h2>Scatter and Heatmaps<a class="headerlink" href="#scatter-and-heatmaps" title="Link to this heading">#</a></h2>
+<p>The creation of</p>
+<figure class="align-center" id="id4">
+<a class="reference internal image-reference" href="_images/LaME_Scatter_and_Heatmaps.png"><img alt="LaME interface: left toolbox, scatter and heatmaps tab" src="_images/LaME_Scatter_and_Heatmaps.png" style="width: 315px;" />
+</a>
+<figcaption>
+<p><span class="caption-text">The <em>Scatter and Heatmaps</em> tab contains tools for plotting scatter maps and heat maps in 2 (biplots) and 3 (ternary) dimensions.  Scatter data may be colored by a field set in the <em>Styling</em> tab.  A map may also be produced with color defined by pixel position within a ternary diagram.</span><a class="headerlink" href="#id4" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="n-dim">
+<h2>n-Dim<a class="headerlink" href="#n-dim" title="Link to this heading">#</a></h2>
+<figure class="align-center" id="id5">
+<a class="reference internal image-reference" href="_images/LaME_n-Dim.png"><img alt="LaME interface: left toolbox, n-Dim tab" src="_images/LaME_n-Dim.png" style="width: 315px;" />
+</a>
+<figcaption>
+<p><span class="caption-text">The <em>n-Dim</em> tab contains tools for plotting multidimensional data as either radar plots or trace element compatibility diagrams (a.k.a. spider diagrams).</span><a class="headerlink" href="#id5" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<p>This tab is used to produce trace element compatibility diagrams (spider plots) with data normalized to a set of reference concentrations.  This tab is also used to produce radar plots (that look more like spider webs).</p>
+</section>
+<section id="dimensional-reduction">
+<h2>Dimensional Reduction<a class="headerlink" href="#dimensional-reduction" title="Link to this heading">#</a></h2>
+<figure class="align-center" id="id6">
+<a class="reference internal image-reference" href="_images/LaME_PCA.png"><img alt="LaME interface: left toolbox, pca tab" src="_images/LaME_PCA.png" style="width: 315px;" />
+</a>
+<figcaption>
+<p><span class="caption-text">The <em>PCA</em> tab contains tools for displaying a variety of plots relevant to principal component analysis, including maps of PCA dimension scores.</span><a class="headerlink" href="#id6" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<p>Select from a range of plots relevant to principal component analyses using the <em>Plot type</em> dropdown, including:</p>
+<ul class="simple">
+<li><p>Variance - individual and cumulative explained variance for the principal components</p></li>
+<li><p>Vectors - a heatmap showing vector components, useful for observing the influence of input fields on the variance (spread) in the data along each principal component axis</p></li>
+<li><p>2-D score plots - shows both the scores of individual data points along two principal component axes (<em>PC X</em> and <em>PC Y</em>) and the field components along each axis</p></li>
+<li><p>Score maps - produces a score map for a single principal component, change the map by changing the value of <em>PC X</em> field.</p></li>
+</ul>
+<p>2-D score plots can also be displayed as a scatter or heatmap by selecting the corresponding from the <em>Plot type</em> dropdown.</p>
+<p>To save to the plot tree by clicking the <a class="reference internal" href="_images/icon-launch-64.png"><img alt="icon-launch" src="_images/icon-launch-64.png" style="height: 2.5ex;" /></a> button.</p>
+</section>
+<section id="clustering">
+<h2>Clustering<a class="headerlink" href="#clustering" title="Link to this heading">#</a></h2>
+<p>Clustering employs unsupervised machine learning to identify subsets of the data that contain similar characteristics in multidimensional space (i.e., similar geochemical characteristics).  It is often a more efficient way to filter data when the goal is to isolate or exclude specific minerals from analyses.  Two methods are currently implemented, <em>k-means</em> and <em>fuzzy c-means</em>, which are chosen from the <em>Method</em> dropdown.  K-means is the simpler of the two algorithms, which optimizes the centroids of clusters by minimizing the distance of points nearest to each respective centroid.  Fuzzy c-means differs in that it assumes that the clusters can overlap allowing for an additional score to be provided for each cluster in addition to map and assigning each point to the cluster with the highest score.</p>
+<figure class="align-center" id="id7">
+<a class="reference internal image-reference" href="_images/LaME_Clustering.png"><img alt="LaME interface: left toolbox, clustering tab" src="_images/LaME_Clustering.png" style="width: 315px;" />
+</a>
+<figcaption>
+<p><span class="caption-text">The <em>Clustering</em> tab contains tools for calculating and displaying multianalyte data classified into clusters based on similarities in properties.  Clustering needs to be performed prior to creating a cluster mask.</span><a class="headerlink" href="#id7" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
 <section id="special-functions">
 <h2>Special Functions<a class="headerlink" href="#special-functions" title="Link to this heading">#</a></h2>
 <p>These are not yet implemented, but will include methods to compute thermometry, barometry, dating using various isotopic systems, and multicomponent diffusion.  If you have interest in applying a specific methods please contact us and we’ll see what we can do.</p>
@@ -612,16 +575,16 @@ document.write(`
               
               
               
-                <footer class="prev-next-footer">
+                <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="import.html"
+       href="top_toolbar.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Import Formats</p>
+        <p class="prev-next-title">Main Toolbar (Top)</p>
       </div>
     </a>
     <a class="right-next"
@@ -629,7 +592,7 @@ document.write(`
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Plot and Property (Right) Toolbox</p>
+        <p class="prev-next-title">Plot and Property Toolbox (Right)</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -651,20 +614,23 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#samples-and-fields">Samples and Fields</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preprocess">Preprocess</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#samples-and-fields">Samples and Fields</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#autoscaling-icon-autoscale">Autoscaling </a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#histogram-equalization">Histogram Equalization</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#histograms">Histograms</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preprocess">Preprocess</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#noise-reduction">Noise Reduction</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#histograms">Histograms</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#spot-data">Spot Data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#polygons">Polygons</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#profiling">Profiling</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scatter-and-heatmaps">Scatter and Heatmaps</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#n-dim">n-Dim</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#principal-component-analysis-pca">Principal Component Analysis (PCA)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dimensional-reduction">Dimensional Reduction</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#clustering">Clustering</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#profiling">Profiling</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#special-functions">Special Functions</a></li>
 </ul>
   </nav></div>
@@ -691,8 +657,8 @@ document.write(`
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
-<script src="_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -712,7 +678,7 @@ document.write(`
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
     <br/>
   </p>
 </div>
@@ -725,7 +691,7 @@ document.write(`
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.2.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
 </p></div>
       
     </div>

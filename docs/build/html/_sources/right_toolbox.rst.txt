@@ -1,4 +1,4 @@
-Plot and Property (Right) Toolbox
+Plot and Property Toolbox (Right)
 *********************************
 
 The *Plot and Property Toolbox* consists of three major tabs: a tree containing saved plots (*Plot Selector*); a styling pane with plot options; and a calculator for creating custom fields.
@@ -25,7 +25,7 @@ The properties in the styling pane control the look and feel of plots generated 
 Four controls sit above the styling pages.  The plot selector updates the types of plots available to each of the *Control Toolbox* tabs.  In case the plot does not update, click the |icon-launch| button.  Styles can be customized and saved using the save ( |icon-save| ) button.  Saved themes can be recalled in future sessions.
 
 +----------------+---------------------------+----------------------+-----------------------------------------------+----------+----------+--------------------------------------------------------------------------+--------------------------+------------+
-| tab            | Samples and Fields        | Preprocessing        | Scatter & Heatmap                             | n-Dim               | PCA                                                                      | Clustering               | Propfiling |
+| tab            | Samples and Fields        | Preprocessing        | Scatter & Heatmap                             | n-Dim               | PCA                                                                      | Clustering               | Profiling |
 +================+=============+=============+===========+==========+================+================+=============+==========+==========+==========+=========+====================+====================+===========+==========+===============+============+
 | plot type      | analyte map | correlation | histogram | gradient | scatter        | heatmap        | ternary map | TEC      | radar    | variance | vectors | PCx vs PCy scatter | PCx vs PCy heatmap | PCA score | clusters | cluster score | profiles   |
 +----------------+-------------+-------------+-----------+----------+----------------+----------------+-------------+----------+----------+----------+---------+--------------------+--------------------+-----------+----------+---------------+------------+
@@ -96,7 +96,7 @@ Four controls sit above the styling pages.  The plot selector updates the types 
 .. [4] ternary plot
 .. [5] color by field is not none
 .. [6] for linear fits
-.. [7] for diplaying vector components
+.. [7] for displaying vector components
 .. [8] for scores only
 .. [9] error bars
 
@@ -143,7 +143,7 @@ Markers
 
     The *Styling \> Markers* contains settings for markers used in scatter, ternary, and PCA plots. 
     
-For other plot types text is greyed out, indicating these settings can not be modified. Symbol options, symbol size, and transperency are modified in this tab. 
+For other plot types text is greyed out, indicating these settings can not be modified. Symbol options, symbol size, and transparency are modified in this tab. 
 
 Lines
 +++++
@@ -204,7 +204,7 @@ Calculator
 
     The *Calculator* can be used to compute custom fields.  Expressions can be typed directly into the edit box, by clicking the buttons.
 
-Use the calculator ( |icon-calculator| ) to create custom fields.  These custom fields can be used to as dimensions on plots or to set marker color values.  Once created, custom fields will be added to associated drop downs.
+Use the calculator ( |icon-calculator| ) to create :doc:`custom_fields`.  These custom fields can be used to as dimensions on plots or to set marker color values.  Once created, custom fields will be added to associated drop downs.
 
 .. |icon-sort| image:: _static/icons/icon-sort-64.png
     :height: 2ex

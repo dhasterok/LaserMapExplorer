@@ -1,5 +1,5 @@
-Plot Window (Center Pane)
-*************************
+Plot Window (Center)
+********************
 
 Most plots are displayed within the *Plot Window*.  The only exception are profiles, which are displayed in the *Lower Tabs*.  The plots can be viewed individually, a grid, or as a predefined set for quick viewing.
 

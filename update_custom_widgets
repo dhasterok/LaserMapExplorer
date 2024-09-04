@@ -7,7 +7,7 @@ file="src/ui/MainWindow.py"
 pyuic5 designer/mainwindow.ui -o $file
 
 # Define the file containing the list of object names
-object_names_file="src/CustomLineEdit_widget_list.txt"
+object_names_file="src/widget_list_MainWindow.txt"
 
 # Check if the files exist
 if [[ ! -f "$file" ]]; then
@@ -38,4 +38,66 @@ done < "$object_names_file"
 echo "Replacing 'import resources_rc' with 'import src.ui.resources_rc'..."
 sed -i '' "s/import resources_rc/import src.ui.resources_rc/g" "$file"
 
-echo "Updates complete!"
+echo "Processing complete for $file"
+echo
+
+
+
+# Define the file to be updated
+names=("FileSelectorDialog" "MapImportDialog")
+
+# Function to determine widget type from object name
+get_widget_type() {
+  local object_name=$1
+  # Extract widget type from object name using pattern matching
+  case "$object_name" in
+    self.tableWidget*) echo "TableWidget" ;;
+    self.lineEdit*) echo "LineEdit" ;;
+    # Add more patterns as needed
+    *) echo "Unknown" ;;
+  esac
+}
+
+# Iterate over each name in the list
+for name in "${names[@]}"; do
+  file="src/ui/$name.py"
+
+  # Generate the .py file from the .ui file using pyuic5
+  pyuic5 -x designer/$name.ui -o $file
+
+  # Define the file containing the list of object names
+  object_names_file="src/widget_list_$name.txt"
+
+  # Check if the generated .py file exists
+  if [[ ! -f "$file" ]]; then
+    echo "File $file not found for $name!"
+    continue
+  fi
+
+  # Check if the object names file exists
+  if [[ ! -f "$object_names_file" ]]; then
+    echo "File $object_names_file not found for $name!"
+    continue
+  fi
+
+  # Add the import for CustomWidgets as cw if it doesn't exist
+  if ! grep -q "import src.CustomWidgets as cw" "$file"; then
+    echo "Adding import for src.CustomWidgets as cw to $file..."
+    sed -i '' "1i\\
+import src.CustomWidgets as cw
+" "$file"
+  fi
+
+  # Replace widget types based on the object names
+  echo "Replacing 'QtWidgets.QWidgetType' with 'cw.CustomWidgetType' for specified object names in $file..."
+
+  while IFS= read -r object_name; do
+    widget_type=$(get_widget_type "$object_name")
+    echo "    object name: $object_name, widget type: $widget_type"
+    sed -i '' "s/${object_name} = QtWidgets.Q${widget_type}/${object_name} = cw.Custom${widget_type}/g" "$file"
+  done < "$object_names_file"
+
+  echo "Processing completed for $name."
+  echo
+
+done

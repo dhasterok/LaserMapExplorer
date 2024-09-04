@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1024</width>
+    <width>1300</width>
     <height>637</height>
    </rect>
   </property>
@@ -29,7 +29,7 @@
     <rect>
      <x>0</x>
      <y>610</y>
-     <width>1024</width>
+     <width>1301</width>
      <height>27</height>
     </rect>
    </property>
@@ -45,7 +45,7 @@
     <rect>
      <x>12</x>
      <y>12</y>
-     <width>1001</width>
+     <width>1281</width>
      <height>597</height>
     </rect>
    </property>
@@ -102,7 +102,7 @@
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset resource="../resources.qrc">
+         <iconset>
           <normaloff>:/resources/icons/icon-question-64.svg</normaloff>:/resources/icons/icon-question-64.svg</iconset>
         </property>
         <property name="iconSize">
@@ -250,7 +250,7 @@
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset resource="../resources.qrc">
+         <iconset>
           <normaloff>:/resources/icons/icon-add-directory-64.svg</normaloff>:/resources/icons/icon-add-directory-64.svg</iconset>
         </property>
         <property name="iconSize">
@@ -308,7 +308,7 @@
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset resource="../resources.qrc">
+         <iconset>
           <normaloff>:/resources/icons/icon-accept-64.svg</normaloff>:/resources/icons/icon-accept-64.svg</iconset>
         </property>
         <property name="iconSize">
@@ -370,6 +370,12 @@
           <property name="toolTip">
            <string>Add missing metadata.  If left blank, quick import assumes square pixel dimensions</string>
           </property>
+          <attribute name="horizontalHeaderCascadingSectionResizes">
+           <bool>false</bool>
+          </attribute>
+          <attribute name="horizontalHeaderHighlightSections">
+           <bool>false</bool>
+          </attribute>
           <column>
            <property name="text">
             <string>Import</string>
@@ -382,7 +388,17 @@
           </column>
           <column>
            <property name="text">
+            <string>Select files</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
             <string>Standard</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Scan Axis</string>
            </property>
           </column>
           <column>
@@ -406,11 +422,6 @@ reverse</string>
            <property name="text">
             <string>Spot size
 (µm)</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Line Dim.</string>
            </property>
           </column>
           <column>
@@ -525,7 +536,7 @@ reverse</string>
              <string>left</string>
             </property>
             <property name="icon">
-             <iconset resource="../resources.qrc">
+             <iconset>
               <normaloff>:/resources/icons/icon-back-arrow-64.svg</normaloff>:/resources/icons/icon-back-arrow-64.svg</iconset>
             </property>
             <property name="iconSize">
@@ -585,7 +596,7 @@ reverse</string>
              <string>right</string>
             </property>
             <property name="icon">
-             <iconset resource="../resources.qrc">
+             <iconset>
               <normaloff>:/resources/icons/icon-forward-arrow-64.svg</normaloff>:/resources/icons/icon-forward-arrow-64.svg</iconset>
             </property>
             <property name="iconSize">
@@ -677,8 +688,6 @@ reverse</string>
    </layout>
   </widget>
  </widget>
- <resources>
-  <include location="../resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

@@ -11,9 +11,32 @@
     <script src="https://unpkg.com/blockly/javascript_compressed.js"></script>
     <!-- Load a message file -->
     <script src="https://unpkg.com/blockly/msg/en.js"></script>
-    <script src="qwebchannel.js"></script> <!-- Include the WebChannel library -->
+    <script src="https://unpkg.com/blockly/python_compressed"></script>
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script> <!-- Include the WebChannel library -->
+    <script>
+        // Define the custom block for loading directories
+        const load_directory = {
+        init: function() {
+            this.appendValueInput('DIR')
+            .setCheck('String')
+            .appendField('load files from directory')
+            .appendField(new Blockly.FieldTextInput('directory name'), 'DIR');
+            this.setNextStatement(true, null);
+            this.setTooltip('Loads files from a directory');
+            this.setHelpUrl('');
+            this.setColour(225);
+        }
+        };
+        Blockly.common.defineBlocks({load_directory: load_directory});
+        python.pythonGenerator.forBlock['load_directory'] = function(block,generator)  {
+            var dir_name = generator.quote_(block.getFieldValue('DIR'));
+            var code = 'self.open_directory(' + dir_name + ')\n';
+            return code;
+        };
+    </script>
 </head>
 <body>
+    
     <h1>Scratch-like Environment</h1>
     <div id="blocklyDiv" style="height: 600px; width: 1000px;"></div>
     <xml id="toolbox" style="display: none">
@@ -23,25 +46,31 @@
         <block type="math_arithmetic"></block>
         <block type="text"></block>
         <block type="text_print"></block>
+        <block type="load_directory"></block>
     </xml>
     <script>
         var workspace = Blockly.inject('blocklyDiv',
             {toolbox: document.getElementById('toolbox')});
 
-        function sendCodeToPython() {
-            // Generate JavaScript code from Blockly
-            var code = Blockly.JavaScript.workspaceToCode(workspace);
-            
-            // Send the code to Python via WebChannel
-            if (window.blocklyBridge) {
-                window.blocklyBridge.runCode(code);
-            } else {
-                console.log("No blocklyBridge available.");
-            }
-        }
+            new QWebChannel(qt.webChannelTransport, function(channel) {
+            window.blocklyBridge = channel.objects.blocklyBridge;
 
-        // Automatically send code whenever the workspace changes
-        workspace.addChangeListener(sendCodeToPython);
+            function sendCodeToPython() {
+                // Generate Python code from Blockly
+                var code = python.pythonGenerator.workspaceToCode(workspace);
+                
+                // Send the code to Python via WebChannel
+                if (window.blocklyBridge) {
+                    window.blocklyBridge.runCode(code);
+                } else {
+                    console.log("No blocklyBridge available.");
+                }
+            }
+
+            // Automatically send code whenever the workspace changes
+            workspace.addChangeListener(sendCodeToPython);
+        });
+        
     </script>
 </body>
 </html>

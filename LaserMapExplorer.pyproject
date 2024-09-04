@@ -11,6 +11,6 @@
         "designer/ImageImportDialog.ui",
         "designer/SpotImportDialog.ui",
         "designer/WorkflowDesigner.ui",
-        "designer/FileImportDialog.ui"
+        "designer/FileSelectorDialog.ui"
     ]
 }

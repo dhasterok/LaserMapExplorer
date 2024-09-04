@@ -1,4 +1,4 @@
-Control (Left) Toolbox
+Control Toolbox (Left)
 **********************
 
 The control toolbox includes the controls for processing samples, producing plots, and performing analyses.  
@@ -13,6 +13,7 @@ Samples and Fields
 
     The *Samples and Fields* tab contains tools for choosing analytes and plotting correlations.
 
+<<<<<<< HEAD
 Change Analytes:
 
 * updates *Plot Selector*
@@ -42,6 +43,24 @@ Histogram Equalization
 An alternative to auto scaling that does not alter the data, histogram equalization ( |icon-histeq| ) ensures that colors are assigned by equal quantiles.  This method is particularly useful when the histogram covers a relatively large range of values often bi- or multi-modal with large regions of few data between.  A potential disadvantage is an amplification of noise at the expense of real features.
 
 .. _preprocessing
+=======
+* Change ref value: update anything with norm data (plots, calculated fields, n-Dim plots, clustering?, filters?)
+
+* Change data scaling: same as crop and clears filters
+
+* Change Correlation Method: update correlation plots
+
+Autoscaling |icon-autoscale|
+----------------------------
+
+One common calibration issue is the conversion of low counts to negative concentrations after calibration.  These are almost certainly due to difference between the ablation properties of the mineral used to calibrate the map applied and another mineral.  Negative values are particularly an issue when the data are log-scaled.  To reduce the effect of negatives, we rescale the data by bringing applying a linear compression of the data, fixing the upper end and moving the lower end to a small positive value.  While this does change the concentration, it has a small effect on large concentrations.  We also perform an autoscaling, performed by default, to clip the high and low ends of the concentrations.  These values are not removed, rather set to the top or bottom of the scale.  Autoscaling can skew statistics as a result; however, it generally improves estimates of the mean as values that are several orders of magnitude higher than reasonable no longer have a massive effect.  Autoscaling can be toggled on or off by pressing the |icon-autoscale| button. 
+
+Histogram Equalization
+----------------------
+
+An alternative to auto scaling that does not alter the data, histogram equalization ( |icon-histeq| ) ensures that colors are assigned by equal quantiles.  This method is particularly useful when the histogram covers a relatively large range of values often bi- or multi-modal with large regions of few data between.  A potential disadvantage is an amplification of noise at the expense of real features.
+
+>>>>>>> temp-branch
 Preprocess
 ==========
 
@@ -59,13 +78,16 @@ These changes can have an impact on certain statistical calculations, such as me
 Noise Reduction
 ---------------
 
-Noise reduction ( |icon-noise-reduction| ) involves the smoothing of data.  It may be applied to maps only for viewing, or can be applied to *Analysis Data* before producing other plots and analyses (set from the *Apply to analysis* drop down).  There are four noise reduction methods available:
+Noise reduction ( |icon-noise-reduction| ) involves smoothing data.  It may be applied to maps only for viewing, or can be applied to *Analysis Data* before producing other plots and analyses (set from the *Apply to analysis* drop down).  There are five noise reduction methods available:
 
-* median, smooths the data by computing the median value over a specified kernel (window) size, assigning the result to the center pixel. The results smooth across the entire image;
+* Median, smooths the data by computing the median value over a specified kernel (window) size, assigning the result to the center pixel. The results smooth across the entire image;
 * Gaussian, smooths the data using a Gaussian weighting with a specified sigma computed over a specified kernel size, assigning the result to the center pixel. The results smooth across the entire image;
 * Wiener, smooths the data using a Fourier domain low-pass filter;
-* edge-preserving, smooths the data while preserving sharp edges, this is the suggested option for most cases, though it may oversmooth inside grains; and
-* bilateral, Gaussian smoothing and edge-preserving, this filter differs from edge-preserving as it does not as strongly smooth the data.
+* Edge-preserving, smooths the data while preserving sharp edges, this is the suggested option for most cases, though it may oversmooth inside grains; and
+* Bilateral, Gaussian smoothing and edge-preserving, this filter differs from edge-preserving as it does not as strongly smooth the data.
+
+Histograms
+----------
 
 Histograms
 ----------
@@ -88,6 +110,20 @@ Polygons
 Creating a polygon for filtering is a straightforward process. First, select a map from the plot selector. Then, click the |icon-polygon-new| button in the *Control Toolbox* to begin. As you move your mouse over the map, left-click to add vertices. You'll notice a zoom tool appear, showing a small region of the map around your cursor for precision. Once you've added all desired points, right-click on the map to finish. Your new polygon will appear in the Polygon Table, where you can assign it a name.
 
 Editing existing polygons is equally intuitive. To move a point, click the |icon-move-point| button, then left-click near the point you want to move, and left-click again at its new location. Adding a vertex is done by clicking the |icon-add-point| button, selecting the line segment for the new point, and clicking where you want it placed. Removing points is as simple as clicking the |icon-remove-point| button and then clicking the point you wish to remove.
+<<<<<<< HEAD
+=======
+
+Profiling
+=========
+
+Create profiles across the map.
+.. figure:: _static/screenshots/LaME_Profiling.png
+    :align: center
+    :alt: LaME interface: left toolbox, profiling tab
+    :width: 315
+
+    The *Profiling* tab contains tools for creating cross sections of analytes across the maps.
+>>>>>>> temp-branch
 
 Scatter and Heatmaps
 ====================
@@ -101,6 +137,7 @@ The creation of
 
     The *Scatter and Heatmaps* tab contains tools for plotting scatter maps and heat maps in 2 (biplots) and 3 (ternary) dimensions.  Scatter data may be colored by a field set in the *Styling* tab.  A map may also be produced with color defined by pixel position within a ternary diagram.
 
+<<<<<<< HEAD
 Polygons
 ========
 
@@ -119,6 +156,8 @@ Create profiles across the map.
 
     The *Profiling* tab contains tools for creating cross sections of analytes across the maps.
 
+=======
+>>>>>>> temp-branch
 n-Dim
 =====
 
@@ -143,10 +182,17 @@ Dimensional Reduction
 
 Select from a range of plots relevant to principal component analyses using the *Plot type* dropdown, including: 
 
+<<<<<<< HEAD
 * variance - individual and cumulative explained variance for the principal components
 * vectors - a heatmap showing vector components, useful for observing the influence of input fields on the variance (spread) in the data along each principal component axis
 * 2-D score plots - shows both the scores of individual data points along two principal component axes (*PC X* and *PC Y*) and the field components along each axis
 * score maps - produces a score map for a single principal component, change the map by changing the value of *PC X* field.
+=======
+* Variance - individual and cumulative explained variance for the principal components
+* Vectors - a heatmap showing vector components, useful for observing the influence of input fields on the variance (spread) in the data along each principal component axis
+* 2-D score plots - shows both the scores of individual data points along two principal component axes (*PC X* and *PC Y*) and the field components along each axis
+* Score maps - produces a score map for a single principal component, change the map by changing the value of *PC X* field.
+>>>>>>> temp-branch
 
 2-D score plots can also be displayed as a scatter or heatmap by selecting the corresponding from the *Plot type* dropdown.  
 
@@ -155,7 +201,11 @@ To save to the plot tree by clicking the |icon-launch| button.
 Clustering
 ==========
 
+<<<<<<< HEAD
 Clustering employs unsupervised machine learning to identify subsets of the data that contain similar characteristics in multidimensional space (i.e., similar geochemical characteristics).  It is often a more efficient way to filter data when the goal is to isolate or exclude specific minerals from analyses.  Two methods are currently implemented, *k-means* and *fuzzy c-means*, which are chosen from the *Method* dropdown.  K-means is the simpler of the two algorithms, which optimizes the centroids of clusters by minimizing the distance of points nearest to each respective centroid.  Fuzzy c-means differs in that it assumes that the clusters can overlap allowing for an additional score to be provided for each cluster in addition to map assigning each point to the cluster with the highest score.
+=======
+Clustering employs unsupervised machine learning to identify subsets of the data that contain similar characteristics in multidimensional space (i.e., similar geochemical characteristics).  It is often a more efficient way to filter data when the goal is to isolate or exclude specific minerals from analyses.  Two methods are currently implemented, *k-means* and *fuzzy c-means*, which are chosen from the *Method* dropdown.  K-means is the simpler of the two algorithms, which optimizes the centroids of clusters by minimizing the distance of points nearest to each respective centroid.  Fuzzy c-means differs in that it assumes that the clusters can overlap allowing for an additional score to be provided for each cluster in addition to map and assigning each point to the cluster with the highest score.
+>>>>>>> temp-branch
 
 .. figure:: _static/screenshots/LaME_Clustering.png
     :align: center

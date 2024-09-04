@@ -46,13 +46,9 @@ html_css_files = [
 ]
 #html_theme = "mpl_sphinx_theme"
 
-html_theme_options = {"navbar_start": ["navbar-logo"],
-                      "navbar_center": ["navbar-nav"],
-                      "navbar_end": ["navbar-icon-links"]}
-
 html_static_path = ['_static']
 
-html_logo = "_static/LaME-wide-64.svg"
+#html_logo = "_static/LaME-wide-64.svg"
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
@@ -70,8 +66,12 @@ intersphinx_mapping = {
 }
 
 html_theme_options = {
+    "navbar_start": ["navbar-logo"],
+    "navbar_center": ["navbar-nav"],
+    "navbar_end": ["navbar-icon-links"],
     "logo": {
         "text": "LaME v.0.0 beta",
+        "image_light": "_static/LaME-wide-64.svg",
         "image_dark": "_static/LaME-wide-green-64.svg",
     },
     "icon_links": [

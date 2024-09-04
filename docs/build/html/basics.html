@@ -197,15 +197,15 @@
 
 <script>
 document.write(`
-  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
   </button>
 `);
 </script></div>
       
-        <div class="navbar-item"><ul class="navbar-icon-links"
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
     aria-label="Icon Links">
         <li class="nav-item">
           
@@ -322,15 +322,15 @@ document.write(`
 
 <script>
 document.write(`
-  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
   </button>
 `);
 </script></div>
         
-          <div class="navbar-item"><ul class="navbar-icon-links"
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
     aria-label="Icon Links">
         <li class="nav-item">
           
@@ -374,7 +374,6 @@ document.write(`
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">The Interface</span></p>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="top_toolbar.html">Main (Top) Toolbar</a></li>
 <li class="toctree-l1"><a class="reference internal" href="left_toolbox.html">Control (Left) Toolbox</a></li>
 <li class="toctree-l1"><a class="reference internal" href="right_toolbox.html">Plot and Property (Right) Toolbox</a></li>
 <li class="toctree-l1"><a class="reference internal" href="center_pane.html">Plot Window (Center Pane)</a></li>
@@ -453,13 +452,12 @@ document.write(`
 <h2>GUI Layout<a class="headerlink" href="#gui-layout" title="Link to this heading">#</a></h2>
 <p>LaME’s user interface is organized into five panels:</p>
 <ul class="simple">
-<li><p>Top: File menu and main toolbar with frequently used functions</p></li>
-<li><p>Left: Toolbox with functions for plotting and analysis</p></li>
-<li><p>Right: Toolbox with plot selection tree, plot styles, and calculator for custom fields</p></li>
-<li><p>Center: Plot viewer tabs for single plots, multiple plots, and quick view of all fields</p></li>
-<li><p>Bottom: Tabs for notes, selected filters, and profile plots</p></li>
+<li><p>left, toolbox with functions for plotting and analysis</p></li>
+<li><p>right, toolbox with a plot selection tree, plot styles, and a calculator for creating custom fields</p></li>
+<li><p>center, plot viewer tabs for single plots, multiple plots, and a quick view of all fields</p></li>
+<li><p>bottom, tabs for notes, selected filters, and profile plots</p></li>
 </ul>
-<p>To begin using LaME, load a directory either from the file menu or the main toolbar (<a class="reference internal" href="_images/icon-add-directory-64.png"><img alt="icon-add-directory" src="_images/icon-add-directory-64.png" style="height: 2ex;" /></a>).  You can load a directory with a single sample or multiple samples, each in their own subdirectory.  See <a class="reference internal" href="import.html"><span class="doc">Import Formats</span></a> for file specifications that LaME can handle.</p>
+<p>Once LaME starts, you will need to load a directory, either from the file menu or toolbar ( <a class="reference internal" href="_images/icon-add-directory-64.png"><img alt="icon-add-directory" src="_images/icon-add-directory-64.png" style="height: 2ex;" /></a> ).  You can load a directory with a single sample or a directory with multiple samples, each in their own subdirectory.  See <a class="reference internal" href="import.html"><span class="doc">Import Formats</span></a> for file specifications that LaME can handle.</p>
 <figure class="align-center" id="id1">
 <img alt="LaME interface" src="_images/LaME_Initial_Window.png" />
 <figcaption>
@@ -469,14 +467,13 @@ document.write(`
 </section>
 <section id="loading-data">
 <h2>Loading Data<a class="headerlink" href="#loading-data" title="Link to this heading">#</a></h2>
-<p>Data can be loaded into <em>LaME</em> using various methods.  If you haven’t loaded a sample previously, use the <a class="reference internal" href="import.html"><span class="doc">Import Formats</span></a>.  The imported sample should be automatically added to the top <em>Toolbar</em> sample list combobox.  If you have previously loaded the data, you can load a saved session, a single sample, or a directory of samples from the <em>File</em> menu.</p>
+<p>Data can be loaded into <em>LaME</em> using a variety of methods.  If you haven’t loaded a sample previously, you will need to use the <a class="reference internal" href="import.html"><span class="doc">Import Formats</span></a>.  The imported sample should be automatically added to the <em>Samples and Fields</em> sample list combobox.  If you have previously loaded the data, you can load a saved session, a single sample, or a directory of samples from the <em>Menubar</em> or <em>File</em> menu.</p>
 </section>
 <section id="where-to-start">
 <h2>Where to Start<a class="headerlink" href="#where-to-start" title="Link to this heading">#</a></h2>
-<p>Once a directory is loaded, changing samples is easy.  From the top <em>Toolbar</em>, use the sample dropdown to select the desired sample.  All work on previous samples will be stored and any images can be recalled from the <em>Plot Selector</em> in the right panel.</p>
-<p>Use Analyte Selector ( <a class="reference internal" href="_images/icon-atom-64.png"><img alt="icon-atom" src="_images/icon-atom-64.png" style="height: 2ex;" /></a> ) to choose the fields for analysis, including ratios between elements/analytes.  Generally the more analytes selected for analysis, the better.  To aid selection of ratios, the background of the <em>Analyte Selector</em> tool are the correlation coefficients between every pair of fields.
-When the sample first loads, all analytes are selected (highlighted in yellow).  To select or deselect an analyte, click on the diagonal corresponding to the analyte.  To select or deselect a ratios, click on the row and column corresponding to the pair.  The column corresponds to the numerator and the row to the denominator of the ratio.  Once selected, the ratio will be highlighted in yellow in the table and be added to the selection list on the right.  When finished, click <em>Done</em>.</p>
-<p>To load a previously saved set of analytes and ratios, click <em>Load Selection</em>.</p>
+<p>Once a directory is loaded, changing samples is easy.  From the <em>Samples sand Fields</em> tab, use the sample dropdown to select the desired sample.  All work on previous samples will be stored and any images can be recalled from the <em>Plot Selector</em> in the right panel.</p>
+<p>Use Isotope Selector ( <a class="reference internal" href="_images/icon-atom-64.png"><img alt="icon-atom" src="_images/icon-atom-64.png" style="height: 2ex;" /></a> ) to choose the fields to be used for analysis, including ratios between elements/isotopes.  Generally the more isotopes selected for analysis, the better.  To aid selection of ratios, the background of the <em>Analyte Selector</em> tool are the correlation coefficients between every pair of fields (Figure 1).  When the sample first loads, all isotopes are selected (highlighted in yellow).  To select or deselect an isotope, click on the diagonal corresponding to the isotope.  To select or deselect a ratios, simply by click on the row and column corresponding to the pair.  The column corresponds to the numerator and the row to the denominator of the ratio.  Once selected, the ratio will be highlighed in yellow in the table and be added to the selection list on the right.  When finished, click <em>Done</em>.</p>
+<p>To load a previously saved set of isotopes and ratios, click <em>Load Selection</em>.</p>
 <figure class="align-center" id="id2">
 <img alt="isotope selection tool" src="_images/LaME_Analyte_Selector.png" />
 <figcaption>
@@ -494,11 +491,11 @@ When the sample first loads, all analytes are selected (highlighted in yellow). 
 </section>
 <section id="clipped-data">
 <h3>Clipped data<a class="headerlink" href="#clipped-data" title="Link to this heading">#</a></h3>
-<p>The <em>clipped data</em> refers to data that are preprocessed.  The preprocessing steps include several potential operations meant to reduce issues with analyses including autoscaling ( <a class="reference internal" href="_images/icon-autoscale-64.png"><img alt="icon-autoscale" src="_images/icon-autoscale-64.png" style="height: 2ex;" /></a> ) and rescaling to remove negative values.  While it may alter the values of some data points, it does so by improving stability of some processing methods (e.g., PCA and clustering) that are otherwise skewed by extreme outliers or cannot handle negative values.  These outliers often result from point measurement errors or incorrect calibrations related to differences in mineral ablation properties.  These preprocessing data steps are described in greater detail in the preprocessing subsection (<a class="reference internal" href="left_toolbox.html"><span class="doc">Control (Left) Toolbox</span></a>).</p>
+<p>The <em>clipped data</em> refers to data that are preprocessed.  The preprocessing steps include several potential operations meant to reduce issues with analyses including autoscaling ( <a class="reference internal" href="_images/icon-autoscale-64.png"><img alt="icon-autoscale" src="_images/icon-autoscale-64.png" style="height: 2ex;" /></a> ) and rescaling to remove negative values.  While it may alter the values of some data points, it does so by improving stability of some processing methods (e.g., PCA and clustering) that are otherwise skewed by extreme outliers or cannot handle negative values.  These outliers often result from point measurement errors or incorrect calibrations related to differences in mineral ablation properties.  These preprocessing data steps are described in greater detail in the preprocessing subsection (<a class="reference internal" href="left_toolbox.html"><span class="doc">Control Toolbox (Left)</span></a>).</p>
 </section>
 <section id="analysis-data">
 <h3>Analysis data<a class="headerlink" href="#analysis-data" title="Link to this heading">#</a></h3>
-<p>There are three types of <a class="reference internal" href="filtering.html"><span class="doc">Filter</span></a>  than can be applied to exclude data from analyses and geochemical plots.  These include elemental filters (on = <a class="reference internal" href="_images/icon-filter2-64.png"><img alt="icon-filter2" src="_images/icon-filter2-64.png" style="height: 2ex;" /></a>, off = <a class="reference internal" href="_images/icon-filter-64.png"><img alt="icon-filter" src="_images/icon-filter-64.png" style="height: 2ex;" /></a> ), polygon masking (on = <a class="reference internal" href="_images/icon-polygon-new-64.png"><img alt="icon-polygon-new" src="_images/icon-polygon-new-64.png" style="height: 2ex;" /></a>, off = <a class="reference internal" href="_images/icon-polygon-off-64.png"><img alt="icon-polygon-off" src="_images/icon-polygon-off-64.png" style="height: 2ex;" /></a> ), and cluster masking (on = <a class="reference internal" href="_images/icon-mask-dark-64.png"><img alt="icon-mask-dark" src="_images/icon-mask-dark-64.png" style="height: 2ex;" /></a>, off = <a class="reference internal" href="_images/icon-mask-light-64.png"><img alt="icon-mask-light" src="_images/icon-mask-light-64.png" style="height: 2ex;" /></a> ).  It is possible to use any combination of these and turn them on or off as required.  Each are implemented as a simple pixel by pixel mask.  They can be turned on or off by clicking the icon found in the <em>Filter tab</em> on the left and grouped in <em>Data for analysis</em>.  All filters/masks can be turned off by clicking the <a class="reference internal" href="_images/icon-map-64.png"><img alt="icon-map" src="_images/icon-map-64.png" style="height: 2ex;" /></a> button.  Note, the filters will automatically be turned on when they are first created.</p>
+<p>There are three types of filters than can be applied to exclude data from analyses and geochemical plots.  These include elemental filters (on = <a class="reference internal" href="_images/icon-filter2-64.png"><img alt="icon-filter2" src="_images/icon-filter2-64.png" style="height: 2ex;" /></a>, off = <a class="reference internal" href="_images/icon-filter-64.png"><img alt="icon-filter" src="_images/icon-filter-64.png" style="height: 2ex;" /></a> ), polygon masking (on = <a class="reference internal" href="_images/icon-polygon-new-64.png"><img alt="icon-polygon-new" src="_images/icon-polygon-new-64.png" style="height: 2ex;" /></a>, off = <a class="reference internal" href="_images/icon-polygon-off-64.png"><img alt="icon-polygon-off" src="_images/icon-polygon-off-64.png" style="height: 2ex;" /></a> ), and cluster masking (on = <a class="reference internal" href="_images/icon-mask-dark-64.png"><img alt="icon-mask-dark" src="_images/icon-mask-dark-64.png" style="height: 2ex;" /></a>, off = <a class="reference internal" href="_images/icon-mask-light-64.png"><img alt="icon-mask-light" src="_images/icon-mask-light-64.png" style="height: 2ex;" /></a> ).  It is possible to use any combination of these and turn them on or off as required.  Each are implemented as a simple pixel by pixel mask.  They can be turned on or off by clicking the icon found in the <em>Filter tab</em> on the left and grouped in <em>Data for analysis</em>.  All filters/masks can be turned off by clicking the <a class="reference internal" href="_images/icon-map-64.png"><img alt="icon-map" src="_images/icon-map-64.png" style="height: 2ex;" /></a> button.  Note, the filters will automatically be turned on when they are first created.</p>
 <p>The <em>analysis data</em> are used to produce plots and compute analyses; turning filters and masks on or off results in their recomputation.</p>
 </section>
 </section>

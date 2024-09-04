@@ -1,4 +1,5 @@
 import os, re, darkdetect
+from collections import defaultdict
 import pandas as pd
 import numpy as np
 from PyQt5.QtWidgets import (
@@ -9,7 +10,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt, QUrl
 import src.lame_fileio as lameio
 from src.ui.MapImportDialog import Ui_MapImportDialog
-from src.ui.FileImportDialog import Ui_FileImportDialog
+from src.ui.FileSelectorDialog import Ui_FileSelectorDialog
 from lame_helper import BASEDIR, ICONPATH
 
 # Import Tool Dialog
@@ -39,6 +40,9 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         super().__init__(parent)
         self.setupUi(self)
 
+        if parent is None:
+            return
+
         self.parent = parent
 
         if darkdetect.isDark():
@@ -51,6 +55,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         self.toolButtonAddStandard.clicked.connect(self.add_standard)
         self.sample_ids = []
         self.paths = []
+        self.metadata = {'directory_data': pd.DataFrame()}
         
         # Set a message that will be displayed in the status bar
         self.statusBar.showMessage('Ready')
@@ -266,10 +271,11 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         file_name, _ = QFileDialog.getSaveFileName(self, "Save sample metadata", "", "CSV Files (*.csv);;All Files (*)")
         if file_name:
             # read data from QTableWidget and place in DataFrame
-            table_df = self.qtablewidget_to_dataframe(self.tableWidgetMetadata)
+            #self.metadata['directory_data'] = self.qtablewidget_to_dataframe(self.tableWidgetMetadata)
+            self.metadata['directory_data'] = self.tableWidgetMetadata.to_dataframe()
             
             # save DataFrame to CSV
-            table_df.to_csv(file_name, index=False)  # Save DataFrame to CSV without the index
+            self.metadata['directory_data'].to_csv(file_name, index=False)  # Save DataFrame to CSV without the index
             self.statusBar.showMessage("Metadata saved successfully")
 
     def open_directory(self):
@@ -364,7 +370,12 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             self.labelSampleID.setText(self.sample_ids[self.preview_index])
             self.toolButtonPrevSample.setEnabled(True)
             self.toolButtonNextSample.setEnabled(True)
-        
+
+        # create an empty dictionary of metadata for each
+        self.metadata = {'directory_data': self.tableWidgetMetadata.to_dataframe}
+        for sample_id in self.sample_ids:
+            self.metadata[sample_id] = pd.DataFrame()
+
         self.pushButtonImport.setDefault(True)
     
     def populate_la_icp_ms_table(self):
@@ -383,6 +394,8 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                         item = QTableWidgetItem(sample_id)
                         item.setFlags(item.flags() & ~Qt.ItemIsEditable)
                         self.tableWidgetMetadata.setItem(row, col, item)
+                    case 'Select files':
+                        self.add_pushbutton(row, col)
                     case 'Standard':
                         self.add_combobox(row, col, self.standard_list, 0)
                     case 'Line Dir.':
@@ -408,6 +421,13 @@ class MapImporter(QDialog, Ui_MapImportDialog):
     #     le.setValidator(QDoubleValidator)
     #     le.setStyleSheet("text-align: right;")
     #     self.tableWidgetMetadata.setCellWidget(row,col,cb)
+
+    def add_pushbutton(self, row, col):
+        pb = QPushButton()
+        pb.setText("0 files")
+        pb.setToolTip("Click to select files for import.")
+        pb.clicked.connect(lambda: self.select_sample_files(row))
+        self.tableWidgetMetadata.setCellWidget(row, col, pb)
 
     def add_checkbox(self, row, col, state):
         """Adds a check box to a QTableWidget
@@ -532,44 +552,44 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         else:
             return None
 
-    def qtablewidget_to_dataframe(self, table_widget: QTableWidget) -> pd.DataFrame:
-        """Takes the data from a tableWidget and places it into a DataFrame
+    # def qtablewidget_to_dataframe(self, table_widget: QTableWidget) -> pd.DataFrame:
+    #     """Takes the data from a tableWidget and places it into a DataFrame
 
-        Parameters
-        ----------
-        table_widget : QTableWidget
-            Table with data for copying to dataframe.
+    #     Parameters
+    #     ----------
+    #     table_widget : QTableWidget
+    #         Table with data for copying to dataframe.
             
-        Returns
-        -------
-        pd.DataFrame
-            Data frame with data from ``ImportTool.tableWidgetMetadata``
-        """        
-        # Get number of rows and columns in the QTableWidget
-        row_count = table_widget.rowCount()
-        column_count = table_widget.columnCount()
+    #     Returns
+    #     -------
+    #     pd.DataFrame
+    #         Data frame with data from ``ImportTool.tableWidgetMetadata``
+    #     """        
+    #     # Get number of rows and columns in the QTableWidget
+    #     row_count = table_widget.rowCount()
+    #     column_count = table_widget.columnCount()
         
-        # Create a dictionary to store the data with column headers
-        table_data = {table_widget.horizontalHeaderItem(col).text(): [] for col in range(column_count)}
+    #     # Create a dictionary to store the data with column headers
+    #     table_data = {table_widget.horizontalHeaderItem(col).text(): [] for col in range(column_count)}
         
-        # Iterate over all rows and columns to retrieve the data
-        for row in range(row_count):
-            for col in range(column_count):
-                item = table_widget.item(row, col)
-                if item is not None:
-                    table_data[table_widget.horizontalHeaderItem(col).text()].append(item.text())
-                else:
-                    # Check for a widget in the cell
-                    widget = table_widget.cellWidget(row, col)
-                    if widget is not None:
-                        table_data[table_widget.horizontalHeaderItem(col).text()].append(self.extract_widget_data(widget))
-                    else:
-                        table_data[table_widget.horizontalHeaderItem(col).text()].append(None)
+    #     # Iterate over all rows and columns to retrieve the data
+    #     for row in range(row_count):
+    #         for col in range(column_count):
+    #             item = table_widget.item(row, col)
+    #             if item is not None:
+    #                 table_data[table_widget.horizontalHeaderItem(col).text()].append(item.text())
+    #             else:
+    #                 # Check for a widget in the cell
+    #                 widget = table_widget.cellWidget(row, col)
+    #                 if widget is not None:
+    #                     table_data[table_widget.horizontalHeaderItem(col).text()].append(self.extract_widget_data(widget))
+    #                 else:
+    #                     table_data[table_widget.horizontalHeaderItem(col).text()].append(None)
         
-        # Convert the dictionary to a pandas DataFrame
-        df = pd.DataFrame(table_data)
+    #     # Convert the dictionary to a pandas DataFrame
+    #     df = pd.DataFrame(table_data)
         
-        return df
+    #     return df
 
     # def parse_filenames(self, sample_id, file):
     #     """Cleans file names to determine file type and identifier for reading
@@ -655,17 +675,17 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             - file type (either 'matrix', 'line', or None)
             - the extracted analyte, ratio, or line number
         """
-        el_list = ['H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne', 'Na', 'Mg',
-                'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr',
-                'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se', 'Br',
-                'Kr', 'Rb', 'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd',
-                'Ag', 'Cd', 'In', 'Sn', 'Sb', 'Te', 'I', 'Xe', 'Cs', 'Ba', 'La',
-                'Ce', 'Pr', 'Nd', 'Pm', 'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 'Ho', 'Er',
-                'Tm', 'Yb', 'Lu', 'Hf', 'Ta', 'W', 'Re', 'Os', 'Ir', 'Pt', 'Au',
-                'Hg', 'Tl', 'Pb', 'Bi', 'Po', 'At', 'Rn', 'Fr', 'Ra', 'Ac', 'Th',
-                'Pa', 'U', 'Np', 'Pu']
+        # Load the Excel file with element symbols and isotope masses
+        df = pd.read_csv(os.path.join(BASEDIR, 'resources/app_data/isotope_info.csv'))
+        elements = df['symbol'].str.lower().tolist()
+        masses = df['atomic_mass'].astype(str).tolist()
+        
+        # Initialize defaultdict with list
+        isotopes = defaultdict(list)
+        for element, mass_list in zip(elements, masses):
+            isotopes[element].append(mass_list)
 
-        delimiters = [' ', '-', '_', '.']
+        delimiters = r' |-|_|,|\.'
         units = ['CPS', 'cps', 'PPM', 'ppm', 'PPB', 'ppb']
         valid_extensions = ['csv', 'xlsx', 'xls']
 
@@ -675,32 +695,25 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             valid = False
             filetype = None
             fieldtype = None
-            field = None
             unit = None
+            analyte1, analyte2 = None, None
+            lineno = None
 
             # Extract the filename without the directory path
             file = file.split('/')[-1].lower()
-
-            # determine file extension
             extension = file.split('.')[-1]
 
-            # determine if valid file type
-            for ve in valid_extensions:
-                if ve == extension:
-                    valid = True
+            if extension in valid_extensions:
+                valid = True
 
             if not valid:
-                results.append((valid,extension,filetype,fieldtype,field,unit))
+                results.append((valid, extension, filetype, fieldtype, analyte1, analyte2, unit))
                 continue
 
-            # remove extension
-            filename = file.replace('.'+extension,'')
-
-            # Remove the sample_id from the filename so it doesn't interfere with parsing other portions
-            filename = filename.replace(sample_id, '')
+            # Remove extension and sample_id
+            filename = file.replace('.' + extension, '').replace(sample_id, '')
 
             # Remove units
-            unit = None
             for u in units:
                 if u in filename:
                     unit = u
@@ -709,39 +722,80 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             # Check if matrix file type
             if 'matrix' in filename:
                 filetype = 'matrix'
-                filename = filename.replace(filetype,'')
+                filename = filename.replace('matrix', '')
 
-            # At this point, the only additional data we need is a line number for filetype == 'line' or
-            # an analyte for filetype == 'matrix'.  There could still be other things, but we'll ignore them.
+            # Step 1: Split the filename by the specified delimiters
+            parts = re.split(delimiters, filename)
 
-            # Remove delimiters
-            for d in delimiters:
-                filename = filename.replace(d, '')
+            # Step 2: Identify and handle combined element-isotope patterns (e.g., 'hf176')
+            possible_elements = []
+            possible_masses = []
 
-            text = ''.join(re.findall('[a-zA-Z]', filename))
-            
-            # If all numbers, probably a line number
-            if filename.isdigit():
-                filetype = 'line'
-                valid = True
-                parsed_value = fid
-            
-            # If it includes text, see if it matches the list of element symbols
-            elif text in el_list or '/' in filename.lower():
-                filetype = 'matrix'
-                valid = True
-                parsed_value = text
-            
-            # If it matches neither, it's probably not a valid file
-            else:
+            for part in parts:
+                if any(char.isdigit() for char in part) and any(char.isalpha() for char in part):
+                    # Part contains both letters and numbers, split them
+                    split_parts = re.findall(r'[A-Za-z]+|\d+', part)
+                    for sp in split_parts:
+                        if sp.isdigit():
+                            possible_masses.append(sp)
+                        elif sp in isotopes:
+                            possible_elements.append(sp)
+                elif part.isdigit():
+                    possible_masses.append(part)
+                elif part in isotopes:
+                    possible_elements.append(part)
+
+            # Initialize analytes
+            analyte1 = None
+            analyte2 = None
+
+            # Check if there are numbers and elements to pair
+            if possible_elements and possible_masses:
+                used_masses = set()  # Track used masses to avoid duplicate use
+                for element in possible_elements:
+                    valid_isotopes = isotopes.get(element, [])
+                    for number in possible_masses:
+                        if number in valid_isotopes and number not in used_masses:
+                            if not analyte1:
+                                analyte1 = element + number
+                                used_masses.add(number)
+                            elif not analyte2:
+                                analyte2 = element + number
+                                used_masses.add(number)
+                            else:
+                                # Break if both analytes are assigned
+                                break
+                    if analyte1 and analyte2:
+                        break
+
+            # Debugging: Print analytes
+            print(f"Analyte 1: {analyte1}")
+            print(f"Analyte 2: {analyte2}")
+
+            # If all numbers, probably a line number            
+            if filetype is None and analyte1 is None and analyte2 is None:
+                if possible_masses:
+                    filetype = 'line'
+                    lineno = possible_masses[0]
+
+            if analyte2 is not None:
+                analyte1 = analyte1.capitalize()
+                analyte2 = analyte2.capitalize()
+                fieldtype = 'Ratio'
+            elif analyte1 is not None:
+                fieldtype = 'Analyte'
+
+            # Final validity check
+            if filetype is None:
                 valid = False
-                filetype = None
-                fieldtype = None
-                field = None
-                unit = None
+            else:
+                valid = True
 
-            results.append((valid,extension,filetype,fieldtype,field,unit))
-        
+            if valid and lineno is not None:
+                results.append((valid, extension, filetype, fieldtype, lineno, None, unit))
+            else:
+                results.append((valid, extension, filetype, fieldtype, analyte1, analyte2, unit))
+
         return results
 
 
@@ -753,7 +807,8 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         self.ok = False
 
         data_type = self.comboBoxDataType.currentText()
-        table_df = self.qtablewidget_to_dataframe(self.tableWidgetMetadata)
+        #self.metadata['directory_data'] = self.qtablewidget_to_dataframe(self.tableWidgetMetadata)
+        self.metadata['directory_data'] = self.tableWidgetMetadata.to_dataframe()
 
         if not self.checkBoxSaveToRoot.isChecked():
             save_path = QFileDialog.getExistingDirectory(None, "Select a folder to Save imports", options=QFileDialog.ShowDirsOnly)
@@ -767,14 +822,14 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                 method = self.comboBoxMethod.currentText()
                 match method:
                     case 'quadrupole':
-                        self.import_la_icp_ms_data(table_df, save_path)
+                        self.import_la_icp_ms_data(self.metadata['directory_data'], save_path)
                     case 'TOF':
                         # for now, require iolite or xmaptools output.  In future, allow for 
                         # TOF raw format.
-                        self.import_la_icp_ms_data(table_df, save_path)
+                        self.import_la_icp_ms_data(self.metadata['directory_data'], save_path)
                         #df = pd.read_hdf(file_path, key='dataset_1')
                     case 'SF':
-                        self.import_la_icp_ms_data(table_df, save_path)
+                        self.import_la_icp_ms_data(self.metadata['directory_data'], save_path)
             case 'MLA':
                 pass
             case 'XRF':
@@ -787,15 +842,13 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         if self.ok:
             self.parent.open_directory(dir_name=self.root_path)
         
-    def import_la_icp_ms_data(self, table_df, save_path):
+    def import_la_icp_ms_data(self, save_path):
         """Reads LA-ICP-MS data into a DataFrame
 
         _extended_summary_
 
         Parameters
         ----------
-        table_df : pandas.DataFrame
-            Input parameters and options
         save_path : str
             Location to save DataFrame reformatted into CSV for use in LaME
         """        
@@ -819,16 +872,13 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             # Use a list comprehension to apply the parse_filenames method to each file in the file_list
             #parsed_results = [self.parse_filenames(self.sample_ids[i], f) for f in file_list]
 
-            results = self.parse_filenames(self.sample_ids[i], file_list)
-
-            # Extract the results
-            valid_list, ftype_list, fid_list = zip(*parsed_results)  # This will give you three lists
+            parsed_results = self.parse_filenames(self.sample_ids[i], file_list)
 
             # Show the dialog to confirm or edit the file import details
-            dialog = FileImportData(file_list, analyte_guesses)
+            dialog = FileSelectData(self.sample_ids[i], file_list, parsed_results, parent=self)
             if dialog.exec_() == QDialog.Accepted:
                 # Retrieve the updated data from the dialog
-                import_data = dialog.get_data()
+                self.metadata[self.sample_ids[i]] = dialog.get_data()
 
                 # Process the selected files
                 for filename, analyte, units, import_file in import_data:
@@ -840,25 +890,25 @@ class MapImporter(QDialog, Ui_MapImportDialog):
 
         for i,path in enumerate(self.paths):
             # if Import is False, skip sample
-            if not table_df['Import'][i]:
+            if not self.metadata['directory_data']['Import'][i]:
                 continue
 
             sample_id = self.sample_ids[i]
 
             # swapping x and y is handled at end
-            swap_xy = table_df['Swap XY'][i]
+            swap_xy = self.metadata['directory_data']['Swap XY'][i]
             
             # reversing is handled at end
-            reverse_x = table_df['X\nreverse'][i]
-            reverse_y = table_df['Y\nreverse'][i]
+            reverse_x = self.metadata['directory_data']['X\nreverse'][i]
+            reverse_y = self.metadata['directory_data']['Y\nreverse'][i]
 
-            dx = table_df['Spot size\n(µm)'][i]
+            dx = self.metadata['directory_data']['Spot size\n(µm)'][i]
             if dx is None:
                 dx = 1
             else:
                 dx = float(dx)
-            sweep_time = table_df['Sweep\n(s)'][i]
-            speed = table_df['Speed\n(µm/s)'][i]
+            sweep_time = self.metadata['directory_data']['Sweep\n(s)'][i]
+            speed = self.metadata['directory_data']['Speed\n(µm/s)'][i]
             if speed is None or sweep_time is None:
                 dy = dx
             else:
@@ -1101,40 +1151,125 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         print(f"Processing file: {filepath} with analyte {analyte} and units {units}")
         # Implement your file handling logic here
 
-class FileImportData(QDialog, Ui_FileImportDialog):
-    def __init__(self, file_list, analyte_guesses, parent=None):
+    def select_sample_files(self, row):
+        # get current dataframe
+        #self.metadata['directory_data'] = self.qtablewidget_to_dataframe(self.tableWidgetMetadata)
+        self.metadata['directory_data'] = self.tableWidgetMetadata.to_dataframe()
+
+        directory = self.paths[row]
+
+        # Get a list of files in the directory
+        file_list = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
+
+        # Guess analytes from filenames (implement your logic here)
+        #analyte_guesses = [self.guess_analyte_from_filename(f) for f in file_list]
+
+        # Use a list comprehension to apply the parse_filenames method to each file in the file_list
+        #parsed_results = [self.parse_filenames(self.sample_ids[i], f) for f in file_list]
+
+        parsed_results = self.parse_filenames(self.sample_ids[row], file_list)
+
+        # Show the dialog to confirm or edit the file import details
+        dialog = FileSelectData(self.sample_ids[row], file_list, parsed_results, parent=self)
+        if dialog.exec_() == QDialog.Accepted:
+            # Retrieve the updated data from the dialog
+            self.metadata[self.sample_ids[row]] = dialog.get_data()
+        else:
+            return
+
+        import_count = sum(self.metadata[self.sample_ids[row]]['Import'])
+
+        # Get the column index for "Sample files"
+        column_index = None
+        for col in range(self.tableWidgetMetadata.columnCount()):
+            if self.tableWidgetMetadata.horizontalHeaderItem(col).text() == "Select files":
+                column_index = col
+
+                # Get the button widget in the specific cell
+                widget = self.tableWidgetMetadata.cellWidget(row, column_index)
+                
+                if isinstance(widget, QPushButton):
+                    # Update the button's text with the import_count
+                    widget.setText(f"{import_count} files")
+
+                break
+
+        # Check if the column was found
+        if column_index is None:
+            print("Column 'Sample files' not found.")
+                
+
+            # # Process the selected files
+            # for filename, analyte, units, import_file in self.metadata[self.sample_ids[row]]:
+            #     if import_file:
+            #         # Update the paths and file import logic here
+            #         file_path = os.path.join(directory, filename)
+            #         self.process_file(file_path, analyte, units)
+            #         num_imported += 1
+
+class FileSelectData(QDialog, Ui_FileSelectorDialog):
+    def __init__(self, sample_id, file_list, parsed_results, parent=None):
         super().__init__(parent)
         self.setupUi(self)
 
         self.parent = parent
 
+        self.lineEditDirectory.setText(self.parent.root_path+"/"+sample_id)
+
+        valid_extensions = ['csv', 'xlsx', 'xls']
+
+        # Filter file_list and parsed_results based on valid extensions
+        filtered_files = []
+        filtered_results = []
+
+        for file, result in zip(file_list, parsed_results):
+            # Get the file extension (assume the extension is after the last dot in the filename)
+            extension = file.split('.')[-1].lower()
+
+            if extension in valid_extensions:
+                filtered_files.append(file)
+                filtered_results.append(result)
+
         # Initialize the table widget
-        self.tableWidget.setRowCount(len(file_list))
+        self.tableWidgetFileMetadata.setRowCount(len(filtered_files))
 
         # Populate the table with data
-        for row, filename in enumerate(file_list):
+        for row, (filename, result) in enumerate(zip(filtered_files, filtered_results)):
             # Checkbox for import
             import_checkbox = QCheckBox()
-            import_checkbox.setChecked(True)
-            self.tableWidget.setCellWidget(row, 0, import_checkbox)
+            import_checkbox.setStyleSheet("text-align: center; margin-left:25%; margin-right:25%;")
+            import_checkbox.setChecked(result[0])
+            self.tableWidgetFileMetadata.setCellWidget(row, 0, import_checkbox)
 
             # Filename (non-editable)
             filename_item = QTableWidgetItem(filename)
             filename_item.setFlags(filename_item.flags() & ~Qt.ItemIsEditable)
-            self.tableWidget.setItem(row, 1, filename_item)
+            self.tableWidgetFileMetadata.setItem(row, 1, filename_item)
 
             # Analyte Type ComboBox (editable)
             analyte_type_combo = QComboBox()
             analyte_type_combo.addItems(['Analyte', 'Ratio', 'Computed'])
-            self.tableWidget.setCellWidget(row, 2, analyte_type_combo)
+            analyte_type_combo.setCurrentText(result[3])
+            self.tableWidgetFileMetadata.setCellWidget(row, 2, analyte_type_combo)
 
             # Guessed analyte (editable)
-            analyte_item = QTableWidgetItem(analyte_guesses[row])
-            self.tableWidget.setItem(row, 3, analyte_item)
+            analyte_item1 = QTableWidgetItem(result[4])
+            self.tableWidgetFileMetadata.setItem(row, 3, analyte_item1)
+
+            analyte_item2 = QTableWidgetItem(result[5])
+            self.tableWidgetFileMetadata.setItem(row, 4, analyte_item2)
 
             # Units (editable)
             units_item = QTableWidgetItem("Unit")  # Default or guessed units
-            self.tableWidget.setItem(row, 4, units_item)
+            units_item.setText(result[6])
+            self.tableWidgetFileMetadata.setItem(row, 5, units_item)
+
+        header = self.tableWidgetFileMetadata.horizontalHeader()
+        for col in range(self.tableWidgetFileMetadata.columnCount()):
+            if self.tableWidgetFileMetadata.horizontalHeaderItem(col).text() == 'Filename':
+                header.setSectionResizeMode(col,QHeaderView.Stretch)
+            else:
+                header.setSectionResizeMode(col,QHeaderView.ResizeToContents)
 
         # Add buttons for OK and Cancel
         self.buttonBox.ok_button = QPushButton("OK")
@@ -1146,11 +1281,6 @@ class FileImportData(QDialog, Ui_FileImportDialog):
 
     def get_data(self):
         """Return the updated information from the table."""
-        data = []
-        for row in range(self.table.rowCount()):
-            filename = self.table.item(row, 0).text()
-            analyte = self.table.item(row, 1).text()
-            units = self.table.item(row, 2).text()
-            import_file = self.table.cellWidget(row, 3).isChecked()
-            data.append((filename, analyte, units, import_file))
+        data = self.tableWidgetFileMetadata.to_dataframe()
+
         return data

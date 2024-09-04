@@ -2520,7 +2520,7 @@ class Ui_MainWindow(object):
         self.labelIsotope3 = QtWidgets.QLabel(self.scrollAreaWidgetContents_2)
         self.labelIsotope3.setObjectName("labelIsotope3")
         self.gridLayoutDatingParams.addWidget(self.labelIsotope3, 2, 0, 1, 1)
-        self.lineEditDecayConstantUncertainty = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_2)
+        self.lineEditDecayConstantUncertainty = cw.CustomLineEdit(self.scrollAreaWidgetContents_2)
         self.lineEditDecayConstantUncertainty.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.lineEditDecayConstantUncertainty.setObjectName("lineEditDecayConstantUncertainty")
         self.gridLayoutDatingParams.addWidget(self.lineEditDecayConstantUncertainty, 3, 2, 1, 1)

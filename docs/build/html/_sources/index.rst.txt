@@ -7,7 +7,7 @@
 
    <script type="text/javascript" src="_static/custom.js"></script>
 
-Welcome to Laser Map Explorer (*LaME*)!
+Welcome to 
 ***************************************
 
 Laser Map Explorer (*LaME*) is an innovative software tool developed by researchers in the University of Adelaide, Earth Sciences Department.  The work is supported by the MinEx CRC.  *LaME* is designed for processing and visualizing multi-analyte maps of minerals, whether it be LA-ICP-MS maps of isotopes, XRF maps of elements, or some other imaging method. The software aims to simplify the complex task of handling large volumes of map-form data via an intuitive graphical user interface.

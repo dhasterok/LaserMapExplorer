@@ -102,7 +102,7 @@
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../resources.qrc">
           <normaloff>:/resources/icons/icon-question-64.svg</normaloff>:/resources/icons/icon-question-64.svg</iconset>
         </property>
         <property name="iconSize">
@@ -250,7 +250,7 @@
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../resources.qrc">
           <normaloff>:/resources/icons/icon-add-directory-64.svg</normaloff>:/resources/icons/icon-add-directory-64.svg</iconset>
         </property>
         <property name="iconSize">
@@ -308,7 +308,7 @@
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../resources.qrc">
           <normaloff>:/resources/icons/icon-accept-64.svg</normaloff>:/resources/icons/icon-accept-64.svg</iconset>
         </property>
         <property name="iconSize">
@@ -398,7 +398,7 @@
           </column>
           <column>
            <property name="text">
-            <string>Scan Axis</string>
+            <string>Scan axis</string>
            </property>
           </column>
           <column>
@@ -536,7 +536,7 @@ reverse</string>
              <string>left</string>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="../resources.qrc">
               <normaloff>:/resources/icons/icon-back-arrow-64.svg</normaloff>:/resources/icons/icon-back-arrow-64.svg</iconset>
             </property>
             <property name="iconSize">
@@ -596,7 +596,7 @@ reverse</string>
              <string>right</string>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="../resources.qrc">
               <normaloff>:/resources/icons/icon-forward-arrow-64.svg</normaloff>:/resources/icons/icon-forward-arrow-64.svg</iconset>
             </property>
             <property name="iconSize">
@@ -688,6 +688,8 @@ reverse</string>
    </layout>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="../resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

@@ -31,10 +31,12 @@ class MapImporter(QDialog, Ui_MapImportDialog):
 
     Parameters
     ----------
-    QtWidgets : QMainWindow
-        Window for import tool
-    Ui_ImportDialog : Ui_ImportDialog
-        Import window design
+    QDialog : QDialog
+        Inherits the properties of the QDialog
+    Ui_MapImportDialog : UI
+        UI interface design.  Note this interface was created in QtCreator, though it requires replacing
+        of ``QtWidgets.TableWidget`` with ``CustomWidgets.CustomTableWidget``.  The custom widget adds a
+        ``.to_dataframe()`` simplify data extraction tables (especially complex tables).
     """    
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -389,7 +391,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             for row, sample_id in enumerate(self.sample_ids):
                 match col_name:
                     case 'Import':
-                        self.add_checkbox(row, col, True)
+                        self.add_checkbox(row, col, False)
                     case 'Sample ID':
                         item = QTableWidgetItem(sample_id)
                         item.setFlags(item.flags() & ~Qt.ItemIsEditable)
@@ -398,7 +400,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                         self.add_pushbutton(row, col)
                     case 'Standard':
                         self.add_combobox(row, col, self.standard_list, 0)
-                    case 'Line Dir.':
+                    case 'Scan axis':
                         self.add_combobox(row,col, ['X', 'Y'], 0)
                     case 'X\nreverse' | 'Y\nreverse' | 'Swap XY':
                         self.add_checkbox(row, col, False)
@@ -552,111 +554,6 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         else:
             return None
 
-    # def qtablewidget_to_dataframe(self, table_widget: QTableWidget) -> pd.DataFrame:
-    #     """Takes the data from a tableWidget and places it into a DataFrame
-
-    #     Parameters
-    #     ----------
-    #     table_widget : QTableWidget
-    #         Table with data for copying to dataframe.
-            
-    #     Returns
-    #     -------
-    #     pd.DataFrame
-    #         Data frame with data from ``ImportTool.tableWidgetMetadata``
-    #     """        
-    #     # Get number of rows and columns in the QTableWidget
-    #     row_count = table_widget.rowCount()
-    #     column_count = table_widget.columnCount()
-        
-    #     # Create a dictionary to store the data with column headers
-    #     table_data = {table_widget.horizontalHeaderItem(col).text(): [] for col in range(column_count)}
-        
-    #     # Iterate over all rows and columns to retrieve the data
-    #     for row in range(row_count):
-    #         for col in range(column_count):
-    #             item = table_widget.item(row, col)
-    #             if item is not None:
-    #                 table_data[table_widget.horizontalHeaderItem(col).text()].append(item.text())
-    #             else:
-    #                 # Check for a widget in the cell
-    #                 widget = table_widget.cellWidget(row, col)
-    #                 if widget is not None:
-    #                     table_data[table_widget.horizontalHeaderItem(col).text()].append(self.extract_widget_data(widget))
-    #                 else:
-    #                     table_data[table_widget.horizontalHeaderItem(col).text()].append(None)
-        
-    #     # Convert the dictionary to a pandas DataFrame
-    #     df = pd.DataFrame(table_data)
-        
-    #     return df
-
-    # def parse_filenames(self, sample_id, file):
-    #     """Cleans file names to determine file type and identifier for reading
-
-    #     Removes sample names, file types, units and delimiters from file names.  If a valid file type, then
-    #     the remaining string should be the line number, element or isotope symbol.
-
-    #     Parameters
-    #     ----------
-    #     sample_id : str
-    #         Current sample ID
-    #     files : list of str
-    #         List of file names for *sample_id*
-
-    #     Returns
-    #     -------
-    #     list, list, list
-    #         Returns a list of boolean values ``True`` is believed to be a valid file format and ``False`` is thought to be invalid.
-    #         The second list includes the type of file that it expects to read, either ``line`` for all analytes for each scan line or
-    #         ``matrix`` for each analyte stored as a matrix in a separate file.  The third list is the file name stripped down to line
-    #         numbers or analytes.
-    #     """        
-    #     el_list =['H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne', 'Na', 'Mg',
-    #             'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr',
-    #             'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se', 'Br',
-    #             'Kr', 'Rb', 'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd',
-    #             'Ag', 'Cd', 'In', 'Sn', 'Sb', 'Te', 'I', 'Xe', 'Cs', 'Ba', 'La',
-    #             'Ce', 'Pr', 'Nd', 'Pm', 'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 'Ho', 'Er',
-    #             'Tm', 'Yb', 'Lu', 'Hf', 'Ta', 'W', 'Re', 'Os', 'Ir', 'Pt', 'Au',
-    #             'Hg', 'Tl', 'Pb', 'Bi', 'Po', 'At', 'Rn', 'Fr', 'Ra', 'Ac', 'Th',
-    #             'Pa', 'U', 'Np', 'Pu']
-
-    #     delimiters = [' ','-','_','.']
-    #     units = ['CPS','cps','PPM','ppm','PPB','ppb','PPT','ppt','Ma','MA']
-    #     formats = ['matrix','csv','xlsx','xls']
-
-    #     # remove sample_id from filename
-    #     fid = file.replace(sample_id,'')
-
-    #     # remove delimiters
-    #     for d in delimiters:
-    #         fid = fid.replace(d,'')
-
-    #     # remove units
-    #     for u in units:
-    #         fid = fid.replace(u,'')
-
-    #     for fmt in formats:
-    #         fid = fid.replace(fmt,'')
-
-    #     text = ''.join(re.findall('[a-zA-Z]',fid))
-    #     # if all numbers, probably a line number
-    #     if fid.isdigit():
-    #         ftype = 'line'            
-    #         valid = True
-    #     # if includes text, see if it matches the list of element symbols
-    #     elif text in el_list:
-    #         ftype = 'matrix'
-    #         valid = True
-    #     # probably not a valid file name
-    #     else:
-    #         ftype = None
-    #         fid = None
-    #         valid = False
-
-    #     return valid, ftype, fid
-
     def parse_filenames(self, sample_id, files):
         """Parses a list of filenames to predict file type and extract analyte, unit, and line number information.
 
@@ -798,7 +695,6 @@ class MapImporter(QDialog, Ui_MapImportDialog):
 
         return results
 
-
     def import_data(self): 
         """Import data associated with each *Sample Id* using metadata to define important structural parameters
 
@@ -894,6 +790,8 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                 continue
 
             sample_id = self.sample_ids[i]
+
+            # scan axis
 
             # swapping x and y is handled at end
             swap_xy = self.metadata['directory_data']['Swap XY'][i]
@@ -1152,6 +1050,19 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         # Implement your file handling logic here
 
     def select_sample_files(self, row):
+        """Calls ``FileSelectDialog`` for the user to select files for import and to update metadata.
+
+        Executes when a push button in the *Select file* column of ``MapImporter.tableWidgetMetadata``.
+        When the user accepts the state of the table in ``FileSelectDialog``, the text of the push button
+        updates with the number of files to import for the sample and changes the Import check box to ``True``
+        the number of files selected for import is greater than 0 and ``False`` otherwise.
+
+        Parameters
+        ----------
+        row : int
+            Row number associated with selected push button in ``MapImporter.tableWidgetMetadata``.
+        """
+        sample_id = self.sample_ids[row]
         # get current dataframe
         #self.metadata['directory_data'] = self.qtablewidget_to_dataframe(self.tableWidgetMetadata)
         self.metadata['directory_data'] = self.tableWidgetMetadata.to_dataframe()
@@ -1161,54 +1072,72 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         # Get a list of files in the directory
         file_list = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
 
-        # Guess analytes from filenames (implement your logic here)
-        #analyte_guesses = [self.guess_analyte_from_filename(f) for f in file_list]
-
-        # Use a list comprehension to apply the parse_filenames method to each file in the file_list
-        #parsed_results = [self.parse_filenames(self.sample_ids[i], f) for f in file_list]
-
-        parsed_results = self.parse_filenames(self.sample_ids[row], file_list)
+        # Guess the analytes from filenames and allow user to change them and select files
+        parsed_results = self.parse_filenames(sample_id, file_list)
 
         # Show the dialog to confirm or edit the file import details
-        dialog = FileSelectData(self.sample_ids[row], file_list, parsed_results, parent=self)
+        dialog = FileSelectData(sample_id, file_list, parsed_results, parent=self)
         if dialog.exec_() == QDialog.Accepted:
             # Retrieve the updated data from the dialog
-            self.metadata[self.sample_ids[row]] = dialog.get_data()
+            self.metadata[sample_id] = dialog.get_data()
         else:
             return
 
-        import_count = sum(self.metadata[self.sample_ids[row]]['Import'])
+        # Number of files in the sample directory to import
+        import_count = sum(self.metadata[sample_id]['Import'])
 
         # Get the column index for "Sample files"
-        column_index = None
         for col in range(self.tableWidgetMetadata.columnCount()):
-            if self.tableWidgetMetadata.horizontalHeaderItem(col).text() == "Select files":
-                column_index = col
+            col_name = self.tableWidgetMetadata.horizontalHeaderItem(col).text()
+            match col_name:
+                case 'Import':
+                    # Get the button widget in the specific cell
+                    widget = self.tableWidgetMetadata.cellWidget(row, col)
+                    
+                    if isinstance(widget, QCheckBox):
+                        # Update the button's text with the import_count
+                        widget.setChecked(import_count > 0)
+                case 'Select files':
+                    # Get the button widget in the specific cell
+                    widget = self.tableWidgetMetadata.cellWidget(row, col)
+                    
+                    if isinstance(widget, QPushButton):
+                        # Update the button's text with the import_count
+                        widget.setText(f"{import_count} files")
+                case _:
+                    pass
 
-                # Get the button widget in the specific cell
-                widget = self.tableWidgetMetadata.cellWidget(row, column_index)
-                
-                if isinstance(widget, QPushButton):
-                    # Update the button's text with the import_count
-                    widget.setText(f"{import_count} files")
-
-                break
-
-        # Check if the column was found
-        if column_index is None:
-            print("Column 'Sample files' not found.")
-                
-
-            # # Process the selected files
-            # for filename, analyte, units, import_file in self.metadata[self.sample_ids[row]]:
-            #     if import_file:
-            #         # Update the paths and file import logic here
-            #         file_path = os.path.join(directory, filename)
-            #         self.process_file(file_path, analyte, units)
-            #         num_imported += 1
 
 class FileSelectData(QDialog, Ui_FileSelectorDialog):
+    """
+
+    _extended_summary_
+
+    Parameters
+    ----------
+    QDialog : QDialog
+        Inherits the properties of the QDialog
+    Ui_FileSelectorDialog : UI
+        UI interface design.  Note this interface was created in QtCreator, though it requires replacing
+        of ``QtWidgets.TableWidget`` with ``CustomWidgets.CustomTableWidget``.  The custom widget adds a
+        ``.to_dataframe()`` simplify data extraction tables (especially complex tables).
+    """    
     def __init__(self, sample_id, file_list, parsed_results, parent=None):
+        """Initializes a file selection dialog.
+
+        Use the file selection dialog to pick the files for import and correcting parsing errors of individual files.
+
+        Parameters
+        ----------
+        sample_id : str
+            Sample id.
+        file_list : list
+            A list of files within the sample directory.
+        parsed_results : list
+            A multidimensional list of metadata and parsed information from the filenames in file_list.
+        parent : _type_, optional
+            Parent object, by default None
+        """        
         super().__init__(parent)
         self.setupUi(self)
 

@@ -301,18 +301,18 @@ class Ui_MapImportDialog(object):
         item = self.tableWidgetMetadata.horizontalHeaderItem(3)
         item.setText(_translate("MapImportDialog", "Standard"))
         item = self.tableWidgetMetadata.horizontalHeaderItem(4)
-        item.setText(_translate("MapImportDialog", "Swap XY"))
+        item.setText(_translate("MapImportDialog", "Scan axis"))
         item = self.tableWidgetMetadata.horizontalHeaderItem(5)
+        item.setText(_translate("MapImportDialog", "Swap XY"))
+        item = self.tableWidgetMetadata.horizontalHeaderItem(6)
         item.setText(_translate("MapImportDialog", "X\n"
 "reverse"))
-        item = self.tableWidgetMetadata.horizontalHeaderItem(6)
+        item = self.tableWidgetMetadata.horizontalHeaderItem(7)
         item.setText(_translate("MapImportDialog", "Y\n"
 "reverse"))
-        item = self.tableWidgetMetadata.horizontalHeaderItem(7)
+        item = self.tableWidgetMetadata.horizontalHeaderItem(8)
         item.setText(_translate("MapImportDialog", "Spot size\n"
 "(µm)"))
-        item = self.tableWidgetMetadata.horizontalHeaderItem(8)
-        item.setText(_translate("MapImportDialog", "Line Dim."))
         item = self.tableWidgetMetadata.horizontalHeaderItem(9)
         item.setText(_translate("MapImportDialog", "Sweep\n"
 "(s)"))

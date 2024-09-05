@@ -1,15 +1,15 @@
 Export Formats
-==============
+**************
 
-The data used to produce a plot can be exported by clicking the save button (|icon-save|) from the central plot viewer.  The exported file ...
+The data used to produce a plot can be exported by clicking the save button (|icon-save|) from the central plot viewer.  
 
 Polygon Data
-------------
-Polygon locations are exported by clicking the save button (|icon-save|) below the *Polygon table* from the left toolbox *Filter* tab.  The exported file ...
+============
+Polygon locations are exported by clicking the save button (|icon-save|) below the *Polygon table* from the left toolbox *Filter* tab.  
 
 
 Profile Data
-------------
+============
 Profile data are exported by clicking the save button (|icon-save|) on the *Profile* tab in the lower pane.  The exported file will be a csv file with the following format:
 
 Line 1 - Averaging radius (set by ``Point radius``)

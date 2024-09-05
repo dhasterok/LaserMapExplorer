@@ -3,14 +3,25 @@ The Basics
 
 GUI Layout
 ==========
-LaME's user interface is organized into four panels:
+LaME's user interface is organized into five panels:
 
-* left, toolbox with functions for plotting and analysis
-* right, toolbox with a plot selection tree, plot styles, and a calculator for creating custom fields
-* center, plot viewer tabs for single plots, multiple plots, and a quick view of all fields
-* bottom, tabs for notes, selected filters, and profile plots
+<<<<<<< HEAD
+* Top: File menu and main toolbar with frequently used functions
+* Left: Toolbox with functions for plotting and analysis
+* Right: Toolbox with plot selection tree, plot styles, and calculator for custom fields
+* Center: Plot viewer tabs for single plots, multiple plots, and quick view of all fields
+* Bottom: Tabs for notes, selected filters, and profile plots
 
-Once LaME starts, you will need to load a directory, either from the file menu or toolbar ( |icon-add-directory| ).  You can load a directory with a single sample or a directory with multiple samples, each in their own subdirectory.  See :doc:`import` for file specifications that LaME can handle.
+To begin using LaME, load a directory either from the file menu or the main toolbar (|icon-add-directory|).  You can load a directory with a single sample or multiple samples, each in their own subdirectory.  See :doc:`import` for file specifications that LaME can handle.
+=======
+* Main Toolbar (Top) : File menu and main toolbar with frequently used functions
+* Control Toolbox (Left) : Functions for plotting and analysis
+* Plot and Property (Right) Toolbox: Plot selection tree, plot styles, and calculator for custom fields
+* Plot Window (Center): Plot viewer tabs for single plots, multiple plots, and quick view of all fields
+* Lower Tabs: Tabs for notes, selected filters, and profile plots
+
+To begin using *LaME*, load a directory either from the *File Menu* or the *Main Toolbar* (|icon-add-directory|). You can load a directory with a single sample or multiple samples, each in their own subdirectory. See :doc:import for file specifications that LaME can handle.
+>>>>>>> temp-branch
 
 .. figure:: _static/screenshots/LaME_Initial_Window.png
     :align: center
@@ -21,32 +32,47 @@ Once LaME starts, you will need to load a directory, either from the file menu o
 Loading Data
 ============
 
-Data can be loaded into *LaME* using a variety of methods.  If you haven't loaded a sample previously, you will need to use the :doc:`import`.  The imported sample should be automatically added to the *Samples and Fields* sample list combobox.  If you have previously loaded the data, you can load a saved session, a single sample, or a directory of samples from the *Menubar* or *File* menu.
+<<<<<<< HEAD
+Data can be loaded into *LaME* using various methods.  If you haven't loaded a sample previously, use the :doc:`import`.  The imported sample should be automatically added to the top *Toolbar* sample list combobox.  If you have previously loaded the data, you can load a saved session, a single sample, or a directory of samples from the *File* menu.
+=======
+Data can be loaded into *LaME* using various methods.  If you haven't loaded a sample previously, use the :doc:`import`.  The imported sample should be automatically added to the *Main Toolbar* sample list dropdown.  If you have previously loaded the data, you can load a saved session, a single sample, or a directory of samples from the *File Menu*.
+>>>>>>> temp-branch
 
 Where to Start
 ==============
 
-Once a directory is loaded, changing samples is easy.  From the *Samples sand Fields* tab, use the sample dropdown to select the desired sample.  All work on previous samples will be stored and any images can be recalled from the *Plot Selector* in the right panel.
+<<<<<<< HEAD
+Once a directory is loaded, changing samples is easy.  From the top *Toolbar*, use the sample dropdown to select the desired sample.  All work on previous samples will be stored and any images can be recalled from the *Plot Selector* in the right panel.
 
-Use Isotope Selector ( |icon-atom| ) to choose the fields to be used for analysis, including ratios between elements/isotopes.  Generally the more isotopes selected for analysis, the better.  To aid selection of ratios, the background of the *Analyte Selector* tool are the correlation coefficients between every pair of fields (Figure 1).  When the sample first loads, all isotopes are selected (highlighted in yellow).  To select or deselect an isotope, click on the diagonal corresponding to the isotope.  To select or deselect a ratios, simply by click on the row and column corresponding to the pair.  The column corresponds to the numerator and the row to the denominator of the ratio.  Once selected, the ratio will be highlighed in yellow in the table and be added to the selection list on the right.  When finished, click *Done*.
+Use Analyte Selector ( |icon-atom| ) to choose the fields for analysis, including ratios between elements/analytes.  Generally the more analytes selected for analysis, the better.  To aid selection of ratios, the background of the *Analyte Selector* tool are the correlation coefficients between every pair of fields.  
+=======
+Once a directory is loaded, changing samples is easy.  From the *Main Toolbar*, use the sample list dropdown to select the desired sample.  All work on previous samples will be stored and any images can be recalled from the *Plot Selector* in the *Plot and Property Toolbox*.
 
-To load a previously saved set of isotopes and ratios, click *Load Selection*.
+Use *Analyte Selector* ( |icon-atom| ) to choose the fields for analysis, including ratios between elements/analytes.  Generally the more analytes selected for analysis, the better.  To aid selection of ratios, the background of the *Analyte Selector* are the correlation coefficients between every pair of fields.  
+>>>>>>> temp-branch
+When the sample first loads, all analytes are selected (highlighted in yellow).  To select or deselect an analyte, click on the diagonal corresponding to the analyte.  To select or deselect a ratios, click on the row and column corresponding to the pair.  The column corresponds to the numerator and the row to the denominator of the ratio.  Once selected, the ratio will be highlighted in yellow in the table and be added to the selection list on the right.  When finished, click *Done*.
+
+To load a previously saved set of analytes and ratios, click *Load Selection*.
 
 .. figure:: _static/screenshots/LaME_Analyte_Selector.png
     :align: center
     :alt: isotope selection tool
 
-    Isotope selection tool, with isotopes and ratios selected.
+    Analyte selection tool, with analytes and ratios selected.
 
-Stucture of stored data
+Structure of stored data
+<<<<<<< HEAD
 =======================
+=======
+========================
+>>>>>>> temp-branch
 
-It is useful to know how data are stored within the program as some operations will clear analyses and associated figures when the underlying data are changed.  There are three versions of the data kept within the program: *raw data*, original data; *clippped data*, preprocessed data; and *analysis data*, data that are filtered and/or masked.
+It is useful to know how data are stored within the program as some operations will clear analyses and associated figures when the underlying data are changed.  *LaME* keeps three versions of the data: *raw data* (original data), *clipped data* (preprocessed data), and *analysis data* (filtered and/or masked).
 
 Raw data
 --------
 
-The *raw data* refers to the data read from a file.  The raw data may be uncalibrated (e.g., cps) or calibrated (e.g., ppm).  LaME does not calibrate LA-ICP-MS data at present, so the any calibrated data should be calibrated in Iolite or XMapTools first.
+The *raw data* refers to the data read from a file.  It may be uncalibrated (e.g., cps) or calibrated (e.g., ppm).  *LaME* does not currently alibrate LA-ICP-MS data, so any calibrated data should be calibrated in Iolite or XMapTools first.
 
 Cropping ( |icon-crop| ) is applied to the *raw data*, reducing the area analyzed by the code.  The original extent can be restored by clicking the |icon-fit-to-width| button.  The *clipped data* and *analysis data* must be recomputed from *raw data* if the *raw data* is cropped or restored to the original extent.  These operations result in clearing any figures or analyses.  A dialog will appear prompting the user if they wish to proceed before clearing the memory.
 
@@ -58,7 +84,11 @@ The *clipped data* refers to data that are preprocessed.  The preprocessing step
 Analysis data
 -------------
 
-There are three types of filters than can be applied to exclude data from analyses and geochemical plots.  These include elemental filters (on = |icon-filter2|, off = |icon-filter| ), polygon masking (on = |icon-polygon-new|, off = |icon-polygon-off| ), and cluster masking (on = |icon-mask-dark|, off = |icon-mask-light| ).  It is possible to use any combination of these and turn them on or off as required.  Each are implemented as a simple pixel by pixel mask.  They can be turned on or off by clicking the icon found in the *Filter tab* on the left and grouped in *Data for analysis*.  All filters/masks can be turned off by clicking the |icon-map| button.  Note, the filters will automatically be turned on when they are first created.
+<<<<<<< HEAD
+There are three types of :doc:`filtering`  than can be applied to exclude data from analyses and geochemical plots.  These include elemental filters (on = |icon-filter2|, off = |icon-filter| ), polygon masking (on = |icon-polygon-new|, off = |icon-polygon-off| ), and cluster masking (on = |icon-mask-dark|, off = |icon-mask-light| ).  It is possible to use any combination of these and turn them on or off as required.  Each are implemented as a simple pixel by pixel mask.  They can be turned on or off by clicking the icon found in the *Filter tab* on the left and grouped in *Data for analysis*.  All filters/masks can be turned off by clicking the |icon-map| button.  Note, the filters will automatically be turned on when they are first created.
+=======
+There are three types of :doc:`filtering`  than can be applied to exclude data from analyses and geochemical plots.  These include elemental filters (on = |icon-filter2|, off = |icon-filter| ), polygon masking (on = |icon-polygon-new|, off = |icon-polygon-off| ), and cluster masking (on = |icon-mask-dark|, off = |icon-mask-light| ).  It is possible to use any combination of these and turn them on or off as required.  Each are implemented as a simple pixel by pixel mask.  They can be turned on or off by clicking the icon found in the *Main Toolbar*.  All filters/masks can be turned off by clicking the |icon-map| button.  Note, the filters will automatically be turned on when they are first created.
+>>>>>>> temp-branch
 
 The *analysis data* are used to produce plots and compute analyses; turning filters and masks on or off results in their recomputation. 
 

@@ -12,7 +12,7 @@ Clustering is an unsupervised machine-learning technique that divides a multidim
 k-Means
 -------
 
-One of the simplist clustering algorithms is k-means, though it is well suited to the task of identifying minerals or zones within minerals.
+One of the simplest clustering algorithms is k-means, though it is well suited to the task of identifying minerals or zones within minerals.
 
 Fuzzy c-means
 -------------

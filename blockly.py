@@ -21,7 +21,8 @@ class BlocklyBridge(QObject):
         # This method will be called with the generated code as a string
         print("Received code:")
         print(code)
-class ScratchLikeApp(QMainWindow):
+        
+class Workflow(QMainWindow):
     def __init__(self):
         super().__init__()
 
@@ -71,6 +72,6 @@ class ScratchLikeApp(QMainWindow):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    window = ScratchLikeApp()
+    window = Workflow()
     window.show()
     sys.exit(app.exec_())

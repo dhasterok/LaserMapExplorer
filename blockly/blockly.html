@@ -30,23 +30,69 @@
         Blockly.common.defineBlocks({load_directory: load_directory});
         python.pythonGenerator.forBlock['load_directory'] = function(block,generator)  {
             var dir_name = generator.quote_(block.getFieldValue('DIR'));
-            var code = 'self.open_directory(' + dir_name + ')\n';
+            var code = 'self.parent.open_directory(' + dir_name + ')\n';
             return code;
         };
+
+        // Define the custom block for selecting samples
+        const select_samples = {
+            init: function() {
+                // Initially, create an empty dropdown field
+                this.appendDummyInput()
+                    .appendField('select sample ID')
+                    .appendField(new Blockly.FieldDropdown([["sample1", "sample1"], ["sample2", "sample2"]]), 'SAMPLE_ID');
+                this.setPreviousStatement(true, null);
+                this.setNextStatement(true, null);
+                this.setTooltip('Selects a sample ID');
+                this.setHelpUrl('');
+                this.setColour(160);
+            }
+        };
+        Blockly.common.defineBlocks({select_samples: select_samples});
+
+        // Define the Python code generator for the select_samples block
+        python.pythonGenerator.forBlock['select_samples'] = function(block, generator) {
+            var sample_id = generator.quote_(block.getFieldValue('SAMPLE_ID'));
+            var code = 'self.parent.select_sample(' + sample_id + ')\n';
+            return code;
+        };
+        // Function to dynamically populate the sample dropdown from parent.sample_ids
+        function updateSampleDropdown(sampleIds) {
+            const dropdownOptions = sampleIds.map(id => [id, id]);
+
+            Blockly.getMainWorkspace().getAllBlocks().forEach(function(block) {
+                if (block.type === 'select_samples') {
+                    block.getField('SAMPLE_ID').menuGenerator_ = dropdownOptions;  // Update the dropdown options dynamically
+                    block.getField('SAMPLE_ID').setValue(dropdownOptions[0][0]);  // Set default value
+                }
+            });
+            console.log("Dropdown updated with sample IDs:", dropdownOptions);
+        }
+
+        // Update dropdown when directory is loaded
+        python.pythonGenerator.forBlock['load_directory'] = function(block, generator) {
+            var dir_name = generator.quote_(block.getFieldValue('DIR'));
+            var code = 'self.parent.open_directory(' + dir_name + ')\n' + 'self.updateSampleDropdown()\n';  // Run dropdown update after directory is loaded
+            return code;
+        };
+
+        // When Python tells us to update the dropdown, call this function
+        //window.blocklyBridge.updateSampleDropdown.connect(updateSampleDropdown);
     </script>
 </head>
 <body>
     
-    <h1>Scratch-like Environment</h1>
     <div id="blocklyDiv" style="height: 600px; width: 1000px;"></div>
     <xml id="toolbox" style="display: none">
+        <block type="load_directory"></block>
+        <block type="select_samples"></block>
         <block type="controls_if"></block>
         <block type="logic_compare"></block>
         <block type="math_number"></block>
         <block type="math_arithmetic"></block>
         <block type="text"></block>
         <block type="text_print"></block>
-        <block type="load_directory"></block>
+        
     </xml>
     <script>
         var workspace = Blockly.inject('blocklyDiv',
@@ -66,7 +112,10 @@
                     console.log("No blocklyBridge available.");
                 }
             }
-
+            // When Python tells us to update the dropdown, call this function
+            //window.blocklyBridge.updateSampleDropdown = function(sampleIds) {
+            //    updateSampleDropdown(sampleIds);
+            //};
             // Automatically send code whenever the workspace changes
             workspace.addChangeListener(sendCodeToPython);
         });

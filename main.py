@@ -11,14 +11,14 @@ from PyQt5.QtGui import (
     QIntValidator, QDoubleValidator, QColor, QImage, QPainter, QPixmap, QFont, QPen, QPalette,
     QCursor, QBrush, QStandardItemModel, QStandardItem, QTextCursor, QDropEvent, QFontDatabase, QIcon, QWindow
 )
-from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
+#from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
 import pyqtgraph as pg
 from pyqtgraph.GraphicsScene import exportDialog
 from pyqtgraph import (
     setConfigOption, colormap, ColorBarItem,ViewBox, TargetItem, ImageItem,
     GraphicsLayoutWidget, ScatterPlotItem, AxisItem, PlotDataItem
 )
-from datetime import datetime
+#from datetime import datetime
 import numpy as np
 import pandas as pd
 pd.options.mode.copy_on_write = True
@@ -26,9 +26,9 @@ pd.options.mode.copy_on_write = True
 import matplotlib
 matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
-from matplotlib.projections.polar import PolarAxes
-from matplotlib.collections import PathCollection
+#from matplotlib.figure import Figure
+#from matplotlib.projections.polar import PolarAxes
+#from matplotlib.collections import PathCollection
 import matplotlib.gridspec as gs
 import matplotlib.pyplot as plt
 from matplotlib.path import Path
@@ -49,9 +49,8 @@ import src.lame_fileio as lameio
 #import src.radar_factory
 from src.radar import Radar
 from src.ui.MainWindow import Ui_MainWindow
-from src.ui.PreferencesWindow import Ui_PreferencesWindow
+#from src.ui.PreferencesWindow import Ui_PreferencesWindow
 from src.AnalyteSelectionWindow import AnalyteDialog
-#from src.WebEngineView import WebEngine
 from src.TableFunctions import TableFcn as TableFcn
 import src.CustomMplCanvas as mplc
 import src.MapImporter as MapImporter
@@ -64,11 +63,13 @@ from src.Calculator import CustomFieldCalculator as cfc
 from src.SpecialFunctions import SpecialFunctions as specfun
 from src.NoteTaking import Notes
 from src.Browser import Browser
+from src.Workflow import Workflow
 import src.QuickView as QV
 from lame_helper import BASEDIR, ICONPATH, SSPATH, load_stylesheet
 from src.ExtendedDF import AttributeDataFrame
 import src.format as fmt
-
+# to prevent segmentation error at startup
+os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
 setConfigOption('imageAxisOrder', 'row-major') # best performance
 ## sphinx-build -b html docs/source/ docs/build/html
 ## !pyrcc5 resources.qrc -o src/ui/resources_rc.py
@@ -652,6 +653,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.browser = Browser(self)
         self.actionReportBug.triggered.connect(lambda: self.browser.setUrl(QUrl('https://github.com/dhasterok/LaserMapExplorer/issues')))
 
+        # initiate Workflow 
+        self.workflow = Workflow(self)
+
         #create plot tree
         self.create_tree()
         # self.open_directory()
@@ -1186,22 +1190,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolButtonLeftDock.setFixedSize(24, 24)
         self.toolButtonLeftDock.setIconSize(QSize(18, 18))
         self.toolButtonLeftDock.setCheckable(True)
-        self.toolButtonLeftDock.setIcon(QIcon(':/icons/resources/icons/icon-left_toolbar_show-64.svg'))
-        self.toolButtonLeftDock.toggled.connect(lambda checked: self.toolButtonLeftDock.setIcon(QIcon(':/icons/resources/icons/icon-left_toolbar_show-64.svg') if checked else QIcon(':/icons/resources/icons/icon-left_toolbar_hide-64.svg')))
+        self.toolButtonLeftDock.setIcon(QIcon(':/resources/icons/icon-left_toolbar_show-64.svg'))
+        self.toolButtonLeftDock.toggled.connect(lambda checked: self.toolButtonLeftDock.setIcon(QIcon(':/resources/icons/icon-left_toolbar_show-64.svg') if checked else QIcon(':/resources/icons/icon-left_toolbar_hide-64.svg')))
 
         self.toolButtonRightDock = QToolButton(self)
         self.toolButtonRightDock.setFixedSize(24, 24)
         self.toolButtonRightDock.setIconSize(QSize(18, 18))
         self.toolButtonRightDock.setCheckable(True)
-        self.toolButtonRightDock.setIcon(QIcon(':/icons/resources/icons/icon-right_toolbar_show-64.svg'))
-        self.toolButtonRightDock.toggled.connect(lambda checked: self.toolButtonRightDock.setIcon(QIcon(':/icons/resources/icons/icon-right_toolbar_show-64.svg') if checked else QIcon(':/icons/resources/icons/icon-right_toolbar_hide-64.svg')))
+        self.toolButtonRightDock.setIcon(QIcon(':/resources/icons/icon-right_toolbar_show-64.svg'))
+        self.toolButtonRightDock.toggled.connect(lambda checked: self.toolButtonRightDock.setIcon(QIcon(':/resources/icons/icon-right_toolbar_show-64.svg') if checked else QIcon(':/resources/icons/icon-right_toolbar_hide-64.svg')))
 
         self.toolButtonBottomDock = QToolButton(self)
         self.toolButtonBottomDock.setFixedSize(24, 24)
         self.toolButtonBottomDock.setIconSize(QSize(18, 18))
         self.toolButtonBottomDock.setCheckable(True)
-        self.toolButtonBottomDock.setIcon(QIcon(':/icons/resources/icons/icon-bottom_toolbar_show-64.svg'))
-        self.toolButtonBottomDock.toggled.connect(lambda checked: self.toolButtonBottomDock.setIcon(QIcon(':/icons/resources/icons/icon-bottom_toolbar_show-64.svg') if checked else QIcon(':/icons/resources/icons/icon-bottom_toolbar_hide-64.svg')))
+        self.toolButtonBottomDock.setIcon(QIcon(':/resources/icons/icon-bottom_toolbar_show-64.svg'))
+        self.toolButtonBottomDock.toggled.connect(lambda checked: self.toolButtonBottomDock.setIcon(QIcon(':/resources/icons/icon-bottom_toolbar_show-64.svg') if checked else QIcon(':/resources/icons/icon-bottom_toolbar_hide-64.svg')))
 
         self.toolButtonLeftDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.dockWidgetLeftToolbox, button=self.toolButtonLeftDock))
         self.toolButtonRightDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.dockWidgetRightToolbox, button=self.toolButtonRightDock))
@@ -1431,7 +1435,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # Create and configure the QMessageBox
             messageBoxChangeSample = QMessageBox()
             iconWarning = QtGui.QIcon()
-            iconWarning.addPixmap(QtGui.QPixmap(":/icons/resources/icons/icon-warning-64.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            iconWarning.addPixmap(QtGui.QPixmap(":/resources/icons/icon-warning-64.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
 
             messageBoxChangeSample.setWindowIcon(iconWarning)  # Set custom icon
             messageBoxChangeSample.setText("Do you want to save current analysis")
@@ -2629,7 +2633,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     #         # Create and configure the QMessageBox
     #         messageBoxChangeSample = QMessageBox()
     #         iconWarning = QtGui.QIcon()
-    #         iconWarning.addPixmap(QtGui.QPixmap(":/icons/resources/icons/icon-warning-64.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+    #         iconWarning.addPixmap(QtGui.QPixmap(":/resources/icons/icon-warning-64.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
 
     #         messageBoxChangeSample.setWindowIcon(iconWarning)  # Set custom icon
     #         messageBoxChangeSample.setText("Do you want to save current analysis")
@@ -2712,7 +2716,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # Create and configure the QMessageBox
             messageBoxChangeSample = QMessageBox()
             iconWarning = QtGui.QIcon()
-            iconWarning.addPixmap(QtGui.QPixmap(":/icons/resources/icons/icon-warning-64.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            iconWarning.addPixmap(QtGui.QPixmap(":/resources/icons/icon-warning-64.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
 
             messageBoxChangeSample.setWindowIcon(iconWarning)  # Set custom icon
             messageBoxChangeSample.setText("Do you want to save current analysis?")

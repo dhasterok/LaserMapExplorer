@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/icons">
+    <qresource prefix="/">
         <file>resources/icons/icon-accept-64.svg</file>
         <file>resources/icons/icon-add-axes-64.svg</file>
         <file>resources/icons/icon-add-axes-dark-64.svg</file>

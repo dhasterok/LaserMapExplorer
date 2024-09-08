@@ -300,7 +300,7 @@ class Ui_MapImportDialog(object):
         item = self.tableWidgetMetadata.horizontalHeaderItem(3)
         item.setText(_translate("MapImportDialog", "Standard"))
         item = self.tableWidgetMetadata.horizontalHeaderItem(4)
-        item.setText(_translate("MapImportDialog", "Scan Axis"))
+        item.setText(_translate("MapImportDialog", "Scan axis"))
         item = self.tableWidgetMetadata.horizontalHeaderItem(5)
         item.setText(_translate("MapImportDialog", "Swap XY"))
         item = self.tableWidgetMetadata.horizontalHeaderItem(6)
@@ -336,3 +336,4 @@ class Ui_MapImportDialog(object):
         self.pushButtonCancel.setText(_translate("MapImportDialog", "Cancel"))
         self.pushButtonImport.setToolTip(_translate("MapImportDialog", "Import selected data"))
         self.pushButtonImport.setText(_translate("MapImportDialog", "Import"))
+import resources_rc

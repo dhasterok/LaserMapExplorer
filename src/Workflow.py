@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QTextEdit
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QTextEdit, QPushButton
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWebChannel import QWebChannel
 from PyQt5.QtCore import pyqtSlot, QObject, QUrl, QFile, QIODevice
@@ -14,6 +14,11 @@ class BlocklyBridge(QObject):
         super().__init__()
         self.output_text_edit = output_text_edit
 
+    @pyqtSlot(result=list)
+    def getSampleIds(self):
+        # Assume self.parent.sample_ids is a list of sample IDs
+        return self.parent.sample_ids
+    
     @pyqtSlot(str)
     def runCode(self, code):
         # Display the received code in the QTextEdit
@@ -21,35 +26,33 @@ class BlocklyBridge(QObject):
         # This method will be called with the generated code as a string
         print("Received code:")
         print(code)
+
+    # @pyqtSlot()
+    # def updateSampleDropdown(self):
+    #     # Notify JavaScript to update the dropdown after directory is loaded
+    #     sample_ids = self.parent.sample_ids  # Assume this is a list of sample IDs
+    #     self.parent.web_view.page().runJavaScript(f"window.blocklyBridge.updateSampleDropdown({sample_ids})")
         
-class Workflow(QMainWindow):
-    def __init__(self):
-        super().__init__()
+class Workflow():
+    def __init__(self,parent = None):
+        self.parent = parent
 
-        self.setWindowTitle("Scratch-like Environment")
-        self.setGeometry(100, 100, 1200, 800)
-
-        # Create a central widget
-        self.central_widget = QWidget()
-        self.setCentralWidget(self.central_widget)
-
-        # Create a layout
-        self.layout = QVBoxLayout(self.central_widget)
+        # Create the layout within parent.tabWorkflow
+        self.layout = QVBoxLayout(parent.tabWorkflow)   
 
         # Create a QTextEdit to display the generated code
-        self.output_text_edit = QTextEdit(self)
+        self.output_text_edit = QTextEdit(self.parent)
         self.output_text_edit.setReadOnly(True)
         self.layout.addWidget(self.output_text_edit)
         
+        
+        # Create a button to execute the code
+        self.run_button = QPushButton("Run Code", parent)
+        self.run_button.clicked.connect(self.execute_code)
+        self.layout.addWidget(self.run_button)
+
         # Create a web engine view
         self.web_view = QWebEngineView()
-        # Enable developer tools
-        # self.web_view.settings().setAttribute(QWebEngineSettings.DeveloperExtrasEnabled, True)
-        # Enable developer tools in the QWebEngineView
-        # self.web_view.settings().setAttribute(QWebEngineSettings.JavascriptEnabled, True)
-        # self.web_view.settings().setAttribute(QWebEngineSettings.LocalContentCanAccessRemoteUrls, True)
-        # self.web_view.settings().setAttribute(QWebEngineSettings.ErrorPageEnabled, True)
-        # self.web_view.settings().setAttribute(QWebEngineSettings.PluginsEnabled, True)
 
         # Setup the WebChannel for communication
         self.channel = QWebChannel()
@@ -69,9 +72,14 @@ class Workflow(QMainWindow):
 
         # Add the web view to the layout
         self.layout.addWidget(self.web_view)
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    window = Workflow()
-    window.show()
-    sys.exit(app.exec_())
+    
+    def updateSampleDropdown(self):
+        self.web_view.page().runJavaScript(f"updateSampleDropdown({self.parent.sample_ids})")
+        
+    def execute_code(self):
+        # Get the code from the output_text_edit and execute it
+        code = self.output_text_edit.toPlainText()
+        try:
+            exec(code)
+        except Exception as e:
+            print(f"Error executing code: {e}")

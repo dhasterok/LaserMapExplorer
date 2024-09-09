@@ -595,7 +595,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         for item in sortmenu_items:
             SortMenu.addAction(item)
         
-
         # Menu and Toolbar
         #-------------------------
         # Connect the "Open" action to a function

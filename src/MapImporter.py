@@ -748,42 +748,23 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         save_path : str
             Location to save DataFrame reformatted into CSV for use in LaME
         """        
-        method = self.comboBoxMethod.currentText()
+        self.metadata = self.tableWidgetMetadata.to_dataframe()
 
-        total_files = sum(len(files) for path in self.paths for r, d, files in os.walk(path))
+        # The total number of files to parse are the number of selected files for samples with the import checkbox set to True.
+        total_files = sum(self.metadata['directory_data']['Select files'] * self.metadata['directory_data']['Import'])
+        if total_files == 0:
+            return
+        
+        # Initialize progress bar
         current_progress = 0
         self.progressBar.setMaximum(total_files)
+
+        method = self.comboBoxMethod.currentText()
         
         final_data = pd.DataFrame([])
         num_imported = 0
 
 #        try:
-        for i, directory in enumerate(self.paths):
-            # Get a list of files in the directory
-            file_list = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
-
-            # Guess analytes from filenames (implement your logic here)
-            #analyte_guesses = [self.guess_analyte_from_filename(f) for f in file_list]
-
-            # Use a list comprehension to apply the parse_filenames method to each file in the file_list
-            #parsed_results = [self.parse_filenames(self.sample_ids[i], f) for f in file_list]
-
-            parsed_results = self.parse_filenames(self.sample_ids[i], file_list)
-
-            # Show the dialog to confirm or edit the file import details
-            dialog = FileSelectData(self.sample_ids[i], file_list, parsed_results, parent=self)
-            if dialog.exec_() == QDialog.Accepted:
-                # Retrieve the updated data from the dialog
-                self.metadata[self.sample_ids[i]] = dialog.get_data()
-
-                # Process the selected files
-                for filename, analyte, units, import_file in import_data:
-                    if import_file:
-                        # Update the paths and file import logic here
-                        file_path = os.path.join(directory, filename)
-                        self.process_file(file_path, analyte, units)
-                        num_imported += 1
-
         for i,path in enumerate(self.paths):
             # if Import is False, skip sample
             if not self.metadata['directory_data']['Import'][i]:
@@ -792,6 +773,10 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             sample_id = self.sample_ids[i]
 
             # scan axis
+            if self.metadata['directory_data']['Scan axis'][i] == 'X':
+                swap_axis = False
+            else:
+                sawp_axis = True
 
             # swapping x and y is handled at end
             swap_xy = self.metadata['directory_data']['Swap XY'][i]
@@ -814,7 +799,6 @@ class MapImporter(QDialog, Ui_MapImportDialog):
 
             first = True
             for subdir, dirs, files in os.walk(path):
-
                 data_frames = []
                 for file in files:
                     valid, ftype, fid = self.parse_filenames(sample_id, file)
@@ -832,14 +816,14 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                         
                         match self.ftype:
                             case 'line':
-                                df = self.read_raw_folder(fid, file_path, swap_xy, reverse_x, reverse_y)
+                                df = self.read_raw_folder(fid, file_path, swap_xy, swap_axis, reverse_x, reverse_y)
                                 data_frames.append(df)
                             case 'matrix':
                                 if first:
-                                    df = self.read_matrix_folder(fid, file_path, swap_xy, reverse_x, reverse_y,dx,dy)
+                                    df = self.read_matrix_folder(fid, file_path, swap_xy, swap_axis, reverse_x, reverse_y,dx,dy)
                                     first = False
                                 else:
-                                    df = self.read_matrix_folder(fid, file_path, swap_xy, reverse_x, reverse_y)
+                                    df = self.read_matrix_folder(fid, file_path, swap_xy, swap_axis, reverse_x, reverse_y)
                                 
                                 data_frames.append(df)
                             case _:
@@ -908,7 +892,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
 
         self.ok = True
             
-    def read_raw_folder(self,line_no,file_path, swap_xy, dx, dy):
+    def read_raw_folder(self,line_no,file_path, swap_xy, swap_axis, dx, dy):
         df = pd.read_csv(file_path, skiprows=3)
         if swap_xy:
             df.insert(1,'Y',(int(line_no)-1)*dy)
@@ -918,7 +902,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             df.insert(1,'Y',range(0, len(df))*dy)
         return df
    
-    def read_matrix_folder(self, analyte, file_path, swap_xy, reverse_x, reverse_y, dx=None, dy=None):
+    def read_matrix_folder(self, analyte, file_path, swap_xy, swap_axis, reverse_x, reverse_y, dx=None, dy=None):
         """Reads analyte data in matrix form
 
         Parameters

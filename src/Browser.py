@@ -68,7 +68,8 @@ class Browser():
         self.parent = parent
 
         self.open_browser()
-        self.parent.browser = WebEngineView(self.parent)
+        #self.parent.browser = WebEngineView(self.parent)
+
         self.parent.toolButtonBrowserHome.clicked.connect(self.browser_home_callback)
         self.parent.lineEditBrowserLocation.editingFinished.connect(self.browser_location_callback)
         self.parent.toolButtonBack.clicked.connect(self.parent.browser.back)

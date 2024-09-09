@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1123</width>
-    <height>1027</height>
+    <height>1039</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -1151,7 +1151,7 @@
         <string>Swap X and Y resolution</string>
        </property>
        <property name="currentIndex">
-        <number>7</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="SelectAnalytePage">
         <property name="enabled">
@@ -1162,7 +1162,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>135</height>
+          <height>147</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -1959,8 +1959,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>300</width>
-          <height>135</height>
+          <width>100</width>
+          <height>72</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -1999,7 +1999,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>300</width>
+              <width>257</width>
               <height>355</height>
              </rect>
             </property>
@@ -2558,8 +2558,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>300</width>
-          <height>135</height>
+          <width>100</width>
+          <height>78</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -2598,7 +2598,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>294</width>
+              <width>258</width>
               <height>131</height>
              </rect>
             </property>
@@ -2912,8 +2912,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>300</width>
-          <height>135</height>
+          <width>100</width>
+          <height>72</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -2952,7 +2952,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>300</width>
+              <width>230</width>
               <height>263</height>
              </rect>
             </property>
@@ -3551,8 +3551,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>300</width>
-          <height>135</height>
+          <width>100</width>
+          <height>72</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -3591,7 +3591,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>300</width>
+              <width>274</width>
               <height>484</height>
              </rect>
             </property>
@@ -4317,8 +4317,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>300</width>
-          <height>135</height>
+          <width>100</width>
+          <height>72</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5004,8 +5004,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>300</width>
-          <height>135</height>
+          <width>100</width>
+          <height>72</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5044,7 +5044,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>300</width>
+              <width>286</width>
               <height>402</height>
              </rect>
             </property>
@@ -5611,6 +5611,14 @@
         </layout>
        </widget>
        <widget class="QWidget" name="BatchPage">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>300</width>
+          <height>147</height>
+         </rect>
+        </property>
         <attribute name="icon">
          <iconset resource="../resources.qrc">
           <normaloff>:/resources/icons/icon-batch-64.svg</normaloff>:/resources/icons/icon-batch-64.svg</iconset>
@@ -5645,7 +5653,7 @@
               <x>0</x>
               <y>0</y>
               <width>300</width>
-              <height>135</height>
+              <height>147</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_75">
@@ -5690,8 +5698,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>300</width>
-          <height>135</height>
+          <width>100</width>
+          <height>72</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5737,7 +5745,7 @@
               <x>0</x>
               <y>0</y>
               <width>301</width>
-              <height>135</height>
+              <height>128</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_57">
@@ -5923,8 +5931,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>300</width>
-          <height>135</height>
+          <width>100</width>
+          <height>72</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5963,7 +5971,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>300</width>
+              <width>246</width>
               <height>284</height>
              </rect>
             </property>
@@ -6342,8 +6350,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>300</width>
-          <height>135</height>
+          <width>100</width>
+          <height>72</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6388,8 +6396,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>300</width>
-              <height>135</height>
+              <width>209</width>
+              <height>111</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_64">
@@ -6558,7 +6566,7 @@
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>280</width>
+                      <width>260</width>
                       <height>303</height>
                      </rect>
                     </property>
@@ -7244,8 +7252,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>268</width>
-          <height>360</height>
+          <width>212</width>
+          <height>130</height>
          </rect>
         </property>
         <attribute name="label">
@@ -7932,8 +7940,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>294</width>
-              <height>144</height>
+              <width>100</width>
+              <height>72</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -7972,7 +7980,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>294</width>
+                  <width>203</width>
                   <height>374</height>
                  </rect>
                 </property>
@@ -9515,8 +9523,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>290</width>
-          <height>360</height>
+          <width>100</width>
+          <height>72</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -9555,7 +9563,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>290</width>
+              <width>222</width>
               <height>687</height>
              </rect>
             </property>
@@ -12794,7 +12802,7 @@
     <string>toolBar</string>
    </property>
    <property name="toolTip">
-    <string>Nuclear option, reset everything...will delete session progress</string>
+    <string/>
    </property>
    <property name="iconSize">
     <size>

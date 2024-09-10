@@ -110,6 +110,20 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             # Load the selected HTML file into the QWebEngineView
             self.browser.setUrl(QUrl.fromLocalFile(filename))
     
+    def get_metadata(self):
+        """Gets data in ``MapImporter.tableWidgetMetadata`` and formats it for the dataframe.
+
+        Returns
+        -------
+        pandas.DataFrame
+            Contents of ``tableWidgetMetadata``.
+        """        
+        data = self.tableWidgetMetadata.to_dataframe()
+        data['Select files'] = data['Select files'].str.extract('(\d+)').astype(int)
+        data = data.rename(columns={'X\nreverse':'Reverse X', 'Y\nreverse': 'Reverse Y', 'Spot size\n(µm)': 'Spot size', 'Sweep\n(s)': 'Sweep', 'Speed\n(µm/s)':'Speed'})
+
+        return data
+
     def change_preview(self,next=True):
         # Get indexes of samples that are selected for analysis
         selected = []
@@ -274,11 +288,15 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         if file_name:
             # read data from QTableWidget and place in DataFrame
             #self.metadata['directory_data'] = self.qtablewidget_to_dataframe(self.tableWidgetMetadata)
-            self.metadata['directory_data'] = self.tableWidgetMetadata.to_dataframe()
+            self.metadata['directory_data'] = self.get_metadata()
             
             # save DataFrame to CSV
-            self.metadata['directory_data'].to_csv(file_name, index=False)  # Save DataFrame to CSV without the index
-            self.statusBar.showMessage("Metadata saved successfully")
+            try:
+                self.metadata['directory_data'].to_csv(file_name, index=False)  # Save DataFrame to CSV without the index
+                self.statusBar.showMessage("Metadata saved successfully")
+            except Exception as e:
+                print("Error: {e}")
+
 
     def open_directory(self):
         """Reads sample IDs for import from directory list
@@ -374,7 +392,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             self.toolButtonNextSample.setEnabled(True)
 
         # create an empty dictionary of metadata for each
-        self.metadata = {'directory_data': self.tableWidgetMetadata.to_dataframe}
+        self.metadata = {'directory_data': self.get_metadata()}
         for sample_id in self.sample_ids:
             self.metadata[sample_id] = pd.DataFrame()
 
@@ -422,7 +440,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
     #     le = QLineEdit()
     #     le.setValidator(QDoubleValidator)
     #     le.setStyleSheet("text-align: right;")
-    #     self.tableWidgetMetadata.setCellWidget(row,col,cb)
+    #     self.tableWidgetMetadata.setCellWidget(row,col,le)
 
     def add_pushbutton(self, row, col):
         pb = QPushButton()
@@ -470,7 +488,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         combo.currentIndexChanged.connect(lambda _, r=row, c=col: self.on_combobox_changed(r, c))
         self.tableWidgetMetadata.setCellWidget(row, col, combo)
 
-    def on_item_changed(self , curr_item, prev_item):
+    def on_item_changed(self, curr_item, prev_item):
         if prev_item:
             if self.checkBoxApplyAll.isChecked() and prev_item.column() != 0:
                 column = prev_item.column()
@@ -528,31 +546,6 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                         item = QTableWidgetItem(self.line_dir[row])
                     #case 'Filename\nformat':
                     #    self.add_combobox(row, col, ['SampleID-LineNum','LineNum-SampleID'], 0)
-
-    def extract_widget_data(self, widget: QWidget):
-        """Extracts relevant information from a widget for placing in a DataFrame
-
-        _extended_summary_
-
-        Parameters
-        ----------
-        widget : QWidget
-            A widget stored in ``ImportTool.tableWidgetMetadata``
-
-        Returns
-        -------
-        str or bool
-            Returns key value of widget item to be added to a DataFrame
-        """        
-        if isinstance(widget, QCheckBox):
-            return widget.isChecked()
-        elif isinstance(widget, QComboBox):
-            return widget.currentText()
-        elif isinstance(widget, QLineEdit):
-            return widget.text()
-        # Add more widget types as needed
-        else:
-            return None
 
     def parse_filenames(self, sample_id, files):
         """Parses a list of filenames to predict file type and extract analyte, unit, and line number information.
@@ -622,48 +615,66 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                 filename = filename.replace('matrix', '')
 
             # Step 1: Split the filename by the specified delimiters
-            parts = re.split(delimiters, filename)
+            filename_lower = filename.lower()
 
-            # Step 2: Identify and handle combined element-isotope patterns (e.g., 'hf176')
-            possible_elements = []
-            possible_masses = []
+            parts = re.split(delimiters, filename_lower)
 
+            # Convert isotopes dictionary keys to lowercase for case-insensitive matching
+            isotopes_lower = {k.lower(): [m.lower() for m in v] for k, v in isotopes.items()}
+
+            # Track used masses
+            used_masses = set()
+
+            # Process combined patterns
             for part in parts:
-                if any(char.isdigit() for char in part) and any(char.isalpha() for char in part):
-                    # Part contains both letters and numbers, split them
-                    split_parts = re.findall(r'[A-Za-z]+|\d+', part)
-                    for sp in split_parts:
-                        if sp.isdigit():
-                            possible_masses.append(sp)
-                        elif sp in isotopes:
-                            possible_elements.append(sp)
-                elif part.isdigit():
-                    possible_masses.append(part)
-                elif part in isotopes:
-                    possible_elements.append(part)
-
-            # Initialize analytes
-            analyte1 = None
-            analyte2 = None
-
-            # Check if there are numbers and elements to pair
-            if possible_elements and possible_masses:
-                used_masses = set()  # Track used masses to avoid duplicate use
-                for element in possible_elements:
-                    valid_isotopes = isotopes.get(element, [])
-                    for number in possible_masses:
-                        if number in valid_isotopes and number not in used_masses:
+                combined_pattern = re.match(r'([a-z]+)(\d+)_(\d+)', part)
+                if combined_pattern:
+                    # Extract the element and the two isotopes
+                    element, mass1, mass2 = combined_pattern.groups()
+                    if element in isotopes_lower:
+                        if mass1 in isotopes_lower[element] and mass1 not in used_masses:
                             if not analyte1:
-                                analyte1 = element + number
-                                used_masses.add(number)
-                            elif not analyte2:
-                                analyte2 = element + number
-                                used_masses.add(number)
-                            else:
-                                # Break if both analytes are assigned
-                                break
-                    if analyte1 and analyte2:
-                        break
+                                analyte1 = element + mass1
+                                used_masses.add(mass1)
+                        if mass2 in isotopes_lower[element] and mass2 not in used_masses:
+                            if not analyte2:
+                                analyte2 = element + mass2
+                                used_masses.add(mass2)
+                        continue  # Skip to the next part since we've already handled this part
+
+            # If analytes are still not assigned, check remaining parts
+            if not analyte1 or not analyte2:
+                possible_elements = []
+                possible_masses = []
+
+                for part in parts:
+                    if any(char.isdigit() for char in part) and any(char.isalpha() for char in part):
+                        split_parts = re.findall(r'[a-z]+|\d+', part)
+                        for sp in split_parts:
+                            if sp.isdigit():
+                                possible_masses.append(sp)
+                            elif sp in isotopes_lower:
+                                possible_elements.append(sp)
+                    elif part.isdigit():
+                        possible_masses.append(part)
+                    elif part in isotopes_lower:
+                        possible_elements.append(part)
+
+                # Assign analytes if they aren't assigned yet
+                if possible_elements and possible_masses:
+                    for element in possible_elements:
+                        valid_isotopes = isotopes_lower.get(element, [])
+                        for number in possible_masses:
+                            if number in valid_isotopes and number not in used_masses:
+                                if not analyte1:
+                                    analyte1 = element + number
+                                    used_masses.add(number)
+                                elif not analyte2:
+                                    analyte2 = element + number
+                                    used_masses.add(number)
+                                if analyte1 and analyte2:
+                                    break
+
 
             # Debugging: Print analytes
             print(f"Analyte 1: {analyte1}")
@@ -680,6 +691,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                 analyte2 = analyte2.capitalize()
                 fieldtype = 'Ratio'
             elif analyte1 is not None:
+                analyte1 = analyte1.capitalize()
                 fieldtype = 'Analyte'
 
             # Final validity check
@@ -704,7 +716,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
 
         data_type = self.comboBoxDataType.currentText()
         #self.metadata['directory_data'] = self.qtablewidget_to_dataframe(self.tableWidgetMetadata)
-        self.metadata['directory_data'] = self.tableWidgetMetadata.to_dataframe()
+        self.metadata['directory_data'] = self.get_metadata()
 
         if not self.checkBoxSaveToRoot.isChecked():
             save_path = QFileDialog.getExistingDirectory(None, "Select a folder to Save imports", options=QFileDialog.ShowDirsOnly)
@@ -718,14 +730,14 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                 method = self.comboBoxMethod.currentText()
                 match method:
                     case 'quadrupole':
-                        self.import_la_icp_ms_data(self.metadata['directory_data'], save_path)
+                        self.import_la_icp_ms_data(save_path)
                     case 'TOF':
                         # for now, require iolite or xmaptools output.  In future, allow for 
                         # TOF raw format.
-                        self.import_la_icp_ms_data(self.metadata['directory_data'], save_path)
+                        self.import_la_icp_ms_data(save_path)
                         #df = pd.read_hdf(file_path, key='dataset_1')
                     case 'SF':
-                        self.import_la_icp_ms_data(self.metadata['directory_data'], save_path)
+                        self.import_la_icp_ms_data(save_path)
             case 'MLA':
                 pass
             case 'XRF':
@@ -747,11 +759,9 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         ----------
         save_path : str
             Location to save DataFrame reformatted into CSV for use in LaME
-        """        
-        self.metadata = self.tableWidgetMetadata.to_dataframe()
-
+        """
         # The total number of files to parse are the number of selected files for samples with the import checkbox set to True.
-        total_files = sum(self.metadata['directory_data']['Select files'] * self.metadata['directory_data']['Import'])
+        total_files = self.metadata['directory_data'].loc[self.metadata['directory_data']['Import'],'Select files'].sum()
         if total_files == 0:
             return
         
@@ -765,8 +775,9 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         num_imported = 0
 
 #        try:
+        # import all directories with samples
         for i,path in enumerate(self.paths):
-            # if Import is False, skip sample
+            # if Import is False, skip directory
             if not self.metadata['directory_data']['Import'][i]:
                 continue
 
@@ -776,109 +787,112 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             if self.metadata['directory_data']['Scan axis'][i] == 'X':
                 swap_axis = False
             else:
-                sawp_axis = True
+                swap_axis = True
 
             # swapping x and y is handled at end
             swap_xy = self.metadata['directory_data']['Swap XY'][i]
             
             # reversing is handled at end
-            reverse_x = self.metadata['directory_data']['X\nreverse'][i]
-            reverse_y = self.metadata['directory_data']['Y\nreverse'][i]
+            reverse_x = self.metadata['directory_data']['Reverse X'][i]
+            reverse_y = self.metadata['directory_data']['Reverse Y'][i]
 
-            dx = self.metadata['directory_data']['Spot size\n(µm)'][i]
+            dx = self.metadata['directory_data']['Spot size'][i]
             if dx is None:
                 dx = 1
             else:
                 dx = float(dx)
-            sweep_time = self.metadata['directory_data']['Sweep\n(s)'][i]
-            speed = self.metadata['directory_data']['Speed\n(µm/s)'][i]
+            sweep_time = self.metadata['directory_data']['Sweep'][i]
+            speed = self.metadata['directory_data']['Speed'][i]
             if speed is None or sweep_time is None:
                 dy = dx
             else:
                 dy = float(speed)*float(sweep_time)
 
+            if swap_axis == 'Y':
+                tmp = dx
+                dx = dy
+                dy = tmp
+
+            data_frames = []
+
+            # Convert to numeric, coercing errors (non-numeric values become NaN)
+            numeric_check = pd.to_numeric(self.metadata[sample_id]['Analyte 1'], errors='coerce')
+
+            # Check if a value is numeric (True for numeric values, False for non-numeric)
+            is_numeric = all(numeric_check.notna())
+
             first = True
-            for subdir, dirs, files in os.walk(path):
-                data_frames = []
-                for file in files:
-                    valid, ftype, fid = self.parse_filenames(sample_id, file)
-                    if not valid:
-                        continue
-
-                    if file.endswith('.csv') or file.endswith('.xls') or file.endswith('.xlsx'):
-                        file_path = os.path.join(subdir, file)
-                        save_prefix = os.path.basename(subdir)
-                        if any(std in file for std in self.standard_list):
-                            continue  # skip standard files
-
-                        if first:
-                            self.ftype = ftype
-                        
-                        match self.ftype:
-                            case 'line':
-                                df = self.read_raw_folder(fid, file_path, swap_xy, swap_axis, reverse_x, reverse_y)
-                                data_frames.append(df)
-                            case 'matrix':
-                                if first:
-                                    df = self.read_matrix_folder(fid, file_path, swap_xy, swap_axis, reverse_x, reverse_y,dx,dy)
-                                    first = False
-                                else:
-                                    df = self.read_matrix_folder(fid, file_path, swap_xy, swap_axis, reverse_x, reverse_y)
-                                
-                                data_frames.append(df)
-                            case _:
-                                #df = self.read_ladr_ppm_folder(file_path)
-                                #data_frames.append(df)
-                                raise Exception('Unknown file type for import.')
-
-                    current_progress += 1
-                    self.progressBar.setValue(current_progress)
-                    self.statusBar.showMessage(f"{sample_id}: {current_progress}/{total_files} files imported.")
-                    QApplication.processEvents()  # Process GUI events to update the progress bar
-
-                if not data_frames:
+            for i, file in enumerate(self.metadata[sample_id]['Filename']):
+                if not self.metadata[sample_id]['Import'][i]:
                     continue
 
-                self.statusBar.showMessage(f'Formatting {sample_id}...')
+                file_path = os.path.join(path, file)
+                if any(std in file for std in self.standard_list):
+                    continue  # skip standard files
+
+                analyte1 = self.metadata[sample_id]['Analyte 1'][i]
+                analyte2 = self.metadata[sample_id]['Analyte 2'][i]
+                if is_numeric:
+                    # line data
+                    df = self.read_raw_folder(analyte1, file_path, swap_xy, reverse_x, reverse_y)
+                    data_frames.append(df)
+                else:
+                    # matrix data
+                    if not analyte2:
+                        analyte = analyte1
+                    else:
+                        analyte = f"{analyte1} / {analyte2}"
+
+                    if first:
+                        df = self.read_matrix_folder(analyte, file_path, swap_xy, reverse_x, reverse_y,dx,dy)
+                        first = False
+                    else:
+                        df = self.read_matrix_folder(analyte, file_path, swap_xy, reverse_x, reverse_y)
+                    
+                    data_frames.append(df)
+
+                current_progress += 1
+                self.progressBar.setValue(current_progress)
+                self.statusBar.showMessage(f"{sample_id}: {current_progress}/{total_files} files imported.")
                 QApplication.processEvents()  # Process GUI events to update the progress bar
-                match self.ftype:
-                    case 'lines':
-                        final_data = pd.concat(data_frames, ignore_index=True)
-                        
-                        # reverse x and/or y if needed
-                        if reverse_x:
-                            final_data['X'] = -final_data['X']
-                        if reverse_y:
-                            final_data['Y'] = -final_data['Y']
-                        
-                        # Adjust coordinates based on the reading direction and make upper left corner as (0,0)
-                        final_data['X'] = final_data['X'] - final_data['X'].min()
-                        final_data['Y'] = final_data['Y'] - final_data['Y'].min()
-                    case 'matrix':
-                        final_data = pd.concat(data_frames, axis = 1)
-                    case _:
-                        Exception('Unknown file type format. Submit bug request and sample file for testing.')
+
+            if not data_frames:
+                continue
+
+            self.statusBar.showMessage(f'Formatting {sample_id}...')
+            QApplication.processEvents()  # Process GUI events to update the progress bar
+            if is_numeric:
+                final_data = pd.concat(data_frames, ignore_index=True)
                 
-                if not data_frames:
-                    continue
+                # reverse x and/or y if needed
+                if reverse_x:
+                    final_data['X'] = -final_data['X']
+                if reverse_y:
+                    final_data['Y'] = -final_data['Y']
+                
+                # Adjust coordinates based on the reading direction and make upper left corner as (0,0)
+                final_data['X'] = final_data['X'] - final_data['X'].min()
+                final_data['Y'] = final_data['Y'] - final_data['Y'].min()
+            else:
+                final_data = pd.concat(data_frames, axis = 1)
+            
+            if not data_frames:
+                continue
 
-                self.statusBar.showMessage(f'Formatting {sample_id}...')
-                QApplication.processEvents()
-                match self.ftype:
-                    case 'lines':
-                        final_data = pd.concat(data_frames, ignore_index=True)
-                        final_data['X'] -= final_data['X'].min() if reverse_x else 0
-                        final_data['Y'] -= final_data['Y'].min() if reverse_y else 0
-                    case 'matrix':
-                        final_data = pd.concat(data_frames, axis=1)
-                    case _:
-                        raise Exception('Unknown file type format. Submit bug request and sample file for testing.')
+            self.statusBar.showMessage(f'Formatting {sample_id}...')
+            QApplication.processEvents()
+            if is_numeric:
+                final_data = pd.concat(data_frames, ignore_index=True)
+                final_data['X'] -= final_data['X'].min() if reverse_x else 0
+                final_data['Y'] -= final_data['Y'].min() if reverse_y else 0
+            else:
+                final_data = pd.concat(data_frames, axis=1)
 
-                file_name = os.path.join(save_path, sample_id+'.lame.csv')
-                self.statusBar.showMessage(f'Saving {sample_id}.lame.csv...')
-                QApplication.processEvents()  # Process GUI events to update the progress bar
-                final_data.to_csv(file_name, index= False)
-                num_imported += 1
+            file_name = os.path.join(save_path, sample_id+'.lame.csv')
+            self.statusBar.showMessage(f'Saving {sample_id}.lame.csv...')
+            QApplication.processEvents()  # Process GUI events to update the progress bar
+            final_data.to_csv(file_name, index= False)
+            num_imported += 1
 
         # except Exception as e:
         #     self.statusBar.showMessage(f"Error during import: {str(e)}")
@@ -892,7 +906,27 @@ class MapImporter(QDialog, Ui_MapImportDialog):
 
         self.ok = True
             
-    def read_raw_folder(self,line_no,file_path, swap_xy, swap_axis, dx, dy):
+    def read_raw_folder(self,line_no,file_path, swap_xy, dx, dy):
+        """Reads laser data formatted into files with separate lines, each with all analytes.
+
+        Parameters
+        ----------
+        line_no : int
+            Line number.
+        file_path : str
+            Full file path and name to be parsed.
+        swap_xy : bool
+            Flag indicating whether to swap the orientation of the file (``False`` = no swap).
+        dx : float
+            Size of pixel in x-direction
+        dy : float
+            Size of pixel in y-direction
+
+        Returns
+        -------
+        pd.DataFrame
+            Data in the current file, ``file_path``.
+        """        
         df = pd.read_csv(file_path, skiprows=3)
         if swap_xy:
             df.insert(1,'Y',(int(line_no)-1)*dy)
@@ -902,7 +936,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             df.insert(1,'Y',range(0, len(df))*dy)
         return df
    
-    def read_matrix_folder(self, analyte, file_path, swap_xy, swap_axis, reverse_x, reverse_y, dx=None, dy=None):
+    def read_matrix_folder(self, analyte, file_path, swap_xy, reverse_x, reverse_y, dx=None, dy=None):
         """Reads analyte data in matrix form
 
         Parameters
@@ -923,8 +957,8 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         pandas.DataFrame
             Results from a single analyte with X and Y values if dx and dy are not None
         """        
-        #match = re.search(r' (\w+)_ppm', file_name)
-        #match2 = re.search(r'(\D+)(\d+).csv', file_name) or re.search(r'(\d+)(\D+).csv', file_name)
+        # match = re.search(r' (\w+)_ppm', file_name)
+        # match2 = re.search(r'(\D+)(\d+).csv', file_name) or re.search(r'(\d+)(\D+).csv', file_name)
         # if match:
         #     analyte_name =  match.group(1)  # Returns the captured group, which is the text of interest
         # elif  match2:
@@ -937,9 +971,9 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         #     return []
 
         # if analyte has isotope mass first and symbol second, swap order
-        test = re.search(r'(\d+)(\D+)', analyte)
-        if test:
-            analyte = f"{test.group(2)}{test.group(1)}"
+        # test = re.search(r'(\d+)(\D+)', analyte)
+        # if test:
+        #     analyte = f"{test.group(2)}{test.group(1)}"
         
         # drop rows and columns with all nans 
         if file_path.endswith('.csv'):
@@ -1049,7 +1083,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         sample_id = self.sample_ids[row]
         # get current dataframe
         #self.metadata['directory_data'] = self.qtablewidget_to_dataframe(self.tableWidgetMetadata)
-        self.metadata['directory_data'] = self.tableWidgetMetadata.to_dataframe()
+        self.metadata['directory_data'] = self.get_metadata()
 
         directory = self.paths[row]
 
@@ -1193,7 +1227,7 @@ class FileSelectData(QDialog, Ui_FileSelectorDialog):
         self.buttonBox.cancel_button.clicked.connect(self.reject)
 
     def get_data(self):
-        """Return the updated information from the table."""
+        """Returns the updated information from ``tableWidgetFileMetadata``."""
         data = self.tableWidgetFileMetadata.to_dataframe()
 
         return data

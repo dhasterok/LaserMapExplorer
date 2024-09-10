@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QLineEdit, QTableWidget, QComboBox, QCheckBox, QWidget, QAbstractItemView, QTableWidgetItem
+from PyQt5.QtWidgets import QLineEdit, QTableWidget, QComboBox, QPushButton, QCheckBox, QWidget, QAbstractItemView, QTableWidgetItem
 import src.format as fmt
 import pandas as pd
 
@@ -86,6 +86,8 @@ class CustomTableWidget(QTableWidget):
             return widget.isChecked()
         elif isinstance(widget, QComboBox):
             return widget.currentText()
+        elif isinstance(widget, QPushButton):
+            return widget.text()
         elif isinstance(widget, QLineEdit):
             return widget.text()
         elif isinstance(widget, CustomLineEdit):

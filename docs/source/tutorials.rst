@@ -9,6 +9,6 @@ The tutorials shown here provide workflows that can be used to do some of the mo
     getting_start
     process_data
     exploratory
-    profile
+   
 
 .. 

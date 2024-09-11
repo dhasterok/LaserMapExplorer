@@ -9,8 +9,8 @@ There are two ways to use *LaME*, either as a precompiled executable or using th
     :maxdepth: 2
     :caption: Getting Started
 
-    basics
     installation
+    basics
     import
 
 .. toctree::

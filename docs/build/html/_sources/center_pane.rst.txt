@@ -1,19 +1,35 @@
 Plot Window (Center)
 ********************
 
-Most plots are displayed within the *Plot Window*.  The only exception are profiles, which are displayed in the *Lower Tabs*.  The plots can be viewed individually, a grid, or as a predefined set for quick viewing.
+The Plot Window, located in the center of the LaME interface, is the primary area for displaying visual representations of your data. It offers three distinct viewing modes to suit different analysis needs.
+
+.. figure:: _static/screenshots/LaME_Plot_Window.png
+   :align: center
+   :alt: LaME interface: Plot Window (Center)
+   :width: 800
+
+   The Plot Window displaying multiple plots in Multi View mode.
 
 Single View
 ===========
+Displays a single plot at a time. This mode is ideal for:
 
-Displays a single plot.  This view is recommended for the development of most plots, labeling, and drafting of polygons.
+* Detailed examination of individual plots
+* Adding labels and annotations
+* Creating and editing polygons for data selection
 
 Multi View
 ==========
+Allows the display of multiple plots simultaneously. Benefits include:
 
-Allows users to display multiple plots in the same pane.  Users may find this view useful for producing figures with multiple subplots, with minimal post processing necessary for reports or publication.  The multiview may also be used to rapidly compare maps and their values.  Profiles can also be produced on multiple maps at once, simplifying the task of creating coincident multianalyte traverses.
+* Comparing different analytes or plot types side by side
+* Creating figures with multiple subplots for reports or publications
+* Generating coincident multianalyte traverses efficiently
 
 Quick View
 ==========
+Presents all analytes in a series of subplots, providing a rapid overview of the sample. Features:
 
-Quick view displays all the analytes in a series of subplots to provide a rapid overview of the samples.  Users may customize the order of the samples.
+* Comprehensive view of all analyte distributions
+* Customizable order of analytes for logical comparisons
+* Efficient identification of patterns or anomalies across multiple analytes

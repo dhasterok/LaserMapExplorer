@@ -18,7 +18,7 @@ The *Plot Selector* lists the available plots for display.  The default list inc
 Analytes and their normalized equivalents can be sorted alphabetically, by mass, or compatibility.  To change the sorting method, click the |icon-sort| button.  Remove plots using the |icon-trash| button.  Clicking the save button will bring up a dialog.  Input the name for the new theme and click ok after entering a name.  If the name is the same as an existing theme, the original will be overwritten.
 
 Styling Pane
-------------
+============
 
 The properties in the styling pane control the look and feel of plots generated from functions in the *Control (Right) Toolbox*.  In also controls the type of plot that is generated (e.g., analyte map, scatter plot or heatmap, etc.).  A complete list is given in the table below along with each of the properties that can be changed.  Not all properties are available for each type of plot.
 
@@ -102,19 +102,19 @@ Four controls sit above the styling pages.  The plot selector updates the types 
 
 
 Axes and Labels
-+++++++++++++++
+---------------
 
 The axes and labels are filled initially with default values, but can be edited to update the plot.
 
-.. figure:: _static/screenshots/LaME_Styles_Axes_Labels.png
+.. figure:: _static/screenshots/LaME_Styling_Axes_Labels.png
     :align: center
     :alt: LaME interface: right toolbox, styling-axes-and-labels tab
     :width: 232
 
     The *Styling \> Axes and Labels* contains general settings applied to all plots.
 
-Annotations
-+++++++++++
+Annotations and Scales
+----------------------
 
 .. figure:: _static/screenshots/LaME_Styling_Annotations.png
     :align: center
@@ -123,18 +123,8 @@ Annotations
 
     The *Styling \> Annotations* contains font type and font size settings.
 
-Scales
-++++++
-
-.. figure:: _static/screenshots/LaME_Styling_Scales.png
-    :align: center
-    :alt: LaME interface: right toolbox, Styling-scales tab
-    :width: 232
-
-    The *Styling \> Scatter and Heatmap* contains settings for scatter plots and heatmaps including correlations.
-
-Markers
-+++++++
+Markers and Lines
+-----------------
 
 .. figure:: _static/screenshots/LaME_Styling_Markers.png
     :align: center
@@ -145,20 +135,13 @@ Markers
     
 For other plot types text is greyed out, indicating these settings can not be modified. Symbol options, symbol size, and transparency are modified in this tab. 
 
-Lines
-+++++
-
-.. figure:: _static/screenshots/LaME_Styling_Lines.png
-    :align: center
-    :alt: LaME interface: right toolbox, Styling-lines tab
-    :width: 232
 
     The *Styling \> Lines* contains settings for line width used in TEC, radar, variance, and PCx plots. 
 
 Line widths range from 0.25 to 6 pt. 
 
-Colors
-++++++
+Coloring
+--------
 
 .. figure:: _static/screenshots/LaME_Styling_Colors.png
     :align: center
@@ -171,19 +154,13 @@ Use the Color tab to choose and modify the colors applied to plots. The *Colors 
 
 The *Colors \> Cbar* direction allows user to choose horizontal or vertical placement of the Color Bar legend. The *Colors \> Cbar* label allows user to specify legend label.
 
-Color picker
-------------
-.. figure:: _static/screenshots/LaME_Styling_Colors_Colorpicker.png
-    :align: center
-    :alt: LaME interface: right toolbox, styling-colors tab
-    :width: 232
 
     The *Styling \> Colors \> Color* opens a color picker window
 
 The *Colors \> Color* color picker allows users to pick colors from a color wheel. The color is chosen by positioning the pointer over the desired location on the color wheel. Color intensity can be modified by the greyscale slider located under the color wheel. Colors are added to the available color choices only after the *OK* button is pushed.
 
 Clusters
-++++++++
+--------
 
 .. figure:: _static/screenshots/LaME_Styling_Clusters.png
     :align: center
@@ -195,7 +172,7 @@ Clusters
 Clustering is available if the *Styling \> Colors \> Color by field* is set to *Clusters*. Clustered data can be assigned a name and color. Clusters can be linked ( |icon-link| ) or unlinked ( |icon-unlink| ). A selected cluster or clusters can be used to mask ( |icon-mask-dark| ) or reverse mask ( |icon-mask-light| ) data in a plot or on a map.
 
 Calculator
-----------
+==========
 
 .. figure:: _static/screenshots/LaME_Calculator.png
     :align: center

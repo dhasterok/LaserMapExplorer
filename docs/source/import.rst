@@ -49,7 +49,6 @@ The distance along the scan line is given by *sweep* \* *speed*.  Though if thes
    - 90-75B-PY-3.csv
    - 121.csv
    |
-   
    In all but the last two cases above, the line number came last.  However, the order doesn't matter as LaME will strip away the common patterns to reveal the line number, which it needs along with spot size to determine distance between lines.  This distance is defined as the *X*-direction.
 
    Each file should include several metadata lines followed by a header and the table of values with results from each analyte in a separate column.  The first column is the time along the line.  The difference in times are the sweep time and should be constant from measurement to measurement.  The sweep time along with the rate of travel of the laser is used to determine the distance along the line.  This distance is the *Y*-direction.  A snippet is shown in the table below, with the first three lines removed.  These three lines do not provide metadata useful to LaME.
@@ -70,7 +69,6 @@ The distance along the scan line is given by *sweep* \* *speed*.  Though if thes
    - 4337064_grt03 Ba137_CPS matrix.csv
    - B10B_SMALL_ppm K39_ppm matrix.csv
    |
-   
    Each file should include a matrix of data without headers, line numbers, distances, or times.  The default reads columns as the *X* coordinate and rows as the *Y*.  A snippet is shown in the table below.
 
  .. csv-table:: Analyte-matrix file from LA-ICP-MS quadrupole
@@ -78,31 +76,14 @@ The distance along the scan line is given by *sweep* \* *speed*.  Though if thes
     :widths: 16 17 16 17 16 17
     :header-rows: 0
 
-TOF
----
+Other Data Types (Coming Soon)
+==============================
 
-HDF5 format files...to be added soon
+The following data types and formats are planned for future implementation:
 
-MLA
-===
-
-Not currently implemented.  
-
-XRF
-===
-
-Not currently implemented.  XRF data are formatted as images (\*.png, \*.tif) and include the analyte name.
-
-SEM
-===
-
-Not currently implemented.  
-
-CL
-==
-Not currently implemented.  
-
-Petrography
-===========
-
-Not currently implemented.  Image data (\*.png, \*.jpg, \*.tif)
+- TOF (HDF5)
+- MLA
+- XRF (*.png, *.tif)
+- SEM
+- CL
+- Petrography (*.png, *.jpg, *.tif)

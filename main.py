@@ -1527,7 +1527,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             analytes['use'] = True
             analytes['negative_method'] = self.comboBoxNegativeMethod.currentText()
             
-            df = self.data[sample_id]['raw_data'][self.selected_analytes]
             # # Replace non-positive values with NaN
             # df_positive = df.where(df > 0, np.nan)
             # # Get the minimum positive values
@@ -3399,19 +3398,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if sample_id is None:
             sample_id = self.sample_id #set to default sample_id
 
-        if analyte_1: #if single analyte
+        if analyte_1: #if single analyte 
             analytes = [analyte_1]
         else: #if analyte is not provided update all analytes in analytes_df
             analytes = self.data[sample_id]['analyte_info'][self.data[sample_id]['analyte_info']['sample_id']==sample_id]['analytes']
 
         analyte_info = self.data[sample_id]['analyte_info'].loc[
                                  (self.data[sample_id]['analyte_info']['analytes'].isin(analytes))]
-        
-        
-        
-            
-            
-            
         if not analyte_2: #not a ratio
             
             # perform negative value handling

@@ -10,29 +10,23 @@ import os
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
 
 class BlocklyBridge(QObject):
-    def __init__(self, output_text_edit):
+    def __init__(self,parent, output_text_edit):
         super().__init__()
+        self.parent = parent  # Store reference to parent
         self.output_text_edit = output_text_edit
-
-    @pyqtSlot(result=list)
-    def getSampleIds(self):
-        # Assume self.parent.sample_ids is a list of sample IDs
-        return self.parent.sample_ids
     
     @pyqtSlot(str)
     def runCode(self, code):
         # Display the received code in the QTextEdit
         self.output_text_edit.setPlainText(code)
         # This method will be called with the generated code as a string
-        print("Received code:")
-        print(code)
+        #print("Received code:")
+        #print(code)
 
-    # @pyqtSlot()
-    # def updateSampleDropdown(self):
-    #     # Notify JavaScript to update the dropdown after directory is loaded
-    #     sample_ids = self.parent.sample_ids  # Assume this is a list of sample IDs
-    #     self.parent.web_view.page().runJavaScript(f"window.blocklyBridge.updateSampleDropdown({sample_ids})")
-        
+    @pyqtSlot(str)
+    def executeCode(self, code):
+        self.parent.execute_code(code)
+
 class Workflow():
     def __init__(self,parent = None):
         self.parent = parent
@@ -56,7 +50,7 @@ class Workflow():
 
         # Setup the WebChannel for communication
         self.channel = QWebChannel()
-        self.bridge = BlocklyBridge(self.output_text_edit)
+        self.bridge = BlocklyBridge(self, self.output_text_edit)
         self.channel.registerObject('blocklyBridge', self.bridge)
         self.web_view.page().setWebChannel(self.channel)
 
@@ -69,17 +63,25 @@ class Workflow():
         self.web_view.page().runJavaScript(api_script)
         #Load the Blockly HTML page
         self.web_view.setUrl(QUrl.fromLocalFile(BASEDIR + '/blockly/blockly.html'))
-
         # Add the web view to the layout
         self.layout.addWidget(self.web_view)
     
-    def updateSampleDropdown(self):
-        self.web_view.page().runJavaScript(f"updateSampleDropdown({self.parent.sample_ids})")
+    def store_sample_ids(self):
+            """
+            Sends sample_ids to JavaScript to update the sample_ids list and refresh dropdowns.
+            """
+            # Convert the sample_ids list to a format that JavaScript can use (a JSON array)
+            sample_ids_js_array = str(self.parent.sample_ids)
+            self.web_view.page().runJavaScript(f"updateSampleIds({sample_ids_js_array})")
+
         
-    def execute_code(self):
-        # Get the code from the output_text_edit and execute it
-        code = self.output_text_edit.toPlainText()
+    def execute_code(self,code=None):
+        if not code:
+            # Get the code from the output_text_edit and execute it
+            code = self.output_text_edit.toPlainText()
         try:
+            print("Execute code:")
+            print(code)
             exec(code)
         except Exception as e:
             print(f"Error executing code: {e}")

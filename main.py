@@ -45,7 +45,8 @@ from sklearn.decomposition import PCA
 from src.ternary_plot import ternary
 from src.plot_spider import plot_spider_norm
 from src.scalebar import scalebar
-import src.lame_fileio as lameio
+from src.LameIO import LameIO
+import src.csvdict as csvdict
 #import src.radar_factory
 from src.radar import Radar
 from src.ui.MainWindow import Ui_MainWindow
@@ -54,7 +55,6 @@ from src.AnalyteSelectionWindow import AnalyteDialog
 from src.TableFunctions import TableFcn as TableFcn
 import src.CustomMplCanvas as mplc
 import src.MapImporter as MapImporter
-import src.SpotImporter as SpotImporter
 from src.CropImage import CropTool
 from src.ImageProcessing import ImageProcessing as ip
 from src.Profile import Profiling
@@ -440,7 +440,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.widgetQuickView.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         try:
-            self.QV_analyte_list = lameio.import_csv_to_dict(os.path.join(BASEDIR,'resources/styles/qv_lists.csv'))
+            self.QV_analyte_list = csvdict.import_csv_to_dict(os.path.join(BASEDIR,'resources/styles/qv_lists.csv'))
         except:
             self.QV_analyte_list = {'default':['Si29','Ti47','Al27','Cr52','Fe56','Mn55','Mg24','Ca43','K39','Na23','P31',
                 'Ba137','Th232','U238','La139','Ce140','Pb206','Pr141','Sr88','Zr90','Hf178','Nd146','Eu153',
@@ -597,10 +597,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         # Menu and Toolbar
         #-------------------------
+        self.LameIO = LameIO(self)
+
         # Connect the "Open" action to a function
-        self.actionOpenSample.triggered.connect(self.open_sample)
-        self.actionOpenDirectory.triggered.connect(lambda: self.open_directory(dir_name=None))
-        self.actionImportSpots.triggered.connect(self.import_spots)
         self.actionQuit_LaME.triggered.connect(self.quit)
 
         # Intialize Tabs as not enabled
@@ -657,7 +656,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         #create plot tree
         self.create_tree()
-        # self.open_directory()
 
         #init table_fcn
         self.table_fcn = TableFcn(self)
@@ -1028,7 +1026,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 del self.mpl_colormaps[i]
 
         # custom colormaps
-        self.custom_color_dict = lameio.import_csv_to_dict(os.path.join(BASEDIR,'resources/app_data/custom_colormaps.csv'))
+        self.custom_color_dict = csvdict.import_csv_to_dict(os.path.join(BASEDIR,'resources/app_data/custom_colormaps.csv'))
         for key in self.custom_color_dict:
             self.custom_color_dict[key] = [h for h in self.custom_color_dict[key] if h]
 
@@ -1286,117 +1284,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             button.setChecked(True)
 
 
-    def initialise_samples_and_tabs(self):
-        """
-        Initialize samples and tabs in the application.
+    
 
-        This method performs the following tasks:
-        - Clears the current analysis
-        - Sets up sample IDs
-        - Populates the sample ID combobox
-        - Changes to the first sample
-        - Initializes tabs
-        - Sets up profiling and polygon samples
-        
-        Initializes ``MainWindow.treeView``.  The ``tree`` is intialized for each of the plot groups.
-        ``Analyte`` its normalized counterpart are initialized with the full list of analytes.  Table
-        data are stored in ``MainWindow.treeModel``.
-        """
+    
 
-        ###
-        #clear the current analysis
-        self.reset_analysis()
-        self.sample_ids = [os.path.splitext(file)[0].replace('.lame','') for file in self.csv_files]
-        # set first sample id as default
-        self.comboBoxSampleId.addItems(self.sample_ids)
-        self.comboBoxSampleId.setCurrentIndex(0)
-        # Populate the sampleidcomboBox with the file names
-        self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
-        self.change_sample(0)
-        self.init_tabs()
-        self.profiling.add_samples()
-        self.polygon.add_samples()
-
-    # -------------------------------------
-    # File I/O related functions
-    # -------------------------------------
-    def open_sample(self):
-        dialog = QFileDialog()
-        dialog.setFileMode(QFileDialog.ExistingFiles)
-        dialog.setNameFilter("LaME CSV (*.csv)")
-        if dialog.exec_():
-            file_list = dialog.selectedFiles()
-            self.selected_directory = os.path.dirname(os.path.abspath(file_list[0]))
-            
-            self.csv_files = [os.path.split(file)[1] for file in file_list if file.endswith('.csv')]
-            if self.csv_files == []:
-                # warning dialog
-                self.statusBar.showMessage("No valid csv files found.")
-                return
-        else:
-            return
-        self.initialise_samples_and_tabs()
-
-
-    def open_directory(self, dir_name=None):
-        """Open directory with samples
-
-        Executes on ``MainWindow.actionOpen`` and ``MainWindow.actionOpenDirectory``.  Opening a directory, enables
-        the toolboxes.
-
-        Alternatively, *open_dicrectory* is called after ``MapImporter`` successfully completes an import and the tool
-        is closed.
-
-        Opens a dialog to select directory filled with samples.  Updates sample list in
-        ``MainWindow.comboBoxSampleID`` and comboBoxes associated with analyte lists.  The first sample
-        in list is loaded by default.
-
-        Parameters
-        ----------
-        dir_name : str
-            Path to datafiles, if ``None``, an open directory dialog is openend, by default ``None``
-        """
-        if dir_name is None:
-            dialog = QFileDialog()
-            dialog.setFileMode(QFileDialog.Directory)
-            # Set the default directory to the current working directory
-            # dialog.setDirectory(os.getcwd())
-            dialog.setDirectory(BASEDIR)
-            if dialog.exec_():
-                self.selected_directory = dialog.selectedFiles()[0]
-            else:
-                self.statusBar.showMessage("Open directory canceled.")
-                return
-        else:
-            self.selected_directory = dir_name
-
-        file_list = os.listdir(self.selected_directory)
-        self.csv_files = [file for file in file_list if file.endswith('.lame.csv')]
-        if self.csv_files == []:
-            # warning dialog
-            self.statusBar.showMessage("No valid csv files found.")
-            return
-
-        self.initialise_samples_and_tabs()
-
-    def populate_spot_table(self):
-        """Populates spot table when spot file is opened or sample is changed
-
-        Populates ``MainWindow.tableWidgetSpots``.
-        """        
-        if self.sample_id == '':
-            return
-        
-        filtered_df = self.spotdata[self.sample_id==self.spotdata['sample_id']]
-        filtered_df = filtered_df['sample_id','X','Y','visible','display_text']
-
-        self.tableWidgetSpots.clearContents()
-        self.tableWidgetSpots.setRowCount(len(filtered_df))
-        header = self.tableWidgetSpots.horizontalHeader()
-
-        for row_index, row in filtered_df.iterrows():
-            for col_index, value in enumerate(row):
-                self.tableWidgetSpots.setItem(row_index, col_index, QTableWidgetItem(str(value)))
+    
         
     def init_tabs(self):
         self.toolBox.setCurrentIndex(self.left_tab['sample'])
@@ -1478,27 +1370,64 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             #Set crop to false
             self.data[self.sample_id]['crop'] = False
 
+            #----------------
+            # Load sample data into dataframes
+
+            # sample_df = pd.read_csv(file_path, engine='c')
+            # sample_df = sample_df.loc[:, ~sample_df .columns.str.contains('^Unnamed')]
+            # # self.data[sample_id] = pd.read_csv(file_path, engine='c')
+            # self.data[sample_id]['raw_data'] = sample_df
+            # ######
+            # # BUG?
+            # self.selected_analytes = self.data[sample_id]['raw_data'].columns[2:].tolist()
+            # # The columns used to read [5:] here, but that is from the matlab ExcelConcatenator files
+            # # The ones from the new import tool should only include an X and Y so only the first two
+            # # columns should be skipped.  But there may be other cases where other columns can slip
+            # # in, which should be excluded for LA-ICP-MS data, but may not be for other file types?
+            # # May need to future proof this line.
+            # ######
+            # self.data[sample_id]['computed_data'] = {
+            #     'Ratio':pd.DataFrame(),
+            #     'Calculated': self.SpecialFunctions.add_ree(sample_df),
+            #     'PCA Score':pd.DataFrame(),
+            #     'Cluster':pd.DataFrame(columns = ['fuzzy c-means', 'k-means']),
+            #     'Cluster Score':pd.DataFrame(),
+            #     'Special':pd.DataFrame(),
+            #     }
+
             sample_df = pd.read_csv(file_path, engine='c')
-            sample_df = sample_df.loc[:, ~sample_df .columns.str.contains('^Unnamed')]
-            # self.data[sample_id] = pd.read_csv(file_path, engine='c')
-            self.data[sample_id]['raw_data'] = sample_df
-            ######
-            # BUG?
-            self.selected_analytes = self.data[sample_id]['raw_data'].columns[2:].tolist()
-            # The columns used to read [5:] here, but that is from the matlab ExcelConcatenator files
-            # The ones from the new import tool should only include an X and Y so only the first two
-            # columns should be skipped.  But there may be other cases where other columns can slip
-            # in, which should be excluded for LA-ICP-MS data, but may not be for other file types?
-            # May need to future proof this line.
-            ######
+            sample_df = sample_df.loc[:, ~sample_df.columns.str.contains('^Unnamed')]  # Remove unnamed columns
+
+            # Initialize or retrieve 'self.data'
+            if sample_id not in self.data:
+                self.data[sample_id] = {}
+
+            # Identify and separate ratio columns
+            ratio_pattern = re.compile(r'([A-Za-z]+[0-9]*) / ([A-Za-z]+[0-9]*)')
+
+            # List to store column names that match the ratio pattern
+            ratio_columns = [col for col in sample_df.columns if ratio_pattern.match(col)]
+            print(ratio_columns)
+
+            # Store ratio columns in 'computed_data' under 'Ratio'
             self.data[sample_id]['computed_data'] = {
-                'Ratio':pd.DataFrame(),
-                'Calculated': self.add_ree(sample_df),
-                'PCA Score':pd.DataFrame(),
-                'Cluster':pd.DataFrame(columns = ['fuzzy c-means', 'k-means']),
-                'Cluster Score':pd.DataFrame(),
-                'Special':pd.DataFrame(),
-                }
+                'Ratio': sample_df[ratio_columns] if ratio_columns else pd.DataFrame(),
+                'Calculated': self.SpecialFunctions.add_ree(sample_df),  # Assuming SpecialFunctions.add_ree is defined
+                'PCA Score': pd.DataFrame(),
+                'Cluster': pd.DataFrame(columns=['fuzzy c-means', 'k-means']),
+                'Cluster Score': pd.DataFrame(),
+                'Special': pd.DataFrame(),
+            }
+
+            # Remove the ratio columns from the raw_data and store the rest
+            non_ratio_columns = [col for col in sample_df.columns if col not in ratio_columns]
+            self.data[sample_id]['raw_data'] = sample_df[non_ratio_columns]
+
+            # Set selected_analytes to columns excluding X and Y (future-proofed)
+            self.selected_analytes = self.data[sample_id]['raw_data'].columns[2:].tolist()  # Skipping first two columns
+
+            #----------------
+
             analytes = pd.DataFrame()
             analytes['analytes']=self.selected_analytes
             analytes['sample_id'] = sample_id
@@ -1686,16 +1615,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # change sample
     
-    def import_spots(self):
-        """Import a data file with spot data."""
-        # import spot dialog
-        self.spotDialog = SpotImporter.SpotImporter(self)
-        self.spotDialog.show()
 
-        if not self.spotDialog.ok:
-            return
-
-        self.populate_spot_table()
 
 
     # Other windows/dialogs
@@ -3405,6 +3325,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         analyte_info = self.data[sample_id]['analyte_info'].loc[
                                  (self.data[sample_id]['analyte_info']['analytes'].isin(analytes))]
+        
+        
+        
+            
+            
+            
         if not analyte_2: #not a ratio
             
             # perform negative value handling
@@ -8921,44 +8847,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 return t_array
 
     # make this part of the calculated fields
-    def add_ree(self, sample_df):
-        """Adds predefined sums of rare earth elements to calculated fields
-
-        Computes four separate sums, LREE, MREE, HREE, and REE.  Elements not analyzed are igorned by the sum.
-
-        * ``lree = ['la', 'ce', 'pr', 'nd', 'sm', 'eu', 'gd']``
-        * ``mree = ['sm', 'eu', 'gd']``
-        * ``hree = ['tb', 'dy', 'ho', 'er', 'tm', 'yb', 'lu']``
-
-        Parameters
-        ----------
-        sample_df : pandas.DataFrame
-            Sample data
-        
-        Returns
-        -------
-        pandas.DataFrame
-            REE dataframe
-        """
-
-        lree = ['la', 'ce', 'pr', 'nd', 'sm', 'eu', 'gd']
-        mree = ['sm', 'eu', 'gd']
-        hree = ['tb', 'dy', 'ho', 'er', 'tm', 'yb', 'lu']
-
-        # Convert column names to lowercase and filter based on lree, hree, etc. lists
-        lree_cols = [col for col in sample_df.columns if any([col.lower().startswith(iso) for iso in lree])]
-        hree_cols = [col for col in sample_df.columns if any([col.lower().startswith(iso) for iso in hree])]
-        mree_cols = [col for col in sample_df.columns if any([col.lower().startswith(iso) for iso in mree])]
-        ree_cols = lree_cols + hree_cols
-
-        # Sum up the values for each row
-        ree_df = pd.DataFrame(index=sample_df.index)
-        ree_df['LREE'] = sample_df[lree_cols].sum(axis=1)
-        ree_df['HREE'] = sample_df[hree_cols].sum(axis=1)
-        ree_df['MREE'] = sample_df[mree_cols].sum(axis=1)
-        ree_df['REE'] = sample_df[ree_cols].sum(axis=1)
-
-        return ree_df
+    
 
 
     # -------------------------------------
@@ -9256,7 +9145,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     # ----start debugging----
     # def test_get_field_list(self):
-    #     self.open_directory()
+    #     lameio.open_directory()
 
     #     self.compute_pca()
 
@@ -9507,43 +9396,44 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         return df_filtered, use_analytes
 
-    def import_data(self, path):
-        """Reads data files and returns data dictionary
+    # I don't think this is used...delete?
+    # def import_data(self, path):
+    #     """Reads data files and returns data dictionary
 
-        Reads available csv files in ``path`` and returns a dictionary with sample id's (file names minus extension).
+    #     Reads available csv files in ``path`` and returns a dictionary with sample id's (file names minus extension).
 
-        Parameters
-        ----------
-        path : str
-            Path with data files.
+    #     Parameters
+    #     ----------
+    #     path : str
+    #         Path with data files.
         
-        Returns
-        -------
-        dict
-            Dictionary of dataframes
-        """
-        # Get a list of all files in the directory
-        file_list = os.listdir(path)
-        csv_files = [file for file in file_list if file.endswith('.csv')]
-        csv_files = csv_files[0:2]
-        # layout = self.widgetLaserMap.layout()
-        # progressBar = QProgressDialog("Loading CSV files...", None, 0,
-        #                               len(csv_files))
-        # layout.addWidget(progressBar, 3, 0,  1, 2)
-        # progressBar.setWindowTitle("Loading")
-        # progressBar.setWindowModality(QtCore.Qt.WindowModal)
-        # Loop through the CSV files and read them using pandas
-        data_dict = {}
-        i = 0
-        for csv_file in csv_files:
-            file_path = os.path.join(path, csv_file)
-            df = pd.read_csv(file_path, engine='c')
-            file_name = os.path.splitext(csv_file)[0].replace('.lame','')
-            # Get the file name without extension
-            data_dict[file_name] = df
-            i += 1
-            # progressBar.setValue(i)
-        return data_dict
+    #     Returns
+    #     -------
+    #     dict
+    #         Dictionary of dataframes
+    #     """
+    #     # Get a list of all files in the directory
+    #     file_list = os.listdir(path)
+    #     csv_files = [file for file in file_list if file.endswith('.csv')]
+    #     csv_files = csv_files[0:2]
+    #     # layout = self.widgetLaserMap.layout()
+    #     # progressBar = QProgressDialog("Loading CSV files...", None, 0,
+    #     #                               len(csv_files))
+    #     # layout.addWidget(progressBar, 3, 0,  1, 2)
+    #     # progressBar.setWindowTitle("Loading")
+    #     # progressBar.setWindowModality(QtCore.Qt.WindowModal)
+    #     # Loop through the CSV files and read them using pandas
+    #     data_dict = {}
+    #     i = 0
+    #     for csv_file in csv_files:
+    #         file_path = os.path.join(path, csv_file)
+    #         df = pd.read_csv(file_path, engine='c')
+    #         file_name = os.path.splitext(csv_file)[0].replace('.lame','')
+    #         # Get the file name without extension
+    #         data_dict[file_name] = df
+    #         i += 1
+    #         # progressBar.setValue(i)
+    #     return data_dict
 
     def update_ratio_df(self,sample_id,analyte_1, analyte_2,norm):
         parameter = self.data[sample_id]['ratio_info'].loc[(self.data[sample_id]['ratio_info']['analyte_1'] == analyte_1) & (self.data[sample_id]['ratio_info']['analyte_2'] == analyte_2)]

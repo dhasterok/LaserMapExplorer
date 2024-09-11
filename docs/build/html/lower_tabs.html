@@ -425,16 +425,17 @@
                   
   <section id="lower-tabs">
 <h1>Lower Tabs<a class="headerlink" href="#lower-tabs" title="Link to this heading">#</a></h1>
+<p>The Lower Tabs provide additional functionality for note-taking and profile visualization, enhancing your analysis workflow in LaME.</p>
 <section id="notes">
 <h2>Notes<a class="headerlink" href="#notes" title="Link to this heading">#</a></h2>
-<p>The Notes tab allows you to take notes on a sample and keep them with the files. Notes are automatically saved every 5 minutes and when the sample is changed or the program is closed.  The saved file is stored in the same directory as the sample file with the extension <em>*.rst</em>.  While in plain text, the notes can be compiled into a pdf or html.  The specific formatting language is called <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/restructuredtext/">reStructured Text</a> (<em>reST</em>).  This format was chosen due to its basic formatting that can be easily read without compiling and yet produces a clean, easy to read document with figures and tables.  In fact, this documentation is compiled from <em>reST</em>.</p>
-<p>A simple guide to <em>reST</em> is provided below and more complete documentation can be found online with a greater range of formatting operations.  <em>LaME</em> also includes several formatting tools to quickly add formatted information and figures.</p>
-<section id="intro-to-rest">
-<h3>Intro to <em>reST</em><a class="headerlink" href="#intro-to-rest" title="Link to this heading">#</a></h3>
+<p>The Notes tab allows you to take and store notes on a sample, keeping them alongside your analysis files. This integrated note-taking capability is one of LaME’s novel features, enabling rapid production of report-style documentation for your samples or analyses.</p>
+<section id="intro-to-restructured-text-rest">
+<h3>Intro to reStructured Text (reST)<a class="headerlink" href="#intro-to-restructured-text-rest" title="Link to this heading">#</a></h3>
+<p>reST is a simple yet powerful markup language. Here are some basic formatting options:</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
-<tr class="row-odd"><th class="head"><p>text</p></th>
-<th class="head"><p>result</p></th>
+<tr class="row-odd"><th class="head"><p>Text</p></th>
+<th class="head"><p>Result</p></th>
 </tr>
 </thead>
 <tbody>
@@ -451,7 +452,7 @@
 <td><p><a class="footnote-reference brackets" href="#id3" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> footnote</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">[Citation2024]_</span></code></p></td>
-<td><p><a class="reference internal" href="#citation2004" id="id2"><span>[Citation2004]</span></a></p></td>
+<td><p><a class="reference internal" href="#citation2024" id="id2"><span>[Citation2024]</span></a></p></td>
 </tr>
 </tbody>
 </table>
@@ -463,21 +464,21 @@
 </aside>
 </aside>
 <p><code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">_reference:</span> <span class="pre">http://www.this-is-an-external-hyperlink.org</span></code></p>
-<p>To use a phrase, rather than a word, to make a reference, enclose the words within backticks (`) and end with an underscore (_).</p>
+<p>To use a phrase as a reference, enclose the words within backticks (`) and end with an underscore (_).</p>
 <p><code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">_reference:</span> <span class="pre">this</span> <span class="pre">is</span> <span class="pre">an</span> <span class="pre">internal</span> <span class="pre">hyperlink</span></code></p>
 <div role="list" class="citation-list">
-<div class="citation" id="citation2004" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">Citation2004</a><span class="fn-bracket">]</span></span>
-<p><code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">[Citation2004]</span></code> will produce a journal-like citation (no spaces).</p>
+<div class="citation" id="citation2024" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">Citation2024</a><span class="fn-bracket">]</span></span>
+<p><code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">[Citation2024]</span></code> will produce a journal-like citation (no spaces).</p>
 </div>
 </div>
 <p>To display a special character, use a ‘\’</p>
-<p>Titles, sections and subsections can be created by including a line of *, =, and -, the same length as the heading text.  The <a class="reference internal" href="_images/icon-heading-64.png"><img alt="icon-heading" src="_images/icon-heading-64.png" style="height: 2ex;" /></a> button can be used to add the symbols for you.  Simply put the cursor on the line to make a heading and click the <a class="reference internal" href="_images/icon-heading-64.png"><img alt="icon-heading" src="_images/icon-heading-64.png" style="height: 2ex;" /></a> button.</p>
+<p>Titles, sections, and subsections can be created by including a line of *, =, and - characters, the same length as the heading text. Use the <a class="reference internal" href="_images/icon-heading-64.png"><img alt="icon-heading" src="_images/icon-heading-64.png" style="height: 2ex;" /></a> button to quickly add these symbols.</p>
 </section>
 </section>
 <section id="profiling">
 <h2>Profiling<a class="headerlink" href="#profiling" title="Link to this heading">#</a></h2>
-<p>Profile plots are displayed in the <em>Profiles</em> tab.</p>
+<p>Profile plots are displayed in the Profiles tab of the Lower Tabs section. This feature allows you to visualize data trends across specific sections of your sample.</p>
 </section>
 </section>
 
@@ -528,7 +529,7 @@
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#notes">Notes</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#intro-to-rest">Intro to <em>reST</em></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#intro-to-restructured-text-rest">Intro to reStructured Text (reST)</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#profiling">Profiling</a></li>

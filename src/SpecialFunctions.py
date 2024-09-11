@@ -1,8 +1,12 @@
 import numpy as np
+import pandas as pd
 from PyQt5.QtWidgets import ( QMessageBox )
 
 class SpecialFunctions():
     def __init__(self, parent=None):
+
+        if parent is None:
+            return
         self.parent = parent
 
         self.parent.comboBoxDatingMethod.activated.connect(self.callback_dating_method)
@@ -119,7 +123,7 @@ class SpecialFunctions():
                 try:
                     date_map = np.log((Hf176_Hf178 - 3.55)/Lu175_Hf178 + 1) / decay_constant 
                 except:
-                    QMessageBox.warning(self,'Error','Something went wrong. Could not compute date map.')
+                    QMessageBox.warning(self.parent,'Error','Something went wrong. Could not compute date map.')
 
             case "Re-Os":
                 pass
@@ -135,3 +139,42 @@ class SpecialFunctions():
         #self.set_style_widgets(plot_type='analyte map')
 
         #self.update_SV()
+
+    def add_ree(self, sample_df):
+        """Adds predefined sums of rare earth elements to calculated fields
+
+        Computes four separate sums, LREE, MREE, HREE, and REE.  Elements not analyzed are igorned by the sum.
+
+        * ``lree = ['la', 'ce', 'pr', 'nd', 'sm', 'eu', 'gd']``
+        * ``mree = ['sm', 'eu', 'gd']``
+        * ``hree = ['tb', 'dy', 'ho', 'er', 'tm', 'yb', 'lu']``
+
+        Parameters
+        ----------
+        sample_df : pandas.DataFrame
+            Sample data
+        
+        Returns
+        -------
+        pandas.DataFrame
+            REE dataframe
+        """
+
+        lree = ['la', 'ce', 'pr', 'nd', 'sm', 'eu', 'gd']
+        mree = ['sm', 'eu', 'gd']
+        hree = ['tb', 'dy', 'ho', 'er', 'tm', 'yb', 'lu']
+
+        # Convert column names to lowercase and filter based on lree, hree, etc. lists
+        lree_cols = [col for col in sample_df.columns if any([col.lower().startswith(iso) for iso in lree])]
+        hree_cols = [col for col in sample_df.columns if any([col.lower().startswith(iso) for iso in hree])]
+        mree_cols = [col for col in sample_df.columns if any([col.lower().startswith(iso) for iso in mree])]
+        ree_cols = lree_cols + hree_cols
+
+        # Sum up the values for each row
+        ree_df = pd.DataFrame(index=sample_df.index)
+        ree_df['LREE'] = sample_df[lree_cols].sum(axis=1)
+        ree_df['HREE'] = sample_df[hree_cols].sum(axis=1)
+        ree_df['MREE'] = sample_df[mree_cols].sum(axis=1)
+        ree_df['REE'] = sample_df[ree_cols].sum(axis=1)
+
+        return ree_df

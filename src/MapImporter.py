@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt, QUrl
-import src.lame_fileio as lameio
+import src.csvdict as csvdict
 from src.ui.MapImportDialog import Ui_MapImportDialog
 from src.ui.FileSelectorDialog import Ui_FileSelectorDialog
 from lame_helper import BASEDIR, ICONPATH
@@ -44,7 +44,6 @@ class MapImporter(QDialog, Ui_MapImportDialog):
 
         if parent is None:
             return
-
         self.parent = parent
 
         if darkdetect.isDark():
@@ -52,7 +51,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             self.toolButtonPrevSample.setIcon(QIcon(os.path.join(ICONPATH,'icon-back-arrow-dark-64.svg')))
         
         # dictionary with standards (files to ignore or use as calibration...once we add that capability)
-        self.standards_dict = lameio.import_csv_to_dict(os.path.join(BASEDIR,'resources/app_data/standards_list.csv'))
+        self.standards_dict = csvdict.import_csv_to_dict(os.path.join(BASEDIR,'resources/app_data/standards_list.csv'))
 
         self.toolButtonAddStandard.clicked.connect(self.add_standard)
         self.sample_ids = []

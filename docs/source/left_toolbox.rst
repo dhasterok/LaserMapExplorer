@@ -57,9 +57,6 @@ Noise reduction ( |icon-noise-reduction| ) involves smoothing data.  It may be a
 Histograms
 ----------
 
-Histograms
-----------
-
 Spot Data
 =========
 

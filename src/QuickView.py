@@ -3,7 +3,7 @@ from PyQt5.QtGui import ( QIcon )
 from src.ui.QuickViewDialog import Ui_QuickViewDialog
 import src.CustomTableWidget as TW
 import os, darkdetect
-import src.lame_fileio as lameio
+import src.csvdict as csvdict
 import lame_helper as lamepath
 
 # QuickViewDialog gui
@@ -132,7 +132,7 @@ class QuickView(QDialog, Ui_QuickViewDialog):
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
         # append dictionary to file of saved qv_lists
-        lameio.export_dict_to_csv(self.analyte_list, file_path)
+        csvdict.export_dict_to_csv(self.analyte_list, file_path)
         
 
         QMessageBox.information(self, "Save Successful", f"Analytes view saved under '{self.view_name}' successfully.")

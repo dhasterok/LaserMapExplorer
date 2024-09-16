@@ -54,6 +54,7 @@ from src.ui.MainWindow import Ui_MainWindow
 from src.AnalyteSelectionWindow import AnalyteDialog
 from src.TableFunctions import TableFcn as TableFcn
 import src.CustomMplCanvas as mplc
+from src.DataHandling import SampleObj
 import src.MapImporter as MapImporter
 from src.CropImage import CropTool
 from src.ImageProcessing import ImageProcessing as ip
@@ -1282,13 +1283,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             dock.show()
             button.setChecked(True)
-
-
-    
-
-    
-
-    
         
     def init_tabs(self):
         self.toolBox.setCurrentIndex(self.left_tab['sample'])
@@ -1318,6 +1312,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # if selected sample id is same as previous
             return
 
+        self.sample_id = self.sample_ids[index]
+
+        # initialize filter_info dataframe for storing filter properties
+        if self.filter_info is not None and not self.filter_info.empty:
+            if any(self.filter_info['persistent']):
+                # Keep only rows where 'persistent' is True
+                self.filter_info = self.filter_info[self.filter_info['persistent'] == True]
+            else:
+                # re-initialize an empty DataFrame with the specified columns
+                self.filter_info = pd.DataFrame(columns=['use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'persistent'])
+        else:
+            # initialize an empty DataFrame if filter_info is None or empty
+            self.filter_info = pd.DataFrame(columns=['use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'persistent'])
+
         # stop autosave timer
         self.notes.save_notes_file()
         self.notes.autosaveTimer.stop()
@@ -1345,9 +1353,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.comboBoxSampleId.setCurrentText(self.sample_id)
                 return
 
-        file_path = os.path.join(self.selected_directory, self.csv_files[index])
-        self.sample_id = self.sample_ids[index]
-
         # notes and autosave timer
         self.notes_file = os.path.join(self.selected_directory,self.sample_id+'.rst')
         # open notes file if it exists
@@ -1359,144 +1364,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # add sample to sample dictionary
         if self.sample_id not in self.data:
-            sample_id = self.sample_id
-            #initialise nested dict for each sample
-            self.data[self.sample_id] = {}
-            #set info dataframes for each sample
-            self.data[self.sample_id]['analyte_info'] = pd.DataFrame(columns = ['analytes', 'norm', 'upper_bound', 'lower_bound', 'd_l_bound', 'd_u_bound', 'use'])
-            self.data[self.sample_id]['ratio_info'] = pd.DataFrame(columns = [ 'analyte_1', 'analyte_2', 'norm', 'upper_bound', 'lower_bound', 'd_l_bound', 'd_u_bound', 'use', 'auto_scale'])
-            self.data[self.sample_id]['filter_info'] = pd.DataFrame(columns = [ 'use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'use', 'persistent'])
-
-            #Set crop to false
-            self.data[self.sample_id]['crop'] = False
-
-            #----------------
-            # Load sample data into dataframes
-
-            # sample_df = pd.read_csv(file_path, engine='c')
-            # sample_df = sample_df.loc[:, ~sample_df .columns.str.contains('^Unnamed')]
-            # # self.data[sample_id] = pd.read_csv(file_path, engine='c')
-            # self.data[sample_id]['raw_data'] = sample_df
-            # ######
-            # # BUG?
-            # self.selected_analytes = self.data[sample_id]['raw_data'].columns[2:].tolist()
-            # # The columns used to read [5:] here, but that is from the matlab ExcelConcatenator files
-            # # The ones from the new import tool should only include an X and Y so only the first two
-            # # columns should be skipped.  But there may be other cases where other columns can slip
-            # # in, which should be excluded for LA-ICP-MS data, but may not be for other file types?
-            # # May need to future proof this line.
-            # ######
-            # self.data[sample_id]['computed_data'] = {
-            #     'Ratio':pd.DataFrame(),
-            #     'Calculated': self.SpecialFunctions.add_ree(sample_df),
-            #     'PCA Score':pd.DataFrame(),
-            #     'Cluster':pd.DataFrame(columns = ['fuzzy c-means', 'k-means']),
-            #     'Cluster Score':pd.DataFrame(),
-            #     'Special':pd.DataFrame(),
-            #     }
-
-            sample_df = pd.read_csv(file_path, engine='c')
-            sample_df = sample_df.loc[:, ~sample_df.columns.str.contains('^Unnamed')]  # Remove unnamed columns
-
-            # Initialize or retrieve 'self.data'
-            if sample_id not in self.data:
-                self.data[sample_id] = {}
-
-            # Identify and separate ratio columns
-            ratio_pattern = re.compile(r'([A-Za-z]+[0-9]*) / ([A-Za-z]+[0-9]*)')
-
-            # List to store column names that match the ratio pattern
-            ratio_columns = [col for col in sample_df.columns if ratio_pattern.match(col)]
-            print(ratio_columns)
-
-            # Store ratio columns in 'computed_data' under 'Ratio'
-            self.data[sample_id]['computed_data'] = {
-                'Ratio': sample_df[ratio_columns] if ratio_columns else pd.DataFrame(),
-                'Calculated': self.SpecialFunctions.add_ree(sample_df),  # Assuming SpecialFunctions.add_ree is defined
-                'PCA Score': pd.DataFrame(),
-                'Cluster': pd.DataFrame(columns=['fuzzy c-means', 'k-means']),
-                'Cluster Score': pd.DataFrame(),
-                'Special': pd.DataFrame(),
-            }
-
-            # Remove the ratio columns from the raw_data and store the rest
-            non_ratio_columns = [col for col in sample_df.columns if col not in ratio_columns]
-            self.data[sample_id]['raw_data'] = sample_df[non_ratio_columns]
-
-            # Set selected_analytes to columns excluding X and Y (future-proofed)
-            self.selected_analytes = self.data[sample_id]['raw_data'].columns[2:].tolist()  # Skipping first two columns
-
-            #----------------
-
-            analytes = pd.DataFrame()
-            analytes['analytes']=self.selected_analytes
-            analytes['sample_id'] = sample_id
-            analytes['norm'] = 'linear'
-
-            #update self.data['norm']
-            self.data[sample_id]['norm'] = {}
-
-            for analyte in self.selected_analytes:
-                self.data[sample_id]['norm'][analyte] = 'linear'
-
-            # obtain axis bounds for plotting and cropping, initially the entire map
-            self.data[sample_id]['x_max'] = self.data[sample_id]['crop_x_max'] = self.data[sample_id]['raw_data']['X'].max()
-            self.data[sample_id]['x_min'] = self.data[sample_id]['crop_x_min'] = self.data[sample_id]['raw_data']['X'].min()
-            self.data[sample_id]['y_max'] = self.data[sample_id]['crop_y_max'] = self.data[sample_id]['raw_data']['Y'].max()
-            self.data[sample_id]['y_min'] = self.data[sample_id]['crop_y_min'] = self.data[sample_id]['raw_data']['Y'].min()
-
-            # setup a dataframe with parameters for autoscaling and handling negative values for each analyte
-            analytes['lower_bound'] = 0.05
-            analytes['upper_bound'] = 99.5
-            analytes['d_l_bound'] = 0.05 
-            analytes['d_u_bound'] = 99
-            analytes['v_min'] = None
-            analytes['v_max'] = None
-            analytes['auto_scale'] = True
-            analytes['use'] = True
-            analytes['negative_method'] = self.comboBoxNegativeMethod.currentText()
-            
-            df = self.data[sample_id]['raw_data'][self.selected_analytes]
-            # # Replace non-positive values with NaN
-            # df_positive = df.where(df > 0, np.nan)
-            # # Get the minimum positive values
-            # min_positive_values = df_positive.min()
-            
-            # analytes['min_positive_value'] = min_positive_values
-            self.data[sample_id]['analyte_info'] = analytes
-
-            # create dataframes for cropped data and processed data
-            self.data[self.sample_id]['cropped_raw_data'] = copy.deepcopy(self.data[self.sample_id]['raw_data'])
-            self.data[self.sample_id]['processed_data'] = copy.deepcopy(self.data[self.sample_id]['raw_data'][self.selected_analytes])
-
-            # for plot_type in self.plot_widget_dict.keys():
-            #     if sample_id not in self.plot_widget_dict[plot_type]:
-            #         self.plot_widget_dict[plot_type][sample_id]={}
-
-            # set mask of size of analyte array
-            # self.data[self.sample_id]['axis_mask'] = MaskObj( np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool) )
-            # self.data[self.sample_id]['axis_mask'].register_callback(self.apply_filters(fullmap=False))
-            # self.data[self.sample_id]['filter_mask'] = MaskObj( np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool) )
-            # self.data[self.sample_id]['filter_mask'].register_callback(self.apply_filters(fullmap=False))
-            # self.data[self.sample_id]['polygon_mask'] = MaskObj( np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool) )
-            # self.data[self.sample_id]['polygon_mask'].register_callback(self.apply_filters(fullmap=False))
-            # self.data[self.sample_id]['cluster_mask'] = MaskObj( np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool) )
-            # self.data[self.sample_id]['cluster_mask'].register_callback(self.apply_filters(fullmap=False))
-            self.data[self.sample_id]['axis_mask'] = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
-            self.data[self.sample_id]['filter_mask'] = np.ones_like( self.data[sample_id]['raw_data']['X'].values, dtype=bool)
-            self.data[self.sample_id]['polygon_mask'] = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
-            self.data[self.sample_id]['cluster_mask'] = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
-            self.data[self.sample_id]['mask'] = \
-                self.data[self.sample_id]['axis_mask'] & \
-                self.data[self.sample_id]['filter_mask'] & \
-                self.data[self.sample_id]['polygon_mask'] & \
-                self.data[self.sample_id]['cluster_mask']
-
-            # autoscale and negative handling
-            self.prep_data()
-
-            # determine aspect ratio
-            self.compute_map_aspect_ratio()
+            file_path = os.path.join(self.selected_directory, self.csv_files[index])
+            self.data[self.sample_id] = SampleObj(self.sample_id, self.filepath, self.comboBoxNegativeMethod.currentText())
 
             #get plot array
             #current_plot_df = self.get_map_data(sample_id=sample_id, field=self.selected_analytes[0], field_type='Analyte')
@@ -1615,8 +1484,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #    self.open_directory(dir_name=self.importDialog.root_path)
 
         # change sample
-    
-
 
 
     # Other windows/dialogs
@@ -2021,25 +1888,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Recalculates X and Y for a dataframe
         """
-        X = round(self.data[self.sample_id]['raw_data']['X']/self.dx)
-        Y = round(self.data[self.sample_id]['raw_data']['Y']/self.dy)
+        X = round(self.data[self.sample_id].raw_data['X']/self.data[self.sample_id].dx)
+        Y = round(self.data[self.sample_id].raw_data['Y']/self.data[self.sample_id].dy)
 
-        Xp = round(self.data[self.sample_id]['processed_data']['X']/self.dx)
-        Yp = round(self.data[self.sample_id]['processed_data']['Y']/self.dy)
+        Xp = round(self.data[self.sample_id].processed_data['X']/self.data[self.sample_id].dx)
+        Yp = round(self.data[self.sample_id].processed_data['Y']/self.data[self.sample_id].dy)
 
-        self.dx = self.lineEditDX.value
-        self.dy = self.lineEditDY.value
+        self.data[self.sample_id].dx = self.lineEditDX.value
+        self.data[self.sample_id].dy = self.lineEditDY.value
 
-        self.data[self.sample_id]['raw_data']['X'] = self.dx*X
-        self.data[self.sample_id]['raw_data']['Y'] = self.dy*Y
+        self.data[self.sample_id].raw_data['X'] = self.data[self.sample_id].dx*X
+        self.data[self.sample_id].raw_data['Y'] = self.data[self.sample_id].dy*Y
 
-        self.data[self.sample_id]['processed_data']['X'] = self.dx*Xp
-        self.data[self.sample_id]['processed_data']['Y'] = self.dy*Yp
+        self.data[self.sample_id].processed_data['X'] = self.data[self.sample_id].dx*Xp
+        self.data[self.sample_id].processed_data['Y'] = self.data[self.sample_id].dy*Yp
 
         self.compute_map_aspect_ratio()
 
         self.update_SV()
-
 
     # toolbar functions
     def change_ref_material(self, comboBox1, comboBox2):
@@ -2101,38 +1967,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         Executes on ``MainWindow.actionFullMap`` is clicked.
         """
 
-        sample_id = self.plot_info['sample_id']
+        sample_id = self.sample_id
         #set original bounds
-        self.data[sample_id]['crop_x_max'] = self.data[sample_id]['x_max']
-        self.data[sample_id]['crop_x_min'] = self.data[sample_id]['x_min']
-        self.data[sample_id]['crop_y_max'] = self.data[sample_id]['y_max']
-        self.data[sample_id]['crop_y_min'] = self.data[sample_id]['y_min']
+        
         #remove crop overlays
         self.crop_tool.remove_overlays()
 
-        self.data[sample_id]['processed_data'] = copy.deepcopy(self.data[sample_id]['raw_data'])
-        self.data[sample_id]['cropped_raw_data'] = copy.deepcopy(self.data[sample_id]['raw_data'])
-        self.data[sample_id]['computed_data'] = {
-            'Ratio':None,
-            'Calculated':None,
-            'Special':None,
-            'PCA Score':None,
-            'Cluster':None,
-            'Cluster Score':None
-        }
-
-        # reset axis mask and mask
-        self.data[self.sample_id]['axis_mask'] = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
-        self.data[self.sample_id]['mask'] = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
-        # self.data[self.sample_id]['mask'] = \
-        #         self.data[self.sample_id]['axis_mask'] & \
-        #         self.data[self.sample_id]['filter_mask'] & \
-        #         self.data[self.sample_id]['polygon_mask'] & \
-        #         self.data[self.sample_id]['cluster_mask']
-        self.prep_data()
-        # re-compute aspect ratio
-        self.compute_map_aspect_ratio()
-
+        self.data[sample_id].reset_crop()
+        
         # reapply existing filters
         if self.actionFilterToggle.isChecked():
             self.apply_field_filters(update_plot=False)
@@ -2379,7 +2221,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         self.update_filter_values()
         self.update_SV()
-        
 
     def update_plot(self,bin_s=True, axis=False, reset=False):
         """"Update plot
@@ -2413,26 +2254,28 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # Computing data range using the 'array' column
             data_range = current_plot_df['array'].max() - current_plot_df['array'].min()
             #change axis range for all plots in sample
-            if axis:
-                # Filtering rows based on the conditions on 'X' and 'Y' columns
-                self.data[self.sample_id]['axis_mask'] = ((current_plot_df['X'] >= self.data[sample_id]['crop_x_min']) & (current_plot_df['X'] <= self.data[sample_id]['crop_x_max']) &
-                               (current_plot_df['Y'] <= current_plot_df['Y'].max() - self.data[sample_id]['crop_y_min']) & (current_plot_df['Y'] >= current_plot_df['Y'].max() - self.data[sample_id]['crop_y_max']))
+
+            # Removed during DataHandling update
+            # if axis:
+            #     # Filtering rows based on the conditions on 'X' and 'Y' columns
+            #     self.data[self.sample_id].axis_mask = ((current_plot_df['X'] >= self.data[sample_id].crop_x_min) & (current_plot_df['X'] <= self.data[sample_id].crop_x_max) &
+            #                    (current_plot_df['Y'] <= current_plot_df['Y'].max() - self.data[sample_id].crop_y_min) & (current_plot_df['Y'] >= current_plot_df['Y'].max() - self.data[sample_id].crop_y_max))
 
 
-                #crop original_data based on self.data[self.sample_id]['axis_mask']
-                self.data[sample_id]['cropped_raw_data'] = self.data[sample_id]['raw_data'][self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
+            #     #crop original_data based on self.data[self.sample_id]['axis_mask']
+            #     self.data[sample_id]['cropped_raw_data'] = self.data[sample_id]['raw_data'][self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
 
 
-                #crop clipped_analyte_data based on self.data[self.sample_id]['axis_mask']
-                self.data[sample_id]['processed_data'] = self.data[sample_id]['processed_data'][self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
+            #     #crop clipped_analyte_data based on self.data[self.sample_id]['axis_mask']
+            #     self.data[sample_id]['processed_data'] = self.data[sample_id]['processed_data'][self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
 
-                #crop each df of computed_analyte_data based on self.data[self.sample_id]['axis_mask']
-                for analysis_type, df in self.data[sample_id]['computed_data'].items():
-                    if isinstance(df, pd.DataFrame):
-                        df = df[self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
+            #     #crop each df of computed_analyte_data based on self.data[self.sample_id]['axis_mask']
+            #     for analysis_type, df in self.data[sample_id]['computed_data'].items():
+            #         if isinstance(df, pd.DataFrame):
+            #             df = df[self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
 
 
-                self.prep_data(sample_id)
+            #     self.prep_data(sample_id)
 
             if plot_type=='histogram':
                 if reset:
@@ -2479,7 +2322,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #self.add_remove(selected_plot_name)
         self.comboBoxPlots.clear()
         self.comboBoxPlots.addItems(self.multi_view_index)
-
     
     def save_project(self):
         projects_dir = os.path.join(BASEDIR, "projects")
@@ -2801,24 +2643,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         field = self.comboBoxColorField.currentText()
         current_plot_df = self.get_map_data(sample_id, field, field_type=field_type)
         
-        self.data[self.sample_id]['axis_mask'] = ((current_plot_df['X'] >= self.data[sample_id]['crop_x_min']) & (current_plot_df['X'] <= self.data[sample_id]['crop_x_max']) &
-                       (current_plot_df['Y'] <=  self.data[sample_id]['crop_y_max']) & (current_plot_df['Y'] >= self.data[sample_id]['crop_y_min']))
+        # self.data[self.sample_id].axis_mask = ((current_plot_df['X'] >= self.data[sample_id].crop_x_min) & (current_plot_df['X'] <= self.data[sample_id].crop_x_max) &
+        #                (current_plot_df['Y'] <=  self.data[sample_id].crop_y_max) & (current_plot_df['Y'] >= self.data[sample_id].crop_y_min))
 
 
-        #crop original_data based on self.data[self.sample_id]['axis_mask']
-        self.data[sample_id]['cropped_raw_data'] = self.data[sample_id]['raw_data'][self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
+        # #crop original_data based on self.data[self.sample_id]['axis_mask']
+        # self.data[sample_id]['cropped_raw_data'] = self.data[sample_id]['raw_data'][self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
 
-        #crop clipped_analyte_data based on self.data[self.sample_id]['axis_mask']
-        self.data[sample_id]['processed_data'] = self.data[sample_id]['processed_data'][self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
+        # #crop clipped_analyte_data based on self.data[self.sample_id]['axis_mask']
+        # self.data[sample_id]['processed_data'] = self.data[sample_id]['processed_data'][self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
 
-        #crop each df of computed_analyte_data based on self.data[self.sample_id]['axis_mask']
-        for analysis_type, df in self.data[sample_id]['computed_data'].items():
-            if isinstance(df, pd.DataFrame):
-                self.data[sample_id]['computed_data'][analysis_type] = df[self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
+        # #crop each df of computed_analyte_data based on self.data[self.sample_id]['axis_mask']
+        # for analysis_type, df in self.data[sample_id]['computed_data'].items():
+        #     if isinstance(df, pd.DataFrame):
+        #         self.data[sample_id]['computed_data'][analysis_type] = df[self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
 
-        self.data[self.sample_id]['mask'] = self.data[self.sample_id]['mask'][self.data[self.sample_id]['axis_mask']]
-        self.data[self.sample_id]['polygon_mask'] = self.data[self.sample_id]['polygon_mask'][self.data[self.sample_id]['axis_mask']]
-        self.data[self.sample_id]['filter_mask'] = self.data[self.sample_id]['filter_mask'][self.data[self.sample_id]['axis_mask']]
+        self.data[self.sample_id].mask = self.data[self.sample_id].mask[self.data[self.sample_id].axis_mask]
+        self.data[self.sample_id].polygon_mask = self.data[self.sample_id].polygon_mask[self.data[self.sample_id].axis_mask]
+        self.data[self.sample_id].filter_mask = self.data[self.sample_id].filter_mask[self.data[self.sample_id].axis_mask]
         self.prep_data(sample_id)
         #self.update_all_plots()
         # compute new aspect ratio
@@ -3261,223 +3103,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         if update_plot:
             self.apply_filters(fullmap=False)
-
-
-    def update_norm(self,sample_id, norm=None, analyte_1=None, analyte_2=None, update=False):
-        """Update the norm of the data.
-
-        Parameters
-        ----------
-        sample_id : str
-            Sample identifier
-        norm : str, optional
-            Data scale method ``linear`` or ``log``, by default None
-        analyte_1 : str, optional
-            Analyte, numerator of ratio if *analyte_2* is not None, by default None
-        analyte_2 : str, optional
-            Denominator of ratio, by default None
-        update : bool, optional
-            Update the scal information of the data, by default False
-        """        
-        if analyte_1: #if normalising single analyte
-            if not analyte_2: #not a ratio
-                self.data[sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['sample_id']==sample_id)
-                                 & (self.data[sample_id]['analyte_info']['analytes']==analyte_1),'norm'] = norm
-                analytes = [analyte_1]
-            else:
-               self.data[sample_id]['ratio_info'].loc[
-                   (self.data[sample_id]['ratio_info']['analyte_1'] == analyte_1) &
-                   (self.data[sample_id]['ratio_info']['analyte_2'] == analyte_2),'norm'] = norm
-               analytes = [analyte_1+' / '+analyte_2]
-
-        else: #if normalising all analytes in sample
-            self.data[sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['sample_id']==sample_id),'norm'] = norm
-            analytes = self.data[sample_id]['analyte_info'][self.data[sample_id]['analyte_info']['sample_id']==sample_id]['analytes']
-
-
-        self.prep_data(sample_id, analyte_1, analyte_2)
-
-        #update self.data['norm']
-        for analyte in analytes:
-            self.data[sample_id]['norm'][analyte] = norm
-
-        #if update:
-        # self.update_all_plots()
-        # self.update_plot()
-        self.update_SV()
-
-    def prep_data(self, sample_id=None, analyte_1=None, analyte_2=None):
-        """Prepares data to be used in analysis
-
-        1. Obtains raw DataFrame
-        2. Handles negative values based on option chosen
-        3. Scale data  (linear,log, loggit)
-        4. Autoscales data if choosen by user
-
-        The prepped data is stored in one of 2 Dataframes: analysis_analyte_data or computed_analyte_data
-        """
-        if sample_id is None:
-            sample_id = self.sample_id #set to default sample_id
-
-        if analyte_1: #if single analyte
-            analytes = [analyte_1]
-        else: #if analyte is not provided update all analytes in analytes_df
-            analytes = self.data[sample_id]['analyte_info'][self.data[sample_id]['analyte_info']['sample_id']==sample_id]['analytes']
-
-        analyte_info = self.data[sample_id]['analyte_info'].loc[
-                                 (self.data[sample_id]['analyte_info']['analytes'].isin(analytes))]
-            
-        if not analyte_2: #not a ratio
-            
-            # perform negative value handling
-            for neg_method in analyte_info['negative_method'].unique():
-                filtered_analytes = analyte_info[analyte_info['negative_method'] == neg_method]['analytes']
-                filtered_data = self.data[sample_id]['cropped_raw_data'][filtered_analytes].values
-                self.data[sample_id]['processed_data'].loc[:,filtered_analytes] = self.transform_array(filtered_data,neg_method)
-                
-                
-            # shifts analyte values so that all values are postive
-            # adj_data = pd.DataFrame(self.transform_plots(self.data[sample_id]['cropped_raw_data'][analytes].values), columns= analytes)
-            
-            
-            # #perform scaling for groups of analytes with same norm parameter
-            # for norm in analyte_info['norm'].unique():
-            #     filtered_analytes = analyte_info[(analyte_info['norm'] == norm)]['analytes']
-            #     filtered_data = adj_data[filtered_analytes].values
-            #     if norm == 'log':
-
-            #         # np.nanlog handles NaN value
-            #         self.data[sample_id]['processed_data'].loc[:,filtered_analytes] = np.log10(filtered_data, where=~np.isnan(filtered_data))
-            #         # print(self.processed_analyte_data[sample_id].loc[:10,analytes])
-            #         # print(self.data[sample_id]['processed_data'].loc[:10,analytes])
-            #     elif norm == 'logit':
-            #         # Handle division by zero and NaN values
-            #         with np.errstate(divide='ignore', invalid='ignore'):
-            #             analyte_array = np.log10(filtered_data / (10**6 - filtered_data), where=~np.isnan(filtered_data))
-            #             self.data[sample_id]['processed_data'].loc[:,filtered_analytes] = analyte_array
-            #     else:
-            #         # set to clipped data with original values if linear normalisation
-            #         self.data[sample_id]['processed_data'].loc[:,filtered_analytes] = filtered_data
-
-            # perform autoscaling on columns where auto_scale is set to true
-            for auto_scale in analyte_info['auto_scale'].unique():
-                filtered_analytes = analyte_info[analyte_info['auto_scale'] == auto_scale]['analytes']
-
-                for analyte_1 in filtered_analytes:
-                    parameters = analyte_info.loc[(analyte_info['sample_id']==sample_id)
-                                          & (analyte_info['analytes']==analyte_1)].iloc[0]
-                    filtered_data =  self.data[sample_id]['processed_data'][analytes][analyte_1].values
-                    lq = parameters['lower_bound']
-                    uq = parameters['upper_bound']
-                    d_lb = parameters['d_l_bound']
-                    d_ub = parameters['d_u_bound']
-                    if auto_scale:
-
-                        self.data[sample_id]['processed_data'][analyte_1] = self.outlier_detection(filtered_data.reshape(-1, 1),lq, uq, d_lb,d_ub)
-                    else:
-                        #clip data using ub and lb
-                        lq_val = np.nanpercentile(filtered_data, lq, axis=0)
-                        uq_val = np.nanpercentile(filtered_data, uq, axis=0)
-                        filtered_data = np.clip(filtered_data, lq_val, uq_val)
-                        self.data[sample_id]['processed_data'][analyte_1] = filtered_data
-
-                    # update v_min and v_max in self.data[sample_id]['analyte_info']
-                    self.data[sample_id]['analyte_info'].loc[
-                                             (self.data[sample_id]['analyte_info']['analytes']==analyte_1),'v_max'] = np.nanmax(filtered_data)
-                    self.data[sample_id]['analyte_info'].loc[
-                                             (self.data[sample_id]['analyte_info']['analytes']==analyte_1), 'v_min'] = np.nanmin(filtered_data)
-
-            #add x and y columns from raw data
-            self.data[sample_id]['processed_data']['X'] = self.data[sample_id]['cropped_raw_data']['X']
-            self.data[sample_id]['processed_data']['Y'] = self.data[sample_id]['cropped_raw_data']['Y']
-
-        else:  #if ratio
-            ratio_df = self.data[sample_id]['cropped_raw_data'][[analyte_1,analyte_2]] #consider original data for ratio
-
-            ratio_name = analyte_1+' / '+analyte_2
-
-            # shifts analyte values so that all values are postive
-            # ratio_array = self.transform_plots(ratio_df.values)
-            ratio_array= ratio_df.values
-            ratio_df = pd.DataFrame(ratio_array, columns= [analyte_1,analyte_2])
-            
-            # mask = (ratio_df[analyte_1] > 0) & (ratio_df[analyte_2] > 0)
-            
-            mask =   (ratio_df[analyte_2] == 0)
-
-            ratio_array = np.where(mask, ratio_array[:,0] / ratio_array[:,1], np.nan)
-
-            # Get the index of the row that matches the criteria
-            index_to_update = self.data[sample_id]['ratio_info'].loc[
-                    (self.data[sample_id]['ratio_info']['analyte_1'] == analyte_1) &
-                    (self.data[sample_id]['ratio_info']['analyte_2'] == analyte_2)
-                ].index
-
-            # Check if we found such a row
-            if len(index_to_update) > 0:
-                idx = index_to_update[0]
-
-                if pd.isna(self.data[sample_id]['ratio_info'].at[idx, 'lower_bound']): #if bounds are not updated in dataframe
-                    #sets auto scale to true by default with default values for lb,db, d_lb and d_ub
-                    auto_scale = True
-                    norm = self.data[sample_id]['ratio_info'].at[idx, 'norm']
-                    lb = 0.05
-                    ub = 99.5
-                    d_lb = 99
-                    d_ub = 99
-                    self.data[sample_id]['ratio_info'].at[idx, 'lower_bound'] = lb
-                    self.data[sample_id]['ratio_info'].at[idx, 'upper_bound'] = ub
-                    self.data[sample_id]['ratio_info'].at[idx, 'd_l_bound'] = d_lb
-                    self.data[sample_id]['ratio_info'].at[idx, 'd_u_bound'] = d_ub
-                    self.data[sample_id]['ratio_info'].at[idx, 'auto_scale'] = auto_scale
-                    neg_method = self.comboBoxNegativeMethod.currentText()
-                    min_positive_value = min(ratio_array[ratio_array>0])
-                    self.data[sample_id]['ratio_info'].at[idx, 'negative_method'] = neg_method
-                    # self.data[sample_id]['ratio_info'].at[idx, 'min_positive_value'] = min_positive_value
-                else: #if bounds exist in ratios_df
-                    norm = self.data[sample_id]['ratio_info'].at[idx, 'norm']
-                    lb = self.data[sample_id]['ratio_info'].at[idx, 'lower_bound']
-                    ub = self.data[sample_id]['ratio_info'].at[idx, 'upper_bound']
-                    d_lb = self.data[sample_id]['ratio_info'].at[idx, 'd_l_bound']
-                    d_ub = self.data[sample_id]['ratio_info'].at[idx, 'd_u_bound']
-                    auto_scale = self.data[sample_id]['ratio_info'].at[idx, 'auto_scale']
-                    neg_method = self.data[sample_id]['ratio_info'].at[idx, 'negative_method']
-                    # min_positive_value = self.data[sample_id]['ratio_info'].at[idx, 'min_positive_value']
-                    
-                    
-                # if norm == 'log':
-
-                #     # np.nanlog handles NaN value
-                #     ratio_array = np.log10(ratio_array, where=~np.isnan(ratio_array))
-                #     # print(self.processed_analyte_data[sample_id].loc[:10,analytes])
-                #     # print(self.data[sample_id]['processed_data'].loc[:10,analytes])
-                # elif norm == 'logit':
-                #     # Handle division by zero and NaN values
-                #     with np.errstate(divide='ignore', invalid='ignore'):
-                #         ratio_array = np.log10(ratio_array / (10**6 - ratio_array), where=~np.isnan(ratio_array))
-                # else:
-                #     # set to clipped data with original values if linear normalisation
-                #     pass
-
-                # perform negative value handling
-                ratio_array = self.transform_array(ratio_array,neg_method)     
-
-                if auto_scale:
-
-                    ratio_array = self.outlier_detection(ratio_array.reshape(-1, 1),lb, ub, d_lb,d_ub)
-                else:
-                    #clip data using ub and lb
-                    lq_val = np.nanpercentile(ratio_array, lq, axis=0)
-                    uq_val = np.nanpercentile(ratio_array, uq, axis=0)
-                    ratio_array = np.clip(ratio_array, lq_val, uq_val)
-
-                if self.data[sample_id]['computed_data']['Ratio'].empty:
-                    self.data[sample_id]['computed_data']['Ratio'] = self.data[sample_id]['cropped_raw_data'][['X','Y']]
-
-                self.data[sample_id]['computed_data']['Ratio'][ratio_name] = ratio_array
-
-                self.data[sample_id]['ratio_info'].at[idx, 'v_min'] = np.nanmin(ratio_array)
-                self.data[sample_id]['ratio_info'].at[idx, 'v_max'] = np.nanmax(ratio_array)
 
     def remove_widgets_from_layout(self, layout, object_names_to_remove):
         """
@@ -6234,31 +5859,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         return length
 
-    def compute_map_aspect_ratio(self):
-        """Computes aspect ratio of current sample
-        
-        The aspect ratio is needed for maps and computations of areas as the pixels may not be square in dimension.
-        The aspect ratio is defined as dy/dx where dy is y_range/n_y and dx is x_range/n_x.
-        """
-        self.x = self.data[self.sample_id]['processed_data']['X']
-        self.y = self.data[self.sample_id]['processed_data']['Y']
-
-        self.x_range = self.x.max() -  self.x.min()
-        self.y_range = self.y.max() -  self.y.min()
-
-        self.dx = self.x_range/self.x.nunique()
-        self.dy = self.y_range/self.y.nunique()
-
-        units = self.preferences['Units']['Distance']
-        self.lineEditDX.value = self.dx
-        self.lineEditDY.value = self.dy
-
-        self.aspect_ratio = self.dy / self.dx
-
-        self.array_size = (self.y.nunique(), self.x.nunique())
-        
-        self.lineEditResolutionNx.value = self.array_size[1]
-        self.lineEditResolutionNy.value = self.array_size[0]
 
     def add_scalebar(self, ax):
         """Add a scalebar to a map
@@ -8737,113 +8337,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # update plot with new cluster name
             self.update_SV()
 
-    def outlier_detection(self, data ,lq=0.0005, uq=99.5, d_lq=9.95 , d_uq=99):
-        # Ensure data is a numpy array
-        data = np.array(data)
-
-        # Shift values to positive concentrations
-        v0 = np.nanmin(data, axis=0) - 0.001
-        data_shifted = np.log10(data - v0)
-
-        # Calculate required quantiles and differences
-        lq_val = np.nanpercentile(data_shifted, lq, axis=0)
-        uq_val = np.nanpercentile(data_shifted, uq, axis=0)
-        sorted_indices = np.argsort(data_shifted, axis=0)
-        sorted_data = np.take_along_axis(data_shifted, sorted_indices, axis=0)
-
-
-        diff_sorted_data = np.diff(sorted_data, axis=0)
-        # Adding a 0 to the beginning of each column to account for the reduction in size by np.diff
-        diff_sorted_data = np.insert(diff_sorted_data, 0, 0, axis=0)
-        diff_array_uq_val = np.nanpercentile(diff_sorted_data, d_uq, axis=0)
-        diff_array_lq_val = np.nanpercentile(diff_sorted_data, d_lq, axis=0)
-        upper_cond = (sorted_data > uq_val) & (diff_sorted_data > diff_array_uq_val)
-
-        # Initialize arrays for results
-        clipped_data = np.copy(sorted_data)
-
-        # Upper bound outlier filter
-        for col in range(sorted_data.shape[1]):
-            up_indices = np.where(upper_cond[:, col])[0]
-            if len(up_indices) > 0:
-                uq_outlier_index = up_indices[0]
-                clipped_data[uq_outlier_index:, col] = clipped_data[uq_outlier_index-1, col]
-
-        lower_cond = (sorted_data < lq_val) & (diff_sorted_data > diff_array_lq_val)
-        # Lower bound outlier filter
-        for col in range(sorted_data.shape[1]):
-            low_indices = np.where(lower_cond[:, col])[0]
-            if len(low_indices) > 0:
-                lq_outlier_index = low_indices[-1]
-                clipped_data[:lq_outlier_index+1, col] = clipped_data[lq_outlier_index+1, col]
-
-        clipped_data = np.take_along_axis(clipped_data, np.argsort(sorted_indices, axis=0), axis=0)
-        # Unshift the data
-        clipped_data = 10**clipped_data + v0
-
-        return clipped_data
-
-    def transform_array(self, array, negative_method):
-        """Negative and zero handling
-
-        Parameters
-        ----------
-        array : numpy.ndarray
-            Input data
-        negative_method : str
-            negative_method obtained from analyte info
-        Returns
-        -------
-        numpy.ndarray
-            Transformed data
-        """
-
-
-        #n
-        match negative_method.lower():
-            case 'ignore negative values':
-                t_array = np.copy(array)
-                t_array = np.where(t_array > 0, t_array, np.nan)
-                return t_array
-            case 'minimum positive value':
-                min_positive_value = np.nanmin(array[array > 0])
-                t_array = np.where(array < 0, min_positive_value, array)
-                return t_array
-            case 'gradual shift':
-                if array.ndim == 2:
-                    # Calculate min and max values for each column and adjust their shapes for broadcasting
-                    min_val = np.nanmin(array, axis=0, keepdims=True) - 0.0001
-                    max_val = np.nanmax(array, axis=0, keepdims=True)
-
-                    # Adjust the shape of min_val and max_val for broadcasting
-                    adjusted_min_val = min_val
-                    adjusted_max_val = max_val
-
-                    # Check if min values are less than or equal 0
-                    min_leq_zero = adjusted_min_val <= 0
-
-                    # Perform transformation with broadcasting
-                    t_array = np.where(
-                        min_leq_zero,
-                        (adjusted_max_val * (array - adjusted_min_val)) / (adjusted_max_val - adjusted_min_val),
-                        array
-                    )
-                else:
-                    # 1D array case, similar to original logic
-                    min_val = np.nanmin(array) - 0.0001
-                    max_val = np.nanmax(array)
-                    if min_val < 0:
-                        t_array = (max_val * (array - min_val)) / (max_val - min_val)
-                    else:
-                        t_array = np.copy(array)
-                return t_array
-            case 'yeo-johnson transformation':
-                # Apply Yeo-Johnson transformation
-                t_array, lambda_yeojohnson = yeojohnson(array)
-                return t_array
-
     # make this part of the calculated fields
-    
 
 
     # -------------------------------------
@@ -9149,110 +8643,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     #         print(self.get_field_list(set_name=type))
     # ----end debugging----
 
-
-    # -------------------------------------
-    # Data functions functions
-    # -------------------------------------
-    def get_map_data(self, sample_id, field, field_type='Analyte', scale_data=False):
-        """
-        Retrieves and processes the mapping data for the given sample and analytes, then plots the result if required.
-
-        The method also updates certain parameters in the analyte data frame related to scaling.
-        Based on the plot type, this method internally calls the appropriate plotting functions.
-
-        Parameters
-        ----------
-        sample_id : str
-            Sample identifier
-        field : str, optional
-            Name of field to plot, Defaults to None
-        analysis_type : str, optional
-            Field type for plotting, options include: 'Analyte', 'Ratio', 'pca', 'Cluster', 'Cluster Score',
-            'Special', 'computed'. Some options require a field. Defaults to 'Analyte'
-
-        Returns
-        -------
-        pandas.DataFrame
-            Processed data for plotting. This is only returned if analysis_type is not 'laser' or 'hist'.
-        """
-        # ----begin debugging----
-        # print('[get_map_data] sample_id: '+sample_id+'   field_type: '+field_type+'   field: '+field)
-        # ----end debugging----
-
-        # if sample_id != self.sample_id:
-        #     #axis mask is not used when plot analytes of a different sample
-        #     axis_mask  = np.ones_like( self.data[sample_id]['raw_data']['X'], dtype=bool)
-        # else:
-        #     axis_mask = self.data[self.sample_id]['axis_mask']
-        
-        # retrieve axis mask for that sample
-        axis_mask = self.data[self.sample_id]['axis_mask']
-        
-        #crop plot if filter applied
-        df = self.data[sample_id]['raw_data'][['X','Y']][axis_mask].reset_index(drop=True)
-
-        print(field_type)
-
-        match field_type:
-            case 'Analyte' | 'Analyte (normalized)':
-                # unnormalized
-                df ['array'] = self.data[sample_id]['processed_data'].loc[:,field].values
-                #get analyte info
-                norm = self.data[sample_id]['analyte_info'].loc[self.data[sample_id]['analyte_info']['analytes']==field,'norm'].iloc[0]
-                
-                #perform scaling for groups of analytes with same norm parameter
-                
-                if norm == 'log' and scale_data:
-                    df['array'] = np.where(~np.isnan(df['array']), np.log10(df['array']), df['array'])
-
-                    # print(self.processed_analyte_data[sample_id].loc[:10,analytes])
-                    # print(self.data[sample_id]['processed_data'].loc[:10,analytes])
-                elif norm == 'logit' and scale_data:
-                    # Handle division by zero and NaN values
-                    with np.errstate(divide='ignore', invalid='ignore'):
-                        df['array'] = np.where(~np.isnan(df['array']), np.log10(df['array'] / (10**6 - df['array'])))
-                
-                # normalize
-                if 'normalized' in field_type:
-                    refval = self.ref_chem[re.sub(r'\d', '', field).lower()]
-                    df['array'] = df['array'] / refval
-
-            case 'Ratio' | 'Ratio (normalized)':
-                field_1 = field.split(' / ')[0]
-                field_2 = field.split(' / ')[1]
-
-                # unnormalized
-                #df['array'] = self.data[sample_id]['computed_data'].loc[:,field_1].values / self.data[sample_id]['processed_data'].loc[:,field_2].values
-                df['array'] = self.data[sample_id]['computed_data']['Ratio'].loc[:,field].values
-                
-                # normalize
-                if 'normalized' in field_type:
-                    refval_1 = self.ref_chem[re.sub(r'\d', '', field_1).lower()]
-                    refval_2 = self.ref_chem[re.sub(r'\d', '', field_2).lower()]
-                    df['array'] = df['array'] * (refval_2 / refval_1)
-
-                #get norm value
-                norm = self.data[sample_id]['ratio_info'].loc['norm',(self.data[sample_id]['ratio_info']['analyte_1']==field_1 & self.data[sample_id]['ratio_info']['analyte_2']==field_2)].iloc[0]
-
-                if norm == 'log' and scale_data:
-                    df ['array'] = np.where(~np.isnan(df['array']), np.log10(df ['array']))
-                    # print(self.processed_analyte_data[sample_id].loc[:10,analytes])
-                    # print(self.data[sample_id]['processed_data'].loc[:10,analytes])
-                elif norm == 'logit' and scale_data:
-                    # Handle division by zero and NaN values
-                    with np.errstate(divide='ignore', invalid='ignore'):
-                        df['array'] = np.where(~np.isnan(df['array']), np.log10(df['array'] / (10**6 - df['array'])))
-
-            case _:#'PCA Score' | 'Cluster' | 'Cluster Score' | 'Special' | 'Computed':
-                df['array'] = self.data[sample_id]['computed_data'][field_type].loc[:,field].values
-            
-        # ----begin debugging----
-        # print(df.columns)
-        # ----end debugging----
-
-        # crop plot if filter applied
-        # current_plot_df = current_plot_df[self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
-        return df
 
     # extracts data for scatter plot
     def get_scatter_values(self,plot_type):

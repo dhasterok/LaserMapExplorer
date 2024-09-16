@@ -11,10 +11,7 @@ class SpecialFunctions():
 
         self.parent.comboBoxDatingMethod.activated.connect(self.callback_dating_method)
         self.parent.checkBoxComputeRatios.stateChanged.connect(self.callback_dating_ratios)
-
-        
         self.parent.pushButtonComputeAge.clicked.connect(self.compute_date_map)
-
 
     def callback_dating_ratios(self):
         self.callback_dating_method()

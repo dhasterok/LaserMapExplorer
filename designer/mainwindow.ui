@@ -1201,8 +1201,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>300</width>
-              <height>585</height>
+              <width>316</width>
+              <height>600</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_41">
@@ -1399,20 +1399,7 @@
                   </item>
                  </layout>
                 </item>
-                <item row="3" column="0">
-                 <widget class="QLabel" name="labelSampleResolution">
-                  <property name="font">
-                   <font>
-                    <pointsize>11</pointsize>
-                    <stylestrategy>PreferDefault</stylestrategy>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Resolution</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="3" column="1">
+                <item row="4" column="1">
                  <layout class="QHBoxLayout" name="horizontalLayout_25">
                   <item>
                    <widget class="QLabel" name="labelResolutionNx">
@@ -1504,7 +1491,7 @@
                   </item>
                  </layout>
                 </item>
-                <item row="4" column="0">
+                <item row="5" column="0">
                  <widget class="QLabel" name="labelPixelResolution">
                   <property name="font">
                    <font>
@@ -1517,7 +1504,7 @@
                   </property>
                  </widget>
                 </item>
-                <item row="4" column="1">
+                <item row="5" column="1">
                  <layout class="QHBoxLayout" name="horizontalLayout_42">
                   <item>
                    <widget class="QLabel" name="labelDX">
@@ -1636,6 +1623,68 @@
                     </property>
                     <property name="alignment">
                      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item row="3" column="1">
+                 <widget class="Line" name="line_3">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="0">
+                 <layout class="QHBoxLayout" name="horizontalLayout_40">
+                  <item>
+                   <widget class="QLabel" name="labelSampleResolution">
+                    <property name="font">
+                     <font>
+                      <pointsize>11</pointsize>
+                      <stylestrategy>PreferDefault</stylestrategy>
+                     </font>
+                    </property>
+                    <property name="text">
+                     <string>Resolution</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QToolButton" name="toolButtonResolutionReset">
+                    <property name="minimumSize">
+                     <size>
+                      <width>20</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>20</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                    <property name="toolTip">
+                     <string>Reset histogram axes</string>
+                    </property>
+                    <property name="accessibleName">
+                     <string>axis reset</string>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">border : none;</string>
+                    </property>
+                    <property name="text">
+                     <string>Reset</string>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="../resources.qrc">
+                      <normaloff>:/resources/icons/icon-reset-64.svg</normaloff>:/resources/icons/icon-reset-64.svg</iconset>
+                    </property>
+                    <property name="iconSize">
+                     <size>
+                      <width>14</width>
+                      <height>14</height>
+                     </size>
                     </property>
                    </widget>
                   </item>
@@ -1939,8 +1988,8 @@
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
-                 <width>20</width>
-                 <height>40</height>
+                 <width>285</width>
+                 <height>132</height>
                 </size>
                </property>
               </spacer>
@@ -1959,8 +2008,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>72</height>
+          <width>300</width>
+          <height>147</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -1999,7 +2048,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>257</width>
+              <width>300</width>
               <height>355</height>
              </rect>
             </property>
@@ -2558,8 +2607,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>78</height>
+          <width>300</width>
+          <height>147</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -2598,8 +2647,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>258</width>
-              <height>131</height>
+              <width>294</width>
+              <height>141</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_45">
@@ -2912,8 +2961,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>72</height>
+          <width>300</width>
+          <height>147</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -2952,7 +3001,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>230</width>
+              <width>300</width>
               <height>263</height>
              </rect>
             </property>
@@ -3551,8 +3600,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>72</height>
+          <width>300</width>
+          <height>147</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -3591,7 +3640,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>274</width>
+              <width>300</width>
               <height>484</height>
              </rect>
             </property>
@@ -4317,8 +4366,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>72</height>
+          <width>300</width>
+          <height>147</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5004,8 +5053,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>72</height>
+          <width>300</width>
+          <height>147</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5044,7 +5093,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>286</width>
+              <width>300</width>
               <height>402</height>
              </rect>
             </property>
@@ -5698,8 +5747,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>72</height>
+          <width>300</width>
+          <height>147</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5745,7 +5794,7 @@
               <x>0</x>
               <y>0</y>
               <width>301</width>
-              <height>128</height>
+              <height>147</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_57">
@@ -5931,8 +5980,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>72</height>
+          <width>300</width>
+          <height>147</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5971,7 +6020,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>246</width>
+              <width>300</width>
               <height>284</height>
              </rect>
             </property>
@@ -6350,8 +6399,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>72</height>
+          <width>300</width>
+          <height>147</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6396,8 +6445,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>209</width>
-              <height>111</height>
+              <width>300</width>
+              <height>147</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_64">
@@ -6566,7 +6615,7 @@
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>260</width>
+                      <width>280</width>
                       <height>303</height>
                      </rect>
                     </property>
@@ -7252,8 +7301,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>212</width>
-          <height>130</height>
+          <width>268</width>
+          <height>360</height>
          </rect>
         </property>
         <attribute name="label">
@@ -7528,15 +7577,15 @@
             <enum>QFrame::Raised</enum>
            </property>
            <property name="currentIndex">
-            <number>3</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="StyleAxes">
             <property name="geometry">
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>100</width>
-              <height>72</height>
+              <width>294</width>
+              <height>144</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -7575,7 +7624,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>171</width>
+                  <width>294</width>
                   <height>342</height>
                  </rect>
                 </property>
@@ -9523,8 +9572,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>72</height>
+          <width>290</width>
+          <height>360</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -9563,7 +9612,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>222</width>
+              <width>290</width>
               <height>687</height>
              </rect>
             </property>

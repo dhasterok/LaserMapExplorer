@@ -246,11 +246,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 | 'use' : (bool) -- ``True`` indicates the filter should be used to filter data
                 | 'persistent' : (bool) -- ``True`` retains the filter when the sample is changed
 
-            | 'axis_mask' : (MaskObj) -- mask created from cropped data.
+            | 'crop_mask' : (MaskObj) -- mask created from cropped axes.
             | 'filter_mask' : (MaskObj) -- mask created by a combination of filters.  Filters are displayed for the user in ``tableWidgetFilters``.
             | 'polygon_mask' : (MaskObj) -- mask created from selected polygons.
             | 'cluster_mask' : (MaskObj) -- mask created from selected or inverse selected cluster groups.  Once this mask is set, it cannot be reset unless it is turned off, clustering is recomputed, and selected clusters are used to produce a new mask.
-            | 'mask' : () -- combined mask, derived from filter_mask & 'polygon_mask' & 'axis_mask'
+            | 'mask' : () -- combined mask, derived from filter_mask & 'polygon_mask' & 'crop_mask'
         left_tab : dict
             Holds the indices for pages in ``toolBox``
         map_plot_types : list
@@ -1794,9 +1794,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
                 # swap x and y
                 # print(self.data[self.sample_id][['X','Y']])
-                self.swap_xy_data(self.data[self.sample_id]['raw_data'])
+                self.swap_xy_data(self.data[self.sample_id].raw_data)
 
-                self.swap_xy_data(self.data[self.sample_id]['processed_data']) #this rotates processed data as well
+                self.swap_xy_data(self.data[self.sample_id].processed_data) #this rotates processed data as well
 
                 # self.swap_xy_data(self.data[self.sample_id]['computed_data']['Cluster'])
             case 'scatter' | 'heatmap':
@@ -1853,14 +1853,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         df = df.sort_values(['Y','X'])
 
         self.compute_map_aspect_ratio()
+        self.update_aspect_ratio_controls()
+
+    def update_aspect_ratio_controls(self):
+        self.lineEditDX.value = self.dx
+        self.lineEditDY.value = self.dy
+
+        self.lineEditResolutionNx.value = self.array_size[1]
+        self.lineEditResolutionNy.value = self.array_size[0]
 
     def swap_resolution(self):
         """Swaps DX and DY for a dataframe
 
         Recalculates X and Y for a dataframe
         """
-        X = round(self.data[self.sample_id]['raw_data']['X']/self.dx)
-        Y = round(self.data[self.sample_id]['raw_data']['Y']/self.dy)
+        X = round(self.data[self.sample_id].raw_data['X']/self.dx)
+        Y = round(self.data[self.sample_id].raw_data['Y']/self.dy)
 
         Xp = round(self.data[self.sample_id]['processed_data']['X']/self.dx)
         Yp = round(self.data[self.sample_id]['processed_data']['Y']/self.dy)
@@ -1880,6 +1888,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.data[self.sample_id]['processed_data']['Y'] = self.dy*Yp
 
         self.compute_map_aspect_ratio()
+        self.update_aspect_ratio_controls()
 
         self.update_SV()
 
@@ -1888,22 +1897,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Recalculates X and Y for a dataframe
         """
-        X = round(self.data[self.sample_id].raw_data['X']/self.data[self.sample_id].dx)
-        Y = round(self.data[self.sample_id].raw_data['Y']/self.data[self.sample_id].dy)
+        self.data[self.sample_id].update_resolution(self.lineEditDX.value, self.lineEditDY.value)
 
-        Xp = round(self.data[self.sample_id].processed_data['X']/self.data[self.sample_id].dx)
-        Yp = round(self.data[self.sample_id].processed_data['Y']/self.data[self.sample_id].dy)
-
-        self.data[self.sample_id].dx = self.lineEditDX.value
-        self.data[self.sample_id].dy = self.lineEditDY.value
-
-        self.data[self.sample_id].raw_data['X'] = self.data[self.sample_id].dx*X
-        self.data[self.sample_id].raw_data['Y'] = self.data[self.sample_id].dy*Y
-
-        self.data[self.sample_id].processed_data['X'] = self.data[self.sample_id].dx*Xp
-        self.data[self.sample_id].processed_data['Y'] = self.data[self.sample_id].dy*Yp
-
-        self.compute_map_aspect_ratio()
+        self.update_aspect_ratio_controls()
 
         self.update_SV()
 
@@ -2258,21 +2254,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # Removed during DataHandling update
             # if axis:
             #     # Filtering rows based on the conditions on 'X' and 'Y' columns
-            #     self.data[self.sample_id].axis_mask = ((current_plot_df['X'] >= self.data[sample_id].crop_x_min) & (current_plot_df['X'] <= self.data[sample_id].crop_x_max) &
+            #     self.data[self.sample_id].crop_mask = ((current_plot_df['X'] >= self.data[sample_id].crop_x_min) & (current_plot_df['X'] <= self.data[sample_id].crop_x_max) &
             #                    (current_plot_df['Y'] <= current_plot_df['Y'].max() - self.data[sample_id].crop_y_min) & (current_plot_df['Y'] >= current_plot_df['Y'].max() - self.data[sample_id].crop_y_max))
 
 
-            #     #crop original_data based on self.data[self.sample_id]['axis_mask']
-            #     self.data[sample_id]['cropped_raw_data'] = self.data[sample_id]['raw_data'][self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
+            #     #crop original_data based on self.data[self.sample_id]['crop_mask']
+            #     self.data[sample_id]['cropped_raw_data'] = self.data[sample_id]['raw_data'][self.data[self.sample_id]['crop_mask']].reset_index(drop=True)
 
 
-            #     #crop clipped_analyte_data based on self.data[self.sample_id]['axis_mask']
-            #     self.data[sample_id]['processed_data'] = self.data[sample_id]['processed_data'][self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
+            #     #crop clipped_analyte_data based on self.data[self.sample_id]['crop_mask']
+            #     self.data[sample_id]['processed_data'] = self.data[sample_id]['processed_data'][self.data[self.sample_id]['crop_mask']].reset_index(drop=True)
 
-            #     #crop each df of computed_analyte_data based on self.data[self.sample_id]['axis_mask']
+            #     #crop each df of computed_analyte_data based on self.data[self.sample_id]['crop_mask']
             #     for analysis_type, df in self.data[sample_id]['computed_data'].items():
             #         if isinstance(df, pd.DataFrame):
-            #             df = df[self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
+            #             df = df[self.data[self.sample_id]['crop_mask']].reset_index(drop=True)
 
 
             #     self.prep_data(sample_id)
@@ -2643,24 +2639,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         field = self.comboBoxColorField.currentText()
         current_plot_df = self.get_map_data(sample_id, field, field_type=field_type)
         
-        # self.data[self.sample_id].axis_mask = ((current_plot_df['X'] >= self.data[sample_id].crop_x_min) & (current_plot_df['X'] <= self.data[sample_id].crop_x_max) &
+        # self.data[self.sample_id].crop_mask = ((current_plot_df['X'] >= self.data[sample_id].crop_x_min) & (current_plot_df['X'] <= self.data[sample_id].crop_x_max) &
         #                (current_plot_df['Y'] <=  self.data[sample_id].crop_y_max) & (current_plot_df['Y'] >= self.data[sample_id].crop_y_min))
 
 
-        # #crop original_data based on self.data[self.sample_id]['axis_mask']
-        # self.data[sample_id]['cropped_raw_data'] = self.data[sample_id]['raw_data'][self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
+        # #crop original_data based on self.data[self.sample_id]['crop_mask']
+        # self.data[sample_id]['cropped_raw_data'] = self.data[sample_id]['raw_data'][self.data[self.sample_id]['crop_mask']].reset_index(drop=True)
 
-        # #crop clipped_analyte_data based on self.data[self.sample_id]['axis_mask']
-        # self.data[sample_id]['processed_data'] = self.data[sample_id]['processed_data'][self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
+        # #crop clipped_analyte_data based on self.data[self.sample_id]['crop_mask']
+        # self.data[sample_id]['processed_data'] = self.data[sample_id]['processed_data'][self.data[self.sample_id]['crop_mask']].reset_index(drop=True)
 
-        # #crop each df of computed_analyte_data based on self.data[self.sample_id]['axis_mask']
+        # #crop each df of computed_analyte_data based on self.data[self.sample_id]['crop_mask']
         # for analysis_type, df in self.data[sample_id]['computed_data'].items():
         #     if isinstance(df, pd.DataFrame):
-        #         self.data[sample_id]['computed_data'][analysis_type] = df[self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
+        #         self.data[sample_id]['computed_data'][analysis_type] = df[self.data[self.sample_id]['crop_mask']].reset_index(drop=True)
 
-        self.data[self.sample_id].mask = self.data[self.sample_id].mask[self.data[self.sample_id].axis_mask]
-        self.data[self.sample_id].polygon_mask = self.data[self.sample_id].polygon_mask[self.data[self.sample_id].axis_mask]
-        self.data[self.sample_id].filter_mask = self.data[self.sample_id].filter_mask[self.data[self.sample_id].axis_mask]
+        self.data[self.sample_id].mask = self.data[self.sample_id].mask[self.data[self.sample_id].crop_mask]
+        self.data[self.sample_id].polygon_mask = self.data[self.sample_id].polygon_mask[self.data[self.sample_id].crop_mask]
+        self.data[self.sample_id].filter_mask = self.data[self.sample_id].filter_mask[self.data[self.sample_id].crop_mask]
         self.prep_data(sample_id)
         #self.update_all_plots()
         # compute new aspect ratio
@@ -2728,7 +2724,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             cluster_mask = np.ones_like( self.data[sample_id]['mask'], dtype=bool)
 
-        self.data[sample_id]['mask'] = self.data[sample_id]['axis_mask'] & filter_mask & polygon_mask & cluster_mask
+        self.data[sample_id]['mask'] = self.data[sample_id]['crop_mask'] & filter_mask & polygon_mask & cluster_mask
 
         # if single view is active
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:

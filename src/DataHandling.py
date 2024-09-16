@@ -5,7 +5,126 @@ from src.ExtendedDF import AttributeDataFrame
 from scipy.stats import yeojohnson
 
 class SampleObj:
+    """Creates a sample object to store and manipulate geochemical data in map form
+    
+    The sample object is initially constructed from the data within a *.lame.csv file and loaded into
+    the ``raw_data`` dataframe.  The sample object also contains a number of properties in addition
+    to the input data.  These include metadata that are linked to each column.  To make this link,
+    the dataframe is initialized as an ``ExtendedDF.AttributeDataFrame``, which brings with it a
+    number of methods to set, get and search the dataframe's metadata.
+
+    
+    Methods
+    -------
+    update_crop_mask :
+        Automatically update the crop_mask whenever crop bounds change.
+    reset_crop : 
+        Resets dataframe to original bounds.
+    compute_map_aspect_ratio :
+    update_resolution :
+    prep_data :
+    outlier_detection :
+    transform_array :
+    swap_xy :
+
+            | 'analyte_info' : (dataframe) -- holds information regarding each analyte in sample id,
+                | 'analytes' (str) -- name of analyte
+                | 'sample_id' (str) -- sample id
+                | 'norm' (str) -- type of normalisation used(linear,log,logit)
+                | 'upper_bound' (float) -- upper bound for autoscaling/scaling
+                | 'lower_bound' (float) -- lower bound for autoscaling/scaling
+                | 'd_l_bound' (float) -- difference lower bound for autoscaling
+                | 'd_u_bound' (float) -- difference upper bound for autoscaling
+                | 'v_min' (float) -- max value of analyte
+                | 'v_max' (float) -- min value of analyte
+                | 'auto_scale' (bool) -- indicates whether auto_scaling is switched on for that analyte, use percentile bounds if False
+                | 'use' (bool) -- indicates whether the analyte is being used in the analysis
+            | 'ratio_info' : (dataframe) -- holds information  regarding computerd ratios 
+                | 'analyte_1' (str) -- name of analyte at numerator of ratio
+                | 'analyte_2' (str) -- name of analyte at denominator of ratio
+                | 'norm' (str) -- type of normalisation used(linear,log,logit)
+                | 'upper_bound' (float) --  upper bound for autoscaling/scaling
+                | 'lower_bound' (float) --  lower bound for autoscaling/scaling
+                | 'd_l_bound' (float) --  difference lower bound for autoscaling
+                | 'd_u_bound' (float) --  difference upper bound for autoscaling
+                | 'v_min' (float) -- max value of analyte
+                | 'v_max' (float) -- min value of analyte
+                | 'auto_scale' (bool) -- indicates whether auto_scaling is switched on for that analyte, use percentile bounds if False
+                | 'use' (bool) -- indicates whether the analyte is being used in the analysis
+            
+            | 'crop' : () --
+            | 'x_max' : () --
+            | 'x_min' : () --
+            | 'y_max' : () --
+            | 'y_min' : () --
+            | 'crop_x_max' : () --
+            | 'crop_x_min' : () --
+            | 'crop_y_max' : () --
+            | 'crop_y_min' : () --
+            | 'processed data': () --
+            | 'raw_data': () -- 
+            | 'cropped_raw_data': () --
+            
+        | 'ratio_info' : (dataframe) --
+        | 'crop' : () --
+        | 'x_max' : () --
+        | 'x_min' : () --
+        | 'y_max' : () --
+        | 'y_min' : () --
+        | 'crop_x_max' : () --
+        | 'crop_x_min' : () --
+        | 'crop_y_max' : () --
+        | 'crop_y_min' : () --
+        | 'processed data': () --
+        | 'raw_data': () -- 
+        | 'cropped_raw_data': () -- 
+        | 'raw data' : (pandas.DataFrame) --
+        | 'x_min' : (float) -- minimum x of full data
+        | 'x_max' : (float) -- maximum x of full data
+        | 'y_min' : (float) -- minimum y of full data
+        | 'y_max' : (float) -- maximum y of full data
+        | 'crop_x_min' : (float) -- minimum x of cropped data
+        | 'crop_x_max' : (float) -- maximum x of cropped data
+        | 'crop_x_min' : (float) -- minimum y of cropped data
+        | 'crop_x_max' : (float) -- maximum y of cropped data
+        | 'norm' : () --
+        | 'analysis data' : (pandas.DataFrame) --
+        | 'cropped_raw_data' : (pandas.DataFrame) --
+        | 'computed_data' : (dict) --
+            | 'PCA Score' : (pandas.DataFrame) --
+            | 'Cluster' : (pandas.DataFrame) --
+            | 'Cluster Score' : (pandas.DataFrame) --
+        | 'processed_data' : (pandas.DataFrame) --
+        ['filter_info'] : (pandas.DataFrame) -- stores filters for each sample
+            | 'field_type' : (str) -- field type
+            | 'field' : (str) -- name of field
+            | 'norm' : (str) -- scale normalization function, ``linear`` or ``log``
+            | 'min' : (float) -- minimum value for filtering
+            | 'max' : (float) -- maximum value for filtering
+            | 'operator' : (str) -- boolean operator for combining filters, ``and`` or ``or``
+            | 'use' : (bool) -- ``True`` indicates the filter should be used to filter data
+            | 'persistent' : (bool) -- ``True`` retains the filter when the sample is changed
+
+        | 'crop_mask' : (MaskObj) -- mask created from cropped axes.
+        | 'filter_mask' : (MaskObj) -- mask created by a combination of filters.  Filters are displayed for the user in ``tableWidgetFilters``.
+        | 'polygon_mask' : (MaskObj) -- mask created from selected polygons.
+        | 'cluster_mask' : (MaskObj) -- mask created from selected or inverse selected cluster groups.  Once this mask is set, it cannot be reset unless it is turned off, clustering is recomputed, and selected clusters are used to produce a new mask.
+        | 'mask' : () -- combined mask, derived from filter_mask & 'polygon_mask' & 'crop_mask'
+    """    
     def __init__(self, sample_id, file_path, negative_method):
+        """_summary_
+
+        _extended_summary_
+
+        Parameters
+        ----------
+        sample_id : str
+            Sample identifier.
+        file_path : str
+            Path to data file for sample_id
+        negative_method : str
+            Method used to handle negative values in the dataset
+        """        
         # assign sample ID
         self.sample_id = sample_id
 
@@ -44,8 +163,18 @@ class SampleObj:
         self.cropped_raw_data = copy.deepcopy(self.raw_data)
 
         # set selected_analytes to columns excluding X and Y (future-proofed)
-        self.selected_analytes = self.raw_data.columns[2:].tolist()  # Skipping first two columns
-        self.processed_data = copy.deepcopy(self.raw_data[self.selected_analytes])
+        #self.selected_analytes = self.raw_data.columns[2:].tolist()  # Skipping first two columns
+        analyte_columns = self.raw_data.find_columns(attribute='data_type',value='analyte')
+        self.processed_data = self.raw_data.copy_columns(columns=analyte_columns)
+        self.processed_data.set_attribute(attribute='use', columns=analyte_columns, values=True)
+        self.processed_data.set_attribute(attribute='upper_bound', columns=analyte_columns, values=99.5)
+        self.processed_data.set_attribute(attribute='diff_lower_bound', columns=analyte_columns, values=0.05)
+        self.processed_data.set_attribute(attribute='diff_upper_bound', columns=analyte_columns, values=99)
+        self.processed_data.set_attribute(attribute='v_min', columns=analyte_columns, values=None)
+        self.processed_data.set_attribute(attribute='v_max', columns=analyte_columns, values=None)
+        self.processed_data.set_attribute(attribute='norm', columns=analyte_columns, values='linear')
+        self.processed_data.set_attribute(attribute='auto_scale', columns=analyte_columns, values=True)
+        self.processed_data.set_attribute(attribute='negative_method', columns=analyte_columns, values=negative_method)
 
         self.computed_data = {
             'Analyte': pd.DataFrame(),
@@ -56,7 +185,6 @@ class SampleObj:
             'Cluster Score': pd.DataFrame(),
         }
 
-        self.analyte_info = pd.DataFrame(columns = ['analytes', 'norm', 'upper_bound', 'lower_bound', 'd_l_bound', 'd_u_bound', 'use'])
         self.ratio_info = pd.DataFrame(columns = [ 'analyte_1', 'analyte_2', 'norm', 'upper_bound', 'lower_bound', 'd_l_bound', 'd_u_bound', 'use', 'auto_scale'])
 
         # initialize X and Y axes bounds for plotting and cropping, initially the entire map
@@ -74,47 +202,29 @@ class SampleObj:
         #----------------
 
         analytes = pd.DataFrame()
-        analytes['analytes']=self.selected_analytes
-        analytes['sample_id'] = sample_id
-        analytes['norm'] = 'linear'
-
-        #update self.data['norm']
-        self.norm = {}
-
-        for analyte in self.selected_analytes:
-            self.norm[analyte] = 'linear'
-
         # setup a dataframe with parameters for autoscaling and handling negative values for each analyte
-        analytes['lower_bound'] = 0.05
-        analytes['upper_bound'] = 99.5
-        analytes['d_l_bound'] = 0.05 
-        analytes['d_u_bound'] = 99
-        analytes['v_min'] = None
-        analytes['v_max'] = None
-        analytes['auto_scale'] = True
-        analytes['use'] = True
-        analytes['negative_method'] = negative_method
-        
-        df = self.raw_data[self.selected_analytes]
-        # # Replace non-positive values with NaN
-        # df_positive = df.where(df > 0, np.nan)
-        # # Get the minimum positive values
-        # min_positive_values = df_positive.min()
-        
-        # analytes['min_positive_value'] = min_positive_values
-        self.analyte_info = analytes
+        # analytes['analytes']=self.selected_analytes
+        # analytes['sample_id'] = sample_id
+        # analytes['norm'] = 'linear'
+        # analytes['lower_bound'] = 0.05
+        # analytes['upper_bound'] = 99.5
+        # analytes['d_l_bound'] = 0.05 
+        # analytes['d_u_bound'] = 99
+        # analytes['v_min'] = None
+        # analytes['v_max'] = None
+        # analytes['auto_scale'] = True
+        # analytes['use'] = True
+        # analytes['negative_method'] = negative_method
 
-        # for plot_type in self.plot_widget_dict.keys():
-        #     if sample_id not in self.plot_widget_dict[plot_type]:
-        #         self.plot_widget_dict[plot_type][sample_id]={}
+        # self.analyte_info = analytes
 
         # set mask of size of analyte array
-        self.axis_mask = np.ones_like(self.raw_data['X'], dtype=bool)
+        self.crop_mask = np.ones_like(self.raw_data['X'], dtype=bool)
         self.filter_mask = np.ones_like(self.raw_data['X'].values, dtype=bool)
         self.polygon_mask = np.ones_like(self.raw_data['X'], dtype=bool)
         self.cluster_mask = np.ones_like(self.raw_data['X'], dtype=bool)
         self.mask = \
-            self.axis_mask & \
+            self.crop_mask & \
             self.filter_mask & \
             self.polygon_mask & \
             self.cluster_mask
@@ -148,7 +258,7 @@ class SampleObj:
             self._xlim[0] = minval
         if maxval:
             self._xlim[1] = maxval
-        self.update_axis_mask()
+        self.update_crop_mask()
 
     # Cropped Y-axis limits
     @property
@@ -161,34 +271,35 @@ class SampleObj:
             self._ylim[0] = minval
         if maxval:
             self._ylim[1] = maxval
-        self.update_axis_mask()
+        self.update_crop_mask()
     
-    def update_axis_mask(self):
-        """Automatically update the axis_mask whenever crop bounds change."""
+    def update_crop_mask(self):
+        """Automatically update the crop_mask whenever crop bounds change."""
         self.crop = True
 
         df = self.raw_data
-        self.axis_mask = (
+        self.crop_mask = (
             (df['X'] >= self.xlim[0]) & 
             (df['X'] <= self.xlim[1]) &
             (df['Y'] <= df['Y'].max() - self.ylim[0]) &
             (df['Y'] >= df['Y'].max() - self.ylim[1])
         )
 
-        #crop original_data based on self.axis_mask
-        self.cropped_raw_data = self.raw_data[self.axis_mask].reset_index(drop=True)
+        #crop original_data based on self.crop_mask
+        self.cropped_raw_data = self.raw_data[self.crop_mask].reset_index(drop=True)
 
-        #crop clipped_analyte_data based on self.axis_mask
-        self.processed_data = self.processed_data[self.axis_mask].reset_index(drop=True)
+        #crop clipped_analyte_data based on self.crop_mask
+        self.processed_data = self.processed_data[self.crop_mask].reset_index(drop=True)
 
         for analysis_type, df in self.computed_data.items():
             if isinstance(df, pd.DataFrame):
-                df = df[self.axis_mask].reset_index(drop=True)
+                df = df[self.crop_mask].reset_index(drop=True)
 
 
         self.prep_data(sample_id)
 
     def reset_crop(self):
+        """Resets dataframe to original bounds."""        
         self.crop = False
 
         self.xlim = self.xlim_raw
@@ -206,10 +317,10 @@ class SampleObj:
         }
 
         # reset axis mask and mask
-        self.axis_mask = np.ones_like( self.raw_data['X'], dtype=bool)
+        self.crop_mask = np.ones_like( self.raw_data['X'], dtype=bool)
         self.mask = np.ones_like( self.raw_data['X'], dtype=bool)
         # self.data[self.sample_id]['mask'] = \
-        #         self.data[self.sample_id]['axis_mask'] & \
+        #         self.data[self.sample_id]['crop_mask'] & \
         #         self.data[self.sample_id]['filter_mask'] & \
         #         self.data[self.sample_id]['polygon_mask'] & \
         #         self.data[self.sample_id]['cluster_mask']
@@ -218,18 +329,46 @@ class SampleObj:
         # re-compute aspect ratio
         self.compute_map_aspect_ratio()
 
-    def preprocess_data(self):
-        """Preprocess the raw data and store the results in computed_data."""
-        # Cropping and processing the raw data
-        self.dataset.crop(x_range=(0, 100), y_range=(0, 100))  # Example ranges
-        self.dataset.process(self.some_processing_method)
+    def compute_map_aspect_ratio(self):
+        """Computes aspect ratio of current sample
         
-        # Separate processed data into different computed categories
-        separated_data = self.dataset.separate_computed_data()
-        self.computed_data['Analyte'] = separated_data['analytes']
-        self.computed_data['Ratio'] = separated_data['ratios']
-        self.computed_data['Special'] = separated_data['special']
+        The aspect ratio is needed for maps and computations of areas as the pixels may not be square in dimension.
+        The aspect ratio is defined as dy/dx where dy is y_range/n_y and dx is x_range/n_x.
+        """
+        self.x = self.processed_data['X']
+        self.y = self.processed_data['Y']
 
+        self.x_range = self.x.max() - self.x.min()
+        self.y_range = self.y.max() - self.y.min()
+
+        self.dx = self.x_range/self.x.nunique()
+        self.dy = self.y_range/self.y.nunique()
+
+        self.aspect_ratio = self.dy / self.dx
+
+        self.array_size = (self.y.nunique(), self.x.nunique())
+
+    def update_resolution(self, dx, dy):
+        """Updates DX and DY for a dataframe
+
+        Recalculates X and Y for a dataframe
+        """
+        X = round(self.raw_data['X']/self.dx)
+        Y = round(self.raw_data['Y']/self.dy)
+
+        Xp = round(self.processed_data['X']/self.dx)
+        Yp = round(self.processed_data['Y']/self.dy)
+
+        self.dx = dx
+        self.dy = dy
+
+        self.raw_data['X'] = self.dx*X
+        self.raw_data['Y'] = self.dy*Y
+
+        self.processed_data['X'] = self.dx*Xp
+        self.processed_data['Y'] = self.dy*Yp
+
+        self.compute_map_aspect_ratio()
 
     def prep_data(self, analyte_1=None, analyte_2=None):
         """Prepares data to be used in analysis
@@ -295,10 +434,9 @@ class SampleObj:
                     filtered_data =  self.processed_data[analytes][analyte_1].values
                     lq = parameters['lower_bound']
                     uq = parameters['upper_bound']
-                    d_lb = parameters['d_l_bound']
-                    d_ub = parameters['d_u_bound']
+                    d_lb = parameters['diff_lower_bound']
+                    d_ub = parameters['diff_upper_bound']
                     if auto_scale:
-
                         self.processed_data[analyte_1] = self.outlier_detection(filtered_data.reshape(-1, 1),lq, uq, d_lb,d_ub)
                     else:
                         #clip data using ub and lb
@@ -419,7 +557,7 @@ class SampleObj:
         analyte_2 : str, optional
             Denominator of ratio, by default None
         update : bool, optional
-            Update the scal information of the data, by default False
+            Update the scale information of the data, by default False
         """        
         if analyte_1: #if normalising single analyte
             if not analyte_2: #not a ratio
@@ -441,7 +579,7 @@ class SampleObj:
 
         #update self.data['norm']
         for analyte in analytes:
-            self.norm'][analyte] = norm
+            self.norm[analyte] = norm
 
         #if update:
         # self.update_all_plots()
@@ -476,15 +614,15 @@ class SampleObj:
 
         # if sample_id != self.sample_id:
         #     #axis mask is not used when plot analytes of a different sample
-        #     axis_mask  = np.ones_like( self.raw_data['X'], dtype=bool)
+        #     crop_mask  = np.ones_like( self.raw_data['X'], dtype=bool)
         # else:
-        #     axis_mask = self.data[self.sample_id]['axis_mask']
+        #     crop_mask = self.data[self.sample_id]['crop_mask']
         
         # retrieve axis mask for that sample
-        axis_mask = self.axis_mask
+        crop_mask = self.crop_mask
         
         #crop plot if filter applied
-        df = self.raw_data[['X','Y']][axis_mask].reset_index(drop=True)
+        df = self.raw_data[['X','Y']][crop_mask].reset_index(drop=True)
 
         print(field_type)
 
@@ -546,7 +684,7 @@ class SampleObj:
         # ----end debugging----
 
         # crop plot if filter applied
-        # current_plot_df = current_plot_df[self.data[self.sample_id]['axis_mask']].reset_index(drop=True)
+        # current_plot_df = current_plot_df[self.data[self.sample_id]['crop_mask']].reset_index(drop=True)
         return df
 
     def outlier_detection(data ,lq=0.0005, uq=99.5, d_lq=9.95 , d_uq=99):
@@ -673,28 +811,3 @@ class SampleObj:
                 t_array, lambda_yeojohnson = yeojohnson(array)
                 return t_array
     
-
-    def compute_map_aspect_ratio(self):
-        """Computes aspect ratio of current sample
-        
-        The aspect ratio is needed for maps and computations of areas as the pixels may not be square in dimension.
-        The aspect ratio is defined as dy/dx where dy is y_range/n_y and dx is x_range/n_x.
-        """
-        self.x = self.processed_data['X']
-        self.y = self.processed_data['Y']
-
-        self.x_range = self.x.max() -  self.x.min()
-        self.y_range = self.y.max() -  self.y.min()
-
-        self.dx = self.x_range/self.x.nunique()
-        self.dy = self.y_range/self.y.nunique()
-
-        self.lineEditDX.value = self.dx
-        self.lineEditDY.value = self.dy
-
-        self.aspect_ratio = self.dy / self.dx
-
-        self.array_size = (self.y.nunique(), self.x.nunique())
-        
-        self.lineEditResolutionNx.value = self.array_size[1]
-        self.lineEditResolutionNy.value = self.array_size[0]

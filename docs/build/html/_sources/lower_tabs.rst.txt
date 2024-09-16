@@ -3,6 +3,13 @@ Lower Tabs
 
 The Lower Tabs provide additional functionality for note-taking and profile visualization, enhancing your analysis workflow in LaME.
 
+.. figure:: _static/screenshots/LaME_Lower_Tab.png
+    :align: center
+    :alt: LaME interface: lower tab
+    :width: 232
+
+    Lower Tabs
+
 Notes
 =====
 

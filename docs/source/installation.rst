@@ -3,6 +3,9 @@ Installation
 
 There are two ways to install and use *LaME*:
 
+* using precomplied executable (standalone application)
+* using source code
+
 Standalone Application
 ======================
 
@@ -12,17 +15,12 @@ To install the standalone application:
 
 1. Download the *LaME* installer: (link)
 2. Run the installer and follow the on-screen instructions
-3. Once installed, you can launch *LaME* from your applications menu or desktop shortcut
+3. Once installed, *LaME* can be launched from your applications menu or desktop shortcut
 
 Source Code
 ===========
 
 This method always provides the most up-to-date version with the latest features and improvements, but may occasionally break as we improve the code, implement new features, or experiment with new tools.
-
-Prerequisites
--------------
-* Anaconda or Miniconda
-* Git or Visual Studio Code
 
 Step 1: Install Anaconda
 ------------------------
@@ -49,9 +47,9 @@ Option B: Install Visual Studio Code
 2. Install the Python extension in VSC
 3. Run the following command in Anaconda Prompt or Terminal:
 
-   .. code-block:: bash
+.. code-block:: bash
 
-      conda install git
+   conda install git
 
 Step 3: Clone Repository
 ------------------------
@@ -90,7 +88,7 @@ Using Terminal Prompt or Anaconda Prompt:
    python3 main.py
 
 Updating *LaME*
-===============
+---------------
 To update *LaME* in the future, navigate to the LaserMapExplorer directory and run:
 
 .. code-block:: bash
@@ -107,5 +105,5 @@ Then, activate your virtual environment and update dependencies if necessary:
 Remember to check the project's documentation for any additional steps that might be required after updating.
 
 Troubleshooting
-===============
+---------------
 If you encounter any issues during the installation process, please :doc:`contact us <contact>`.

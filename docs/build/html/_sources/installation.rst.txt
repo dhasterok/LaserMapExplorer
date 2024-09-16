@@ -1,30 +1,45 @@
 Installation
 ************
 
-Using a Precompiled Executable
-==============================
+There are two ways to install and use *LaME*:
 
-Using the Source Code
-=====================
+* using precomplied executable (standalone application)
+* using source code
 
-This method always provides you with the most up-to-date version of *LaME*. However, please note that this method may occasionally encounter issues as we improve the code, implement new features, or experiment with new tools.
+Standalone Application
+======================
+
+This method provides a ready-to-run program that doesn't require any programming knowledge. While this method is the easiest to set up, it may not have the very latest features.
+
+To install the standalone application:
+
+1. Download the *LaME* installer: (link)
+2. Run the installer and follow the on-screen instructions
+3. Once installed, you can launch *LaME* from your applications menu or desktop shortcut
+
+Source Code
+===========
+
+This method always provides the most up-to-date version with the latest features and improvements, but may occasionally break as we improve the code, implement new features, or experiment with new tools.
+
+Prerequisites
+-------------
+* Anaconda or Miniconda
+* Git or Visual Studio Code
 
 Step 1: Install Anaconda
 ------------------------
-
 Download and install Anaconda from https://www.anaconda.com/download
 
 Step 2: Install Git or Visual Studio Code
 -----------------------------------------
-
-You have two options for managing the *LaME* repository: Git or Visual Studio Code (VSC). Choose the option that best suits your needs.
+Choose the option that bestß suits your needs:
 
 Option A: Install Git
 ^^^^^^^^^^^^^^^^^^^^^
-
 * Windows: Open Anaconda Prompt
 * Mac/Linux: Open Terminal
- 
+
 Run the following command:
 
 .. code-block:: bash
@@ -33,13 +48,9 @@ Run the following command:
 
 Option B: Install Visual Studio Code
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Download and install Visual Studio Code from https://code.visualstudio.com/
-Install the following extensions in VSC:
-
-* Python
-
-Run the following command:
+1. Download and install Visual Studio Code from https://code.visualstudio.com/
+2. Install the Python extension in VSC
+3. Run the following command in Anaconda Prompt or Terminal:
 
 .. code-block:: bash
 
@@ -47,7 +58,6 @@ Run the following command:
 
 Step 3: Clone Repository
 ------------------------
-
 Clone the *LaME* repository to your local directory:
 
 .. code-block:: bash
@@ -57,7 +67,6 @@ Clone the *LaME* repository to your local directory:
 
 Step 4: Create and Activate Virtual Environment
 -----------------------------------------------
-
 Create a new Anaconda virtual environment:
 
 .. code-block:: bash
@@ -77,21 +86,14 @@ If the above step fails, try the following alternative:
 
 Step 5: Run *LaME*
 ------------------
-
-Using Terminal Prompt:
+Using Terminal Prompt or Anaconda Prompt:
 
 .. code-block:: bash
-    
-    python3 main.py
 
-Troubleshooting
----------------
-
-If you encounter any issues during the installation process, please refer to the project's documentation or :doc:`contact us <contact>`.
+   python3 main.py
 
 Updating *LaME*
 ---------------
-
 To update *LaME* in the future, navigate to the LaserMapExplorer directory and run:
 
 .. code-block:: bash
@@ -106,3 +108,7 @@ Then, activate your virtual environment and update dependencies if necessary:
    conda update --all
 
 Remember to check the project's documentation for any additional steps that might be required after updating.
+
+Troubleshooting
+---------------
+If you encounter any issues during the installation process, please :doc:`contact us <contact>`.

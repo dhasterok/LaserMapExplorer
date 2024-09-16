@@ -1,7 +1,7 @@
 Plotting
 ********
 
-There are a number of plots that are possible within LaME.  A list of plot types and where they are generated is given below.  If you would like a new type of plot or additional options, file a feature request on the GitHub page or contact us (:doc:`contact`).
+There are a number of plots that are possible within *LaME*.  A list of plot types and where they are generated is given below.  If you would like a new type of plot or additional options, file a feature request on the GitHub page or contact us (:doc:`contact`).
 
 +---------------------------+---------------------------+
 | Plot type                 | Tab                       |

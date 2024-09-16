@@ -1,12 +1,12 @@
 Plot and Property Toolbox (Right)
 *********************************
 
-The *Plot and Property Toolbox* consists of three major tabs: a tree containing saved plots (*Plot Selector*); a styling pane with plot options; and a calculator for creating custom fields.
+The *Plot and Property Toolbox*, located on the right side of the LaME interface, consists of three major components: the Plot Selector, the Styling Pane, and the Calculator. These tools work together to provide comprehensive control over plot creation, customization, and data manipulation.
 
 Plot Selector
 =============
 
-The *Plot Selector* lists the available plots for display.  The default list includes all analytes and their normalized versions.  Ratios can be added by selecting them from *Analyte Selector*.  All other plots in the list are generated once they have been created and/or explicitly stored.
+The *Plot Selector* lists the available plots for display.  By default, it includes all analytes and their normalized versions. You can add ratios by selecting them from the Analyte Selector in the top toolbar.  Other plots appear in the list once they've been created or explicitly saved.
 
 .. figure:: _static/screenshots/LaME_Plot_Selector.png
     :align: center
@@ -15,12 +15,13 @@ The *Plot Selector* lists the available plots for display.  The default list inc
 
     The *Plot Selector* is similar to a file tree.  It lists types of fields, samples and the plots available beneath each.
 
-Analytes and their normalized equivalents can be sorted alphabetically, by mass, or compatibility.  To change the sorting method, click the |icon-sort| button.  Remove plots using the |icon-trash| button.  Clicking the save button will bring up a dialog.  Input the name for the new theme and click ok after entering a name.  If the name is the same as an existing theme, the original will be overwritten.
+Analytes and their normalized equivalents can be sorted alphabetically, by mass, or compatibility using the |icon-sort| button.  To remove plots, use the |icon-trash| button.  Clicking the save button will bring up a dialog to allow you to create new themes or overwrite existing ones.
 
 Styling Pane
 ============
 
 The properties in the styling pane control the look and feel of plots generated from functions in the *Control (Right) Toolbox*.  In also controls the type of plot that is generated (e.g., analyte map, scatter plot or heatmap, etc.).  A complete list is given in the table below along with each of the properties that can be changed.  Not all properties are available for each type of plot.
+
 
 Four controls sit above the styling pages.  The plot selector updates the types of plots available to each of the *Control Toolbox* tabs.  In case the plot does not update, click the |icon-launch| button.  Styles can be customized and saved using the save ( |icon-save| ) button.  Saved themes can be recalled in future sessions.
 

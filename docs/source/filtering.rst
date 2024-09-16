@@ -3,21 +3,14 @@ Filter
 
 *LaME* offers three types of filters to exclude data from analyses and geochemical plots: 
 
-* Filters by value (|icon-filter2|): Created in the *Filter* tab of the *Lower Tab*.
-* Polygon masking (|icon-polygon-new|): Managed in the *Polygon* table of the right toolbox.
-* Cluster masking (|icon-mask-dark|): Set from *Styling > Clusters* in the left toolbox.
+* Filters by value (|icon-filter-64|): Created in the *Filter* tab of the *Lower Tab*.
+* Polygon masking (|icon-polygon-new|): Managed in the *Polygon* table of the *Control Toolbox*.
+* Cluster masking (|icon-mask-dark|): Set from *Styling > Clusters* in the *Plot and Property Toolbox*.
 
-It's possible to use any combination of these filters and masks. You can easily toggle them on or off using the top toolbar for quick access. To disable all filters and masks at once, click the |icon-map| button in the top toolbar.
+It's possible to use any combination of these filters and masks. You can easily toggle them on or off using the *Top Toolbar* for quick access. To disable all filters and masks at once, click the |icon-map-64| button in the top toolbar.
 
-.. figure:: _static/screenshots/LaME_Filter.png
-    :align: center
-    :alt: LaME interface: left toolbox, filter tab
-    :width: 315
-
-    The *Filter* tab contains tools for filtering by value creating polygons.  It also contains an edge detection algorithm, useful for creating polygons.
-
-Filter by value |icon-filter2|
-==============================
+Filter by value |icon-filter-64|
+================================
 
 To set a filter, use the two drop down menus to select the type of field (upper) and the desired field (lower).  It is possible to filter by value using analytes, ratios, custom fields, principal component score, or cluster score.  Once selected, the ranges for the field will be automatically displayed in the min and max boxes.  Change the values to set the bounds explicitly using the (left boxes) or implicitly by setting the quantile bounds (right boxes).  Once the bounds are set, click the |icon-filter2| button to add the filter to the list.
 
@@ -32,6 +25,11 @@ Polygons can be used to filter specific regions of your data. For details on how
 
 The polygons within the table can be stored by clicking the |icon-save| button and recalled using the |icon-open-file| button.  See a description of :doc:`file specifications` for more information.
 
+Edge-detection |icon-spotlight-64|
+----------------------------------
+
+To aid with the identification of mineral boundaries, you can turn on edge detection by clicking the |icon-spotlight-64| button. There are multiple edge detection methods available (Sobel, Canny, zero-cross) which you can select using the dropdown menu.  Edge-detection is useful for locating the boundaries of polygons.  The use of edge detection does not affect analyses.
+
 Cluster Masking |icon-mask-light|
 =================================
 
@@ -42,10 +40,11 @@ While cluster masks can be toggled in the :doc:`top_toolbar`, they are set in th
 #. select the cluster(s) that you wish to mask and click the |icon-mask-dark| button to set the cluster mask or
 #. alternatively, select the clusters you wish to use for analysis and click the |icon-mask-light| button to set the other groups as the mask.
 
-Edge-detection
-==============
-
-To aid with the identification of mineral boundaries, you can turn on edge detection by clicking the |icon-edge-detection| button. There are multiple edge detection methods available (Sobel, Canny, zero-cross) which you can select using the dropdown menu.  Edge-detection is useful for locating the boundaries of polygons.  The use of edge detection does not affect analyses.
+.. |icon-filter-64| image:: _static/icons/icon-filter-64.png
+    :height: 2.5ex
+   
+.. |icon-map-64| image:: _static/icons/icon-map-64.png
+    :height: 2.5ex
 
 .. |icon-mask-light| image:: _static/icons/icon-mask-light-64.png
     :height: 2.5ex
@@ -54,6 +53,9 @@ To aid with the identification of mineral boundaries, you can turn on edge detec
     :height: 2.5ex
 
 .. |icon-polygon-new| image:: _static/icons/icon-polygon-new-64.png
+    :height: 2.5ex
+
+.. |icon-spotlight-64| image:: _static/icons/icon-spotlight-64.png
     :height: 2.5ex
 
 .. |icon-polygon-off| image:: _static/icons/icon-polygon-off-64.png

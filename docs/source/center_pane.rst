@@ -12,24 +12,15 @@ The Plot Window, located in the center of the LaME interface, is the primary are
 
 Single View
 ===========
-Displays a single plot at a time. This mode is ideal for:
 
-* Detailed examination of individual plots
-* Adding labels and annotations
-* Creating and editing polygons for data selection
+The Single View mode displays one plot at a time, allowing for a detailed examination of individual plots. This mode is particularly useful when you need to focus on a specific analyte or plot type. In Single View, you can easily add labels and annotations to your plot, enhancing its informativeness. It's also the ideal mode for creating and editing polygons for data selection, giving you precise control over your analysis area.
 
 Multi View
 ==========
-Allows the display of multiple plots simultaneously. Benefits include:
 
-* Comparing different analytes or plot types side by side
-* Creating figures with multiple subplots for reports or publications
-* Generating coincident multianalyte traverses efficiently
+Multi View mode enables the simultaneous display of multiple plots, offering a comparative perspective on your data. This mode is invaluable when you need to compare different analytes or plot types side by side. It's especially useful for creating figures with multiple subplots for reports or publications. Additionally, Multi View facilitates the efficient generation of coincident multianalyte traverses, allowing you to observe relationships between different elements or properties across your sample.
 
 Quick View
 ==========
-Presents all analytes in a series of subplots, providing a rapid overview of the sample. Features:
 
-* Comprehensive view of all analyte distributions
-* Customizable order of analytes for logical comparisons
-* Efficient identification of patterns or anomalies across multiple analytes
+Multi View mode enables the simultaneous display of multiple plots, offering a comparative perspective on your data. This mode is invaluable when you need to compare different analytes or plot types side by side. It's especially useful for creating figures with multiple subplots for reports or publications. Additionally, Multi View facilitates the efficient generation of coincident multianalyte traverses, allowing you to observe relationships between different elements or properties across your sample.

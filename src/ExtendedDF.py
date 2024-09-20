@@ -4,7 +4,8 @@ import pandas as pd
 class AttributeDataFrame(pd.DataFrame):
     """Creates a pandas DataFrame with custom attributes stored with each column.
 
-    Create a dataframe with column attributes or add attributes to existing columns of a dataframe and methods to get and set them.
+    Create a dataframe with column attributes or add attributes to existing columns of a
+    dataframe and methods to get and set them.
 
     Parameters
     ----------
@@ -19,11 +20,11 @@ class AttributeDataFrame(pd.DataFrame):
     copy_columns :
         Extract specified columns into a new AttributeDataFrame, preserving their attributes
 
-    find_columns :
+    match_attribute :
         Returns a list of columns where a specific attribute matches the given value
 
     get_attribute :
-        Get an attribute from an AttributeDataFrame
+        Get an attribute from an AttributeDataFrame given a column or set of columns
 
     is_attribute :
         Checks to see if an attribute exists
@@ -119,31 +120,44 @@ class AttributeDataFrame(pd.DataFrame):
             return self.column_attributes.get(column, {})
         return self.column_attributes
     
-    def get_attribute(self, column, attribute):
-        """Get an attribute from an AttributeDataFrame.
-
-        Get the values of an attribute.
+    def get_attribute(self, columns, attribute):
+        """
+        Get a single attribute from an AttributeDataFrame for one or more columns.
 
         Parameters
         ----------
-        column : str
-            Name of column
+        columns : str or list of str
+            Name or list of column names.
         attribute : str
-            Name of attribute
+            Name of the attribute to retrieve.
 
         Returns
         -------
-        any
-            Attribute value
+        any or list
+            Attribute value(s). Returns a single value if one column is provided, 
+            otherwise returns a list of attribute values for multiple columns.
 
         Examples
         --------
         df = AttributeDataFrame()
         df['Temperature'] = [22, 23, 21]
+        df['Pressure'] = [101, 100, 102]
         df.set_attribute('Temperature', 'units', 'Celsius')
-        print(df.get_attribute('Temperature', 'units'))
-        """        
-        return self.column_attributes.get(column, {}).get(attribute)
+        df.set_attribute('Pressure', 'units', 'Pascal')
+
+        # Single column
+        print(df.get_attribute('Temperature', 'units'))  # Output: 'Celsius'
+
+        # Multiple columns
+        print(df.get_attribute(['Temperature', 'Pressure'], 'units'))  
+        # Output: ['Celsius', 'Pascal']
+        """
+        if isinstance(columns, str):  # Handle single column input
+            return self.column_attributes.get(columns, {}).get(attribute)
+        
+        # Handle multiple columns
+        return [self.column_attributes.get(column, {}).get(attribute) for column in columns]
+
 
     def _set_attribute(self, attribute, column, value):
         """Set attribute of an AttributeDataFrame
@@ -162,14 +176,10 @@ class AttributeDataFrame(pd.DataFrame):
         Examples
         --------
         df = AttributeDataFrame({'Temperature': [22, 23, 21], 'Pressure': [101, 102, 100]})
-        df.set_attribute('Temperature', 'units', 'Celsius')
-        df.set_attribute('Pressure', 'units', 'Pascal')
-        df.set_attribute('Temperature', 'average', 22)
-        df.set_attribute('Pressure', 'average', 101)
-
-        # Get all attributes as a DataFrame
-        attribute_df = df.get_all_attributes()
-        print(attribute_df)
+        df._set_attribute('Temperature', 'units', 'Celsius')
+        df._set_attribute('Pressure', 'units', 'Pascal')
+        df._set_attribute('Temperature', 'average', 22)
+        df._set_attribute('Pressure', 'average', 101)
         """        
         if column not in self.column_attributes:
             self.column_attributes[column] = {}
@@ -220,7 +230,7 @@ class AttributeDataFrame(pd.DataFrame):
             for col in columns:
                 self._set_attribute(attribute, col, values)
     
-    def find_columns(self, attribute, value):
+    def match_attribute(self, attribute, value):
         """
         Returns a list of columns where a specific attribute matches the given value.
 

@@ -420,6 +420,18 @@
 </dd>
 </dl>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>ValueError</dt><dd><p>‘Bins must be a positive integer’, requires bin values are positive.</p>
+</dd>
+<dt>ValueError</dt><dd><p>‘Number of vertices must be 3 or 4’, 3 verticies are required for ternary diagram and 4 for quaternary (double ternary).</p>
+</dd>
+<dt>ValueError</dt><dd><p>‘Tick spacing must be between 0 and 1’</p>
+</dd>
+<dt>ValueError</dt><dd><p>“Style must be ‘ternary’ or ‘quaternary’”</p>
+</dd>
+</dl>
+</dd>
 </dl>
 <p class="rubric">Methods</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
@@ -460,20 +472,6 @@
 </tbody>
 </table>
 </div>
-<dl class="field-list simple">
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt>ValueError</dt><dd><p>‘Bins must be a positive integer’, requires bin values are positive.</p>
-</dd>
-<dt>ValueError</dt><dd><p>‘Number of vertices must be 3 or 4’, 3 verticies are required for ternary diagram and 4 for quaternary (double ternary).</p>
-</dd>
-<dt>ValueError</dt><dd><p>‘Tick spacing must be between 0 and 1’</p>
-</dd>
-<dt>ValueError</dt><dd><p>“Style must be ‘ternary’ or ‘quaternary’”</p>
-</dd>
-</dl>
-</dd>
-</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="ternary_plot.ternary.cplane">
 <span class="sig-name descname"><span class="pre">cplane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ca</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ternary_plot.html#ternary.cplane"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ternary_plot.ternary.cplane" title="Link to this definition">#</a></dt>
@@ -823,7 +821,7 @@ the Cartesian origin is defined at the midpoint between b and c.</p>
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
     <br/>
   </p>
 </div>

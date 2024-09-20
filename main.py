@@ -2724,7 +2724,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             cluster_mask = np.ones_like( self.data[sample_id]['mask'], dtype=bool)
 
-        self.data[sample_id]['mask'] = self.data[sample_id]['crop_mask'] & filter_mask & polygon_mask & cluster_mask
+        #self.data[sample_id]['mask'] = self.data[sample_id]['crop_mask'] & filter_mask & polygon_mask & cluster_mask
+        self.data[sample_id]['mask'] = filter_mask & polygon_mask & cluster_mask
 
         # if single view is active
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
@@ -3040,7 +3041,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 # Create a grid of points covering the entire array
                 # x, y = np.meshgrid(np.arange(self.array.shape[1]), np.arange(self.array.shape[0]))
 
-                points = pd.concat([self.x, self.y] , axis=1).values
+                points = pd.concat([self.data[sample_id].processed_data['X'], self.data[sample_id].processed_data['Y']] , axis=1).values
                 # Use the path to determine which points are inside the polygon
                 inside_polygon = path.contains_points(points)
 
@@ -6797,12 +6798,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Creates both scatter and heatmaps (spatial histograms) for bi- and ternary plots.
 
-        :param values: Defaults to None
-        :type values:
-        :param fig: Defaults to None
-        :type fig:
-        :param save: Flag for saving widget to self.toolBoxTreeView Plot Selector page, Defaults to False
-        :type save: bool, optional
+        Parameters
+        ----------
+        canvas : MplCanvas
+            canvas within gui for plotting, by default ``None``
         """
         #print('plot_scatter')
         plot_type = self.comboBoxPlotType.currentText()
@@ -7199,9 +7198,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         bfield = self.comboBoxFieldY.currentText()
         cfield = self.comboBoxFieldZ.currentText()
 
-        a = self.data[self.sample_id]['processed_data'].loc[:,afield].values
-        b = self.data[self.sample_id]['processed_data'].loc[:,bfield].values
-        c = self.data[self.sample_id]['processed_data'].loc[:,cfield].values
+        a = self.data[self.sample_id].processed_data.loc[:,afield].values
+        b = self.data[self.sample_id].processed_data.loc[:,bfield].values
+        c = self.data[self.sample_id].processed_data.loc[:,cfield].values
 
         ca = self.get_rgb_color(self.get_hex_color(self.toolButtonTCmapXColor.palette().button().color()))
         cb = self.get_rgb_color(self.get_hex_color(self.toolButtonTCmapYColor.palette().button().color()))
@@ -7295,7 +7294,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Add PCA scores to DataFrame for easier plotting
         if self.data[self.sample_id]['computed_data']['PCA Score'].empty:
-            self.data[self.sample_id]['computed_data']['PCA Score'] = self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
+            self.data[self.sample_id]['computed_data']['PCA Score'] = self.data[self.sample_id]['processed_data'][['X','Y']]
 
         self.data[self.sample_id]['computed_data']['PCA Score'].loc[self.data[self.sample_id]['mask'], pca_scores.columns ] = pca_scores
 
@@ -7702,7 +7701,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 
         if self.data[self.sample_id]['computed_data']['Cluster'].empty:
-            self.data[self.sample_id]['computed_data']['Cluster'][['X','Y']] = self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
+            self.data[self.sample_id]['computed_data']['Cluster'][['X','Y']] = self.data[self.sample_id]['processed_data'][['X','Y']]
 
         # set all masked data to cluster id -1
         self.data[self.sample_id]['computed_data']['Cluster'].loc[~self.data[self.sample_id]['mask'],method] = 99 
@@ -7733,7 +7732,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             case 'fuzzy c-means':
                 # add x y from raw data if empty dataframe
                 if self.data[self.sample_id]['computed_data']['Cluster Score'].empty:
-                    self.data[self.sample_id]['computed_data']['Cluster Score'] = self.data[self.sample_id]['cropped_raw_data'][['X','Y']]
+                    self.data[self.sample_id]['computed_data']['Cluster Score'] = self.data[self.sample_id]['processed_data'][['X','Y']]
 
                 # compute cluster scores
                 cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(array.T, n_clusters, exponent, error=0.00001, maxiter=1000, seed=seed)
@@ -7956,6 +7955,93 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # update plot
             if (self.comboBoxPlotType.currentText() not in ['Cluster', 'Cluster Score']) and (self.comboBoxColorByField.currentText() == 'Cluster'):
                 self.update_SV()
+
+    # Elbow plot used to determine the optimal number of clusters
+    # 1. Elbow Method
+    # The elbow method looks at the variance (or inertia) within clusters as the number of clusters increases. The idea is to plot the sum of squared distances between each point and its assigned cluster's centroid, known as the within-cluster sum of squares (WCSS) or inertia, for different values of k (number of clusters).
+
+    # Process:
+    # Run KMeans for a range of cluster numbers (k).
+    # Plot the inertia (WCSS) vs. the number of clusters.
+    # Look for the "elbow" point, where the rate of decrease sharply slows down, indicating that adding more clusters does not significantly reduce the inertia.
+    # def plot_elbow_method(data, max_clusters=10):
+    #     inertia = []
+    #     k_range = range(1, max_clusters + 1)
+        
+    #     for k in k_range:
+    #         kmeans = KMeans(n_clusters=k)
+    #         kmeans.fit(data)
+    #         inertia.append(kmeans.inertia_)
+        
+    #     # Plot WCSS vs number of clusters
+    #     plt.figure(figsize=(8, 6))
+    #     plt.plot(k_range, inertia, 'bx-')
+    #     plt.xlabel('Number of clusters (k)')
+    #     plt.ylabel('Inertia (WCSS)')
+    #     plt.title('Elbow Method For Optimal k')
+    #     plt.show()
+
+
+    # 2. Silhouette Score
+    # The silhouette score measures how similar an object is to its own cluster compared to other clusters. The score ranges from -1 to 1, where:
+    # In cases where clusters have widely varying sizes or densities, Silhouette Score may provide the best result.
+
+    # A score close to 1 means the sample is well clustered.
+    # A score close to 0 means the sample lies on the boundary between clusters.
+    # A score close to -1 means the sample is assigned to the wrong cluster.
+    # Process:
+    # Run KMeans for a range of cluster numbers (k).
+    # Calculate the silhouette score for each k.
+    # Choose the k with the highest silhouette score.
+    # from sklearn.metrics import silhouette_score
+
+    # def silhouette_method(data, max_clusters=10):
+    #     silhouette_scores = []
+    #     k_range = range(2, max_clusters + 1)
+        
+    #     for k in k_range:
+    #         kmeans = KMeans(n_clusters=k)
+    #         kmeans.fit(data)
+    #         cluster_labels = kmeans.labels_
+    #         silhouette_avg = silhouette_score(data, cluster_labels)
+    #         silhouette_scores.append(silhouette_avg)
+        
+    #     # Plot silhouette scores
+    #     plt.figure(figsize=(8, 6))
+    #     plt.plot(k_range, silhouette_scores, 'bx-')
+    #     plt.xlabel('Number of clusters (k)')
+    #     plt.ylabel('Silhouette Score')
+    #     plt.title('Silhouette Score Method For Optimal k')
+    #     plt.show()
+
+    # 4. Davies-Bouldin Index
+    # The Davies-Bouldin Index (DBI) measures the ratio of within-cluster scatter to between-cluster separation. Lower values indicate better clustering.
+
+    # Process:
+    # Run KMeans for a range of k.
+    # Compute the Davies-Bouldin index for each k.
+    # Select the k with the lowest DBI score.
+    # Interpretation: The k with the lowest DBI score is generally the best number of clusters.
+    # from sklearn.metrics import davies_bouldin_score
+
+    # def davies_bouldin_method(data, max_clusters=10):
+    #     db_scores = []
+    #     k_range = range(2, max_clusters + 1)
+        
+    #     for k in k_range:
+    #         kmeans = KMeans(n_clusters=k)
+    #         kmeans.fit(data)
+    #         cluster_labels = kmeans.labels_
+    #         db_score = davies_bouldin_score(data, cluster_labels)
+    #         db_scores.append(db_score)
+        
+    #     # Plot Davies-Bouldin index scores
+    #     plt.figure(figsize=(8, 6))
+    #     plt.plot(k_range, db_scores, 'bx-')
+    #     plt.xlabel('Number of clusters (k)')
+    #     plt.ylabel('Davies-Bouldin Score')
+    #     plt.title('Davies-Bouldin Index Method For Optimal k')
+    #     plt.show()
 
 
     # -------------------------------------

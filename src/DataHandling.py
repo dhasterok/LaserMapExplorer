@@ -1,4 +1,5 @@
 import re, copy
+import config
 import numpy as np
 import pandas as pd
 from src.ExtendedDF import AttributeDataFrame
@@ -176,31 +177,44 @@ class SampleObj:
         self.x = self.orig_x = self.raw_data['X']
         self.y = self.orig_y = self.raw_data['Y']
 
-        # create dataframes for cropped data and processed data
-        self.processed_data = copy.deepcopy(self.raw_data)
 
         # set selected_analytes to columns excluding X and Y (future-proofed)
         #self.selected_analytes = self.raw_data.columns[2:].tolist()  # Skipping first two columns
         coordinate_columns = self.raw_data.match_attribute(attribute='data_type',value='coordinate')
-        self.processed_data.set_attribute(attribute='units', columns=coordinate_columns, values=None)
-        self.processed_data.set_attribute(attribute='use', columns=coordinate_columns, values=False)
+        self.raw_data.set_attribute(attribute='units', columns=coordinate_columns, values=None)
+        self.raw_data.set_attribute(attribute='use', columns=coordinate_columns, values=False)
 
         analyte_columns = self.raw_data.match_attribute(attribute='data_type',value='analyte')
-        self.processed_data.set_attribute(attribute='units', columns=analyte_columns, values=None)
-        self.processed_data.set_attribute(attribute='use', columns=analyte_columns, values=True)
+        self.raw_data.set_attribute(attribute='units', columns=analyte_columns, values=None)
+        self.raw_data.set_attribute(attribute='use', columns=analyte_columns, values=True)
         # quantile bounds
-        self.processed_data.set_attribute(attribute='lower_bound', columns=analyte_columns, values=0.05)
-        self.processed_data.set_attribute(attribute='upper_bound', columns=analyte_columns, values=99.5)
+        self.raw_data.set_attribute(attribute='lower_bound', columns=analyte_columns, values=0.05)
+        self.raw_data.set_attribute(attribute='upper_bound', columns=analyte_columns, values=99.5)
         # quantile bounds for differences
-        self.processed_data.set_attribute(attribute='diff_lower_bound', columns=analyte_columns, values=0.05)
-        self.processed_data.set_attribute(attribute='diff_upper_bound', columns=analyte_columns, values=99)
+        self.raw_data.set_attribute(attribute='diff_lower_bound', columns=analyte_columns, values=0.05)
+        self.raw_data.set_attribute(attribute='diff_upper_bound', columns=analyte_columns, values=99)
         # min and max unmasked values
-        self.processed_data.set_attribute(attribute='v_min', columns=analyte_columns, values=None)
-        self.processed_data.set_attribute(attribute='v_max', columns=analyte_columns, values=None)
+        self.raw_data.set_attribute(attribute='v_min', columns=analyte_columns, values=None)
+        self.raw_data.set_attribute(attribute='v_max', columns=analyte_columns, values=None)
         # linear/log scale
-        self.processed_data.set_attribute(attribute='norm', columns=analyte_columns, values='linear')
-        self.processed_data.set_attribute(attribute='auto_scale', columns=analyte_columns, values=True)
-        self.processed_data.set_attribute(attribute='negative_method', columns=analyte_columns, values=self._negative_method)        
+        self.raw_data.set_attribute(attribute='norm', columns=analyte_columns, values='linear')
+        self.raw_data.set_attribute(attribute='auto_scale', columns=analyte_columns, values=True)
+
+        analyte_columns = self.raw_data.match_attribute(attribute='data_type',value='ratio')
+        self.raw_data.set_attribute(attribute='units', columns=analyte_columns, values=None)
+        self.raw_data.set_attribute(attribute='use', columns=analyte_columns, values=True)
+        # quantile bounds
+        self.raw_data.set_attribute(attribute='lower_bound', columns=analyte_columns, values=0.05)
+        self.raw_data.set_attribute(attribute='upper_bound', columns=analyte_columns, values=99.5)
+        # quantile bounds for differences
+        self.raw_data.set_attribute(attribute='diff_lower_bound', columns=analyte_columns, values=0.05)
+        self.raw_data.set_attribute(attribute='diff_upper_bound', columns=analyte_columns, values=99)
+        # min and max unmasked values
+        self.raw_data.set_attribute(attribute='v_min', columns=analyte_columns, values=None)
+        self.raw_data.set_attribute(attribute='v_max', columns=analyte_columns, values=None)
+        # linear/log scale
+        self.raw_data.set_attribute(attribute='norm', columns=analyte_columns, values='linear')
+        self.raw_data.set_attribute(attribute='auto_scale', columns=analyte_columns, values=True)
 
         # initialize X and Y axes bounds for plotting and cropping, initially the entire map
         self._xlim = [self.raw_data['X'].min(), self.raw_data['X'].max()]
@@ -210,8 +224,8 @@ class SampleObj:
         self.crop = False
 
         # Remove the ratio columns from the raw_data and store the rest
-        non_ratio_columns = [col for col in sample_df.columns if col not in ratio_columns]
-        self.raw_data = sample_df[non_ratio_columns]
+        #non_ratio_columns = [col for col in sample_df.columns if col not in ratio_columns]
+        #self.raw_data = sample_df[non_ratio_columns]
 
         # set mask of size of analyte array
         self._crop_mask = np.ones_like(self.raw_data['X'].values, dtype=bool)
@@ -223,6 +237,11 @@ class SampleObj:
             self.filter_mask & \
             self.polygon_mask & \
             self.cluster_mask
+
+        # cluster data
+        # This determines the optimal number of clusters and creates cluster indicies that are used for preprocessing.
+        # This should only need to be run once on the initial raw data, unless the set of used analytes changes.
+        self.cluster_data()
 
         # autoscale and negative handling
         self.prep_data()
@@ -480,27 +499,160 @@ class SampleObj:
 
         self.add_column('ratio',ratio_name,ratio_array)
 
-    def prep_data(self):
+    def cluster_data(self):
+        # Step 1: Clustering
+        # ------------------
         # Select columns where 'data_type' attribute is 'analyte'
-        analyte_columns = [col for col in self.processed_data.columns if (self.processed_data.get_attribute(col, 'data_type') == 'analyte') 
-            and (self.processed_data.get_attribute(col, 'use') is not None
-            and self.processed_data.get_attribute(col, 'use')) ]
+        analyte_columns = [col for col in self.raw_data.columns if (self.raw_data.get_attribute(col, 'data_type') == 'analyte') 
+            and (self.raw_data.get_attribute(col, 'use') is not None
+            and self.raw_data.get_attribute(col, 'use')) ]
 
         # Extract the analyte data
-        analyte_data = self.processed_data[analyte_columns].values
+        analyte_data = self.raw_data[analyte_columns].values
 
-        # Call function to determine optimal clusters
-        optimal_clusters = self.find_optimal_clusters(analyte_data)
-        print(f"Optimal number of clusters: {optimal_clusters}")
+        # Mask invalid data (e.g., NaN, inf)
+        mask_valid = np.isfinite(analyte_data).all(axis=1)
+
+        # Filter out the invalid data
+        analyte_data = analyte_data[mask_valid]
+
+        # Calculate percentiles for central bulk of the valid data
+        lower_percentile = np.percentile(analyte_data, 1.25, axis=0)
+        upper_percentile = np.percentile(analyte_data, 98.75, axis=0)
+
+        # Create a mask for central bulk of the data (within the range of percentiles)
+        mask_central = np.all((analyte_data >= lower_percentile) & (analyte_data <= upper_percentile), axis=1)
+
+        # Data for optimal cluster calculation: central 97.5%
+        # Determine the optimal number of clusters using filtered_data
+        optimal_clusters = self.k_optimal_clusters(analyte_data[mask_central])
 
         # Fit KMeans with the optimal number of clusters
         kmeans = KMeans(n_clusters=optimal_clusters, random_state=42)
         cluster_labels = kmeans.fit_predict(analyte_data)
 
-        # loop over all analytes
+        # Create a full-sized vector with NaN values where mask is False
+        self.cluster_labels = np.full(mask_valid.shape[0], np.nan)
+        self.cluster_labels[mask_valid] = cluster_labels
+
+        if config.debug:
+            # Reshape the full_labels array based on unique X and Y values
+            x_unique = self.raw_data['X'].nunique()  # Assuming 'X' is a column in raw_data
+            y_unique = self.raw_data['Y'].nunique()  # Assuming 'Y' is a column in raw_data
+
+            # Ensure the reshaped array has the same shape as the spatial grid
+            reshaped_labels = np.reshape(self.cluster_labels, (y_unique, x_unique), order='F')
+
+            # Plot using imshow
+            fig, ax1 = plt.subplots() 
+            cax = ax1.imshow(reshaped_labels, cmap='viridis', interpolation='none')
+            cbar = fig.colorbar(cax, label='Cluster Labels', ax=ax1, orientation='horizontal')
+            ax1.set_title('Cluster Labels with NaN Handling')
+            ax1.set_xlabel('X')
+            ax1.set_ylabel('Y')
+            fig.show()
+
+    def prep_data(self, field=None):
+        """Applies adjustments to data data prior to analyses and plotting.
+
+        This method applies a workflow to adjust data to limit the number of data that are otherwise
+        unusable due to incorrect calibrations, particularly for low and high element concentration regions.
+        
+        Data are adjusted according to the proceedure:
+        | Determine optimal number of clusters and use it to classify the data using kmeans.
+        | Transform each cluster, by handling negative data.  The method of negative handling is set by ``MainWindow.comboBoxNegativeMethod.currentText()``.
+        | Compute ratios not imported (i.e., not in raw_data).
+        | Determine outliers and limit their impact on analyses by clipping/autoscaling
+
+        These calculations start from the cropped data, but do not include chemical, polygonal, or cluster filtering.
+
+        Raises
+        ------
+        AssertionError
+            processed_data has not yet been initialized.  processed_data should be created when the sample is initialized and prep_data is
+            run for the first time.
+        """ 
+        attribute_df = None
+        if (field == None) or (field == 'all'):
+            # Select columns where 'data_type' attribute is 'analyte'
+            analyte_columns = self.raw_data.match_attributes({'data_type': 'analyte', 'use': True})
+            # analyte_columns = self.raw_data.match_attribute('data_type', 'analyte')
+            # analyte_columns = [col for col in analyte_columns if self.raw_data.get_attribute(col, 'use') is True]
+            # analyte_columns = [col for col in self.raw_data.columns if (self.raw_data.get_attribute(col, 'data_type') == 'analyte') 
+                # and (self.raw_data.get_attribute(col, 'use') is not None
+                # and self.raw_data.get_attribute(col, 'use')) ]
+
+            # Select columns where 'data_type' attribute is 'ratio'
+            ratio_columns = self.raw_data.match_attributes({'data_type': 'ratio', 'use': True})
+            # ratio_columns = self.raw_data.match_attribute('data_type', 'ratio')
+            # ratio_columns = [col for col in ratio_columns if self.raw_data.get_attribute(col, 'use') is True]
+            # ratio_columns = [col for col in self.raw_data.columns if (self.raw_data.get_attribute(col, 'data_type') == 'ratio') 
+            #     and (self.raw_data.get_attribute(col, 'use') is not None
+            #     and self.raw_data.get_attribute(col, 'use')) ]
+
+            columns = analyte_columns + ratio_columns
+
+            if hasattr(self, 'processed_data'):
+                attributes_df = self.processed_data.attributes_to_dataframe()
+                negative_method = attributes_df['negative_method'].values
+            else:
+                negative_method = self._negative_method
+            self.processed_data = copy.deepcopy(self.raw_data)
+            self.processed_data.set_attribute(attribute='negative_method', columns=analyte_columns, values=negative_method)
+        else:
+            columns = field
+
+        if not hasattr(self, 'processed_data'):
+            raise AssertionError("processed_data has not yet been defined.")
+
+        # Handle negative values
+        # ----------------------
+        for col in columns:
+            if col not in self.raw_data.columns:
+                continue
+
+            for idx in np.unique(self.cluster_labels):
+                if np.isnan(idx):
+                    continue
+                cluster_mask = self.cluster_labels == idx
+                self.processed_data[col][cluster_mask] = self.transform_array(self.processed_data[col][cluster_mask],self.processed_data.get_attribute(col,'negative_method'))
+
+        # Compute ratios not included in raw_data
+        # ---------------------------------------
+        if ((field == None) or (field == 'all')) and (attribute_df is not None):
+            ratios = attribute_df.columns[(data_type == 'ratio').any()]
+
+            ratios_not_in_raw_data = [col for col in ratios if col not in ratio_columns]
+
+            for col in ratios_not_in_raw_data:
+                columns = columns + col
+                self.compute_ratio(analyte_1, analyte_2)
+
+            self.processed_data.set_attribute('lower_bound', ratios_not_in_raw_data, attribute_df.loc['lower_bound', ratios_not_in_raw_data].tolist())
+            self.processed_data.set_attribute('upper_bound', ratios_not_in_raw_data, attribute_df.loc['upper_bound', ratios_not_in_raw_data].tolist())
+            self.processed_data.set_attribute('diff_upper_bound', ratios_not_in_raw_data, attribute_df.loc['diff_upper_bound', ratios_not_in_raw_data].tolist())
+            self.processed_data.set_attribute('diff_lower_bound', ratios_not_in_raw_data, attribute_df.loc['diff_lower_bound', ratios_not_in_raw_data].tolist())
+            self.processed_data.set_attribute('norm', ratios_not_in_raw_data, attribute_df.loc['norm', ratios_not_in_raw_data].tolist())
+            self.processed_data.set_attribute('auto_scale', ratios_not_in_raw_data, attribute_df.loc['auto_scale', ratios_not_in_raw_data].tolist())
+
+        # Compute special fields?
+        # -----------------------
+
+
+        # Clip outliers / autoscale the data
+        # ------------------
+        # loop over all fields
         for col in (col for col in self.processed_data.columns if self.processed_data.get_attribute(col, 'data_type') != 'coordinate'):
             lq = self.processed_data.get_attribute(col, 'lower_bound')
             uq = self.processed_data.get_attribute(col, 'upper_bound')
+            # skip is autoscale is False for column
+            if not self.processed_data.get_attribute(col, 'autoscale'):
+                #clip data using ub and lb
+                lq_val = np.nanpercentile(self.processed_data[col], lq, axis=0)
+                uq_val = np.nanpercentile(self.processed_data[col], uq, axis=0)
+                self.processed_data[col] = np.clip(self.processed_data[col], lq_val, uq_val)
+                continue
+
             d_lq = self.processed_data.get_attribute(col, 'diff_lower_bound')
             d_uq = self.processed_data.get_attribute(col, 'diff_upper_bound')
 
@@ -518,25 +670,32 @@ class SampleObj:
                     max_val = 1e6
                     shift_percentile = 90
 
+            # Apply robust outlier detection to each cluster
+            for idx in np.unique(self.cluster_labels):
+                cluster_mask = (self.cluster_labels == idx)
 
-            # Apply your transformation and outlier detection to each cluster
-            for cluster in range(optimal_clusters):
-                cluster_mask = (cluster_labels == cluster)
-                cluster_data = self.processed_data[col][cluster_mask]
+                self.processed_data[col][cluster_mask] = self.outlier_detection(self.processed_data[col][cluster_mask], lq, uq, d_lq, d_uq, compositional, max_val)
 
-                # Apply negative value handling
-                transformed_data = self.transform_array(cluster_data, negative_method='gradual shift')
+    def k_optimal_clusters(self, data, max_clusters=int(10)):
+        """Predicts the optimal number of clusters
 
-                # Apply robust outlier detection
-                processed_cluster = self.robust_outlier_detection(cluster_data, lq, uq, d_lq, d_uq, compositional, max_val, shift_percentile=shift_percentile)
+        Predicts the optimal number of kmeans clusters using the elbow method from the within-cluster sum of squares (WCSS):
+        .. math::
+            WCSS = \sum_{i=1}^k \sum_{x \in C_i} (x - \mu_i)^2
+        The optimal number of clusters is determined by taking the k-value associated with the maximum value of the second derivative.
 
-                # Store the processed cluster back into the full dataset
-                analyte_data[cluster_mask] = processed_cluster
+        Parameters
+        ----------
+        data : numpy.ndarray
+            Data used in clustering. Make sure it has NaN and +/- inf values removed.
+        max_clusters : int, optional
+            Computes cluster results from ``1`` to ``max_clusters``, by default 10
 
-            # Replace the original data in the processed_data DataFrame
-            self.processed_data[col][cluster_mask] = analyte_data
-
-    def find_optimal_clusters(self, data, max_clusters=int(10)):
+        Returns
+        -------
+        int
+            Returns the optimal number of k-means clusters.
+        """        
         inertia = []
         
         # Perform KMeans for cluster numbers from 1 to max_clusters
@@ -545,186 +704,62 @@ class SampleObj:
             kmeans.fit(data)
             inertia.append(kmeans.inertia_)  # Record the inertia (sum of squared distances)
         
-        # Plot inertia values for the elbow method
-        plt.plot(range(1, max_clusters+1), inertia, marker='o')
-        plt.xlabel('Number of clusters')
-        plt.ylabel('Inertia')
-        plt.title('Elbow Method for Optimal Clusters')
-        plt.show()
+        # Calculate second-order difference (second derivative)
+        second_derivative = np.diff(np.diff(inertia))
 
-        # Identify the elbow point (this can be manually or programmatically selected)
-        # Here, you might automate it with a threshold or second derivative
-        # For simplicity, return the elbow manually or based on a heuristic
-        optimal_clusters = np.argmin(np.diff(np.diff(inertia))) + 2  # Example heuristic
-        return optimal_clusters
+        # Identify the elbow point
+        # add 2 to the maximum index to obtain the optimal number of clusters,
+        # 1 because it starts at 0 and 1 because it is the second derivative
+        optimal_k = np.argmax(second_derivative) + 2  # Example heuristic
 
-    def apply_cluster_transformations(self, data, analyte_columns, optimal_clusters):
-        transformed_data = data.copy()
-        
-        for analyte in analyte_columns:
-            analyte_data = data[analyte].values.reshape(-1, 1)
-            
-            # Scale the data for clustering
-            scaler = StandardScaler()
-            scaled_data = scaler.fit_transform(analyte_data)
-            
-            # Apply KMeans with the optimal number of clusters
-            kmeans = KMeans(n_clusters=optimal_clusters[analyte])
-            labels = kmeans.fit_predict(scaled_data)
-            centroids = kmeans.cluster_centers_
-            
-            # Apply transform_array function to handle negative values
-            # Adjust negative values based on cluster-based shift
-            transformed_array = self.transform_array(analyte_data, labels, centroids)
-            
-            # Replace the column with transformed data
-            transformed_data[analyte] = transformed_array.flatten()
-        
-        return transformed_data
+        if config.debug:
+            # Plot inertia
+            fig, ax1 = plt.subplots()
 
-    def apply_outlier_detection(self, data, analyte_columns):
-        for analyte in analyte_columns:
-            analyte_data = data[analyte].values
-            
-            # Apply robust outlier detection
-            adjusted_data = self.robust_outlier_detection(analyte_data)
-            
-            # Replace the column with adjusted data
-            data[analyte] = adjusted_data
-        
-        return data
+            ax1.plot(range(1, max_clusters+1), inertia, marker='o', color='b', label='Inertia')
+            ax1.set_xlabel('Number of clusters')
+            ax1.set_ylabel('Inertia', color='b')
+            ax1.tick_params(axis='y', labelcolor='b')
+            ax1.set_title('Elbow Method for Optimal Clusters')
+            ax1.axvline(x=optimal_k, linestyle='--', color='r', label=f'Elbow at k={optimal_k}')
 
-    def elbow_auto_detection(self, data, max_clusters=10):
-        inertia = []
-        k_range = range(1, max_clusters + 1)
-        
-        for k in k_range:
-            kmeans = KMeans(n_clusters=k)
-            kmeans.fit(data)
-            inertia.append(kmeans.inertia_)
-        
-        # Compute first and second derivatives
-        first_derivative = np.diff(inertia)
-        second_derivative = np.diff(first_derivative)
-        
-        # Find the index of the largest second derivative (i.e., the elbow)
-        optimal_k = np.argmax(second_derivative) + 2  # Add 2 because np.diff reduces the length
-        
-        # Plot WCSS and mark the elbow
-        plt.figure(figsize=(8, 6))
-        plt.plot(k_range, inertia, 'bx-')
-        plt.xlabel('Number of clusters (k)')
-        plt.ylabel('Inertia (WCSS)')
-        plt.title('Elbow Method for Optimal k')
-        plt.axvline(x=optimal_k, linestyle='--', color='r', label=f'Elbow at k={optimal_k}')
-        plt.legend()
-        plt.show()
-        
+
+            # Create a secondary y-axis to plot the second derivative
+            ax2 = ax1.twinx()
+            ax2.plot(range(2, max_clusters), second_derivative, marker='x', color='r', label='2nd Derivative')
+            ax2.set_ylabel('2nd Derivative', color='r')
+            ax2.tick_params(axis='y', labelcolor='r')
+
+            print(f"Second derivative of inertia: {second_derivative}")
+            print(f"Optimal number of clusters: {optimal_k}")
+
         return optimal_k
 
-    def robust_outlier_detection(self, n_clusters=None):
+    def outlier_detection(self, array, lq, uq, d_lq, d_uq, compositional, max_val):
         """Outlier detection with cluster-based correction for negatives and compositional constraints, using percentile-based shifting.
 
         Parameters
         ----------
-        n_clusters : int, None
-            Number of clusters for correcting negative values, defaults is None.
-        """
-        # Select columns where 'data_type' attribute is 'analyte'
-        analyte_columns = [col for col in self.processed_data.columns if
-            (self.processed_data.get_attribute(col, 'data_type') != 'coordinate') 
-            and (self.processed_data.get_attribute(col, 'use') is not None
-            and self.processed_data.get_attribute(col, 'use'))
-            and (self.processed_data.get_attribute(col, 'data_type') == 'analyte') ]
+        array : numpy.ndarray
+            _description_
+        lq : float
+            _description_
+        uq : float
+            _description_
+        d_lq : float
+            _description_
+        d_uq : float
+            _description_
+        compositional : bool
+            _description_
+        max_val : float
+            _description_
 
-        ratio_columns = [col for col in self.processed_data.columns if
-            (self.processed_data.get_attribute(col, 'data_type') != 'coordinate') 
-            and (self.processed_data.get_attribute(col, 'use') is not None
-            and self.processed_data.get_attribute(col, 'use'))
-            and (self.processed_data.get_attribute(col, 'data_type') == 'ratio') ]
-
-
-        # Extract the analyte data
-        analyte_data = self.processed_data[analyte_columns].values
-
-        if n_clusters is not None:
-            if n_clusters < 1:
-                raise ValueError("Number of clusters, must be an integer >0.")
-            if n_clusters == 1:
-                cluster_labels = np.ones(shape=[])
-            else:
-                optimal_clusters = n_clusters
-        else:
-            # Call function to determine optimal clusters
-            optimal_clusters = self.find_optimal_clusters(analyte_data)
-            print(f"Optimal number of clusters: {optimal_clusters}")
-
-            # Fit KMeans with the optimal number of clusters
-
-        if n_clusters != 1:
-            kmeans = KMeans(n_clusters=optimal_clusters, random_state=42)
-            cluster_labels = kmeans.fit_predict(analyte_data)
-
-        # loop over all analytes
-        for col in (col for col in self.processed_data.columns if self.processed_data.get_attribute(col, 'data_type') != 'coordinate'):
-            lq = self.processed_data.get_attribute(col, 'lower_bound')
-            uq = self.processed_data.get_attribute(col, 'upper_bound')
-            d_lq = self.processed_data.get_attribute(col, 'diff_lower_bound')
-            d_uq = self.processed_data.get_attribute(col, 'diff_upper_bound')
-
-            match self.processed_data.get_attribute(col, 'units'):
-                case 'ppm':
-                    compositional = True
-                    max_val = 1e6
-                    shift_percentile = 90
-                case 'cps':
-                    compositional = True
-                    max_val = 1e6
-                    shift_percentile = 90
-                case _:
-                    compositional = True
-                    max_val = 1e6
-                    shift_percentile = 90
-
-
-            # Apply your transformation and outlier detection to each cluster
-            for cluster in range(optimal_clusters):
-        # Handle below-zero values using cluster-based correction
-        if np.nanmin(array) < 0:
-            # Apply clustering to separate potential noise (negatives)
-            kmeans = KMeans(n_clusters=n_clusters)
-            valid_data = array[np.isfinite(array)].reshape(-1, 1)  # Exclude NaNs for clustering
-            labels = kmeans.fit_predict(valid_data)
-            
-            # Find the cluster with the lowest mean and treat it as the potential noise cluster
-            cluster_means = np.array([valid_data[labels == i].mean() for i in range(n_clusters)])
-            noise_cluster = np.argmin(cluster_means)
-            
-            # Get the values in the noise cluster
-            noise_data = valid_data[labels == noise_cluster]
-
-            # Calculate the centroid of the noise cluster
-            noise_centroid = np.mean(noise_data)
-            
-            # Determine the percentile value for shifting
-            high_percentile_value = np.percentile(noise_data, shift_percentile)
-            
-            # Calculate the shift based on values within the specified percentile range
-            shift_values = noise_data[noise_data >= high_percentile_value]
-            if len(shift_values) > 0:
-                min_shift_value = np.min(shift_values)
-                shift_value = np.abs(min_shift_value)
-                
-                # Apply the shift to positive values within the noise cluster
-                array[labels.reshape(array.shape) == noise_cluster] += shift_value
-                
-                # Move extreme negative values (outside the shift percentile) to the new minimum positive value
-                array[labels.reshape(array.shape) == noise_cluster] = np.where(
-                    array[labels.reshape(array.shape) == noise_cluster] < high_percentile_value, 
-                    min_shift_value, 
-                    array[labels.reshape(array.shape) == noise_cluster]
-                )
-
+        Returns
+        -------
+        _type_
+            _description_
+        """        
         # Set a small epsilon to handle zeros (if compositional data)
         epsilon = 1e-10 if compositional else 0
 
@@ -777,8 +812,7 @@ class SampleObj:
 
         return clipped_data
 
-
-    def transform_array(self, array, negative_method):
+    def transform_array(self, array, negative_method, shift_percentile=None):
         """
         Negative and zero handling with clustering for noise detection.
         Parameters
@@ -794,14 +828,14 @@ class SampleObj:
         """
         match negative_method.lower():
             case 'ignore negative values':
+                # do nothing, the values remain unchanged
                 t_array = np.copy(array)
                 t_array = np.where(t_array > 0, t_array, np.nan)
-                return t_array
 
             case 'minimum positive value':
+                # shift all negative values to be a 
                 min_positive_value = np.nanmin(array[array > 0])
                 t_array = np.where(array < 0, min_positive_value, array)
-                return t_array
 
             case 'gradual shift':
                 # Handle multidimensional case (2D array)
@@ -816,108 +850,11 @@ class SampleObj:
                     min_val = np.nanmin(array) - 0.0001
                     max_val = np.nanmax(array)
                     t_array = (max_val * (array - min_val)) / (max_val - min_val) if min_val < 0 else np.copy(array)
-                return t_array
-
-            case 'cluster-based correction':
-                # Use clustering to identify noise-like negative points
-                reshaped_data = array.reshape(-1, 1)  # Reshape for clustering
-                clustering = DBSCAN(eps=0.5, min_samples=10).fit(reshaped_data)
-                labels = clustering.labels_
-                noise_mask = (labels == -1)  # DBSCAN marks noise with -1
-                t_array = np.copy(array)
-                min_positive_value = np.nanmin(t_array[t_array > 0])
-
-                # Adjust noise and negative values
-                t_array[noise_mask | (t_array < 0)] = min_positive_value
-                return t_array
 
             case 'yeo-johnson transformation':
                 t_array, _ = yeojohnson(array)
-                return t_array
+        return t_array
 
-
-
-
-    # def prep_data(self, analyte_1=None, analyte_2=None):
-    #     """Prepares data to be used in analysis
-
-    #     1. Obtains raw DataFrame
-    #     2. Handles negative values based on option chosen
-    #     3. Scale data  (linear,log, loggit)
-    #     4. Autoscales data if choosen by user
-
-    #     The prepped data is stored in one of 2 Dataframes: analysis_analyte_data or computed_analyte_data
-    #     """
-    #     if analyte_1: #if single analyte
-    #         if not isinstance(analyte_1,list):
-    #             analytes = [analyte_1]
-    #     else: #if analyte is not provided update all analytes in analytes_df
-    #         analytes = self.processed_data.match_attribute(attribute='data_type', value='analyte')
-
-    #     #analyte_info = self.processed_data.attributes_to_dataframe()
-            
-    #     if not analyte_2: #not a ratio
-            
-    #         # perform negative value handling
-    #         for neg_method in self.processed_data.get_attribute(analytes, 'negative_method').unique():
-    #             filtered_analytes = self.processed_data.match_attribute('negative_method', neg_method)
-    #             filtered_data = self.processed_data[filtered_analytes].values
-    #             self.processed_data.loc[:,filtered_analytes] = self.transform_array(filtered_data,neg_method)
-                
-    #         # perform autoscaling on columns where auto_scale is set to true
-    #         for auto_scale in analyte_info['auto_scale'].unique():
-    #             filtered_analytes = analyte_info[analyte_info['auto_scale'] == auto_scale]['analytes']
-
-    #             for analyte_1 in filtered_analytes:
-    #                 lq = self.processed_data.get_attribute(analyte_1,'lower_bound')
-    #                 uq = self.processed_data.get_attribute(analyte_1,'upper_bound')
-    #                 d_lb = self.processed_data.get_attribute(analyte_1,'diff_lower_bound')
-    #                 d_ub = self.processed_data.get_attribute(analyte_1,'diff_upper_bound')
-    #                 if auto_scale:
-    #                     self.processed_data[analyte_1] = self.outlier_detection(self.processed_data[analyte_1].values.reshape(-1, 1),lq, uq, d_lb, d_ub)
-    #                 else:
-    #                     #clip data using ub and lb
-    #                     lq_val = np.nanpercentile(self.processed_data[analyte_1], lq, axis=0)
-    #                     uq_val = np.nanpercentile(self.processed_data[analyte_1], uq, axis=0)
-    #                     self.processed_data[analyte_1] = np.clip(self.processed_data[analyte_1], lq_val, uq_val)
-
-    #     # update v_min and v_max in self.analyte_info
-    #     v_min = self.processed_data[column_name][self.mask].min()
-    #     v_max = self.processed_data[column_name][self.mask].max()
-    #     self.processed_data.set_attribute('v_min', field, v_min)
-    #     self.processed_data.set_attribute('v_max', field, v_max)
-
-    #     else:  #if ratio
-    #         self.compute_ratio(analyte_1, analyte_2)
-
-    #         # Check if we found such a row
-    #         if len(index_to_update) > 0:
-    #             idx = index_to_update[0]
-
-    #             neg_method = self.comboBoxNegativeMethod.currentText()
-    #             min_positive_value = min(ratio_array[ratio_array>0])
-    #             self.ratio_info.at[idx, 'negative_method'] = neg_method
-
-    #             # perform negative value handling
-    #             ratio_array = self.transform_array(ratio_array,neg_method)     
-
-    #             if auto_scale:
-
-    #                 ratio_array = self.outlier_detection(ratio_array.reshape(-1, 1),lb, ub, d_lb,d_ub)
-    #             else:
-    #                 #clip data using ub and lb
-    #                 lq_val = np.nanpercentile(ratio_array, lq, axis=0)
-    #                 uq_val = np.nanpercentile(ratio_array, uq, axis=0)
-    #                 ratio_array = np.clip(ratio_array, lq_val, uq_val)
-
-    #             if self.computed_data['Ratio'].empty:
-    #                 self.computed_data['Ratio'] = self.cropped_raw_data[['X','Y']]
-
-    #             self.processed_data['Ratio'][ratio_name] = ratio_array
-
-    #             self.ratio_info.at[idx, 'v_min'] = np.nanmin(ratio_array)
-    #             self.ratio_info.at[idx, 'v_max'] = np.nanmax(ratio_array)
-    
     def update_norm(self, data, sample_id, norm=None, analyte_1=None, analyte_2=None, update=False):
         """Update the norm of the data.
 
@@ -1145,14 +1082,6 @@ class SampleObj:
     #         Transformed data
     #     """
     #     match negative_method.lower():
-    #         case 'ignore negative values':
-    #             t_array = np.copy(array)
-    #             t_array = np.where(t_array > 0, t_array, np.nan)
-    #             return t_array
-    #         case 'minimum positive value':
-    #             min_positive_value = np.nanmin(array[array > 0])
-    #             t_array = np.where(array < 0, min_positive_value, array)
-    #             return t_array
     #         case 'gradual shift':
     #             if array.ndim == 2:
     #                 # Calculate min and max values for each column and adjust their shapes for broadcasting
@@ -1181,8 +1110,3 @@ class SampleObj:
     #                 else:
     #                     t_array = np.copy(array)
     #             return t_array
-    #         case 'yeo-johnson transformation':
-    #             # Apply Yeo-Johnson transformation
-    #             t_array, lambda_yeojohnson = yeojohnson(array)
-    #             return t_array
-    

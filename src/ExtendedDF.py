@@ -158,7 +158,6 @@ class AttributeDataFrame(pd.DataFrame):
         # Handle multiple columns
         return [self.column_attributes.get(column, {}).get(attribute) for column in columns]
 
-
     def _set_attribute(self, attribute, column, value):
         """Set attribute of an AttributeDataFrame
 
@@ -238,15 +237,35 @@ class AttributeDataFrame(pd.DataFrame):
         ----------
         attribute : str
             The attribute to search for.
-        value : any
-            The value to match.
+        value : any, list
+            The value(s) to match.
 
         Returns
         -------
         list
             A list of column names that have the attribute set to the specified value.
         """
-        return [col for col, attrs in self.column_attributes.items() if attrs.get(attribute) == value]
+        if isinstance(value, list):
+            return [col for col, attrs in self.column_attributes.items() if attrs.get(attribute) in value]
+        else:
+            return [col for col, attrs in self.column_attributes.items() if attrs.get(attribute) == value]
+
+    def match_attributes(self, attributes_dict):
+        """
+        Returns a list of columns where each attribute matches its corresponding value.
+
+        Parameters
+        ----------
+        attributes_dict : dict
+            A dictionary where keys are attribute names and values are the corresponding values to match.
+
+        Returns
+        -------
+        list
+            A list of column names where each attribute matches its corresponding value.
+        """
+        return [col for col, attrs in self.column_attributes.items()
+                if all(attrs.get(attr) == val for attr, val in attributes_dict.items())]
 
     def attributes_to_dataframe(self, attributes=None):
         """

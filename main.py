@@ -380,7 +380,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.clipped_analyte_data = {} # stores processed analyted data
         # self.data['computed_data'] = {} # stores computed analyted data (ratios, custom fields)
         self.sample_id = ''
-        self.aspect_ratio = 1.0
+        self.filter_info = pd.DataFrame()
         #self.data = {}
         self.selected_analytes = []
         self.ndim_list = []
@@ -1365,15 +1365,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # add sample to sample dictionary
         if self.sample_id not in self.data:
             file_path = os.path.join(self.selected_directory, self.csv_files[index])
-            self.data[self.sample_id] = SampleObj(self.sample_id, self.filepath, self.comboBoxNegativeMethod.currentText())
+            self.data[self.sample_id] = SampleObj(self.sample_id, file_path, self.comboBoxNegativeMethod.currentText())
+            self.selected_analytes = [col for col in self.data[self.sample_id].processed_data.columns if (self.data[self.sample_id].processed_data.get_attribute(col, 'data_type') == 'analyte') 
+                and (self.data[self.sample_id].processed_data.get_attribute(col, 'use') is not None
+                and self.data[self.sample_id].processed_data.get_attribute(col, 'use')) ]
 
             #get plot array
             #current_plot_df = self.get_map_data(sample_id=sample_id, field=self.selected_analytes[0], field_type='Analyte')
             #set
             self.styles['analyte map']['Colors']['Field'] = self.selected_analytes[0]
 
-            self.create_tree(sample_id)
-            self.update_tree(self.data[sample_id]['norm'])
+            self.create_tree(self.sample_id)
+            self.update_tree(self.data[self.sample_id]['norm'])
         else:
             #update filters, polygon, profiles with existing data
             self.compute_map_aspect_ratio()
@@ -4144,7 +4147,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             style['Axes']['YLim'] = [ymin, ymax]
             style['Axes']['YScale'] = yscale
             style['Axes']['YLabel'] = 'Y'
-            style['Axes']['AspectRatio'] = self.aspect_ratio
+            style['Axes']['AspectRatio'] = self.data[self.sample_id].aspect_ratio
 
             # do not round axes limits for maps
             self.lineEditXLB.precision = None
@@ -5646,7 +5649,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             # add image to canvas
             cmap = self.get_colormap()
-            cax = canvas.axes.imshow(reshaped_array, cmap=cmap,  aspect=self.aspect_ratio, interpolation='none')
+            cax = canvas.axes.imshow(reshaped_array, cmap=cmap,  aspect=self.data[self.sample_id].aspect_ratio, interpolation='none')
             font = {'family': 'sans-serif', 'stretch': 'condensed', 'size': 8, 'weight': 'semibold'}
             canvas.axes.text(0.025*self.array_size[0],0.1*self.array_size[1], analyte, fontdict=font, color=style['Scale']['OverlayColor'], ha='left', va='top')
             canvas.axes.set_axis_off()
@@ -6091,7 +6094,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             
         norm = self.color_norm(style)
 
-        cax = canvas.axes.imshow(reshaped_array, cmap=self.get_colormap(),  aspect=self.aspect_ratio, interpolation='none', norm=norm)
+        cax = canvas.axes.imshow(reshaped_array, cmap=self.get_colormap(),  aspect=self.data[self.sample_id].aspect_ratio, interpolation='none', norm=norm)
 
 
         self.add_colorbar(canvas, cax, style)
@@ -6105,7 +6108,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         alphas = np.clip(alphas, .4, 1)
 
         alpha_mask = np.where(reshaped_mask == 0, 0.5, 0)  
-        canvas.axes.imshow(np.ones_like(alpha_mask), aspect=self.aspect_ratio, interpolation='none', cmap='Greys', alpha=alpha_mask)
+        canvas.axes.imshow(np.ones_like(alpha_mask), aspect=self.data[self.sample_id].aspect_ratio, interpolation='none', cmap='Greys', alpha=alpha_mask)
         canvas.array = reshaped_array
 
         # font = {'family': 'sans-serif', 'stretch': 'condensed', 'size': 8, 'weight': 'semibold'}
@@ -7217,7 +7220,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         map_data = np.zeros((M, N, 3), dtype=np.uint8)
         map_data[:len(cval), :, :] = cval.reshape(M, N, 3, order=self.order)
 
-        canvas.axes.imshow(map_data, aspect=self.aspect_ratio)
+        canvas.axes.imshow(map_data, aspect=self.data[self.sample_id].aspect_ratio)
         canvas.array = map_data
 
         # add scalebar
@@ -7596,7 +7599,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         reshaped_array = np.reshape(self.data[self.sample_id]['computed_data'][plot_type][field].values, self.array_size, order=self.order)
 
-        cax = canvas.axes.imshow(reshaped_array, cmap=style['Colors']['Colormap'], aspect=self.aspect_ratio, interpolation='none')
+        cax = canvas.axes.imshow(reshaped_array, cmap=style['Colors']['Colormap'], aspect=self.data[self.sample_id].aspect_ratio, interpolation='none')
         canvas.array = reshaped_array
 
          # Add a colorbar
@@ -7637,8 +7640,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #norm = colors.BoundaryNorm(boundaries, cmap.N, clip=True)
         norm = self.color_norm(style,n_clusters)
 
-        #cax = canvas.axes.imshow(self.array.astype('float'), cmap=style['Colors']['Colormap'], norm=norm, aspect = self.aspect_ratio)
-        cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect=self.aspect_ratio)
+        #cax = canvas.axes.imshow(self.array.astype('float'), cmap=style['Colors']['Colormap'], norm=norm, aspect = self.data[self.sample_id].aspect_ratio)
+        cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect=self.data[self.sample_id].aspect_ratio)
         canvas.array = reshaped_array
         #cax.cmap.set_under(style['Scale']['OverlayColor'])
 
@@ -9223,26 +9226,28 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             hexcolor = '#FFFFC8'
 
         sample_id = self.sample_id
+        analyte_items = self.data[sample_id].processed_data.match_attribute('data_type','analyte')
+        ratio_items = self.data[sample_id].processed_data.match_attribute('data_type','ratio')
 
         # Un-highlight all leaf in the trees
-        self.unhighlight_tree(self.ratios_items)
-        self.unhighlight_tree(self.analytes_items)
+        self.unhighlight_tree(ratios_items)
+        self.unhighlight_tree(analytes_items)
 
-        self.data[sample_id]['analyte_info'].loc[:,'use'] = False
-        if not (len(analyte_df.keys()) > 0):
+        self.data[sample_id].processed_data.set_attribute(analyte_items,'use',False)
+        if not (len(analyte_items) > 0):
             return
 
-        for analyte, norm in analyte_df.items():
+        for analyte in analyte_items + ratio_items:
+            norm = self.data[sample_id].processed_data.get_attribute(analyte,'norm')
             if '/' in analyte:
                 analyte_1, analyte_2 = analyte.split(' / ')
-                self.update_ratio_df(self.sample_id, analyte_1, analyte_2, norm)
                 ratio_name = f"{analyte_1} / {analyte_2}"
                 # Populate ratios_items if the pair doesn't already exist
-                item1,check = self.find_leaf('Ratio', branch = self.sample_id, leaf = ratio_name)
+                item1,check = self.find_leaf('Ratio', branch = sample_id, leaf = ratio_name)
 
                 if norm_update:
-                    item1,check = self.find_leaf('Ratio', branch = self.sample_id, leaf = ratio_name)
-                    item2,check = self.find_leaf('Ratio (normalized)', branch = self.sample_id, leaf = ratio_name)
+                    item1,check = self.find_leaf('Ratio', branch = sample_id, leaf = ratio_name)
+                    item2,check = self.find_leaf('Ratio (normalized)', branch = sample_id, leaf = ratio_name)
                 # else:
                 #     item1,check = self.find_leaf('Ratio', branch = self.sample_id, leaf = ratio_name)
                 #     item2,check = self.find_leaf('Ratio (normalized)', branch = self.sample_id, leaf = ratio_name)
@@ -9276,8 +9281,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 #     item2.setBackground(QBrush(QColor(hexcolor)))
 
             else: #single analyte
-                analyte_1 = analyte
-                analyte_2 = None
                 item,check = self.find_leaf('Analyte', branch = sample_id, leaf = analyte)
                 # if norm_update:
                 #     item,check = self.find_leaf('Analyte (normalized)', branch = sample_id, leaf = analyte)
@@ -9289,7 +9292,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.data[self.sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['analytes']==analyte),'use'] = True
 
             if norm_update: #update if analytes are returned from analyte selection window
-                self.update_norm(self.sample_id, norm, analyte_1=analyte_1, analyte_2=analyte_2)
+                self.update_norm(self.sample_id, norm, analyte_1=analyte, analyte_2=None)
 
     def add_tree_item(self, plot_info):
         """Updates plot selector list and adds plot information data to tree item

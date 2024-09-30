@@ -1,8 +1,12 @@
 Control Toolbox (Left)
 **********************
 
+The Control Toolbox provides essential functions for data management, analysis, and visualization. 
+
 Samples and Fields
 ==================
+
+The Samples and Fields tab offers crucial functions for data management.  Here, reference values can be changed, which updates normalized data across plots, calculated fields, n-Dim plots, clustering, and filters.  Modifying data scaling is similar to cropping and clears existing filters, so this option should be used judiciously.  Additionally, the correlation method can be adjusted, which automatically updates all correlation plots to reflect the chosen approach.
 
 .. figure:: _static/screenshots/LaME_Samples_and_Fields.png
     :align: center
@@ -11,21 +15,14 @@ Samples and Fields
 
     Samples and Fields tab with options for data manipulation and correlation visualization.
 
-The Samples and Fields tab offers crucial functions for data management. Here, you can change reference values, which updates normalized data across plots, calculated fields, n-Dim plots, clustering, and filters. Modifying data scaling is similar to cropping and clears existing filters, so use this option judiciously. Additionally, you can adjust the correlation method, which automatically updates all correlation plots to reflect your chosen approach.
+Autoscaling
+-----------
 
-Autoscaling |icon-autoscale|
-----------------------------
-
-Autoscaling addresses a common calibration issue where low counts convert to negative concentrations after calibration. This often results from differences in ablation properties between calibration and sample minerals, causing particular problems with log-scaled data.
-
-To mitigate this, *LaME* applies a linear compression to the data, fixing the upper end and shifting the lower end to a small positive value. While this alters concentrations slightly, it minimally affects larger values. The autoscaling process, performed by default, clips extreme high and low concentrations to the scale's limits.
-
-Although autoscaling can influence statistics, it generally improves mean estimates by reducing the impact of unreasonably high values. Toggle autoscaling on or off using the |icon-autoscale| button.
+Autoscaling (|icon-autoscale|) addresses a common calibration issue where low counts convert to negative concentrations after calibration.  This often results from differences in ablation properties between calibration and sample minerals, causing particular problems with log-scaled data.  To mitigate this, *LaME* applies a linear compression to the data, fixing the upper end and shifting the lower end to a small positive value.  While this alters concentrations slightly, it minimally affects larger values.  The autoscaling process, performed by default, clips extreme high and low concentrations to the scale's limits.  Although autoscaling can influence statistics, it generally improves mean estimates by reducing the impact of unreasonably high values. 
 
 Histogram Equalization
 ----------------------
-
-Histogram equalization (|icon-histeq|) offers an alternative to autoscaling that preserves the original data. This method assigns colors based on equal quantiles, proving particularly useful for datasets with wide value ranges or multi-modal distributions. While effective for visualizing complex distributions, be aware that it may amplify noise at the expense of real features.
+Histogram equalization (|icon-histeq|) offers an alternative to autoscaling that preserves the original data.  This method assigns colors based on equal quantiles, proving particularly useful for datasets with wide value ranges or multi-modal distributions. While effective for visualizing complex distributions, be aware that it may amplify noise at the expense of real features.
 
 .. figure:: _static/screenshots/LaME_Preprocess.png
     :align: center
@@ -37,6 +34,8 @@ Histogram equalization (|icon-histeq|) offers an alternative to autoscaling that
 Preprocess
 ==========
 
+The Preprocessing tab provides tools for data enhancement and noise reduction. Preprocessing alters the data to improve performance, stability, and visual characteristics. Note that these changes can impact certain statistical calculations, such as mean values and standard deviations.
+
 .. figure:: _static/screenshots/LaME_Preprocess.png
     :align: center
     :alt: LaME interface: left toolbox, preprocessing tab
@@ -44,12 +43,10 @@ Preprocess
 
     Preprocessing tab with tools for data enhancement and noise reduction.
 
-Preprocessing alters the data to improve performance, stability, and visual characteristics. Note that these changes can impact certain statistical calculations, such as mean values and standard deviations.
-
 Noise Reduction
 ---------------
 
-Noise reduction (|icon-noise-reduction|) smooths data to enhance clarity. You can apply it solely to maps for viewing or to Analysis Data before generating plots and analyses. Select the application method from the 'Apply to analysis' dropdown. LaME offers five noise reduction methods:
+Noise reduction (|icon-noise-reduction|) smooths data to enhance clarity.  It can be applied solely to maps for viewing or to Analysis Data before generating plots and analyses.  The application method can be selected from the Method dropdown. *LaME* offers five noise reduction methods:
 
 * Median: Computes the median value over a specified kernel size, smoothing across the entire image.
 * Gaussian: Applies Gaussian weighting over a specified kernel size, smoothing across the entire image.
@@ -57,13 +54,15 @@ Noise reduction (|icon-noise-reduction|) smooths data to enhance clarity. You ca
 * Edge-preserving: Smooths data while maintaining sharp edges, recommended for most cases but may over-smooth within grains.
 * Bilateral: Combines Gaussian smoothing with edge preservation, offering less aggressive smoothing than the edge-preserving method.
 
-Histograms
-----------
+Histogram
+---------
 
-The Histogram tool produces visualize the distribution of your data. You can adjust the presentation of your histogram by modifying either the bin width or the number of bins. Changing the bin width automatically updates the number of bins, and vice versa. This flexibility enables you to fine-tune histogram to best represent the data distribution.
+The Histogram tool produces visualizations of data distribution.  The presentation of the histogram can be adjusted by modifying either the bin width or the number of bins.  Changing the bin width automatically updates the number of bins, and vice versa.  This flexibility enables fine-tuning of the histogram to best represent the data distribution.
 
 Spot Data
 =========
+
+Spot data functionality is currently under development and not available.
 
 .. figure:: _static/screenshots/LaME_Spot_Data.png
     :align: center
@@ -72,23 +71,12 @@ Spot Data
 
     Spot Data tab (functionality not currently available).
 
-Spot data functionality is currently under development and not available.
-
 Polygons
 ========
 
-The Polygons tab allows you to create and edit polygons for data filtering and selection. Follow these steps to create a polygon:
+The Polygons tab allows you to create and edit polygons for data filtering and selection.  To create a polygon, first select a map from the *Plot Selector*.  Then, click the |icon-polygon-new| button in the Polygons tab.  Left-click on the map to add vertices, and a zoom tool will appear for precision.  Right-click to finish the polygon.  The newly created polygon can be named in the Polygon Table.
 
-1. Select a map from the plot selector.
-2. Click the |icon-polygon-new| button in the Control Toolbox.
-3. Left-click on the map to add vertices. A zoom tool will appear for precision.
-4. Right-click to finish the polygon.
-5. Name your new polygon in the Polygon Table.
-
-To edit existing polygons:
-- To move a point: Click |icon-move-point|, then left-click near the point and again at its new location.
-- To add a vertex: Click |icon-add-point|, select a line segment, and click where you want to add the point.
-- To remove a point: Click |icon-remove-point| and then click the point you wish to remove.
+Existing polygons can be modified using several editing tools.  To move a point, select the |icon-move-point| tool, left-click near the point to be moved, then left-click again at the desired new location.  For adding a new vertex to an existing polygon, use |icon-add-point| tool and click on a line segment of the polygon, then click where the new point should be added.  If a point needs to be removed, simply select the |icon-remove-point| tool, then click on the point to be deleted from the polygon.
 
 .. figure:: _static/screenshots/LaME_Polygons.png
     :align: center
@@ -100,6 +88,8 @@ To edit existing polygons:
 Profiling
 =========
 
+The Profiling tab enables the creation of cross-sections of analytes across maps, allowing for detailed analysis of compositional changes along specific paths in the sample.
+
 .. figure:: _static/screenshots/LaME_Profiling.png
     :align: center
     :alt: LaME interface: left toolbox, profiling tab
@@ -107,10 +97,10 @@ Profiling
 
     Profiling tab with tools for creating cross-sections of analytes across maps.
 
-The Profiling tab enables you to create cross-sections of analytes across maps, allowing for detailed analysis of compositional changes along specific paths in your sample.
-
 Scatter and Heatmaps
 ====================
+
+The Scatter and Heatmaps tab provides tools for creating scatter plots and heatmaps in both 2D (biplots) and 3D (ternary) dimensions.  Scatter data can be colored by a field set in the Colormap dropdownlist, allowing for multi-variable visualization. Additionally, maps can be generated with colors defined by pixel positions within a ternary diagram, offering a unique perspective on three-component systems.
 
 .. figure:: _static/screenshots/LaME_Scatter_and_Heatmaps.png
     :align: center
@@ -119,10 +109,10 @@ Scatter and Heatmaps
 
     Scatter and Heatmaps tab for creating various 2D and 3D visualizations.
 
-The Scatter and Heatmaps tab provides tools for creating scatter plots and heatmaps in both 2D (biplots) and 3D (ternary) dimensions. Scatter data can be colored by a field set in the Styling tab, allowing for multi-variable visualization. Additionally, you can generate maps with colors defined by pixel positions within a ternary diagram, offering a unique perspective on three-component systems.
-
 n-Dim
 =====
+
+The n-Dim tab is used for plotting multidimensional data as radar plots or trace element compatibility diagrams (spider plots).  This tab allows for the production of spider plots with data normalized to a set of reference concentrations, as well as radar plots that resemble spider webs, offering versatile options for visualizing complex, multi-element data.
 
 .. figure:: _static/screenshots/LaME_n-Dim.png
     :align: center
@@ -131,10 +121,10 @@ n-Dim
 
     n-Dim tab for creating multidimensional plots like spider diagrams and radar plots.
 
-The n-Dim tab is used for plotting multidimensional data as radar plots or trace element compatibility diagrams (spider plots). This tab allows you to produce spider plots with data normalized to a set of reference concentrations, as well as radar plots that resemble spider webs, offering versatile options for visualizing complex, multi-element data.
-
 Dimensional Reduction
 =====================
+
+The Dimensional Reduction tab offers tools for principal component analysis (PCA) visualization, a key technique for reducing the dimensionality of complex datasets.
 
 .. figure:: _static/screenshots/LaME_PCA.png
     :align: center
@@ -143,17 +133,15 @@ Dimensional Reduction
 
     Dimensional Reduction tab with tools for principal component analysis visualization.
 
-The Dimensional Reduction tab offers tools for principal component analysis (PCA) visualization. Use the Plot type dropdown to select from various PCA-related plots:
-
-- Variance: Shows individual and cumulative explained variance for principal components.
-- Vectors: Displays a heatmap of vector components, illustrating input field influence on data variance along principal component axes.
-- 2-D score plots: Visualizes data point scores and field components along two principal component axes (PC X and PC Y).
-- Score maps: Generates a score map for a single principal component, adjustable via the PC X field.
-
-2-D score plots can be displayed as scatter plots or heatmaps. Save your plots to the plot tree by clicking the |icon-launch| button.
-
 Clustering
 ==========
+
+The Clustering tab employs unsupervised machine learning to identify data subsets with similar multidimensional characteristics.  This functionality is often used to isolate or exclude specific minerals from analyses.  *LaME* implements two clustering methods:
+
+1. K-means: A method that optimizes cluster centroids by minimizing the distance of nearest points to each centroid.
+2. Fuzzy c-means: An approach that allows for overlapping clusters, providing an additional score for each cluster alongside the map and assigning each point to the highest-scoring cluster.
+
+The number of clusters can be specified using the 'No. clusters' field. For fine-tuning the clustering process, an 'Exponent' value can be adjusted using a slider when fuzzy c-means is selected, and the 'Distance' metric can be chosen from a dropdown menu.  To ensure reproducibility of results, a 'Starting seed' can be set.  The interface also provides options to incorporate Principal Component Analysis (PCA) and a 'No. basis' field for specifying the number of components to use.  These options provide users with flexibility in how clustering is performed, allowing for customization based on the specific requirements of the data being analyzed.  Note that clustering must be performed before creating a cluster mask.
 
 .. figure:: _static/screenshots/LaME_Clustering.png
     :align: center
@@ -162,17 +150,10 @@ Clustering
 
     Clustering tab for multivariate data classification and analysis.
 
-Clustering employs unsupervised machine learning to identify data subsets with similar multidimensional characteristics, often used to isolate or exclude specific minerals from analyses. LaME implements two clustering methods:
+P-T-t Functions
+===============
 
-* K-means: A simpler algorithm that optimizes cluster centroids by minimizing the distance of nearest points to each centroid.
-* Fuzzy c-means: Allows for overlapping clusters, providing an additional score for each cluster alongside the map and assigning each point to the highest-scoring cluster.
-
-Choose your preferred method from the Method dropdown. Note that clustering must be performed before creating a cluster mask.
-
-Special Functions
-=================
-
-Special functions for computing thermometry, barometry, isotopic dating, and multicomponent diffusion are planned for future implementation. 
+P-T-t Functions for computing thermometry, barometry, isotopic dating, and multicomponent diffusion are planned for future implementation. 
 
 .. |icon-atom| image:: _static/icons/icon-atom-64.png
     :height: 2.5ex

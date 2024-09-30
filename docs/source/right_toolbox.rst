@@ -1,12 +1,16 @@
 Plot and Property Toolbox (Right)
 *********************************
 
-The *Plot and Property Toolbox*, located on the right side of the LaME interface, consists of three major components: the Plot Selector, the Styling Pane, and the Calculator. These tools work together to provide comprehensive control over plot creation, customization, and data manipulation.
+The *Plot and Property Toolbox* consists of three major components: the Plot Selector, the Styling Pane, and the Calculator. These tools work together to provide comprehensive control over plot creation, customization, and data manipulation.
 
 Plot Selector
 =============
 
-The *Plot Selector* lists the available plots for display.  By default, it includes all analytes and their normalized versions. You can add ratios by selecting them from the Analyte Selector in the top toolbar.  Other plots appear in the list once they've been created or explicitly saved.
+The plot type dropdown list sits above the *Plot Selector*. It updates the types of plots available to each of the *Control Toolbox* tabs. In case the plot does not update automatically, the |icon-launch| button can be clicked. 
+
+The *Plot Selector* lists the available plots for display.  By default, it includes all analytes and their normalized versions.  Ratios can be added by selecting them from the *Analyte Selector* in the *Main Toolbar*.  Other plots will also appear in the list once they've been created or explicitly saved.
+
+Analytes and their normalized equivalents can be sorted alphabetically, by mass, or compatibility using the |icon-sort| button.  To remove plots, use the |icon-trash| button.  
 
 .. figure:: _static/screenshots/LaME_Plot_Selector.png
     :align: center
@@ -15,15 +19,11 @@ The *Plot Selector* lists the available plots for display.  By default, it inclu
 
     The *Plot Selector* is similar to a file tree.  It lists types of fields, samples and the plots available beneath each.
 
-Analytes and their normalized equivalents can be sorted alphabetically, by mass, or compatibility using the |icon-sort| button.  To remove plots, use the |icon-trash| button.  Clicking the save button will bring up a dialog to allow you to create new themes or overwrite existing ones.
-
 Styling Pane
 ============
 
-The properties in the styling pane control the look and feel of plots generated from functions in the *Control (Right) Toolbox*.  In also controls the type of plot that is generated (e.g., analyte map, scatter plot or heatmap, etc.).  A complete list is given in the table below along with each of the properties that can be changed.  Not all properties are available for each type of plot.
+The Styling Pane controls the appearance of plots generated from functions in the *Control Toolbox*.  It also controls the type of plot generated (e.g., analyte map, scatter plot, heatmap, etc.).  A complete list is given in the table below along with each of the properties that can be changed.  Not all properties are available for each type of plot.  Styles can be customized and saved using the save ( |icon-save| ) button.  Saved themes can be recalled in future sessions.
 
-
-Four controls sit above the styling pages.  The plot selector updates the types of plots available to each of the *Control Toolbox* tabs.  In case the plot does not update, click the |icon-launch| button.  Styles can be customized and saved using the save ( |icon-save| ) button.  Saved themes can be recalled in future sessions.
 
 +----------------+---------------------------+----------------------+-----------------------------------------------+----------+----------+--------------------------------------------------------------------------+--------------------------+------------+
 | tab            | Samples and Fields        | Preprocessing        | Scatter & Heatmap                             | n-Dim               | PCA                                                                      | Clustering               | Profiling |
@@ -91,6 +91,7 @@ Four controls sit above the styling pages.  The plot selector updates the types 
 | resolution     | N           | N           | N         | N        | N              | Y              | N           | N        | N        | N        | N       | N                  | Y                  | N         | N        | N             | N          |
 +----------------+-------------+-------------+-----------+----------+----------------+----------------+-------------+----------+----------+----------+---------+--------------------+--------------------+-----------+----------+---------------+------------+
 
+
 .. [1] for displaying spot data
 .. [2] for displaying polygons
 .. [3] when clusters are selected for color by field
@@ -105,14 +106,14 @@ Four controls sit above the styling pages.  The plot selector updates the types 
 Axes and Labels
 ---------------
 
-The axes and labels are filled initially with default values, but can be edited to update the plot.
+The axes and labels are initially filled with default values but can be edited to update the plot.
 
 .. figure:: _static/screenshots/LaME_Styling_Axes_Labels.png
     :align: center
     :alt: LaME interface: right toolbox, styling-axes-and-labels tab
     :width: 232
 
-    The *Styling \> Axes and Labels* contains general settings applied to all plots.
+    The Styling \> Axes and Labels contains general settings applied to all plots.
 
 Annotations and Scales
 ----------------------
@@ -122,67 +123,57 @@ Annotations and Scales
     :alt: LaME interface: right toolbox, styling-annotations tab
     :width: 232
 
-    The *Styling \> Annotations* contains font type and font size settings.
+    The Styling \> Annotations contains font type and font size settings.
 
 Markers and Lines
 -----------------
+
+The Markers tab contains settings for markers and lines used in scatter, ternary, and PCA plots. For other plot types, these settings are grayed out. Symbol options, symbol size, and transparency can be modified in this tab.
+
+The Lines tab contains settings for line width used in TEC, radar, variance, and PCx plots. Line widths range from 0.25 to 6 pt.
 
 .. figure:: _static/screenshots/LaME_Styling_Markers.png
     :align: center
     :alt: LaME interface: right toolbox, Styling-markers tab
     :width: 232
 
-    The *Styling \> Markers* contains settings for markers used in scatter, ternary, and PCA plots. 
-    
-For other plot types text is greyed out, indicating these settings can not be modified. Symbol options, symbol size, and transparency are modified in this tab. 
-
-
-    The *Styling \> Lines* contains settings for line width used in TEC, radar, variance, and PCx plots. 
-
-Line widths range from 0.25 to 6 pt. 
+    The Styling > Markers and Lines tab contains settings for markers and lines used in various plots.
 
 Coloring
 --------
+
+The Coloring tab provides a range of options for customizing the color representation of data in plots and maps.  Color by field allows selection of the data aspect to be represented by color.  The Field option specifies which particular analyte or calculated value to use for coloring. Resolution, Colormap, and Scale settings offer further customization of the color representation.  For fine-tuning the color range, Clim (color limits) can be adjusted.  The Cbar label field allows customization of the colorbar label, while Cbar direction determines the orientation of the colorbar on the plot.
 
 .. figure:: _static/screenshots/LaME_Styling_Colors.png
     :align: center
     :alt: LaME interface: right toolbox, Styling-colors tab
     :width: 232
 
-    The *Styling |> Colors* contains settings for changing color options.
-
-Use the Color tab to choose and modify the colors applied to plots. The *Colors \> Color* tick box brings up a color picker, the use of which is described below. If the box is left unticked, preset color maps are available under the *Colors \> Colormap* dropdown menu. The *Colors \> Color Limits* setting allows selection of a subset of the color range from a chosen colormap. 
-
-The *Colors \> Cbar* direction allows user to choose horizontal or vertical placement of the Color Bar legend. The *Colors \> Cbar* label allows user to specify legend label.
-
-
-    The *Styling \> Colors \> Color* opens a color picker window
-
-The *Colors \> Color* color picker allows users to pick colors from a color wheel. The color is chosen by positioning the pointer over the desired location on the color wheel. Color intensity can be modified by the greyscale slider located under the color wheel. Colors are added to the available color choices only after the *OK* button is pushed.
+    The Styling |> Colors contains settings for changing color options.
 
 Clusters
 --------
+
+Clustered data can be assigned a name and color. Clusters can be linked (|icon-link|) or unlinked (|icon-unlink|). A selected cluster or clusters can be used to mask (|icon-mask-dark|) or reverse mask (|icon-mask-light|) data in a plot or on a map.
 
 .. figure:: _static/screenshots/LaME_Styling_Clusters.png
     :align: center
     :alt: LaME interface: right toolbox, styling-clustering tab
     :width: 232
 
-    The *Styling \> Clustering* contains options for working with clustered data
-
-Clustering is available if the *Styling \> Colors \> Color by field* is set to *Clusters*. Clustered data can be assigned a name and color. Clusters can be linked ( |icon-link| ) or unlinked ( |icon-unlink| ). A selected cluster or clusters can be used to mask ( |icon-mask-dark| ) or reverse mask ( |icon-mask-light| ) data in a plot or on a map.
+    The Styling \> Clustering contains options for working with clustered data
 
 Calculator
 ==========
+
+The calculator (|icon-calculator|) can be used to compute custom fields.  These custom fields can be used as dimensions on plots or to set marker color values.  Once created, custom fields will be added to associated drop-down menus.  For detailed information on how to use the calculator and create custom fields, please refer to the :doc:`custom_fields` section.
 
 .. figure:: _static/screenshots/LaME_Calculator.png
     :align: center
     :alt: LaME interface: right toolbox, calculator tab
     :width: 232
 
-    The *Calculator* can be used to compute custom fields.  Expressions can be typed directly into the edit box, by clicking the buttons.
-
-Use the calculator ( |icon-calculator| ) to create :doc:`custom_fields`.  These custom fields can be used to as dimensions on plots or to set marker color values.  Once created, custom fields will be added to associated drop downs.
+    The Calculator can be used to compute custom fields.  Expressions can be typed directly into the edit box, by clicking the buttons.
 
 .. |icon-sort| image:: _static/icons/icon-sort-64.png
     :height: 2ex

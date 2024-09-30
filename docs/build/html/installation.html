@@ -31,6 +31,7 @@
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="_static/mpl.css?v=369bd9d1" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -425,7 +426,7 @@
                   
   <section id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h1>
-<p>There are two ways to install and use <em>LaME</em>:</p>
+<p>There are two methods available for installing and using <em>LaME</em>:</p>
 <ul class="simple">
 <li><p>using precomplied executable (standalone application)</p></li>
 <li><p>using source code</p></li>
@@ -435,28 +436,24 @@
 <p>This method provides a ready-to-run program that doesn’t require any programming knowledge. While this method is the easiest to set up, it may not have the very latest features.</p>
 <p>To install the standalone application:</p>
 <ol class="arabic simple">
-<li><p>Download the <em>LaME</em> installer: (link)</p></li>
+<li><p>Download the <em>LaME</em> installer from: [insert download link]</p></li>
 <li><p>Run the installer and follow the on-screen instructions</p></li>
-<li><p>Once installed, you can launch <em>LaME</em> from your applications menu or desktop shortcut</p></li>
+<li><p>Once installed, <em>LaME</em> can be launched from your applications menu or desktop shortcut</p></li>
 </ol>
 </section>
-<section id="source-code">
-<h2>Source Code<a class="headerlink" href="#source-code" title="Link to this heading">#</a></h2>
-<p>This method always provides the most up-to-date version with the latest features and improvements, but may occasionally break as we improve the code, implement new features, or experiment with new tools.</p>
-<section id="prerequisites">
-<h3>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading">#</a></h3>
-<ul class="simple">
-<li><p>Anaconda or Miniconda</p></li>
-<li><p>Git or Visual Studio Code</p></li>
-</ul>
-</section>
+<section id="source-code-installation">
+<h2>Source Code Installation<a class="headerlink" href="#source-code-installation" title="Link to this heading">#</a></h2>
+<p>This method always provides the most up-to-date version with the latest features and improvements. However, it may occasionally encounter issues as the code is improved and new features are implemented.</p>
 <section id="step-1-install-anaconda">
 <h3>Step 1: Install Anaconda<a class="headerlink" href="#step-1-install-anaconda" title="Link to this heading">#</a></h3>
-<p>Download and install Anaconda from <a class="reference external" href="https://www.anaconda.com/download">https://www.anaconda.com/download</a></p>
+<ol class="arabic simple">
+<li><p>Download Anaconda from <a class="reference external" href="https://www.anaconda.com/download">https://www.anaconda.com/download</a></p></li>
+<li><p>Install Anaconda following the official installation guide for your operating system</p></li>
+</ol>
 </section>
 <section id="step-2-install-git-or-visual-studio-code">
 <h3>Step 2: Install Git or Visual Studio Code<a class="headerlink" href="#step-2-install-git-or-visual-studio-code" title="Link to this heading">#</a></h3>
-<p>Choose the option that bestß suits your needs:</p>
+<p>Choose the option that best suits your needs:</p>
 <section id="option-a-install-git">
 <h4>Option A: Install Git<a class="headerlink" href="#option-a-install-git" title="Link to this heading">#</a></h4>
 <ul class="simple">
@@ -472,7 +469,7 @@
 <h4>Option B: Install Visual Studio Code<a class="headerlink" href="#option-b-install-visual-studio-code" title="Link to this heading">#</a></h4>
 <ol class="arabic simple">
 <li><p>Download and install Visual Studio Code from <a class="reference external" href="https://code.visualstudio.com/">https://code.visualstudio.com/</a></p></li>
-<li><p>Install the Python extension in VSC</p></li>
+<li><p>Install the Python extension in Visual Studio Code</p></li>
 <li><p>Run the following command in Anaconda Prompt or Terminal:</p></li>
 </ol>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>install<span class="w"> </span>git
@@ -522,11 +519,11 @@ pip<span class="w"> </span>install<span class="w"> </span>darkdetect<span class=
 conda<span class="w"> </span>update<span class="w"> </span>--all
 </pre></div>
 </div>
-<p>Remember to check the project’s documentation for any additional steps that might be required after updating.</p>
+<p>It’s recommended to check the project’s documentation for any additional steps that might be required after updating.</p>
 </section>
 <section id="troubleshooting">
 <h3>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading">#</a></h3>
-<p>If you encounter any issues during the installation process, please <a class="reference internal" href="contact.html"><span class="doc">contact us</span></a>.</p>
+<p>If you encounter any issues during the installation process, please <a class="reference internal" href="contact.html"><span class="doc">contact us</span></a> for further assistance.</p>
 </section>
 </section>
 </section>
@@ -578,8 +575,7 @@ conda<span class="w"> </span>update<span class="w"> </span>--all
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#standalone-application">Standalone Application</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#source-code">Source Code</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#prerequisites">Prerequisites</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#source-code-installation">Source Code Installation</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-install-anaconda">Step 1: Install Anaconda</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-install-git-or-visual-studio-code">Step 2: Install Git or Visual Studio Code</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#option-a-install-git">Option A: Install Git</a></li>

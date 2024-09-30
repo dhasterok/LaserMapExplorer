@@ -31,6 +31,7 @@
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="_static/mpl.css?v=369bd9d1" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -425,23 +426,23 @@
                   
   <section id="plot-and-property-toolbox-right">
 <h1>Plot and Property Toolbox (Right)<a class="headerlink" href="#plot-and-property-toolbox-right" title="Link to this heading">#</a></h1>
-<p>The <em>Plot and Property Toolbox</em>, located on the right side of the LaME interface, consists of three major components: the Plot Selector, the Styling Pane, and the Calculator. These tools work together to provide comprehensive control over plot creation, customization, and data manipulation.</p>
+<p>The <em>Plot and Property Toolbox</em> consists of three major components: the Plot Selector, the Styling Pane, and the Calculator. These tools work together to provide comprehensive control over plot creation, customization, and data manipulation.</p>
 <section id="plot-selector">
 <h2>Plot Selector<a class="headerlink" href="#plot-selector" title="Link to this heading">#</a></h2>
-<p>The <em>Plot Selector</em> lists the available plots for display.  By default, it includes all analytes and their normalized versions. You can add ratios by selecting them from the Analyte Selector in the top toolbar.  Other plots appear in the list once they’ve been created or explicitly saved.</p>
-<figure class="align-center" id="id10">
+<p>The plot type dropdown list sits above the <em>Plot Selector</em>. It updates the types of plots available to each of the <em>Control Toolbox</em> tabs. In case the plot does not update automatically, the <a class="reference internal" href="_images/icon-launch-64.png"><img alt="icon-launch" src="_images/icon-launch-64.png" style="height: 2ex;" /></a> button can be clicked.</p>
+<p>The <em>Plot Selector</em> lists the available plots for display.  By default, it includes all analytes and their normalized versions.  Ratios can be added by selecting them from the <em>Analyte Selector</em> in the <em>Main Toolbar</em>.  Other plots will also appear in the list once they’ve been created or explicitly saved.</p>
+<p>Analytes and their normalized equivalents can be sorted alphabetically, by mass, or compatibility using the <a class="reference internal" href="_images/icon-sort-64.png"><img alt="icon-sort" src="_images/icon-sort-64.png" style="height: 2ex;" /></a> button.  To remove plots, use the <a class="reference internal" href="_images/icon-delete-64.png"><img alt="icon-trash" src="_images/icon-delete-64.png" style="height: 2ex;" /></a> button.</p>
+<figure class="align-center" id="id12">
 <a class="reference internal image-reference" href="_images/LaME_Plot_Selector.png"><img alt="LaME interface: right toolbox, plot selector tab" src="_images/LaME_Plot_Selector.png" style="width: 232px;" />
 </a>
 <figcaption>
-<p><span class="caption-text">The <em>Plot Selector</em> is similar to a file tree.  It lists types of fields, samples and the plots available beneath each.</span><a class="headerlink" href="#id10" title="Link to this image">#</a></p>
+<p><span class="caption-text">The <em>Plot Selector</em> is similar to a file tree.  It lists types of fields, samples and the plots available beneath each.</span><a class="headerlink" href="#id12" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
-<p>Analytes and their normalized equivalents can be sorted alphabetically, by mass, or compatibility using the <a class="reference internal" href="_images/icon-sort-64.png"><img alt="icon-sort" src="_images/icon-sort-64.png" style="height: 2ex;" /></a> button.  To remove plots, use the <a class="reference internal" href="_images/icon-delete-64.png"><img alt="icon-trash" src="_images/icon-delete-64.png" style="height: 2ex;" /></a> button.  Clicking the save button will bring up a dialog to allow you to create new themes or overwrite existing ones.</p>
 </section>
 <section id="styling-pane">
 <h2>Styling Pane<a class="headerlink" href="#styling-pane" title="Link to this heading">#</a></h2>
-<p>The properties in the styling pane control the look and feel of plots generated from functions in the <em>Control (Right) Toolbox</em>.  In also controls the type of plot that is generated (e.g., analyte map, scatter plot or heatmap, etc.).  A complete list is given in the table below along with each of the properties that can be changed.  Not all properties are available for each type of plot.</p>
-<p>Four controls sit above the styling pages.  The plot selector updates the types of plots available to each of the <em>Control Toolbox</em> tabs.  In case the plot does not update, click the <a class="reference internal" href="_images/icon-launch-64.png"><img alt="icon-launch" src="_images/icon-launch-64.png" style="height: 2ex;" /></a> button.  Styles can be customized and saved using the save ( <a class="reference internal" href="_images/icon-save-file-64.png"><img alt="icon-save" src="_images/icon-save-file-64.png" style="height: 2ex;" /></a> ) button.  Saved themes can be recalled in future sessions.</p>
+<p>The Styling Pane controls the appearance of plots generated from functions in the <em>Control Toolbox</em>.  It also controls the type of plot generated (e.g., analyte map, scatter plot, heatmap, etc.).  A complete list is given in the table below along with each of the properties that can be changed.  Not all properties are available for each type of plot.  Styles can be customized and saved using the save ( <a class="reference internal" href="_images/icon-save-file-64.png"><img alt="icon-save" src="_images/icon-save-file-64.png" style="height: 2ex;" /></a> ) button.  Saved themes can be recalled in future sessions.</p>
 <aside class="footnote-list brackets">
 <aside class="footnote brackets" id="id1" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
@@ -482,78 +483,72 @@
 </aside>
 <section id="axes-and-labels">
 <h3>Axes and Labels<a class="headerlink" href="#axes-and-labels" title="Link to this heading">#</a></h3>
-<p>The axes and labels are filled initially with default values, but can be edited to update the plot.</p>
-<figure class="align-center" id="id11">
+<p>The axes and labels are initially filled with default values but can be edited to update the plot.</p>
+<figure class="align-center" id="id13">
 <a class="reference internal image-reference" href="_images/LaME_Styling_Axes_Labels.png"><img alt="LaME interface: right toolbox, styling-axes-and-labels tab" src="_images/LaME_Styling_Axes_Labels.png" style="width: 232px;" />
 </a>
 <figcaption>
-<p><span class="caption-text">The <em>Styling &gt; Axes and Labels</em> contains general settings applied to all plots.</span><a class="headerlink" href="#id11" title="Link to this image">#</a></p>
+<p><span class="caption-text">The Styling &gt; Axes and Labels contains general settings applied to all plots.</span><a class="headerlink" href="#id13" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 </section>
 <section id="annotations-and-scales">
 <h3>Annotations and Scales<a class="headerlink" href="#annotations-and-scales" title="Link to this heading">#</a></h3>
-<figure class="align-center" id="id12">
+<figure class="align-center" id="id14">
 <a class="reference internal image-reference" href="_images/LaME_Styling_Annotations.png"><img alt="LaME interface: right toolbox, styling-annotations tab" src="_images/LaME_Styling_Annotations.png" style="width: 232px;" />
 </a>
 <figcaption>
-<p><span class="caption-text">The <em>Styling &gt; Annotations</em> contains font type and font size settings.</span><a class="headerlink" href="#id12" title="Link to this image">#</a></p>
+<p><span class="caption-text">The Styling &gt; Annotations contains font type and font size settings.</span><a class="headerlink" href="#id14" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 </section>
 <section id="markers-and-lines">
 <h3>Markers and Lines<a class="headerlink" href="#markers-and-lines" title="Link to this heading">#</a></h3>
-<figure class="align-center" id="id13">
+<p>The Markers tab contains settings for markers and lines used in scatter, ternary, and PCA plots. For other plot types, these settings are grayed out. Symbol options, symbol size, and transparency can be modified in this tab.</p>
+<p>The Lines tab contains settings for line width used in TEC, radar, variance, and PCx plots. Line widths range from 0.25 to 6 pt.</p>
+<figure class="align-center" id="id15">
 <a class="reference internal image-reference" href="_images/LaME_Styling_Markers.png"><img alt="LaME interface: right toolbox, Styling-markers tab" src="_images/LaME_Styling_Markers.png" style="width: 232px;" />
 </a>
 <figcaption>
-<p><span class="caption-text">The <em>Styling &gt; Markers</em> contains settings for markers used in scatter, ternary, and PCA plots.</span><a class="headerlink" href="#id13" title="Link to this image">#</a></p>
+<p><span class="caption-text">The Styling &gt; Markers and Lines tab contains settings for markers and lines used in various plots.</span><a class="headerlink" href="#id15" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
-<p>For other plot types text is greyed out, indicating these settings can not be modified. Symbol options, symbol size, and transparency are modified in this tab.</p>
-<blockquote>
-<div><p>The <em>Styling &gt; Lines</em> contains settings for line width used in TEC, radar, variance, and PCx plots.</p>
-</div></blockquote>
-<p>Line widths range from 0.25 to 6 pt.</p>
 </section>
 <section id="coloring">
 <h3>Coloring<a class="headerlink" href="#coloring" title="Link to this heading">#</a></h3>
-<figure class="align-center" id="id14">
+<p>The Coloring tab provides a range of options for customizing the color representation of data in plots and maps.  Color by field allows selection of the data aspect to be represented by color.  The Field option specifies which particular analyte or calculated value to use for coloring. Resolution, Colormap, and Scale settings offer further customization of the color representation.  For fine-tuning the color range, Clim (color limits) can be adjusted.  The Cbar label field allows customization of the colorbar label, while Cbar direction determines the orientation of the colorbar on the plot.</p>
+<figure class="align-center" id="id16">
 <a class="reference internal image-reference" href="_images/LaME_Styling_Colors.png"><img alt="LaME interface: right toolbox, Styling-colors tab" src="_images/LaME_Styling_Colors.png" style="width: 232px;" />
 </a>
 <figcaption>
-<p><span class="caption-text">The <em>Styling |&gt; Colors</em> contains settings for changing color options.</span><a class="headerlink" href="#id14" title="Link to this image">#</a></p>
+<p><span class="caption-text">The Styling <a href="#id10"><span class="problematic" id="id11">|</span></a>&gt; Colors contains settings for changing color options.</span><a class="headerlink" href="#id16" title="Link to this image">#</a></p>
+<div class="legend">
+</div>
 </figcaption>
 </figure>
-<p>Use the Color tab to choose and modify the colors applied to plots. The <em>Colors &gt; Color</em> tick box brings up a color picker, the use of which is described below. If the box is left unticked, preset color maps are available under the <em>Colors &gt; Colormap</em> dropdown menu. The <em>Colors &gt; Color Limits</em> setting allows selection of a subset of the color range from a chosen colormap.</p>
-<p>The <em>Colors &gt; Cbar</em> direction allows user to choose horizontal or vertical placement of the Color Bar legend. The <em>Colors &gt; Cbar</em> label allows user to specify legend label.</p>
-<blockquote>
-<div><p>The <em>Styling &gt; Colors &gt; Color</em> opens a color picker window</p>
-</div></blockquote>
-<p>The <em>Colors &gt; Color</em> color picker allows users to pick colors from a color wheel. The color is chosen by positioning the pointer over the desired location on the color wheel. Color intensity can be modified by the greyscale slider located under the color wheel. Colors are added to the available color choices only after the <em>OK</em> button is pushed.</p>
 </section>
 <section id="clusters">
 <h3>Clusters<a class="headerlink" href="#clusters" title="Link to this heading">#</a></h3>
-<figure class="align-center" id="id15">
+<p>Clustered data can be assigned a name and color. Clusters can be linked (<a class="reference internal" href="_images/icon-link-64.png"><img alt="icon-link" src="_images/icon-link-64.png" style="height: 2ex;" /></a>) or unlinked (<a class="reference internal" href="_images/icon-unlink-64.png"><img alt="icon-unlink" src="_images/icon-unlink-64.png" style="height: 2ex;" /></a>). A selected cluster or clusters can be used to mask (<a class="reference internal" href="_images/icon-mask-dark-64.png"><img alt="icon-mask-dark" src="_images/icon-mask-dark-64.png" style="height: 2ex;" /></a>) or reverse mask (<a class="reference internal" href="_images/icon-mask-light-64.png"><img alt="icon-mask-light" src="_images/icon-mask-light-64.png" style="height: 2ex;" /></a>) data in a plot or on a map.</p>
+<figure class="align-center" id="id17">
 <a class="reference internal image-reference" href="_images/LaME_Styling_Clusters.png"><img alt="LaME interface: right toolbox, styling-clustering tab" src="_images/LaME_Styling_Clusters.png" style="width: 232px;" />
 </a>
 <figcaption>
-<p><span class="caption-text">The <em>Styling &gt; Clustering</em> contains options for working with clustered data</span><a class="headerlink" href="#id15" title="Link to this image">#</a></p>
+<p><span class="caption-text">The Styling &gt; Clustering contains options for working with clustered data</span><a class="headerlink" href="#id17" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
-<p>Clustering is available if the <em>Styling &gt; Colors &gt; Color by field</em> is set to <em>Clusters</em>. Clustered data can be assigned a name and color. Clusters can be linked ( <a class="reference internal" href="_images/icon-link-64.png"><img alt="icon-link" src="_images/icon-link-64.png" style="height: 2ex;" /></a> ) or unlinked ( <a class="reference internal" href="_images/icon-unlink-64.png"><img alt="icon-unlink" src="_images/icon-unlink-64.png" style="height: 2ex;" /></a> ). A selected cluster or clusters can be used to mask ( <a class="reference internal" href="_images/icon-mask-dark-64.png"><img alt="icon-mask-dark" src="_images/icon-mask-dark-64.png" style="height: 2ex;" /></a> ) or reverse mask ( <a class="reference internal" href="_images/icon-mask-light-64.png"><img alt="icon-mask-light" src="_images/icon-mask-light-64.png" style="height: 2ex;" /></a> ) data in a plot or on a map.</p>
 </section>
 </section>
 <section id="calculator">
 <h2>Calculator<a class="headerlink" href="#calculator" title="Link to this heading">#</a></h2>
-<figure class="align-center" id="id16">
+<p>The calculator (<a class="reference internal" href="_images/icon-calculator-64.png"><img alt="icon-calculator" src="_images/icon-calculator-64.png" style="height: 2ex;" /></a>) can be used to compute custom fields.  These custom fields can be used as dimensions on plots or to set marker color values.  Once created, custom fields will be added to associated drop-down menus.  For detailed information on how to use the calculator and create custom fields, please refer to the <a class="reference internal" href="custom_fields.html"><span class="doc">Custom Fields</span></a> section.</p>
+<figure class="align-center" id="id18">
 <a class="reference internal image-reference" href="_images/LaME_Calculator.png"><img alt="LaME interface: right toolbox, calculator tab" src="_images/LaME_Calculator.png" style="width: 232px;" />
 </a>
 <figcaption>
-<p><span class="caption-text">The <em>Calculator</em> can be used to compute custom fields.  Expressions can be typed directly into the edit box, by clicking the buttons.</span><a class="headerlink" href="#id16" title="Link to this image">#</a></p>
+<p><span class="caption-text">The Calculator can be used to compute custom fields.  Expressions can be typed directly into the edit box, by clicking the buttons.</span><a class="headerlink" href="#id18" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
-<p>Use the calculator ( <a class="reference internal" href="_images/icon-calculator-64.png"><img alt="icon-calculator" src="_images/icon-calculator-64.png" style="height: 2ex;" /></a> ) to create <a class="reference internal" href="custom_fields.html"><span class="doc">Custom Fields</span></a>.  These custom fields can be used to as dimensions on plots or to set marker color values.  Once created, custom fields will be added to associated drop downs.</p>
 </section>
 </section>
 

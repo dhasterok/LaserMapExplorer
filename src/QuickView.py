@@ -5,6 +5,7 @@ import src.CustomTableWidget as TW
 import os, darkdetect
 import src.csvdict as csvdict
 import lame_helper as lamepath
+from src.SortAnalytes import sort_analytes
 
 # QuickViewDialog gui
 # -------------------------------
@@ -98,7 +99,7 @@ class QuickView(QDialog, Ui_QuickViewDialog):
     def apply_sort(self, action):
         """Sorts analyte table in dialog"""        
         method = action.text()
-        self.analyte_list = self.main_window.sort_analytes(method, self.analyte_list)
+        self.analyte_list = sort_analytes(method, self.analyte_list)
         self.populate_table()  # Refresh table with sorted data
 
     def save_selected_analytes(self):

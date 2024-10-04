@@ -141,8 +141,10 @@ class MplCanvas(FigureCanvas):
             elif y_i > self.array.shape[0]-1:
                 y_i = self.array.shape[0]
             
-            x = x_i*self.parent.dx
-            y = y_i*self.parent.dy
+            #x = x_i*self.parent.dx
+            #y = y_i*self.parent.dy
+            x = x_i*self.parent.data[self.parent.sample_id].dx
+            y = y_i*self.parent.data[self.parent.sample_id].dy
 
             label =  f" {self.parent.preferences['Units']['Concentration']}"
         else:

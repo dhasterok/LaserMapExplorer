@@ -55,6 +55,7 @@ from src.AnalyteSelectionWindow import AnalyteDialog
 from src.TableFunctions import TableFcn as TableFcn
 import src.CustomMplCanvas as mplc
 from src.DataHandling import SampleObj
+from src.PlotTree import PlotTree
 import src.MapImporter as MapImporter
 from src.CropImage import CropTool
 from src.ImageProcessing import ImageProcessing as ip
@@ -69,6 +70,7 @@ import src.QuickView as QV
 from lame_helper import BASEDIR, ICONPATH, SSPATH, load_stylesheet
 from src.ExtendedDF import AttributeDataFrame
 import src.format as fmt
+
 # to prevent segmentation error at startup
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
 setConfigOption('imageAxisOrder', 'row-major') # best performance
@@ -588,14 +590,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxPlotType.addItems(self.plot_types[self.toolBox.currentIndex()][1:])
         self.comboBoxPlotType.setCurrentIndex(self.plot_types[self.toolBox.currentIndex()][0])
         
-        # create analyte sort menu
-        sortmenu_items = ['alphabetical', 'atomic number', 'mass', 'compatibility', 'radius']
-        SortMenu = QMenu()
-        SortMenu.triggered.connect(self.apply_sort)
-        self.toolButtonSortAnalyte.setMenu(SortMenu)
-        for item in sortmenu_items:
-            SortMenu.addAction(item)
-        
         # Menu and Toolbar
         #-------------------------
         self.LameIO = LameIO(self)
@@ -655,8 +649,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # initiate Workflow 
         self.workflow = Workflow(self)
 
-        #create plot tree
-        self.create_tree()
+        self.plot_tree = PlotTree(self)
 
         #init table_fcn
         self.table_fcn = TableFcn(self)
@@ -665,7 +658,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #-------------------------
         self.ref_data = pd.read_excel(os.path.join(BASEDIR,'resources/app_data/earthref.xlsx'))
         self.ref_data = self.ref_data[self.ref_data['sigma']!=1]
-        self.sort_data = pd.read_excel(os.path.join(BASEDIR,'resources/app_data/element_info.xlsx'))
         ref_list = self.ref_data['layer']+' ['+self.ref_data['model']+'] '+ self.ref_data['reference']
 
         self.comboBoxRefMaterial.addItems(ref_list.values)          # Select analyte Tab
@@ -1247,7 +1239,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.lasermaps = {}
             self.treeModel.clear()
             self.prev_plot = ''
-            self.create_tree()
+            self.plot_tree = PlotTree(self)
             self.change_sample(self.comboBoxSampleId.currentIndex())
 
             # reset styles
@@ -1364,19 +1356,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # add sample to sample dictionary
         if self.sample_id not in self.data:
+            # load sample's *.lame file
             file_path = os.path.join(self.selected_directory, self.csv_files[index])
             self.data[self.sample_id] = SampleObj(self.sample_id, file_path, self.comboBoxNegativeMethod.currentText())
-            self.selected_analytes = [col for col in self.data[self.sample_id].processed_data.columns if (self.data[self.sample_id].processed_data.get_attribute(col, 'data_type') == 'analyte') 
-                and (self.data[self.sample_id].processed_data.get_attribute(col, 'use') is not None
-                and self.data[self.sample_id].processed_data.get_attribute(col, 'use')) ]
+
+            # get selected_analyte columns
+            self.selected_analytes = self.data[self.sample_id].processed_data.match_attributes({'data_type': 'analyte', 'use': True})
+            # self.selected_analytes = [col for col in self.data[self.sample_id].processed_data.columns if (self.data[self.sample_id].processed_data.get_attribute(col, 'data_type') == 'analyte') 
+            #     and (self.data[self.sample_id].processed_data.get_attribute(col, 'use') is not None
+            #     and self.data[self.sample_id].processed_data.get_attribute(col, 'use')) ]
 
             #get plot array
             #current_plot_df = self.get_map_data(sample_id=sample_id, field=self.selected_analytes[0], field_type='Analyte')
             #set
             self.styles['analyte map']['Colors']['Field'] = self.selected_analytes[0]
 
-            self.create_tree(self.sample_id)
-            self.update_tree(self.data[self.sample_id]['norm'])
+            self.plot_tree.add_sample(self.sample_id)
+            self.plot_tree.update_tree()
         else:
             #update filters, polygon, profiles with existing data
             self.compute_map_aspect_ratio()
@@ -1417,7 +1413,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionNoiseReduction.setEnabled(False)
 
         # sort data
-        self.apply_sort(None, method=self.sort_method)
+        self.plot_tree.apply_sort(None, method=self.sort_method)
 
         # reset flags
         self.update_cluster_flag = True
@@ -1433,8 +1429,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.calculate_new_field(save=False)
 
         #update UI with auto scale and neg handling parameters from 'Analyte Info'
-        
-        self.update_spinboxes(sample_id=self.sample_id, field_type='Analyte', field = self.analyte_list[0])
+
+        analyte_list = self.data[self.sample_id].processed_data.match_attribute('data_type','analyte')
+
+        self.update_spinboxes(sample_id=self.sample_id, field_type='Analyte', field=analyte_list[0])
 
         # reset all plot types on change of tab to the first option
         for key in self.plot_types.keys():
@@ -1447,7 +1445,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.set_style_widgets(self.comboBoxPlotType.currentText())
 
         self.styles['analyte map']['Colors']['ColorByField'] = 'Analyte'
-        self.styles['analyte map']['Colors']['Field'] = self.analyte_list[0] 
+        self.styles['analyte map']['Colors']['Field'] = analyte_list[0]
         if self.comboBoxPlotType.currentText() != 'analyte map':
             self.comboBoxPlotType.setCurrentText('analyte map')
         self.toolbox_changed(update=False)
@@ -1512,7 +1510,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             #update self.data['norm'] with selection
             self.data[self.sample_id]['norm'] = self.analyteDialog.norm_dict
 
-            self.update_tree(self.data[self.sample_id]['norm'], norm_update = True)
+            self.plot_tree.update_tree(self.data[self.sample_id]['norm'], norm_update = True)
             #update analysis type combo in styles
             self.check_analysis_type()
 
@@ -1895,6 +1893,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.update_SV()
 
+    def update_fields(self, sample_id, plot_type, field_type, field,  plot=False):
+        # updates comboBoxPlotType,comboBoxColorByField and comboBoxColorField comboboxes using tree, branch and leaf
+        if sample_id == self.sample_id:
+            if plot_type != self.comboBoxPlotType.currentText():
+                self.comboBoxPlotType.setCurrentText(plot_type)
+            if field_type != self.comboBoxColorByField.currentText():
+                if field_type =='Calculated Map':  # correct name 
+                    self.comboBoxColorByField.setCurrentText('Calculated')
+                else:
+                    self.comboBoxColorByField.setCurrentText(field_type)
+                self.color_by_field_callback() # added color by field callback to update color field
+            if field != self.comboBoxColorField.currentText():
+                self.comboBoxColorField.setCurrentText(field)
+                self.color_field_callback(plot)
+            
     def update_resolution(self):
         """Updates DX and DY for a dataframe
 
@@ -1933,7 +1946,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             analyte_1 = row['analyte_1']
             analyte_2 = row['analyte_2']
             ratio_name = f"{analyte_1} / {analyte_2}"
-            item, check = self.find_leaf(tree, branch, leaf=ratio_name)
+            item, check = self.plot_tree.find_leaf(tree, branch, leaf=ratio_name)
 
             if check:
                 # ratio normalized
@@ -2144,7 +2157,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.data[sample_id]['analyte_info']['d_u_bound'] = d_ub
                 # clear existing plot info from tree to ensure saved plots using most recent data
                 for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
-                    self.clear_tree_data(tree)
+                    self.plot_tree.clear_tree_data(tree)
                 self.prep_data(sample_id)
             else:
                 self.data[sample_id]['analyte_info'].loc[self.data[sample_id]['analyte_info']['analytes']==analyte_1,
@@ -2162,7 +2175,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.data[sample_id]['ratio_info']['d_u_bound'] = d_ub
                 # clear existing plot info from tree to ensure saved plots using most recent data
                 for tree in ['Ratio', 'Ratio (normalized)']:
-                    self.clear_tree_data(tree)
+                    self.plot_tree.clear_tree_data(tree)
                 self.prep_data(sample_id)
             else:
                 self.data[sample_id]['ratio_info'].loc[ (self.data[sample_id]['ratio_info']['analyte_1']==analyte_1)
@@ -2200,7 +2213,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.data[sample_id]['analyte_info']['negative_method'] = self.comboBoxNegativeMethod.currentText()
                 # clear existing plot info from tree to ensure saved plots using most recent data
                 for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
-                    self.clear_tree_data(tree)
+                    self.plot_tree.clear_tree_data(tree)
                 self.prep_data(sample_id)
             else:
                 self.data[sample_id]['analyte_info'].loc[self.data[sample_id]['analyte_info']['analytes']==analyte_1,
@@ -2211,7 +2224,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 # Apply to all ratios
                 self.data[sample_id]['ratio_info']['negative_method'] = self.comboBoxNegativeMethod.currentText()
                 for tree in ['Ratio', 'Ratio (normalized)']:
-                    self.clear_tree_data(tree)
+                    self.plot_tree.clear_tree_data(tree)
                 self.prep_data(sample_id)
             else:
                 self.data[sample_id]['ratio_info'].loc[ (self.data[sample_id]['ratio_info']['analyte_1']==analyte_1)
@@ -2372,7 +2385,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     'data': self.data,
                     'styles': self.styles,
                     'axis_dict': self.axis_dict,
-                    'plot_infos': self.get_plot_info_from_tree(self.treeModel),
+                    'plot_infos': self.plot_tree.get_plot_info_from_tree(self.treeModel),
                     'sample_id': self.sample_id,
                     'sample_ids': self.sample_ids
                 }
@@ -2523,15 +2536,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         self.sample_id = data_dict['sample_id']
                         self.project_name = project_name
                         
-                        self.create_tree(self.sample_id)
+                        self.plot_tree.create_tree(self.sample_id)
                         # Update tree with selected analytes
-                        self.update_tree(self.data[self.sample_id]['norm'], norm_update=False)
+                        self.plot_tree.update_tree(self.data[self.sample_id]['norm'], norm_update=False)
                         # Add plot info to tree
                         for plot_info in data_dict['plot_infos']:
                             if plot_info:
                                 canvas = mplc.MplCanvas(fig=plot_info['figure'])
                                 plot_info['figure'] = canvas
-                                self.add_tree_item(plot_info)
+                                self.plot_tree.add_tree_item(plot_info)
                         
                         # Update sample id combo
                         self.comboBoxSampleId.clear()
@@ -2581,50 +2594,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
                         self.statusBar.showMessage("Project loaded successfully")
     
-    def extract_plot_info(self, item):
-        """
-        Recursively extract plot_info from QStandardItem and append to a flat list.
-        """
-        # Retrieve the plot_info from the UserRole data
-        plot_info = item.data(Qt.UserRole)
-        if isinstance(plot_info, dict) and 'figure' in plot_info:
-            # Check if it contains an mplc.MplCanvas object
-            if isinstance(plot_info['figure'], mplc.MplCanvas):
-                # Create a copy of plot_info and replace the mplc.MplCanvas object with its Figure
-                plot_info_copy = plot_info.copy()
-                plot_info_copy['figure'] = plot_info['figure'].fig
-                self.plot_info_list.append(plot_info_copy)
-
-        # Recursively process each child of this item
-        for i in range(item.rowCount()):
-            child = item.child(i)
-            if child:
-                self.extract_plot_info(child)  # Process child recursively
-
-    def get_plot_info_from_tree(self, model):
-        """
-        Extract plot_info data from the root of QStandardItemModel as a flat list.
-        """
-        self.plot_info_list = []  # Reset the list each time this method is called
-        root = model.invisibleRootItem()
-        for i in range(root.rowCount()):
-            self.extract_plot_info(root.child(i))
-        return self.plot_info_list
-     
-    def create_item_from_data(self,data):
-        """Recursively create QStandardItem from data."""
-        item = QStandardItem(data['text'])
-        if 'plot_info' in data.keys():
-            #create new matplotlib canvas and save fig
-            canvas = mplc.MplCanvas(fig=data['plot_info']['figure'])
-            data['plot_info']['figure'] = canvas
-            #store plot dictionary in tree
-            item.setData(data['plot_info'], role=Qt.UserRole)
-        for child_data in data['children']:
-            child_item = self.create_item_from_data(child_data)
-            item.appendRow(child_item)
-        return item
-
     def update_tables(self):
         self.update_filter_table(reload = True)
         self.profiling.update_table_widget()
@@ -2642,21 +2611,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         field = self.comboBoxColorField.currentText()
         current_plot_df = self.get_map_data(sample_id, field, field_type=field_type)
         
-        # self.data[self.sample_id].crop_mask = ((current_plot_df['X'] >= self.data[sample_id].crop_x_min) & (current_plot_df['X'] <= self.data[sample_id].crop_x_max) &
-        #                (current_plot_df['Y'] <=  self.data[sample_id].crop_y_max) & (current_plot_df['Y'] >= self.data[sample_id].crop_y_min))
-
-
-        # #crop original_data based on self.data[self.sample_id]['crop_mask']
-        # self.data[sample_id]['cropped_raw_data'] = self.data[sample_id]['raw_data'][self.data[self.sample_id]['crop_mask']].reset_index(drop=True)
-
-        # #crop clipped_analyte_data based on self.data[self.sample_id]['crop_mask']
-        # self.data[sample_id]['processed_data'] = self.data[sample_id]['processed_data'][self.data[self.sample_id]['crop_mask']].reset_index(drop=True)
-
-        # #crop each df of computed_analyte_data based on self.data[self.sample_id]['crop_mask']
-        # for analysis_type, df in self.data[sample_id]['computed_data'].items():
-        #     if isinstance(df, pd.DataFrame):
-        #         self.data[sample_id]['computed_data'][analysis_type] = df[self.data[self.sample_id]['crop_mask']].reset_index(drop=True)
-
         self.data[self.sample_id].mask = self.data[self.sample_id].mask[self.data[self.sample_id].crop_mask]
         self.data[self.sample_id].polygon_mask = self.data[self.sample_id].polygon_mask[self.data[self.sample_id].crop_mask]
         self.data[self.sample_id].filter_mask = self.data[self.sample_id].filter_mask[self.data[self.sample_id].crop_mask]
@@ -2737,24 +2691,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     # Field filter functions
     # -------------------------------
     def update_filter_values(self):
-        field_type = self.comboBoxFilterFieldType.currentText()
-        field = self.comboBoxFilterField.currentText()
+        """Updates widgets that display the filter bounds for a selected field.
 
-        if not field:
+        Updates ``MainWindow.lineEditFMin`` and ``MainWindow.lineEditFMax`` values for display when the
+        field in ``MainWindow.comboBoxFilterField`` is changed.
+        """
+        if self.sample_id == '':
             return
+        
+        # field = self.comboBoxFilterField.currentText()
+        # if not field:
+        #     return
+        if not (field := self.comboBoxFilterField.currentText()): return
+        
+        data = self.data[self.sample_id].processed_data
 
-        if 'Analyte' in field_type:
-            f_val =  self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes'] == field)].iloc[0][['v_min', 'v_max']]
-        elif 'Ratio' in field_type:
-            if '/' in field:
-                analyte_1, analyte_2 = field.split(' / ')
-                f_val = self.data[self.sample_id]['ratio_info'].loc[(self.data[self.sample_id]['ratio_info']['analyte_1'] == analyte_1) & (self.data[self.sample_id]['ratio_info']['analyte_2'] == analyte_2)].iloc[0][['v_min', 'v_max']]
-        else:
-            pass
-
-        self.lineEditFMin.value = f_val['v_min']
+        self.lineEditFMin.value = data.get_attribute(field, 'v_min')
         self.callback_lineEditFMin()
-        self.lineEditFMax.value = f_val['v_max']
+        self.lineEditFMax.value = data.get_attribute(field,'v_max')
         self.callback_lineEditFMax()
 
     def callback_lineEditFMin(self):
@@ -4636,11 +4590,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         #current_plot_df = pd.DataFrame()
         if field not in ['X','Y']:
-            df = self.get_map_data(self.sample_id, field, field_type)
-            array = df['array'][self.data[self.sample_id]['mask']].values if not df.empty else []
+            df = self.data[self.sample_id].get_map_data(field, field_type)
+            array = df['array'][self.data[self.sample_id].mask].values if not df.empty else []
         else:
             # field 'X' and 'Y' require separate extraction
-            array = self.data[self.sample_id]['raw_data'].loc[:,field].values
+            array = self.data[self.sample_id].processed_data[field].values
 
         match field_type:
             case 'Analyte' | 'Analyte (normalized)':
@@ -4656,7 +4610,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
                     #amin = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes']==field),'v_min'].values[0]
                     #amax = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes']==field),'v_max'].values[0]
-                    scale = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes']==field),'norm'].values[0]
+                    scale = self.data[self.sample_id].processed_data.get_attribute(field, 'norm')
+                    #['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes']==field),'norm'].values[0]
 
                 amin = np.nanmin(array)
                 amax = np.nanmax(array)
@@ -4672,9 +4627,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
                 amin = np.nanmin(array)
                 amax = np.nanmax(array)
-                scale = self.data[self.sample_id]['ratio_info'].loc[
-                    (self.data[self.sample_id]['ratio_info']['analyte_1']==field_1) & (self.data[self.sample_id]['ratio_info']['analyte_2']==field_2),
-                    'norm'].values[0]
+                scale = self.data[self.sample_id].processed_data.get_attribute(field, 'norm')
+                #'data_type','ratio'['ratio_info'].loc[
+                #    (self.data[self.sample_id]['ratio_info']['analyte_1']==field_1) & (self.data[self.sample_id]['ratio_info']['analyte_2']==field_2),
+                #    'norm'].values[0]
             case _:
                 #current_plot_df = self.data[self.sample_id]['computed_data'][field_type].loc[:,field].values
                 scale = 'linear'
@@ -5492,7 +5448,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # put plot_info back into table
         #print(plot_info)
-        self.add_tree_item(plot_info)
+        self.plot_tree.add_tree_item(plot_info)
     
     def get_SV_widget(self, index):
         layout = self.widgetSingleView.layout()
@@ -6077,7 +6033,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.set_style_widgets(plot_type='analyte map',style=style)
 
         # get data for current map
-        map_df = self.get_map_data(self.sample_id, field, field_type=field_type, scale_data=True)
+        map_df = self.data[self.sample_id].get_map_data(field, field_type=field_type, scale_data=True)
+
+        array_size = self.data[self.sample_id].array_size
+        aspect_ratio = self.data[self.sample_id].aspect_ratio
 
         # store map_df to save_data if data needs to be exported
         self.save_data = map_df.copy()
@@ -6090,25 +6049,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             map_df.loc[sorted_data.index, 'array'] = cdf.values
 
         # plot map
-        reshaped_array = np.reshape(map_df['array'].values, self.array_size, order=self.order)
+        reshaped_array = np.reshape(map_df['array'].values, array_size, order=self.order)
             
         norm = self.color_norm(style)
 
-        cax = canvas.axes.imshow(reshaped_array, cmap=self.get_colormap(),  aspect=self.data[self.sample_id].aspect_ratio, interpolation='none', norm=norm)
+        cax = canvas.axes.imshow(reshaped_array, cmap=self.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
 
 
         self.add_colorbar(canvas, cax, style)
         cax.set_clim(style['Colors']['CLim'][0], style['Colors']['CLim'][1])
 
         # use mask to create an alpha layer
-        mask = self.data[self.sample_id]['mask'].astype(float)
-        reshaped_mask = np.reshape(mask, self.array_size, order=self.order)
+        mask = self.data[self.sample_id].mask.astype(float)
+        reshaped_mask = np.reshape(mask, array_size, order=self.order)
 
         alphas = colors.Normalize(0, 1, clip=False)(reshaped_mask)
         alphas = np.clip(alphas, .4, 1)
 
         alpha_mask = np.where(reshaped_mask == 0, 0.5, 0)  
-        canvas.axes.imshow(np.ones_like(alpha_mask), aspect=self.data[self.sample_id].aspect_ratio, interpolation='none', cmap='Greys', alpha=alpha_mask)
+        canvas.axes.imshow(np.ones_like(alpha_mask), aspect=aspect_ratio, interpolation='none', cmap='Greys', alpha=alpha_mask)
         canvas.array = reshaped_array
 
         # font = {'family': 'sans-serif', 'stretch': 'condensed', 'size': 8, 'weight': 'semibold'}
@@ -6148,7 +6107,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.add_plotwidget_to_canvas( self.plot_info)
         # self.widgetSingleView.layout().addWidget(canvas)
 
-        self.add_tree_item(self.plot_info)
+        self.plot_tree.add_tree_item(self.plot_info)
 
     def plot_map_pg(self, sample_id, field_type, field):
         """Create a graphic widget for plotting a map
@@ -6507,7 +6466,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_bins = False
 
         # get currently selected data
-        current_plot_df = self.get_map_data(self.sample_id, self.comboBoxHistField.currentText(), field_type=self.comboBoxHistFieldType.currentText())
+        current_plot_df = self.data[self.sample_id].get_map_data(self.comboBoxHistField.currentText(), field_type=self.comboBoxHistFieldType.currentText())
 
         # update bin width
         range = (np.nanmax(current_plot_df['array']) - np.nanmin(current_plot_df['array']))
@@ -6575,7 +6534,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Histogram
         #remove by mask and drop rows with na
-        mask = self.data[self.sample_id]['mask']
+        mask = self.data[self.sample_id].mask
         mask = mask & current_plot_df['array'].notna()
 
         array = current_plot_df['array'][mask].values
@@ -8485,8 +8444,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 field_list = ['Analyte', 'Analyte (normalized)']
 
                 # add check for ratios
-                for field in self.data[self.sample_id]['computed_data']:
-                    if not (self.data[self.sample_id]['computed_data'][field].empty):
+                for field in self.data[self.sample_id].processed_data:
+                    if not (self.data[self.sample_id].processed_data[field].empty):
                         field_list.append(field)
                         if field == 'Ratio':
                             field_list.append('Ratio (normalized)')
@@ -8634,19 +8593,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.sample_id == '':
             return ['']
 
+        data = self.data[self.sample_id].processed_data
+
         match set_name:
             case 'Analyte' | 'Analyte (normalized)':
-                set_fields = self.data[self.sample_id]['analyte_info'].loc[self.data[self.sample_id]['analyte_info']['use']== True,'analytes'].values.tolist()
+                set_fields = data.match_attributes({'data_type': 'analyte', 'use': True})
             case 'Ratio' | 'Ratio (normalized)':
-                analytes_1 = self.data[self.sample_id]['ratio_info'].loc[self.data[self.sample_id]['ratio_info']['use']== True,'analyte_1']
-                analytes_2 =  self.data[self.sample_id]['ratio_info'].loc[self.data[self.sample_id]['ratio_info']['use']== True,'analyte_2']
-                ratios = analytes_1 +' / '+ analytes_2
-                set_fields = ratios.values.tolist()
+                #analytes_1 = self.data[self.sample_id]['ratio_info'].loc[self.data[self.sample_id]['ratio_info']['use']== True,'analyte_1']
+                #analytes_2 =  self.data[self.sample_id]['ratio_info'].loc[self.data[self.sample_id]['ratio_info']['use']== True,'analyte_2']
+                #ratios = analytes_1 +' / '+ analytes_2
+                #set_fields = ratios.values.tolist()
+                set_fields = data.match_attributes({'data_type': 'ratio', 'use': True})
             case 'None':
                 return []
             case _:
                 #populate field name with column names of corresponding dataframe remove 'X', 'Y' is it exists
-                set_fields = [col for col in self.data[self.sample_id]['computed_data'][set_name].columns.tolist() if col not in ['X', 'Y']]
+                #set_fields = [col for col in self.data[self.sample_id]['computed_data'][set_name].columns.tolist() if col not in ['X', 'Y']]
+                set_fields = data.match_attribute('data_type', set_name.lower)
 
         return set_fields
 
@@ -8678,16 +8641,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         match field_type:
             case 'Analyte' | 'Analyte (normalized)':
-                # get Auto scale parameters and neg handling from analyte info
-                parameters = self.data[sample_id]['analyte_info'].loc[self.data[sample_id]['analyte_info']['analytes']==field].iloc[0]
-            
+                pass
             case 'Ratio' | 'Ratio (normalized)':
                 field_1 = field.split(' / ')[0]
                 field_2 = field.split(' / ')[1]
-                # get Auto scale parameters and neg handling from Ratio info
-                parameters = self.data[sample_id]['ratio_info'].loc[self.data[sample_id]['analyte_info']['analytes']==field].iloc[0]  
             case _:
                 return
+
+        # get Auto scale parameters and neg handling from analyte info
+        parameters = self.data[sample_id].processed_data.column_attributes[field]
+
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
             auto_scale = parameters['auto_scale']
             #self.spinBoxX.setValue(int(parameters['x_max']))
@@ -8704,8 +8667,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # update Auto scale UI
             self.lineEditLowerQuantile.value = parameters['lower_bound']
             self.lineEditUpperQuantile.value = parameters['upper_bound']
-            self.lineEditDifferenceLowerQuantile.value = parameters['d_l_bound']
-            self.lineEditDifferenceUpperQuantile.value = parameters['d_u_bound']
+            self.lineEditDifferenceLowerQuantile.value = parameters['diff_lower_bound']
+            self.lineEditDifferenceUpperQuantile.value = parameters['diff_upper_bound']
 
             # Update Neg Value handling combobox 
             index = self.comboBoxNegativeMethod.findText(str(parameters['negative_method']))
@@ -8729,143 +8692,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     # ----end debugging----
 
 
-    # extracts data for scatter plot
-    def get_scatter_values(self,plot_type):
-        """Creates a dictionary of values for plotting
 
-        Returns
-        -------
-        dict
-            Four return variables, x, y, z, and c, each as a dict with locations for bi- and
-            ternary plots.  Each contain a 'field', 'type', 'label', and 'array'.  x, y and z
-            contain coordinates and c contains the colors
-        """
-        value_dict = {
-            'x': {'field': None, 'type': None, 'label': None, 'array': None},
-            'y': {'field': None, 'type': None, 'label': None, 'array': None},
-            'z': {'field': None, 'type': None, 'label': None, 'array': None},
-            'c': {'field': None, 'type': None, 'label': None, 'array': None}
-        }
 
-        match plot_type:
-            case 'histogram':
-                value_dict['x']['field'] = self.comboBoxHistField.currentText()
-                value_dict['x']['type'] = self.comboBoxHistFieldType.currentText()
-                value_dict['y']['field'] = None
-                value_dict['y']['type'] = None
-                value_dict['z']['field'] = None
-                value_dict['z']['type'] = None
-                value_dict['c']['field'] = None
-                value_dict['c']['type'] = None
-            case 'scatter' | 'heatmap' | 'ternary map':
-                value_dict['x']['field'] = self.comboBoxFieldX.currentText()
-                value_dict['x']['type'] = self.comboBoxFieldTypeX.currentText()
-                value_dict['y']['field'] = self.comboBoxFieldY.currentText()
-                value_dict['y']['type'] = self.comboBoxFieldTypeY.currentText()
-                value_dict['z']['field'] = self.comboBoxFieldZ.currentText()
-                value_dict['z']['type'] = self.comboBoxFieldTypeZ.currentText()
-                value_dict['c']['field'] = self.comboBoxColorField.currentText()
-                value_dict['c']['type'] = self.comboBoxColorByField.currentText()
-            case 'pca scatter' | 'pca heatmap':
-                value_dict['x']['field'] = f'PC{self.spinBoxPCX.value()}'
-                value_dict['x']['type'] = 'PCA Score'
-                value_dict['y']['field'] = f'PC{self.spinBoxPCY.value()}'
-                value_dict['y']['type'] = 'PCA Score'
-
-                value_dict['z']['field'] = None
-                value_dict['z']['type'] = None
-                value_dict['c']['field'] = self.comboBoxColorField.currentText()
-                value_dict['c']['type'] = self.comboBoxColorByField.currentText()
-            case _:
-                print('get_scatter_values(): Not defined for ' + self.comboBoxPlotType.currentText())
-                return
-
-        for k, v in value_dict.items():
-            # only need to setup when fields exist
-            if v['field'] is None:
-                continue
-
-            match v['type']:
-                case 'Analyte' | 'Analyte (normalized)':
-                    df = self.get_map_data(self.sample_id, field=v['field'], field_type=v['type'], scale_data=False)
-                    v['label'] = v['field'] + ' (' + self.preferences['Units']['Concentration'] + ')'
-                case 'Ratio':
-                    #analyte_1, analyte_2 = v['field'].split('/')
-                    df = self.get_map_data(self.sample_id, field=v['field'], field_type=v['type'], scale_data=False)
-                    v['label'] = v['field']
-                case 'PCA Score' | 'Cluster' | 'Cluster Score':
-                    df = self.get_map_data(self.sample_id, field=v['field'], field_type=v['type'], scale_data=False)
-                    v['label'] = v['field']
-                case 'Special':
-                    df = self.get_map_data(self.sample_id, field=v['field'], field_type=v['type'], scale_data=False)
-                    v['label'] = v['field']
-                case _:
-                    df = pd.DataFrame({'array': []})  # Or however you want to handle this case
-
-            value_dict[k]['array'] = df['array'][self.data[self.sample_id]['mask']].values if not df.empty else []
-
-            # set axes widgets
-            if v['field'] not in self.axis_dict.keys():
-                self.initialize_axis_values(v['type'], v['field'])
-
-            if k == 'c':
-                self.set_color_axis_widgets()
-            else:
-                self.set_axis_widgets(k, v['field'])
-
-            # set lineEdit labels for axes
-            # self.lineEditXLabel.setText(value_dict['x']['label'])
-            # self.lineEditYLabel.setText(value_dict['y']['label'])
-            # self.lineEditZLabel.setText(value_dict['z']['label'])
-            # self.lineEditCbarLabel.setText(value_dict['c']['label'])
-
-        return value_dict['x'], value_dict['y'], value_dict['z'], value_dict['c']
-
-    def get_processed_data(self):
-        """Gets the processed data for analysis
-
-        Returns
-        -------
-        pandas.DataFrame
-            Filtered data frame 
-        bool
-            Analytes included from processed data
-        """
-        if self.sample_id == '':
-            return
-
-        # return normalised, filtered data with that will be used for analysis
-        use_analytes = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['use']==True), 'analytes'].values
-
-        df_filtered = self.data[self.sample_id]['processed_data'][use_analytes]
-
-        #get analyte info to extract choice of scale
-        analyte_info = self.data[self.sample_id]['analyte_info'].loc[
-                                 (self.data[self.sample_id]['analyte_info']['analytes'].isin(use_analytes))]
-        
-        #perform scaling for groups of analytes with same norm parameter
-        for norm in analyte_info['norm'].unique():
-            filtered_analytes = analyte_info[(analyte_info['norm'] == norm)]['analytes']
-            filtered_data = df_filtered[filtered_analytes].values
-            if norm == 'log':
-
-                # np.nanlog handles NaN value
-                df_filtered[filtered_analytes] = np.where(~np.isnan(filtered_data), np.log10(filtered_data))
-                # print(self.processed_analyte_data[sample_id].loc[:10,analytes])
-                # print(self.data[sample_id]['processed_data'].loc[:10,analytes])
-            elif norm == 'logit':
-                # Handle division by zero and NaN values
-                with np.errstate(divide='ignore', invalid='ignore'):
-                    df_filtered[filtered_analytes] = np.where(~np.isnan(filtered_data), np.log10(filtered_data / (10**6 - filtered_data)))
-
-        # Combine the two masks to create a final mask
-        nan_mask = df_filtered.notna().all(axis=1)
-        
-        
-        # mask nan values and add to self.data[self.sample_id]['mask']
-        self.data[self.sample_id]['mask'] = self.data[self.sample_id]['mask']  & nan_mask.values
-
-        return df_filtered, use_analytes
+ 
 
     # I don't think this is used...delete?
     # def import_data(self, path):
@@ -8914,562 +8743,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.data[sample_id]['ratio_info'].loc[len(self.data[sample_id]['ratio_info'])] = ratio_info
 
             self.prep_data(sample_id, analyte_1=analyte_1, analyte_2=analyte_2)
-
-
-    # -------------------------------
-    # Plot Selector (tree) functions
-    # -------------------------------
-    def create_tree(self,sample_id = None):
-        """Create plot selector tree
-
-        Initializes ``MainWindow.treeView``.  The ``tree`` is intialized for each of the plot groups.
-        ``Analyte`` its normalized counterpart are initialized with the full list of analytes.  Table
-        data are stored in ``MainWindow.treeModel``.
-        
-        Parameters
-        ----------
-        sample_id : str
-            Sample name, Defaults to None
-        """
-        if not self.data:
-            treeView  = self.treeView
-            treeView.setHeaderHidden(True)
-            self.treeModel = QStandardItemModel()
-            rootNode = self.treeModel.invisibleRootItem()
-            self.analytes_items = StandardItem('Analyte', 11, True)
-            self.norm_analytes_items = StandardItem('Analyte (normalized)', 11, True)
-            self.ratios_items = StandardItem('Ratio', 11, True)
-            self.norm_ratios_items = StandardItem('Ratio (normalized)', 11, True)
-            self.histogram_items = StandardItem('Histogram', 11, True)
-            self.correlation_items = StandardItem('Correlation', 11, True)
-            self.geochemistry_items = StandardItem('Geochemistry', 11, True)
-            self.multidim_items = StandardItem('Multidimensional Analysis', 11, True)
-            self.calculated_items = StandardItem('Calculated Map', 11, True)
-
-            rootNode.appendRows([self.analytes_items, self.norm_analytes_items, self.ratios_items, self.norm_ratios_items,
-                                self.histogram_items,self.correlation_items, self.geochemistry_items,
-                                self.multidim_items, self.calculated_items])
-            treeView.setModel(self.treeModel)
-            treeView.expandAll()
-            treeView.doubleClicked.connect(self.tree_double_click)
-        elif sample_id:
-            #self.analytes_items.setRowCount(0)
-            sample_id_item = StandardItem(sample_id, 11)
-            norm_sample_id_item = StandardItem(sample_id, 11)
-            #histogram_sample_id_item = StandardItem(sample_id, 11)
-            ratio_sample_id_item = StandardItem(sample_id, 11)
-            norm_ratio_sample_id_item = StandardItem(sample_id, 11)
-            for analyte in self.data[sample_id]['analyte_info'].loc[:,'analytes']:
-                analyte_item = StandardItem(analyte)
-                sample_id_item.appendRow(analyte_item)
-                #histogram_item = StandardItem(analyte)
-                #histogram_sample_id_item.appendRow(histogram_item)
-                norm_item = StandardItem(analyte)
-                norm_sample_id_item.appendRow(norm_item)
-            self.analytes_items.appendRow(sample_id_item)
-            #self.histogram_items.appendRow(histogram_sample_id_item)
-            self.ratios_items.appendRow(ratio_sample_id_item)
-            self.norm_ratios_items.appendRow(norm_ratio_sample_id_item)
-            self.norm_analytes_items.appendRow(norm_sample_id_item)
-
-            # print('\ncreate_tree: analyte_items')
-            # print(self.analytes_items)
-            # print('\n')
-    
-    def apply_sort(self, action, method=None):
-
-        if method is None:
-            method = action.text()
-            self.sort_method = method
-
-        # retrieve analyte_list
-        self.analyte_list = self.data[self.sample_id]['analyte_info']['analytes']
-        
-        # sort analyte sort based on method chosen by user
-        self.analyte_list = self.sort_analytes(method, self.analyte_list)
-        
-        # sort analyte dataframes in a self.data
-        # Convert the 'analytes' column in DataFrame to a categorical type with the specified order
-        self.data[self.sample_id]['analyte_info']['analytes'] = pd.Categorical(
-            self.data[self.sample_id]['analyte_info']['analytes'],
-            categories=self.analyte_list,
-            ordered=True
-        )
-        
-        # Sort the DataFrame by the 'analytes' column
-        self.data[self.sample_id]['analyte_info'] = self.data[self.sample_id]['analyte_info'].sort_values('analytes')
-        
-        # Ensure all analytes in self.analyte_list are actually columns in the DataFrame
-        # This step filters out any items in self.analyte_list that are not columns in the DataFrame
-        columns_to_order = [analyte for analyte in self.analyte_list if analyte in self.data[self.sample_id]['raw_data'].columns]
-        
-        # Reorder the columns of the DataFrame based on self.analyte_list
-        self.data[self.sample_id]['raw_data'][columns_to_order] = self.data[self.sample_id]['raw_data'][columns_to_order]
-        
-        self.data[self.sample_id]['processed_data'][columns_to_order] = self.data[self.sample_id]['processed_data'][columns_to_order]
-        
-        self.data[self.sample_id]['cropped_raw_data'][columns_to_order] = self.data[self.sample_id]['cropped_raw_data'][columns_to_order]
-
-        self.data[self.sample_id]['norm'] = {key: self.data[self.sample_id]['norm'][key] for key in self.analyte_list if key in self.data[self.sample_id]['norm']}
-         
-        #self.update_tree(self.data[self.sample_id]['norm'])
-        # Reorder tree items according to the new analyte list
-        # Sort the tree branches
-        self.sort_tree_branch(self.analytes_items, self.analyte_list)
-        self.sort_tree_branch(self.norm_analytes_items, self.analyte_list)
-        self.sort_tree_branch(self.ratios_items, self.analyte_list)
-        self.sort_tree_branch(self.norm_ratios_items, self.analyte_list)
-    
-    def sort_tree_branch(self, branch, order_list):
-        """Sorts a branch in ``MainWindow.treeView`` given an ordered list
-
-        Sorts the branch given an ordered list, resulting from the user selection from the dropdown menu when ``MainWindow.toolButtonSortAnalyte`` is pushed.
-
-        Parameters
-        ----------
-        branch : str
-            Branch to sort leaf items
-        order_list : list
-            The desired order for the leaf items.
-        """        
-        #for i in range(branch.rowCount()):
-        i = 0
-        leaf = branch.child(i)
-
-        # Create a list of tuples containing the row index and item reference
-        item_list = [(i, leaf.takeChild(i)) for i in range(leaf.rowCount()-1,-1,-1)]
-
-        item_list.sort(key=lambda x: order_list.index(x[1].text()) if x[1].text() in order_list else len(order_list))
-
-        for i in range(len(item_list)-1,-1,-1):
-            leaf.removeRow(i)
-
-        for row, (original_index, item) in enumerate(item_list):
-            leaf.insertRow(row, item)
-
-        # # Sort this list based on the order_list ensuring that each item is found in the order_list
-        # # If not found, it is placed at the end
-        # item_list.sort(key=lambda x: order_list.index(x[1].text()) if x[1].text() in order_list else len(order_list))
-        
-        # # Move the items within the leaf to reflect the new order
-        # # We move the items to the beginning in the order defined by the sorted list
-        # #for i in range(len(item_list)):
-        # #    leaf.removeRow(i)
-
-        # for new_index, (original_index, item) in enumerate(item_list):
-        #     leaf.insertRow(new_index, item)
-        #     # if original_index != new_index:  # Check if item needs to be moved
-        #     #     # Take the item out from its current position
-        #     #     #taken_item = leaf.takeChild(original_index)
-        #     #     # Insert the item at its new position
-        #     #     #leaf.insertRow(new_index, taken_item)
-        #     #     leaf.insertRow(new_index, item)
-        #     #     if (original_index > new_index):
-        #     #         leaf.removeRow(original_index+1)
-        #     #     else:
-        #     #         leaf.removeRow(original_index)
-
-    def retrieve_plotinfo_from_tree(self, tree_index=None, tree=None, branch=None, leaf=None):
-        """Gets the plot_info associated with a tree location
-        
-        Can recall the plot info given the index into the tree (top level group in ``Plot Selector``), or by the tree, branch, leaf location.
-        
-        Parameters
-        ----------
-        tree_index : QModelIndex
-            Index into the ``Plot Selector`` tree items
-        tree : str
-            Top level of tree, categorized by the type of plots
-        branch : str
-            Associated with sample ID
-        leaf : str
-            Lowest level of tree, associated with an individual plot
-        
-        Returns
-        -------
-        dict
-            Plot_info dictionary with plot widget and information about the plot construction
-        """
-        #print('retrieve_table_data')
-        if tree_index is not None:
-            tree = tree_index.parent().parent().data()
-            branch = tree_index.parent().data()
-            leaf = tree_index.data()
-
-        item,item_flag = self.find_leaf(tree, branch, leaf)
-
-        if not item_flag:
-            return None, True
-
-        if not item.isEnabled():
-            return None, False
-
-        # ----start debugging----
-        # print(tree_index)
-        # print('item')
-        # print(tree+':'+branch+':'+leaf)
-        # ----end debugging----
-
-        plot_info = item.data(role=Qt.UserRole)
-
-        # ----start debugging----
-        # print(plot_info)
-        # print('\nsuccessfully retrieved plot info\n')
-        # ----end debugging----
-
-        return plot_info, True
-
-    def tree_double_click(self,tree_index):
-        """Double-click on plot selector
-        
-        When the user double-clicks on the ``Plot Selector``, the stored plot is placed on the current canvas.
-
-        Parameters
-        ----------
-        val : PyQt5.QtCore.QModelIndex
-            Item selected in ``Plot Selector``
-        """
-        # get double-click result
-        self.plot_info, flag = self.retrieve_plotinfo_from_tree(tree_index=tree_index)
-
-        if not flag:
-            return
-
-        tree = tree_index.parent().parent().data()
-        branch = tree_index.parent().data()
-        leaf = tree_index.data()
-
-
-        #print(tree+':'+branch+':'+leaf)
-
-        if tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
-            #current_plot_df = self.get_map_data(sample_id=level_2_data, field=level_3_data, field_type='Analyte')
-            #self.create_plot(current_plot_df, sample_id=level_2_data, plot_type='analyte', analyte_1=level_3_data)
-            # if leaf in self.plot_widget_dict[tree][branch].keys():
-            #     widget_dict = self.plot_widget_dict[tree][branch][leaf]
-            #     self.add_plotwidget_to_canvas(widget_dict['info'], view=widget_dict['view'], position=widget_dict['position'])
-            self.initialize_axis_values(tree, leaf)
-            style = self.styles['analyte map']
-            self.set_style_widgets('analyte map', style)
-            if self.plot_info:
-                print('tree_double_click: add_plotwidget_to_canvas')
-                self.add_plotwidget_to_canvas(self.plot_info)
-                # updates comboBoxColorByField and comboBoxColorField comboboxes 
-                self.update_fields(self.plot_info['sample_id'], self.plot_info['plot_type'],self.plot_info['field_type'], self.plot_info['field'])
-                #update UI with auto scale and neg handling parameters from 'Analyte/Ratio Info'
-                self.update_spinboxes(self.plot_info['sample_id'],self.plot_info['field'],self.plot_info['field_type'])
-            else:
-                # print('tree_double_click: plot_map_pg')
-                if self.toolBox.currentIndex() not in [self.left_tab['sample'], self.left_tab['process'], self.left_tab['polygons'], self.left_tab['profile']]:
-                    self.toolBox.setCurrentIndex(self.left_tab['sample'])
-
-
-                # else:
-                #     pass
-
-                
-                
-                # if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
-                #     self.plot_map_mpl(sample_id=branch, field_type=tree, field=leaf)
-                # else:
-                #     self.plot_map_pg(sample_id=branch, field_type=tree, field=leaf)
-
-                # updates comboBoxColorByField and comboBoxColorField comboboxes and creates new plot
-                self.update_fields(branch,'analyte map',tree, leaf, plot=True)
-                #set styles
-
-                #update UI with auto scale and neg handling parameters from 'Analyte/Ratio Info'
-                self.update_spinboxes(sample_id=branch, field=leaf, field_type = tree)
-
-        elif tree in ['Histogram', 'Correlation', 'Geochemistry', 'Multidimensional Analysis', 'Calculated Map']:
-            if self.plot_info:
-                self.add_plotwidget_to_canvas(self.plot_info)
-                # updates comboBoxColorByField and comboBoxColorField comboboxes 
-                self.update_fields(self.plot_info['sample_id'], self.plot_info['plot_type'],self.plot_info['field_type'], self.plot_info['field'])
-
-    def update_fields(self, sample_id, plot_type, field_type, field,  plot=False):
-        # updates comboBoxPlotType,comboBoxColorByField and comboBoxColorField comboboxes using tree, branch and leaf
-        if sample_id == self.sample_id:
-            if plot_type != self.comboBoxPlotType.currentText():
-                self.comboBoxPlotType.setCurrentText(plot_type)
-            if field_type != self.comboBoxColorByField.currentText():
-                if field_type =='Calculated Map':  # correct name 
-                    self.comboBoxColorByField.setCurrentText('Calculated')
-                else:
-                    self.comboBoxColorByField.setCurrentText(field_type)
-                self.color_by_field_callback() # added color by field callback to update color field
-            if field != self.comboBoxColorField.currentText():
-                self.comboBoxColorField.setCurrentText(field)
-                self.color_field_callback(plot)
-            
-
-    def update_tree(self, analyte_df, norm_update=False):
-        """Updates plot selector list and data
-
-        Updates the tree with the list of analytes in ``MainWindow.data[sample_id]['norm']`` and background color
-        to light yellow for analytes used in analyses.
-        
-        Parameters
-        ----------
-        analyte_df : pandas.DataFrame
-            Data frame with information about analytes, scales, limits and use in analysis
-        norm_update : bool
-            Flag for updating norm list. Defaults to False
-        """
-        #print('update_tree')
-        if self.sample_id == '':
-            return
-
-        if darkdetect.isDark():
-            hexcolor = '#696880'
-        else:
-            hexcolor = '#FFFFC8'
-
-        sample_id = self.sample_id
-        analyte_items = self.data[sample_id].processed_data.match_attribute('data_type','analyte')
-        ratio_items = self.data[sample_id].processed_data.match_attribute('data_type','ratio')
-
-        # Un-highlight all leaf in the trees
-        self.unhighlight_tree(ratios_items)
-        self.unhighlight_tree(analytes_items)
-
-        self.data[sample_id].processed_data.set_attribute(analyte_items,'use',False)
-        if not (len(analyte_items) > 0):
-            return
-
-        for analyte in analyte_items + ratio_items:
-            norm = self.data[sample_id].processed_data.get_attribute(analyte,'norm')
-            if '/' in analyte:
-                analyte_1, analyte_2 = analyte.split(' / ')
-                ratio_name = f"{analyte_1} / {analyte_2}"
-                # Populate ratios_items if the pair doesn't already exist
-                item1,check = self.find_leaf('Ratio', branch = sample_id, leaf = ratio_name)
-
-                if norm_update:
-                    item1,check = self.find_leaf('Ratio', branch = sample_id, leaf = ratio_name)
-                    item2,check = self.find_leaf('Ratio (normalized)', branch = sample_id, leaf = ratio_name)
-                # else:
-                #     item1,check = self.find_leaf('Ratio', branch = self.sample_id, leaf = ratio_name)
-                #     item2,check = self.find_leaf('Ratio (normalized)', branch = self.sample_id, leaf = ratio_name)
-
-                if not check: #if ratio doesn't exist
-                    # ratio
-                    child_item = StandardItem(ratio_name)
-                    # child_item.setBackground(QBrush(QColor(hexcolor)))
-                    item1.appendRow(child_item)
-
-                    # ratio normalized
-                    # check if ratio can be normalized (note: normalization is not handled here)
-                    refval_1 = self.ref_chem[re.sub(r'\d', '', analyte_1).lower()]
-                    refval_2 = self.ref_chem[re.sub(r'\d', '', analyte_2).lower()]
-                    ratio_flag = False
-                    if (refval_1 > 0) and (refval_2 > 0):
-                        ratio_flag = True
-                    #print([analyte, refval_1, refval_2, ratio_flag])
-
-                    child_item2 = StandardItem(ratio_name)
-                    # child_item2.setBackground(QBrush(QColor(hexcolor)))
-                    # if normization cannot be done, make text italic and disable item
-                    if not ratio_flag:
-                        font = child_item2.font()
-                        font.setItalic(True)
-                        child_item2.setFont(font)
-                        child_item2.setEnabled(False)
-                    item2.appendRow(child_item2)
-                # else:
-                #     item1.setBackground(QBrush(QColor(hexcolor)))
-                #     item2.setBackground(QBrush(QColor(hexcolor)))
-
-            else: #single analyte
-                item,check = self.find_leaf('Analyte', branch = sample_id, leaf = analyte)
-                # if norm_update:
-                #     item,check = self.find_leaf('Analyte (normalized)', branch = sample_id, leaf = analyte)
-                # else:
-                #     item,check = self.find_leaf('Analyte', branch = sample_id, leaf = analyte)
-
-                item.setBackground(QBrush(QColor(hexcolor)))
-
-                self.data[self.sample_id]['analyte_info'].loc[(self.data[sample_id]['analyte_info']['analytes']==analyte),'use'] = True
-
-            if norm_update: #update if analytes are returned from analyte selection window
-                self.update_norm(self.sample_id, norm, analyte_1=analyte, analyte_2=None)
-
-    def add_tree_item(self, plot_info):
-        """Updates plot selector list and adds plot information data to tree item
-        
-        Parameters
-        ----------
-        plot_info : dict
-            Plot related data (including plot widget) to tree item associated with the plot.
-        """
-        if plot_info is None:
-            return
-
-        #print('add_tree_item')
-        sample_id = plot_info['sample_id']
-        leaf = plot_info['plot_name']
-        tree = plot_info['tree']
-        if tree == 'Calculated':
-            tree= 'Calculated Map'
-
-        tree_items = self.get_tree_items(tree)
-        
-        
-        # Ensure there's a persistent reference to items.
-        # if not hasattr(self, 'item_refs'):
-        #     self.item_refs = {}  # Initialize once
-        
-        #check if leaf is in tree
-        item,check = self.find_leaf(tree=tree, branch=sample_id, leaf=leaf)
-        # sample id item and plot item both dont exist
-        if item is None and check is None:
-            # create new branch for sample id
-            sample_id_item = StandardItem(sample_id, 11)
-
-            # create new leaf item
-            plot_item = StandardItem(leaf)
-
-            # store plot dictionary in leaf
-            plot_item.setData(plot_info, role=Qt.UserRole)
-
-            sample_id_item.appendRow(plot_item)
-            tree_items.appendRow(sample_id_item)
-            
-            # Store references
-            # self.item_refs[(tree, sample_id)] = sample_id_item
-            # self.item_refs[(tree, sample_id, leaf)] = plot_item
-            
-        # sample id item exists plot item doesnt exist
-        elif item is not None and not check:
-            # create new leaf item
-            plot_item = StandardItem(leaf)
-
-            # store plot dictionary in leaf
-            plot_item.setData(plot_info, role=Qt.UserRole)
-
-            #item is sample id item (branch)
-            item.appendRow(plot_item)
-            
-            # Update reference
-            # self.item_refs[(tree, sample_id, leaf)] = plot_item
-
-        # sample id item exists and plot item exists
-        elif item is not None and check: 
-            # store plot dictionary in tree
-            item.setData(plot_info, role=Qt.UserRole)
-            
-            # self.item_refs[(tree, sample_id, leaf)] = item
- 
-    def unhighlight_tree(self, tree):
-        """Reset the highlight of all items in the tree.
-        
-        Parameters
-        ----------
-        tree : str
-            Highest level of tree with branches to unhighlight
-        """
-        #bgcolor = tree.background().color()
-        if darkdetect.isDark():
-            bgcolor = '#1e1e1e'
-        else:
-            bgcolor = '#ffffff'
-
-        for i in range(tree.rowCount()):
-            branch_item = tree.child(i)
-            # branch_item.setBackground(QBrush(QColor(bgcolor)))  # white or any default background color
-            for j in range(branch_item.rowCount()):
-                leaf_item = branch_item.child(j)
-                leaf_item.setBackground(QBrush(QColor(bgcolor)))  # white or any default background color
-
-    def get_tree_items(self, tree):
-        """Returns items associated with the specified tree
-        
-        Parameters
-        ----------
-        tree : str
-            Name of tree in ``MainWindow.treeView``
-
-        Returns
-        -------
-        Qt.AbstractModelItem
-            The set of items under *tree*
-        """
-        match tree:
-            case 'Analyte':
-                return  self.analytes_items
-            case 'Analyte (normalized)':
-                return self.norm_analytes_items
-            case 'Ratio':
-                return self.ratios_items
-            case 'Ratio (normalized)':
-                return self.norm_ratios_items
-            case 'Histogram':
-                return self.histogram_items
-            case 'Correlation':
-                return self.correlation_items
-            case 'Geochemistry':
-                return self.geochemistry_items
-            case 'Multidimensional Analysis':
-                return self.multidim_items
-            case 'Calculated Map':
-                return self.calculated_items
-
-    def find_leaf(self, tree, branch, leaf):
-        """Get a branch or leaf item from treeView
-        
-        Parameters
-        ----------
-        tree : str
-            Highest level of tree, ``plot_info['tree']``
-        branch : str
-            Middle tree level, ``plot_info['sample_id']``
-        leaf : str
-            Lowest level of tree, ``plot_info['plot_name']``
-
-        Returns
-        -------
-        tuple
-            (item, flag), item is a branch (``flag==False``) or leaf (``flag==True``), if item neither return is ``(None, None)``.
-        """
-        #print('find_leaf')
-        #print(f'{tree} : {branch} : {leaf}')
-        tree_items = self.get_tree_items(tree)
-
-        #Returns leaf_item & True if leaf exists, else returns branch_item, False
-        if tree_items:
-            for index in range(tree_items.rowCount()):
-                branch_item = tree_items.child(index)
-                if branch_item.text() == branch:
-                    for index in range(branch_item.rowCount()):
-                        leaf_item = branch_item.child(index)
-                        if leaf_item.text() == leaf:
-                            return (leaf_item, True)
-                    return (branch_item,False)
-        return (None,None)
-
-    def clear_tree_data(self, tree):
-        """Removes item data from all items in a given tree
-        
-        Parameters
-        ----------
-        tree : str
-            Name of tree in ``MainWindow.treeView``
-        """
-        tree_items = self.get_tree_items(tree)
-
-        def clear_item_data(item):
-            """Recursively clear data from the item and its children"""
-            item.setData(None, role=Qt.UserRole)
-            for index in range(item.rowCount()):
-                child_item = item.child(index)
-                clear_item_data(child_item)
-        
-        for index in range(tree_items.rowCount()):
-            branch_item = tree_items.child(index)
-            clear_item_data(branch_item)
-
-    
-
 
     
     def toggle_help_mode(self):
@@ -9566,58 +8839,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.toolButtonPlotProfile.setChecked(False)
                 self.toolButtonPointMove.setChecked(False)
 
-    def sort_analytes(self, method, analytes, order = 'd'):
-        """Sort the analyte list
-
-        Sorting the analyte list can make data selection easier, or improve the pattern of correlations and PCA vectors.
-
-        Parameters
-        ----------
-        method : str
-            Method used for sorting.  Options include ``'alphabetical'``, ``'atomic number'``, ``'mass'``, ``'compatibility'``, and ``'radius'``.
-        analytes : list
-            List of analytes to sort
-        order : str, optional
-            Sets order as ascending (``'a'``) or decending (``'d'``), by default 'd'
-
-        Returns
-        -------
-        list
-            Sorted analyte list.
-        """        
-        # Extract element symbols and any mass numbers if present
-        parsed_analytes = []
-        for analyte in analytes:
-            # Extracts the element symbol and mass if available (e.g., "Al27" -> ("Al", 27))
-            match = re.match(r"([A-Za-z]+)(\d*)", analyte)
-            element_symbol = match.group(1) if match else analyte
-            mass_number = int(match.group(2)) if match.group(2) else None
-            parsed_analytes.append((element_symbol, mass_number))
-        
-        # Convert to DataFrame for easier manipulation
-        df_analytes = pd.DataFrame(parsed_analytes, columns=['element_symbol', 'mass'])
-
-        # Merge with sort_data for additional information
-        df_analytes = df_analytes.merge(self.sort_data, on='element_symbol', how='left')
-
-        # Sort based on the selected method
-        match method:
-            case 'alphabetical':
-                df_analytes.sort_values(by='element_symbol', ascending=True, inplace=True)
-            case 'atomic number':
-                df_analytes.sort_values(by='atomic_number', ascending=True, inplace=True)
-            case 'mass':
-                # Use provided mass or average mass if not available
-                df_analytes['computed_mass'] = df_analytes['mass'].fillna(df_analytes['average_mass'])
-                df_analytes.sort_values(by='computed_mass', ascending=True, inplace=True)
-            case 'compatibility':
-                df_analytes.sort_values(by='order', ascending=False, inplace=True)
-            case 'radius':
-                df_analytes.sort_values(by='radius1', ascending=True, inplace=True)
-            
-        analytes = df_analytes['element_symbol'] + df_analytes['mass'].astype(str)
-        # Return the sorted list of analytes as (symbol, mass) tuples
-        return analytes.to_list()
 
     def partial_match_in_list(self, lst, string):
         """Checks whether values in a list partially match a string
@@ -9869,16 +9090,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 # -------------------------------
 # Classes
 # -------------------------------
-class StandardItem(QStandardItem):
-    def __init__(self, txt='', font_size=11, set_bold=False):
-        super().__init__()
 
-        fnt  = QFont()
-        fnt.setPointSize(font_size)
-        fnt.setBold(set_bold)
-        self.setEditable(False)
-        self.setText(txt)
-        self.setFont(fnt)
 
 
 # Mask object

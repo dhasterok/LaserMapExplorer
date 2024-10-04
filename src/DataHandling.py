@@ -9,6 +9,7 @@ from sklearn.cluster import DBSCAN
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
+from src.SortAnalytes import sort_analytes
 
 class SampleObj:
     """Creates a sample object to store and manipulate geochemical data in map form
@@ -133,7 +134,7 @@ class SampleObj:
         self.sample_id = sample_id
         self.file_path = file_path
         self._negative_method = negative_method
-        self._updating = True
+        self._updating = False
         self._filter_df = pd.DataFrame()
         self._valid_data_types = ['analyte','ratio','computed','special','pca_score','cluster','cluster_score']
 
@@ -176,7 +177,6 @@ class SampleObj:
 
         self.x = self.orig_x = self.raw_data['X']
         self.y = self.orig_y = self.raw_data['Y']
-
 
         # set selected_analytes to columns excluding X and Y (future-proofed)
         #self.selected_analytes = self.raw_data.columns[2:].tolist()  # Skipping first two columns
@@ -898,7 +898,7 @@ class SampleObj:
         # self.update_plot()
         self.update_SV()
 
-    def get_map_data(self, data, sample_id, field, field_type='Analyte', scale_data=False):
+    def get_map_data(self, field, field_type='Analyte', scale_data=False):
         """
         Retrieves and processes the mapping data for the given sample and analytes, then plots the result if required.
 
@@ -931,19 +931,19 @@ class SampleObj:
         #     crop_mask = self.data[self.sample_id]['crop_mask']
         
         # retrieve axis mask for that sample
-        crop_mask = self.crop_mask
+        #crop_mask = self.crop_mask
         
         #crop plot if filter applied
-        df = self.raw_data[['X','Y']][crop_mask].reset_index(drop=True)
+        df = self.processed_data[['X','Y']]
 
-        print(field_type)
+        print(f"get_map_data, {field_type}")
 
         match field_type:
             case 'Analyte' | 'Analyte (normalized)':
                 # unnormalized
-                df ['array'] = self.processed_data.loc[:,field].values
+                df['array'] = self.processed_data[field].values
                 #get analyte info
-                norm = self.analyte_info.loc[self.analyte_info['analytes']==field,'norm'].iloc[0]
+                norm = self.processed_data.get_attribute(field, 'norm')
                 
                 #perform scaling for groups of analytes with same norm parameter
                 
@@ -968,7 +968,7 @@ class SampleObj:
 
                 # unnormalized
                 #df['array'] = self.computed_data.loc[:,field_1].values / self.processed_data.loc[:,field_2].values
-                df['array'] = self.computed_data['Ratio'].loc[:,field].values
+                df['array'] = self.processed_data[field].values
                 
                 # normalize
                 if 'normalized' in field_type:
@@ -989,7 +989,7 @@ class SampleObj:
                         df['array'] = np.where(~np.isnan(df['array']), np.log10(df['array'] / (10**6 - df['array'])))
 
             case _:#'PCA Score' | 'Cluster' | 'Cluster Score' | 'Special' | 'Computed':
-                df['array'] = self.computed_data[field_type].loc[:,field].values
+                df['array'] = self.processed_data[field].values
             
         # ----begin debugging----
         # print(df.columns)
@@ -1110,3 +1110,142 @@ class SampleObj:
     #                 else:
     #                     t_array = np.copy(array)
     #             return t_array
+
+    def get_processed_data(self):
+        """Gets the processed data for analysis
+
+        Returns
+        -------
+        pandas.DataFrame
+            Filtered data frame 
+        bool
+            Analytes included from processed data
+        """
+        if self.sample_id == '':
+            return
+
+        # return normalised, filtered data with that will be used for analysis
+        use_analytes = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['use']==True), 'analytes'].values
+
+        df_filtered = self.data[self.sample_id]['processed_data'][use_analytes]
+
+        #get analyte info to extract choice of scale
+        analyte_info = self.data[self.sample_id]['analyte_info'].loc[
+                                 (self.data[self.sample_id]['analyte_info']['analytes'].isin(use_analytes))]
+        
+        #perform scaling for groups of analytes with same norm parameter
+        for norm in analyte_info['norm'].unique():
+            filtered_analytes = analyte_info[(analyte_info['norm'] == norm)]['analytes']
+            filtered_data = df_filtered[filtered_analytes].values
+            if norm == 'log':
+
+                # np.nanlog handles NaN value
+                df_filtered[filtered_analytes] = np.where(~np.isnan(filtered_data), np.log10(filtered_data))
+                # print(self.processed_analyte_data[sample_id].loc[:10,analytes])
+                # print(self.data[sample_id]['processed_data'].loc[:10,analytes])
+            elif norm == 'logit':
+                # Handle division by zero and NaN values
+                with np.errstate(divide='ignore', invalid='ignore'):
+                    df_filtered[filtered_analytes] = np.where(~np.isnan(filtered_data), np.log10(filtered_data / (10**6 - filtered_data)))
+
+        # Combine the two masks to create a final mask
+        nan_mask = df_filtered.notna().all(axis=1)
+        
+        
+        # mask nan values and add to self.data[self.sample_id]['mask']
+        self.data[self.sample_id]['mask'] = self.data[self.sample_id]['mask']  & nan_mask.values
+
+        return df_filtered, use_analytes
+    
+
+    # extracts data for scatter plot
+    def get_scatter_values(self,plot_type):
+        """Creates a dictionary of values for plotting
+
+        Returns
+        -------
+        dict
+            Four return variables, x, y, z, and c, each as a dict with locations for bi- and
+            ternary plots.  Each contain a 'field', 'type', 'label', and 'array'.  x, y and z
+            contain coordinates and c contains the colors
+        """
+        value_dict = {
+            'x': {'field': None, 'type': None, 'label': None, 'array': None},
+            'y': {'field': None, 'type': None, 'label': None, 'array': None},
+            'z': {'field': None, 'type': None, 'label': None, 'array': None},
+            'c': {'field': None, 'type': None, 'label': None, 'array': None}
+        }
+
+        match plot_type:
+            case 'histogram':
+                value_dict['x']['field'] = self.comboBoxHistField.currentText()
+                value_dict['x']['type'] = self.comboBoxHistFieldType.currentText()
+                value_dict['y']['field'] = None
+                value_dict['y']['type'] = None
+                value_dict['z']['field'] = None
+                value_dict['z']['type'] = None
+                value_dict['c']['field'] = None
+                value_dict['c']['type'] = None
+            case 'scatter' | 'heatmap' | 'ternary map':
+                value_dict['x']['field'] = self.comboBoxFieldX.currentText()
+                value_dict['x']['type'] = self.comboBoxFieldTypeX.currentText()
+                value_dict['y']['field'] = self.comboBoxFieldY.currentText()
+                value_dict['y']['type'] = self.comboBoxFieldTypeY.currentText()
+                value_dict['z']['field'] = self.comboBoxFieldZ.currentText()
+                value_dict['z']['type'] = self.comboBoxFieldTypeZ.currentText()
+                value_dict['c']['field'] = self.comboBoxColorField.currentText()
+                value_dict['c']['type'] = self.comboBoxColorByField.currentText()
+            case 'pca scatter' | 'pca heatmap':
+                value_dict['x']['field'] = f'PC{self.spinBoxPCX.value()}'
+                value_dict['x']['type'] = 'PCA Score'
+                value_dict['y']['field'] = f'PC{self.spinBoxPCY.value()}'
+                value_dict['y']['type'] = 'PCA Score'
+
+                value_dict['z']['field'] = None
+                value_dict['z']['type'] = None
+                value_dict['c']['field'] = self.comboBoxColorField.currentText()
+                value_dict['c']['type'] = self.comboBoxColorByField.currentText()
+            case _:
+                print('get_scatter_values(): Not defined for ' + self.comboBoxPlotType.currentText())
+                return
+
+        for k, v in value_dict.items():
+            # only need to setup when fields exist
+            if v['field'] is None:
+                continue
+
+            match v['type']:
+                case 'Analyte' | 'Analyte (normalized)':
+                    df = self.get_map_data(self.sample_id, field=v['field'], field_type=v['type'], scale_data=False)
+                    v['label'] = v['field'] + ' (' + self.preferences['Units']['Concentration'] + ')'
+                case 'Ratio':
+                    #analyte_1, analyte_2 = v['field'].split('/')
+                    df = self.get_map_data(self.sample_id, field=v['field'], field_type=v['type'], scale_data=False)
+                    v['label'] = v['field']
+                case 'PCA Score' | 'Cluster' | 'Cluster Score':
+                    df = self.get_map_data(self.sample_id, field=v['field'], field_type=v['type'], scale_data=False)
+                    v['label'] = v['field']
+                case 'Special':
+                    df = self.get_map_data(self.sample_id, field=v['field'], field_type=v['type'], scale_data=False)
+                    v['label'] = v['field']
+                case _:
+                    df = pd.DataFrame({'array': []})  # Or however you want to handle this case
+
+            value_dict[k]['array'] = df['array'][self.data[self.sample_id]['mask']].values if not df.empty else []
+
+            # set axes widgets
+            if v['field'] not in self.axis_dict.keys():
+                self.initialize_axis_values(v['type'], v['field'])
+
+            if k == 'c':
+                self.set_color_axis_widgets()
+            else:
+                self.set_axis_widgets(k, v['field'])
+
+            # set lineEdit labels for axes
+            # self.lineEditXLabel.setText(value_dict['x']['label'])
+            # self.lineEditYLabel.setText(value_dict['y']['label'])
+            # self.lineEditZLabel.setText(value_dict['z']['label'])
+            # self.lineEditCbarLabel.setText(value_dict['c']['label'])
+
+        return value_dict['x'], value_dict['y'], value_dict['z'], value_dict['c']

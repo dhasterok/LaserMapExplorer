@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blockly Demo</title>
+</head>
+<body>
+    <div id="blocklyDiv" style="height: 600px; width: 1000px;"></div>
+    <xml id="toolbox" style="display: none">
+        <!-- Variables -->
+        <category name="Variables" custom="VARIABLE" colour="330">
+            <block type="variables_get"></block>
+            <block type="variables_set"></block>
+        </category>
+        <!-- Lists -->
+        <category name="Lists" colour="260">
+            <block type="sample_ids_list_block"></block> <!-- Custom Block for Sample IDs List -->
+            <block type="select_samples"></block> <!-- Custom Block for Selecting Sample IDs -->
+        </category>
+        <!-- Loops -->
+        <category name="Loops" colour="120">
+            <block type="controls_repeat_ext"></block>
+            <block type="controls_for"></block>
+            <block type="controls_whileUntil"></block>
+            <block type="iterate_sample_ids"></block> <!-- Custom Loop Block -->
+        </category>
+        <!-- Logic -->
+        <category name="Logic" colour="210">
+            <block type="controls_if"></block>
+            <block type="logic_compare"></block>
+        </category>
+        <!-- Math -->
+        <category name="Math" colour="230">
+            <block type="math_number"></block>
+            <block type="math_arithmetic"></block>
+        </category>
+        <!-- Text -->
+        <category name="Text" colour="160">
+            <block type="text"></block>
+            <block type="text_print"></block>
+        </category>
+        <!-- Custom Blocks -->
+        <category name="Custom Blocks" colour="60">
+            <block type="load_directory"></block>
+            <block type="select_samples"></block>
+        </category>
+        <!-- Plot Category -->
+        <category name="Plot" colour="285">
+            <block type="plot"></block>
+            <block type="plot_map"></block>
+        </category>
+        <!-- Style Category -->
+        <category name="Style" colour="285">
+            <block type="styles"></block>
+            <block type="axisAndLabels"></block>
+            <block type="annotAndScale"></block>
+            <block type="marksAndLines"></block>
+            <block type="coloring"></block>            
+        </category>
+    </xml>
+
+    <script src="./dist/bundle.js"></script> <!-- Reference the Webpack bundle -->
+</body>
+</html>

@@ -28,23 +28,25 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         _description_
     """    
     listUpdated = pyqtSignal()
-    def __init__(self, analytes, norm_dict, clipped_data, parent=None):
+    def __init__(self, data, parent=None):
         super().__init__(parent)
         self.setupUi(self)
 
-        self.analytes = list(analytes)
-        self.norm_dict = norm_dict
-        self.clipped_data = clipped_data
+        self.analytes = self.data.match_attribute('data_type','analyte')
+        self.norm_dict = {}
+        for analyte in self.analytes:
+            self.norm_dict[analyte] = self.data.get_attribute(analyte,'norm')
+        self.data = data
         self.correlation_matrix = None
-        self.tableWidgetAnalytes.setRowCount(len(analytes))
-        self.tableWidgetAnalytes.setColumnCount(len(analytes))
-        self.tableWidgetAnalytes.setHorizontalHeaderLabels(list(analytes))
+        self.tableWidgetAnalytes.setRowCount(len(self.analytes))
+        self.tableWidgetAnalytes.setColumnCount(len(self.analytes))
+        self.tableWidgetAnalytes.setHorizontalHeaderLabels(list(self.analytes))
         self.tableWidgetAnalytes.setHorizontalHeader(RotatedHeaderView(self.tableWidgetAnalytes))
         self.tableWidgetAnalytes.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.tableWidgetAnalytes.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.comboBoxScale.currentIndexChanged.connect(self.update_all_combos)
 
-        self.tableWidgetAnalytes.setVerticalHeaderLabels(analytes)
+        self.tableWidgetAnalytes.setVerticalHeaderLabels(self.analytes)
         self.correlation_methods = ["Pearson", "Spearman"]
 
         for method in self.correlation_methods:
@@ -135,7 +137,7 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         """        
         selected_method = self.comboBoxCorrelation.currentText().lower()
         # Compute the correlation matrix
-        self.correlation_matrix = self.clipped_data.corr(method=selected_method)
+        self.correlation_matrix = self.data.corr(method=selected_method)
         for i, row_analyte in enumerate(self.analytes):
             for j, col_analyte in enumerate(self.analytes):
 

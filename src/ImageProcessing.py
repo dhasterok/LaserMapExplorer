@@ -174,7 +174,7 @@ class ImageProcessing():
                 self.parent.checkBoxGradient.setEnabled(False)
                 self.parent.labelGradient.setEnabled(False)
 
-                self.actionNoiseReduction.setEnabled(False)
+                self.parent.actionNoiseReduction.setEnabled(False)
 
                 self.parent.update_SV()
             case _:
@@ -336,10 +336,13 @@ class ImageProcessing():
         # get data for current map
         field_type = self.parent.comboBoxColorByField.currentText()
         field = self.parent.comboBoxColorField.currentText()
-        map_df = self.parent.get_map_data(self.parent.sample_id, field, field_type=field_type)
+
+        map_df = self.parent.data[self.parent.sample_id].get_map_data(field, field_type=field_type)
+        array_size = self.parent.data[self.parent.sample_id].array_size
+        aspect_ratio = self.parent.data[self.parent.sample_id].aspect_ratio
 
         # plot map
-        self.array = np.reshape(map_df['array'].values, self.parent.array_size, order=self.parent.order)
+        self.array = np.reshape(map_df['array'].values, array_size, order=self.parent.order)
 
         match algorithm:
             case 'none':
@@ -403,15 +406,15 @@ class ImageProcessing():
 
         norm = self.parent.color_norm(style)
 
-        cax = canvas.axes.imshow(filtered_image, cmap=self.parent.get_colormap(),  aspect=self.parent.aspect_ratio, interpolation='none', norm=norm)
+        cax = canvas.axes.imshow(filtered_image, cmap=self.parent.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
 
         # set color limits
         self.parent.add_colorbar(canvas, cax, style)
         cax.set_clim(style['Colors']['CLim'][0], style['Colors']['CLim'][1])
 
         # use mask to create an alpha layer
-        mask = self.parent.data[self.parent.sample_id]['mask'].astype(float)
-        reshaped_mask = np.reshape(mask, self.parent.array_size, order=self.parent.order)
+        mask = self.parent.data[self.parent.sample_id].mask.astype(float)
+        reshaped_mask = np.reshape(mask, array_size, order=self.parent.order)
 
         alphas = colors.Normalize(0, 1, clip=False)(reshaped_mask)
         alphas = np.clip(alphas, .4, 1)
@@ -419,7 +422,7 @@ class ImageProcessing():
         #canvas.axes.set_facecolor('w')
 
         alpha_mask = np.where(reshaped_mask == 0, 0.5, 0)  
-        canvas.axes.imshow(np.ones_like(alpha_mask), aspect=self.parent.aspect_ratio, interpolation='none', cmap='Greys', alpha=alpha_mask)
+        canvas.axes.imshow(np.ones_like(alpha_mask), aspect=aspect_ratio, interpolation='none', cmap='Greys', alpha=alpha_mask)
 
         # add scalebar
         self.parent.add_scalebar(canvas.axes)
@@ -447,7 +450,7 @@ class ImageProcessing():
         self.parent.clear_layout(self.parent.widgetSingleView.layout())
         self.parent.widgetSingleView.layout().addWidget(canvas)
 
-        self.parent.add_tree_item(self.plot_info)
+        self.parent.plot_tree.add_tree_item(self.plot_info)
 
     def plot_gradient(self):
         """Produces a gradient map
@@ -457,6 +460,9 @@ class ImageProcessing():
         self.plot_flag = False
         self.parent.comboBoxPlotType.setCurrentText('gradient map')
         self.plot_flat = True
+
+        array_size = self.parent.data[self.parent.sample_id].array_size
+        aspect_ratio = self.parent.data[self.parent.sample_id].aspect_ratio
 
         # Compute gradient
         grad_array = np.gradient(self.noise_red_array)
@@ -495,7 +501,7 @@ class ImageProcessing():
         q = np.quantile(self.grad_mag.flatten(), q=[0.025, 0.975])
         norm = colors.Normalize(q[0],q[1], clip=False)
 
-        cax = canvas.axes.imshow(self.grad_mag, cmap=self.parent.get_colormap(),  aspect=self.parent.aspect_ratio, interpolation='none', norm=norm)
+        cax = canvas.axes.imshow(self.grad_mag, cmap=self.parent.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
         canvas.axes.quiver(X,Y,dx,dy, color=style['Scale']['OverlayColor'], linewidth=0.5)
 
         # set color limits
@@ -503,8 +509,8 @@ class ImageProcessing():
         #cax.set_clim(style['Colors']['CLim'][0], style['Colors']['CLim'][1])
 
         # use mask to create an alpha layer
-        mask = self.parent.data[self.parent.sample_id]['mask'].astype(float)
-        reshaped_mask = np.reshape(mask, self.parent.array_size, order=self.parent.order)
+        mask = self.parent.data[self.parent.sample_id].mask.astype(float)
+        reshaped_mask = np.reshape(mask, array_size, order=self.parent.order)
 
         alphas = colors.Normalize(0, 1, clip=False)(reshaped_mask)
         alphas = np.clip(alphas, .4, 1)
@@ -512,7 +518,7 @@ class ImageProcessing():
         #canvas.axes.set_facecolor('w')
 
         alpha_mask = np.where(reshaped_mask == 0, 0.5, 0)  
-        canvas.axes.imshow(np.ones_like(alpha_mask), aspect=self.parent.aspect_ratio, interpolation='none', cmap='Greys', alpha=alpha_mask)
+        canvas.axes.imshow(np.ones_like(alpha_mask), aspect=aspect_ratio, interpolation='none', cmap='Greys', alpha=alpha_mask)
 
         # add scalebar
         self.parent.add_scalebar(canvas.axes)

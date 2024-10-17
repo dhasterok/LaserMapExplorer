@@ -5,7 +5,7 @@ from PyQt5.QtCore import (
 from PyQt5.QtWidgets import (
     QVBoxLayout, QDialog, QInputDialog, QDialogButtonBox
 )
-
+import numpy as np
 import matplotlib
 matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
@@ -141,8 +141,10 @@ class MplCanvas(FigureCanvas):
             elif y_i > self.array.shape[0]-1:
                 y_i = self.array.shape[0]
             
-            x = x_i*self.parent.dx
-            y = y_i*self.parent.dy
+            #x = x_i*self.parent.dx
+            #y = y_i*self.parent.dy
+            x = x_i*self.parent.data[self.parent.sample_id].dx
+            y = y_i*self.parent.data[self.parent.sample_id].dy
 
             label =  f" {self.parent.preferences['Units']['Concentration']}"
         else:
@@ -248,8 +250,8 @@ class MplCanvas(FigureCanvas):
             Distance between two given points.
         """
         if self.map_flag:
-            dx = self.parent.dx
-            dy = self.parent.dy
+            dx = self.parent.data[self.parent.sample_id].dx
+            dy = self.parent.data[self.parent.sample_id].dy
         else:
             dx = 1
             dy = 1
@@ -307,8 +309,8 @@ class MplCanvas(FigureCanvas):
 
         # Update distance label on map
         if self.map_flag:
-            xrange = self.parent.x.nunique()*self.parent.aspect_ratio
-            yrange = self.parent.y.nunique()
+            xrange = self.parent.data[self.parent.sample_id].x.nunique()*self.parent.data[self.parent.sample_id].aspect_ratio
+            yrange = self.parent.data[self.parent.sample_id].y.nunique()
         else:
             xl = self.axes.get_xlim
             xrange = xl[1] - xl[0]

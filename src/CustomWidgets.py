@@ -1,4 +1,5 @@
-from PyQt5.QtWidgets import QLineEdit, QTableWidget, QComboBox, QPushButton, QCheckBox, QWidget, QAbstractItemView, QTableWidgetItem
+from PyQt5.QtWidgets import QLineEdit, QTableWidget, QComboBox, QPushButton, QCheckBox, QWidget, QTreeView
+from PyQt5.QtGui import QStandardItem, QStandardItemModel, QFont
 import src.format as fmt
 import pandas as pd
 
@@ -140,3 +141,107 @@ class CustomTableWidget(QTableWidget):
         df = pd.DataFrame(table_data)
         
         return df
+    
+class StandardItem(QStandardItem):
+    def __init__(self, txt='', font_size=10, set_bold=False, data=None):
+        """Extends properties of QStandardItem for QTreeView and QList items.
+
+        Parameters
+        ----------
+        txt : str, optional
+            Text displayed in tree or list, by default ``''``
+        font_size : int, optional
+            fontsize, by default ``10``
+        set_bold : bool, optional
+            Bold tree font when ``True``, by default ``False``
+        """    
+        super().__init__()
+
+        # Set item font
+        fnt = QFont()
+        fnt.setPointSize(font_size)
+        fnt.setBold(set_bold)
+
+        self.setEditable(False)
+        self.setText(txt)
+        self.setFont(fnt)
+        if data is not None:
+            self.setData(data)
+
+class CustomTreeView(QTreeView):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.treeModel = QStandardItemModel()
+        self.root_node = self.treeModel.invisibleRootItem()
+        self.setModel(self.treeModel)
+    
+    def branch_exists(self, parent_item, branch_name):
+        """Check if a branch exists under the given parent."""
+        for row in range(parent_item.rowCount()):
+            item = parent_item.child(row)
+            if item.text() == branch_name:
+                return item  # Return the branch if found
+        return None  # Branch not found
+    
+    def add_branch(self, parent_item, branch_name, data=None):
+        """Add a branch to the tree under the given parent item."""
+        branch_item = StandardItem(branch_name, 10, True, data)
+        parent_item.appendRow(branch_item)
+        return branch_item
+    
+    def add_leaf(self, parent_item, leaf_name, data=None):
+        """Add a leaf to the tree under the given parent branch."""
+        leaf_item = StandardItem(leaf_name, 10, False, data)
+        parent_item.appendRow(leaf_item)
+        return leaf_item
+
+    def get_item_path(self, item):
+        """Return the path of the given item as (tree, branch, leaf)."""
+        path = []
+        while item is not None:
+            path.insert(0, item.text())
+            item = item.parent()
+        return path
+    
+    def get_leaf_data(self, leaf_item):
+        """Get the data associated with a leaf."""
+        return leaf_item.data()
+    
+    def find_leaf(self, branch_item, leaf_name):
+        """Find a leaf by name under a branch."""
+        for row in range(branch_item.rowCount()):
+            leaf = branch_item.child(row)
+            if leaf.text() == leaf_name:
+                return leaf
+        return None
+
+    def sort_branch(self, branch, order_list):
+        """
+        Sorts a branch in the treeView given an ordered list.
+
+        Parameters
+        ----------
+        branch : QStandardItem
+            Branch to sort leaf items.
+        order_list : list
+            The desired order for the leaf items.
+        """        
+        # Collect all children (leaves) under the branch into a list
+        leaf_items = []
+        for i in range(branch.rowCount()):
+            leaf_items.append(branch.takeChild(i))
+        
+        # Sort the leaves based on the provided order list
+        # Items not in order_list will be placed at the end
+        leaf_items.sort(key=lambda x: order_list.index(x.text()) if x.text() in order_list else len(order_list))
+        
+        # Add sorted items back to the branch
+        for i, leaf in enumerate(leaf_items):
+            branch.insertRow(i, leaf)
+
+    def on_double_click(self, index):
+        """Handle double-click events in the tree view."""
+        item = self.treeModel.itemFromIndex(index)
+        item_path = self.get_item_path(item)
+        leaf_data = self.get_leaf_data(item)
+        print(f"Double-clicked on: {item_path}, Data: {leaf_data}")

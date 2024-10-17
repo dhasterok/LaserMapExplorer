@@ -91,10 +91,8 @@ class CropTool:
         """Uses selected crop extent to set viewable area and map region for analysis."""
         if self.crop_rect:
             crop_rect = self.crop_rect.rect()  # self.crop_rect is ResizableRectItem
-            self.main_window.data[self.main_window.sample_id]['crop_x_min'] = crop_rect.left()
-            self.main_window.data[self.main_window.sample_id]['crop_x_max'] = crop_rect.right()
-            self.main_window.data[self.main_window.sample_id]['crop_y_min'] = crop_rect.top()
-            self.main_window.data[self.main_window.sample_id]['crop_y_max'] = crop_rect.bottom()
+            self.main_window.data[self.main_window.sample_id].xlim = [crop_rect.left(), crop_rect.right()]
+            self.main_window.data[self.main_window.sample_id].ylim = [crop_rect.top(), crop_rect.bottom()]
             if len(self.overlays)> 0: #remove crop rect and overlays
                 self.main_window.plot.removeItem(self.crop_rect)
                 for overlay in self.overlays:

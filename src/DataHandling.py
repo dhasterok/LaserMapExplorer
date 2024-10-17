@@ -135,9 +135,19 @@ class SampleObj:
         self.file_path = file_path
         self._negative_method = negative_method
         self._updating = False
+
+        # filter dataframe
         self._filter_df = pd.DataFrame()
+
+        # axis dictionary for plotting
         self.axis_dict = {}
+
+        # data types stored in AttributeDataFrames.column_attributes['data_type']
         self._valid_data_types = ['analyte','ratio','computed','special','pca score','cluster','cluster score']
+
+        # matrix order set by x-y sorting, which changes when swapping axes
+        self.is_swapped = False
+        self.order = 'F'
 
         self.reset_data()
 
@@ -537,6 +547,13 @@ class SampleObj:
         
     def swap_xy(self):
         """Swaps data in a SampleObj."""        
+        self.is_swapped = not self.is_swapped
+
+        if self.is_swapped:
+            self.order = 'C'
+        else:
+            self.order = 'F'
+
         self._swap_xy(self.raw_data)
         self._swap_xy(self.processed_data)
 

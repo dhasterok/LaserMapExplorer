@@ -141,6 +141,50 @@ class CustomTableWidget(QTableWidget):
         df = pd.DataFrame(table_data)
         
         return df
+
+    def column_to_list(self, column):
+        """Extract data from a column of a CustomTableWidget into a list.
+
+        Parameters
+        ----------
+        column : int, str
+            Column index or column name.
+
+        Returns
+        -------
+        list
+            Data from ``column`` is placed into a list.
+
+        Raises
+        ------
+        ValueError
+            Column was not found.
+        """
+        column_index = None
+        if isinstance(column, int):
+            column_index = column
+        elif isinstance(column, str) :
+            for col in range(self.columnCount()):
+                header_text = self.horizontalHeaderItem(col).text()
+                if header_text == column:
+                    column_index = col
+                    break
+
+        if column_index is None:
+            raise ValueError(f"Column '{column}' not found")
+
+        # Loop through each row in the column
+        column_data = []
+        for row in range(self.rowCount()):
+            item = self.item(row, column_index)  # Get QTableWidgetItem at (row, column_index)
+            
+            # Check if item exists (not None) and add its text to the list
+            if item:
+                column_data.append(item.text())
+            else:
+                column_data.append('')  # Handle empty cells if needed
+        
+        return column_data
     
 class StandardItem(QStandardItem):
     def __init__(self, txt='', font_size=10, set_bold=False, data=None):

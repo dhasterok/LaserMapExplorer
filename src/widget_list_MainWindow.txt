@@ -24,3 +24,4 @@ self.lineEditFMax
 self.lineEditDecayConstant
 self.lineEditDecayConstantUncertainty
 self.treeView
+self.tableWidgetNDim

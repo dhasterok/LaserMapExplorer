@@ -1979,7 +1979,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_5.addLayout(self.formLayout_4)
         self.gridLayout = QtWidgets.QGridLayout()
         self.gridLayout.setObjectName("gridLayout")
-        self.tableWidgetNDim = QtWidgets.QTableWidget(self.groupBoxNDim)
+        self.tableWidgetNDim = cw.CustomTableWidget(self.groupBoxNDim)
         self.tableWidgetNDim.setMaximumSize(QtCore.QSize(16777215, 16777215))
         font = QtGui.QFont()
         font.setPointSize(11)

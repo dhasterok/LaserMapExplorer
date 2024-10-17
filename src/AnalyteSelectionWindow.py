@@ -32,11 +32,13 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         super().__init__(parent)
         self.setupUi(self)
 
-        self.analytes = self.data.match_attribute('data_type','analyte')
+        self.data = data
+
         self.norm_dict = {}
+
+        self.analytes = self.data.match_attribute('data_type','analyte')
         for analyte in self.analytes:
             self.norm_dict[analyte] = self.data.get_attribute(analyte,'norm')
-        self.data = data
         self.correlation_matrix = None
         self.tableWidgetAnalytes.setRowCount(len(self.analytes))
         self.tableWidgetAnalytes.setColumnCount(len(self.analytes))

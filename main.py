@@ -377,7 +377,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.lasermaps = {}
         self.prev_plot = ''
-        self.order = 'F'
         self.pyqtgraph_widget = None
         self.isUpdatingTable = False
         self.cursor = False
@@ -713,8 +712,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Preprocess Tab
         #-------------------------
-        self.swap_xy_val = False
-
         # histogram
         self.default_bins = 100
         self.comboBoxHistFieldType.activated.connect(self.histogram_field_type_callback)
@@ -1787,15 +1784,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         match self.comboBoxPlotType.currentText():
             case 'analyte map':
-                self.swap_xy_val = not self.swap_xy_val
-
-                if self.swap_xy_val:
-                    self.order = 'C'
-                else:
-                    self.order = 'F'
-
                 # swap x and y
-                self.data[self.sample_id].swap_xy
+                self.data[self.sample_id].swap_xy()
 
                 self.update_aspect_ratio_controls()
 
@@ -5556,7 +5546,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             # get data for current analyte
             current_plot_df = self.get_map_data(self.sample_id, field=analyte, field_type='Analyte')
-            reshaped_array = np.reshape(current_plot_df['array'].values, self.data[self.sample_id].array_size, order=self.order)
+            reshaped_array = np.reshape(current_plot_df['array'].values, self.data[self.sample_id].array_size, order=self.data[self.sample_id].order)
 
             # add image to canvas
             cmap = self.get_colormap()
@@ -5942,7 +5932,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         mask = self.data[self.sample_id].mask
 
-        array = np.reshape(map_df['array'].values, self.data[self.sample_id].array_size, order=self.order)
+        array = np.reshape(map_df['array'].values, self.data[self.sample_id].array_size, order=self.data[self.sample_id].order)
 
         # Step 1: Normalize your data array for colormap application
         norm = colors.Normalize(vmin=np.nanmin(array), vmax=np.nanmax(array))
@@ -5955,7 +5945,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Step 3: Create an RGBA array where the alpha channel is based on self.data[self.sample_id].mask
         rgba_array = np.zeros((*rgb_array.shape[:2], 4), dtype=np.uint8)
         rgba_array[:, :, :3] = rgb_array  # Set RGB channels
-        mask_r = np.reshape(mask, self.data[self.sample_id].array_size, order=self.order)
+        mask_r = np.reshape(mask, self.data[self.sample_id].array_size, order=self.data[self.sample_id].order)
 
         rgba_array[:, :, 3] = np.where(mask_r, 255, 100)  # Set alpha channel based on self.data[self.sample_id].mask
 
@@ -6002,7 +5992,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             map_df.loc[sorted_data.index, 'array'] = cdf.values
 
         # plot map
-        reshaped_array = np.reshape(map_df['array'].values, array_size, order=self.order)
+        reshaped_array = np.reshape(map_df['array'].values, array_size, order=self.data[self.sample_id].order)
             
         norm = self.color_norm(style)
 
@@ -6014,7 +6004,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # use mask to create an alpha layer
         mask = self.data[self.sample_id].mask.astype(float)
-        reshaped_mask = np.reshape(mask, array_size, order=self.order)
+        reshaped_mask = np.reshape(mask, array_size, order=self.data[self.sample_id].order)
 
         alphas = colors.Normalize(0, 1, clip=False)(reshaped_mask)
         alphas = np.clip(alphas, .4, 1)
@@ -7193,7 +7183,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Reshape the array into MxNx3
         map_data = np.zeros((M, N, 3), dtype=np.uint8)
-        map_data[:len(cval), :, :] = cval.reshape(M, N, 3, order=self.order)
+        map_data[:len(cval), :, :] = cval.reshape(M, N, 3, order=self.data[self.sample_id].order)
 
         canvas.axes.imshow(map_data, aspect=self.data[self.sample_id].aspect_ratio)
         canvas.array = map_data
@@ -7568,7 +7558,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 print('(MainWindow.plot_score_map) Unknown score type'+plot_type)
                 return canvas
 
-        reshaped_array = np.reshape(self.data[self.sample_id].processed_data[field].values, self.data[self.sample_id].array_size, order=self.order)
+        reshaped_array = np.reshape(self.data[self.sample_id].processed_data[field].values, self.data[self.sample_id].array_size, order=self.data[self.sample_id].order)
 
         cax = canvas.axes.imshow(reshaped_array, cmap=style['Colors']['Colormap'], aspect=self.data[self.sample_id].aspect_ratio, interpolation='none')
         canvas.array = reshaped_array
@@ -7603,7 +7593,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #groups = self.data[self.sample_id][plot_type][method].values
         groups = self.data[self.sample_id].processed_data[method].values
 
-        reshaped_array = np.reshape(groups, self.data[self.sample_id].array_size, order=self.order)
+        reshaped_array = np.reshape(groups, self.data[self.sample_id].array_size, order=self.data[self.sample_id].order)
 
         n_clusters = len(np.unique(groups))
 
@@ -8220,58 +8210,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.tableWidgetNDim.setCellWidget(row, 0, chkBoxItem_use)
             self.tableWidgetNDim.setItem(row, 1, QTableWidgetItem(analyte))
     
-    def column_to_list(self, table_widget, column):
-        """Extract data from a column of a QTableWidget into a list.
 
-        Parameters
-        ----------
-        table_widget : QTableWidget
-            Table with column data.
-        column : int, str
-            Column index or column name.
-
-        Returns
-        -------
-        list
-            Data from ``column`` is placed into a list.
-
-        Raises
-        ------
-        ValueError
-            Column was not found.
-        """
-        column_index = None
-        if isinstance(column, int):
-            column_index = column
-        elif isinstance(column, str) :
-            for col in range(table_widget.columnCount()):
-                header_text = table_widget.horizontalHeaderItem(col).text()
-                if header_text == column:
-                    column_index = col
-                    break
-
-        if column_index is None:
-            raise ValueError(f"Column '{column}' not found")
-
-        # Loop through each row in the column
-        column_data = []
-        for row in range(table_widget.rowCount()):
-            item = table_widget.item(row, column_index)  # Get QTableWidgetItem at (row, column_index)
-            
-            # Check if item exists (not None) and add its text to the list
-            if item:
-                column_data.append(item.text())
-            else:
-                column_data.append('')  # Handle empty cells if needed
-        
-        return column_data
 
     def save_ndim_list(self):
         # get the list name from the user
         name, ok = QInputDialog.getText(self, 'Save custom TEC list', 'Enter name for new list:')
         if ok:
             try:
-                self.ndim_list_dict[name] = self.column_to_list(self.tableWidgetNDim, 'Analyte')
+                self.ndim_list_dict[name] = self.tableWidgetNDim.column_to_list('Analyte')
 
                 # export the csv
                 csvdict.export_dict_to_csv(self.ndim_list_dict,self.ndim_list_filename)

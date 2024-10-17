@@ -46,8 +46,8 @@ class PlotTree():
         self.parent.treeView.expandAll()
         
         # Connect double-click event
-        self.parent.treeView.doubleClicked.connect(treeView.on_double_click)
-        #self.parent.treeView.doubleClicked.connect(self.tree_double_click)
+        #self.parent.treeView.doubleClicked.connect(treeView.on_double_click)
+        self.parent.treeView.doubleClicked.connect(self.tree_double_click)
         
     def add_sample(self, sample_id):
         """Create plot selector tree
@@ -226,7 +226,7 @@ class PlotTree():
             #     widget_dict = self.plot_widget_dict[tree][branch][leaf]
             #     self.add_plotwidget_to_canvas(widget_dict['info'], view=widget_dict['view'], position=widget_dict['position'])
             self.parent.initialize_axis_values(tree, leaf)
-            style = self.styles['analyte map']
+            style = self.parent.styles['analyte map']
             self.parent.set_style_widgets('analyte map', style)
             if self.plot_info:
                 print('tree_double_click: add_plotwidget_to_canvas')
@@ -237,7 +237,7 @@ class PlotTree():
                 self.parent.update_spinboxes(self.parent.plot_info['sample_id'],self.parent.plot_info['field'],self.parent.plot_info['field_type'])
             else:
                 # print('tree_double_click: plot_map_pg')
-                if self.parent.toolBox.currentIndex() not in [self.parent.left_tab['sample'], self.parent.left_tab['process'], self.parent.left_tab['polygons'], self.left_tab['profile']]:
+                if self.parent.toolBox.currentIndex() not in [self.parent.left_tab['sample'], self.parent.left_tab['process'], self.parent.left_tab['polygons'], self.parent.left_tab['profile']]:
                     self.parent.toolBox.setCurrentIndex(self.parent.left_tab['sample'])
 
 

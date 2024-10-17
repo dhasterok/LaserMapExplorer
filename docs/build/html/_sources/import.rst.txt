@@ -1,13 +1,21 @@
 Import Formats
 **************
 
-Import formats vary by data type, and can differ based on machine manufacturer or the program used to processes the data.  The formats for the various input files are described below.  If you have a file type that is not included, feel free to :doc:`contact us <contact>` to see if we can write a method to suit your particular needs.
+Import formats vary by data type, and can differ based on machine manufacturer or the program used to processes the data.  This section describes the supported formats and the import process.  If you have a file type that is not included, feel free to :doc:`contact us <contact>` to see if we can write a method to suit your particular needs.
 
-At present, we only handle LA-ICP-MS data, though we plan to include additional data types in the coming months.
+Currently, *LaME* primarily handles LA-ICP-MS data, with plans to include additional data types in future updates.
 
-Importing data into *LaME* is relatively simple using the *Import Tool* from *Main Toolbar* as seen below.  Imported files for each sample are saved into a single file for more rapid loading, with the name *[sample_id].lame.[ftype]*.  In most cases the file type is a \*.csv, though in some cases where color is appropriate it may be stored as a \*.png.
+Using the Import Tool
+=====================
 
-Start by selecting the type of data and the method (if applicable).  Then select the directory with the samples. Each sample's files should be in its own subdirectory.  A table will appear with options depending on the data type and method chosen.  To the right of the table is a preview frame, which will display an analyte map from the sample when the preview checkbox is selected. *The preview feature is not currently implemented.*
+Importing data into *LaME* is relatively simple using the *Import Tool* from the *Main Toolbar* (|icon-import-directory-64|).  Here's an overview of the process:
+
+1. Select the data type and method (if applicable) from the dropdown menus.
+2. Choose the directory containing the sample files. Each sample should be in its own subdirectory.
+3. A table will appear with options depending on the data type and method chosen.
+4. On the right side of the *Import Tool*, a preview frame is available to display an analyte map from the sample when the preview checkbox is selected. (Note: The preview feature is not currently implemented.)
+
+After import, files for each sample are saved into a single file for more rapid loading, with the name format *[sample_id].lame.[ftype]*.  In most cases, the file type is \*.csv, though in some instances where color is appropriate, it may be stored as a \*.png.
 
 .. figure:: _static/screenshots/LaME_Import_Tool.png
     :align: center
@@ -15,8 +23,11 @@ Start by selecting the type of data and the method (if applicable).  Then select
 
     *LaME Import Tool*, shown importing LA-ICP-MS data.
 
+Supported Data Formats
+======================
+
 LA-ICP-MS
-=========
+---------
 
 Quadrupole
 ----------
@@ -87,3 +98,6 @@ The following data types and formats are planned for future implementation:
 - SEM
 - CL
 - Petrography (*.png, *.jpg, *.tif)
+
+.. |icon-import-directory-64| image:: _static/icons/icon-import-directory-64.png
+    :height: 2ex

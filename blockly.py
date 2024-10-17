@@ -6,7 +6,7 @@ from PyQt5.QtCore import pyqtSlot, QObject, QUrl, QFile, QIODevice
 from lame_helper import BASEDIR
 from PyQt5.QtWebEngineWidgets import QWebEngineSettings
 import os
-# export QTWEBENGINE_REMOTE_DEBUGGING=9222  
+#export QTWEBENGINE_REMOTE_DEBUGGING=9222  
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
 
 class BlocklyBridge(QObject):
@@ -65,7 +65,7 @@ class Workflow(QMainWindow):
         api_file.close()
         self.web_view.page().runJavaScript(api_script)
         #Load the Blockly HTML page
-        self.web_view.setUrl(QUrl.fromLocalFile(BASEDIR + '/blockly/blockly.html'))
+        self.web_view.setUrl(QUrl.fromLocalFile(BASEDIR + '/blockly/index.html'))
 
         # Add the web view to the layout
         self.layout.addWidget(self.web_view)

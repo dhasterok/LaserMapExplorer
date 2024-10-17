@@ -43,6 +43,7 @@ html_theme = 'pydata_sphinx_theme'
 
 html_css_files = [
     "mpl.css",
+    "custom.css",
 ]
 #html_theme = "mpl_sphinx_theme"
 

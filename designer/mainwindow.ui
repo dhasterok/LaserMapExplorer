@@ -1151,7 +1151,7 @@
         <string>Swap X and Y resolution</string>
        </property>
        <property name="currentIndex">
-        <number>9</number>
+        <number>6</number>
        </property>
        <widget class="QWidget" name="SelectAnalytePage">
         <property name="enabled">
@@ -5286,52 +5286,6 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="3" column="0">
-                   <widget class="QLabel" name="labelNDimQuantiles">
-                    <property name="text">
-                     <string>Quantiles</string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="3" column="1">
-                   <widget class="QComboBox" name="comboBoxNDimQuantiles">
-                    <property name="maximumSize">
-                     <size>
-                      <width>16777215</width>
-                      <height>16777215</height>
-                     </size>
-                    </property>
-                    <property name="toolTip">
-                     <string>Select quantiles for statistics</string>
-                    </property>
-                    <property name="currentIndex">
-                     <number>2</number>
-                    </property>
-                    <item>
-                     <property name="text">
-                      <string>0.5</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>0.25, 0.75</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>0.25, 0.5, 0.75</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>0.05, 0.25, 0.5, 0.75, 0.95</string>
-                     </property>
-                    </item>
-                   </widget>
-                  </item>
                   <item row="2" column="1">
                    <layout class="QHBoxLayout" name="horizontalLayout_39">
                     <item>
@@ -5405,6 +5359,52 @@
                     </item>
                    </layout>
                   </item>
+                  <item row="3" column="0">
+                   <widget class="QLabel" name="labelNDimQuantiles">
+                    <property name="text">
+                     <string>Quantiles</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="1">
+                   <widget class="QComboBox" name="comboBoxNDimQuantiles">
+                    <property name="maximumSize">
+                     <size>
+                      <width>16777215</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
+                    <property name="toolTip">
+                     <string>Select quantiles for statistics</string>
+                    </property>
+                    <property name="currentIndex">
+                     <number>2</number>
+                    </property>
+                    <item>
+                     <property name="text">
+                      <string>0.5</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>0.25, 0.75</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>0.25, 0.5, 0.75</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>0.05, 0.25, 0.5, 0.75, 0.95</string>
+                     </property>
+                    </item>
+                   </widget>
+                  </item>
                  </layout>
                 </item>
                 <item>
@@ -5441,16 +5441,6 @@
                     <column>
                      <property name="text">
                       <string>Use</string>
-                     </property>
-                     <property name="font">
-                      <font>
-                       <pointsize>11</pointsize>
-                      </font>
-                     </property>
-                    </column>
-                    <column>
-                     <property name="text">
-                      <string>Sample Id</string>
                      </property>
                      <property name="font">
                       <font>
@@ -7750,6 +7740,11 @@
                      </item>
                      <item>
                       <property name="text">
+                       <string>scientific</string>
+                      </property>
+                     </item>
+                     <item>
+                      <property name="text">
                        <string>log</string>
                       </property>
                      </item>
@@ -7843,6 +7838,11 @@
                      <item>
                       <property name="text">
                        <string>linear</string>
+                      </property>
+                     </item>
+                     <item>
+                      <property name="text">
+                       <string>scientific</string>
                       </property>
                      </item>
                      <item>
@@ -11034,7 +11034,7 @@
         <string>Pop the figure out into a separate window</string>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>3</number>
        </property>
        <widget class="QWidget" name="tabNotes">
         <property name="sizePolicy">
@@ -11596,7 +11596,7 @@
                   <item row="2" column="0">
                    <widget class="QLabel" name="labelFMinVal">
                     <property name="text">
-                     <string>min value</string>
+                     <string>Min value</string>
                     </property>
                    </widget>
                   </item>
@@ -11619,7 +11619,7 @@
                   <item row="3" column="0">
                    <widget class="QLabel" name="labelFMinQ">
                     <property name="text">
-                     <string>min q</string>
+                     <string>Min quantile</string>
                     </property>
                    </widget>
                   </item>
@@ -11644,7 +11644,7 @@
                      </font>
                     </property>
                     <property name="toolTip">
-                     <string>Select mimimum quantile for filtering</string>
+                     <string>Set mimimum quantile for filtering</string>
                     </property>
                     <property name="alignment">
                      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -11657,7 +11657,7 @@
                   <item row="4" column="0">
                    <widget class="QLabel" name="labelFMaxVal">
                     <property name="text">
-                     <string>max value</string>
+                     <string>Max value</string>
                     </property>
                    </widget>
                   </item>
@@ -11680,7 +11680,7 @@
                   <item row="5" column="0">
                    <widget class="QLabel" name="labelFMaxQ">
                     <property name="text">
-                     <string>max q</string>
+                     <string>Max quantile</string>
                     </property>
                    </widget>
                   </item>
@@ -11705,7 +11705,7 @@
                      </font>
                     </property>
                     <property name="toolTip">
-                     <string>Select maximum quantile for filtering</string>
+                     <string>Set maximum quantile for filtering</string>
                     </property>
                     <property name="alignment">
                      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -12629,7 +12629,7 @@
         <attribute name="title">
          <string>Plot Info</string>
         </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_15">
+        <layout class="QVBoxLayout" name="verticalLayout_77">
          <property name="leftMargin">
           <number>12</number>
          </property>
@@ -12640,7 +12640,188 @@
           <number>12</number>
          </property>
          <item>
-          <widget class="QTextEdit" name="textEditPlotInfo"/>
+          <layout class="QHBoxLayout" name="horizontalLayout_41">
+           <item>
+            <widget class="QTextEdit" name="textEditPlotInfo"/>
+           </item>
+           <item>
+            <widget class="QTableWidget" name="tableWidgetAnnotations">
+             <column>
+              <property name="text">
+               <string>Type</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Object</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Value</string>
+              </property>
+             </column>
+            </widget>
+           </item>
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_15">
+             <item>
+              <widget class="QGroupBox" name="groupBoxAnnotations">
+               <property name="minimumSize">
+                <size>
+                 <width>40</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>40</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="title">
+                <string/>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_73">
+                <property name="leftMargin">
+                 <number>3</number>
+                </property>
+                <property name="topMargin">
+                 <number>6</number>
+                </property>
+                <property name="rightMargin">
+                 <number>3</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>6</number>
+                </property>
+                <item>
+                 <widget class="QToolButton" name="toolButtonAnnotationsSelectAll">
+                  <property name="minimumSize">
+                   <size>
+                    <width>28</width>
+                    <height>28</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>28</width>
+                    <height>28</height>
+                   </size>
+                  </property>
+                  <property name="toolTip">
+                   <string>Select all filters</string>
+                  </property>
+                  <property name="text">
+                   <string>Select All</string>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="../resources.qrc">
+                    <normaloff>:/resources/icons/icon-select-all-64.svg</normaloff>:/resources/icons/icon-select-all-64.svg</iconset>
+                  </property>
+                  <property name="iconSize">
+                   <size>
+                    <width>20</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QToolButton" name="toolButtonAnnotationsShow">
+                  <property name="minimumSize">
+                   <size>
+                    <width>28</width>
+                    <height>28</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>28</width>
+                    <height>28</height>
+                   </size>
+                  </property>
+                  <property name="toolTip">
+                   <string>View/hide profile points</string>
+                  </property>
+                  <property name="text">
+                   <string>...</string>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="../resources.qrc">
+                    <normaloff>:/resources/icons/icon-show-hide-64.svg</normaloff>:/resources/icons/icon-show-hide-64.svg</iconset>
+                  </property>
+                  <property name="iconSize">
+                   <size>
+                    <width>20</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                  <property name="checkable">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QToolButton" name="toolButtonAnnotationsRemove">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>28</horstretch>
+                    <verstretch>28</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>28</width>
+                    <height>28</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>28</width>
+                    <height>28</height>
+                   </size>
+                  </property>
+                  <property name="toolTip">
+                   <string>Remove selected field from profile plot</string>
+                  </property>
+                  <property name="text">
+                   <string>...</string>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="../resources.qrc">
+                    <normaloff>:/resources/icons/icon-delete-64.svg</normaloff>:/resources/icons/icon-delete-64.svg</iconset>
+                  </property>
+                  <property name="iconSize">
+                   <size>
+                    <width>20</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <spacer name="verticalSpacerAnnotations">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+          </layout>
          </item>
         </layout>
        </widget>

@@ -136,9 +136,11 @@ class SampleObj:
         self._negative_method = negative_method
         self._updating = False
         self._filter_df = pd.DataFrame()
-        self._valid_data_types = ['analyte','ratio','computed','special','pca_score','cluster','cluster_score']
+        self.axis_dict = {}
+        self._valid_data_types = ['analyte','ratio','computed','special','pca score','cluster','cluster score']
 
         self.reset_data()
+
 
     def reset_data(self):
         """Reverts back to the original data.
@@ -173,7 +175,7 @@ class SampleObj:
         # use an ExtendedDF.AttributeDataFrame to add attributes to the columns
         # may includes analytes, ratios, and special data
         self.raw_data = AttributeDataFrame(data=sample_df)
-        self.raw_data.set_attribute(attribute='data_type', columns=list(self.raw_data.columns), values=data_type)
+        self.raw_data.set_attribute(list(self.raw_data.columns), 'data_type', data_type)
 
         self.x = self.orig_x = self.raw_data['X']
         self.y = self.orig_y = self.raw_data['Y']
@@ -181,40 +183,40 @@ class SampleObj:
         # set selected_analytes to columns excluding X and Y (future-proofed)
         #self.selected_analytes = self.raw_data.columns[2:].tolist()  # Skipping first two columns
         coordinate_columns = self.raw_data.match_attribute(attribute='data_type',value='coordinate')
-        self.raw_data.set_attribute(attribute='units', columns=coordinate_columns, values=None)
-        self.raw_data.set_attribute(attribute='use', columns=coordinate_columns, values=False)
+        self.raw_data.set_attribute(coordinate_columns, 'units', None)
+        self.raw_data.set_attribute(coordinate_columns, 'use', False)
 
         analyte_columns = self.raw_data.match_attribute(attribute='data_type',value='analyte')
-        self.raw_data.set_attribute(attribute='units', columns=analyte_columns, values=None)
-        self.raw_data.set_attribute(attribute='use', columns=analyte_columns, values=True)
+        self.raw_data.set_attribute(analyte_columns, 'units', None)
+        self.raw_data.set_attribute(analyte_columns, 'use', True)
         # quantile bounds
-        self.raw_data.set_attribute(attribute='lower_bound', columns=analyte_columns, values=0.05)
-        self.raw_data.set_attribute(attribute='upper_bound', columns=analyte_columns, values=99.5)
+        self.raw_data.set_attribute(analyte_columns, 'lower_bound', 0.05)
+        self.raw_data.set_attribute(analyte_columns, 'upper_bound', 99.5)
         # quantile bounds for differences
-        self.raw_data.set_attribute(attribute='diff_lower_bound', columns=analyte_columns, values=0.05)
-        self.raw_data.set_attribute(attribute='diff_upper_bound', columns=analyte_columns, values=99)
+        self.raw_data.set_attribute(analyte_columns, 'diff_lower_bound', 0.05)
+        self.raw_data.set_attribute(analyte_columns, 'diff_upper_bound', 99)
         # min and max unmasked values
-        self.raw_data.set_attribute(attribute='v_min', columns=analyte_columns, values=None)
-        self.raw_data.set_attribute(attribute='v_max', columns=analyte_columns, values=None)
+        self.raw_data.set_attribute(analyte_columns, 'v_min', None)
+        self.raw_data.set_attribute(analyte_columns, 'v_max', None)
         # linear/log scale
-        self.raw_data.set_attribute(attribute='norm', columns=analyte_columns, values='linear')
-        self.raw_data.set_attribute(attribute='auto_scale', columns=analyte_columns, values=True)
+        self.raw_data.set_attribute(analyte_columns, 'norm', 'linear')
+        self.raw_data.set_attribute(analyte_columns, 'auto_scale', True)
 
         analyte_columns = self.raw_data.match_attribute(attribute='data_type',value='ratio')
-        self.raw_data.set_attribute(attribute='units', columns=analyte_columns, values=None)
-        self.raw_data.set_attribute(attribute='use', columns=analyte_columns, values=True)
+        self.raw_data.set_attribute(analyte_columns, 'units', None)
+        self.raw_data.set_attribute(analyte_columns, 'use', True)
         # quantile bounds
-        self.raw_data.set_attribute(attribute='lower_bound', columns=analyte_columns, values=0.05)
-        self.raw_data.set_attribute(attribute='upper_bound', columns=analyte_columns, values=99.5)
+        self.raw_data.set_attribute(analyte_columns, 'lower_bound', 0.05)
+        self.raw_data.set_attribute(analyte_columns, 'upper_bound', 99.5)
         # quantile bounds for differences
-        self.raw_data.set_attribute(attribute='diff_lower_bound', columns=analyte_columns, values=0.05)
-        self.raw_data.set_attribute(attribute='diff_upper_bound', columns=analyte_columns, values=99)
+        self.raw_data.set_attribute(analyte_columns, 'diff_lower_bound', 0.05)
+        self.raw_data.set_attribute(analyte_columns, 'diff_upper_bound', 99)
         # min and max unmasked values
-        self.raw_data.set_attribute(attribute='v_min', columns=analyte_columns, values=None)
-        self.raw_data.set_attribute(attribute='v_max', columns=analyte_columns, values=None)
+        self.raw_data.set_attribute(analyte_columns, 'v_min', None)
+        self.raw_data.set_attribute(analyte_columns, 'v_max', None)
         # linear/log scale
-        self.raw_data.set_attribute(attribute='norm', columns=analyte_columns, values='linear')
-        self.raw_data.set_attribute(attribute='auto_scale', columns=analyte_columns, values=True)
+        self.raw_data.set_attribute(analyte_columns, 'norm', 'linear')
+        self.raw_data.set_attribute(analyte_columns, 'auto_scale', True)
 
         # initialize X and Y axes bounds for plotting and cropping, initially the entire map
         self._xlim = [self.raw_data['X'].min(), self.raw_data['X'].max()]
@@ -384,65 +386,113 @@ class SampleObj:
     def filter_df(self):
         return self._filter_df
 
-    def add_column(self, data_type, column_name, array):
-        """Add a column to the sample object
+    def add_columns(self, data_type, column_names, array, mask=None):
+        """
+        Add one or more columns to the sample object.
 
-        Adds a column to ``SampleObj.processed_data``.
+        Adds one or more columns to `SampleObj.processed_data`. If a mask is provided,
+        the data is placed in the correct rows based on the mask.
 
         Parameters
         ----------
         data_type : str
-            The type of data stored in the column.
-        column_name : str
-            The name of the column to add.  If the column already exists, it overwrites the column.
+            The type of data stored in the columns.
+        column_names : str or list of str
+            The name or names of the columns to add. If a column already exists, it will be overwritten.
         array : numpy.ndarray
-            The data to be added to column_name of the data frame, i.e., ``SampleObj.processed_data[column_name]``.
+            A 1D array (for single column) or 2D array (for multiple columns). The data to be added.
+        mask : numpy.ndarray, optional
+            A boolean mask that indicates which rows in the original data should be filled. If not provided,
+            the length of `array` must match the height of `processed_data`.
 
         Returns
         -------
-        str, None
-            Returns a message (str) if a column is overwritten, otherwise returns ``None``.
+        dict or str
+            Returns a message if a column is overwritten, or a dictionary with column names as keys
+            and "overwritten" or "added" as values if multiple columns are added.
 
         Raises
         ------
         ValueError
-            Valid types are given in ``SampleObj._valid_data_types``.
+            Valid types are given in `SampleObj._valid_data_types`.
         ValueError
-            The length of array must be the same as the height of ``SampleObj.processed_data``.
-        """        
-        # check data type
+            The number of columns in the array must match the length of `column_names` (if multiple columns are being added).
+        ValueError
+            The length of array must match the height of `processed_data` if no mask is provided.
+        ValueError
+            If a mask is provided, its length must match the height of `processed_data`, and the number of `True` values
+            in the mask must match the number of rows in `array`.
+        """
+        # Ensure column_names is a list, even if adding a single column
+        if isinstance(column_names, str):
+            column_names = [column_names]
+            array = np.expand_dims(array, axis=1)  # Convert 1D array to 2D for consistency
+
+        # Check data type
         if data_type not in self._valid_data_types:
             raise ValueError("The (data_type) provided is not valid. Valid types include: " + ", ".join([f"{dt}" for dt in self._valid_data_types]))
 
-        # check column name for duplicate
-        if column_name in self.processed_data.columns:
-            return "Column already exists... overwriting"
-        
-        # check array length
-        if len(array) != self.processed_data.shape[0]:
-            raise ValueError("Length of (array), must be the same as height as the data frame.")
-        
-        self.processed_data[column_name] = array
-        self.processed_data.set_attribute(attribute='data_type', columns=column_name, values=data_type)
-        self.processed_data.set_attribute(attribute='units', columns=column_name, values=None)
-        self.processed_data.set_attribute(attribute='use', columns=column_name, values=False)
-        # quantile bounds
-        self.processed_data.set_attribute(attribute='lower_bound', columns=analyte_columns, values=0.05)
-        self.processed_data.set_attribute(attribute='upper_bound', columns=analyte_columns, values=99.5)
-        # quantile bounds for differences
-        self.processed_data.set_attribute(attribute='diff_lower_bound', columns=analyte_columns, values=0.05)
-        self.processed_data.set_attribute(attribute='diff_upper_bound', columns=analyte_columns, values=99)
-        # min and max unmasked values
-        v_min = self.processed_data[column_name][self.mask].min()
-        v_max = self.processed_data[column_name][self.mask].max()
-        self.processed_data.set_attribute(attribute='v_min', columns=column_name, values=v_min)
-        self.processed_data.set_attribute(attribute='v_max', columns=column_name, values=v_max)
-        # linear/log scale
-        self.processed_data.set_attribute(attribute='norm', columns=column_name, values='linear')
-        self.processed_data.set_attribute(attribute='auto_scale', columns=column_name, values=False)
-        self.processed_data.set_attribute(attribute='negative_method', columns=column_name, values=None)
+        # Check if number of columns in array matches column_names
+        if len(column_names) != array.shape[1]:
+            raise ValueError("The number of columns in (array) must match the number of (column_names).")
 
-        return None
+        # Check array length or mask
+        if mask is None:
+            # No mask, array length must match the height of processed_data
+            if len(array) != self.processed_data.shape[0]:
+                raise ValueError("Length of (array) must be the same as the height of the data frame.")
+        else:
+            # Mask provided, check its validity
+            if len(mask) != self.processed_data.shape[0]:
+                raise ValueError("The length of (mask) must be the same as the number of rows in the data frame.")
+            if array.shape[0] != mask.sum():
+                raise ValueError("The number of rows in (array) must match the number of `True` values in the mask.")
+
+        result = {}
+
+        # Loop through each column
+        for i, column_name in enumerate(column_names):
+            # Check if the column already exists
+            if column_name in self.processed_data.columns:
+                result[column_name] = "overwritten"
+            else:
+                result[column_name] = "added"
+
+            # Create the new column array
+            if mask is None:
+                # No mask: directly use the array for this column
+                self.processed_data[column_name] = array[:, i]
+            else:
+                # Masked: fill a new column initialized with NaNs, then assign the masked rows
+                full_column = np.full(self.processed_data.shape[0], np.nan)
+                full_column[mask] = array[:, i]
+                self.processed_data[column_name] = full_column
+
+            # Set attributes for the newly added column
+            self.processed_data.set_attribute(column_name, 'data_type', data_type)
+            self.processed_data.set_attribute(column_name, 'units', None)
+            self.processed_data.set_attribute(column_name, 'use', False)
+            # Set quantile bounds
+            self.processed_data.set_attribute(column_name, 'lower_bound', 0.05)
+            self.processed_data.set_attribute(column_name, 'upper_bound', 99.5)
+            # Set quantile bounds for differences
+            self.processed_data.set_attribute(column_name, 'diff_lower_bound', 0.05)
+            self.processed_data.set_attribute(column_name, 'diff_upper_bound', 99)
+            # Set min and max unmasked values
+            v_min = self.processed_data[column_name][mask].min() if mask is not None else self.processed_data[column_name].min()
+            v_max = self.processed_data[column_name][mask].max() if mask is not None else self.processed_data[column_name].max()
+            self.processed_data.set_attribute(column_name, 'v_min', v_min)
+            self.processed_data.set_attribute(column_name, 'v_max', v_max)
+            # Set additional attributes
+            self.processed_data.set_attribute(column_name, 'norm', 'linear')
+            self.processed_data.set_attribute(column_name, 'auto_scale', False)
+            self.processed_data.set_attribute(column_name, 'negative_method', None)
+
+        # Return a message if a single column was added, or the result dictionary for multiple columns
+        if len(column_names) == 1:
+            return result[column_names[0]]
+
+        return result
 
     def delete_column(self, column_name):
         """Deletes a column and associated attributes from the AttributeDataFrame.
@@ -467,6 +517,76 @@ class SampleObj:
         # Remove associated attributes, if any
         if column_name in self.processed_data.column_attributes:
             del self.processed_data.column_attributes[column_name]
+
+    def get_attribute_dict(self, attribute_name):
+        """
+        Creates a dictionary from an attribute where the unique values of the attribute becomes the
+        keys and the items are lists with the column names that match each attribute_name.
+
+        Parameters
+        ----------
+        attribute_name : str
+            Name of attribute within the `processed_data.column_attributes` dictionary.
+
+        Returns
+        -------
+        dict
+            A dictionary with attribute_values and columns that match.
+        """
+        return self.processed_data.get_attribute_dict(attribute_name)
+        
+    def swap_xy(self):
+        """Swaps data in a SampleObj."""        
+        self._swap_xy(self.raw_data)
+        self._swap_xy(self.processed_data)
+
+        self.x = self.raw_data['X']
+        self.y = self.raw_data['Y']
+
+    def _swap_xy(self, df):
+        """Swaps X and Y of a dataframe
+
+        Swaps coordinates for all maps in sample dataframe.
+
+        Parameters
+        ----------
+        df : pandas.DataFrame
+            data frame to swap X and Y coordinates
+        """
+        xtemp = df['Y']
+        df['Y'] = df['X']
+        df['X'] = xtemp
+
+        df = df.sort_values(['Y','X'])
+
+    def swap_resolution(self):
+        """Swaps DX and DY for a dataframe
+
+        Recalculates X and Y for a dataframe
+        """
+        X = round(self.raw_data['X']/self.dx)
+        Y = round(self.raw_data['Y']/self.dy)
+
+        Xp = round(self.processed_data['X']/self.dx)
+        Yp = round(self.processed_data['Y']/self.dy)
+
+        dx = self.dx
+        self.dx = self.dy
+        self.dy = dx
+
+        self.parent.lineEditDX.value = self.dx
+        self.parent.lineEditDY.value = self.dy
+
+        self.raw_data['X'] = self.dx*X
+        self.raw_data['Y'] = self.dy*Y
+
+        self.processed_data['X'] = self.dx*Xp
+        self.processed_data['Y'] = self.dy*Yp
+
+        self.parent.compute_map_aspect_ratio()
+        self.parent.update_aspect_ratio_controls()
+
+        self.parent.update_SV()
 
     def reset_crop(self):
         """Reset the data to the new bounds.
@@ -497,7 +617,7 @@ class SampleObj:
         # Generate the ratio column name
         ratio_name = f'{analyte_1} / {analyte_2}'
 
-        self.add_column('ratio',ratio_name,ratio_array)
+        self.add_columns('ratio',ratio_name,ratio_array)
 
     def cluster_data(self):
         # Step 1: Clustering
@@ -592,13 +712,11 @@ class SampleObj:
 
             columns = analyte_columns + ratio_columns
 
-            if hasattr(self, 'processed_data'):
-                attributes_df = self.processed_data.attributes_to_dataframe()
-                negative_method = attributes_df['negative_method'].values
-            else:
-                negative_method = self._negative_method
+            # this needs to be updated to handle different negative handling methods for different fields.
+            # may need to create a copy of processed_data overwriting with raw_data
+            negative_method = self._negative_method
             self.processed_data = copy.deepcopy(self.raw_data)
-            self.processed_data.set_attribute(attribute='negative_method', columns=analyte_columns, values=negative_method)
+            self.processed_data.set_attribute(analyte_columns, 'negative_method', negative_method)
         else:
             columns = field
 
@@ -628,12 +746,12 @@ class SampleObj:
                 columns = columns + col
                 self.compute_ratio(analyte_1, analyte_2)
 
-            self.processed_data.set_attribute('lower_bound', ratios_not_in_raw_data, attribute_df.loc['lower_bound', ratios_not_in_raw_data].tolist())
-            self.processed_data.set_attribute('upper_bound', ratios_not_in_raw_data, attribute_df.loc['upper_bound', ratios_not_in_raw_data].tolist())
-            self.processed_data.set_attribute('diff_upper_bound', ratios_not_in_raw_data, attribute_df.loc['diff_upper_bound', ratios_not_in_raw_data].tolist())
-            self.processed_data.set_attribute('diff_lower_bound', ratios_not_in_raw_data, attribute_df.loc['diff_lower_bound', ratios_not_in_raw_data].tolist())
-            self.processed_data.set_attribute('norm', ratios_not_in_raw_data, attribute_df.loc['norm', ratios_not_in_raw_data].tolist())
-            self.processed_data.set_attribute('auto_scale', ratios_not_in_raw_data, attribute_df.loc['auto_scale', ratios_not_in_raw_data].tolist())
+            self.processed_data.set_attribute(ratios_not_in_raw_data, 'lower_bound', attribute_df.loc['lower_bound', ratios_not_in_raw_data].tolist())
+            self.processed_data.set_attribute(ratios_not_in_raw_data, 'upper_bound', attribute_df.loc['upper_bound', ratios_not_in_raw_data].tolist())
+            self.processed_data.set_attribute(ratios_not_in_raw_data, 'diff_upper_bound', attribute_df.loc['diff_upper_bound', ratios_not_in_raw_data].tolist())
+            self.processed_data.set_attribute(ratios_not_in_raw_data, 'diff_lower_bound', attribute_df.loc['diff_lower_bound', ratios_not_in_raw_data].tolist())
+            self.processed_data.set_attribute(ratios_not_in_raw_data, 'norm', attribute_df.loc['norm', ratios_not_in_raw_data].tolist())
+            self.processed_data.set_attribute(ratios_not_in_raw_data, 'auto_scale', attribute_df.loc['auto_scale', ratios_not_in_raw_data].tolist())
 
         # Compute special fields?
         # -----------------------
@@ -855,7 +973,7 @@ class SampleObj:
                 t_array, _ = yeojohnson(array)
         return t_array
 
-    def update_norm(self, data, sample_id, norm=None, analyte_1=None, analyte_2=None, update=False):
+    def update_norm(self, norm=None, field=None):
         """Update the norm of the data.
 
         Parameters
@@ -864,39 +982,18 @@ class SampleObj:
             Sample identifier
         norm : str, optional
             Data scale method ``linear`` or ``log``, by default None
-        analyte_1 : str, optional
-            Analyte, numerator of ratio if *analyte_2* is not None, by default None
-        analyte_2 : str, optional
-            Denominator of ratio, by default None
+        field : str, optional
+            Field to change the norm, by default None
         update : bool, optional
             Update the scale information of the data, by default False
-        """        
-        if analyte_1: #if normalising single analyte
-            if not analyte_2: #not a ratio
-                self.analyte_info.loc[(self.analyte_info['sample_id']==sample_id)
-                                 & (self.analyte_info['analytes']==analyte_1),'norm'] = norm
-                analytes = [analyte_1]
-            else:
-               self.ratio_info.loc[
-                   (self.ratio_info['analyte_1'] == analyte_1) &
-                   (self.ratio_info['analyte_2'] == analyte_2),'norm'] = norm
-               analytes = [analyte_1+' / '+analyte_2]
+        """ 
 
+        if field is not None: #if normalising single analyte
+            self.processed_data.set_attribute(field,'norm',norm)
         else: #if normalising all analytes in sample
-            self.analyte_info.loc[(self.analyte_info['sample_id']==sample_id),'norm'] = norm
-            analytes = self.analyte_info[self.analyte_info['sample_id']==sample_id]['analytes']
+            self.processed_data.set_attribute(self.processed_data.match_attribute('data_type','analyte'),'norm',norm)
 
-
-        self.prep_data(sample_id, analyte_1, analyte_2)
-
-        #update self.data['norm']
-        for analyte in analytes:
-            self.norm[analyte] = norm
-
-        #if update:
-        # self.update_all_plots()
-        # self.update_plot()
-        self.update_SV()
+        self.prep_data(field)
 
     def get_map_data(self, field, field_type='Analyte', scale_data=False):
         """
@@ -935,8 +1032,6 @@ class SampleObj:
         
         #crop plot if filter applied
         df = self.processed_data[['X','Y']]
-
-        print(f"get_map_data, {field_type}")
 
         match field_type:
             case 'Analyte' | 'Analyte (normalized)':
@@ -999,73 +1094,73 @@ class SampleObj:
         # current_plot_df = current_plot_df[self.data[self.sample_id]['crop_mask']].reset_index(drop=True)
         return df
 
-    def outlier_detection(self, lq=0.0005, uq=99.5, d_lq=9.95 , d_uq=99):
-        """_summary_
+    # def outlier_detection(self, lq=0.0005, uq=99.5, d_lq=9.95 , d_uq=99):
+    #     """_summary_
 
-        _extended_summary_
+    #     _extended_summary_
 
-        Parameters
-        ----------
-        data : _type_
-            _description_
-        lq : float, optional
-            _description_, by default 0.0005
-        uq : float, optional
-            _description_, by default 99.5
-        d_lq : float, optional
-            _description_, by default 9.95
-        d_uq : int, optional
-            _description_, by default 99
+    #     Parameters
+    #     ----------
+    #     data : _type_
+    #         _description_
+    #     lq : float, optional
+    #         _description_, by default 0.0005
+    #     uq : float, optional
+    #         _description_, by default 99.5
+    #     d_lq : float, optional
+    #         _description_, by default 9.95
+    #     d_uq : int, optional
+    #         _description_, by default 99
 
-        Returns
-        -------
-        _type_
-            _description_
-        """        
-        # Ensure data is a numpy array
-        data = np.array(data)
+    #     Returns
+    #     -------
+    #     _type_
+    #         _description_
+    #     """        
+    #     # Ensure data is a numpy array
+    #     data = np.array(data)
 
-        # Shift values to positive concentrations
-        v0 = np.nanmin(data, axis=0) - 0.001
-        data_shifted = np.log10(data - v0)
+    #     # Shift values to positive concentrations
+    #     v0 = np.nanmin(data, axis=0) - 0.001
+    #     data_shifted = np.log10(data - v0)
 
-        # Calculate required quantiles and differences
-        lq_val = np.nanpercentile(data_shifted, lq, axis=0)
-        uq_val = np.nanpercentile(data_shifted, uq, axis=0)
-        sorted_indices = np.argsort(data_shifted, axis=0)
-        sorted_data = np.take_along_axis(data_shifted, sorted_indices, axis=0)
+    #     # Calculate required quantiles and differences
+    #     lq_val = np.nanpercentile(data_shifted, lq, axis=0)
+    #     uq_val = np.nanpercentile(data_shifted, uq, axis=0)
+    #     sorted_indices = np.argsort(data_shifted, axis=0)
+    #     sorted_data = np.take_along_axis(data_shifted, sorted_indices, axis=0)
 
 
-        diff_sorted_data = np.diff(sorted_data, axis=0)
-        # Adding a 0 to the beginning of each column to account for the reduction in size by np.diff
-        diff_sorted_data = np.insert(diff_sorted_data, 0, 0, axis=0)
-        diff_array_uq_val = np.nanpercentile(diff_sorted_data, d_uq, axis=0)
-        diff_array_lq_val = np.nanpercentile(diff_sorted_data, d_lq, axis=0)
-        upper_cond = (sorted_data > uq_val) & (diff_sorted_data > diff_array_uq_val)
+    #     diff_sorted_data = np.diff(sorted_data, axis=0)
+    #     # Adding a 0 to the beginning of each column to account for the reduction in size by np.diff
+    #     diff_sorted_data = np.insert(diff_sorted_data, 0, 0, axis=0)
+    #     diff_array_uq_val = np.nanpercentile(diff_sorted_data, d_uq, axis=0)
+    #     diff_array_lq_val = np.nanpercentile(diff_sorted_data, d_lq, axis=0)
+    #     upper_cond = (sorted_data > uq_val) & (diff_sorted_data > diff_array_uq_val)
 
-        # Initialize arrays for results
-        clipped_data = np.copy(sorted_data)
+    #     # Initialize arrays for results
+    #     clipped_data = np.copy(sorted_data)
 
-        # Upper bound outlier filter
-        for col in range(sorted_data.shape[1]):
-            up_indices = np.where(upper_cond[:, col])[0]
-            if len(up_indices) > 0:
-                uq_outlier_index = up_indices[0]
-                clipped_data[uq_outlier_index:, col] = clipped_data[uq_outlier_index-1, col]
+    #     # Upper bound outlier filter
+    #     for col in range(sorted_data.shape[1]):
+    #         up_indices = np.where(upper_cond[:, col])[0]
+    #         if len(up_indices) > 0:
+    #             uq_outlier_index = up_indices[0]
+    #             clipped_data[uq_outlier_index:, col] = clipped_data[uq_outlier_index-1, col]
 
-        lower_cond = (sorted_data < lq_val) & (diff_sorted_data > diff_array_lq_val)
-        # Lower bound outlier filter
-        for col in range(sorted_data.shape[1]):
-            low_indices = np.where(lower_cond[:, col])[0]
-            if len(low_indices) > 0:
-                lq_outlier_index = low_indices[-1]
-                clipped_data[:lq_outlier_index+1, col] = clipped_data[lq_outlier_index+1, col]
+    #     lower_cond = (sorted_data < lq_val) & (diff_sorted_data > diff_array_lq_val)
+    #     # Lower bound outlier filter
+    #     for col in range(sorted_data.shape[1]):
+    #         low_indices = np.where(lower_cond[:, col])[0]
+    #         if len(low_indices) > 0:
+    #             lq_outlier_index = low_indices[-1]
+    #             clipped_data[:lq_outlier_index+1, col] = clipped_data[lq_outlier_index+1, col]
 
-        clipped_data = np.take_along_axis(clipped_data, np.argsort(sorted_indices, axis=0), axis=0)
-        # Unshift the data
-        clipped_data = 10**clipped_data + v0
+    #     clipped_data = np.take_along_axis(clipped_data, np.argsort(sorted_indices, axis=0), axis=0)
+    #     # Unshift the data
+    #     clipped_data = 10**clipped_data + v0
 
-        return clipped_data
+    #     return clipped_data
 
     # def transform_array(array, negative_method):
     #     """Negative and zero handling
@@ -1125,127 +1220,60 @@ class SampleObj:
             return
 
         # return normalised, filtered data with that will be used for analysis
-        use_analytes = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['use']==True), 'analytes'].values
+        #use_analytes = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['use']==True), 'analytes'].values
+        use_analytes = self.processed_data.match_attributes({'data_type': 'analyte', 'use': True})
 
-        df_filtered = self.data[self.sample_id]['processed_data'][use_analytes]
+        df = self.processed_data[use_analytes]
 
-        #get analyte info to extract choice of scale
-        analyte_info = self.data[self.sample_id]['analyte_info'].loc[
-                                 (self.data[self.sample_id]['analyte_info']['analytes'].isin(use_analytes))]
-        
         #perform scaling for groups of analytes with same norm parameter
-        for norm in analyte_info['norm'].unique():
-            filtered_analytes = analyte_info[(analyte_info['norm'] == norm)]['analytes']
-            filtered_data = df_filtered[filtered_analytes].values
-            if norm == 'log':
+        for norm in ['log', 'logit']:
+            analyte_set = self.processed_data.match_attributes({'data_type': 'analyte', 'use': True, 'norm': norm})
+            if not analyte_set:
+                continue
 
+            tmp_array = df[analyte_set].values
+            if norm == 'log':
                 # np.nanlog handles NaN value
-                df_filtered[filtered_analytes] = np.where(~np.isnan(filtered_data), np.log10(filtered_data))
-                # print(self.processed_analyte_data[sample_id].loc[:10,analytes])
-                # print(self.data[sample_id]['processed_data'].loc[:10,analytes])
+                df[analyte_set] = np.where(~np.isnan(tmp_array), np.log10(tmp_array))
             elif norm == 'logit':
                 # Handle division by zero and NaN values
                 with np.errstate(divide='ignore', invalid='ignore'):
-                    df_filtered[filtered_analytes] = np.where(~np.isnan(filtered_data), np.log10(filtered_data / (10**6 - filtered_data)))
+                    df[analyte_set] = np.where(~np.isnan(tmp_array), np.log10(tmp_array / (10**6 - tmp_array)))
 
         # Combine the two masks to create a final mask
-        nan_mask = df_filtered.notna().all(axis=1)
+        nan_mask = df.notna().all(axis=1)
         
         
-        # mask nan values and add to self.data[self.sample_id]['mask']
-        self.data[self.sample_id]['mask'] = self.data[self.sample_id]['mask']  & nan_mask.values
+        # mask nan values and add to self.mask
+        self.mask = self.mask  & nan_mask.values
 
-        return df_filtered, use_analytes
+        return df, use_analytes
     
-
     # extracts data for scatter plot
-    def get_scatter_values(self,plot_type):
+    def get_vector(self, field_type, field):
         """Creates a dictionary of values for plotting
 
         Returns
         -------
         dict
-            Four return variables, x, y, z, and c, each as a dict with locations for bi- and
-            ternary plots.  Each contain a 'field', 'type', 'label', and 'array'.  x, y and z
-            contain coordinates and c contains the colors
+            Dictionary with array and additional relevant plot data, contains
+            'field', 'type', 'label', and 'array'.
         """
-        value_dict = {
-            'x': {'field': None, 'type': None, 'label': None, 'array': None},
-            'y': {'field': None, 'type': None, 'label': None, 'array': None},
-            'z': {'field': None, 'type': None, 'label': None, 'array': None},
-            'c': {'field': None, 'type': None, 'label': None, 'array': None}
-        }
+        # initialize dictionary
+        value_dict = {'type': field_type, 'field': field, 'label': None, 'array': None}
 
-        match plot_type:
-            case 'histogram':
-                value_dict['x']['field'] = self.comboBoxHistField.currentText()
-                value_dict['x']['type'] = self.comboBoxHistFieldType.currentText()
-                value_dict['y']['field'] = None
-                value_dict['y']['type'] = None
-                value_dict['z']['field'] = None
-                value_dict['z']['type'] = None
-                value_dict['c']['field'] = None
-                value_dict['c']['type'] = None
-            case 'scatter' | 'heatmap' | 'ternary map':
-                value_dict['x']['field'] = self.comboBoxFieldX.currentText()
-                value_dict['x']['type'] = self.comboBoxFieldTypeX.currentText()
-                value_dict['y']['field'] = self.comboBoxFieldY.currentText()
-                value_dict['y']['type'] = self.comboBoxFieldTypeY.currentText()
-                value_dict['z']['field'] = self.comboBoxFieldZ.currentText()
-                value_dict['z']['type'] = self.comboBoxFieldTypeZ.currentText()
-                value_dict['c']['field'] = self.comboBoxColorField.currentText()
-                value_dict['c']['type'] = self.comboBoxColorByField.currentText()
-            case 'pca scatter' | 'pca heatmap':
-                value_dict['x']['field'] = f'PC{self.spinBoxPCX.value()}'
-                value_dict['x']['type'] = 'PCA Score'
-                value_dict['y']['field'] = f'PC{self.spinBoxPCY.value()}'
-                value_dict['y']['type'] = 'PCA Score'
+        if field == '':
+            return value_dict
 
-                value_dict['z']['field'] = None
-                value_dict['z']['type'] = None
-                value_dict['c']['field'] = self.comboBoxColorField.currentText()
-                value_dict['c']['type'] = self.comboBoxColorByField.currentText()
-            case _:
-                print('get_scatter_values(): Not defined for ' + self.comboBoxPlotType.currentText())
-                return
+        # add label
+        unit = self.processed_data.get_attribute(field, 'unit')
+        if unit is None:
+            value_dict['label'] = value_dict['field']
+        else:
+            value_dict['label'] = value_dict['field'] + ' (' + unit + ')'
 
-        for k, v in value_dict.items():
-            # only need to setup when fields exist
-            if v['field'] is None:
-                continue
+        # add array
+        df = self.get_map_data(field=field, field_type=field_type, scale_data=False)
+        value_dict['array'] = df['array'][self.mask].values if not df.empty else []
 
-            match v['type']:
-                case 'Analyte' | 'Analyte (normalized)':
-                    df = self.get_map_data(self.sample_id, field=v['field'], field_type=v['type'], scale_data=False)
-                    v['label'] = v['field'] + ' (' + self.preferences['Units']['Concentration'] + ')'
-                case 'Ratio':
-                    #analyte_1, analyte_2 = v['field'].split('/')
-                    df = self.get_map_data(self.sample_id, field=v['field'], field_type=v['type'], scale_data=False)
-                    v['label'] = v['field']
-                case 'PCA Score' | 'Cluster' | 'Cluster Score':
-                    df = self.get_map_data(self.sample_id, field=v['field'], field_type=v['type'], scale_data=False)
-                    v['label'] = v['field']
-                case 'Special':
-                    df = self.get_map_data(self.sample_id, field=v['field'], field_type=v['type'], scale_data=False)
-                    v['label'] = v['field']
-                case _:
-                    df = pd.DataFrame({'array': []})  # Or however you want to handle this case
-
-            value_dict[k]['array'] = df['array'][self.data[self.sample_id]['mask']].values if not df.empty else []
-
-            # set axes widgets
-            if v['field'] not in self.axis_dict.keys():
-                self.initialize_axis_values(v['type'], v['field'])
-
-            if k == 'c':
-                self.set_color_axis_widgets()
-            else:
-                self.set_axis_widgets(k, v['field'])
-
-            # set lineEdit labels for axes
-            # self.lineEditXLabel.setText(value_dict['x']['label'])
-            # self.lineEditYLabel.setText(value_dict['y']['label'])
-            # self.lineEditZLabel.setText(value_dict['z']['label'])
-            # self.lineEditCbarLabel.setText(value_dict['c']['label'])
-
-        return value_dict['x'], value_dict['y'], value_dict['z'], value_dict['c']
+        return value_dict

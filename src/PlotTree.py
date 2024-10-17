@@ -288,20 +288,20 @@ class PlotTree():
         else:
             hexcolor = '#FFFFC8'
 
-        data = self.parent.data
+        data = self.parent.data[sample_id]
         ref_chem = self.parent.ref_chem
 
         # Un-highlight all leaf in the trees
         self.unhighlight_tree(self.ratio_branch)
         self.unhighlight_tree(self.analyte_branch)
 
-        analytes = data[sample_id].processed_data.match_attribute('data_type','analyte')
-        ratios = data[sample_id].processed_data.match_attribute('data_type','ratio')
+        analytes = data.processed_data.match_attribute('data_type','analyte')
+        ratios = data.processed_data.match_attribute('data_type','ratio')
 
-        data[sample_id].processed_data.set_attribute('use',analytes,False)
+        data.processed_data.set_attribute(analytes,'use',False)
 
         for analyte in analytes + ratios:
-            norm = data[sample_id].processed_data.get_attribute(analyte,'norm')
+            norm = data.processed_data.get_attribute(analyte,'norm')
             if '/' in analyte:
                 analyte_1, analyte_2 = analyte.split(' / ')
                 ratio_name = f"{analyte_1} / {analyte_2}"
@@ -352,10 +352,10 @@ class PlotTree():
 
                 item.setBackground(QBrush(QColor(hexcolor)))
 
-                data[sample_id].processed_data.set_attribute('use',analytes,True)
+                data.processed_data.set_attribute(analytes,'use',True)
 
             if norm_update: #update if analytes are returned from analyte selection window
-                self.parent.update_norm(sample_id, norm, analyte_1=analyte, analyte_2=None)
+                data.update_norm(norm, analyte)
 
     def add_tree_item(self, plot_info):
         """Updates plot selector list and adds plot information data to tree item

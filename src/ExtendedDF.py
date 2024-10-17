@@ -158,7 +158,7 @@ class AttributeDataFrame(pd.DataFrame):
         # Handle multiple columns
         return [self.column_attributes.get(column, {}).get(attribute) for column in columns]
 
-    def _set_attribute(self, attribute, column, value):
+    def _set_attribute(self, column, attribute, value):
         """Set attribute of an AttributeDataFrame
 
         Adds an attribute to a dataframe
@@ -184,16 +184,16 @@ class AttributeDataFrame(pd.DataFrame):
             self.column_attributes[column] = {}
         self.column_attributes[column][attribute] = value
 
-    def set_attribute(self, attribute, columns, values):
+    def set_attribute(self, columns, attribute, values):
         """
         Set an attribute for one or more columns.
         
         Parameters
         ----------
-        attribute : str
-            The name of the attribute to set.
         columns : str or list
             A single column name or a list of column names.
+        attribute : str
+            The name of the attribute to set.
         values : any or list
             A single value to apply to all columns or a list of values for each column.
 
@@ -215,19 +215,19 @@ class AttributeDataFrame(pd.DataFrame):
         """
         # Case where a single column and a single value are provided
         if isinstance(columns, str) and not isinstance(values, list):
-            self._set_attribute(attribute, columns, values)
+            self._set_attribute(columns, attribute, values)
         
         # Case where multiple columns and a list of values are provided
         elif isinstance(values, list):
             if len(columns) != len(values):
                 raise ValueError("Length of columns and values must match when values is a list.")
             for col, val in zip(columns, values):
-                self._set_attribute(attribute, col, val)
+                self._set_attribute(col, attribute, val)
         
         # Case where multiple columns and a single value are provided
         else:
             for col in columns:
-                self._set_attribute(attribute, col, values)
+                self._set_attribute(col, attribute, values)
     
     def match_attribute(self, attribute, value):
         """
@@ -266,6 +266,36 @@ class AttributeDataFrame(pd.DataFrame):
         """
         return [col for col, attrs in self.column_attributes.items()
                 if all(attrs.get(attr) == val for attr, val in attributes_dict.items())]
+
+    def get_attribute_dict(self, attribute_name):
+        """
+        Creates a dictionary from an attribute where the unique values of the attribute becomes the
+        keys and the items are lists with the column names that match each attribute_name.
+
+        Parameters
+        ----------
+        attribute_name : str
+            Name of attribute within the `edf.column_attributes` dictionary.
+
+        Returns
+        -------
+        dict
+            A dictionary with attribute_values and columns that match.
+        """
+
+        # Initialize an empty dictionary
+        attribute_dict = {}
+        for k in self.column_attributes.keys():
+            attribute = self.column_attributes[k].get(attribute_name)
+            if attribute is None:
+                attribute = 'none'
+
+            if attribute not in attribute_dict:
+                attribute_dict[attribute] = [k]
+            else:
+                attribute_dict[attribute].append(k)
+        
+        return attribute_dict
 
     def attributes_to_dataframe(self, attributes=None):
         """

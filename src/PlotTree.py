@@ -10,7 +10,7 @@ from src.SortAnalytes import sort_analytes
 # Plot Selector (tree) functions
 # -------------------------------
 class PlotTree():
-    def __init__(self, parent=None):
+    def __init__(self, parent):
 
         self.parent = parent
 
@@ -29,6 +29,7 @@ class PlotTree():
         """Initialize ``self.parent.treeView`` with the top level items."""        
         # create tree
         treeView = self.parent.treeView
+        # hide the header row
         treeView.setHeaderHidden(True)
 
         # Top level branches
@@ -43,11 +44,11 @@ class PlotTree():
         self.calculated_branch = treeView.add_branch(treeView.root_node, 'Calculated Map')
 
         # Set the model to the view and expand the tree
-        self.parent.treeView.expandAll()
+        treeView.expandAll()
         
         # Connect double-click event
         #self.parent.treeView.doubleClicked.connect(treeView.on_double_click)
-        self.parent.treeView.doubleClicked.connect(self.tree_double_click)
+        treeView.doubleClicked.connect(self.tree_double_click)
         
     def add_sample(self, sample_id):
         """Create plot selector tree
@@ -61,32 +62,63 @@ class PlotTree():
         sample_id : str
             Sample name, Defaults to None
         """
-        if sample_id:
-            analyte_branch = self.parent.treeView.branch_exists(self.analyte_branch, sample_id)
-            if not analyte_branch:
-                analyte_branch = self.parent.treeView.add_branch(self.analyte_branch, sample_id)
-            else:
-                return
+        if not sample_id:
+            return
 
-#            norm_sample_id_item = StandardItem(sample_id, 10)
-#            ratio_sample_id_item = StandardItem(sample_id, 10)
-#            norm_ratio_sample_id_item = StandardItem(sample_id, 10)
+        # assign the two objects needed from self.parent
+        data = self.parent.data[sample_id].processed_data
+        treeView = self.parent.treeView
 
-            for analyte in self.parent.data[sample_id].processed_data.match_attribute('data_type','analyte'):
-                leaf = self.parent.treeView.find_leaf(analyte_branch, analyte)
-                if not leaf:
-                    self.parent.treeView.add_leaf(analyte_branch, analyte)
-#                norm_item = StandardItem(analyte)
-#                norm_sample_id_item.appendRow(norm_item)
+        # add sample_id to analyte branch
+        analyte_branch = treeView.branch_exists(self.analyte_branch, sample_id)
+        if not analyte_branch:
+            analyte_branch = treeView.add_branch(self.analyte_branch, sample_id)
+        else:
+            return
 
-#            self.analyte_branch.appendRow(sample_id_item)
-#            self.ratio_branch.appendRow(ratio_sample_id_item)
-#            self.norm_ratio_branch.appendRow(norm_ratio_sample_id_item)
-#            self.norm_analyte_branch.appendRow(norm_sample_id_item)
+        # add sample_id to analyte (normalized) branch
+        norm_analyte_branch = treeView.branch_exists(self.norm_analyte_branch, sample_id)
+        if not norm_analyte_branch:
+            norm_analyte_branch = treeView.add_branch(self.norm_analyte_branch, sample_id)
+        else:
+            return
 
-            # print('\ncreate_tree: analyte_items')
-            # print(self.analyte_branch)
-            # print('\n')
+        # add leaves for analytes
+        for analyte in data.match_attribute('data_type','analyte'):
+            leaf = treeView.find_leaf(analyte_branch, analyte)
+            if not leaf:
+                treeView.add_leaf(analyte_branch, analyte)
+
+            leaf = treeView.find_leaf(norm_analyte_branch, analyte)
+            if not leaf:
+                treeView.add_leaf(norm_analyte_branch, analyte)
+
+        if not data.match_attribute('data_type','ratio'):
+            return
+
+        # add sample_id to ratio branch
+        ratio_branch = treeView.branch_exists(self.ratio_branch, sample_id)
+        if not ratio_branch:
+            ratio_branch = treeView.add_branch(self.ratio_branch, sample_id)
+        else:
+            return
+
+        # add sample_id to ratio (normalized) branch
+        norm_ratio_branch = treeView.branch_exists(self.norm_ratio_branch, sample_id)
+        if not norm_ratio_branch:
+            norm_ratio_branch = treeView.add_branch(self.norm_ratio_branch, sample_id)
+        else:
+            return
+
+        # add leaves for ratios
+        for ratio in data.match_attribute('data_type','ratio'):
+            leaf = treeView.find_leaf(ratio_branch, ratio)
+            if not leaf:
+                treeView.add_leaf(ratio_branch, ratio)
+
+            leaf = treeView.find_leaf(norm_ratio_branch, ratio)
+            if not leaf:
+                treeView.add_leaf(norm_ratio_branch, ratio)
     
     def apply_sort(self, action, method=None):
         """Sorts raw_data and processed_data
@@ -105,46 +137,37 @@ class PlotTree():
             self.sort_method = method
 
         data = self.parent.data[self.parent.sample_id]
+        treeView = self.parent.treeView
 
         # retrieve analyte_list
         analyte_list = data.processed_data.match_attribute('data_type','analyte')
        
         # sort analyte sort based on method chosen by user
-        analyte_list = sort_analytes(method, analyte_list)
-        
-        # sort analyte dataframes in a self.parent.data
-        # Convert the 'analytes' column in DataFrame to a categorical type with the specified order
-        # data[sample_id]['analyte_info']['analytes'] = pd.Categorical(
-        #     data[sample_id]['analyte_info']['analytes'],
-        #     categories=analyte_list,
-        #     ordered=True
-        # )
-        
-        # no longer needed?
-        # Sort the DataFrame by the 'analytes' column
-        #data[sample_id]['analyte_info'] = data[sample_id]['analyte_info'].sort_values('analytes')
+        sorted_analyte_list = sort_analytes(method, analyte_list)
         
         # Ensure all analytes in self.analyte_list are actually columns in the DataFrame
+        # Does this ever happen?
         # This step filters out any items in self.analyte_list that are not columns in the DataFrame
-        columns_to_order = [analyte for analyte in analyte_list if analyte in data.raw_data.columns]
+        #columns_to_order = [analyte for analyte in analyte_list if analyte in data.raw_data.columns]
         
         # Reorder the columns of the DataFrame based on self.analyte_list
-        data.raw_data[columns_to_order] = data.raw_data[columns_to_order]
-        data.processed_data[columns_to_order] = data.processed_data[columns_to_order]
+        data.raw_data.sort_columns(sorted_analyte_list)
+        data.processed_data.sort_columns(sorted_analyte_list)
          
         # Reorder tree items according to the new analyte list
         # Sort the tree branches associated with analytes
-        self.parent.treeView.sort_branch(self.analyte_branch, analyte_list)
-        self.parent.treeView.sort_branch(self.norm_analyte_branch, analyte_list)
+        for sample_id in self.parent.sample_ids:
+            sample_branch = treeView.find_leaf(self.analyte_branch, sample_id)
+            if sample_branch:
+                treeView.sort_branch(sample_branch, sorted_analyte_list)
+
+            norm_sample_branch = treeView.find_leaf(self.norm_analyte_branch, sample_id)
+            if sample_branch:
+                treeView.sort_branch(norm_sample_branch, sorted_analyte_list)
 
         # Sort the tree branches associated with ratios
-        #self.parent.treeView.sort_branch(self.ratio_branch, analyte_list)
-        #self.parent.treeView.sort_branch(self.norm_ratio_branch, analyte_list)
-
-        #self.sort_tree_branch(self.analyte_branch, analyte_list)
-        #self.sort_tree_branch(self.norm_analyte_branch, analyte_list)
-        #self.sort_tree_branch(self.ratio_branch, analyte_list)
-        #self.sort_tree_branch(self.norm_ratio_branch, analyte_list)
+        # maybe later
+        # sort by denominator and then numerator?
 
     def retrieve_plotinfo_from_tree(self, tree_index=None, tree=None, branch=None, leaf=None):
         """Gets the plot_info associated with a tree location
@@ -240,11 +263,8 @@ class PlotTree():
                 if self.parent.toolBox.currentIndex() not in [self.parent.left_tab['sample'], self.parent.left_tab['process'], self.parent.left_tab['polygons'], self.parent.left_tab['profile']]:
                     self.parent.toolBox.setCurrentIndex(self.parent.left_tab['sample'])
 
-
                 # else:
                 #     pass
-
-                
                 
                 # if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
                 #     self.plot_map_mpl(sample_id=branch, field_type=tree, field=leaf)
@@ -263,7 +283,6 @@ class PlotTree():
                 self.parent.add_plotwidget_to_canvas(self.parent.plot_info)
                 # updates comboBoxColorByField and comboBoxColorField comboboxes 
                 self.parent.update_fields(self.parent.plot_info['sample_id'], self.parent.plot_info['plot_type'],self.parent.plot_info['field_type'], self.parent.plot_info['field'])
-
 
     def update_tree(self, norm_update=False):
         """Updates plot selector list and data
@@ -531,7 +550,6 @@ class PlotTree():
             branch_item = tree_items.child(index)
             clear_item_data(branch_item)
 
-    
     def get_plot_info_from_tree(self, model):
         """
         Extract plot_info data from the root of QStandardItemModel as a flat list.
@@ -561,7 +579,6 @@ class PlotTree():
             child = item.child(i)
             if child:
                 self.extract_plot_info(child)  # Process child recursively
-
 
     def create_item_from_data(self,data):
         """Recursively create QStandardItem from data."""

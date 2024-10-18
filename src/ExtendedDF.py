@@ -85,6 +85,7 @@ class AttributeDataFrame(pd.DataFrame):
         
         # Initialize the DataFrame
         super(AttributeDataFrame, self).__init__(data, *args, **kwargs)
+        #self._update_callbacks = {}  # Dictionary to store update callbacks
 
     def __getitem__(self, key):
         result = super().__getitem__(key)
@@ -95,10 +96,44 @@ class AttributeDataFrame(pd.DataFrame):
                 if col in self.column_attributes
             }
         return result
+
+    # # Override __setitem__ to detect when data changes
+    # def __setitem__(self, key, value):
+    #     super().__setitem__(key, value)  # Set the data first
+    #     if isinstance(key, str):  # Single column case
+    #         self._trigger_update_callbacks(key)
+    #     elif isinstance(key, pd.Index):  # Multiple columns case
+    #         for col in key:
+    #             self._trigger_update_callbacks(col)
     
+    # # Trigger registered update callbacks for a column
+    # def _trigger_update_callbacks(self, column_name):
+    #     if column_name in self._update_callbacks:
+    #         for attribute_name, callback in self._update_callbacks[column_name].items():
+    #             # Execute the callback, which updates the attribute
+    #             self.column_attributes[column_name][attribute_name] = callback(self[column_name])
+
+    # # Method to register update callbacks for attributes
+    # def register_update_callback(self, column_name, attribute_name, callback):
+    #     """_summary_
+
+    #     _extended_summary_
+
+    #     Parameters
+    #     ----------
+    #     column_name : _type_
+    #         _description_
+    #     attribute_name : _type_
+    #         _description_
+    #     callback : function
+    #         _description_
+    #     """        
+    #     if column_name not in self._update_callbacks:
+    #         self._update_callbacks[column_name] = {}
+    #     self._update_callbacks[column_name][attribute_name] = callback
+
     def is_attribute(self, column, attribute):
-        """
-        Check if a given attribute exists for the specified column.
+        """Check if a given attribute exists for the specified column.
 
         Parameters
         ----------
@@ -395,3 +430,40 @@ class AttributeDataFrame(pd.DataFrame):
                 new_attribute_df.column_attributes[column] = copy.deepcopy(self.column_attributes[column])
 
         return new_attribute_df
+
+    
+    # Function to reorder both columns and attributes
+    def sort_columns(self, sorted_columns):
+        """Sorts columns and attributes of an AttributeDataFrame object.
+
+        Parameters
+        ----------
+        sorted_columns : list of str
+            List of selected new column order
+
+        Returns
+        -------
+        self
+            For chaining methods.
+        """        
+        # Get the original column order
+        original_order = self.columns.tolist()
+        
+        # Create a new list to hold the sorted columns
+        new_order = original_order.copy()
+
+        # Add the sorted columns first if they exist in original_order
+        j = 0
+        for i, col in enumerate(original_order):
+            if col in sorted_columns:
+                new_order[i] = sorted_columns[j]
+                j += 1
+                if j == len(sorted_columns):
+                    break
+
+        # Reorder the DataFrame and attributes accordingly
+        #self[:] = self.reindex(columns=new_order, copy=False)
+        self.columns = new_order
+        self.column_attributes = {col: self.column_attributes[col] for col in new_order if col in self.column_attributes}
+
+        return self

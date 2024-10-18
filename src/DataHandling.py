@@ -23,6 +23,9 @@ class SampleObj:
     
     Methods
     -------
+
+    Attributes
+    ----------
     update_crop_mask :
         Automatically update the crop_mask whenever crop bounds change.
     reset_crop : 
@@ -32,7 +35,8 @@ class SampleObj:
     outlier_detection :
     transform_array :
     swap_xy :
-
+    raw_data :
+    processed_data
             | 'analyte_info' : (dataframe) -- holds information regarding each analyte in sample id,
                 | 'analytes' (str) -- name of analyte
                 | 'sample_id' (str) -- sample id
@@ -41,8 +45,6 @@ class SampleObj:
                 | 'lower_bound' (float) -- lower bound for autoscaling/scaling
                 | 'd_l_bound' (float) -- difference lower bound for autoscaling
                 | 'd_u_bound' (float) -- difference upper bound for autoscaling
-                | 'v_min' (float) -- max value of analyte
-                | 'v_max' (float) -- min value of analyte
                 | 'auto_scale' (bool) -- indicates whether auto_scaling is switched on for that analyte, use percentile bounds if False
                 | 'use' (bool) -- indicates whether the analyte is being used in the analysis
             | 'ratio_info' : (dataframe) -- holds information  regarding computerd ratios 
@@ -53,8 +55,6 @@ class SampleObj:
                 | 'lower_bound' (float) --  lower bound for autoscaling/scaling
                 | 'd_l_bound' (float) --  difference lower bound for autoscaling
                 | 'd_u_bound' (float) --  difference upper bound for autoscaling
-                | 'v_min' (float) -- max value of analyte
-                | 'v_max' (float) -- min value of analyte
                 | 'auto_scale' (bool) -- indicates whether auto_scaling is switched on for that analyte, use percentile bounds if False
                 | 'use' (bool) -- indicates whether the analyte is being used in the analysis
             
@@ -205,9 +205,6 @@ class SampleObj:
         # quantile bounds for differences
         self.raw_data.set_attribute(analyte_columns, 'diff_lower_bound', 0.05)
         self.raw_data.set_attribute(analyte_columns, 'diff_upper_bound', 99)
-        # min and max unmasked values
-        self.raw_data.set_attribute(analyte_columns, 'v_min', None)
-        self.raw_data.set_attribute(analyte_columns, 'v_max', None)
         # linear/log scale
         self.raw_data.set_attribute(analyte_columns, 'norm', 'linear')
         self.raw_data.set_attribute(analyte_columns, 'auto_scale', True)
@@ -221,9 +218,6 @@ class SampleObj:
         # quantile bounds for differences
         self.raw_data.set_attribute(analyte_columns, 'diff_lower_bound', 0.05)
         self.raw_data.set_attribute(analyte_columns, 'diff_upper_bound', 99)
-        # min and max unmasked values
-        self.raw_data.set_attribute(analyte_columns, 'v_min', None)
-        self.raw_data.set_attribute(analyte_columns, 'v_max', None)
         # linear/log scale
         self.raw_data.set_attribute(analyte_columns, 'norm', 'linear')
         self.raw_data.set_attribute(analyte_columns, 'auto_scale', True)
@@ -491,8 +485,6 @@ class SampleObj:
             # Set min and max unmasked values
             v_min = self.processed_data[column_name][mask].min() if mask is not None else self.processed_data[column_name].min()
             v_max = self.processed_data[column_name][mask].max() if mask is not None else self.processed_data[column_name].max()
-            self.processed_data.set_attribute(column_name, 'v_min', v_min)
-            self.processed_data.set_attribute(column_name, 'v_max', v_max)
             # Set additional attributes
             self.processed_data.set_attribute(column_name, 'norm', 'linear')
             self.processed_data.set_attribute(column_name, 'auto_scale', False)
@@ -962,12 +954,12 @@ class SampleObj:
             Transformed data
         """
         match negative_method.lower():
-            case 'ignore negative values':
+            case 'ignore negatives':
                 # do nothing, the values remain unchanged
                 t_array = np.copy(array)
                 t_array = np.where(t_array > 0, t_array, np.nan)
 
-            case 'minimum positive value':
+            case 'minimum positive':
                 # shift all negative values to be a 
                 min_positive_value = np.nanmin(array[array > 0])
                 t_array = np.where(array < 0, min_positive_value, array)
@@ -986,7 +978,7 @@ class SampleObj:
                     max_val = np.nanmax(array)
                     t_array = (max_val * (array - min_val)) / (max_val - min_val) if min_val < 0 else np.copy(array)
 
-            case 'yeo-johnson transformation':
+            case 'yeo-johnson transform':
                 t_array, _ = yeojohnson(array)
         return t_array
 
@@ -1012,7 +1004,7 @@ class SampleObj:
 
         self.prep_data(field)
 
-    def get_map_data(self, field, field_type='Analyte', scale_data=False):
+    def get_map_data(self, field, field_type='Analyte', scale_data=False, ref_chem=None):
         """
         Retrieves and processes the mapping data for the given sample and analytes, then plots the result if required.
 
@@ -1071,7 +1063,7 @@ class SampleObj:
                 
                 # normalize
                 if 'normalized' in field_type:
-                    refval = self.ref_chem[re.sub(r'\d', '', field).lower()]
+                    refval = ref_chem[re.sub(r'\d', '', field).lower()]
                     df['array'] = df['array'] / refval
 
             case 'Ratio' | 'Ratio (normalized)':
@@ -1084,15 +1076,15 @@ class SampleObj:
                 
                 # normalize
                 if 'normalized' in field_type:
-                    refval_1 = self.ref_chem[re.sub(r'\d', '', field_1).lower()]
-                    refval_2 = self.ref_chem[re.sub(r'\d', '', field_2).lower()]
+                    refval_1 = ref_chem[re.sub(r'\d', '', field_1).lower()]
+                    refval_2 = ref_chem[re.sub(r'\d', '', field_2).lower()]
                     df['array'] = df['array'] * (refval_2 / refval_1)
 
                 #get norm value
-                norm = self.ratio_info.loc['norm',(self.ratio_info['analyte_1']==field_1 & self.ratio_info['analyte_2']==field_2)].iloc[0]
+                norm = self.processed_data.column_attributes['field']['norm']
 
                 if norm == 'log' and scale_data:
-                    df ['array'] = np.where(~np.isnan(df['array']), np.log10(df ['array']))
+                    df ['array'] = np.where(~np.isnan(df['array']), np.log10(df['array']))
                     # print(self.processed_analyte_data[sample_id].loc[:10,analytes])
                     # print(self.processed_data.loc[:10,analytes])
                 elif norm == 'logit' and scale_data:
@@ -1267,7 +1259,7 @@ class SampleObj:
         return df, use_analytes
     
     # extracts data for scatter plot
-    def get_vector(self, field_type, field):
+    def get_vector(self, field_type, field, ref_chem=None):
         """Creates a dictionary of values for plotting
 
         Returns
@@ -1290,7 +1282,7 @@ class SampleObj:
             value_dict['label'] = value_dict['field'] + ' (' + unit + ')'
 
         # add array
-        df = self.get_map_data(field=field, field_type=field_type, scale_data=False)
+        df = self.get_map_data(field=field, field_type=field_type, scale_data=False, ref_chem=ref_chem)
         value_dict['array'] = df['array'][self.mask].values if not df.empty else []
 
         return value_dict

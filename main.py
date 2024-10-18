@@ -170,69 +170,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             with relevant data.  The dictionary is nested with the first level keys defined by the sample ID.
             
             [*sample_id*] : (str) -- sample identifier
-                | 'analyte_info' : (dataframe) -- holds information regarding each analyte in sample id,
-                    | 'analytes' (str) -- name of analyte
-                    | 'sample_id' (str) -- sample id
-                    | 'norm' (str) -- type of normalisation used(linear,log,logit)
-                    | 'upper_bound' (float) -- upper bound for autoscaling/scaling
-                    | 'lower_bound' (float) -- lower bound for autoscaling/scaling
-                    | 'd_l_bound' (float) -- difference lower bound for autoscaling
-                    | 'd_u_bound' (float) -- difference upper bound for autoscaling
-                    | 'v_min' (float) -- max value of analyte
-                    | 'v_max' (float) -- min value of analyte
-                    | 'auto_scale' (bool) -- indicates whether auto_scaling is switched on for that analyte, use percentile bounds if False
-                    | 'use' (bool) -- indicates whether the analyte is being used in the analysis
-                | 'ratio_info' : (dataframe) -- holds information  regarding computerd ratios 
-                    | 'analyte_1' (str) -- name of analyte at numerator of ratio
-                    | 'analyte_2' (str) -- name of analyte at denominator of ratio
-                    | 'norm' (str) -- type of normalisation used(linear,log,logit)
-                    | 'upper_bound' (float) --  upper bound for autoscaling/scaling
-                    | 'lower_bound' (float) --  lower bound for autoscaling/scaling
-                    | 'd_l_bound' (float) --  difference lower bound for autoscaling
-                    | 'd_u_bound' (float) --  difference upper bound for autoscaling
-                    | 'v_min' (float) -- max value of analyte
-                    | 'v_max' (float) -- min value of analyte
-                    | 'auto_scale' (bool) -- indicates whether auto_scaling is switched on for that analyte, use percentile bounds if False
-                    | 'use' (bool) -- indicates whether the analyte is being used in the analysis
                 
-                | 'crop' : () --
-                | 'x_max' : () --
-                | 'x_min' : () --
-                | 'y_max' : () --
-                | 'y_min' : () --
-                | 'crop_x_max' : () --
-                | 'crop_x_min' : () --
-                | 'crop_y_max' : () --
-                | 'crop_y_min' : () --
-                | 'processed data': () --
-                | 'raw_data': () -- 
-                | 'cropped_raw_data': () --
-                
-            | 'ratio_info' : (dataframe) --
             | 'crop' : () --
             | 'x_max' : () --
             | 'x_min' : () --
             | 'y_max' : () --
             | 'y_min' : () --
-            | 'crop_x_max' : () --
-            | 'crop_x_min' : () --
-            | 'crop_y_max' : () --
-            | 'crop_y_min' : () --
-            | 'processed data': () --
-            | 'raw_data': () -- 
-            | 'cropped_raw_data': () -- 
-            | 'raw data' : (pandas.DataFrame) --
-            | 'x_min' : (float) -- minimum x of full data
-            | 'x_max' : (float) -- maximum x of full data
-            | 'y_min' : (float) -- minimum y of full data
-            | 'y_max' : (float) -- maximum y of full data
-            | 'crop_x_min' : (float) -- minimum x of cropped data
-            | 'crop_x_max' : (float) -- maximum x of cropped data
-            | 'crop_x_min' : (float) -- minimum y of cropped data
-            | 'crop_x_max' : (float) -- maximum y of cropped data
             | 'norm' : () --
             | 'analysis data' : (pandas.DataFrame) --
-            | 'cropped_raw_data' : (pandas.DataFrame) --
             ['filter_info'] : (pandas.DataFrame) -- stores filters for each sample
                 | 'field_type' : (str) -- field type
                 | 'field' : (str) -- name of field
@@ -662,7 +607,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxCorrelationMethod.activated.connect(self.correlation_method_callback)
         self.checkBoxCorrelationSquared.stateChanged.connect(self.correlation_squared_callback)
 
-        self.comboBoxNegativeMethod.addItems(['Ignore negative values', 'Minimum positive value', 'Gradual shift', 'Yeo-Johnson transformation'])
+        self.comboBoxNegativeMethod.addItems(['Ignore negatives', 'Minimum positive', 'Gradual shift', 'Yeo-Johnson transform'])
         self.comboBoxNegativeMethod.activated.connect(self.update_neg_handling)
 
         # Selecting analytes
@@ -762,7 +707,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolButtonAddFilter.clicked.connect(lambda: self.apply_field_filters())
 
         self.comboBoxFilterFieldType.activated.connect(lambda: self.update_field_combobox(self.comboBoxFilterFieldType, self.comboBoxFilterField))
-        self.comboBoxFilterField.activated.connect(self.update_filter_values)
+        self.comboBoxFilterField.currentIndexChanged.connect(self.update_filter_values)
 
         self.toolButtonFilterUp.clicked.connect(lambda: self.table_fcn.move_row_up(self.tableWidgetFilters))
         self.toolButtonFilterUp.clicked.connect(lambda: self.apply_field_filters(update_plot=True))
@@ -1873,10 +1818,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Sets all QComboBox to a common normalizing reference.
 
-        :param comboBox1: user changed QComboBox
-        :type comboBox1: QComboBox
-        :param comboBox2: QComboBox to update
-        :type comboBox2: QComboBox
+        Parameters
+        ----------
+        comboBox1 : QComboBox
+            user changed QComboBox
+        comboBox2 : QComboBox
+            QComboBox to update
         """
         comboBox2.setCurrentIndex(comboBox1.currentIndex())
 
@@ -2554,7 +2501,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         sample_id = self.plot_info['sample_id']
         field_type = self.comboBoxColorByField.currentText()
         field = self.comboBoxColorField.currentText()
-        current_plot_df = self.get_map_data(sample_id, field, field_type=field_type)
+        current_plot_df = self.get_map_data(field, field_type)
         
         self.data[self.sample_id].mask = self.data[self.sample_id].mask[self.data[self.sample_id].crop_mask]
         self.data[self.sample_id].polygon_mask = self.data[self.sample_id].polygon_mask[self.data[self.sample_id].crop_mask]
@@ -2650,17 +2597,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         data = self.data[self.sample_id].processed_data
 
-        self.lineEditFMin.value = data.get_attribute(field, 'v_min')
+        self.lineEditFMin.value = data[field].min()
         self.callback_lineEditFMin()
-        self.lineEditFMax.value = data.get_attribute(field,'v_max')
+        self.lineEditFMax.value = data[field].max()
         self.callback_lineEditFMax()
 
     def callback_lineEditFMin(self):
         """Updates ``MainWindow.doubleSpinBoxFMinQ.value`` when ``MainWindow.lineEditFMin.value`` is changed"""        
         if self.sample_id == '':
             return
+
+        if (self.comboBoxFilterField.currentText() == '') or (self.comboBoxFilterFieldType.currentText() == ''):
+            return
+
         try:
-            array = self.get_map_data(self.sample_id, self.comboBoxFilterField.currentText(), field_type=self.comboBoxFilterFieldType.currentText())['array'].dropna()
+            array = self.get_map_data(self.comboBoxFilterField.currentText(), self.comboBoxFilterFieldType.currentText())['array'].dropna()
         except:
             return
 
@@ -2673,8 +2624,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.sample_id == '':
             return
 
+        if (self.comboBoxFilterField.currentText() == '') or (self.comboBoxFilterFieldType.currentText() == ''):
+            return
+
         try:
-            array = self.get_map_data(self.sample_id, self.comboBoxFilterField.currentText(), field_type=self.comboBoxFilterFieldType.currentText())['array'].dropna()
+            array = self.get_map_data(self.comboBoxFilterField.currentText(), self.comboBoxFilterFieldType.currentText())['array'].dropna()
         except:
             return
 
@@ -2684,13 +2638,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def callback_doubleSpinBoxFMinQ(self):
         """Updates ``MainWindow.lineEditFMin.value`` when ``MainWindow.doubleSpinBoxFMinQ.value`` is changed"""        
-        array = self.get_map_data(self.sample_id, self.comboBoxFilterField.currentText(), field_type=self.comboBoxFilterFieldType.currentText())['array'].dropna()
+        array = self.get_map_data(self.comboBoxFilterField.currentText(), self.comboBoxFilterFieldType.currentText())['array'].dropna()
 
         self.lineEditFMin.value = np.percentile(array, self.doubleSpinBoxFMinQ.value())
 
     def callback_doubleSpinBoxFMaxQ(self):
         """Updates ``MainWindow.lineEditFMax.value`` when ``MainWindow.doubleSpinBoxFMaxQ.value`` is changed"""        
-        array = self.get_map_data(self.sample_id, self.comboBoxFilterField.currentText(), field_type=self.comboBoxFilterFieldType.currentText())['array'].dropna()
+        array = self.get_map_data(self.comboBoxFilterField.currentText(), self.comboBoxFilterFieldType.currentText())['array'].dropna()
 
         self.lineEditFMax.value = np.percentile(array, self.doubleSpinBoxFMaxQ.value())
 
@@ -2891,7 +2845,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # by creating a mask based on min and max of the corresponding filter analytes
         for index, filter_row in self.data[sample_id]['filter_info'].iterrows():
             if filter_row['use'].any():
-                analyte_df = self.get_map_data(sample_id=sample_id, field=filter_row['field'], field_type=filter_row['field_type'])
+                analyte_df = self.get_map_data(filter_row['field'], filter_row['field_type'])
                 
                 operator = filter_row['operator']
                 if operator == 'and':
@@ -4534,7 +4488,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         #current_plot_df = pd.DataFrame()
         if field not in ['X','Y']:
-            df = self.data[self.sample_id].get_map_data(field, field_type)
+            df = self.get_map_data(field, field_type)
             array = df['array'][self.data[self.sample_id].mask].values if not df.empty else []
         else:
             # field 'X' and 'Y' require separate extraction
@@ -4552,8 +4506,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     else:
                         self.data[self.sample_id].axis_dict[field]['label'] = f"$^{{{mass}}}${symbol}$_N$ ({self.preferences['Units']['Concentration']})"
 
-                    #amin = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes']==field),'v_min'].values[0]
-                    #amax = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes']==field),'v_max'].values[0]
                     scale = self.data[self.sample_id].processed_data.get_attribute(field, 'norm')
                     #['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes']==field),'norm'].values[0]
 
@@ -5171,6 +5123,29 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     # -------------------------------------
     # General plot functions
     # -------------------------------------
+    def get_map_data(self, field, field_type, scale_data=False):
+        """Wrapper for ``DataHandling.get_map_data`` that ensure proper call from ``MainWindow`` methods.
+
+        Parameters
+        ----------
+        field : str
+            Field requested.
+        field_type : str
+            Field type, if normalized it will include reference chemistry in call.
+        scale_data : bool, optional
+            Sets whether to return the data scaled (linear, log, etc.), by default False
+
+        Returns
+        -------
+        df : pandas.DataFrame
+        """        
+        if 'normalized' in field_type:
+            df = self.data[self.sample_id].get_map_data(field, field_type, scale_data=scale_data, ref_chem=self.ref_chem)
+        else:
+            df = self.data[self.sample_id].get_map_data(field, field_type, scale_data=scale_data)
+
+        return df
+
     def update_SV(self):
         """Updates current plot (not saved to plot selector)
 
@@ -5545,7 +5520,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             row = i // ncol
 
             # get data for current analyte
-            current_plot_df = self.get_map_data(self.sample_id, field=analyte, field_type='Analyte')
+            current_plot_df = self.get_map_data(analyte, 'Analyte')
             reshaped_array = np.reshape(current_plot_df['array'].values, self.data[self.sample_id].array_size, order=self.data[self.sample_id].order)
 
             # add image to canvas
@@ -5600,19 +5575,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.toolButtonPan.setChecked(False)
             self.toolButtonZoom.setChecked(False)
             self.toolButtonAnnotate.setChecked(False)
+
             if isinstance(canvas,mplc.MplCanvas):
                 canvas.restore_view()
+
             elif isinstance(canvas,GraphicsLayoutWidget):
                 canvas.getItem(0, 0).getViewBox().autoRange()
 
         if function == 'pan':
             self.toolButtonZoom.setChecked(False)
             self.toolButtonAnnotate.setChecked(False)
+
             if isinstance(canvas,mplc.MplCanvas):
                 # Toggle pan mode in Matplotlib
                 self.mpl_toolbar.pan()
                 print(self.mpl_toolbar)
                 #canvas.figure.canvas.toolbar.pan()
+
             elif isinstance(canvas,GraphicsLayoutWidget):
                 # Enable or disable panning
                 canvas.getItem(0, 0).getViewBox().setMouseMode(ViewBox.PanMode if enable else ViewBox.RectMode)
@@ -5620,6 +5599,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if function == 'zoom':
             self.toolButtonPan.setChecked(False)
             self.toolButtonAnnotate.setChecked(False)
+
             if isinstance(canvas,mplc.MplCanvas):
                 # Toggle zoom mode in Matplotlib
                 self.mpl_toolbar.zoom()  # Assuming your Matplotlib canvas has a toolbar with a zoom function
@@ -5643,6 +5623,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if function == 'preference':
             if isinstance(canvas,mplc.MplCanvas):
                 self.mpl_toolbar.edit_parameters()
+
             elif isinstance(canvas,GraphicsLayoutWidget):
                 # Assuming it's about showing/hiding axes
                 if enable:
@@ -5655,6 +5636,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if function == 'axes':
             if isinstance(canvas,mplc.MplCanvas):
                 self.mpl_toolbar.configure_subplots()
+
             elif isinstance(canvas,GraphicsLayoutWidget):
                 # Assuming it's about showing/hiding axes
                 if enable:
@@ -5668,6 +5650,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.toolButtonPan.setChecked(False)
             self.toolButtonZoom.setChecked(False)
             self.toolButtonAnnotate.setChecked(False)
+
             if isinstance(canvas,mplc.MplCanvas):
                 self.pop_figure = mplc.MplDialog(self,canvas,self.plot_info['plot_name'])
                 self.pop_figure.show()
@@ -5676,7 +5659,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.update_SV()
 
         if function == 'save':
-            
             if isinstance(canvas,mplc.MplCanvas):
                 self.mpl_toolbar.save_figure()
             elif isinstance(canvas,GraphicsLayoutWidget):
@@ -5691,41 +5673,34 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         canvas = self.sv_widget #get the widget in SV layout
         method = action.text()
         if method == 'Figure':
-            
             if isinstance(canvas, mplc.MplCanvas):
                 self.mpl_toolbar.save_figure()
+
             elif isinstance(canvas,GraphicsLayoutWidget):
                 # Save functionality for pyqtgraph
                 export = exportDialog.ExportDialog(canvas.getItem(0, 0).scene())
                 export.show(canvas.getItem(0, 0).getViewBox())
+
         elif method == 'Data':
             if self.plot_info:
                 sample_id = self.plot_info['sample_id']
                 plot_type = self.plot_info['plot_type']
                 
-                
                 match plot_type:
                     case 'analyte map':
-                        
                         field_type = self.plot_info['field_type']
                         field = self.plot_info['field']
-                        save_data = self.get_map_data(self.sample_id, field, field_type=field_type)
+                        save_data = self.get_map_data(field, field_type)
                     case 'gradient map':
                         field_type = self.plot_info['field_type']
                         field = self.plot_info['field']
-                        save_data = self.get_map_data(self.sample_id, field, field_type=field_type)
+                        save_data = self.get_map_data(field, field_type)
                         filtered_image = self.noise_red_array
                     case 'cluster':
-                        save_data= self.data[self.sample_id]['computed_data'][plot_type]
-                        
+                        save_data= self.data[self.sample_id].processed_data[field]
                     case _:
                         save_data = self.plot_info['data']
                     
-                
-                
-                
-                
-                
             #open dialog to get name of file
             file_name, _ = QFileDialog.getSaveFileName(self, "Save File", "", "CSV Files (*.csv);;All Files (*)")
             if file_name:
@@ -5976,7 +5951,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.set_style_widgets(plot_type='analyte map',style=style)
 
         # get data for current map
-        map_df = self.data[self.sample_id].get_map_data(field, field_type=field_type, scale_data=True)
+        map_df = self.data[self.sample_id].get_map_data(field, field_type, scale_data=True)
 
         array_size = self.data[self.sample_id].array_size
         aspect_ratio = self.data[self.sample_id].aspect_ratio
@@ -6073,7 +6048,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         style = self.styles['analyte map']
 
         # get data for current map
-        map_df = self.get_map_data(sample_id, field, field_type=field_type, scale_data=False)
+        map_df = self.get_map_data(field, field_type, scale_data=False)
 
         # store map_df to save_data if data needs to be exported
         self.save_data = map_df
@@ -6288,7 +6263,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         canvas.axes.clear()
 
         # get the data for computing correlations
-        df_filtered, analytes = self.get_processed_data()
+        df_filtered, analytes = self.data[self.sample_id].get_processed_data()
 
         # Calculate the correlation matrix
         method = self.comboBoxCorrelationMethod.currentText().lower()
@@ -6405,11 +6380,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         if not self.update_bins:
             return
+
+        if (self.comboBoxHistFieldType.currentText() == '') or (self.comboBoxHistField.currentText() == ''):
+            return
+
         #print('histogram_update_bin_width')
         self.update_bins = False
 
         # get currently selected data
-        current_plot_df = self.data[self.sample_id].get_map_data(self.comboBoxHistField.currentText(), field_type=self.comboBoxHistFieldType.currentText())
+        current_plot_df = self.get_map_data(self.comboBoxHistField.currentText(), self.comboBoxHistFieldType.currentText())
 
         # update bin width
         range = (np.nanmax(current_plot_df['array']) - np.nanmin(current_plot_df['array']))
@@ -6433,7 +6412,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_bins = False
 
         # get currently selected data
-        map_df = self.get_map_data(self.sample_id, field=self.comboBoxHistField.currentText(), analysis_type=self.comboBoxHistFieldType.currentText())
+        map_df = self.get_map_data(self.comboBoxHistField.currentText(), self.comboBoxHistFieldType.currentText())
 
         # update n bins
         self.spinBoxBinWidth.setValue( int((np.nanmax(map_df['array']) - np.nanmin(map_df['array'])) / self.spinBoxBinWidth.value()) )
@@ -6523,7 +6502,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #self.widgetHistView.show()
 
     def plot_histogram(self):
-        """Plots a histogramn the canvas window"""
+        """Plots a histogramn in the canvas window"""
         
         plot_data = None
         #print('plot histogram')
@@ -6561,7 +6540,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             edges = np.linspace(10**xmin, 10**xmax, nbins)
 
-        print(edges)
+        #print(edges)
 
         # histogram style
         lw = style['Lines']['LineWidth']
@@ -7575,7 +7554,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # add scalebar
         self.add_scalebar(canvas.axes)
 
-        return canvas, self.data[self.sample_id]['computed_data'][plot_type][field]
+        return canvas, self.data[self.sample_id].processed_data[field]
 
     def plot_cluster_map(self):
         """Produces a map of cluster categories
@@ -8650,7 +8629,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 return
 
         # get Auto scale parameters and neg handling from analyte info
-        parameters = self.data[sample_id].processed_data.column_attributes[field]
+        data = self.data[self.sample_id].processed_data
+        parameters = data.column_attributes[field]
 
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
             auto_scale = parameters['auto_scale']
@@ -8677,8 +8657,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.comboBoxNegativeMethod.setCurrentIndex(index)
             
             # Update filter UI 
-            self.lineEditFMin.value = parameters['v_min']
-            self.lineEditFMax.value = parameters['v_max']
+            self.lineEditFMin.value = data[field].min()
+            self.lineEditFMax.value = data[field].max()
             self.callback_lineEditFMin()
             self.callback_lineEditFMax()
 

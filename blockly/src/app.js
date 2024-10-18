@@ -2,19 +2,27 @@
 import * as Blockly from 'blockly/core';
 // Import a message file.
 import * as En from 'blockly/msg/en';
+import 'blockly/blocks';  // Import default blocks
+import {pythonGenerator} from 'blockly/python';
+import { sample_ids } from './globals';
 import './custom_blocks';  // Import custom blocks
 import './python_generators';  // Import python generators
 import './helper_functions';  // Import helper functions
+
+
 Blockly.setLocale(En);  // Set the locale to English
+
 var workspace = Blockly.inject('blocklyDiv',
     {toolbox: document.getElementById('toolbox')});
 
+window.workspace = workspace;
+window.Blockly = Blockly
 new QWebChannel(qt.webChannelTransport, function(channel) {
     window.blocklyBridge = channel.objects.blocklyBridge;
 
     function sendCodeToPython() {
         // Generate Python code from Blockly
-        var code = python.pythonGenerator.workspaceToCode(workspace);
+        var code = pythonGenerator.workspaceToCode(workspace);
         
         // Send the code to Python via WebChannel
         if (window.blocklyBridge) {
@@ -29,9 +37,9 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
         let code = '';
         //while (block) {
             // Ensure the Python generator is initialized for this workspace
-            python.pythonGenerator.init(workspace);
+            pythonGenerator.init(workspace);
             // Generate code for the block
-            code = python.pythonGenerator.blockToCode(block) ;
+            code = pythonGenerator.blockToCode(block) ;
             //block = block.getNextBlock();  // Move to the next block
         //}
         return code;

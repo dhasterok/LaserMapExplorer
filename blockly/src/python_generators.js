@@ -3,6 +3,7 @@
  ******************************/
 // Import a generator.
 import {pythonGenerator} from 'blockly/python';
+import { sample_ids } from './globals';
 // Python Generator: Load Directory
 pythonGenerator.forBlock['load_directory'] = function(block, generator) {
     var dir_name = generator.quote_(block.getFieldValue('DIR'));
@@ -16,7 +17,7 @@ pythonGenerator.forBlock['load_directory'] = function(block, generator) {
 // Python Generator: Select Samples
 pythonGenerator.forBlock['select_samples'] = function(block, generator) {
     var sample_id = generator.quote_(block.getFieldValue('SAMPLE_ID'));
-    var code = 'self.parent.sample_id =' + sample_id + '\n';
+    var code = 'self.parent.change_sample(self.parent.sample_ids.index(' + sample_id + ')\n';
     return code;
 };
 

@@ -2,38 +2,32 @@
  * Helper Functions
  ******************************/
 import * as Blockly from 'blockly/core';
+import { sample_ids, updateSampleIds } from './globals';
+import {enableSampleIDsBlockFunction} from './custom_blocks'
 // Function: Update Sample Dropdown with IDs
 function updateSampleDropdown(sampleIds) {
-    storeSampleIdsAsList(sampleIds);  // Store sample IDs as Blockly list
+    // Step 1: Store sample IDs in the global variable
+    updateSampleIds(sampleIds);
+    // Step 2: Enable dependent blocks now that sample_ids is populated
+    enableSampleIDsBlockFunction();
+    // Step 3: Update the dropdown options in the 'select_samples' block
+    const dropdownOptions = sampleIds.map(id => [id, id]);  // Convert sample IDs to dropdown format
 
-    const dropdownOptions = sampleIds.map(id => [id, id]);
-    Blockly.getMainWorkspace().getAllBlocks().forEach(function(block) {
-        if (block.type === 'select_samples') {
-            block.getField('SAMPLE_IDS').menuGenerator_ = dropdownOptions;  // Update dropdown options dynamically
-            block.getField('SAMPLE_IDS').setValue(dropdownOptions[0][0]);  // Set default value
-        }
-    });
-    console.log("Dropdown updated with sample IDs:", dropdownOptions);
-}
-
-// Global variable to store sample IDs
-let sample_ids = [];
-
-// Function: Update the sample_ids list and refresh the dropdown
-function updateSampleIds(sampleIds) {
-    // Update the global sample_ids variable
-    sample_ids = sampleIds;
-
-    // Refresh all blocks in the workspace that use the select_samples dropdown
+    // Iterate through all blocks and update the 'select_samples' block dropdown
     Blockly.getMainWorkspace().getAllBlocks().forEach(function(block) {
         if (block.type === 'select_samples') {
             const dropdownField = block.getField('SAMPLE_IDS');
             if (dropdownField) {
-                dropdownField.menuGenerator_ = sampleIds.map(id => [id, id]); // Update dropdown options dynamically
-                dropdownField.setValue(sampleIds.length ? sampleIds[0] : 'NONE'); // Set default value
+                // Update the dropdown options dynamically
+                dropdownField.menuGenerator_ = dropdownOptions;
+                dropdownField.setValue(sampleIds.length ? sampleIds[0] : 'NONE');  // Set default value
+                block.render();  // Re-render the block to reflect the changes
             }
         }
     });
 
-    console.log("Dropdown updated with sample IDs:", sample_ids);
+    // Step 4: Refresh the toolbox to reflect updated blocks
+    refreshToolbox();
+    console.log("Dropdown updated with sample IDs:", dropdownOptions);
 }
+window.updateSampleDropdown = updateSampleDropdown;

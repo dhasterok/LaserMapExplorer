@@ -1,6 +1,10 @@
 import * as Blockly from 'blockly/core';
 import {registerFieldColour, FieldColour} from '@blockly/field-colour';
 registerFieldColour();
+import { sample_ids } from './globals';
+
+var enableSampleIDsBlock = false; // Initially false
+window.Blockly = Blockly.Blocks
 const load_directory = {
     init: function() {
         this.appendValueInput('DIR')
@@ -22,25 +26,62 @@ const sample_ids_list_block = {
         this.setColour(230);
         this.setTooltip('Represents a list of sample IDs');
         this.setHelpUrl('');
+        if (!enableSampleIDsBlock) {
+            this.setDisabledReason(true, "no_sample_ids");
+        }
     }
 };
 Blockly.Blocks['sample_ids_list_block'] = sample_ids_list_block;
 
+
+// Function to enable the block
+export function enableSampleIDsBlockFunction() {
+    let workspace = Blockly.getMainWorkspace()
+    enableSampleIDsBlock = true;
+
+    // Re-register the block definition
+    Blockly.Blocks['sample_ids_list_block'] = sample_ids_list_block;
+    Blockly.Blocks['select_samples'] = select_samples;
+    Blockly.Blocks['plot_map'] = plot_map;
+    Blockly.Blocks['iterate_sample_ids'] = iterate_sample_ids;
+    Blockly.Blocks['sample_ids_list_block'] = sample_ids_list_block;
+
+    // Refresh the toolbox
+    workspace.updateToolbox(document.getElementById('toolbox'));
+}
+
+
+
 const select_samples = {
     init: function() {
         this.appendDummyInput().appendField('Select sample ID').appendField(new Blockly.FieldDropdown(this.getOptions), 'SAMPLE_IDS');
-        this.appendDummyInput().appendField('Store selected sample in variable').appendField(new Blockly.FieldVariable('sample_id'), 'SAMPLE_VAR');
+        this.appendDummyInput().appendField('Store selected sample in variable').appendField(new Blockly.FieldVariable('sample_id'), 'SAMPLE_ID');
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
         this.setColour(160);
         this.setTooltip('Selects a sample ID');
         this.setHelpUrl('');
+        if (!enableSampleIDsBlock) {
+            this.setDisabledReason(true, "no_sample_ids");
+        }
     },
     getOptions: function() {
         if (!sample_ids.length) {
             return [['No sample IDs available', 'NONE']];
         }
         return sample_ids.map(id => [id, id]);
+    },
+    // Handler for when the dropdown value changes
+    onChange: function(newValue) {
+        // Get the Blockly variable field and set its value to the selected sample ID
+        const workspace = this.sourceBlock_.workspace;
+        const variableName = this.sourceBlock_.getFieldValue('SAMPLE_ID');  // Get the name of the variable
+        const variable = workspace.getVariable(variableName);
+
+        if (variable) {
+            workspace.getVariableMap().getVariable(variableName).name = newValue;  // Update variable value to selected sample ID
+            console.log('Sample ID selected:', newValue);  // Log for debugging
+        }
     }
 };
 Blockly.Blocks['select_samples'] = select_samples;
@@ -60,6 +101,9 @@ Blockly.Blocks['select_samples'] = select_samples;
         this.setColour(230);
         this.setTooltip('Iterate through each sample ID in the sample_ids list');
         this.setHelpUrl('');
+        if (!enableSampleIDsBlock) {
+            this.setDisabledReason(true, "no_sample_ids");
+        }
     }
 };
 Blockly.common.defineBlocks({ iterate_sample_ids: iterate_sample_ids });
@@ -77,6 +121,9 @@ const plot = {
         this.setTooltip('add plot type block');
         this.setHelpUrl('');
         this.setColour(285);
+        if (!enableSampleIDsBlock) {
+            this.setDisabledReason(true, "no_sample_ids");
+        }
     }
 };
 Blockly.common.defineBlocks({plot: plot});
@@ -88,11 +135,14 @@ const plot_map = {
         this.appendValueInput('style')
         .appendField('Style');
         this.appendValueInput('save')
-        .appendField('Save ');
+        .appendField('Save '); 
         this.setOutput(true, null);
         this.setTooltip('plot 2d image of analyte');
         this.setHelpUrl('');
         this.setColour(285);
+        if (!enableSampleIDsBlock) {
+            this.setDisabledReason(true, "no_sample_ids");
+        }
     }
 };
 Blockly.common.defineBlocks({plot_map: plot_map});

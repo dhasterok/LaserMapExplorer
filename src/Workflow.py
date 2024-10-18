@@ -62,7 +62,7 @@ class Workflow():
         api_file.close()
         self.web_view.page().runJavaScript(api_script)
         #Load the Blockly HTML page
-        self.web_view.setUrl(QUrl.fromLocalFile(BASEDIR + '/blockly/blockly.html'))
+        self.web_view.setUrl(QUrl.fromLocalFile(BASEDIR + '/blockly/index.html'))
         # Add the web view to the layout
         self.layout.addWidget(self.web_view)
     
@@ -72,7 +72,7 @@ class Workflow():
             """
             # Convert the sample_ids list to a format that JavaScript can use (a JSON array)
             sample_ids_js_array = str(self.parent.sample_ids)
-            self.web_view.page().runJavaScript(f"updateSampleIds({sample_ids_js_array})")
+            self.web_view.page().runJavaScript(f"updateSampleDropdown({sample_ids_js_array})")
 
         
     def execute_code(self,code=None):

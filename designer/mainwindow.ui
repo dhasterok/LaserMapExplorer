@@ -1148,10 +1148,10 @@
         </font>
        </property>
        <property name="toolTip">
-        <string>Swap X and Y resolution</string>
+        <string/>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>3</number>
        </property>
        <widget class="QWidget" name="SelectAnalytePage">
         <property name="enabled">
@@ -7227,10 +7227,10 @@
         </font>
        </property>
        <property name="toolTip">
-        <string>Select method for sorting analytes</string>
+        <string/>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="PlotSelectorPage">
         <property name="geometry">
@@ -10977,10 +10977,10 @@
         </font>
        </property>
        <property name="toolTip">
-        <string>Pop the figure out into a separate window</string>
+        <string/>
        </property>
        <property name="currentIndex">
-        <number>3</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="tabNotes">
         <property name="sizePolicy">
@@ -12659,7 +12659,7 @@
                    </size>
                   </property>
                   <property name="toolTip">
-                   <string>Select all filters</string>
+                   <string>Select all annotations</string>
                   </property>
                   <property name="text">
                    <string>Select All</string>
@@ -12691,7 +12691,7 @@
                    </size>
                   </property>
                   <property name="toolTip">
-                   <string>View/hide profile points</string>
+                   <string>View/hide annotations</string>
                   </property>
                   <property name="text">
                    <string>...</string>
@@ -12732,7 +12732,7 @@
                    </size>
                   </property>
                   <property name="toolTip">
-                   <string>Remove selected field from profile plot</string>
+                   <string>Remove selected annotation(s) from plot</string>
                   </property>
                   <property name="text">
                    <string>...</string>

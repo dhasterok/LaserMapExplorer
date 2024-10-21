@@ -1181,6 +1181,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.lasermaps = {}
             #self.treeModel.clear()
             self.prev_plot = ''
+            self.treeView.treeModel.clear()
             self.plot_tree = PlotTree(self)
             self.change_sample(self.comboBoxSampleId.currentIndex())
 
@@ -4647,7 +4648,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if plot_type in self.map_plot_types:
                 if self.styles[plot_type]['Scale']['Length'] is None:
                     scale_length = self.default_scale_length()
-                elif ((direction == 'horizontal') and (self.styles[plot_type]['Scale']['Length'] > self.x_range)) or ((direction == 'vertical') and (self.styles[plot_type]['Scale']['Length'] > self.y_range)):
+                elif ((direction == 'horizontal') and (self.styles[plot_type]['Scale']['Length'] > self.data[self.sample_id].x_range)) or ((direction == 'vertical') and (self.styles[plot_type]['Scale']['Length'] > self.data[self.sample_id].y_range)):
                     scale_length = self.default_scale_length()
                 else:
                     scale_length = self.styles[plot_type]['Scale']['Length']
@@ -4686,11 +4687,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         scale_length = float(self.lineEditScaleLength.text())
         if plot_type in self.map_plot_types:
             # make sure user input is within bounds, do not change
-            if ((self.comboBoxScaleDirection.currentText() == 'horizontal') and (scale_length > self.x_range)) or (scale_length <= 0):
+            if ((self.comboBoxScaleDirection.currentText() == 'horizontal') and (scale_length > self.data[self.sample_id].x_range)) or (scale_length <= 0):
                 scale_length = self.styles[plot_type]['Scale']['Length']
                 self.lineEditScaleLength.value = scale_length
                 return
-            elif ((self.comboBoxScaleDirection.currentText() == 'vertical') and (scale_length > self.y_range)) or (scale_length <= 0):
+            elif ((self.comboBoxScaleDirection.currentText() == 'vertical') and (scale_length > self.data[self.sample_id].y_range)) or (scale_length <= 0):
                 scale_length = self.styles[plot_type]['Scale']['Length']
                 self.lineEditScaleLength.value = scale_length
                 return
@@ -5729,14 +5730,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if (plot_type not in self.map_plot_types) or (direction == 'none'):
             return None
 
+        x_range = self.data[self.sample_id].x_range
+        y_range = self.data[self.sample_id].y_range
+
         if direction == 'vertical':
-            length = 10**np.floor(np.log10(self.y_range))
-            if length > self.x_range:
-                length = 0.2 * self.y_range
+            length = 10**np.floor(np.log10(y_range))
+            if length > x_range:
+                length = 0.2 * y_range
         else: # direction == horizontal
-            length = 10**np.floor(np.log10(self.x_range))
-            if length > self.x_range:
-                length = 0.2 * self.x_range
+            length = 10**np.floor(np.log10(x_range))
+            if length > x_range:
+                length = 0.2 * x_range
 
         return length
 
@@ -6108,7 +6112,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ## These cut off parts of the map when plotting.
         #plotWindow.setRange(yRange=[self.y.min(), self.y.max()])
         #plotWindow.setLimits(xMin=self.x.min(), xMax=self.x.max(), yMin=self.y.min(), yMax = self.y.max())
-        #plotWindow.setLimits(maxXRange=self.x_range, maxYRange=self.y_range)
+        #plotWindow.setLimits(maxXRange=self.data[self.sample_id].x_range, maxYRange=self.data[self.sample_id].y_range)
 
         #supress right click menu
         plotWindow.setMenuEnabled(False)

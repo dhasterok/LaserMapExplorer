@@ -20,7 +20,7 @@ class PlotTree():
         # create analyte sort menu
         sortmenu_items = ['alphabetical', 'atomic number', 'mass', 'compatibility', 'radius']
         SortMenu = QMenu()
-        SortMenu.triggered.connect(self.apply_sort)
+        SortMenu.triggered.connect(self.sort_tree)
         self.parent.toolButtonSortAnalyte.setMenu(SortMenu)
         for item in sortmenu_items:
             SortMenu.addAction(item)
@@ -120,17 +120,15 @@ class PlotTree():
             if not leaf:
                 treeView.add_leaf(norm_ratio_branch, ratio)
     
-    def apply_sort(self, action, method=None):
-        """Sorts raw_data and processed_data
-
-        _extended_summary_
+    def sort_tree(self, action, method=None):
+        """Sorts `MainWindow.treeView` and raw_data and processed_data according to one of several options.
 
         Parameters
         ----------
-        action : _type_
-            _description_
+        action : QAction
+            Menu selection defining sort type
         method : str, optional
-            Method used for sorting the analytes, by default None
+            Method used for sorting the analytes. If `None`, defined by action, by default `None`
         """        
         if method is None:
             method = action.text()
@@ -255,7 +253,7 @@ class PlotTree():
                 print('tree_double_click: add_plotwidget_to_canvas')
                 self.parent.add_plotwidget_to_canvas(self.plot_info)
                 # updates comboBoxColorByField and comboBoxColorField comboboxes 
-                self.update_fields(self.parent.plot_info['sample_id'], self.parent.plot_info['plot_type'],self.parent.plot_info['field_type'], self.parent.plot_info['field'])
+                self.parent.update_fields(self.parent.plot_info['sample_id'], self.parent.plot_info['plot_type'],self.parent.plot_info['field_type'], self.parent.plot_info['field'])
                 #update UI with auto scale and neg handling parameters from 'Analyte/Ratio Info'
                 self.parent.update_spinboxes(self.parent.plot_info['sample_id'],self.parent.plot_info['field'],self.parent.plot_info['field_type'])
             else:

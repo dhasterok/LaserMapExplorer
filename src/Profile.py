@@ -196,15 +196,15 @@ class Profiling:
 
     def cart_to_dist(self,pixel:int,direction = 'y') -> float:
         if direction == 'x':
-            return pixel*self.main_window.array_size[1]/self.main_window.x_range
+            return pixel*self.main_window.data[self.main_window.sample_id].array_size[1]/self.main_window.data[self.main_window.sample_id].x_range
         else:
-            return pixel*self.main_window.array_size[0]/self.main_window.y_range
+            return pixel*self.main_window.data[self.main_window.sample_id].array_size[0]/self.main_window.data[self.main_window.sample_id].y_range
     
     def dist_to_cart(self,dist:float, direction = 'y')-> int:
         if direction == 'x':
-            return round(dist*self.main_window.dx)
+            return round(dist*self.main_window.data[self.main_window.sample_id].dx)
         else:
-            return round(dist*self.main_window.dy)
+            return round(dist*self.main_window.data[self.main_window.sample_id].dy)
 
     def plot_profile_scatter(self, event, array,k,v, plot, x, y, x_i, y_i):
         #k is key (name of Analyte)
@@ -304,7 +304,7 @@ class Profiling:
                     if mindist > dist:
                         mindist = dist
                         self.point_index = i
-                if not(round(mindist*self.array_x/self.main_window.x_range) < 50):
+                if not(round(mindist*self.array_x/self.main_window.data[self.main_window.sample_id].x_range) < 50):
                     self.point_selected = True
 
 
@@ -428,11 +428,6 @@ class Profiling:
                                         value = array[i, j]
                                         circ_val.append( value)
 
-                            # for i in range(max(0, y_i - radius), min(self.array_y, y_i + radius + 1)):
-                            #     for j in range(max(0, x_i - radius), min(self.array_x , x_i + radius + 1)):
-                            #         if np.sqrt((x - j * self.main_window.x_range / self.array_x)**2 + (y - i * self.main_window.y_range / self.array_y)**2)  <= radius:
-                            #             value = array[i, j]
-                            #             circ_val.append(value)
                             if (k,v) in i_profile:
                                 i_profile[(k,v)].append((x,y,circ_val, scatter, interpolate))
 

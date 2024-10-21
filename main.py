@@ -1179,7 +1179,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.selected_analytes = []
             self.ndim_list = []
             self.lasermaps = {}
-            self.treeModel.clear()
+            #self.treeModel.clear()
             self.prev_plot = ''
             self.plot_tree = PlotTree(self)
             self.change_sample(self.comboBoxSampleId.currentIndex())
@@ -1358,7 +1358,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionNoiseReduction.setEnabled(False)
 
         # sort data
-        self.plot_tree.apply_sort(None, method=self.sort_method)
+        self.plot_tree.sort_tree(None, method=self.sort_method)
 
         # reset flags
         self.update_cluster_flag = True
@@ -1445,7 +1445,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.sample_id == '':
             return
 
-        self.analyteDialog = AnalyteDialog(self.data[self.sample_id].processed_data, self)
+        self.analyteDialog = AnalyteDialog(self)
         self.analyteDialog.show()
 
         result = self.analyteDialog.exec_()  # Store the result here
@@ -3001,8 +3001,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 mouse_point = pos_view
                 x, y = mouse_point.x(), mouse_point.y()
 
-                x_i = round(x*array.shape[1]/self.x_range)
-                y_i = round(y*array.shape[0]/self.y_range)
+                x_i = round(x*array.shape[1]/self.data[self.sample_id].x_range)
+                y_i = round(y*array.shape[0]/self.data[self.sample_id].y_range)
 
                 # if hover within lasermap array
                 if 0 <= x_i < array.shape[1] and 0 <= y_i < array.shape[0] :
@@ -3056,8 +3056,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Convert the click position to plot coordinates
         self.array_x = array.shape[1]
         self.array_y = array.shape[0]
-        x_i = round(x*self.array_x/self.x_range)
-        y_i = round(y*self.array_y/self.y_range)
+        x_i = round(x*self.array_x/self.data[self.sample_id].x_range)
+        y_i = round(y*self.array_y/self.data[self.sample_id].y_range)
 
         # Ensure indices are within plot bounds
         if not(0 <= x_i < self.array_x) or not(0 <= y_i < self.array_y):
@@ -3145,11 +3145,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         x_pos = min(max(x + xOffset, 0), self.plot.viewRect().width() - self.zoomViewBox.width())
         y_pos = min(max(y + yOffset, 0), self.plot.viewRect().height() - self.zoomViewBox.height())
 
+        x_range = self.data[self.sample_id].x_range
+        y_range = self.data[self.sample_id].y_range
+
         # Update the position of the zoom view
         self.zoomViewBox.setGeometry(x_pos, y_pos, self.zoomViewBox.width(), self.zoomViewBox.height())
 
         # Calculate the region to zoom in on
-        zoomRect = QtCore.QRectF(x - self.x_range * self.zoomLevel, y - self.y_range * self.zoomLevel, self.x_range * self.zoomLevel * 2, self.y_range * self.zoomLevel * 2)
+        zoomRect = QtCore.QRectF(x - x_range * self.zoomLevel,
+                y - y_range * self.zoomLevel,
+                x_range * self.zoomLevel * 2,
+                y_range * self.zoomLevel * 2)
 
         # Update the zoom view's displayed region
         # self.zoomViewBox.setRange(rect=zoomRect, padding=0)
@@ -3158,7 +3164,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             self.zoomImg.setImage(image=self.array)  # Make sure this uses the current image data
 
-        self.zoomImg.setRect(0,0,self.x_range,self.y_range)
+        self.zoomImg.setRect(0,0,x_range,y_range)
         self.zoomViewBox.setRange(zoomRect) # Set the zoom area in the image
         self.zoomImg.setColorMap(colormap.get(style['Colors']['Colormap'], source = 'matplotlib'))
         self.zoomTarget.setPos(x, y)  # Update target position
@@ -6083,7 +6089,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         img_item = ImageItem(image=self.array, antialias=False)
 
         #set aspect ratio of rectangle
-        img_item.setRect(self.x.min(),self.y.min(),self.x_range,self.y_range)
+        img_item.setRect(self.data[self.sample_id].x.min(),
+                self.data[self.sample_id].y.min(),
+                self.data[self.sample_id].x_range,
+                self.data[self.sample_id].y_range)
 
         #--- add non-interactive image with integrated color ------------------
         plotWindow = graphicWidget.addPlot(0,0,title=field.replace('_',' '))
@@ -6199,7 +6208,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.add_plotwidget_to_canvas(self.plot_info)
 
         #self.update_tree(plot_info=self.plot_info)
-        self.add_tree_item(self.plot_info)
+        self.plot_tree.add_tree_item(self.plot_info)
 
         # add small histogram
         if (self.toolBox.currentIndex() == self.left_tab['sample']) and (view == self.canvas_tab['sv']):

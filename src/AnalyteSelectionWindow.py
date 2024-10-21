@@ -1,6 +1,7 @@
 from PyQt5.QtCore import (Qt, pyqtSignal)
-from PyQt5.QtWidgets import (QDialog, QTableWidgetItem, QLabel, QComboBox, QHeaderView, QFileDialog)
-from PyQt5.QtGui import (QImage, QColor, QPixmap, QPainter)
+from PyQt5.QtWidgets import (QTableWidget, QDialog, QTableWidgetItem, QLabel, QComboBox, QHeaderView, QFileDialog)
+from PyQt5.QtCore import Qt, QObject, QEvent
+from PyQt5.QtGui import (QImage, QColor, QFont, QPixmap, QPainter)
 from src.ui.AnalyteSelectionDialog import Ui_Dialog
 from src.rotated import RotatedHeaderView
 
@@ -28,11 +29,11 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         _description_
     """    
     listUpdated = pyqtSignal()
-    def __init__(self, data, parent=None):
+    def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
 
-        self.data = data
+        self.data = parent.data[parent.sample_id].processed_data
 
         self.norm_dict = {}
 
@@ -40,15 +41,37 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         for analyte in self.analytes:
             self.norm_dict[analyte] = self.data.get_attribute(analyte,'norm')
         self.correlation_matrix = None
+
+        # Set up the table
         self.tableWidgetAnalytes.setRowCount(len(self.analytes))
         self.tableWidgetAnalytes.setColumnCount(len(self.analytes))
+
+        # Set initial font for headers to Normal weight
+        header_font = self.tableWidgetAnalytes.horizontalHeader().font()
+        header_font.setWeight(QFont.Normal)
+
         self.tableWidgetAnalytes.setHorizontalHeaderLabels(list(self.analytes))
         self.tableWidgetAnalytes.setHorizontalHeader(RotatedHeaderView(self.tableWidgetAnalytes))
         self.tableWidgetAnalytes.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-        self.tableWidgetAnalytes.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-        self.comboBoxScale.currentIndexChanged.connect(self.update_all_combos)
+        self.tableWidgetAnalytes.horizontalHeader().setFont(header_font)
 
         self.tableWidgetAnalytes.setVerticalHeaderLabels(self.analytes)
+        self.tableWidgetAnalytes.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.tableWidgetAnalytes.verticalHeader().setFont(header_font)
+
+        # Variables to track previous row/column for font reset
+        self.prev_row = None
+        self.prev_col = None
+
+        # Enable mouse tracking to capture hover events
+        self.tableWidgetAnalytes.setMouseTracking(True)
+        self.tableWidgetAnalytes.viewport().setMouseTracking(True)
+
+        # Connect mouse move event to custom handler
+        self.tableWidgetAnalytes.viewport().installEventFilter(self)
+
+        self.comboBoxScale.currentIndexChanged.connect(self.update_all_combos)
+
         self.correlation_methods = ["Pearson", "Spearman"]
 
         for method in self.correlation_methods:
@@ -76,21 +99,11 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         else:
             # Select diagonal pairs by default
             for i in range(len(self.analytes)):
-                row=column = i
+                row = column = i
                 item = self.tableWidgetAnalytes.item(row, column)
 
                 # If the item doesn't exist, create it
-                if not item:
-                    item = QTableWidgetItem()
-                    self.tableWidgetAnalytes.setItem(row, column, item)
-                    self.add_analyte_to_list(row, column)
-                # If the cell is already selected, deselect it
-                elif not item.isSelected():
-                    item.setSelected(True)
-                    self.add_analyte_to_list(row, column)
-                else:
-                    item.setSelected(False)
-                    self.remove_analyte_from_list(row, column)
+                self.toggle_cell_selection(row, column)
 
     def done_selection(self):
         """Executes when `Done` button is clicked."""        
@@ -98,8 +111,7 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         self.accept()
 
     def update_all_combos(self):
-        """_summary_
-        """        
+        """Updates the scale combo box (`comboBoxScale`) and the combo boxes within ``tableWidgetSelected`."""
         # Get the currently selected value in comboBoxScale
         selected_scale = self.comboBoxScale.currentText()
 
@@ -135,7 +147,10 @@ class AnalyteDialog(QDialog, Ui_Dialog):
             self.comboBoxScale.setCurrentText(first_selection)
 
     def calculate_correlation(self):
-        """_summary_
+        """Calculates correlation coefficient between two analytes.
+
+        The correlation coefficient is used to color the background between two analytes displayed
+        in `tableWidgetAnalytes` as a visual aid to help selection of potentially relevant ratios.
         """        
         selected_method = self.comboBoxCorrelation.currentText().lower()
         # Compute the correlation matrix
@@ -157,19 +172,17 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         item.setBackground(color)
 
     def get_color_for_correlation(self, correlation):
-        """_summary_
-
-        _extended_summary_
+        """Computes color associated with a given correlation value.
 
         Parameters
         ----------
-        correlation : _type_
-            _description_
+        correlation : float
+            Correlation coefficient for displaying on `tableWidgetAnalytes` with color background.
 
         Returns
         -------
-        _type_
-            _description_
+        QColor
+            RGB color triplet associated with correlation
         """        
         #cmap = plt.get_cmap('RdBu')
         #c = cmap((1 + correlation)/2)
@@ -184,27 +197,26 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         return QColor(int(r), int(g),int(b))
 
     def create_colorbar(self):
-        """_summary_
-        """        
+        """Displays a colorbar for the ``tableWidgetAnalytes``."""        
         colorbar_image = self.generate_colorbar_image(40, 200)  # Width, Height of colorbar
         colorbar_label = QLabel(self)
         colorbar_pixmap = QPixmap.fromImage(colorbar_image)
         self.labelColorbar.setPixmap(colorbar_pixmap)
 
     def generate_colorbar_image(self, width, height):
-        """_summary_
+        """Creates a colorbar for the ``tableWidgetAnalytes``.
 
         Parameters
         ----------
-        width : _type_  
-            _description_
-        height : _type_
-            _description_
+        width : int  
+            Width of colorbar image.
+        height : int
+            Height of colorbar image.
 
         Returns
         -------
-        _type_
-            _description_
+        QImage
+            Colorbar image to be displayed in UI.
         """        
         image = QImage(width, height, QImage.Format_RGB32)
         painter = QPainter(image)
@@ -227,14 +239,15 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         return image
 
     def toggle_cell_selection(self, row, column):
-        """_summary_
+        """Toggles cell selection in `tableWidgetAnalytes` and adds or removes from list of
+        analytes and ratios used by `MainWindow` methods.
 
         Parameters
         ----------
-        row : _type_
-            _description_
-        column : _type_
-            _description_
+        row : int
+            Row in `tableWidgetAnalytes` to toggle.
+        column : int
+            Column in `tableWidgetAnalytes` to toggle.
         """        
         item = self.tableWidgetAnalytes.item(row, column)
 
@@ -252,14 +265,14 @@ class AnalyteDialog(QDialog, Ui_Dialog):
             self.remove_analyte_from_list(row, column)
 
     def add_analyte_to_list(self, row, column):
-        """_summary_
+        """Adds an analyte or ratio to the list to use for analyses in ``MainWindow`` related methods.
 
         Parameters
         ----------
-        row : _type_
-            _description_
-        column : _type_
-            _description_
+        row : int
+            Row in `tableWidgetAnalytes` to select.
+        column : int
+            Column in `tableWidgetAnalytes` to select.
         """        
         row_header = self.tableWidgetAnalytes.verticalHeaderItem(row).text()
         col_header = self.tableWidgetAnalytes.horizontalHeaderItem(column).text()
@@ -279,14 +292,14 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         self.update_list()
 
     def remove_analyte_from_list(self, row, column):
-        """_summary_
+        """Removes an analyte or ratio from the list to use for analyses in ``MainWindow`` related methods.
 
         Parameters
         ----------
-        row : _type_
-            _description_
-        column : _type_
-            _description_
+        row : int
+            Row in `tableWidgetAnalytes` to deselect.
+        column : int
+            Column in `tableWidgetAnalytes` to deselect.
         """        
         row_header = self.tableWidgetAnalytes.verticalHeaderItem(row).text()
         col_header = self.tableWidgetAnalytes.horizontalHeaderItem(column).text()
@@ -303,12 +316,12 @@ class AnalyteDialog(QDialog, Ui_Dialog):
                 break
 
     def get_selected_data(self):
-        """_summary_
+        """Grabs data from `tableWidgetSelected`.
 
         Returns
         -------
-        _type_
-            _description_
+        list of tuple
+            A list of analytes and the selected norm
         """        
         data = []
         for i in range(self.tableWidgetSelected.rowCount()):
@@ -319,8 +332,7 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         return data
 
     def save_selection(self):
-        """_summary_
-        """        
+        """Saves the list of analytes (and ratios) and their norms so they can be quickly recalled for other samples."""        
         file_name, _ = QFileDialog.getSaveFileName(self, "Save File", "", "Text Files (*.txt);;All Files (*)")
         if file_name:
             with open(file_name, 'w') as f:
@@ -331,7 +343,7 @@ class AnalyteDialog(QDialog, Ui_Dialog):
                     f.write(f"{analyte_pair},{selection}\n")
 
     def load_selection(self):
-        """Load a saved analyte lists"""
+        """Loads a saved analyte (and ratio) list and fill the analyte table"""
         file_name, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Text Files (*.txt);;All Files (*)")
         if file_name:
             with open(file_name, 'r') as f:
@@ -346,9 +358,11 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         self.norm_dict={}
         for i in range(self.tableWidgetSelected.rowCount()):
             analyte_pair = self.tableWidgetSelected.item(i, 0).text()
-            combo = self.tableWidgetSelected.cellWidget(i, 1)
-            selection = combo.currentText()
-            self.norm_dict[analyte_pair] = selection
+            comboBox = self.tableWidgetSelected.cellWidget(i, 1)
+            self.norm_dict[analyte_pair] = comboBox.currentText()
+
+            # update norm in data
+            self.data.set_attribute(analyte_pair,'norm',comboBox.currentText())
         self.listUpdated.emit()
 
     def populate_analyte_list(self, analyte_pair, norm='linear'):
@@ -386,3 +400,83 @@ class AnalyteDialog(QDialog, Ui_Dialog):
             self.tableWidgetSelected.setCellWidget(newRow, 1, combo)
             combo.currentIndexChanged.connect(self.update_scale)
 
+    def mouseMoveEvent(self, event):
+        # Get the row and column of the cell under the mouse
+        index = self.tableWidgetAnalytes.indexAt(event.pos())
+        row = index.row()
+        col = index.column()
+
+        # Check if the mouse is over a valid cell
+        if row >= 0 and col >= 0:
+            if self.prev_row != row:
+                self._set_row_font(self.prev_row, QFont.Normal)  # Reset previous row
+                self._set_row_font(row, QFont.Bold)  # Set current row to Bold
+                self.prev_row = row  # Update previous row
+            
+            if self.prev_col != col:
+                self._set_col_font(self.prev_col, QFont.Normal)  # Reset previous column
+                self._set_col_font(col, QFont.Bold)  # Set current column to Bold
+                self.prev_col = col  # Update previous column
+
+        super().mouseMoveEvent(event)
+
+    def leaveEvent(self, event):
+        # Reset font when the mouse leaves the table area
+        self._set_row_font(self.prev_row, QFont.Normal)
+        self._set_col_font(self.prev_col, QFont.Normal)
+        self.prev_row = None
+        self.prev_col = None
+        super().leaveEvent(event)
+
+    def eventFilter(self, obj, event):
+        if obj == self.tableWidgetAnalytes.viewport() and event.type() == event.MouseMove:
+            # Get the row and column of the cell under the mouse
+            index = self.tableWidgetAnalytes.indexAt(event.pos())
+            row = index.row()
+            col = index.column()
+
+            print(f"({row}, {col})")
+
+            # Reset the previous row and column to normal font if they exist
+            if self.prev_row is not None:
+                self._set_row_font(self.prev_row, QFont.Normal)
+            if self.prev_col is not None:
+                self._set_col_font(self.prev_col, QFont.Normal)
+
+            # Apply bold font to the current row and column headers
+            if row >= 0:
+                self._set_row_font(row, QFont.Bold)
+                self.prev_row = row
+            if col >= 0:
+                self._set_col_font(col, QFont.Bold)
+                self.prev_col = col
+
+        # Handle resetting when the mouse leaves the widget
+        if obj == self.tableWidgetAnalytes.viewport() and event.type() == event.Leave:
+            # Reset any bold headers when the mouse leaves the table
+            if self.prev_row is not None:
+                self._set_row_font(self.prev_row, QFont.Normal)
+            if self.prev_col is not None:
+                self._set_col_font(self.prev_col, QFont.Normal)
+            self.prev_row = None
+            self.prev_col = None
+
+        return super().eventFilter(obj, event)
+
+    def _set_row_font(self, row, weight):
+        """Set the font weight for the vertical header row."""
+        if row is not None:
+            item = self.tableWidgetAnalytes.verticalHeaderItem(row)
+            if item:
+                font = item.font()
+                font.setWeight(weight)
+                item.setFont(font)
+
+    def _set_col_font(self, col, weight):
+        """Set the font weight for the horizontal header column."""
+        if col is not None:
+            item = self.tableWidgetAnalytes.horizontalHeaderItem(col)
+            if item:
+                font = item.font()
+                font.setWeight(weight)
+                item.setFont(font)

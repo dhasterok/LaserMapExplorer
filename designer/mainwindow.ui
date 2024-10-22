@@ -7230,7 +7230,7 @@
         <string/>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="PlotSelectorPage">
         <property name="geometry">
@@ -7513,7 +7513,7 @@
             <enum>QFrame::Raised</enum>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>3</number>
            </property>
            <widget class="QWidget" name="StyleAxes">
             <property name="geometry">
@@ -8759,8 +8759,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>100</width>
-              <height>75</height>
+              <width>294</width>
+              <height>144</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -8799,8 +8799,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>247</width>
-                  <height>312</height>
+                  <width>294</width>
+                  <height>318</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_32">
@@ -8901,19 +8901,6 @@
                      </property>
                      <property name="alignment">
                       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="1">
-                    <widget class="QComboBox" name="comboBoxColorField">
-                     <property name="maximumSize">
-                      <size>
-                       <width>155</width>
-                       <height>16777215</height>
-                      </size>
-                     </property>
-                     <property name="toolTip">
-                      <string>Select field to color points</string>
                      </property>
                     </widget>
                    </item>
@@ -9147,6 +9134,30 @@
                       <string/>
                      </property>
                     </widget>
+                   </item>
+                   <item row="1" column="1">
+                    <layout class="QHBoxLayout" name="horizontalLayout_44">
+                     <item>
+                      <widget class="QComboBox" name="comboBoxColorField">
+                       <property name="maximumSize">
+                        <size>
+                         <width>155</width>
+                         <height>16777215</height>
+                        </size>
+                       </property>
+                       <property name="toolTip">
+                        <string>Select field to color points</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QSpinBox" name="spinBoxColorField">
+                       <property name="readOnly">
+                        <bool>false</bool>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
                    </item>
                   </layout>
                  </item>

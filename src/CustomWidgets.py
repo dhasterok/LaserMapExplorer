@@ -292,3 +292,9 @@ class CustomTreeView(QTreeView):
         item_path = self.get_item_path(item)
         leaf_data = self.get_leaf_data(item)
         print(f"Double-clicked on: {item_path}, Data: {leaf_data}")
+
+    def clear_tree(self):
+        try:
+            self.treeModel.clear()
+        except Exception as e:
+            print(f"Error while clearing model: {e}")

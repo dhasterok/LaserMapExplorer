@@ -824,6 +824,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.tableWidgetViewGroups.itemChanged.connect(self.cluster_label_changed)
 
         self.comboBoxColorField.currentText() == 'none'
+        self.spinBoxColorField.lineEdit().setReadOnly(True)
         self.tableWidgetViewGroups.selectionModel().selectionChanged.connect(self.update_clusters)
 
         # Scatter and Ternary Tab
@@ -1041,6 +1042,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # marker color
         self.comboBoxColorByField.activated.connect(self.color_by_field_callback)
         self.comboBoxColorField.activated.connect(self.color_field_callback)
+        self.spinBoxColorField.valueChanged.connect(self.color_field_update)
         self.comboBoxFieldColormap.activated.connect(self.field_colormap_callback)
         self.comboBoxCbarDirection.activated.connect(self.cbar_direction_callback)
         # resolution
@@ -1097,7 +1099,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.canvas_changed()
 
         # multi-view tools
-        self.actionCalculator.triggered.connect(lambda: self.toolBoxTreeView.currentIndex(self.right_tab['calculator']))
+        self.actionCalculator.triggered.connect(lambda: self.toolBoxTreeView.setCurrentIndex(self.right_tab['calculator']))
 
         #reset check boxes to prevent incorrect behaviour during plot click
         self.toolButtonPlotProfile.clicked.connect(lambda: self.reset_checked_items('profiling'))
@@ -1181,7 +1183,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.lasermaps = {}
             #self.treeModel.clear()
             self.prev_plot = ''
-            self.treeView.treeModel.clear()
             self.plot_tree = PlotTree(self)
             self.change_sample(self.comboBoxSampleId.currentIndex())
 
@@ -1378,7 +1379,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         analyte_list = self.data[self.sample_id].processed_data.match_attribute('data_type','analyte')
 
-        self.update_spinboxes(sample_id=self.sample_id, field_type='Analyte', field=analyte_list[0])
+        self.update_spinboxes(field_type='Analyte', field=analyte_list[0])
 
         # reset all plot types on change of tab to the first option
         for key in self.plot_types.keys():
@@ -1397,6 +1398,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolbox_changed(update=False)
         self.update_all_field_comboboxes()
         self.update_field_combobox(self.comboBoxColorByField,self.comboBoxColorField)
+        self.spinBoxColorField.setMinimum(0)
+        self.spinBoxColorField.setMaximum(self.comboBoxColorField.count() - 1)
 
         self.update_filter_values()
         self.histogram_update_bin_width()
@@ -4073,9 +4076,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.comboBoxColorField.clear()
         else:
             self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
+            self.spinBoxColorField.setMinimum(0)
+            self.spinBoxColorField.setMaximum(self.comboBoxColorField.count() - 1)
 
         if style['Colors']['Field'] in self.comboBoxColorField.allItems():
             self.comboBoxColorField.setCurrentText(style['Colors']['Field'])
+            self.update_color_field_spinbox()
         else:
             style['Colors']['Field'] = self.comboBoxColorField.currentText()
 
@@ -4859,6 +4865,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #print('color_by_field_callback')
         # need this line to update field comboboxes when colorby field is updated
         self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
+        self.update_color_field_spinbox()
         plot_type = self.comboBoxPlotType.currentText()
         if plot_type == '':
             return
@@ -4878,7 +4885,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.comboBoxColorByField.currentText() != 'None' or self.comboBoxColorField.currentText() != '' or self.comboBoxColorByField.currentText() in ['cluster']:
             self.update_SV()
 
-    def color_field_callback(self, plot= True):
+    def color_field_callback(self, plot=True):
         """Updates color field and plot
 
         Executes on change of ``MainWindow.comboBoxColorField``
@@ -4886,6 +4893,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #print('color_field_callback')
         plot_type = self.comboBoxPlotType.currentText()
         field = self.comboBoxColorField.currentText()
+        self.update_color_field_spinbox()
+        
         if self.styles[plot_type]['Colors']['Field'] == field:
             return
 
@@ -4901,8 +4910,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.styles[plot_type]['Colors']['CLabel'] = self.data[self.sample_id].axis_dict[field]['label']
         else:
             self.lineEditCbarLabel.setText('')
+
+        # update plot
         if plot:
             self.update_SV()
+
+    def color_field_update(self):
+        self.spinBoxColorField.blockSignals(True)
+        self.comboBoxColorField.setCurrentIndex(self.spinBoxColorField.value())
+        self.color_field_callback(plot=True)
+        self.spinBoxColorField.blockSignals(False)
 
     def field_colormap_callback(self):
         """Sets the color map
@@ -5188,7 +5205,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     self.plot_map_mpl(sample_id, field_type, field)
                 
                 #update UI with auto scale and neg handling parameters from 'Analyte/Ratio Info'
-                self.update_spinboxes(sample_id, field, field_type)
+                self.update_spinboxes(field, field_type)
                 
                 # if not self.comboBoxColorField.currentText():
                 #     return
@@ -5759,9 +5776,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         length = style['Scale']['Length']
         if (length is not None) and (direction != 'none'):
             if direction == 'horizontal':
-                dd = self.dx
+                dd = self.data[self.sample_id].dx
             else:
-                dd = self.dy
+                dd = self.data[self.sample_id].dy
             sb = scalebar( width=length,
                     pixel_width=dd,
                     units=self.preferences['Units']['Distance'],
@@ -5790,7 +5807,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         grouplabels : list of str, optional
             category/group labels for tick marks
         """
-        print("add_colorbar")
+        #print("add_colorbar")
         # Add a colorbar
         cbar = None
         if style['Colors']['Direction'] == 'none':
@@ -7283,7 +7300,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.sample_id == '':
             return
 
-        if self.update_pca_flag or not self.data[self.sample_id].processed_data.match_attribute('data_type','pca_score'):
+        if self.update_pca_flag or not self.data[self.sample_id].processed_data.match_attribute('data_type','pca score'):
             self.compute_pca()
 
         # Determine which PCA plot to create based on the combobox selection
@@ -7346,7 +7363,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         }
 
         self.update_canvas(canvas)
-        self.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
+        #self.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
 
     def plot_pca_variance(self):
         """Creates a plot of explained variance, individual and cumulative, for PCA
@@ -7697,7 +7714,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 # assign cluster scores to self.data
                 for n in range(n_clusters):
                     #self.data[self.sample_id]['computed_data']['cluster score'].loc[:,str(n)] = pd.NA
-                    self.data[self.sample_id].add_columns('cluster_score', 'cluster' + str(n), u[n-1,:], self.data[self.sample_id].mask)
+                    self.data[self.sample_id].add_columns('cluster score', 'cluster' + str(n), u[n-1,:], self.data[self.sample_id].mask)
 
                 #add cluster results to self.data
                 self.data[self.sample_id].add_columns('cluster', method, np.argmax(u, axis=0), self.data[self.sample_id].mask)
@@ -8557,6 +8574,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             addNone = False
         self.update_field_type_combobox(self.comboBoxColorByField, addNone=addNone, plot_type=self.comboBoxPlotType.currentText())
         self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
+        self.spinBoxColorField.setFixedWidth(22)
+        self.spinBoxColorField.setMinimum(0)
+        self.spinBoxColorField.setMaximum(self.comboBoxColorField.count() - 1)
 
         # calculator
         self.update_field_combobox(self.comboBoxCalcFieldType, self.comboBoxCalcField)
@@ -8565,6 +8585,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_field_combobox(self.comboBoxIsotopeAgeFieldType1, self.comboBoxIsotopeAgeField1)
         self.update_field_combobox(self.comboBoxIsotopeAgeFieldType2, self.comboBoxIsotopeAgeField2)
         self.update_field_combobox(self.comboBoxIsotopeAgeFieldType3, self.comboBoxIsotopeAgeField3)
+
+    
+    def update_color_field_spinbox(self):
+        self.spinBoxColorField.setValue(self.comboBoxColorField.currentIndex())
 
     # gets the set of fields
     def get_field_list(self, set_name='Analyte'):
@@ -8616,9 +8640,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.check_analysis = True
         self.update_field_type_combobox(self.comboBoxColorByField, addNone=True, plot_type=self.comboBoxPlotType.currentText())
         self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
+        self.spinBoxColorField.setMinimum(0)
+        self.spinBoxColorField.setMaximum(self.comboBoxColorField.count() - 1)
         self.check_analysis = False
 
-    def update_spinboxes(self, sample_id, field, field_type='Analyte'):
+    def update_spinboxes(self, field, field_type='Analyte'):
         """
         Retrieves Auto scale parameters and neg handling method from Analyte/Ratio Info and updates UI.
 

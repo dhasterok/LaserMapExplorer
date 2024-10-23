@@ -26,8 +26,6 @@ function updateSampleDropdown(sampleIds) {
         }
     });
 
-    // Step 4: Refresh the toolbox to reflect updated blocks
-    refreshToolbox();
     console.log("Dropdown updated with sample IDs:", dropdownOptions);
 }
 window.updateSampleDropdown = updateSampleDropdown;

@@ -5171,7 +5171,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     # -------------------------------------
     # General plot functions
     # -------------------------------------
-    def update_SV(self):
+    def update_SV(self, plot_type=None, field_type=None, field=None):
         """Updates current plot (not saved to plot selector)
 
         Updates the current plot (as determined by ``MainWindow.comboBoxPlotType.currentText()`` and options in ``MainWindow.toolBox.selectedIndex()``.
@@ -5184,11 +5184,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.sample_id == '' or not self.comboBoxPlotType.currentText():
             return
 
-        match self.comboBoxPlotType.currentText():
+        if not plot_type:
+            plot_type = self.comboBoxPlotType.currentText()
+        
+        match plot_type:
             case 'analyte map':
                 sample_id = self.sample_id
-                field_type = self.comboBoxColorByField.currentText()
-                field = self.comboBoxColorField.currentText()
+                if not field_type:
+                    field_type = self.comboBoxColorByField.currentText()
+                
+                if not field:
+                    field = self.comboBoxColorField.currentText()
 
                 if not field_type or not field:
                     return

@@ -278,6 +278,9 @@ class CustomTreeView(QTreeView):
         # Sort the leaves based on the provided order list
         # Items not in order_list will be placed at the end
         leaf_items.sort(key=lambda x: order_list.index(x.text()) if x.text() in order_list else len(order_list))
+
+        # Remove the items within the branch first and then replace it with the sorted ones
+        branch.removeRows(0, branch.rowCount())
         
         # Add sorted items back to the branch
         for i, leaf in enumerate(leaf_items):
@@ -289,3 +292,9 @@ class CustomTreeView(QTreeView):
         item_path = self.get_item_path(item)
         leaf_data = self.get_leaf_data(item)
         print(f"Double-clicked on: {item_path}, Data: {leaf_data}")
+
+    def clear_tree(self):
+        try:
+            self.treeModel.clear()
+        except Exception as e:
+            print(f"Error while clearing model: {e}")

@@ -342,7 +342,7 @@ class ImageProcessing():
         aspect_ratio = self.parent.data[self.parent.sample_id].aspect_ratio
 
         # plot map
-        self.array = np.reshape(map_df['array'].values, array_size, order=self.parent.order)
+        self.array = np.reshape(map_df['array'].values, array_size, order=self.parent.data[self.parent.sample_id].order)
 
         match algorithm:
             case 'none':
@@ -414,7 +414,7 @@ class ImageProcessing():
 
         # use mask to create an alpha layer
         mask = self.parent.data[self.parent.sample_id].mask.astype(float)
-        reshaped_mask = np.reshape(mask, array_size, order=self.parent.order)
+        reshaped_mask = np.reshape(mask, array_size, order=self.parent.data[self.parent.sample_id].order)
 
         alphas = colors.Normalize(0, 1, clip=False)(reshaped_mask)
         alphas = np.clip(alphas, .4, 1)

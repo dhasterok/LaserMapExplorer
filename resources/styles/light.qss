@@ -492,6 +492,11 @@ QTableWidget {
     border: 1px solid #dadada;
 }
 
+QTableWidget::item {
+    padding-top: 2px
+    padding-bottom: 2px
+}
+
 QHeaderView::section {
     font: 11px;
     background-color:#ececec;

@@ -464,7 +464,7 @@ class PolygonManager:
     def plot_polygon_scatter(self, event,k, x, y, x_i, y_i):
         if self.p_id in self.polygons[self.main_window.sample_id]:
             points = self.polygons[self.main_window.sample_id][self.p_id].points
-            print('p')
+
         self.array_x = self.main_window.array.shape[1]
         self.array_y = self.main_window.array.shape[0]
         # turn off profile (need to suppress context menu on right click)

@@ -196,15 +196,15 @@ class Profiling:
 
     def cart_to_dist(self,pixel:int,direction = 'y') -> float:
         if direction == 'x':
-            return pixel*self.main_window.array_size[1]/self.main_window.x_range
+            return pixel*self.main_window.data[self.main_window.sample_id].array_size[1]/self.main_window.data[self.main_window.sample_id].x_range
         else:
-            return pixel*self.main_window.array_size[0]/self.main_window.y_range
+            return pixel*self.main_window.data[self.main_window.sample_id].array_size[0]/self.main_window.data[self.main_window.sample_id].y_range
     
     def dist_to_cart(self,dist:float, direction = 'y')-> int:
         if direction == 'x':
-            return round(dist*self.main_window.dx)
+            return round(dist*self.main_window.data[self.main_window.sample_id].dx)
         else:
-            return round(dist*self.main_window.dy)
+            return round(dist*self.main_window.data[self.main_window.sample_id].dy)
 
     def plot_profile_scatter(self, event, array,k,v, plot, x, y, x_i, y_i):
         #k is key (name of Analyte)
@@ -304,7 +304,7 @@ class Profiling:
                     if mindist > dist:
                         mindist = dist
                         self.point_index = i
-                if not(round(mindist*self.array_x/self.main_window.x_range) < 50):
+                if not(round(mindist*self.array_x/self.main_window.data[self.main_window.sample_id].x_range) < 50):
                     self.point_selected = True
 
 
@@ -382,7 +382,7 @@ class Profiling:
                 for i in range(len(points) - 1):
                     start_point = points[i]
                     end_point = points[i + 1]
-                    if i==0:
+                    if i == 0:
                         i_profile[(k,v)] = [start_point]
                     else:
                         i_profile[(k,v)].append(start_point)
@@ -410,8 +410,8 @@ class Profiling:
                         y_i = self.dist_to_cart(y,'y')
 
                         # Add the scatter item to all other plots and save points in profile
-                        _, p, array= self.main_window.lasermaps[(k,v)]
-                        if v==self.main_window.canvasWindow.currentIndex() and self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #only add scatters to other lasermaps of same sample
+                        _, p, array = self.main_window.lasermaps[(k,v)]
+                        if (v == self.main_window.canvasWindow.currentIndex()) and (self.array_x == array.shape[1]) and (self.array_y == array.shape[0]) : #only add scatters to other lasermaps of same sample
                             # Create a scatter plot item at the clicked position
                             scatter = ScatterPlotItem([x], [y], symbol='+', size=5)
                             scatter.setZValue(1e9)
@@ -426,13 +426,8 @@ class Profiling:
                                 for j in range(max(0, x_i - p_radius_x), min(self.array_x , x_i + p_radius_x + 1)):
                                     if self.calculate_distance(self.cart_to_dist(y_i - i)**2 , self.cart_to_dist(x_i - j)**2) <= radius:
                                         value = array[i, j]
-                                        circ_val.append( value)
+                                        circ_val.append(value)
 
-                            # for i in range(max(0, y_i - radius), min(self.array_y, y_i + radius + 1)):
-                            #     for j in range(max(0, x_i - radius), min(self.array_x , x_i + radius + 1)):
-                            #         if np.sqrt((x - j * self.main_window.x_range / self.array_x)**2 + (y - i * self.main_window.y_range / self.array_y)**2)  <= radius:
-                            #             value = array[i, j]
-                            #             circ_val.append(value)
                             if (k,v) in i_profile:
                                 i_profile[(k,v)].append((x,y,circ_val, scatter, interpolate))
 
@@ -471,7 +466,7 @@ class Profiling:
                             _, plot, _ = self.main_window.lasermaps[(k,v)]
                             plot.removeItem(scatter_item)
 
-    def plot_profiles(self, interpolate= False, sort_axis=None):
+    def plot_profiles(self, interpolate=False, sort_axis=None):
         profile = self.profiles[self.main_window.sample_id][self.profile_name].points
         i_profile = self.profiles[self.main_window.sample_id][self.profile_name].i_points
         def process_points( points, sort_axis):
@@ -858,6 +853,7 @@ class Profiling:
                     self.main_window.tableWidgetProfilePoints.setItem(row_position, 0, QTableWidgetItem(str(point_number)))
                     self.main_window.tableWidgetProfilePoints.setItem(row_position, 1, QTableWidgetItem(str(round(x))))
                     self.main_window.tableWidgetProfilePoints.setItem(row_position, 2, QTableWidgetItem(str(round(y))))
+                    self.main_window.tableWidgetProfilePoints.setRowHeight(row_position, 20)
                     point_number += 1
 
                 # Enable or disable buttons based on the presence of points

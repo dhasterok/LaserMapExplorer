@@ -1148,10 +1148,13 @@
         </font>
        </property>
        <property name="toolTip">
-        <string>Swap X and Y resolution</string>
+        <string/>
        </property>
        <property name="currentIndex">
-        <number>6</number>
+        <number>1</number>
+       </property>
+       <property name="tabSpacing">
+        <number>2</number>
        </property>
        <widget class="QWidget" name="SelectAnalytePage">
         <property name="enabled">
@@ -1162,7 +1165,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>257</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -1201,7 +1204,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>316</width>
+              <width>302</width>
               <height>600</height>
              </rect>
             </property>
@@ -1256,7 +1259,7 @@
                  <widget class="QComboBox" name="comboBoxRefMaterial">
                   <property name="maximumSize">
                    <size>
-                    <width>204</width>
+                    <width>190</width>
                     <height>16777215</height>
                    </size>
                   </property>
@@ -1403,12 +1406,6 @@
                  <layout class="QHBoxLayout" name="horizontalLayout_25">
                   <item>
                    <widget class="QLabel" name="labelResolutionNx">
-                    <property name="maximumSize">
-                     <size>
-                      <width>20</width>
-                      <height>16777215</height>
-                     </size>
-                    </property>
                     <property name="font">
                      <font>
                       <pointsize>11</pointsize>
@@ -1422,12 +1419,6 @@
                   </item>
                   <item>
                    <widget class="QLineEdit" name="lineEditResolutionNx">
-                    <property name="maximumSize">
-                     <size>
-                      <width>100</width>
-                      <height>16777215</height>
-                     </size>
-                    </property>
                     <property name="font">
                      <font>
                       <pointsize>11</pointsize>
@@ -1447,12 +1438,6 @@
                   </item>
                   <item>
                    <widget class="QLabel" name="labelResolutionNy">
-                    <property name="maximumSize">
-                     <size>
-                      <width>20</width>
-                      <height>16777215</height>
-                     </size>
-                    </property>
                     <property name="font">
                      <font>
                       <pointsize>11</pointsize>
@@ -1466,12 +1451,6 @@
                   </item>
                   <item>
                    <widget class="QLineEdit" name="lineEditResolutionNy">
-                    <property name="maximumSize">
-                     <size>
-                      <width>100</width>
-                      <height>16777215</height>
-                     </size>
-                    </property>
                     <property name="font">
                      <font>
                       <pointsize>11</pointsize>
@@ -1508,12 +1487,6 @@
                  <layout class="QHBoxLayout" name="horizontalLayout_42">
                   <item>
                    <widget class="QLabel" name="labelDX">
-                    <property name="maximumSize">
-                     <size>
-                      <width>20</width>
-                      <height>16777215</height>
-                     </size>
-                    </property>
                     <property name="font">
                      <font>
                       <pointsize>11</pointsize>
@@ -1527,12 +1500,6 @@
                   </item>
                   <item>
                    <widget class="QLineEdit" name="lineEditDX">
-                    <property name="maximumSize">
-                     <size>
-                      <width>100</width>
-                      <height>16777215</height>
-                     </size>
-                    </property>
                     <property name="font">
                      <font>
                       <pointsize>11</pointsize>
@@ -1584,12 +1551,6 @@
                   </item>
                   <item>
                    <widget class="QLabel" name="labelDY">
-                    <property name="maximumSize">
-                     <size>
-                      <width>20</width>
-                      <height>16777215</height>
-                     </size>
-                    </property>
                     <property name="font">
                      <font>
                       <pointsize>11</pointsize>
@@ -1603,12 +1564,6 @@
                   </item>
                   <item>
                    <widget class="QLineEdit" name="lineEditDY">
-                    <property name="maximumSize">
-                     <size>
-                      <width>100</width>
-                      <height>16777215</height>
-                     </size>
-                    </property>
                     <property name="font">
                      <font>
                       <pointsize>11</pointsize>
@@ -1955,12 +1910,6 @@
                  <layout class="QFormLayout" name="formLayout_2">
                   <item row="1" column="0">
                    <widget class="QLabel" name="labelNegativeMethod">
-                    <property name="maximumSize">
-                     <size>
-                      <width>150</width>
-                      <height>16777215</height>
-                     </size>
-                    </property>
                     <property name="text">
                      <string>Negative handling</string>
                     </property>
@@ -2009,7 +1958,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -2608,7 +2557,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>257</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -2648,7 +2597,7 @@
               <x>0</x>
               <y>0</y>
               <width>294</width>
-              <height>141</height>
+              <height>251</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_45">
@@ -2962,7 +2911,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>257</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -3601,7 +3550,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>257</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -4367,7 +4316,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>257</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5054,7 +5003,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>257</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5655,7 +5604,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>257</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5692,7 +5641,7 @@
               <x>0</x>
               <y>0</y>
               <width>300</width>
-              <height>147</height>
+              <height>257</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_75">
@@ -5738,7 +5687,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>257</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5784,7 +5733,7 @@
               <x>0</x>
               <y>0</y>
               <width>301</width>
-              <height>147</height>
+              <height>257</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_57">
@@ -5971,7 +5920,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>257</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6011,7 +5960,7 @@
               <x>0</x>
               <y>0</y>
               <width>300</width>
-              <height>284</height>
+              <height>315</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_60">
@@ -6036,7 +5985,7 @@
                 <set>Qt::AlignCenter</set>
                </property>
                <layout class="QFormLayout" name="formLayout_7">
-                <item row="0" column="0">
+                <item row="1" column="0">
                  <widget class="QLabel" name="labelNClusters">
                   <property name="font">
                    <font>
@@ -6049,7 +5998,7 @@
                   </property>
                  </widget>
                 </item>
-                <item row="0" column="1">
+                <item row="1" column="1">
                  <widget class="QSpinBox" name="spinBoxNClusters">
                   <property name="maximumSize">
                    <size>
@@ -6076,14 +6025,14 @@
                    <number>1</number>
                   </property>
                   <property name="maximum">
-                   <number>500</number>
+                   <number>98</number>
                   </property>
                   <property name="value">
                    <number>5</number>
                   </property>
                  </widget>
                 </item>
-                <item row="1" column="0">
+                <item row="2" column="0">
                  <widget class="QLabel" name="labelClusterMethod">
                   <property name="font">
                    <font>
@@ -6096,7 +6045,7 @@
                   </property>
                  </widget>
                 </item>
-                <item row="1" column="1">
+                <item row="2" column="1">
                  <widget class="QComboBox" name="comboBoxClusterMethod">
                   <property name="maximumSize">
                    <size>
@@ -6125,7 +6074,7 @@
                   </item>
                  </widget>
                 </item>
-                <item row="2" column="0">
+                <item row="3" column="0">
                  <widget class="QLabel" name="labelExponent">
                   <property name="font">
                    <font>
@@ -6138,7 +6087,7 @@
                   </property>
                  </widget>
                 </item>
-                <item row="2" column="1">
+                <item row="3" column="1">
                  <layout class="QHBoxLayout" name="horizontalLayout">
                   <item>
                    <widget class="QLabel" name="labelClusterExponent">
@@ -6186,7 +6135,7 @@
                   </item>
                  </layout>
                 </item>
-                <item row="3" column="0">
+                <item row="4" column="0">
                  <widget class="QLabel" name="labelClusterDistance">
                   <property name="font">
                    <font>
@@ -6199,7 +6148,7 @@
                   </property>
                  </widget>
                 </item>
-                <item row="3" column="1">
+                <item row="4" column="1">
                  <widget class="QComboBox" name="comboBoxClusterDistance">
                   <property name="maximumSize">
                    <size>
@@ -6218,7 +6167,7 @@
                   </property>
                  </widget>
                 </item>
-                <item row="4" column="0">
+                <item row="5" column="0">
                  <widget class="QLabel" name="labelClusterStartingSeed">
                   <property name="font">
                    <font>
@@ -6231,7 +6180,7 @@
                   </property>
                  </widget>
                 </item>
-                <item row="4" column="1">
+                <item row="5" column="1">
                  <layout class="QHBoxLayout" name="horizontalLayout_5">
                   <item>
                    <widget class="QToolButton" name="toolButtonRandomSeed">
@@ -6295,7 +6244,7 @@
                   </item>
                  </layout>
                 </item>
-                <item row="5" column="0">
+                <item row="6" column="0">
                  <widget class="QLabel" name="labelClusterWithPCA">
                   <property name="font">
                    <font>
@@ -6308,7 +6257,7 @@
                   </property>
                  </widget>
                 </item>
-                <item row="5" column="1">
+                <item row="6" column="1">
                  <widget class="QCheckBox" name="checkBoxWithPCA">
                   <property name="font">
                    <font>
@@ -6321,7 +6270,7 @@
                   </property>
                  </widget>
                 </item>
-                <item row="6" column="0">
+                <item row="7" column="0">
                  <widget class="QLabel" name="labelPCANumBasis">
                   <property name="font">
                    <font>
@@ -6337,7 +6286,7 @@
                   </property>
                  </widget>
                 </item>
-                <item row="6" column="1">
+                <item row="7" column="1">
                  <widget class="QSpinBox" name="spinBoxPCANumBasis">
                   <property name="maximumSize">
                    <size>
@@ -6359,6 +6308,35 @@
                   </property>
                   <property name="keyboardTracking">
                    <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="0">
+                 <widget class="QLabel" name="labelClusterMax">
+                  <property name="text">
+                   <string>Max. clusters</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QSpinBox" name="spinBoxClusterMax">
+                  <property name="maximumSize">
+                   <size>
+                    <width>150</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  </property>
+                  <property name="minimum">
+                   <number>3</number>
+                  </property>
+                  <property name="maximum">
+                   <number>98</number>
+                  </property>
+                  <property name="value">
+                   <number>10</number>
                   </property>
                  </widget>
                 </item>
@@ -6390,7 +6368,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>257</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6436,7 +6414,7 @@
               <x>0</x>
               <y>0</y>
               <width>300</width>
-              <height>147</height>
+              <height>257</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_64">
@@ -7281,10 +7259,13 @@
         </font>
        </property>
        <property name="toolTip">
-        <string>Select method for sorting analytes</string>
+        <string/>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
+       </property>
+       <property name="tabSpacing">
+        <number>2</number>
        </property>
        <widget class="QWidget" name="PlotSelectorPage">
         <property name="geometry">
@@ -7292,7 +7273,7 @@
           <x>0</x>
           <y>0</y>
           <width>268</width>
-          <height>360</height>
+          <height>384</height>
          </rect>
         </property>
         <attribute name="label">
@@ -7437,7 +7418,7 @@
           <x>0</x>
           <y>0</y>
           <width>296</width>
-          <height>360</height>
+          <height>390</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7567,7 +7548,10 @@
             <enum>QFrame::Raised</enum>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>3</number>
+           </property>
+           <property name="tabSpacing">
+            <number>2</number>
            </property>
            <widget class="QWidget" name="StyleAxes">
             <property name="geometry">
@@ -8813,8 +8797,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>100</width>
-              <height>75</height>
+              <width>294</width>
+              <height>214</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -8853,8 +8837,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>247</width>
-                  <height>312</height>
+                  <width>294</width>
+                  <height>318</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_32">
@@ -8955,19 +8939,6 @@
                      </property>
                      <property name="alignment">
                       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="1">
-                    <widget class="QComboBox" name="comboBoxColorField">
-                     <property name="maximumSize">
-                      <size>
-                       <width>155</width>
-                       <height>16777215</height>
-                      </size>
-                     </property>
-                     <property name="toolTip">
-                      <string>Select field to color points</string>
                      </property>
                     </widget>
                    </item>
@@ -9201,6 +9172,30 @@
                       <string/>
                      </property>
                     </widget>
+                   </item>
+                   <item row="1" column="1">
+                    <layout class="QHBoxLayout" name="horizontalLayout_44">
+                     <item>
+                      <widget class="QComboBox" name="comboBoxColorField">
+                       <property name="maximumSize">
+                        <size>
+                         <width>155</width>
+                         <height>16777215</height>
+                        </size>
+                       </property>
+                       <property name="toolTip">
+                        <string>Select field to color points</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QSpinBox" name="spinBoxColorField">
+                       <property name="readOnly">
+                        <bool>false</bool>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
                    </item>
                   </layout>
                  </item>
@@ -11031,10 +11026,10 @@
         </font>
        </property>
        <property name="toolTip">
-        <string>Pop the figure out into a separate window</string>
+        <string/>
        </property>
        <property name="currentIndex">
-        <number>3</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="tabNotes">
         <property name="sizePolicy">
@@ -12713,7 +12708,7 @@
                    </size>
                   </property>
                   <property name="toolTip">
-                   <string>Select all filters</string>
+                   <string>Select all annotations</string>
                   </property>
                   <property name="text">
                    <string>Select All</string>
@@ -12745,7 +12740,7 @@
                    </size>
                   </property>
                   <property name="toolTip">
-                   <string>View/hide profile points</string>
+                   <string>View/hide annotations</string>
                   </property>
                   <property name="text">
                    <string>...</string>
@@ -12786,7 +12781,7 @@
                    </size>
                   </property>
                   <property name="toolTip">
-                   <string>Remove selected field from profile plot</string>
+                   <string>Remove selected annotation(s) from plot</string>
                   </property>
                   <property name="text">
                    <string>...</string>

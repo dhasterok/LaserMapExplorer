@@ -36,30 +36,41 @@ pythonGenerator.forBlock['iterate_sample_ids'] = function(block, generator) {
 };
 
 pythonGenerator.forBlock['plot'] = function(block, generator) {
-//const plot_type = generator.valueToCode(block, 'plot_type', Order.ATOMIC);
-var code = '';
-var plot_type = block.getFieldValue('PLOT_TYPE');
-if (plot_type){
-    // TODO: Assemble python into the code variable.
-    plot_type = generator.quote_(plot_type);  // Ensure it's safely quoted for Python
-    const code = 'self.parent.update_SV('+plot_type+')';
-}
-else
-{
-    const code = 'self.parent.update_SV()';
-}
-return code;
+    //const plot_type = generator.valueToCode(block, 'plot_type', Order.ATOMIC);
+    var code = '';
+    // Access the stored plotType from the block
+    var plot_type = block.plotType;
+    if (plot_type){
+        // TODO: Assemble python into the code variable.
+        plot_type = generator.quote_(plot_type);  // Ensure it's safely quoted for Python
+        code = 'self.parent.update_SV('+plot_type+')';
+    }
+    else
+    {
+        code = 'self.parent.update_SV()';
+    }
+    return code;
 };
 
 pythonGenerator.forBlock['analyte_map'] = function(block, generator) {
-// TODO: change Order.ATOMIC to the correct operator precedence strength
-const value_style = generator.valueToCode(block, 'style');
 
-// TODO: change Order.ATOMIC to the correct operator precedence strength
-const value_save = generator.valueToCode(block, 'save');
+return '';
+};
 
-// TODO: Assemble python into the code variable.
-const code = '...';
-// TODO: Change Order.NONE to the correct operator precedence strength
-return code;
+pythonGenerator.forBlock['styles'] = function(block, generator) {
+
+return '';
+};
+
+pythonGenerator.forBlock['axisAndLabels'] = function(block, generator) {
+return '';
+};
+pythonGenerator.forBlock['annotAndScale'] = function(block, generator) {
+return '';
+};
+pythonGenerator.forBlock['marksAndLines'] = function(block, generator) {
+return '';
+};
+pythonGenerator.forBlock['coloring'] = function(block, generator) {
+return '';
 };

@@ -6,6 +6,8 @@ from PyQt5.QtCore import pyqtSlot, QObject, QUrl, QFile, QIODevice
 from lame_helper import BASEDIR
 from PyQt5.QtWebEngineWidgets import QWebEngineSettings
 import os
+import json
+import numpy as np
 # export QTWEBENGINE_REMOTE_DEBUGGING=9222  
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
 
@@ -27,6 +29,34 @@ class BlocklyBridge(QObject):
     def executeCode(self, code):
         self.parent.execute_code(code)
 
+    @pyqtSlot(str, result=str)
+    def invokeSetStyleWidgets(self, plot_type):
+        # Call the set_style_widgets function
+        plot_type = plot_type.replace('_',' ')
+        self.parent.parent.set_style_widgets(plot_type)
+        style = self.parent.parent.styles[plot_type]
+        
+        # Convert NumPy types to native Python types (if any)
+        style_serializable = self.convert_numpy_types(style)
+        
+        # Return the style dictionary as a JSON string
+        return json.dumps(style_serializable)
+    
+    def convert_numpy_types(self, obj):
+        """ Recursively convert NumPy types to Python native types. """
+        if isinstance(obj, dict):
+            return {key: self.convert_numpy_types(value) for key, value in obj.items()}
+        elif isinstance(obj, list):
+            return [self.convert_numpy_types(element) for element in obj]
+        elif isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        else:
+            return obj
+        
 class Workflow():
     def __init__(self,parent = None):
         self.parent = parent

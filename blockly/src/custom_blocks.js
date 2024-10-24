@@ -2,7 +2,7 @@ import * as Blockly from 'blockly/core';
 import {registerFieldColour, FieldColour} from '@blockly/field-colour';
 registerFieldColour();
 import { sample_ids } from './globals';
-
+import {dynamicStyleUpdate} from './helper_functions'
 var enableSampleIDsBlock = false; // Initially false
 window.Blockly = Blockly.Blocks
 const load_directory = {
@@ -111,6 +111,8 @@ const plot = {
         if (!enableSampleIDsBlock) {
             this.setDisabledReason(true, "no_sample_ids");
         }
+        // Initialize an internal property to store plot type
+        this.plotType = null;
     },
     onchange: function() {
         // Get the block attached to the 'plot_type' input
@@ -118,22 +120,18 @@ const plot = {
 
         // Check if a block is connected
         if (connectedBlock) {
-            // Get the type of the connected block and store it in a variable
+            // Get the type of the connected block and store it internally
             const plotType = connectedBlock.type;
             console.log('Connected plot type block:', plotType);  // Debugging log
-
-            // Store the connected block's type in a Blockly variable 'PLOT_TYPE'
-            const workspace = this.workspace;
-            const variable = workspace.getVariable('PLOT_TYPE');
-            if (variable) {
-                // Update the variable with the connected block's type
-                workspace.getVariableMap().getVariable('PLOT_TYPE').name = plotType;
-            } else {
-                // Create the variable if it doesn't exist yet
-                workspace.createVariable('PLOT_TYPE', null, plotType);
+            if (plotType != this.plotType){
+                // Store the connected block's type internally (not displayed)
+                this.plotType = plotType;
+                dynamicStyleUpdate(plotType);
             }
         } else {
             console.log('No block connected to plot_type');
+            // Reset the stored plot type if no block is connected
+            this.plotType = null;
         }
     }
 };
@@ -170,7 +168,7 @@ const axisAndLabels = {
         this.appendDummyInput('xLimitsHeader')
         .appendField('X Limits')
         .appendField(new Blockly.FieldTextInput(''), 'xLimMin')
-        .appendField(new Blockly.FieldTextInput(''), 'xLimMin');
+        .appendField(new Blockly.FieldTextInput(''), 'xLimMax');
         this.appendDummyInput('xScaleHeader')
         .appendField('X Scale')
         .appendField(new Blockly.FieldDropdown([
@@ -185,7 +183,7 @@ const axisAndLabels = {
         this.appendDummyInput('yLimitsHeader')
         .appendField('Y Limits')
         .appendField(new Blockly.FieldTextInput(''), 'yLimMin')
-        .appendField(new Blockly.FieldTextInput(''), 'yLimMin');
+        .appendField(new Blockly.FieldTextInput(''), 'yLimMax');
         this.appendDummyInput('xScaleHeader')
         .appendField('Y Scale')
         .appendField(new Blockly.FieldDropdown([

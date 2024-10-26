@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import scipy.odr as odr
 from PyQt5.QtWidgets import ( QMessageBox )
 
 class SpecialFunctions():
@@ -22,28 +23,35 @@ class SpecialFunctions():
         Default decay constants are as follows:
         * Lu-Hf : :math:`1.867 \pm 0.008 \times 10^{-5}` Ma (Sonderlund et al., EPSL, 2004, https://doi.org/10.1016/S0012-821X(04)00012-3)
         * Re-Os : :math:`1.666 \pm 0.005 \times 10^{-5}` Ma (Selby et al., GCA, 2007, https://doi.org/10.1016/j.gca.2007.01.008)
-        """        
+        """
+        data = self.parent.data[self.parent.sample_id].processed_data
+
         match self.parent.comboBoxDatingMethod.currentText():
             case "Lu-Hf":
                 if self.parent.checkBoxComputeRatios.isChecked():
+                    # get list of analytes
+                    analyte_list = data.get_attribute('data_type','analyte')
+
                     self.parent.labelIsotope1.setText("Lu175")
                     self.parent.comboBoxIsotopeAgeFieldType1.setCurrentText("Analyte")
-                    if ("Lu175" in self.parent.analyte_list) and (self.parent.parent.comboBoxIsotopeAgeFieldType1.currentText() == "Analyte"):
+                    if ("Lu175" in analyte_list) and (self.parent.parent.comboBoxIsotopeAgeFieldType1.currentText() == "Analyte"):
                         self.parent.comboBoxIsotopeAgeField1.setCurrentText("Lu175")
 
                     self.parent.labelIsotope2.setText("Hf176")
                     self.parent.comboBoxIsotopeAgeFieldType2.setCurrentText("Analyte")
-                    if ("Hf176" in self.parent.analyte_list) and (self.parent.comboBoxIsotopeAgeFieldType2.currentText() == "Analyte"):
+                    if ("Hf176" in analyte_list) and (self.parent.comboBoxIsotopeAgeFieldType2.currentText() == "Analyte"):
                         self.parent.comboBoxIsotopeAgeField2.setCurrentText("Hf176")
 
                     self.parent.labelIsotope3.setEnabled(True)
                     self.parent.comboBoxIsotopeAgeField3.setEnabled(True)
                     self.parent.labelIsotope3.setText("Hf178")
                     self.parent.comboBoxIsotopeAgeFieldType3.setCurrentText("Analyte")
-                    if ("Hf178" in self.parent.analyte_list) and (self.parent.comboBoxIsotopeAgeFieldType3.currentText() == "Analyte"):
+                    if ("Hf178" in analyte_list) and (self.parent.comboBoxIsotopeAgeFieldType3.currentText() == "Analyte"):
                         self.parent.comboBoxIsotopeAgeField3.setCurrentText("Hf178")
                 else:
-                    ratio_list = (self.parent.data[self.parent.sample_id]['ratio_info']['analyte_1'] + '/' + self.parent.data[self.parent.sample_id]['ratio_info']['analyte_2']).tolist()
+                    # get list of ratios
+                    ratio_list = data.get_attribute('data_type','ratio')
+
                     self.parent.labelIsotope1.setText("Hf176/Hf178")
                     self.parent.comboBoxIsotopeAgeFieldType1.setCurrentText("Ratio")
                     if ("Hf176/Hf178" in ratio_list) and (self.parent.comboBoxIsotopeAgeFieldType1.currentText() == "Ratio"):
@@ -88,6 +96,20 @@ class SpecialFunctions():
                 pass
             case "Pb-Pb":
                 pass
+
+    def scatter_date(self, x, y, y0):
+
+        def slope_only(b):
+            def model(A,x):
+                return A[0]*x + b
+            return model
+
+        linear = odr.Model(slope_only(y0))
+        data = odr.RealData(x,y)
+        myodr = odr.ODR(data, linear, beta0=[1])
+        myoutput = myodr.run()
+        myoutput.pprint()
+
 
     def compute_date_map(self):
         """Compute one of several date maps"""

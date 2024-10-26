@@ -11,6 +11,8 @@ from PyQt5.QtGui import (
     QIntValidator, QDoubleValidator, QColor, QImage, QPainter, QPixmap, QFont, QPen, QPalette,
     QCursor, QBrush, QStandardItemModel, QStandardItem, QTextCursor, QDropEvent, QFontDatabase, QIcon, QWindow
 )
+from src.UITheme import UIThemes
+
 #from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
 import pyqtgraph as pg
 from pyqtgraph.GraphicsScene import exportDialog
@@ -60,6 +62,7 @@ from src.PlotTree import PlotTree
 import src.MapImporter as MapImporter
 from src.CropImage import CropTool
 from src.ImageProcessing import ImageProcessing as ip
+from src.StyleToolbox import Styling
 from src.Profile import Profiling
 from src.Polygon import PolygonManager
 from src.Calculator import CustomFieldCalculator as cfc
@@ -71,6 +74,7 @@ import src.QuickView as QV
 from lame_helper import BASEDIR, ICONPATH, SSPATH, load_stylesheet
 from src.ExtendedDF import AttributeDataFrame
 import src.format as fmt
+from src.colorfunc import get_hex_color, get_rgb_color
 
 # to prevent segmentation error at startup
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
@@ -304,20 +308,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         # Add this line to set the size policy
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
         self.buttons_layout = None  # create a reference to your layout
 
-        #Initialise nested data which will hold the main sets of data for analysis
+        #Initialize nested data which will hold the main sets of data for analysis
         self.data = {}
 
-        # this does not work
-        #darkdetect.listener(lambda: self.switch_view_mode(0))
-        
         self.clipped_ratio_data = pd.DataFrame()
         self.analyte_data = {}  #stores orginal analyte data
         self.clipped_analyte_data = {} # stores processed analyted data
         self.sample_id = ''
         self.filter_info = pd.DataFrame()
-        #self.data = {}
         self.selected_analytes = []
 
 
@@ -491,12 +492,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolBoxTreeView.setCurrentIndex(self.right_tab['tree'])
         self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
 
-        # set theme
-        self.view_mode = 0
-        self.switch_view_mode(self.view_mode)
-        self.actionViewMode.triggered.connect(lambda: self.switch_view_mode(self.view_mode+1))
-
-
 
         # create dictionaries for default plot styles
         #-------------------------
@@ -516,8 +511,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.left_tab['cluster']: [0, 'cluster', 'cluster score', 'cluster performance'],
             self.left_tab['special']: [0,'analyte map', 'gradient map', 'cluster score', 'PCA score', 'profile']}
 
-        self.styles = {}
-        self.load_theme_names()
 
         # initalize self.comboBoxPlotType
         self.comboBoxPlotType.clear()
@@ -579,6 +572,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.browser = Browser(self)
         self.actionReportBug.triggered.connect(lambda: self.browser.setUrl(QUrl('https://github.com/dhasterok/LaserMapExplorer/issues')))
+
+        # For light and dark themes, connects actionViewMode
+        self.theme = UIThemes(app, self)
+
 
         # initiate Workflow 
         self.workflow = Workflow(self)
@@ -740,27 +737,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxFieldY.activated.connect(self.update_SV)
         self.comboBoxFieldZ.activated.connect(self.update_SV)
 
-        # ternary colormaps
-        # create ternary colors dictionary
-        df = pd.read_csv(os.path.join(BASEDIR,'resources/styles/ternary_colormaps.csv'))
-        self.ternary_colormaps = df.to_dict(orient='records')
-        self.comboBoxTernaryColormap.clear()
-        schemes = []
-        for cmap in self.ternary_colormaps:
-            schemes.append(cmap['scheme'])
-        self.comboBoxTernaryColormap.addItems(schemes)
-        self.comboBoxTernaryColormap.addItem('user defined')
-
-        # dialog for adding and saving new colormaps
-        self.toolButtonSaveTernaryColormap.clicked.connect(self.input_ternary_name_dlg)
-
-        # select new ternary colors
-        self.toolButtonTCmapXColor.clicked.connect(lambda: self.button_color_select(self.toolButtonTCmapXColor))
-        self.toolButtonTCmapYColor.clicked.connect(lambda: self.button_color_select(self.toolButtonTCmapYColor))
-        self.toolButtonTCmapZColor.clicked.connect(lambda: self.button_color_select(self.toolButtonTCmapZColor))
-        self.toolButtonTCmapMColor.clicked.connect(lambda: self.button_color_select(self.toolButtonTCmapMColor))
-        self.comboBoxTernaryColormap.currentIndexChanged.connect(lambda: self.ternary_colormap_changed())
-        self.ternary_colormap_changed()
 
         # polygon table
         header = self.tableWidgetPolyPoints.horizontalHeader()
@@ -927,26 +903,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         # Styling Tab
         #-------------------------
-        # set style theme
-        self.comboBoxStyleTheme.activated.connect(self.read_theme)
+        self.styling = Styling(self)
+        self.styling.load_theme_names()
 
-        # comboBox with plot type
-        # overlay and annotation properties
-        self.toolButtonOverlayColor.clicked.connect(self.overlay_color_callback)
-        self.toolButtonMarkerColor.clicked.connect(self.marker_color_callback)
-        self.toolButtonLineColor.clicked.connect(self.line_color_callback)
-        self.toolButtonClusterColor.clicked.connect(self.cluster_color_callback)
-        self.toolButtonXAxisReset.clicked.connect(lambda: self.axis_reset_callback('x'))
-        self.toolButtonYAxisReset.clicked.connect(lambda: self.axis_reset_callback('y'))
-        self.toolButtonCAxisReset.clicked.connect(lambda: self.axis_reset_callback('c'))
-        self.toolButtonClusterColorReset.clicked.connect(self.set_default_cluster_colors)
-        #self.toolButtonOverlayColor.setStyleSheet("background-color: white;")
-
-        setattr(self.comboBoxMarker, "allItems", lambda: [self.comboBoxMarker.itemText(i) for i in range(self.comboBoxMarker.count())])
-        setattr(self.comboBoxLineWidth, "allItems", lambda: [self.comboBoxLineWidth.itemText(i) for i in range(self.comboBoxLineWidth.count())])
-        setattr(self.comboBoxColorByField, "allItems", lambda: [self.comboBoxColorByField.itemText(i) for i in range(self.comboBoxColorByField.count())])
-        setattr(self.comboBoxColorField, "allItems", lambda: [self.comboBoxColorField.itemText(i) for i in range(self.comboBoxColorField.count())])
-        setattr(self.comboBoxFieldColormap, "allItems", lambda: [self.comboBoxFieldColormap.itemText(i) for i in range(self.comboBoxFieldColormap.count())])
         setattr(self.comboBoxMVPlots, "allItems", lambda: [self.comboBoxMVPlots.itemText(i) for i in range(self.comboBoxMVPlots.count())])
 
         # self.doubleSpinBoxMarkerSize.valueChanged.connect(lambda: self.plot_scatter(save=False))
@@ -959,102 +918,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         header.setSectionResizeMode(2,QHeaderView.ResizeToContents)
         self.toolButtonGroupMask.clicked.connect(lambda: self.apply_cluster_mask(inverse=False))
         self.toolButtonGroupMaskInverse.clicked.connect(lambda: self.apply_cluster_mask(inverse=True))
-
-        # colormaps
-        # matplotlib colormaps
-        self.mpl_colormaps = colormap.listMaps('matplotlib')
-        for i in range(len(self.mpl_colormaps) - 1, -1, -1):
-            if self.mpl_colormaps[i].endswith('_r'):
-                # If the item ends with '_r', remove it from the list
-                del self.mpl_colormaps[i]
-
-        # custom colormaps
-        self.custom_color_dict = csvdict.import_csv_to_dict(os.path.join(BASEDIR,'resources/app_data/custom_colormaps.csv'))
-        for key in self.custom_color_dict:
-            self.custom_color_dict[key] = [h for h in self.custom_color_dict[key] if h]
-
-        # add list of colormaps to comboBoxFieldColormap and set callbacks
-        self.comboBoxFieldColormap.clear()
-        self.comboBoxFieldColormap.addItems(list(self.custom_color_dict.keys())+self.mpl_colormaps)
-        self.comboBoxFieldColormap.activated.connect(self.field_colormap_callback)
-        self.checkBoxReverseColormap.stateChanged.connect(self.colormap_direction_callback)
-
-        # callback functions
-        self.comboBoxPlotType.currentIndexChanged.connect(lambda: self.plot_type_callback(update=True))
-        self.toolButtonUpdatePlot.clicked.connect(self.update_SV)
-        self.toolButtonSaveTheme.clicked.connect(self.input_theme_name_dlg)
-        # axes
-        self.lineEditXLabel.editingFinished.connect(lambda: self.axis_label_edit_callback('x',self.lineEditXLabel.text()))
-        self.lineEditYLabel.editingFinished.connect(lambda: self.axis_label_edit_callback('y',self.lineEditYLabel.text()))
-        self.lineEditZLabel.editingFinished.connect(lambda: self.axis_label_edit_callback('z',self.lineEditZLabel.text()))
-        self.lineEditCbarLabel.editingFinished.connect(lambda: self.axis_label_edit_callback('c',self.lineEditCbarLabel.text()))
-
-        self.comboBoxXScale.activated.connect(lambda: self.axis_scale_callback(self.comboBoxXScale,'x'))
-        self.comboBoxYScale.activated.connect(lambda: self.axis_scale_callback(self.comboBoxYScale,'y'))
-        self.comboBoxColorScale.activated.connect(lambda: self.axis_scale_callback(self.comboBoxColorScale,'c'))
-
-        self.lineEditXLB.setValidator(QDoubleValidator())
-        self.lineEditXLB.precision = 3
-        self.lineEditXLB.toward = 0
-        self.lineEditXUB.setValidator(QDoubleValidator())
-        self.lineEditXUB.precision = 3
-        self.lineEditXUB.toward = 1
-        self.lineEditYLB.setValidator(QDoubleValidator())
-        self.lineEditYLB.precision = 3
-        self.lineEditYLB.toward = 0
-        self.lineEditYUB.setValidator(QDoubleValidator())
-        self.lineEditYUB.precision = 3
-        self.lineEditYUB.toward = 1
-        self.lineEditColorLB.setValidator(QDoubleValidator())
-        self.lineEditColorLB.precision = 3
-        self.lineEditColorLB.toward = 0
-        self.lineEditColorUB.setValidator(QDoubleValidator())
-        self.lineEditColorUB.precision = 3
-        self.lineEditColorUB.toward = 1
-        self.lineEditAspectRatio.setValidator(QDoubleValidator())
-
-        self.lineEditXLB.editingFinished.connect(lambda: self.axis_limit_edit_callback('x', 0, float(self.lineEditXLB.text())))
-        self.lineEditXUB.editingFinished.connect(lambda: self.axis_limit_edit_callback('x', 1, float(self.lineEditXUB.text())))
-        self.lineEditYLB.editingFinished.connect(lambda: self.axis_limit_edit_callback('y', 0, float(self.lineEditYLB.text())))
-        self.lineEditYUB.editingFinished.connect(lambda: self.axis_limit_edit_callback('y', 1, float(self.lineEditYUB.text())))
-        self.lineEditColorLB.editingFinished.connect(lambda: self.axis_limit_edit_callback('c', 0, float(self.lineEditColorLB.text())))
-        self.lineEditColorUB.editingFinished.connect(lambda: self.axis_limit_edit_callback('c', 1, float(self.lineEditColorUB.text())))
-
-        self.lineEditAspectRatio.editingFinished.connect(self.aspect_ratio_callback)
-        self.comboBoxTickDirection.activated.connect(self.tickdir_callback)
-        # annotations
-        self.fontComboBox.activated.connect(self.font_callback)
-        self.doubleSpinBoxFontSize.valueChanged.connect(self.font_size_callback)
-        # ---------
-        # These are tools are for future use, when individual annotations can be added
-        self.tableWidgetAnnotation.setVisible(False)
-        self.toolButtonAnnotationDelete.setVisible(False)
-        self.toolButtonAnnotationSelectAll.setVisible(False)
-        # ---------
-
-        # scales
-        self.lineEditScaleLength.setValidator(QDoubleValidator())
-        self.comboBoxScaleDirection.activated.connect(self.scale_direction_callback)
-        self.comboBoxScaleLocation.activated.connect(self.scale_location_callback)
-        self.lineEditScaleLength.editingFinished.connect(self.scale_length_callback)
-        #overlay color
-        self.comboBoxMarker.activated.connect(self.marker_symbol_callback)
-        self.doubleSpinBoxMarkerSize.valueChanged.connect(self.marker_size_callback)
-        self.horizontalSliderMarkerAlpha.sliderReleased.connect(self.slider_alpha_changed)
-        # lines
-        self.comboBoxLineWidth.activated.connect(self.line_width_callback)
-        self.lineEditLengthMultiplier.editingFinished.connect(self.length_multiplier_callback)
-        # colors
-        # marker color
-        self.comboBoxColorByField.activated.connect(self.color_by_field_callback)
-        self.comboBoxColorField.activated.connect(self.color_field_callback)
-        self.spinBoxColorField.valueChanged.connect(self.color_field_update)
-        self.comboBoxFieldColormap.activated.connect(self.field_colormap_callback)
-        self.comboBoxCbarDirection.activated.connect(self.cbar_direction_callback)
-        # resolution
-        self.spinBoxHeatmapResolution.valueChanged.connect(lambda: self.resolution_callback(update_plot=True))
-        # clusters
-        self.spinBoxClusterGroup.valueChanged.connect(self.select_cluster_group_callback)
 
 
         # Calculator tab
@@ -1170,6 +1033,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.sample_id == '':
             return
 
+        messageBoxResetSample = QMessageBox()
+        iconWarning = QtGui.QIcon()
+        iconWarning.addPixmap(QtGui.QPixmap(":/resources/icons/icon-warning-64.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+
+        messageBoxResetSample.setWindowIcon(iconWarning)  # Set custom icon
+        messageBoxResetSample.setText("Do you wish to discard all work and revert to the original data?")
+        messageBoxResetSample.setWindowTitle("Reset analyses")
+        messageBoxResetSample.setStandardButtons(QMessageBox.Reset | QMessageBox.Cancel)
+
+        # Display the dialog and wait for user action
+        response = messageBoxResetSample.exec_()
+
+        if response == QMessageBox.Cancel:
+            return
+
         if selection =='full':
             #reset self.data
             self.data = {}
@@ -1193,7 +1071,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.change_sample(self.comboBoxSampleId.currentIndex())
 
             # reset styles
-            self.reset_default_styles()
+            self.styling.reset_default_styles()
 
             # reset plot layouts
             self.clear_layout(self.widgetSingleView.layout())
@@ -1395,7 +1273,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolBoxStyle.setCurrentIndex(0)
         self.toolBoxTreeView.setCurrentIndex(self.right_tab['tree'])
         self.toolBox.setCurrentIndex(self.left_tab['sample'])
-        self.set_style_widgets(self.comboBoxPlotType.currentText())
+        self.styling.set_style_widgets(self.comboBoxPlotType.currentText())
 
         self.styles['analyte map']['Colors']['ColorByField'] = 'Analyte'
         self.styles['analyte map']['Colors']['Field'] = analyte_list[0]
@@ -1416,9 +1294,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # fields = self.get_field_list('Analyte')
         # self.styles['analyte map']['Colors']['Field'] = fields[0]
         # self.comboBoxColorField.setCurrentText(fields[0])
-        # self.initialize_axis_values('Analyte', fields[0])
+        # self.styling.initialize_axis_values('Analyte', fields[0])
         # self.color_field_callback()
-        # self.set_style_widgets('analyte map')
+        # self.styling.set_style_widgets('analyte map')
         
         # update toolbar
         self.canvas_changed()
@@ -1698,7 +1576,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # get the current plot type
         #plot_type = self.comboBoxPlotType.currentText()
-        #self.set_style_widgets(plot_type=plot_type, style=self.styles[plot_type])
+        #self.styling.set_style_widgets(plot_type=plot_type, style=self.styles[plot_type])
 
         # If canvasWindow is set to SingleView, update the plot
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv'] and update:
@@ -1731,10 +1609,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if ok:
             # update colormap structure
             self.ternary_colormaps.append({'scheme': name,
-                    'top': self.get_hex_color(self.toolButtonTCmapXColor.palette().button().color()),
-                    'left': self.get_hex_color(self.toolButtonTCmapYColor.palette().button().color()),
-                    'right': self.get_hex_color(self.toolButtonTCmapZColor.palette().button().color()),
-                    'center': self.get_hex_color(self.toolButtonTCmapMColor.palette().button().color())})
+                    'top': get_hex_color(self.toolButtonTCmapXColor.palette().button().color()),
+                    'left': get_hex_color(self.toolButtonTCmapYColor.palette().button().color()),
+                    'right': get_hex_color(self.toolButtonTCmapZColor.palette().button().color()),
+                    'center': get_hex_color(self.toolButtonTCmapMColor.palette().button().color())})
             # update comboBox
             self.comboBoxTernaryColormap.addItem(name)
             self.comboBoxTernaryColormap.setText(name)
@@ -1929,83 +1807,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     #     self.toolButtonPopFigure.setVisible(False)
 
     # color picking functions
-    def button_color_select(self, button):
-        """Select background color of button
-
-        :param button: button clicked
-        :type button: QPushbutton | QToolButton
-        """
-        old_color = button.palette().color(button.backgroundRole())
-        color_dlg = QColorDialog(self)
-        color_dlg.setCurrentColor(old_color)
-        color_dlg.setCustomColor(int(1),old_color)
-
-        color = color_dlg.getColor()
-
-        if color.isValid():
-            button.setStyleSheet("background-color: %s;" % color.name())
-            QColorDialog.setCustomColor(int(1),color)
-            if button.accessibleName().startswith('Ternary'):
-                button.setCurrentText('user defined')
-
-    def get_hex_color(self, color):
-        """Converts QColor to hex-rgb format
-
-        Parameters
-        ----------
-        color : list of int
-            RGB color triplet
-
-        Returns
-        -------
-        str : 
-            hex code for an RGB color triplet
-        """
-        if type(color) is tuple:
-            color = np.round(255*np.array(color))
-            color[color < 0] = 0
-            color[color > 255] = 255
-            return "#{:02x}{:02x}{:02x}".format(int(color[0]), int(color[1]), int(color[2]))
-        else:
-            return "#{:02x}{:02x}{:02x}".format(color.red(), color.green(), color.blue())
-
-    def get_rgb_color(self, color):
-        """Convert from hex to RGB formatted color
-
-        Parameters
-        ----------
-        color : str or list
-            Converts a hex str to RGB colors.  If list, should be a list of hex str.
-
-        Returns
-        -------
-        list of int or list of RGB tuples:
-            RGB color triplets used to create colormaps.
-        """        
-        if not color:
-            return []
-        elif isinstance(color,str):
-            color = color.lstrip('#').lower()
-            return [int(color[0:2],16), int(color[2:4],16), int(color[4:6],16)]
-        else:
-            color_list = [None]*len(color)
-            for i, hexcolor in enumerate(color):
-                rgb = self.get_rgb_color(hexcolor)
-                color_list[i] = tuple(float(c)/255 for c in rgb) + (1.0,)
-            return color_list
-
-    def ternary_colormap_changed(self):
-        """Changes toolButton backgrounds associated with ternary colormap
-
-        Updates ternary colormap when swatch colors are changed in the Scatter and Heatmaps >
-        Map from Ternary groupbox.  The ternary colored chemical map is updated.
-        """
-        for cmap in self.ternary_colormaps:
-            if cmap['scheme'] == self.comboBoxTernaryColormap.currentText():
-                self.toolButtonTCmapXColor.setStyleSheet("background-color: %s;" % cmap['top'])
-                self.toolButtonTCmapYColor.setStyleSheet("background-color: %s;" % cmap['left'])
-                self.toolButtonTCmapZColor.setStyleSheet("background-color: %s;" % cmap['right'])
-                self.toolButtonTCmapMColor.setStyleSheet("background-color: %s;" % cmap['center'])
 
     def plot_profile_and_table(self):
         self.profiling.plot_profiles()
@@ -2467,16 +2268,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         # set the comboBoxSampleId with the correct sample id
                         self.comboBoxSampleId.setCurrentIndex(0)
                         self.sample_id = data_dict['sample_id']
-                        
-                        
-
 
                         # Compute aspect ratio
                         self.compute_map_aspect_ratio()
                         
                         # Initialize tabs
                         self.init_tabs()
-                        
                         
                         # Reset flags
                         self.update_cluster_flag = True
@@ -2489,9 +2286,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         self.histogram_update_bin_width()
 
                         # add sample id to self.profiles, self.polygons and load saved profiles and polygons
+                        #self.profiling.add_samples()
                         for sample_id in self.data.keys():
-                            self.profiling.add_samples()
+                            # profiles
+                            self.profiling.add_profiles(project_dir, sample_id)
                             self.profiling.load_profiles(project_dir, sample_id)
+
+                            # polygons
                             self.polygon.add_samples()
                             self.polygon.load_polygons(project_dir, sample_id)
 
@@ -3199,1982 +3000,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         histogram.autoHistogramRange()
 
 
-    # -------------------------------------
-    # Style related fuctions/callbacks
-    # -------------------------------------
-    def reset_default_styles(self):
-        """Resets ``MainWindow.styles`` dictionary to default values."""
-        default_plot_style = {'Axes': {'XLim': [0,1], 'XScale': 'linear', 'XLabel': '', 'YLim': [0,1], 'YScale': 'linear', 'YLabel': '', 'ZLabel': '', 'AspectRatio': '1.0', 'TickDir': 'out'},
-                               'Text': {'Font': '', 'FontSize': 11.0},
-                               'Scale': {'Direction': 'none', 'Location': 'northeast', 'Length': None, 'OverlayColor': '#ffffff'},
-                               'Markers': {'Symbol': 'circle', 'Size': 6, 'Alpha': 30},
-                               'Lines': {'LineWidth': 1.5, 'Multiplier': 1, 'Color': '#1c75bc'},
-                               'Colors': {'Color': '#1c75bc', 'ColorByField': 'None', 'Field': '', 'Colormap': 'viridis', 'Reverse': False, 'CLim':[0,1], 'CScale':'linear', 'Direction': 'vertical', 'CLabel': '', 'Resolution': 10}
-                               }
-
-        # try to load one of the preferred fonts
-        default_font = ['Avenir','Candara','Myriad Pro','Myriad','Aptos','Calibri','Helvetica','Arial','Verdana']
-        names = QFontDatabase().families()
-        for font in default_font:
-            if font in names:
-                self.fontComboBox.setCurrentFont(QFont(font, 11))
-                default_plot_style['Text']['Font'] = self.fontComboBox.currentFont().family()
-                break
-            # try:
-            #     self.fontComboBox.setCurrentFont(QFont(font, 11))
-            #     default_plot_style['Text']['Font'] = self.fontComboBox.currentFont().family()
-            # except:
-            #     print(f'Could not find {font} font')
-
-
-
-        self.styles = {'analyte map': copy.deepcopy(default_plot_style),
-                'correlation': copy.deepcopy(default_plot_style),
-                'histogram': copy.deepcopy(default_plot_style),
-                'gradient map': copy.deepcopy(default_plot_style),
-                'scatter': copy.deepcopy(default_plot_style),
-                'heatmap': copy.deepcopy(default_plot_style),
-                'ternary map': copy.deepcopy(default_plot_style),
-                'TEC': copy.deepcopy(default_plot_style),
-                'Radar': copy.deepcopy(default_plot_style),
-                'variance': copy.deepcopy(default_plot_style),
-                'vectors': copy.deepcopy(default_plot_style),
-                'PCA scatter': copy.deepcopy(default_plot_style),
-                'PCA heatmap': copy.deepcopy(default_plot_style),
-                'PCA score': copy.deepcopy(default_plot_style),
-                'cluster': copy.deepcopy(default_plot_style),
-                'cluster score': copy.deepcopy(default_plot_style),
-                'cluster performance': copy.deepcopy(default_plot_style),
-                'profile': copy.deepcopy(default_plot_style)}
-
-        # update default styles
-        for k in self.styles.keys():
-            self.styles[k]['Text']['Font'] = self.fontComboBox.currentFont().family()
-
-        self.styles['analyte map']['Colors']['Colormap'] = 'plasma'
-        self.styles['analyte map']['Colors']['ColorByField'] = 'Analyte'
-
-        self.styles['correlation']['Axes']['AspectRatio'] = 1.0
-        self.styles['correlation']['Text']['FontSize'] = 8
-        self.styles['correlation']['Colors']['Colormap'] = 'RdBu'
-        self.styles['correlation']['Colors']['Direction'] = 'vertical'
-        self.styles['correlation']['Colors']['CLim'] = [-1,1]
-
-        self.styles['vectors']['Axes']['AspectRatio'] = 1.0
-        self.styles['vectors']['Colors']['Colormap'] = 'RdBu'
-
-        self.styles['gradient map']['Colors']['Colormap'] = 'RdYlBu'
-
-        self.styles['cluster score']['Colors']['Colormap'] = 'plasma'
-        self.styles['cluster score']['Colors']['Direction'] = 'vertical'
-        self.styles['cluster score']['Colors']['ColorByField'] = 'cluster score'
-        self.styles['cluster score']['Colors']['ColorField'] = 'cluster0'
-        self.styles['cluster score']['Colors']['CScale'] = 'linear'
-
-        self.styles['cluster']['Colors']['CScale'] = 'discrete'
-        self.styles['cluster']['Markers']['Alpha'] = 100
-
-        self.styles['cluster performance']['Axes']['AspectRatio'] = 0.62
-
-        self.styles['PCA score']['Colors']['CScale'] = 'linear'
-        self.styles['PCA score']['Colors']['ColorByField'] = 'PCA score'
-        self.styles['PCA score']['Colors']['ColorField'] = 'PC1'
-
-        self.styles['scatter']['Axes']['AspectRatio'] = 1
-
-        self.styles['heatmap']['Axes']['AspectRatio'] = 1
-        self.styles['heatmap']['Colors']['CLim'] = [1,1000]
-        self.styles['heatmap']['Colors']['CScale'] = 'log'
-        self.styles['TEC']['Axes']['AspectRatio'] = 0.62
-        self.styles['variance']['Axes']['AspectRatio'] = 0.62
-        self.styles['PCA scatter']['Lines']['Color'] = '#4d4d4d'
-        self.styles['PCA scatter']['Lines']['LineWidth'] = 0.5
-        self.styles['PCA scatter']['Axes']['AspectRatio'] = 1
-        self.styles['PCA heatmap']['Axes']['AspectRatio'] = 1
-        self.styles['PCA heatmap']['Lines']['Color'] = '#ffffff'
-
-        self.styles['variance']['Text']['FontSize'] = 8
-
-        self.styles['histogram']['Axes']['AspectRatio'] = 0.62
-        self.styles['histogram']['Lines']['LineWidth'] = 0
-
-        self.styles['profile']['Axes']['AspectRatio'] = 0.62
-        self.styles['profile']['Lines']['LineWidth'] = 1.0
-        self.styles['profile']['Markers']['Size'] = 12
-        self.styles['profile']['Colors']['Color'] = '#d3d3d3'
-        self.styles['profile']['Lines']['Color'] = '#d3d3d3'
-
-    # Themes
-    # -------------------------------------
-    def load_theme_names(self):
-        """Loads theme names and adds them to the theme comboBox
-        
-        Looks for saved style themes (*.sty) in ``resources/styles/`` directory and adds them to
-        ``MainWindow.comboBoxStyleTheme``.  After setting list, the comboBox is set to default style.
-        """
-        # read filenames with *.sty
-        file_list = os.listdir(os.path.join(BASEDIR,'resources/styles/'))
-        style_list = [file.replace('.sty','') for file in file_list if file.endswith('.sty')]
-
-        # add default to list
-        style_list.insert(0,'default')
-
-        # update theme comboBox
-        self.comboBoxStyleTheme.clear()
-        self.comboBoxStyleTheme.addItems(style_list)
-        self.comboBoxStyleTheme.setCurrentIndex(0)
-
-        self.reset_default_styles()
-
-    def read_theme(self):
-        """Reads a style theme
-        
-        Executes when the user changes the ``MainWindow.comboBoxStyleTheme.currentIndex()``.
-        """
-        name = self.comboBoxStyleTheme.currentText()
-
-        if name == 'default':
-            self.reset_default_styles()
-            return
-
-        with open(os.path.join(BASEDIR,f'resources/styles/{name}.sty'), 'rb') as file:
-            self.styles = pickle.load(file)
-
-    def input_theme_name_dlg(self):
-        """Opens a dialog to save style theme
-
-        Executes on ``MainWindow.toolButtonSaveTheme`` is clicked.  The theme is added to
-        ``MainWindow.comboBoxStyleTheme`` and the style widget settings for each plot type (``MainWindow.styles``) are saved as a
-        dictionary into the theme name with a ``.sty`` extension.
-        """
-        name, ok = QInputDialog.getText(self, 'Save custom theme', 'Enter theme name:')
-        if ok:
-            # update comboBox
-            self.comboBoxStyleTheme.addItem(name)
-            self.comboBoxStyleTheme.setCurrentText(name)
-
-            # append theme to file of saved themes
-            with open(os.path.join(BASEDIR,f'resources/styles/{name}.sty'), 'wb') as file:
-                pickle.dump(self.styles, file, protocol=pickle.HIGHEST_PROTOCOL)
-        else:
-            # throw a warning that name is not saved
-            QMessageBox.warning(None,'Error','could not save theme.')
-
-            return
-
-    # general style functions
-    # -------------------------------------
-    def toggle_style_widgets(self):
-        """Enables/disables all style widgets
-
-        Toggling of enabled states are based on ``MainWindow.toolBox`` page and the current plot type
-        selected in ``MainWindow.comboBoxPlotType."""
-        #print('toggle_style_widgets')
-        plot_type = self.comboBoxPlotType.currentText().lower()
-
-        # annotation properties
-        self.fontComboBox.setEnabled(True)
-        self.doubleSpinBoxFontSize.setEnabled(True)
-        match plot_type.lower():
-            case 'analyte map' | 'gradient map':
-                # axes properties
-                self.lineEditXLB.setEnabled(True)
-                self.lineEditXUB.setEnabled(True)
-                self.comboBoxXScale.setEnabled(False)
-                self.lineEditYLB.setEnabled(True)
-                self.lineEditYUB.setEnabled(True)
-                self.comboBoxYScale.setEnabled(False)
-                self.lineEditXLabel.setEnabled(False)
-                self.lineEditYLabel.setEnabled(False)
-                self.lineEditZLabel.setEnabled(False)
-                self.lineEditAspectRatio.setEnabled(False)
-                self.comboBoxTickDirection.setEnabled(False)
-
-                # scalebar properties
-                self.comboBoxScaleDirection.setEnabled(True)
-                self.comboBoxScaleLocation.setEnabled(True)
-                self.lineEditScaleLength.setEnabled(True)
-                self.toolButtonOverlayColor.setEnabled(True)
-
-                # marker properties
-                if len(self.spotdata) != 0:
-                    self.comboBoxMarker.setEnabled(True)
-                    self.doubleSpinBoxMarkerSize.setEnabled(True)
-                    self.horizontalSliderMarkerAlpha.setEnabled(True)
-                    self.labelMarkerAlpha.setEnabled(True)
-
-                    self.toolButtonMarkerColor.setEnabled(True)
-                else:
-                    self.comboBoxMarker.setEnabled(False)
-                    self.doubleSpinBoxMarkerSize.setEnabled(False)
-                    self.horizontalSliderMarkerAlpha.setEnabled(False)
-                    self.labelMarkerAlpha.setEnabled(False)
-
-                    self.toolButtonMarkerColor.setEnabled(False)
-
-                # line properties
-                #if len(self.polygon.polygons) > 0:
-                #    self.comboBoxLineWidth.setEnabled(True)
-                #else:
-                #    self.comboBoxLineWidth.setEnabled(False)
-                self.comboBoxLineWidth.setEnabled(True)
-                self.toolButtonLineColor.setEnabled(True)
-                self.lineEditLengthMultiplier.setEnabled(False)
-
-                # color properties
-                self.comboBoxColorByField.setEnabled(True)
-                self.comboBoxColorField.setEnabled(True)
-                self.comboBoxFieldColormap.setEnabled(True)
-                self.lineEditColorLB.setEnabled(True)
-                self.lineEditColorUB.setEnabled(True)
-                self.comboBoxColorScale.setEnabled(True)
-                self.comboBoxCbarDirection.setEnabled(True)
-                self.lineEditCbarLabel.setEnabled(True)
-
-                self.spinBoxHeatmapResolution.setEnabled(False)
-            case 'correlation' | 'vectors':
-                # axes properties
-                self.lineEditXLB.setEnabled(False)
-                self.lineEditXUB.setEnabled(False)
-                self.comboBoxXScale.setEnabled(False)
-                self.lineEditYLB.setEnabled(False)
-                self.lineEditYUB.setEnabled(False)
-                self.comboBoxYScale.setEnabled(False)
-                self.lineEditXLabel.setEnabled(False)
-                self.lineEditYLabel.setEnabled(False)
-                self.lineEditZLabel.setEnabled(False)
-                self.comboBoxXScale.setEnabled(False)
-                self.comboBoxYScale.setEnabled(False)
-                self.lineEditAspectRatio.setEnabled(False)
-                self.comboBoxTickDirection.setEnabled(True)
-
-                # scalebar properties
-                self.comboBoxScaleDirection.setEnabled(False)
-                self.comboBoxScaleLocation.setEnabled(False)
-                self.lineEditScaleLength.setEnabled(False)
-                self.toolButtonOverlayColor.setEnabled(False)
-
-                # marker properties
-                self.comboBoxMarker.setEnabled(False)
-                self.doubleSpinBoxMarkerSize.setEnabled(False)
-                self.horizontalSliderMarkerAlpha.setEnabled(False)
-                self.labelMarkerAlpha.setEnabled(False)
-
-                # line properties
-                self.comboBoxLineWidth.setEnabled(False)
-                self.lineEditLengthMultiplier.setEnabled(False)
-                self.toolButtonLineColor.setEnabled(False)
-
-                # color properties
-                self.toolButtonMarkerColor.setEnabled(False)
-                self.comboBoxFieldColormap.setEnabled(True)
-                self.comboBoxColorScale.setEnabled(False)
-                self.lineEditColorLB.setEnabled(True)
-                self.lineEditColorUB.setEnabled(True)
-                self.comboBoxCbarDirection.setEnabled(True)
-                self.lineEditCbarLabel.setEnabled(False)
-                if plot_type.lower() == 'correlation':
-                    self.comboBoxColorByField.setEnabled(True)
-                    if self.comboBoxColorByField.currentText() == 'cluster':
-                        self.comboBoxColorField.setEnabled(True)
-                    else:
-                        self.comboBoxColorField.setEnabled(False)
-
-                else:
-                    self.comboBoxColorByField.setEnabled(False)
-                    self.comboBoxColorField.setEnabled(False)
-
-                self.spinBoxHeatmapResolution.setEnabled(False)
-            case 'histogram':
-                # axes properties
-                self.lineEditXLB.setEnabled(True)
-                self.lineEditXUB.setEnabled(True)
-                self.comboBoxXScale.setEnabled(True)
-                self.lineEditYLB.setEnabled(True)
-                self.lineEditYUB.setEnabled(True)
-                self.comboBoxYScale.setEnabled(False)
-                self.lineEditXLabel.setEnabled(True)
-                self.lineEditYLabel.setEnabled(True)
-                self.lineEditZLabel.setEnabled(False)
-                self.lineEditAspectRatio.setEnabled(True)
-                self.comboBoxTickDirection.setEnabled(True)
-
-                # scalebar properties
-                self.comboBoxScaleDirection.setEnabled(False)
-                self.comboBoxScaleLocation.setEnabled(False)
-                self.lineEditScaleLength.setEnabled(False)
-                self.toolButtonOverlayColor.setEnabled(False)
-
-                # marker properties
-                self.comboBoxMarker.setEnabled(False)
-                self.doubleSpinBoxMarkerSize.setEnabled(False)
-                self.horizontalSliderMarkerAlpha.setEnabled(True)
-                self.labelMarkerAlpha.setEnabled(True)
-
-                # line properties
-                self.comboBoxLineWidth.setEnabled(True)
-                self.toolButtonLineColor.setEnabled(True)
-                self.lineEditLengthMultiplier.setEnabled(False)
-
-                # color properties
-                self.comboBoxColorByField.setEnabled(True)
-                # if color by field is set to clusters, then colormap fields are on,
-                # field is set by cluster table
-                self.comboBoxColorScale.setEnabled(False)
-                if self.comboBoxColorByField.currentText().lower() == 'none':
-                    self.toolButtonMarkerColor.setEnabled(True)
-                    self.comboBoxColorField.setEnabled(False)
-                    self.comboBoxCbarDirection.setEnabled(False)
-                else:
-                    self.toolButtonMarkerColor.setEnabled(False)
-                    self.comboBoxColorField.setEnabled(True)
-                    self.comboBoxCbarDirection.setEnabled(True)
-
-                self.comboBoxFieldColormap.setEnabled(False)
-                self.lineEditColorLB.setEnabled(False)
-                self.lineEditColorUB.setEnabled(False)
-                self.lineEditCbarLabel.setEnabled(False)
-
-                self.spinBoxHeatmapResolution.setEnabled(False)
-            case 'scatter' | 'PCA scatter':
-                # axes properties
-                if (self.toolBox.currentIndex() != self.left_tab['scatter']) or (self.comboBoxFieldZ.currentText() == ''):
-                    self.lineEditXLB.setEnabled(True)
-                    self.lineEditXUB.setEnabled(True)
-                    self.comboBoxXScale.setEnabled(True)
-                    self.lineEditYLB.setEnabled(True)
-                    self.lineEditYUB.setEnabled(True)
-                    self.comboBoxYScale.setEnabled(True)
-                else:
-                    self.lineEditXLB.setEnabled(False)
-                    self.lineEditXUB.setEnabled(False)
-                    self.comboBoxXScale.setEnabled(False)
-                    self.lineEditYLB.setEnabled(False)
-                    self.lineEditYUB.setEnabled(False)
-                    self.comboBoxYScale.setEnabled(False)
-
-                self.lineEditXLabel.setEnabled(True)
-                self.lineEditYLabel.setEnabled(True)
-                if self.comboBoxFieldZ.currentText() == '':
-                    self.lineEditZLabel.setEnabled(False)
-                else:
-                    self.lineEditZLabel.setEnabled(True)
-                self.lineEditAspectRatio.setEnabled(True)
-                self.comboBoxTickDirection.setEnabled(True)
-
-                # scalebar properties
-                self.comboBoxScaleDirection.setEnabled(False)
-                self.comboBoxScaleLocation.setEnabled(False)
-                self.lineEditScaleLength.setEnabled(False)
-                self.toolButtonOverlayColor.setEnabled(False)
-
-                # marker properties
-                self.comboBoxMarker.setEnabled(True)
-                self.doubleSpinBoxMarkerSize.setEnabled(True)
-                self.horizontalSliderMarkerAlpha.setEnabled(True)
-                self.labelMarkerAlpha.setEnabled(True)
-
-                # line properties
-                if self.comboBoxFieldZ.currentText() == '':
-                    self.comboBoxLineWidth.setEnabled(True)
-                    self.toolButtonLineColor.setEnabled(True)
-                else:
-                    self.comboBoxLineWidth.setEnabled(False)
-                    self.toolButtonLineColor.setEnabled(False)
-
-                if plot_type == 'PCA scatter':
-                    self.lineEditLengthMultiplier.setEnabled(True)
-                else:
-                    self.lineEditLengthMultiplier.setEnabled(False)
-
-                # color properties
-                self.comboBoxColorByField.setEnabled(True)
-                # if color by field is none, then use marker color,
-                # otherwise turn off marker color and turn all field and colormap properties to on
-                if self.comboBoxColorByField.currentText().lower() == 'none':
-                    self.toolButtonMarkerColor.setEnabled(True)
-
-                    self.comboBoxColorField.setEnabled(False)
-                    self.comboBoxFieldColormap.setEnabled(False)
-                    self.lineEditColorLB.setEnabled(False)
-                    self.lineEditColorUB.setEnabled(False)
-                    self.comboBoxColorScale.setEnabled(False)
-                    self.comboBoxCbarDirection.setEnabled(False)
-                    self.lineEditCbarLabel.setEnabled(False)
-                elif self.comboBoxColorByField.currentText() == 'cluster':
-                    self.toolButtonMarkerColor.setEnabled(False)
-
-                    self.comboBoxColorField.setEnabled(True)
-                    self.comboBoxFieldColormap.setEnabled(False)
-                    self.lineEditColorLB.setEnabled(False)
-                    self.lineEditColorUB.setEnabled(False)
-                    self.comboBoxColorScale.setEnabled(False)
-                    self.comboBoxCbarDirection.setEnabled(True)
-                    self.lineEditCbarLabel.setEnabled(False)
-                else:
-                    self.toolButtonMarkerColor.setEnabled(False)
-
-                    self.comboBoxColorField.setEnabled(True)
-                    self.comboBoxFieldColormap.setEnabled(True)
-                    self.lineEditColorLB.setEnabled(True)
-                    self.lineEditColorUB.setEnabled(True)
-                    self.comboBoxColorScale.setEnabled(True)
-                    self.comboBoxCbarDirection.setEnabled(True)
-                    self.lineEditCbarLabel.setEnabled(True)
-
-                self.spinBoxHeatmapResolution.setEnabled(False)
-            case 'heatmap' | 'PCA heatmap':
-                # axes properties
-                if (self.toolBox.currentIndex() != self.left_tab['scatter']) or (self.comboBoxFieldZ.currentText() == ''):
-                    self.lineEditXLB.setEnabled(True)
-                    self.lineEditXUB.setEnabled(True)
-                    self.comboBoxXScale.setEnabled(True)
-                    self.lineEditYLB.setEnabled(True)
-                    self.lineEditYUB.setEnabled(True)
-                    self.comboBoxYScale.setEnabled(True)
-                else:
-                    self.lineEditXLB.setEnabled(False)
-                    self.lineEditXUB.setEnabled(False)
-                    self.comboBoxXScale.setEnabled(False)
-                    self.lineEditYLB.setEnabled(False)
-                    self.lineEditYUB.setEnabled(False)
-                    self.comboBoxYScale.setEnabled(False)
-
-                self.lineEditXLabel.setEnabled(True)
-                self.lineEditYLabel.setEnabled(True)
-                if (self.toolBox.currentIndex() != self.left_tab['scatter']) or (self.comboBoxFieldZ.currentText() == ''):
-                    self.lineEditZLabel.setEnabled(False)
-                else:
-                    self.lineEditZLabel.setEnabled(True)
-                self.lineEditAspectRatio.setEnabled(True)
-                self.comboBoxTickDirection.setEnabled(True)
-
-                # scalebar properties
-                self.comboBoxScaleDirection.setEnabled(False)
-                self.comboBoxScaleLocation.setEnabled(False)
-                self.toolButtonOverlayColor.setEnabled(False)
-                self.lineEditScaleLength.setEnabled(False)
-
-                # marker properties
-                self.comboBoxMarker.setEnabled(False)
-                self.doubleSpinBoxMarkerSize.setEnabled(False)
-                self.horizontalSliderMarkerAlpha.setEnabled(False)
-                self.labelMarkerAlpha.setEnabled(False)
-
-                # line properties
-                if self.comboBoxFieldZ.currentText() == '':
-                    self.comboBoxLineWidth.setEnabled(True)
-                    self.toolButtonLineColor.setEnabled(True)
-                else:
-                    self.comboBoxLineWidth.setEnabled(False)
-                    self.toolButtonLineColor.setEnabled(False)
-
-                if plot_type == 'PCA heatmap':
-                    self.lineEditLengthMultiplier.setEnabled(True)
-                else:
-                    self.lineEditLengthMultiplier.setEnabled(False)
-
-                # color properties
-                self.toolButtonMarkerColor.setEnabled(False)
-                self.comboBoxColorByField.setEnabled(False)
-                self.comboBoxColorField.setEnabled(False)
-                self.comboBoxFieldColormap.setEnabled(True)
-                self.lineEditColorLB.setEnabled(True)
-                self.lineEditColorUB.setEnabled(True)
-                self.comboBoxColorScale.setEnabled(True)
-                self.comboBoxCbarDirection.setEnabled(True)
-                self.lineEditCbarLabel.setEnabled(True)
-
-                self.spinBoxHeatmapResolution.setEnabled(True)
-            case 'ternary map':
-                # axes properties
-                self.lineEditXLB.setEnabled(True)
-                self.lineEditXUB.setEnabled(True)
-                self.comboBoxXScale.setEnabled(False)
-                self.lineEditYLB.setEnabled(True)
-                self.lineEditYUB.setEnabled(True)
-                self.comboBoxXScale.setEnabled(False)
-                self.lineEditXLabel.setEnabled(True)
-                self.lineEditYLabel.setEnabled(True)
-                self.lineEditZLabel.setEnabled(True)
-                self.lineEditAspectRatio.setEnabled(False)
-                self.comboBoxTickDirection.setEnabled(False)
-
-                # scalebar properties
-                self.comboBoxScaleDirection.setEnabled(True)
-                self.comboBoxScaleLocation.setEnabled(True)
-                self.lineEditScaleLength.setEnabled(True)
-                self.toolButtonOverlayColor.setEnabled(True)
-
-                # marker properties
-                if not self.spotdata.empty:
-                    self.comboBoxMarker.setEnabled(True)
-                    self.doubleSpinBoxMarkerSize.setEnabled(True)
-                    self.horizontalSliderMarkerAlpha.setEnabled(True)
-                    self.labelMarkerAlpha.setEnabled(True)
-
-                    self.toolButtonMarkerColor.setEnabled(True)
-                else:
-                    self.comboBoxMarker.setEnabled(False)
-                    self.doubleSpinBoxMarkerSize.setEnabled(False)
-                    self.horizontalSliderMarkerAlpha.setEnabled(False)
-                    self.labelMarkerAlpha.setEnabled(False)
-
-                    self.toolButtonMarkerColor.setEnabled(False)
-
-                # line properties
-                self.comboBoxLineWidth.setEnabled(False)
-                self.lineEditLengthMultiplier.setEnabled(False)
-                self.toolButtonLineColor.setEnabled(False)
-
-                # color properties
-                self.comboBoxColorByField.setEnabled(False)
-                self.comboBoxColorField.setEnabled(False)
-                self.comboBoxFieldColormap.setEnabled(False)
-                self.comboBoxColorScale.setEnabled(False)
-                self.lineEditColorLB.setEnabled(False)
-                self.lineEditColorUB.setEnabled(False)
-                self.comboBoxCbarDirection.setEnabled(True)
-                self.lineEditCbarLabel.setEnabled(False)
-
-                self.spinBoxHeatmapResolution.setEnabled(False)
-            case 'tec' | 'radar':
-                # axes properties
-                self.lineEditXLB.setEnabled(False)
-                self.lineEditXUB.setEnabled(False)
-                self.lineEditXLabel.setEnabled(False)
-                if plot_type == 'tec':
-                    self.lineEditYLB.setEnabled(True)
-                    self.lineEditYUB.setEnabled(True)
-                    self.lineEditYLabel.setEnabled(True)
-                else:
-                    self.lineEditYLB.setEnabled(False)
-                    self.lineEditYUB.setEnabled(False)
-                    self.lineEditYLabel.setEnabled(False)
-                self.lineEditZLabel.setEnabled(False)
-                self.lineEditAspectRatio.setEnabled(True)
-                self.comboBoxTickDirection.setEnabled(True)
-
-                # scalebar properties
-                self.comboBoxScaleDirection.setEnabled(False)
-                self.comboBoxScaleLocation.setEnabled(False)
-                self.lineEditScaleLength.setEnabled(True)
-                self.toolButtonOverlayColor.setEnabled(False)
-
-                # marker properties
-                self.comboBoxMarker.setEnabled(False)
-                self.doubleSpinBoxMarkerSize.setEnabled(False)
-                self.horizontalSliderMarkerAlpha.setEnabled(False)
-                self.labelMarkerAlpha.setEnabled(True)
-
-                # line properties
-                self.comboBoxLineWidth.setEnabled(True)
-                self.toolButtonLineColor.setEnabled(True)
-                self.lineEditLengthMultiplier.setEnabled(False)
-
-                # color properties
-                self.comboBoxColorByField.setEnabled(True)
-                if self.comboBoxColorByField.currentText().lower() == 'none':
-                    self.toolButtonMarkerColor.setEnabled(True)
-                    self.comboBoxColorField.setEnabled(False)
-                    self.comboBoxFieldColormap.setEnabled(False)
-                    self.comboBoxCbarDirection.setEnabled(False)
-                elif self.comboBoxColorByField.currentText().lower() == 'cluster':
-                    self.toolButtonMarkerColor.setEnabled(False)
-                    self.comboBoxColorField.setEnabled(True)
-                    self.comboBoxFieldColormap.setEnabled(False)
-                    self.comboBoxCbarDirection.setEnabled(True)
-
-                self.comboBoxColorScale.setEnabled(False)
-                self.lineEditColorLB.setEnabled(False)
-                self.lineEditColorUB.setEnabled(False)
-                self.lineEditCbarLabel.setEnabled(False)
-                self.spinBoxHeatmapResolution.setEnabled(False)
-            case 'variance' | 'cluster performance':
-                # axes properties
-                self.lineEditXLB.setEnabled(False)
-                self.lineEditXUB.setEnabled(False)
-                self.lineEditXLabel.setEnabled(False)
-                self.lineEditYLB.setEnabled(False)
-                self.lineEditYUB.setEnabled(False)
-                self.lineEditYLabel.setEnabled(False)
-                self.lineEditZLabel.setEnabled(False)
-                self.lineEditAspectRatio.setEnabled(True)
-                self.comboBoxTickDirection.setEnabled(True)
-
-                # scalebar properties
-                self.comboBoxScaleDirection.setEnabled(False)
-                self.comboBoxScaleLocation.setEnabled(False)
-                self.lineEditScaleLength.setEnabled(True)
-                self.toolButtonOverlayColor.setEnabled(True)
-
-                # marker properties
-                self.comboBoxMarker.setEnabled(True)
-                self.doubleSpinBoxMarkerSize.setEnabled(True)
-                self.horizontalSliderMarkerAlpha.setEnabled(False)
-                self.labelMarkerAlpha.setEnabled(False)
-
-                # line properties
-                self.comboBoxLineWidth.setEnabled(True)
-                self.toolButtonLineColor.setEnabled(True)
-                self.lineEditLengthMultiplier.setEnabled(False)
-
-                # color properties
-                self.toolButtonMarkerColor.setEnabled(True)
-                self.comboBoxColorByField.setEnabled(False)
-                self.comboBoxFieldColormap.setEnabled(False)
-                self.lineEditColorLB.setEnabled(False)
-                self.lineEditColorUB.setEnabled(False)
-                self.comboBoxColorScale.setEnabled(False)
-                self.comboBoxCbarDirection.setEnabled(False)
-                self.lineEditCbarLabel.setEnabled(False)
-                self.spinBoxHeatmapResolution.setEnabled(False)
-            case 'pca score' | 'cluster score' | 'cluster':
-                # axes properties
-                self.lineEditXLB.setEnabled(True)
-                self.lineEditXUB.setEnabled(True)
-                self.lineEditYLB.setEnabled(True)
-                self.lineEditYUB.setEnabled(True)
-                self.lineEditXLabel.setEnabled(False)
-                self.lineEditYLabel.setEnabled(False)
-                self.lineEditZLabel.setEnabled(False)
-                self.lineEditAspectRatio.setEnabled(False)
-                self.comboBoxTickDirection.setEnabled(False)
-
-                # scalebar properties
-                self.comboBoxScaleDirection.setEnabled(True)
-                self.comboBoxScaleLocation.setEnabled(True)
-                self.lineEditScaleLength.setEnabled(True)
-                self.toolButtonOverlayColor.setEnabled(True)
-
-                # marker properties
-                if len(self.spotdata) != 0:
-                    self.comboBoxMarker.setEnabled(True)
-                    self.doubleSpinBoxMarkerSize.setEnabled(True)
-                    self.horizontalSliderMarkerAlpha.setEnabled(True)
-                    self.labelMarkerAlpha.setEnabled(True)
-
-                    self.toolButtonMarkerColor.setEnabled(True)
-                else:
-                    self.comboBoxMarker.setEnabled(False)
-                    self.doubleSpinBoxMarkerSize.setEnabled(False)
-                    self.horizontalSliderMarkerAlpha.setEnabled(False)
-                    self.labelMarkerAlpha.setEnabled(False)
-
-                    self.toolButtonMarkerColor.setEnabled(False)
-
-                # line properties
-                self.comboBoxLineWidth.setEnabled(True)
-                self.toolButtonLineColor.setEnabled(True)
-                self.lineEditLengthMultiplier.setEnabled(False)
-
-                # color properties
-                if plot_type == 'clusters':
-                    self.comboBoxColorByField.setEnabled(False)
-                    self.comboBoxColorField.setEnabled(False)
-                    self.comboBoxFieldColormap.setEnabled(False)
-                    self.lineEditColorLB.setEnabled(False)
-                    self.lineEditColorUB.setEnabled(False)
-                    self.comboBoxColorScale.setEnabled(False)
-                    self.comboBoxCbarDirection.setEnabled(False)
-                    self.lineEditCbarLabel.setEnabled(False)
-                else:
-                    self.comboBoxColorByField.setEnabled(True)
-                    self.comboBoxColorField.setEnabled(True)
-                    self.comboBoxFieldColormap.setEnabled(True)
-                    self.lineEditColorLB.setEnabled(True)
-                    self.lineEditColorUB.setEnabled(True)
-                    self.comboBoxColorScale.setEnabled(True)
-                    self.comboBoxCbarDirection.setEnabled(True)
-                    self.lineEditCbarLabel.setEnabled(True)
-                self.spinBoxHeatmapResolution.setEnabled(False)
-            case 'profile':
-                # axes properties
-                self.lineEditXLB.setEnabled(True)
-                self.lineEditXUB.setEnabled(True)
-                self.lineEditXLabel.setEnabled(True)
-                self.lineEditYLB.setEnabled(False)
-                self.lineEditYUB.setEnabled(False)
-                self.lineEditYLabel.setEnabled(False)
-                self.lineEditZLabel.setEnabled(False)
-                self.lineEditAspectRatio.setEnabled(True)
-                self.comboBoxTickDirection.setEnabled(True)
-
-                # scalebar properties
-                self.comboBoxScaleDirection.setEnabled(False)
-                self.comboBoxScaleLocation.setEnabled(False)
-                self.lineEditScaleLength.setEnabled(True)
-                self.toolButtonOverlayColor.setEnabled(False)
-
-                # marker properties
-                self.comboBoxMarker.setEnabled(True)
-                self.doubleSpinBoxMarkerSize.setEnabled(True)
-                self.horizontalSliderMarkerAlpha.setEnabled(False)
-                self.labelMarkerAlpha.setEnabled(False)
-
-                # line properties
-                self.comboBoxLineWidth.setEnabled(True)
-                self.toolButtonLineColor.setEnabled(True)
-                self.lineEditLengthMultiplier.setEnabled(False)
-
-                # color properties
-                self.toolButtonMarkerColor.setEnabled(True)
-                self.comboBoxColorByField.setEnabled(False)
-                self.comboBoxFieldColormap.setEnabled(True)
-                self.lineEditColorLB.setEnabled(False)
-                self.lineEditColorUB.setEnabled(False)
-                self.comboBoxColorScale.setEnabled(False)
-                self.comboBoxCbarDirection.setEnabled(False)
-                self.lineEditCbarLabel.setEnabled(False)
-                self.spinBoxHeatmapResolution.setEnabled(False)
-
-        # enable/disable labels
-        # axes properties
-        self.labelXLim.setEnabled(self.lineEditXLB.isEnabled())
-        self.toolButtonXAxisReset.setEnabled(self.labelXLim.isEnabled())
-        self.labelXScale.setEnabled(self.comboBoxXScale.isEnabled())
-        self.labelYLim.setEnabled(self.lineEditYLB.isEnabled())
-        self.toolButtonYAxisReset.setEnabled(self.labelYLim.isEnabled())
-        self.labelYScale.setEnabled(self.comboBoxYScale.isEnabled())
-        self.labelXLabel.setEnabled(self.lineEditXLabel.isEnabled())
-        self.labelYLabel.setEnabled(self.lineEditYLabel.isEnabled())
-        self.labelZLabel.setEnabled(self.lineEditZLabel.isEnabled())
-        self.labelAspectRatio.setEnabled(self.lineEditAspectRatio.isEnabled())
-        self.labelTickDirection.setEnabled(self.comboBoxTickDirection.isEnabled())
-
-        # scalebar properties
-        self.labelScaleLocation.setEnabled(self.comboBoxScaleLocation.isEnabled())
-        self.labelScaleDirection.setEnabled(self.comboBoxScaleDirection.isEnabled())
-        if self.toolButtonOverlayColor.isEnabled():
-            self.labelOverlayColor.setEnabled(True)
-        else:
-            self.toolButtonOverlayColor.setStyleSheet("background-color: %s;" % '#e6e6e6')
-            self.labelOverlayColor.setEnabled(False)
-        self.labelScaleLength.setEnabled(self.lineEditScaleLength.isEnabled())
-
-        # marker properties
-        self.labelMarker.setEnabled(self.comboBoxMarker.isEnabled())
-        self.labelMarkerSize.setEnabled(self.doubleSpinBoxMarkerSize.isEnabled())
-        self.labelTransparency.setEnabled(self.horizontalSliderMarkerAlpha.isEnabled())
-
-        # line properties
-        self.labelLineWidth.setEnabled(self.comboBoxLineWidth.isEnabled())
-        self.labelLineColor.setEnabled(self.toolButtonLineColor.isEnabled())
-        self.labelLengthMultiplier.setEnabled(self.lineEditLengthMultiplier.isEnabled())
-
-        # color properties
-        if self.toolButtonMarkerColor.isEnabled():
-            self.labelMarkerColor.setEnabled(True)
-        else:
-            self.toolButtonMarkerColor.setStyleSheet("background-color: %s;" % '#e6e6e6')
-            self.labelMarkerColor.setEnabled(False)
-        self.labelColorByField.setEnabled(self.comboBoxColorByField.isEnabled())
-        self.labelColorField.setEnabled(self.comboBoxColorField.isEnabled())
-        self.checkBoxReverseColormap.setEnabled(self.comboBoxFieldColormap.isEnabled())
-        self.labelReverseColormap.setEnabled(self.checkBoxReverseColormap.isEnabled())
-        self.labelFieldColormap.setEnabled(self.comboBoxFieldColormap.isEnabled())
-        self.labelColorScale.setEnabled(self.comboBoxColorScale.isEnabled())
-        self.labelColorBounds.setEnabled(self.lineEditColorLB.isEnabled())
-        self.toolButtonCAxisReset.setEnabled(self.labelColorBounds.isEnabled())
-        self.labelCbarDirection.setEnabled(self.comboBoxCbarDirection.isEnabled())
-        self.labelCbarLabel.setEnabled(self.lineEditCbarLabel.isEnabled())
-        self.labelHeatmapResolution.setEnabled(self.spinBoxHeatmapResolution.isEnabled())
-
-    def set_style_widgets(self, plot_type=None, style=None):
-        """Sets values in right toolbox style page
-
-        :param plot_type: dictionary key into ``MainWindow.style``
-        :type plot_type: str, optional
-        """
-        print('set_style_widgets')
-        tab_id = self.toolBox.currentIndex()
-
-        if plot_type is None:
-            plot_type = self.plot_types[tab_id][self.plot_types[tab_id][0]+1]
-            self.comboBoxPlotType.blockSignals(True)
-            self.comboBoxPlotType.clear()
-            self.comboBoxPlotType.addItems(self.plot_types[tab_id][1:])
-            self.comboBoxPlotType.setCurrentText(plot_type)
-            self.comboBoxPlotType.blockSignals(False)
-        elif plot_type == '':
-            return
-
-        # toggle actionSwapAxes
-        match plot_type:
-            case 'analyte map':
-                self.actionSwapAxes.setEnabled(True)
-            case 'scatter' | 'heatmap':
-                self.actionSwapAxes.setEnabled(True)
-            case _:
-                self.actionSwapAxes.setEnabled(False)
-
-        if style is None:
-            style = self.styles[plot_type]
-
-        # axes properties
-        # for map plots, check to see that 'X' and 'Y' are initialized
-        if plot_type.lower() in self.map_plot_types:
-            if ('X' not in list(self.data[self.sample_id].axis_dict.keys())) or ('Y' not in list(self.data[self.sample_id].axis_dict.keys())):
-                # initialize 'X' and 'Y' axes
-                # all plot types use the same map dimensions so just use Analyte for the field_type
-                self.initialize_axis_values('Analyte','X')
-                self.initialize_axis_values('Analyte','Y')
-            xmin,xmax,xscale,xlabel = self.get_axis_values('Analyte','X')
-            ymin,ymax,yscale,ylabel = self.get_axis_values('Analyte','Y')
-
-            # set style dictionary values for X and Y
-            style['Axes']['XLim'] = [xmin, xmax]
-            style['Axes']['XScale'] = xscale
-            style['Axes']['XLabel'] = 'X'
-            style['Axes']['YLim'] = [ymin, ymax]
-            style['Axes']['YScale'] = yscale
-            style['Axes']['YLabel'] = 'Y'
-            style['Axes']['AspectRatio'] = self.data[self.sample_id].aspect_ratio
-
-            # do not round axes limits for maps
-            self.lineEditXLB.precision = None
-            self.lineEditXUB.precision = None
-            self.lineEditXLB.value = style['Axes']['XLim'][0]
-            self.lineEditXUB.value = style['Axes']['XLim'][1]
-
-            self.lineEditYLB.value = style['Axes']['YLim'][0]
-            self.lineEditYUB.value = style['Axes']['YLim'][1]
-        else:
-            # round axes limits for everything that isn't a map
-            self.lineEditXLB.value = style['Axes']['XLim'][0]
-            self.lineEditXUB.value = style['Axes']['XLim'][1]
-
-            self.lineEditYLB.value = style['Axes']['YLim'][0]
-            self.lineEditYUB.value = style['Axes']['YLim'][1]
-
-        self.comboBoxXScale.setCurrentText(style['Axes']['XScale'])
-        self.lineEditXLabel.setText(style['Axes']['XLabel'])
-
-        self.comboBoxYScale.setCurrentText(style['Axes']['YScale'])
-        self.lineEditYLabel.setText(style['Axes']['YLabel'])
-
-        self.lineEditZLabel.setText(style['Axes']['ZLabel'])
-        self.lineEditAspectRatio.setText(str(style['Axes']['AspectRatio']))
-
-        # annotation properties
-        #self.fontComboBox.setCurrentFont(style['Text']['Font'])
-        self.doubleSpinBoxFontSize.blockSignals(True)
-        self.doubleSpinBoxFontSize.setValue(style['Text']['FontSize'])
-        self.doubleSpinBoxFontSize.blockSignals(False)
-
-        # scalebar properties
-        self.comboBoxScaleLocation.setCurrentText(style['Scale']['Location'])
-        self.comboBoxScaleDirection.setCurrentText(style['Scale']['Direction'])
-        if (style['Scale']['Length'] is None) and (plot_type in self.map_plot_types):
-            style['Scale']['Length'] = self.default_scale_length()
-
-            self.lineEditScaleLength.value = style['Scale']['Length']
-        else:
-            self.lineEditScaleLength.value = None
-            
-        self.toolButtonOverlayColor.setStyleSheet("background-color: %s;" % style['Scale']['OverlayColor'])
-
-        # marker properties
-        self.comboBoxMarker.setCurrentText(style['Markers']['Symbol'])
-
-        self.doubleSpinBoxMarkerSize.blockSignals(True)
-        self.doubleSpinBoxMarkerSize.setValue(style['Markers']['Size'])
-        self.doubleSpinBoxMarkerSize.blockSignals(False)
-
-        self.horizontalSliderMarkerAlpha.setValue(int(style['Markers']['Alpha']))
-        self.labelMarkerAlpha.setText(str(self.horizontalSliderMarkerAlpha.value()))
-
-        # line properties
-        self.comboBoxLineWidth.setCurrentText(str(style['Lines']['LineWidth']))
-        self.lineEditLengthMultiplier.value = style['Lines']['Multiplier']
-        self.toolButtonLineColor.setStyleSheet("background-color: %s;" % style['Lines']['Color'])
-
-        # color properties
-        self.toolButtonMarkerColor.setStyleSheet("background-color: %s;" % style['Colors']['Color'])
-        self.update_field_type_combobox(self.comboBoxColorByField,addNone=True,plot_type=plot_type)
-        self.comboBoxColorByField.setCurrentText(style['Colors']['ColorByField'])
-
-        if style['Colors']['ColorByField'] == '':
-            self.comboBoxColorField.clear()
-        else:
-            self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
-            self.spinBoxColorField.setMinimum(0)
-            self.spinBoxColorField.setMaximum(self.comboBoxColorField.count() - 1)
-
-        if style['Colors']['Field'] in self.comboBoxColorField.allItems():
-            self.comboBoxColorField.setCurrentText(style['Colors']['Field'])
-            self.update_color_field_spinbox()
-        else:
-            style['Colors']['Field'] = self.comboBoxColorField.currentText()
-
-        self.comboBoxFieldColormap.setCurrentText(style['Colors']['Colormap'])
-        self.checkBoxReverseColormap.blockSignals(True)
-        self.checkBoxReverseColormap.setChecked(style['Colors']['Reverse'])
-        self.checkBoxReverseColormap.blockSignals(False)
-        if style['Colors']['Field'] in list(self.data[self.sample_id].axis_dict.keys()):
-            style['Colors']['CLim'] = [self.data[self.sample_id].axis_dict[style['Colors']['Field']]['min'], self.data[self.sample_id].axis_dict[style['Colors']['Field']]['max']]
-            style['Colors']['CLabel'] = self.data[self.sample_id].axis_dict[style['Colors']['Field']]['label']
-        self.lineEditColorLB.value = style['Colors']['CLim'][0]
-        self.lineEditColorUB.value = style['Colors']['CLim'][1]
-        if style['Colors']['ColorByField'] == 'cluster':
-            # set ColorField to active cluster method
-            self.comboBoxColorField.setCurrentText(self.cluster_dict['active method'])
-
-            # set color scale to discrete
-            self.comboBoxColorScale.clear()
-            self.comboBoxColorScale.addItem('discrete')
-            self.comboBoxColorScale.setCurrentText('discrete')
-
-            self.styles[plot_type]['Colors']['CScale'] = 'discrete'
-        else:
-            # set color scale options to linear/log
-            self.comboBoxColorScale.clear()
-            self.comboBoxColorScale.addItems(['linear','log'])
-            self.styles[plot_type]['Colors']['CScale'] = 'linear'
-            self.comboBoxColorScale.setCurrentText(self.styles[plot_type]['Colors']['CScale'])
-            
-        self.comboBoxColorScale.setCurrentText(style['Colors']['CScale'])
-        self.comboBoxCbarDirection.setCurrentText(style['Colors']['Direction'])
-        self.lineEditCbarLabel.setText(style['Colors']['CLabel'])
-
-        self.spinBoxHeatmapResolution.blockSignals(True)
-        self.spinBoxHeatmapResolution.setValue(style['Colors']['Resolution'])
-        self.spinBoxHeatmapResolution.blockSignals(False)
-
-        # turn properties on/off based on plot type and style settings
-        self.toggle_style_widgets()
-
-        # update plot (is this line needed)
-        # self.update_SV()
-
-    def get_style_dict(self):
-        """Get style properties"""        
-        plot_type = self.comboBoxPlotType.currentText()
-        self.plot_types[self.toolBox.currentIndex()][0] = self.comboBoxPlotType.currentIndex()
-
-        # update axes properties
-        self.styles[plot_type]['Axes'] = {'XLim': [float(self.lineEditXLB.text()), float(self.lineEditXUB.text())],
-                    'XLabel': self.lineEditXLabel.text(),
-                    'YLim': [float(self.lineEditYLB.text()), float(self.lineEditYUB.text())],
-                    'YLabel': self.lineEditYLabel.text(),
-                    'ZLabel': self.lineEditZLabel.text(),
-                    'AspectRatio': float(self.lineEditAspectRatio.text()),
-                    'TickDir': self.comboBoxTickDirection.text()}
-
-        # update annotation properties
-        self.styles[plot_type]['Text'] = {'Font': self.fontComboBox.currentFont(),
-                    'FontSize': self.doubleSpinBoxFontSize.value()}
-
-        # update scale properties
-        self.styles[plot_type]['Scale'] = {'Location': self.comboBoxScaleLocation.currentText(),
-                    'Direction': self.comboBoxScaleDirection.currentText(),
-                    'OverlayColor': self.get_hex_color(self.toolButtonOverlayColor.palette().button().color())}
-
-        # update marker properties
-        self.styles[plot_type]['Markers'] = {'Symbol': self.comboBoxMarker.currentText(),
-                    'Size': self.doubleSpinBoxMarkerSize.value(),
-                    'Alpha': float(self.horizontalSliderMarkerAlpha.value())}
-
-        # update line properties
-        self.styles[plot_type]['Lines'] = {'LineWidth': float(self.comboBoxLineWidth.currentText()),
-                    'Multiplier': float(self.lineEditLengthMultiplier.text()),
-                    'Color': self.get_hex_color(self.toolButtonMarkerColor.palette().button().color())}
-
-        # update color properties
-        self.styles[plot_type]['Colors'] = {'Color': self.get_hex_color(self.toolButtonMarkerColor.palette().button().color()),
-                    'ColorByField': self.comboBoxColorByField.currentText(),
-                    'Field': self.comboBoxColorField.currentText(),
-                    'Colormap': self.comboBoxFieldColormap.currentText(),
-                    'Reverse': self.checkBoxReverseColormap.isChecked(),
-                    'CLim': [float(self.lineEditColorLB.text()), float(self.lineEditColorUB.text())],
-                    'CScale': self.comboBoxColorScale.currentText(),
-                    'Direction': self.comboBoxCbarDirection.currentText(),
-                    'CLabel': self.lineEditCbarLabel.text(),
-                    'Resolution': self.spinBoxHeatmapResolution.value()}
-
-    # style widget callbacks
-    # -------------------------------------
-    def plot_type_callback(self, update=False):
-        """Updates styles when plot type is changed
-
-        Executes on change of ``MainWindow.comboBoxPlotType``.  Updates ``MainWindow.plot_type[0]`` to the current index of the 
-        combobox, then updates the style widgets to match the dictionary entries and updates the plot.
-        """
-        #print('plot_type_callback')
-        # set plot flag to false
-        plot_type = self.comboBoxPlotType.currentText()
-        self.plot_types[self.toolBox.currentIndex()][0] = self.comboBoxPlotType.currentIndex()
-        match plot_type:
-            case 'analyte map':
-                self.actionSwapAxes.setEnabled(True)
-            case 'scatter' | 'heatmap':
-                self.actionSwapAxes.setEnabled(True)
-            case 'correlation':
-                self.actionSwapAxes.setEnabled(False)
-                if self.comboBoxCorrelationMethod.currentText() == 'None':
-                    self.comboBoxCorrelationMethod.setCurrentText('Pearson')
-            case 'cluster performance':
-                self.labelClusterMax.show()
-                self.spinBoxClusterMax.show()
-                self.labelNClusters.hide()
-                self.spinBoxNClusters.hide()
-            case 'cluster' | 'cluster score':
-                self.labelClusterMax.hide()
-                self.spinBoxClusterMax.hide()
-                self.labelNClusters.show()
-                self.spinBoxNClusters.show()
-            case _:
-                self.actionSwapAxes.setEnabled(False)
-
-        self.set_style_widgets(plot_type=plot_type)
-        #self.check_analysis_type()
-
-        if update:
-            self.update_SV()
-
-    # axes
-    # -------------------------------------
-    def get_axis_field(self, ax):
-        """Grabs the field name from a given axis
-
-        The field name for a given axis comes from a comboBox, and depends upon the plot type.
-        :param ax: axis, options include ``x``, ``y``, ``z``, and ``c``
-        :type ax: str
-        """
-        plot_type = self.comboBoxPlotType.currentText()
-        if ax == 'c':
-            return self.comboBoxColorField.currentText()
-
-        match plot_type:
-            case 'histogram':
-                if ax in ['x', 'y']:
-                    return self.comboBoxHistField.currentText()
-            case 'scatter' | 'heatmap':
-                match ax:
-                    case 'x':
-                        return self.comboBoxFieldX.currentText()
-                    case 'y':
-                        return self.comboBoxFieldY.currentText()
-                    case 'z':
-                        return self.comboBoxFieldZ.currentText()
-            case 'PCA scatter' | 'PCA heatmap':
-                match ax:
-                    case 'x':
-                        return f'PC{self.spinBoxPCX.value()}'
-                    case 'y':
-                        return f'PC{self.spinBoxPCY.value()}'
-            case 'analyte map' | 'ternary map' | 'PCA score' | 'cluster' | 'cluster score':
-                return ax.upper()
-
-
-    def axis_label_edit_callback(self, ax, new_label):
-        """Updates axis label in dictionaries from widget
-
-        :param ax: axis, options include ``x``, ``y``, ``z``, and ``c``
-        :type ax: str
-        :param new_label: new label set by user
-        :type new_label: str
-        """
-        plot_type = self.comboBoxPlotType.currentText()
-
-        old_label = self.styles[plot_type]['Axes'][ax.upper()+'Label']
-
-        # if label has not changed return
-        if old_label == new_label:
-            return
-
-        # change label in dictionary
-        field = self.get_axis_field(ax)
-        self.data[self.sample_id].axis_dict[field]['label'] = new_label
-        self.styles[plot_type]['Axes'][ax.upper()+'Label'] = new_label
-
-        # update plot
-        self.update_SV()
-
-    def axis_limit_edit_callback(self, ax, bound, new_value):
-        """Updates axis limit in dictionaries from widget
-
-        :param ax: axis, options include ``x``, ``y``, ``z``, and ``c``
-        :type ax: str
-        :param bound: ``0`` for lower and ``1`` for upper
-        :type bound: int
-        :param new_value: new value set by user
-        :type new_value: float
-        """
-        plot_type = self.comboBoxPlotType.currentText()
-
-        if ax == 'c':
-            old_value = self.styles[plot_type]['Colors']['CLim'][bound]
-        else:
-            old_value = self.styles[plot_type]['Axes'][ax.upper()+'Lim'][bound]
-
-        # if label has not changed return
-        if old_value == new_value:
-            return
-
-        if ax == 'c' and plot_type in ['heatmap', 'correlation']:
-            self.update_SV()
-            return
-
-        # change label in dictionary
-        field = self.get_axis_field(ax)
-        if bound:
-            if plot_type == 'histogram' and ax == 'y':
-                self.data[self.sample_id].axis_dict[field]['pmax'] = new_value
-                self.data[self.sample_id].axis_dict[field]['pstatus'] = 'custom'
-            else:
-                self.data[self.sample_id].axis_dict[field]['max'] = new_value
-                self.data[self.sample_id].axis_dict[field]['status'] = 'custom'
-        else:
-            if plot_type == 'histogram' and ax == 'y':
-                self.data[self.sample_id].axis_dict[field]['pmin'] = new_value
-                self.data[self.sample_id].axis_dict[field]['pstatus'] = 'custom'
-            else:
-                self.data[self.sample_id].axis_dict[field]['min'] = new_value
-                self.data[self.sample_id].axis_dict[field]['status'] = 'custom'
-
-        if ax == 'c':
-            self.styles[plot_type]['Colors'][f'{ax.upper()}Lim'][bound] = new_value
-        else:
-            self.styles[plot_type]['Axes'][f'{ax.upper()}Lim'][bound] = new_value
-
-        # update plot
-        self.update_SV()
-
-    def axis_scale_callback(self, comboBox, ax):
-        plot_type = self.comboBoxPlotType.currentText()
-
-        new_value = comboBox.currentText()
-        if ax == 'c':
-            if self.styles[plot_type]['Colors']['CLim'] == new_value:
-                return
-        elif self.styles[plot_type]['Axes'][ax.upper()+'Scale'] == new_value:
-            return
-
-        field = self.get_axis_field(ax)
-
-        if plot_type != 'heatmap':
-            self.data[self.sample_id].axis_dict[field]['scale'] = new_value
-
-        if ax == 'c':
-            self.styles[plot_type]['Colors']['CScale'] = new_value
-        else:
-            self.styles[plot_type]['Axes'][ax.upper()+'Scale'] = new_value
-
-        # update plot
-        self.update_SV()
-
-    def set_color_axis_widgets(self):
-        """Sets the color axis widgets
-
-        Sets color axis limits and label
-        """
-        #print('set_color_axis_widgets')
-        field = self.comboBoxColorField.currentText()
-        if field == '':
-            return
-        self.lineEditColorLB.value = self.data[self.sample_id].axis_dict[field]['min']
-        self.lineEditColorUB.value = self.data[self.sample_id].axis_dict[field]['max']
-        self.comboBoxColorScale.setCurrentText(self.data[self.sample_id].axis_dict[field]['scale'])
-
-    def set_axis_widgets(self, ax, field):
-        """Sets axis widgets in the style toolbox
-
-        Updates axes limits and labels.
-
-        :param ax: axis 'x', 'y', or 'z'
-        :type ax: str
-        :param field: field plotted on axis, used as key to ``MainWindow.axis_dict``
-        :type field: str
-        """
-        #print('set_axis_widgets')
-        match ax:
-            case 'x':
-                if field == 'X':
-                    self.lineEditXLB.value = self.data[self.sample_id].axis_dict[field]['min']
-                    self.lineEditXUB.value = self.data[self.sample_id].axis_dict[field]['max']
-                else:
-                    self.lineEditXLB.value = self.data[self.sample_id].axis_dict[field]['min']
-                    self.lineEditXUB.value = self.data[self.sample_id].axis_dict[field]['max']
-                self.lineEditXLabel.setText(self.data[self.sample_id].axis_dict[field]['label'])
-                self.comboBoxXScale.setCurrentText(self.data[self.sample_id].axis_dict[field]['scale'])
-            case 'y':
-                if self.comboBoxPlotType.currentText() == 'histogram':
-                    self.lineEditYLB.value = self.data[self.sample_id].axis_dict[field]['pmin']
-                    self.lineEditYUB.value = self.data[self.sample_id].axis_dict[field]['pmax']
-                    self.lineEditYLabel.setText(self.comboBoxHistType.currentText())
-                    self.comboBoxYScale.setCurrentText('linear')
-                else:
-                    if field == 'X':
-                        self.lineEditYLB.value = self.data[self.sample_id].axis_dict[field]['min']
-                        self.lineEditYUB.value = self.data[self.sample_id].axis_dict[field]['max']
-                    else:
-                        self.lineEditYLB.value = self.data[self.sample_id].axis_dict[field]['min']
-                        self.lineEditYUB.value = self.data[self.sample_id].axis_dict[field]['max']
-                    self.lineEditYLabel.setText(self.data[self.sample_id].axis_dict[field]['label'])
-                    self.comboBoxYScale.setCurrentText(self.data[self.sample_id].axis_dict[field]['scale'])
-            case 'z':
-                self.lineEditZLabel.setText(self.data[self.sample_id].axis_dict[field]['label'])
-
-    def axis_reset_callback(self, ax):
-        """Resets axes widgets and plot axes to auto values
-
-        Axes parameters with ``MainWindow.axis_dict['status']`` can be ``auto`` or ``custom``, where ``custom``
-        is set by the user in the appropriate *lineEdit* widgets.  The ``auto`` status is set by the full range
-        of values of a data column.        
-
-        Parameters
-        ----------
-        ax : str
-            axis to reset values, can be ``x``, ``y``, and ``c``
-
-        .. seealso::
-            :ref: `initialize_axis_values` for initializing the axis dictionary
-        """
-        #print('axis_reset_callback')
-        if ax == 'c':
-            if self.comboBoxPlotType.currentText() == 'vectors':
-                self.styles['vectors']['Colors']['CLim'] = [np.amin(self.pca_results.components_), np.amax(self.pca_results.components_)]
-                self.set_color_axis_widgets()
-            elif not (self.comboBoxColorByField.currentText() in ['None','cluster']):
-                field_type = self.comboBoxColorByField.currentText()
-                field = self.comboBoxColorField.currentText()
-                if field == '':
-                    return
-                self.initialize_axis_values(field_type, field)
-                self.set_color_axis_widgets()
-        else:
-            match self.comboBoxPlotType.currentText().lower():
-                case 'analyte map' | 'cluster' | 'cluster score' | 'pca score':
-                    field = ax.upper()
-                    self.initialize_axis_values('Analyte', field)
-                    self.set_axis_widgets(ax, field)
-                case 'histogram':
-                    field = self.comboBoxHistField.currentText()
-                    if ax == 'x':
-                        field_type = self.comboBoxHistFieldType.currentText()
-                        self.initialize_axis_values(field_type, field)
-                        self.set_axis_widgets(ax, field)
-                    else:
-                        self.data[self.sample_id].axis_dict[field].update({'pstatus':'auto', 'pmin':None, 'pmax':None})
-
-                case 'scatter' | 'heatmap':
-                    if ax == 'x':
-                        field_type = self.comboBoxFieldTypeX.currentText()
-                        field = self.comboBoxFieldX.currentText()
-                    else:
-                        field_type = self.comboBoxFieldTypeY.currentText()
-                        field = self.comboBoxFieldY.currentText()
-                    if (field_type == '') | (field == ''):
-                        return
-                    self.initialize_axis_values(field_type, field)
-                    self.set_axis_widgets(ax, field)
-
-                case 'PCA scatter' | 'PCA heatmap':
-                    field_type = 'PCA score'
-                    if ax == 'x':
-                        field = self.spinBoxPCX.currentText()
-                    else:
-                        field = self.spinBoxPCY.currentText()
-                    self.initialize_axis_values(field_type, field)
-                    self.set_axis_widgets(ax, field)
-
-                case _:
-                    return
-
-        self.set_style_widgets()
-        self.update_SV()
-
-    def get_axis_values(self, field_type, field, ax=None):
-        """Gets axis values
-
-        Returns the axis parameters *field_type* \> *field* for plotting, including the minimum and maximum vales,
-        the scale (``linear`` or ``log``) and the axis label.  For x, y and color axes associated with the plot,
-        no axis needs to be supplied.  For a probability axis associated with histogram PDF plots, ``ax=p``.
-
-        Parameters
-        ----------
-        field_type : str
-            Field type of axis data
-        field : str
-            Field name of axis data
-        ax : str, optional
-            stored axis: ``p`` for probability axis, otherwise all are same, by default None
-
-        Returns
-        -------
-        float, float, str, float
-            Axis parameters: minimum, maximum, scale (``linear`` or ``log``), axis label
-        """        
-        #print('get_axis_values')
-        if field not in self.data[self.sample_id].axis_dict.keys():
-            self.initialize_axis_values(field_type, field)
-
-        # get axis values from self.data[self.sample_id].axis_dict
-        amin = self.data[self.sample_id].axis_dict[field]['min']
-        amax = self.data[self.sample_id].axis_dict[field]['max']
-        scale = self.data[self.sample_id].axis_dict[field]['scale']
-        label = self.data[self.sample_id].axis_dict[field]['label']
-
-        # if probability axis associated with histogram
-        if ax == 'p':
-            pmin = self.data[self.sample_id].axis_dict[field]['pmin']
-            pmax = self.data[self.sample_id].axis_dict[field]['pmax']
-            return amin, amax, scale, label, pmin, pmax
-
-        return amin, amax, scale, label
-
-    def initialize_axis_values(self, field_type, field):
-        #print('initialize_axis_values')
-        # initialize variables
-        if field not in self.data[self.sample_id].axis_dict.keys():
-            #print('initialize self.data[self.sample_id].axis_dict["field"]')
-            self.data[self.sample_id].axis_dict.update({field:{'status':'auto', 'label':field, 'min':None, 'max':None}})
-
-        #current_plot_df = pd.DataFrame()
-        if field not in ['X','Y']:
-            df = self.get_map_data(field, field_type)
-            array = df['array'][self.data[self.sample_id].mask].values if not df.empty else []
-        else:
-            # field 'X' and 'Y' require separate extraction
-            array = self.data[self.sample_id].processed_data[field].values
-
-        match field_type:
-            case 'Analyte' | 'Analyte (normalized)':
-                if field in ['X','Y']:
-                    scale = 'linear'
-                else:
-                    #current_plot_df = self.data[self.sample_id]['processed_data'].loc[:,field].values
-                    symbol, mass = self.parse_field(field)
-                    if field_type == 'Analyte':
-                        self.data[self.sample_id].axis_dict[field]['label'] = f"$^{{{mass}}}${symbol} ({self.preferences['Units']['Concentration']})"
-                    else:
-                        self.data[self.sample_id].axis_dict[field]['label'] = f"$^{{{mass}}}${symbol}$_N$ ({self.preferences['Units']['Concentration']})"
-
-                    scale = self.data[self.sample_id].processed_data.get_attribute(field, 'norm')
-                    #['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes']==field),'norm'].values[0]
-
-                amin = np.nanmin(array)
-                amax = np.nanmax(array)
-            case 'Ratio' | 'Ratio (normalized)':
-                field_1 = field.split(' / ')[0]
-                field_2 = field.split(' / ')[1]
-                symbol_1, mass_1 = self.parse_field(field_1)
-                symbol_2, mass_2 = self.parse_field(field_2)
-                if field_type == 'Ratio':
-                    self.data[self.sample_id].axis_dict[field]['label'] = f"$^{{{mass_1}}}${symbol_1} / $^{{{mass_2}}}${symbol_2}"
-                else:
-                    self.data[self.sample_id].axis_dict[field]['label'] = f"$^{{{mass_1}}}${symbol_1}$_N$ / $^{{{mass_2}}}${symbol_2}$_N$"
-
-                amin = np.nanmin(array)
-                amax = np.nanmax(array)
-                scale = self.data[self.sample_id].processed_data.get_attribute(field, 'norm')
-                #'data_type','ratio'['ratio_info'].loc[
-                #    (self.data[self.sample_id]['ratio_info']['analyte_1']==field_1) & (self.data[self.sample_id]['ratio_info']['analyte_2']==field_2),
-                #    'norm'].values[0]
-            case _:
-                #current_plot_df = self.data[self.sample_id]['computed_data'][field_type].loc[:,field].values
-                scale = 'linear'
-
-                amin = np.nanmin(array)
-                amax = np.nanmax(array)
-
-        # do not round 'X' and 'Y' so full extent of map is viewable
-        if field not in ['X','Y']:
-            amin = fmt.oround(amin, order=2, toward=0)
-            amax = fmt.oround(amax, order=2, toward=1)
-
-        d = {'status':'auto', 'min':amin, 'max':amax, 'scale':scale}
-
-        self.data[self.sample_id].axis_dict[field].update(d)
-        #print(self.data[self.sample_id].axis_dict[field])
-
-    def parse_field(self,field):
-
-        match = re.match(r"([A-Za-z]+)(\d*)", field)
-        symbol = match.group(1) if match else field
-        mass = int(match.group(2)) if match.group(2) else None
-
-        return symbol, mass
-
-    def aspect_ratio_callback(self):
-        """Update aspect ratio
-
-        Updates ``MainWindow.style`` dictionary after user change
-        """
-        plot_type = self.comboBoxPlotType.currentText()
-        if self.styles[plot_type]['Axes']['AspectRatio'] == self.lineEditAspectRatio.text():
-            return
-
-        self.styles[plot_type]['Axes']['AspectRatio'] = self.lineEditAspectRatio.text()
-        self.update_SV()
-
-    def tickdir_callback(self):
-        plot_type = self.comboBoxPlotType.currentText()
-        if self.styles[plot_type]['Axes']['TickDir'] == self.comboBoxTickDirection.currentText():
-            return
-
-        self.styles[plot_type]['Axes']['TickDir'] = self.comboBoxTickDirection.currentText()
-        self.update_SV()
-
-    # text and annotations
-    # -------------------------------------
-    def font_callback(self):
-        plot_type = self.comboBoxPlotType.currentText()
-        if self.styles[plot_type]['Text']['Font'] == self.fontComboBox.currentFont().family():
-            return
-
-        self.styles[plot_type]['Text']['Font'] = self.fontComboBox.currentFont().family()
-        self.update_SV()
-
-    def font_size_callback(self):
-        plot_type = self.comboBoxPlotType.currentText()
-        if self.styles[plot_type]['Text']['FontSize'] == self.doubleSpinBoxFontSize.value():
-            return
-
-        self.styles[plot_type]['Text']['FontSize'] = self.doubleSpinBoxFontSize.value()
-        self.update_SV()
-
-    def update_figure_font(self, canvas, font_name):
-        if font_name == '':
-            return
-
-        # Update font of all text elements in the figure
-        try:
-            for text_obj in canvas.fig.findobj(match=plt.Text):
-                text_obj.set_fontname(font_name)
-        except:
-            print('Unable to update figure font.')
-
-    def toggle_mass(self, labels):
-        """Removes mass from labels
-
-        Removes mass if ``MainWindow.checkBoxShowMass.isChecked()`` is False
-
-        :param labels: input labels
-        :type labels: str
-
-        :return: output labels with or without mass
-        :rtype: list
-        """
-        if not self.checkBoxShowMass.isChecked():
-            labels = [re.sub(r'\d', '', col) for col in labels]
-
-        return labels
-
-    # scales
-    # -------------------------------------
-    def scale_direction_callback(self):
-        plot_type = self.comboBoxPlotType.currentText()
-        direction = self.comboBoxScaleDirection.currentText()
-        if self.styles[plot_type]['Scale']['Direction'] == direction:
-            return
-
-        self.styles[plot_type]['Scale']['Direction'] = direction
-        if direction == 'none':
-            self.labelScaleLocation.setEnabled(False)
-            self.comboBoxScaleLocation.setEnabled(False)
-            self.labelScaleLength.setEnabled(False)
-            self.lineEditScaleLength.setEnabled(False)
-            self.lineEditScaleLength.value = None
-        else:
-            self.labelScaleLocation.setEnabled(True)
-            self.comboBoxScaleLocation.setEnabled(True)
-            self.labelScaleLength.setEnabled(True)
-            self.lineEditScaleLength.setEnabled(True)
-            # set scalebar length if plot is a map type
-            if plot_type in self.map_plot_types:
-                if self.styles[plot_type]['Scale']['Length'] is None:
-                    scale_length = self.default_scale_length()
-                elif ((direction == 'horizontal') and (self.styles[plot_type]['Scale']['Length'] > self.data[self.sample_id].x_range)) or ((direction == 'vertical') and (self.styles[plot_type]['Scale']['Length'] > self.data[self.sample_id].y_range)):
-                    scale_length = self.default_scale_length()
-                else:
-                    scale_length = self.styles[plot_type]['Scale']['Length']
-                self.styles[plot_type]['Scale']['Length'] = scale_length
-                self.lineEditScaleLength.value = scale_length
-            else:
-                self.lineEditScaleLength.value = None
-
-        self.update_SV()
-
-    def scale_location_callback(self):
-        plot_type = self.comboBoxPlotType.currentText()
-
-        if self.styles[plot_type]['Scale']['Location'] == self.comboBoxScaleLocation.currentText():
-            return
-
-        self.styles[plot_type]['Scale']['Location'] = self.comboBoxScaleLocation.currentText()
-        self.update_SV()
-
-    def scale_length_callback(self):
-        """Updates length of scalebar on map-type plots
-        
-        Executes on change of ``MainWindow.lineEditScaleLength``, updates length if within bounds set by plot dimensions, then updates plot.
-        """        
-        plot_type = self.comboBoxPlotType.currentText()
-
-        # if length is changed to None
-        if self.lineEditScaleLength.text() == '':
-            if self.styles[plot_type]['Scale']['Length'] is None:
-                return
-            else:
-                self.styles[plot_type]['Scale']['Length'] = None
-                self.update_SV()
-                return
-
-        scale_length = float(self.lineEditScaleLength.text())
-        if plot_type in self.map_plot_types:
-            # make sure user input is within bounds, do not change
-            if ((self.comboBoxScaleDirection.currentText() == 'horizontal') and (scale_length > self.data[self.sample_id].x_range)) or (scale_length <= 0):
-                scale_length = self.styles[plot_type]['Scale']['Length']
-                self.lineEditScaleLength.value = scale_length
-                return
-            elif ((self.comboBoxScaleDirection.currentText() == 'vertical') and (scale_length > self.data[self.sample_id].y_range)) or (scale_length <= 0):
-                scale_length = self.styles[plot_type]['Scale']['Length']
-                self.lineEditScaleLength.value = scale_length
-                return
-        else:
-            self.lineEditScaleLength.value = None
-            return
-
-        # update style dictionary
-        if scale_length == self.styles[plot_type]['Scale']['Length']:
-            return
-        self.styles[plot_type]['Scale']['Length'] = scale_length
-
-        # update plot
-        self.update_SV()
-
-    def overlay_color_callback(self):
-        """Updates color of overlay markers
-
-        Uses ``QColorDialog`` to select new marker color and then updates plot on change of backround ``MainWindow.toolButtonOverlayColor`` color.
-        """
-        plot_type = self.comboBoxPlotType.currentText()
-        # change color
-        self.button_color_select(self.toolButtonOverlayColor)
-
-        color = self.get_hex_color(self.toolButtonOverlayColor.palette().button().color())
-        # update style
-        if self.styles[plot_type]['Scale']['OverlayColor'] == color:
-            return
-
-        self.styles[plot_type]['Scale']['OverlayColor'] = color
-        # update plot
-        self.update_SV()
-
-    # markers
-    # -------------------------------------
-    def marker_symbol_callback(self):
-        """Updates marker symbol
-
-        Updates marker symbols on current plot on change of ``MainWindow.comboBoxMarker.currentText()``.
-        """
-        plot_type = self.comboBoxPlotType.currentText()
-        if self.styles[plot_type]['Markers']['Symbol'] == self.comboBoxMarker.currentText():
-            return
-        self.styles[plot_type]['Markers']['Symbol'] = self.comboBoxMarker.currentText()
-
-        self.update_SV()
-
-    def marker_size_callback(self):
-        """Updates marker size
-
-        Updates marker size on current plot on change of ``MainWindow.doubleSpinBoxMarkerSize.value()``.
-        """
-        plot_type = self.comboBoxPlotType.currentText()
-        if self.styles[plot_type]['Markers']['Size'] == self.doubleSpinBoxMarkerSize.value():
-            return
-        self.styles[plot_type]['Markers']['Size'] = self.doubleSpinBoxMarkerSize.value()
-
-        self.update_SV()
-
-    def slider_alpha_changed(self):
-        """Updates transparency on scatter plots.
-
-        Executes on change of ``MainWindow.horizontalSliderMarkerAlpha.value()``.
-        """
-        plot_type = self.comboBoxPlotType.currentText()
-        self.labelMarkerAlpha.setText(str(self.horizontalSliderMarkerAlpha.value()))
-
-        if self.horizontalSliderMarkerAlpha.isEnabled():
-            self.styles[plot_type]['Markers']['Alpha'] = float(self.horizontalSliderMarkerAlpha.value())
-            self.update_SV()
-
-    # lines
-    # -------------------------------------
-    def line_width_callback(self):
-        """Updates line width
-
-        Updates line width on current plot on change of ``MainWindow.comboBoxLineWidth.currentText()."""
-        plot_type = self.comboBoxPlotType.currentText()
-        if self.styles[plot_type]['Lines']['LineWidth'] == float(self.comboBoxLineWidth.currentText()):
-            return
-
-        self.styles[plot_type]['Lines']['LineWidth'] = float(self.comboBoxLineWidth.currentText())
-        self.update_SV()
-
-    def length_multiplier_callback(self):
-        """Updates line length multiplier
-
-        Used when plotting vector components in multidimensional plots.  Values entered by the user must be (0,10]
-        """
-        plot_type = self.comboBoxPlotType.currentText()
-        if not float(self.lineEditLengthMultiplier.text()):
-            self.lineEditLengthMultiplier.values = self.styles[plot_type]['Lines']['Multiplier']
-
-        value = float(self.lineEditLengthMultiplier.text())
-        if self.styles[plot_type]['Lines']['Multiplier'] == value:
-            return
-        elif (value < 0) or (value >= 100):
-            self.lineEditLengthMultiplier.values = self.styles[plot_type]['Lines']['Multiplier']
-            return
-
-        self.styles[plot_type]['Lines']['Multiplier'] = value
-        self.update_SV()
-
-    def line_color_callback(self):
-        """Updates color of plot markers
-
-        Uses ``QColorDialog`` to select new marker color and then updates plot on change of backround ``MainWindow.toolButtonLineColor`` color.
-        """
-        plot_type = self.comboBoxPlotType.currentText()
-        # change color
-        self.button_color_select(self.toolButtonLineColor)
-        color = self.get_hex_color(self.toolButtonLineColor.palette().button().color())
-        if self.styles[plot_type]['Lines']['Color'] == color:
-            return
-
-        # update style
-        self.styles[plot_type]['Lines']['Color'] = color
-
-        # update plot
-        self.update_SV()
-
-    # colors
-    # -------------------------------------
-    def marker_color_callback(self):
-        """Updates color of plot markers
-
-        Uses ``QColorDialog`` to select new marker color and then updates plot on change of backround ``MainWindow.toolButtonMarkerColor`` color.
-        """
-        plot_type = self.comboBoxPlotType.currentText()
-        # change color
-        self.button_color_select(self.toolButtonMarkerColor)
-        color = self.get_hex_color(self.toolButtonMarkerColor.palette().button().color())
-        if self.styles[plot_type]['Colors']['Color'] == color:
-            return
-
-        # update style
-        self.styles[plot_type]['Colors']['Color'] = color
-
-        # update plot
-        self.update_SV()
-
-    def resolution_callback(self, update_plot=False):
-        """Updates heatmap resolution
-
-        Updates the resolution of heatmaps when ``MainWindow.spinBoxHeatmapResolution`` is changed.
-
-        Parameters
-        ----------
-        update_plot : bool, optional
-            Sets the resolution of a heatmap for either Cartesian or ternary plots and both *heatmap* and *pca heatmap*, by default ``False``
-        """        
-        style = self.styles[self.comboBoxPlotType.currentText()]
-
-        style['Colors']['Resolution'] = self.spinBoxHeatmapResolution.value()
-
-        if update_plot:
-            self.update_SV()
-
-    # updates scatter styles when ColorByField comboBox is changed
-    def color_by_field_callback(self):
-        """Executes on change to *ColorByField* combobox
-        
-        Updates style associated with ``MainWindow.comboBoxColorByField``.  Also updates
-        ``MainWindow.comboBoxColorField`` and ``MainWindow.comboBoxColorScale``."""
-        #print('color_by_field_callback')
-        # need this line to update field comboboxes when colorby field is updated
-        self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
-        self.update_color_field_spinbox()
-        plot_type = self.comboBoxPlotType.currentText()
-        if plot_type == '':
-            return
-
-        style = self.styles[plot_type]
-        if style['Colors']['ColorByField'] == self.comboBoxColorByField.currentText():
-            return
-
-        style['Colors']['ColorByField'] = self.comboBoxColorByField.currentText()
-        if self.comboBoxColorByField.currentText() != '':
-            self.set_style_widgets(plot_type)
-
-        if self.comboBoxPlotType.isEnabled() == False | self.comboBoxColorByField.isEnabled() == False:
-            return
-
-        # only run update current plot if color field is selected or the color by field is clusters
-        if self.comboBoxColorByField.currentText() != 'None' or self.comboBoxColorField.currentText() != '' or self.comboBoxColorByField.currentText() in ['cluster']:
-            self.update_SV()
-
-    def color_field_callback(self, plot=True):
-        """Updates color field and plot
-
-        Executes on change of ``MainWindow.comboBoxColorField``
-        """
-        #print('color_field_callback')
-        plot_type = self.comboBoxPlotType.currentText()
-        field = self.comboBoxColorField.currentText()
-        self.update_color_field_spinbox()
-        
-        if self.styles[plot_type]['Colors']['Field'] == field:
-            return
-
-        self.styles[plot_type]['Colors']['Field'] = field
-
-        if field != '' and field is not None:
-            if field not in self.data[self.sample_id].axis_dict.keys():
-                self.initialize_axis_values(self.comboBoxColorByField.currentText(), field)
-
-            self.set_color_axis_widgets()
-            if plot_type not in ['correlation']:
-                self.styles[plot_type]['Colors']['CLim'] = [self.data[self.sample_id].axis_dict[field]['min'], self.data[self.sample_id].axis_dict[field]['max']]
-                self.styles[plot_type]['Colors']['CLabel'] = self.data[self.sample_id].axis_dict[field]['label']
-        else:
-            self.lineEditCbarLabel.setText('')
-
-        # update plot
-        if plot:
-            self.update_SV()
-
-    def color_field_update(self):
-        self.spinBoxColorField.blockSignals(True)
-        self.comboBoxColorField.setCurrentIndex(self.spinBoxColorField.value())
-        self.color_field_callback(plot=True)
-        self.spinBoxColorField.blockSignals(False)
-
-    def field_colormap_callback(self):
-        """Sets the color map
-
-        Sets the colormap in ``MainWindow.styles`` for the current plot type, set from ``MainWindow.comboBoxFieldColormap``.
-        """
-        plot_type = self.comboBoxPlotType.currentText()
-        if self.styles[plot_type]['Colors']['Colormap'] == self.comboBoxFieldColormap.currentText():
-            return
-
-        self.toggle_style_widgets()
-        self.styles[self.comboBoxPlotType.currentText()]['Colors']['Colormap'] = self.comboBoxFieldColormap.currentText()
-
-        self.update_SV()
-
-    def colormap_direction_callback(self):
-        """Set colormap direction (normal/reverse)
-
-        Reverses colormap if ``MainWindow.checkBoxReverseColormap.isChecked()`` is ``True``."""
-        plot_type = self.comboBoxPlotType.currentText()
-        if self.styles[plot_type]['Colors']['Reverse'] == self.checkBoxReverseColormap.isChecked():
-            return
-
-        self.styles[plot_type]['Colors']['Reverse'] = self.checkBoxReverseColormap.isChecked()
-
-        self.update_SV()
-
-    def get_cluster_colormap(self, cluster_dict, alpha=100):
-        """Converts hex colors to a colormap
-
-        Creates a discrete colormap given a list of hex color strings.  The colors in cluster_dict are set/changed in the ``MainWindow.tableWidgetViewGroups``.
-
-        Parameters
-        ----------
-        cluster_dict : dict
-            Dictionary with cluster information    
-        alpha : int, optional
-            Transparency to be added to color, by default 100
-
-        Returns
-        -------
-        matplotlib.colormap
-            A discrete (colors.ListedColormap) colormap
-        """
-        n = cluster_dict['n_clusters']
-        cluster_color = [None]*n
-        cluster_label = [None]*n
-        
-        # convert colors from hex to rgb and add to cluster_color list
-        for i in range(n):
-            color = self.get_rgb_color(cluster_dict[i]['color'])
-            cluster_color[i] = tuple(float(c)/255 for c in color) + (float(alpha)/100,)
-            cluster_label[i] = cluster_dict[i]['name']
-
-        # mask
-        if 99 in list(cluster_dict.keys()):
-            color = self.get_rgb_color(cluster_dict[99]['color'])
-            cluster_color.append(tuple(float(c)/255 for c in color) + (float(alpha)/100,))
-            cluster_label.append(cluster_dict[99]['name'])
-            cmap = colors.ListedColormap(cluster_color, N=n+1)
-        else:
-            cmap = colors.ListedColormap(cluster_color, N=n)
-
-        return cluster_color, cluster_label, cmap
-
-    def get_colormap(self, N=None):
-        """Gets the color map
-
-        Gets the colormap from ``MainWindow.styles`` for the current plot type and reverses or sets as discrete in needed.
-
-        Parameters
-        ----------
-        N : int, optional
-            Creates a discrete color map, if not supplied, the colormap is continuous, Defaults to None.
-
-        Returns
-        -------
-        matplotlib.colormap.ListedColormap : colormap
-        """
-        if self.canvasWindow.currentIndex() == self.canvas_tab['qv']:
-            plot_type = 'analyte map'
-        else:
-            plot_type = self.comboBoxPlotType.currentText()
-
-        name = self.styles[plot_type]['Colors']['Colormap']
-        if name in self.mpl_colormaps:
-            if N is not None:
-                cmap = plt.get_cmap(name, N)
-            else:
-                cmap = plt.get_cmap(name)
-        else:
-            cmap = self.create_custom_colormap(name, N)
-
-        if self.styles[plot_type]['Colors']['Reverse']:
-            cmap = cmap.reversed()
-
-        return cmap
-
-    def create_custom_colormap(self, name, N=None):
-        """Creates custom colormaps
-
-        Custom colormaps as found in ``resources/appdata/custom_colormaps.xlsx``.
-
-        Parameters
-        ----------
-        name : str
-            Name of colormap
-        N : int, optional
-            Number of colors to compute using colormap, by default None
-
-        Returns
-        -------
-        matplotlib.LinearSegmentedColormap
-            Colormap
-        """
-        if N is None:
-            N = 256
-
-        color_list = self.get_rgb_color(self.custom_color_dict[name])
-
-        cmap = colors.LinearSegmentedColormap.from_list(name, color_list, N=N)
-
-        return cmap
-
-    def clim_callback(self):
-        """Sets the color limits
-
-        Sets the color limits in ``MainWindow.styles`` for the current plot type.
-        """
-        plot_type = self.comboBoxPlotType.currentText()
-        if self.styles[plot_type]['Colors']['CLim'][0] == float(self.lineEditColorLB.text()) and self.styles[plot_type]['Colors']['CLim'][1] == float(self.lineEditColorUB.text()):
-            return
-
-        self.styles[plot_type]['Colors']['CLim'] = [float(self.lineEditColorLB.text()), float(self.lineEditColorUB.text())]
-
-        self.update_SV()
-
-    def cbar_direction_callback(self):
-        """Sets the colorbar direction
-
-        Sets the colorbar direction in ``MainWindow.styles`` for the current plot type.
-        """
-        plot_type = self.comboBoxPlotType.currentText()
-        if self.styles[plot_type]['Colors']['Direction'] == self.comboBoxCbarDirection.currentText():
-            return
-        self.styles[plot_type]['Colors']['Direction'] = self.comboBoxCbarDirection.currentText()
-
-        self.update_SV()
-
-    def cbar_label_callback(self):
-        """Sets color label
-
-        Sets the color label in ``MainWindow.styles`` for the current plot type.
-        """
-        plot_type = self.comboBoxPlotType.currentText()
-        if self.styles[plot_type]['Colors']['CLabel'] == self.lineEditCbarLabel.text():
-            return
-        self.styles[plot_type]['Colors']['CLabel'] = self.lineEditCbarLabel.text()
-
-        if self.comboBoxCbarLabel.isEnabled():
-            self.update_SV()
-
-    # cluster styles
-    # -------------------------------------
-    def cluster_color_callback(self):
-        """Updates color of a cluster
-
-        Uses ``QColorDialog`` to select new cluster color and then updates plot on change of
-        backround ``MainWindow.toolButtonClusterColor`` color.  Also updates ``MainWindow.tableWidgetViewGroups``
-        color associated with selected cluster.  The selected cluster is determined by ``MainWindow.spinBoxClusterGroup.value()``
-        """
-        #print('cluster_color_callback')
-        if self.tableWidgetViewGroups.rowCount() == 0:
-            return
-
-        selected_cluster = self.spinBoxClusterGroup.value()-1
-
-        # change color
-        self.button_color_select(self.toolButtonClusterColor)
-        color = self.get_hex_color(self.toolButtonClusterColor.palette().button().color())
-        self.cluster_dict[self.cluster_dict['active method']][selected_cluster]['color'] = color
-        if self.tableWidgetViewGroups.item(selected_cluster,2).text() == color:
-            return
-
-        # update_table
-        self.tableWidgetViewGroups.setItem(selected_cluster,2,QTableWidgetItem(color))
-
-        # update plot
-        if self.comboBoxColorByField.currentText() == 'cluster':
-            self.update_SV()
-
-    def set_default_cluster_colors(self, mask=False):
-        """Sets cluster group to default colormap
-
-        Sets the colors in ``MainWindow.tableWidgetViewGroups`` to the default colormap in
-        ``MainWindow.styles['cluster']['Colors']['Colormap'].  Change the default colormap
-        by changing ``MainWindow.comboBoxColormap``, when ``MainWindow.comboBoxColorByField.currentText()`` is ``Cluster``.
-
-        Returns
-        -------
-            str : hexcolor
-        """
-        #print('set_default_cluster_colors')
-        # cluster colormap
-        cmap = self.get_colormap(N=self.tableWidgetViewGroups.rowCount())
-
-        # set color for each cluster and place color in table
-        colors = [cmap(i) for i in range(cmap.N)]
-
-        hexcolor = []
-        for i in range(self.tableWidgetViewGroups.rowCount()):
-            hexcolor.append(self.get_hex_color(colors[i]))
-            self.tableWidgetViewGroups.blockSignals(True)
-            self.tableWidgetViewGroups.setItem(i,2,QTableWidgetItem(hexcolor[i]))
-            self.tableWidgetViewGroups.blockSignals(False)
-
-        if mask:
-            hexcolor.append(self.styles['cluster']['Scale']['OverlayColor'])
-
-        self.toolButtonClusterColor.setStyleSheet("background-color: %s;" % self.tableWidgetViewGroups.item(self.spinBoxClusterGroup.value()-1,2).text())
-
-        return hexcolor
-
 
     # -------------------------------------
     # General plot functions
@@ -5221,7 +3046,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 field_type = self.comboBoxColorByField.currentText()
                 field = self.comboBoxColorField.currentText()
 
-                if not field_type or not field:
+                if not field_type or not field or (field_type == '') or (field == ''):
                     return
 
                 if self.toolBox.currentIndex() in [self.left_tab['polygons'], self.left_tab['profile']]:
@@ -5239,24 +3064,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 #update UI with auto scale and neg handling parameters from 'Analyte/Ratio Info'
                 self.update_spinboxes(field, field_type)
                 
-                # if not self.comboBoxColorField.currentText():
-                #     return
-
-                # if analysis in ['Analyte', 'Ratio']:
-                #     map_type = 'analyte'
-                # elif analysis == 'Analyte (normalized)':
-                #     map_type = 'analyte_norm'
-                # else:
-                #     return
-
-                # current_plot_df = self.get_map_data(sample_id=sample_id, field=field, field_type=analysis)
-                # if analysis == 'Ratio':
-                #     analyte_1 = field.split(' / ')[0]
-                #     analyte_2 = field.split(' / ')[1]
-                #     self.create_plot(current_plot_df, sample_id, plot_type = map_type, analyte_1=analyte_1, analyte_2=analyte_2, plot=True)
-                # else: #Not a ratio
-                #     self.create_plot(current_plot_df, sample_id, plot_type = map_type, analyte_1=field, plot=True)
-
             case 'gradient map':
                 if self.comboBoxNoiseReductionMethod.currentText() == 'none':
                     QMessageBox.warning(None,'Warning','Noise reduction must be performed before computing a gradient.')
@@ -5583,7 +3390,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             reshaped_array = np.reshape(current_plot_df['array'].values, self.data[self.sample_id].array_size, order=self.data[self.sample_id].order)
 
             # add image to canvas
-            cmap = self.get_colormap()
+            cmap = self.styling.get_colormap()
             cax = canvas.axes.imshow(reshaped_array, cmap=cmap,  aspect=self.data[self.sample_id].aspect_ratio, interpolation='none')
             font = {'family': 'sans-serif', 'stretch': 'condensed', 'size': 8, 'weight': 'semibold'}
             canvas.axes.text(0.025*self.data[self.sample_id].array_size[0],0.1*self.data[self.sample_id].array_size[1], analyte, fontdict=font, color=style['Scale']['OverlayColor'], ha='left', va='top')
@@ -5950,7 +3757,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 boundaries = np.arange(-0.5, N, 1)
                 norm = colors.BoundaryNorm(boundaries, N, clip=True)
 
-        #scalarMappable = plt.cm.ScalarMappable(cmap=self.get_colormap(), norm=norm)
+        #scalarMappable = plt.cm.ScalarMappable(cmap=self.styling.get_colormap(), norm=norm)
 
         return norm
     
@@ -5973,7 +3780,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Step 1: Normalize your data array for colormap application
         norm = colors.Normalize(vmin=np.nanmin(array), vmax=np.nanmax(array))
-        cmap = self.get_colormap()
+        cmap = self.styling.get_colormap()
 
         # Step 2: Apply the colormap to get RGB values, then normalize to [0, 255] for QImage
         rgb_array = cmap(norm(array))[:, :, :3]  # Drop the alpha channel returned by cmap
@@ -6009,11 +3816,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # set color limits
         if field not in self.data[self.sample_id].axis_dict:
-            self.initialize_axis_values(field_type,field)
-            self.set_style_widgets(plot_type='analyte map',style=style)
+            self.styling.initialize_axis_values(field_type,field)
+            self.styling.set_style_widgets(plot_type='analyte map',style=style)
 
         # get data for current map
-        map_df = self.data[self.sample_id].get_map_data(field, field_type, scale_data=True)
+        map_df = self.data[self.sample_id].get_map_data(field, field_type, scale_data=False)
 
         array_size = self.data[self.sample_id].array_size
         aspect_ratio = self.data[self.sample_id].aspect_ratio
@@ -6033,7 +3840,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             
         norm = self.color_norm(style)
 
-        cax = canvas.axes.imshow(reshaped_array, cmap=self.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
+        cax = canvas.axes.imshow(reshaped_array, cmap=self.styling.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
 
 
         self.add_colorbar(canvas, cax, style)
@@ -6171,7 +3978,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # colorbar
         cmap = colormap.get(style['Colors']['Colormap'], source = 'matplotlib')
-        #clb,cub,cscale,clabel = self.get_axis_values(field_type,field)
+        #clb,cub,cscale,clabel = self.styling.get_axis_values(field_type,field)
         # cbar = ColorBarItem(values=(clb,cub), width=25, colorMap=cmap, label=clabel, interactive=False, limits=(clb,cub), orientation=style['Colors']['Direction'], pen='black')
         img_item.setLookupTable(cmap.getLookupTable())
         # graphicWidget.addItem(cbar)
@@ -6296,7 +4103,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         if self.comboBoxPlotType.currentText() != 'correlation':
             self.comboBoxPlotType.setCurrentText('correlation')
-            self.set_style_widgets('correlation')
+            self.styling.set_style_widgets('correlation')
 
         self.update_SV()
 
@@ -6360,10 +4167,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # plot correlation or correlation^2
         square_flag = self.checkBoxCorrelationSquared.isChecked()
         if square_flag:
-            cax = canvas.axes.imshow(correlation_matrix**2, cmap=self.get_colormap(), norm=norm)
+            cax = canvas.axes.imshow(correlation_matrix**2, cmap=self.styling.get_colormap(), norm=norm)
             canvas.array = correlation_matrix**2
         else:
-            cax = canvas.axes.imshow(correlation_matrix, cmap=self.get_colormap(), norm=norm)
+            cax = canvas.axes.imshow(correlation_matrix, cmap=self.styling.get_colormap(), norm=norm)
             canvas.array = correlation_matrix
             
         # store correlation_matrix to save_data if data needs to be exported
@@ -6389,14 +4196,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         canvas.axes.set_yticks(ticks, minor=False)
         canvas.axes.set_xticks(ticks, minor=False)
 
-        labels = self.toggle_mass(columns)
+        labels = self.styling.toggle_mass(columns)
 
         canvas.axes.set_xticklabels(labels, rotation=90, ha='center', va='bottom', fontproperties=font)
         canvas.axes.set_yticklabels(labels, ha='left', va='center', fontproperties=font)
 
         canvas.axes.set_title('')
 
-        self.update_figure_font(canvas, style['Text']['Font'])
+        self.styling.update_figure_font(canvas, style['Text']['Font'])
 
         if square_flag:
             plot_name = method+'_squared'
@@ -6540,7 +4347,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         _, _, patches = canvas.axes.hist(array, bins=edges, density=True, color=style['Colors']['Color'], edgecolor=None, linewidth=style['Lines']['LineWidth'], log=logflag, alpha=0.6)
         # color histogram bins by analyte colormap?
         if self.checkBoxShowHistCmap.isChecked():
-            cmap = self.get_colormap()
+            cmap = self.styling.get_colormap()
             for j, p in enumerate(patches):
                 p.set_facecolor(cmap(j / len(patches)))
 
@@ -6587,7 +4394,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         x = self.get_scatter_data('histogram')['x']
 
         # determine edges
-        xmin,xmax,xscale,xlbl = self.get_axis_values(x['type'],x['field'])
+        xmin,xmax,xscale,xlbl = self.styling.get_axis_values(x['type'],x['field'])
         style['Axes']['XLim'] = [xmin, xmax]
         style['Axes']['XScale'] = xscale
         #if xscale == 'log':
@@ -6626,7 +4433,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             method = self.cluster_dict['active method']
 
             # Get the cluster labels for the data
-            cluster_color, cluster_label, _ = self.get_cluster_colormap(self.cluster_dict[method],alpha=style['Markers']['Alpha'])
+            cluster_color, cluster_label, _ = self.styling.get_cluster_colormap(self.cluster_dict[method],alpha=style['Markers']['Alpha'])
             cluster_group = self.data[self.sample_id].processed_data.loc[:,method]
             clusters = self.cluster_dict[method]['selected_clusters']
 
@@ -6685,10 +4492,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             ymin, ymax = canvas.axes.get_ylim()
             d = {'pstatus':'auto', 'pmin':fmt.oround(ymin,order=2,toward=0), 'pmax':fmt.oround(ymax,order=2,toward=1)}
             self.data[self.sample_id].axis_dict[x['field']].update(d)
-            self.set_axis_widgets('y', x['field'])
+            self.styling.set_axis_widgets('y', x['field'])
 
         # grab probablility axes limits
-        _, _, _, _, ymin, ymax = self.get_axis_values(x['type'],x['field'],ax='p')
+        _, _, _, _, ymin, ymax = self.styling.get_axis_values(x['type'],x['field'],ax='p')
 
         # label font
         if 'font' == '':
@@ -6717,7 +4524,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         canvas.axes.tick_params(labelsize=style['Text']['FontSize'],direction=style['Axes']['TickDir'])
         canvas.axes.set_box_aspect(style['Axes']['AspectRatio'])
 
-        self.update_figure_font(canvas, style['Text']['Font'])
+        self.styling.update_figure_font(canvas, style['Text']['Font'])
 
         canvas.fig.tight_layout()
 
@@ -6771,20 +4578,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # set axes widgets
         if (scatter_dict['x']['field'] is not None) and (scatter_dict['y']['field'] != ''):
             if scatter_dict['x']['field'] not in self.data[self.sample_id].axis_dict.keys():
-                self.initialize_axis_values(scatter_dict['x']['type'], scatter_dict['x']['field'])
+                self.styling.initialize_axis_values(scatter_dict['x']['type'], scatter_dict['x']['field'])
 
         if (scatter_dict['y']['field'] is not None) and (scatter_dict['y']['field'] != ''):
             if scatter_dict['y']['field'] not in self.data[self.sample_id].axis_dict.keys():
-                self.initialize_axis_values(scatter_dict['y']['type'], scatter_dict['y']['field'])
+                self.styling.initialize_axis_values(scatter_dict['y']['type'], scatter_dict['y']['field'])
 
         if (scatter_dict['z']['field'] is not None) and (scatter_dict['z']['field'] != ''):
             if scatter_dict['z']['field'] not in self.data[self.sample_id].axis_dict.keys():
-                self.initialize_axis_values(scatter_dict['z']['type'], scatter_dict['z']['field'])
+                self.styling.initialize_axis_values(scatter_dict['z']['type'], scatter_dict['z']['field'])
 
         if (scatter_dict['c']['field'] is not None) and (scatter_dict['c']['field'] != ''):
             if scatter_dict['c']['field'] not in self.data[self.sample_id].axis_dict.keys():
-                self.set_color_axis_widgets()
-                self.set_axis_widgets('c', scatter_dict['c']['field'])
+                self.styling.set_color_axis_widgets()
+                self.styling.set_axis_widgets('c', scatter_dict['c']['field'])
 
         return scatter_dict
 
@@ -6836,7 +4643,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         canvas.axes.margins(x=0)
 
         if plot_flag:
-            self.update_figure_font(canvas, style['Text']['Font'])
+            self.styling.update_figure_font(canvas, style['Text']['Font'])
             self.clear_layout(self.widgetSingleView.layout())
             self.widgetSingleView.layout().addWidget(canvas)
 
@@ -6845,16 +4652,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         A general function for creating scatter plots of 2-dimensions.
 
-        :param fig: figure object
-        :type fig: matplotlib.figure
-        :param x: data associated with field ``MainWindow.comboBoxFieldX.currentText()`` as x coordinate
-        :type x: dict
-        :param y: data associated with field ``MainWindow.comboBoxFieldX.currentText()`` as y coordinate
-        :type y: dict
-        :param c: data associated with field ``MainWindow.comboBoxColorField.currentText()`` as marker colors
-        :type c: dict
-        :param style: style parameters
-        :type style: dict
+        Parameters
+        ----------
+        canvas : MplCanvas
+            Canvas to be added to main window
+        x : dict
+            Data associated with field ``MainWindow.comboBoxFieldX.currentText()`` as x coordinate
+        y : dict
+            Data associated with field ``MainWindow.comboBoxFieldX.currentText()`` as y coordinate
+        c : dict
+            Data associated with field ``MainWindow.comboBoxColorField.currentText()`` as marker colors
+        style : dict
+            Style parameters
         """
         if (c['field'] is None) or (c['field'] == ''):
             # single color
@@ -6876,7 +4685,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 if 0 not in list(self.cluster_dict[method].keys()):
                     return
 
-            cluster_color, cluster_label, cmap = self.get_cluster_colormap(self.cluster_dict[method],alpha=style['Markers']['Alpha'])
+            cluster_color, cluster_label, cmap = self.styling.get_cluster_colormap(self.cluster_dict[method],alpha=style['Markers']['Alpha'])
             cluster_group = self.data[self.sample_id].processed_data.loc[:,method]
             selected_clusters = self.cluster_dict[method]['selected_clusters']
 
@@ -6901,7 +4710,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 s=style['Markers']['Size'],
                 marker=self.markerdict[style['Markers']['Symbol']],
                 edgecolors='none',
-                cmap=self.get_colormap(),
+                cmap=self.styling.get_colormap(),
                 alpha=style['Markers']['Alpha']/100,
                 norm=norm)
 
@@ -6910,8 +4719,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             
 
         # axes
-        xmin, xmax, xscale, xlbl = self.get_axis_values(x['type'],x['field'])
-        ymin, ymax, yscale, ylbl = self.get_axis_values(y['type'],y['field'])
+        xmin, xmax, xscale, xlbl = self.styling.get_axis_values(x['type'],x['field'])
+        ymin, ymax, yscale, ylbl = self.styling.get_axis_values(y['type'],y['field'])
 
         # labels
         font = {'size':style['Text']['FontSize']}
@@ -7001,7 +4810,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 if 0 not in list(self.cluster_dict[method].keys()):
                     return
 
-            cluster_color, cluster_label, cmap = self.get_cluster_colormap(self.cluster_dict[method],alpha=style['Markers']['Alpha'])
+            cluster_color, cluster_label, cmap = self.styling.get_cluster_colormap(self.cluster_dict[method],alpha=style['Markers']['Alpha'])
             cluster_group = self.data[self.sample_id].processed_data.loc[:,method]
             selected_clusters = self.cluster_dict[method]['selected_clusters']
 
@@ -7077,12 +4886,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         # color by field
         norm = self.color_norm(style)
-        h = canvas.axes.hist2d(x['array'], y['array'], bins=style['Colors']['Resolution'], norm=norm, cmap=self.get_colormap())
+        h = canvas.axes.hist2d(x['array'], y['array'], bins=style['Colors']['Resolution'], norm=norm, cmap=self.styling.get_colormap())
         self.add_colorbar(canvas, h[3], style)
 
         # axes
-        xmin, xmax, xscale, xlbl = self.get_axis_values(x['type'],x['field'])
-        ymin, ymax, yscale, ylbl = self.get_axis_values(y['type'],y['field'])
+        xmin, xmax, xscale, xlbl = self.styling.get_axis_values(x['type'],x['field'])
+        ymin, ymax, yscale, ylbl = self.styling.get_axis_values(y['type'],y['field'])
 
         # labels
         font = {'size':style['Text']['FontSize']}
@@ -7200,7 +5009,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """Creates map colored by ternary coordinate positions"""
         if self.comboBoxPlotType.currentText() != 'ternary map':
             self.comboBoxPlotType.setCurrentText('ternary map')
-            self.set_style_widgets('ternary map')
+            self.styling.set_style_widgets('ternary map')
 
         style = self.styles['ternary map']
 
@@ -7214,10 +5023,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         b = self.data[self.sample_id].processed_data.loc[:,bfield].values
         c = self.data[self.sample_id].processed_data.loc[:,cfield].values
 
-        ca = self.get_rgb_color(self.get_hex_color(self.toolButtonTCmapXColor.palette().button().color()))
-        cb = self.get_rgb_color(self.get_hex_color(self.toolButtonTCmapYColor.palette().button().color()))
-        cc = self.get_rgb_color(self.get_hex_color(self.toolButtonTCmapZColor.palette().button().color()))
-        cm = self.get_rgb_color(self.get_hex_color(self.toolButtonTCmapMColor.palette().button().color()))
+        ca = get_rgb_color(get_hex_color(self.toolButtonTCmapXColor.palette().button().color()))
+        cb = get_rgb_color(get_hex_color(self.toolButtonTCmapYColor.palette().button().color()))
+        cc = get_rgb_color(get_hex_color(self.toolButtonTCmapZColor.palette().button().color()))
+        cm = get_rgb_color(get_hex_color(self.toolButtonTCmapMColor.palette().button().color()))
 
         t = ternary(canvas.axes)
 
@@ -7380,7 +5189,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 print(f'Unknown PCA plot type: {plot_type}')
                 return
 
-        self.update_figure_font(canvas, self.styles[plot_type]['Text']['Font'])
+        self.styling.update_figure_font(canvas, self.styles[plot_type]['Text']['Font'])
 
         self.plot_info = {
             'tree': 'Multidimensional Analysis',
@@ -7478,7 +5287,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         n_variables = components.shape[1]
 
         norm = self.color_norm(style)
-        cax = canvas.axes.imshow(components, cmap=self.get_colormap(), aspect=1.0, norm=norm)
+        cax = canvas.axes.imshow(components, cmap=self.styling.get_colormap(), aspect=1.0, norm=norm)
         canvas.array = components
 
         # Add a colorbar
@@ -7522,7 +5331,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         #ax.set_yticks(n_components, labels=[f'Var{i+1}' for i in range(len(n_components))])
         canvas.axes.set_yticks(range(0, n_variables,1), minor=False)
-        canvas.axes.set_yticklabels(self.toggle_mass(analytes), ha='right', va='center')
+        canvas.axes.set_yticklabels(self.styling.toggle_mass(analytes), ha='right', va='center')
 
         canvas.fig.tight_layout()
         plot_data = pd.DataFrame(components, columns = list(map(str, range(n_variables))))
@@ -7641,7 +5450,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         n_clusters = len(np.unique(groups))
 
-        cluster_color, cluster_label, cmap = self.get_cluster_colormap(self.cluster_dict[method], alpha=style['Markers']['Alpha'])
+        cluster_color, cluster_label, cmap = self.styling.get_cluster_colormap(self.cluster_dict[method], alpha=style['Markers']['Alpha'])
 
         #boundaries = np.arange(-0.5, n_clusters, 1)
         #norm = colors.BoundaryNorm(boundaries, cmap.N, clip=True)
@@ -7669,18 +5478,35 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         return canvas, self.data[self.sample_id].processed_data[method]
 
     def plot_cluster_performance(self):
-        """Elbow plot used to determine the optimal number of clusters
+        """Plots used to estimate the optimal number of clusters
 
+        1. Elbow Method
         The elbow method looks at the variance (or inertia) within clusters as the number
         of clusters increases. The idea is to plot the sum of squared distances between
         each point and its assigned cluster's centroid, known as the within-cluster sum
         of squares (WCSS) or inertia, for different values of k (number of clusters).
 
         Process:
-        1. Run KMeans for a range of cluster numbers (k).
-        2. Plot the inertia (WCSS) vs. the number of clusters.
-        3. Look for the "elbow" point, where the rate of decrease sharply slows down,
+        * Run KMeans for a range of cluster numbers (k).
+        * Plot the inertia (WCSS) vs. the number of clusters.
+        * Look for the "elbow" point, where the rate of decrease sharply slows down,
         indicating that adding more clusters does not significantly reduce the inertia.
+
+
+        2. Silhouette Score
+        The silhouette score measures how similar an object is to its own cluster compared
+        to other clusters. The score ranges from -1 to 1, where:
+
+        * A score close to 1 means the sample is well clustered.
+        * A score close to 0 means the sample lies on the boundary between clusters.
+        * A score close to -1 means the sample is assigned to the wrong cluster.
+
+        In cases where clusters have widely varying sizes or densities, Silhouette Score may provide the best result.
+
+        Process:
+        * Run KMeans for a range of cluster numbers (k).
+        * Calculate the silhouette score for each k.
+        * Choose the k with the highest silhouette score.
         """        
         if self.sample_id == '':
             return
@@ -7764,9 +5590,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.clear_layout(self.widgetSingleView.layout())
         self.widgetSingleView.layout().addWidget(canvas)
-
-
-
 
     def compute_clusters(self, max_clusters=None):
         """Computes cluster results
@@ -7929,7 +5752,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 print(f'Unknown PCA plot type: {plot_type}')
                 return
 
-        self.update_figure_font(canvas, self.styles[plot_type]['Text']['Font'])
+        self.styling.update_figure_font(canvas, self.styles[plot_type]['Text']['Font'])
 
         self.plot_info = {
             'tree': 'Multidimensional Analysis',
@@ -8062,15 +5885,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.update_cluster_flag:
             self.update_SV()
 
-    def select_cluster_group_callback(self):
-        """Set cluster color button background after change of selected cluster group
-
-        Sets ``MainWindow.toolButtonClusterColor`` background on change of ``MainWindow.spinBoxClusterGroup``
-        """
-        if self.tableWidgetViewGroups.rowCount() == 0:
-            return
-        self.toolButtonClusterColor.setStyleSheet("background-color: %s;" % self.tableWidgetViewGroups.item(self.spinBoxClusterGroup.value()-1,2).text())
-
     def update_clusters(self):
         """Executed on update to cluster table.
 
@@ -8098,36 +5912,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.update_SV()
 
     # 2. Silhouette Score
-    # The silhouette score measures how similar an object is to its own cluster compared to other clusters. The score ranges from -1 to 1, where:
-    # In cases where clusters have widely varying sizes or densities, Silhouette Score may provide the best result.
-
-    # A score close to 1 means the sample is well clustered.
-    # A score close to 0 means the sample lies on the boundary between clusters.
-    # A score close to -1 means the sample is assigned to the wrong cluster.
-    # Process:
-    # Run KMeans for a range of cluster numbers (k).
-    # Calculate the silhouette score for each k.
-    # Choose the k with the highest silhouette score.
-    # from sklearn.metrics import silhouette_score
-
-    # def silhouette_method(data, max_clusters=10):
-    #     silhouette_scores = []
-    #     k_range = range(2, max_clusters + 1)
-        
-    #     for k in k_range:
-    #         kmeans = KMeans(n_clusters=k)
-    #         kmeans.fit(data)
-    #         cluster_labels = kmeans.labels_
-    #         silhouette_avg = silhouette_score(data, cluster_labels)
-    #         silhouette_scores.append(silhouette_avg)
-        
-    #     # Plot silhouette scores
-    #     plt.figure(figsize=(8, 6))
-    #     plt.plot(k_range, silhouette_scores, 'bx-')
-    #     plt.xlabel('Number of clusters (k)')
-    #     plt.ylabel('Silhouette Score')
-    #     plt.title('Silhouette Score Method For Optimal k')
-    #     plt.show()
 
     # 4. Davies-Bouldin Index
     # The Davies-Bouldin Index (DBI) measures the ratio of within-cluster scatter to between-cluster separation. Lower values indicate better clustering.
@@ -8208,12 +5992,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             angle = 45
         else:
             angle = 0
-        labels = self.toggle_mass(self.ndim_list)
+        labels = self.styling.toggle_mass(self.ndim_list)
             
         if self.comboBoxColorByField.currentText() == 'cluster' and self.comboBoxColorField.currentText() != '':
             method = self.comboBoxColorField.currentText()
             cluster_dict = self.cluster_dict[method]
-            cluster_color, cluster_label, cmap = self.get_cluster_colormap(cluster_dict, alpha=style['Markers']['Alpha'])
+            cluster_color, cluster_label, cmap = self.styling.get_cluster_colormap(cluster_dict, alpha=style['Markers']['Alpha'])
 
             clusters = cluster_dict['selected_clusters']
             if 0 in list(cluster_dict.keys()):
@@ -8304,7 +6088,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             plot_name = f"{plot_type}_all"
 
-        self.update_figure_font(canvas, self.styles[plot_type]['Text']['Font'])
+        self.styling.update_figure_font(canvas, self.styles[plot_type]['Text']['Font'])
 
         self.plot_info = {
             'tree': 'Geochemistry',
@@ -8359,8 +6143,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.tableWidgetNDim.setCellWidget(row, 0, chkBoxItem_use)
             self.tableWidgetNDim.setItem(row, 1, QTableWidgetItem(analyte))
     
-
-
     def save_ndim_list(self):
         # get the list name from the user
         name, ok = QInputDialog.getText(self, 'Save custom TEC list', 'Enter name for new list:')
@@ -8378,7 +6160,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             QMessageBox.warning(None,'Error','could not save TEC list.')
 
             return
-
 
     def logax(self,ax, lim, axis='y', label='', tick_label_rotation=0):
         """
@@ -8455,12 +6236,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     self.tableWidgetViewGroups.setRowCount(len(clusters)-1)
                     self.spinBoxClusterGroup.setMaximum(len(clusters)-1)
 
-                    hexcolor = self.set_default_cluster_colors(mask=True)
+                    hexcolor = self.styling.set_default_cluster_colors(mask=True)
                 else:
                     self.tableWidgetViewGroups.setRowCount(len(clusters))
                     self.spinBoxClusterGroup.setMaximum(len(clusters))
 
-                    hexcolor = self.set_default_cluster_colors(mask=False)
+                    hexcolor = self.styling.set_default_cluster_colors(mask=False)
 
                 for c in clusters:
                     if c == 99:
@@ -8474,7 +6255,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     self.isUpdatingTable = True
                     self.tableWidgetViewGroups.setItem(c, 0, QTableWidgetItem(cluster_name))
                     self.tableWidgetViewGroups.setItem(c, 1, QTableWidgetItem(''))
-                    # colors in table are set by self.set_default_cluster_colors()
+                    # colors in table are set by self.styling.set_default_cluster_colors()
                     #self.tableWidgetViewGroups.setItem(i, 2, QTableWidgetItem(cluster_color))
                     self.tableWidgetViewGroups.selectRow(c)
                     
@@ -8527,8 +6308,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             # update plot with new cluster name
             self.update_SV()
-
-    # make this part of the calculated fields
 
 
     # -------------------------------------
@@ -8599,7 +6378,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 if 'cluster score' in data_type_dict:
                     field_list.append('Cluster score')
 
-        self.toggle_style_widgets()
+        self.styling.toggle_style_widgets()
 
         # add None to list?
         if addNone:
@@ -9021,237 +6800,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         return False
 
 
-    # -------------------------------
-    # Unclassified functions
-    # -------------------------------
-    def switch_view_mode(self, view_mode):
-        if view_mode > 2:
-            view_mode = 0
-        self.view_mode = view_mode
-
-        match self.view_mode:
-            case 0: # auto
-                if darkdetect.isDark():
-                    self.set_dark_theme()
-                else:
-                    self.set_light_theme()
-
-                self.actionViewMode.setIcon(QIcon(os.path.join(ICONPATH,'icon-sun-and-moon-64.svg')))
-                self.actionViewMode.setIconText('Auto')
-            case 1: # dark
-                self.set_dark_theme()
-            case 2: # light
-                self.set_light_theme()
-
-    def set_dark_theme(self):
-        ss = load_stylesheet('dark.qss')
-        app.setStyleSheet(ss)
-
-        self.actionViewMode.setIcon(QIcon(os.path.join(ICONPATH,'icon-moon-64.svg')))
-        self.actionViewMode.setIconText('Dark')
-
-        self.actionSelectAnalytes.setIcon(QIcon(os.path.join(ICONPATH,'icon-atom-dark-64.svg')))
-        self.actionOpenProject.setIcon(QIcon(os.path.join(ICONPATH,'icon-open-session-dark-64.svg')))
-        self.actionSaveProject.setIcon(QIcon(os.path.join(ICONPATH,'icon-save-session-dark-64.svg')))
-        self.actionFullMap.setIcon(QIcon(os.path.join(ICONPATH,'icon-fit-to-width-dark-64.svg')))
-        self.actionCrop.setIcon(QIcon(os.path.join(ICONPATH,'icon-crop-dark-64.svg')))
-        self.actionSwapAxes.setIcon(QIcon(os.path.join(ICONPATH,'icon-swap-dark-64.svg')))
-        self.toolButtonSwapResolution.setIcon(QIcon(os.path.join(ICONPATH,'icon-swap-resolution-dark-64.svg')))
-        # Notes
-        self.toolButtonNotesHeading.setIcon(QIcon(os.path.join(ICONPATH,'icon-heading-dark-64.svg')))
-        self.toolButtonNotesBold.setIcon(QIcon(os.path.join(ICONPATH,'icon-bold-dark-64.svg')))
-        self.toolButtonNotesItalic.setIcon(QIcon(os.path.join(ICONPATH,'icon-italics-dark-64.svg')))
-        self.toolButtonNotesBulletList.setIcon(QIcon(os.path.join(ICONPATH,'icon-bullet-list-dark-64.svg')))
-        self.toolButtonNotesNumList.setIcon(QIcon(os.path.join(ICONPATH,'icon-numbered-list-dark-64.svg')))
-        self.toolButtonNotesImage.setIcon(QIcon(os.path.join(ICONPATH,'icon-image-64.svg')))
-        self.toolButtonNotesSave.setIcon(QIcon(os.path.join(ICONPATH,'icon-pdf-dark-64.svg')))
-        # Reset Buttons
-        self.toolButtonXAxisReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-dark-64.svg')))
-        self.toolButtonYAxisReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-dark-64.svg')))
-        self.toolButtonCAxisReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-dark-64.svg')))
-        self.toolButtonClusterColorReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-dark-64.svg')))
-        self.toolButtonHistogramReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-dark-64.svg')))
-        # Plot Tree
-        self.toolButtonSortAnalyte.setIcon(QIcon(os.path.join(ICONPATH,'icon-sort-dark-64.svg')))
-        self.toolButtonRemovePlot.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-dark-64.svg')))
-        # Samples
-        self.toolBox.setItemIcon(self.left_tab['sample'],QIcon(os.path.join(ICONPATH,'icon-atom-dark-64.svg')))
-        self.toolButtonScaleEqualize.setIcon(QIcon(os.path.join(ICONPATH,'icon-histeq-dark-64.svg')))
-        self.toolButtonAutoScale.setIcon(QIcon(os.path.join(ICONPATH,'icon-autoscale-dark-64.svg')))
-        self.toolBox.setItemIcon(self.left_tab['process'],QIcon(os.path.join(ICONPATH,'icon-histogram-dark-64.svg')))
-        self.toolBox.setItemIcon(self.left_tab['multidim'],QIcon(os.path.join(ICONPATH,'icon-dimensional-analysis-dark-64.svg')))
-        self.toolBox.setItemIcon(self.left_tab['cluster'],QIcon(os.path.join(ICONPATH,'icon-cluster-dark-64.svg')))
-        self.toolBox.setItemIcon(self.left_tab['scatter'],QIcon(os.path.join(ICONPATH,'icon-ternary-dark-64.svg')))
-        # Spot Data
-        self.toolButtonSpotMove.setIcon(QIcon(os.path.join(ICONPATH,'icon-move-point-dark-64.svg')))
-        self.toolButtonSpotToggle.setIcon(QIcon(os.path.join(ICONPATH,'icon-show-hide-dark-64.svg')))
-        self.toolButtonSpotSelectAll.setIcon(QIcon(os.path.join(ICONPATH,'icon-select-all-dark-64.svg')))
-        self.toolButtonSpotAnalysis.setIcon(QIcon(os.path.join(ICONPATH,'icon-analysis-dark-64.svg')))
-        self.toolButtonSpotRemove.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-dark-64.svg')))
-        # N-Dim
-        self.toolBox.setItemIcon(self.left_tab['ndim'],QIcon(os.path.join(ICONPATH,'icon-TEC-dark-64.svg')))
-        self.toolButtonNDimDown.setIcon(QIcon(os.path.join(ICONPATH,'icon-down-arrow-dark-64.svg')))
-        self.toolButtonNDimUp.setIcon(QIcon(os.path.join(ICONPATH,'icon-up-arrow-dark-64.svg')))
-        self.toolButtonNDimSelectAll.setIcon(QIcon(os.path.join(ICONPATH,'icon-select-all-dark-64.svg')))
-        self.toolButtonNDimRemove.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-dark-64.svg')))
-        # Filter
-        self.toolButtonFilterSelectAll.setIcon(QIcon(os.path.join(ICONPATH,'icon-select-all-dark-64.svg')))
-        self.toolButtonFilterUp.setIcon(QIcon(os.path.join(ICONPATH,'icon-up-arrow-dark-64.svg')))
-        self.toolButtonFilterDown.setIcon(QIcon(os.path.join(ICONPATH,'icon-down-arrow-dark-64.svg')))
-        self.toolButtonFilterRemove.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-dark-64.svg')))
-        # Polygons
-        self.toolBox.setItemIcon(self.left_tab['polygons'],QIcon(os.path.join(ICONPATH,'icon-polygon-new-dark-64.svg')))
-        self.toolButtonPolyCreate.setIcon(QIcon(os.path.join(ICONPATH,'icon-polygon-new-dark-64.svg')))
-        self.toolButtonPolyAddPoint.setIcon(QIcon(os.path.join(ICONPATH,'icon-add-point-dark-64.svg')))
-        self.toolButtonPolyRemovePoint.setIcon(QIcon(os.path.join(ICONPATH,'icon-remove-point-dark-64.svg')))
-        self.toolButtonPolyMovePoint.setIcon(QIcon(os.path.join(ICONPATH,'icon-move-point-dark-64.svg')))
-        self.toolButtonPolyLink.setIcon(QIcon(os.path.join(ICONPATH,'icon-link-dark-64.svg')))
-        self.toolButtonPolyDelink.setIcon(QIcon(os.path.join(ICONPATH,'icon-unlink-dark-64.svg')))
-        self.toolButtonPolyDelete.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-dark-64.svg')))
-        # Profile
-        self.toolBox.setItemIcon(self.left_tab['profile'],QIcon(os.path.join(ICONPATH,'icon-profile-dark-64.svg')))
-        self.toolButtonClearProfile.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-dark-64.svg')))
-        self.toolButtonPointDelete.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-dark-64.svg')))
-        self.toolButtonPointSelectAll.setIcon(QIcon(os.path.join(ICONPATH,'icon-select-all-dark-64.svg')))
-        self.toolButtonPointMove.setIcon(QIcon(os.path.join(ICONPATH,'icon-move-point-dark-64.svg')))
-        self.toolButtonProfileInterpolate.setIcon(QIcon(os.path.join(ICONPATH,'icon-interpolate-dark-64.svg')))
-        self.toolButtonPlotProfile.setIcon(QIcon(os.path.join(ICONPATH,'icon-profile-dark-64.svg')))
-        self.toolButtonPointDown.setIcon(QIcon(os.path.join(ICONPATH,'icon-down-arrow-dark-64.svg')))
-        self.toolButtonPointUp.setIcon(QIcon(os.path.join(ICONPATH,'icon-up-arrow-dark-64.svg')))
-        # Browser
-        self.toolButtonBrowserHome.setIcon(QIcon(os.path.join(ICONPATH,'icon-home-dark-64.svg')))
-        self.toolButtonForward.setIcon(QIcon(os.path.join(ICONPATH,'icon-forward-arrow-dark-64.svg')))
-        self.toolButtonBack.setIcon(QIcon(os.path.join(ICONPATH,'icon-back-arrow-dark-64.svg')))
-        # Group Box Plot Tools
-        self.toolButtonHome.setIcon(QIcon(os.path.join(ICONPATH,'icon-home-dark-64.svg')))
-        self.toolButtonRemoveAllMVPlots.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-dark-64.svg')))
-        self.toolButtonPopFigure.setIcon(QIcon(os.path.join(ICONPATH,'icon-popout-dark-64.svg')))
-        self.toolButtonAnnotate.setIcon(QIcon(os.path.join(ICONPATH,'icon-annotate-dark-64.svg')))
-        self.toolButtonPan.setIcon(QIcon(os.path.join(ICONPATH,'icon-move-dark-64.svg')))
-        self.toolButtonZoom.setIcon(QIcon(os.path.join(ICONPATH,'icon-zoom-dark-64.svg')))
-        self.toolButtonDistance.setIcon(QIcon(os.path.join(ICONPATH,'icon-distance-dark-64.svg')))
-        # Calculator
-        self.toolButtonCalculate.setIcon(QIcon(os.path.join(ICONPATH,'icon-calculator-dark-64.svg')))
-        self.actionCalculator.setIcon(QIcon(os.path.join(ICONPATH,'icon-calculator-dark-64.svg')))
-        self.toolBoxTreeView.setItemIcon(self.right_tab['calculator'],QIcon(os.path.join(ICONPATH,'icon-calculator-dark-64.svg')))
-        self.toolButtonCalcDelete.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-dark-64.svg')))
-        # Style Toolbox
-        self.toolBoxStyle.setItemIcon(0,QIcon(os.path.join(ICONPATH,'icon-axes-dark-64.svg')))
-        self.toolBoxStyle.setItemIcon(1,QIcon(os.path.join(ICONPATH,'icon-text-and-scales-dark-64.svg')))
-        self.toolBoxStyle.setItemIcon(2,QIcon(os.path.join(ICONPATH,'icon-marker-and-lines-dark-64.svg')))
-        self.toolBoxStyle.setItemIcon(3,QIcon(os.path.join(ICONPATH,'icon-rgb-dark-64.svg')))
-        # Cluster tab
-        self.toolBoxStyle.setItemIcon(4,QIcon(os.path.join(ICONPATH,'icon-cluster-dark-64.svg')))
-        self.toolButtonClusterLink.setIcon(QIcon(os.path.join(ICONPATH,'icon-link-dark-64.svg')))
-        self.toolButtonClusterDelink.setIcon(QIcon(os.path.join(ICONPATH,'icon-unlink-dark-64.svg')))
-
-    def set_light_theme(self):
-        ss = load_stylesheet('light.qss')
-        app.setStyleSheet(ss)
-
-        self.actionViewMode.setIcon(QIcon(os.path.join(ICONPATH,'icon-sun-64.svg')))
-        self.actionViewMode.setIconText('Light')
-
-        self.actionSelectAnalytes.setIcon(QIcon(os.path.join(ICONPATH,'icon-atom-64.svg')))
-        self.actionOpenProject.setIcon(QIcon(os.path.join(ICONPATH,'icon-open-session-64.svg')))
-        self.actionSaveProject.setIcon(QIcon(os.path.join(ICONPATH,'icon-save-session-64.svg')))
-        self.actionFullMap.setIcon(QIcon(os.path.join(ICONPATH,'icon-fit-to-width-64.svg')))
-        self.actionCrop.setIcon(QIcon(os.path.join(ICONPATH,'icon-crop-64.svg')))
-        self.actionSwapAxes.setIcon(QIcon(os.path.join(ICONPATH,'icon-swap-64.svg')))
-        self.toolButtonSwapResolution.setIcon(QIcon(os.path.join(ICONPATH,'icon-swap-resolution-64.svg')))
-        # Notes
-        self.toolButtonNotesHeading.setIcon(QIcon(os.path.join(ICONPATH,'icon-heading-64.svg')))
-        self.toolButtonNotesBold.setIcon(QIcon(os.path.join(ICONPATH,'icon-bold-64.svg')))
-        self.toolButtonNotesItalic.setIcon(QIcon(os.path.join(ICONPATH,'icon-italics-64.svg')))
-        self.toolButtonNotesBulletList.setIcon(QIcon(os.path.join(ICONPATH,'icon-bullet-list-64.svg')))
-        self.toolButtonNotesNumList.setIcon(QIcon(os.path.join(ICONPATH,'icon-numbered-list-64.svg')))
-        self.toolButtonNotesImage.setIcon(QIcon(os.path.join(ICONPATH,'icon-image-dark-64.svg')))
-        self.toolButtonNotesSave.setIcon(QIcon(os.path.join(ICONPATH,'icon-pdf-64.svg')))
-        # Reset Buttons
-        self.toolButtonXAxisReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-64.svg')))
-        self.toolButtonYAxisReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-64.svg')))
-        self.toolButtonCAxisReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-64.svg')))
-        self.toolButtonClusterColorReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-64.svg')))
-        self.toolButtonHistogramReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-64.svg')))
-        # Plot Tree
-        self.toolButtonSortAnalyte.setIcon(QIcon(os.path.join(ICONPATH,'icon-sort-64.svg')))
-        self.toolButtonRemovePlot.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
-        # Samples
-        self.toolBox.setItemIcon(self.left_tab['sample'],QIcon(os.path.join(ICONPATH,'icon-atom-64.svg')))
-        self.toolButtonScaleEqualize.setIcon(QIcon(os.path.join(ICONPATH,'icon-histeq-64.svg')))
-        self.toolButtonAutoScale.setIcon(QIcon(os.path.join(ICONPATH,'icon-autoscale-64.svg')))
-        self.toolBox.setItemIcon(self.left_tab['process'],QIcon(os.path.join(ICONPATH,'icon-histogram-64.svg')))
-        self.toolBox.setItemIcon(self.left_tab['multidim'],QIcon(os.path.join(ICONPATH,'icon-dimensional-analysis-64.svg')))
-        self.toolBox.setItemIcon(self.left_tab['cluster'],QIcon(os.path.join(ICONPATH,'icon-cluster-64.svg')))
-        self.toolBox.setItemIcon(self.left_tab['scatter'],QIcon(os.path.join(ICONPATH,'icon-ternary-64.svg')))
-        # Spot Data
-        self.toolButtonSpotMove.setIcon(QIcon(os.path.join(ICONPATH,'icon-move-point-64.svg')))
-        self.toolButtonSpotToggle.setIcon(QIcon(os.path.join(ICONPATH,'icon-show-hide-64.svg')))
-        self.toolButtonSpotSelectAll.setIcon(QIcon(os.path.join(ICONPATH,'icon-select-all-64.svg')))
-        self.toolButtonSpotAnalysis.setIcon(QIcon(os.path.join(ICONPATH,'icon-analysis-64.svg')))
-        self.toolButtonSpotRemove.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
-        # N-Dim
-        self.toolBox.setItemIcon(self.left_tab['ndim'],QIcon(os.path.join(ICONPATH,'icon-TEC-64.svg')))
-        self.toolButtonNDimDown.setIcon(QIcon(os.path.join(ICONPATH,'icon-down-arrow-64.svg')))
-        self.toolButtonNDimUp.setIcon(QIcon(os.path.join(ICONPATH,'icon-up-arrow-64.svg')))
-        self.toolButtonNDimSelectAll.setIcon(QIcon(os.path.join(ICONPATH,'icon-select-all-64.svg')))
-        self.toolButtonNDimRemove.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
-        # Filter
-        self.toolButtonFilterSelectAll.setIcon(QIcon(os.path.join(ICONPATH,'icon-select-all-64.svg')))
-        self.toolButtonFilterUp.setIcon(QIcon(os.path.join(ICONPATH,'icon-up-arrow-64.svg')))
-        self.toolButtonFilterDown.setIcon(QIcon(os.path.join(ICONPATH,'icon-down-arrow-64.svg')))
-        self.toolButtonFilterRemove.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
-        # Polygons
-        self.toolBox.setItemIcon(self.left_tab['polygons'],QIcon(os.path.join(ICONPATH,'icon-polygon-new-64.svg')))
-        self.toolButtonPolyCreate.setIcon(QIcon(os.path.join(ICONPATH,'icon-polygon-new-64.svg')))
-        self.toolButtonPolyAddPoint.setIcon(QIcon(os.path.join(ICONPATH,'icon-add-point-64.svg')))
-        self.toolButtonPolyRemovePoint.setIcon(QIcon(os.path.join(ICONPATH,'icon-remove-point-64.svg')))
-        self.toolButtonPolyMovePoint.setIcon(QIcon(os.path.join(ICONPATH,'icon-move-point-64.svg')))
-        self.toolButtonPolyLink.setIcon(QIcon(os.path.join(ICONPATH,'icon-link-64.svg')))
-        self.toolButtonPolyDelink.setIcon(QIcon(os.path.join(ICONPATH,'icon-unlink-64.svg')))
-        self.toolButtonPolyDelete.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
-        # Profile
-        self.toolBox.setItemIcon(self.left_tab['profile'],QIcon(os.path.join(ICONPATH,'icon-profile-64.svg')))
-        self.toolButtonClearProfile.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
-        self.toolButtonPointDelete.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
-        self.toolButtonPointSelectAll.setIcon(QIcon(os.path.join(ICONPATH,'icon-select-all-64.svg')))
-        self.toolButtonPointMove.setIcon(QIcon(os.path.join(ICONPATH,'icon-move-point-64.svg')))
-        self.toolButtonProfileInterpolate.setIcon(QIcon(os.path.join(ICONPATH,'icon-interpolate-64.svg')))
-        self.toolButtonPlotProfile.setIcon(QIcon(os.path.join(ICONPATH,'icon-profile-64.svg')))
-        self.toolButtonPointDown.setIcon(QIcon(os.path.join(ICONPATH,'icon-down-arrow-64.svg')))
-        self.toolButtonPointUp.setIcon(QIcon(os.path.join(ICONPATH,'icon-up-arrow-64.svg')))
-        # Browser
-        self.toolButtonBrowserHome.setIcon(QIcon(os.path.join(ICONPATH,'icon-home-64.svg')))
-        self.toolButtonForward.setIcon(QIcon(os.path.join(ICONPATH,'icon-forward-arrow-64.svg')))
-        self.toolButtonBack.setIcon(QIcon(os.path.join(ICONPATH,'icon-back-arrow-64.svg')))
-        # Group Box Plot Tools
-        self.toolButtonHome.setIcon(QIcon(os.path.join(ICONPATH,'icon-home-64.svg')))
-        self.toolButtonRemoveAllMVPlots.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
-        self.toolButtonPopFigure.setIcon(QIcon(os.path.join(ICONPATH,'icon-popout-64.svg')))
-        self.toolButtonAnnotate.setIcon(QIcon(os.path.join(ICONPATH,'icon-annotate-64.svg')))
-        self.toolButtonPan.setIcon(QIcon(os.path.join(ICONPATH,'icon-move-64.svg')))
-        self.toolButtonZoom.setIcon(QIcon(os.path.join(ICONPATH,'icon-zoom-64.svg')))
-        self.toolButtonDistance.setIcon(QIcon(os.path.join(ICONPATH,'icon-distance-64.svg')))
-        # Calculator
-        self.toolButtonCalculate.setIcon(QIcon(os.path.join(ICONPATH,'icon-calculator-64.svg')))
-        self.actionCalculator.setIcon(QIcon(os.path.join(ICONPATH,'icon-calculator-64.svg')))
-        self.toolBoxTreeView.setItemIcon(self.right_tab['calculator'],QIcon(os.path.join(ICONPATH,'icon-calculator-64.svg')))
-        self.toolButtonCalcDelete.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
-        # Style Toolbox
-        self.toolBoxStyle.setItemIcon(0,QIcon(os.path.join(ICONPATH,'icon-axes-64.svg')))
-        self.toolBoxStyle.setItemIcon(1,QIcon(os.path.join(ICONPATH,'icon-text-and-scales-64.svg')))
-        self.toolBoxStyle.setItemIcon(2,QIcon(os.path.join(ICONPATH,'icon-marker-and-lines-64.svg')))
-        self.toolBoxStyle.setItemIcon(3,QIcon(os.path.join(ICONPATH,'icon-rgb-64.svg')))
-        # Cluster tab
-        self.toolBoxStyle.setItemIcon(4,QIcon(os.path.join(ICONPATH,'icon-cluster-64.svg')))
-        self.toolButtonClusterLink.setIcon(QIcon(os.path.join(ICONPATH,'icon-link-64.svg')))
-        self.toolButtonClusterDelink.setIcon(QIcon(os.path.join(ICONPATH,'icon-unlink-64.svg')))
-
 # -------------------------------
 # Classes
 # -------------------------------
-
-
 
 # Mask object
 # -------------------------------
@@ -9276,30 +6827,6 @@ class MaskObj:
     
     def register_callback(self, callback):
         self._callbacks.append(callback)
-
-
-
-        
-       
-
-
-
-
-
-# class CustomAxis(AxisItem):
-#     def __init__(self, *args, **kwargs):
-#         AxisItem.__init__(self, *args, **kwargs)
-#         self.scale_factor = 1.0
-
-#     def setScaleFactor(self, scale_factor):
-#         self.scale_factor = scale_factor
-
-#     def tickStrings(self, values, scale, spacing):
-#         # Scale the values back to the original scale
-#         scaled_values = [v * self.scale_factor for v in values]
-#         # Format the tick strings as you want them to appear
-#         return ['{:.2f}'.format(v) for v in scaled_values]
-
 
 
 # -------------------------------

@@ -24,6 +24,15 @@ class Profile:
 
 class Profiling:
     def __init__(self,main_window):
+        """_summary_
+
+        _extended_summary_
+
+        Parameters
+        ----------
+        main_window : _type_
+            _description_
+        """        
         self.main_window = main_window
         # Initialize other necessary attributes
         # Initialize variables and states as needed
@@ -37,6 +46,10 @@ class Profiling:
         self.profile_name = None
 
     def add_samples(self):
+        """_summary_
+
+        _extended_summary_
+        """        
         #add sample id to dictionary
         for sample_id in self.main_window.sample_ids:
             if sample_id not in self.profiles:
@@ -51,9 +64,16 @@ class Profiling:
     #                 pickle.dump(profile, file)
     #         print("Profile saved successfully.")
 
-
-
     def save_profiles(self, project_dir, sample_id):
+        """Save profiles to a file with *.prfl extension
+
+        Parameters
+        ----------
+        project_dir : str
+            Directory to store profile data into.
+        sample_id : str
+            Sample with profile to save.
+        """        
         if sample_id in self.profiles:
             for profile_name, profile in self.profiles[sample_id].items():
                 file_name = os.path.join(project_dir, sample_id, f'{profile_name}.prfl')
@@ -63,6 +83,20 @@ class Profiling:
             print("Profile saved successfully.")
 
     def load_profiles(self, project_dir, sample_id):
+        """Load saved simulated transects (profiles).
+
+        Parameters
+        ----------
+        project_dir : str
+            Target directory with profiles.
+        sample_id : str
+            Sample with profiles to load.
+        """        
+        # add sample_id to profile dictionary if needed
+        # if sample_id not in self.profiles:
+        #     self.profiles[sample_id] = {}
+
+        # open profile file and add saved profiles to self.profiles
         directory = os.path.join(project_dir, sample_id)
         for file_name in os.listdir(directory):
             if file_name.endswith(".prfl"):
@@ -76,6 +110,20 @@ class Profiling:
         print("All profiles loaded successfully.")
 
     def transform_profile_for_pickling(self, profile):
+        """_summary_
+
+        _extended_summary_
+
+        Parameters
+        ----------
+        profile : _type_
+            _description_
+
+        Returns
+        -------
+        _type_
+            _description_
+        """        
         serializable_profile = {
             'name': profile.name,
             'sort': profile.sort,
@@ -113,8 +161,6 @@ class Profiling:
         scatter = ScatterPlotItem(state['data'][0], state['data'][1], symbol=state['symbol'], size=state['size'])
         scatter.setZValue(state['z_value'])
         return scatter
-
-
 
     def reconstruct_profile(self, serializable_profile):
         profile = Profile(
@@ -216,7 +262,7 @@ class Profiling:
         self.array_x = array.shape[1] #no of colmns
         self.array_y = array.shape[0] #no of rows
         interpolate = False
-        radius= int(self.main_window.lineEditPointRadius.text())
+        radius = int(self.main_window.lineEditPointRadius.text())
 
         profile = self.profiles[self.main_window.sample_id][self.profile_name].points
         
@@ -231,9 +277,6 @@ class Profiling:
             return
         elif event.button() == QtCore.Qt.RightButton or event.button() == QtCore.Qt.MiddleButton:
             return
-
-
-
         elif event.button() == QtCore.Qt.LeftButton and not(self.main_window.toolButtonPlotProfile.isChecked()) and self.main_window.toolButtonPointMove.isChecked():
 
             # move point
@@ -271,9 +314,7 @@ class Profiling:
 
                 #update self.point_index index of self.profiles[self.self.profile_name] with new point data
                 if (k,v) in profile:
-
                     profile[k,v][self.point_index] = (x,y, circ_val,scatter, interpolate)
-
 
                 if self.main_window.canvasWindow.currentIndex() == self.main_window.canvas_tab['mv']:
                     # Add the scatter item to all other plots and save points in profile
@@ -291,7 +332,7 @@ class Profiling:
                                 profile[k,v][self.point_index] = (x,y, circ_val,scatter, interpolate)
 
                 #update plot and table widget
-                self.main_window.plot_profiles()
+                self.plot_profiles()
                 self.update_table_widget()
                 if self.main_window.toolButtonProfileInterpolate.isChecked(): #reset interpolation if selected
                     self.clear_interpolation()
@@ -508,8 +549,6 @@ class Profiling:
             if self.main_window.canvasWindow.currentIndex() == self.main_window.canvas_tab['mv']: #multiview
                 keys= [(k,v) for (k,v) in profiles.keys() if v== 1]
 
-
-
             else: #singleview
                 keys = [(k,v) for (k,v) in profiles.keys() if v== 0]
 
@@ -545,7 +584,6 @@ class Profiling:
                         profile_groups[range_value] = [(k, distances, medians, lowers, uppers, np.nanmin(medians), np.nanmax(medians))]
 
             return profile_groups, colors
-
 
         if not interpolate:
             profiles = profile
@@ -695,7 +733,6 @@ class Profiling:
                             if g_idx == 0: #the min value of the group is stored in first row of each group_profiles
                                 twinx_min = min_val
                                 twinx_max = max_val
-
 
                             # Scale values and errors
                             scaled_values = [(value - twinx_min) * scale_factor + original_min for value in medians]
@@ -884,7 +921,6 @@ class Profiling:
             # we might need to ensure the array is expanded to explicitly cover all points.
             if len(facecolors) == 1 and num_points > 1:
                 facecolors = np.tile(facecolors, (num_points, 1))
-
 
             if not self.selected_points[profile_key][ind]:
                 # If already grey (picked)

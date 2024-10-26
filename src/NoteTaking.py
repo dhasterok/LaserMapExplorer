@@ -13,7 +13,7 @@ import src.format as fmt
 # Notes functions
 # -------------------------------
 class Notes():
-    def __init__(self, parent=None):
+    def __init__(self, parent):
 
         self.parent = parent
 

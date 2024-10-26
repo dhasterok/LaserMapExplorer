@@ -406,7 +406,7 @@ class ImageProcessing():
 
         norm = self.parent.color_norm(style)
 
-        cax = canvas.axes.imshow(filtered_image, cmap=self.parent.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
+        cax = canvas.axes.imshow(filtered_image, cmap=self.parent.styling.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
 
         # set color limits
         self.parent.add_colorbar(canvas, cax, style)
@@ -501,7 +501,7 @@ class ImageProcessing():
         q = np.quantile(self.grad_mag.flatten(), q=[0.025, 0.975])
         norm = colors.Normalize(q[0],q[1], clip=False)
 
-        cax = canvas.axes.imshow(self.grad_mag, cmap=self.parent.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
+        cax = canvas.axes.imshow(self.grad_mag, cmap=self.parent.styling.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
         canvas.axes.quiver(X,Y,dx,dy, color=style['Scale']['OverlayColor'], linewidth=0.5)
 
         # set color limits

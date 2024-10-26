@@ -1013,13 +1013,16 @@ class SampleObj:
 
         Parameters
         ----------
-        sample_id : str
-            Sample identifier
-        field : str, optional
-            Name of field to plot, Defaults to None
-        analysis_type : str, optional
-            Field type for plotting, options include: 'Analyte', 'Ratio', 'pca', 'Cluster', 'Cluster Score',
-            'Special', 'computed'. Some options require a field. Defaults to 'Analyte'
+        field : str
+            Name of field to plot. By default `None`.
+        field_type : str, optional
+            Type of field to plot. Types include 'Analyte', 'Ratio', 'pca', 'Cluster', 'Cluster Score',
+            'Special', 'computed'. By default `'Analyte'`
+        scale_data : bool
+            Scale data as linear, log, etc. based on stored norm.  If scale_data is `False`, the
+            data are returned with a linear scale.  By default `False`.
+        ref_chem : dict
+            Reference chemistry. By default `None`.
 
         Returns
         -------

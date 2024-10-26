@@ -16,8 +16,8 @@ pythonGenerator.forBlock['load_directory'] = function(block, generator) {
 
 // Python Generator: Select Samples
 pythonGenerator.forBlock['select_samples'] = function(block, generator) {
-    var sample_id = generator.quote_(block.getFieldValue('SAMPLE_ID'));
-    var code = 'self.parent.change_sample(self.parent.sample_ids.index(' + sample_id + ')\n';
+    var sample_id = generator.quote_(block.getFieldValue('SAMPLE_IDS'));
+    var code = 'self.parent.change_sample(self.parent.sample_ids.index(' + sample_id + '))\n';
     return code;
 };
 
@@ -35,24 +35,42 @@ pythonGenerator.forBlock['iterate_sample_ids'] = function(block, generator) {
     return code;
 };
 
-pythonGenerator.forBlock['plot'] = function() {
-// TODO: change Order.ATOMIC to the correct operator precedence strength
-const value_plot_type = generator.valueToCode(block, 'plot_type', Order.ATOMIC);
+pythonGenerator.forBlock['plot'] = function(block, generator) {
+    //const plot_type = generator.valueToCode(block, 'plot_type', Order.ATOMIC);
+    var code = '';
+    // Access the stored plotType from the block
+    var plot_type = block.plotType;
+    if (plot_type){
+        // TODO: Assemble python into the code variable.
+        plot_type = generator.quote_(plot_type);  // Ensure it's safely quoted for Python
+        code = 'self.parent.update_SV('+plot_type+')';
+    }
+    else
+    {
+        code = 'self.parent.update_SV()';
+    }
+    return code;
+};
 
-// TODO: Assemble python into the code variable.
-const code = '...';
-return code;
-}
+pythonGenerator.forBlock['analyte_map'] = function(block, generator) {
 
-pythonGenerator.forBlock['plot_map'] = function() {
-// TODO: change Order.ATOMIC to the correct operator precedence strength
-const value_style = generator.valueToCode(block, 'style', Order.ATOMIC);
+return '';
+};
 
-// TODO: change Order.ATOMIC to the correct operator precedence strength
-const value_save = generator.valueToCode(block, 'save', Order.ATOMIC);
+pythonGenerator.forBlock['styles'] = function(block, generator) {
 
-// TODO: Assemble python into the code variable.
-const code = '...';
-// TODO: Change Order.NONE to the correct operator precedence strength
-return [code, Order.NONE];
-}
+return '';
+};
+
+pythonGenerator.forBlock['axisAndLabels'] = function(block, generator) {
+return '';
+};
+pythonGenerator.forBlock['annotAndScale'] = function(block, generator) {
+return '';
+};
+pythonGenerator.forBlock['marksAndLines'] = function(block, generator) {
+return '';
+};
+pythonGenerator.forBlock['coloring'] = function(block, generator) {
+return '';
+};

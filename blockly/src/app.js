@@ -19,7 +19,11 @@ window.workspace = workspace;
 window.Blockly = Blockly
 new QWebChannel(qt.webChannelTransport, function(channel) {
     window.blocklyBridge = channel.objects.blocklyBridge;
-
+    window.blocklyBridge.callSetStyleWidgets = function(plotType, callback) {
+        window.blocklyBridge.invokeSetStyleWidgets(plotType, function(response) {
+            callback(JSON.parse(response));  // Parse the response from Python as a JSON object
+        });
+    };
     function sendCodeToPython() {
         // Generate Python code from Blockly
         var code = pythonGenerator.workspaceToCode(workspace);
@@ -81,3 +85,4 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
         });
     workspace.addChangeListener(sendCodeToPython);
 });
+

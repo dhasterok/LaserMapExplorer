@@ -2,7 +2,7 @@ import * as Blockly from 'blockly/core';
 import {registerFieldColour, FieldColour} from '@blockly/field-colour';
 registerFieldColour();
 import { sample_ids } from './globals';
-
+import {dynamicStyleUpdate} from './helper_functions'
 var enableSampleIDsBlock = false; // Initially false
 window.Blockly = Blockly.Blocks
 const load_directory = {
@@ -42,7 +42,7 @@ export function enableSampleIDsBlockFunction() {
     // Re-register the block definition
     Blockly.Blocks['sample_ids_list_block'] = sample_ids_list_block;
     Blockly.Blocks['select_samples'] = select_samples;
-    Blockly.Blocks['plot_map'] = plot_map;
+    Blockly.Blocks['analyte_map'] = analyte_map;
     Blockly.Blocks['iterate_sample_ids'] = iterate_sample_ids;
     Blockly.Blocks['sample_ids_list_block'] = sample_ids_list_block;
 
@@ -55,7 +55,6 @@ export function enableSampleIDsBlockFunction() {
 const select_samples = {
     init: function() {
         this.appendDummyInput().appendField('Select sample ID').appendField(new Blockly.FieldDropdown(this.getOptions), 'SAMPLE_IDS');
-        this.appendDummyInput().appendField('Store selected sample in variable').appendField(new Blockly.FieldVariable('sample_id'), 'SAMPLE_ID');
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
         this.setColour(160);
@@ -71,18 +70,6 @@ const select_samples = {
         }
         return sample_ids.map(id => [id, id]);
     },
-    // Handler for when the dropdown value changes
-    onChange: function(newValue) {
-        // Get the Blockly variable field and set its value to the selected sample ID
-        const workspace = this.sourceBlock_.workspace;
-        const variableName = this.sourceBlock_.getFieldValue('SAMPLE_ID');  // Get the name of the variable
-        const variable = workspace.getVariable(variableName);
-
-        if (variable) {
-            workspace.getVariableMap().getVariable(variableName).name = newValue;  // Update variable value to selected sample ID
-            console.log('Sample ID selected:', newValue);  // Log for debugging
-        }
-    }
 };
 Blockly.Blocks['select_samples'] = select_samples;
 
@@ -124,11 +111,33 @@ const plot = {
         if (!enableSampleIDsBlock) {
             this.setDisabledReason(true, "no_sample_ids");
         }
+        // Initialize an internal property to store plot type
+        this.plotType = null;
+    },
+    onchange: function() {
+        // Get the block attached to the 'plot_type' input
+        const connectedBlock = this.getInputTargetBlock('plot_type');
+
+        // Check if a block is connected
+        if (connectedBlock) {
+            // Get the type of the connected block and store it internally
+            const plotType = connectedBlock.type;
+            console.log('Connected plot type block:', plotType);  // Debugging log
+            if (plotType != this.plotType){
+                // Store the connected block's type internally (not displayed)
+                this.plotType = plotType;
+                dynamicStyleUpdate(plotType);
+            }
+        } else {
+            console.log('No block connected to plot_type');
+            // Reset the stored plot type if no block is connected
+            this.plotType = null;
+        }
     }
 };
 Blockly.common.defineBlocks({plot: plot});
           
-const plot_map = {
+const analyte_map = {
     init: function() {
         this.appendDummyInput('plot_map_header')
         .appendField('Plot Map');
@@ -145,7 +154,7 @@ const plot_map = {
         }
     }
 };
-Blockly.common.defineBlocks({plot_map: plot_map});
+Blockly.common.defineBlocks({analyte_map: analyte_map});
 
 // Style Blocks
 const axisAndLabels = {
@@ -159,7 +168,7 @@ const axisAndLabels = {
         this.appendDummyInput('xLimitsHeader')
         .appendField('X Limits')
         .appendField(new Blockly.FieldTextInput(''), 'xLimMin')
-        .appendField(new Blockly.FieldTextInput(''), 'xLimMin');
+        .appendField(new Blockly.FieldTextInput(''), 'xLimMax');
         this.appendDummyInput('xScaleHeader')
         .appendField('X Scale')
         .appendField(new Blockly.FieldDropdown([
@@ -174,7 +183,7 @@ const axisAndLabels = {
         this.appendDummyInput('yLimitsHeader')
         .appendField('Y Limits')
         .appendField(new Blockly.FieldTextInput(''), 'yLimMin')
-        .appendField(new Blockly.FieldTextInput(''), 'yLimMin');
+        .appendField(new Blockly.FieldTextInput(''), 'yLimMax');
         this.appendDummyInput('xScaleHeader')
         .appendField('Y Scale')
         .appendField(new Blockly.FieldDropdown([

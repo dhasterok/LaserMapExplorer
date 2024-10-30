@@ -255,7 +255,7 @@ class PlotTree():
                 # updates comboBoxColorByField and comboBoxColorField comboboxes 
                 self.parent.update_fields(self.parent.plot_info['sample_id'], self.parent.plot_info['plot_type'],self.parent.plot_info['field_type'], self.parent.plot_info['field'])
                 #update UI with auto scale and neg handling parameters from 'Analyte/Ratio Info'
-                self.parent.update_spinboxes(self.parent.plot_info['sample_id'],self.parent.plot_info['field'],self.parent.plot_info['field_type'])
+                self.parent.update_spinboxes(self.parent.plot_info['field'],self.parent.plot_info['field_type'])
             else:
                 # print('tree_double_click: plot_map_pg')
                 if self.parent.toolBox.currentIndex() not in [self.parent.left_tab['sample'], self.parent.left_tab['process'], self.parent.left_tab['polygons'], self.parent.left_tab['profile']]:

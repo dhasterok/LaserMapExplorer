@@ -36,6 +36,15 @@ class SampleObj:
     transform_array :
     swap_xy :
     raw_data :
+    filter_df : (pandas.DataFrame) -- stores filters for each sample
+        | 'field_type' : (str) -- field type
+        | 'field' : (str) -- name of field
+        | 'norm' : (str) -- scale normalization function, ``linear`` or ``log``
+        | 'min' : (float) -- minimum value for filtering
+        | 'max' : (float) -- maximum value for filtering
+        | 'operator' : (str) -- boolean operator for combining filters, ``and`` or ``or``
+        | 'use' : (bool) -- ``True`` indicates the filter should be used to filter data
+        | 'persistent' : (bool) -- ``True`` retains the filter when the sample is changed
     processed_data
             | 'analyte_info' : (dataframe) -- holds information regarding each analyte in sample id,
                 | 'analytes' (str) -- name of analyte
@@ -101,15 +110,6 @@ class SampleObj:
             | 'Cluster' : (pandas.DataFrame) --
             | 'Cluster Score' : (pandas.DataFrame) --
         | 'processed_data' : (pandas.DataFrame) --
-        ['filter_info'] : (pandas.DataFrame) -- stores filters for each sample
-            | 'field_type' : (str) -- field type
-            | 'field' : (str) -- name of field
-            | 'norm' : (str) -- scale normalization function, ``linear`` or ``log``
-            | 'min' : (float) -- minimum value for filtering
-            | 'max' : (float) -- maximum value for filtering
-            | 'operator' : (str) -- boolean operator for combining filters, ``and`` or ``or``
-            | 'use' : (bool) -- ``True`` indicates the filter should be used to filter data
-            | 'persistent' : (bool) -- ``True`` retains the filter when the sample is changed
 
         | 'crop_mask' : (MaskObj) -- mask created from cropped axes.
         | 'filter_mask' : (MaskObj) -- mask created by a combination of filters.  Filters are displayed for the user in ``tableWidgetFilters``.
@@ -138,6 +138,8 @@ class SampleObj:
 
         # filter dataframe
         self._filter_df = pd.DataFrame()
+        self._filter_df = pd.DataFrame(columns=['use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'persistent'])
+
 
         # axis dictionary for plotting
         self.axis_dict = {}

@@ -165,28 +165,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 | 'name' : (str) -- user-defined name for cluster, defaults to ``f"Cluster {cluster_id}"``
                 | 'link' : (list) -- list of clusters id's linked to current cluster
                 | 'color' : (str) -- hex color string
-        data : dict
-            Dictionary containing a dictionary of each sample with the raw, processed, and computed (analyses) DataFrames, mask array, and informational dataframes
-            with relevant data.  The dictionary is nested with the first level keys defined by the sample ID.
-            
-            [*sample_id*] : (str) -- sample identifier
-                
-            | 'crop' : () --
-            | 'x_max' : () --
-            | 'x_min' : () --
-            | 'y_max' : () --
-            | 'y_min' : () --
-            | 'norm' : () --
-            | 'analysis data' : (pandas.DataFrame) --
-            ['filter_info'] : (pandas.DataFrame) -- stores filters for each sample
-                | 'field_type' : (str) -- field type
-                | 'field' : (str) -- name of field
-                | 'norm' : (str) -- scale normalization function, ``linear`` or ``log``
-                | 'min' : (float) -- minimum value for filtering
-                | 'max' : (float) -- maximum value for filtering
-                | 'operator' : (str) -- boolean operator for combining filters, ``and`` or ``or``
-                | 'use' : (bool) -- ``True`` indicates the filter should be used to filter data
-                | 'persistent' : (bool) -- ``True`` retains the filter when the sample is changed
         left_tab : dict
             Holds the indices for pages in ``toolBox``
         map_plot_types : list
@@ -313,9 +291,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.analyte_data = {}  #stores orginal analyte data
         self.clipped_analyte_data = {} # stores processed analyted data
         self.sample_id = ''
-        self.filter_info = pd.DataFrame()
-        self.selected_analytes = []
-
 
         self.lasermaps = {}
         self.prev_plot = ''
@@ -1053,7 +1028,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.multi_view_index = []
             self.laser_map_dict = {}
             self.multiview_info_label = {}
-            self.selected_analytes = []
             self.ndim_list = []
             self.lasermaps = {}
             #self.treeModel.clear()
@@ -1124,17 +1098,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.sample_id = self.sample_ids[index]
 
+        ######
+        # THIS DOESN'T DO ANYTHING ANYMORE, BUT WHEN A NEW SAMPLE IS LOADED, IT NEEDS TO CHECK FOR PERSISTANT FILTERS AND THEN ADD THEM TO THE NEW SAMPLEOBJ
         # initialize filter_info dataframe for storing filter properties
-        if self.filter_info is not None and not self.filter_info.empty:
-            if any(self.filter_info['persistent']):
-                # Keep only rows where 'persistent' is True
-                self.filter_info = self.filter_info[self.filter_info['persistent'] == True]
-            else:
-                # re-initialize an empty DataFrame with the specified columns
-                self.filter_info = pd.DataFrame(columns=['use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'persistent'])
-        else:
-            # initialize an empty DataFrame if filter_info is None or empty
-            self.filter_info = pd.DataFrame(columns=['use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'persistent'])
+        # if self.filter_df is not None and not self.filter_info.empty:
+        #     if any(self.filter_info['persistent']):
+        #         # Keep only rows where 'persistent' is True
+        #         self.filter_info = self.filter_info[self.filter_info['persistent'] == True]
 
         # stop autosave timer
         self.notes.save_notes_file()
@@ -1183,15 +1153,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.update_aspect_ratio_controls()
 
             # get selected_analyte columns
-            self.selected_analytes = self.data[self.sample_id].processed_data.match_attributes({'data_type': 'analyte', 'use': True})
-            # self.selected_analytes = [col for col in self.data[self.sample_id].processed_data.columns if (self.data[self.sample_id].processed_data.get_attribute(col, 'data_type') == 'analyte') 
-            #     and (self.data[self.sample_id].processed_data.get_attribute(col, 'use') is not None
-            #     and self.data[self.sample_id].processed_data.get_attribute(col, 'use')) ]
+            selected_analytes = self.data[self.sample_id].processed_data.match_attributes({'data_type': 'analyte', 'use': True})
 
-            #get plot array
-            #current_plot_df = self.get_map_data(sample_id=sample_id, field=self.selected_analytes[0], field_type='Analyte')
-            #set
-            self.styles['analyte map']['Colors']['Field'] = self.selected_analytes[0]
+            # set analyte map to first available analyte
+            if not selected_analytes:
+                self.styles['analyte map']['Colors']['Field'] = selected_analytes[0]
 
             self.plot_tree.add_sample(self.sample_id)
             self.plot_tree.update_tree()
@@ -2196,7 +2162,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.tableWidgetFilters.setRowCount(0)
 
             # Repopulate the table from 'filter_info'
-            for index, row in self.data[self.sample_id]['filter_info'].iterrows():
+            for index, row in self.data[self.sample_id].filter_df.iterrows():
                 current_row = self.tableWidgetFilters.rowCount()
                 self.tableWidgetFilters.insertRow(current_row)
 
@@ -2225,7 +2191,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             def on_use_checkbox_state_changed(row, state):
                 # Update the 'use' value in the filter_df for the given row
-                self.data[self.sample_id]['filter_info'].at[row, 'use'] = state == Qt.Checked
+                self.data[self.sample_id].filter_df.at[row, 'use'] = state == Qt.Checked
 
             field_type = self.comboBoxFilterFieldType.currentText()
             field = self.comboBoxFilterField.currentText()
@@ -2269,7 +2235,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.tableWidgetFilters.setItem(row, 7, chkBoxItem_select)
 
             filter_info = {'use':True, 'field_type': field_type, 'field': field, 'norm':scale ,'min': f_min,'max':f_max, 'operator':operator, 'persistent':True}
-            self.data[self.sample_id]['filter_info'].loc[len(self.data[self.sample_id]['filter_info'])] = filter_info
+            self.data[self.sample_id].filter_df.loc[len(self.data[self.sample_id].filter_df)] = filter_info
 
         self.apply_field_filters()
 
@@ -2289,7 +2255,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             field = self.tableWidgetFilters.item(row, 2).text()
             if chkBoxItem.checkState() == Qt.Checked:
                 self.tableWidgetFilters.removeRow(row)
-                self.data[sample_id]['filter_info'].drop(self.data[sample_id]['filter_info'][(self.data[sample_id]['filter_info']['field'] == field)].index, inplace=True)
+                self.data[sample_id].filter_df.drop(self.data[sample_id].filter_df[(self.data[sample_id].filter_df['field'] == field)].index, inplace=True)
 
         self.apply_field_filters(sample_id)
 
@@ -2305,7 +2271,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             filter_file = os.path.join(BASEDIR,f'resources/filters/{name}.fltr')
 
             # save dictionary to file
-            self.data[self.sample_id]['filter_info'].to_csv(filter_file, index=False)
+            self.data[self.sample_id].filter_df.to_csv(filter_file, index=False)
 
             # update comboBox
             self.comboBoxFilterPresets.addItem(name)
@@ -2348,7 +2314,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         filter_info = pd.read_csv(filter_file)
 
         # put filter_info into data and table
-        self.data[self.sample_id]['filter_info'] = filter_info
+        self.data[self.sample_id].filter_df = filter_info
 
         self.update_filter_table()
 
@@ -2373,11 +2339,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionFilterToggle.setChecked(True)
 
         # apply interval filters
-        #print(self.data[sample_id]['filter_info'])
+        #print(self.data[sample_id].filter_df)
 
         # Check if rows in self.data[sample_id]['filter_info'] exist and filter array in current_plot_df
         # by creating a mask based on min and max of the corresponding filter analytes
-        for index, filter_row in self.data[sample_id]['filter_info'].iterrows():
+        for index, filter_row in self.data[sample_id].filter_df.iterrows():
             if filter_row['use'].any():
                 analyte_df = self.get_map_data(filter_row['field'], filter_row['field_type'])
                 
@@ -5627,8 +5593,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if (self.comboBoxPlotType.currentText() not in ['cluster', 'cluster score']) and (self.comboBoxColorByField.currentText() == 'cluster'):
                 self.update_SV()
 
-    # 2. Silhouette Score
-
     # 4. Davies-Bouldin Index
     # The Davies-Bouldin Index (DBI) measures the ratio of within-cluster scatter to between-cluster separation. Lower values indicate better clustering.
 
@@ -5832,7 +5796,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # 
         def on_use_checkbox_state_changed(row, state):
             # Update the 'use' value in the filter_df for the given row
-            self.data[self.sample_id]['filter_info'].at[row, 'use'] = state == Qt.Checked
+            self.data[self.sample_id].filter_df.at[row, 'use'] = state == Qt.Checked
 
         if calling_widget == 'analyteAdd':
             el_list = [self.comboBoxNDimAnalyte.currentText().lower()]
@@ -6346,50 +6310,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     #         print(self.get_field_list(set_name=type))
     # ----end debugging----
 
-
-
-
- 
-
-    # I don't think this is used...delete?
-    # def import_data(self, path):
-    #     """Reads data files and returns data dictionary
-
-    #     Reads available csv files in ``path`` and returns a dictionary with sample id's (file names minus extension).
-
-    #     Parameters
-    #     ----------
-    #     path : str
-    #         Path with data files.
-        
-    #     Returns
-    #     -------
-    #     dict
-    #         Dictionary of dataframes
-    #     """
-    #     # Get a list of all files in the directory
-    #     file_list = os.listdir(path)
-    #     csv_files = [file for file in file_list if file.endswith('.csv')]
-    #     csv_files = csv_files[0:2]
-    #     # layout = self.widgetLaserMap.layout()
-    #     # progressBar = QProgressDialog("Loading CSV files...", None, 0,
-    #     #                               len(csv_files))
-    #     # layout.addWidget(progressBar, 3, 0,  1, 2)
-    #     # progressBar.setWindowTitle("Loading")
-    #     # progressBar.setWindowModality(Qt.WindowModal)
-    #     # Loop through the CSV files and read them using pandas
-    #     data_dict = {}
-    #     i = 0
-    #     for csv_file in csv_files:
-    #         file_path = os.path.join(path, csv_file)
-    #         df = pd.read_csv(file_path, engine='c')
-    #         file_name = os.path.splitext(csv_file)[0].replace('.lame','')
-    #         # Get the file name without extension
-    #         data_dict[file_name] = df
-    #         i += 1
-    #         # progressBar.setValue(i)
-    #     return data_dict
-
     def update_ratio_df(self,sample_id,analyte_1, analyte_2,norm):
         parameter = self.data[sample_id]['ratio_info'].loc[(self.data[sample_id]['ratio_info']['analyte_1'] == analyte_1) & (self.data[sample_id]['ratio_info']['analyte_2'] == analyte_2)]
         if parameter.empty:
@@ -6399,7 +6319,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             self.prep_data(sample_id, analyte_1=analyte_1, analyte_2=analyte_2)
 
-    
     def toggle_help_mode(self):
         """Toggles help mode
 

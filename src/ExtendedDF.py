@@ -462,7 +462,7 @@ class AttributeDataFrame(pd.DataFrame):
                     break
 
         # Reorder the DataFrame and attributes accordingly
-        #self[:] = self.reindex(columns=new_order, copy=False)
+        self[:] = self.reindex(columns=new_order, copy=False)
         self.columns = new_order
         self.column_attributes = {col: self.column_attributes[col] for col in new_order if col in self.column_attributes}
 

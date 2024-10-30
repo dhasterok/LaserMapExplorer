@@ -151,7 +151,6 @@ class SampleObj:
 
         self.reset_data()
 
-
     def reset_data(self):
         """Reverts back to the original data.
 
@@ -573,6 +572,8 @@ class SampleObj:
 
         Recalculates X and Y for a dataframe
         """
+        parent = self.parent
+
         X = round(self.raw_data['X']/self.dx)
         Y = round(self.raw_data['Y']/self.dy)
 
@@ -583,8 +584,8 @@ class SampleObj:
         self.dx = self.dy
         self.dy = dx
 
-        self.parent.lineEditDX.value = self.dx
-        self.parent.lineEditDY.value = self.dy
+        parent.lineEditDX.value = self.dx
+        parent.lineEditDY.value = self.dy
 
         self.raw_data['X'] = self.dx*X
         self.raw_data['Y'] = self.dy*Y
@@ -592,10 +593,10 @@ class SampleObj:
         self.processed_data['X'] = self.dx*Xp
         self.processed_data['Y'] = self.dy*Yp
 
-        self.parent.compute_map_aspect_ratio()
-        self.parent.update_aspect_ratio_controls()
+        parent.compute_map_aspect_ratio()
+        parent.update_aspect_ratio_controls()
 
-        self.parent.update_SV()
+        parent.update_SV()
 
     def reset_crop(self):
         """Reset the data to the new bounds.

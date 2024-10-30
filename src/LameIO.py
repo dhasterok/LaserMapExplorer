@@ -1,7 +1,10 @@
-import os
-from PyQt5.QtWidgets import QFileDialog, QTableWidgetItem
+import os, pickle
+from PyQt5.QtWidgets import QFileDialog, QTableWidgetItem, QMessageBox
+from PyQt5.QtGui import QIcon
 import src.SpotImporter as SpotImporter
+import src.MapImporter as MapImporter
 from lame_helper import BASEDIR
+import src.CustomMplCanvas as mplc
 
 # -------------------------------------
 # File I/O related functions
@@ -11,32 +14,37 @@ class LameIO():
         if parent is None:
             return
 
-        self.parent = parent
+        parent.actionOpenSample.triggered.connect(self.open_sample)
+        parent.actionOpenDirectory.triggered.connect(lambda: self.open_directory(dir_name=None))
+        parent.actionImportSpots.triggered.connect(self.import_spots)
+        parent.actionOpenProject.triggered.connect(lambda: self.open_project())
+        parent.actionSaveProject.triggered.connect(lambda: self.save_project())
+        parent.actionImportFiles.triggered.connect(lambda: self.import_files())
 
-        self.parent.actionOpenSample.triggered.connect(self.open_sample)
-        self.parent.actionOpenDirectory.triggered.connect(lambda: self.open_directory(dir_name=None))
-        self.parent.actionImportSpots.triggered.connect(self.import_spots)
+        self.parent = parent
 
     def open_sample(self):
         """Opens a single *.lame.csv file.
 
         Opens files created by MapImporter.
-        """        
+        """
+        parent = self.parent
+
         dialog = QFileDialog()
         dialog.setFileMode(QFileDialog.ExistingFiles)
         dialog.setNameFilter("LaME CSV (*.csv)")
         if dialog.exec_():
             file_list = dialog.selectedFiles()
-            self.parent.selected_directory = os.path.dirname(os.path.abspath(file_list[0]))
+            parent.selected_directory = os.path.dirname(os.path.abspath(file_list[0]))
             
-            self.parent.csv_files = [os.path.split(file)[1] for file in file_list if file.endswith('.csv')]
-            if self.parent.csv_files == []:
+            parent.csv_files = [os.path.split(file)[1] for file in file_list if file.endswith('.csv')]
+            if parent.csv_files == []:
                 # warning dialog
-                self.parent.statusBar.showMessage("No valid csv files found.")
+                parent.statusBar.showMessage("No valid csv files found.")
                 return
         else:
             return
-        self.parent.initialise_samples_and_tabs()
+        parent.initialise_samples_and_tabs()
 
 
     def open_directory(self, dir_name=None):
@@ -57,6 +65,8 @@ class LameIO():
         dir_name : str
             Path to datafiles, if ``None``, an open directory dialog is openend, by default ``None``
         """
+        parent = self.parent 
+
         if dir_name is None:
             dialog = QFileDialog()
             dialog.setFileMode(QFileDialog.Directory)
@@ -64,18 +74,18 @@ class LameIO():
             # dialog.setDirectory(os.getcwd())
             dialog.setDirectory(BASEDIR)
             if dialog.exec_():
-                self.parent.selected_directory = dialog.selectedFiles()[0]
+                parent.selected_directory = dialog.selectedFiles()[0]
             else:
-                self.parent.statusBar.showMessage("Open directory canceled.")
+                parent.statusBar.showMessage("Open directory canceled.")
                 return
         else:
-            self.parent.selected_directory = dir_name
+            parent.selected_directory = dir_name
 
-        file_list = os.listdir(self.parent.selected_directory)
-        self.parent.csv_files = [file for file in file_list if file.endswith('.lame.csv')]
-        if self.parent.csv_files == []:
+        file_list = os.listdir(parent.selected_directory)
+        parent.csv_files = [file for file in file_list if file.endswith('.lame.csv')]
+        if parent.csv_files == []:
             # warning dialog
-            self.parent.statusBar.showMessage("No valid csv files found.")
+            parent.statusBar.showMessage("No valid csv files found.")
             return
 
         self.initialize_samples_and_tabs()
@@ -84,7 +94,7 @@ class LameIO():
     def import_spots(self):
         """Import a data file with spot data."""
         # import spot dialog
-        self.spotDialog = SpotImporter.SpotImporter(self)
+        self.spotDialog = SpotImporter.SpotImporter(self.parent)
         self.spotDialog.show()
 
         if not self.spotDialog.ok:
@@ -96,20 +106,196 @@ class LameIO():
         """Populates spot table when spot file is opened or sample is changed
 
         Populates ``MainWindow.tableWidgetSpots``.
-        """        
-        if self.parent.sample_id == '':
+        """
+        parent = self.parent
+
+        if parent.sample_id == '':
             return
         
-        filtered_df = self.parent.spotdata[self.parent.sample_id==self.parent.spotdata['sample_id']]
+        filtered_df = parent.spotdata[parent.sample_id==parent.spotdata['sample_id']]
         filtered_df = filtered_df['sample_id','X','Y','visible','display_text']
 
-        self.parent.tableWidgetSpots.clearContents()
-        self.parent.tableWidgetSpots.setRowCount(len(filtered_df))
-        header = self.parent.tableWidgetSpots.horizontalHeader()
+        parent.tableWidgetSpots.clearContents()
+        parent.tableWidgetSpots.setRowCount(len(filtered_df))
+        header = parent.tableWidgetSpots.horizontalHeader()
 
         for row_index, row in filtered_df.iterrows():
             for col_index, value in enumerate(row):
-                self.parent.tableWidgetSpots.setItem(row_index, col_index, QTableWidgetItem(str(value)))
+                parent.tableWidgetSpots.setItem(row_index, col_index, QTableWidgetItem(str(value)))
+
+    def save_project(self):
+        """Save a project session
+
+        Saves (mostly) everything for recalling later.
+        """        
+        parent = self.parent
+        projects_dir = os.path.join(BASEDIR, "projects")
+        
+        # Ensure the projects directory exists
+        if not os.path.exists(projects_dir):
+            os.makedirs(projects_dir)
+        
+        # Open QFileDialog to enter a new project name
+        file_dialog = QFileDialog(parent, "Save Project", projects_dir)
+        file_dialog.setAcceptMode(QFileDialog.AcceptSave)
+        file_dialog.setFileMode(QFileDialog.AnyFile)
+        file_dialog.setOption(QFileDialog.ShowDirsOnly, True)
+        
+        if file_dialog.exec_() == QFileDialog.Accepted:
+            selected_dir = file_dialog.selectedFiles()[0]
+            
+            # Ensure a valid directory name is selected
+            if selected_dir:
+                project_name = os.path.basename(selected_dir)
+                project_dir = os.path.join(projects_dir, project_name)
+                
+                # Creating the required directory structure and store raw data
+                if not os.path.exists(project_dir):
+                    os.makedirs(project_dir)
+                    for sample_id in parent.data.keys():
+                        # create directory for each sample in self.data
+                        os.makedirs(os.path.join(project_dir, sample_id))
+                        # store raw data
+                        parent.data[sample_id].raw_data.to_csv(os.path.join(project_dir, sample_id, 'lame.csv'), index = False)
+                        # create rest of directories
+                        os.makedirs(os.path.join(project_dir, sample_id, 'figure_data'))
+                        os.makedirs(os.path.join(project_dir, sample_id, 'figures'))
+                        os.makedirs(os.path.join(project_dir, sample_id, 'tables'))
+                
+                # Saving data to the directory structure
+                data_dict = {
+                    'data': parent.data,
+                    'styles': parent.styles,
+                    'plot_infos': parent.plot_tree.get_plot_info_from_tree(parent.treeModel),
+                    'sample_id': parent.sample_id,
+                    'sample_ids': parent.sample_ids
+                }
+                
+                # Save the main data dictionary as a pickle file
+                pickle_path = os.path.join(project_dir, f'{project_name}.pkl')
+                with open(pickle_path, 'wb') as file:
+                    pickle.dump(data_dict, file)
+                
+                for sample_id in parent.data.keys():
+                    parent.profiling.save_profiles(project_dir, sample_id)
+                    parent.polygon.save_polygons(project_dir, sample_id)
+                
+                parent.statusBar.showMessage("Analysis saved successfully")
+
+    def open_project(self):
+        """Open a project session.
+
+        Restores a project session: data, analysis, and plots.
+        """        
+        parent = self.parent
+
+        if parent.data:
+            # Create and configure the QMessageBox
+            messageBoxChangeSample = QMessageBox()
+            iconWarning = QIcon()
+            iconWarning.addPixmap(QtGui.QPixmap(":/resources/icons/icon-warning-64.svg"), QIcon.Normal, QIcon.Off)
+
+            messageBoxChangeSample.setWindowIcon(iconWarning)  # Set custom icon
+            messageBoxChangeSample.setText("Do you want to save current analysis?")
+            messageBoxChangeSample.setWindowTitle("Save analysis")
+            messageBoxChangeSample.setStandardButtons(QMessageBox.Discard | QMessageBox.Cancel | QMessageBox.Save)
+
+            # Display the dialog and wait for user action
+            response = messageBoxChangeSample.exec_()
+
+            if response == QMessageBox.Save:
+                self.save_project()
+                parent.reset_analysis('full')
+            elif response == QMessageBox.Discard:
+                parent.reset_analysis('full')
+            else:  # user pressed cancel
+                parent.comboBoxSampleId.setCurrentText(parent.sample_id)
+                return
+        
+        projects_dir = os.path.join(BASEDIR, "projects")
+        
+        # Open QFileDialog to select the project folder
+        file_dialog = QFileDialog(parent, "Open Project", projects_dir)
+        file_dialog.setFileMode(QFileDialog.Directory)
+        file_dialog.setOption(QFileDialog.ShowDirsOnly, True)
+        
+        if file_dialog.exec_() == QFileDialog.Accepted:
+            selected_dir = file_dialog.selectedFiles()[0]
+            
+            # Ensure a valid directory is selected
+            if selected_dir:
+                project_name = os.path.basename(selected_dir)
+                project_dir = os.path.join(projects_dir, project_name)
+                
+                # Path to the pickle file
+                pickle_path = os.path.join(project_dir, f'{project_name}.pkl')
+                if os.path.exists(pickle_path):
+                    with open(pickle_path, 'rb') as file:
+                        data_dict = pickle.load(file)
+                    if data_dict:
+                        parent.data = data_dict['data']
+                        parent.styles = data_dict['styles']
+                        parent.sample_ids = data_dict['sample_ids']
+                        parent.sample_id = data_dict['sample_id']
+                        
+                        parent.plot_tree.create_tree(parent.sample_id)
+                        # Update tree with selected analytes
+                        ####
+                        # THIS LINE IS WRONG
+                        parent.plot_tree.update_tree(parent.data[parent.sample_id]['norm'], norm_update=False)
+                        ####
+
+                        # Add plot info to tree
+                        for plot_info in data_dict['plot_infos']:
+                            if plot_info:
+                                canvas = mplc.MplCanvas(fig=plot_info['figure'])
+                                plot_info['figure'] = canvas
+                                parent.plot_tree.add_tree_item(plot_info)
+                        
+                        # Update sample id combo
+                        parent.comboBoxSampleId.clear()
+                        parent.comboBoxSampleId.addItems(parent.data.keys())
+                        # set the comboBoxSampleId with the correct sample id
+                        parent.comboBoxSampleId.setCurrentIndex(0)
+                        parent.sample_id = data_dict['sample_id']
+
+                        # Initialize tabs
+                        parent.init_tabs()
+                        
+                        # Reset flags
+                        parent.update_cluster_flag = True
+                        parent.update_pca_flag = True
+                        parent.plot_flag = False
+
+                        parent.update_all_field_comboboxes()
+                        parent.update_filter_values()
+
+                        parent.histogram_update_bin_width()
+
+                        # add sample id to self.profiles, self.polygons and load saved profiles and polygons
+                        #self.profiling.add_samples()
+                        for sample_id in parent.data.keys():
+                            # profiles
+                            parent.profiling.add_profiles(project_dir, sample_id)
+                            parent.profiling.load_profiles(project_dir, sample_id)
+
+                            # polygons
+                            parent.polygon.add_samples()
+                            parent.polygon.load_polygons(project_dir, sample_id)
+
+                        # Plot first analyte as lasermap
+                        parent.styles['analyte map']['Colors']['ColorByField'] = 'Analyte'
+                        parent.comboBoxColorByField.setCurrentText(parent.styles['analyte map']['Colors']['ColorByField'])
+                        parent.color_by_field_callback()
+                        fields = parent.get_field_list('Analyte')
+                        parent.styles['analyte map']['Colors']['Field'] = fields[0]
+                        parent.comboBoxColorField.setCurrentText(fields[0])
+                        parent.color_field_callback()
+
+                        parent.plot_flag = True
+                        parent.update_SV()
+
+                        parent.statusBar.showMessage("Project loaded successfully")
 
     def initialize_samples_and_tabs(self):
         """
@@ -141,3 +327,15 @@ class LameIO():
         self.parent.init_tabs()
         self.parent.profiling.add_samples()
         self.parent.polygon.add_samples()
+
+    def import_files(self):
+        """Opens an import dialog from ``MapImporter`` to open selected data directories."""
+        # import data dialog
+        self.importDialog = MapImporter.MapImporter(self.parent)
+        self.importDialog.show()
+
+        # read directory
+        #if self.importDialog.ok:
+        #    self.open_directory(dir_name=self.importDialog.root_path)
+
+        # change sample

@@ -1,16 +1,12 @@
-import sys, os, re, copy, random, pickle, darkdetect
-from PyQt5 import QtCore, QtGui
-from PyQt5.QtCore import ( Qt, QTimer, QUrl, QSize )
+import sys, os, re, copy, random, darkdetect
+from PyQt5.QtCore import ( Qt, QTimer, QUrl, QSize, QRectF )
 from PyQt5.QtWidgets import (
-    QColorDialog, QCheckBox, QTableWidgetItem, QVBoxLayout, QGridLayout,
-    QMessageBox, QHeaderView, QMenu, QFileDialog, QWidget, QPushButton, QToolButton,
-    QDialog, QLabel, QTableWidget, QInputDialog, QAbstractItemView, QProgressBar,
+    QCheckBox, QTableWidgetItem, QVBoxLayout, QGridLayout,
+    QMessageBox, QHeaderView, QMenu, QFileDialog, QWidget, QToolButton,
+    QDialog, QLabel, QTableWidget, QInputDialog, QAbstractItemView,
     QSplashScreen, QApplication, QMainWindow, QSizePolicy
 )
-from PyQt5.QtGui import (
-    QIntValidator, QDoubleValidator, QColor, QImage, QPainter, QPixmap, QFont, QPen, QPalette,
-    QCursor, QBrush, QStandardItemModel, QStandardItem, QTextCursor, QDropEvent, QFontDatabase, QIcon, QWindow
-)
+from PyQt5.QtGui import ( QIntValidator, QDoubleValidator, QPixmap, QFont, QIcon )
 from src.UITheme import UIThemes
 
 #from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
@@ -59,7 +55,6 @@ from src.TableFunctions import TableFcn as TableFcn
 import src.CustomMplCanvas as mplc
 from src.DataHandling import SampleObj
 from src.PlotTree import PlotTree
-import src.MapImporter as MapImporter
 from src.CropImage import CropTool
 from src.ImageProcessing import ImageProcessing as ip
 from src.StyleToolbox import Styling
@@ -329,7 +324,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.cursor = False
         self.duplicate_plot_info= None
         
-        self.project_name = None
         self.calc_dict = {}
 
         self.laser_map_dict = {}
@@ -519,7 +513,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         # Menu and Toolbar
         #-------------------------
-        self.LameIO = LameIO(self)
+        self.io = LameIO(self)
 
         # Connect the "Open" action to a function
         self.actionQuit_LaME.triggered.connect(self.quit)
@@ -564,9 +558,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionProfiles.triggered.connect(lambda: self.open_tab('profiles'))
         self.actionCluster.triggered.connect(lambda: self.open_tab('clustering'))
         self.actionReset.triggered.connect(lambda: self.reset_analysis())
-        self.actionImportFiles.triggered.connect(lambda: self.import_files())
-        self.actionOpenProject.triggered.connect(lambda: self.open_project())
-        self.actionSaveProject.triggered.connect(lambda: self.save_project())
         self.actionSwapAxes.triggered.connect(self.swap_xy)
         self.actionSwapAxes.setEnabled(False)
 
@@ -1034,8 +1025,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return
 
         messageBoxResetSample = QMessageBox()
-        iconWarning = QtGui.QIcon()
-        iconWarning.addPixmap(QtGui.QPixmap(":/resources/icons/icon-warning-64.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        iconWarning = QIcon()
+        iconWarning.addPixmap(QPixmap(":/resources/icons/icon-warning-64.svg"), QIcon.Normal, QIcon.Off)
 
         messageBoxResetSample.setWindowIcon(iconWarning)  # Set custom icon
         messageBoxResetSample.setText("Do you wish to discard all work and revert to the original data?")
@@ -1152,8 +1143,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.data:
             # Create and configure the QMessageBox
             messageBoxChangeSample = QMessageBox()
-            iconWarning = QtGui.QIcon()
-            iconWarning.addPixmap(QtGui.QPixmap(":/resources/icons/icon-warning-64.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            iconWarning = QIcon()
+            iconWarning.addPixmap(QPixmap(":/resources/icons/icon-warning-64.svg"), QIcon.Normal, QIcon.Off)
 
             messageBoxChangeSample.setWindowIcon(iconWarning)  # Set custom icon
             messageBoxChangeSample.setText("Do you want to save current analysis")
@@ -1206,8 +1197,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.plot_tree.update_tree()
         else:
             #update filters, polygon, profiles with existing data
-            self.compute_map_aspect_ratio()
-
             self.actionClearFilters.setEnabled(False)
             if np.all(self.data[self.sample_id].filter_mask):
                 self.actionFilterToggle.setEnabled(False)
@@ -1307,17 +1296,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def open_preferences_dialog(self):
         pass
 
-    def import_files(self):
-        """Import selected map files."""
-        # import data dialog
-        self.importDialog = MapImporter.MapImporter(self)
-        self.importDialog.show()
-
-        # read directory
-        #if self.importDialog.ok:
-        #    self.open_directory(dir_name=self.importDialog.root_path)
-
-        # change sample
 
 
     # Other windows/dialogs
@@ -2054,262 +2032,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxPlots.clear()
         self.comboBoxPlots.addItems(self.multi_view_index)
     
-    def save_project(self):
-        projects_dir = os.path.join(BASEDIR, "projects")
-        
-        # Ensure the projects directory exists
-        if not os.path.exists(projects_dir):
-            os.makedirs(projects_dir)
-        
-        # Open QFileDialog to enter a new project name
-        file_dialog = QFileDialog(self, "Save Project", projects_dir)
-        file_dialog.setAcceptMode(QFileDialog.AcceptSave)
-        file_dialog.setFileMode(QFileDialog.AnyFile)
-        file_dialog.setOption(QFileDialog.ShowDirsOnly, True)
-        
-        if file_dialog.exec_() == QFileDialog.Accepted:
-            selected_dir = file_dialog.selectedFiles()[0]
-            
-            # Ensure a valid directory name is selected
-            if selected_dir:
-                self.project_name = os.path.basename(selected_dir)
-                project_dir = os.path.join(projects_dir, self.project_name)
-                
-                # Creating the required directory structure and store raw data
-                if not os.path.exists(project_dir):
-                    os.makedirs(project_dir)
-                    for sample_id in self.data.keys():
-                        # create directory for each sample in self.data
-                        os.makedirs(os.path.join(project_dir, sample_id))
-                        # store raw data
-                        self.data[sample_id].raw_data.to_csv(os.path.join(project_dir, sample_id, 'lame.csv'), index = False)
-                        # create rest of directories
-                        os.makedirs(os.path.join(project_dir, sample_id, 'figure_data'))
-                        os.makedirs(os.path.join(project_dir, sample_id, 'figures'))
-                        os.makedirs(os.path.join(project_dir, sample_id, 'tables'))
-                
-                # Paths for different files
-                # csv_path = os.path.join(project_dir, f'{project_name}.lame.csv')
-                # rst_path = os.path.join(project_dir, f'{project_name}.lame.rst')
-                # poly_path = os.path.join(project_dir, 'polygon.poly')
-                # prfl_path = os.path.join(project_dir, 'profiles.prfl')
-                
-                # store the lame.csv, lame.rst and lame.pdf files 
-                
-
-
-
-                # Saving data to the directory structure
-                data_dict = {
-                    'data': self.data,
-                    'styles': self.styles,
-                    'plot_infos': self.plot_tree.get_plot_info_from_tree(self.treeModel),
-                    'sample_id': self.sample_id,
-                    'sample_ids': self.sample_ids
-                }
-                
-                # Save the main data dictionary as a pickle file
-                pickle_path = os.path.join(project_dir, f'{self.project_name}.pkl')
-                with open(pickle_path, 'wb') as file:
-                    pickle.dump(data_dict, file)
-                
-                for sample_id in self.data.keys():
-                    self.profiling.save_profiles(project_dir, sample_id)
-                    self.polygon.save_polygons(project_dir, sample_id)
-                
-                self.statusBar.showMessage("Analysis saved successfully")
-
-    # def open_project(self):
-    #     if self.data:
-    #         # Create and configure the QMessageBox
-    #         messageBoxChangeSample = QMessageBox()
-    #         iconWarning = QtGui.QIcon()
-    #         iconWarning.addPixmap(QtGui.QPixmap(":/resources/icons/icon-warning-64.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-
-    #         messageBoxChangeSample.setWindowIcon(iconWarning)  # Set custom icon
-    #         messageBoxChangeSample.setText("Do you want to save current analysis")
-    #         messageBoxChangeSample.setWindowTitle("Save analysis")
-    #         messageBoxChangeSample.setStandardButtons(QMessageBox.Discard | QMessageBox.Cancel | QMessageBox.Save)
-
-    #         # Display the dialog and wait for user action
-    #         response = messageBoxChangeSample.exec_()
-
-    #         if response == QMessageBox.Save:
-    #             self.save_project()
-    #             self.reset_analysis('sample')
-    #         elif response == QMessageBox.Discard:
-    #             self.reset_analysis('sample')
-    #         else: #user pressed cancel
-    #             self.comboBoxSampleId.setCurrentText(self.sample_id)
-    #             return
-    #     file_name, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Pickle Files (*.pkl);;All Files (*)")
-    #     if file_name:
-    #         with open(file_name, 'rb') as file:
-    #             data_dict = pickle.load(file)
-    #         if data_dict:
-    #             self.data = data_dict['data']
-    #             self.profiling.profiles = data_dict['profiling'] 
-    #             self.polygon.polygons = data_dict['polygons'] 
-    #             self.styles = data_dict['styles']
-    #             self.sample_ids = data_dict['sample_ids']
-    #             self.sample_id = data_dict['sample_id'] 
-    #             self.selected_dirctory= data_dict['selected_directory'] 
-    #             self.create_tree(self.sample_id)
-    #             #update tree with selected analytes
-    #             self.update_tree(self.data[self.sample_id]['norm'], norm_update = False)
-    #             #print(data_dict['plot_infos'])
-    #             #add plot info to tree
-    #             for plot_info in data_dict['plot_infos']:
-    #                 if plot_info:
-    #                     canvas = mplc.MplCanvas(fig=plot_info['figure'])
-    #                     plot_info['figure'] = canvas
-    #                     self.add_tree_item(plot_info)
-            
-    #             self.sample_ids = data_dict['sample_ids']
-    #             # update sample id combo
-    #             self.comboBoxSampleId.clear()
-    #             self.comboBoxSampleId.addItems(self.sample_ids)
-    #             self.sample_id = data_dict['sample_id']
-    #             #compute aspect ratio
-    #             self.compute_map_aspect_ratio()
-                
-    #             #inilialise tabs
-    #             self.init_tabs()
-    #             self.statusBar.showMessage("Analysis loaded successfully")  
-                
-                
-    #             # reset flags
-    #             self.update_cluster_flag = True
-    #             self.update_pca_flag = True
-    #             self.plot_flag = False
-
-    #             self.update_all_field_comboboxes()
-    #             self.update_filter_values()
-
-    #             self.histogram_update_bin_width()
-
-    #             # plot first analyte as lasermap
-    #             self.styles['analyte map']['Colors']['ColorByField'] = 'Analyte'
-    #             self.comboBoxColorByField.setCurrentText(self.styles['analyte map']['Colors']['ColorByField'])
-    #             self.color_by_field_callback()
-    #             fields = self.get_field_list('Analyte')
-    #             self.styles['analyte map']['Colors']['Field'] = fields[0]
-    #             self.comboBoxColorField.setCurrentText(fields[0])
-    #             self.color_field_callback()
-
-    #             self.plot_flag = True
-    #             self.update_SV()
-
-
-    def open_project(self):
-        if self.data:
-            # Create and configure the QMessageBox
-            messageBoxChangeSample = QMessageBox()
-            iconWarning = QtGui.QIcon()
-            iconWarning.addPixmap(QtGui.QPixmap(":/resources/icons/icon-warning-64.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-
-            messageBoxChangeSample.setWindowIcon(iconWarning)  # Set custom icon
-            messageBoxChangeSample.setText("Do you want to save current analysis?")
-            messageBoxChangeSample.setWindowTitle("Save analysis")
-            messageBoxChangeSample.setStandardButtons(QMessageBox.Discard | QMessageBox.Cancel | QMessageBox.Save)
-
-            # Display the dialog and wait for user action
-            response = messageBoxChangeSample.exec_()
-
-            if response == QMessageBox.Save:
-                self.save_project()
-                self.reset_analysis('full')
-            elif response == QMessageBox.Discard:
-                self.reset_analysis('full')
-            else:  # user pressed cancel
-                self.comboBoxSampleId.setCurrentText(self.sample_id)
-                return
-        
-        projects_dir = os.path.join(BASEDIR, "projects")
-        
-        # Open QFileDialog to select the project folder
-        file_dialog = QFileDialog(self, "Open Project", projects_dir)
-        file_dialog.setFileMode(QFileDialog.Directory)
-        file_dialog.setOption(QFileDialog.ShowDirsOnly, True)
-        
-        if file_dialog.exec_() == QFileDialog.Accepted:
-            selected_dir = file_dialog.selectedFiles()[0]
-            
-            # Ensure a valid directory is selected
-            if selected_dir:
-                project_name = os.path.basename(selected_dir)
-                project_dir = os.path.join(projects_dir, project_name)
-                
-                # Path to the pickle file
-                pickle_path = os.path.join(project_dir, f'{project_name}.pkl')
-                if os.path.exists(pickle_path):
-                    with open(pickle_path, 'rb') as file:
-                        data_dict = pickle.load(file)
-                    if data_dict:
-                        self.data = data_dict['data']
-                        self.styles = data_dict['styles']
-                        self.sample_ids = data_dict['sample_ids']
-                        self.sample_id = data_dict['sample_id']
-                        self.project_name = project_name
-                        
-                        self.plot_tree.create_tree(self.sample_id)
-                        # Update tree with selected analytes
-                        self.plot_tree.update_tree(self.data[self.sample_id]['norm'], norm_update=False)
-                        # Add plot info to tree
-                        for plot_info in data_dict['plot_infos']:
-                            if plot_info:
-                                canvas = mplc.MplCanvas(fig=plot_info['figure'])
-                                plot_info['figure'] = canvas
-                                self.plot_tree.add_tree_item(plot_info)
-                        
-                        # Update sample id combo
-                        self.comboBoxSampleId.clear()
-                        self.comboBoxSampleId.addItems(self.data.keys())
-                        # set the comboBoxSampleId with the correct sample id
-                        self.comboBoxSampleId.setCurrentIndex(0)
-                        self.sample_id = data_dict['sample_id']
-
-                        # Compute aspect ratio
-                        self.compute_map_aspect_ratio()
-                        
-                        # Initialize tabs
-                        self.init_tabs()
-                        
-                        # Reset flags
-                        self.update_cluster_flag = True
-                        self.update_pca_flag = True
-                        self.plot_flag = False
-
-                        self.update_all_field_comboboxes()
-                        self.update_filter_values()
-
-                        self.histogram_update_bin_width()
-
-                        # add sample id to self.profiles, self.polygons and load saved profiles and polygons
-                        #self.profiling.add_samples()
-                        for sample_id in self.data.keys():
-                            # profiles
-                            self.profiling.add_profiles(project_dir, sample_id)
-                            self.profiling.load_profiles(project_dir, sample_id)
-
-                            # polygons
-                            self.polygon.add_samples()
-                            self.polygon.load_polygons(project_dir, sample_id)
-
-                        # Plot first analyte as lasermap
-                        self.styles['analyte map']['Colors']['ColorByField'] = 'Analyte'
-                        self.comboBoxColorByField.setCurrentText(self.styles['analyte map']['Colors']['ColorByField'])
-                        self.color_by_field_callback()
-                        fields = self.get_field_list('Analyte')
-                        self.styles['analyte map']['Colors']['Field'] = fields[0]
-                        self.comboBoxColorField.setCurrentText(fields[0])
-                        self.color_field_callback()
-
-                        self.plot_flag = True
-                        self.update_SV()
-
-                        self.statusBar.showMessage("Project loaded successfully")
-    
     def update_tables(self):
         self.update_filter_table(reload = True)
         self.profiling.update_table_widget()
@@ -2331,9 +2053,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.data[self.sample_id].polygon_mask = self.data[self.sample_id].polygon_mask[self.data[self.sample_id].crop_mask]
         self.data[self.sample_id].filter_mask = self.data[self.sample_id].filter_mask[self.data[self.sample_id].crop_mask]
         self.prep_data(sample_id)
-        #self.update_all_plots()
-        # compute new aspect ratio
-        self.compute_map_aspect_ratio()
+
         # replot after cropping 
         self.plot_map_pg(sample_id, field_type, field)
         
@@ -2492,7 +2212,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
                 # Create and set the checkbox for 'use'
                 chkBoxItem_use = QCheckBox()
-                chkBoxItem_use.setCheckState(QtCore.Qt.Checked if row['use'] else QtCore.Qt.Unchecked)
+                chkBoxItem_use.setCheckState(Qt.Checked if row['use'] else Qt.Unchecked)
                 chkBoxItem_use.stateChanged.connect(lambda state, row=current_row: on_use_checkbox_state_changed(row, state))
                 self.tableWidgetFilters.setCellWidget(current_row, 0, chkBoxItem_use)
 
@@ -2506,7 +2226,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
                 # Create and set the checkbox for selection (assuming this is a checkbox similar to 'use')
                 chkBoxItem_select = QCheckBox()
-                chkBoxItem_select.setCheckState(QtCore.Qt.Checked if row.get('select', False) else QtCore.Qt.Unchecked)
+                chkBoxItem_select.setCheckState(Qt.Checked if row.get('select', False) else Qt.Unchecked)
                 self.tableWidgetFilters.setCellWidget(current_row, 7, chkBoxItem_select)
 
         else:
@@ -2515,7 +2235,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             def on_use_checkbox_state_changed(row, state):
                 # Update the 'use' value in the filter_df for the given row
-                self.data[self.sample_id]['filter_info'].at[row, 'use'] = state == QtCore.Qt.Checked
+                self.data[self.sample_id]['filter_info'].at[row, 'use'] = state == Qt.Checked
 
             field_type = self.comboBoxFilterFieldType.currentText()
             field = self.comboBoxFilterField.currentText()
@@ -2528,20 +2248,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             # Create a QCheckBox for the 'use' column
             chkBoxItem_use = QCheckBox()
-            chkBoxItem_use.setCheckState(QtCore.Qt.Checked)
+            chkBoxItem_use.setCheckState(Qt.Checked)
             chkBoxItem_use.stateChanged.connect(lambda state, row=row: on_use_checkbox_state_changed(row, state))
 
             chkBoxItem_select = QTableWidgetItem()
-            chkBoxItem_select.setFlags(QtCore.Qt.ItemIsUserCheckable |
-                                QtCore.Qt.ItemIsEnabled)
+            chkBoxItem_select.setFlags(Qt.ItemIsUserCheckable |
+                                Qt.ItemIsEnabled)
 
             if 'Analyte' in field_type:
-                chkBoxItem_select.setCheckState(QtCore.Qt.Unchecked)
+                chkBoxItem_select.setCheckState(Qt.Unchecked)
                 analyte_1 = field
                 analyte_2 = None
                 scale = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes'] == field)].iloc[0]['norm']
             elif 'Ratio' in field_type:
-                chkBoxItem_select.setCheckState(QtCore.Qt.Unchecked)
+                chkBoxItem_select.setCheckState(Qt.Unchecked)
                 analyte_1, analyte_2 = field.split(' / ')
                 scale = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes'] == analyte_1)].iloc[0]['norm'].value
                 #norm = self.data[self.sample_id]['ratio_info'].loc[(self.data[self.sample_id]['ratio_info']['analyte_1'] == analyte_1)
@@ -2577,7 +2297,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             chkBoxItem = self.tableWidgetFilters.item(row, 7)
             field_type = self.tableWidgetFilters.item(row, 1).text()
             field = self.tableWidgetFilters.item(row, 2).text()
-            if chkBoxItem.checkState() == QtCore.Qt.Checked:
+            if chkBoxItem.checkState() == Qt.Checked:
                 self.tableWidgetFilters.removeRow(row)
                 self.data[sample_id]['filter_info'].drop(self.data[sample_id]['filter_info'][(self.data[sample_id]['filter_info']['field'] == field)].index, inplace=True)
 
@@ -2890,7 +2610,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # elif self.actionCrop.isChecked():
         #     self.crop_tool.create_rect(event, click_pos)
-        # if event.button() == QtCore.Qt.LeftButton and self.main_window.pushButtonStartProfile.isChecked():
+        # if event.button() == Qt.LeftButton and self.main_window.pushButtonStartProfile.isChecked():
        #apply profiles
         elif self.toolButtonPlotProfile.isChecked() or self.toolButtonPointMove.isChecked():
             self.profiling.plot_profile_scatter(event, array, k,v, plot, x, y,x_i, y_i)
@@ -2899,7 +2619,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.polygon.plot_polygon_scatter(event, k, x, y,x_i, y_i)
 
         #apply crop
-        elif self.actionCrop.isChecked() and event.button() == QtCore.Qt.RightButton:
+        elif self.actionCrop.isChecked() and event.button() == Qt.RightButton:
             self.crop_tool.apply_crop()
 
     def plot_laser_map_cont(self,layout,array,img,p1,cm, view):
@@ -2976,7 +2696,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.zoomViewBox.setGeometry(x_pos, y_pos, self.zoomViewBox.width(), self.zoomViewBox.height())
 
         # Calculate the region to zoom in on
-        zoomRect = QtCore.QRectF(x - x_range * self.zoomLevel,
+        zoomRect = QRectF(x - x_range * self.zoomLevel,
                 y - y_range * self.zoomLevel,
                 x_range * self.zoomLevel * 2,
                 y_range * self.zoomLevel * 2)
@@ -4008,7 +3728,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             #create label with analyte name
             #create another label for value of the corresponding plot
             labelMVInfoField = QLabel()
-            # labelMVInfoValueLabel.setMaximumSize(QtCore.QSize(20, 16777215))
+            # labelMVInfoValueLabel.setMaximumSize(QSize(20, 16777215))
             labelMVInfoField.setObjectName("labelMVInfoField"+field)
             labelMVInfoField.setText(field)
             font = QFont()
@@ -6122,7 +5842,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # 
         def on_use_checkbox_state_changed(row, state):
             # Update the 'use' value in the filter_df for the given row
-            self.data[self.sample_id]['filter_info'].at[row, 'use'] = state == QtCore.Qt.Checked
+            self.data[self.sample_id]['filter_info'].at[row, 'use'] = state == Qt.Checked
 
         if calling_widget == 'analyteAdd':
             el_list = [self.comboBoxNDimAnalyte.currentText().lower()]
@@ -6143,7 +5863,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             # Create a QCheckBox for the 'use' column
             chkBoxItem_use = QCheckBox()
-            chkBoxItem_use.setCheckState(QtCore.Qt.Checked)
+            chkBoxItem_use.setCheckState(Qt.Checked)
             chkBoxItem_use.stateChanged.connect(lambda state, row=row: on_use_checkbox_state_changed(row, state))
 
             self.tableWidgetNDim.setCellWidget(row, 0, chkBoxItem_use)
@@ -6666,7 +6386,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     #     #                               len(csv_files))
     #     # layout.addWidget(progressBar, 3, 0,  1, 2)
     #     # progressBar.setWindowTitle("Loading")
-    #     # progressBar.setWindowModality(QtCore.Qt.WindowModal)
+    #     # progressBar.setWindowModality(Qt.WindowModal)
     #     # Loop through the CSV files and read them using pandas
     #     data_dict = {}
     #     i = 0
@@ -6869,7 +6589,7 @@ def main():
     show_splash()
 
     # Uncomment this line to set icon to App
-    app.setWindowIcon(QtGui.QIcon(os.path.join(BASEDIR, os.path.join(ICONPATH,'LaME-64.svg'))))
+    app.setWindowIcon(QIcon(os.path.join(BASEDIR, os.path.join(ICONPATH,'LaME-64.svg'))))
     main = MainWindow()
 
     # Set the main window to fullscreen

@@ -9,7 +9,7 @@ pythonGenerator.forBlock['load_directory'] = function(block, generator) {
     var dir_name = generator.quote_(block.getFieldValue('DIR'));
     // Generate code with or without directory parameter
     var code = (dir_name === "'directory name'")
-        ? 'self.parent.LameIO.open_directory()\nself.store_sample_ids()\n'
+        ? 'self.parent.io.open_directory()\nself.store_sample_ids()\n'
         : 'self.parent.open_directory(' + dir_name + ')\nself.store_sample_ids()\n';
     return code;
 };

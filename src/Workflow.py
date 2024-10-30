@@ -25,6 +25,7 @@ class BlocklyBridge(QObject):
         #print("Received code:")
         #print(code)
 
+
     @pyqtSlot(str)
     def executeCode(self, code):
         self.parent.execute_code(code)
@@ -33,7 +34,7 @@ class BlocklyBridge(QObject):
     def invokeSetStyleWidgets(self, plot_type):
         # Call the set_style_widgets function
         plot_type = plot_type.replace('_',' ')
-        self.parent.parent.set_style_widgets(plot_type)
+        self.parent.parent.styling.set_style_widgets(plot_type)
         style = self.parent.parent.styles[plot_type]
         
         # Convert NumPy types to native Python types (if any)

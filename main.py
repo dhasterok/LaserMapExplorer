@@ -1277,16 +1277,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_filter_values()
         self.histogram_update_bin_width()
 
-        # plot first analyte as lasermap
-        # self.comboBoxColorByField.setCurrentText(self.styles['analyte map']['Colors']['ColorByField'])
-        # self.color_by_field_callback()
-        # fields = self.get_field_list('Analyte')
-        # self.styles['analyte map']['Colors']['Field'] = fields[0]
-        # self.comboBoxColorField.setCurrentText(fields[0])
-        # self.styling.initialize_axis_values('Analyte', fields[0])
-        # self.color_field_callback()
-        # self.styling.set_style_widgets('analyte map')
-        
         # update toolbar
         self.canvas_changed()
 
@@ -1678,7 +1668,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.color_by_field_callback() # added color by field callback to update color field
             if field != self.comboBoxColorField.currentText():
                 self.comboBoxColorField.setCurrentText(field)
-                self.color_field_callback(plot)
+                self.styling.color_field_callback(plot)
             
     def update_resolution(self):
         """Updates DX and DY for a dataframe

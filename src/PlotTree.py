@@ -246,9 +246,9 @@ class PlotTree():
             # if leaf in self.plot_widget_dict[tree][branch].keys():
             #     widget_dict = self.plot_widget_dict[tree][branch][leaf]
             #     self.add_plotwidget_to_canvas(widget_dict['info'], view=widget_dict['view'], position=widget_dict['position'])
-            self.parent.initialize_axis_values(tree, leaf)
+            self.parent.styling.initialize_axis_values(tree, leaf)
             style = self.parent.styles['analyte map']
-            self.parent.set_style_widgets('analyte map', style)
+            self.parent.styling.set_style_widgets('analyte map', style)
             if self.plot_info:
                 print('tree_double_click: add_plotwidget_to_canvas')
                 self.parent.add_plotwidget_to_canvas(self.plot_info)
@@ -274,7 +274,7 @@ class PlotTree():
                 #set styles
 
                 #update UI with auto scale and neg handling parameters from 'Analyte/Ratio Info'
-                self.parent.update_spinboxes(sample_id=branch, field=leaf, field_type = tree)
+                self.parent.update_spinboxes(field=leaf, field_type=tree)
 
         elif tree in ['Histogram', 'Correlation', 'Geochemistry', 'Multidimensional Analysis', 'Calculated Map']:
             if self.plot_info:

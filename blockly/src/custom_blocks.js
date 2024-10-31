@@ -42,7 +42,6 @@ export function enableSampleIDsBlockFunction() {
     // Re-register the block definition
     Blockly.Blocks['sample_ids_list_block'] = sample_ids_list_block;
     Blockly.Blocks['select_samples'] = select_samples;
-    Blockly.Blocks['analyte_map'] = analyte_map;
     Blockly.Blocks['iterate_sample_ids'] = iterate_sample_ids;
     Blockly.Blocks['sample_ids_list_block'] = sample_ids_list_block;
 
@@ -99,62 +98,94 @@ Blockly.common.defineBlocks({ iterate_sample_ids: iterate_sample_ids });
 const plot = {
     init: function() {
         this.appendDummyInput('plot_header')
-        .setAlign(Blockly.inputs.Align.CENTRE)
-        .appendField('Plot ');
-        this.appendValueInput('plot_type')
-        .appendField('Plot type');
+            .setAlign(Blockly.inputs.Align.CENTRE)
+            .appendField('Plot Type')
+            .appendField(new Blockly.FieldDropdown([
+                ['Analyte Map', 'analyte_map'],
+                ['Histogram', 'histogram'],
+                ['Correlation', 'correlation'],
+                ['Gradient Map', 'gradient_map'],
+                ['Scatter', 'scatter'],
+                ['Heatmap', 'heatmap'],
+                ['Ternary Map', 'ternary_map'],
+                ['TEC', 'tec'],
+                ['Radar', 'radar'],
+                ['Variance', 'variance'],
+                ['Vectors', 'vectors'],
+                ['PCA Scatter', 'pca_scatter'],
+                ['PCA Heatmap', 'pca_heatmap'],
+                ['PCA Score', 'pca_score'],
+                ['Clusters', 'clusters'],
+                ['Cluster Score', 'cluster_score'],
+                ['Profile', 'profile']
+            ]), 'plot_type_dropdown');
+        
+        // Style and Save inputs
+        this.appendValueInput('style')
+            .appendField('Style');
+        this.appendValueInput('save')
+            .appendField('Save');
+        
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
-        this.setTooltip('add plot type block');
+        this.setTooltip('Configure and render a plot with specified type and settings.');
         this.setHelpUrl('');
         this.setColour(285);
-        if (!enableSampleIDsBlock) {
-            this.setDisabledReason(true, "no_sample_ids");
-        }
-        // Initialize an internal property to store plot type
-        this.plotType = null;
-    },
-    onchange: function() {
-        // Get the block attached to the 'plot_type' input
-        const connectedBlock = this.getInputTargetBlock('plot_type');
 
-        // Check if a block is connected
-        if (connectedBlock) {
-            // Get the type of the connected block and store it internally
-            const plotType = connectedBlock.type;
-            console.log('Connected plot type block:', plotType);  // Debugging log
-            if (plotType != this.plotType){
-                // Store the connected block's type internally (not displayed)
-                this.plotType = plotType;
-                dynamicStyleUpdate(plotType);
-            }
-        } else {
-            console.log('No block connected to plot_type');
-            // Reset the stored plot type if no block is connected
-            this.plotType = null;
-        }
-    }
-};
-Blockly.common.defineBlocks({plot: plot});
-          
-const analyte_map = {
-    init: function() {
-        this.appendDummyInput('plot_map_header')
-        .appendField('Plot Map');
-        this.appendValueInput('style')
-        .appendField('Style');
-        this.appendValueInput('save')
-        .appendField('Save '); 
-        this.setOutput(true, null);
-        this.setTooltip('plot 2d image of analyte');
-        this.setHelpUrl('');
-        this.setColour(285);
+        // Initialize internal properties
+        this.plotType = null;
+        this.connectedStyleBlocks = {}; // To store references to connected style blocks
+
+        // Automatically disable the block if sample IDs are not enabled
         if (!enableSampleIDsBlock) {
             this.setDisabledReason(true, "no_sample_ids");
         }
+    },
+
+    onchange: function() {
+        const selectedPlotType = this.getFieldValue('plot_type_dropdown');
+        if (selectedPlotType && selectedPlotType !== this.plotType) {
+            this.plotType = selectedPlotType;
+            this.updateConnectedStyleBlocks();
+        } else if (!selectedPlotType) {
+            this.plotType = null;
+            this.clearConnectedStyleBlocks();
+        }
+    },
+
+    updateConnectedStyleBlocks: function() {
+        // Get the style block connected to the 'style' input
+        const styleBlock = this.getInputTargetBlock('style');
+        
+        if (styleBlock && styleBlock.type === 'styles') {
+            const connectedBlocks = this.getStyleSubBlocks(styleBlock);
+            this.connectedStyleBlocks = connectedBlocks;
+
+            // Trigger style updates
+            dynamicStyleUpdate(this.plotType, connectedBlocks);
+        }
+        else{
+            this.plotType = null;
+            this.clearConnectedStyleBlocks();
+        }
+    },
+
+    clearConnectedStyleBlocks: function() {
+        this.connectedStyleBlocks = {};
+    },
+
+    getStyleSubBlocks: function(styleBlock) {
+        const connectedBlocks = {};
+
+        ['axisAndLabels', 'annotAndScale', 'marksAndLines', 'coloring'].forEach((type) => {
+            const subBlock = styleBlock.getInputTargetBlock(type);
+            if (subBlock) connectedBlocks[type] = subBlock;
+        });
+
+        return connectedBlocks;
     }
 };
-Blockly.common.defineBlocks({analyte_map: analyte_map});
+Blockly.common.defineBlocks({ plot: plot });
 
 // Style Blocks
 const axisAndLabels = {
@@ -175,8 +206,7 @@ const axisAndLabels = {
             ['Linear', 'linear'],
             ['Log', 'log'],
             ['Logit', 'logit'],
-            ['option', 'OPTIONNAME']
-            ]), 'xAxisDropdown');
+            ]), 'xScaleDropdown');
         this.appendDummyInput('yLabelHeader')
         .appendField('Y Label')
         .appendField(new Blockly.FieldTextInput(''), 'yLabel');
@@ -190,8 +220,7 @@ const axisAndLabels = {
             ['Linear', 'linear'],
             ['Log', 'log'],
             ['Logit', 'logit'],
-            ['option', 'OPTIONNAME']
-            ]), 'yAxisDropdown');
+            ]), 'yScaleDropdown');
         this.appendDummyInput('zLabelHeader')
         .appendField('Z Label')
         .appendField(new Blockly.FieldTextInput(''), 'zLabel');
@@ -202,7 +231,7 @@ const axisAndLabels = {
             ['in', 'in'],
             ['inout', 'inout'],
             ['none', 'none']
-            ]), 'yAxisDropdown');
+            ]), 'tickDirectionDropdown');
         this.setInputsInline(false)
         this.setOutput(true, null);
         this.setTooltip('Adjust axis and labels of a plot');
@@ -224,9 +253,9 @@ const styles = {
             ['option', 'OPTIONNAME'],
             ['option', 'OPTIONNAME']
             ]), 'NAME');
-        this.appendValueInput('axisAndLabelInput')
+        this.appendValueInput('axisAndLabels')
         .appendField('Axis and Labels');
-        this.appendValueInput('annotAndScaleInput')
+        this.appendValueInput('annotAndScale')
         .appendField('Annotations and Scale');
         this.appendValueInput('markersAndLines')
         .appendField('Markers and Lines');
@@ -239,9 +268,18 @@ const styles = {
         this.setTooltip('');
         this.setHelpUrl('');
         this.setColour(285);
+    },
+    onchange: function(event) {
+        // Trigger an update in the plot block when style connections change
+        if (event.type === Blockly.Events.BLOCK_MOVE || event.type === Blockly.Events.BLOCK_CHANGE) {
+            const plotBlock = this.getSurroundParent();
+            if (plotBlock && plotBlock.type === 'plot') {
+                plotBlock.updateConnectedStyleBlocks();
+            }
+        }
     }
 };
-Blockly.common.defineBlocks({styles: styles});
+Blockly.common.defineBlocks({ styles: styles });
 
 const annotAndScale = {
     init: function() {

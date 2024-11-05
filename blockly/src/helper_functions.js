@@ -31,31 +31,37 @@ function updateSampleDropdown(sampleIds) {
 window.updateSampleDropdown = updateSampleDropdown;
 
 
-export function dynamicStyleUpdate(plotType) {
-    // Assume set_style_widgets is available from Python backend
+// Function to dynamically update connected style blocks
+export function dynamicStyleUpdate(plotType, connectedBlocks) {
+    // Call the backend to get updated styles for the specific plot type
+    console.log(connectedBlocks)
     window.blocklyBridge.callSetStyleWidgets(plotType, function(style) {
-        // The 'style' object contains the updated style properties
-        // Now, update the 'styles', 'axisAndLabels', etc. blocks with the new values
-
-        Blockly.getMainWorkspace().getAllBlocks().forEach(function(block) {
-            switch (block.type) {
-                case 'styles':
-                    updateStylesBlock(block, style);
-                    break;
-                case 'axisAndLabels':
-                    updateAxisAndLabelsBlock(block, style);
-                    break;
-                case 'annotAndScale':
-                    updateAnnotAndScaleBlock(block, style);
-                    break;
-                case 'marksAndLines':
-                    updateMarksAndLinesBlock(block, style);
-                    break;
-                case 'coloring':
-                    updateColoringBlock(block, style);
-                    break;
-            }
-        });
+        if (style.constructor === Object && Object.keys(style).length === 0){
+            console.warn("Style dictionary not provided for plotType:", plotType);
+            return; // Exit if style is not available
+        }
+        else{
+            console.log('updating styles')
+            Object.entries(connectedBlocks).forEach(([blockType, block]) => {
+                switch (blockType) {
+                    case 'styles':
+                        updateStylesBlock(block, style);
+                        break;
+                    case 'axisAndLabels':
+                        updateAxisAndLabelsBlock(block, style);
+                        break;
+                    case 'annotAndScale':
+                        updateAnnotAndScaleBlock(block, style);
+                        break;
+                    case 'marksAndLines':
+                        updateMarksAndLinesBlock(block, style);
+                        break;
+                    case 'coloring':
+                        updateColoringBlock(block, style);
+                        break;
+                }
+            });
+        };
     });
 }
 
@@ -63,6 +69,7 @@ function updateStylesBlock(block, style) {
     
 }
 
+///style = {"Axes": {"XLim": [1, 738], "XScale": "linear", "XLabel": "X", "YLim": [1, 106], "YScale": "linear", "YLabel": "Y", "ZLabel": "", "AspectRatio": 0.9919100893474309, "TickDir": "out"}, "Text": {"Font": "Avenir", "FontSize": 11.0}, "Scale": {"Direction": "none", "Location": "northeast", "Length": null, "OverlayColor": "#ffffff"}, "Markers": {"Symbol": "circle", "Size": 6, "Alpha": 30}, "Lines": {"LineWidth": 1.5, "Multiplier": 1, "Color": "#1c75bc"}, "Colors": {"Color": "#1c75bc", "ColorByField": "Analyte", "Field": "Li7", "Colormap": "plasma", "Reverse": false, "CLim": [-0.00144, 66.7], "CScale": "linear", "Direction": "vertical", "CLabel": "$^{7}$Li (ppm)", "Resolution": 10}}
 function updateAxisAndLabelsBlock(block, style) {
     // Update X, Y, and Z Labels
     block.setFieldValue(style['Axes']['XLabel'], 'xLabel');
@@ -76,8 +83,11 @@ function updateAxisAndLabelsBlock(block, style) {
     block.setFieldValue(style['Axes']['YLim'][1], 'yLimMax');
     
     // Update X and Y Scales
-    block.setFieldValue(style['Axes']['XScale'], 'xAxisDropdown');
-    block.setFieldValue(style['Axes']['YScale'], 'yAxisDropdown');
+    block.setFieldValue(style['Axes']['XScale'], 'xScaleDropdown');
+    block.setFieldValue(style['Axes']['YScale'], 'yScaleDropdown');
+
+    // Update tick direction
+    block.setFieldValue(style['Axes']['TickDir'], 'tickDirectionDropdown');
     
     // Render the updated block
     block.render();

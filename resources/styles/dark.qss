@@ -73,7 +73,7 @@ QToolButton:disabled {
 }
 
 QLineEdit, QTextEdit, QPlainTextEdit, QSpinBox, QDoubleSpinBox, QTimeEdit, QDateEdit, QDateTimeEdit {
-    border-width: 2px;
+    border-width: 1px;
     border-radius: 4px;
     border-style: solid;
     border-top-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 #525252, stop:1 #727272);
@@ -85,7 +85,7 @@ QLineEdit, QTextEdit, QPlainTextEdit, QSpinBox, QDoubleSpinBox, QTimeEdit, QDate
     font-size: 11px;
 }
 QLineEdit:focus, QTextEdit:focus, QPlainTextEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus, QTimeEdit:focus, QDateEdit:focus, QDateTimeEdit:focus {
-    border-width: 2px;
+    border-width: 1px;
     border-radius: 4px;
     border-style: solid;
     border-top-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 #e9873a, stop:1 #dd8b14);
@@ -228,7 +228,7 @@ QSlider::add-page:horizontal:disabled, QSlider::sub-page:horizontal:disabled, QS
 }
 
 QComboBox, QFontComboBox {
-    border-width: 2px;
+    border-width: 1px;
     border-radius: 4px;
     border-style: solid;
     border-top-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 #525252, stop:1 #727272);

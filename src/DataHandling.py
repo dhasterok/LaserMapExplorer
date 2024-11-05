@@ -1109,6 +1109,78 @@ class SampleObj:
         # current_plot_df = current_plot_df[self.data[self.sample_id]['crop_mask']].reset_index(drop=True)
         return df
 
+    def get_processed_data(self):
+        """Gets the processed data for analysis
+
+        Returns
+        -------
+        pandas.DataFrame
+            Filtered data frame 
+        bool
+            Analytes included from processed data
+        """
+        if self.sample_id == '':
+            return
+
+        # return normalised, filtered data with that will be used for analysis
+        #use_analytes = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['use']==True), 'analytes'].values
+        use_analytes = self.processed_data.match_attributes({'data_type': 'analyte', 'use': True})
+
+        df = self.processed_data[use_analytes]
+
+        #perform scaling for groups of analytes with same norm parameter
+        for norm in ['log', 'logit']:
+            analyte_set = self.processed_data.match_attributes({'data_type': 'analyte', 'use': True, 'norm': norm})
+            if not analyte_set:
+                continue
+
+            tmp_array = df[analyte_set].values
+            if norm == 'log':
+                # np.nanlog handles NaN value
+                df[analyte_set] = np.where(~np.isnan(tmp_array), np.log10(tmp_array))
+            elif norm == 'logit':
+                # Handle division by zero and NaN values
+                with np.errstate(divide='ignore', invalid='ignore'):
+                    df[analyte_set] = np.where(~np.isnan(tmp_array), np.log10(tmp_array / (10**6 - tmp_array)))
+
+        # Combine the two masks to create a final mask
+        nan_mask = df.notna().all(axis=1)
+        
+        
+        # mask nan values and add to self.mask
+        self.mask = self.mask  & nan_mask.values
+
+        return df, use_analytes
+    
+    # extracts data for scatter plot
+    def get_vector(self, field_type, field, ref_chem=None):
+        """Creates a dictionary of values for plotting
+
+        Returns
+        -------
+        dict
+            Dictionary with array and additional relevant plot data, contains
+            'field', 'type', 'label', and 'array'.
+        """
+        # initialize dictionary
+        value_dict = {'type': field_type, 'field': field, 'label': None, 'array': None}
+
+        if field == '':
+            return value_dict
+
+        # add label
+        unit = self.processed_data.get_attribute(field, 'unit')
+        if unit is None:
+            value_dict['label'] = value_dict['field']
+        else:
+            value_dict['label'] = value_dict['field'] + ' (' + unit + ')'
+
+        # add array
+        df = self.get_map_data(field=field, field_type=field_type, scale_data=False, ref_chem=ref_chem)
+        value_dict['array'] = df['array'][self.mask].values if not df.empty else []
+
+        return value_dict
+
     # def outlier_detection(self, lq=0.0005, uq=99.5, d_lq=9.95 , d_uq=99):
     #     """_summary_
 
@@ -1220,75 +1292,3 @@ class SampleObj:
     #                 else:
     #                     t_array = np.copy(array)
     #             return t_array
-
-    def get_processed_data(self):
-        """Gets the processed data for analysis
-
-        Returns
-        -------
-        pandas.DataFrame
-            Filtered data frame 
-        bool
-            Analytes included from processed data
-        """
-        if self.sample_id == '':
-            return
-
-        # return normalised, filtered data with that will be used for analysis
-        #use_analytes = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['use']==True), 'analytes'].values
-        use_analytes = self.processed_data.match_attributes({'data_type': 'analyte', 'use': True})
-
-        df = self.processed_data[use_analytes]
-
-        #perform scaling for groups of analytes with same norm parameter
-        for norm in ['log', 'logit']:
-            analyte_set = self.processed_data.match_attributes({'data_type': 'analyte', 'use': True, 'norm': norm})
-            if not analyte_set:
-                continue
-
-            tmp_array = df[analyte_set].values
-            if norm == 'log':
-                # np.nanlog handles NaN value
-                df[analyte_set] = np.where(~np.isnan(tmp_array), np.log10(tmp_array))
-            elif norm == 'logit':
-                # Handle division by zero and NaN values
-                with np.errstate(divide='ignore', invalid='ignore'):
-                    df[analyte_set] = np.where(~np.isnan(tmp_array), np.log10(tmp_array / (10**6 - tmp_array)))
-
-        # Combine the two masks to create a final mask
-        nan_mask = df.notna().all(axis=1)
-        
-        
-        # mask nan values and add to self.mask
-        self.mask = self.mask  & nan_mask.values
-
-        return df, use_analytes
-    
-    # extracts data for scatter plot
-    def get_vector(self, field_type, field, ref_chem=None):
-        """Creates a dictionary of values for plotting
-
-        Returns
-        -------
-        dict
-            Dictionary with array and additional relevant plot data, contains
-            'field', 'type', 'label', and 'array'.
-        """
-        # initialize dictionary
-        value_dict = {'type': field_type, 'field': field, 'label': None, 'array': None}
-
-        if field == '':
-            return value_dict
-
-        # add label
-        unit = self.processed_data.get_attribute(field, 'unit')
-        if unit is None:
-            value_dict['label'] = value_dict['field']
-        else:
-            value_dict['label'] = value_dict['field'] + ' (' + unit + ')'
-
-        # add array
-        df = self.get_map_data(field=field, field_type=field_type, scale_data=False, ref_chem=ref_chem)
-        value_dict['array'] = df['array'][self.mask].values if not df.empty else []
-
-        return value_dict

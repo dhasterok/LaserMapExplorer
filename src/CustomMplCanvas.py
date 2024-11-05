@@ -91,7 +91,7 @@ class MplCanvas(FigureCanvas):
         self.saved_dtext = []
         self.array = None
         if self.parent is not None:
-            if self.parent.comboBoxPlotType.currentText() in self.parent.map_plot_types:
+            if self.parent.comboBoxPlotType.currentText() in self.parent.style.map_plot_types:
                 self.map_flag = True
             else:
                 self.map_flag = False

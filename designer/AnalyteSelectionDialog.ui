@@ -6,9 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>517</width>
-    <height>358</height>
+    <width>730</width>
+    <height>500</height>
    </rect>
+  </property>
+  <property name="font">
+   <font>
+    <pointsize>11</pointsize>
+   </font>
   </property>
   <property name="windowTitle">
    <string>LaME: Select Analytes and Ratios</string>
@@ -16,6 +21,14 @@
   <layout class="QGridLayout" name="gridLayout">
    <item row="5" column="3" colspan="2">
     <widget class="QPushButton" name="pushButtonCancel">
+     <property name="font">
+      <font>
+       <pointsize>11</pointsize>
+      </font>
+     </property>
+     <property name="toolTip">
+      <string>Close window without keeping current changes</string>
+     </property>
      <property name="text">
       <string>Cancel</string>
      </property>
@@ -23,20 +36,38 @@
    </item>
    <item row="0" column="1">
     <widget class="QLabel" name="label_2">
+     <property name="font">
+      <font>
+       <pointsize>11</pointsize>
+      </font>
+     </property>
      <property name="text">
-      <string>Correlation Type</string>
+      <string>Correlation method</string>
      </property>
     </widget>
    </item>
    <item row="5" column="1">
     <widget class="QPushButton" name="pushButtonLoadSelection">
+     <property name="font">
+      <font>
+       <pointsize>11</pointsize>
+      </font>
+     </property>
+     <property name="toolTip">
+      <string>Load a previously saved set of selected analytes and ratios</string>
+     </property>
      <property name="text">
-      <string>Load Selection</string>
+      <string>Load</string>
      </property>
     </widget>
    </item>
    <item row="1" column="1" rowspan="3" colspan="4">
     <widget class="QTableWidget" name="tableWidgetAnalytes">
+     <property name="font">
+      <font>
+       <pointsize>11</pointsize>
+      </font>
+     </property>
      <property name="selectionMode">
       <enum>QAbstractItemView::MultiSelection</enum>
      </property>
@@ -44,13 +75,29 @@
    </item>
    <item row="5" column="2">
     <widget class="QPushButton" name="pushButtonSaveSelection">
+     <property name="font">
+      <font>
+       <pointsize>11</pointsize>
+      </font>
+     </property>
+     <property name="toolTip">
+      <string>Save the selected analytes and ratios</string>
+     </property>
      <property name="text">
-      <string>Save Selection</string>
+      <string>Save</string>
      </property>
     </widget>
    </item>
    <item row="5" column="6">
     <widget class="QPushButton" name="pushButtonDone">
+     <property name="font">
+      <font>
+       <pointsize>11</pointsize>
+      </font>
+     </property>
+     <property name="toolTip">
+      <string>Update currently selected set of analytes and ratios</string>
+     </property>
      <property name="text">
       <string>Done</string>
      </property>
@@ -64,6 +111,11 @@
        <height>200</height>
       </size>
      </property>
+     <property name="font">
+      <font>
+       <pointsize>11</pointsize>
+      </font>
+     </property>
      <property name="text">
       <string/>
      </property>
@@ -71,6 +123,11 @@
    </item>
    <item row="0" column="6">
     <widget class="QLabel" name="label">
+     <property name="font">
+      <font>
+       <pointsize>11</pointsize>
+      </font>
+     </property>
      <property name="text">
       <string>Selected list</string>
      </property>
@@ -80,10 +137,24 @@
     </widget>
    </item>
    <item row="0" column="2">
-    <widget class="QComboBox" name="comboBoxCorrelation"/>
+    <widget class="QComboBox" name="comboBoxCorrelation">
+     <property name="font">
+      <font>
+       <pointsize>11</pointsize>
+      </font>
+     </property>
+     <property name="toolTip">
+      <string>Change the correlation method displayed in the selection table</string>
+     </property>
+    </widget>
    </item>
    <item row="1" column="6">
     <widget class="QComboBox" name="comboBoxScale">
+     <property name="font">
+      <font>
+       <pointsize>11</pointsize>
+      </font>
+     </property>
      <property name="toolTip">
       <string>Apply scale to all samples</string>
      </property>
@@ -111,6 +182,11 @@
        <width>300</width>
        <height>16777215</height>
       </size>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>11</pointsize>
+      </font>
      </property>
     </widget>
    </item>

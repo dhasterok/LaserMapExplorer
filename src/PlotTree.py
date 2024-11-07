@@ -246,9 +246,8 @@ class PlotTree():
             # if leaf in self.plot_widget_dict[tree][branch].keys():
             #     widget_dict = self.plot_widget_dict[tree][branch][leaf]
             #     self.add_plotwidget_to_canvas(widget_dict['info'], view=widget_dict['view'], position=widget_dict['position'])
-            self.parent.styling.initialize_axis_values(tree, leaf)
-            style = self.parent.styles['analyte map']
-            self.parent.styling.set_style_widgets('analyte map', style)
+            self.parent.style.initialize_axis_values(tree, leaf)
+            self.parent.style.set_style_widgets('analyte map')
             if self.plot_info:
                 print('tree_double_click: add_plotwidget_to_canvas')
                 self.parent.add_plotwidget_to_canvas(self.plot_info)

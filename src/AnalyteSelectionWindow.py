@@ -459,28 +459,16 @@ class AnalyteDialog(QDialog, Ui_Dialog):
 
             # Reset the previous row and column to normal font if they exist
             if self.prev_row is not None:
-                self._set_row_font(self.prev_row, QFont.Normal)
-                item = self.tableWidgetAnalytes.verticalHeaderItem(row)
-                if item:
-                    item.setBackground(QBrush())
+                self._set_row_font(self.prev_row, QFont.Normal, QBrush())
             if self.prev_col is not None:
-                self._set_col_font(self.prev_col, QFont.Normal)
-                item = self.tableWidgetAnalytes.horizontalHeaderItem(col)
-                if item:
-                    item.setBackground(QBrush())
+                self._set_col_font(self.prev_col, QFont.Normal, QBrush())
 
             # Apply bold font to the current row and column headers
             if row >= 0:
-                self._set_row_font(row, QFont.Bold)
-                item = self.tableWidgetAnalytes.verticalHeaderItem(row)
-                if item:
-                    item.setBackground(QBrush(QColor("lightblue")))
+                self._set_row_font(row, QFont.Bold, QBrush(QColor("yellow")))
                 self.prev_row = row
             if col >= 0:
-                self._set_col_font(col, QFont.Bold)
-                item = self.tableWidgetAnalytes.horizontalHeaderItem(col)
-                if item:
-                    item.setBackground(QBrush(QColor("lightblue")))
+                self._set_col_font(col, QFont.Bold, QBrush(QColor("yellow")))
                 self.prev_col = col
 
         # Handle resetting when the mouse leaves the widget
@@ -497,22 +485,24 @@ class AnalyteDialog(QDialog, Ui_Dialog):
 
         return super().eventFilter(obj, event)
 
-    def _set_row_font(self, row, weight):
+    def _set_row_font(self, row, weight, brush):
         """Set the font weight for the vertical header row."""
         if row is not None:
             header_item = self.tableWidgetAnalytes.verticalHeaderItem(row)
             font = header_item.font()
             font.setWeight(weight)
             header_item.setFont(font)
+            header_item.setBackground(brush)
             # Force a repaint
             self.tableWidgetAnalytes.viewport().update()
 
-    def _set_col_font(self, col, weight):
+    def _set_col_font(self, col, weight, brush):
         """Set the font weight for the horizontal header column."""
         if col is not None:
             header_item = self.tableWidgetAnalytes.horizontalHeaderItem(col)
             font = header_item.font()
             font.setWeight(weight)
             header_item.setFont(font)
+            header_item.setBackground(brush)
             # Force a repaint
             self.tableWidgetAnalytes.viewport().update()

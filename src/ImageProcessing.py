@@ -402,15 +402,12 @@ class ImageProcessing():
         # -----------
         canvas = mplc.MplCanvas(parent=self.parent)
 
-        style = self.parent.styles['analyte map']
-
-        norm = self.parent.color_norm(style)
-
-        cax = canvas.axes.imshow(filtered_image, cmap=self.parent.styling.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
+        norm = self.parent.style.color_norm()
+        cax = canvas.axes.imshow(filtered_image, cmap=self.parent.style.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
 
         # set color limits
-        self.parent.add_colorbar(canvas, cax, style)
-        cax.set_clim(style['Colors']['CLim'][0], style['Colors']['CLim'][1])
+        self.parent.add_colorbar(canvas, cax)
+        cax.set_clim(self.parent.style.clim[0], self.parent.style.clim[1])
 
         # use mask to create an alpha layer
         mask = self.parent.data[self.parent.sample_id].mask.astype(float)
@@ -418,8 +415,6 @@ class ImageProcessing():
 
         alphas = colors.Normalize(0, 1, clip=False)(reshaped_mask)
         alphas = np.clip(alphas, .4, 1)
-        #cax = canvas.axes.imshow(self.array, alpha=alphas, cmap=self.get_colormap(),  aspect=self.aspect_ratio, interpolation='none', norm=norm)
-        #canvas.axes.set_facecolor('w')
 
         alpha_mask = np.where(reshaped_mask == 0, 0.5, 0)  
         canvas.axes.imshow(np.ones_like(alpha_mask), aspect=aspect_ratio, interpolation='none', cmap='Greys', alpha=alpha_mask)
@@ -441,7 +436,7 @@ class ImageProcessing():
             'field_type': self.parent.comboBoxColorByField.currentText(),
             'field': field,
             'figure': canvas,
-            'style': style,
+            'style': self.parent.style.style_dict[self.parent.style.plot_type],
             'cluster_groups': None,
             'view': [True,False],
             'position': None

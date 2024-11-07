@@ -101,22 +101,22 @@ const plot = {
             .setAlign(Blockly.inputs.Align.CENTRE)
             .appendField('Plot Type')
             .appendField(new Blockly.FieldDropdown([
-                ['Analyte Map', 'analyte_map'],
+                ['Analyte Map', 'analyte map'],
                 ['Histogram', 'histogram'],
                 ['Correlation', 'correlation'],
-                ['Gradient Map', 'gradient_map'],
+                ['Gradient Map', 'gradient map'],
                 ['Scatter', 'scatter'],
                 ['Heatmap', 'heatmap'],
-                ['Ternary Map', 'ternary_map'],
+                ['Ternary Map', 'ternary map'],
                 ['TEC', 'tec'],
                 ['Radar', 'radar'],
                 ['Variance', 'variance'],
                 ['Vectors', 'vectors'],
-                ['PCA Scatter', 'pca_scatter'],
-                ['PCA Heatmap', 'pca_heatmap'],
-                ['PCA Score', 'pca_score'],
+                ['PCA Scatter', 'pca scatter'],
+                ['PCA Heatmap', 'pca heatmap'],
+                ['PCA Score', 'pca score'],
                 ['Clusters', 'clusters'],
-                ['Cluster Score', 'cluster_score'],
+                ['Cluster Score', 'cluster score'],
                 ['Profile', 'profile']
             ]), 'plot_type_dropdown');
         
@@ -146,11 +146,9 @@ const plot = {
         const selectedPlotType = this.getFieldValue('plot_type_dropdown');
         if (selectedPlotType && selectedPlotType !== this.plotType) {
             this.plotType = selectedPlotType;
+            console.log()
             this.updateConnectedStyleBlocks();
-        } else if (!selectedPlotType) {
-            this.plotType = null;
-            this.clearConnectedStyleBlocks();
-        }
+        } 
     },
 
     updateConnectedStyleBlocks: function() {
@@ -187,60 +185,6 @@ const plot = {
 };
 Blockly.common.defineBlocks({ plot: plot });
 
-// Style Blocks
-const axisAndLabels = {
-    init: function() {
-        this.appendDummyInput('axisHeader')
-        .setAlign(Blockly.inputs.Align.CENTRE)
-        .appendField('Axis and Labels');
-        this.appendDummyInput('xLabelHeader')
-        .appendField('X Label')
-        .appendField(new Blockly.FieldTextInput(''), 'xLabel');
-        this.appendDummyInput('xLimitsHeader')
-        .appendField('X Limits')
-        .appendField(new Blockly.FieldTextInput(''), 'xLimMin')
-        .appendField(new Blockly.FieldTextInput(''), 'xLimMax');
-        this.appendDummyInput('xScaleHeader')
-        .appendField('X Scale')
-        .appendField(new Blockly.FieldDropdown([
-            ['Linear', 'linear'],
-            ['Log', 'log'],
-            ['Logit', 'logit'],
-            ]), 'xScaleDropdown');
-        this.appendDummyInput('yLabelHeader')
-        .appendField('Y Label')
-        .appendField(new Blockly.FieldTextInput(''), 'yLabel');
-        this.appendDummyInput('yLimitsHeader')
-        .appendField('Y Limits')
-        .appendField(new Blockly.FieldTextInput(''), 'yLimMin')
-        .appendField(new Blockly.FieldTextInput(''), 'yLimMax');
-        this.appendDummyInput('xScaleHeader')
-        .appendField('Y Scale')
-        .appendField(new Blockly.FieldDropdown([
-            ['Linear', 'linear'],
-            ['Log', 'log'],
-            ['Logit', 'logit'],
-            ]), 'yScaleDropdown');
-        this.appendDummyInput('zLabelHeader')
-        .appendField('Z Label')
-        .appendField(new Blockly.FieldTextInput(''), 'zLabel');
-        this.appendDummyInput('zLabelHeader')
-        .appendField('Tick Direction')
-        .appendField(new Blockly.FieldDropdown([
-            ['out', 'out'],
-            ['in', 'in'],
-            ['inout', 'inout'],
-            ['none', 'none']
-            ]), 'tickDirectionDropdown');
-        this.setInputsInline(false)
-        this.setOutput(true, null);
-        this.setTooltip('Adjust axis and labels of a plot');
-        this.setHelpUrl('');
-        this.setColour(285);
-    }
-};
-Blockly.common.defineBlocks({axisAndLabels: axisAndLabels});
-                        
 const styles = {
     init: function() {
         this.appendDummyInput('stylesHeader')
@@ -270,8 +214,9 @@ const styles = {
         this.setColour(285);
     },
     onchange: function(event) {
-        // Trigger an update in the plot block when style connections change
-        if (event.type === Blockly.Events.BLOCK_MOVE || event.type === Blockly.Events.BLOCK_CHANGE) {
+        // Check if the event is a BLOCK_MOVE event and involves this block as the parent
+        if (event.type === Blockly.Events.BLOCK_MOVE && event.newParentId === this.id) {
+            // Only proceed if a new block is added to the 'styles' block
             const plotBlock = this.getSurroundParent();
             if (plotBlock && plotBlock.type === 'plot') {
                 plotBlock.updateConnectedStyleBlocks();
@@ -280,6 +225,64 @@ const styles = {
     }
 };
 Blockly.common.defineBlocks({ styles: styles });
+
+// Style Blocks
+const axisAndLabels = {
+    init: function() {
+        this.appendDummyInput('axisHeader')
+        .setAlign(Blockly.inputs.Align.CENTRE)
+        .appendField('Axis and Labels');
+        this.appendDummyInput('xLabelHeader')
+        .appendField('X Label')
+        .appendField(new Blockly.FieldTextInput(''), 'xLabel');
+        this.appendDummyInput('xLimitsHeader')
+        .appendField('X Limits')
+        .appendField(new Blockly.FieldTextInput(''), 'xLimMin')
+        .appendField(new Blockly.FieldTextInput(''), 'xLimMax');
+        this.appendDummyInput('xScaleHeader')
+        .appendField('X Scale')
+        .appendField(new Blockly.FieldDropdown([
+            ['Linear', 'linear'],
+            ['Log', 'log'],
+            ['Logit', 'logit'],
+            ]), 'xScaleDropdown');
+        this.appendDummyInput('yLabelHeader')
+        .appendField('Y Label')
+        .appendField(new Blockly.FieldTextInput(''), 'yLabel');
+        this.appendDummyInput('yLimitsHeader')
+        .appendField('Y Limits')
+        .appendField(new Blockly.FieldTextInput(''), 'yLimMin')
+        .appendField(new Blockly.FieldTextInput(''), 'yLimMax');
+        this.appendDummyInput('yScaleHeader')
+        .appendField('Y Scale')
+        .appendField(new Blockly.FieldDropdown([
+            ['Linear', 'linear'],
+            ['Log', 'log'],
+            ['Logit', 'logit'],
+            ]), 'yScaleDropdown');
+        this.appendDummyInput('zLabelHeader')
+        .appendField('Z Label')
+        .appendField(new Blockly.FieldTextInput(''), 'zLabel');
+        this.appendDummyInput('axisRatioHeader')
+        .appendField('Aspect Ratio')
+        .appendField(new Blockly.FieldTextInput(''), 'aspectRatio');
+        this.appendDummyInput('tickDirectionHeader')
+        .appendField('Tick Direction')
+        .appendField(new Blockly.FieldDropdown([
+            ['out', 'out'],
+            ['in', 'in'],
+            ['inout', 'inout'],
+            ['none', 'none']
+            ]), 'tickDirectionDropdown');
+        this.setInputsInline(false)
+        this.setOutput(true, null);
+        this.setTooltip('Adjust axis and labels of a plot');
+        this.setHelpUrl('');
+        this.setColour(285);
+    }
+};
+Blockly.common.defineBlocks({axisAndLabels: axisAndLabels});
+                        
 
 const annotAndScale = {
     init: function() {
@@ -345,6 +348,9 @@ const marksAndLines = {
         this.appendDummyInput('size')
         .appendField('Size')
         .appendField(new Blockly.FieldNumber(6, 1, 50), 'size');
+        this.appendDummyInput('symbolColorHeader')
+        .appendField('Symbol Color')
+        .appendField(new FieldColour('#ff0000'), 'symbolColor');
         this.appendDummyInput('transparency')
         .appendField('Transparency')
         .appendField(new Blockly.FieldNumber(100, 0, 100), 'size');
@@ -414,10 +420,9 @@ const coloring = {
         this.appendDummyInput('scale')
         .appendField('Scale')
         .appendField(new Blockly.FieldDropdown([
-            ['option', 'OPTIONNAME'],
-            ['option', 'OPTIONNAME'],
-            ['option', 'OPTIONNAME']
-            ]), 'scale');
+            ['linear', 'linear'],
+            ['log', 'log'],
+            ]), 'cScale');
         this.appendDummyInput('cLim')
         .appendField('Clim')
         .appendField(new Blockly.FieldTextInput(''), 'cLimMin')

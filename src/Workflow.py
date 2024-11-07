@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QTextEdit, QPushButton
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QTextEdit, QPushButton, QSizePolicy
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWebChannel import QWebChannel
 from PyQt5.QtCore import pyqtSlot, QObject, QUrl, QFile, QIODevice
@@ -35,6 +35,7 @@ class BlocklyBridge(QObject):
         # Call the set_style_widgets function
         plot_type = plot_type.replace('_',' ')
         if plot_type in self.parent.parent.styles.keys():
+            ### need to add parent.parent to access main code from this class 
             self.parent.parent.styling.set_style_widgets(plot_type)
             style = self.parent.parent.styles[plot_type]
             print('invokeSetStyleWidgets')
@@ -80,6 +81,7 @@ class Workflow():
 
         # Create a web engine view
         self.web_view = QWebEngineView()
+        self.web_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         # Setup the WebChannel for communication
         self.channel = QWebChannel()
@@ -98,6 +100,13 @@ class Workflow():
         self.web_view.setUrl(QUrl.fromLocalFile(BASEDIR + '/blockly/index.html'))
         # Add the web view to the layout
         self.layout.addWidget(self.web_view)
+
+        # Connect resize event
+        parent.resizeEvent = self.handleResizeEvent
+
+    def handleResizeEvent(self, event):
+        self.web_view.page().runJavaScript("resizeBlocklyWorkspace()")
+        event.accept()
     
     def store_sample_ids(self):
             """

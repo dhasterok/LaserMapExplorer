@@ -43,6 +43,7 @@ export function dynamicStyleUpdate(plotType, connectedBlocks) {
         else{
             console.log('updating styles')
             Object.entries(connectedBlocks).forEach(([blockType, block]) => {
+                updateFieldsBasedOnPlotType(plotType, block); // Adjust fields per plot type
                 switch (blockType) {
                     case 'styles':
                         updateStylesBlock(block, style);
@@ -65,11 +66,210 @@ export function dynamicStyleUpdate(plotType, connectedBlocks) {
     });
 }
 
+// Function to update fields based on plot type in style blocks
+function updateFieldsBasedOnPlotType(plotType, block) {
+    // Reset all fields to default visibility and enabled state
+    block.getField('xLabel').setEnabled(true);
+    block.getField('xLimMin').setEnabled(true);
+    block.getField('xScaleDropdown').setEnabled(true);
+    block.getField('yLabel').setEnabled(true);
+    block.getField('yLimMin').setEnabled(true);
+    block.getField('yScaleDropdown').setEnabled(true);
+    block.getField('zLabel').setEnabled(true);
+    block.getField('aspectRatio').setEnabled(true);
+    block.getField('tickDirectionDropdown').setEnabled(true);
+    
+    // Adjust fields based on plot type
+    switch (plotType) {
+        case 'analyte map':
+                // Reset all fields to default visibility and enabled state
+            block.getField('xLabel').setEnabled(true);
+            block.getField('xLimMin').setEnabled(true);
+            block.getField('xScaleDropdown').setEnabled(true);
+            block.getField('yLabel').setEnabled(true);
+            block.getField('yLimMin').setEnabled(true);
+            block.getField('yScaleDropdown').setEnabled(true);
+            block.getField('zLabel').setEnabled(true);
+            block.getField('aspectRatio').setEnabled(true);
+            block.getField('tickDirectionDropdown').setEnabled(true);
+        case 'gradient map':
+            // Axes properties
+            block.getField('xLabel').setEnabled(false);
+            block.getField('xLimMin').setEnabled(true);
+            block.getField('xScaleDropdown').setEnabled(false);
+            block.getField('yLabel').setEnabled(false);
+            block.getField('yLimMin').setEnabled(true);
+            block.getField('yScaleDropdown').setEnabled(false);
+            block.getField('zLabel').setEnabled(false);
+            block.getField('aspectRatio').setEnabled(false);
+            block.getField('tickDirectionDropdown').setEnabled(false);
+            // Scalebar properties
+            block.getField('scaleDirection').setEnabled(true);
+            block.getField('scaleLocation').setEnabled(true);
+            block.getField('scaleLength').setEnabled(true);
+            block.getField('overlayColor').setEnabled(true);
+            // Marker properties
+            block.getField('symbol').setEnabled(true);
+            block.getField('size').setEnabled(true);
+            block.getField('transparency').setEnabled(true);
+            block.getField('symbolColor').setEnabled(true);
+            // Line properties
+            block.getField('lineWidth').setEnabled(true);
+            block.getField('lineColor').setEnabled(true);
+            block.getField('lengthMultiplier').setEnabled(false);
+            // Color properties
+            block.getField('colorByField').setEnabled(true);
+            block.getField('field').setEnabled(true);
+            block.getField('colormap').setEnabled(true);
+            block.getField('cLimMin').setEnabled(true);
+            block.getField('cLimMax').setEnabled(true);
+            block.getField('cScale').setEnabled(true);
+            block.getField('cBarDirection').setEnabled(true);
+            block.getField('cBarLabel').setEnabled(true);
+            block.getField('resolution').setEnabled(false);
+            break;
+
+        case 'correlation':
+        case 'vectors':
+            // Axes properties
+            block.getField('xLabel').setEnabled(false);
+            block.getField('xLimMin').setEnabled(false);
+            block.getField('xScaleDropdown').setEnabled(false);
+            block.getField('yLabel').setEnabled(false);
+            block.getField('yLimMin').setEnabled(false);
+            block.getField('yScaleDropdown').setEnabled(false);
+            block.getField('zLabel').setEnabled(false);
+            block.getField('aspectRatio').setEnabled(false);
+            block.getField('tickDirectionDropdown').setEnabled(true);
+            // Scalebar properties
+            block.getField('scaleDirection').setEnabled(false);
+            block.getField('scaleLocation').setEnabled(false);
+            block.getField('scaleLength').setEnabled(false);
+            block.getField('overlayColor').setEnabled(false);
+            // Marker properties
+            block.getField('symbol').setEnabled(false);
+            block.getField('size').setEnabled(false);
+            block.getField('transparency').setEnabled(false);
+            block.getField('symbolColor').setEnabled(false);
+            // Line properties
+            block.getField('lineWidth').setEnabled(false);
+            block.getField('lineColor').setEnabled(false);
+            block.getField('lengthMultiplier').setEnabled(false);
+            // Color properties
+            block.getField('colormap').setEnabled(true);
+            block.getField('cScale').setEnabled(false);
+            block.getField('cLimMin').setEnabled(true);
+            block.getField('cLimMax').setEnabled(true);
+            block.getField('cBarDirection').setEnabled(true);
+            block.getField('cBarLabel').setEnabled(false);
+            block.getField('colorByField').setEnabled(plotType === 'correlation');
+            block.getField('field').setEnabled(block.getField('colorByField').getValue() === 'cluster');
+            block.getField('resolution').setEnabled(false);
+            break;
+
+        case 'histogram':
+            // Axes properties
+            block.getField('xLabel').setEnabled(true);
+            block.getField('xLimMin').setEnabled(true);
+            block.getField('xScaleDropdown').setEnabled(true);
+            block.getField('yLabel').setEnabled(true);
+            block.getField('yLimMin').setEnabled(true);
+            block.getField('yScaleDropdown').setEnabled(false);
+            block.getField('zLabel').setEnabled(false);
+            block.getField('aspectRatio').setEnabled(true);
+            block.getField('tickDirectionDropdown').setEnabled(true);
+            // Scalebar properties
+            block.getField('scaleDirection').setEnabled(false);
+            block.getField('scaleLocation').setEnabled(false);
+            block.getField('scaleLength').setEnabled(false);
+            block.getField('overlayColor').setEnabled(false);
+            // Marker properties
+            block.getField('symbol').setEnabled(false);
+            block.getField('size').setEnabled(false);
+            block.getField('transparency').setEnabled(true);
+            // Line properties
+            block.getField('lineWidth').setEnabled(true);
+            block.getField('lineColor').setEnabled(true);
+            block.getField('lengthMultiplier').setEnabled(false);
+            // Color properties
+            block.getField('colorByField').setEnabled(true);
+            block.getField('colormap').setEnabled(false);
+            block.getField('cBarDirection').setEnabled(block.getField('colorByField').getValue() !== 'none');
+            block.getField('field').setEnabled(block.getField('colorByField').getValue() !== 'none');
+            block.getField('symbolColor').setEnabled(block.getField('colorByField').getValue() === 'none');
+            break;
+
+        case 'scatter':
+        case 'pca scatter':
+            // Axes properties
+            const isScatter = block.getField('zLabel').getValue() === '';
+            block.getField('xLimMin').setEnabled(isScatter);
+            block.getField('xScaleDropdown').setEnabled(isScatter);
+            block.getField('yLimMin').setEnabled(isScatter);
+            block.getField('yScaleDropdown').setEnabled(isScatter);
+            block.getField('zLabel').setEnabled(!isScatter);
+            // Other properties similar to Python code logic...
+            break;
+
+        // Add additional cases for each plot type as needed
+
+        default:
+            // Default settings if plot type doesn't match any case
+            break;
+    }
+}
+
 function updateStylesBlock(block, style) {
     
 }
 
-///style = {"Axes": {"XLim": [1, 738], "XScale": "linear", "XLabel": "X", "YLim": [1, 106], "YScale": "linear", "YLabel": "Y", "ZLabel": "", "AspectRatio": 0.9919100893474309, "TickDir": "out"}, "Text": {"Font": "Avenir", "FontSize": 11.0}, "Scale": {"Direction": "none", "Location": "northeast", "Length": null, "OverlayColor": "#ffffff"}, "Markers": {"Symbol": "circle", "Size": 6, "Alpha": 30}, "Lines": {"LineWidth": 1.5, "Multiplier": 1, "Color": "#1c75bc"}, "Colors": {"Color": "#1c75bc", "ColorByField": "Analyte", "Field": "Li7", "Colormap": "plasma", "Reverse": false, "CLim": [-0.00144, 66.7], "CScale": "linear", "Direction": "vertical", "CLabel": "$^{7}$Li (ppm)", "Resolution": 10}}
+/*
+style = {
+    "Axes": {
+        "XLim": [1, 738],
+        "XScale": "linear",
+        "XLabel": "X",
+        "YLim": [1, 106],
+        "YScale": "linear",
+        "YLabel": "Y",
+        "ZLabel": "",
+        "AspectRatio": 0.9919100893474309,
+        "TickDir": "out"
+    },
+    "Text": {
+        "Font": "Avenir",
+        "FontSize": 11.0
+    },
+    "Scale": {
+        "Direction": "none",
+        "Location": "northeast",
+        "Length": None,
+        "OverlayColor": "#ffffff"
+    },
+    "Markers": {
+        "Symbol": "circle",
+        "Size": 6,
+        "Alpha": 30
+    },
+    "Lines": {
+        "LineWidth": 1.5,
+        "Multiplier": 1,
+        "Color": "#1c75bc"
+    },
+    "Colors": {
+        "Color": "#1c75bc",
+        "ColorByField": "Analyte",
+        "Field": "Li7",
+        "Colormap": "plasma",
+        "Reverse": False,
+        "CLim": [-0.00144, 66.7],
+        "CScale": "linear",
+        "Direction": "vertical",
+        "CLabel": "$^{7}$Li (ppm)",
+        "Resolution": 10
+    }
+}
+    */
 function updateAxisAndLabelsBlock(block, style) {
     // Update X, Y, and Z Labels
     block.setFieldValue(style['Axes']['XLabel'], 'xLabel');
@@ -88,6 +288,9 @@ function updateAxisAndLabelsBlock(block, style) {
 
     // Update tick direction
     block.setFieldValue(style['Axes']['TickDir'], 'tickDirectionDropdown');
+
+    // Update aspect Ratio
+    block.setFieldValue(style['Axes']['AspectRatio'], 'aspectRatio');
     
     // Render the updated block
     block.render();
@@ -117,7 +320,8 @@ function updateMarksAndLinesBlock(block, style) {
     block.setFieldValue(style['Markers']['Alpha'], 'transparency');
     block.setFieldValue(style['Lines']['LineWidth'], 'lineWidth');
     
-    // Update Line Color
+    // Update Line Color and symbol Color
+    block.setFieldValue(style['Lines']['Color'], 'lineColor');
     block.setFieldValue(style['Lines']['Color'], 'lineColor');
     
     // Render the updated block
@@ -135,6 +339,8 @@ function updateColoringBlock(block, style) {
     // Update the Cbar label and direction
     block.setFieldValue(style['Colors']['CLabel'], 'cBarLabel');
     block.setFieldValue(style['Colors']['Direction'], 'cBarDirection');
+
+    block.setFieldValue(style['Colors']['CScale'], 'cScale');
     
     // Render the updated block
     block.render();

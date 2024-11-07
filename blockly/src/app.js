@@ -84,5 +84,12 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
             }
         });
     workspace.addChangeListener(sendCodeToPython);
+    
 });
 
+function resizeBlocklyWorkspace() {
+    const blocklyDiv = document.getElementById('blocklyDiv');
+    Blockly.svgResize(window.workspace);
+}
+
+resizeBlocklyWorkspace();

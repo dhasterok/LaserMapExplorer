@@ -46,8 +46,8 @@ pythonGenerator.forBlock['plot'] = function(block, generator) {
     var styleCode = generator.valueToCode(block, 'style', Order.NONE);
     if (styleCode && styleCode !== '{}') {
         code += `
-self.parent.styles[${plot_type}] = {**self.parent.styles[${plot_type}], **${styleCode}}
-self.parent.styling.set_style_widgets(${plot_type})
+self.parent.style.style_dict[${plot_type}] = {**self.parent.style.style_dict[${plot_type}], **${styleCode}}
+self.parent.style.set_style_widgets(${plot_type})
 `;
     }
 

@@ -2,7 +2,7 @@
  * Helper Functions
  ******************************/
 import * as Blockly from 'blockly/core';
-import { sample_ids, updateSampleIds } from './globals';
+import { sample_ids, updateSampleIds, spot_data } from './globals';
 import {enableSampleIDsBlockFunction} from './custom_blocks'
 // Function: Update Sample Dropdown with IDs
 function updateSampleDropdown(sampleIds) {
@@ -68,150 +68,404 @@ export function dynamicStyleUpdate(plotType, connectedBlocks) {
 
 // Function to update fields based on plot type in style blocks
 function updateFieldsBasedOnPlotType(plotType, block) {
-    // Reset all fields to default visibility and enabled state
-    block.getField('xLabel').setEnabled(true);
-    block.getField('xLimMin').setEnabled(true);
-    block.getField('xScaleDropdown').setEnabled(true);
-    block.getField('yLabel').setEnabled(true);
-    block.getField('yLimMin').setEnabled(true);
-    block.getField('yScaleDropdown').setEnabled(true);
-    block.getField('zLabel').setEnabled(true);
-    block.getField('aspectRatio').setEnabled(true);
-    block.getField('tickDirectionDropdown').setEnabled(true);
-    
-    // Adjust fields based on plot type
     switch (plotType) {
-        case 'analyte map':
+        case 'analyte map' | 'gradient map':
                 // Reset all fields to default visibility and enabled state
-            block.getField('xLabel').setEnabled(true);
-            block.getField('xLimMin').setEnabled(true);
-            block.getField('xScaleDropdown').setEnabled(true);
-            block.getField('yLabel').setEnabled(true);
-            block.getField('yLimMin').setEnabled(true);
-            block.getField('yScaleDropdown').setEnabled(true);
-            block.getField('zLabel').setEnabled(true);
-            block.getField('aspectRatio').setEnabled(true);
-            block.getField('tickDirectionDropdown').setEnabled(true);
-        case 'gradient map':
-            // Axes properties
-            block.getField('xLabel').setEnabled(false);
-            block.getField('xLimMin').setEnabled(true);
-            block.getField('xScaleDropdown').setEnabled(false);
-            block.getField('yLabel').setEnabled(false);
-            block.getField('yLimMin').setEnabled(true);
-            block.getField('yScaleDropdown').setEnabled(false);
-            block.getField('zLabel').setEnabled(false);
-            block.getField('aspectRatio').setEnabled(false);
-            block.getField('tickDirectionDropdown').setEnabled(false);
-            // Scalebar properties
-            block.getField('scaleDirection').setEnabled(true);
-            block.getField('scaleLocation').setEnabled(true);
-            block.getField('scaleLength').setEnabled(true);
-            block.getField('overlayColor').setEnabled(true);
-            // Marker properties
-            block.getField('symbol').setEnabled(true);
-            block.getField('size').setEnabled(true);
-            block.getField('transparency').setEnabled(true);
-            block.getField('symbolColor').setEnabled(true);
-            // Line properties
-            block.getField('lineWidth').setEnabled(true);
-            block.getField('lineColor').setEnabled(true);
-            block.getField('lengthMultiplier').setEnabled(false);
-            // Color properties
-            block.getField('colorByField').setEnabled(true);
-            block.getField('field').setEnabled(true);
-            block.getField('colormap').setEnabled(true);
-            block.getField('cLimMin').setEnabled(true);
-            block.getField('cLimMax').setEnabled(true);
-            block.getField('cScale').setEnabled(true);
-            block.getField('cBarDirection').setEnabled(true);
-            block.getField('cBarLabel').setEnabled(true);
-            block.getField('resolution').setEnabled(false);
-            break;
+            switch (block.type){
+                case 'axisAndLabels':
+                    block.getField('xLabel').setVisible(false);
+                    block.getField('xLimMin').setVisible(true);
+                    block.getField('xLimMax').setVisible(true);
+                    block.getField('xScaleDropdown').setVisible(false);
+                    block.getField('yLabel').setVisible(false);
+                    block.getField('yLimMin').setVisible(true);
+                    block.getField('yLimMax').setVisible(true);
+                    block.getField('yScaleDropdown').setVisible(false);
+                    block.getField('zLabel').setVisible(false);
+                    block.getField('aspectRatio').setVisible(false);
+                    block.getField('tickDirectionDropdown').setVisible(false);
+                    block.render();
+                    break;
+                case 'annotAndScale':
+                    block.getField('scaleDirection').setVisible(true);
+                    block.getField('scaleLocation').setVisible(true);
+                    block.getField('scaleLength').setVisible(true);
+                    block.getField('overlayColor').setVisible(true);
+                    // font 
+                    block.getField('font').setVisible(true);
+                    block.getField('fontSize').setVisible(true);
+                    block.getField('showMass').setVisible(true);
+                    break;
+                case 'marksAndLines':
+                    if (spot_data){
+                        block.getField('symbol').setVisible(true);
+                        block.getField('size').setVisible(true);
+                        block.getField('symbolColor').setVisible(true);
+                        block.getField('transparency').setVisible(true);
+                    }
+                    else{
+                        block.getField('symbol').setVisible(false);
+                        block.getField('size').setVisible(false);
+                        block.getField('symbolColor').setVisible(false);
+                        block.getField('transparency').setVisible(false);
+                    }
 
-        case 'correlation':
-        case 'vectors':
-            // Axes properties
-            block.getField('xLabel').setEnabled(false);
-            block.getField('xLimMin').setEnabled(false);
-            block.getField('xScaleDropdown').setEnabled(false);
-            block.getField('yLabel').setEnabled(false);
-            block.getField('yLimMin').setEnabled(false);
-            block.getField('yScaleDropdown').setEnabled(false);
-            block.getField('zLabel').setEnabled(false);
-            block.getField('aspectRatio').setEnabled(false);
-            block.getField('tickDirectionDropdown').setEnabled(true);
-            // Scalebar properties
-            block.getField('scaleDirection').setEnabled(false);
-            block.getField('scaleLocation').setEnabled(false);
-            block.getField('scaleLength').setEnabled(false);
-            block.getField('overlayColor').setEnabled(false);
-            // Marker properties
-            block.getField('symbol').setEnabled(false);
-            block.getField('size').setEnabled(false);
-            block.getField('transparency').setEnabled(false);
-            block.getField('symbolColor').setEnabled(false);
-            // Line properties
-            block.getField('lineWidth').setEnabled(false);
-            block.getField('lineColor').setEnabled(false);
-            block.getField('lengthMultiplier').setEnabled(false);
-            // Color properties
-            block.getField('colormap').setEnabled(true);
-            block.getField('cScale').setEnabled(false);
-            block.getField('cLimMin').setEnabled(true);
-            block.getField('cLimMax').setEnabled(true);
-            block.getField('cBarDirection').setEnabled(true);
-            block.getField('cBarLabel').setEnabled(false);
-            block.getField('colorByField').setEnabled(plotType === 'correlation');
-            block.getField('field').setEnabled(block.getField('colorByField').getValue() === 'cluster');
-            block.getField('resolution').setEnabled(false);
-            break;
+                    // Line properties
+                    block.getField('lineWidth').setVisible(true);
+                    block.getField('lineColor').setVisible(true);
+                    block.getField('lengthMultiplier').setVisible(false);
+                    break;
+                case 'coloring':
+                    // Color properties
+                    block.getField('colorByField').setVisible(true);
+                    block.getField('field').setVisible(true);
+                    block.getField('resolution').setVisible(false);
+                    block.getField('colormap').setVisible(true);
+                    block.getField('reverse').setVisible(true);
+                    block.getField('cScale').setVisible(true);
+                    block.getField('cLimMin').setVisible(true);
+                    block.getField('cLimMax').setVisible(true);
+                    block.getField('cBarLabel').setVisible(true);
+                    block.getField('cBarDirection').setVisible(true);
+                    break;
+            };
+        case 'correlation' | 'vectors':
+            switch (block.type){
+                case 'axisAndLabels':
+                    block.getField('xLabel').setVisible(false);
+                    block.getField('xLimMin').setVisible(false);
+                    block.getField('xLimMax').setVisible(false);
+                    block.getField('xScaleDropdown').setVisible(false);
+                    block.getField('yLabel').setVisible(false);
+                    block.getField('yLimMin').setVisible(false);
+                    block.getField('yLimMax').setVisible(false);
+                    block.getField('yScaleDropdown').setVisible(false);
+                    block.getField('zLabel').setVisible(false);
+                    block.getField('aspectRatio').setVisible(false);
+                    block.getField('tickDirectionDropdown').setVisible(true);
+                    block.render();
+                    break;
+                case 'annotAndScale':
+                    block.getField('scaleDirection').setVisible(false);
+                    block.getField('scaleLocation').setVisible(false);
+                    block.getField('scaleLength').setVisible(false);
+                    block.getField('overlayColor').setVisible(false);
+                    // font 
+                    block.getField('font').setVisible(true);
+                    block.getField('fontSize').setVisible(true);
+                    block.getField('showMass').setVisible(true);
+                    break;
+                case 'marksAndLines':
+                    block.getField('symbol').setVisible(false);
+                    block.getField('size').setVisible(false);
+                    block.getField('symbolColor').setVisible(false);
+                    block.getField('transparency').setVisible(false);
+                    // Line properties
+                    block.getField('lineWidth').setVisible(false);
+                    block.getField('lineColor').setVisible(false);
+                    block.getField('lengthMultiplier').setVisible(false);
+                    break;
+                case 'coloring':
+                    // Color properties
+                    if (plotType ==='correlation'){
+                        block.getField('colorByField').setVisible(true);
+                        if (block.getFieldValue('colorByField') == 'cluster'){
+                            block.getField('field').setVisible(true);
+                        }
+                        else{
+                            block.getField('field').setVisible(false);
+                        }
+                    }
+                    else {
+                        block.getField('colorByField').setVisible(false);
+                        block.getField('field').setVisible(false);
+                    }
+                    block.getField('colorByField').setVisible(true);
+                    block.getField('field').setVisible(false);
+                    block.getField('resolution').setVisible(false);
+                    block.getField('colormap').setVisible(true);
+                    block.getField('reverse').setVisible(true);
+                    block.getField('cScale').setVisible(false);
+                    block.getField('cLimMin').setVisible(true);
+                    block.getField('cLimMax').setVisible(true);
+                    block.getField('cBarLabel').setVisible(false);
+                    block.getField('cBarDirection').setVisible(true);
+                    break;
+            }
+        case 'histogram':
+            switch (block.type){
+                case 'axisAndLabels':
+                    block.getField('xLabel').setVisible(true);
+                    block.getField('xLimMin').setVisible(true);
+                    block.getField('xLimMax').setVisible(true);
+                    block.getField('xScaleDropdown').setVisible(true);
+                    block.getField('yLabel').setVisible(true);
+                    block.getField('yLimMin').setVisible(true);
+                    block.getField('yLimMax').setVisible(true);
+                    block.getField('yScaleDropdown').setVisible(false);
+                    block.getField('zLabel').setVisible(false);
+                    block.getField('aspectRatio').setVisible(true);
+                    block.getField('tickDirectionDropdown').setVisible(true);
+                    block.render();
+                    break;
+                case 'annotAndScale':
+                    block.getField('scaleDirection').setVisible(false);
+                    block.getField('scaleLocation').setVisible(false);
+                    block.getField('scaleLength').setVisible(false);
+                    block.getField('overlayColor').setVisible(false);
+                    // font 
+                    block.getField('font').setVisible(true);
+                    block.getField('fontSize').setVisible(true);
+                    block.getField('showMass').setVisible(true);
+                    break;
+                case 'marksAndLines':
+                    block.getField('symbol').setVisible(false);
+                    block.getField('size').setVisible(false);
+                    
+                    block.getField('transparency').setVisible(true);
+                    // Line properties
+                    block.getField('lineWidth').setVisible(true);
+                    block.getField('lineColor').setVisible(true);
+                    block.getField('lengthMultiplier').setVisible(false);
+                    break;
+                case 'coloring':
+                    // Color properties
+                    block.getField('colorByField').setVisible(true);
+                    if (block.getFieldValue('colorByField') == 'none'){
+                        block.getField('field').setVisible(false);
+                        block.getField('cBarDirection').setVisible(false);
+                        block.getField('symbolColor').setVisible(false);
+                    }
+                    else{
+                        block.getField('field').setVisible(true);
+                        block.getField('cBarDirection').setVisible(true);
+                        block.getField('symbolColor').setVisible(true);
+                    }
+                    block.getField('field').setVisible(false);
+                    block.getField('resolution').setVisible(false);
+                    block.getField('colormap').setVisible(false);
+                    block.getField('reverse').setVisible(false);
+                    block.getField('cScale').setVisible(false);
+                    block.getField('cLimMin').setVisible(false);
+                    block.getField('cLimMax').setVisible(false);
+                    block.getField('cBarLabel').setVisible(false);
+                    block.getField('cBarDirection').setVisible(false);
+                    break;
+            }
+        case 'scatter' | 'PCA scatter':
+            switch (block.type){
+                case 'axisAndLabels':
+                    if (plotType ==='scatter'){
+                        block.getField('xLabel').setVisible(true);
+                        block.getField('xLimMin').setVisible(true);
+                        block.getField('xLimMax').setVisible(true);
+                        block.getField('xScaleDropdown').setVisible(true);
+                        block.getField('yLabel').setVisible(true);
+                        block.getField('yLimMin').setVisible(true);
+                        block.getField('yLimMax').setVisible(true);
+                        block.getField('yScaleDropdown').setVisible(true);
+                    }
+                    else{
+                        block.getField('xLabel').setVisible(true);
+                        block.getField('xLimMin').setVisible(false);
+                        block.getField('xLimMax').setVisible(false);
+                        block.getField('xScaleDropdown').setVisible(false);
+                        block.getField('yLabel').setVisible(true);
+                        block.getField('yLimMin').setVisible(false);
+                        block.getField('yLimMax').setVisible(false);
+                        block.getField('yScaleDropdown').setVisible(false);
+                    }
+                    block.getField('zLabel').setVisible(false);
+                    block.getField('aspectRatio').setVisible(false);
+                    block.getField('tickDirectionDropdown').setVisible(false);
+                    block.render();
+                    break;
+                case 'annotAndScale':
+                    block.getField('scaleDirection').setVisible(true);
+                    block.getField('scaleLocation').setVisible(true);
+                    block.getField('scaleLength').setVisible(true);
+                    block.getField('overlayColor').setVisible(true);
+                    // font 
+                    block.getField('font').setVisible(true);
+                    block.getField('fontSize').setVisible(true);
+                    block.getField('showMass').setVisible(true);
+                    break;
+                case 'marksAndLines':
+                    block.getField('symbol').setVisible(false);
+                    block.getField('size').setVisible(false);
+                    block.getField('symbolColor').setVisible(false);
+                    block.getField('transparency').setVisible(false);
+                    // Line properties
+                    block.getField('lineWidth').setVisible(true);
+                    block.getField('lineColor').setVisible(true);
+                    block.getField('lengthMultiplier').setVisible(false);
+                    break;
+                case 'coloring':
+                    // Color properties
+                    block.getField('colorByField').setVisible(true);
+                    block.getField('field').setVisible(true);
+                    block.getField('resolution').setVisible(false);
+                    block.getField('colormap').setVisible(true);
+                    block.getField('reverse').setVisible(true);
+                    block.getField('cScale').setVisible(true);
+                    block.getField('cLimMin').setVisible(true);
+                    block.getField('cLimMax').setVisible(true);
+                    block.getField('cBarLabel').setVisible(true);
+                    block.getField('cBarDirection').setVisible(true);
+                    break;
+            }
 
         case 'histogram':
-            // Axes properties
-            block.getField('xLabel').setEnabled(true);
-            block.getField('xLimMin').setEnabled(true);
-            block.getField('xScaleDropdown').setEnabled(true);
-            block.getField('yLabel').setEnabled(true);
-            block.getField('yLimMin').setEnabled(true);
-            block.getField('yScaleDropdown').setEnabled(false);
-            block.getField('zLabel').setEnabled(false);
-            block.getField('aspectRatio').setEnabled(true);
-            block.getField('tickDirectionDropdown').setEnabled(true);
-            // Scalebar properties
-            block.getField('scaleDirection').setEnabled(false);
-            block.getField('scaleLocation').setEnabled(false);
-            block.getField('scaleLength').setEnabled(false);
-            block.getField('overlayColor').setEnabled(false);
-            // Marker properties
-            block.getField('symbol').setEnabled(false);
-            block.getField('size').setEnabled(false);
-            block.getField('transparency').setEnabled(true);
-            // Line properties
-            block.getField('lineWidth').setEnabled(true);
-            block.getField('lineColor').setEnabled(true);
-            block.getField('lengthMultiplier').setEnabled(false);
-            // Color properties
-            block.getField('colorByField').setEnabled(true);
-            block.getField('colormap').setEnabled(false);
-            block.getField('cBarDirection').setEnabled(block.getField('colorByField').getValue() !== 'none');
-            block.getField('field').setEnabled(block.getField('colorByField').getValue() !== 'none');
-            block.getField('symbolColor').setEnabled(block.getField('colorByField').getValue() === 'none');
-            break;
+            switch (block.type){
+                case 'axisAndLabels':
+                    block.getField('xLabel').setVisible(false);
+                    block.getField('xLimMin').setVisible(true);
+                    block.getField('xLimMax').setVisible(true);
+                    block.getField('xScaleDropdown').setVisible(false);
+                    block.getField('yLabel').setVisible(false);
+                    block.getField('yLimMin').setVisible(true);
+                    block.getField('yLimMax').setVisible(true);
+                    block.getField('yScaleDropdown').setVisible(false);
+                    block.getField('zLabel').setVisible(false);
+                    block.getField('aspectRatio').setVisible(false);
+                    block.getField('tickDirectionDropdown').setVisible(false);
+                    block.render();
+                    break;
+                case 'annotAndScale':
+                    block.getField('scaleDirection').setVisible(true);
+                    block.getField('scaleLocation').setVisible(true);
+                    block.getField('scaleLength').setVisible(true);
+                    block.getField('overlayColor').setVisible(true);
+                    // font 
+                    block.getField('font').setVisible(true);
+                    block.getField('fontSize').setVisible(true);
+                    block.getField('showMass').setVisible(true);
+                    break;
+                case 'marksAndLines':
+                    block.getField('symbol').setVisible(false);
+                    block.getField('size').setVisible(false);
+                    block.getField('symbolColor').setVisible(false);
+                    block.getField('transparency').setVisible(false);
+                    // Line properties
+                    block.getField('lineWidth').setVisible(true);
+                    block.getField('lineColor').setVisible(true);
+                    block.getField('lengthMultiplier').setVisible(false);
+                    break;
+                case 'coloring':
+                    // Color properties
+                    block.getField('colorByField').setVisible(true);
+                    block.getField('field').setVisible(true);
+                    block.getField('resolution').setVisible(false);
+                    block.getField('colormap').setVisible(true);
+                    block.getField('reverse').setVisible(true);
+                    block.getField('cScale').setVisible(true);
+                    block.getField('cLimMin').setVisible(true);
+                    block.getField('cLimMax').setVisible(true);
+                    block.getField('cBarLabel').setVisible(true);
+                    block.getField('cBarDirection').setVisible(true);
+                    break;
+            }
 
         case 'scatter':
+            switch (block.type){
+                case 'axisAndLabels':
+                    block.getField('xLabel').setVisible(false);
+                    block.getField('xLimMin').setVisible(true);
+                    block.getField('xLimMax').setVisible(true);
+                    block.getField('xScaleDropdown').setVisible(false);
+                    block.getField('yLabel').setVisible(false);
+                    block.getField('yLimMin').setVisible(true);
+                    block.getField('yLimMax').setVisible(true);
+                    block.getField('yScaleDropdown').setVisible(false);
+                    block.getField('zLabel').setVisible(false);
+                    block.getField('aspectRatio').setVisible(false);
+                    block.getField('tickDirectionDropdown').setVisible(false);
+                    block.render();
+                    break;
+                case 'annotAndScale':
+                    block.getField('scaleDirection').setVisible(true);
+                    block.getField('scaleLocation').setVisible(true);
+                    block.getField('scaleLength').setVisible(true);
+                    block.getField('overlayColor').setVisible(true);
+                    // font 
+                    block.getField('font').setVisible(true);
+                    block.getField('fontSize').setVisible(true);
+                    block.getField('showMass').setVisible(true);
+                    break;
+                case 'marksAndLines':
+                    block.getField('symbol').setVisible(false);
+                    block.getField('size').setVisible(false);
+                    block.getField('symbolColor').setVisible(false);
+                    block.getField('transparency').setVisible(false);
+                    // Line properties
+                    block.getField('lineWidth').setVisible(true);
+                    block.getField('lineColor').setVisible(true);
+                    block.getField('lengthMultiplier').setVisible(false);
+                    break;
+                case 'coloring':
+                    // Color properties
+                    block.getField('colorByField').setVisible(true);
+                    block.getField('field').setVisible(true);
+                    block.getField('resolution').setVisible(false);
+                    block.getField('colormap').setVisible(true);
+                    block.getField('reverse').setVisible(true);
+                    block.getField('cScale').setVisible(true);
+                    block.getField('cLimMin').setVisible(true);
+                    block.getField('cLimMax').setVisible(true);
+                    block.getField('cBarLabel').setVisible(true);
+                    block.getField('cBarDirection').setVisible(true);
+                    break;
+            }
         case 'pca scatter':
-            // Axes properties
-            const isScatter = block.getField('zLabel').getValue() === '';
-            block.getField('xLimMin').setEnabled(isScatter);
-            block.getField('xScaleDropdown').setEnabled(isScatter);
-            block.getField('yLimMin').setEnabled(isScatter);
-            block.getField('yScaleDropdown').setEnabled(isScatter);
-            block.getField('zLabel').setEnabled(!isScatter);
-            // Other properties similar to Python code logic...
-            break;
-
-        // Add additional cases for each plot type as needed
+            switch (block.type){
+                case 'axisAndLabels':
+                    block.getField('xLabel').setVisible(false);
+                    block.getField('xLimMin').setVisible(true);
+                    block.getField('xLimMax').setVisible(true);
+                    block.getField('xScaleDropdown').setVisible(false);
+                    block.getField('yLabel').setVisible(false);
+                    block.getField('yLimMin').setVisible(true);
+                    block.getField('yLimMax').setVisible(true);
+                    block.getField('yScaleDropdown').setVisible(false);
+                    block.getField('zLabel').setVisible(false);
+                    block.getField('aspectRatio').setVisible(false);
+                    block.getField('tickDirectionDropdown').setVisible(false);
+                    block.render();
+                    break;
+                case 'annotAndScale':
+                    block.getField('scaleDirection').setVisible(true);
+                    block.getField('scaleLocation').setVisible(true);
+                    block.getField('scaleLength').setVisible(true);
+                    block.getField('overlayColor').setVisible(true);
+                    // font 
+                    block.getField('font').setVisible(true);
+                    block.getField('fontSize').setVisible(true);
+                    block.getField('showMass').setVisible(true);
+                    break;
+                case 'marksAndLines':
+                    block.getField('symbol').setVisible(false);
+                    block.getField('size').setVisible(false);
+                    block.getField('symbolColor').setVisible(false);
+                    block.getField('transparency').setVisible(false);
+                    // Line properties
+                    block.getField('lineWidth').setVisible(true);
+                    block.getField('lineColor').setVisible(true);
+                    block.getField('lengthMultiplier').setVisible(false);
+                    break;
+                case 'coloring':
+                    // Color properties
+                    block.getField('colorByField').setVisible(true);
+                    block.getField('field').setVisible(true);
+                    block.getField('resolution').setVisible(false);
+                    block.getField('colormap').setVisible(true);
+                    block.getField('reverse').setVisible(true);
+                    block.getField('cScale').setVisible(true);
+                    block.getField('cLimMin').setVisible(true);
+                    block.getField('cLimMax').setVisible(true);
+                    block.getField('cBarLabel').setVisible(true);
+                    block.getField('cBarDirection').setVisible(true);
+                    break;
+            }
 
         default:
             // Default settings if plot type doesn't match any case
@@ -269,28 +523,54 @@ style = {
         "Resolution": 10
     }
 }
+
+'XLim':
+[1, 738]
+'XScale':
+'linear'
+'XLabel':
+'X'
+'YLim':
+[1, 106]
+'YScale':
+'linear'
+'YLabel':
+'Y'
+'ZLabel':
+''
+'AspectRatio':
+0.9919100893474309
+'TickDir':
+'out'
+'Font':
+'Avenir'
+'FontSize':
+11.0
+'ScaleDir':
+'none'
+
     */
 function updateAxisAndLabelsBlock(block, style) {
     // Update X, Y, and Z Labels
-    block.setFieldValue(style['Axes']['XLabel'], 'xLabel');
-    block.setFieldValue(style['Axes']['YLabel'], 'yLabel');
-    block.setFieldValue(style['Axes']['ZLabel'], 'zLabel');
+    block.setFieldValue(style['XLabel'], 'xLabel');
+    block.setFieldValue(style['YLabel'], 'yLabel');
+    block.setFieldValue(style['ZLabel'], 'zLabel');
     
     // Update X and Y Limits
-    block.setFieldValue(style['Axes']['XLim'][0], 'xLimMin');
-    block.setFieldValue(style['Axes']['XLim'][1], 'xLimMax');
-    block.setFieldValue(style['Axes']['YLim'][0], 'yLimMin');
-    block.setFieldValue(style['Axes']['YLim'][1], 'yLimMax');
+    block.setFieldValue(style['XLim'][0], 'xLimMin');
+    block.setFieldValue(style['XLim'][1], 'xLimMax');
+    block.setFieldValue(style['YLim'][0], 'yLimMin');
+    block.setFieldValue(style['YLim'][1], 'yLimMax');
     
     // Update X and Y Scales
-    block.setFieldValue(style['Axes']['XScale'], 'xScaleDropdown');
-    block.setFieldValue(style['Axes']['YScale'], 'yScaleDropdown');
+    block.setFieldValue(style['XScale'], 'xScaleDropdown');
+    block.setFieldValue(style['YScale'], 'yScaleDropdown');
 
     // Update tick direction
-    block.setFieldValue(style['Axes']['TickDir'], 'tickDirectionDropdown');
+    block.setFieldValue(style['TickDir'], 'tickDirectionDropdown');
 
     // Update aspect Ratio
-    block.setFieldValue(style['Axes']['AspectRatio'], 'aspectRatio');
+    block.setFieldValue(style['AspectRatio'], 'aspectRatio');
     
     // Render the updated block
     block.render();
@@ -298,31 +578,31 @@ function updateAxisAndLabelsBlock(block, style) {
 
 function updateAnnotAndScaleBlock(block, style) {
     // Update Scale direction and location
-    block.setFieldValue(style['Scale']['Direction'], 'scaleDirection');
-    block.setFieldValue(style['Scale']['Location'], 'scaleLocation');
+    block.setFieldValue(style['ScaleDir'], 'scaleDirection');
+    block.setFieldValue(style['ScaleLocation'], 'scaleLocation');
     
     // Update Scale length and overlay color
-    if (style['Scale']['Length'] !== null) {
-        block.setFieldValue(style['Scale']['Length'], 'scaleLength');
-    }
-    block.setFieldValue(style['Scale']['OverlayColor'], 'overlayColor');
+    block.setFieldValue(style['ScaleLength'], 'scaleLength');
+
+    block.setFieldValue(style['OverlayColor'], 'overlayColor');
     
     // Render the updated block
     block.render();
 }
 
 function updateMarksAndLinesBlock(block, style) {
-    // Update Symbol and Size
-    block.setFieldValue(style['Markers']['Symbol'], 'symbol');
-    block.setFieldValue(style['Markers']['Size'], 'size');
-    
+    // Update Marker Symbol and Size and transparency
+    block.setFieldValue(style['Marker'], 'symbol');
+    block.setFieldValue(style['MarkerSize'], 'size');
+    block.setFieldValue(style['MarkerColor'], 'symbolColor');
+    block.setFieldValue(style['MarkerAlpha'], 'transparency');
     // Update Transparency and Line Width
-    block.setFieldValue(style['Markers']['Alpha'], 'transparency');
-    block.setFieldValue(style['Lines']['LineWidth'], 'lineWidth');
+    
+    block.setFieldValue(style['LineWidth'], 'lineWidth');
     
     // Update Line Color and symbol Color
-    block.setFieldValue(style['Lines']['Color'], 'lineColor');
-    block.setFieldValue(style['Lines']['Color'], 'lineColor');
+    block.setFieldValue(style['LineColor'], 'lineColor');
+    block.setFieldValue(style['Multiplier'], 'lengthMultiplier');
     
     // Render the updated block
     block.render();
@@ -330,17 +610,19 @@ function updateMarksAndLinesBlock(block, style) {
 
 function updateColoringBlock(block, style) {
     // Update Colormap, Scale, and CLim
-    block.setFieldValue(style['Colors']['Colormap'], 'colormap');
-    block.setFieldValue(style['Colors']['CScale'], 'scale');
+    block.setFieldValue(style['Colormap'], 'colormap');
+    block.setFieldValue(style['CScale'], 'cScale');
     
-    block.setFieldValue(style['Colors']['CLim'][0], 'cLimMin');
-    block.setFieldValue(style['Colors']['CLim'][1], 'cLimMax');
+    block.setFieldValue(style['CLim'][0], 'cLimMin');
+    block.setFieldValue(style['CLim'][1], 'cLimMax');
     
     // Update the Cbar label and direction
-    block.setFieldValue(style['Colors']['CLabel'], 'cBarLabel');
-    block.setFieldValue(style['Colors']['Direction'], 'cBarDirection');
+    block.setFieldValue(style['CLabel'], 'cBarLabel');
+    block.setFieldValue(style['CbarDir'], 'cBarDirection');
 
-    block.setFieldValue(style['Colors']['CScale'], 'cScale');
+    block.setFieldValue(style['Resolution'], 'resolution');
+
+    block.setFieldValue(style['CbarReverse'], 'reverse');
     
     // Render the updated block
     block.render();

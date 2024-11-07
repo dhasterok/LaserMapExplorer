@@ -1,5 +1,6 @@
 
 export let sample_ids = [];  // Declare and export the global variable
+export let spot_data = false;  // Declare and export the global variable
 
 export function updateSampleIds(newIds) {
     sample_ids.length = 0;  // Clear the array

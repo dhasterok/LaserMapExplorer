@@ -51,7 +51,25 @@ class BlocklyBridge(QObject):
     def getFieldList(self, analyte_type):
         print('get_field_list')
         return self.parent.parent.get_field_list(analyte_type)
+    
+    @pyqtSlot(result=str)
+    def getBaseDir(self):
+        return self.parent.parent.BASEDIR
+    
+    @pyqtSlot(result=list)
+    def getAnalyteList(self):
+        directory = os.path.join(self.parent.parent.BASEDIR, 'resources/analytes list')
+        # List all .txt files in the directory
+        print('analyte_list')
+        txt_files = [str(f).replace('.txt','') for f in os.listdir(directory) if f.endswith('.txt')]
+        return txt_files
 
+    @pyqtSlot()
+    def refreshAnalyteDropdown(self):
+        """Fetches the list of analytes and sends it to JavaScript to refresh the dropdown."""
+        analyte_list = self.getAnalyteList()
+        analyte_list_js_array = json.dumps(analyte_list)  # Convert to JSON for JavaScript
+        self.parent.web_view.page().runJavaScript(f"updateAnalyteDropdown({analyte_list_js_array})")
 
     def convert_numpy_types(self, obj):
         """ Recursively convert NumPy types to Python native types. """

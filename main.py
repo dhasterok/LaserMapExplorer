@@ -230,7 +230,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         #Initialize nested data which will hold the main sets of data for analysis
         self.data = {}
-
+        self.BASEDIR = BASEDIR
         self.clipped_ratio_data = pd.DataFrame()
         self.analyte_data = {}  #stores orginal analyte data
         self.clipped_analyte_data = {} # stores processed analyted data

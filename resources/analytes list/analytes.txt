@@ -1,0 +1,39 @@
+Li7,linear
+Mg24,linear
+Al27,linear
+P31,linear
+Ca43,linear
+Ti49,linear
+Cr53,linear
+Mn55,linear
+Fe57,linear
+Y89,linear
+Zr91,linear
+La139,linear
+Ce140,linear
+Pr141,linear
+Nd146,linear
+Sm147,linear
+Eu153,linear
+Gd157,linear
+Tb159,linear
+Dy163,linear
+Ho165,linear
+Er166,linear
+Tm169,linear
+Yb172,linear
+Lu175,linear
+Pb208,linear
+Th232,linear
+U238,linear
+Cr53 / P31,linear
+Ca43 / Y89,linear
+Mg24 / Cr53,linear
+P31 / Li7,linear
+Ti49 / Mg24,linear
+Mg24 / Ca43,linear
+Pr141 / Cr53,linear
+Mg24 / Zr91,linear
+Dy163 / Y89,linear
+Dy163 / Mn55,linear
+Y89 / Nd146,linear

@@ -4,6 +4,7 @@
 import * as Blockly from 'blockly/core';
 import { sample_ids, updateSampleIds, spot_data } from './globals';
 import {enableSampleIDsBlockFunction} from './custom_blocks'
+
 // Function: Update Sample Dropdown with IDs
 function updateSampleDropdown(sampleIds) {
     // Step 1: Store sample IDs in the global variable
@@ -30,6 +31,24 @@ function updateSampleDropdown(sampleIds) {
 }
 window.updateSampleDropdown = updateSampleDropdown;
 
+function updateAnalyteDropdown(analyteList) {
+    const dropdownOptions = analyteList.map(id => [id, id]);  // Convert sample IDs to dropdown format
+
+    // Iterate through all blocks and update the 'select_samples' block dropdown
+    Blockly.getMainWorkspace().getAllBlocks().forEach(function(block) {
+        if (block.type === 'select_analytes') {
+            const dropdownField = block.getField('ANALYTELISTDROPDOWN');
+            if (dropdownField) {
+                // Update the dropdown options dynamically
+                dropdownField.menuGenerator_ = dropdownOptions;
+                dropdownField.setValue(analyteList.length ? analyteList[0] : 'NONE');  // Set default value
+                block.render();  // Re-render the block to reflect the changes
+            }
+        }
+    });
+}
+
+window.updateAnalyteDropdown = updateAnalyteDropdown;
 
 // Function to dynamically update connected style blocks
 export function dynamicStyleUpdate(plotType, connectedBlocks) {
@@ -48,13 +67,13 @@ export function dynamicStyleUpdate(plotType, connectedBlocks) {
                     case 'styles':
                         updateStylesBlock(block, style);
                         break;
-                    case 'axisAndLabels':
+                    case 'axis_and_labels':
                         updateAxisAndLabelsBlock(block, style);
                         break;
-                    case 'annotAndScale':
+                    case 'annot_and_scale':
                         updateAnnotAndScaleBlock(block, style);
                         break;
-                    case 'marksAndLines':
+                    case 'marks_and_lines':
                         updateMarksAndLinesBlock(block, style);
                         break;
                     case 'coloring':
@@ -86,7 +105,7 @@ function updateFieldsBasedOnPlotType(plotType, block) {
                     block.getField('tickDirectionDropdown').setVisible(false);
                     block.render();
                     break;
-                case 'annotAndScale':
+                case 'annot_and_scale':
                     block.getField('scaleDirection').setVisible(true);
                     block.getField('scaleLocation').setVisible(true);
                     block.getField('scaleLength').setVisible(true);
@@ -96,7 +115,7 @@ function updateFieldsBasedOnPlotType(plotType, block) {
                     block.getField('fontSize').setVisible(true);
                     block.getField('showMass').setVisible(true);
                     break;
-                case 'marksAndLines':
+                case 'marks_and_lines':
                     if (spot_data){
                         block.getField('symbol').setVisible(true);
                         block.getField('size').setVisible(true);
@@ -131,7 +150,7 @@ function updateFieldsBasedOnPlotType(plotType, block) {
             };
         case 'correlation' | 'vectors':
             switch (block.type){
-                case 'axisAndLabels':
+                case 'axis_and_labels':
                     block.getField('xLabel').setVisible(false);
                     block.getField('xLimMin').setVisible(false);
                     block.getField('xLimMax').setVisible(false);
@@ -145,7 +164,7 @@ function updateFieldsBasedOnPlotType(plotType, block) {
                     block.getField('tickDirectionDropdown').setVisible(true);
                     block.render();
                     break;
-                case 'annotAndScale':
+                case 'annot_and_scale':
                     block.getField('scaleDirection').setVisible(false);
                     block.getField('scaleLocation').setVisible(false);
                     block.getField('scaleLength').setVisible(false);
@@ -155,7 +174,7 @@ function updateFieldsBasedOnPlotType(plotType, block) {
                     block.getField('fontSize').setVisible(true);
                     block.getField('showMass').setVisible(true);
                     break;
-                case 'marksAndLines':
+                case 'marks_and_lines':
                     block.getField('symbol').setVisible(false);
                     block.getField('size').setVisible(false);
                     block.getField('symbolColor').setVisible(false);
@@ -194,7 +213,7 @@ function updateFieldsBasedOnPlotType(plotType, block) {
             }
         case 'histogram':
             switch (block.type){
-                case 'axisAndLabels':
+                case 'axis_and_labels':
                     block.getField('xLabel').setVisible(true);
                     block.getField('xLimMin').setVisible(true);
                     block.getField('xLimMax').setVisible(true);
@@ -208,7 +227,7 @@ function updateFieldsBasedOnPlotType(plotType, block) {
                     block.getField('tickDirectionDropdown').setVisible(true);
                     block.render();
                     break;
-                case 'annotAndScale':
+                case 'annot_and_scale':
                     block.getField('scaleDirection').setVisible(false);
                     block.getField('scaleLocation').setVisible(false);
                     block.getField('scaleLength').setVisible(false);
@@ -218,7 +237,7 @@ function updateFieldsBasedOnPlotType(plotType, block) {
                     block.getField('fontSize').setVisible(true);
                     block.getField('showMass').setVisible(true);
                     break;
-                case 'marksAndLines':
+                case 'marks_and_lines':
                     block.getField('symbol').setVisible(false);
                     block.getField('size').setVisible(false);
                     
@@ -254,7 +273,7 @@ function updateFieldsBasedOnPlotType(plotType, block) {
             }
         case 'scatter' | 'PCA scatter':
             switch (block.type){
-                case 'axisAndLabels':
+                case 'axis_and_labels':
                     if (plotType ==='scatter'){
                         block.getField('xLabel').setVisible(true);
                         block.getField('xLimMin').setVisible(true);
@@ -280,7 +299,7 @@ function updateFieldsBasedOnPlotType(plotType, block) {
                     block.getField('tickDirectionDropdown').setVisible(false);
                     block.render();
                     break;
-                case 'annotAndScale':
+                case 'annot_and_scale':
                     block.getField('scaleDirection').setVisible(true);
                     block.getField('scaleLocation').setVisible(true);
                     block.getField('scaleLength').setVisible(true);
@@ -290,7 +309,7 @@ function updateFieldsBasedOnPlotType(plotType, block) {
                     block.getField('fontSize').setVisible(true);
                     block.getField('showMass').setVisible(true);
                     break;
-                case 'marksAndLines':
+                case 'marks_and_lines':
                     block.getField('symbol').setVisible(false);
                     block.getField('size').setVisible(false);
                     block.getField('symbolColor').setVisible(false);
@@ -317,7 +336,7 @@ function updateFieldsBasedOnPlotType(plotType, block) {
 
         case 'histogram':
             switch (block.type){
-                case 'axisAndLabels':
+                case 'axis_and_labels':
                     block.getField('xLabel').setVisible(false);
                     block.getField('xLimMin').setVisible(true);
                     block.getField('xLimMax').setVisible(true);
@@ -331,7 +350,7 @@ function updateFieldsBasedOnPlotType(plotType, block) {
                     block.getField('tickDirectionDropdown').setVisible(false);
                     block.render();
                     break;
-                case 'annotAndScale':
+                case 'annot_and_scale':
                     block.getField('scaleDirection').setVisible(true);
                     block.getField('scaleLocation').setVisible(true);
                     block.getField('scaleLength').setVisible(true);
@@ -341,7 +360,7 @@ function updateFieldsBasedOnPlotType(plotType, block) {
                     block.getField('fontSize').setVisible(true);
                     block.getField('showMass').setVisible(true);
                     break;
-                case 'marksAndLines':
+                case 'marks_and_lines':
                     block.getField('symbol').setVisible(false);
                     block.getField('size').setVisible(false);
                     block.getField('symbolColor').setVisible(false);
@@ -368,7 +387,7 @@ function updateFieldsBasedOnPlotType(plotType, block) {
 
         case 'scatter':
             switch (block.type){
-                case 'axisAndLabels':
+                case 'axis_and_labels':
                     block.getField('xLabel').setVisible(false);
                     block.getField('xLimMin').setVisible(true);
                     block.getField('xLimMax').setVisible(true);
@@ -382,7 +401,7 @@ function updateFieldsBasedOnPlotType(plotType, block) {
                     block.getField('tickDirectionDropdown').setVisible(false);
                     block.render();
                     break;
-                case 'annotAndScale':
+                case 'annot_and_scale':
                     block.getField('scaleDirection').setVisible(true);
                     block.getField('scaleLocation').setVisible(true);
                     block.getField('scaleLength').setVisible(true);
@@ -392,7 +411,7 @@ function updateFieldsBasedOnPlotType(plotType, block) {
                     block.getField('fontSize').setVisible(true);
                     block.getField('showMass').setVisible(true);
                     break;
-                case 'marksAndLines':
+                case 'marks_and_lines':
                     block.getField('symbol').setVisible(false);
                     block.getField('size').setVisible(false);
                     block.getField('symbolColor').setVisible(false);
@@ -418,7 +437,7 @@ function updateFieldsBasedOnPlotType(plotType, block) {
             }
         case 'pca scatter':
             switch (block.type){
-                case 'axisAndLabels':
+                case 'axis_and_labels':
                     block.getField('xLabel').setVisible(false);
                     block.getField('xLimMin').setVisible(true);
                     block.getField('xLimMax').setVisible(true);
@@ -432,7 +451,7 @@ function updateFieldsBasedOnPlotType(plotType, block) {
                     block.getField('tickDirectionDropdown').setVisible(false);
                     block.render();
                     break;
-                case 'annotAndScale':
+                case 'annot_and_scale':
                     block.getField('scaleDirection').setVisible(true);
                     block.getField('scaleLocation').setVisible(true);
                     block.getField('scaleLength').setVisible(true);
@@ -442,7 +461,7 @@ function updateFieldsBasedOnPlotType(plotType, block) {
                     block.getField('fontSize').setVisible(true);
                     block.getField('showMass').setVisible(true);
                     break;
-                case 'marksAndLines':
+                case 'marks_and_lines':
                     block.getField('symbol').setVisible(false);
                     block.getField('size').setVisible(false);
                     block.getField('symbolColor').setVisible(false);

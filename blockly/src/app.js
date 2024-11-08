@@ -4,11 +4,10 @@ import * as Blockly from 'blockly/core';
 import * as En from 'blockly/msg/en';
 import 'blockly/blocks';  // Import default blocks
 import {pythonGenerator} from 'blockly/python';
-import { sample_ids } from './globals';
+import { sample_ids, setBaseDir } from './globals';
 import './custom_blocks';  // Import custom blocks
 import './python_generators';  // Import python generators
 import './helper_functions';  // Import helper functions
-
 
 Blockly.setLocale(En);  // Set the locale to English
 
@@ -19,6 +18,10 @@ window.workspace = workspace;
 window.Blockly = Blockly
 new QWebChannel(qt.webChannelTransport, function(channel) {
     window.blocklyBridge = channel.objects.blocklyBridge;
+      // Set baseDir from Python by calling a method
+    window.blocklyBridge.getBaseDir().then((dir) => {
+        setBaseDir(dir);
+    });
     window.blocklyBridge.callSetStyleWidgets = function(plotType, callback) {
         window.blocklyBridge.invokeSetStyleWidgets(plotType, function(response) {
             callback(JSON.parse(response));  // Parse the response from Python as a JSON object

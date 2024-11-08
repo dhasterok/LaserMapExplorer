@@ -1,10 +1,20 @@
 import * as Blockly from 'blockly/core';
 import {registerFieldColour, FieldColour} from '@blockly/field-colour';
 registerFieldColour();
-import { sample_ids } from './globals';
+import { sample_ids, baseDir } from './globals';
 import {dynamicStyleUpdate} from './helper_functions'
 var enableSampleIDsBlock = false; // Initially false
 window.Blockly = Blockly.Blocks
+
+/*
+Summary of Naming Conventions:
+Field Names: Camel case (plotType).
+Variable Names (js): Camel case (plotType).
+Block Type Names: Snake case (set_plot_type).
+Block Input Names: Snake case (set_plot_type).
+*/
+
+//// I/O //// 
 const load_directory = {
     init: function() {
         this.appendValueInput('DIR')
@@ -18,7 +28,7 @@ const load_directory = {
     }
 };
 Blockly.Blocks['load_directory'] = load_directory;
-
+/*
 const sample_ids_list_block = {
     init: function() {
         this.appendDummyInput().appendField("sample IDs list");
@@ -32,7 +42,9 @@ const sample_ids_list_block = {
     }
 };
 Blockly.Blocks['sample_ids_list_block'] = sample_ids_list_block;
+*/
 
+//// Samples and Fields /////
 
 // Function to enable the block
 export function enableSampleIDsBlockFunction() {
@@ -40,10 +52,9 @@ export function enableSampleIDsBlockFunction() {
     enableSampleIDsBlock = true;
 
     // Re-register the block definition
-    Blockly.Blocks['sample_ids_list_block'] = sample_ids_list_block;
+    //Blockly.Blocks['sample_ids_list_block'] = sample_ids_list_block;
     Blockly.Blocks['select_samples'] = select_samples;
     Blockly.Blocks['iterate_sample_ids'] = iterate_sample_ids;
-    Blockly.Blocks['sample_ids_list_block'] = sample_ids_list_block;
 
     // Refresh the toolbox
     workspace.updateToolbox(document.getElementById('toolbox'));
@@ -94,6 +105,152 @@ Blockly.Blocks['select_samples'] = select_samples;
 };
 Blockly.common.defineBlocks({ iterate_sample_ids: iterate_sample_ids });
 
+// Define the select_analytes block
+const select_analytes = {
+    init: function() {
+      this.appendDummyInput('NAME')
+        .setAlign(Blockly.inputs.Align.CENTRE)
+        .appendField('Select analytes');
+  
+      // Initialize with a placeholder dropdown
+      this.appendDummyInput('NAME')
+        .appendField(new Blockly.FieldLabelSerializable('Analyte list'), 'NAME')
+        .appendField(new Blockly.FieldDropdown([['Loading...', '']]), 'ANALYTELISTDROPDOWN')
+        .appendField(new Blockly.FieldImage(`${baseDir}/resources/icons/icon-atom-64.svg`, 15, 15, { alt: '*', flipRtl: 'FALSE' }));
+  
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setTooltip('');
+      this.setHelpUrl('');
+      this.setColour(225);
+  
+      // Populate dropdown asynchronously
+      this.updateAnalyteOptions();
+    },
+  
+    // Function to update the analyte options asynchronously
+    updateAnalyteOptions: function() {
+      // Call the Python function getAnalyteList through the WebChannel
+      window.blocklyBridge.getAnalyteList().then((response) => {
+        // Map the response to the required format for Blockly dropdowns
+        const options = response.map(option => [option, option]);
+        const dropdown = this.getField('ANALYTELISTDROPDOWN');
+        
+        // Clear existing options and add new ones
+        dropdown.menuGenerator_ = options;
+        dropdown.setValue(options[0][1]);  // Set the first option as the default
+        dropdown.forceRerender();  // Refresh dropdown to display updated options
+
+      }).catch(error => {
+        console.error('Error fetching analyte list:', error);
+      });
+    }
+  };
+  
+  Blockly.common.defineBlocks({ select_analytes: select_analytes });
+  
+                      
+
+const properties = {
+    init: function() {
+        // Header
+        this.appendDummyInput('header')
+            .appendField('Properties')
+            .setAlign(Blockly.inputs.Align.CENTRE);
+
+        // Reference value selection
+        this.appendDummyInput('refValue')
+            .appendField('Ref. value')
+            .appendField(new Blockly.FieldDropdown([
+                ['bulk silicate Earth [MS95] McD', 'bulk_silicate_earth'],
+                ['option 2', 'option_2']
+            ]), 'refValueDropdown');
+
+        // Data scaling selection
+        this.appendDummyInput('dataScaling')
+            .appendField('Data scaling')
+            .appendField(new Blockly.FieldDropdown([
+                ['linear', 'linear'],
+                ['logarithmic', 'logarithmic']
+            ]), 'dataScalingDropdown');
+
+        // Correlation method selection
+        this.appendDummyInput('corrMethod')
+            .appendField('Corr. Method')
+            .appendField(new Blockly.FieldDropdown([
+                ['none', 'none'],
+                ['method 1', 'method_1']
+            ]), 'corrMethodDropdown')
+            .appendField(new Blockly.FieldCheckbox('FALSE'), 'corrMethodCheckbox')
+            .appendField('C²');
+
+        // Resolution inputs
+        this.appendDummyInput('resolution')
+            .appendField('Resolution')
+            .appendField(new Blockly.FieldNumber(738, 1), 'Nx')
+            .appendField('Nx')
+            .appendField(new Blockly.FieldNumber(106, 1), 'Ny')
+            .appendField('Ny');
+
+        // Dimensions inputs
+        this.appendDummyInput('dimensions')
+            .appendField('Dimensions')
+            .appendField(new Blockly.FieldNumber(0.9986), 'dx')
+            .appendField('dx')
+            .appendField(new Blockly.FieldNumber(0.9906), 'dy')
+            .appendField('dy');
+
+        // Autoscale settings
+        this.appendDummyInput('autoscaleHeader')
+            .appendField('Autoscale')
+            .setAlign(Blockly.inputs.Align.CENTRE);
+
+        // Show with colormap checkbox
+        this.appendDummyInput('showColormap')
+            .appendField(new Blockly.FieldCheckbox('TRUE'), 'showColormap')
+            .appendField('Show with colormap');
+
+        // Quantile bounds
+        this.appendDummyInput('quantileBounds')
+            .appendField('Quantile bounds')
+            .appendField(new Blockly.FieldNumber(0.05), 'quantileLower')
+            .appendField('to')
+            .appendField(new Blockly.FieldNumber(99.5), 'quantileUpper');
+
+        // Difference bound
+        this.appendDummyInput('differenceBound')
+            .appendField('Difference bound')
+            .appendField(new Blockly.FieldNumber(0.05), 'diffBoundLower')
+            .appendField('to')
+            .appendField(new Blockly.FieldNumber(99), 'diffBoundUpper');
+
+        // Negative handling dropdown
+        this.appendDummyInput('negativeHandling')
+            .appendField('Negative handling')
+            .appendField(new Blockly.FieldDropdown([
+                ['Ignore negatives', 'ignore_negatives'],
+                ['Treat as zero', 'treat_as_zero']
+            ]), 'negativeHandlingDropdown');
+
+        // Apply to all analytes checkbox
+        this.appendDummyInput('applyAll')
+            .appendField(new Blockly.FieldCheckbox('FALSE'), 'applyAll')
+            .appendField('Apply to all analytes');
+
+        this.setInputsInline(false);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setTooltip('Configure samples and fields settings.');
+        this.setHelpUrl('');
+        this.setColour(160);
+    }
+};
+
+Blockly.common.defineBlocks({ properties: properties });
+
+
+////  Analysis ////
+
 // heatmap and ternary
 
 const scatter_and_heatmaps = {
@@ -115,12 +272,12 @@ const scatter_and_heatmaps = {
 
         this.appendDummyInput('analyteY')
             .appendField('Analyte Y')
-            .appendField(new Blockly.FieldDropdown([['Analyte', 'Analyte'], ['Analyte (Normalised)', 'Analyte (Normalised)'],['PCA Score', 'PCA Score'], ['Cluster', 'Cluster']],this.updateAnalyteDropdown.bind(this, 'analyteX', 'analyteXType')), 'analyteYType')
+            .appendField(new Blockly.FieldDropdown([['Analyte', 'Analyte'], ['Analyte (Normalised)', 'Analyte (Normalised)'],['PCA Score', 'PCA Score'], ['Cluster', 'Cluster']],this.updateAnalyteDropdown.bind(this, 'analyteY', 'analyteYType')), 'analyteYType')
             .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'analyteY');
 
         this.appendDummyInput('analyteZ')
             .appendField('Analyte Z')
-            .appendField(new Blockly.FieldDropdown([['Analyte', 'Analyte'], ['Analyte (Normalised)', 'Analyte (Normalised)'],['PCA Score', 'PCA Score'], ['Cluster', 'Cluster']],this.updateAnalyteDropdown.bind(this, 'analyteX', 'analyteXType')), 'analyteZType')
+            .appendField(new Blockly.FieldDropdown([['Analyte', 'Analyte'], ['Analyte (Normalised)', 'Analyte (Normalised)'],['PCA Score', 'PCA Score'], ['Cluster', 'Cluster']],this.updateAnalyteDropdown.bind(this, 'analyteZ', 'analyteZType')), 'analyteZType')
             .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'analyteZ');
 
         this.appendDummyInput('preset')
@@ -181,9 +338,12 @@ Blockly.common.defineBlocks({ scatter_and_heatmaps: scatter_and_heatmaps });
 // Block: Plot 
 const plot = {
     init: function() {
+        // Style and Save inputs
+        this.appendValueInput('analysisType')
+            .appendField('Analysis type');
         this.appendDummyInput('plot_header')
             .setAlign(Blockly.inputs.Align.CENTRE)
-            .appendField('Plot Type')
+            .appendField('Plot type')
             .appendField(new Blockly.FieldDropdown([
                 ['Analyte Map', 'analyte map'],
                 ['Histogram', 'histogram'],
@@ -311,7 +471,7 @@ const styles = {
 Blockly.common.defineBlocks({ styles: styles });
 
 // Style Blocks
-const axisAndLabels = {
+const axis_and_labels = {
     init: function() {
         this.appendDummyInput('axisHeader')
         .setAlign(Blockly.inputs.Align.CENTRE)
@@ -365,10 +525,10 @@ const axisAndLabels = {
         this.setColour(285);
     }
 };
-Blockly.common.defineBlocks({axisAndLabels: axisAndLabels});
+Blockly.common.defineBlocks({axis_and_labels: axis_and_labels});
                         
 
-const annotAndScale = {
+const annot_and_scale = {
     init: function() {
         this.appendDummyInput('scaleDirection')
         .appendField('Scale direction')
@@ -408,9 +568,9 @@ const annotAndScale = {
         this.setColour(285);
     }
 };
-Blockly.common.defineBlocks({annotAndScale: annotAndScale});
+Blockly.common.defineBlocks({annot_and_scale: annot_and_scale});
 
-const marksAndLines = {
+const marks_and_lines = {
     init: function() {
         this.appendDummyInput('symbol')
         .appendField('Symbol')
@@ -467,7 +627,7 @@ const marksAndLines = {
         this.setColour(225);
     }
 };
-Blockly.common.defineBlocks({marksAndLines: marksAndLines});
+Blockly.common.defineBlocks({marks_and_lines: marks_and_lines});
             
 const coloring = {
     init: function() {

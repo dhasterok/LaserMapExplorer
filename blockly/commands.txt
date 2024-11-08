@@ -1,8 +1,16 @@
 npx webpack --config webpack.config.js
 
 
+/*
 Summary of Naming Conventions:
-Field Names: Lowercase with underscores (plot_type).
-Variable Names: CamelCase (plotType).
+
+JavaScript
+Use camelCase for variables and functions.
+Use TitleCase for classes.
+Use ALL_CAPS for constants.
+
+Blockly
+Field Names: Uppercase (PLOTTYPE).
 Block Type Names: Snake case (set_plot_type).
-Block Input Names: Lowercase with underscores (plot_type_input).
+Block Input Names: Snake case (set_plot_type).
+*/

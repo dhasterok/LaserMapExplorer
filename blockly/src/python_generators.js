@@ -4,6 +4,9 @@
 // Import a generator.
 import {pythonGenerator, Order} from 'blockly/python';
 import { sample_ids } from './globals';
+
+
+
 // Python Generator: Load Directory
 pythonGenerator.forBlock['load_directory'] = function(block, generator) {
     var dir_name = generator.quote_(block.getFieldValue('DIR'));
@@ -21,12 +24,20 @@ pythonGenerator.forBlock['select_samples'] = function(block, generator) {
     return code;
 };
 
+// Python code generator for the select_analytes block
+pythonGenerator.forBlock['select_analytes'] = function(block) {
+    // Generate the Python code to call open_select_analyte_dialog
+    return 'self.parent.open_select_analyte_dialog()\nself.bridge.refreshAnalyteDropdown()\n';
+  };
+  
+
+/*
 // Python Generator: Sample IDs List
 pythonGenerator.forBlock['sample_ids_list_block'] = function(block, generator) {
     const code = JSON.stringify(sample_ids);  // Generates Python list from global sample_ids variable
     return code;
 };
-
+*/
 // Python Generator: Iterate Through Sample IDs
 pythonGenerator.forBlock['iterate_sample_ids'] = function(block, generator) {
     var variable_sample_ids = JSON.stringify(sample_ids);
@@ -59,9 +70,9 @@ self.parent.style.set_style_widgets(${plot_type})
 
 pythonGenerator.forBlock['styles'] = function(block, generator) {
     // Retrieve code for each connected sub-block, default to an empty object if not connected
-    var axisAndLabelsCode = generator.valueToCode(block, 'axisAndLabels', Order.NONE);
-    var annotAndScaleCode = generator.valueToCode(block, 'annotAndScale', Order.NONE);
-    var marksAndLinesCode = generator.valueToCode(block, 'markersAndLines', Order.NONE);
+    var axisAndLabelsCode = generator.valueToCode(block, 'axis_and_labels', Order.NONE);
+    var annotAndScaleCode = generator.valueToCode(block, 'annot_and_scale', Order.NONE);
+    var marksAndLinesCode = generator.valueToCode(block, 'markers_and_lines', Order.NONE);
     var coloringCode = generator.valueToCode(block, 'coloring', Order.NONE);
 
     // Construct the style dictionary with only non-empty entries
@@ -80,7 +91,7 @@ pythonGenerator.forBlock['styles'] = function(block, generator) {
 
 
 
-pythonGenerator.forBlock['axisAndLabels'] = function(block, generator) {
+pythonGenerator.forBlock['axis_and_labels'] = function(block, generator) {
     const xLabel = generator.quote_(block.getFieldValue('xLabel'));
     const xLimMin = block.getFieldValue('xLimMin');
     const xLimMax = block.getFieldValue('xLimMax');
@@ -106,7 +117,7 @@ pythonGenerator.forBlock['axisAndLabels'] = function(block, generator) {
     return [code, Order.ATOMIC];
 };
 
-pythonGenerator.forBlock['annotAndScale'] = function(block, generator) {
+pythonGenerator.forBlock['annot_and_scale'] = function(block, generator) {
     const scaleDirection = generator.quote_(block.getFieldValue('scaleDirection'));
     const scaleLocation = generator.quote_(block.getFieldValue('scaleLocation'));
     const scaleLength = block.getFieldValue('scaleLength') || 'None';
@@ -128,7 +139,7 @@ pythonGenerator.forBlock['annotAndScale'] = function(block, generator) {
     return [code,Order.ATOMIC];
 };
 
-pythonGenerator.forBlock['marksAndLines'] = function(block, generator) {
+pythonGenerator.forBlock['marks_and_lines'] = function(block, generator) {
     const symbol = generator.quote_(block.getFieldValue('symbol'));
     const size = block.getFieldValue('size');
     const transparency = block.getFieldValue('transparency');

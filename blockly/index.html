@@ -6,17 +6,12 @@
     <title>Blockly Demo</title>
 </head>
 <body>
-    <div id="blocklyDiv" style="height: 600px; width: 1000px;"></div>
+    <div id="blocklyDiv" style="height: 600px; width: 100%;"></div>
     <xml id="toolbox" style="display: none">
         <!-- Variables -->
         <category name="Variables" custom="VARIABLE" colour="330">
             <block type="variables_get"></block>
             <block type="variables_set"></block>
-        </category>
-        <!-- Lists -->
-        <category name="Lists" colour="260">
-            <block type="sample_ids_list_block"></block> <!-- Custom Block for Sample IDs List -->
-            <block type="select_samples"></block> <!-- Custom Block for Selecting Sample IDs -->
         </category>
         <!-- Loops -->
         <category name="Loops" colour="120">
@@ -35,10 +30,20 @@
             <block type="math_number"></block>
             <block type="math_arithmetic"></block>
         </category>
-        <!-- Text -->
+        <!-- Text -->ik
         <category name="Text" colour="160">
             <block type="text"></block>
             <block type="text_print"></block>
+        </category>
+        <!-- Analysis -->
+        <category name="Samples and fields" colour="180">
+            <block type="properties"></block>
+            <block type="select_samples"></block> <!-- Custom Block for Selecting Sample IDs -->
+            <block type="select_analytes"></block>
+        </category>
+        <!-- Analysis -->
+        <category name="Analysis" colour="160">
+            <block type="scatter_and_heatmaps"></block>
         </category>
         <!-- Custom Blocks -->
         <category name="Custom Blocks" colour="60">
@@ -52,9 +57,9 @@
         <!-- Style Category -->
         <category name="Style" colour="285">
             <block type="styles"></block>
-            <block type="axisAndLabels"></block>
-            <block type="annotAndScale"></block>
-            <block type="marksAndLines"></block>
+            <block type="axis_and_labels"></block>
+            <block type="annot_and_Scale"></block>
+            <block type="marks_and_lines"></block>
             <block type="coloring"></block>            
         </category>
     </xml>

@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QTextEdit, QPushButton
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QTextEdit, QPushButton, QSizePolicy
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWebChannel import QWebChannel
 from PyQt5.QtCore import pyqtSlot, QObject, QUrl, QFile, QIODevice
@@ -34,9 +34,10 @@ class BlocklyBridge(QObject):
     def invokeSetStyleWidgets(self, plot_type):
         # Call the set_style_widgets function
         plot_type = plot_type.replace('_',' ')
-        if plot_type in self.parent.parent.styles.keys():
-            self.parent.parent.styling.set_style_widgets(plot_type)
-            style = self.parent.parent.styles[plot_type]
+        if plot_type in self.parent.parent.style.style_dict.keys():
+            ### need to add parent.parent to access main code from this class 
+            self.parent.parent.style.set_style_widgets(plot_type)
+            style = self.parent.parent.style.style_dict[plot_type]
             print('invokeSetStyleWidgets')
             # Convert NumPy types to native Python types (if any)
             style_serializable = self.convert_numpy_types(style)
@@ -45,6 +46,31 @@ class BlocklyBridge(QObject):
             style_serializable = {}
         # Return the style dictionary as a JSON string
         return json.dumps(style_serializable)
+    
+    @pyqtSlot(str, result=list)
+    def getFieldList(self, analyte_type):
+        print('get_field_list')
+        return self.parent.parent.get_field_list(analyte_type)
+    
+    @pyqtSlot(result=str)
+    def getBaseDir(self):
+        return self.parent.parent.BASEDIR
+    
+    @pyqtSlot(result=list)
+    def getAnalyteList(self):
+        directory = os.path.join(self.parent.parent.BASEDIR, 'resources/analytes list')
+        # List all .txt files in the directory
+        print('analyte_list')
+        txt_files = [str(f).replace('.txt','') for f in os.listdir(directory) if f.endswith('.txt')]
+        return txt_files
+
+    @pyqtSlot()
+    def refreshAnalyteDropdown(self):
+        """Fetches the list of analytes and sends it to JavaScript to refresh the dropdown."""
+        analyte_list = self.getAnalyteList()
+        analyte_list_js_array = json.dumps(analyte_list)  # Convert to JSON for JavaScript
+        self.parent.web_view.page().runJavaScript(f"updateAnalyteDropdown({analyte_list_js_array})")
+
     def convert_numpy_types(self, obj):
         """ Recursively convert NumPy types to Python native types. """
         if isinstance(obj, dict):
@@ -80,6 +106,7 @@ class Workflow():
 
         # Create a web engine view
         self.web_view = QWebEngineView()
+        self.web_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         # Setup the WebChannel for communication
         self.channel = QWebChannel()
@@ -98,6 +125,13 @@ class Workflow():
         self.web_view.setUrl(QUrl.fromLocalFile(BASEDIR + '/blockly/index.html'))
         # Add the web view to the layout
         self.layout.addWidget(self.web_view)
+
+        # Connect resize event
+        parent.resizeEvent = self.handleResizeEvent
+
+    def handleResizeEvent(self, event):
+        self.web_view.page().runJavaScript("resizeBlocklyWorkspace()")
+        event.accept()
     
     def store_sample_ids(self):
             """

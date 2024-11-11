@@ -1346,6 +1346,9 @@
                 <item row="2" column="1">
                  <layout class="QHBoxLayout" name="horizontalLayout_3">
                   <item>
+                   <layout class="QFormLayout" name="formLayout_12"/>
+                  </item>
+                  <item>
                    <widget class="QComboBox" name="comboBoxCorrelationMethod">
                     <property name="maximumSize">
                      <size>
@@ -1958,7 +1961,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -2557,7 +2560,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -2597,7 +2600,7 @@
               <x>0</x>
               <y>0</y>
               <width>294</width>
-              <height>141</height>
+              <height>229</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_45">
@@ -2911,7 +2914,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -3550,7 +3553,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -4316,7 +4319,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5003,7 +5006,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5607,7 +5610,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5653,7 +5656,7 @@
               <x>0</x>
               <y>0</y>
               <width>301</width>
-              <height>147</height>
+              <height>235</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_57">
@@ -5840,7 +5843,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6288,7 +6291,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6334,7 +6337,7 @@
               <x>0</x>
               <y>0</y>
               <width>300</width>
-              <height>147</height>
+              <height>235</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_64">
@@ -7027,7 +7030,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7064,7 +7067,7 @@
               <x>0</x>
               <y>0</y>
               <width>300</width>
-              <height>147</height>
+              <height>235</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_75">
@@ -7548,7 +7551,7 @@
             <enum>QFrame::Raised</enum>
            </property>
            <property name="currentIndex">
-            <number>3</number>
+            <number>0</number>
            </property>
            <property name="tabSpacing">
             <number>2</number>
@@ -7558,8 +7561,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>100</width>
-              <height>72</height>
+              <width>294</width>
+              <height>208</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -7598,8 +7601,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>190</width>
-                  <height>342</height>
+                  <width>294</width>
+                  <height>411</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -7874,14 +7877,14 @@
                      </property>
                     </widget>
                    </item>
-                   <item row="9" column="0">
+                   <item row="11" column="0">
                     <widget class="QLabel" name="labelAspectRatio">
                      <property name="text">
                       <string>Aspect ratio</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="9" column="1">
+                   <item row="11" column="1">
                     <widget class="QLineEdit" name="lineEditAspectRatio">
                      <property name="maximumSize">
                       <size>
@@ -7900,14 +7903,14 @@
                      </property>
                     </widget>
                    </item>
-                   <item row="10" column="0">
+                   <item row="12" column="0">
                     <widget class="QLabel" name="labelTickDirection">
                      <property name="text">
                       <string>Tick direction</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="10" column="1">
+                   <item row="12" column="1">
                     <widget class="QComboBox" name="comboBoxTickDirection">
                      <property name="maximumSize">
                       <size>
@@ -7946,6 +7949,99 @@
                       <enum>Qt::Horizontal</enum>
                      </property>
                     </widget>
+                   </item>
+                   <item row="10" column="1">
+                    <widget class="QComboBox" name="comboBoxZScale">
+                     <item>
+                      <property name="text">
+                       <string>linear</string>
+                      </property>
+                     </item>
+                     <item>
+                      <property name="text">
+                       <string>scientific</string>
+                      </property>
+                     </item>
+                     <item>
+                      <property name="text">
+                       <string>log</string>
+                      </property>
+                     </item>
+                    </widget>
+                   </item>
+                   <item row="10" column="0">
+                    <widget class="QLabel" name="labelZScale">
+                     <property name="text">
+                      <string>Z Scale</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="9" column="0">
+                    <layout class="QHBoxLayout" name="horizontalLayout_45">
+                     <item>
+                      <widget class="QLabel" name="labelZLim">
+                       <property name="text">
+                        <string>Z Limits</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QToolButton" name="toolButtonZAxisReset">
+                       <property name="minimumSize">
+                        <size>
+                         <width>20</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>20</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                       <property name="toolTip">
+                        <string>Reset histogram axes</string>
+                       </property>
+                       <property name="accessibleName">
+                        <string>axis reset</string>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">border : none;</string>
+                       </property>
+                       <property name="text">
+                        <string>Reset</string>
+                       </property>
+                       <property name="icon">
+                        <iconset resource="../resources.qrc">
+                         <normaloff>:/resources/icons/icon-reset-64.svg</normaloff>:/resources/icons/icon-reset-64.svg</iconset>
+                       </property>
+                       <property name="iconSize">
+                        <size>
+                         <width>14</width>
+                         <height>14</height>
+                        </size>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                   <item row="9" column="1">
+                    <layout class="QHBoxLayout" name="horizontalLayout_46">
+                     <item>
+                      <widget class="QLineEdit" name="lineEditZLB">
+                       <property name="alignment">
+                        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLineEdit" name="lineEditZUB">
+                       <property name="alignment">
+                        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
                    </item>
                   </layout>
                  </item>
@@ -8371,8 +8467,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>100</width>
-              <height>72</height>
+              <width>294</width>
+              <height>208</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -8411,7 +8507,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>244</width>
+                  <width>294</width>
                   <height>256</height>
                  </rect>
                 </property>

@@ -173,6 +173,10 @@ class Styling():
         # set style theme
         parent.comboBoxStyleTheme.activated.connect(self.read_theme)
 
+        parent.comboBoxFieldX.activated.connect(lambda: self.axis_variable_changed(parent.comboBoxFieldTypeX.currentText(), parent.comboBoxFieldX.currentText(), 'x'))
+        parent.comboBoxFieldY.activated.connect(lambda: self.axis_variable_changed(parent.comboBoxFieldTypeY.currentText(), parent.comboBoxFieldY.currentText(), 'y'))
+        parent.comboBoxFieldZ.activated.connect(lambda: self.axis_variable_changed(parent.comboBoxFieldTypeZ.currentText(), parent.comboBoxFieldZ.currentText(), 'z'))
+
         # comboBox with plot type
         # overlay and annotation properties
         parent.toolButtonOverlayColor.clicked.connect(self.overlay_color_callback)
@@ -238,6 +242,12 @@ class Styling():
         parent.lineEditYUB.setValidator(QDoubleValidator())
         parent.lineEditYUB.precision = 3
         parent.lineEditYUB.toward = 1
+        parent.lineEditZLB.setValidator(QDoubleValidator())
+        parent.lineEditZLB.precision = 3
+        parent.lineEditZLB.toward = 0
+        parent.lineEditZUB.setValidator(QDoubleValidator())
+        parent.lineEditZUB.precision = 3
+        parent.lineEditZUB.toward = 1
         parent.lineEditColorLB.setValidator(QDoubleValidator())
         parent.lineEditColorLB.precision = 3
         parent.lineEditColorLB.toward = 0
@@ -250,6 +260,8 @@ class Styling():
         parent.lineEditXUB.editingFinished.connect(lambda: self.axis_limit_edit_callback('x', 1, float(parent.lineEditXUB.text())))
         parent.lineEditYLB.editingFinished.connect(lambda: self.axis_limit_edit_callback('y', 0, float(parent.lineEditYLB.text())))
         parent.lineEditYUB.editingFinished.connect(lambda: self.axis_limit_edit_callback('y', 1, float(parent.lineEditYUB.text())))
+        parent.lineEditZLB.editingFinished.connect(lambda: self.axis_limit_edit_callback('z', 0, float(parent.lineEditZLB.text())))
+        parent.lineEditZUB.editingFinished.connect(lambda: self.axis_limit_edit_callback('z', 1, float(parent.lineEditZUB.text())))
         parent.lineEditColorLB.editingFinished.connect(lambda: self.axis_limit_edit_callback('c', 0, float(parent.lineEditColorLB.text())))
         parent.lineEditColorUB.editingFinished.connect(lambda: self.axis_limit_edit_callback('c', 1, float(parent.lineEditColorUB.text())))
 
@@ -400,6 +412,18 @@ class Styling():
         else:
             raise TypeError("scale must be linear, log or logit.")
 
+    # zlim
+    @property
+    def zlim(self):
+        return self.style_dict[self._plot_type]['ZLim']
+
+    @zlim.setter
+    def zlim(self, value):
+        if value is None or self._is_valid_bounds(value):
+            self.style_dict[self._plot_type]['ZLim'] = value
+        else:
+            raise ValueError("zlim must be a list of two floats or None.")
+
     # zlabel
     @property
     def zlabel(self):
@@ -411,6 +435,18 @@ class Styling():
             self.style_dict[self._plot_type]['ZLabel'] = label
         else:
             raise TypeError("label must be of type str or None.")
+
+    # zscale
+    @property
+    def zscale(self):
+        return self.style_dict[self._plot_type]['ZScale']
+
+    @yscale.setter
+    def yscale(self, scale):
+        if self._is_valid_scale(scale):
+            self.style_dict[self._plot_type]['ZScale'] = scale
+        else:
+            raise TypeError("scale must be linear, log or logit.")
 
     # aspect_ratio
     @property
@@ -747,7 +783,7 @@ class Styling():
         styles = {}
 
         default_plot_style = {
-                'XLim': [0,1], 'XScale': 'linear', 'XLabel': '', 'YLim': [0,1], 'YScale': 'linear', 'YLabel': '', 'ZLabel': '', 'AspectRatio': '1.0', 'TickDir': 'out',
+                'XLim': [0,1], 'XScale': 'linear', 'XLabel': '', 'YLim': [0,1], 'YScale': 'linear', 'YLabel': '', 'ZLim': [0,1], 'ZLabel': '', 'ZScale': 'linear', 'AspectRatio': '1.0', 'TickDir': 'out',
                 'Font': '', 'FontSize': 11.0,
                 'ScaleDir': 'none', 'ScaleLocation': 'northeast', 'ScaleLength': None, 'OverlayColor': '#ffffff',
                 'Marker': 'circle', 'MarkerSize': 6, 'MarkerColor': '#1c75bc', 'MarkerAlpha': 30,
@@ -939,6 +975,9 @@ class Styling():
                 parent.lineEditYLB.setEnabled(True)
                 parent.lineEditYUB.setEnabled(True)
                 parent.comboBoxYScale.setEnabled(False)
+                parent.lineEditZLB.setEnabled(False)
+                parent.lineEditZUB.setEnabled(False)
+                parent.comboBoxYScale.setEnabled(False)
                 parent.lineEditXLabel.setEnabled(False)
                 parent.lineEditYLabel.setEnabled(False)
                 parent.lineEditZLabel.setEnabled(False)
@@ -995,6 +1034,9 @@ class Styling():
                 parent.lineEditYLB.setEnabled(False)
                 parent.lineEditYUB.setEnabled(False)
                 parent.comboBoxYScale.setEnabled(False)
+                parent.lineEditZLB.setEnabled(False)
+                parent.lineEditZUB.setEnabled(False)
+                parent.comboBoxZScale.setEnabled(False)
                 parent.lineEditXLabel.setEnabled(False)
                 parent.lineEditYLabel.setEnabled(False)
                 parent.lineEditZLabel.setEnabled(False)
@@ -1048,6 +1090,9 @@ class Styling():
                 parent.lineEditYLB.setEnabled(True)
                 parent.lineEditYUB.setEnabled(True)
                 parent.comboBoxYScale.setEnabled(False)
+                parent.lineEditZLB.setEnabled(False)
+                parent.lineEditZUB.setEnabled(False)
+                parent.comboBoxZScale.setEnabled(False)
                 parent.lineEditXLabel.setEnabled(True)
                 parent.lineEditYLabel.setEnabled(True)
                 parent.lineEditZLabel.setEnabled(False)
@@ -1111,8 +1156,14 @@ class Styling():
                 parent.lineEditXLabel.setEnabled(True)
                 parent.lineEditYLabel.setEnabled(True)
                 if parent.comboBoxFieldZ.currentText() == '':
+                    parent.lineEditZLB.setEnabled(False)
+                    parent.lineEditZUB.setEnabled(False)
+                    parent.comboBoxZScale.setEnabled(False)
                     parent.lineEditZLabel.setEnabled(False)
                 else:
+                    parent.lineEditZLB.setEnabled(True)
+                    parent.lineEditZUB.setEnabled(True)
+                    parent.comboBoxZScale.setEnabled(True)
                     parent.lineEditZLabel.setEnabled(True)
                 parent.lineEditAspectRatio.setEnabled(True)
                 parent.comboBoxTickDirection.setEnabled(True)
@@ -1198,8 +1249,14 @@ class Styling():
                 parent.lineEditXLabel.setEnabled(True)
                 parent.lineEditYLabel.setEnabled(True)
                 if (parent.toolBox.currentIndex() != parent.left_tab['scatter']) or (parent.comboBoxFieldZ.currentText() == ''):
+                    parent.lineEditZLB.setEnabled(False)
+                    parent.lineEditZUB.setEnabled(False)
+                    parent.comboBoxZScale.setEnabled(False)
                     parent.lineEditZLabel.setEnabled(False)
                 else:
+                    parent.lineEditZLB.setEnabled(True)
+                    parent.lineEditZUB.setEnabled(True)
+                    parent.comboBoxZScale.setEnabled(True)
                     parent.lineEditZLabel.setEnabled(True)
                 parent.lineEditAspectRatio.setEnabled(True)
                 parent.comboBoxTickDirection.setEnabled(True)
@@ -1245,11 +1302,14 @@ class Styling():
                 # axes properties
                 parent.lineEditXLB.setEnabled(True)
                 parent.lineEditXUB.setEnabled(True)
-                parent.comboBoxXScale.setEnabled(False)
+                parent.comboBoxXScale.setEnabled(True)
                 parent.lineEditYLB.setEnabled(True)
                 parent.lineEditYUB.setEnabled(True)
-                parent.comboBoxXScale.setEnabled(False)
-                parent.lineEditXLabel.setEnabled(True)
+                parent.comboBoxYScale.setEnabled(True)
+                parent.lineEditZLB.setEnabled(True)
+                parent.lineEditZUB.setEnabled(True)
+                parent.comboBoxZScale.setEnabled(True)
+                parent.lineEditYLabel.setEnabled(True)
                 parent.lineEditYLabel.setEnabled(True)
                 parent.lineEditZLabel.setEnabled(True)
                 parent.lineEditAspectRatio.setEnabled(False)
@@ -1297,15 +1357,20 @@ class Styling():
                 # axes properties
                 parent.lineEditXLB.setEnabled(False)
                 parent.lineEditXUB.setEnabled(False)
+                parent.comboBoxXScale.setEnabled(False)
                 parent.lineEditXLabel.setEnabled(False)
                 if plot_type == 'tec':
                     parent.lineEditYLB.setEnabled(True)
                     parent.lineEditYUB.setEnabled(True)
+                    parent.comboBoxYScale.setEnabled(False)
                     parent.lineEditYLabel.setEnabled(True)
                 else:
                     parent.lineEditYLB.setEnabled(False)
                     parent.lineEditYUB.setEnabled(False)
                     parent.lineEditYLabel.setEnabled(False)
+                parent.comboBoxYScale.setEnabled(False)
+                parent.lineEditZLB.setEnabled(False)
+                parent.lineEditZUB.setEnabled(False)
                 parent.lineEditZLabel.setEnabled(False)
                 parent.lineEditAspectRatio.setEnabled(True)
                 parent.comboBoxTickDirection.setEnabled(True)
@@ -1349,10 +1414,15 @@ class Styling():
                 # axes properties
                 parent.lineEditXLB.setEnabled(False)
                 parent.lineEditXUB.setEnabled(False)
+                parent.comboBoxXScale.setEnabled(False)
                 parent.lineEditXLabel.setEnabled(False)
                 parent.lineEditYLB.setEnabled(False)
                 parent.lineEditYUB.setEnabled(False)
+                parent.comboBoxYScale.setEnabled(False)
                 parent.lineEditYLabel.setEnabled(False)
+                parent.lineEditZLB.setEnabled(False)
+                parent.lineEditZUB.setEnabled(False)
+                parent.comboBoxZScale.setEnabled(False)
                 parent.lineEditZLabel.setEnabled(False)
                 parent.lineEditAspectRatio.setEnabled(True)
                 parent.comboBoxTickDirection.setEnabled(True)
@@ -1390,6 +1460,11 @@ class Styling():
                 parent.lineEditXUB.setEnabled(True)
                 parent.lineEditYLB.setEnabled(True)
                 parent.lineEditYUB.setEnabled(True)
+                parent.lineEditZLB.setEnabled(False)
+                parent.lineEditZUB.setEnabled(False)
+                parent.comboBoxXScale.setEnabled(False)
+                parent.comboBoxYScale.setEnabled(False)
+                parent.comboBoxZScale.setEnabled(False)
                 parent.lineEditXLabel.setEnabled(False)
                 parent.lineEditYLabel.setEnabled(False)
                 parent.lineEditZLabel.setEnabled(False)
@@ -1447,10 +1522,15 @@ class Styling():
                 # axes properties
                 parent.lineEditXLB.setEnabled(True)
                 parent.lineEditXUB.setEnabled(True)
+                parent.comboBoxXScale.setEnabled(False)
                 parent.lineEditXLabel.setEnabled(True)
                 parent.lineEditYLB.setEnabled(False)
                 parent.lineEditYUB.setEnabled(False)
+                parent.comboBoxYScale.setEnabled(False)
                 parent.lineEditYLabel.setEnabled(False)
+                parent.lineEditZLB.setEnabled(False)
+                parent.lineEditZUB.setEnabled(False)
+                parent.comboBoxZScale.setEnabled(False)
                 parent.lineEditZLabel.setEnabled(False)
                 parent.lineEditAspectRatio.setEnabled(True)
                 parent.comboBoxTickDirection.setEnabled(True)
@@ -1491,6 +1571,9 @@ class Styling():
         parent.labelYLim.setEnabled(parent.lineEditYLB.isEnabled())
         parent.toolButtonYAxisReset.setEnabled(parent.labelYLim.isEnabled())
         parent.labelYScale.setEnabled(parent.comboBoxYScale.isEnabled())
+        parent.labelZLim.setEnabled(parent.lineEditZLB.isEnabled())
+        parent.toolButtonZAxisReset.setEnabled(parent.labelZLim.isEnabled())
+        parent.labelZScale.setEnabled(parent.comboBoxZScale.isEnabled())
         parent.labelXLabel.setEnabled(parent.lineEditXLabel.isEnabled())
         parent.labelYLabel.setEnabled(parent.lineEditYLabel.isEnabled())
         parent.labelZLabel.setEnabled(parent.lineEditZLabel.isEnabled())
@@ -1570,8 +1653,7 @@ class Styling():
             case _:
                 parent.actionSwapAxes.setEnabled(False)
 
-        if style is None:
-            style = self.style_dict[self.plot_type]
+        style = self.style_dict[self.plot_type]
 
         # axes properties
         # for map plots, check to see that 'X' and 'Y' are initialized
@@ -1601,6 +1683,9 @@ class Styling():
 
             parent.lineEditYLB.value = style['YLim'][0]
             parent.lineEditYUB.value = style['YLim'][1]
+
+            parent.lineEditZLB.value = style['ZLim'][0]
+            parent.lineEditZUB.value = style['ZLim'][1]
         else:
             # round axes limits for everything that isn't a map
             parent.lineEditXLB.value = style['XLim'][0]
@@ -1609,13 +1694,18 @@ class Styling():
             parent.lineEditYLB.value = style['YLim'][0]
             parent.lineEditYUB.value = style['YLim'][1]
 
+            parent.lineEditZLB.value = style['ZLim'][0]
+            parent.lineEditZUB.value = style['ZLim'][1]
+
         parent.comboBoxXScale.setCurrentText(style['XScale'])
         parent.lineEditXLabel.setText(style['XLabel'])
 
         parent.comboBoxYScale.setCurrentText(style['YScale'])
         parent.lineEditYLabel.setText(style['YLabel'])
 
+        parent.comboBoxYScale.setCurrentText(style['ZScale'])
         parent.lineEditZLabel.setText(style['ZLabel'])
+
         parent.lineEditAspectRatio.setText(str(style['AspectRatio']))
 
         # annotation properties
@@ -1802,12 +1892,110 @@ class Styling():
 
     # axes
     # -------------------------------------
+    def axis_variable_changed(self, fieldtype, field, ax="None"):
+        """Updates axis variables when the field is changed.
+
+        Parameters
+        ----------
+        fieldtype : str
+            _description_
+        field : str
+            _description_
+        ax : str, optional
+            axis for plotting, by default "None"
+        """
+        parent = self.parent
+        if field == '' or field.lower() == 'none':
+            match ax:
+                case 'x':
+                    parent.lineEditXLB.setEnabled(False)
+                    parent.lineEditXUB.setEnabled(False)
+                    parent.comboBoxXScale.setEnabled(False)
+                    parent.lineEditXLabel.setEnabled(False)
+                    parent.lineEditXLB.setText('')
+                    parent.lineEditXUB.setText('')
+                    parent.comboBoxXScale.setCurrentText('')
+                    parent.lineEditXLabel.setText('')
+                case 'y':
+                    parent.lineEditYLB.setEnabled(False)
+                    parent.lineEditYUB.setEnabled(False)
+                    parent.comboBoxYScale.setEnabled(False)
+                    parent.lineEditYLabel.setEnabled(False)
+                    parent.lineEditYLB.setText('')
+                    parent.lineEditYUB.setText('')
+                    parent.comboBoxYScale.setCurrentText('')
+                    parent.lineEditYLabel.setText('')
+                case 'z':
+                    parent.lineEditZLB.setEnabled(False)
+                    parent.lineEditZUB.setEnabled(False)
+                    parent.comboBoxZScale.setEnabled(False)
+                    parent.lineEditZLabel.setEnabled(False)
+                    parent.lineEditZLB.setText('')
+                    parent.lineEditZUB.setText('')
+                    parent.comboBoxZScale.setCurrentText('')
+                    parent.lineEditZLabel.setText('')
+            return
+        else:
+            amin, amax, scale, label = self.get_axis_values(fieldtype, field, ax)
+
+            plot_type = self.plot_type
+
+            self.style_dict[plot_type][ax+'Lim'] = [amin, amax]
+            self.style_dict[plot_type][ax+'Scale'] = scale
+            self.style_dict[plot_type][ax+'Label'] = label
+
+            match ax:
+                case 'x':
+                    parent.lineEditXLB.setEnabled(True)
+                    parent.lineEditXUB.setEnabled(True)
+                    parent.comboBoxXScale.setEnabled(True)
+                    parent.lineEditXLabel.setEnabled(True)
+                    parent.lineEditXLB.value = amin
+                    parent.lineEditXUB.value = amax
+                    parent.comboBoxXScale.setCurrentText(scale)
+                    parent.lineEditXLabel.setText(label)
+                case 'y':
+                    parent.lineEditYLB.setEnabled(True)
+                    parent.lineEditYUB.setEnabled(True)
+                    parent.comboBoxYScale.setEnabled(True)
+                    parent.lineEditYLabel.setEnabled(True)
+                    parent.lineEditYLB.value = amin
+                    parent.lineEditYUB.value = amax
+                    parent.comboBoxYScale.setCurrentText(scale)
+                    parent.lineEditYLabel.setText(label)
+                case 'z':
+                    parent.lineEditZLB.setEnabled(True)
+                    parent.lineEditZUB.setEnabled(True)
+                    parent.comboBoxZScale.setEnabled(True)
+                    parent.lineEditZLabel.setEnabled(True)
+                    parent.lineEditZLB.value = amin
+                    parent.lineEditZUB.value = amax
+                    parent.comboBoxZScale.setCurrentText(scale)
+                    parent.lineEditZLabel.setText(label)
+
+            parent.update_SV()
+
+        parent.labelXLim.setEnabled(parent.lineEditXLB.isEnabled()) 
+        parent.labelYLim.setEnabled(parent.lineEditYLB.isEnabled()) 
+        parent.labelZLim.setEnabled(parent.lineEditZLB.isEnabled()) 
+        parent.labelXScale.setEnabled(parent.comboBoxXScale.isEnabled())
+        parent.labelYScale.setEnabled(parent.comboBoxYScale.isEnabled())
+        parent.labelZScale.setEnabled(parent.comboBoxZScale.isEnabled())
+        parent.labelXLabel.setEnabled(parent.lineEditXLabel.isEnabled())
+        parent.labelYLabel.setEnabled(parent.lineEditYLabel.isEnabled())
+        parent.labelZLabel.setEnabled(parent.lineEditZLabel.isEnabled())
+        parent.toolButtonXAxisReset.setEnabled(parent.lineEditXLB.isEnabled()) 
+        parent.toolButtonYAxisReset.setEnabled(parent.lineEditYLB.isEnabled()) 
+        parent.toolButtonZAxisReset.setEnabled(parent.lineEditZLB.isEnabled()) 
+
     def get_axis_field(self, ax):
         """Grabs the field name from a given axis
 
         The field name for a given axis comes from a comboBox, and depends upon the plot type.
-        :param ax: axis, options include ``x``, ``y``, ``z``, and ``c``
-        :type ax: str
+        Parameters
+        ----------
+        ax : str
+            Axis, options include ``x``, ``y``, ``z``, and ``c``
         """
         parent = self.parent
 
@@ -1986,6 +2174,8 @@ class Styling():
         """
         #print('set_axis_widgets')
         parent = self.parent
+        if field == '':
+            return
 
         match ax:
             case 'x':
@@ -2013,7 +2203,10 @@ class Styling():
                     parent.lineEditYLabel.setText(parent.data[parent.sample_id].axis_dict[field]['label'])
                     parent.comboBoxYScale.setCurrentText(parent.data[parent.sample_id].axis_dict[field]['scale'])
             case 'z':
+                parent.lineEditZLB.value = parent.data[parent.sample_id].axis_dict[field]['min']
+                parent.lineEditZUB.value = parent.data[parent.sample_id].axis_dict[field]['max']
                 parent.lineEditZLabel.setText(parent.data[parent.sample_id].axis_dict[field]['label'])
+                parent.comboBoxZScale.setCurrentText(parent.data[parent.sample_id].axis_dict[field]['scale'])
 
     def axis_reset_callback(self, ax):
         """Resets axes widgets and plot axes to auto values
@@ -2060,12 +2253,16 @@ class Styling():
                         parent.data[parent.sample_id].axis_dict[field].update({'pstatus':'auto', 'pmin':None, 'pmax':None})
 
                 case 'scatter' | 'heatmap':
-                    if ax == 'x':
-                        field_type = parent.comboBoxFieldTypeX.currentText()
-                        field = parent.comboBoxFieldX.currentText()
-                    else:
-                        field_type = parent.comboBoxFieldTypeY.currentText()
-                        field = parent.comboBoxFieldY.currentText()
+                    match ax:
+                        case 'x':
+                            field_type = parent.comboBoxFieldTypeX.currentText()
+                            field = parent.comboBoxFieldX.currentText()
+                        case 'y':
+                            field_type = parent.comboBoxFieldTypeY.currentText()
+                            field = parent.comboBoxFieldY.currentText()
+                        case 'z':
+                            field_type = parent.comboBoxFieldTypeZ.currentText()
+                            field = parent.comboBoxFieldZ.currentText()
                     if (field_type == '') | (field == ''):
                         return
                     self.initialize_axis_values(field_type, field)
@@ -2771,21 +2968,6 @@ class Styling():
         cmap = colors.LinearSegmentedColormap.from_list(name, color_list, N=N)
 
         return cmap
-
-    def clim_callback(self):
-        """Sets the color limits
-
-        Sets the color limits in ``MainWindow.styles`` for the current plot type.
-        """
-        parent = self.parent
-
-        plot_type = self.parent.comboBoxPlotType.currentText()
-        if self.style_dict[plot_type]['CLim'][0] == float(parent.lineEditColorLB.text()) and self.style_dict[plot_type]['CLim'][1] == float(parent.lineEditColorUB.text()):
-            return
-
-        self.style_dict[plot_type]['CLim'] = [float(parent.lineEditColorLB.text()), float(parent.lineEditColorUB.text())]
-
-        parent.update_SV()
 
     def cbar_direction_callback(self):
         """Sets the colorbar direction

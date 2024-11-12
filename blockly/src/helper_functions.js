@@ -7,7 +7,7 @@ import {enableSampleIDsBlockFunction} from './custom_blocks'
 
 // Function: Update Sample Dropdown with IDs
 function updateSampleDropdown(sampleIds) {
-    // Step 1: Store sample IDs in the global variable
+    // Step 1: Store sample IDs in the global variableaxis_and_labels
     updateSampleIds(sampleIds);
     // Step 2: Enable dependent blocks now that sample_ids is populated
     enableSampleIDsBlockFunction();

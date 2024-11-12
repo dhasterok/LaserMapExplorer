@@ -1209,9 +1209,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         result = self.analyteDialog.exec_()  # Store the result here
         if result == QDialog.Accepted:
             #update self.data['norm'] with selection
-            self.data[self.sample_id].processed_data.set_attribute(self.analyteDialog.analytes,'norm',self.analyteDialog.norms)
+            self.data[self.sample_id].processed_data.set_attribute(self.analyteDialog.analytes,'norm',self.analyteDialog.norm_dict)
 
-            self.plot_tree.update_tree(self.data[self.sample_id]['norm'], norm_update = True)
+            self.plot_tree.update_tree(norm_update=True)
             #update analysis type combo in styles
             self.check_analysis_type()
 

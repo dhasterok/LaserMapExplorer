@@ -377,7 +377,7 @@ const plot = {
         this.setTooltip('Configure and render a plot with specified type and settings.');
         this.setHelpUrl('');
         this.setColour(285);
-
+        this.setInputsInline(false)
         // Initialize internal properties
         this.plotType = null;
         this.connectedStyleBlocks = {}; // To store references to connected style blocks

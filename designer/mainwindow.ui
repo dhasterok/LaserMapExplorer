@@ -1346,6 +1346,9 @@
                 <item row="2" column="1">
                  <layout class="QHBoxLayout" name="horizontalLayout_3">
                   <item>
+                   <layout class="QFormLayout" name="formLayout_12"/>
+                  </item>
+                  <item>
                    <widget class="QComboBox" name="comboBoxCorrelationMethod">
                     <property name="maximumSize">
                      <size>
@@ -1958,7 +1961,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -2557,7 +2560,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -2597,7 +2600,7 @@
               <x>0</x>
               <y>0</y>
               <width>294</width>
-              <height>141</height>
+              <height>229</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_45">
@@ -2911,7 +2914,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -3550,7 +3553,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -4316,7 +4319,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5003,7 +5006,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5607,7 +5610,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5653,7 +5656,7 @@
               <x>0</x>
               <y>0</y>
               <width>301</width>
-              <height>147</height>
+              <height>235</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_57">
@@ -5840,7 +5843,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6288,7 +6291,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6334,7 +6337,7 @@
               <x>0</x>
               <y>0</y>
               <width>300</width>
-              <height>147</height>
+              <height>235</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_64">
@@ -7027,7 +7030,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>147</height>
+          <height>235</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7064,7 +7067,7 @@
               <x>0</x>
               <y>0</y>
               <width>300</width>
-              <height>147</height>
+              <height>235</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_75">
@@ -7116,7 +7119,7 @@
    <property name="minimumSize">
     <size>
      <width>255</width>
-     <height>543</height>
+     <height>577</height>
     </size>
    </property>
    <property name="maximumSize">
@@ -7262,10 +7265,10 @@
         <string/>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>2</number>
        </property>
        <property name="tabSpacing">
-        <number>2</number>
+        <number>-1</number>
        </property>
        <widget class="QWidget" name="PlotSelectorPage">
         <property name="geometry">
@@ -7273,7 +7276,7 @@
           <x>0</x>
           <y>0</y>
           <width>268</width>
-          <height>384</height>
+          <height>360</height>
          </rect>
         </property>
         <attribute name="label">
@@ -7418,7 +7421,7 @@
           <x>0</x>
           <y>0</y>
           <width>296</width>
-          <height>384</height>
+          <height>360</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -7548,7 +7551,7 @@
             <enum>QFrame::Raised</enum>
            </property>
            <property name="currentIndex">
-            <number>3</number>
+            <number>2</number>
            </property>
            <property name="tabSpacing">
             <number>2</number>
@@ -7558,8 +7561,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>100</width>
-              <height>72</height>
+              <width>294</width>
+              <height>208</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -7598,8 +7601,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>190</width>
-                  <height>342</height>
+                  <width>294</width>
+                  <height>411</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -7874,14 +7877,14 @@
                      </property>
                     </widget>
                    </item>
-                   <item row="9" column="0">
+                   <item row="11" column="0">
                     <widget class="QLabel" name="labelAspectRatio">
                      <property name="text">
                       <string>Aspect ratio</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="9" column="1">
+                   <item row="11" column="1">
                     <widget class="QLineEdit" name="lineEditAspectRatio">
                      <property name="maximumSize">
                       <size>
@@ -7900,14 +7903,14 @@
                      </property>
                     </widget>
                    </item>
-                   <item row="10" column="0">
+                   <item row="12" column="0">
                     <widget class="QLabel" name="labelTickDirection">
                      <property name="text">
                       <string>Tick direction</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="10" column="1">
+                   <item row="12" column="1">
                     <widget class="QComboBox" name="comboBoxTickDirection">
                      <property name="maximumSize">
                       <size>
@@ -7947,6 +7950,99 @@
                      </property>
                     </widget>
                    </item>
+                   <item row="10" column="1">
+                    <widget class="QComboBox" name="comboBoxZScale">
+                     <item>
+                      <property name="text">
+                       <string>linear</string>
+                      </property>
+                     </item>
+                     <item>
+                      <property name="text">
+                       <string>scientific</string>
+                      </property>
+                     </item>
+                     <item>
+                      <property name="text">
+                       <string>log</string>
+                      </property>
+                     </item>
+                    </widget>
+                   </item>
+                   <item row="10" column="0">
+                    <widget class="QLabel" name="labelZScale">
+                     <property name="text">
+                      <string>Z Scale</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="9" column="0">
+                    <layout class="QHBoxLayout" name="horizontalLayout_45">
+                     <item>
+                      <widget class="QLabel" name="labelZLim">
+                       <property name="text">
+                        <string>Z Limits</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QToolButton" name="toolButtonZAxisReset">
+                       <property name="minimumSize">
+                        <size>
+                         <width>20</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>20</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                       <property name="toolTip">
+                        <string>Reset histogram axes</string>
+                       </property>
+                       <property name="accessibleName">
+                        <string>axis reset</string>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">border : none;</string>
+                       </property>
+                       <property name="text">
+                        <string>Reset</string>
+                       </property>
+                       <property name="icon">
+                        <iconset resource="../resources.qrc">
+                         <normaloff>:/resources/icons/icon-reset-64.svg</normaloff>:/resources/icons/icon-reset-64.svg</iconset>
+                       </property>
+                       <property name="iconSize">
+                        <size>
+                         <width>14</width>
+                         <height>14</height>
+                        </size>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                   <item row="9" column="1">
+                    <layout class="QHBoxLayout" name="horizontalLayout_46">
+                     <item>
+                      <widget class="QLineEdit" name="lineEditZLB">
+                       <property name="alignment">
+                        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLineEdit" name="lineEditZUB">
+                       <property name="alignment">
+                        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
                   </layout>
                  </item>
                  <item>
@@ -7973,8 +8069,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>100</width>
-              <height>72</height>
+              <width>294</width>
+              <height>208</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -8013,7 +8109,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>203</width>
+                  <width>294</width>
                   <height>374</height>
                  </rect>
                 </property>
@@ -8371,8 +8467,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>100</width>
-              <height>72</height>
+              <width>294</width>
+              <height>184</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -8411,7 +8507,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>244</width>
+                  <width>294</width>
                   <height>256</height>
                  </rect>
                 </property>
@@ -8798,7 +8894,7 @@
               <x>0</x>
               <y>0</y>
               <width>294</width>
-              <height>208</height>
+              <height>184</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -9562,13 +9658,161 @@
          </item>
         </layout>
        </widget>
+       <widget class="QWidget" name="regression">
+        <attribute name="icon">
+         <iconset resource="../resources.qrc">
+          <normaloff>:/resources/icons/icon-regression-64.svg</normaloff>:/resources/icons/icon-regression-64.svg</iconset>
+        </attribute>
+        <attribute name="label">
+         <string>Regression</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_76">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QScrollArea" name="scrollAreaRegression">
+           <property name="widgetResizable">
+            <bool>true</bool>
+           </property>
+           <widget class="QWidget" name="scrollAreaWidgetContentsRegression">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>239</width>
+              <height>358</height>
+             </rect>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_78">
+             <property name="leftMargin">
+              <number>6</number>
+             </property>
+             <property name="topMargin">
+              <number>6</number>
+             </property>
+             <property name="rightMargin">
+              <number>6</number>
+             </property>
+             <property name="bottomMargin">
+              <number>6</number>
+             </property>
+             <item>
+              <layout class="QFormLayout" name="formLayout_13">
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_4">
+                 <property name="text">
+                  <string>Show/hide</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="label_2">
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                   <bold>false</bold>
+                   <stylestrategy>PreferDefault</stylestrategy>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Method</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QComboBox" name="comboBoxRegressionMethod">
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                   <bold>false</bold>
+                   <stylestrategy>PreferDefault</stylestrategy>
+                  </font>
+                 </property>
+                 <item>
+                  <property name="text">
+                   <string>linear least squares</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>total least squares</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QLabel" name="label_3">
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                   <bold>false</bold>
+                   <stylestrategy>PreferDefault</stylestrategy>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Fixed intercept</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QCheckBox" name="checkBox">
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                   <bold>false</bold>
+                   <stylestrategy>PreferDefault</stylestrategy>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QCheckBox" name="checkBox_2">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <spacer name="verticalSpacer_14">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>257</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </widget>
+          </widget>
+         </item>
+        </layout>
+       </widget>
        <widget class="QWidget" name="CalculatorPage">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
           <width>290</width>
-          <height>384</height>
+          <height>360</height>
          </rect>
         </property>
         <attribute name="icon">

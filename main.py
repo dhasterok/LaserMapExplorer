@@ -368,6 +368,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     self.right_tab.update({'tree': tid})
                 case 'styling':
                     self.right_tab.update({'style': tid})
+                case 'regression':
+                    self.right_tab.update({'regression': tid})
                 case 'calculator':
                     self.right_tab.update({'calculator': tid})
 
@@ -639,9 +641,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxFieldTypeX.activated.connect(lambda: self.update_field_combobox(self.comboBoxFieldTypeX, self.comboBoxFieldX))
         self.comboBoxFieldTypeY.activated.connect(lambda: self.update_field_combobox(self.comboBoxFieldTypeY, self.comboBoxFieldY))
         self.comboBoxFieldTypeZ.activated.connect(lambda: self.update_field_combobox(self.comboBoxFieldTypeZ, self.comboBoxFieldZ))
-        self.comboBoxFieldX.activated.connect(self.update_SV)
-        self.comboBoxFieldY.activated.connect(self.update_SV)
-        self.comboBoxFieldZ.activated.connect(self.update_SV)
 
 
         # polygon table
@@ -1212,9 +1211,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         result = self.analyteDialog.exec_()  # Store the result here
         if result == QDialog.Accepted:
             #update self.data['norm'] with selection
-            self.data[self.sample_id].processed_data.set_attribute(self.analyteDialog.analytes,'norm',self.analyteDialog.norms)
+            self.data[self.sample_id].processed_data.set_attribute(self.analyteDialog.analytes,'norm',self.analyteDialog.norm_dict)
 
-            self.plot_tree.update_tree(self.data[self.sample_id]['norm'], norm_update = True)
+            self.plot_tree.update_tree(norm_update=True)
             #update analysis type combo in styles
             self.check_analysis_type()
 
@@ -2618,7 +2617,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     # -------------------------------------
     # General plot functions
     # -------------------------------------
-    def get_map_data(self, field, field_type, scale_data=False):
+    def get_map_data(self, field, field_type, norm='linear'):
         """Wrapper for ``DataHandling.get_map_data`` that ensure proper call from ``MainWindow`` methods.
 
         Parameters
@@ -2627,7 +2626,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             Field requested.
         field_type : str
             Field type, if normalized it will include reference chemistry in call.
-        scale_data : bool, optional
+        norm : str, optional
             Sets whether to return the data scaled (linear, log, etc.), by default False
 
         Returns
@@ -2635,9 +2634,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         df : pandas.DataFrame
         """        
         if 'normalized' in field_type:
-            df = self.data[self.sample_id].get_map_data(field, field_type, scale_data=scale_data, ref_chem=self.ref_chem)
+            df = self.data[self.sample_id].get_map_data(field, field_type, norm=norm, ref_chem=self.ref_chem)
         else:
-            df = self.data[self.sample_id].get_map_data(field, field_type, scale_data=scale_data)
+            df = self.data[self.sample_id].get_map_data(field, field_type, norm=norm)
 
         return df
 
@@ -2771,7 +2770,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.sv_widget.show()
 
             if (self.comboBoxPlotType.currentText() == 'analyte map') and (self.toolBox.currentIndex() == self.left_tab['sample']):
-                current_map_df = self.get_map_data(plot_info['plot_name'], plot_info['field_type'], scale_data=True)
+                current_map_df = self.get_map_data(plot_info['plot_name'], plot_info['field_type'], norm=self.style.cscale)
                 self.plot_small_histogram(current_map_df)
         # add figure to MultiView canvas
         elif self.canvasWindow.currentIndex() == self.canvas_tab['mv']:
@@ -3384,7 +3383,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.style.set_style_widgets()
 
         # get data for current map
-        map_df = self.data[self.sample_id].get_map_data(field, field_type, scale_data=True)
+        #scale = self.data[self.sample_id].processed_data.get_attribute(field, 'norm')
+        scale = self.style.cscale
+        map_df = self.data[self.sample_id].get_map_data(field, field_type)
 
         array_size = self.data[self.sample_id].array_size
         aspect_ratio = self.data[self.sample_id].aspect_ratio
@@ -3406,9 +3407,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         cax = canvas.axes.imshow(reshaped_array, cmap=self.style.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
 
-
         self.add_colorbar(canvas, cax)
-        cax.set_clim(self.style.clim[0], self.style.clim[1])
+        match self.style.cscale:
+            case 'linear':
+                clim = self.style.clim
+            case 'log':
+                clim = self.style.clim
+                #clim = np.log10(self.style.clim)
+            case 'logit':
+                print('Color limits for logit are not currently implemented')
+
+        cax.set_clim(clim[0], clim[1])
 
         # use mask to create an alpha layer
         mask = self.data[self.sample_id].mask.astype(float)
@@ -3450,7 +3459,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             'position': None
             }
         
-        self.add_plotwidget_to_canvas( self.plot_info)
+        self.add_plotwidget_to_canvas(self.plot_info)
         # self.widgetSingleView.layout().addWidget(canvas)
 
         self.plot_tree.add_tree_item(self.plot_info)
@@ -3474,7 +3483,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # ----end debugging----
 
         # get data for current map
-        map_df = self.get_map_data(field, field_type, scale_data=False)
+        scale = self.style.cscale
+        map_df = self.get_map_data(field, field_type, norm=scale)
 
         # store map_df to save_data if data needs to be exported
         self.save_data = map_df
@@ -3791,12 +3801,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def histogram_field_type_callback(self):
         """"Executes when the histogram field type is changed"""
         self.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
-        self.comboBoxPlotType.setCurrentText('histogram')
+        if self.comboBoxPlotType.currentText() != 'histogram':
+            self.comboBoxPlotType.setCurrentText('histogram')
         self.histogram_update_bin_width()
 
     def histogram_field_callback(self):
         """Executes when the histogram field is changed"""
-        self.comboBoxPlotType.setCurrentText('histogram')
+        if self.comboBoxPlotType.currentText() != 'histogram':
+            self.comboBoxPlotType.setCurrentText('histogram')
         self.histogram_update_bin_width()
 
     def histogram_update_bin_width(self):
@@ -3882,7 +3894,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Histogram
         #remove by mask and drop rows with na
         mask = self.data[self.sample_id].mask
-        mask = mask & current_plot_df['array'].notna()
+        if self.style.cscale == 'log' or 'logit':
+            mask = mask & current_plot_df['array'].notna() & (current_plot_df['array'] > 0)
+        else:
+            mask = mask & current_plot_df['array'].notna()
 
         array = current_plot_df['array'][mask].values
 
@@ -3891,7 +3906,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.style.cscale == 'log':
             print('log scale')
             logflag = True
-            array = np.log10(array)
+            if any(array <= 0):
+                print(f"Warning issues with values <= 0, (-): {sum(array < 0)}, (0): {sum(array == 0)}")
+                return
 
         bin_width = (np.nanmax(array) - np.nanmin(array)) / self.default_bins
         edges = np.arange(np.nanmin(array), np.nanmax(array) + bin_width, bin_width)
@@ -4131,32 +4148,35 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         match plot_type:
             case 'histogram':
-                scatter_dict['x'] = self.data[self.sample_id].get_vector(self.comboBoxHistFieldType.currentText(), self.comboBoxHistField.currentText())
+                scatter_dict['x'] = self.data[self.sample_id].get_vector(self.comboBoxHistFieldType.currentText(), self.comboBoxHistField.currentText(), norm=self.style.xscale)
             case 'PCA scatter' | 'PCA heatmap':
-                scatter_dict['x'] = self.data[self.sample_id].get_vector('PCA score', f'PC{self.spinBoxPCX.value()}')
-                scatter_dict['y'] = self.data[self.sample_id].get_vector('PCA score', f'PC{self.spinBoxPCY.value()}')
+                scatter_dict['x'] = self.data[self.sample_id].get_vector('PCA score', f'PC{self.spinBoxPCX.value()}', norm=self.style.xscale)
+                scatter_dict['y'] = self.data[self.sample_id].get_vector('PCA score', f'PC{self.spinBoxPCY.value()}', norm=self.style.yscale)
                 if (self.comboBoxColorByField.currentText() is None) or (self.comboBoxColorByField.currentText != ''):
                     scatter_dict['c'] = self.data[self.sample_id].get_vector(self.comboBoxColorByField.currentText(), self.comboBoxColorField.currentText())
             case _:
-                scatter_dict['x'] = self.data[self.sample_id].get_vector(self.comboBoxFieldTypeX.currentText(), self.comboBoxFieldX.currentText())
-                scatter_dict['y'] = self.data[self.sample_id].get_vector(self.comboBoxFieldTypeY.currentText(), self.comboBoxFieldY.currentText())
+                scatter_dict['x'] = self.data[self.sample_id].get_vector(self.comboBoxFieldTypeX.currentText(), self.comboBoxFieldX.currentText(), norm=self.style.xscale)
+                scatter_dict['y'] = self.data[self.sample_id].get_vector(self.comboBoxFieldTypeY.currentText(), self.comboBoxFieldY.currentText(), norm=self.style.yscale)
                 if (self.comboBoxColorByField.currentText() is not None) and (self.comboBoxColorByField.currentText() != ''):
-                    scatter_dict['z'] = self.data[self.sample_id].get_vector(self.comboBoxFieldTypeZ.currentText(), self.comboBoxFieldZ.currentText())
+                    scatter_dict['z'] = self.data[self.sample_id].get_vector(self.comboBoxFieldTypeZ.currentText(), self.comboBoxFieldZ.currentText(), norm=self.style.zscale)
                 elif (self.comboBoxFieldZ.currentText() is not None) and (self.comboBoxFieldZ.currentText() != ''):
-                    scatter_dict['c'] = self.data[self.sample_id].get_vector(self.comboBoxColorByField.currentText(), self.comboBoxColorField.currentText())
+                    scatter_dict['c'] = self.data[self.sample_id].get_vector(self.comboBoxColorByField.currentText(), self.comboBoxColorField.currentText(), norm=self.style.cscale)
 
         # set axes widgets
         if (scatter_dict['x']['field'] is not None) and (scatter_dict['y']['field'] != ''):
             if scatter_dict['x']['field'] not in self.data[self.sample_id].axis_dict.keys():
                 self.style.initialize_axis_values(scatter_dict['x']['type'], scatter_dict['x']['field'])
+                self.style.set_axis_widgets('z', scatter_dict['z']['field'])
 
         if (scatter_dict['y']['field'] is not None) and (scatter_dict['y']['field'] != ''):
             if scatter_dict['y']['field'] not in self.data[self.sample_id].axis_dict.keys():
                 self.style.initialize_axis_values(scatter_dict['y']['type'], scatter_dict['y']['field'])
+                self.style.set_axis_widgets('z', scatter_dict['z']['field'])
 
         if (scatter_dict['z']['field'] is not None) and (scatter_dict['z']['field'] != ''):
             if scatter_dict['z']['field'] not in self.data[self.sample_id].axis_dict.keys():
                 self.style.initialize_axis_values(scatter_dict['z']['type'], scatter_dict['z']['field'])
+                self.style.set_axis_widgets('z', scatter_dict['z']['field'])
 
         if (scatter_dict['c']['field'] is not None) and (scatter_dict['c']['field'] != ''):
             if scatter_dict['c']['field'] not in self.data[self.sample_id].axis_dict.keys():

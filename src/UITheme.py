@@ -59,6 +59,7 @@ class UIThemes():
         # Reset Buttons
         parent.toolButtonXAxisReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-dark-64.svg')))
         parent.toolButtonYAxisReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-dark-64.svg')))
+        parent.toolButtonZAxisReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-dark-64.svg')))
         parent.toolButtonCAxisReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-dark-64.svg')))
         parent.toolButtonClusterColorReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-dark-64.svg')))
         parent.toolButtonHistogramReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-dark-64.svg')))
@@ -121,6 +122,8 @@ class UIThemes():
         parent.toolButtonPan.setIcon(QIcon(os.path.join(ICONPATH,'icon-move-dark-64.svg')))
         parent.toolButtonZoom.setIcon(QIcon(os.path.join(ICONPATH,'icon-zoom-dark-64.svg')))
         parent.toolButtonDistance.setIcon(QIcon(os.path.join(ICONPATH,'icon-distance-dark-64.svg')))
+        # Regression
+        parent.toolBoxTreeView.setItemIcon(parent.right_tab['regression'],QIcon(os.path.join(ICONPATH,'icon-regression-dark-64.svg')))
         # Calculator
         parent.toolButtonCalculate.setIcon(QIcon(os.path.join(ICONPATH,'icon-calculator-dark-64.svg')))
         parent.actionCalculator.setIcon(QIcon(os.path.join(ICONPATH,'icon-calculator-dark-64.svg')))
@@ -163,6 +166,7 @@ class UIThemes():
         # Reset Buttons
         parent.toolButtonXAxisReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-64.svg')))
         parent.toolButtonYAxisReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-64.svg')))
+        parent.toolButtonZAxisReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-64.svg')))
         parent.toolButtonCAxisReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-64.svg')))
         parent.toolButtonClusterColorReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-64.svg')))
         parent.toolButtonHistogramReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-64.svg')))
@@ -225,6 +229,8 @@ class UIThemes():
         parent.toolButtonPan.setIcon(QIcon(os.path.join(ICONPATH,'icon-move-64.svg')))
         parent.toolButtonZoom.setIcon(QIcon(os.path.join(ICONPATH,'icon-zoom-64.svg')))
         parent.toolButtonDistance.setIcon(QIcon(os.path.join(ICONPATH,'icon-distance-64.svg')))
+        # Regression
+        parent.toolBoxTreeView.setItemIcon(parent.right_tab['regression'],QIcon(os.path.join(ICONPATH,'icon-regression-64.svg')))
         # Calculator
         parent.toolButtonCalculate.setIcon(QIcon(os.path.join(ICONPATH,'icon-calculator-64.svg')))
         parent.actionCalculator.setIcon(QIcon(os.path.join(ICONPATH,'icon-calculator-64.svg')))

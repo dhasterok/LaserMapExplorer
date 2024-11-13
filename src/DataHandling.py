@@ -705,6 +705,8 @@ class SampleObj:
             run for the first time.
         """ 
         attribute_df = None
+        analyte_columns = []
+        ratio_columns = []
         if (field == None) or (field == 'all'):
             # Select columns where 'data_type' attribute is 'analyte'
             analyte_columns = self.raw_data.match_attributes({'data_type': 'analyte', 'use': True})
@@ -737,7 +739,7 @@ class SampleObj:
 
         # Handle negative values
         # ----------------------
-        for col in columns:
+        for col in analyte_columns:
             if col not in self.raw_data.columns:
                 continue
 
@@ -745,7 +747,10 @@ class SampleObj:
                 if np.isnan(idx):
                     continue
                 cluster_mask = self.cluster_labels == idx
-                self.processed_data[col][cluster_mask] = self.transform_array(self.processed_data[col][cluster_mask],self.processed_data.get_attribute(col,'negative_method'))
+                print(f"{(col, idx)} before: {sum(self.processed_data[col] < 0)}, {sum(self.processed_data[col][cluster_mask] < 0)}")
+                transformed_data = self.transform_array(self.processed_data[col][cluster_mask],self.processed_data.get_attribute(col,'negative_method'))
+                self.processed_data.loc[cluster_mask, col] = transformed_data
+                print(f"{(col, idx)} after : {sum(self.processed_data[col] < 0)}, {sum(self.processed_data[col][cluster_mask] < 0)}, {sum(transformed_data < 0)}")
 
         # Compute ratios not included in raw_data
         # ---------------------------------------
@@ -804,7 +809,8 @@ class SampleObj:
             for idx in np.unique(self.cluster_labels):
                 cluster_mask = (self.cluster_labels == idx)
 
-                self.processed_data[col][cluster_mask] = self.outlier_detection(self.processed_data[col][cluster_mask], lq, uq, d_lq, d_uq, compositional, max_val)
+                transformed_data = self.outlier_detection(self.processed_data[col][cluster_mask], lq, uq, d_lq, d_uq, compositional, max_val)
+                self.processed_data.loc[cluster_mask, col] = transformed_data
 
     def k_optimal_clusters(self, data, max_clusters=int(10)):
         """Predicts the optimal number of clusters
@@ -827,6 +833,23 @@ class SampleObj:
             Returns the optimal number of k-means clusters.
         """        
         inertia = []
+
+        # clip outliers and make entirely positive
+        percentile = 2.5
+        min_pos = 1e-2
+        for i in range(data.shape[1]):
+            # Find the minimum positive value in the column
+            col_min_pos = np.min(data[data[:, i] > 0, i])
+            min_threshold = max(col_min_pos, min_pos)  # Choose the larger of min positive or 0.01
+
+            # Set all values less than the threshold to the threshold value
+            data[:, i] = np.where(data[:, i] < min_threshold, min_threshold, data[:, i])
+
+        lower_bound = np.percentile(data, percentile, axis=0)
+        upper_bound = np.percentile(data, 100-percentile, axis=0)
+
+        # Clip values to the 5th and 95th percentiles per column
+        data = np.log(np.clip(data, lower_bound, upper_bound))
         
         # Perform KMeans for cluster numbers from 1 to max_clusters
         for n_clusters in range(1, max_clusters+1):
@@ -1007,7 +1030,7 @@ class SampleObj:
 
         self.prep_data(field)
 
-    def get_map_data(self, field, field_type='Analyte', scale_data=False, ref_chem=None):
+    def get_map_data(self, field, field_type='Analyte', norm=False, ref_chem=None):
         """
         Retrieves and processes the mapping data for the given sample and analytes, then plots the result if required.
 
@@ -1021,7 +1044,7 @@ class SampleObj:
         field_type : str, optional
             Type of field to plot. Types include 'Analyte', 'Ratio', 'pca', 'Cluster', 'Cluster Score',
             'Special', 'computed'. By default `'Analyte'`
-        scale_data : bool
+        norm : str
             Scale data as linear, log, etc. based on stored norm.  If scale_data is `False`, the
             data are returned with a linear scale.  By default `False`.
         ref_chem : dict
@@ -1052,20 +1075,20 @@ class SampleObj:
             case 'Analyte' | 'Analyte (normalized)':
                 # unnormalized
                 df['array'] = self.processed_data[field].values
-                #get analyte info
-                norm = self.processed_data.get_attribute(field, 'norm')
+
+                #norm = self.processed_data.get_attribute(field, 'norm')
                 
                 #perform scaling for groups of analytes with same norm parameter
-                
-                if norm == 'log' and scale_data:
-                    df['array'] = np.where(~np.isnan(df['array']), np.log10(df['array']), df['array'])
+                if norm == 'log':
+                    df['array'] = np.where((~np.isnan(df['array'])) & (df['array'] > 0), np.log10(df['array']), np.nan)
+
 
                     # print(self.processed_analyte_data[sample_id].loc[:10,analytes])
                     # print(self.processed_data.loc[:10,analytes])
-                elif norm == 'logit' and scale_data:
+                elif norm == 'logit':
                     # Handle division by zero and NaN values
                     with np.errstate(divide='ignore', invalid='ignore'):
-                        df['array'] = np.where(~np.isnan(df['array']), np.log10(df['array'] / (10**6 - df['array'])))
+                        df['array'] = np.where((~np.isnan(df['array'])) & (df['array'] > 0), np.log10(df['array'] / (10**6 - df['array'])), np.nan)
                 
                 # normalize
                 if 'normalized' in field_type:
@@ -1087,16 +1110,17 @@ class SampleObj:
                     df['array'] = df['array'] * (refval_2 / refval_1)
 
                 #get norm value
-                norm = self.processed_data.column_attributes['field']['norm']
+                #norm = self.processed_data.column_attributes['field']['norm']
 
-                if norm == 'log' and scale_data:
-                    df ['array'] = np.where(~np.isnan(df['array']), np.log10(df['array']))
+                if norm == 'log':
+                    df['array'] = np.where((~np.isnan(df['array'])) & (df['array'] > 0), np.log10(df['array']), np.nan)
+
                     # print(self.processed_analyte_data[sample_id].loc[:10,analytes])
                     # print(self.processed_data.loc[:10,analytes])
-                elif norm == 'logit' and scale_data:
+                elif norm == 'logit':
                     # Handle division by zero and NaN values
                     with np.errstate(divide='ignore', invalid='ignore'):
-                        df['array'] = np.where(~np.isnan(df['array']), np.log10(df['array'] / (10**6 - df['array'])))
+                        df['array'] = np.where((~np.isnan(df['array'])) & (df['array'] > 0), np.log10(df['array'] / (10**6 - df['array'])), np.nan)
 
             case _:#'PCA Score' | 'Cluster' | 'Cluster Score' | 'Special' | 'Computed':
                 df['array'] = self.processed_data[field].values
@@ -1153,7 +1177,7 @@ class SampleObj:
         return df, use_analytes
     
     # extracts data for scatter plot
-    def get_vector(self, field_type, field, ref_chem=None):
+    def get_vector(self, field_type, field, norm='linear', ref_chem=None):
         """Creates a dictionary of values for plotting
 
         Returns
@@ -1176,7 +1200,7 @@ class SampleObj:
             value_dict['label'] = value_dict['field'] + ' (' + unit + ')'
 
         # add array
-        df = self.get_map_data(field=field, field_type=field_type, scale_data=False, ref_chem=ref_chem)
+        df = self.get_map_data(field=field, field_type=field_type, norm='linear', ref_chem=ref_chem)
         value_dict['array'] = df['array'][self.mask].values if not df.empty else []
 
         return value_dict

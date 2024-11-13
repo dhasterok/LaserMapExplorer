@@ -429,21 +429,21 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         # Check if the mouse is over a valid cell
         if row >= 0 and col >= 0:
             if self.prev_row != row:
-                self._set_row_font(self.prev_row, QFont.Normal)  # Reset previous row
-                self._set_row_font(row, QFont.Bold)  # Set current row to Bold
+                self._set_row_font(self.prev_row, QFont.Normal, QBrush())  # Reset previous row
+                self._set_row_font(row, QFont.Bold, QBrush(QColor("yellow")))  # Set current row to Bold
                 self.prev_row = row  # Update previous row
             
             if self.prev_col != col:
-                self._set_col_font(self.prev_col, QFont.Normal)  # Reset previous column
-                self._set_col_font(col, QFont.Bold)  # Set current column to Bold
+                self._set_col_font(self.prev_col, QFont.Normal, QBrush())  # Reset previous column
+                self._set_col_font(col, QFont.Bold, QBrush(QColor("yellow")))  # Set current column to Bold
                 self.prev_col = col  # Update previous column
 
         super().mouseMoveEvent(event)
 
     def leaveEvent(self, event):
         # Reset font when the mouse leaves the table area
-        self._set_row_font(self.prev_row, QFont.Normal)
-        self._set_col_font(self.prev_col, QFont.Normal)
+        self._set_row_font(self.prev_row, QFont.Normal, QBrush())
+        self._set_col_font(self.prev_col, QFont.Normal, QBrush())
         self.prev_row = None
         self.prev_col = None
         super().leaveEvent(event)
@@ -475,9 +475,9 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         if obj == self.tableWidgetAnalytes.viewport() and event.type() == event.Leave:
             # Reset any bold headers when the mouse leaves the table
             if self.prev_row is not None:
-                self._set_row_font(self.prev_row, QFont.Normal)
+                self._set_row_font(self.prev_row, QFont.Normal, QBrush())
             if self.prev_col is not None:
-                self._set_col_font(self.prev_col, QFont.Normal)
+                self._set_col_font(self.prev_col, QFont.Normal, QBrush())
             self.prev_row = None
             self.prev_col = None
 

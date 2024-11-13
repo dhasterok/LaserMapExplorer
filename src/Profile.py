@@ -590,7 +590,7 @@ class Profiling:
         else:
             profiles = i_profile
 
-        style = self.main_window.styles['profile']
+        style = self.main_window.style
 
         if len(list(profiles.values())[0])>0: #if profile has values
             self.main_window.tabWidget.setCurrentIndex(self.main_window.bottom_tab['profile']) #show profile plot tab
@@ -604,7 +604,7 @@ class Profiling:
                     child.widget().deleteLater()
 
             # Get the colormap specified by the user
-            cmap = self.main_window.get_colormap()
+            cmap = style.get_colormap()
             # Determine point type from the pushButtonProfileType text
             if self.main_window.comboBoxPointType.currentText() == 'median + IQR':
                 point_type = 'median'
@@ -661,8 +661,8 @@ class Profiling:
                             # Plot markers with ax.scatter
                             scatter = ax.scatter(distances, scaled_values,
                                                   color=colors[idx+g_idx],
-                                                  s=style['Markers']['Size'],
-                                                  marker=self.main_window.markerdict[style['Markers']['Symbol']],
+                                                  s=style.marker_size,
+                                                  marker=style.marker_dict[style.marker],
                                                   edgecolors='none',
                                                   picker=5,
                                                   label=f'{profile_key}',
@@ -673,8 +673,8 @@ class Profiling:
                                                             yerr=scaled_errors,
                                                             fmt='none',
                                                             color=colors[idx+g_idx],
-                                                            ecolor=style['Colors']['Color'],
-                                                            elinewidth=style['Lines']['LineWidth'],
+                                                            ecolor=style.line_color,
+                                                            elinewidth=style.line_width,
                                                             capsize=0,
                                                             zorder=2*g_idx)
 
@@ -695,8 +695,8 @@ class Profiling:
                             # Plot markers with ax.scatter
                             scatter = ax.scatter(distances, means,
                                                 color=colors[idx+g_idx],
-                                                s=style['Markers']['Size'],
-                                                marker=self.main_window.markerdict[style['Markers']['Symbol']],
+                                                s=style.marker_size,
+                                                marker=style.marker_dict[style.marker],
                                                 edgecolors='none',
                                                 picker=5,
                                                 label=f'{profile_key[:-1]}',
@@ -707,8 +707,8 @@ class Profiling:
                                                             yerr=s_errors,
                                                             fmt='none',
                                                             color=colors[idx+g_idx],
-                                                            ecolor=style['Colors']['Color'],
-                                                            elinewidth=style['Lines']['LineWidth'],
+                                                            ecolor=style.line_color,
+                                                            elinewidth=style.line_width,
                                                             capsize=0, zorder=2*g_idx)
 
                         self.all_errorbars.append((scatter,barlinecols[0]))
@@ -745,8 +745,8 @@ class Profiling:
                             # Plot markers with ax.scatter
                             scatter = ax.scatter(distances, scaled_values,
                                                 color=colors[idx+g_idx],
-                                                s=style['Markers']['Size'],
-                                                marker=self.main_window.markerdict[style['Markers']['Symbol']],
+                                                s=style.marker_size,
+                                                marker=style.marker_dict[style.marker],
                                                 edgecolors='none',
                                                 picker=5,
                                                 gid=profile_key,
@@ -758,8 +758,8 @@ class Profiling:
                                                             yerr=scaled_errors,
                                                             fmt='none',
                                                             color=colors[idx+g_idx],
-                                                            ecolor=style['Colors']['Color'],
-                                                            elinewidth=style['Lines']['LineWidth'],
+                                                            ecolor=style.line_color,
+                                                            elinewidth=style.line_width,
                                                             capsize=0,
                                                             zorder=2*g_idx)
 
@@ -781,8 +781,8 @@ class Profiling:
                             # Plot markers with ax.scatter
                             scatter = ax.scatter(distances, medians,
                                                  color=colors[idx+g_idx],
-                                                 s=style['Markers']['Size'],
-                                                 marker=self.main_window.markerdict[style['Markers']['Symbol']],
+                                                 s=style.marker_size,
+                                                 marker=style.marker_dict[style.marker],
                                                  edgecolors='none',
                                                  picker=5,
                                                  gid=profile_key,
@@ -794,8 +794,8 @@ class Profiling:
                                                             yerr=errors,
                                                             fmt='none',
                                                             color=colors[idx+g_idx],
-                                                            ecolor=style['Colors']['Color'],
-                                                            elinewidth=style['Lines']['LineWidth'],
+                                                            ecolor=style.line_color,
+                                                            elinewidth=style.line_width,
                                                             capsize=0,
                                                             zorder=2*g_idx)
 
@@ -902,6 +902,7 @@ class Profiling:
         self.main_window.toolButtonPointDelete.setEnabled(enable)
 
     def on_pick(self, event):
+        style = self.main_window.style
 
         if self.edit_mode_enabled and isinstance(event.artist, PathCollection):
             # The picked scatter plot
@@ -932,7 +933,7 @@ class Profiling:
 
             picked_scatter.set_facecolors(facecolors)
             # Update the scatter plot sizes
-            picked_scatter.set_sizes(np.full(num_points, self.main_window.styles['profile']['Markers']['Size']))
+            picked_scatter.set_sizes(np.full(num_points, style.marker_size))
             self.fig.canvas.draw_idle()
 
     def toggle_edit_mode(self):

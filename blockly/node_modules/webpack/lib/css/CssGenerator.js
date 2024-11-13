@@ -8,32 +8,31 @@
 const { ReplaceSource } = require("webpack-sources");
 const Generator = require("../Generator");
 const InitFragment = require("../InitFragment");
+const { CSS_TYPES } = require("../ModuleSourceTypesConstants");
 const RuntimeGlobals = require("../RuntimeGlobals");
 
 /** @typedef {import("webpack-sources").Source} Source */
 /** @typedef {import("../../declarations/WebpackOptions").CssGeneratorExportsConvention} CssGeneratorExportsConvention */
 /** @typedef {import("../../declarations/WebpackOptions").CssGeneratorLocalIdentName} CssGeneratorLocalIdentName */
+/** @typedef {import("../CodeGenerationResults")} CodeGenerationResults */
 /** @typedef {import("../Dependency")} Dependency */
 /** @typedef {import("../DependencyTemplate").CssDependencyTemplateContext} DependencyTemplateContext */
 /** @typedef {import("../DependencyTemplate").CssExportsData} CssExportsData */
 /** @typedef {import("../Generator").GenerateContext} GenerateContext */
 /** @typedef {import("../Generator").UpdateHashContext} UpdateHashContext */
+/** @typedef {import("../Module").SourceTypes} SourceTypes */
 /** @typedef {import("../NormalModule")} NormalModule */
 /** @typedef {import("../util/Hash")} Hash */
 
-const TYPES = new Set(["css"]);
-
 class CssGenerator extends Generator {
 	/**
-	 * @param {CssGeneratorExportsConvention | undefined} convention the convention of the exports name
-	 * @param {CssGeneratorLocalIdentName | undefined} localIdentName css export local ident name
+	 * @param {CssGeneratorExportsConvention} convention the convention of the exports name
+	 * @param {CssGeneratorLocalIdentName} localIdentName css export local ident name
 	 * @param {boolean} esModule whether to use ES modules syntax
 	 */
 	constructor(convention, localIdentName, esModule) {
 		super();
-		/** @type {CssGeneratorExportsConvention | undefined} */
 		this.convention = convention;
-		/** @type {CssGeneratorLocalIdentName | undefined} */
 		this.localIdentName = localIdentName;
 		/** @type {boolean} */
 		this.esModule = esModule;
@@ -42,12 +41,12 @@ class CssGenerator extends Generator {
 	/**
 	 * @param {NormalModule} module module for which the code should be generated
 	 * @param {GenerateContext} generateContext context for generate
-	 * @returns {Source} generated code
+	 * @returns {Source | null} generated code
 	 */
 	generate(module, generateContext) {
 		const originalSource = /** @type {Source} */ (module.originalSource());
 		const source = new ReplaceSource(originalSource);
-		/** @type {InitFragment[]} */
+		/** @type {InitFragment<GenerateContext>[]} */
 		const initFragments = [];
 		/** @type {CssExportsData} */
 		const cssExportsData = {
@@ -57,6 +56,7 @@ class CssGenerator extends Generator {
 
 		generateContext.runtimeRequirements.add(RuntimeGlobals.hasCssModules);
 
+		/** @type {InitFragment<GenerateContext>[] | undefined} */
 		let chunkInitFragments;
 		/** @type {DependencyTemplateContext} */
 		const templateContext = {
@@ -68,12 +68,16 @@ class CssGenerator extends Generator {
 			runtime: generateContext.runtime,
 			runtimeRequirements: generateContext.runtimeRequirements,
 			concatenationScope: generateContext.concatenationScope,
-			codeGenerationResults: generateContext.codeGenerationResults,
+			codeGenerationResults:
+				/** @type {CodeGenerationResults} */
+				(generateContext.codeGenerationResults),
 			initFragments,
 			cssExportsData,
 			get chunkInitFragments() {
 				if (!chunkInitFragments) {
-					const data = generateContext.getData();
+					const data =
+						/** @type {NonNullable<GenerateContext["getData"]>} */
+						(generateContext.getData)();
 					chunkInitFragments = data.get("chunkInitFragments");
 					if (!chunkInitFragments) {
 						chunkInitFragments = [];
@@ -89,9 +93,9 @@ class CssGenerator extends Generator {
 		 * @param {Dependency} dependency dependency
 		 */
 		const handleDependency = dependency => {
-			const constructor = /** @type {new (...args: any[]) => Dependency} */ (
-				dependency.constructor
-			);
+			const constructor =
+				/** @type {new (...args: EXPECTED_ANY[]) => Dependency} */
+				(dependency.constructor);
 			const template = generateContext.dependencyTemplates.get(constructor);
 			if (!template) {
 				throw new Error(
@@ -110,7 +114,9 @@ class CssGenerator extends Generator {
 			}
 		}
 
-		const data = generateContext.getData();
+		const data =
+			/** @type {NonNullable<GenerateContext["getData"]>} */
+			(generateContext.getData)();
 		data.set("css-exports", cssExportsData);
 
 		return InitFragment.addToSource(source, initFragments, generateContext);
@@ -118,10 +124,10 @@ class CssGenerator extends Generator {
 
 	/**
 	 * @param {NormalModule} module fresh module
-	 * @returns {Set<string>} available types (do not mutate)
+	 * @returns {SourceTypes} available types (do not mutate)
 	 */
 	getTypes(module) {
-		return TYPES;
+		return CSS_TYPES;
 	}
 
 	/**

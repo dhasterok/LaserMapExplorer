@@ -8,18 +8,21 @@
 const { ReplaceSource, RawSource, ConcatSource } = require("webpack-sources");
 const { UsageState } = require("../ExportsInfo");
 const Generator = require("../Generator");
+const { JS_TYPES } = require("../ModuleSourceTypesConstants");
 const RuntimeGlobals = require("../RuntimeGlobals");
 const Template = require("../Template");
 
 /** @typedef {import("webpack-sources").Source} Source */
 /** @typedef {import("../../declarations/WebpackOptions").CssGeneratorExportsConvention} CssGeneratorExportsConvention */
 /** @typedef {import("../../declarations/WebpackOptions").CssGeneratorLocalIdentName} CssGeneratorLocalIdentName */
+/** @typedef {import("../CodeGenerationResults")} CodeGenerationResults */
 /** @typedef {import("../Dependency")} Dependency */
 /** @typedef {import("../DependencyTemplate").CssDependencyTemplateContext} DependencyTemplateContext */
 /** @typedef {import("../DependencyTemplate").CssExportsData} CssExportsData */
 /** @typedef {import("../Generator").GenerateContext} GenerateContext */
 /** @typedef {import("../Generator").UpdateHashContext} UpdateHashContext */
 /** @typedef {import("../Module").ConcatenationBailoutReasonContext} ConcatenationBailoutReasonContext */
+/** @typedef {import("../Module").SourceTypes} SourceTypes */
 /** @typedef {import("../NormalModule")} NormalModule */
 /** @typedef {import("../util/Hash")} Hash */
 
@@ -28,19 +31,15 @@ const Template = require("../Template");
  * @typedef {import("../InitFragment")<T>} InitFragment
  */
 
-const TYPES = new Set(["javascript"]);
-
 class CssExportsGenerator extends Generator {
 	/**
-	 * @param {CssGeneratorExportsConvention | undefined} convention the convention of the exports name
-	 * @param {CssGeneratorLocalIdentName | undefined} localIdentName css export local ident name
+	 * @param {CssGeneratorExportsConvention} convention the convention of the exports name
+	 * @param {CssGeneratorLocalIdentName} localIdentName css export local ident name
 	 * @param {boolean} esModule whether to use ES modules syntax
 	 */
 	constructor(convention, localIdentName, esModule) {
 		super();
-		/** @type {CssGeneratorExportsConvention | undefined} */
 		this.convention = convention;
-		/** @type {CssGeneratorLocalIdentName | undefined} */
 		this.localIdentName = localIdentName;
 		/** @type {boolean} */
 		this.esModule = esModule;
@@ -68,11 +67,11 @@ class CssExportsGenerator extends Generator {
 	/**
 	 * @param {NormalModule} module module for which the code should be generated
 	 * @param {GenerateContext} generateContext context for generate
-	 * @returns {Source} generated code
+	 * @returns {Source | null} generated code
 	 */
 	generate(module, generateContext) {
 		const source = new ReplaceSource(new RawSource(""));
-		/** @type {InitFragment<TODO>[]} */
+		/** @type {InitFragment<GenerateContext>[]} */
 		const initFragments = [];
 		/** @type {CssExportsData} */
 		const cssExportsData = {
@@ -82,6 +81,7 @@ class CssExportsGenerator extends Generator {
 
 		generateContext.runtimeRequirements.add(RuntimeGlobals.module);
 
+		/** @type {InitFragment<GenerateContext>[] | undefined} */
 		let chunkInitFragments;
 		const runtimeRequirements = new Set();
 
@@ -95,12 +95,16 @@ class CssExportsGenerator extends Generator {
 			runtime: generateContext.runtime,
 			runtimeRequirements,
 			concatenationScope: generateContext.concatenationScope,
-			codeGenerationResults: generateContext.codeGenerationResults,
+			codeGenerationResults:
+				/** @type {CodeGenerationResults} */
+				(generateContext.codeGenerationResults),
 			initFragments,
 			cssExportsData,
 			get chunkInitFragments() {
 				if (!chunkInitFragments) {
-					const data = generateContext.getData();
+					const data =
+						/** @type {NonNullable<GenerateContext["getData"]>} */
+						(generateContext.getData)();
 					chunkInitFragments = data.get("chunkInitFragments");
 					if (!chunkInitFragments) {
 						chunkInitFragments = [];
@@ -176,10 +180,10 @@ class CssExportsGenerator extends Generator {
 
 	/**
 	 * @param {NormalModule} module fresh module
-	 * @returns {Set<string>} available types (do not mutate)
+	 * @returns {SourceTypes} available types (do not mutate)
 	 */
 	getTypes(module) {
-		return TYPES;
+		return JS_TYPES;
 	}
 
 	/**

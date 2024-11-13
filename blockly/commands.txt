@@ -1,3 +1,7 @@
+// download and install Node.js
+brew install node@22
+
+// in /blockly directory run  the following code to compile blockly code 
 npx webpack --config webpack.config.js
 
 

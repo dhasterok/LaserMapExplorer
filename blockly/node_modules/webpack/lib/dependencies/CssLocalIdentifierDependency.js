@@ -21,6 +21,7 @@ const NullDependency = require("./NullDependency");
 /** @typedef {import("../Dependency").UpdateHashContext} UpdateHashContext */
 /** @typedef {import("../DependencyTemplate").CssDependencyTemplateContext} DependencyTemplateContext */
 /** @typedef {import("../ModuleGraph")} ModuleGraph */
+/** @typedef {import("../NormalModuleFactory").ResourceDataWithData} ResourceDataWithData */
 /** @typedef {import("../RuntimeTemplate")} RuntimeTemplate */
 /** @typedef {import("../css/CssExportsGenerator")} CssExportsGenerator */
 /** @typedef {import("../css/CssGenerator")} CssGenerator */
@@ -28,6 +29,7 @@ const NullDependency = require("./NullDependency");
 /** @typedef {import("../serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
 /** @typedef {import("../serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
 /** @typedef {import("../util/Hash")} Hash */
+/** @typedef {import("../util/createHash").Algorithm} Algorithm */
 
 /**
  * @param {string} local css local
@@ -41,12 +43,16 @@ const getLocalIdent = (local, module, chunkGraph, runtimeTemplate) => {
 		/** @type {CssGenerator | CssExportsGenerator} */
 		(module.generator).localIdentName;
 	const relativeResourcePath = makePathsRelative(
-		/** @type {string} */ (module.context),
-		module.resourceResolveData.path
+		/** @type {string} */
+		(module.context),
+		/** @type {string} */ (
+			/** @type {ResourceDataWithData} */
+			(module.resourceResolveData).path
+		)
 	);
 	const { hashFunction, hashDigest, hashDigestLength, hashSalt, uniqueName } =
 		runtimeTemplate.outputOptions;
-	const hash = createHash(hashFunction);
+	const hash = createHash(/** @type {Algorithm} */ (hashFunction));
 	if (hashSalt) {
 		hash.update(hashSalt);
 	}
@@ -71,7 +77,7 @@ const getLocalIdent = (local, module, chunkGraph, runtimeTemplate) => {
 			module
 		})
 		.replace(/\[local\]/g, local)
-		.replace(/\[uniqueName\]/g, uniqueName);
+		.replace(/\[uniqueName\]/g, /** @type {string} */ (uniqueName));
 };
 
 class CssLocalIdentifierDependency extends NullDependency {
@@ -209,28 +215,31 @@ CssLocalIdentifierDependency.Template = class CssLocalIdentifierDependencyTempla
 	) {
 		const dep = /** @type {CssLocalIdentifierDependency} */ (dependency);
 		const module = /** @type {CssModule} */ (m);
-		const convention = /** @type {CssGenerator | CssExportsGenerator} */ (
-			module.generator
-		).convention;
+		const convention =
+			/** @type {CssGenerator | CssExportsGenerator} */
+			(module.generator).convention;
 		const names = dep.getExportsConventionNames(dep.name, convention);
-		const usedNames = /** @type {string[]} */ (
-			names
-				.map(name =>
-					moduleGraph.getExportInfo(module, name).getUsedName(name, runtime)
-				)
-				.filter(Boolean)
-		);
-		if (usedNames.length === 0) return;
+		const usedNames =
+			/** @type {(string)[]} */
+			(
+				names
+					.map(name =>
+						moduleGraph.getExportInfo(module, name).getUsedName(name, runtime)
+					)
+					.filter(Boolean)
+			);
+		const used = usedNames.length === 0 ? names[0] : usedNames[0];
 
 		// use the first usedName to generate localIdent, it's shorter when mangle exports enabled
 		const localIdent =
-			dep.prefix +
-			getLocalIdent(usedNames[0], module, chunkGraph, runtimeTemplate);
+			dep.prefix + getLocalIdent(used, module, chunkGraph, runtimeTemplate);
+
 		source.replace(
 			dep.range[0],
 			dep.range[1] - 1,
 			escapeCssIdentifier(localIdent, dep.prefix)
 		);
+
 		for (const used of usedNames) {
 			cssExportsData.exports.set(used, localIdent);
 		}

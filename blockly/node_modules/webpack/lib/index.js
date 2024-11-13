@@ -70,7 +70,13 @@ const memoize = require("./util/memoize");
  */
 const lazyFunction = factory => {
 	const fac = memoize(factory);
-	const f = /** @type {any} */ ((...args) => fac()(...args));
+	const f = /** @type {any} */ (
+		/**
+		 * @param {...any} args args
+		 * @returns {T} result
+		 */
+		(...args) => fac()(...args)
+	);
 	return /** @type {T} */ (f);
 };
 
@@ -113,15 +119,24 @@ module.exports = mergeExports(fn, {
 	get webpack() {
 		return require("./webpack");
 	},
+	/**
+	 * @returns {function(Configuration | Configuration[]): void} validate fn
+	 */
 	get validate() {
 		const webpackOptionsSchemaCheck = require("../schemas/WebpackOptions.check.js");
-		const getRealValidate = memoize(() => {
-			const validateSchema = require("./validateSchema");
-			const webpackOptionsSchema = require("../schemas/WebpackOptions.json");
-			return options => validateSchema(webpackOptionsSchema, options);
-		});
+		const getRealValidate = memoize(
+			/**
+			 * @returns {function(Configuration | Configuration[]): void} validate fn
+			 */
+			() => {
+				const validateSchema = require("./validateSchema");
+				const webpackOptionsSchema = require("../schemas/WebpackOptions.json");
+				return options => validateSchema(webpackOptionsSchema, options);
+			}
+		);
 		return options => {
-			if (!webpackOptionsSchemaCheck(options)) getRealValidate()(options);
+			if (!webpackOptionsSchemaCheck(/** @type {TODO} */ (options)))
+				getRealValidate()(options);
 		};
 	},
 	get validateSchema() {
@@ -475,6 +490,15 @@ module.exports = mergeExports(fn, {
 		},
 		get JsonpTemplatePlugin() {
 			return require("./web/JsonpTemplatePlugin");
+		},
+		get CssLoadingRuntimeModule() {
+			return require("./css/CssLoadingRuntimeModule");
+		}
+	},
+
+	esm: {
+		get ModuleChunkLoadingRuntimeModule() {
+			return require("./esm/ModuleChunkLoadingRuntimeModule");
 		}
 	},
 
@@ -514,6 +538,12 @@ module.exports = mergeExports(fn, {
 		},
 		get EnableWasmLoadingPlugin() {
 			return require("./wasm/EnableWasmLoadingPlugin");
+		}
+	},
+
+	css: {
+		get CssModulesPlugin() {
+			return require("./css/CssModulesPlugin");
 		}
 	},
 

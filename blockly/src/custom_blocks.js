@@ -135,11 +135,13 @@ const select_analytes = {
         // Map the response to the required format for Blockly dropdowns
         const options = response.map(option => [option, option]);
         const dropdown = this.getField('ANALYTELISTDROPDOWN');
-        
-        // Clear existing options and add new ones
+        if (dropdown){
+            // Clear existing options and add new ones
         dropdown.menuGenerator_ = options;
         dropdown.setValue(options[0][1]);  // Set the first option as the default
         dropdown.forceRerender();  // Refresh dropdown to display updated options
+        }
+        
 
       }).catch(error => {
         console.error('Error fetching analyte list:', error);

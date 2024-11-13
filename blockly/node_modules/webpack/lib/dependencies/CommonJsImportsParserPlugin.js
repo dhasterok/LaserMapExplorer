@@ -283,7 +283,7 @@ class CommonJsImportsParserPlugin {
 						parser.state.module.addWarning(
 							new CommentCompilationWarning(
 								`Compilation error while processing magic comment(-s): /*${comment.value}*/: ${e.message}`,
-								comment.loc
+								/** @type {DependencyLocation} */ (comment.loc)
 							)
 						);
 					}
@@ -590,12 +590,9 @@ class CommonJsImportsParserPlugin {
 					data: { context },
 					next: undefined
 				});
+
 				return new BasicEvaluatedExpression()
-					.setIdentifier(
-						/** @type {TODO} */ (ident),
-						/** @type {TODO} */ (ident),
-						() => []
-					)
+					.setIdentifier(ident, ident, () => [])
 					.setSideEffects(false)
 					.setRange(/** @type {Range} */ (expr.range));
 			});

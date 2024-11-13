@@ -368,6 +368,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     self.right_tab.update({'tree': tid})
                 case 'styling':
                     self.right_tab.update({'style': tid})
+                case 'regression':
+                    self.right_tab.update({'regression': tid})
                 case 'calculator':
                     self.right_tab.update({'calculator': tid})
 

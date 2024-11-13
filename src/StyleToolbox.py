@@ -953,6 +953,66 @@ class Styling():
 
     # general style functions
     # -------------------------------------
+    def disable_style_widgets(self):
+        """Disables all style related widgets."""        
+        parent = self.parent
+
+        # x-axis widgets
+        parent.lineEditXLB.setEnabled(False)
+        parent.lineEditXUB.setEnabled(False)
+        parent.comboBoxXScale.setEnabled(False)
+        parent.lineEditXLabel.setEnabled(False)
+
+        # y-axis widgets
+        parent.lineEditYLB.setEnabled(False)
+        parent.lineEditYUB.setEnabled(False)
+        parent.comboBoxYScale.setEnabled(False)
+        parent.lineEditYLabel.setEnabled(False)
+
+        # z-axis widgets
+        parent.lineEditZLB.setEnabled(False)
+        parent.lineEditZUB.setEnabled(False)
+        parent.comboBoxZScale.setEnabled(False)
+        parent.lineEditZLabel.setEnabled(False)
+
+        # other axis properties
+        parent.lineEditAspectRatio.setEnabled(False)
+        parent.comboBoxTickDirection.setEnabled(False)
+
+        # annotations
+        parent.fontComboBox.setEnabled(False)
+        parent.doubleSpinBoxFontSize.setEnabled(False)
+        parent.checkBoxShowMass.setEnabled(False)
+
+        # scale
+        parent.comboBoxScaleDirection.setEnabled(False)
+        parent.comboBoxScaleLocation.setEnabled(False)
+        parent.lineEditScaleLength.setEnabled(False)
+        parent.toolButtonOverlayColor.setEnabled(False)
+
+        # markers and lines
+        parent.comboBoxMarker.setEnabled(False)
+        parent.doubleSpinBoxMarkerSize.setEnabled(False)
+        parent.toolButtonMarkerColor.setEnabled(False)
+        parent.horizontalSliderMarkerAlpha.setEnabled(False)
+        parent.comboBoxLineWidth.setEnabled(False)
+        parent.toolButtonLineColor.setEnabled(False)
+        parent.lineEditLengthMultiplier.setEnabled(False)
+
+        # coloring
+        parent.comboBoxColorByField.setEnabled(False)
+        parent.comboBoxColorField.setEnabled(False)
+        parent.spinBoxHeatmapResolution.setEnabled(False)
+        parent.comboBoxFieldColormap.setEnabled(False)
+        parent.checkBoxReverseColormap.setEnabled(False)
+        parent.lineEditColorLB.setEnabled(False)
+        parent.lineEditColorUB.setEnabled(False)
+        parent.comboBoxColorScale.setEnabled(False)
+        parent.lineEditCbarLabel.setEnabled(False)
+        parent.comboBoxCbarDirection.setEnabled(False)
+
+        # clusters
+
     def toggle_style_widgets(self):
         """Enables/disables all style widgets
 
@@ -963,6 +1023,8 @@ class Styling():
         #print('toggle_style_widgets')
         plot_type = self.plot_type.lower()
 
+        self.disable_style_widgets()
+
         # annotation properties
         parent.fontComboBox.setEnabled(True)
         parent.doubleSpinBoxFontSize.setEnabled(True)
@@ -971,18 +1033,9 @@ class Styling():
                 # axes properties
                 parent.lineEditXLB.setEnabled(True)
                 parent.lineEditXUB.setEnabled(True)
-                parent.comboBoxXScale.setEnabled(False)
+
                 parent.lineEditYLB.setEnabled(True)
                 parent.lineEditYUB.setEnabled(True)
-                parent.comboBoxYScale.setEnabled(False)
-                parent.lineEditZLB.setEnabled(False)
-                parent.lineEditZUB.setEnabled(False)
-                parent.comboBoxYScale.setEnabled(False)
-                parent.lineEditXLabel.setEnabled(False)
-                parent.lineEditYLabel.setEnabled(False)
-                parent.lineEditZLabel.setEnabled(False)
-                parent.lineEditAspectRatio.setEnabled(False)
-                parent.comboBoxTickDirection.setEnabled(False)
 
                 # scalebar properties
                 parent.comboBoxScaleDirection.setEnabled(True)
@@ -998,22 +1051,10 @@ class Styling():
                     parent.labelMarkerAlpha.setEnabled(True)
 
                     parent.toolButtonMarkerColor.setEnabled(True)
-                else:
-                    parent.comboBoxMarker.setEnabled(False)
-                    parent.doubleSpinBoxMarkerSize.setEnabled(False)
-                    parent.horizontalSliderMarkerAlpha.setEnabled(False)
-                    parent.labelMarkerAlpha.setEnabled(False)
-
-                    parent.toolButtonMarkerColor.setEnabled(False)
 
                 # line properties
-                #if len(parent.polygon.polygons) > 0:
-                #    parent.comboBoxLineWidth.setEnabled(True)
-                #else:
-                #    parent.comboBoxLineWidth.setEnabled(False)
                 parent.comboBoxLineWidth.setEnabled(True)
                 parent.toolButtonLineColor.setEnabled(True)
-                parent.lineEditLengthMultiplier.setEnabled(False)
 
                 # color properties
                 parent.comboBoxColorByField.setEnabled(True)
@@ -1025,63 +1066,20 @@ class Styling():
                 parent.comboBoxCbarDirection.setEnabled(True)
                 parent.lineEditCbarLabel.setEnabled(True)
 
-                parent.spinBoxHeatmapResolution.setEnabled(False)
             case 'correlation' | 'vectors':
                 # axes properties
-                parent.lineEditXLB.setEnabled(False)
-                parent.lineEditXUB.setEnabled(False)
-                parent.comboBoxXScale.setEnabled(False)
-                parent.lineEditYLB.setEnabled(False)
-                parent.lineEditYUB.setEnabled(False)
-                parent.comboBoxYScale.setEnabled(False)
-                parent.lineEditZLB.setEnabled(False)
-                parent.lineEditZUB.setEnabled(False)
-                parent.comboBoxZScale.setEnabled(False)
-                parent.lineEditXLabel.setEnabled(False)
-                parent.lineEditYLabel.setEnabled(False)
-                parent.lineEditZLabel.setEnabled(False)
-                parent.comboBoxXScale.setEnabled(False)
-                parent.comboBoxYScale.setEnabled(False)
-                parent.lineEditAspectRatio.setEnabled(False)
                 parent.comboBoxTickDirection.setEnabled(True)
 
-                # scalebar properties
-                parent.comboBoxScaleDirection.setEnabled(False)
-                parent.comboBoxScaleLocation.setEnabled(False)
-                parent.lineEditScaleLength.setEnabled(False)
-                parent.toolButtonOverlayColor.setEnabled(False)
-
-                # marker properties
-                parent.comboBoxMarker.setEnabled(False)
-                parent.doubleSpinBoxMarkerSize.setEnabled(False)
-                parent.horizontalSliderMarkerAlpha.setEnabled(False)
-                parent.labelMarkerAlpha.setEnabled(False)
-
-                # line properties
-                parent.comboBoxLineWidth.setEnabled(False)
-                parent.lineEditLengthMultiplier.setEnabled(False)
-                parent.toolButtonLineColor.setEnabled(False)
-
                 # color properties
-                parent.toolButtonMarkerColor.setEnabled(False)
                 parent.comboBoxFieldColormap.setEnabled(True)
-                parent.comboBoxColorScale.setEnabled(False)
                 parent.lineEditColorLB.setEnabled(True)
                 parent.lineEditColorUB.setEnabled(True)
                 parent.comboBoxCbarDirection.setEnabled(True)
-                parent.lineEditCbarLabel.setEnabled(False)
                 if plot_type.lower() == 'correlation':
                     parent.comboBoxColorByField.setEnabled(True)
                     if parent.comboBoxColorByField.currentText() == 'cluster':
                         parent.comboBoxColorField.setEnabled(True)
-                    else:
-                        parent.comboBoxColorField.setEnabled(False)
 
-                else:
-                    parent.comboBoxColorByField.setEnabled(False)
-                    parent.comboBoxColorField.setEnabled(False)
-
-                parent.spinBoxHeatmapResolution.setEnabled(False)
             case 'histogram':
                 # axes properties
                 parent.lineEditXLB.setEnabled(True)
@@ -1089,53 +1087,29 @@ class Styling():
                 parent.comboBoxXScale.setEnabled(True)
                 parent.lineEditYLB.setEnabled(True)
                 parent.lineEditYUB.setEnabled(True)
-                parent.comboBoxYScale.setEnabled(False)
-                parent.lineEditZLB.setEnabled(False)
-                parent.lineEditZUB.setEnabled(False)
-                parent.comboBoxZScale.setEnabled(False)
                 parent.lineEditXLabel.setEnabled(True)
                 parent.lineEditYLabel.setEnabled(True)
-                parent.lineEditZLabel.setEnabled(False)
                 parent.lineEditAspectRatio.setEnabled(True)
                 parent.comboBoxTickDirection.setEnabled(True)
 
-                # scalebar properties
-                parent.comboBoxScaleDirection.setEnabled(False)
-                parent.comboBoxScaleLocation.setEnabled(False)
-                parent.lineEditScaleLength.setEnabled(False)
-                parent.toolButtonOverlayColor.setEnabled(False)
-
                 # marker properties
-                parent.comboBoxMarker.setEnabled(False)
-                parent.doubleSpinBoxMarkerSize.setEnabled(False)
                 parent.horizontalSliderMarkerAlpha.setEnabled(True)
                 parent.labelMarkerAlpha.setEnabled(True)
 
                 # line properties
                 parent.comboBoxLineWidth.setEnabled(True)
                 parent.toolButtonLineColor.setEnabled(True)
-                parent.lineEditLengthMultiplier.setEnabled(False)
 
                 # color properties
                 parent.comboBoxColorByField.setEnabled(True)
                 # if color by field is set to clusters, then colormap fields are on,
                 # field is set by cluster table
-                parent.comboBoxColorScale.setEnabled(False)
                 if parent.comboBoxColorByField.currentText().lower() == 'none':
                     parent.toolButtonMarkerColor.setEnabled(True)
-                    parent.comboBoxColorField.setEnabled(False)
-                    parent.comboBoxCbarDirection.setEnabled(False)
                 else:
-                    parent.toolButtonMarkerColor.setEnabled(False)
                     parent.comboBoxColorField.setEnabled(True)
                     parent.comboBoxCbarDirection.setEnabled(True)
 
-                parent.comboBoxFieldColormap.setEnabled(False)
-                parent.lineEditColorLB.setEnabled(False)
-                parent.lineEditColorUB.setEnabled(False)
-                parent.lineEditCbarLabel.setEnabled(False)
-
-                parent.spinBoxHeatmapResolution.setEnabled(False)
             case 'scatter' | 'PCA scatter':
                 # axes properties
                 if (parent.toolBox.currentIndex() != parent.left_tab['scatter']) or (parent.comboBoxFieldZ.currentText() == ''):
@@ -1145,34 +1119,16 @@ class Styling():
                     parent.lineEditYLB.setEnabled(True)
                     parent.lineEditYUB.setEnabled(True)
                     parent.comboBoxYScale.setEnabled(True)
-                else:
-                    parent.lineEditXLB.setEnabled(False)
-                    parent.lineEditXUB.setEnabled(False)
-                    parent.comboBoxXScale.setEnabled(False)
-                    parent.lineEditYLB.setEnabled(False)
-                    parent.lineEditYUB.setEnabled(False)
-                    parent.comboBoxYScale.setEnabled(False)
 
                 parent.lineEditXLabel.setEnabled(True)
                 parent.lineEditYLabel.setEnabled(True)
-                if parent.comboBoxFieldZ.currentText() == '':
-                    parent.lineEditZLB.setEnabled(False)
-                    parent.lineEditZUB.setEnabled(False)
-                    parent.comboBoxZScale.setEnabled(False)
-                    parent.lineEditZLabel.setEnabled(False)
-                else:
+                if parent.comboBoxFieldZ.currentText() != '':
                     parent.lineEditZLB.setEnabled(True)
                     parent.lineEditZUB.setEnabled(True)
                     parent.comboBoxZScale.setEnabled(True)
                     parent.lineEditZLabel.setEnabled(True)
                 parent.lineEditAspectRatio.setEnabled(True)
                 parent.comboBoxTickDirection.setEnabled(True)
-
-                # scalebar properties
-                parent.comboBoxScaleDirection.setEnabled(False)
-                parent.comboBoxScaleLocation.setEnabled(False)
-                parent.lineEditScaleLength.setEnabled(False)
-                parent.toolButtonOverlayColor.setEnabled(False)
 
                 # marker properties
                 parent.comboBoxMarker.setEnabled(True)
@@ -1184,14 +1140,9 @@ class Styling():
                 if parent.comboBoxFieldZ.currentText() == '':
                     parent.comboBoxLineWidth.setEnabled(True)
                     parent.toolButtonLineColor.setEnabled(True)
-                else:
-                    parent.comboBoxLineWidth.setEnabled(False)
-                    parent.toolButtonLineColor.setEnabled(False)
 
                 if plot_type == 'PCA scatter':
                     parent.lineEditLengthMultiplier.setEnabled(True)
-                else:
-                    parent.lineEditLengthMultiplier.setEnabled(False)
 
                 # color properties
                 parent.comboBoxColorByField.setEnabled(True)
@@ -1200,25 +1151,10 @@ class Styling():
                 if parent.comboBoxColorByField.currentText().lower() == 'none':
                     parent.toolButtonMarkerColor.setEnabled(True)
 
-                    parent.comboBoxColorField.setEnabled(False)
-                    parent.comboBoxFieldColormap.setEnabled(False)
-                    parent.lineEditColorLB.setEnabled(False)
-                    parent.lineEditColorUB.setEnabled(False)
-                    parent.comboBoxColorScale.setEnabled(False)
-                    parent.comboBoxCbarDirection.setEnabled(False)
-                    parent.lineEditCbarLabel.setEnabled(False)
                 elif parent.comboBoxColorByField.currentText() == 'cluster':
-                    parent.toolButtonMarkerColor.setEnabled(False)
 
                     parent.comboBoxColorField.setEnabled(True)
-                    parent.comboBoxFieldColormap.setEnabled(False)
-                    parent.lineEditColorLB.setEnabled(False)
-                    parent.lineEditColorUB.setEnabled(False)
-                    parent.comboBoxColorScale.setEnabled(False)
                     parent.comboBoxCbarDirection.setEnabled(True)
-                    parent.lineEditCbarLabel.setEnabled(False)
-                else:
-                    parent.toolButtonMarkerColor.setEnabled(False)
 
                     parent.comboBoxColorField.setEnabled(True)
                     parent.comboBoxFieldColormap.setEnabled(True)
@@ -1228,7 +1164,6 @@ class Styling():
                     parent.comboBoxCbarDirection.setEnabled(True)
                     parent.lineEditCbarLabel.setEnabled(True)
 
-                parent.spinBoxHeatmapResolution.setEnabled(False)
             case 'heatmap' | 'PCA heatmap':
                 # axes properties
                 if (parent.toolBox.currentIndex() != parent.left_tab['scatter']) or (parent.comboBoxFieldZ.currentText() == ''):
@@ -1238,22 +1173,10 @@ class Styling():
                     parent.lineEditYLB.setEnabled(True)
                     parent.lineEditYUB.setEnabled(True)
                     parent.comboBoxYScale.setEnabled(True)
-                else:
-                    parent.lineEditXLB.setEnabled(False)
-                    parent.lineEditXUB.setEnabled(False)
-                    parent.comboBoxXScale.setEnabled(False)
-                    parent.lineEditYLB.setEnabled(False)
-                    parent.lineEditYUB.setEnabled(False)
-                    parent.comboBoxYScale.setEnabled(False)
 
                 parent.lineEditXLabel.setEnabled(True)
                 parent.lineEditYLabel.setEnabled(True)
-                if (parent.toolBox.currentIndex() != parent.left_tab['scatter']) or (parent.comboBoxFieldZ.currentText() == ''):
-                    parent.lineEditZLB.setEnabled(False)
-                    parent.lineEditZUB.setEnabled(False)
-                    parent.comboBoxZScale.setEnabled(False)
-                    parent.lineEditZLabel.setEnabled(False)
-                else:
+                if (parent.toolBox.currentIndex() == parent.left_tab['scatter']) and (parent.comboBoxFieldZ.currentText() == ''):
                     parent.lineEditZLB.setEnabled(True)
                     parent.lineEditZUB.setEnabled(True)
                     parent.comboBoxZScale.setEnabled(True)
@@ -1261,35 +1184,15 @@ class Styling():
                 parent.lineEditAspectRatio.setEnabled(True)
                 parent.comboBoxTickDirection.setEnabled(True)
 
-                # scalebar properties
-                parent.comboBoxScaleDirection.setEnabled(False)
-                parent.comboBoxScaleLocation.setEnabled(False)
-                parent.toolButtonOverlayColor.setEnabled(False)
-                parent.lineEditScaleLength.setEnabled(False)
-
-                # marker properties
-                parent.comboBoxMarker.setEnabled(False)
-                parent.doubleSpinBoxMarkerSize.setEnabled(False)
-                parent.horizontalSliderMarkerAlpha.setEnabled(False)
-                parent.labelMarkerAlpha.setEnabled(False)
-
                 # line properties
                 if parent.comboBoxFieldZ.currentText() == '':
                     parent.comboBoxLineWidth.setEnabled(True)
                     parent.toolButtonLineColor.setEnabled(True)
-                else:
-                    parent.comboBoxLineWidth.setEnabled(False)
-                    parent.toolButtonLineColor.setEnabled(False)
 
                 if plot_type == 'PCA heatmap':
                     parent.lineEditLengthMultiplier.setEnabled(True)
-                else:
-                    parent.lineEditLengthMultiplier.setEnabled(False)
 
                 # color properties
-                parent.toolButtonMarkerColor.setEnabled(False)
-                parent.comboBoxColorByField.setEnabled(False)
-                parent.comboBoxColorField.setEnabled(False)
                 parent.comboBoxFieldColormap.setEnabled(True)
                 parent.lineEditColorLB.setEnabled(True)
                 parent.lineEditColorUB.setEnabled(True)
@@ -1312,8 +1215,6 @@ class Styling():
                 parent.lineEditYLabel.setEnabled(True)
                 parent.lineEditYLabel.setEnabled(True)
                 parent.lineEditZLabel.setEnabled(True)
-                parent.lineEditAspectRatio.setEnabled(False)
-                parent.comboBoxTickDirection.setEnabled(False)
 
                 # scalebar properties
                 parent.comboBoxScaleDirection.setEnabled(True)
@@ -1329,147 +1230,60 @@ class Styling():
                     parent.labelMarkerAlpha.setEnabled(True)
 
                     parent.toolButtonMarkerColor.setEnabled(True)
-                else:
-                    parent.comboBoxMarker.setEnabled(False)
-                    parent.doubleSpinBoxMarkerSize.setEnabled(False)
-                    parent.horizontalSliderMarkerAlpha.setEnabled(False)
-                    parent.labelMarkerAlpha.setEnabled(False)
 
-                    parent.toolButtonMarkerColor.setEnabled(False)
-
-                # line properties
-                parent.comboBoxLineWidth.setEnabled(False)
-                parent.lineEditLengthMultiplier.setEnabled(False)
-                parent.toolButtonLineColor.setEnabled(False)
-
-                # color properties
-                parent.comboBoxColorByField.setEnabled(False)
-                parent.comboBoxColorField.setEnabled(False)
-                parent.comboBoxFieldColormap.setEnabled(False)
-                parent.comboBoxColorScale.setEnabled(False)
-                parent.lineEditColorLB.setEnabled(False)
-                parent.lineEditColorUB.setEnabled(False)
-                parent.comboBoxCbarDirection.setEnabled(True)
-                parent.lineEditCbarLabel.setEnabled(False)
-
-                parent.spinBoxHeatmapResolution.setEnabled(False)
             case 'tec' | 'radar':
                 # axes properties
-                parent.lineEditXLB.setEnabled(False)
-                parent.lineEditXUB.setEnabled(False)
-                parent.comboBoxXScale.setEnabled(False)
-                parent.lineEditXLabel.setEnabled(False)
                 if plot_type == 'tec':
                     parent.lineEditYLB.setEnabled(True)
                     parent.lineEditYUB.setEnabled(True)
-                    parent.comboBoxYScale.setEnabled(False)
                     parent.lineEditYLabel.setEnabled(True)
-                else:
-                    parent.lineEditYLB.setEnabled(False)
-                    parent.lineEditYUB.setEnabled(False)
-                    parent.lineEditYLabel.setEnabled(False)
-                parent.comboBoxYScale.setEnabled(False)
-                parent.lineEditZLB.setEnabled(False)
-                parent.lineEditZUB.setEnabled(False)
-                parent.lineEditZLabel.setEnabled(False)
                 parent.lineEditAspectRatio.setEnabled(True)
                 parent.comboBoxTickDirection.setEnabled(True)
 
                 # scalebar properties
-                parent.comboBoxScaleDirection.setEnabled(False)
-                parent.comboBoxScaleLocation.setEnabled(False)
                 parent.lineEditScaleLength.setEnabled(True)
-                parent.toolButtonOverlayColor.setEnabled(False)
 
                 # marker properties
-                parent.comboBoxMarker.setEnabled(False)
-                parent.doubleSpinBoxMarkerSize.setEnabled(False)
-                parent.horizontalSliderMarkerAlpha.setEnabled(False)
                 parent.labelMarkerAlpha.setEnabled(True)
 
                 # line properties
                 parent.comboBoxLineWidth.setEnabled(True)
                 parent.toolButtonLineColor.setEnabled(True)
-                parent.lineEditLengthMultiplier.setEnabled(False)
 
                 # color properties
                 parent.comboBoxColorByField.setEnabled(True)
                 if parent.comboBoxColorByField.currentText().lower() == 'none':
                     parent.toolButtonMarkerColor.setEnabled(True)
-                    parent.comboBoxColorField.setEnabled(False)
-                    parent.comboBoxFieldColormap.setEnabled(False)
-                    parent.comboBoxCbarDirection.setEnabled(False)
                 elif parent.comboBoxColorByField.currentText().lower() == 'cluster':
-                    parent.toolButtonMarkerColor.setEnabled(False)
                     parent.comboBoxColorField.setEnabled(True)
-                    parent.comboBoxFieldColormap.setEnabled(False)
                     parent.comboBoxCbarDirection.setEnabled(True)
 
-                parent.comboBoxColorScale.setEnabled(False)
-                parent.lineEditColorLB.setEnabled(False)
-                parent.lineEditColorUB.setEnabled(False)
-                parent.lineEditCbarLabel.setEnabled(False)
-                parent.spinBoxHeatmapResolution.setEnabled(False)
             case 'variance' | 'cluster performance':
                 # axes properties
-                parent.lineEditXLB.setEnabled(False)
-                parent.lineEditXUB.setEnabled(False)
-                parent.comboBoxXScale.setEnabled(False)
-                parent.lineEditXLabel.setEnabled(False)
-                parent.lineEditYLB.setEnabled(False)
-                parent.lineEditYUB.setEnabled(False)
-                parent.comboBoxYScale.setEnabled(False)
-                parent.lineEditYLabel.setEnabled(False)
-                parent.lineEditZLB.setEnabled(False)
-                parent.lineEditZUB.setEnabled(False)
-                parent.comboBoxZScale.setEnabled(False)
-                parent.lineEditZLabel.setEnabled(False)
                 parent.lineEditAspectRatio.setEnabled(True)
                 parent.comboBoxTickDirection.setEnabled(True)
 
                 # scalebar properties
-                parent.comboBoxScaleDirection.setEnabled(False)
-                parent.comboBoxScaleLocation.setEnabled(False)
                 parent.lineEditScaleLength.setEnabled(True)
                 parent.toolButtonOverlayColor.setEnabled(True)
 
                 # marker properties
                 parent.comboBoxMarker.setEnabled(True)
                 parent.doubleSpinBoxMarkerSize.setEnabled(True)
-                parent.horizontalSliderMarkerAlpha.setEnabled(False)
-                parent.labelMarkerAlpha.setEnabled(False)
 
                 # line properties
                 parent.comboBoxLineWidth.setEnabled(True)
                 parent.toolButtonLineColor.setEnabled(True)
-                parent.lineEditLengthMultiplier.setEnabled(False)
 
                 # color properties
                 parent.toolButtonMarkerColor.setEnabled(True)
-                parent.comboBoxColorByField.setEnabled(False)
-                parent.comboBoxFieldColormap.setEnabled(False)
-                parent.lineEditColorLB.setEnabled(False)
-                parent.lineEditColorUB.setEnabled(False)
-                parent.comboBoxColorScale.setEnabled(False)
-                parent.comboBoxCbarDirection.setEnabled(False)
-                parent.lineEditCbarLabel.setEnabled(False)
-                parent.spinBoxHeatmapResolution.setEnabled(False)
+
             case 'pca score' | 'cluster score' | 'cluster':
                 # axes properties
                 parent.lineEditXLB.setEnabled(True)
                 parent.lineEditXUB.setEnabled(True)
                 parent.lineEditYLB.setEnabled(True)
                 parent.lineEditYUB.setEnabled(True)
-                parent.lineEditZLB.setEnabled(False)
-                parent.lineEditZUB.setEnabled(False)
-                parent.comboBoxXScale.setEnabled(False)
-                parent.comboBoxYScale.setEnabled(False)
-                parent.comboBoxZScale.setEnabled(False)
-                parent.lineEditXLabel.setEnabled(False)
-                parent.lineEditYLabel.setEnabled(False)
-                parent.lineEditZLabel.setEnabled(False)
-                parent.lineEditAspectRatio.setEnabled(False)
-                parent.comboBoxTickDirection.setEnabled(False)
 
                 # scalebar properties
                 parent.comboBoxScaleDirection.setEnabled(True)
@@ -1483,32 +1297,14 @@ class Styling():
                     parent.doubleSpinBoxMarkerSize.setEnabled(True)
                     parent.horizontalSliderMarkerAlpha.setEnabled(True)
                     parent.labelMarkerAlpha.setEnabled(True)
-
                     parent.toolButtonMarkerColor.setEnabled(True)
-                else:
-                    parent.comboBoxMarker.setEnabled(False)
-                    parent.doubleSpinBoxMarkerSize.setEnabled(False)
-                    parent.horizontalSliderMarkerAlpha.setEnabled(False)
-                    parent.labelMarkerAlpha.setEnabled(False)
-
-                    parent.toolButtonMarkerColor.setEnabled(False)
 
                 # line properties
                 parent.comboBoxLineWidth.setEnabled(True)
                 parent.toolButtonLineColor.setEnabled(True)
-                parent.lineEditLengthMultiplier.setEnabled(False)
 
                 # color properties
-                if plot_type == 'clusters':
-                    parent.comboBoxColorByField.setEnabled(False)
-                    parent.comboBoxColorField.setEnabled(False)
-                    parent.comboBoxFieldColormap.setEnabled(False)
-                    parent.lineEditColorLB.setEnabled(False)
-                    parent.lineEditColorUB.setEnabled(False)
-                    parent.comboBoxColorScale.setEnabled(False)
-                    parent.comboBoxCbarDirection.setEnabled(False)
-                    parent.lineEditCbarLabel.setEnabled(False)
-                else:
+                if plot_type != 'clusters':
                     parent.comboBoxColorByField.setEnabled(True)
                     parent.comboBoxColorField.setEnabled(True)
                     parent.comboBoxFieldColormap.setEnabled(True)
@@ -1517,53 +1313,35 @@ class Styling():
                     parent.comboBoxColorScale.setEnabled(True)
                     parent.comboBoxCbarDirection.setEnabled(True)
                     parent.lineEditCbarLabel.setEnabled(True)
-                parent.spinBoxHeatmapResolution.setEnabled(False)
             case 'profile':
                 # axes properties
                 parent.lineEditXLB.setEnabled(True)
                 parent.lineEditXUB.setEnabled(True)
-                parent.comboBoxXScale.setEnabled(False)
-                parent.lineEditXLabel.setEnabled(True)
-                parent.lineEditYLB.setEnabled(False)
-                parent.lineEditYUB.setEnabled(False)
-                parent.comboBoxYScale.setEnabled(False)
-                parent.lineEditYLabel.setEnabled(False)
-                parent.lineEditZLB.setEnabled(False)
-                parent.lineEditZUB.setEnabled(False)
-                parent.comboBoxZScale.setEnabled(False)
-                parent.lineEditZLabel.setEnabled(False)
                 parent.lineEditAspectRatio.setEnabled(True)
                 parent.comboBoxTickDirection.setEnabled(True)
 
                 # scalebar properties
-                parent.comboBoxScaleDirection.setEnabled(False)
-                parent.comboBoxScaleLocation.setEnabled(False)
                 parent.lineEditScaleLength.setEnabled(True)
-                parent.toolButtonOverlayColor.setEnabled(False)
 
                 # marker properties
                 parent.comboBoxMarker.setEnabled(True)
                 parent.doubleSpinBoxMarkerSize.setEnabled(True)
-                parent.horizontalSliderMarkerAlpha.setEnabled(False)
-                parent.labelMarkerAlpha.setEnabled(False)
 
                 # line properties
                 parent.comboBoxLineWidth.setEnabled(True)
                 parent.toolButtonLineColor.setEnabled(True)
-                parent.lineEditLengthMultiplier.setEnabled(False)
 
                 # color properties
                 parent.toolButtonMarkerColor.setEnabled(True)
-                parent.comboBoxColorByField.setEnabled(False)
                 parent.comboBoxFieldColormap.setEnabled(True)
-                parent.lineEditColorLB.setEnabled(False)
-                parent.lineEditColorUB.setEnabled(False)
-                parent.comboBoxColorScale.setEnabled(False)
-                parent.comboBoxCbarDirection.setEnabled(False)
-                parent.lineEditCbarLabel.setEnabled(False)
-                parent.spinBoxHeatmapResolution.setEnabled(False)
-
+        
         # enable/disable labels
+        self.toggle_style_labels()
+
+    def toggle_style_labels(self):
+        """Toggles style labels based on enabled/disabled style widgets."""        
+        parent = self.parent
+
         # axes properties
         parent.labelXLim.setEnabled(parent.lineEditXLB.isEnabled())
         parent.toolButtonXAxisReset.setEnabled(parent.labelXLim.isEnabled())
@@ -1584,6 +1362,7 @@ class Styling():
         parent.labelScaleLocation.setEnabled(parent.comboBoxScaleLocation.isEnabled())
         parent.labelScaleDirection.setEnabled(parent.comboBoxScaleDirection.isEnabled())
         if parent.toolButtonOverlayColor.isEnabled():
+            parent.toolButtonOverlayColor.setStyleSheet("background-color: %s;" % self.style_dict[self.plot_type]['OverlayColor'])
             parent.labelOverlayColor.setEnabled(True)
         else:
             parent.toolButtonOverlayColor.setStyleSheet("background-color: %s;" % '#e6e6e6')
@@ -1593,15 +1372,22 @@ class Styling():
         # marker properties
         parent.labelMarker.setEnabled(parent.comboBoxMarker.isEnabled())
         parent.labelMarkerSize.setEnabled(parent.doubleSpinBoxMarkerSize.isEnabled())
+        parent.labelMarkerAlpha.setEnabled(parent.horizontalSliderMarkerAlpha.isEnabled())
         parent.labelTransparency.setEnabled(parent.horizontalSliderMarkerAlpha.isEnabled())
 
         # line properties
         parent.labelLineWidth.setEnabled(parent.comboBoxLineWidth.isEnabled())
-        parent.labelLineColor.setEnabled(parent.toolButtonLineColor.isEnabled())
+        if parent.toolButtonLineColor.isEnabled():
+            parent.toolButtonLineColor.setStyleSheet("background-color: %s;" % self.style_dict[self.plot_type]['LineColor'])
+            parent.labelLineColor.setEnabled(True)
+        else:
+            parent.toolButtonLineColor.setStyleSheet("background-color: %s;" % '#e6e6e6')
+            parent.labelLineColor.setEnabled(False)
         parent.labelLengthMultiplier.setEnabled(parent.lineEditLengthMultiplier.isEnabled())
 
         # color properties
         if parent.toolButtonMarkerColor.isEnabled():
+            parent.toolButtonMarkerColor.setStyleSheet("background-color: %s;" % self.style_dict[self.plot_type]['MarkerColor'])
             parent.labelMarkerColor.setEnabled(True)
         else:
             parent.toolButtonMarkerColor.setStyleSheet("background-color: %s;" % '#e6e6e6')

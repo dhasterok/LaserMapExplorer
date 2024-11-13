@@ -705,6 +705,8 @@ class SampleObj:
             run for the first time.
         """ 
         attribute_df = None
+        analyte_columns = []
+        ratio_columns = []
         if (field == None) or (field == 'all'):
             # Select columns where 'data_type' attribute is 'analyte'
             analyte_columns = self.raw_data.match_attributes({'data_type': 'analyte', 'use': True})
@@ -737,7 +739,7 @@ class SampleObj:
 
         # Handle negative values
         # ----------------------
-        for col in columns:
+        for col in analyte_columns:
             if col not in self.raw_data.columns:
                 continue
 

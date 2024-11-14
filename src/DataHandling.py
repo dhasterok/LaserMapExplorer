@@ -754,7 +754,7 @@ class SampleObj:
 
         # Compute ratios not included in raw_data
         # ---------------------------------------
-        if ((field == None) or (field == 'all')) and (attribute_df is not None):
+        if ((field is None) or (field == 'all')) and (attribute_df is not None):
             ratios = attribute_df.columns[(data_type == 'ratio').any()]
 
             ratios_not_in_raw_data = [col for col in ratios if col not in ratio_columns]
@@ -986,7 +986,7 @@ class SampleObj:
                 t_array = np.where(t_array > 0, t_array, np.nan)
 
             case 'minimum positive':
-                # shift all negative values to be a 
+                # shift all negative values to be a minimum value
                 min_positive_value = np.nanmin(array[array > 0])
                 t_array = np.where(array < 0, min_positive_value, array)
 
@@ -1006,6 +1006,7 @@ class SampleObj:
 
             case 'yeo-johnson transform':
                 t_array, _ = yeojohnson(array)
+
         return t_array
 
     def update_norm(self, norm=None, field=None):

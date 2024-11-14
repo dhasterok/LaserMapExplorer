@@ -233,10 +233,10 @@ class CustomTreeView(QTreeView):
         parent_item.appendRow(branch_item)
         return branch_item
     
-    def add_leaf(self, parent_item, leaf_name, data=None):
+    def add_leaf(self, branch_item, leaf_name, data=None):
         """Add a leaf to the tree under the given parent branch."""
         leaf_item = StandardItem(leaf_name, 10, False, data)
-        parent_item.appendRow(leaf_item)
+        branch_item.appendRow(leaf_item)
         return leaf_item
 
     def get_item_path(self, item):
@@ -247,7 +247,7 @@ class CustomTreeView(QTreeView):
             item = item.parent()
         return path
     
-    def get_leaf_data(self, leaf_item):
+    def get_leaf_data(self, parent_item, branch_name, leaf_name):
         """Get the data associated with a leaf."""
         return leaf_item.data()
     

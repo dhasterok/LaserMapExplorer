@@ -1205,13 +1205,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.sample_id == '':
             return
 
-        self.analyteDialog = AnalyteDialog(self)
-        self.analyteDialog.show()
+        self.analyte_dialog = AnalyteDialog(self)
+        self.analyte_dialog.show()
 
-        result = self.analyteDialog.exec_()  # Store the result here
+        result = self.analyte_dialog.exec_()  # Store the result here
         if result == QDialog.Accepted:
             #update self.data['norm'] with selection
-            self.data[self.sample_id].processed_data.set_attribute(self.analyteDialog.analytes,'norm',self.analyteDialog.norm_dict)
+            for analyte in self.data[self.sample_id].processed_data.match_attribute('data_type','Analyte'):
+                if analyte in list(self.analyte_dialog.norm_dict.keys()):
+                    self.data[self.sample_id].set_attribute(analyte, 'use', True)
+                else:
+                    self.data[self.sample_id].set_attribute(analyte, 'use', False)
+
+            for analyte, norm in self.analyte_dialog.norm_dict.items():
+                if '/' in analyte:
+                    if analyte not in self.data[self.sample_id].processed_data.columns:
+                        analyte_1, analyte_2 = analyte.split(' / ') 
+                        self.data[self.sample_id].compute_ratio(analyte_1, analyte_2)
+
+                self.data[self.sample_id].processed_data.set_attribute(analyte,'norm',norm)
 
             self.plot_tree.update_tree(norm_update=True)
             #update analysis type combo in styles
@@ -1788,40 +1800,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Changes how negative values are handled for each analyte, the followinf options are available:
             Ignore negative values, Minimum positive value, Gradual shift, Yeo-Johnson transformation
-
-
         """
         sample_id = self.plot_info['sample_id']
         field = self.plot_info['field']
-        if '/' in field:
-            analyte_1, analyte_2 = field.split(' / ')
-        else:
-            analyte_1 = field
-            analyte_2 = None
             
-        if analyte_1 and not analyte_2:
-            if self.checkBoxApplyAll.isChecked():
-                # Apply to all iolties
-                self.data[sample_id]['analyte_info']['negative_method'] = self.comboBoxNegativeMethod.currentText()
-                # clear existing plot info from tree to ensure saved plots using most recent data
-                for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
-                    self.plot_tree.clear_tree_data(tree)
-                self.prep_data(sample_id)
-            else:
-                self.data[sample_id]['analyte_info'].loc[self.data[sample_id]['analyte_info']['analytes']==analyte_1,
-                'negative_method'] = self.comboBoxNegativeMethod.currentText()
-                self.prep_data(sample_id, analyte_1,analyte_2)
+        if self.checkBoxApplyAll.isChecked():
+            # Apply to all iolties
+            analyte_list = self.data[sample_id].match_attributes({'data_type':['Analyte', 'Ratio']})
+            self.data[sample_id].raw_data.set_attributes(analyte_list, 'negative_method', self.comboBoxNegativeMethod.currentText())
+            # clear existing plot info from tree to ensure saved plots using most recent data
+            for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
+                self.plot_tree.clear_tree_data(tree)
+            self.data[sample_id].prep_data()
         else:
-            if self.checkBoxApplyAll.isChecked():
-                # Apply to all ratios
-                self.data[sample_id]['ratio_info']['negative_method'] = self.comboBoxNegativeMethod.currentText()
-                for tree in ['Ratio', 'Ratio (normalized)']:
-                    self.plot_tree.clear_tree_data(tree)
-                self.prep_data(sample_id)
-            else:
-                self.data[sample_id]['ratio_info'].loc[ (self.data[sample_id]['ratio_info']['analyte_1']==analyte_1)
-                                        & (self.data[sample_id]['ratio_info']['analyte_2']==analyte_2),'negative_method']  = self.comboBoxNegativeMethod.currentText()
-                self.prep_data(sample_id, analyte_1,analyte_2)
+            self.data[sample_id].raw_data.set_attribute(field, 'negative_method', self.comboBoxNegativeMethod.currentText())
+            self.data[sample_id].prep_data(field)
         
         self.update_filter_values()
         self.update_SV()
@@ -2358,7 +2351,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Uses selected clusters in ``MainWindow.tableWidgetViewGroups`` to create a mask (or inverse mask).  Masking is controlled
         clicking either ``MainWindow.toolButtonGroupMask`` or ``MainWindow.toolButtonGroupMaskInverse``.  The masking can be turned
-        on or off by changing the checked state of ``MainWindow.actionClusterMask`` on the *Left Toolbox \> Filter Page*.
+        on or off by changing the checked state of ``MainWindow.actionClusterMask`` on the *Left Toolbox \\ Filter Page*.
 
         Updates ``MainWindow.data[sample_id].cluster_mask`` and if ``update_plot==True``, updates ``MainWindow.data[sample_id].mask``.
 
@@ -5400,7 +5393,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def cluster_method_callback(self):
         """Updates clustering-related widgets
 
-        Enables/disables widgets in Left Toolbox > Clustering Page.  Updates widget values/text with values saved in ``MainWindow.cluster_dict``.
+        Enables/disables widgets in *Left Toolbox \\ Clustering* page.  Updates widget values/text with values saved in ``MainWindow.cluster_dict``.
         """
         print('cluster_method_callback')
         if self.sample_id == '':

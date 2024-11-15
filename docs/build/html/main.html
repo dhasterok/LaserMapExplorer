@@ -762,7 +762,7 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#main.MainWindow.get_field_list" title="main.MainWindow.get_field_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_field_list</span></code></a>([set_name])</p></td>
 <td><p>Gets the fields associated with a defined set</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#main.MainWindow.get_map_data" title="main.MainWindow.get_map_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_map_data</span></code></a>(field, field_type[, scale_data])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#main.MainWindow.get_map_data" title="main.MainWindow.get_map_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_map_data</span></code></a>(field, field_type[, norm])</p></td>
 <td><p>Wrapper for <code class="docutils literal notranslate"><span class="pre">DataHandling.get_map_data</span></code> that ensure proper call from <code class="docutils literal notranslate"><span class="pre">MainWindow</span></code> methods.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#main.MainWindow.get_scatter_data" title="main.MainWindow.get_scatter_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_scatter_data</span></code></a>(plot_type)</p></td>
@@ -1849,34 +1849,31 @@
 <tr class="row-odd"><td><p><strong>update_canvas</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p><strong>update_color_field_spinbox</strong></p></td>
+<tr class="row-even"><td><p><strong>update_fields</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p><strong>update_fields</strong></p></td>
+<tr class="row-odd"><td><p><strong>update_ndim_table</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p><strong>update_ndim_table</strong></p></td>
+<tr class="row-even"><td><p><strong>update_norm</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p><strong>update_norm</strong></p></td>
+<tr class="row-odd"><td><p><strong>update_ratio_df</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p><strong>update_ratio_df</strong></p></td>
+<tr class="row-even"><td><p><strong>update_tables</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p><strong>update_tables</strong></p></td>
+<tr class="row-odd"><td><p><strong>update_zoom_view_position</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p><strong>update_zoom_view_position</strong></p></td>
+<tr class="row-even"><td><p><strong>windowIconChanged</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p><strong>windowIconChanged</strong></p></td>
+<tr class="row-odd"><td><p><strong>windowIconTextChanged</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p><strong>windowIconTextChanged</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><strong>windowTitleChanged</strong></p></td>
+<tr class="row-even"><td><p><strong>windowTitleChanged</strong></p></td>
 <td></td>
 </tr>
 </tbody>
@@ -2340,7 +2337,7 @@ use the same sorting algorithm, change the default preferences using the Prefere
 <tr class="row-even"><td><p><a class="reference internal" href="#main.MainWindow.get_field_list" title="main.MainWindow.get_field_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_field_list</span></code></a>([set_name])</p></td>
 <td><p>Gets the fields associated with a defined set</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#main.MainWindow.get_map_data" title="main.MainWindow.get_map_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_map_data</span></code></a>(field, field_type[, scale_data])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#main.MainWindow.get_map_data" title="main.MainWindow.get_map_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_map_data</span></code></a>(field, field_type[, norm])</p></td>
 <td><p>Wrapper for <code class="docutils literal notranslate"><span class="pre">DataHandling.get_map_data</span></code> that ensure proper call from <code class="docutils literal notranslate"><span class="pre">MainWindow</span></code> methods.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#main.MainWindow.get_scatter_data" title="main.MainWindow.get_scatter_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_scatter_data</span></code></a>(plot_type)</p></td>
@@ -3427,34 +3424,31 @@ use the same sorting algorithm, change the default preferences using the Prefere
 <tr class="row-odd"><td><p><strong>update_canvas</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p><strong>update_color_field_spinbox</strong></p></td>
+<tr class="row-even"><td><p><strong>update_fields</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p><strong>update_fields</strong></p></td>
+<tr class="row-odd"><td><p><strong>update_ndim_table</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p><strong>update_ndim_table</strong></p></td>
+<tr class="row-even"><td><p><strong>update_norm</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p><strong>update_norm</strong></p></td>
+<tr class="row-odd"><td><p><strong>update_ratio_df</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p><strong>update_ratio_df</strong></p></td>
+<tr class="row-even"><td><p><strong>update_tables</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p><strong>update_tables</strong></p></td>
+<tr class="row-odd"><td><p><strong>update_zoom_view_position</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p><strong>update_zoom_view_position</strong></p></td>
+<tr class="row-even"><td><p><strong>windowIconChanged</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p><strong>windowIconChanged</strong></p></td>
+<tr class="row-odd"><td><p><strong>windowIconTextChanged</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p><strong>windowIconTextChanged</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><strong>windowTitleChanged</strong></p></td>
+<tr class="row-even"><td><p><strong>windowTitleChanged</strong></p></td>
 <td></td>
 </tr>
 </tbody>
@@ -3524,7 +3518,7 @@ counterparts are automatically added when produced so they are skipped.</p>
 <dd><p>Creates a mask from selected clusters</p>
 <p>Uses selected clusters in <code class="docutils literal notranslate"><span class="pre">MainWindow.tableWidgetViewGroups</span></code> to create a mask (or inverse mask).  Masking is controlled
 clicking either <code class="docutils literal notranslate"><span class="pre">MainWindow.toolButtonGroupMask</span></code> or <code class="docutils literal notranslate"><span class="pre">MainWindow.toolButtonGroupMaskInverse</span></code>.  The masking can be turned
-on or off by changing the checked state of <code class="docutils literal notranslate"><span class="pre">MainWindow.actionClusterMask</span></code> on the <em>Left Toolbox &gt; Filter Page</em>.</p>
+on or off by changing the checked state of <code class="docutils literal notranslate"><span class="pre">MainWindow.actionClusterMask</span></code> on the <em>Left Toolbox Filter Page</em>.</p>
 <p>Updates <code class="docutils literal notranslate"><span class="pre">MainWindow.data[sample_id].cluster_mask</span></code> and if <code class="docutils literal notranslate"><span class="pre">update_plot==True</span></code>, updates <code class="docutils literal notranslate"><span class="pre">MainWindow.data[sample_id].mask</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -3760,7 +3754,7 @@ comboBoxSampleID</p>
 <dt class="sig sig-object py" id="main.MainWindow.cluster_method_callback">
 <span class="sig-name descname"><span class="pre">cluster_method_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#MainWindow.cluster_method_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.MainWindow.cluster_method_callback" title="Link to this definition">#</a></dt>
 <dd><p>Updates clustering-related widgets</p>
-<p>Enables/disables widgets in Left Toolbox &gt; Clustering Page.  Updates widget values/text with values saved in <code class="docutils literal notranslate"><span class="pre">MainWindow.cluster_dict</span></code>.</p>
+<p>Enables/disables widgets in <em>Left Toolbox Clustering</em> page.  Updates widget values/text with values saved in <code class="docutils literal notranslate"><span class="pre">MainWindow.cluster_dict</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -3837,7 +3831,7 @@ comboBoxSampleID</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.get_map_data">
-<span class="sig-name descname"><span class="pre">get_map_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#MainWindow.get_map_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.MainWindow.get_map_data" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_map_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#MainWindow.get_map_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.MainWindow.get_map_data" title="Link to this definition">#</a></dt>
 <dd><p>Wrapper for <code class="docutils literal notranslate"><span class="pre">DataHandling.get_map_data</span></code> that ensure proper call from <code class="docutils literal notranslate"><span class="pre">MainWindow</span></code> methods.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -3846,7 +3840,7 @@ comboBoxSampleID</p>
 </dd>
 <dt><strong>field_type</strong><span class="classifier">str</span></dt><dd><p>Field type, if normalized it will include reference chemistry in call.</p>
 </dd>
-<dt><strong>scale_data</strong><span class="classifier">bool, optional</span></dt><dd><p>Sets whether to return the data scaled (linear, log, etc.), by default False</p>
+<dt><strong>norm</strong><span class="classifier">str, optional</span></dt><dd><p>Sets whether to return the data scaled (linear, log, etc.), by default False</p>
 </dd>
 </dl>
 </dd>
@@ -4509,11 +4503,6 @@ or spider web.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="main.MainWindow.update_color_field_spinbox">
-<span class="sig-name descname"><span class="pre">update_color_field_spinbox</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#MainWindow.update_color_field_spinbox"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.MainWindow.update_color_field_spinbox" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="main.MainWindow.update_field_combobox">
 <span class="sig-name descname"><span class="pre">update_field_combobox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parentBox</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">childBox</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#MainWindow.update_field_combobox"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.MainWindow.update_field_combobox" title="Link to this definition">#</a></dt>
 <dd><p>Updates comboBoxes with fields for plots or analysis</p>
@@ -4863,7 +4852,6 @@ recursively to handle dictionaries within dictionaries, the flag is set to <code
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.update_aspect_ratio_controls"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_aspect_ratio_controls()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.update_canvas"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_canvas()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.update_clusters"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_clusters()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.update_color_field_spinbox"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_color_field_spinbox()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.update_field_combobox"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_field_combobox()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.update_field_type_combobox"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_field_type_combobox()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#main.MainWindow.update_fields"><code class="docutils literal notranslate"><span class="pre">MainWindow.update_fields()</span></code></a></li>

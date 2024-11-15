@@ -630,6 +630,7 @@ class SampleObj:
         ratio_name = f'{analyte_1} / {analyte_2}'
 
         self.add_columns('ratio',ratio_name,ratio_array)
+        self.processed_data.set_attribute(ratio_name, 'use', True)
 
     def cluster_data(self):
         # Step 1: Clustering

@@ -1577,12 +1577,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if sample_id == self.sample_id:
             if plot_type != self.comboBoxPlotType.currentText():
                 self.comboBoxPlotType.setCurrentText(plot_type)
+
             if field_type != self.comboBoxColorByField.currentText():
                 if field_type =='Calculated Map':  # correct name 
                     self.comboBoxColorByField.setCurrentText('Calculated')
                 else:
                     self.comboBoxColorByField.setCurrentText(field_type)
-                self.color_by_field_callback() # added color by field callback to update color field
+                self.style.color_by_field_callback() # added color by field callback to update color field
+
             if field != self.comboBoxColorField.currentText():
                 self.comboBoxColorField.setCurrentText(field)
                 self.style.color_field_callback(plot)
@@ -3378,7 +3380,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # get data for current map
         #scale = self.data[self.sample_id].processed_data.get_attribute(field, 'norm')
         scale = self.style.cscale
-        map_df = self.data[self.sample_id].get_map_data(field, field_type)
+        map_df = self.data[self.sample_id].get_map_data(field, field_type, ref_chem=self.ref_chem)
 
         array_size = self.data[self.sample_id].array_size
         aspect_ratio = self.data[self.sample_id].aspect_ratio
@@ -6067,9 +6069,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_field_combobox(self.comboBoxIsotopeAgeFieldType2, self.comboBoxIsotopeAgeField2)
         self.update_field_combobox(self.comboBoxIsotopeAgeFieldType3, self.comboBoxIsotopeAgeField3)
 
-    
-    def update_color_field_spinbox(self):
-        self.spinBoxColorField.setValue(self.comboBoxColorField.currentIndex())
 
     # gets the set of fields
     def get_field_list(self, set_name='Analyte'):
@@ -6097,10 +6096,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             case 'Analyte' | 'Analyte (normalized)':
                 set_fields = data.match_attributes({'data_type': 'analyte', 'use': True})
             case 'Ratio' | 'Ratio (normalized)':
-                #analytes_1 = self.data[self.sample_id]['ratio_info'].loc[self.data[self.sample_id]['ratio_info']['use']== True,'analyte_1']
-                #analytes_2 =  self.data[self.sample_id]['ratio_info'].loc[self.data[self.sample_id]['ratio_info']['use']== True,'analyte_2']
-                #ratios = analytes_1 +' / '+ analytes_2
-                #set_fields = ratios.values.tolist()
                 set_fields = data.match_attributes({'data_type': 'ratio', 'use': True})
             case 'None':
                 return []
@@ -6181,16 +6176,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.lineEditFMax.value = data[field].max()
             self.callback_lineEditFMin()
             self.callback_lineEditFMax()
-
-    # ----start debugging----
-    # def test_get_field_list(self):
-    #     lameio.open_directory()
-
-    #     self.compute_pca()
-
-    #     for type in ['Analyte', 'Analyte (normalized)', 'Ratio', 'PCA score']:
-    #         print(self.get_field_list(set_name=type))
-    # ----end debugging----
 
     def update_ratio_df(self,sample_id,analyte_1, analyte_2,norm):
         parameter = self.data[sample_id]['ratio_info'].loc[(self.data[sample_id]['ratio_info']['analyte_1'] == analyte_1) & (self.data[sample_id]['ratio_info']['analyte_2'] == analyte_2)]
@@ -6294,7 +6279,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.actionCrop.setChecked(False)
                 self.toolButtonPlotProfile.setChecked(False)
                 self.toolButtonPointMove.setChecked(False)
-
 
     def partial_match_in_list(self, lst, string):
         """Checks whether values in a list partially match a string

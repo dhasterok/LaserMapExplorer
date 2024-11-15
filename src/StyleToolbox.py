@@ -1541,7 +1541,7 @@ class Styling():
 
         if style['ColorField'] in parent.comboBoxColorField.allItems():
             parent.comboBoxColorField.setCurrentText(style['ColorField'])
-            parent.update_color_field_spinbox()
+            self.update_color_field_spinbox()
         else:
             style['ColorField'] = parent.comboBoxColorField.currentText()
 
@@ -2121,7 +2121,7 @@ class Styling():
 
         #current_plot_df = pd.DataFrame()
         if field not in ['X','Y']:
-            df = data.get_map_data(field, field_type)
+            df = data.get_map_data(field, field_type, ref_chem=self.parent.ref_chem)
             array = df['array'][data.mask].values if not df.empty else []
         else:
             # field 'X' and 'Y' require separate extraction
@@ -2344,7 +2344,7 @@ class Styling():
 
         if self._plot_type in self.map_plot_types:
             # make sure user input is within bounds, do not change
-            if ((parent.comboBoxScaleDirection.currentText() == 'horizontal') and (scale_length > data.x_range)) or (scale_length <= 0):
+            if ((parent.comboBoxScaleDirection.currentText() == 'horizontal') and (scale_length  > data.x_range)) or (scale_length <= 0):
                 scale_length = self.style_dict[self._plot_type]['ScaleLength']
                 parent.lineEditScaleLength.value = scale_length
                 return
@@ -2533,7 +2533,7 @@ class Styling():
 
         # need this line to update field comboboxes when colorby field is updated
         parent.update_field_combobox(parent.comboBoxColorByField, parent.comboBoxColorField)
-        parent.update_color_field_spinbox()
+        self.update_color_field_spinbox()
         plot_type = parent.comboBoxPlotType.currentText()
         if plot_type == '':
             return
@@ -2565,7 +2565,7 @@ class Styling():
 
         plot_type = parent.comboBoxPlotType.currentText()
         field = parent.comboBoxColorField.currentText()
-        parent.update_color_field_spinbox()
+        self.update_color_field_spinbox()
         
         if self.style_dict[plot_type]['ColorField'] == field:
             return
@@ -2611,6 +2611,10 @@ class Styling():
         self.style_dict[parent.comboBoxPlotType.currentText()]['Colormap'] = parent.comboBoxFieldColormap.currentText()
 
         parent.update_SV()
+    
+    def update_color_field_spinbox(self):
+        """Updates ``spinBoxColorField`` using the index of ``comboBoxColorField``"""        
+        self.parent.spinBoxColorField.setValue(self.parent.comboBoxColorField.currentIndex())
 
     def colormap_direction_callback(self):
         """Set colormap direction (normal/reverse)

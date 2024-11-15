@@ -187,8 +187,9 @@ class PlotTree():
         
         Returns
         -------
-        dict
-            Plot_info dictionary with plot widget and information about the plot construction
+        dict, bool
+            Plot_info dictionary with plot widget and information about the plot construction, 
+            returns True if the branch exists
         """
         #print('retrieve_table_data')
         if tree_index is not None:
@@ -272,7 +273,6 @@ class PlotTree():
 
                 # updates comboBoxColorByField and comboBoxColorField comboboxes and creates new plot
                 self.parent.update_fields(branch,'analyte map',tree, leaf, plot=True)
-                #set styles
 
                 #update UI with auto scale and neg handling parameters from 'Analyte/Ratio Info'
                 self.parent.update_spinboxes(field=leaf, field_type=tree)
@@ -359,6 +359,7 @@ class PlotTree():
                     font.setItalic(True)
                     leaf_item_norm.setFont(font)
                     leaf_item_norm.setEnabled(False)
+                    data.processed_data.set_attribute(analyte, 'use', False)
 
             else: #single analyte
 

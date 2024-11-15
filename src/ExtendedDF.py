@@ -9,8 +9,8 @@ class AttributeDataFrame(pd.DataFrame):
 
     Parameters
     ----------
-    pandas.DataFrame : 
-        Input dataframe, if none provided an empty dataframe can be created, defaults to None
+    data : pandas.DataFrame
+        Input dataframe, if none provided an empty dataframe can be created, defaults to ``None``
 
     Methods
     -------
@@ -23,22 +23,36 @@ class AttributeDataFrame(pd.DataFrame):
     match_attribute :
         Returns a list of columns where a specific attribute matches the given value
 
+    match_attributes :
+        Returns a list of columns where each attribute matches its corresponding value.
+
     get_attribute :
         Get an attribute from an AttributeDataFrame given a column or set of columns
+
+    get_attribute_dict :
+        Creates a dictionary from an attribute where the unique values of the attribute becomes the
+        keys and the items are lists with the column names that match each attribute_name.
 
     is_attribute :
         Checks to see if an attribute exists
 
     set_attribute :
-        Get an attribute from an AttributeDataFrame
+        Set one or more values for columns of an attribute in an AttributeDataFrame
+
+    _set_attribute : 
+        Set a single attribute in a column of an AttributeDataFrame
 
     show_attributes :
         Prints the attributes stored in the dataframe
 
+    sort_columns :
+        Sorts columns and attributes of an AttributeDataFrame object.
+
+
     Returns
     -------
     AttributeDataFrame
-        Adds column attributes and sets their values to a dataframe
+        Adds a dictionary ``column_attributes`` to a dataframe and the methods to add, set, and get column attributes and their values.
 
     Examples
     --------
@@ -431,7 +445,6 @@ class AttributeDataFrame(pd.DataFrame):
 
         return new_attribute_df
 
-    
     # Function to reorder both columns and attributes
     def sort_columns(self, sorted_columns):
         """Sorts columns and attributes of an AttributeDataFrame object.

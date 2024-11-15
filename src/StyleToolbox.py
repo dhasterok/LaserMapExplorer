@@ -330,6 +330,7 @@ class Styling():
     # -------------------------------------
     @property
     def plot_type(self):
+        """str: Plot type used to determine plot method and associated style settings."""
         return self._plot_type
 
     @plot_type.setter

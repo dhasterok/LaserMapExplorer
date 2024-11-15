@@ -1,9 +1,9 @@
-from PyQt5.QtCore import (Qt, pyqtSignal)
+from PyQt5.QtCore import (Qt, pyqtSignal, QObject, QEvent)
 from PyQt5.QtWidgets import (QTableWidget, QDialog, QTableWidgetItem, QLabel, QComboBox, QHeaderView, QFileDialog)
-from PyQt5.QtCore import Qt, QObject, QEvent
 from PyQt5.QtGui import (QImage, QColor, QFont, QPixmap, QPainter, QBrush)
 from src.ui.AnalyteSelectionDialog import Ui_Dialog
 from src.rotated import RotatedHeaderView
+import config
 
 # Analyte GUI
 # -------------------------------
@@ -29,26 +29,53 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         _description_
     """    
     listUpdated = pyqtSignal()
-    def __init__(self, parent=None):
+    def __init__(self, parent):
         super().__init__(parent)
         self.setupUi(self)
+
+        if parent.sample_id is None or parent.sample_id == '':
+            return
 
         self.data = parent.data[parent.sample_id].processed_data
 
         self.norm_dict = {}
 
         self.analytes = self.data.match_attribute('data_type','analyte')
+        self.ratio = self.data.match_attribute('data_type','ratio')
         for analyte in self.analytes:
             self.norm_dict[analyte] = self.data.get_attribute(analyte,'norm')
+
+
+        # setup scale (norm) combobox
+        self.comboBoxScale.clear()
+        self.scale_methods = ['linear','log','logit','mixed']
+        for scale in self.scale_methods:
+            self.comboBoxScale.addItem(scale)
+        self.comboBoxScale.currentIndexChanged.connect(self.update_all_combos)
+
+
+        # setup correlation combobox
         self.correlation_matrix = None
 
-        # Set up the table
+        self.comboBoxCorrelation.clear()
+        self.correlation_methods = ["Pearson", "Spearman"]
+        for method in self.correlation_methods:
+            self.comboBoxCorrelation.addItem(method)
+        self.comboBoxCorrelation.activated.connect(self.calculate_correlation)
+
+
+        # setup selected analyte table
+        self.tableWidgetSelected.setColumnCount(2)
+        self.tableWidgetSelected.setHorizontalHeaderLabels(['Field', 'Scaling'])
+
+
+        # setup analyte table
         self.tableWidgetAnalytes.setStyleSheet("")  # Clears the local stylesheet
 
         self.tableWidgetAnalytes.setRowCount(len(self.analytes))
         self.tableWidgetAnalytes.setColumnCount(len(self.analytes))
 
-        # setup header properties.
+        # setup header properties
         self.tableWidgetAnalytes.setObjectName("analyteTable")
         self.tableWidgetAnalytes.setStyleSheet("""
             QTableWidget#analyteTable::item { 
@@ -64,9 +91,7 @@ class AnalyteDialog(QDialog, Ui_Dialog):
             }
         """)
 
-        self.setStyleSheet("")
-
-        # Set initial font for headers to Normal weight
+        # initial font for headers to Normal weight
         header_font = self.tableWidgetAnalytes.horizontalHeader().font()
         header_font.setWeight(QFont.Normal)
 
@@ -79,41 +104,9 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         self.tableWidgetAnalytes.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.tableWidgetAnalytes.verticalHeader().setFont(header_font)
 
-        # Variables to track previous row/column for font reset
-        self.prev_row = None
-        self.prev_col = None
-
-        # Enable mouse tracking to capture hover events
-        self.tableWidgetAnalytes.setMouseTracking(True)
-        self.tableWidgetAnalytes.viewport().setMouseTracking(True)
-
-        # Connect mouse move event to custom handler
-        self.tableWidgetAnalytes.viewport().installEventFilter(self)
-
-        self.comboBoxScale.currentIndexChanged.connect(self.update_all_combos)
-
-        self.correlation_methods = ["Pearson", "Spearman"]
-
-        for method in self.correlation_methods:
-            self.comboBoxCorrelation.addItem(method)
-
-        self.calculate_correlation()
-
-        self.tableWidgetAnalytes.cellClicked.connect(self.toggle_cell_selection)
-
-        self.tableWidgetSelected.setColumnCount(2)
-        self.tableWidgetSelected.setHorizontalHeaderLabels(['analyte Pair', 'normalisation'])
-
-        self.pushButtonSaveSelection.clicked.connect(self.save_selection)
-
-        self.pushButtonLoadSelection.clicked.connect(self.load_selection)
-
-        self.pushButtonDone.clicked.connect(self.done_selection)
-
-        self.pushButtonCancel.clicked.connect(self.reject)
-        self.comboBoxCorrelation.activated.connect(self.calculate_correlation)
+        # highlight diagonal (use analytes)
         self.tableWidgetAnalytes.setStyleSheet("QTableWidget::item:selected {background-color: yellow;}")
-        if len(self.norm_dict.keys())>0:
+        if len(self.norm_dict.keys()) > 0:
             for analyte,norm in self.norm_dict.items():
                 self.populate_analyte_list(analyte,norm)
         else:
@@ -124,6 +117,29 @@ class AnalyteDialog(QDialog, Ui_Dialog):
 
                 # If the item doesn't exist, create it
                 self.toggle_cell_selection(row, column)
+
+        # Variables to track previous row/column for font reset
+        self.prev_row = None
+        self.prev_col = None
+
+        # Enable mouse tracking to capture hover events
+        self.tableWidgetAnalytes.setMouseTracking(True)
+        self.tableWidgetAnalytes.viewport().setMouseTracking(True)
+
+        # Connect mouse move event to custom handler
+        self.tableWidgetAnalytes.viewport().installEventFilter(self)
+        self.tableWidgetAnalytes.cellClicked.connect(self.toggle_cell_selection)
+
+
+        # UI buttons
+        self.pushButtonSaveSelection.clicked.connect(self.save_selection)
+        self.pushButtonLoadSelection.clicked.connect(self.load_selection)
+        self.pushButtonDone.clicked.connect(self.done_selection)
+        self.pushButtonCancel.clicked.connect(self.reject)
+
+
+        # compute correlations for background colors
+        self.calculate_correlation()
 
     def done_selection(self):
         """Executes when `Done` button is clicked."""        
@@ -312,7 +328,7 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         self.update_list()
 
     def remove_analyte_from_list(self, row, column):
-        """Removes an analyte or ratio from the list to use for analyses in ``MainWindow`` related methods.
+        """Removes an analyte or ratio from the list to use in ``MainWindow`` related methods.
 
         Parameters
         ----------
@@ -411,51 +427,39 @@ class AnalyteDialog(QDialog, Ui_Dialog):
             item.setSelected(True)
 
             # Add the loaded data to tableWidgetSelected
-            newRow = self.tableWidgetSelected.rowCount()
-            self.tableWidgetSelected.insertRow(newRow)
-            self.tableWidgetSelected.setItem(newRow, 0, QTableWidgetItem(analyte_pair))
+            new_row = self.tableWidgetSelected.rowCount()
+            self.tableWidgetSelected.insertRow(new_row)
+            self.tableWidgetSelected.setItem(new_row, 0, QTableWidgetItem(analyte_pair))
             combo = QComboBox()
             combo.addItems(['linear', 'log', 'logit'])
             combo.setCurrentText(norm)
-            self.tableWidgetSelected.setCellWidget(newRow, 1, combo)
+            self.tableWidgetSelected.setCellWidget(new_row, 1, combo)
             combo.currentIndexChanged.connect(self.update_scale)
 
-    def mouseMoveEvent(self, event):
-        # Get the row and column of the cell under the mouse
-        index = self.tableWidgetAnalytes.indexAt(event.pos())
-        row = index.row()
-        col = index.column()
+    def event_filter(self, obj, event):
+        """Highlights row and column header of tableWidgetAnalytes as mouse moves over cells.
 
-        # Check if the mouse is over a valid cell
-        if row >= 0 and col >= 0:
-            if self.prev_row != row:
-                self._set_row_font(self.prev_row, QFont.Normal, QBrush())  # Reset previous row
-                self._set_row_font(row, QFont.Bold, QBrush(QColor("yellow")))  # Set current row to Bold
-                self.prev_row = row  # Update previous row
-            
-            if self.prev_col != col:
-                self._set_col_font(self.prev_col, QFont.Normal, QBrush())  # Reset previous column
-                self._set_col_font(col, QFont.Bold, QBrush(QColor("yellow")))  # Set current column to Bold
-                self.prev_col = col  # Update previous column
+        Parameters
+        ----------
+        obj : widget
+            Widget that is currently under the mouse pointer.
+        event : QEvent
+            Triggered by motion of mouse pointer.
 
-        super().mouseMoveEvent(event)
-
-    def leaveEvent(self, event):
-        # Reset font when the mouse leaves the table area
-        self._set_row_font(self.prev_row, QFont.Normal, QBrush())
-        self._set_col_font(self.prev_col, QFont.Normal, QBrush())
-        self.prev_row = None
-        self.prev_col = None
-        super().leaveEvent(event)
-
-    def eventFilter(self, obj, event):
+        Returns
+        -------
+        event_filter
+            Updated event_filter.
+        """        
         if obj == self.tableWidgetAnalytes.viewport() and event.type() == event.MouseMove:
             # Get the row and column of the cell under the mouse
             index = self.tableWidgetAnalytes.indexAt(event.pos())
             row = index.row()
             col = index.column()
 
-            print(f"({row}, {col})")
+            # debugging
+            if config.debug:
+                print(f"Mouse location: ({row}, {col})")
 
             # Reset the previous row and column to normal font if they exist
             if self.prev_row is not None:
@@ -483,7 +487,7 @@ class AnalyteDialog(QDialog, Ui_Dialog):
 
         self.tableWidgetAnalytes.viewport().update()  # Force a repaint
 
-        return super().eventFilter(obj, event)
+        return super().event_filter(obj, event)
 
     def _set_row_font(self, row, weight, brush):
         """Set the font weight for the vertical header row."""

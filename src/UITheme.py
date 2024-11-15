@@ -13,6 +13,9 @@ class UIThemes():
         self.switch_view_mode(self.view_mode)
         parent.actionViewMode.triggered.connect(lambda: self.switch_view_mode(self.view_mode+1))
 
+        self.highlight_color_dark = '#696880'
+        self.highlight_color_light = '#FFFFC8'
+
     def switch_view_mode(self, view_mode):
         if view_mode > 2:
             view_mode = 0
@@ -245,3 +248,5 @@ class UIThemes():
         parent.toolBoxStyle.setItemIcon(4,QIcon(os.path.join(ICONPATH,'icon-cluster-64.svg')))
         parent.toolButtonClusterLink.setIcon(QIcon(os.path.join(ICONPATH,'icon-link-64.svg')))
         parent.toolButtonClusterDelink.setIcon(QIcon(os.path.join(ICONPATH,'icon-unlink-64.svg')))
+
+

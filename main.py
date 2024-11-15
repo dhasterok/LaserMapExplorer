@@ -1219,13 +1219,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.sample_id == '':
             return
 
-        self.analyteDialog = AnalyteDialog(self)
-        self.analyteDialog.show()
+        self.analyte_dialog = AnalyteDialog(self)
+        self.analyte_dialog.show()
 
-        result = self.analyteDialog.exec_()  # Store the result here
+        result = self.analyte_dialog.exec_()  # Store the result here
         if result == QDialog.Accepted:
             #update self.data['norm'] with selection
-            self.data[self.sample_id].processed_data.set_attribute(self.analyteDialog.analytes,'norm',self.analyteDialog.norm_dict)
+            for analyte in self.data[self.sample_id].processed_data.match_attribute('data_type','Analyte'):
+                if analyte in list(self.analyte_dialog.norm_dict.keys()):
+                    self.data[self.sample_id].set_attribute(analyte, 'use', True)
+                else:
+                    self.data[self.sample_id].set_attribute(analyte, 'use', False)
+
+            for analyte, norm in self.analyte_dialog.norm_dict.items():
+                if '/' in analyte:
+                    if analyte not in self.data[self.sample_id].processed_data.columns:
+                        analyte_1, analyte_2 = analyte.split(' / ') 
+                        self.data[self.sample_id].compute_ratio(analyte_1, analyte_2)
+
+                self.data[self.sample_id].processed_data.set_attribute(analyte,'norm',norm)
 
             self.plot_tree.update_tree(norm_update=True)
             #update analysis type combo in styles
@@ -1579,12 +1591,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if sample_id == self.sample_id:
             if plot_type != self.comboBoxPlotType.currentText():
                 self.comboBoxPlotType.setCurrentText(plot_type)
+
             if field_type != self.comboBoxColorByField.currentText():
                 if field_type =='Calculated Map':  # correct name 
                     self.comboBoxColorByField.setCurrentText('Calculated')
                 else:
                     self.comboBoxColorByField.setCurrentText(field_type)
-                self.color_by_field_callback() # added color by field callback to update color field
+                self.style.color_by_field_callback() # added color by field callback to update color field
+
             if field != self.comboBoxColorField.currentText():
                 self.comboBoxColorField.setCurrentText(field)
                 self.style.color_field_callback(plot)
@@ -1802,40 +1816,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Changes how negative values are handled for each analyte, the followinf options are available:
             Ignore negative values, Minimum positive value, Gradual shift, Yeo-Johnson transformation
-
-
         """
         sample_id = self.plot_info['sample_id']
         field = self.plot_info['field']
-        if '/' in field:
-            analyte_1, analyte_2 = field.split(' / ')
-        else:
-            analyte_1 = field
-            analyte_2 = None
             
-        if analyte_1 and not analyte_2:
-            if self.checkBoxApplyAll.isChecked():
-                # Apply to all iolties
-                self.data[sample_id]['analyte_info']['negative_method'] = self.comboBoxNegativeMethod.currentText()
-                # clear existing plot info from tree to ensure saved plots using most recent data
-                for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
-                    self.plot_tree.clear_tree_data(tree)
-                self.prep_data(sample_id)
-            else:
-                self.data[sample_id]['analyte_info'].loc[self.data[sample_id]['analyte_info']['analytes']==analyte_1,
-                'negative_method'] = self.comboBoxNegativeMethod.currentText()
-                self.prep_data(sample_id, analyte_1,analyte_2)
+        if self.checkBoxApplyAll.isChecked():
+            # Apply to all iolties
+            analyte_list = self.data[sample_id].match_attributes({'data_type':['Analyte', 'Ratio']})
+            self.data[sample_id].raw_data.set_attributes(analyte_list, 'negative_method', self.comboBoxNegativeMethod.currentText())
+            # clear existing plot info from tree to ensure saved plots using most recent data
+            for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
+                self.plot_tree.clear_tree_data(tree)
+            self.data[sample_id].prep_data()
         else:
-            if self.checkBoxApplyAll.isChecked():
-                # Apply to all ratios
-                self.data[sample_id]['ratio_info']['negative_method'] = self.comboBoxNegativeMethod.currentText()
-                for tree in ['Ratio', 'Ratio (normalized)']:
-                    self.plot_tree.clear_tree_data(tree)
-                self.prep_data(sample_id)
-            else:
-                self.data[sample_id]['ratio_info'].loc[ (self.data[sample_id]['ratio_info']['analyte_1']==analyte_1)
-                                        & (self.data[sample_id]['ratio_info']['analyte_2']==analyte_2),'negative_method']  = self.comboBoxNegativeMethod.currentText()
-                self.prep_data(sample_id, analyte_1,analyte_2)
+            self.data[sample_id].raw_data.set_attribute(field, 'negative_method', self.comboBoxNegativeMethod.currentText())
+            self.data[sample_id].prep_data(field)
         
         self.update_filter_values()
         self.update_SV()
@@ -2372,7 +2367,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Uses selected clusters in ``MainWindow.tableWidgetViewGroups`` to create a mask (or inverse mask).  Masking is controlled
         clicking either ``MainWindow.toolButtonGroupMask`` or ``MainWindow.toolButtonGroupMaskInverse``.  The masking can be turned
-        on or off by changing the checked state of ``MainWindow.actionClusterMask`` on the *Left Toolbox \> Filter Page*.
+        on or off by changing the checked state of ``MainWindow.actionClusterMask`` on the *Left Toolbox \\ Filter Page*.
 
         Updates ``MainWindow.data[sample_id].cluster_mask`` and if ``update_plot==True``, updates ``MainWindow.data[sample_id].mask``.
 
@@ -3399,7 +3394,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # get data for current map
         #scale = self.data[self.sample_id].processed_data.get_attribute(field, 'norm')
         scale = self.style.cscale
-        map_df = self.data[self.sample_id].get_map_data(field, field_type)
+        map_df = self.data[self.sample_id].get_map_data(field, field_type, ref_chem=self.ref_chem)
 
         array_size = self.data[self.sample_id].array_size
         aspect_ratio = self.data[self.sample_id].aspect_ratio
@@ -5414,7 +5409,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def cluster_method_callback(self):
         """Updates clustering-related widgets
 
-        Enables/disables widgets in Left Toolbox > Clustering Page.  Updates widget values/text with values saved in ``MainWindow.cluster_dict``.
+        Enables/disables widgets in *Left Toolbox \\ Clustering* page.  Updates widget values/text with values saved in ``MainWindow.cluster_dict``.
         """
         print('cluster_method_callback')
         if self.sample_id == '':
@@ -6094,11 +6089,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_field_combobox(self.comboBoxIsotopeAgeFieldType3, self.comboBoxIsotopeAgeField3)
 
 
-
-    
-    def update_color_field_spinbox(self):
-        self.spinBoxColorField.setValue(self.comboBoxColorField.currentIndex())
-
     # gets the set of fields
     def get_field_list(self, set_name='Analyte'):
         """Gets the fields associated with a defined set
@@ -6125,10 +6115,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             case 'Analyte' | 'Analyte (normalized)':
                 set_fields = data.match_attributes({'data_type': 'analyte', 'use': True})
             case 'Ratio' | 'Ratio (normalized)':
-                #analytes_1 = self.data[self.sample_id]['ratio_info'].loc[self.data[self.sample_id]['ratio_info']['use']== True,'analyte_1']
-                #analytes_2 =  self.data[self.sample_id]['ratio_info'].loc[self.data[self.sample_id]['ratio_info']['use']== True,'analyte_2']
-                #ratios = analytes_1 +' / '+ analytes_2
-                #set_fields = ratios.values.tolist()
                 set_fields = data.match_attributes({'data_type': 'ratio', 'use': True})
             case 'None':
                 return []
@@ -6209,16 +6195,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.lineEditFMax.value = data[field].max()
             self.callback_lineEditFMin()
             self.callback_lineEditFMax()
-
-    # ----start debugging----
-    # def test_get_field_list(self):
-    #     lameio.open_directory()
-
-    #     self.compute_pca()
-
-    #     for type in ['Analyte', 'Analyte (normalized)', 'Ratio', 'PCA score']:
-    #         print(self.get_field_list(set_name=type))
-    # ----end debugging----
 
     def update_ratio_df(self,sample_id,analyte_1, analyte_2,norm):
         parameter = self.data[sample_id]['ratio_info'].loc[(self.data[sample_id]['ratio_info']['analyte_1'] == analyte_1) & (self.data[sample_id]['ratio_info']['analyte_2'] == analyte_2)]
@@ -6322,7 +6298,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.actionCrop.setChecked(False)
                 self.toolButtonPlotProfile.setChecked(False)
                 self.toolButtonPointMove.setChecked(False)
-
 
     def partial_match_in_list(self, lst, string):
         """Checks whether values in a list partially match a string

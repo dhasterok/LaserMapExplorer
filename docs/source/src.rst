@@ -12,10 +12,42 @@ Subpackages
 Submodules
 ----------
 
+src.CustomWidgets module
+-----------------
+
+.. automodule:: src.CustomWidgets
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+src.DataHandling module
+---------------------
+
+.. automodule:: src.DataHandling
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 src.ExtendedDF module
 ---------------------
 
 .. automodule:: src.ExtendedDF
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+src.ImageProcessing module
+-----------------
+
+.. automodule:: src.ImageProcessing
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+src.LameIO module
+-----------------
+
+.. automodule:: src.LameIO
    :members:
    :undoc-members:
    :show-inheritance:
@@ -68,6 +100,14 @@ src.lame\_fileio module
    :undoc-members:
    :show-inheritance:
 
+src.NoteTaking module
+-----------------
+
+.. automodule:: src.NoteTaking
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 src.plot\_spider module
 -----------------------
 
@@ -104,6 +144,14 @@ src.scalebar module
 -------------------
 
 .. automodule:: src.scalebar
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+src.StyleToolbox module
+-------------------
+
+.. automodule:: src.StyleToolbox
    :members:
    :undoc-members:
    :show-inheritance:

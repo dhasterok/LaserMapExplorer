@@ -6,6 +6,7 @@ import src.CustomMplCanvas as mplc
 from src.CustomWidgets import StandardItem, CustomTreeView
 from src.SortAnalytes import sort_analytes
 
+
 # -------------------------------
 # Plot Selector (tree) functions
 # -------------------------------
@@ -33,15 +34,16 @@ class PlotTree():
         treeView.setHeaderHidden(True)
 
         # Top level branches
-        self.analyte_branch = treeView.add_branch(treeView.root_node, 'Analyte')
-        self.norm_analyte_branch = treeView.add_branch(treeView.root_node, 'Analyte (normalized)')
-        self.ratio_branch = treeView.add_branch(treeView.root_node, 'Ratio')
-        self.norm_ratio_branch = treeView.add_branch(treeView.root_node, 'Ratio (normalized)')
-        self.histogram_branch = treeView.add_branch(treeView.root_node, 'Histogram')
-        self.correlation_branch = treeView.add_branch(treeView.root_node, 'Correlation')
-        self.geochemistry_branch = treeView.add_branch(treeView.root_node, 'Geochemistry')
-        self.multidim_branch = treeView.add_branch(treeView.root_node, 'Multidimensional Analysis')
-        self.calculated_branch = treeView.add_branch(treeView.root_node, 'Calculated Map')
+        self.tree = {}
+        self.tree['Analyte'] = treeView.add_branch(treeView.root_node, 'Analyte')
+        self.tree['Analyte (normalized)'] = treeView.add_branch(treeView.root_node, 'Analyte (normalized)')
+        self.tree['Ratio'] = treeView.add_branch(treeView.root_node, 'Ratio')
+        self.tree['Ratio (normalized)'] = treeView.add_branch(treeView.root_node, 'Ratio (normalized)')
+        self.tree['Histogram'] = treeView.add_branch(treeView.root_node, 'Histogram')
+        self.tree['Correlation'] = treeView.add_branch(treeView.root_node, 'Correlation')
+        self.tree['Geochemistry'] = treeView.add_branch(treeView.root_node, 'Geochemistry')
+        self.tree['Multidimensional Analysis'] = treeView.add_branch(treeView.root_node, 'Multidimensional Analysis')
+        self.tree['Calculated'] = treeView.add_branch(treeView.root_node, 'Calculated')
 
         # Set the model to the view and expand the tree
         treeView.expandAll()
@@ -70,16 +72,16 @@ class PlotTree():
         treeView = self.parent.treeView
 
         # add sample_id to analyte branch
-        analyte_branch = treeView.branch_exists(self.analyte_branch, sample_id)
+        analyte_branch = treeView.branch_exists(self.tree['Analyte'], sample_id)
         if not analyte_branch:
-            analyte_branch = treeView.add_branch(self.analyte_branch, sample_id)
+            analyte_branch = treeView.add_branch(self.tree['Analyte'], sample_id)
         else:
             return
 
         # add sample_id to analyte (normalized) branch
-        norm_analyte_branch = treeView.branch_exists(self.norm_analyte_branch, sample_id)
+        norm_analyte_branch = treeView.branch_exists(self.tree['Analyte (normalized)'], sample_id)
         if not norm_analyte_branch:
-            norm_analyte_branch = treeView.add_branch(self.norm_analyte_branch, sample_id)
+            norm_analyte_branch = treeView.add_branch(self.tree['Analyte (normalized)'], sample_id)
         else:
             return
 
@@ -97,16 +99,16 @@ class PlotTree():
             return
 
         # add sample_id to ratio branch
-        ratio_branch = treeView.branch_exists(self.ratio_branch, sample_id)
+        ratio_branch = treeView.branch_exists(self.tree['Ratio'], sample_id)
         if not ratio_branch:
-            ratio_branch = treeView.add_branch(self.ratio_branch, sample_id)
+            ratio_branch = treeView.add_branch(self.tree['Ratio'], sample_id)
         else:
             return
 
         # add sample_id to ratio (normalized) branch
-        norm_ratio_branch = treeView.branch_exists(self.norm_ratio_branch, sample_id)
+        norm_ratio_branch = treeView.branch_exists(self.tree['Ratio (normalized)'], sample_id)
         if not norm_ratio_branch:
-            norm_ratio_branch = treeView.add_branch(self.norm_ratio_branch, sample_id)
+            norm_ratio_branch = treeView.add_branch(self.tree['Ratio (normalized)'], sample_id)
         else:
             return
 
@@ -155,11 +157,11 @@ class PlotTree():
         # Reorder tree items according to the new analyte list
         # Sort the tree branches associated with analytes
         for sample_id in self.parent.sample_ids:
-            sample_branch = treeView.find_leaf(self.analyte_branch, sample_id)
+            sample_branch = treeView.find_leaf(self.tree['Analyte'], sample_id)
             if sample_branch:
                 treeView.sort_branch(sample_branch, sorted_analyte_list)
 
-            norm_sample_branch = treeView.find_leaf(self.norm_analyte_branch, sample_id)
+            norm_sample_branch = treeView.find_leaf(self.tree['Analyte (normalized)'], sample_id)
             if sample_branch:
                 treeView.sort_branch(norm_sample_branch, sorted_analyte_list)
 
@@ -185,8 +187,9 @@ class PlotTree():
         
         Returns
         -------
-        dict
-            Plot_info dictionary with plot widget and information about the plot construction
+        dict, bool
+            Plot_info dictionary with plot widget and information about the plot construction, 
+            returns True if the branch exists
         """
         #print('retrieve_table_data')
         if tree_index is not None:
@@ -270,7 +273,6 @@ class PlotTree():
 
                 # updates comboBoxColorByField and comboBoxColorField comboboxes and creates new plot
                 self.parent.update_fields(branch,'analyte map',tree, leaf, plot=True)
-                #set styles
 
                 #update UI with auto scale and neg handling parameters from 'Analyte/Ratio Info'
                 self.parent.update_spinboxes(field=leaf, field_type=tree)
@@ -300,73 +302,74 @@ class PlotTree():
             return
 
         if darkdetect.isDark():
-            hexcolor = '#696880'
+            hexcolor = self.parent.theme.highlight_color_dark
         else:
-            hexcolor = '#FFFFC8'
+            hexcolor = self.parent.theme.highlight_color_light
 
         data = self.parent.data[sample_id]
         ref_chem = self.parent.ref_chem
 
         # Un-highlight all leaf in the trees
-        self.unhighlight_tree(self.ratio_branch)
-        self.unhighlight_tree(self.analyte_branch)
+        self.unhighlight_tree(self.tree['Ratio'])
+        self.unhighlight_tree(self.tree['Analyte'])
 
         analytes = data.processed_data.match_attribute('data_type','analyte')
         ratios = data.processed_data.match_attribute('data_type','ratio')
 
         data.processed_data.set_attribute(analytes,'use',False)
+        treeView = self.parent.treeView
 
         for analyte in analytes + ratios:
             norm = data.processed_data.get_attribute(analyte,'norm')
             if '/' in analyte:
                 analyte_1, analyte_2 = analyte.split(' / ')
-                ratio_name = f"{analyte_1} / {analyte_2}"
-                # Populate ratios_items if the pair doesn't already exist
-                item1,check = self.find_leaf('Ratio', branch = sample_id, leaf = ratio_name)
 
-                if norm_update:
-                    item1,check = self.find_leaf('Ratio', branch = sample_id, leaf = ratio_name)
-                    item2,check = self.find_leaf('Ratio (normalized)', branch = sample_id, leaf = ratio_name)
-                # else:
-                #     item1,check = self.find_leaf('Ratio', branch = self.parent.sample_id, leaf = ratio_name)
-                #     item2,check = self.find_leaf('Ratio (normalized)', branch = self.parent.sample_id, leaf = ratio_name)
+                # find sample_id (branch) in ratio (tree), if it does not exist, create it
+                sample_branch = treeView.branch_exists(self.tree['Ratio'],sample_id)
+                if not sample_branch:
+                    sample_branch = self.parent.treeView.add_branch(self.tree['Ratio'], sample_id)
 
-                if not check: #if ratio doesn't exist
-                    # ratio
-                    child_item = StandardItem(ratio_name)
-                    # child_item.setBackground(QBrush(QColor(hexcolor)))
-                    item1.appendRow(child_item)
+                # find sample_id (branch) in ratio normalized (tree), if it does not exist, create it
+                sample_branch_norm = treeView.branch_exists(self.tree['Ratio (normalized)'], sample_id)
+                if not sample_branch_norm:
+                    sample_branch_norm = self.parent.treeView.add_branch(self.tree['Ratio (normalized)'], sample_id)
 
-                    # ratio normalized
-                    # check if ratio can be normalized (note: normalization is not handled here)
-                    refval_1 = ref_chem[re.sub(r'\d', '', analyte_1).lower()]
-                    refval_2 = ref_chem[re.sub(r'\d', '', analyte_2).lower()]
-                    ratio_flag = False
-                    if (refval_1 > 0) and (refval_2 > 0):
-                        ratio_flag = True
-                    #print([analyte, refval_1, refval_2, ratio_flag])
+                # check if ratio (leaf) exists in sample_id (branch) and create if necessesary
+                leaf_item_norm = None
+                if not treeView.find_leaf(sample_branch, analyte):
+                    # add ratio (leaf) item to sample_id (branch)
+                    treeView.add_leaf(sample_branch, analyte)
 
-                    child_item2 = StandardItem(ratio_name)
-                    # child_item2.setBackground(QBrush(QColor(hexcolor)))
-                    # if normization cannot be done, make text italic and disable item
-                    if not ratio_flag:
-                        font = child_item2.font()
-                        font.setItalic(True)
-                        child_item2.setFont(font)
-                        child_item2.setEnabled(False)
-                    item2.appendRow(child_item2)
-                # else:
-                #     item1.setBackground(QBrush(QColor(hexcolor)))
-                #     item2.setBackground(QBrush(QColor(hexcolor)))
+                    # add ratio normalized (leaf) item to sample_id (branch)
+                    leaf_item_norm = treeView.add_leaf(sample_branch_norm, analyte)
+                else:
+                    leaf_item_norm = treeView.find_leaf(sample_branch_norm, analyte)
+
+                # check if ratio can be normalized (note: normalization is not handled here)
+                refval_1 = ref_chem[re.sub(r'\d', '', analyte_1).lower()]
+                refval_2 = ref_chem[re.sub(r'\d', '', analyte_2).lower()]
+                ratio_flag = False
+                if (refval_1 > 0) and (refval_2 > 0):
+                    ratio_flag = True
+                #print([analyte, refval_1, refval_2, ratio_flag])
+
+                # if normalization cannot be done, make text italic and disable item
+                if not ratio_flag:
+                    font = leaf_item_norm.font()
+                    font.setItalic(True)
+                    leaf_item_norm.setFont(font)
+                    leaf_item_norm.setEnabled(False)
+                    data.processed_data.set_attribute(analyte, 'use', False)
 
             else: #single analyte
-                item,check = self.find_leaf('Analyte', branch = sample_id, leaf = analyte)
+
+                leaf_item = treeView.find_leaf(treeView.find_leaf(self.tree['Analyte'], sample_id), analyte)
                 # if norm_update:
                 #     item,check = self.find_leaf('Analyte (normalized)', branch = sample_id, leaf = analyte)
                 # else:
                 #     item,check = self.find_leaf('Analyte', branch = sample_id, leaf = analyte)
 
-                item.setBackground(QBrush(QColor(hexcolor)))
+                leaf_item.setBackground(QBrush(QColor(hexcolor)))
 
                 data.processed_data.set_attribute(analytes,'use',True)
 
@@ -473,25 +476,7 @@ class PlotTree():
         Qt.AbstractModelItem
             The set of items under *tree*
         """
-        match tree:
-            case 'Analyte':
-                return  self.analyte_branch
-            case 'Analyte (normalized)':
-                return self.norm_analyte_branch
-            case 'Ratio':
-                return self.ratio_branch
-            case 'Ratio (normalized)':
-                return self.norm_ratio_branch
-            case 'Histogram':
-                return self.histogram_branch
-            case 'Correlation':
-                return self.correlation_branch
-            case 'Geochemistry':
-                return self.geochemistry_branch
-            case 'Multidimensional Analysis':
-                return self.multidim_branch
-            case 'Calculated Map':
-                return self.calculated_branch
+        return self.tree[tree]
 
     def find_leaf(self, tree, branch, leaf):
         """Get a branch or leaf item from treeView

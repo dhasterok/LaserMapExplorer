@@ -20,9 +20,72 @@ class SampleObj:
     the dataframe is initialized as an ``ExtendedDF.AttributeDataFrame``, which brings with it a
     number of methods to set, get and search the dataframe's metadata.
 
+    Parameters
+    ----------
+    sample_id : str
+        Sample identifier.
+    file_path : str
+        Path to data file for sample_id
+    negative_method : str
+        Method used to handle negative values in the dataset
     
     Methods
     -------
+    reset_data :
+        Reverts back to the original data
+
+    add_columns :
+        Add one or more columns to the sample object
+
+    delete_column :
+        Deletes a column and associated attributes from the AttributeDataFrame
+
+    get_attribute_dict :
+        Creates a dictionary from an attribute where the unique values of the attribute becomes the
+        keys and the items are lists with the column names that match each attribute_name
+
+    swap_xy : 
+        Swaps data in a SampleObj
+
+    _swap_xy :
+        Swaps X and Y of a dataframe
+    
+    swap_resolution :
+        Swaps DX and DY for a dataframe
+
+    reset_crop :
+        Reset the data to the new bounds.
+
+    compute_ratio :
+        Compute a ratio field from two analytes
+
+    cluster_data :
+        Clusters data for use with data preprocessing
+
+
+    prep_data :
+        Applies adjustments to data data prior to analyses and plotting
+
+    k_optimal_clusters :
+        Predicts the optimal number of clusters
+
+    outlier_detection :
+        Outlier detection with cluster-based correction for negatives and compositional constraints, using percentile-based shifting
+
+    transform_array :
+        Negative and zero handling with clustering for noise detection
+
+    update_norm :
+        Update the norm of the data
+
+    get_map_data :
+        Retrieves and processes the mapping data for the given sample and analytes
+
+    get_processed_data :
+        Gets the processed data for analysis
+
+    get_vector :
+        Creates a dictionary of values for plotting
 
     Attributes
     ----------
@@ -118,19 +181,7 @@ class SampleObj:
         | 'mask' : () -- combined mask, derived from filter_mask & 'polygon_mask' & 'crop_mask'
     """    
     def __init__(self, sample_id, file_path, negative_method):
-        """_summary_
 
-        _extended_summary_
-
-        Parameters
-        ----------
-        sample_id : str
-            Sample identifier.
-        file_path : str
-            Path to data file for sample_id
-        negative_method : str
-            Method used to handle negative values in the dataset
-        """
         self.sample_id = sample_id
         self.file_path = file_path
         self._negative_method = negative_method
@@ -268,6 +319,7 @@ class SampleObj:
     # note properties are based on the cropped X and Y values
     @property
     def x(self):
+        """numpy.ndarray: Value of x-coordinate associated with map data"""
         return self._x
 
     @x.setter
@@ -281,6 +333,7 @@ class SampleObj:
     # Define the y property
     @property
     def y(self):
+        """numpy.ndarray: Value of y-coordinate associated with map data"""
         return self._y
 
     @y.setter
@@ -293,6 +346,7 @@ class SampleObj:
 
     @property
     def dx(self):
+        """float: Width of pixels in x-direction."""
         return self._dx
 
     @dx.setter
@@ -314,6 +368,7 @@ class SampleObj:
 
     @property
     def dy(self):
+        """float: Width of pixels in y-direction."""
         return self._dy
 
     @dy.setter
@@ -336,33 +391,40 @@ class SampleObj:
     # Cropped X-axis limits
     @property
     def xlim(self):
+        """list: (float, float) Limits of pixels in x-direction."""
         return (self._x.min(), self._x.max()) if self._x is not None else (None, None)
 
     # Cropped Y-axis limits
     @property
     def ylim(self):
+        """list: (float, float) Limits of pixels in y-direction."""
         return (self._y.min(), self._y.max()) if self._y is not None else (None, None)
 
     @property
     def x_range(self):
+        """float: Range of pixels in x-direction."""
         return self._x.max() - self._x.min() if self._x is not None else None
 
     @property
     def y_range(self):
+        """float: Range of pixels in y-direction."""
         return self._y.max() - self._y.min() if self._y is not None else None
     
     @property
     def aspect_ratio(self):
+        """float: Aspect ratio of maps (dy / dx)."""
         if self._dx and self._dy:
             return self._dy / self._dx
         return None
 
     @property
     def array_size(self):
+        """tuple: (int, int) Size of map in pixels"""
         return (self._y.nunique(), self._x.nunique())
 
     @property
     def crop_mask(self):
+        """numpy.ndarray: Boolean mask used to crop the raw data. True values will be used."""
         return self._crop_mask
     
     @crop_mask.setter
@@ -389,6 +451,7 @@ class SampleObj:
 
     @property
     def filter_df(self):
+        """pandas.DataFrame : Field filters applied to data for masking."""
         return self._filter_df
 
     def add_columns(self, data_type, column_names, array, mask=None):
@@ -630,8 +693,13 @@ class SampleObj:
         ratio_name = f'{analyte_1} / {analyte_2}'
 
         self.add_columns('ratio',ratio_name,ratio_array)
+        self.processed_data.set_attribute(ratio_name, 'use', True)
 
     def cluster_data(self):
+        """Clusters data for use with data preprocessing
+
+        _extended_summary_
+        """        
         # Step 1: Clustering
         # ------------------
         # Select columns where 'data_type' attribute is 'analyte'
@@ -754,7 +822,7 @@ class SampleObj:
 
         # Compute ratios not included in raw_data
         # ---------------------------------------
-        if ((field == None) or (field == 'all')) and (attribute_df is not None):
+        if ((field is None) or (field == 'all')) and (attribute_df is not None):
             ratios = attribute_df.columns[(data_type == 'ratio').any()]
 
             ratios_not_in_raw_data = [col for col in ratios if col not in ratio_columns]
@@ -968,6 +1036,7 @@ class SampleObj:
     def transform_array(self, array, negative_method, shift_percentile=None):
         """
         Negative and zero handling with clustering for noise detection.
+
         Parameters
         ----------
         array : numpy.ndarray
@@ -986,7 +1055,7 @@ class SampleObj:
                 t_array = np.where(t_array > 0, t_array, np.nan)
 
             case 'minimum positive':
-                # shift all negative values to be a 
+                # shift all negative values to be a minimum value
                 min_positive_value = np.nanmin(array[array > 0])
                 t_array = np.where(array < 0, min_positive_value, array)
 
@@ -1006,6 +1075,7 @@ class SampleObj:
 
             case 'yeo-johnson transform':
                 t_array, _ = yeojohnson(array)
+
         return t_array
 
     def update_norm(self, norm=None, field=None):
@@ -1032,7 +1102,7 @@ class SampleObj:
 
     def get_map_data(self, field, field_type='Analyte', norm=False, ref_chem=None):
         """
-        Retrieves and processes the mapping data for the given sample and analytes, then plots the result if required.
+        Retrieves and processes the mapping data for the given sample and analytes
 
         The method also updates certain parameters in the analyte data frame related to scaling.
         Based on the plot type, this method internally calls the appropriate plotting functions.
@@ -1082,9 +1152,6 @@ class SampleObj:
                 if norm == 'log':
                     df['array'] = np.where((~np.isnan(df['array'])) & (df['array'] > 0), np.log10(df['array']), np.nan)
 
-
-                    # print(self.processed_analyte_data[sample_id].loc[:10,analytes])
-                    # print(self.processed_data.loc[:10,analytes])
                 elif norm == 'logit':
                     # Handle division by zero and NaN values
                     with np.errstate(divide='ignore', invalid='ignore'):
@@ -1100,7 +1167,6 @@ class SampleObj:
                 field_2 = field.split(' / ')[1]
 
                 # unnormalized
-                #df['array'] = self.computed_data.loc[:,field_1].values / self.processed_data.loc[:,field_2].values
                 df['array'] = self.processed_data[field].values
                 
                 # normalize
@@ -1110,13 +1176,9 @@ class SampleObj:
                     df['array'] = df['array'] * (refval_2 / refval_1)
 
                 #get norm value
-                #norm = self.processed_data.column_attributes['field']['norm']
-
                 if norm == 'log':
                     df['array'] = np.where((~np.isnan(df['array'])) & (df['array'] > 0), np.log10(df['array']), np.nan)
 
-                    # print(self.processed_analyte_data[sample_id].loc[:10,analytes])
-                    # print(self.processed_data.loc[:10,analytes])
                 elif norm == 'logit':
                     # Handle division by zero and NaN values
                     with np.errstate(divide='ignore', invalid='ignore'):
@@ -1128,9 +1190,6 @@ class SampleObj:
         # ----begin debugging----
         # print(df.columns)
         # ----end debugging----
-
-        # crop plot if filter applied
-        # current_plot_df = current_plot_df[self.data[self.sample_id]['crop_mask']].reset_index(drop=True)
         return df
 
     def get_processed_data(self):

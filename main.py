@@ -775,7 +775,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolButtonPointDelete.clicked.connect(lambda: self.table_fcn.delete_row(self.tableWidgetProfilePoints))
         self.comboBoxProfileSort.currentIndexChanged.connect(self.plot_profile_and_table)
         self.toolButtonProfileInterpolate.clicked.connect(lambda: self.profiling.interpolate_points(interpolation_distance=int(self.lineEditIntDist.text()), radius= int(self.lineEditPointRadius.text())))
+        # update profile plot when point type is changed
         self.comboBoxPointType.currentIndexChanged.connect(lambda: self.profiling.plot_profiles())
+        # update profile plot when selected subplot is changed
+        self.spinBoxProfileSelectedSubplot.valueChanged.connect(lambda: self.profiling.plot_profiles())
+        # update profile plot when Num subplot is changed
+        self.spinBoxProfileNumSubplots.valueChanged.connect(lambda: self.profiling.plot_profiles())
+        # update profile plot when field in subplot table is changed
+        self.toolButtonProfileAddField.clicked.connect(lambda: self.profiling.plot_profiles())
+        
+        # Connect the add and remove field buttons to methods
+        self.toolButtonProfileAddField.clicked.connect(self.profiling.add_field_to_listview)
+        self.toolButtonProfileRemove.clicked.connect(self.profiling.remove_field_from_listview)
+        self.toolButtonProfileRemove.clicked.connect(lambda: self.profiling.plot_profiles())
+        self.comboBoxProfileFieldType.activated.connect(lambda: self.update_field_combobox(self.comboBoxProfileFieldType, self.comboBoxProfileField))
+
         # below line is commented because plot_profiles is automatically triggered when user clicks on map once they are in profiling tab
         # self.toolButtonPlotProfile.clicked.connect(lambda:self.profiling.plot_profiles())
         self.toolButtonPointSelectAll.clicked.connect(self.tableWidgetProfilePoints.selectAll)
@@ -2432,9 +2446,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         pos_view = plot.vb.mapSceneToView(event)  # This is in view coordinates
         pos_scene = plot.vb.mapViewToScene(pos_view)  # Map from view to scene coordinates
         any_plot_hovered = False
-        for (k,v), (_, p, array) in self.lasermaps.items():
+        for (field, view), (_, p, array) in self.lasermaps.items():
             # print(p.sceneBoundingRect(), pos)
-            if p.sceneBoundingRect().contains(pos_scene) and v == self.canvasWindow.currentIndex() and not self.toolButtonPan.isChecked() and not self.toolButtonZoom.isChecked() :
+            if p.sceneBoundingRect().contains(pos_scene) and view == self.canvasWindow.currentIndex() and not self.toolButtonPan.isChecked() and not self.toolButtonZoom.isChecked() :
 
                 # mouse_point = p.vb.mapSceneToView(pos)
                 mouse_point = pos_view
@@ -2470,13 +2484,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         self.labelMVInfoX.setText('X: '+str(round(x)))
                         self.labelMVInfoY.setText('Y: '+str(round(y)))
 
-                    for (k,v), (target, _,array) in self.lasermaps.items():
+                    for (field, view), (target, _,array) in self.lasermaps.items():
                         if not self.actionCrop.isChecked():
                             target.setPos(mouse_point)
                             target.show()
                             value = array[y_i, x_i]
-                            if k in self.multiview_info_label:
-                                self.multiview_info_label[k][1].setText('v: '+str(round(value,2)))
+                            if field in self.multiview_info_label:
+                                self.multiview_info_label[field][1].setText('v: '+str(round(value,2)))
                 # break
         if not any_plot_hovered and not self.actionCrop.isChecked():
             QApplication.restoreOverrideCursor()
@@ -2486,12 +2500,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # hide zoom view
             self.zoomViewBox.hide()
 
-    def plot_clicked(self, event,array,k, plot,radius=5):
+    def plot_clicked(self, event,array,field, plot,radius=5):
 
         # get click location
         click_pos = plot.vb.mapSceneToView(event.scenePos())
         x, y = click_pos.x(), click_pos.y()
-        v = self.canvasWindow.currentIndex() #view
+        view = self.canvasWindow.currentIndex() #view
         # Convert the click position to plot coordinates
         self.array_x = array.shape[1]
         self.array_y = array.shape[0]
@@ -2508,10 +2522,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # if event.button() == Qt.LeftButton and self.main_window.pushButtonStartProfile.isChecked():
        #apply profiles
         elif self.toolButtonPlotProfile.isChecked() or self.toolButtonPointMove.isChecked():
-            self.profiling.plot_profile_scatter(event, array, k,v, plot, x, y,x_i, y_i)
+            self.profiling.plot_profile_scatter(event, field,view, plot, x, y,x_i, y_i)
         #create polygons
         elif self.toolButtonPolyCreate.isChecked() or self.toolButtonPolyMovePoint.isChecked() or self.toolButtonPolyAddPoint.isChecked() or self.toolButtonPolyRemovePoint.isChecked():
-            self.polygon.plot_polygon_scatter(event, k, x, y,x_i, y_i)
+            self.polygon.plot_polygon_scatter(event, field, x, y,x_i, y_i)
 
         #apply crop
         elif self.actionCrop.isChecked() and event.button() == Qt.RightButton:
@@ -6056,6 +6070,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # n-Dim
         self.update_field_combobox(None, self.comboBoxNDimAnalyte)
 
+        # profiles
+        self.update_field_type_combobox(self.comboBoxProfileFieldType)
+        self.update_field_combobox(self.comboBoxProfileFieldType, self.comboBoxProfileField)
+
+
         # colors
         addNone = True
         if self.comboBoxPlotType.currentText() in ['analyte map','PCA score','cluster','cluster score']:
@@ -6073,6 +6092,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_field_combobox(self.comboBoxIsotopeAgeFieldType1, self.comboBoxIsotopeAgeField1)
         self.update_field_combobox(self.comboBoxIsotopeAgeFieldType2, self.comboBoxIsotopeAgeField2)
         self.update_field_combobox(self.comboBoxIsotopeAgeFieldType3, self.comboBoxIsotopeAgeField3)
+
+
 
     
     def update_color_field_spinbox(self):

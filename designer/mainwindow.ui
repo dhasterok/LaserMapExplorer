@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1123</width>
-    <height>1060</height>
+    <height>1073</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -976,7 +976,7 @@
      <x>0</x>
      <y>0</y>
      <width>1123</width>
-     <height>24</height>
+     <height>37</height>
     </rect>
    </property>
    <property name="font">
@@ -1151,7 +1151,7 @@
         <string/>
        </property>
        <property name="currentIndex">
-        <number>4</number>
+        <number>1</number>
        </property>
        <property name="tabSpacing">
         <number>2</number>
@@ -1345,9 +1345,6 @@
                 </item>
                 <item row="2" column="1">
                  <layout class="QHBoxLayout" name="horizontalLayout_3">
-                  <item>
-                   <layout class="QFormLayout" name="formLayout_12"/>
-                  </item>
                   <item>
                    <widget class="QComboBox" name="comboBoxCorrelationMethod">
                     <property name="maximumSize">
@@ -2000,7 +1997,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>285</width>
+              <width>300</width>
               <height>355</height>
              </rect>
             </property>
@@ -2528,6 +2525,11 @@
                   <item>
                    <property name="text">
                     <string>CDF</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>log-scaling</string>
                    </property>
                   </item>
                  </widget>
@@ -3591,8 +3593,8 @@
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>-215</y>
-              <width>285</width>
+              <y>0</y>
+              <width>300</width>
               <height>484</height>
              </rect>
             </property>
@@ -5045,7 +5047,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>286</width>
+              <width>300</width>
               <height>402</height>
              </rect>
             </property>
@@ -5656,7 +5658,7 @@
               <x>0</x>
               <y>0</y>
               <width>301</width>
-              <height>254</height>
+              <height>269</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_57">
@@ -5882,7 +5884,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>285</width>
+              <width>300</width>
               <height>315</height>
              </rect>
             </property>
@@ -6506,7 +6508,7 @@
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>265</width>
+                      <width>280</width>
                       <height>303</height>
                      </rect>
                     </property>
@@ -6831,7 +6833,7 @@
                       <x>0</x>
                       <y>0</y>
                       <width>236</width>
-                      <height>231</height>
+                      <height>234</height>
                      </rect>
                     </property>
                     <layout class="QVBoxLayout" name="verticalLayout_65">
@@ -7561,8 +7563,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>85</width>
-              <height>69</height>
+              <width>98</width>
+              <height>72</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -8069,8 +8071,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>85</width>
-              <height>69</height>
+              <width>98</width>
+              <height>72</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -8110,7 +8112,7 @@
                   <x>0</x>
                   <y>0</y>
                   <width>203</width>
-                  <height>371</height>
+                  <height>374</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_34">
@@ -8893,8 +8895,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>85</width>
-              <height>72</height>
+              <width>98</width>
+              <height>75</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -9319,8 +9321,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>85</width>
-              <height>69</height>
+              <width>98</width>
+              <height>72</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -9360,7 +9362,7 @@
                   <x>0</x>
                   <y>0</y>
                   <width>178</width>
-                  <height>160</height>
+                  <height>163</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_39">
@@ -9859,7 +9861,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>275</width>
+              <width>290</width>
               <height>687</height>
              </rect>
             </property>
@@ -11767,7 +11769,7 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>495</width>
+                <width>510</width>
                 <height>292</height>
                </rect>
               </property>

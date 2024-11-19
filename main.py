@@ -28,7 +28,7 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 #from matplotlib.projections.polar import PolarAxes
 #from matplotlib.collections import PathCollection
 import matplotlib.gridspec as gs
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from matplotlib.path import Path
 from matplotlib.patches import Patch
 import matplotlib.colors as colors
@@ -3987,7 +3987,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #    analyte_1 = field.split(' / ')[0]
         #    analyte_2 = field.split(' / ')[1]
 
-        x = self.get_scatter_data('histogram')['x']
+        if self.comboBoxHistType.currentText() == 'log-scaling' and self.comboBoxHistFieldType.currentText() == 'Analyte':
+            print('raw_data for log-scaling')
+            x = self.get_scatter_data('histogram', processed=False)['x']
+        else:
+            print('processed_data for histogram')
+            x = self.get_scatter_data('histogram', processed=True)['x']
 
         # determine edges
         xmin,xmax,xscale,xlbl = self.style.get_axis_values(x['type'],x['field'])
@@ -4019,10 +4024,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # CDF or PDF
         match self.comboBoxHistType.currentText():
-            case 'PDF':
-                cumflag = False
             case 'CDF':
                 cumflag = True
+            case _:
+                cumflag = False
 
         # Check if the algorithm is in the current group and if results are available
         if self.comboBoxColorByField.currentText() == 'cluster' and self.comboBoxColorField.currentText() != '':
@@ -4043,19 +4048,33 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 else:
                     ecolor = None
 
-                plot_data = canvas.axes.hist( cluster_data,
-                        cumulative=cumflag,
-                        histtype=htype,
-                        bins=edges,
-                        color=bar_color, edgecolor=ecolor,
-                        linewidth=lw,
-                        label=cluster_label[int(i)],
-                        alpha=self.style.marker_alpha/100,
-                        density=True
-                    )
+                if self.comboBoxHistType.currentText() != 'log-scaling' :
+                    plot_data = canvas.axes.hist( cluster_data,
+                            cumulative=cumflag,
+                            histtype=htype,
+                            bins=edges,
+                            color=bar_color, edgecolor=ecolor,
+                            linewidth=lw,
+                            label=cluster_label[int(i)],
+                            alpha=self.style.marker_alpha/100,
+                            density=True
+                        )
+                else:
+                    # Filter out NaN and zero values
+                    filtered_data = cluster_data[~np.isnan(cluster_data) & (cluster_data > 0)]
+
+                    # Sort the data in ascending order
+                    sorted_data = np.sort(filtered_data)
+
+                    # Calculate log(number of values > x)
+                    log_values = np.log10(sorted_data)
+                    log_counts = np.log10(len(sorted_data) - np.arange(len(sorted_data)))
+
+                    # Plot the data
+                    canvas.axes.plot(log_values, log_counts, label=cluster_label[int(i)], color=bar_color, lw=lw)
 
             # Add a legend
-            self.add_colorbar(canvas, None, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color)
+            self.add_colorbar(canvas, None, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color, alpha=self.style.marker_alpha/100)
             #canvas.axes.legend()
         else:
             clusters = None
@@ -4066,56 +4085,77 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             else:
                 ecolor = None
 
-            plot_data = canvas.axes.hist( x['array'],
-                    cumulative=cumflag,
-                    histtype=htype,
-                    bins=edges,
-                    color=bar_color, edgecolor=ecolor,
-                    linewidth=lw,
-                    alpha=self.style.marker_alpha/100,
-                    density=True
-                )
+            if self.comboBoxHistType.currentText() != 'log-scaling' :
+                plot_data = canvas.axes.hist( x['array'],
+                        cumulative=cumflag,
+                        histtype=htype,
+                        bins=edges,
+                        color=bar_color, edgecolor=ecolor,
+                        linewidth=lw,
+                        alpha=self.style.marker_alpha/100,
+                        density=True
+                    )
+            else:
+                # Filter out NaN and zero values
+                filtered_data = x['array'][~np.isnan(x['array']) & (x['array'] > 0)]
+
+                # Sort the data in ascending order
+                sorted_data = np.sort(filtered_data)
+
+                # Calculate log(number of values > x)
+                #log_values = np.log10(sorted_data)
+                counts = len(sorted_data) - np.arange(len(sorted_data))
+
+                # Plot the data
+                #canvas.axes.plot(log_values, log_counts, label=cluster_label[int(i)], color=bar_color, lw=lw)
+                canvas.axes.plot(sorted_data, counts, color=bar_color, lw=lw, alpha=self.style.marker_alpha/100)
 
         # axes
-        # set y-limits as p-axis min and max in self.data[self.sample_id].axis_dict
-        pflag = False
-        if 'pstatus' not in self.data[self.sample_id].axis_dict[x['field']]:
-            pflag = True
-        elif self.data[self.sample_id].axis_dict[x['field']]['pstatus'] == 'auto':
-            pflag = True
-
-        if pflag:
-            ymin, ymax = canvas.axes.get_ylim()
-            d = {'pstatus':'auto', 'pmin':fmt.oround(ymin,order=2,toward=0), 'pmax':fmt.oround(ymax,order=2,toward=1)}
-            self.data[self.sample_id].axis_dict[x['field']].update(d)
-            self.style.set_axis_widgets('y', x['field'])
-
-        # grab probablility axes limits
-        _, _, _, _, ymin, ymax = self.style.get_axis_values(x['type'],x['field'],ax='p')
-
         # label font
         if 'font' == '':
             font = {'size':self.style.font}
         else:
             font = {'font':self.style.font, 'size':self.style.font_size}
 
+        # set y-limits as p-axis min and max in self.data[self.sample_id].axis_dict
+        if self.comboBoxHistType.currentText() != 'log-scaling' :
+            pflag = False
+            if 'pstatus' not in self.data[self.sample_id].axis_dict[x['field']]:
+                pflag = True
+            elif self.data[self.sample_id].axis_dict[x['field']]['pstatus'] == 'auto':
+                pflag = True
 
-        # x-axis
-        canvas.axes.set_xlabel(xlbl, fontdict=font)
-        if xscale == 'log':
-        #    self.logax(canvas.axes, [xmin,xmax], axis='x', label=xlbl)
-            canvas.axes.set_xscale(xscale,base=10)
-        # if self.style.xscale == 'linear':
-        # else:
-        #     canvas.axes.set_xlim(xmin,xmax)
-        canvas.axes.set_xlim(xmin,xmax)
+            if pflag:
+                ymin, ymax = canvas.axes.get_ylim()
+                d = {'pstatus':'auto', 'pmin':fmt.oround(ymin,order=2,toward=0), 'pmax':fmt.oround(ymax,order=2,toward=1)}
+                self.data[self.sample_id].axis_dict[x['field']].update(d)
+                self.style.set_axis_widgets('y', x['field'])
 
-        if xscale == 'scientific':
-            canvas.axes.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
+            # grab probablility axes limits
+            _, _, _, _, ymin, ymax = self.style.get_axis_values(x['type'],x['field'],ax='p')
 
-        # y-axis
-        canvas.axes.set_ylabel(self.comboBoxHistType.currentText(), fontdict=font)
-        canvas.axes.set_ylim(ymin,ymax)
+            # x-axis
+            canvas.axes.set_xlabel(xlbl, fontdict=font)
+            if xscale == 'log':
+            #    self.logax(canvas.axes, [xmin,xmax], axis='x', label=xlbl)
+                canvas.axes.set_xscale(xscale,base=10)
+            # if self.style.xscale == 'linear':
+            # else:
+            #     canvas.axes.set_xlim(xmin,xmax)
+            canvas.axes.set_xlim(xmin,xmax)
+
+            if xscale == 'scientific':
+                canvas.axes.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
+
+            # y-axis
+            canvas.axes.set_ylabel(self.comboBoxHistType.currentText(), fontdict=font)
+            canvas.axes.set_ylim(ymin,ymax)
+        else:
+            canvas.axes.set_xscale('log',base=10)
+            canvas.axes.set_yscale('log',base=10)
+
+            canvas.axes.set_xlabel(r"$\log_{10}($" + f"{field}" + r"$)$", fontdict=font)
+            canvas.axes.set_ylabel(r"$\log_{10}(N > \log_{10}$" + f"{field}" + r"$)$", fontdict=font)
 
         canvas.axes.tick_params(labelsize=self.style.font_size,direction=self.style.tick_dir)
         canvas.axes.set_box_aspect(self.style.aspect_ratio)
@@ -4148,7 +4188,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     # -------------------------------------
     # Scatter/Heatmap functions
     # -------------------------------------
-    def get_scatter_data(self,plot_type):
+    def get_scatter_data(self, plot_type, processed=True):
 
         scatter_dict = {'x': {'type': None, 'field': None, 'label': None, 'array': None},
                 'y': {'type': None, 'field': None, 'label': None, 'array': None},
@@ -4157,7 +4197,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         match plot_type:
             case 'histogram':
-                scatter_dict['x'] = self.data[self.sample_id].get_vector(self.comboBoxHistFieldType.currentText(), self.comboBoxHistField.currentText(), norm=self.style.xscale)
+                if processed or self.comboBoxHistFieldType.currentText() != 'Analyte':
+                    scatter_dict['x'] = self.data[self.sample_id].get_vector(self.comboBoxHistFieldType.currentText(), self.comboBoxHistField.currentText(), norm=self.style.xscale)
+                else:
+                    scatter_dict['x'] = self.data[self.sample_id].get_vector(self.comboBoxHistFieldType.currentText(), self.comboBoxHistField.currentText(), norm=self.style.xscale, processed=False)
             case 'PCA scatter' | 'PCA heatmap':
                 scatter_dict['x'] = self.data[self.sample_id].get_vector('PCA score', f'PC{self.spinBoxPCX.value()}', norm=self.style.xscale)
                 scatter_dict['y'] = self.data[self.sample_id].get_vector('PCA score', f'PC{self.spinBoxPCY.value()}', norm=self.style.yscale)
@@ -4175,12 +4218,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if (scatter_dict['x']['field'] is not None) and (scatter_dict['y']['field'] != ''):
             if scatter_dict['x']['field'] not in self.data[self.sample_id].axis_dict.keys():
                 self.style.initialize_axis_values(scatter_dict['x']['type'], scatter_dict['x']['field'])
-                self.style.set_axis_widgets('z', scatter_dict['z']['field'])
+                self.style.set_axis_widgets('x', scatter_dict['x']['field'])
 
         if (scatter_dict['y']['field'] is not None) and (scatter_dict['y']['field'] != ''):
             if scatter_dict['y']['field'] not in self.data[self.sample_id].axis_dict.keys():
                 self.style.initialize_axis_values(scatter_dict['y']['type'], scatter_dict['y']['field'])
-                self.style.set_axis_widgets('z', scatter_dict['z']['field'])
+                self.style.set_axis_widgets('y', scatter_dict['y']['field'])
 
         if (scatter_dict['z']['field'] is not None) and (scatter_dict['z']['field'] != ''):
             if scatter_dict['z']['field'] not in self.data[self.sample_id].axis_dict.keys():
@@ -5554,6 +5597,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ref_i = self.comboBoxNDimRefMaterial.currentIndex()
 
         plot_type = self.comboBoxPlotType.currentText()
+        plot_data = None
 
         # Get quantile for plotting TEC & radar plots
         match self.comboBoxNDimQuantiles.currentIndex():
@@ -5634,7 +5678,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     for i in clusters:
                         # Create RGBA color
                         #print(f'Cluster {i}')
-                        canvas.axes, yl_tmp = plot_spider_norm(
+                        canvas.axes, yl_tmp, _ = plot_spider_norm(
                                 data=df_filtered.loc[df_filtered['clusters']==i,:],
                                 ref_data=self.ref_data, norm_ref_data=self.ref_data['model'][ref_i],
                                 layer=self.ref_data['layer'][ref_i], el_list=self.ndim_list ,
@@ -5655,7 +5699,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
                     canvas.axes.set_xticklabels(labels, rotation=angle)
                 else:
-                    canvas.axes,yl, plot_data = plot_spider_norm(data=df_filtered, ref_data=self.ref_data, norm_ref_data=self.ref_data['model'][ref_i], layer=self.ref_data['layer'][ref_i], el_list=self.ndim_list, style='Quanta', quantiles=quantiles, ax=canvas.axes)
+                    canvas.axes, yl, plot_data = plot_spider_norm(data=df_filtered, ref_data=self.ref_data, norm_ref_data=self.ref_data['model'][ref_i], layer=self.ref_data['layer'][ref_i], el_list=self.ndim_list, style='Quanta', quantiles=quantiles, ax=canvas.axes)
 
                     canvas.axes.set_xticklabels(labels, rotation=angle)
                 canvas.axes.set_ylabel(f"Abundance / [{self.ref_data['model'][ref_i]}, {self.ref_data['layer'][ref_i]}]")

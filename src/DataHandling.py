@@ -1100,7 +1100,7 @@ class SampleObj:
 
         self.prep_data(field)
 
-    def get_map_data(self, field, field_type='Analyte', norm=False, ref_chem=None):
+    def get_map_data(self, field, field_type='Analyte', norm=False, ref_chem=None, processed=True):
         """
         Retrieves and processes the mapping data for the given sample and analytes
 
@@ -1144,7 +1144,10 @@ class SampleObj:
         match field_type:
             case 'Analyte' | 'Analyte (normalized)':
                 # unnormalized
-                df['array'] = self.processed_data[field].values
+                if processed:
+                    df['array'] = self.processed_data[field].values
+                else:
+                    df['array'] = self.raw_data[field].values
 
                 #norm = self.processed_data.get_attribute(field, 'norm')
                 
@@ -1236,7 +1239,7 @@ class SampleObj:
         return df, use_analytes
     
     # extracts data for scatter plot
-    def get_vector(self, field_type, field, norm='linear', ref_chem=None):
+    def get_vector(self, field_type, field, norm='linear', ref_chem=None, processed=True):
         """Creates a dictionary of values for plotting
 
         Returns
@@ -1259,7 +1262,7 @@ class SampleObj:
             value_dict['label'] = value_dict['field'] + ' (' + unit + ')'
 
         # add array
-        df = self.get_map_data(field=field, field_type=field_type, norm='linear', ref_chem=ref_chem)
+        df = self.get_map_data(field=field, field_type=field_type, norm='linear', ref_chem=ref_chem, processed=processed)
         value_dict['array'] = df['array'][self.mask].values if not df.empty else []
 
         return value_dict

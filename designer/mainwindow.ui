@@ -33,6 +33,18 @@
    <bool>false</bool>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>0</width>
+     <height>450</height>
+    </size>
+   </property>
    <property name="font">
     <font>
      <pointsize>13</pointsize>
@@ -42,6 +54,18 @@
    <layout class="QVBoxLayout" name="verticalLayout_21">
     <item>
      <widget class="QTabWidget" name="canvasWindow">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
       <property name="font">
        <font>
         <pointsize>11</pointsize>
@@ -7267,7 +7291,7 @@
         <string/>
        </property>
        <property name="currentIndex">
-        <number>2</number>
+        <number>1</number>
        </property>
        <property name="tabSpacing">
         <number>-1</number>
@@ -7277,7 +7301,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>268</width>
+          <width>252</width>
           <height>360</height>
          </rect>
         </property>
@@ -7563,7 +7587,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>98</width>
+              <width>100</width>
               <height>72</height>
              </rect>
             </property>
@@ -8071,7 +8095,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>98</width>
+              <width>100</width>
               <height>72</height>
              </rect>
             </property>
@@ -8895,7 +8919,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>98</width>
+              <width>100</width>
               <height>75</height>
              </rect>
             </property>
@@ -9321,7 +9345,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>98</width>
+              <width>100</width>
               <height>72</height>
              </rect>
             </property>
@@ -9821,7 +9845,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>290</width>
+          <width>252</width>
           <height>360</height>
          </rect>
         </property>
@@ -9861,7 +9885,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>290</width>
+              <width>252</width>
               <height>687</height>
              </rect>
             </property>
@@ -11219,7 +11243,7 @@
   </widget>
   <widget class="QDockWidget" name="dockWidgetBottomTabs">
    <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>

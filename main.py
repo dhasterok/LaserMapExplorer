@@ -934,11 +934,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolButtonBottomDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.dockWidgetBottomTabs, button=self.toolButtonBottomDock))
 
         # Add the button to the status bar
+        self.labelInvalidValues = QLabel("Negative/zeros: False, NaNs: False")
+        self.statusbar.addPermanentWidget(self.labelInvalidValues)
+
         self.statusbar.addPermanentWidget(self.toolButtonLeftDock)
         self.statusbar.addPermanentWidget(self.toolButtonBottomDock)
         self.statusbar.addPermanentWidget(self.toolButtonRightDock)
 
+
         self.toolBox.currentChanged.connect(self.toolbox_changed)
+
+
+
 
 
         # ----start debugging----
@@ -1100,6 +1107,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # load sample's *.lame file
             file_path = os.path.join(self.selected_directory, self.csv_files[index])
             self.data[self.sample_id] = SampleObj(self.sample_id, file_path, self.comboBoxNegativeMethod.currentText())
+            self.update_labels()
 
             # set slot for swapXY button
             self.toolButtonSwapResolution.clicked.connect(self.data[self.sample_id].swap_resolution)
@@ -1709,6 +1717,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     # color picking functions
 
+    def update_labels(self):
+        """Updates flags on statusbar indicating negative/zero and nan values within the processed_data_frame"""        
+
+        data = self.data[self.sample_id].processed_data
+
+        columns = data.match_attributes({'data_type': 'analyte', 'use': True}) + data.match_attributes({'data_type': 'ratio', 'use': True})
+        negative_count = any(data[columns] <= 0)
+        nan_count = any(np.isnan(data[columns]))
+        
+        self.labelInvalidValues.setText(f"Negative/zeros: {negative_count}, NaNs: {nan_count}")
+
+
     def plot_profile_and_table(self):
         self.profiling.plot_profiles()
         self.profiling.update_table_widget()
@@ -1770,21 +1790,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if analyte_1 and not analyte_2:
             if self.checkBoxApplyAll.isChecked():
                 # Apply to all analytes in sample
-                self.data[sample_id]['analyte_info']['auto_scale'] = auto_scale
-                self.data[sample_id]['analyte_info']['upper_bound']= ub
-                self.data[sample_id]['analyte_info']['lower_bound'] = lb
-                self.data[sample_id]['analyte_info']['d_l_bound'] = d_lb
-                self.data[sample_id]['analyte_info']['d_u_bound'] = d_ub
+                columns = self.data[sample_id].raw_data.columns
+
                 # clear existing plot info from tree to ensure saved plots using most recent data
                 for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
                     self.plot_tree.clear_tree_data(tree)
-                self.prep_data(sample_id)
             else:
-                self.data[sample_id]['analyte_info'].loc[self.data[sample_id]['analyte_info']['analytes']==analyte_1,
-                    'auto_scale'] = auto_scale
-                self.data[sample_id]['analyte_info'].loc[self.data[sample_id]['analyte_info']['analytes']==analyte_1,
-                    ['upper_bound', 'lower_bound', 'd_l_bound', 'd_u_bound']] = [ub, lb, d_lb, d_ub]
-                self.prep_data(sample_id, analyte_1,analyte_2)
+                columns = analyte_1
+
+            # update column attributes
+            self.data[sample_id].set_attribute(columns, 'auto_scale', auto_scale)
+            self.data[sample_id].set_attribute(columns, 'upper_bound', ub)
+            self.data[sample_id].set_attribute(columns, 'lower_bound', lb)
+            self.data[sample_id].set_attribute(columns, 'diff_upper_bound', d_ub)
+            self.data[sample_id].set_attribute(columns, 'diff_lower_bound', d_lb)
+            self.data[sample_id].set_attribute(columns, 'negative_method', self.comboBoxNegativeMethod.currentText())
+
+            # update data with new auto-scale/negative handling
+            self.prep_data(sample_id)
+            self.update_labels()
+
         else:
             if self.checkBoxApplyAll.isChecked():
                 # Apply to all ratios in sample
@@ -1797,6 +1822,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 for tree in ['Ratio', 'Ratio (normalized)']:
                     self.plot_tree.clear_tree_data(tree)
                 self.prep_data(sample_id)
+                self.update_labels()
             else:
                 self.data[sample_id]['ratio_info'].loc[ (self.data[sample_id]['ratio_info']['analyte_1']==analyte_1)
                                             & (self.data[sample_id]['ratio_info']['analyte_2']==analyte_2),'auto_scale']  = auto_scale
@@ -1804,6 +1830,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                             & (self.data[sample_id]['ratio_info']['analyte_2']==analyte_2),
                                             ['upper_bound','lower_bound','d_l_bound', 'd_u_bound']] = [ub,lb,d_lb, d_ub]
                 self.prep_data(sample_id, analyte_1,analyte_2)
+                self.update_labels()
         
         self.update_filter_values()
         self.update_SV()
@@ -1822,8 +1849,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             
         if self.checkBoxApplyAll.isChecked():
             # Apply to all iolties
-            analyte_list = self.data[sample_id].match_attributes({'data_type':['Analyte', 'Ratio']})
-            self.data[sample_id].raw_data.set_attributes(analyte_list, 'negative_method', self.comboBoxNegativeMethod.currentText())
+            analyte_list = self.data[self.sample_id].raw_data.match_attribute('data_type', 'analyte') + self.data[self.sample_id].raw_data.match_attribute('data_type', 'ratio')
+            self.data[sample_id].raw_data.set_attribute(analyte_list, 'negative_method', self.comboBoxNegativeMethod.currentText())
             # clear existing plot info from tree to ensure saved plots using most recent data
             for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
                 self.plot_tree.clear_tree_data(tree)
@@ -1832,6 +1859,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.data[sample_id].raw_data.set_attribute(field, 'negative_method', self.comboBoxNegativeMethod.currentText())
             self.data[sample_id].prep_data(field)
         
+        self.update_labels()
         self.update_filter_values()
         self.update_SV()
 
@@ -1957,6 +1985,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.data[self.sample_id].polygon_mask = self.data[self.sample_id].polygon_mask[self.data[self.sample_id].crop_mask]
         self.data[self.sample_id].filter_mask = self.data[self.sample_id].filter_mask[self.data[self.sample_id].crop_mask]
         self.prep_data(sample_id)
+        self.update_labels()
 
         # replot after cropping 
         self.plot_map_pg(sample_id, field_type, field)
@@ -2696,7 +2725,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 if self.comboBoxNoiseReductionMethod.currentText() == 'none':
                     QMessageBox.warning(None,'Warning','Noise reduction must be performed before computing a gradient.')
                     return
-                self.noise_reduction_method_callback()
+                self.noise_reduction.noise_reduction_method_callback()
             case 'correlation':
                 if self.comboBoxCorrelationMethod.currentText() == 'none':
                     return
@@ -6248,6 +6277,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.data[sample_id]['ratio_info'].loc[len(self.data[sample_id]['ratio_info'])] = ratio_info
 
             self.prep_data(sample_id, analyte_1=analyte_1, analyte_2=analyte_2)
+            self.update_labels()
 
     def toggle_help_mode(self):
         """Toggles help mode

@@ -10,6 +10,7 @@ import matplotlib.colors as colors
 import src.csvdict as csvdict
 from src.colorfunc import get_hex_color, get_rgb_color
 from src.LameIO import BASEDIR
+import config
 
 class Styling():
     """Manages plot styling for different plot types and syncs with main window UI.
@@ -780,6 +781,9 @@ class Styling():
     def reset_default_styles(self):
         """Resets ``MainWindow.styles`` dictionary to default values."""
 
+        if config.debug:
+            print("reset_default_styles")
+
         parent = self.parent
         styles = {}
 
@@ -893,6 +897,9 @@ class Styling():
         Looks for saved style themes (*.sty) in ``resources/styles/`` directory and adds them to
         ``MainWindow.comboBoxStyleTheme``.  After setting list, the comboBox is set to default style.
         """
+        if config.debug:
+            print("load_theme_names")
+
         parent = self.parent
 
         # read filenames with *.sty
@@ -914,6 +921,8 @@ class Styling():
         
         Executes when the user changes the ``MainWindow.comboBoxStyleTheme.currentIndex()``.
         """
+        if config.debug:
+            print("load_theme_names")
         parent = self.parent
         name = parent.comboBoxStyleTheme.currentText()
 
@@ -935,6 +944,8 @@ class Styling():
         ``MainWindow.comboBoxStyleTheme`` and the style widget settings for each plot type (``MainWindow.styles``) are saved as a
         dictionary into the theme name with a ``.sty`` extension.
         """
+        if config.debug:
+            print("input_theme_name_dlg")
         parent = self.parent
 
         name, ok = QInputDialog.getText(parent, 'Save custom theme', 'Enter theme name:')
@@ -956,6 +967,8 @@ class Styling():
     # -------------------------------------
     def disable_style_widgets(self):
         """Disables all style related widgets."""        
+        if config.debug:
+            print("disable_style_widgets")
         parent = self.parent
 
         # x-axis widgets
@@ -1019,6 +1032,9 @@ class Styling():
 
         Toggling of enabled states are based on ``MainWindow.toolBox`` page and the current plot type
         selected in ``MainWindow.comboBoxPlotType."""
+        if config.debug:
+            print("toggle_style_widgets")
+
         parent = self.parent
 
         #print('toggle_style_widgets')
@@ -1341,6 +1357,8 @@ class Styling():
 
     def toggle_style_labels(self):
         """Toggles style labels based on enabled/disabled style widgets."""        
+        if config.debug:
+            print("toggle_style_labels")
         parent = self.parent
 
         # axes properties
@@ -1415,6 +1433,8 @@ class Styling():
         style : dict, optional
             Style dictionary for the current plot type. Defaults to ``None``
         """
+        if config.debug:
+            print("set_style_widgets")
         #print('set_style_widgets')
         parent = self.parent
         data = parent.data[parent.sample_id]
@@ -1588,6 +1608,8 @@ class Styling():
 
     def get_style_dict(self):
         """Get style properties"""        
+        if config.debug:
+            print("get_style_dict")
         parent = self.parent
 
         plot_type = self.plot_type
@@ -1644,6 +1666,8 @@ class Styling():
         Executes on change of ``MainWindow.comboBoxPlotType``.  Updates ``MainWindow.plot_type[0]`` to the current index of the 
         combobox, then updates the style widgets to match the dictionary entries and updates the plot.
         """
+        if config.debug:
+            print("plot_type_callback")
         #print('plot_type_callback')
         # set plot flag to false
         parent = self.parent
@@ -1691,6 +1715,9 @@ class Styling():
         ax : str, optional
             axis for plotting, by default "None"
         """
+        if config.debug:
+            print("axis_variable_changed")
+
         parent = self.parent
         if field == '' or field.lower() == 'none':
             match ax:
@@ -1784,6 +1811,8 @@ class Styling():
         ax : str
             Axis, options include ``x``, ``y``, ``z``, and ``c``
         """
+        if config.debug:
+            print("get_axis_field")
         parent = self.parent
 
         plot_type = parent.comboBoxPlotType.currentText()
@@ -1821,6 +1850,9 @@ class Styling():
         new_label : str
             New label for bound set by user.
         """
+        if config.debug:
+            print("axis_label_edit_callback")
+
         parent = self.parent
         plot_type = parent.comboBoxPlotType.currentText()
 
@@ -1856,6 +1888,9 @@ class Styling():
         new_value : float
             New value for bound set by user.
         """
+        if config.debug:
+            print("axis_limit_edit_callback")
+
         parent = self.parent
         axis_dict = parent.data[parent.sample_id].axis_dict
         plot_type = parent.comboBoxPlotType.currentText()
@@ -1908,6 +1943,9 @@ class Styling():
         ax : str
             Axis whos scale been set from comboBox, options include ``x``, ``y``, ``z``, and ``c``.
         """        
+        if config.debug:
+            print("axis_scale_callback")
+
         parent = self.parent
 
         plot_type = parent.comboBoxPlotType.currentText()
@@ -1935,6 +1973,9 @@ class Styling():
 
     def set_color_axis_widgets(self):
         """Sets the color axis limits and label widgets."""
+        if config.debug:
+            print("set_color_axis_widgets")
+
         #print('set_color_axis_widgets')
         parent = self.parent
 
@@ -1959,6 +2000,9 @@ class Styling():
         field : str
             Field plotted on axis, used as key to ``MainWindow.axis_dict``
         """
+        if config.debug:
+            print("set_axis_widgets")
+
         #print('set_axis_widgets')
         parent = self.parent
         if field == '':
@@ -2010,6 +2054,9 @@ class Styling():
         .. seealso::
             :ref: `initialize_axis_values` for initializing the axis dictionary
         """
+        if config.debug:
+            print(f"axis_reset_callback, axis: {ax}")
+
         #print('axis_reset_callback')
         parent = self.parent
 
@@ -2091,6 +2138,9 @@ class Styling():
         float, float, str, float
             Axis parameters: minimum, maximum, scale (``linear`` or ``log``), axis label
         """ 
+        if config.debug:
+            print(f"get_axis_values\n  field_type: {field_type}\n  field: {field}\n  axis: {ax}")
+
         #print('get_axis_values')
         axis_dict = self.parent.data[self.parent.sample_id].axis_dict
 
@@ -2112,6 +2162,18 @@ class Styling():
         return amin, amax, scale, label
 
     def initialize_axis_values(self, field_type, field):
+        """Initialize axis dict for a given field_type and field
+
+        Parameters
+        ----------
+        field_type : str
+            Field type, generally determined by a field type combobox.
+        field : str
+            Field, generally determined by a field combobox.
+        """        
+        if config.debug:
+            print(f"get_axis_values\n  field_type: {field_type}\n  field: {field}")
+
         #print('initialize_axis_values')
         data = self.parent.data[self.parent.sample_id]
 
@@ -2187,6 +2249,9 @@ class Styling():
         str, int
             Returns the element symbol and mass.
         """
+        if config.debug:
+            print(f"parse_field, field: {field}")
+
         match = re.match(r"([A-Za-z]+)(\d*)", field)
         symbol = match.group(1) if match else field
         mass = int(match.group(2)) if match.group(2) else None
@@ -2198,6 +2263,9 @@ class Styling():
 
         Updates ``MainWindow.style`` dictionary after user change
         """
+        if config.debug:
+            print(f"aspect_ratio_callback")
+
         parent = self.parent
 
         plot_type = parent.comboBoxPlotType.currentText()
@@ -2209,6 +2277,9 @@ class Styling():
 
     def tickdir_callback(self):
         """Updates tick directions in style dictionary from change of ``MainWindow.comboBoxTickDirection``."""        
+        if config.debug:
+            print("tickdir_callback")
+
         parent = self.parent
 
         plot_type = parent.comboBoxPlotType.currentText()
@@ -2221,6 +2292,10 @@ class Styling():
     # text and annotations
     # -------------------------------------
     def font_callback(self):
+        """Updates figure fonts"""        
+        if config.debug:
+            print("font_callback")
+
         parent = self.parent
 
         plot_type = parent.comboBoxPlotType.currentText()
@@ -2231,6 +2306,10 @@ class Styling():
         parent.update_SV()
 
     def font_size_callback(self):
+        """Updates figure font sizes"""        
+        if config.debug:
+            print("font_size_callback")
+
         parent = self.parent
 
         plot_type = parent.comboBoxPlotType.currentText()
@@ -2241,6 +2320,18 @@ class Styling():
         parent.update_SV()
 
     def update_figure_font(self, canvas, font_name):
+        """updates figure fonts without the need to recreate the figure.
+
+        Parameters
+        ----------
+        canvas : MplCanvas
+            Canvas object displayed in UI.
+        font_name : str
+            Font used on plot.
+        """        
+        if config.debug:
+            print("update_figure_font")
+
         if font_name == '':
             return
 
@@ -2266,6 +2357,9 @@ class Styling():
         list
             Output labels with or without mass
         """
+        if config.debug:
+            print("toggle_mass")
+
         if not self.parent.checkBoxShowMass.isChecked():
             labels = [re.sub(r'\d', '', col) for col in labels]
 
@@ -2274,6 +2368,10 @@ class Styling():
     # scales
     # -------------------------------------
     def scale_direction_callback(self):
+        """Sets scale direction on figure"""        
+        if config.debug:
+            print("scale_direction_callback")
+
         parent = self.parent
 
         if self.style_dict[self._plot_type]['ScaleDir'] == 'none':
@@ -2304,6 +2402,9 @@ class Styling():
         float
             Length of scalebar dependent on direction of scalebar.
         """        
+        if config.debug:
+            print("default_scale_length")
+
         if (self._plot_type not in self.map_plot_types) or (self.style_dict[self._plot_type]['ScaleDir'] == 'none'):
             return None
 
@@ -2325,6 +2426,9 @@ class Styling():
 
     def scale_location_callback(self):
         """Sets scalebar location on map from ``MainWindow.comboBoxScaleLocation``"""        
+        if config.debug:
+            print("scale_location_callback")
+
         parent = self.parent
 
         plot_type = parent.comboBoxPlotType.currentText()
@@ -2858,6 +2962,9 @@ class Styling():
 
         Sets ``MainWindow.toolButtonClusterColor`` background on change of ``MainWindow.spinBoxClusterGroup``
         """
+        if config.debug:
+            print("select_cluster_group_callback")
+
         parent = self.parent
         if parent.tableWidgetViewGroups.rowCount() == 0:
             return
@@ -2869,6 +2976,9 @@ class Styling():
         Updates ternary colormap when swatch colors are changed in the Scatter and Heatmaps >
         Map from Ternary groupbox.  The ternary colored chemical map is updated.
         """
+        if config.debug:
+            print("ternary_colormap_changed")
+
         parent = self.parent
         for cmap in self.ternary_colormaps:
             if cmap['scheme'] == parent.comboBoxTernaryColormap.currentText():
@@ -2880,9 +2990,14 @@ class Styling():
     def button_color_select(self, button):
         """Select background color of button
 
-        :param button: button clicked
-        :type button: QPushbutton | QToolButton
+        Parameters
+        ----------
+        button : QPushbutton, QToolbutton
+            Button object that was clicked
         """
+        if config.debug:
+            print("button_color_select")
+
         old_color = button.palette().color(button.backgroundRole())
         color_dlg = QColorDialog(self.parent)
         color_dlg.setCurrentColor(old_color)

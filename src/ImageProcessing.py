@@ -46,7 +46,6 @@ class ImageProcessing():
         Options include 'sobel', 'canny', and 'zero_cross'.
         """
         #print('add_edge_detection')
-        style = self.parent.styles[self.parent.comboBoxPlotType.currentText()]
         if self.edge_img:
             # remove existing filters
             self.parent.plot.removeItem(self.edge_img)
@@ -93,7 +92,7 @@ class ImageProcessing():
             #self.plot.addItem(self.edge_img)
 
             overlay_image = np.zeros(self.edge_array.shape+(4,), dtype=np.uint8)
-            colorlist = self.parent.get_rgb_color(self.parent.styles['analyte map']['Scale']['OverlayColor'])
+            colorlist = self.parent.get_rgb_color(self.parent.style.overlay_color)
             overlay_image[..., 0] = colorlist[0]  # Red channel
             overlay_image[..., 1] = colorlist[1]  # Green channel
             overlay_image[..., 2] = colorlist[2]  # Blue channel
@@ -382,24 +381,11 @@ class ImageProcessing():
         if self.parent.checkBoxGradient.isChecked():
             self.plot_gradient()
             return
+        else:
+            if self.parent.comboBoxPlotType.currentText != 'analyte map':
+                self.parent.comboBoxPlotType.setCurrentText('analyte map')
 
-        # uncomment for pyqtgraph version
-        # -----------
-        # self.noise_red_img = ImageItem(image=self.noise_red_array)
 
-        # # Set aspect ratio of rectangle
-        # self.noise_red_img.setRect(0, 0, self.x_range, self.y_range)
-
-        # # Optionally, set a color map
-        # self.comboBoxPlotType.setCurrentText('analyte map')
-        # cm = colormap.get(self.styles['analyte map']['Colors']['Colormap'], source='matplotlib')
-        # self.noise_red_img.setColorMap(cm)
-
-        # # Add the image item to the plot
-        # self.plot.addItem(self.noise_red_img)
-
-        # uncomment for matplotlib version
-        # -----------
         canvas = mplc.MplCanvas(parent=self.parent)
 
         norm = self.parent.style.color_norm()
@@ -471,33 +457,13 @@ class ImageProcessing():
         y = np.arange((dy.T).shape[1])*10
         X, Y = np.meshgrid(x, y)
 
-        # uncomment for pyqtgraph version
-        # -----------
-        # remove existing gradient map
-        # if self.grad_img:
-        #     self.plot.removeItem(self.grad_img)
-
-        # self.grad_img = ImageItem(image=self.grad_mag)
-        # self.grad_img.setRect(0, 0, self.x_range, self.y_range)
-
-        # # Optionally, set a color map
-        # cm = colormap.get(self.styles['gradient map']['Colors']['Colormap'], source='matplotlib')
-        # self.grad_img.setColorMap(cm)
-
-        # # Add the image item to the plot
-        # self.plot.addItem(self.grad_img)
-
-        # uncomment for matplotlib version
-        # -----------
         canvas = mplc.MplCanvas(parent=self.parent)
-
-        style = self.parent.styles['analyte map']
 
         q = np.quantile(self.grad_mag.flatten(), q=[0.025, 0.975])
         norm = colors.Normalize(q[0],q[1], clip=False)
 
-        cax = canvas.axes.imshow(self.grad_mag, cmap=self.parent.styling.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
-        canvas.axes.quiver(X,Y,dx,dy, color=style['Scale']['OverlayColor'], linewidth=0.5)
+        cax = canvas.axes.imshow(self.grad_mag, cmap=self.parent.style.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
+        canvas.axes.quiver(X,Y,dx,dy, color=self.parent.style.overlay_color, linewidth=0.5)
 
         # set color limits
         #self.add_colorbar(canvas, cax, style)
@@ -505,7 +471,7 @@ class ImageProcessing():
 
         # use mask to create an alpha layer
         mask = self.parent.data[self.parent.sample_id].mask.astype(float)
-        reshaped_mask = np.reshape(mask, array_size, order=self.parent.order)
+        reshaped_mask = np.reshape(mask, array_size, order=self.parent.data[self.parent.sample_id].order)
 
         alphas = colors.Normalize(0, 1, clip=False)(reshaped_mask)
         alphas = np.clip(alphas, .4, 1)
@@ -532,7 +498,7 @@ class ImageProcessing():
             'field_type': self.parent.comboBoxColorByField.currentText(),
             'field': field,
             'figure': canvas,
-            'style': style,
+            'style': self.parent.style.style_dict[self.parent.style.plot_type],
             'cluster_groups': None,
             'view': [True,False],
             'position': None

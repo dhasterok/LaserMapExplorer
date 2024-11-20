@@ -735,7 +735,7 @@ class SampleObj:
         self.cluster_labels = np.full(mask_valid.shape[0], np.nan)
         self.cluster_labels[mask_valid] = cluster_labels
 
-        if config.debug:
+        if config.debug_plot:
             # Reshape the full_labels array based on unique X and Y values
             x_unique = self.raw_data['X'].nunique()  # Assuming 'X' is a column in raw_data
             y_unique = self.raw_data['Y'].nunique()  # Assuming 'Y' is a column in raw_data
@@ -807,18 +807,18 @@ class SampleObj:
 
         # Handle negative values
         # ----------------------
-        for col in analyte_columns:
-            if col not in self.raw_data.columns:
-                continue
+        # for col in analyte_columns:
+        #     if col not in self.raw_data.columns:
+        #         continue
 
-            for idx in np.unique(self.cluster_labels):
-                if np.isnan(idx):
-                    continue
-                cluster_mask = self.cluster_labels == idx
-                print(f"{(col, idx)} before: {sum(self.processed_data[col] < 0)}, {sum(self.processed_data[col][cluster_mask] < 0)}")
-                transformed_data = self.transform_array(self.processed_data[col][cluster_mask],self.processed_data.get_attribute(col,'negative_method'))
-                self.processed_data.loc[cluster_mask, col] = transformed_data
-                print(f"{(col, idx)} after : {sum(self.processed_data[col] < 0)}, {sum(self.processed_data[col][cluster_mask] < 0)}, {sum(transformed_data < 0)}")
+        #     for idx in np.unique(self.cluster_labels):
+        #         if np.isnan(idx):
+        #             continue
+        #         cluster_mask = self.cluster_labels == idx
+        #         print(f"{(col, idx)} before: {sum(self.processed_data[col] < 0)}, {sum(self.processed_data[col][cluster_mask] < 0)}")
+        #         transformed_data = self.transform_array(self.processed_data[col][cluster_mask],self.processed_data.get_attribute(col,'negative_method'))
+        #         self.processed_data.loc[cluster_mask, col] = transformed_data
+        #         print(f"{(col, idx)} after : {sum(self.processed_data[col] < 0)}, {sum(self.processed_data[col][cluster_mask] < 0)}, {sum(transformed_data < 0)}")
 
         # Compute ratios not included in raw_data
         # ---------------------------------------

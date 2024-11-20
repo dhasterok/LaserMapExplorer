@@ -1,1 +1,2 @@
-debug = False
+debug = True
+debug_plot = False

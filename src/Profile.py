@@ -448,12 +448,13 @@ class Profiling:
                         scatter_points[self.point_index] = scatter
                 self.compute_profile_points(profile_points, radius, x, y, x_i, y_i, self.point_index)
                 self.point_index = -1              # reset index 
-                # update plot and table widget
-                self.plot_profiles()
-                self.update_table_widget()
                 if self.main_window.toolButtonProfileInterpolate.isChecked():  # reset interpolation if selected
                     self.clear_interpolation()
                     self.interpolate_points(interpolation_distance=int(self.main_window.lineEditIntDist.text()), radius=int(self.main_window.lineEditPointRadius.text()))
+                # switch to profile tab
+                self.main_window.tabWidget.setCurrentIndex(self.main_window.bottom_tab['profile'])
+                self.plot_profiles()  # Plot averaged profile value on profiles plots with error bars
+                self.update_table_widget()
             else:
                 # find nearest profile point
                 mindist = 10 ** 12
@@ -464,7 +465,6 @@ class Profiling:
                         self.point_index = i
                 if not (round(mindist * self.array_x / self.data.x_range) < 50):
                     self.point_selected = True
-
         elif event.button() == QtCore.Qt.LeftButton:  # plot profile scatter
             # Add the scatter item to all plots and save points in profile
             for (field,view), (_, plot,  array) in self.main_window.lasermaps.items():
@@ -480,11 +480,11 @@ class Profiling:
                     else:
                         scatter_points[(field,view)]= [(scatter)]
             self.compute_profile_points(profile_points, radius, x, y, x_i, y_i)
-        # switch to profile tab
-        self.main_window.tabWidget.setCurrentIndex(self.main_window.bottom_tab['profile'])
-        
-        self.plot_profiles(fields=field)  # Plot averaged profile value on profiles plots with error bars
-        self.update_table_widget()
+            # switch to profile tab
+            self.main_window.tabWidget.setCurrentIndex(self.main_window.bottom_tab['profile'])
+            
+            self.plot_profiles(fields=[field])  # Plot averaged profile value on profiles plots with error bars
+            self.update_table_widget()
 
     
 
@@ -724,7 +724,8 @@ class Profiling:
         if fields is None:
             fields = self.get_fields_from_listview()
         else:
-            self.add_field_to_listview(fields,update=False) # add field used to generate points to list view
+            for field in fields:
+                self.add_field_to_listview(field,update=False) # add field used to generate points to list view (Field viewer table in Profiles tab)
         # Get num_subplots and selected_subplot from UI if not provided
         if num_subplots is None:
             num_subplots = self.main_window.spinBoxProfileNumSubplots.value()
@@ -779,18 +780,11 @@ class Profiling:
 
         # Map fields to subplots
         fields_per_subplot = {i: [] for i in range(num_subplots)}
-        if selected_subplot == 0:
-            # Distribute fields evenly across subplots
-            for idx, field in enumerate(fields):
-                subplot_idx = idx % num_subplots
-                fields_per_subplot[subplot_idx].append(field)
-        else:
-            # Plot all fields on the selected subplot
-            subplot_idx = selected_subplot - 1  # Convert to 0-based index
-            if subplot_idx >= num_subplots:
-                subplot_idx = num_subplots - 1
-            fields_per_subplot = {i: [] for i in range(num_subplots)}
-            fields_per_subplot[subplot_idx] = fields
+
+        # Plot all fields on the selected subplot
+        subplot_idx = selected_subplot - 1  # Convert to 0-based index
+        fields_per_subplot = {i: [] for i in range(num_subplots)}
+        fields_per_subplot[subplot_idx] = fields
 
         # Now, plot the fields
         for subplot_idx, ax in enumerate(axes):
@@ -801,9 +795,9 @@ class Profiling:
             for field_idx, field in enumerate(fields_in_subplot):
                 # Get the points for the field
                 key = (field, self.main_window.canvasWindow.currentIndex())
-                if key not in profile_points:
+                if field not in profile_points:
                     continue  # Skip if no data for this field
-                points = profile_points[key]
+                points = profile_points[field]
 
                 # Process points
                 distances, medians, lowers, uppers, means, s_errors = self.process_points(points, sort_axis)

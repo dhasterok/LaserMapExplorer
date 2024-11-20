@@ -70,6 +70,8 @@ from lame_helper import BASEDIR, ICONPATH, SSPATH, load_stylesheet
 from src.ExtendedDF import AttributeDataFrame
 import src.format as fmt
 from src.colorfunc import get_hex_color, get_rgb_color
+import config
+from src.Logger import QTextEditLogger
 
 # to prevent segmentation error at startup
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
@@ -944,9 +946,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.toolBox.currentChanged.connect(self.toolbox_changed)
 
-
-
-
+        if config.debug:
+            # Redirect sys.stdout to the QTextEdit
+            sys.stdout = QTextEditLogger(self)
 
         # ----start debugging----
         # self.test_get_field_list()
@@ -1051,6 +1053,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             index of sample name for identifying data.  The values are based on the
             comboBoxSampleID
         """
+        if config.debug:
+            print(f"change_sample, index: {index}")
 
         if self.sample_id == self.sample_ids[index]:
             # if selected sample id is same as previous
@@ -1453,6 +1457,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         update_plot : bool
             ``True`` forces update plot, when the canavas window tab is on single view, by default ``True``
         """
+        if config.debug:
+            print(f"toolbox_changed, update: {update}")
+
         if self.sample_id == '':
             return
 
@@ -2431,36 +2438,39 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if update_plot:
             self.apply_filters(fullmap=False)
 
-    def remove_widgets_from_layout(self, layout, object_names_to_remove):
-        """
-        Remove plot widgets from the provided layout based on their objectName properties.
+    # This is not currently used by anything as far as I can tell.
+    # def remove_widgets_from_layout(self, layout, object_names_to_remove):
+    #     """
+    #     Remove plot widgets from the provided layout based on their objectName properties.
 
-        :param layout:
-        :type layout:
-        :param object_names_to_remove:
-        :type object_names_to_remove:
-        """
-        for i in reversed(range(layout.count())):  # Reverse to avoid skipping due to layout change
-            item = layout.itemAt(i)
-            widget = item.widget()
-            if widget and widget.objectName() in object_names_to_remove:
-                widget.setParent(None)
-                widget.deleteLater()
-            # Handle child layouts
-            elif hasattr(item, 'layout') and item.layout():
-                child_layout = item.layout()
-                if child_layout.objectName() in object_names_to_remove:
-                    # Remove all widgets from the child layout
-                    while child_layout.count():
-                        child_item = child_layout.takeAt(0)
-                        if child_item.widget():
-                            child_item.widget().setParent(None)
-                            child_item.widget().deleteLater()
-                    # Now remove the layout itself
-                    layout.removeItem(child_layout)
-                    del child_layout
+    #     Parameters
+    #     ----------
+    #     layout : Qlayout
+    #         Layout that object is removed from.
+    #     object_names_to_remove : any
+    #         Names of objects to remove.
+    #     """
+    #     for i in reversed(range(layout.count())):  # Reverse to avoid skipping due to layout change
+    #         item = layout.itemAt(i)
+    #         widget = item.widget()
+    #         if widget and widget.objectName() in object_names_to_remove:
+    #             widget.setParent(None)
+    #             widget.deleteLater()
+    #         # Handle child layouts
+    #         elif hasattr(item, 'layout') and item.layout():
+    #             child_layout = item.layout()
+    #             if child_layout.objectName() in object_names_to_remove:
+    #                 # Remove all widgets from the child layout
+    #                 while child_layout.count():
+    #                     child_item = child_layout.takeAt(0)
+    #                     if child_item.widget():
+    #                         child_item.widget().setParent(None)
+    #                         child_item.widget().deleteLater()
+    #                 # Now remove the layout itself
+    #                 layout.removeItem(child_layout)
+    #                 del child_layout
 
-        layout.update()
+    #     layout.update()
 
 
     # -------------------------------
@@ -2686,8 +2696,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         save : bool, optional
             save plot to plot selector, Defaults to False.
         """
-        #print('update_SV, self.plot_flag: '+str(self.plot_flag)+'   sample_id: '+self.sample_id+'   field_type: '+self.comboBoxColorByField.currentText()+'   field: '+self.comboBoxColorField.currentText())
-        #if self.sample_id == '' or not self.comboBoxPlotType.currentText() or not self.plot_flag:
+        if config.debug:
+            print(f"update_SV\n  plot_type: {plot_type}\n  field_type: {field_type}\n  field: {field}")
+
         if self.sample_id == '' or not self.comboBoxPlotType.currentText():
             return
 

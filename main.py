@@ -780,9 +780,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # update profile plot when point type is changed
         self.comboBoxPointType.currentIndexChanged.connect(lambda: self.profiling.plot_profiles())
         # update profile plot when selected subplot is changed
+        # Set initial maximum
+        self.spinBoxProfileSelectedSubplot.setMaximum(self.spinBoxProfileNumSubplots.value())
         self.spinBoxProfileSelectedSubplot.valueChanged.connect(lambda: self.profiling.plot_profiles())
+        # Connect signals
+        self.spinBoxProfileNumSubplots.valueChanged.connect(self.update_selected_subplot_max)
         # update profile plot when Num subplot is changed
         self.spinBoxProfileNumSubplots.valueChanged.connect(lambda: self.profiling.plot_profiles())
+        self.spinBoxProfileNumSubplots.valueChanged.connect(lambda: self.profiling.update_num_subplots())
         # update profile plot when field in subplot table is changed
         self.toolButtonProfileAddField.clicked.connect(lambda: self.profiling.plot_profiles())
         
@@ -1495,6 +1500,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # If canvasWindow is set to SingleView, update the plot
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv'] and update:
             self.update_SV()
+
+    def update_selected_subplot_max(self):
+        # Get the current number of subplots
+        num_subplots = self.spinBoxProfileNumSubplots.value()
+        # Update the maximum value of the selected subplot spin box
+        self.spinBoxProfileSelectedSubplot.setMaximum(num_subplots)
+        # Ensure the current value does not exceed the maximum
+        if self.spinBoxProfileSelectedSubplot.value() > num_subplots:
+            self.spinBoxProfileSelectedSubplot.setValue(num_subplots)
+        # Update the plot
+        self.profiling.plot_profiles()
 
     def open_ternary(self):
         """Executes on actionTernary

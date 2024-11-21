@@ -16,11 +16,21 @@ import numpy as np
 class Profile:
     def __init__(self,name,sort,radius,thresh,int_dist, point_error):
         self.name = name  # name given by user for the profile
-        # points, i_points stores profile point information in format: {field: [point1, point2, ...]}.
-        # each point is a tuple consisting of (x, y, circ_val, interpolate)
+        # points, i_points stores profile point information in format: 
+        # {
+        #     'x': [list of x coordinates],
+        #     'y': [list of y coordinates],
+        #     'field1': [list of circ_val lists at each coordinate],
+        #     'field2': [...],
+        #     ... other fields ...
+        # }
+
         self.points = {}  
         self.i_points = {}
-        # scatter_points holds scatter plots points information in format: {(field,view):[scatter1, scatter2,...]}
+        # scatter_points holds scatter plots points information in format:
+        #         {
+        #     (field, view): [scatter1, scatter2, ...],
+        # }
         # each scatter point is a pg.ScatterPlotItem
         self.scatter_points = {} 
         
@@ -55,7 +65,9 @@ class Profiling:
         self.edit_mode_enabled = False  # Track if edit mode is enabled
         self.original_colors = {}
         self.profile_name = None
-
+        self.fields_per_subplot = {}  # Holds fields for each subplot, key: subplot index, value: list of fields
+        self.new_plot = False #checks if new profile is being plotted
+    
     def add_samples(self):
         """Add sample IDs to the profiles dictionary.
 
@@ -94,9 +106,9 @@ class Profiling:
         if sample_id in self.profiles:
             for profile_name, profile in self.profiles[sample_id].items():
                 file_name = os.path.join(project_dir, sample_id, f'{profile_name}.prfl')
-                serializable_profile = self.transform_profile_for_pickling(profile)
+                #serializable_profile = self.transform_profile_for_pickling(profile)
                 with open(file_name, 'wb') as file:
-                    pickle.dump(serializable_profile, file)
+                    pickle.dump(profile, file)
             print("Profile saved successfully.")
 
     def load_profiles(self, project_dir, sample_id):
@@ -123,8 +135,8 @@ class Profiling:
                 file_path = os.path.join(directory, file_name)
                 with open(file_path, 'rb') as file:
                     profile_name = os.path.basename(file_path).split('.')[0]
-                    serializable_profile = pickle.load(file)
-                    profile = self.reconstruct_profile(serializable_profile)
+                    profile = pickle.load(file)
+                    #profile = self.reconstruct_profile(serializable_profile)
                     self.profiles[sample_id][profile_name] = profile
         self.populate_combobox()
         print("All profiles loaded successfully.")
@@ -233,21 +245,20 @@ class Profiling:
             serializable_profile['int_dist'],
             serializable_profile['point_error']
         )
-        for (field, view), points in serializable_profile['points'].items():
-            reconstructed_points = []
-            for point in points:
-                x, y, circ_val, scatter_state, interpolate = point
+        profile.points = serializable_profile['points']
+        profile.i_points = serializable_profile['i_points']
+        profile.scatter_points = {}
+
+        # Reconstruct scatter_points
+        for key, serialized_scatter_list in serializable_profile.get('scatter_points', {}).items():
+            scatter_list = []
+            for scatter_state in serialized_scatter_list:
                 scatter = self.recreate_scatter_plot(scatter_state)
-                reconstructed_points.append((x, y, circ_val, scatter, interpolate))
-            profile.points[(field, view)] = reconstructed_points
-        for (field, view), i_points in serializable_profile['i_points'].items():
-            reconstructed_i_points = []
-            for point in i_points:
-                x, y, circ_val, scatter_state, interpolate = point
-                scatter = self.recreate_scatter_plot(scatter_state)
-                reconstructed_i_points.append((x, y, circ_val, scatter, interpolate))
-            profile.i_points[(field, view)] = reconstructed_i_points
+                scatter_list.append(scatter)
+            profile.scatter_points[key] = scatter_list
+
         return profile
+
 
     def populate_combobox(self):
         """Populate the profile selection combobox.
@@ -266,6 +277,8 @@ class Profiling:
         self.main_window.comboBoxProfileList.addItem('Create New Profile')
         for profile_name in self.profiles[self.main_window.sample_id].keys():
             self.main_window.comboBoxProfileList.addItem(profile_name)
+
+        self.new_plot = True #resets new plot flag
 
     def load_profiles_from_directory(self, project_dir, sample_id):
         """Load all profiles from a directory for a sample.
@@ -308,6 +321,7 @@ class Profiling:
         -------
         None
         """
+        self.new_plot= True #reset new plot flag
         if profile_name == 'Create New Profile':  # create a new profile instance and store instance in self.profiles
             new_profile_name, ok = QInputDialog.getText(self.main_window, 'New Profile', 'Enter new profile name:')
             if ok and new_profile_name:
@@ -453,7 +467,7 @@ class Profiling:
             else:
                 # find nearest profile point
                 mindist = 10 ** 12
-                for i, (x_p, y_p, _, _, interpolate) in enumerate(profile_points[field, view]):
+                for i, (x_p, y_p) in enumerate(list(zip(profile_points['x'],profile_points['y']))):
                     dist = (x_p - x) ** 2 + (y_p - y) ** 2
                     if mindist > dist:
                         mindist = dist
@@ -462,13 +476,15 @@ class Profiling:
                     self.point_selected = True
         elif event.button() == QtCore.Qt.LeftButton:  # plot profile scatter
             # Add the scatter item to all plots
-            self.plot_scatter_points(self,scatter_points, x, y)
+            self.plot_scatter_points(scatter_points, x, y)
             # compute profile value for all fields 
             self.compute_profile_points(profile_points, radius, x, y, x_i, y_i)
             # switch to profile tab
             self.main_window.tabWidget.setCurrentIndex(self.main_window.bottom_tab['profile'])
-            
-            self.plot_profiles(fields=[field])  # Plot averaged profile value on profiles plots with error bars
+            if self.new_plot: #add field name to profile list view if its a new plot
+                self.add_field_to_listview(field)
+                self.new_plot = False
+            self.plot_profiles()  # Plot averaged profile value on profiles plots with error bars
             self.update_table_widget()
 
     def plot_scatter_points(self,scatter_points, x, y,point_index = None, symbol='+', size=10):
@@ -498,7 +514,7 @@ class Profiling:
                 scatter = ScatterPlotItem([x], [y], symbol=symbol, size=size)
                 scatter.setZValue(1e9)
                 plot.addItem(scatter)
-                if point_index is None: # remove selected point from list (point is being moved) before adding new point
+                if point_index is not None: # remove selected point from list (point is being moved) before adding new point
                     prev_scatter = scatter_points[(field,view)][self.point_index]
                     plot.removeItem(prev_scatter)
                     scatter_points[(field,view)][self.point_index] = scatter #add new scatter point to list
@@ -509,6 +525,79 @@ class Profiling:
                     else:
                         scatter_points[(field,view)]= [scatter]
 
+    # def compute_profile_points(self, profile_points, radius, x, y, x_i, y_i, point_index=None):
+    #     """Compute profile points by averaging values within a radius.
+
+    #     Calculates the mean values within a specified radius around a point and updates the profile points.
+
+    #     Parameters
+    #     ----------
+    #     profile_points : dict
+    #         Dictionary to store computed profile points. in format {x: [], y:[], field: (circ_values)}
+    #     radius : int
+    #         The radius around the point to consider for averaging.
+    #     x : float
+    #         The x-coordinate of the point.
+    #     y : float
+    #         The y-coordinate of the point.
+    #     x_i : int
+    #         The index of the x-coordinate in the array.
+    #     y_i : int
+    #         The index of the y-coordinate in the array.
+    #     point_index : int, optional
+    #         The index of the point if updating an existing point.
+
+    #     Returns
+    #     -------
+    #     None
+    #     """
+    #     # Obtain field data of all fields that will be used for profiling
+    #     fields = self.data.processed_data.match_attribute('data_type', 'analyte') + self.data.processed_data.match_attribute('data_type', 'ratio')
+    #     field_data = self.data.processed_data[fields]
+
+    #     # If updating an existing point, remove it first
+    #     if point_index is not None:
+    #         for key in profile_points.keys():
+    #             del profile_points[key][point_index]
+
+    #     # Collect circ_values for each field
+    #     circ_values_dict = {}
+    #     p_radius_y = self.dist_to_cart(radius, 'y')  # Pixel radius in y direction
+    #     p_radius_x = self.dist_to_cart(radius, 'x')  # Pixel radius in x direction
+
+    #     for field in field_data.columns:
+    #         array = np.reshape(field_data[field].values, self.data.array_size, order=self.data.order)
+    #         circ_values = []
+
+    #         # Store pixel values within bounds of circle with center (x_i, y_i) and radius `radius`
+    #         for i in range(max(0, y_i - p_radius_y), min(self.array_y, y_i + p_radius_y + 1)):
+    #             for j in range(max(0, x_i - p_radius_x), min(self.array_x, x_i + p_radius_x + 1)):
+    #                 if self.calculate_distance(self.cart_to_dist(y_i - i), self.cart_to_dist(x_i - j)) <= radius:
+    #                     value = array[i, j]
+    #                     circ_values.append(value)
+
+    #         circ_values_dict[field] = circ_values
+
+    #     # Update profile_points with new data
+    #     if 'x' in profile_points:
+    #         if point_index is not None:
+    #             profile_points['x'].insert(point_index, x)
+    #             profile_points['y'].insert(point_index, y)
+    #         else:
+    #             profile_points['x'].append(x)
+    #             profile_points['y'].append(y)
+    #     else:
+    #         profile_points['x'] = [x]
+    #         profile_points['y'] = [y]
+
+    #     for field, circ_values in circ_values_dict.items():
+    #         if field in profile_points:
+    #             if point_index is not None:
+    #                 profile_points[field].insert(point_index, circ_values)
+    #             else:
+    #                 profile_points[field].append(circ_values)
+    #         else:
+    #             profile_points[field] = [circ_values]
     def compute_profile_points(self, profile_points, radius, x, y, x_i, y_i, point_index=None):
         """Compute profile points by averaging values within a radius.
 
@@ -517,7 +606,7 @@ class Profiling:
         Parameters
         ----------
         profile_points : dict
-            Dictionary to store computed profile points.
+            Dictionary to store computed profile points. in format {x: [], y:[], field: [circ_values]}
         radius : int
             The radius around the point to consider for averaging.
         x : float
@@ -536,35 +625,77 @@ class Profiling:
         None
         """
         # Obtain field data of all fields that will be used for profiling
-        fields= self.data.processed_data.match_attribute('data_type','analyte')+ self.data.processed_data.match_attribute('data_type','ratio')
+        fields = (
+            self.data.processed_data.match_attribute('data_type', 'analyte') +
+            self.data.processed_data.match_attribute('data_type', 'ratio')
+        )
         field_data = self.data.processed_data[fields]
+
+        # If updating an existing point, remove it first
+        if point_index is not None:
+            for key in profile_points.keys():
+                del profile_points[key][point_index]
+
+        # Physical size per pixel in x and y directions
+        dx = self.data.dx
+        dy = self.data.dy
+
+        # Precompute pixel radius in x and y directions
+        p_radius_y = self.dist_to_cart(radius, 'y')  # Pixel radius in y direction
+        p_radius_x = self.dist_to_cart(radius, 'x')  # Pixel radius in x direction
+
+        # Get the ranges of indices in i and j directions
+        i_min = max(0, y_i - p_radius_y)
+        i_max = min(self.array_y, y_i + p_radius_y + 1)
+        j_min = max(0, x_i - p_radius_x)
+        j_max = min(self.array_x, x_i + p_radius_x + 1)
+
+        i_range = np.arange(i_min, i_max)  # Shape: (n_i,)
+        j_range = np.arange(j_min, j_max)  # Shape: (n_j,)
+
+        # Create grids for indices
+        I_grid, J_grid = np.meshgrid(i_range, j_range, indexing='ij')  # Both shapes: (n_i, n_j)
+
+        # Compute physical distances
+        di_phys = (I_grid - y_i) * dy  # Shape: (n_i, n_j)
+        dj_phys = (J_grid - x_i) * dx  # Shape: (n_i, n_j)
+
+        dists_squared = di_phys**2 + dj_phys**2  # Shape: (n_i, n_j)
+
+        # Create mask for points within the specified radius
+        mask = dists_squared <= radius**2  # Shape: (n_i, n_j)
+
+        # Get the indices of valid points
+        i_indices = I_grid[mask]
+        j_indices = J_grid[mask]
+
+        # For each field, extract the values at these indices
         for field in field_data.columns:
-            # If updating an existing point, remove it first
-            if point_index is not None and field in profile_points and len(profile_points[field]) > point_index:
-                del profile_points[field][point_index]
-
             array = np.reshape(field_data[field].values, self.data.array_size, order=self.data.order)
-            # Find all points within the specified radius
-            circ_val = []
-            p_radius_y = self.dist_to_cart(radius, 'y')  # Pixel radius in y direction
-            p_radius_x = self.dist_to_cart(radius, 'x')  # Pixel radius in x direction
+            values = array[i_indices, j_indices]
+            circ_values = values.tolist()
 
-            # Store pixel values within bounds of circle with center (x_i, y_i) and radius `radius`
-            for i in range(max(0, y_i - p_radius_y), min(self.array_y, y_i + p_radius_y + 1)):
-                for j in range(max(0, x_i - p_radius_x), min(self.array_x, x_i + p_radius_x + 1)):
-                    if self.calculate_distance(self.cart_to_dist(y_i - i), self.cart_to_dist(x_i - j)) <= radius:
-                        value = array[i, j]
-                        circ_val.append(value)
-
-            # Add values within circle of radius in profile
             if field in profile_points:
                 if point_index is not None:
-                    # Insert at the correct index if updating
-                    profile_points[field].insert(point_index, (x, y, circ_val))
+                    profile_points[field].insert(point_index, circ_values)
                 else:
-                    profile_points[field].append((x, y, circ_val))  # Append profile point list
+                    profile_points[field].append(circ_values)
             else:
-                profile_points[field] = [(x, y, circ_val)]  # Create profile point list
+                profile_points[field] = [circ_values]
+
+        # Update profile_points with new data
+        if 'x' in profile_points:
+            if point_index is not None:
+                profile_points['x'].insert(point_index, x)
+                profile_points['y'].insert(point_index, y)
+            else:
+                profile_points['x'].append(x)
+                profile_points['y'].append(y)
+        else:
+            profile_points['x'] = [x]
+            profile_points['y'] = [y]
+
+
 
     def plot_existing_profile(self, plot):
         """Plot existing profile points on the plot.
@@ -580,16 +711,24 @@ class Profiling:
         -------
         None
         """
-        # clear existing plot
+        # Clear existing plots
         self.clear_plot()
-        if self.profile_name in self.profiles[self.main_window.sample_id]:
-            profile_points = self.profiles[self.main_window.sample_id][self.profile_name].points
-            for (field, view) in profile_points:
-                for x, y, _, _, _ in profile_points[field, view]:
-                    # Create a scatter plot item
-                    scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
-                    scatter.setZValue(1e9)
-                    plot.addItem(scatter)
+        sample_id = self.main_window.sample_id
+        profile_name = self.profile_name
+
+        if profile_name in self.profiles[sample_id]:
+            profile_points = self.profiles[sample_id][profile_name].points
+            scatter_points = self.profiles[sample_id][profile_name].scatter_points
+            x_coords = profile_points.get('x', [])
+            y_coords = profile_points.get('y', [])
+
+            # Ensure scatter_points is initialized
+            if not scatter_points:
+                scatter_points = {}
+
+            # Plot the points
+            for idx, (x, y) in enumerate(zip(x_coords, y_coords)):
+                self.plot_scatter_points(scatter_points, x, y)
 
     def interpolate_points(self, interpolation_distance, radius):
         """Interpolate points between existing profile points.
@@ -607,52 +746,91 @@ class Profiling:
         -------
         None
         """
-        profile_points = self.profiles[self.main_window.sample_id][self.profile_name].points
-        i_profile_points = self.profiles[self.main_window.sample_id][self.profile_name].i_points
-        scatter_points = self.profiles[self.sample_id][self.profile_name].scatter_points
-        
+        # Corrected: Use self.main_window.sample_id consistently
+        sample_id = self.sample_id
+        profile_name = self.profile_name
+
+        profile_points = self.profiles[sample_id][profile_name].points
+        i_profile_points = self.profiles[sample_id][profile_name].i_points
+        scatter_points = self.profiles[sample_id][profile_name].scatter_points
+
+        # Ensure 'x' and 'y' are in profile_points
+        if 'x' not in profile_points or 'y' not in profile_points:
+            print("Profile points must contain 'x' and 'y' coordinates.")
+            return
+
+        # Corrected: Convert zip object to list for indexing
+        point_coordinates = list(zip(profile_points['x'], profile_points['y']))
+
+        # Corrected: Use string literals 'x' and 'y' in the set
+        fields = [field for field in profile_points.keys() if field not in {'x', 'y'}]
+
         if self.main_window.toolButtonProfileInterpolate.isChecked():
             interpolate = True
-            for field, points in profile_points.items(): #iterate through profile points
-                for i in range(len(points) - 1):
-                    # define start and end_point to interpolate between two sequential points in profile
-                    start_point = points[i] 
-                    end_point = points[i + 1]
-                    # add the point to interpolate profile list for which is stored in i_profile_points dict with field as key and list as value
-                    if i == 0:
-                        i_profile_points[field] = [start_point]
-                    else:
-                        i_profile_points[field].append(start_point)
+            # Initialize i_profile_points dictionaries
+            i_profile_points.clear()
+            i_profile_points['x'] = []
+            i_profile_points['y'] = []
+            for field in fields:
+                i_profile_points[field] = []
 
-                    # Calculate the distance between start and end points
-                    dist = self.calculate_distance(start_point, end_point)
+            for i in range(len(point_coordinates) - 1):
+                # Define start and end points
+                start_point = point_coordinates[i]
+                end_point = point_coordinates[i + 1]
 
-                    # Determine the number of interpolations based on the distance
-                    num_interpolations = max(int(dist / interpolation_distance), 0)
+                # Add the start_point coordinates to i_profile_points
+                i_profile_points['x'].append(start_point[0])
+                i_profile_points['y'].append(start_point[1])
 
-                    # Calculate the unit vector in the direction from start_point to end_point
-                    dx = (end_point[0] - start_point[0]) / dist
-                    dy = (end_point[1] - start_point[1]) / dist
+                # Add the circ_val list of start_point for each field to i_profile_points
+                for field in fields:
+                    i_profile_points[field].append(profile_points[field][i])
 
-                    for t in range(0, num_interpolations + 1):
-                        # find cordinates of interpolated point 
-                        x = start_point[0] + t * interpolation_distance * dx
-                        y = start_point[1] + t * interpolation_distance * dy
+                # Calculate the distance between start and end points
+                dist = self.calculate_distance(start_point, end_point)
 
-                        x_i = self.dist_to_cart(x, 'x')  # index points
-                        y_i = self.dist_to_cart(y, 'y')
-                        # Add the scatter item to all plots
-                        self.plot_scatter_points(self,scatter_points, x, y)
-                        # compute profile value for all fields 
-                        self.compute_profile_points(profile_points, radius, x, y, x_i, y_i)
-                    i_profile_points[field)].append(end_point)
+                # Handle division by zero if dist is zero
+                if dist == 0:
+                    continue  # Skip interpolation if two points are the same
+
+                # Determine the number of interpolations based on the distance
+                num_interpolations = max(int(dist / interpolation_distance), 0)
+
+                # Calculate the unit vector in the direction from start_point to end_point
+                dx = (end_point[0] - start_point[0]) / dist
+                dy = (end_point[1] - start_point[1]) / dist
+
+                for t in range(1, num_interpolations + 1):
+                    # Find coordinates of interpolated point
+                    x = start_point[0] + t * interpolation_distance * dx
+                    y = start_point[1] + t * interpolation_distance * dy
+
+                    x_i = self.dist_to_cart(x, 'x')  # index points
+                    y_i = self.dist_to_cart(y, 'y')
+
+                    # Add the scatter item to all plots
+                    self.plot_scatter_points(scatter_points, x, y)
+
+                    # Compute profile values for all fields at the interpolated point
+                    self.compute_profile_points(i_profile_points, radius, x, y, x_i, y_i)
+
+            # Add the end_point coordinates to i_profile_points
+            end_point = point_coordinates[-1]
+            i_profile_points['x'].append(end_point[0])
+            i_profile_points['y'].append(end_point[1])
+
+            # Add the circ_val list of end_point for each field to i_profile_points
+            for field in fields:
+                i_profile_points[field].append(profile_points[field][-1])
+
             # After interpolation, update the plot and table widget
             self.plot_profiles(interpolate=interpolate)
         else:
             self.clear_interpolation()
-            # plot original profile
+            # Plot original profile
             self.plot_profiles(interpolate=False)
-        # self.update_table_widget(interpolate= True)
+
 
     def clear_plot(self):
         """Clear all existing profiles from the plot.
@@ -669,15 +847,14 @@ class Profiling:
         """
         if self.main_window.sample_id in self.profiles:
             for profile_name, profile in self.profiles[self.main_window.sample_id].items():
-                # Clear points from the plot
-                for (field, view), points in profile.points.items():
-                    for _, _, _, scatter, _ in points:
-                        self.main_window.plot.removeItem(scatter)
-
-                # Clear interpolated points from the plot (if applicable)
-                for (field, view), i_points in profile.i_points.items():
-                    for _, _, _, scatter, _ in i_points:
-                        self.main_window.plot.removeItem(scatter)
+                scatter_points = profile.scatter_points
+                # Clear scatter points from the plots
+                for (field, view), scatter_list in scatter_points.items():
+                    for scatter_item in scatter_list:
+                        plot = self.main_window.lasermaps[(field, view)][1]
+                        plot.removeItem(scatter_item)
+                # Clear the scatter_points dictionary
+                scatter_points.clear()
 
     def clear_interpolation(self):
         """Clear all interpolated points from the plot.
@@ -693,32 +870,33 @@ class Profiling:
         None
         """
         i_profile_points = self.profiles[self.main_window.sample_id][self.profile_name].i_points
-        # remove interpolation
-        if len(i_profile_points) > 0:
-            for (field, view), profile in i_profile_points.items():
-                for point in profile:
-                    scatter_item = point[3]  # Access the scatter plot item
-                    interpolate = point[4]
-                    if interpolate:
-                        _, plot, _ = self.main_window.lasermaps[(field, view)]
-                        plot.removeItem(scatter_item)
+        scatter_points = self.profiles[self.main_window.sample_id][self.profile_name].scatter_points
+        # Remove interpolated scatter points
+        for (field, view), scatter_list in scatter_points.items():
+            for scatter_item in scatter_list:
+                plot = self.main_window.lasermaps[(field, view)][1]
+                plot.removeItem(scatter_item)
+        # Clear the interpolated profile points and scatter_points
+        i_profile_points.clear()
+        scatter_points.clear()
 
-    def plot_profiles(self, fields=None, num_subplots=None, selected_subplot=None, interpolate=False, sort_axis=None):
+
+    def plot_profiles(self, fields=None, num_subplots=None, selected_subplot=None, interpolate=None, sort_axis=None):
         """Plot averaged profile values with error bars.
 
         Plots the profile values stored in self.profiles with error bars on the specified subplot(s),
-        optionally using interpolated points.
+        using fields assigned to each subplot stored in self.fields_per_subplot.
 
         Parameters
         ----------
         fields : list of str, optional
-            List of fields to plot. If None, fields are obtained from self.main_window.listViewProfile.
+            List of fields to plot. If None, fields are obtained from self.fields_per_subplot.
         num_subplots : int, optional
             Number of subplots to create. If None, value is obtained from self.main_window.spinBoxProfileNumSubplots.
         selected_subplot : int, optional
-            Index of the selected subplot to plot on (1-based). If None, value is obtained from self.main_window.spinBoxProfileSelectedSubplots.
+            Index of the selected subplot to plot on (1-based). If None, value is obtained from self.main_window.spinBoxProfileSelectedSubplot.
         interpolate : bool, optional
-            Whether to use interpolated points. Default is False.
+            Whether to use interpolated points. Default is None, which checks the UI state.
         sort_axis : str, optional
             Axis to sort the profile points by ('x' or 'y'). If None, obtained from self.main_window.comboBoxProfileSort.
 
@@ -726,24 +904,23 @@ class Profiling:
         -------
         None
         """
-        # Get fields from the list view if not provided
-        if fields is None:
-            fields = self.get_fields_from_listview()
-        else:
-            for field in fields:
-                self.add_field_to_listview(field,update=False) # add field used to generate points to list view (Field viewer table in Profiles tab)
+        if interpolate is None:
+            interpolate = self.main_window.toolButtonProfileInterpolate.isChecked()
+
         # Get num_subplots and selected_subplot from UI if not provided
         if num_subplots is None:
             num_subplots = self.main_window.spinBoxProfileNumSubplots.value()
         if selected_subplot is None:
             selected_subplot = self.main_window.spinBoxProfileSelectedSubplot.value()
 
+        # Ensure fields_per_subplot has entries for all subplots
+        for i in range(num_subplots):
+            if i not in self.fields_per_subplot:
+                self.fields_per_subplot[i] = []
+
         # Get the point type
         point_type_text = self.main_window.comboBoxPointType.currentText()
-        if point_type_text == 'median + IQR':
-            point_type = 'median'
-        else:
-            point_type = 'mean'
+        point_type = 'median' if point_type_text == 'median + IQR' else 'mean'
 
         # Get sort axis if not provided
         if sort_axis is None:
@@ -772,11 +949,8 @@ class Profiling:
 
         # Set up subplots
         self.all_errorbars = []
-        num_fields = len(fields)
         if num_subplots < 1:
             num_subplots = 1
-        if num_subplots > num_fields:
-            num_subplots = num_fields
 
         # Create subplots
         axes = []
@@ -784,29 +958,25 @@ class Profiling:
             ax = self.fig.add_subplot(num_subplots, 1, i + 1)
             axes.append(ax)
 
-        # Map fields to subplots
-        fields_per_subplot = {i: [] for i in range(num_subplots)}
-
-        # Plot all fields on the selected subplot
-        subplot_idx = selected_subplot - 1  # Convert to 0-based index
-        fields_per_subplot = {i: [] for i in range(num_subplots)}
-        fields_per_subplot[subplot_idx] = fields
-
         # Now, plot the fields
         for subplot_idx, ax in enumerate(axes):
-            fields_in_subplot = fields_per_subplot[subplot_idx]
+            fields_in_subplot = self.fields_per_subplot.get(subplot_idx, [])
             if not fields_in_subplot:
                 continue  # No fields to plot in this subplot
 
+            # Update the list view if this is the selected subplot
+            if subplot_idx == selected_subplot - 1:
+                self.update_listview_with_fields(fields_in_subplot)
+
             for field_idx, field in enumerate(fields_in_subplot):
                 # Get the points for the field
-                key = (field, self.main_window.canvasWindow.currentIndex())
                 if field not in profile_points:
                     continue  # Skip if no data for this field
-                points = profile_points[field]
-
+                circ_val = profile_points[field]
+                x = profile_points['x']
+                y = profile_points['y']
                 # Process points
-                distances, medians, lowers, uppers, means, s_errors = self.process_points(points, sort_axis)
+                distances, medians, lowers, uppers, means, s_errors = self.process_points(x, y, circ_val, sort_axis)
 
                 # Decide color
                 color = cmap(field_idx / len(fields_in_subplot))
@@ -815,15 +985,15 @@ class Profiling:
                 if point_type == 'median':
                     # Use medians and IQR
                     errors = [[median - lower for median, lower in zip(medians, lowers)],
-                              [upper - median for upper, median in zip(uppers, medians)]]
+                            [upper - median for upper, median in zip(uppers, medians)]]
                     scatter = ax.scatter(distances, medians,
-                                         color=color,
-                                         s=style.marker_size,
-                                         marker=style.marker_dict[style.marker],
-                                         edgecolors='none',
-                                         picker=5,
-                                         gid=field,
-                                         label=field)
+                                        color=color,
+                                        s=style.marker_size,
+                                        marker=style.marker_dict[style.marker],
+                                        edgecolors='none',
+                                        picker=5,
+                                        gid=field,
+                                        label=field)
                     # Plot error bars
                     _, _, barlinecols = ax.errorbar(distances, medians,
                                                     yerr=errors,
@@ -838,13 +1008,13 @@ class Profiling:
                 else:
                     # Use means and standard errors
                     scatter = ax.scatter(distances, means,
-                                         color=color,
-                                         s=style.marker_size,
-                                         marker=style.marker_dict[style.marker],
-                                         edgecolors='none',
-                                         picker=5,
-                                         gid=field,
-                                         label=field)
+                                        color=color,
+                                        s=style.marker_size,
+                                        marker=style.marker_dict[style.marker],
+                                        edgecolors='none',
+                                        picker=5,
+                                        gid=field,
+                                        label=field)
                     # Plot error bars
                     _, _, barlinecols = ax.errorbar(distances, means,
                                                     yerr=s_errors,
@@ -880,40 +1050,20 @@ class Profiling:
         self.main_window.widgetProfilePlot.layout().addWidget(widget)
         widget.show()
 
-    def get_fields_from_listview(self):
-        """Retrieve the list of fields from the profile list view.
 
-        Extracts the selected fields from the UI's list view widget to determine which fields to plot.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        fields : list of str
-            List of field names selected in the list view.
-        """
-        fields = []
-        model = self.main_window.listViewProfile.model()
-        if not model:
-            #set item model if it doesnt exist
-            model = QStandardItemModel()
-            self.main_window.listViewProfile.setModel(model)
-        for index in range(model.rowCount()):
-            item = model.item(index)
-            fields.append(item.text())
-        return fields
-
-    def process_points(self, points, sort_axis):
+    def process_points(self, x, y, circ_values, sort_axis):
         """Process profile points to compute statistics and distances.
 
         Calculates distances and statistical measures (median, mean, quartiles, standard errors) for profile points.
 
         Parameters
         ----------
-        points : list
-            List of profile points, each point is a tuple (x, y, values).
+        x : list of float
+            List of x-coordinates.
+        y : list of float
+            List of y-coordinates.
+        circ_values : list of lists
+            List where each element is a list of values within the radius around the corresponding point.
         sort_axis : str
             Axis to sort the points by ('x' or 'y').
 
@@ -932,11 +1082,17 @@ class Profiling:
         standard_errors : list of float
             Standard errors at each point.
         """
-        # Sort the points based on the user-specified axis
+        # Combine x, y, and circ_values into a list of tuples
+        combined = list(zip(x, y, circ_values))
+
+        # Sort the combined list based on the user-specified axis
         if sort_axis == 'x':
-            points.sort(key=lambda p: p[0])  # Sort by x-coordinate
+            combined.sort(key=lambda p: p[0])  # Sort by x-coordinate
         elif sort_axis == 'y':
-            points.sort(key=lambda p: p[1])  # Sort by y-coordinate
+            combined.sort(key=lambda p: p[1])  # Sort by y-coordinate
+
+        # Unzip the sorted list back into x_sorted, y_sorted, and circ_values_sorted
+        x_sorted, y_sorted, circ_values_sorted = zip(*combined)
 
         median_values = []
         lower_quantiles = []
@@ -945,8 +1101,7 @@ class Profiling:
         standard_errors = []
         distances = []
 
-        for i, point in enumerate(points):
-            x, y, values = point[0], point[1], point[2]
+        for i, values in enumerate(circ_values_sorted):
             # Compute statistics
             median = np.median(values)
             lower = np.quantile(values, 0.25)
@@ -964,11 +1119,14 @@ class Profiling:
             if i == 0:
                 distances.append(0)
             else:
-                prev_point = points[i - 1]
-                dist = self.calculate_distance((x, y), (prev_point[0], prev_point[1]))
+                dist = self.calculate_distance(
+                    (x_sorted[i], y_sorted[i]),
+                    (x_sorted[i - 1], y_sorted[i - 1])
+                )
                 distances.append(distances[-1] + dist)
 
         return distances, median_values, lower_quantiles, upper_quantiles, mean_values, standard_errors
+
         
 
     def clear_profiles(self):
@@ -1007,6 +1165,27 @@ class Profiling:
                     child = layout.takeAt(0)
                     if child.widget():
                         child.widget().deleteLater()
+                
+                # reset listviewprfile
+                model = self.main_window.listViewProfile.model()
+                if model: 
+                    model.clear()
+
+                # reset flags and variables
+                self.point_selected = False  # move point button selected
+                self.point_index = -1              # index for move point
+                self.all_errorbars = []       #stores points of profiles
+                self.selected_points = {}  # Track selected points, e.g., {point_index: selected_state}
+                self.edit_mode_enabled = False  # Track if edit mode is enabled
+                self.original_colors = {}
+                self.profile_name = None
+                self.fields_per_subplot = {}  # Holds fields for each subplot, key: subplot index, value: list of fields
+                self.new_plot = False #checks if new profile is being plotted
+
+                #reset UI widgets
+                self.main_window.toolButtonPlotProfile.setChecked(False)
+                self.main_window.toolButtonPointMove.setEnabled(False)
+                self.main_window.toolButtonProfileInterpolate.setChecked(False)
 
     def calculate_distance(self, point1, point2):
         """Calculate the Euclidean distance between two points.
@@ -1046,25 +1225,25 @@ class Profiling:
         None
         """
         if self.main_window.sample_id in self.profiles:
-            if self.profile_name in self.profiles[self.main_window.sample_id]:  # if profiles for that sample exist
+            if self.profile_name in self.profiles[self.main_window.sample_id]:
                 profile_points = self.profiles[self.main_window.sample_id][self.profile_name].points
-                self.main_window.tableWidgetProfilePoints.setRowCount(0)  # Clear existing rows
-                point_number = 0
-                first_data_point = list(profile_points.values())[0]
-                for data_point in first_data_point:
-                    x, y, _ = data_point  # Assuming data_point structure
+                x_coords = profile_points.get('x', [])
+                y_coords = profile_points.get('y', [])
+
+                self.main_window.tableWidgetProfilePoints.setRowCount(0)
+                for idx, (x, y) in enumerate(zip(x_coords, y_coords)):
                     row_position = self.main_window.tableWidgetProfilePoints.rowCount()
                     self.main_window.tableWidgetProfilePoints.insertRow(row_position)
 
                     # Fill in the data
-                    self.main_window.tableWidgetProfilePoints.setItem(row_position, 0, QTableWidgetItem(str(point_number)))
+                    self.main_window.tableWidgetProfilePoints.setItem(row_position, 0, QTableWidgetItem(str(idx)))
                     self.main_window.tableWidgetProfilePoints.setItem(row_position, 1, QTableWidgetItem(str(round(x))))
                     self.main_window.tableWidgetProfilePoints.setItem(row_position, 2, QTableWidgetItem(str(round(y))))
                     self.main_window.tableWidgetProfilePoints.setRowHeight(row_position, 20)
-                    point_number += 1
 
                 # Enable or disable buttons based on the presence of points
                 self.toggle_buttons(self.main_window.tableWidgetProfilePoints.rowCount() > 0)
+
 
     def toggle_buttons(self, enable):
         """Enable or disable profile point editing buttons.
@@ -1105,13 +1284,13 @@ class Profiling:
             picked_scatter = event.artist
             # Indices of the picked points, could be multiple if overlapping
             ind = event.ind[0]  # Let's handle the first picked point for simplicity
-            profile_key = picked_scatter.get_gid()
+            field = picked_scatter.get_gid()  # Assuming GID corresponds to field name
             # Determine the color of the picked point
             facecolors = picked_scatter.get_facecolors().copy()
-            original_color = colors.to_rgba(self.original_colors[profile_key])  # Assuming you have a way to map indices to original colors
+            original_color = colors.to_rgba(self.original_colors[field])  # Map field to original colors
 
             # Toggle selection state
-            self.selected_points[profile_key][ind] = not self.selected_points[profile_key][ind]
+            self.selected_points[field][ind] = not self.selected_points[field][ind]
 
             num_points = len(picked_scatter.get_offsets())
             # If initially, there's only one color for all points,
@@ -1119,7 +1298,7 @@ class Profiling:
             if len(facecolors) == 1 and num_points > 1:
                 facecolors = np.tile(facecolors, (num_points, 1))
 
-            if not self.selected_points[profile_key][ind]:
+            if not self.selected_points[field][ind]:
                 # If already grey (picked)
                 # Set to original color
                 facecolors[ind] = colors.to_rgba(original_color)
@@ -1131,6 +1310,7 @@ class Profiling:
             # Update the scatter plot sizes
             picked_scatter.set_sizes(np.full(num_points, style.marker_size))
             self.fig.canvas.draw_idle()
+
 
     def toggle_edit_mode(self):
         """Toggle the profile editing mode.
@@ -1147,22 +1327,9 @@ class Profiling:
         """
         self.edit_mode_enabled = not self.edit_mode_enabled
 
-    def toggle_point_visibility(self):
-        """Toggle visibility of selected profile points.
-
-        Hides or shows selected profile points on the plot without removing them from the data.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
-        for profile_key in self.selected_points.keys():
-            # Retrieve the scatter object using its profile key
-            scatter, barlinecol = self.get_scatter_errorbar_by_gid(profile_key)
+        for field in self.selected_points.keys():
+            # Retrieve the scatter object using its field name
+            scatter, barlinecol = self.get_scatter_errorbar_by_gid(field)
             if scatter is None:
                 continue
 
@@ -1181,7 +1348,7 @@ class Profiling:
                 line_colors = np.tile(line_colors, (num_points, 1))
 
             # Iterate through each point to adjust visibility based on selection state
-            for idx, selected in enumerate(self.selected_points[profile_key]):
+            for idx, selected in enumerate(self.selected_points[field]):
                 if selected:
                     if facecolors[idx][-1] > 0:
                         # Toggle visibility by setting alpha to 0 (invisible) or back to its original value
@@ -1193,6 +1360,54 @@ class Profiling:
             barlinecol.set_colors(line_colors)
             scatter.set_facecolors(facecolors)
         self.fig.canvas.draw_idle()
+
+    def toggle_point_visibility(self):
+        """Toggle visibility of selected profile points.
+
+        Hides or shows selected profile points on the plot without removing them from the data.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
+        for field in self.selected_points.keys():
+            # Retrieve the scatter object using its field name
+            scatter, barlinecol = self.get_scatter_errorbar_by_gid(field)
+            if scatter is None:
+                continue
+
+            facecolors = scatter.get_facecolors().copy()
+            num_points = len(scatter.get_offsets())
+
+            # If initially, there's only one color for all points, expand the colors array
+            if len(facecolors) == 1 and num_points > 1:
+                facecolors = np.tile(facecolors, (num_points, 1))
+
+            # Get the current array of colors (RGBA) for the LineCollection
+            line_colors = barlinecol.get_colors().copy()
+
+            # Ensure the color array is not a single color by expanding it if necessary
+            if len(line_colors) == 1 and len(barlinecol.get_segments()) > 1:
+                line_colors = np.tile(line_colors, (num_points, 1))
+
+            # Iterate through each point to adjust visibility based on selection state
+            for idx, selected in enumerate(self.selected_points[field]):
+                if selected:
+                    if facecolors[idx][-1] > 0:
+                        # Toggle visibility by setting alpha to 0 (invisible) or back to its original value
+                        new_alpha = 0.0
+                    else:
+                        new_alpha = 1.0  # Assume original alpha was 1.0
+                    line_colors[idx][-1] = new_alpha  # Set alpha to 0 for the line at index idx
+                    facecolors[idx][-1] = new_alpha  # Hide/unhide scatter
+            barlinecol.set_colors(line_colors)
+            scatter.set_facecolors(facecolors)
+        self.fig.canvas.draw_idle()
+
 
     def get_scatter_errorbar_by_gid(self, gid):
         """Retrieve scatter and errorbar objects by group ID.
@@ -1216,10 +1431,10 @@ class Profiling:
         return None
 
     def add_field_to_listview(self, field=None, update=True):
-        """Add selected fields to the profile list view.
+        """Add selected fields to the profile list view and update the fields per subplot."""
+        # Get the currently selected subplot index
+        selected_subplot = self.main_window.spinBoxProfileSelectedSubplot.value() - 1  # 0-based index
 
-        Opens a dialog to select fields from available data fields and adds them to the list view.
-        """
         # Get available fields (assuming you have a method to retrieve them)
         if not field:
             field = self.main_window.comboBoxProfileField.currentText()
@@ -1227,27 +1442,25 @@ class Profiling:
             QMessageBox.warning(self.main_window, 'No Fields', 'There are no available fields to add.')
             return
 
-        else:
-            # Add selected field(s) to the list view
-            model = self.main_window.listViewProfile.model()
-            if not model:
-                model = QStandardItemModel()
-                self.main_window.listViewProfile.setModel(model)
-            existing_fields = [model.item(i).text() for i in range(model.rowCount())]
+        # Add selected field to the fields_per_subplot
+        if selected_subplot not in self.fields_per_subplot:
+            self.fields_per_subplot[selected_subplot] = []
 
-            if field not in existing_fields:
-                model.appendRow(QStandardItem(field))
-                
-                if update:# Update the plot
-                    self.plot_profiles()
-            else:
-                return
+        if field not in self.fields_per_subplot[selected_subplot]:
+            self.fields_per_subplot[selected_subplot].append(field)
+            # Update the list view
+            self.update_listview_with_fields(self.fields_per_subplot[selected_subplot])
+            if update:
+                # Update the plot
+                self.plot_profiles()
+        else:
+            QMessageBox.information(self.main_window, 'Field Exists', f'The field "{field}" is already in the list.')
 
     def remove_field_from_listview(self):
-        """Remove selected fields from the profile list view.
+        """Remove selected fields from the profile list view and update the fields per subplot."""
+        # Get the currently selected subplot index
+        selected_subplot = self.main_window.spinBoxProfileSelectedSubplot.value() - 1  # 0-based index
 
-        Removes the selected field(s) from the list view.
-        """
         # Get selected indices
         selection_model = self.main_window.listViewProfile.selectionModel()
         indexes = selection_model.selectedIndexes()
@@ -1256,10 +1469,65 @@ class Profiling:
             QMessageBox.warning(self.main_window, 'No Selection', 'Please select a field to remove.')
             return
 
-        # Remove selected items
+        # Remove selected items from the fields_per_subplot and list view
         model = self.main_window.listViewProfile.model()
+        fields_removed = []
         for index in sorted(indexes, reverse=True):
+            field = model.item(index.row()).text()
+            fields_removed.append(field)
             model.removeRow(index.row())
+
+        # Update fields_per_subplot
+        for field in fields_removed:
+            if field in self.fields_per_subplot.get(selected_subplot, []):
+                self.fields_per_subplot[selected_subplot].remove(field)
 
         # Update the plot
         self.plot_profiles()
+
+    def update_num_subplots(self):
+        num_subplots = self.main_window.spinBoxProfileNumSubplots.value()
+        # Adjust fields_per_subplot
+        existing_subplots = list(self.fields_per_subplot.keys())
+        if num_subplots < len(existing_subplots):
+            # Remove extra subplots
+            for idx in existing_subplots:
+                if idx >= num_subplots:
+                    del self.fields_per_subplot[idx]
+        elif num_subplots > len(existing_subplots):
+            # Add new subplots with empty fields
+            for idx in range(len(existing_subplots), num_subplots):
+                self.fields_per_subplot[idx] = []
+
+        # Ensure selected subplot is within the new range
+        selected_subplot = self.main_window.spinBoxProfileSelectedSubplot.value()
+        if selected_subplot > num_subplots:
+            self.main_window.spinBoxProfileSelectedSubplot.setValue(num_subplots)
+
+        # Update the plot
+        self.plot_profiles()
+
+    def update_listview_with_fields(self, fields):
+        """Update the list view with the given list of fields.
+
+        Parameters
+        ----------
+        fields : list of str
+            The list of field names to display in the list view.
+
+        Returns
+        -------
+        None
+        """
+        model = self.main_window.listViewProfile.model()
+        if not model:
+            model = QStandardItemModel()
+            self.main_window.listViewProfile.setModel(model)
+        else:
+            model.clear()  # Clear existing items
+
+        for field in fields:
+            item = QStandardItem(field)
+            model.appendRow(item)
+
+    

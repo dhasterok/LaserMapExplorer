@@ -345,17 +345,19 @@ class Profiling:
             else:
                 self.main_window.comboBoxProfileList.setCurrentIndex(0)  # Reset to 'Create New Profile'
         else:
-            # plot existing profile and load profile metadata from dictionary
-            self.profile_name = profile_name
-            self.plot_existing_profile(self.main_window.plot)
-            profile = self.profiles[self.main_window.sample_id][self.profile_name]
-            self.main_window.comboBoxProfileSort.setCurrentText(profile.sort)
-            self.main_window.lineEditPointRadius.setText(profile.radius)
-            self.main_window.lineEditPointRadius.setText(profile.y_axis_thresh)
-            self.main_window.lineEditIntDist.setText(profile.int_dist)
-            self.main_window.comboBoxPointType.setCurrentText(profile.point_error)
-            self.plot_profiles()
-            self.update_table_widget()
+            if profile_name != self.profile_name: #if new profile is selected
+                self.clear_profiles()  # clear profiling plots and  contents
+                # plot existing profile and load profile metadata from dictionary
+                self.profile_name = profile_name
+                self.plot_existing_profile(self.main_window.plot)
+                profile = self.profiles[self.main_window.sample_id][self.profile_name]
+                self.main_window.comboBoxProfileSort.setCurrentText(profile.sort)
+                self.main_window.lineEditPointRadius.setText(profile.radius)
+                self.main_window.lineEditPointRadius.setText(profile.y_axis_thresh)
+                self.main_window.lineEditIntDist.setText(profile.int_dist)
+                self.main_window.comboBoxPointType.setCurrentText(profile.point_error)
+                self.plot_profiles()
+                self.update_table_widget()
 
     def cart_to_dist(self, pixel: int, direction='y') -> float:
         """Convert pixel units to distance units.
@@ -961,12 +963,13 @@ class Profiling:
         # Now, plot the fields
         for subplot_idx, ax in enumerate(axes):
             fields_in_subplot = self.fields_per_subplot.get(subplot_idx, [])
-            if not fields_in_subplot:
-                continue  # No fields to plot in this subplot
-
             # Update the list view if this is the selected subplot
             if subplot_idx == selected_subplot - 1:
                 self.update_listview_with_fields(fields_in_subplot)
+            if not fields_in_subplot:
+                continue  # No fields to plot in this subplot
+
+
 
             for field_idx, field in enumerate(fields_in_subplot):
                 # Get the points for the field
@@ -1186,6 +1189,17 @@ class Profiling:
                 self.main_window.toolButtonPlotProfile.setChecked(False)
                 self.main_window.toolButtonPointMove.setEnabled(False)
                 self.main_window.toolButtonProfileInterpolate.setChecked(False)
+                # Block signals
+                self.main_window.spinBoxProfileSelectedSubplot.blockSignals(True)
+                self.main_window.spinBoxProfileNumSubplots.blockSignals(True)
+                # Change the value programmatically
+                self.main_window.spinBoxProfileSelectedSubplot.setValue(1)
+                self.main_window.spinBoxProfileNumSubplots.setValue(1)
+                # Unblock signals
+                self.main_window.spinBoxProfileSelectedSubplot.blockSignals(False)
+                self.main_window.spinBoxProfileNumSubplots.blockSignals(False)
+                self.main_window.comboBoxProfileFieldType.setCurrentIndex(0)
+                self.main_window.comboBoxProfileFieldType.setCurrentIndex(0)
 
     def calculate_distance(self, point1, point2):
         """Calculate the Euclidean distance between two points.

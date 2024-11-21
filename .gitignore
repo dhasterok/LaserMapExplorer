@@ -76,6 +76,7 @@ illustrator
 dist
 build
 test
+blockly/node_modules
 
 # Binaries
 # --------

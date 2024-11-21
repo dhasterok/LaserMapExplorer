@@ -16,14 +16,21 @@ import numpy as np
 class Profile:
     def __init__(self,name,sort,radius,thresh,int_dist, point_error):
         self.name = name  # name given by user for the profile
-        self.points = {}  # stores points (x,y, circ_value, interpolate)
+        # points, i_points stores profile point information in format: {field: [point1, point2, ...]}.
+        # each point is a tuple consisting of (x, y, circ_val, interpolate)
+        self.points = {}  
         self.i_points = {}
+        # scatter_points holds scatter plots points information in format: {(field,view):[scatter1, scatter2,...]}
+        # each scatter point is a pg.ScatterPlotItem
+        self.scatter_points = {} 
+        
+        # initialise profile point properties
         self.sort = sort
         self.radius = radius
         self.y_axis_thresh = thresh
         self.int_dist = int_dist
         self.point_error = point_error
-        self.scatter_points = {} # (scatter_value, interpolate)
+        
         
 
 class Profiling:
@@ -40,7 +47,7 @@ class Profiling:
         self.main_window = main_window
         # Initialize other necessary attributes
         # Initialize variables and states as needed
-        self.profiles = {}
+        self.profiles = {} # holds profile information in format:  {sample_id: {profile_name:Profile instance}} 
         self.point_selected = False  # move point button selected
         self.point_index = -1              # index for move point
         self.all_errorbars = []       #stores points of profiles
@@ -381,7 +388,7 @@ class Profiling:
             return round(dist * self.data.dy)
 
     def plot_profile_scatter(self, event, field , view, plot, x, y, x_i, y_i):
-        """Plot a scatter point for profile at the clicked position.
+        """Plot/move a scatter point for profile at the clicked position.
 
         Computes the profile value by averaging concentrations over a specified radius around the clicked point and plots it.
 
@@ -433,19 +440,7 @@ class Profiling:
         elif event.button() == QtCore.Qt.LeftButton and not (self.main_window.toolButtonPlotProfile.isChecked()) and self.main_window.toolButtonPointMove.isChecked():
             # move point
             if self.point_selected:
-                # Add the scatter item to all plots and save points in profile
-                for (field,view), (_, plot,  array) in self.main_window.lasermaps.items():
-                    plot.removeItem(prev_scatter)
-                    if self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #ensure points within boundaries of plot
-                        # remove selected point
-                        prev_scatter = scatter_points[(field,view)][self.point_index]
-                        plot.removeItem(prev_scatter)
-
-                        # Create a scatter plot item at the clicked position
-                        scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
-                        scatter.setZValue(1e9)
-                        plot.addItem(scatter)
-                        scatter_points[self.point_index] = scatter
+                self.plot_scatter_points(scatter_points, x, y,point_index=self.point_index)
                 self.compute_profile_points(profile_points, radius, x, y, x_i, y_i, self.point_index)
                 self.point_index = -1              # reset index 
                 if self.main_window.toolButtonProfileInterpolate.isChecked():  # reset interpolation if selected
@@ -466,19 +461,9 @@ class Profiling:
                 if not (round(mindist * self.array_x / self.data.x_range) < 50):
                     self.point_selected = True
         elif event.button() == QtCore.Qt.LeftButton:  # plot profile scatter
-            # Add the scatter item to all plots and save points in profile
-            for (field,view), (_, plot,  array) in self.main_window.lasermaps.items():
-                circ_val = []
-                if self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #ensure points within boundaries of plot
-                    # Create a scatter plot item at the clicked position
-                    scatter = ScatterPlotItem([x], [y], symbol='+', size=10)
-                    scatter.setZValue(1e9)
-                    plot.addItem(scatter)
-                    # add scatter point
-                    if (field, view) in scatter_points:
-                        scatter_points[(field,view)].append(scatter)
-                    else:
-                        scatter_points[(field,view)]= [(scatter)]
+            # Add the scatter item to all plots
+            self.plot_scatter_points(self,scatter_points, x, y)
+            # compute profile value for all fields 
             self.compute_profile_points(profile_points, radius, x, y, x_i, y_i)
             # switch to profile tab
             self.main_window.tabWidget.setCurrentIndex(self.main_window.bottom_tab['profile'])
@@ -486,7 +471,43 @@ class Profiling:
             self.plot_profiles(fields=[field])  # Plot averaged profile value on profiles plots with error bars
             self.update_table_widget()
 
-    
+    def plot_scatter_points(self,scatter_points, x, y,point_index = None, symbol='+', size=10):
+        """Plots scatter point in all plots in canvas (Single view/ Multi view)
+
+        Determines iterates through all plot items in self.lasermaps and add scatter points to the plots in the current view
+
+        Parameters
+        ----------
+        scatter_points : dict
+            Dictionary to store scatter points.
+        x : float
+            The x-coordinate of the point.
+        y : float
+            The y-coordinate of the point.
+        point_index : int, optional
+            The index of the point if updating an existing point.
+
+        Returns
+        -------
+        None
+        """
+        for (field,view), (_, plot,  array) in self.main_window.lasermaps.items():
+            canvas_view  =self.main_window.canvasWindow.currentIndex() #check if plot on single view or multi view
+            if view == canvas_view and self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #ensure points within boundaries of plot
+                # Create a scatter plot item at the clicked position
+                scatter = ScatterPlotItem([x], [y], symbol=symbol, size=size)
+                scatter.setZValue(1e9)
+                plot.addItem(scatter)
+                if point_index is None: # remove selected point from list (point is being moved) before adding new point
+                    prev_scatter = scatter_points[(field,view)][self.point_index]
+                    plot.removeItem(prev_scatter)
+                    scatter_points[(field,view)][self.point_index] = scatter #add new scatter point to list
+                else:
+                    # add scatter point to scatter_points dictionary
+                    if (field, view) in scatter_points:
+                        scatter_points[(field,view)].append(scatter)
+                    else:
+                        scatter_points[(field,view)]= [scatter]
 
     def compute_profile_points(self, profile_points, radius, x, y, x_i, y_i, point_index=None):
         """Compute profile points by averaging values within a radius.
@@ -588,17 +609,20 @@ class Profiling:
         """
         profile_points = self.profiles[self.main_window.sample_id][self.profile_name].points
         i_profile_points = self.profiles[self.main_window.sample_id][self.profile_name].i_points
-
+        scatter_points = self.profiles[self.sample_id][self.profile_name].scatter_points
+        
         if self.main_window.toolButtonProfileInterpolate.isChecked():
             interpolate = True
-            for (field, view), points in profile_points.items():
+            for field, points in profile_points.items(): #iterate through profile points
                 for i in range(len(points) - 1):
-                    start_point = points[i]
+                    # define start and end_point to interpolate between two sequential points in profile
+                    start_point = points[i] 
                     end_point = points[i + 1]
+                    # add the point to interpolate profile list for which is stored in i_profile_points dict with field as key and list as value
                     if i == 0:
-                        i_profile_points[(field, view)] = [start_point]
+                        i_profile_points[field] = [start_point]
                     else:
-                        i_profile_points[(field, view)].append(start_point)
+                        i_profile_points[field].append(start_point)
 
                     # Calculate the distance between start and end points
                     dist = self.calculate_distance(start_point, end_point)
@@ -611,35 +635,17 @@ class Profiling:
                     dy = (end_point[1] - start_point[1]) / dist
 
                     for t in range(0, num_interpolations + 1):
+                        # find cordinates of interpolated point 
                         x = start_point[0] + t * interpolation_distance * dx
                         y = start_point[1] + t * interpolation_distance * dy
 
                         x_i = self.dist_to_cart(x, 'x')  # index points
                         y_i = self.dist_to_cart(y, 'y')
-
-                        # Add the scatter item to all other plots and save points in profile
-                        _, p, array = self.main_window.lasermaps[(field, view)]
-                        if (v == self.main_window.canvasWindow.currentIndex()) and (self.array_x == array.shape[1]) and (self.array_y == array.shape[0]):  # only add scatters to other lasermaps of same sample
-                            # Create a scatter plot item at the clicked position
-                            scatter = ScatterPlotItem([x], [y], symbol='+', size=5)
-                            scatter.setZValue(1e9)
-                            p.addItem(scatter)
-                            # Find all points within the specified radius
-                            circ_val = []
-
-                            p_radius_y = self.dist_to_cart(radius, 'y')  # pixel radius in pixels y direction
-                            p_radius_x = self.dist_to_cart(radius, 'x')  # pixel radius in pixels x direction
-
-                            for i in range(max(0, y_i - p_radius_y), min(self.array_y, y_i + p_radius_y + 1)):
-                                for j in range(max(0, x_i - p_radius_x), min(self.array_x, x_i + p_radius_x + 1)):
-                                    if self.calculate_distance(self.cart_to_dist(y_i - i) ** 2, self.cart_to_dist(x_i - j) ** 2) <= radius:
-                                        value = array[i, j]
-                                        circ_val.append(value)
-
-                            if (field, view) in i_profile_points:
-                                i_profile_points[(field, view)].append((x, y, circ_val, scatter, interpolate))
-
-                    i_profile_points[(field, view)].append(end_point)
+                        # Add the scatter item to all plots
+                        self.plot_scatter_points(self,scatter_points, x, y)
+                        # compute profile value for all fields 
+                        self.compute_profile_points(profile_points, radius, x, y, x_i, y_i)
+                    i_profile_points[field)].append(end_point)
             # After interpolation, update the plot and table widget
             self.plot_profiles(interpolate=interpolate)
         else:

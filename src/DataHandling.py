@@ -211,6 +211,9 @@ class SampleObj:
 
         What is not reset?
         """        
+        if config.debug_data:
+            print("reset_data")
+
         # load data
         sample_df = pd.read_csv(self.file_path, engine='c')
         sample_df = sample_df.loc[:, ~sample_df.columns.str.contains('^Unnamed')]  # Remove unnamed columns
@@ -491,6 +494,9 @@ class SampleObj:
             If a mask is provided, its length must match the height of `processed_data`, and the number of `True` values
             in the mask must match the number of rows in `array`.
         """
+        if config.debug_data:
+            print(f"add_columns") 
+
         # Ensure column_names is a list, even if adding a single column
         if isinstance(column_names, str):
             column_names = [column_names]
@@ -573,6 +579,9 @@ class SampleObj:
         ValueError
             Raises an error if the column is not a member of the AttributeDataFrame.
         """        
+        if config.debug_data:
+            print(f"delete_column") 
+
         # Check if the column exists
         if column_name not in self.processed_data.columns:
             raise ValueError(f"Column {column_name} does not exist in the DataFrame.")
@@ -603,6 +612,9 @@ class SampleObj:
         
     def swap_xy(self):
         """Swaps data in a SampleObj."""        
+        if config.debug_data:
+            print(f"swap_xy") 
+
         self.is_swapped = not self.is_swapped
 
         if self.is_swapped:
@@ -626,6 +638,9 @@ class SampleObj:
         df : pandas.DataFrame
             data frame to swap X and Y coordinates
         """
+        if config.debug_data:
+            print(f"_swap_xy") 
+
         xtemp = df['Y']
         df['Y'] = df['X']
         df['X'] = xtemp
@@ -637,6 +652,9 @@ class SampleObj:
 
         Recalculates X and Y for a dataframe
         """
+        if config.debug_data:
+            print(f"swap_resolution") 
+
         parent = self.parent
 
         X = round(self.raw_data['X']/self.dx)
@@ -667,7 +685,10 @@ class SampleObj:
         """Reset the data to the new bounds.
 
         _extended_summary_
-        """        
+        """
+        if config.debug_data:
+            print(f"reset_crop") 
+
         # Need to update to keep computed columns?
         self.reset_data()
 
@@ -683,6 +704,9 @@ class SampleObj:
         analyte_2 : str
             Analyte field to be used as denominator of ratio.
         """
+        if config.debug_data:
+            print(f"compute_ratio") 
+
         # Create a mask where both analytes are positive
         mask = (self.processed_data[analyte_1] > 0) & (self.processed_data[analyte_2] > 0)
 
@@ -699,7 +723,10 @@ class SampleObj:
         """Clusters data for use with data preprocessing
 
         _extended_summary_
-        """        
+        """
+        if config.debug_data:
+            print(f"cluster_data") 
+
         # Step 1: Clustering
         # ------------------
         # Select columns where 'data_type' attribute is 'analyte'
@@ -772,6 +799,9 @@ class SampleObj:
             processed_data has not yet been initialized.  processed_data should be created when the sample is initialized and prep_data is
             run for the first time.
         """ 
+        if config.debug_data:
+            print(f"prep_data") 
+
         attribute_df = None
         analyte_columns = []
         ratio_columns = []
@@ -899,7 +929,10 @@ class SampleObj:
         -------
         int
             Returns the optimal number of k-means clusters.
-        """        
+        """
+        if config.debug_data:
+            print(f"k_optimal_clusters") 
+
         inertia = []
 
         # clip outliers and make entirely positive
@@ -933,7 +966,7 @@ class SampleObj:
         # 1 because it starts at 0 and 1 because it is the second derivative
         optimal_k = np.argmax(second_derivative) + 2  # Example heuristic
 
-        if config.debug:
+        if config.debug_plot:
             # Plot inertia
             fig, ax1 = plt.subplots()
 
@@ -978,9 +1011,12 @@ class SampleObj:
 
         Returns
         -------
-        _type_
-            _description_
-        """        
+        numpy.ndarray
+            array with outliers removed
+        """
+        if config.debug_data:
+            print(f"outlier_detection\n  percentiles: {[lq, uq, d_lq, d_uq]}\n  compositional: {compositional}\n  max_val: {max_val}")
+
         # Set a small epsilon to handle zeros (if compositional data)
         epsilon = 1e-10 if compositional else 0
 
@@ -1033,7 +1069,7 @@ class SampleObj:
 
         return clipped_data
 
-    def transform_array(self, array, negative_method, shift_percentile=None):
+    def transform_array(self, array, negative_method):
         """
         Negative and zero handling with clustering for noise detection.
 
@@ -1048,6 +1084,9 @@ class SampleObj:
         numpy.ndarray
             Transformed data
         """
+        if config.debug_data:
+            print(f"transform_array:  negative_method: {negative_method}")
+
         match negative_method.lower():
             case 'ignore negatives':
                 # do nothing, the values remain unchanged
@@ -1092,6 +1131,8 @@ class SampleObj:
         update : bool, optional
             Update the scale information of the data, by default False
         """ 
+        if config.debug_data:
+            print(f"update_norm:  field: {field},  norm: {norm}")
 
         if field is not None: #if normalising single analyte
             self.processed_data.set_attribute(field,'norm',norm)
@@ -1125,6 +1166,8 @@ class SampleObj:
         pandas.DataFrame
             Processed data for plotting. This is only returned if analysis_type is not 'laser' or 'hist'.
         """
+        if config.debug_data:
+            print(f"get_map_data\n  field type: {field_type}\n  field: {field}\n  norm: {norm}\n  processed: {processed}")
         # ----begin debugging----
         # print('[get_map_data] sample_id: '+sample_id+'   field_type: '+field_type+'   field: '+field)
         # ----end debugging----
@@ -1205,6 +1248,9 @@ class SampleObj:
         bool
             Analytes included from processed data
         """
+        if config.debug_data:
+            print("get_processed_data")
+
         if self.sample_id == '':
             return
 

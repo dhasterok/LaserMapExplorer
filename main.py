@@ -515,7 +515,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxCorrelationMethod.activated.connect(self.correlation_method_callback)
         self.checkBoxCorrelationSquared.stateChanged.connect(self.correlation_squared_callback)
 
-        self.comboBoxNegativeMethod.addItems(['Ignore negatives', 'Minimum positive', 'Gradual shift', 'Yeo-Johnson transform'])
+        self.comboBoxOutlierMethod.addItems(['set quantiles','quantiles and distance', 'Chauvenet criterion', 'log(n>x) inflection'])
+        self.comboBoxOutlierMethod.activated.connect(self.update_outlier_removal)
+
+        self.comboBoxNegativeMethod.addItems(['ignore negatives', 'minimum positive', 'gradual shift', 'Yeo-Johnson transform'])
         self.comboBoxNegativeMethod.activated.connect(self.update_neg_handling)
 
         # Selecting analytes
@@ -1869,6 +1872,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_labels()
         self.update_filter_values()
         self.update_SV()
+
+    def update_outlier_removal(self):
+        """Removes outliers from one or all analytes."""        
+        pass
 
     def update_plot(self,bin_s=True, axis=False, reset=False):
         """"Update plot

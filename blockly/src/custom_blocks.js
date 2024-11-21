@@ -891,8 +891,7 @@ Blockly.Blocks['data_filtering'] = data_filtering;
 
 const correlation_analysis = {
     init: function() {
-        this.appendDummyInput()
-            .setCheck('String')
+        this.appendDummyInput('VARIABLE1')
             .appendField('Correlation');
         this.appendDummyInput()
             .appendField('Method')

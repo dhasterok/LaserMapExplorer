@@ -6,7 +6,7 @@
     <title>Blockly Demo</title>
 </head>
 <body>
-    <div id="blocklyDiv" style="height: 600px; width: 100%;"></div>
+    <div id="blocklyDiv" style="height: 1024px; width: 100%;"></div>
     <xml id="toolbox" style="display: none">
         <!-- Variables -->
         <category name="Variables" custom="VARIABLE" colour="330">
@@ -18,7 +18,7 @@
             <block type="controls_repeat_ext"></block>
             <block type="controls_for"></block>
             <block type="controls_whileUntil"></block>
-            <block type="iterate_sample_ids"></block> <!-- Custom Loop Block -->
+            
         </category>
         <!-- Logic -->
         <category name="Logic" colour="210">
@@ -40,19 +40,29 @@
             <block type="properties"></block>
             <block type="select_samples"></block> <!-- Custom Block for Selecting Sample IDs -->
             <block type="select_analytes"></block>
+            <block type="iterate_sample_ids"></block> <!-- Custom Loop Block -->
+            <block type="properties_v1"></block> <!-- Custom Loop Block -->
+            <block type="data_scaling"></block> <!-- Custom Loop Block -->
+            <block type="autoscale_settings"></block> <!-- Custom Loop Block -->
+            <block type="data_filtering"></block> <!-- Custom Loop Block -->
         </category>
         <!-- Analysis -->
         <category name="Analysis" colour="160">
             <block type="scatter_and_heatmaps"></block>
+            <block type="scatter_plot_settings"></block>
+            <block type="heatmap_settings"></block>
+            <block type="profiling"></block>
+            <block type="clustering"></block>
+            <block type="correlation_analysis"></block>
         </category>
         <!-- Custom Blocks -->
-        <category name="Custom Blocks" colour="60">
+        <category name="I/O" colour="60">
             <block type="load_directory"></block>
-            <block type="select_samples"></block>
         </category>
         <!-- Plot Category -->
         <category name="Plot" colour="285">
             <block type="plot"></block> 
+            <block type="export_data"></block> 
         </category>
         <!-- Style Category -->
         <category name="Style" colour="285">
@@ -60,7 +70,9 @@
             <block type="axis_and_labels"></block>
             <block type="annot_and_scale"></block>
             <block type="marks_and_lines"></block>
-            <block type="coloring"></block>            
+            <block type="coloring"></block>    
+            <block type="x_axis_settings"></block> 
+            <block type="y_axis_settings"></block> 
         </category>
     </xml>
     <!-- Load qwebchannel.js -->

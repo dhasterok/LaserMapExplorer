@@ -1069,6 +1069,38 @@ class SampleObj:
 
         return clipped_data
 
+    def clip_outliers(self, array, outlier_method, ql, qu):
+        if config.debug_data:
+            print(f"clip_outliers, outlier_method: {outlier_method}")
+
+        t_array = np.copy(array)
+
+        match outlier_method.lower():
+            case 'set quantiles':
+                pl = np.percentile(t_array, ql)
+                pu = np.percentile(t_array, qu)
+
+                t_array[t_array > pl] = pl
+                t_array[t_array > pu] = pu
+                
+            case 'quantiles and distance':
+                pass
+            case 'Chauvenet criterion':
+                mask = chauvenet_criterion(array, threshold=1)
+                if not any(mask):
+                    return t_array
+
+                min_value = np.min(t_array[mask])
+                max_value = np.max(t_array[mask])
+
+                t_array[~mask & (t_array < min_value)] = min_value
+                t_array[~mask & (t_array > max_value)] = max_value
+
+            case 'log(n>x) inflection':
+                pass
+
+        return t_array
+
     def transform_array(self, array, negative_method):
         """
         Negative and zero handling with clustering for noise detection.

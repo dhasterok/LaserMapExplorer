@@ -15,7 +15,7 @@ class QTextEditLogger:
         self.dockLogger = QDockWidget("Logger", parent)
         self.dockLogger.setWidget(self.text_edit)
         self.dockLogger.setFloating(True)  # Start as a floating widget
-        parent.addDockWidget(Qt.BottomDockWidgetArea, self.dockLogger)
+        parent.addDockWidget(Qt.RightDockWidgetArea, self.dockLogger)
 
         # Example print statements
         print("This message will appear in the floating QDockWidget!")

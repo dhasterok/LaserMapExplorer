@@ -5193,7 +5193,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         return canvas, self.data[self.sample_id].processed_data[method]
 
-    def plot_cluster_performance(self):
+    def cluster_performance_plot(self):
         """Plots used to estimate the optimal number of clusters
 
         1. Elbow Method

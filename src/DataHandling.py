@@ -180,12 +180,19 @@ class SampleObj:
         | 'cluster_mask' : (MaskObj) -- mask created from selected or inverse selected cluster groups.  Once this mask is set, it cannot be reset unless it is turned off, clustering is recomputed, and selected clusters are used to produce a new mask.
         | 'mask' : () -- combined mask, derived from filter_mask & 'polygon_mask' & 'crop_mask'
     """    
-    def __init__(self, sample_id, file_path, negative_method):
+    def __init__(self, sample_id, file_path, outlier_method, negative_method):
 
         self.sample_id = sample_id
         self.file_path = file_path
         self._negative_method = negative_method
+        self._outlier_method = negative_method
         self._updating = False
+
+        self._default_lower_bound = 0.005
+        self._default_upper_bound = 0.995
+
+        self._default_difference_lower_bound= 0.005
+        self._default_difference_upper_bound= 0.995
 
         # filter dataframe
         self._filter_df = pd.DataFrame()
@@ -245,37 +252,6 @@ class SampleObj:
         self.x = self.orig_x = self.raw_data['X']
         self.y = self.orig_y = self.raw_data['Y']
 
-        # set selected_analytes to columns excluding X and Y (future-proofed)
-        #self.selected_analytes = self.raw_data.columns[2:].tolist()  # Skipping first two columns
-        coordinate_columns = self.raw_data.match_attribute(attribute='data_type',value='coordinate')
-        self.raw_data.set_attribute(coordinate_columns, 'units', None)
-        self.raw_data.set_attribute(coordinate_columns, 'use', False)
-
-        analyte_columns = self.raw_data.match_attribute(attribute='data_type',value='analyte')
-        self.raw_data.set_attribute(analyte_columns, 'units', None)
-        self.raw_data.set_attribute(analyte_columns, 'use', True)
-        # quantile bounds
-        self.raw_data.set_attribute(analyte_columns, 'lower_bound', 0.05)
-        self.raw_data.set_attribute(analyte_columns, 'upper_bound', 99.5)
-        # quantile bounds for differences
-        self.raw_data.set_attribute(analyte_columns, 'diff_lower_bound', 0.05)
-        self.raw_data.set_attribute(analyte_columns, 'diff_upper_bound', 99)
-        # linear/log scale
-        self.raw_data.set_attribute(analyte_columns, 'norm', 'linear')
-        self.raw_data.set_attribute(analyte_columns, 'auto_scale', True)
-
-        analyte_columns = self.raw_data.match_attribute(attribute='data_type',value='ratio')
-        self.raw_data.set_attribute(analyte_columns, 'units', None)
-        self.raw_data.set_attribute(analyte_columns, 'use', True)
-        # quantile bounds
-        self.raw_data.set_attribute(analyte_columns, 'lower_bound', 0.05)
-        self.raw_data.set_attribute(analyte_columns, 'upper_bound', 99.5)
-        # quantile bounds for differences
-        self.raw_data.set_attribute(analyte_columns, 'diff_lower_bound', 0.05)
-        self.raw_data.set_attribute(analyte_columns, 'diff_upper_bound', 99)
-        # linear/log scale
-        self.raw_data.set_attribute(analyte_columns, 'norm', 'linear')
-        self.raw_data.set_attribute(analyte_columns, 'auto_scale', True)
 
         # initialize X and Y axes bounds for plotting and cropping, initially the entire map
         self._xlim = [self.raw_data['X'].min(), self.raw_data['X'].max()]
@@ -299,15 +275,54 @@ class SampleObj:
             self.polygon_mask & \
             self.cluster_mask
 
+        # autoscale and negative handling
+        self.reset_data_handling()
+
+    def reset_data_handling(self):
+        """
+
+        _extended_summary_
+        """        
+        if config.debug_data:
+            print("reset_data_handling")
+
+        coordinate_columns = self.raw_data.match_attribute(attribute='data_type',value='coordinate')
+        self.raw_data.set_attribute(coordinate_columns, 'units', None)
+        self.raw_data.set_attribute(coordinate_columns, 'use', False)
+
+        analyte_columns = self.raw_data.match_attribute(attribute='data_type',value='analyte')
+        self.raw_data.set_attribute(analyte_columns, 'units', None)
+        self.raw_data.set_attribute(analyte_columns, 'use', True)
+        # quantile bounds
+        self.raw_data.set_attribute(analyte_columns, 'lower_bound', 0.05)
+        self.raw_data.set_attribute(analyte_columns, 'upper_bound', 99.5)
+        # quantile bounds for differences
+        self.raw_data.set_attribute(analyte_columns, 'diff_lower_bound', 0.05)
+        self.raw_data.set_attribute(analyte_columns, 'diff_upper_bound', 99)
+        # linear/log scale
+        self.raw_data.set_attribute(analyte_columns, 'norm', 'linear')
+        self.raw_data.set_attribute(analyte_columns, 'auto_scale', True)
+
+        analyte_columns = self.raw_data.match_attribute(attribute='data_type',value='ratio')
+        self.raw_data.set_attribute(analyte_columns, 'units', None)
+        self.raw_data.set_attribute(analyte_columns, 'use', True)
+        # quantile bounds
+        self.raw_data.set_attribute(analyte_columns, 'lower_bound', self._default_lower_bound)
+        self.raw_data.set_attribute(analyte_columns, 'upper_bound', self._default_upper_bound)
+        # quantile bounds for differences
+        self.raw_data.set_attribute(analyte_columns, 'diff_lower_bound', self._default_difference_lower_bound)
+        self.raw_data.set_attribute(analyte_columns, 'diff_upper_bound', self._default_difference_upper_bound)
+        # linear/log scale
+        self.raw_data.set_attribute(analyte_columns, 'norm', 'linear')
+        self.raw_data.set_attribute(analyte_columns, 'auto_scale', True)
+
         # cluster data
         # This determines the optimal number of clusters and creates cluster indicies that are used for preprocessing.
         # This should only need to be run once on the initial raw data, unless the set of used analytes changes.
+
         self.cluster_data()
 
-        # autoscale and negative handling
         self.prep_data()
-
-        # determine aspect ratio
     
     # def update_crop_mask(self):
     #     """Automatically update the crop_mask whenever crop bounds change."""
@@ -426,6 +441,30 @@ class SampleObj:
         return (self._y.nunique(), self._x.nunique())
 
     @property
+    def outlier_method(self):
+        """str: Method for predicting and clipping outliers."""        
+        return self._outlier_method
+
+    @outlier_method.setter
+    def outlier_method(self, method):
+        if method == self._outlier_method:
+            return
+        self._outlier_method = method
+        self.prep_data()
+
+    @property
+    def negative_method(self):
+        """str: Method for negative handling."""        
+        return self._negative_method
+
+    @negative_method.setter
+    def negative_method(self, method):
+        if method == self._negative_method:
+            return
+        self._negative_method = method
+        self.prep_data()
+
+    @property
     def crop_mask(self):
         """numpy.ndarray: Boolean mask used to crop the raw data. True values will be used."""
         return self._crop_mask
@@ -456,6 +495,12 @@ class SampleObj:
     def filter_df(self):
         """pandas.DataFrame : Field filters applied to data for masking."""
         return self._filter_df
+
+    # validation functions
+    def _is_valid_oulier_method(self, text):
+        """Validates if a the method is a valid string."""
+        return isinstance(text, str) and text.lower() in ['none', 'quantile criteria', 'quantile and distance criteria', 'chauvenet criterion', 'log(n>x) inflection']
+
 
     def add_columns(self, data_type, column_names, array, mask=None):
         """
@@ -552,9 +597,11 @@ class SampleObj:
             # Set quantile bounds for differences
             self.processed_data.set_attribute(column_name, 'diff_lower_bound', 0.05)
             self.processed_data.set_attribute(column_name, 'diff_upper_bound', 99)
+
             # Set min and max unmasked values
-            v_min = self.processed_data[column_name][mask].min() if mask is not None else self.processed_data[column_name].min()
-            v_max = self.processed_data[column_name][mask].max() if mask is not None else self.processed_data[column_name].max()
+            #v_min = self.processed_data[column_name][mask].min() if mask is not None else self.processed_data[column_name].min()
+            #v_max = self.processed_data[column_name][mask].max() if mask is not None else self.processed_data[column_name].max()
+
             # Set additional attributes
             self.processed_data.set_attribute(column_name, 'norm', 'linear')
             self.processed_data.set_attribute(column_name, 'auto_scale', False)
@@ -907,7 +954,10 @@ class SampleObj:
             for idx in np.unique(self.cluster_labels):
                 cluster_mask = (self.cluster_labels == idx)
 
-                transformed_data = self.outlier_detection(self.processed_data[col][cluster_mask], lq, uq, d_lq, d_uq, compositional, max_val)
+                transformed_data = self.clip_outliers(self.processed_data[col][cluster_mask], lq, uq, d_lq, d_uq)
+                self.processed_data.loc[cluster_mask, col] = transformed_data
+
+                transformed_data = self.quantile_and_difference(self.processed_data[col][cluster_mask], lq, uq, d_lq, d_uq, compositional, max_val)
                 self.processed_data.loc[cluster_mask, col] = transformed_data
 
     def k_optimal_clusters(self, data, max_clusters=int(10)):
@@ -989,101 +1039,47 @@ class SampleObj:
 
         return optimal_k
 
-    def outlier_detection(self, array, lq, uq, d_lq, d_uq, compositional, max_val):
-        """Outlier detection with cluster-based correction for negatives and compositional constraints, using percentile-based shifting.
+
+    def clip_outliers(self, array, outlier_method, pl=None, pu=None, dpl=None, dpu=None):
+        """Attempts to remove outliers to by a method selected by the user.
 
         Parameters
         ----------
         array : numpy.ndarray
-            _description_
-        lq : float
-            _description_
-        uq : float
-            _description_
-        d_lq : float
-            _description_
-        d_uq : float
-            _description_
-        compositional : bool
-            _description_
-        max_val : float
-            _description_
+            Data vector
+        outlier_method : str
+            Method for removing outliers
+        pl : float, optional
+            Lower percentile bound required by selected methods
+        pu : float, optional
+            Upper percentile bound required by selected methods
+        dpl : float, optional
+            Lower percentile bound for distances required by selected methods
+        dpu : float, optional
+            Upper percentile bound for distances required by selected methods
 
         Returns
         -------
         numpy.ndarray
-            array with outliers removed
-        """
-        if config.debug_data:
-            print(f"outlier_detection\n  percentiles: {[lq, uq, d_lq, d_uq]}\n  compositional: {compositional}\n  max_val: {max_val}")
-
-        # Set a small epsilon to handle zeros (if compositional data)
-        epsilon = 1e-10 if compositional else 0
-
-        # Shift data to handle zeros and negative values for log transformations
-        v0 = np.nanmin(array, axis=0) - epsilon
-        data_shifted = np.log10(array - v0 + epsilon)
-
-        # Quantile-based clipping (detect outliers)
-        lq_val = np.nanpercentile(data_shifted, lq, axis=0)
-        uq_val = np.nanpercentile(data_shifted, uq, axis=0)
-
-        # Sort data and calculate differences between adjacent points
-        sorted_indices = np.argsort(data_shifted, axis=0)
-        sorted_data = np.take_along_axis(data_shifted, sorted_indices, axis=0)
-        diff_sorted_data = np.diff(sorted_data, axis=0)
-
-        # Account for the size reduction in np.diff by adding a zero row at the beginning
-        diff_sorted_data = np.insert(diff_sorted_data, 0, 0, axis=0)
-        diff_array_uq_val = np.nanpercentile(diff_sorted_data, d_uq, axis=0)
-        diff_array_lq_val = np.nanpercentile(diff_sorted_data, d_lq, axis=0)
-
-        # Initialize array for results
-        clipped_data = np.copy(sorted_data)
-
-        # Apply upper bound clipping based on quantiles and differences
-        upper_cond = (sorted_data > uq_val) & (diff_sorted_data > diff_array_uq_val)
-        for col in range(sorted_data.shape[1]):
-            up_indices = np.where(upper_cond[:, col])[0]
-            if len(up_indices) > 0:
-                uq_outlier_index = up_indices[0]
-                clipped_data[uq_outlier_index:, col] = clipped_data[uq_outlier_index - 1, col]
-
-        # Apply lower bound clipping similarly based on lower quantile and difference
-        lower_cond = (sorted_data < lq_val) & (diff_sorted_data > diff_array_lq_val)
-        for col in range(sorted_data.shape[1]):
-            low_indices = np.where(lower_cond[:, col])[0]
-            if len(low_indices) > 0:
-                lq_outlier_index = low_indices[-1]
-                clipped_data[:lq_outlier_index + 1, col] = clipped_data[lq_outlier_index + 1, col]
-
-        # Restore original data order and undo the log transformation
-        clipped_data = np.take_along_axis(clipped_data, np.argsort(sorted_indices, axis=0), axis=0)
-        clipped_data = 10**clipped_data + v0 - epsilon
-
-        # Enforce upper bound (compositional constraint) to ensure data <= max_val
-        clipped_data = np.where(clipped_data > max_val, max_val, clipped_data)
-
-        # Ensure non-negative values and avoid exact zeros by shifting slightly if needed
-        clipped_data = np.maximum(clipped_data, epsilon)
-
-        return clipped_data
-
-    def clip_outliers(self, array, outlier_method, ql, qu):
+            Clipped data vector
+        """        
         if config.debug_data:
             print(f"clip_outliers, outlier_method: {outlier_method}")
 
         t_array = np.copy(array)
 
         match outlier_method.lower():
-            case 'set quantiles':
-                pl = np.percentile(t_array, ql)
-                pu = np.percentile(t_array, qu)
+            case 'none':
+                return t_array
 
-                t_array[t_array > pl] = pl
-                t_array[t_array > pu] = pu
+            case 'quantile criteria':
+                ql = np.percentile(t_array, pl)
+                qu = np.percentile(t_array, pu)
+
+                t_array[t_array > ql] = ql
+                t_array[t_array > qu] = qu
                 
-            case 'quantiles and distance':
+            case 'quantile and distance criteria':
                 pass
             case 'Chauvenet criterion':
                 mask = chauvenet_criterion(array, threshold=1)

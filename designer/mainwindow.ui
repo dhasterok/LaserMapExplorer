@@ -1229,7 +1229,7 @@
               <x>0</x>
               <y>0</y>
               <width>302</width>
-              <height>630</height>
+              <height>637</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_41">
@@ -1820,19 +1820,32 @@
                 </item>
                 <item>
                  <layout class="QFormLayout" name="formLayout_12">
-                  <item row="0" column="0">
-                   <widget class="QLabel" name="labelApplyAll">
+                  <item row="1" column="0">
+                   <widget class="QLabel" name="labelOutlierMethod">
+                    <property name="toolTip">
+                     <string/>
+                    </property>
                     <property name="text">
-                     <string>Apply to all</string>
+                     <string>Outlier method</string>
                     </property>
                    </widget>
                   </item>
-                  <item row="0" column="1">
-                   <widget class="QCheckBox" name="checkBoxApplyAll">
-                    <property name="text">
-                     <string/>
+                  <item row="1" column="1">
+                   <widget class="QComboBox" name="comboBoxOutlierMethod">
+                    <property name="toolTip">
+                     <string>Select method for removing outliers from analyte and ratio data</string>
                     </property>
                    </widget>
+                  </item>
+                  <item row="2" column="0">
+                   <widget class="QLabel" name="labelNegativeMethod">
+                    <property name="text">
+                     <string>Negative handling</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="1">
+                   <widget class="QComboBox" name="comboBoxNegativeMethod"/>
                   </item>
                   <item row="3" column="0">
                    <widget class="QLabel" name="labelQuantileBounds">
@@ -1950,32 +1963,61 @@
                     </item>
                    </layout>
                   </item>
-                  <item row="1" column="0">
-                   <widget class="QLabel" name="labelOutlierMethod">
-                    <property name="toolTip">
+                  <item row="0" column="1">
+                   <widget class="QCheckBox" name="checkBoxApplyAll">
+                    <property name="text">
                      <string/>
                     </property>
-                    <property name="text">
-                     <string>Detection method</string>
-                    </property>
                    </widget>
                   </item>
-                  <item row="2" column="0">
-                   <widget class="QLabel" name="labelNegativeMethod">
-                    <property name="text">
-                     <string>Negative handling</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="1">
-                   <widget class="QComboBox" name="comboBoxNegativeMethod"/>
-                  </item>
-                  <item row="1" column="1">
-                   <widget class="QComboBox" name="comboBoxOutlierMethod">
-                    <property name="toolTip">
-                     <string>Select method for removing outliers from analyte and ratio data</string>
-                    </property>
-                   </widget>
+                  <item row="0" column="0">
+                   <layout class="QHBoxLayout" name="horizontalLayout_49">
+                    <item>
+                     <widget class="QLabel" name="labelApplyAll">
+                      <property name="text">
+                       <string>Apply to all</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QToolButton" name="toolButtonOutlierReset">
+                      <property name="minimumSize">
+                       <size>
+                        <width>20</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>20</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                      <property name="toolTip">
+                       <string>Reset outlier/negative handling</string>
+                      </property>
+                      <property name="accessibleName">
+                       <string>axis reset</string>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">border : none;</string>
+                      </property>
+                      <property name="text">
+                       <string>Reset</string>
+                      </property>
+                      <property name="icon">
+                       <iconset resource="../resources.qrc">
+                        <normaloff>:/resources/icons/icon-reset-64.svg</normaloff>:/resources/icons/icon-reset-64.svg</iconset>
+                      </property>
+                      <property name="iconSize">
+                       <size>
+                        <width>14</width>
+                        <height>14</height>
+                       </size>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
                   </item>
                  </layout>
                 </item>
@@ -7329,7 +7371,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>252</width>
+          <width>268</width>
           <height>392</height>
          </rect>
         </property>
@@ -7474,7 +7516,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>246</width>
+          <width>296</width>
           <height>392</height>
          </rect>
         </property>
@@ -7615,7 +7657,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>244</width>
+              <width>294</width>
               <height>216</height>
              </rect>
             </property>
@@ -7655,7 +7697,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>244</width>
+                  <width>294</width>
                   <height>411</height>
                  </rect>
                 </property>
@@ -8521,8 +8563,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>244</width>
-              <height>184</height>
+              <width>100</width>
+              <height>72</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -9873,7 +9915,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>252</width>
+          <width>290</width>
           <height>392</height>
          </rect>
         </property>
@@ -9913,7 +9955,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>252</width>
+              <width>290</width>
               <height>687</height>
              </rect>
             </property>

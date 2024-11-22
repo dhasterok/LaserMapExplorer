@@ -102,3 +102,85 @@ def peirce_dev(N: int, n: int, m: int) -> float:
     else:
         x2 = 0.0
     return x2
+
+
+    
+def quantile_and_difference(array, pl, pu, d_lq, d_uq, compositional, max_val):
+    """Outlier detection with cluster-based correction for negatives and compositional constraints, using percentile-based shifting.
+
+    Parameters
+    ----------
+    array : numpy.ndarray
+        Data to detect outliers
+    pl : float
+        _description_
+    pu : float
+        _description_
+    d_lq : float
+        _description_
+    d_uq : float
+        _description_
+    compositional : bool
+        _description_
+    max_val : float
+        _description_
+
+    Returns
+    -------
+    numpy.ndarray
+        array with outliers removed
+    """
+    if config.debug_data:
+        print(f"outlier_detection\n  percentiles: {[pl, uq, d_lq, d_uq]}\n  compositional: {compositional}\n  max_val: {max_val}")
+
+    # Set a small epsilon to handle zeros (if compositional data)
+    epsilon = 1e-10 if compositional else 0
+
+    # Shift data to handle zeros and negative values for log transformations
+    v0 = np.nanmin(array, axis=0) - epsilon
+    data_shifted = np.log10(array - v0 + epsilon)
+
+    # Quantile-based clipping (detect outliers)
+    lq_val = np.nanpercentile(data_shifted, pl, axis=0)
+    uq_val = np.nanpercentile(data_shifted, pu, axis=0)
+
+    # Sort data and calculate differences between adjacent points
+    sorted_indices = np.argsort(data_shifted, axis=0)
+    sorted_data = np.take_along_axis(data_shifted, sorted_indices, axis=0)
+    diff_sorted_data = np.diff(sorted_data, axis=0)
+
+    # Account for the size reduction in np.diff by adding a zero row at the beginning
+    diff_sorted_data = np.insert(diff_sorted_data, 0, 0, axis=0)
+    diff_array_uq_val = np.nanpercentile(diff_sorted_data, d_uq, axis=0)
+    diff_array_lq_val = np.nanpercentile(diff_sorted_data, d_lq, axis=0)
+
+    # Initialize array for results
+    clipped_data = np.copy(sorted_data)
+
+    # Apply upper bound clipping based on quantiles and differences
+    upper_cond = (sorted_data > uq_val) & (diff_sorted_data > diff_array_uq_val)
+    for col in range(sorted_data.shape[1]):
+        up_indices = np.where(upper_cond[:, col])[0]
+        if len(up_indices) > 0:
+            uq_outlier_index = up_indices[0]
+            clipped_data[uq_outlier_index:, col] = clipped_data[uq_outlier_index - 1, col]
+
+    # Apply lower bound clipping similarly based on lower quantile and difference
+    lower_cond = (sorted_data < lq_val) & (diff_sorted_data > diff_array_lq_val)
+    for col in range(sorted_data.shape[1]):
+        low_indices = np.where(lower_cond[:, col])[0]
+        if len(low_indices) > 0:
+            lq_outlier_index = low_indices[-1]
+            clipped_data[:lq_outlier_index + 1, col] = clipped_data[lq_outlier_index + 1, col]
+
+    # Restore original data order and undo the log transformation
+    clipped_data = np.take_along_axis(clipped_data, np.argsort(sorted_indices, axis=0), axis=0)
+    clipped_data = 10**clipped_data + v0 - epsilon
+
+    # Enforce upper bound (compositional constraint) to ensure data <= max_val
+    clipped_data = np.where(clipped_data > max_val, max_val, clipped_data)
+
+    # Ensure non-negative values and avoid exact zeros by shifting slightly if needed
+    clipped_data = np.maximum(clipped_data, epsilon)
+
+    return clipped_data

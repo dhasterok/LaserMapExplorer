@@ -515,7 +515,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxCorrelationMethod.activated.connect(self.correlation_method_callback)
         self.checkBoxCorrelationSquared.stateChanged.connect(self.correlation_squared_callback)
 
-        self.comboBoxOutlierMethod.addItems(['set quantiles','quantiles and distance', 'Chauvenet criterion', 'log(n>x) inflection'])
+
+        self.comboBoxOutlierMethod.addItems(['none', 'quantile critera','quantile and distance critera', 'Chauvenet criterion', 'log(n>x) inflection'])
+        self.comboBoxOutlierMethod.setCurrentText('Chauvenet criterion')
         self.comboBoxOutlierMethod.activated.connect(self.update_outlier_removal)
 
         self.comboBoxNegativeMethod.addItems(['ignore negatives', 'minimum positive', 'gradual shift', 'Yeo-Johnson transform'])
@@ -783,14 +785,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # update profile plot when point type is changed
         self.comboBoxPointType.currentIndexChanged.connect(lambda: self.profiling.plot_profiles())
         # update profile plot when selected subplot is changed
-        # Set initial maximum
-        self.spinBoxProfileSelectedSubplot.setMaximum(self.spinBoxProfileNumSubplots.value())
         self.spinBoxProfileSelectedSubplot.valueChanged.connect(lambda: self.profiling.plot_profiles())
-        # Connect signals
-        self.spinBoxProfileNumSubplots.valueChanged.connect(self.update_selected_subplot_max)
         # update profile plot when Num subplot is changed
         self.spinBoxProfileNumSubplots.valueChanged.connect(lambda: self.profiling.plot_profiles())
-        self.spinBoxProfileNumSubplots.valueChanged.connect(lambda: self.profiling.update_num_subplots())
         # update profile plot when field in subplot table is changed
         self.toolButtonProfileAddField.clicked.connect(lambda: self.profiling.plot_profiles())
         
@@ -1118,7 +1115,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.sample_id not in self.data:
             # load sample's *.lame file
             file_path = os.path.join(self.selected_directory, self.csv_files[index])
-            self.data[self.sample_id] = SampleObj(self.sample_id, file_path, self.comboBoxNegativeMethod.currentText())
+            self.data[self.sample_id] = SampleObj(self.sample_id, file_path, self.comboBoxOutlierMethod.currentText(), self.comboBoxNegativeMethod.currentText())
             self.update_labels()
 
             # set slot for swapXY button
@@ -1158,6 +1155,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.update_tables()
 
             #return
+
+        # update slot connections that depend on the sample
+        self.toolButtonOutlierReset.clicked.connect(lambda: self.data[self.sample_id].reset_data_handling(self.comboBoxOutlierMethod.currentText(), self.comboBoxNegativeMethod.currentText()))
 
         # add spot data
         if not self.spotdata.empty:
@@ -1503,17 +1503,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # If canvasWindow is set to SingleView, update the plot
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv'] and update:
             self.update_SV()
-
-    def update_selected_subplot_max(self):
-        # Get the current number of subplots
-        num_subplots = self.spinBoxProfileNumSubplots.value()
-        # Update the maximum value of the selected subplot spin box
-        self.spinBoxProfileSelectedSubplot.setMaximum(num_subplots)
-        # Ensure the current value does not exceed the maximum
-        if self.spinBoxProfileSelectedSubplot.value() > num_subplots:
-            self.spinBoxProfileSelectedSubplot.setValue(num_subplots)
-        # Update the plot
-        self.profiling.plot_profiles()
 
     def open_ternary(self):
         """Executes on actionTernary
@@ -1889,9 +1878,47 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_filter_values()
         self.update_SV()
 
+        
+
     def update_outlier_removal(self):
         """Removes outliers from one or all analytes."""        
-        pass
+        method = self.comboBoxOutlierMethod.currentText()
+
+        if self.data[self.sample_id].outlier_method == method:
+            return
+
+        self.data[self.sample_id].outlier_method = method
+
+        match method.lower():
+            case 'none':
+                self.lineEditLowerQuantile.setEnabled(False)
+                self.lineEditUpperQuantile.setEnabled(False)
+                self.lineEditDifferenceLowerQuantile.setEnabled(False)
+                self.lineEditDifferenceUpperQuantile.setEnabled(False)
+            case 'quantile criteria':
+                self.lineEditLowerQuantile.setEnabled(True)
+                self.lineEditUpperQuantile.setEnabled(True)
+                self.lineEditDifferenceLowerQuantile.setEnabled(False)
+                self.lineEditDifferenceUpperQuantile.setEnabled(False)
+            case 'quantile and distance criteria':
+                self.lineEditLowerQuantile.setEnabled(True)
+                self.lineEditUpperQuantile.setEnabled(True)
+                self.lineEditDifferenceLowerQuantile.setEnabled(True)
+                self.lineEditDifferenceUpperQuantile.setEnabled(True)
+            case 'chauvenet criterion':
+                self.lineEditLowerQuantile.setEnabled(False)
+                self.lineEditUpperQuantile.setEnabled(False)
+                self.lineEditDifferenceLowerQuantile.setEnabled(False)
+                self.lineEditDifferenceUpperQuantile.setEnabled(False)
+            case 'log(n>x) inflection':
+                self.lineEditLowerQuantile.setEnabled(False)
+                self.lineEditUpperQuantile.setEnabled(False)
+                self.lineEditDifferenceLowerQuantile.setEnabled(False)
+                self.lineEditDifferenceUpperQuantile.setEnabled(False)
+
+        # no need to run prep_data as it should be run in DataHandling automatically when outlier_method is changed.
+        #self.data[self.sample_id].prep_data()
+
 
     def update_plot(self,bin_s=True, axis=False, reset=False):
         """"Update plot

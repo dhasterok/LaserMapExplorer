@@ -5167,6 +5167,12 @@ class Ui_MainWindow(object):
         self.actionImportSpots.setIcon(icon87)
         self.actionImportSpots.setMenuRole(QtWidgets.QAction.ApplicationSpecificRole)
         self.actionImportSpots.setObjectName("actionImportSpots")
+        self.actionWorkflowTool = QtWidgets.QAction(MainWindow)
+        icon88 = QtGui.QIcon()
+        icon88.addPixmap(QtGui.QPixmap(":/resources/icons/icon-workflow-design-64.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionWorkflowTool.setIcon(icon88)
+        self.actionWorkflowTool.setMenuRole(QtWidgets.QAction.NoRole)
+        self.actionWorkflowTool.setObjectName("actionWorkflowTool")
         self.menuFile.addAction(self.actionOpenSample)
         self.menuFile.addAction(self.actionOpenDirectory)
         self.menuFile.addAction(self.actionOpenProject)
@@ -5212,6 +5218,7 @@ class Ui_MainWindow(object):
         self.toolBar.addAction(self.actionSaveProject)
         self.toolBar.addSeparator()
         self.toolBar.addAction(self.actionSelectAnalytes)
+        self.toolBar.addAction(self.actionWorkflowTool)
         self.toolBar.addAction(self.actionBatch_Process)
         self.toolBar.addSeparator()
         self.toolBar.addAction(self.actionFullMap)
@@ -5234,7 +5241,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         self.canvasWindow.setCurrentIndex(0)
-        self.toolBox.setCurrentIndex(0)
+        self.toolBox.setCurrentIndex(1)
         self.toolBox.layout().setSpacing(2)
         self.comboBoxNDimQuantiles.setCurrentIndex(2)
         self.tabWidgetSpecialFcn.setCurrentIndex(2)
@@ -5242,7 +5249,7 @@ class Ui_MainWindow(object):
         self.toolBoxTreeView.layout().setSpacing(2)
         self.toolBoxStyle.setCurrentIndex(0)
         self.toolBoxStyle.layout().setSpacing(2)
-        self.tabWidget.setCurrentIndex(2)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -6101,4 +6108,8 @@ class Ui_MainWindow(object):
         self.actionImportSpots.setIconText(_translate("MainWindow", "Import\n"
 "Spots"))
         self.actionImportSpots.setToolTip(_translate("MainWindow", "Import spot data"))
+        self.actionWorkflowTool.setText(_translate("MainWindow", "Workflow Tool"))
+        self.actionWorkflowTool.setIconText(_translate("MainWindow", "Workflow\n"
+"Tool"))
+        self.actionWorkflowTool.setToolTip(_translate("MainWindow", "Open, create, and record workflows using the workflow design tool"))
 import resources_rc

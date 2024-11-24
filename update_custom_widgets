@@ -21,10 +21,10 @@
 # fi
 
 # # Add the import for CustomWidgets as cw if it doesn't exist
-# if ! grep -q "import src.CustomWidgets as cw" "$file"; then
-#   echo "Adding import for src.CustomWidgets as cw..."
+# if ! grep -q "import src.common.CustomWidgets as cw" "$file"; then
+#   echo "Adding import for src.common.CustomWidgets as cw..."
 #   sed -i '' "1i\\
-# import src.CustomWidgets as cw
+# import src.common.CustomWidgets as cw
 # " "$file"
 # fi
 
@@ -87,10 +87,10 @@ for name in "${names[@]}"; do
   fi
 
   # Add the import for CustomWidgets as cw if it doesn't exist
-  if ! grep -q "import src.CustomWidgets as cw" "$file"; then
-    echo "Adding import for src.CustomWidgets as cw to $file..."
+  if ! grep -q "import src.common.CustomWidgets as cw" "$file"; then
+    echo "Adding import for src.common.CustomWidgets as cw to $file..."
     sed -i '' "1i\\
-import src.CustomWidgets as cw
+import src.common.CustomWidgets as cw
 " "$file"
   fi
 

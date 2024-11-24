@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QTe
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWebChannel import QWebChannel
 from PyQt5.QtCore import pyqtSlot, QObject, QUrl, QFile, QIODevice
-from lame_helper import BASEDIR
+from src.app.config import BASEDIR
 from PyQt5.QtWebEngineWidgets import QWebEngineSettings
 import os
 import json

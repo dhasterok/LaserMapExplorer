@@ -394,77 +394,8 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="module-radar">
-<span id="radar-module"></span><h1>radar module<a class="headerlink" href="#module-radar" title="Link to this heading">#</a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="radar.Radar">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">radar.</span></span><span class="sig-name descname"><span class="pre">Radar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fields</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fieldlabels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes_interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/radar.html#Radar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#radar.Radar" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>Prepares a DataFrame for a radar plot.</p>
-<p>_extended_summary_</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>ax</strong><span class="classifier">matplotlib.axes</span></dt><dd><p>Axis object</p>
-</dd>
-<dt><strong>data</strong><span class="classifier">pandas.DataFrame</span></dt><dd><p>Data used for averaging.</p>
-</dd>
-<dt><strong>fields</strong><span class="classifier">list</span></dt><dd><p>list of fields in data used to define the axes.</p>
-</dd>
-<dt><strong>fieldlabels</strong><span class="classifier">list</span></dt><dd><p>Labels associated with fields. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="docutils literal notranslate"><span class="pre">fieldlabels</span></code> is set to <code class="docutils literal notranslate"><span class="pre">fields</span></code>, by default None</p>
-</dd>
-<dt><strong>group_field</strong><span class="classifier">str, optional</span></dt><dd><p>_description_, by default ‘’</p>
-</dd>
-<dt><strong>groups</strong><span class="classifier">_type_, optional</span></dt><dd><p>_description_, by default None</p>
-</dd>
-<dt><strong>quantiles</strong><span class="classifier">_type_, optional</span></dt><dd><p>_description_, by default None</p>
-</dd>
-<dt><strong>axes_interval</strong><span class="classifier">int, optional</span></dt><dd><p>_description_, by default 5</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>ValueError</dt><dd><p>_description_</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p class="rubric">Methods</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#radar.Radar.normalize_vals" title="radar.Radar.normalize_vals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalize_vals</span></code></a>()</p></td>
-<td><p>Normalizes the data in self.vals for radar plot visualization.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#radar.Radar.plot" title="radar.Radar.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>([cmap])</p></td>
-<td><p>_summary_</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<dl class="py method">
-<dt class="sig sig-object py" id="radar.Radar.normalize_vals">
-<span class="sig-name descname"><span class="pre">normalize_vals</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/radar.html#Radar.normalize_vals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#radar.Radar.normalize_vals" title="Link to this definition">#</a></dt>
-<dd><p>Normalizes the data in self.vals for radar plot visualization.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="radar.Radar.plot">
-<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/radar.html#Radar.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#radar.Radar.plot" title="Link to this definition">#</a></dt>
-<dd><p>_summary_</p>
-<p>_extended_summary_</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>cmap</strong><span class="classifier">matplotlib.colormap, optional</span></dt><dd><p>colormap, by default None</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
+  <section id="radar-module">
+<h1>radar module<a class="headerlink" href="#radar-module" title="Link to this heading">#</a></h1>
 </section>
 
 
@@ -486,22 +417,6 @@
               
                 <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
-
-  <div class="sidebar-secondary-item">
-<div
-    id="pst-page-navigation-heading-2"
-    class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> On this page
-  </div>
-  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#radar.Radar"><code class="docutils literal notranslate"><span class="pre">Radar</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#radar.Radar.normalize_vals"><code class="docutils literal notranslate"><span class="pre">Radar.normalize_vals()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#radar.Radar.plot"><code class="docutils literal notranslate"><span class="pre">Radar.plot()</span></code></a></li>
-</ul>
-</li>
-</ul>
-  </nav></div>
 
   <div class="sidebar-secondary-item">
 

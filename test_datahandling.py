@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('TkAgg')  # Or another backend like 'Qt5Agg'
 import numpy as np
-from src.DataHandling import SampleObj
+from src.common.DataHandling import SampleObj
 
 plt.ion()
 

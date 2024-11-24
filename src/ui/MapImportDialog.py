@@ -1,4 +1,4 @@
-import src.CustomWidgets as cw
+import src.common.CustomWidgets as cw
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'designer/MapImportDialog.ui'

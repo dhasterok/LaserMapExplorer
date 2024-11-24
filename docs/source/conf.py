@@ -7,13 +7,13 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../..'))
-sys.path.insert(0, os.path.abspath('../../src'))
-sys.path.insert(0, os.path.abspath('../../src/ui'))
+sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('../src'))
+sys.path.insert(0, os.path.abspath('../src/ui'))
 
 project = 'Laser Map Explorer'
-copyright = '2024, Shavin Kaluthantri and Derrick Hasterok'
-author = 'Shavin Kaluthantri and Derrick Hasterok'
+copyright = '2024, Shavin Kaluthantri, Derrick Hasterok, and Maggie Li'
+author = 'Shavin Kaluthantri,  Derrick Hasterok and Maggie Li'
 release = '0.1'
 
 print(sys.executable)
@@ -21,14 +21,17 @@ print(sys.executable)
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.inheritance_diagram',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.autosectionlabel',
-    'sphinx.ext.viewcode',
-    'numpydoc']
+extensions = [
+        'sphinx.ext.autosummary',
+        'sphinx.ext.autodoc',
+        'sphinx.ext.inheritance_diagram',
+        'sphinx.ext.intersphinx',
+        'sphinx.ext.autosectionlabel',
+        'sphinx.ext.viewcode',
+        'numpydoc'
+    ]
 
+autosummary_generate = True
 templates_path = ['_templates']
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints"]
 

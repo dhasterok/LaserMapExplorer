@@ -169,5 +169,6 @@
         <file>resources/icons/icon-right_toolbar_show-64.svg</file>
         <file>resources/icons/icon-regression-64.svg</file>
         <file>resources/icons/icon-regression-dark-64.svg</file>
+        <file>resources/icons/icon-workflow-design-64.svg</file>
     </qresource>
 </RCC>

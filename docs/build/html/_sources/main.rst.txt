@@ -5,3 +5,9 @@ main module
    :members:
    :undoc-members:
    :show-inheritance:
+
+Submodules
+----------
+
+.. autosummary::
+   :toctree: _autosummary

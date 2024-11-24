@@ -48,7 +48,7 @@ If you would like to contribute in any way to the improvement of the program, ha
 Funding for this app has been provided by the `MinEx CRC <https://minexcrc.com.au/>`_ by developers at the `University of Adelaide <https://www.adelaide.edu.au/>`_.
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Contents
 
    userguide

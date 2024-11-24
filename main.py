@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import (
     QSplashScreen, QApplication, QMainWindow, QSizePolicy
 )
 from PyQt5.QtGui import ( QIntValidator, QDoubleValidator, QPixmap, QFont, QIcon )
-from src.UITheme import UIThemes
+from src.app.UITheme import UIThemes
 
 #from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
 import pyqtgraph as pg
@@ -41,37 +41,38 @@ from sklearn.metrics import silhouette_score
 import skfuzzy as fuzz
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-from src.ternary_plot import ternary
-from src.plot_spider import plot_spider_norm
-from src.scalebar import scalebar
-from src.LameIO import LameIO
-import src.csvdict as csvdict
+from src.common.ternary_plot import ternary
+from src.common.plot_spider import plot_spider_norm
+from src.common.scalebar import scalebar
+from src.app.LameIO import LameIO
+import src.common.csvdict as csvdict
 #import src.radar_factory
-from src.radar import Radar
+from src.common.radar import Radar
 from src.ui.MainWindow import Ui_MainWindow
 #from src.ui.PreferencesWindow import Ui_PreferencesWindow
-from src.AnalyteSelectionWindow import AnalyteDialog
-from src.TableFunctions import TableFcn as TableFcn
-import src.CustomMplCanvas as mplc
-from src.DataHandling import SampleObj
-from src.PlotTree import PlotTree
-from src.CropImage import CropTool
-from src.ImageProcessing import ImageProcessing as ip
-from src.StyleToolbox import Styling
-from src.Profile import Profiling
-from src.Polygon import PolygonManager
-from src.Calculator import CustomFieldCalculator as cfc
-from src.SpecialFunctions import SpecialFunctions as specfun
-from src.NoteTaking import Notes
-from src.Browser import Browser
+from src.app.AnalyteSelectionWindow import AnalyteDialog
+from src.common.TableFunctions import TableFcn as TableFcn
+import src.common.CustomMplCanvas as mplc
+from src.app.Actions import Actions
+from src.common.DataHandling import SampleObj
+from src.app.PlotTree import PlotTree
+from src.app.CropImage import CropTool
+from src.app.ImageProcessing import ImageProcessing as ip
+from src.app.StyleToolbox import Styling
+from src.app.Profile import Profiling
+from src.common.Polygon import PolygonManager
+from src.app.Calculator import CustomFieldCalculator as cfc
+from src.app.SpecialFunctions import SpecialFunctions as specfun
+from src.common.NoteTaking import Notes
+from src.app.Browser import Browser
 from src.Workflow import Workflow
-import src.QuickView as QV
-from lame_helper import BASEDIR, ICONPATH, SSPATH, load_stylesheet
-from src.ExtendedDF import AttributeDataFrame
-import src.format as fmt
-from src.colorfunc import get_hex_color, get_rgb_color
-import config
-from src.Logger import QTextEditLogger
+import src.app.QuickView as QV
+from src.app.config import BASEDIR, ICONPATH, SSPATH, DEBUG, load_stylesheet
+from src.common.ExtendedDF import AttributeDataFrame
+import src.common.format as fmt
+from src.common.colorfunc import get_hex_color, get_rgb_color
+import src.app.config as config
+from src.app.Logger import LoggerDock
 
 # to prevent segmentation error at startup
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
@@ -402,6 +403,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.toolBar.insertWidget(self.actionSelectAnalytes,self.widgetSampleSelect)
 
+        self.toolbar_actio = Actions(self)
+
         # Set initial view
         self.toolBox.setCurrentIndex(self.left_tab['sample'])
         self.tabWidget.setCurrentIndex(self.bottom_tab['notes'])
@@ -452,10 +455,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionSavePlotToTree.triggered.connect(self.add_plotwidget_to_tree)
         self.actionSelectAnalytes.triggered.connect(self.open_select_analyte_dialog)
         self.actionSpotData.triggered.connect(lambda: self.open_tab('spot data'))
-
-        self.actionFullMap.triggered.connect(self.reset_to_full_view)
-        self.actionFullMap.triggered.connect(lambda: self.actionCrop.setChecked(False))
-        self.actionFullMap.setEnabled(False)
 
         #apply filters
         self.actionClearFilters.triggered.connect(lambda: self.apply_filters(fullmap=True))
@@ -951,9 +950,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.toolBox.currentChanged.connect(self.toolbox_changed)
 
-        if config.debug:
+        if DEBUG:
             # Redirect sys.stdout to the QTextEdit
-            sys.stdout = QTextEditLogger(self)
+            sys.stdout = LoggerDock(self)
 
         # ----start debugging----
         # self.test_get_field_list()
@@ -1058,7 +1057,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             index of sample name for identifying data.  The values are based on the
             comboBoxSampleID
         """
-        if config.debug:
+        if DEBUG:
             print(f"change_sample, index: {index}")
 
         if self.sample_id == self.sample_ids[index]:
@@ -1465,7 +1464,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         update_plot : bool
             ``True`` forces update plot, when the canavas window tab is on single view, by default ``True``
         """
-        if config.debug:
+        if DEBUG:
             print(f"toolbox_changed, update: {update}")
 
         if self.sample_id == '':
@@ -1693,37 +1692,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_SV()
         #self.update_all_plots()
 
-    def reset_to_full_view(self):
-        """Reset the map to full view (i.e., remove crop)
-
-        Executes on ``MainWindow.actionFullMap`` is clicked.
-        """
-
-        sample_id = self.sample_id
-        #set original bounds
-        
-        #remove crop overlays
-        self.crop_tool.remove_overlays()
-
-        self.data[sample_id].reset_crop()
-        
-        # reapply existing filters
-        if self.actionFilterToggle.isChecked():
-            self.apply_field_filters(update_plot=False)
-            # should look for filters built on computed fields and remove them
-        if self.actionPolygonMask.isChecked():
-            self.apply_polygon_mask(update_plot=False)
-
-        # reset cluster mask (no valid clustering exists)
-        self.actionClusterMask.setEnabled(False)
-        self.actionClusterMask.setChecked(False)
-        self.data[sample_id].cluster_mask = np.ones_like(self.data[sample_id].mask, dtype=bool)
-
-        self.apply_filters(fullmap=False)
-
-        self.data[self.sample_id].crop = False
-
-    # for a disappearing button
+     # for a disappearing button
     # def mouseEnter(self, event):
     #     self.toolButtonPopFigure.setVisible(True)
 
@@ -1805,7 +1774,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if analyte_1 and not analyte_2:
             if self.checkBoxApplyAll.isChecked():
                 # Apply to all analytes in sample
-                columns = self.data[sample_id].raw_data.columns
+                columns = self.data[sample_id].processed_data.columns
 
                 # clear existing plot info from tree to ensure saved plots using most recent data
                 for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
@@ -1856,7 +1825,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Executes when the value ``MainWindow.comboBoxNegativeMethod`` is changed.
 
-        Changes how negative values are handled for each analyte, the followinf options are available:
+        Changes how negative values are handled for each analyte, the following options are available:
             Ignore negative values, Minimum positive value, Gradual shift, Yeo-Johnson transformation
         """
         sample_id = self.plot_info['sample_id']
@@ -1864,14 +1833,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             
         if self.checkBoxApplyAll.isChecked():
             # Apply to all iolties
-            analyte_list = self.data[self.sample_id].raw_data.match_attribute('data_type', 'analyte') + self.data[self.sample_id].raw_data.match_attribute('data_type', 'ratio')
-            self.data[sample_id].raw_data.set_attribute(analyte_list, 'negative_method', self.comboBoxNegativeMethod.currentText())
+            analyte_list = self.data[self.sample_id].processed_data.match_attribute('data_type', 'analyte') + self.data[self.sample_id].processed_data.match_attribute('data_type', 'ratio')
+            self.data[sample_id].negative_method = self.comboBoxNegativeMethod.currentText()
             # clear existing plot info from tree to ensure saved plots using most recent data
             for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
                 self.plot_tree.clear_tree_data(tree)
             self.data[sample_id].prep_data()
         else:
-            self.data[sample_id].raw_data.set_attribute(field, 'negative_method', self.comboBoxNegativeMethod.currentText())
+            self.data[sample_id].negative_method = self.comboBoxNegativeMethod.currentText()
             self.data[sample_id].prep_data(field)
         
         self.update_labels()
@@ -2314,7 +2283,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.statusBar.showMessage(f'Filters successfully saved as {filter_file}')
         else:
             # throw a warning that name is not saved
-            QMessageBox.warning(None,'Error','could not save filter table.')
+            QMessageBox.warning(self,'Error','could not save filter table.')
 
             return
 
@@ -2746,7 +2715,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         save : bool, optional
             save plot to plot selector, Defaults to False.
         """
-        if config.debug:
+        if DEBUG:
             print(f"update_SV\n  plot_type: {plot_type}\n  field_type: {field_type}\n  field: {field}")
 
         if self.sample_id == '' or not self.comboBoxPlotType.currentText():
@@ -2784,7 +2753,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 
             case 'gradient map':
                 if self.comboBoxNoiseReductionMethod.currentText() == 'none':
-                    QMessageBox.warning(None,'Warning','Noise reduction must be performed before computing a gradient.')
+                    QMessageBox.warning(self,'Warning','Noise reduction must be performed before computing a gradient.')
                     return
                 self.noise_reduction.noise_reduction_method_callback()
             case 'correlation':
@@ -5865,11 +5834,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 # export the csv
                 csvdict.export_dict_to_csv(self.ndim_list_dict,self.ndim_list_filename)
             except:
-                QMessageBox.warning(None,'Error','could not save TEC file.')
+                QMessageBox.warning(self,'Error','could not save TEC file.')
                 
         else:
             # throw a warning that name is not saved
-            QMessageBox.warning(None,'Error','could not save TEC list.')
+            QMessageBox.warning(self,'Error','could not save TEC list.')
 
             return
 

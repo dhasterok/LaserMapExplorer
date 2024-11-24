@@ -76,7 +76,7 @@
        <string/>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <property name="documentMode">
        <bool>false</bool>
@@ -1229,7 +1229,7 @@
               <x>0</x>
               <y>0</y>
               <width>302</width>
-              <height>637</height>
+              <height>668</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_41">
@@ -1305,6 +1305,29 @@
                  </widget>
                 </item>
                 <item row="1" column="0">
+                 <widget class="QLabel" name="labelUnits">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                    <stylestrategy>PreferDefault</stylestrategy>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Units</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QLineEdit" name="lineEditUnits">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                    <stylestrategy>PreferDefault</stylestrategy>
+                   </font>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="0">
                  <widget class="QLabel" name="labelDataScaling">
                   <property name="font">
                    <font>
@@ -1317,7 +1340,7 @@
                   </property>
                  </widget>
                 </item>
-                <item row="1" column="1">
+                <item row="2" column="1">
                  <widget class="QComboBox" name="comboBoxNorm">
                   <property name="maximumSize">
                    <size>
@@ -1354,86 +1377,14 @@
                   </item>
                  </widget>
                 </item>
-                <item row="2" column="0">
-                 <widget class="QLabel" name="labelCorrelationMethod">
-                  <property name="font">
-                   <font>
-                    <pointsize>11</pointsize>
-                    <stylestrategy>PreferDefault</stylestrategy>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Corr. Method</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="1">
-                 <layout class="QHBoxLayout" name="horizontalLayout_3">
-                  <item>
-                   <widget class="QComboBox" name="comboBoxCorrelationMethod">
-                    <property name="maximumSize">
-                     <size>
-                      <width>16777215</width>
-                      <height>16777215</height>
-                     </size>
-                    </property>
-                    <property name="font">
-                     <font>
-                      <pointsize>11</pointsize>
-                      <stylestrategy>PreferDefault</stylestrategy>
-                     </font>
-                    </property>
-                    <property name="toolTip">
-                     <string>Choose correlation method</string>
-                    </property>
-                    <item>
-                     <property name="text">
-                      <string>none</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>Pearson</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>Spearman</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>Kendall</string>
-                     </property>
-                    </item>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QCheckBox" name="checkBoxCorrelationSquared">
-                    <property name="font">
-                     <font>
-                      <pointsize>11</pointsize>
-                      <stylestrategy>PreferDefault</stylestrategy>
-                     </font>
-                    </property>
-                    <property name="toolTip">
-                     <string>Switch between correlation and correlation squared</string>
-                    </property>
-                    <property name="text">
-                     <string>C²</string>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-                <item row="3" column="1">
+                <item row="4" column="1">
                  <widget class="Line" name="line_3">
                   <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
                  </widget>
                 </item>
-                <item row="4" column="0">
+                <item row="5" column="0">
                  <layout class="QHBoxLayout" name="horizontalLayout_40">
                   <item>
                    <widget class="QLabel" name="labelSampleResolution">
@@ -1488,7 +1439,7 @@
                   </item>
                  </layout>
                 </item>
-                <item row="4" column="1">
+                <item row="5" column="1">
                  <layout class="QHBoxLayout" name="horizontalLayout_25">
                   <item>
                    <widget class="QLabel" name="labelResolutionNx">
@@ -1556,7 +1507,7 @@
                   </item>
                  </layout>
                 </item>
-                <item row="5" column="0">
+                <item row="6" column="0">
                  <widget class="QLabel" name="labelPixelResolution">
                   <property name="font">
                    <font>
@@ -1569,7 +1520,7 @@
                   </property>
                  </widget>
                 </item>
-                <item row="5" column="1">
+                <item row="6" column="1">
                  <layout class="QHBoxLayout" name="horizontalLayout_42">
                   <item>
                    <widget class="QLabel" name="labelDX">
@@ -1664,6 +1615,78 @@
                     </property>
                     <property name="alignment">
                      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item row="3" column="0">
+                 <widget class="QLabel" name="labelCorrelationMethod">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                    <stylestrategy>PreferDefault</stylestrategy>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Corr. Method</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="1">
+                 <layout class="QHBoxLayout" name="horizontalLayout_3">
+                  <item>
+                   <widget class="QComboBox" name="comboBoxCorrelationMethod">
+                    <property name="maximumSize">
+                     <size>
+                      <width>16777215</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
+                    <property name="font">
+                     <font>
+                      <pointsize>11</pointsize>
+                      <stylestrategy>PreferDefault</stylestrategy>
+                     </font>
+                    </property>
+                    <property name="toolTip">
+                     <string>Choose correlation method</string>
+                    </property>
+                    <item>
+                     <property name="text">
+                      <string>none</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Pearson</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Spearman</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Kendall</string>
+                     </property>
+                    </item>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="checkBoxCorrelationSquared">
+                    <property name="font">
+                     <font>
+                      <pointsize>11</pointsize>
+                      <stylestrategy>PreferDefault</stylestrategy>
+                     </font>
+                    </property>
+                    <property name="toolTip">
+                     <string>Switch between correlation and correlation squared</string>
+                    </property>
+                    <property name="text">
+                     <string>C²</string>
                     </property>
                    </widget>
                   </item>

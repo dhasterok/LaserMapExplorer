@@ -1,7 +1,7 @@
 Main Toolbar (Top)
 ******************
 
-The Main Toolbar provides quick access to essential functions for data management, sample selection, and common operations.
+The *Main Toolbar* provides quick access to essential functions for data management, sample selection, and common operations.
 
 .. figure:: _static/screenshots/LaME_Main_Toolbar.png
    :align: center
@@ -13,7 +13,7 @@ The Main Toolbar provides quick access to essential functions for data managemen
 Data Management
 ===============
 
-This section offers tools for loading, importing, and saving data. Data can be loaded by opening a directory (|icon-add-directory|) containing multiple sample data files or by loading a single sample file (|icon-open-file|). To preserve work, the save session button (||icon-save-session|) stores all analyses and plots. Previously saved sessions can be retrieved using the load session button (|icon-open-session|).
+This section offers tools for loading, importing, and saving data. Data can be loaded by opening a directory (|icon-add-directory|) containing multiple sample data files or by loading a single sample file (|icon-open-file|). For detailed information about importing data and supported formats, see :doc:`import`. To preserve work, the save session button (|icon-save-session|) stores all analyses and plots. Previously saved sessions can be retrieved using the load session button (|icon-open-session|).ß
 
 Sample and Analyte Selector
 ===========================
@@ -21,6 +21,10 @@ Sample and Analyte Selector
 The sample and analyte selector allows for choosing data to analyze.  The sample dropdown enables quick switching between loaded samples.  The analyte selector (|icon-atom|) opens a tool for choosing elements and ratios to analyze.  It's important to note that changing analytes or samples will update the *Plot Selector*, clear any existing clusters and PCA results, remove masks, and recompute correlations.
 
 When using the analyte selector, click on a diagonal cell to select or deselect an analyte.  For ratios, click on the cell where the row (denominator) and column (numerator) of desired elements intersect. Selected ratios will be highlighted and added to the list on the right. The background colors represent correlation coefficients between pairs of fields, helping you identify potentially meaningful ratios.  Once you've made your selections, click 'Done'.  Previously saved sets of analytes and ratios can be loaded using the 'Load Selection' button.
+
+.. figure:: _static/screenshots/LaME_Analyte_Selector.png
+    :align: center
+    :alt: *Analyte Selector* provides a tool for choosing analytes and ratios to analyze
 
 Data Manipulation
 =================

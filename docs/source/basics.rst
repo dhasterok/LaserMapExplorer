@@ -22,11 +22,11 @@ Getting Started
 
 To begin using *LaME*, first load a directory using either the *File Menu* or the *Main Toolbar* (|icon-add-directory|).  If you haven't loaded a sample previously, the imported sample will be automatically added to the sample list dropdown in the *Main Toolbar*.  If you have previously loaded the data, you can load a saved session, a single sample, or a directory of samples. See :doc:`import` for file specifications that LaME can handle.
 
-Once a directory is loaded, select a sample using the sample list dropdown in the Main Toolbar.  To choose the fields for analysis, use *Analyte Selector* ( |icon-atom| ) to choose the fields for analysis, including ratios between elements/analytes.  More details on this process can be found in the :doc:`top_toolbar` section.  
+Once a directory is loaded, select a sample using the sample list dropdown in the *Main Toolbar*.  To choose the fields for analysis, use *Analyte Selector* ( |icon-atom| ) to choose the fields for analysis, including ratios between elements/analytes.  More details on this process can be found in the :doc:`top_toolbar` section.  
 
-With data loaded and fields selected, various tools in the Control Toolbox and Plot and Property Toolbox can be used to analyze and visualize the data. All work on previous samples will be stored, and any images can be recalled from the Plot Selector in the Plot and Property Toolbox.
+With data loaded and fields selected, various tools in the *Control Toolbox* and *Plot and Property Toolbox* can be used to analyze and visualize the data. All work on previous samples will be stored, and any images can be recalled from the *Plot Selector* in the *Plot and Property Toolbox*.
 
-For a detailed explanation of the Control Toolbox and its features, refer to the :doc:`left_toolbox` section. Similarly, for information about the Plot and Property Toolbox and its capabilities, see the :doc:`right_toolbox` section.
+For a detailed explanation of the *Control Toolbox* and its features, refer to the :doc:`left_toolbox` section. Similarly, for information about the *Plot and Property Toolbox* and its capabilities, see the :doc:`right_toolbox` section.
 
 These toolboxes provide essential functions for data analysis, visualization, and customization in *LaME*. Familiarizing yourself with their features will greatly enhance your ability to explore and analyze your data effectively.
 

@@ -40,7 +40,6 @@
             <block type="properties"></block>
             <block type="select_samples"></block> <!-- Custom Block for Selecting Sample IDs -->
             <block type="select_analytes"></block>
-            <block type="iterate_sample_ids"></block> <!-- Custom Loop Block -->
             <block type="properties_v1"></block> <!-- Custom Loop Block -->
             <block type="data_scaling"></block> <!-- Custom Loop Block -->
             <block type="autoscale_settings"></block> <!-- Custom Loop Block -->
@@ -56,8 +55,11 @@
             <block type="correlation_analysis"></block>
         </category>
         <!-- Custom Blocks -->
-        <category name="I/O" colour="60">
+        <category name="File I/O" colour="60">
             <block type="load_directory"></block>
+            <block type="load_sample"></block>
+            <block type="loop_over_samples"></block> <!-- Custom Loop Block -->
+            <block type="loop_over_fields"></block> <!-- Custom Loop Block -->
         </category>
         <!-- Plot Category -->
         <category name="Plot" colour="285">

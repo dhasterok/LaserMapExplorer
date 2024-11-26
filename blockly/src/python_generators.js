@@ -11,11 +11,21 @@ import { sample_ids } from './globals';
 pythonGenerator.forBlock['load_directory'] = function(block, generator) {
     var dir_name = generator.quote_(block.getFieldValue('DIR'));
     // Generate code with or without directory parameter
-    var code = (dir_name === "'directory name'")
+    var code = (dir_name === "'directory path'")
         ? 'self.parent.io.open_directory()\nself.store_sample_ids()\n'
-        : 'self.parent.open_directory(' + dir_name + ')\nself.store_sample_ids()\n';
+        : 'self.parent.io.open_directory(' + dir_name + ')\nself.store_sample_ids()\n';
     return code;
 };
+
+pythonGenerator.forBlock['load_sample'] = function(block, generator) {
+    var dir_name = generator.quote_(block.getFieldValue('DIR'));
+    // Generate code with or without directory parameter
+    var code = (dir_name === "'file path'")
+        ? 'self.parent.io.open_sample()\nself.store_sample_ids()\n'
+        : 'self.parent.io.open_sample(' + dir_name + ')\nself.store_sample_ids()\n';
+    return code;
+};
+
 
 // Python Generator: Select Samples
 pythonGenerator.forBlock['select_samples'] = function(block, generator) {
@@ -39,10 +49,23 @@ pythonGenerator.forBlock['sample_ids_list_block'] = function(block, generator) {
 };
 */
 // Python Generator: Iterate Through Sample IDs
-pythonGenerator.forBlock['iterate_sample_ids'] = function(block, generator) {
+pythonGenerator.forBlock['loop_over_samples'] = function(block, generator) {
     var variable_sample_ids = JSON.stringify(sample_ids);
     var statements_do = generator.statementToCode(block, 'DO');
-    var code = 'for sample_id in ' + variable_sample_ids + ':\n' + statements_do;
+    var code = 'for field in ' + variable_sample_ids + ':\n' +
+        generator.INDENT + 'self.parent.change_sample(self.parent.sample_ids.index(sample_id), save_analysis= False)\n' +
+        statements_do;
+    return code;
+};
+
+
+// Python Generator: Iterate Through Sample IDs
+pythonGenerator.forBlock['loop_over_fields'] = function(block, generator) {
+    var field_type = block.plotType ? generator.quote_(block.fieldType) : 'Analyte';
+    var statements_do = generator.statementToCode(block, 'DO');
+    var code = 'for field in get_field_list(' + field_type + '):\n' +
+        generator.INDENT + 'self.parent.change_sample(self.parent.sample_ids.index(sample_id), save_analysis= False)\n' +
+        statements_do;
     return code;
 };
 

@@ -8,13 +8,13 @@ ICONPATH = os.path.join(BASEDIR, 'resources', 'icons')
 # Path to the stylesheet
 SSPATH = os.path.join(BASEDIR, 'resources', 'styles')
 
-DEBUG = True
+DEBUG = False
 DEBUG_PLOT = False
-DEBUG_STYLE = True
-DEBUG_DATA = True
-DEBUG_CALCULATOR = True
-DEBUG_ANALYTE_UI = True
-DEBUG_IO = True
+DEBUG_STYLE = False
+DEBUG_DATA = False
+DEBUG_CALCULATOR = False
+DEBUG_ANALYTE_UI = False
+DEBUG_IO = False
 
 def load_stylesheet(filename):
     replacements = {

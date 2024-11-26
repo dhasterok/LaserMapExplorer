@@ -8,7 +8,7 @@ from PyQt5.QtWebEngineWidgets import QWebEngineSettings
 import os
 import json
 import numpy as np
-# export QTWEBENGINE_REMOTE_DEBUGGING=9222  
+os.environ["QTWEBENGINE_REMOTE_DEBUGGING"]="9222" #uncomment to debug in chrome  
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
 
 class BlocklyBridge(QObject):
@@ -48,9 +48,14 @@ class BlocklyBridge(QObject):
         return json.dumps(style_serializable)
     
     @pyqtSlot(str, result=list)
-    def getFieldList(self, analyte_type):
+    def getFieldList(self, field_type):
         print('get_field_list')
-        return self.parent.parent.get_field_list(analyte_type)
+        return self.parent.parent.get_field_list(field_type)
+
+    @pyqtSlot(str, result=list)
+    def getFieldTypeList(self):
+        print('get_field_type_list')
+        return self.parent.parent.get_field_type_list()
     
     @pyqtSlot(result=str)
     def getBaseDir(self):
@@ -134,21 +139,24 @@ class Workflow():
         event.accept()
     
     def store_sample_ids(self):
-            """
-            Sends sample_ids to JavaScript to update the sample_ids list and refresh dropdowns.
-            """
-            # Convert the sample_ids list to a format that JavaScript can use (a JSON array)
-            sample_ids_js_array = str(self.parent.sample_ids)
-            self.web_view.page().runJavaScript(f"updateSampleDropdown({sample_ids_js_array})")
+        """
+        Sends sample_ids to JavaScript to update the sample_ids list and refresh dropdowns.
+        """
+        # Convert the sample_ids list to a format that JavaScript can use (a JSON array)
+        sample_ids_js_array = str(self.parent.sample_ids)
+        self.web_view.page().runJavaScript(f"updateSampleDropdown({sample_ids_js_array})")
 
         
     def execute_code(self,code=None):
         if not code:
             # Get the code from the output_text_edit and execute it
             code = self.output_text_edit.toPlainText()
-        try:
-            print("Execute code:")
-            print(code)
-            exec(code)
-        except Exception as e:
-            print(f"Error executing code: {e}")
+        # try:
+        #     print("Execute code:")
+        #     print(code)
+        #     exec(code)
+        # except Exception as e:
+        #     print(f"Error executing code: {e}")
+
+        print(code)
+        exec(code)

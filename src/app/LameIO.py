@@ -5,7 +5,6 @@ import src.app.SpotImporter as SpotImporter
 import src.app.MapImporter as MapImporter
 from src.app.config import BASEDIR, DEBUG_IO
 import src.common.CustomMplCanvas as mplc
-
 # -------------------------------------
 # File I/O related functions
 # -------------------------------------
@@ -15,7 +14,7 @@ class LameIO():
             return
 
         parent.actionOpenSample.triggered.connect(self.open_sample)
-        parent.actionOpenDirectory.triggered.connect(lambda: self.open_directory(dir_name=None))
+        parent.actionOpenDirectory.triggered.connect(lambda: self.open_directory(path=None))
         parent.actionImportSpots.triggered.connect(self.import_spots)
         parent.actionOpenProject.triggered.connect(lambda: self.open_project())
         parent.actionSaveProject.triggered.connect(lambda: self.save_project())
@@ -23,34 +22,40 @@ class LameIO():
 
         self.parent = parent
 
-    def open_sample(self):
+    def open_sample(self, path =None):
         """Opens a single \\*.lame.csv file.
 
         Opens files created by MapImporter.
+        Parameters
+        ----------
+        path : str
+            Path to datafile, if ``None``, an open directory dialog is openend, by default ``None``
         """
         if DEBUG_IO:
             print("open_sample")
 
         parent = self.parent
-
-        dialog = QFileDialog()
-        dialog.setFileMode(QFileDialog.ExistingFiles)
-        dialog.setNameFilter("LaME CSV (*.csv)")
-        if dialog.exec_():
-            file_list = dialog.selectedFiles()
-            parent.selected_directory = os.path.dirname(os.path.abspath(file_list[0]))
-            
-            parent.csv_files = [os.path.split(file)[1] for file in file_list if file.endswith('.csv')]
-            if parent.csv_files == []:
-                # warning dialog
-                parent.statusBar.showMessage("No valid csv files found.")
+        if path is None:
+            dialog = QFileDialog()
+            dialog.setFileMode(QFileDialog.ExistingFiles)
+            dialog.setNameFilter("LaME CSV (*.csv)")
+            if dialog.exec_():
+                file_list = dialog.selectedFiles()
+                parent.selected_directory = os.path.dirname(os.path.abspath(file_list[0]))
+            else:
                 return
         else:
+            parent.selected_directory = os.path.dirname(os.path.abspath(path))
+        parent.csv_files = [os.path.split(file)[1] for file in file_list if file.endswith('.csv')]
+        if parent.csv_files == []:
+            # warning dialog
+            parent.statusBar.showMessage("No valid csv file found.")
             return
-        parent.initialise_samples_and_tabs()
+            
+        self.initialize_samples_and_tabs()
 
 
-    def open_directory(self, dir_name=None):
+    def open_directory(self, path=None):
         """Open directory with samples in \\*.lame.csv files.
 
         Executes on ``MainWindow.actionOpen`` and ``MainWindow.actionOpenDirectory``.  Opening a directory, enables
@@ -65,7 +70,7 @@ class LameIO():
 
         Parameters
         ----------
-        dir_name : str
+        path : str
             Path to datafiles, if ``None``, an open directory dialog is openend, by default ``None``
         """
         if DEBUG_IO:
@@ -73,7 +78,7 @@ class LameIO():
 
         parent = self.parent 
 
-        if dir_name is None:
+        if path is None:
             dialog = QFileDialog()
             dialog.setFileMode(QFileDialog.Directory)
             # Set the default directory to the current working directory
@@ -85,7 +90,7 @@ class LameIO():
                 parent.statusBar.showMessage("Open directory canceled.")
                 return
         else:
-            parent.selected_directory = dir_name
+            parent.selected_directory = path
 
         file_list = os.listdir(parent.selected_directory)
         parent.csv_files = [file for file in file_list if file.endswith('.lame.csv')]
@@ -93,7 +98,8 @@ class LameIO():
             # warning dialog
             parent.statusBar.showMessage("No valid csv files found.")
             return
-
+                #clear the current analysis
+        self.parent.reset_analysis()
         self.initialize_samples_and_tabs()
 
 
@@ -335,8 +341,6 @@ class LameIO():
             print("initialize_samples_and_tabs")
 
         ###
-        #clear the current analysis
-        self.parent.reset_analysis()
         self.parent.sample_ids = [os.path.splitext(file)[0].replace('.lame','') for file in self.parent.csv_files]
         # set first sample id as default
         self.parent.comboBoxSampleId.addItems(self.parent.sample_ids)
@@ -347,6 +351,8 @@ class LameIO():
         self.parent.init_tabs()
         self.parent.profiling.add_samples()
         self.parent.polygon.add_samples()
+        #add sample ids to workflow and activate sample id dependent blocks
+        self.parent.workflow.store_sample_ids()
 
     def import_files(self):
         """Opens an import dialog from ``MapImporter`` to open selected data directories."""
@@ -359,6 +365,6 @@ class LameIO():
 
         # read directory
         #if self.importDialog.ok:
-        #    self.open_directory(dir_name=self.importDialog.root_path)
+        #    self.open_directory(path=self.importDialog.root_path)
 
         # change sample

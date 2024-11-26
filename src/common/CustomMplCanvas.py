@@ -90,7 +90,7 @@ class MplCanvas(FigureCanvas):
         self.saved_line = []
         self.saved_dtext = []
         self.array = None
-        if self.parent is not None:
+        if self.parent is not None and self.parent.sample_id in self.parent.data:
             if self.parent.comboBoxPlotType.currentText() in self.parent.style.map_plot_types:
                 self.map_flag = True
             else:
@@ -118,7 +118,9 @@ class MplCanvas(FigureCanvas):
         ----------
         event : event data
             Includes the location of mouse pointer.
-        """        
+        """   
+        x= 0
+        y= 0     
         if (not event.inaxes) or (event.xdata is None) or (event.ydata is None):
             return
 
@@ -143,8 +145,11 @@ class MplCanvas(FigureCanvas):
             
             #x = x_i*self.parent.dx
             #y = y_i*self.parent.dy
-            x = x_i*self.parent.data[self.parent.sample_id].dx
-            y = y_i*self.parent.data[self.parent.sample_id].dy
+            if self.parent.sample_id in self.parent.data:
+                x = x_i*self.parent.data[self.parent.sample_id].dx
+                y = y_i*self.parent.data[self.parent.sample_id].dy
+            else:
+                return
 
             label =  f" {self.parent.preferences['Units']['Concentration']}"
         else:

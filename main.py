@@ -965,53 +965,62 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.sample_id == '':
             return
 
-        messageBoxResetSample = QMessageBox()
-        iconWarning = QIcon()
-        iconWarning.addPixmap(QPixmap(":/resources/icons/icon-warning-64.svg"), QIcon.Normal, QIcon.Off)
 
-        messageBoxResetSample.setWindowIcon(iconWarning)  # Set custom icon
-        messageBoxResetSample.setText("Do you wish to discard all work and revert to the original data?")
-        messageBoxResetSample.setWindowTitle("Reset analyses")
-        messageBoxResetSample.setStandardButtons(QMessageBox.Reset | QMessageBox.Cancel)
-
-        # Display the dialog and wait for user action
-        response = messageBoxResetSample.exec_()
-
-        if response == QMessageBox.Cancel:
-            return
 
         if selection =='full':
-            #reset self.data
-            self.data = {}
-            # self.plot_widget_dict = {
-            #     'Analyte':{},
-            #     'Histogram':{},
-            #     'Correlation':{},
-            #     'Multidimensional Analysis':{},
-            #     'Geochemistry':{},
-            #     'Calculated':{}
-            # }
-            self.multi_view_index = []
-            self.laser_map_dict = {}
-            self.multiview_info_label = {}
-            self.ndim_list = []
-            self.lasermaps = {}
-            #self.treeModel.clear()
-            self.prev_plot = ''
-            self.plot_tree = PlotTree(self)
-            self.change_sample(self.comboBoxSampleId.currentIndex())
+            if self.data:
+                # show dialog to to get confirmation from user
+                messageBoxResetSample = QMessageBox()
+                iconWarning = QIcon()
+                iconWarning.addPixmap(QPixmap(":/resources/icons/icon-warning-64.svg"), QIcon.Normal, QIcon.Off)
 
-            # reset styles
-            self.style.reset_default_styles()
+                messageBoxResetSample.setWindowIcon(iconWarning)  # Set custom icon
+                messageBoxResetSample.setText("Do you wish to discard all work and reset analysis?")
+                messageBoxResetSample.setWindowTitle("Reset analyses")
+                messageBoxResetSample.setStandardButtons(QMessageBox.Yes |QMessageBox.Save| QMessageBox.Cancel)
 
-            # reset plot layouts
-            self.clear_layout(self.widgetSingleView.layout())
-            self.clear_layout(self.widgetMultiView.layout())
-            self.clear_layout(self.widgetQuickView.layout())
+                # Display the dialog and wait for user action
+                response = messageBoxResetSample.exec_()
 
-            # make the first plot
-            self.plot_flag = True
-            # self.update_SV()
+                if response == QMessageBox.Cancel:
+                    return
+                elif response == QMessageBox.Save:
+                    self.io.save_project()
+
+
+                #reset self.data
+                self.data = {}
+                # self.plot_widget_dict = {
+                #     'Analyte':{},
+                #     'Histogram':{},
+                #     'Correlation':{},
+                #     'Multidimensional Analysis':{},
+                #     'Geochemistry':{},
+                #     'Calculated':{}
+                # }
+                self.multi_view_index = []
+                self.laser_map_dict = {}
+                self.multiview_info_label = {}
+                self.ndim_list = []
+                self.lasermaps = {}
+                #self.treeModel.clear()
+                self.prev_plot = ''
+                self.plot_tree = PlotTree(self)
+                self.change_sample(self.comboBoxSampleId.currentIndex())
+
+                # reset styles
+                self.style.reset_default_styles()
+
+                # reset plot layouts
+                self.clear_layout(self.widgetSingleView.layout())
+                self.clear_layout(self.widgetMultiView.layout())
+                self.clear_layout(self.widgetQuickView.layout())
+
+                # make the first plot
+                self.plot_flag = True
+                # self.update_SV()
+            # reset_sample id
+            self.sample_id = None
         elif selection == 'sample': #sample is changed
 
             #clear filter table
@@ -1024,7 +1033,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             #clear polygons
             self.polygon.clear_polygons()
 
-        pass
 
     def toggle_dock_visibility(self, dock, button):
         if dock.isVisible():
@@ -1048,7 +1056,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.ProfilingPage.setEnabled(True)
         self.PTtPage.setEnabled(True)
 
-    def change_sample(self, index):
+    def change_sample(self, index, save_analysis= True):
         """Changes sample and plots first map
 
         Parameters
@@ -1064,21 +1072,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # if selected sample id is same as previous
             return
 
-        self.sample_id = self.sample_ids[index]
-
-        ######
-        # THIS DOESN'T DO ANYTHING ANYMORE, BUT WHEN A NEW SAMPLE IS LOADED, IT NEEDS TO CHECK FOR PERSISTANT FILTERS AND THEN ADD THEM TO THE NEW SAMPLEOBJ
-        # initialize filter_info dataframe for storing filter properties
-        # if self.filter_df is not None and not self.filter_info.empty:
-        #     if any(self.filter_info['persistent']):
-        #         # Keep only rows where 'persistent' is True
-        #         self.filter_info = self.filter_info[self.filter_info['persistent'] == True]
-
-        # stop autosave timer
-        self.notes.save_notes_file()
-        self.notes.autosaveTimer.stop()
-
-        if self.data:
+        if self.data and save_analysis:
             # Create and configure the QMessageBox
             messageBoxChangeSample = QMessageBox()
             iconWarning = QIcon()
@@ -1094,19 +1088,38 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             if response == QMessageBox.Save:
                 self.save_project()
-                self.reset_analysis('sample')
             elif response == QMessageBox.Discard:
-                self.reset_analysis('sample')
+                pass
             else: #user pressed cancel
                 self.comboBoxSampleId.setCurrentText(self.sample_id)
                 return
+            
+            
+        self.sample_id = self.sample_ids[index]
+        self.reset_analysis('sample')
+        ######
+        # THIS DOESN'T DO ANYTHING ANYMORE, BUT WHEN A NEW SAMPLE IS LOADED, IT NEEDS TO CHECK FOR PERSISTANT FILTERS AND THEN ADD THEM TO THE NEW SAMPLEOBJ
+        # initialize filter_info dataframe for storing filter properties
+        # if self.filter_df is not None and not self.filter_info.empty:
+        #     if any(self.filter_info['persistent']):
+        #         # Keep only rows where 'persistent' is True
+        #         self.filter_info = self.filter_info[self.filter_info['persistent'] == True]
+
+        # stop autosave timer
+        self.notes.save_notes_file()
+        self.notes.autosaveTimer.stop()
 
         # notes and autosave timer
         self.notes_file = os.path.join(self.selected_directory,self.sample_id+'.rst')
         # open notes file if it exists
         if os.path.exists(self.notes_file):
-            with open(self.notes_file,'r') as file:
-                self.textEditNotes.setText(file.read())
+            try:
+                with open(self.notes_file,'r') as file:
+                    self.textEditNotes.setText(file.read())
+            except:
+                file_name = os.path.basename(self.notes_file)
+                self.statusbar.showMessage(f'Cannot read {file_name}')
+                pass
         # put current notes into self.textEditNotes
         self.notes.autosaveTimer.start()
 
@@ -6422,6 +6435,44 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if test_string in string:
                 return True
         return False
+    
+    # -------------------------------
+    # Blockly functions
+    # -------------------------------
+    # gets the set of fields types
+    def get_field_type_list(self):
+        """Gets the fields associated with a defined set
+
+        Set names are consistent with QComboBox.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        list
+            Set_fields, a list of field types within the input set
+        """
+
+        field_list = ['Analyte', 'Analyte (normalized)']
+        
+        data_type_dict = self.data[self.sample_id].get_attribute_dict('data_type')
+
+        # add check for ratios
+        if 'ratio' in data_type_dict:
+            field_list.append('Ratio')
+            field_list.append('Ratio (normalized)')
+
+        if 'pca score' in data_type_dict:
+            field_list.append('PCA score')
+
+        if 'cluster' in data_type_dict:
+            field_list.append('Cluster')
+
+        if 'cluster score' in data_type_dict:
+            field_list.append('Cluster score')
+        
+        return field_list
 
 
 # -------------------------------

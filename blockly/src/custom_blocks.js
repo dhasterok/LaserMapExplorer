@@ -14,13 +14,13 @@ Block Type Names: Snake case (set_plot_type).
 Block Input Names: Snake case (set_plot_type).
 */
 
-//// I/O //// 
+//// File I/O //// 
 const load_directory = {
     init: function() {
         this.appendValueInput('DIR')
             .setCheck('String')
             .appendField('load files from directory')
-            .appendField(new Blockly.FieldTextInput('directory name'), 'DIR');
+            .appendField(new Blockly.FieldTextInput('directory path'), 'DIR');
         this.setNextStatement(true, null);
         this.setTooltip('Loads files from a directory');
         this.setHelpUrl('');
@@ -28,6 +28,22 @@ const load_directory = {
     }
 };
 Blockly.Blocks['load_directory'] = load_directory;
+
+const load_sample = {
+    init: function() {
+        this.appendValueInput('DIR')
+            .setCheck('String')
+            .appendField('load sample from directory')
+            .appendField(new Blockly.FieldTextInput('file path'), 'DIR');
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setTooltip('Loads files from a directory');
+        this.setHelpUrl('');
+        this.setColour(225);
+    }
+};
+Blockly.Blocks['load_sample'] = load_sample;
+
 /*
 const sample_ids_list_block = {
     init: function() {
@@ -54,8 +70,8 @@ export function enableSampleIDsBlockFunction() {
     // Re-register the block definition
     //Blockly.Blocks['sample_ids_list_block'] = sample_ids_list_block;
     Blockly.Blocks['select_samples'] = select_samples;
-    Blockly.Blocks['iterate_sample_ids'] = iterate_sample_ids;
-
+    Blockly.Blocks['loop_over_samples'] = loop_over_samples;
+    Blockly.Blocks['loop_over_fields'] = loop_over_fields;
     // Refresh the toolbox
     workspace.updateToolbox(document.getElementById('toolbox'));
 }
@@ -83,8 +99,8 @@ const select_samples = {
 };
 Blockly.Blocks['select_samples'] = select_samples;
 
- // Block: Iterate Through Sample IDs
- const iterate_sample_ids = {
+ // Block: loop over Sample IDs
+ const loop_over_samples = {
     init: function() {
         this.appendDummyInput()
             .appendField("for each sample ID in")
@@ -96,14 +112,73 @@ Blockly.Blocks['select_samples'] = select_samples;
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
         this.setColour(230);
-        this.setTooltip('Iterate through each sample ID in the sample_ids list');
+        this.setTooltip('Loop over each sample in the provided directory');
         this.setHelpUrl('');
         if (!enableSampleIDsBlock) {
             this.setDisabledReason(true, "no_sample_ids");
         }
     }
 };
-Blockly.common.defineBlocks({ iterate_sample_ids: iterate_sample_ids });
+Blockly.common.defineBlocks({ loop_over_samples: loop_over_samples });
+
+// Block: loop over fields
+const loop_over_fields = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField("for each sample ID in");
+        this.appendDummyInput('fieldType')
+            .appendField('field type')
+            .appendField(new Blockly.FieldDropdown(
+                [['Analyte', 'Analyte'],
+                 ['Analyte (Normalised)', 'Analyte (Normalised)'],
+                 ['PCA Score', 'PCA Score'],
+                 ['Cluster', 'Cluster']]
+            ), 'fieldType');
+        this.appendStatementInput("DO")
+            .appendField("do");
+
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip('Loop over each field in the selected field type');
+        this.setHelpUrl('');
+        if (!enableSampleIDsBlock) {
+            this.setDisabledReason(true, "no_sample_ids");
+        }
+
+        // Add onchange event listener
+        this.setOnChange(function(event) {
+            if (event.type === Blockly.Events.BLOCK_CHANGE &&
+                event.blockId === this.id &&
+                event.element === 'field' &&
+                event.name === 'fieldType') {
+                // Field 'fieldType' changed
+                this.updateFieldDropdown(event.newValue);
+            }
+        }.bind(this));
+    },
+    /**
+     * Updates the dropdown list dynamically based on the selected field type.
+     * @param {string} fieldType Selected field type
+     */
+    updateFieldDropdown: function(fieldType) {
+        // Call the Python function getFieldList through the WebChannel, handle as a promise
+        window.blocklyBridge.getFieldTypeList(fieldType).then((response) => {
+            const options = response.map(option => [option, option]);
+            const dropdown = this.getField('fieldType');
+
+            // Update the dropdown options
+            dropdown.menuGenerator_ = options;
+            dropdown.setValue(options[0][1]);  // Set the first option as the default
+            dropdown.forceRerender();  // Refresh dropdown to display updated options
+        }).catch(error => {
+            console.error('Error fetching field list:', error);
+        });
+    }
+};
+
+Blockly.common.defineBlocks({ loop_over_fields: loop_over_fields });
+
 
 // Define the select_analytes block
 const select_analytes = {

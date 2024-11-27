@@ -12,11 +12,15 @@ Users can easily toggle these filters on or off using the *Top Toolbar* for quic
 Filter by value
 ===============
 
+.. figure:: _static/screenshots/LaME_Filter_Tab.png
+   :align: center
+   :alt: LaME interface: Lower tab - Filter tab
+
+   *Filter* tab in the *Lower Tab*.
+
 To set a filter by value, use the two drop down menus to select the type of field (upper) and the desired field (lower).  It is possible to filter by value using analytes, ratios, custom fields, principal component score, or cluster score.  Once selected, the ranges for the field will be automatically displayed in the min and max boxes.  Change the values to set the bounds explicitly using the (left boxes) or implicitly by setting the quantile bounds (right boxes).  Once the bounds are set, click the |icon-filter2| button to add the filter to the list.
 
-To set a filter by value, users select the type of field and the desired field using two dropdown menus. Filtering can be applied to analytes, ratios, custom fields, principal component scores, or cluster scores. Once a field is selected, its range is automatically displayed in the min and max boxes. Users can set explicit bounds using the left boxes or implicit bounds using quantile values in the right boxes. After setting the desired bounds, clicking the |icon-filter2| button adds the filter to the list.
-
-Multiple filters may be combined to produce more complex filters.  The filters include a boolean operations (*and* and *or*, set in the *Filter Table* in the :doc:`lower_tabs`) to assist with precisely defining filters to capture the desired regions for analysis and plotting.  In many cases, the overlap between values may make it difficult to separate phases.  In these cases, we suggest targeting specific regions with a polygon or cluster mask.
+Multiple filters may be combined to produce more complex filters.  The filters include a boolean operations (*and* and *or*ß) to assist with precisely defining filters to capture the desired regions for analysis and plotting.  In many cases, the overlap between values may make it difficult to separate phases.  In these cases, we suggest targeting specific regions with a polygon or cluster mask.
 
 Polygon Masking
 ===============

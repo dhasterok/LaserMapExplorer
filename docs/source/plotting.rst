@@ -19,7 +19,7 @@ There are a number of plots that are possible within *LaME*.  A list of plot typ
 | correlation               |                           |
 +---------------------------+---------------------------+
 | - Pearson                 | *Samples and Fields*      |
-| - Spearman               |                           |
+| - Spearman                |                           |
 | - Kendall                 |                           |
 +---------------------------+---------------------------+
 | histogram                 |                           |

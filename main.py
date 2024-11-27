@@ -65,7 +65,7 @@ from src.app.Calculator import CustomFieldCalculator as cfc
 from src.app.SpecialFunctions import SpecialFunctions as specfun
 from src.common.NoteTaking import Notes
 from src.app.Browser import Browser
-from src.Workflow import Workflow
+from src.app.Workflow import Workflow
 import src.app.QuickView as QV
 from src.app.config import BASEDIR, ICONPATH, SSPATH, DEBUG, load_stylesheet
 from src.common.ExtendedDF import AttributeDataFrame

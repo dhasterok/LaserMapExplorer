@@ -11,8 +11,8 @@ The Lower Tabs provide additional functionality for note-taking and profile visu
     The Lower Tabs section of the *LaME* interface, providing access to Notes and Profiles features.
 
 
-Notes
-=====
+Notes Tab
+=========
 
 The Notes tab allows you to take and store notes on a sample, keeping them alongside your analysis files. This integrated note-taking capability is one of LaME's novel features, enabling rapid production of report-style documentation for your samples or analyses.
 
@@ -44,10 +44,24 @@ To display a special character, use a '\\'
 
 Titles, sections, and subsections can be created by including a line of \*, \=, and \- characters, the same length as the heading text. Use the |icon-heading| button to quickly add these symbols.
 
-Profiling
-=========
+Filters Tab
+===========
+
+Profiles Tab
+=============
 
 The Profiles tab allows for the visualization of data trends across specific sections of a sample.  Users can create and view profile plots to analyze how various parameters change along a particular path or cross-section of their sample.  For detailed information on how to create profiles, please refer to the :doc:`left_toolbox` section.
 
 .. |icon-heading| image:: _static/icons/icon-heading-64.png
     :height: 2ex
+
+Plot Info Tab
+=============
+
+Workflow Tab
+============
+
+Help Tab
+========
+
+The help tab includes an integrated web browser that allows you to navigate and search *LaME*'s documentation.

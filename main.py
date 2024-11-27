@@ -2994,7 +2994,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #self.plot_widget_dict[self.plot_info['tree']][self.sample_id][self.plot_info['plot_name']] = {'info':self.plot_info, 'view':view, 'position':None}
 
         # updates tree with new plot name
-        self.add_tree_item(self.plot_info)
+        self.plot_tree.add_tree_item(self.plot_info)
 
     def clear_layout(self, layout):
         """Clears a widget that contains plots

@@ -128,6 +128,22 @@ class PlotTree():
             leaf = treeView.find_leaf(norm_ratio_branch, ratio)
             if not leaf:
                 treeView.add_leaf(norm_ratio_branch, ratio)
+
+    def add_calculated_leaf(self, new_field):
+
+        # assign the two objects needed from self.parent
+        sample_id = self.parent.sample_id
+        treeView = self.parent.treeView
+
+        calculated_branch = treeView.branch_exists(self.tree['Calculated'], sample_id)
+        if not calculated_branch:
+            sample_branch = treeView.add_branch(self.tree['Calculated'], sample_id)
+        else:
+            return
+
+        leaf = treeView.find_leaf(sample_branch, new_field)
+        if not leaf:
+            treeView.add_leaf(sample_branch, new_field)
     
     def sort_tree(self, action, method=None):
         """Sorts `MainWindow.treeView` and raw_data and processed_data according to one of several options.
@@ -256,10 +272,10 @@ class PlotTree():
         branch = tree_index.parent().data()
         leaf = tree_index.data()
 
+        if DEBUG_TREE:
+            print(f"  {tree}:{branch}:{leaf}")
 
-        #print(tree+':'+branch+':'+leaf)
-
-        if tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
+        if tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)', 'Calculated']:
             #current_plot_df = self.get_map_data(sample_id=level_2_data, field=level_3_data, field_type='Analyte')
             #self.create_plot(current_plot_df, sample_id=level_2_data, plot_type='analyte', analyte_1=level_3_data)
             # if leaf in self.plot_widget_dict[tree][branch].keys():
@@ -268,13 +284,18 @@ class PlotTree():
             self.parent.style.initialize_axis_values(tree, leaf)
             self.parent.style.set_style_widgets('analyte map')
             if self.plot_info:
-                print('tree_double_click: add_plotwidget_to_canvas')
+                if DEBUG_TREE:
+                    print(f"  plot_info exists, adding to canvas")
+
                 self.parent.add_plotwidget_to_canvas(self.plot_info)
                 # updates comboBoxColorByField and comboBoxColorField comboboxes 
                 self.parent.update_fields(self.parent.plot_info['sample_id'], self.parent.plot_info['plot_type'],self.parent.plot_info['field_type'], self.parent.plot_info['field'])
                 #update UI with auto scale and neg handling parameters from 'Analyte/Ratio Info'
                 self.parent.update_spinboxes(self.parent.plot_info['field'],self.parent.plot_info['field_type'])
             else:
+                if DEBUG_TREE:
+                    print(f"  plot_info does not exist, creating map")
+
                 # print('tree_double_click: plot_map_pg')
                 if self.parent.toolBox.currentIndex() not in [self.parent.left_tab['sample'], self.parent.left_tab['process'], self.parent.left_tab['polygons'], self.parent.left_tab['profile']]:
                     self.parent.toolBox.setCurrentIndex(self.parent.left_tab['sample'])
@@ -293,7 +314,7 @@ class PlotTree():
                 #update UI with auto scale and neg handling parameters from 'Analyte/Ratio Info'
                 self.parent.update_spinboxes(field=leaf, field_type=tree)
 
-        elif tree in ['Histogram', 'Correlation', 'Geochemistry', 'Multidimensional Analysis', 'Calculated Map']:
+        elif tree in ['Histogram', 'Correlation', 'Geochemistry', 'Multidimensional Analysis']:
 
             if self.plot_info:
                 self.parent.add_plotwidget_to_canvas(self.plot_info)
@@ -301,6 +322,9 @@ class PlotTree():
                 self.parent.style.plot_type = self.plot_info.plot_type
                 # updates comboBoxColorByField and comboBoxColorField comboboxes 
                 #self.parent.update_fields(self.parent.plot_info['sample_id'], self.parent.plot_info['plot_type'],self.parent.plot_info['field_type'], self.parent.plot_info['field'])
+
+        else:
+            raise ValueError(f"Unknown tree type {tree}.")
 
     def update_tree(self, norm_update=False):
         """Updates plot selector list and data
@@ -398,7 +422,7 @@ class PlotTree():
             if norm_update: #update if analytes are returned from analyte selection window
                 data.update_norm(norm, analyte)
 
-    def add_tree_item(self, plot_info):
+    def add_tree_item(self, plot_info=None):
         """Updates plot selector list and adds plot information data to tree item
         
         Parameters
@@ -417,7 +441,7 @@ class PlotTree():
         leaf = plot_info['plot_name']
         tree = plot_info['tree']
         if tree == 'Calculated':
-            tree= 'Calculated Map'
+            tree = 'Calculated Map'
 
         tree_items = self.get_tree_items(tree)
         

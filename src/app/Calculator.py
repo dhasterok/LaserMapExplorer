@@ -2,6 +2,8 @@ import os, re
 import numexpr as ne
 from src.app.config import BASEDIR, DEBUG_CALCULATOR
 import numpy as np
+import pandas as pd
+from src.common.varfunc import partial_match
 
 from PyQt5.QtCore import ( QUrl)
 from PyQt5.QtWidgets import ( QMessageBox, QInputDialog )
@@ -379,7 +381,7 @@ class CustomFieldCalculator():
             new_field, ok = QInputDialog.getText(self.parent, 'Save expression', 'Enter custon field name:')
             if ok:
                 # check for valid field name
-                if self.partial_match_in_list(['_N',':'],new_field):
+                if partial_match(['_N',':'],new_field)[0]:
                     err = "new field name cannot have an '_N' or ':' in the name"
                     self.calc_error(func, err, '')
                     ok = False
@@ -462,6 +464,9 @@ class CustomFieldCalculator():
         self.parent.comboBoxCalcFormula.addItem(new_field)
         self.parent.comboBoxCalcFormula.setCurrentText(new_field)
 
+        # add new calculated field to self.treeView
+        self.parent.plot_tree.add_calculated_leaf(new_field)
+
         if self.parent.comboBoxCalcFieldType.currentText == 'Calculated':
             self.parent.update_field_combobox(self.parent.comboBoxCalcFieldType, self.parent.comboBoxCalcField)
 
@@ -531,7 +536,7 @@ class CustomFieldCalculator():
             Additional info (generally exception raised)
         """        
         if DEBUG_CALCULATOR:
-            print(f"calc_error\n  expr: {expr}\n  val_dict: {val_dict}\n  keep: {keep}")
+            print(f"calc_error\n  func: {func}\n  err: {err}\n  addinfo: {addinfo}")
 
         self.parent.labelCalcMessage.setText(f"Error: {err}")
         QMessageBox.warning(self.parent,'Calculation Error',f"Error: {err}\n\n({func}) {addinfo}")

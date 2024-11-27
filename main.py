@@ -1628,7 +1628,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.comboBoxPlotType.setCurrentText(plot_type)
 
             if field_type != self.comboBoxColorByField.currentText():
-                if field_type =='Calculated Map':  # correct name 
+                if field_type =='Calculated':  # correct name 
                     self.comboBoxColorByField.setCurrentText('Calculated')
                 else:
                     self.comboBoxColorByField.setCurrentText(field_type)
@@ -6416,25 +6416,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.toolButtonPlotProfile.setChecked(False)
                 self.toolButtonPointMove.setChecked(False)
 
-    def partial_match_in_list(self, lst, string):
-        """Checks whether values in a list partially match a string
-
-        Parameters
-        ----------
-        lst: list
-            List of partial strings to find in ``string``
-        string: str
-            Text to test.
-
-        Returns
-        -------
-        bool
-            ``True`` if a match exists, ``False`` if no items match.
-        """    
-        for test_string in lst:
-            if test_string in string:
-                return True
-        return False
     
     # -------------------------------
     # Blockly functions
@@ -6473,35 +6454,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             field_list.append('Cluster score')
         
         return field_list
-
-
-# -------------------------------
-# Classes
-# -------------------------------
-
-# Mask object
-# -------------------------------
-class MaskObj:
-    def __init__(self, initial_value=None):
-        self._value = initial_value
-        self._callbacks = []
-
-    @property
-    def value(self):
-        return self._value
-
-    @value.setter
-    def value(self, new_value):
-        old_value = self._value
-        self._value = new_value 
-        self._notify_observers(old_value, new_value)
-
-    def _notify_observers(self, old_value, new_value):
-        for callback in self._callbacks:
-            callback(old_value, new_value)
-    
-    def register_callback(self, callback):
-        self._callbacks.append(callback)
 
 
 # -------------------------------

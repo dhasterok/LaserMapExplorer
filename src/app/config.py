@@ -15,6 +15,8 @@ DEBUG_DATA = False
 DEBUG_CALCULATOR = False
 DEBUG_ANALYTE_UI = False
 DEBUG_IO = False
+DEBUG_TREE = True
+DEBUG_BROWSER = True
 
 def load_stylesheet(filename):
     replacements = {

@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import ( QMenu )
 import src.common.CustomMplCanvas as mplc
 from src.common.CustomWidgets import StandardItem, CustomTreeView
 from src.common.SortAnalytes import sort_analytes
+from src.app.config import DEBUG_TREE
 
 
 # -------------------------------
@@ -28,6 +29,9 @@ class PlotTree():
 
     def initialize_tree(self):
         """Initialize ``self.parent.treeView`` with the top level items."""        
+        if DEBUG_TREE:
+            print(f"initialize_tree")
+
         # create tree
         treeView = self.parent.treeView
         # hide the header row
@@ -64,6 +68,9 @@ class PlotTree():
         sample_id : str
             Sample name, Defaults to None
         """
+        if DEBUG_TREE:
+            print(f"add_sample, sample_id: {sample_id}")
+
         if not sample_id:
             return
 
@@ -121,6 +128,22 @@ class PlotTree():
             leaf = treeView.find_leaf(norm_ratio_branch, ratio)
             if not leaf:
                 treeView.add_leaf(norm_ratio_branch, ratio)
+
+    def add_calculated_leaf(self, new_field):
+
+        # assign the two objects needed from self.parent
+        sample_id = self.parent.sample_id
+        treeView = self.parent.treeView
+
+        calculated_branch = treeView.branch_exists(self.tree['Calculated'], sample_id)
+        if not calculated_branch:
+            sample_branch = treeView.add_branch(self.tree['Calculated'], sample_id)
+        else:
+            return
+
+        leaf = treeView.find_leaf(sample_branch, new_field)
+        if not leaf:
+            treeView.add_leaf(sample_branch, new_field)
     
     def sort_tree(self, action, method=None):
         """Sorts `MainWindow.treeView` and raw_data and processed_data according to one of several options.
@@ -132,6 +155,9 @@ class PlotTree():
         method : str, optional
             Method used for sorting the analytes. If `None`, defined by action, by default `None`
         """        
+        if DEBUG_TREE:
+            print(f"sort_tree, method: {method}")
+
         if method is None:
             method = action.text()
             self.sort_method = method
@@ -191,6 +217,9 @@ class PlotTree():
             Plot_info dictionary with plot widget and information about the plot construction, 
             returns True if the branch exists
         """
+        if DEBUG_TREE:
+            print(f"retrieve_plotinfo_from_tree, tree_index: {tree_index}")
+
         #print('retrieve_table_data')
         if tree_index is not None:
             tree = tree_index.parent().parent().data()
@@ -230,6 +259,9 @@ class PlotTree():
         val : PyQt5.QtCore.QModelIndex
             Item selected in ``Plot Selector``
         """
+        if DEBUG_TREE:
+            print(f"tree_double_click, tree_index: {tree_index}")
+
         # get double-click result
         self.plot_info, flag = self.retrieve_plotinfo_from_tree(tree_index=tree_index)
 
@@ -240,10 +272,10 @@ class PlotTree():
         branch = tree_index.parent().data()
         leaf = tree_index.data()
 
+        if DEBUG_TREE:
+            print(f"  {tree}:{branch}:{leaf}")
 
-        #print(tree+':'+branch+':'+leaf)
-
-        if tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
+        if tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)', 'Calculated']:
             #current_plot_df = self.get_map_data(sample_id=level_2_data, field=level_3_data, field_type='Analyte')
             #self.create_plot(current_plot_df, sample_id=level_2_data, plot_type='analyte', analyte_1=level_3_data)
             # if leaf in self.plot_widget_dict[tree][branch].keys():
@@ -252,13 +284,18 @@ class PlotTree():
             self.parent.style.initialize_axis_values(tree, leaf)
             self.parent.style.set_style_widgets('analyte map')
             if self.plot_info:
-                print('tree_double_click: add_plotwidget_to_canvas')
+                if DEBUG_TREE:
+                    print(f"  plot_info exists, adding to canvas")
+
                 self.parent.add_plotwidget_to_canvas(self.plot_info)
                 # updates comboBoxColorByField and comboBoxColorField comboboxes 
                 self.parent.update_fields(self.parent.plot_info['sample_id'], self.parent.plot_info['plot_type'],self.parent.plot_info['field_type'], self.parent.plot_info['field'])
                 #update UI with auto scale and neg handling parameters from 'Analyte/Ratio Info'
                 self.parent.update_spinboxes(self.parent.plot_info['field'],self.parent.plot_info['field_type'])
             else:
+                if DEBUG_TREE:
+                    print(f"  plot_info does not exist, creating map")
+
                 # print('tree_double_click: plot_map_pg')
                 if self.parent.toolBox.currentIndex() not in [self.parent.left_tab['sample'], self.parent.left_tab['process'], self.parent.left_tab['polygons'], self.parent.left_tab['profile']]:
                     self.parent.toolBox.setCurrentIndex(self.parent.left_tab['sample'])
@@ -277,11 +314,17 @@ class PlotTree():
                 #update UI with auto scale and neg handling parameters from 'Analyte/Ratio Info'
                 self.parent.update_spinboxes(field=leaf, field_type=tree)
 
-        elif tree in ['Histogram', 'Correlation', 'Geochemistry', 'Multidimensional Analysis', 'Calculated Map']:
+        elif tree in ['Histogram', 'Correlation', 'Geochemistry', 'Multidimensional Analysis']:
+
             if self.plot_info:
-                self.parent.add_plotwidget_to_canvas(self.parent.plot_info)
+                self.parent.add_plotwidget_to_canvas(self.plot_info)
+                self.parent.style.style_dict[self.plot_info.plot_type] = self.plot_info.style
+                self.parent.style.plot_type = self.plot_info.plot_type
                 # updates comboBoxColorByField and comboBoxColorField comboboxes 
-                self.parent.update_fields(self.parent.plot_info['sample_id'], self.parent.plot_info['plot_type'],self.parent.plot_info['field_type'], self.parent.plot_info['field'])
+                #self.parent.update_fields(self.parent.plot_info['sample_id'], self.parent.plot_info['plot_type'],self.parent.plot_info['field_type'], self.parent.plot_info['field'])
+
+        else:
+            raise ValueError(f"Unknown tree type {tree}.")
 
     def update_tree(self, norm_update=False):
         """Updates plot selector list and data
@@ -296,6 +339,9 @@ class PlotTree():
         norm_update : bool
             Flag for updating norm list. Defaults to False
         """
+        if DEBUG_TREE:
+            print(f"update_tree, norm_update: {norm_update}")
+
         #print('update_tree')
         sample_id = self.parent.sample_id
         if sample_id == '':
@@ -376,7 +422,7 @@ class PlotTree():
             if norm_update: #update if analytes are returned from analyte selection window
                 data.update_norm(norm, analyte)
 
-    def add_tree_item(self, plot_info):
+    def add_tree_item(self, plot_info=None):
         """Updates plot selector list and adds plot information data to tree item
         
         Parameters
@@ -384,6 +430,9 @@ class PlotTree():
         plot_info : dict
             Plot related data (including plot widget) to tree item associated with the plot.
         """
+        if DEBUG_TREE:
+            print(f"add_tree_item, plot_info: {plot_info}")
+
         if plot_info is None:
             return
 
@@ -392,7 +441,7 @@ class PlotTree():
         leaf = plot_info['plot_name']
         tree = plot_info['tree']
         if tree == 'Calculated':
-            tree= 'Calculated Map'
+            tree = 'Calculated Map'
 
         tree_items = self.get_tree_items(tree)
         
@@ -450,6 +499,9 @@ class PlotTree():
         tree : str
             Highest level of tree with branches to unhighlight
         """
+        if DEBUG_TREE:
+            print(f"unhighlight_tree, tree: {tree}")
+
         #bgcolor = tree.background().color()
         if darkdetect.isDark():
             bgcolor = '#1e1e1e'
@@ -476,6 +528,9 @@ class PlotTree():
         Qt.AbstractModelItem
             The set of items under *tree*
         """
+        if DEBUG_TREE:
+            print(f"get_tree_items, tree: {tree}")
+
         return self.tree[tree]
 
     def find_leaf(self, tree, branch, leaf):
@@ -495,6 +550,9 @@ class PlotTree():
         tuple
             (item, flag), item is a branch (``flag==False``) or leaf (``flag==True``), if item neither return is ``(None, None)``.
         """
+        if DEBUG_TREE:
+            print(f"find_leaf\n  tree: {tree}\n  branch: {branch}\n  leaf: {leaf}")
+
         #print('find_leaf')
         #print(f'{tree} : {branch} : {leaf}')
         tree_items = self.get_tree_items(tree)
@@ -519,6 +577,9 @@ class PlotTree():
         tree : str
             Name of tree in ``MainWindow.treeView``
         """
+        if DEBUG_TREE:
+            print(f"clear_tree_data, tree: {tree}")
+
         tree_items = self.get_tree_items(tree)
 
         def clear_item_data(item):
@@ -536,6 +597,9 @@ class PlotTree():
         """
         Extract plot_info data from the root of QStandardItemModel as a flat list.
         """
+        if DEBUG_TREE:
+            print(f"get_plot_info_from_tree")
+
         self.plot_info_list = []  # Reset the list each time this method is called
         root = model.invisibleRootItem()
         for i in range(root.rowCount()):
@@ -546,6 +610,9 @@ class PlotTree():
         """
         Recursively extract plot_info from QStandardItem and append to a flat list.
         """
+        if DEBUG_TREE:
+            print(f"extract_plot_info")
+
         # Retrieve the plot_info from the UserRole data
         plot_info = item.data(Qt.UserRole)
         if isinstance(plot_info, dict) and 'figure' in plot_info:
@@ -564,6 +631,9 @@ class PlotTree():
 
     def create_item_from_data(self,data):
         """Recursively create QStandardItem from data."""
+        if DEBUG_TREE:
+            print(f"create_item_from_data")
+
         item = QStandardItem(data['text'])
         if 'plot_info' in data.keys():
             #create new matplotlib canvas and save fig

@@ -7,9 +7,14 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 import os
 import sys
-sys.path.insert(0, os.path.abspath('..'))
-sys.path.insert(0, os.path.abspath('../src'))
-sys.path.insert(0, os.path.abspath('../src/ui'))
+
+sys.path.insert(0, os.path.abspath('../'))
+sys.path.insert(0, os.path.abspath('../src/'))
+sys.path.insert(0, os.path.abspath('../src/app/'))
+sys.path.insert(0, os.path.abspath('../src/common/'))
+sys.path.insert(0, os.path.abspath('../src/ui/'))
+
+print("sys.path:", sys.path)
 
 project = 'Laser Map Explorer'
 copyright = '2024, Shavin Kaluthantri, Derrick Hasterok, and Maggie Li'
@@ -22,8 +27,9 @@ print(sys.executable)
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-        'sphinx.ext.autosummary',
         'sphinx.ext.autodoc',
+        'sphinx.ext.autosummary',
+        'sphinx.ext.napoleon',
         'sphinx.ext.inheritance_diagram',
         'sphinx.ext.intersphinx',
         'sphinx.ext.autosectionlabel',

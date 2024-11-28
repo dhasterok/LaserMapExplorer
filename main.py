@@ -65,7 +65,7 @@ from src.app.Calculator import CustomFieldCalculator as cfc
 from src.app.SpecialFunctions import SpecialFunctions as specfun
 from src.common.NoteTaking import Notes
 from src.app.Browser import Browser
-from src.Workflow import Workflow
+from src.app.Workflow import Workflow
 import src.app.QuickView as QV
 from src.app.config import BASEDIR, ICONPATH, SSPATH, DEBUG, load_stylesheet
 from src.common.ExtendedDF import AttributeDataFrame
@@ -480,7 +480,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionSwapAxes.setEnabled(False)
 
         self.browser = Browser(self)
-        self.actionReportBug.triggered.connect(lambda: self.browser.setUrl(QUrl('https://github.com/dhasterok/LaserMapExplorer/issues')))
+        self.actionReportBug.triggered.connect(lambda: self.browser.engine.setUrl(QUrl('https://github.com/dhasterok/LaserMapExplorer/issues')))
 
         # For light and dark themes, connects actionViewMode
         self.theme = UIThemes(app, self)
@@ -906,7 +906,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Setup Help
         #-------------------------
-        self.actionHelp.triggered.connect(self.toggle_help_mode)
+        self.actionHelp.setCheckable(True)
+        self.actionHelp.toggled.connect(self.toggle_help_mode)
         self.centralwidget.installEventFilter(self)
         self.canvasWindow.installEventFilter(self)
         self.dockWidgetLeftToolbox.installEventFilter(self)
@@ -1644,7 +1645,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.comboBoxPlotType.setCurrentText(plot_type)
 
             if field_type != self.comboBoxColorByField.currentText():
-                if field_type =='Calculated Map':  # correct name 
+                if field_type =='Calculated':  # correct name 
                     self.comboBoxColorByField.setCurrentText('Calculated')
                 else:
                     self.comboBoxColorByField.setCurrentText(field_type)
@@ -3010,7 +3011,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #self.plot_widget_dict[self.plot_info['tree']][self.sample_id][self.plot_info['plot_name']] = {'info':self.plot_info, 'view':view, 'position':None}
 
         # updates tree with new plot name
-        self.add_tree_item(self.plot_info)
+        self.plot_tree.add_tree_item(self.plot_info)
 
     def clear_layout(self, layout):
         """Clears a widget that contains plots
@@ -6434,25 +6435,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.toolButtonPlotProfile.setChecked(False)
                 self.toolButtonPointMove.setChecked(False)
 
-    def partial_match_in_list(self, lst, string):
-        """Checks whether values in a list partially match a string
-
-        Parameters
-        ----------
-        lst: list
-            List of partial strings to find in ``string``
-        string: str
-            Text to test.
-
-        Returns
-        -------
-        bool
-            ``True`` if a match exists, ``False`` if no items match.
-        """    
-        for test_string in lst:
-            if test_string in string:
-                return True
-        return False
     
     # -------------------------------
     # Blockly functions
@@ -6509,35 +6491,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 analyte_dict[field] = norm
 
         self.update_analyte_ratio_selection(analyte_dict)
-
-
-# -------------------------------
-# Classes
-# -------------------------------
-
-# Mask object
-# -------------------------------
-class MaskObj:
-    def __init__(self, initial_value=None):
-        self._value = initial_value
-        self._callbacks = []
-
-    @property
-    def value(self):
-        return self._value
-
-    @value.setter
-    def value(self, new_value):
-        old_value = self._value
-        self._value = new_value 
-        self._notify_observers(old_value, new_value)
-
-    def _notify_observers(self, old_value, new_value):
-        for callback in self._callbacks:
-            callback(old_value, new_value)
-    
-    def register_callback(self, callback):
-        self._callbacks.append(callback)
 
 
 # -------------------------------

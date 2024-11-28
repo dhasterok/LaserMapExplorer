@@ -35,3 +35,9 @@ There are two ways to use *LaME*, either as a precompiled executable or using th
     additional_functions
     notes
     export
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Workflow Design
+
+    workflow

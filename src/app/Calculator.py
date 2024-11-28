@@ -2,6 +2,8 @@ import os, re
 import numexpr as ne
 from src.app.config import BASEDIR, DEBUG_CALCULATOR
 import numpy as np
+import pandas as pd
+from src.common.varfunc import partial_match
 
 from PyQt5.QtCore import ( QUrl)
 from PyQt5.QtWidgets import ( QMessageBox, QInputDialog )
@@ -12,6 +14,8 @@ from PyQt5.QtWidgets import ( QMessageBox, QInputDialog )
 class CustomFieldCalculator():
     def __init__(self, parent=None):
         # super().__init__(self, parent=None)
+        if parent is None:
+            return
 
         self.parent = parent
 
@@ -76,10 +80,16 @@ class CustomFieldCalculator():
         Sets ``MainWindow.add_formula`` to ``True``, a flag used by ``MainWindow.calculate_new_field`` to determine
         whether to add an item to ``MainWindow.comboBoxCalcFormula``.
         """        
+        if DEBUG_CALCULATOR:
+            print("calc_add_formula")
+
         self.add_formula = True
 
     def calc_help(self):
         """Loads the help webpage associated with the calculator in the Help tab"""
+        if DEBUG_CALCULATOR:
+            print("calc_help")
+
         filename = os.path.join(BASEDIR,"docs/build/html/custom_fields.html")
 
         self.parent.lineEditBrowserLocation.setText(filename)
@@ -99,12 +109,14 @@ class CustomFieldCalculator():
         operator : str
             Inserts operators from calculator
         """        
-        print('calc_insert_operator')
+        if DEBUG_CALCULATOR:
+            print(f"calc_insert_operator, operator {operator}")
+
         cursor = self.parent.textEditCalcScreen.textCursor()
         cursor.insertText(operator)
     
-    def calc_insert_function(self, function):
-        """Inserts a function into the calculator
+    def calc_insert_function(self, func_name):
+        """Inserts a func_name into the calculator
 
         When the user pushes a function button on the calculator, *operator* is inserted 
         into ``MainWindow.textEditCalcScreen``.  The ``case()`` function inserts ``(cond, expr)``
@@ -115,21 +127,23 @@ class CustomFieldCalculator():
         operator : str
             Inserts operators from calculator
         """        
-        print('calc_insert_function')
+        if DEBUG_CALCULATOR:
+            print(f"calc_insert_function, function: {func_name}")
+
         cursor = self.parent.textEditCalcScreen.textCursor()
         if cursor.hasSelection():
-            cursor.insertText(f"{function}({cursor.selectedText()})")
+            cursor.insertText(f"{func_name}({cursor.selectedText()})")
             # add semicolon to end of case and otherwise functions
-            if function in ['case', 'otherwise']:
+            if func_name in ['case', 'otherwise']:
                 cursor.insertText(f"; ")
         else:
             # case should have conditional and expression
-            if function == 'case':
-                cursor.insertText(f"{function}(cond, expr); ")
+            if func_name == 'case':
+                cursor.insertText(f"{func_name}(cond, expr); ")
             else:
-                cursor.insertText(f"{function}()")
+                cursor.insertText(f"{func_name}()")
                 # if otherwise add semicolon to end
-                if function == 'otherwise':
+                if func_name == 'otherwise':
                     cursor.insertText(f"; ")
     
     def calc_add_field(self):
@@ -138,6 +152,9 @@ class CustomFieldCalculator():
         Adds the selected field as ``{field_type.field}``.  If the field is normalized,
         a ``_N`` is added to the end of the field name, i.e., ``{field_type.field_N}``.
         """        
+        if DEBUG_CALCULATOR:
+            print("calc_add_field")
+
         # get field type and name
         field_type = self.parent.comboBoxCalcFieldType.currentText()
         field = self.parent.comboBoxCalcField.currentText()
@@ -167,6 +184,9 @@ class CustomFieldCalculator():
         Loads the file saved in ``self.calc_filename``, unless the file is overridden by user preferences.  The file
         should be formatted as *name: expression*.  The expression may contain mulitple *case(cond, expr)* separated by a ``;``.
         """        
+        if DEBUG_CALCULATOR:
+            print("calc_load_dict")
+
         self.calc_dict = {}
         try:
             with open(self.calc_filename, 'r') as file:
@@ -191,8 +211,11 @@ class CustomFieldCalculator():
         """Deletes a previously stored formula
         
         Removes the formula from ``MainWindow.comboBoxCalcFormula``, the file given by ``MainWindow.calc_filename`` and 
-        ``MainWindow.data[MainWindow.sample_id]['computed_data']['Calculated']``.
+        ``parent.data[parent.sample_id].processed_data``.
         """
+        if DEBUG_CALCULATOR:
+            print("calc_delete_formula")
+
         func = 'calc_delete_formula'
 
         # get name of formula
@@ -220,10 +243,13 @@ class CustomFieldCalculator():
             pass
 
         # remove field from Calculated dataframe
-        self.parent.data[self.parent.sample_id]['computed_data']['Calculated'].drop([name], axis=1, inplace=True)
+        self.parent.data[self.parent.sample_id].delete_column(name)
     
     def calc_load_formula(self):
         """Loads a predefined formula to use in the calculator"""        
+        if DEBUG_CALCULATOR:
+            print("calc_load_formula")
+
         name = self.parent.comboBoxCalcFormula.currentText()
 
         self.parent.textEditCalcScreen.clear()
@@ -236,6 +262,9 @@ class CustomFieldCalculator():
 
         Parses ``MainWindow.textEditCalcScreen`` to produce an expression that can be evaluated.
         """
+        if DEBUG_CALCULATOR:
+            print(f"calc_parse, text: {txt}")
+
         func = 'calc_parse'
 
         # Get text 
@@ -315,7 +344,7 @@ class CustomFieldCalculator():
             if field in list(var.keys()):
                 continue
 
-            df = self.parent.get_map_data(self.parent.sample_id, field, field_type, scale_data=False)
+            df = self.parent.data[self.parent.sample_id].get_map_data(field, field_type, ref_chem=self.parent.ref_chem)
             var.update({field: df['array']})
 
             txt = txt.replace(f"{{{field_str}}}", f"{field}")
@@ -342,6 +371,9 @@ class CustomFieldCalculator():
         save: bool, optional
             Determines whether to save upon successful calculation, by default ``False``
         """
+        if DEBUG_CALCULATOR:
+            print(f"calculate_new_field, save: {save}")
+
         func = 'calculate_new_field'
 
         # open dialog to get new field
@@ -349,7 +381,7 @@ class CustomFieldCalculator():
             new_field, ok = QInputDialog.getText(self.parent, 'Save expression', 'Enter custon field name:')
             if ok:
                 # check for valid field name
-                if self.partial_match_in_list(['_N',':'],new_field):
+                if partial_match(['_N',':'],new_field)[0]:
                     err = "new field name cannot have an '_N' or ':' in the name"
                     self.calc_error(func, err, '')
                     ok = False
@@ -365,14 +397,14 @@ class CustomFieldCalculator():
             result = self.calc_evaluate_expr(expr[0], val_dict=expr[1])
             if result is None:
                 return
-            self.parent.data[self.parent.sample_id]['computed_data']['Calculated'][new_field] = result
+            self.parent.data[self.parent.sample_id].add_columns('computed', new_field, result)
         elif expr is None:
             err = "expr returned 'None' could not evaluate formula. Check syntax."
             self.calc_error(func, err, '')
             return
         else:   # conditionals
             # start with empty dataFrame
-            result = pd.DataFrame({new_field: np.nan*np.zeros_like(self.parent.data[self.parent.sample_id]['computed_data']['Calculated'].iloc[:,0])})
+            result = pd.DataFrame({new_field: np.nan*np.zeros_like(self.parent.data[self.parent.sample_id].processed_data.iloc[:,0])})
 
             # loop over cases (cond, expr)
             for i in range(0,len(cond),2):
@@ -383,7 +415,7 @@ class CustomFieldCalculator():
                         err = "could not evaluate otherwise expression. Check syntax."
                         self.calc_error(func, err, e)
                         return
-                    self.parent.data[self.parent.sample_id]['computed_data']['Calculated'][new_field] = result
+                    self.parent.data[self.parent.sample_id].add_columns('computed', new_field, result)
                     continue
 
                 # conditional yields boolean numpy.ndarray keep
@@ -426,11 +458,14 @@ class CustomFieldCalculator():
 
                 result.loc[keep,new_field] = res
 
-            self.parent.data[self.parent.sample_id]['computed_data']['Calculated'][new_field] = result
+            self.parent.data[self.parent.sample_id].add_columns('computed', new_field, result)
 
         # update comboBoxCalcFormula
         self.parent.comboBoxCalcFormula.addItem(new_field)
         self.parent.comboBoxCalcFormula.setCurrentText(new_field)
+
+        # add new calculated field to self.treeView
+        self.parent.plot_tree.add_calculated_leaf(new_field)
 
         if self.parent.comboBoxCalcFieldType.currentText == 'Calculated':
             self.parent.update_field_combobox(self.parent.comboBoxCalcFieldType, self.parent.comboBoxCalcField)
@@ -469,6 +504,9 @@ class CustomFieldCalculator():
         np.ndarray of float or bool
             Result of evaluated expression.
         """        
+        if DEBUG_CALCULATOR:
+            print(f"calc_evaluate_expr\n  expr: {expr}\n  val_dict: {val_dict}\n  keep: {keep}")
+
         func = 'calc_evaluate_expr'
         try:
             if val_dict is None:
@@ -497,5 +535,8 @@ class CustomFieldCalculator():
         addinfo : str
             Additional info (generally exception raised)
         """        
+        if DEBUG_CALCULATOR:
+            print(f"calc_error\n  func: {func}\n  err: {err}\n  addinfo: {addinfo}")
+
         self.parent.labelCalcMessage.setText(f"Error: {err}")
         QMessageBox.warning(self.parent,'Calculation Error',f"Error: {err}\n\n({func}) {addinfo}")

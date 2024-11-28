@@ -1,4 +1,5 @@
 export let sample_ids = [];  // Declare and export the global variable
+export const fieldTypeList = [['Analyte', 'Analyte'], ['Analyte (normalized)', 'Analyte (normalized)']]; // Global variable to store fieldTypeList
 export let spot_data = false;  // Declare and export the global variable
 export let baseDir = ''; // Define a global variable for baseDir
 

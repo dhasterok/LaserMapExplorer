@@ -498,11 +498,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #-------------------------
         self.ref_data = pd.read_excel(os.path.join(BASEDIR,'resources/app_data/earthref.xlsx'))
         self.ref_data = self.ref_data[self.ref_data['sigma']!=1]
-        ref_list = self.ref_data['layer']+' ['+self.ref_data['model']+'] '+ self.ref_data['reference']
+        self.ref_list = self.ref_data['layer']+' ['+self.ref_data['model']+'] '+ self.ref_data['reference']
 
-        self.comboBoxRefMaterial.addItems(ref_list.values)          # Select analyte Tab
+        self.comboBoxRefMaterial.addItems(self.ref_list.values)          # Select analyte Tab
         self.comboBoxRefMaterial.setCurrentIndex(0)
-        self.comboBoxNDimRefMaterial.addItems(ref_list.values)      # NDim Tab
+        self.comboBoxNDimRefMaterial.addItems(self.ref_list.values)      # NDim Tab
         self.comboBoxNDimRefMaterial.setCurrentIndex(0)
         self.comboBoxRefMaterial.activated.connect(lambda: self.change_ref_material(self.comboBoxRefMaterial, self.comboBoxNDimRefMaterial))
         self.comboBoxNDimRefMaterial.activated.connect(lambda: self.change_ref_material(self.comboBoxNDimRefMaterial, self.comboBoxRefMaterial))
@@ -740,7 +740,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxNDimAnalyteSet.clear()
         self.comboBoxNDimAnalyteSet.addItems(list(self.ndim_list_dict.keys()))
 
-        #self.comboBoxNDimRefMaterial.addItems(ref_list.values) This is done with the Set analyte tab initialization above.
+        #self.comboBoxNDimRefMaterial.addItems(self.ref_list.values) This is done with the Set analyte tab initialization above.
         self.toolButtonNDimAnalyteAdd.clicked.connect(lambda: self.update_ndim_table('analyteAdd'))
         self.toolButtonNDimAnalyteAdd.clicked.connect(self.update_SV)
         self.toolButtonNDimAnalyteSetAdd.clicked.connect(lambda: self.update_ndim_table('analytesetAdd'))
@@ -1220,6 +1220,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.comboBoxPlotType.setCurrentText('analyte map')
         self.toolbox_changed(update=False)
         self.update_all_field_comboboxes()
+        self.update_blockly_field_types()
         self.update_field_combobox(self.comboBoxColorByField,self.comboBoxColorField)
         self.spinBoxColorField.setMinimum(0)
         self.spinBoxColorField.setMaximum(self.comboBoxColorField.count() - 1)
@@ -1236,7 +1237,40 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def open_preferences_dialog(self):
         pass
 
+    
+    
+    def update_analyte_ratio_selection(self,analyte_dict):
+        """Updates analytes/ratios in mainwindow and its corresponding scale used for each field
 
+        Updates analytes/ratios and its corresponding scale used for each field based on selection made by user in Analyteselection window or if user choses analyte list in blockly
+        
+        Parameters
+            ----------
+            analyte_dict: dict
+                key: Analyte/Ratio name
+                value: scale used (linear/log/logit)
+        """
+        #update self.data['norm'] with selection
+        for analyte in self.data[self.sample_id].processed_data.match_attribute('data_type','Analyte'):
+            if analyte in list(analyte_dict.keys()):
+                self.data[self.sample_id].set_attribute(analyte, 'use', True)
+            else:
+                self.data[self.sample_id].set_attribute(analyte, 'use', False)
+
+        for analyte, norm in analyte_dict.items():
+            if '/' in analyte:
+                if analyte not in self.data[self.sample_id].processed_data.columns:
+                    analyte_1, analyte_2 = analyte.split(' / ') 
+                    self.data[self.sample_id].compute_ratio(analyte_1, analyte_2)
+
+            self.data[self.sample_id].processed_data.set_attribute(analyte,'norm',norm)
+
+        self.plot_tree.update_tree(norm_update=True)
+        #update analysis type combo in styles
+        self.check_analysis_type()
+
+        self.update_all_field_comboboxes()
+        self.update_blockly_field_types()
 
     # Other windows/dialogs
     # -------------------------------------
@@ -1256,26 +1290,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         result = self.analyte_dialog.exec_()  # Store the result here
         if result == QDialog.Accepted:
-            #update self.data['norm'] with selection
-            for analyte in self.data[self.sample_id].processed_data.match_attribute('data_type','Analyte'):
-                if analyte in list(self.analyte_dialog.norm_dict.keys()):
-                    self.data[self.sample_id].set_attribute(analyte, 'use', True)
-                else:
-                    self.data[self.sample_id].set_attribute(analyte, 'use', False)
-
-            for analyte, norm in self.analyte_dialog.norm_dict.items():
-                if '/' in analyte:
-                    if analyte not in self.data[self.sample_id].processed_data.columns:
-                        analyte_1, analyte_2 = analyte.split(' / ') 
-                        self.data[self.sample_id].compute_ratio(analyte_1, analyte_2)
-
-                self.data[self.sample_id].processed_data.set_attribute(analyte,'norm',norm)
-
-            self.plot_tree.update_tree(norm_update=True)
-            #update analysis type combo in styles
-            self.check_analysis_type()
-
-            self.update_all_field_comboboxes()
+            self.update_analyte_ratio_selection(analyte_dict= self.analyte_dialog.norm_dict)   
+            self.workflow.refresh_analyte_saved_lists_dropdown() #refresh saved analyte dropdown in blockly 
         if result == QDialog.Rejected:
             pass
     
@@ -4831,6 +4847,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.spinBoxPCY.setValue(int(2))
 
         self.update_all_field_comboboxes()
+        self.update_blockly_field_types()
         self.update_pca_flag = False
 
     def plot_pca(self):
@@ -5413,6 +5430,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.statusbar.showMessage('Clustering successful')
 
             self.update_all_field_comboboxes()
+            self.update_blockly_field_types()
             self.update_cluster_flag = False
         else:
             return cluster_results, silhouette_scores
@@ -6440,39 +6458,57 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     # Blockly functions
     # -------------------------------
     # gets the set of fields types
-    def get_field_type_list(self):
-        """Gets the fields associated with a defined set
+    def update_blockly_field_types(self):
+        """Gets the fields types available and invokes workflow function
+          which updates field type dropdown in blockly workflow
 
         Set names are consistent with QComboBox.
-
-        Parameters
-        ----------
-
-        Returns
-        -------
-        list
-            Set_fields, a list of field types within the input set
         """
 
-        field_list = ['Analyte', 'Analyte (normalized)']
+        field_type_list = ['Analyte', 'Analyte (normalized)']
         
         data_type_dict = self.data[self.sample_id].get_attribute_dict('data_type')
 
         # add check for ratios
         if 'ratio' in data_type_dict:
-            field_list.append('Ratio')
-            field_list.append('Ratio (normalized)')
+            field_type_list.append('Ratio')
+            field_type_list.append('Ratio (normalized)')
 
         if 'pca score' in data_type_dict:
-            field_list.append('PCA score')
+            field_type_list.append('PCA score')
 
         if 'cluster' in data_type_dict:
-            field_list.append('Cluster')
+            field_type_list.append('Cluster')
 
         if 'cluster score' in data_type_dict:
-            field_list.append('Cluster score')
+            field_type_list.append('Cluster score')
         
-        return field_list
+        self.workflow.update_field_type_list(field_type_list) #invoke workflow function to update blockly 'fieldType' dropdowns
+
+    def update_blockly_analyte_dropdown(self,filename, unsaved_changes):
+        """update analyte/ratio lists dropdown with the selected analytes/ratios
+
+        Parameters
+            ----------
+            filename: str
+                filename returned from analyte selection window
+            saved: bool
+                if the user saved was saved by user
+        """
+
+        
+            
+        self.workflow.refresh_analyte_dropdown(analyte_list_names)
+
+    def update_analyte_selection_from_file(self,filename):
+        filepath = os.path.join(self.BASEDIR, 'resources/analytes list', filename+'.txt')
+        analyte_dict ={}
+        with open(filepath, 'r') as f:
+            for line in f.readlines():
+                field, norm = line.replace('\n','').split(',')
+                analyte_dict[field] = norm
+
+        self.update_analyte_ratio_selection(analyte_dict)
 
 
 # -------------------------------

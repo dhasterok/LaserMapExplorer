@@ -34,12 +34,28 @@ pythonGenerator.forBlock['select_samples'] = function(block, generator) {
     return code;
 };
 
-// Python code generator for the select_analytes block
 pythonGenerator.forBlock['select_analytes'] = function(block) {
-    // Generate the Python code to call open_select_analyte_dialog
-    return 'self.parent.open_select_analyte_dialog()\nself.bridge.refreshAnalyteDropdown()\n';
-  };
+    var analyteSelectorValue = block.getFieldValue('analyteSelectorDropdown');
+    var code = '';
+    
+    if (analyteSelectorValue === 'Current selection') {
+        code = '';
+    } else if (analyteSelectorValue === 'Analyte selector') {
+        code = 'self.parent.open_select_analyte_dialog()\n';
+    } else if (analyteSelectorValue === 'Saved lists') {
+        var savedListName = block.getFieldValue('analyteSavedListsDropdown');
+        var quotedListName = generator.quote_(savedListName);
+        code = 'self.parent.update_analyte_selection_from_file(' + quotedListName + ')\n';
+    }
+    return code;
+};
   
+  
+// Python code generator for the select_analytes block
+pythonGenerator.forBlock['select_ref_val'] = function(block) {
+    // Generate the Python code to call open_select_analyte_dialog
+    return 'self.parent.open_select_analyte_dialog()\nself.refreshAnalyteDropdown()\n';
+  };
 
 /*
 // Python Generator: Sample IDs List
@@ -64,7 +80,6 @@ pythonGenerator.forBlock['loop_over_fields'] = function(block, generator) {
     var field_type = block.plotType ? generator.quote_(block.fieldType) : 'Analyte';
     var statements_do = generator.statementToCode(block, 'DO');
     var code = 'for field in get_field_list(' + field_type + '):\n' +
-        generator.INDENT + 'self.parent.change_sample(self.parent.sample_ids.index(sample_id), save_analysis= False)\n' +
         statements_do;
     return code;
 };

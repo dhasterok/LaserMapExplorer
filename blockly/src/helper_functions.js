@@ -2,7 +2,7 @@
  * Helper Functions
  ******************************/
 import * as Blockly from 'blockly/core';
-import { sample_ids, updateSampleIds, spot_data } from './globals';
+import { sample_ids,fieldTypeList, updateSampleIds, spot_data } from './globals';
 import {enableSampleIDsBlockFunction} from './custom_blocks'
 
 // Function: Update Sample Dropdown with IDs
@@ -31,24 +31,54 @@ function updateSampleDropdown(sampleIds) {
 }
 window.updateSampleDropdown = updateSampleDropdown;
 
-function updateAnalyteDropdown(analyteList) {
-    const dropdownOptions = analyteList.map(id => [id, id]);  // Convert sample IDs to dropdown format
-
-    // Iterate through all blocks and update the 'select_samples' block dropdown
+// Global function to refresh the analyteSavedListsDropdown
+function refreshAnalyteSavedListsDropdown() {
+    // Iterate through all blocks to find 'select_analytes' blocks
     Blockly.getMainWorkspace().getAllBlocks().forEach(function(block) {
         if (block.type === 'select_analytes') {
-            const dropdownField = block.getField('ANALYTELISTDROPDOWN');
-            if (dropdownField) {
-                // Update the dropdown options dynamically
-                dropdownField.menuGenerator_ = dropdownOptions;
-                dropdownField.setValue(analyteList.length ? analyteList[0] : 'NONE');  // Set default value
-                block.render();  // Re-render the block to reflect the changes
+            // Get the current selection
+            const analyteSelectorValue = block.getFieldValue('analyteSelectorDropdown');
+            if (analyteSelectorValue === 'Saved lists') {
+                const savedListDropdown = block.getField('analyteSavedListsDropdown');
+                const currentSelection = savedListDropdown ? savedListDropdown.getValue() : null;
+                // Update the saved lists dropdown while preserving selection
+                block.updateSavedListsDropdown(currentSelection);
             }
         }
     });
 }
 
-window.updateAnalyteDropdown = updateAnalyteDropdown;
+window.refreshAnalyteSavedListsDropdown = refreshAnalyteSavedListsDropdown;
+
+function updateFieldTypeList(newFieldTypeList) {
+    // Clear the existing array
+    fieldTypeList.length = 0;
+
+    // Populate with new values
+    newFieldTypeList.forEach(item => fieldTypeList.push([item, item]));
+
+    // Update the dropdown options in existing blocks
+    const blocks = Blockly.getMainWorkspace().getAllBlocks();
+    for (const block of blocks) {
+        // If the block has a field named 'fieldType'
+        const field = block.getField('fieldType');
+        if (field) {
+            // Get the currently selected value
+            const currentValue = field.getValue();
+            // Update the field's options
+            //field.setOptions(fieldTypeList); #automatically updated
+            // If the current value is still in the options, keep it selected
+            const values = fieldTypeList.map(option => option[1]);
+            if (values.includes(currentValue)) {
+                field.setValue(currentValue);
+            } else {
+                // Else set to the first option
+                field.setValue(values[0]);
+            }
+        }
+    }
+}
+window.updateFieldTypeList = updateFieldTypeList;
 
 // Function to dynamically update connected style blocks
 export function dynamicStyleUpdate(plotType, connectedBlocks) {

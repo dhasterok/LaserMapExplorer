@@ -62,19 +62,19 @@ class BlocklyBridge(QObject):
         return self.parent.parent.BASEDIR
     
     @pyqtSlot(result=list)
-    def getAnalyteList(self):
-        directory = os.path.join(self.parent.parent.BASEDIR, 'resources/analytes list')
-        # List all .txt files in the directory
-        print('analyte_list')
-        txt_files = [str(f).replace('.txt','') for f in os.listdir(directory) if f.endswith('.txt')]
-        return txt_files
+    def getRefValueList(self):
+        
+        return self.parent.parent.ref_list.values
 
-    @pyqtSlot()
-    def refreshAnalyteDropdown(self):
-        """Fetches the list of analytes and sends it to JavaScript to refresh the dropdown."""
-        analyte_list = self.getAnalyteList()
-        analyte_list_js_array = json.dumps(analyte_list)  # Convert to JSON for JavaScript
-        self.parent.web_view.page().runJavaScript(f"updateAnalyteDropdown({analyte_list_js_array})")
+    @pyqtSlot(result=list)
+    def getSavedAnalyteLists(self):
+        """
+        Exposed method to JavaScript to get the list of saved analyte lists.
+        """
+        saved_lists = self.parent.get_saved_analyte_lists()
+        return saved_lists
+    
+
 
     def convert_numpy_types(self, obj):
         """ Recursively convert NumPy types to Python native types. """
@@ -137,16 +137,7 @@ class Workflow():
     def handleResizeEvent(self, event):
         self.web_view.page().runJavaScript("resizeBlocklyWorkspace()")
         event.accept()
-    
-    def store_sample_ids(self):
-        """
-        Sends sample_ids to JavaScript to update the sample_ids list and refresh dropdowns.
-        """
-        # Convert the sample_ids list to a format that JavaScript can use (a JSON array)
-        sample_ids_js_array = str(self.parent.sample_ids)
-        self.web_view.page().runJavaScript(f"updateSampleDropdown({sample_ids_js_array})")
 
-        
     def execute_code(self,code=None):
         if not code:
             # Get the code from the output_text_edit and execute it
@@ -160,3 +151,36 @@ class Workflow():
 
         print(code)
         exec(code)
+    
+    def store_sample_ids(self):
+        """
+        Sends sample_ids to JavaScript to update the sample_ids list and refresh dropdowns.
+        """
+        # Convert the sample_ids list to a format that JavaScript can use (a JSON array)
+        sample_ids_js_array = str(self.parent.sample_ids)
+        self.web_view.page().runJavaScript(f"updateSampleDropdown({sample_ids_js_array})")
+
+    def update_field_type_list(self, field_type_list):
+        # Convert the field type list to JSON
+        field_type_list_json = json.dumps(field_type_list)
+        # Send the field type list to JavaScript
+        self.web_view.page().runJavaScript(f"updateFieldTypeList({field_type_list_json})")
+
+    def refresh_analyte_saved_lists_dropdown(self):
+            """
+            Calls the JavaScript function to refresh the analyteSavedListsDropdown in Blockly.
+            """
+            self.web_view.page().runJavaScript("refreshAnalyteSavedListsDropdown();")
+
+    def get_saved_analyte_lists(self):
+        """
+        Retrieves the names of saved analyte lists from the resources/analytes list directory.
+
+        Returns
+        -------
+        list
+            List of saved analyte list names.
+        """
+        directory = os.path.join(self.parent.BASEDIR, 'resources/analytes list')
+        analyte_list_names = [str(f).replace('.txt', '') for f in os.listdir(directory) if f.endswith('.txt')]
+        return analyte_list_names

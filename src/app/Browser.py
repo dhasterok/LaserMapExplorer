@@ -1,7 +1,8 @@
 import os
-from PyQt5.QtCore import ( Qt, QUrl, QEvent, pyqtSlot )
+from PyQt5.QtCore import ( Qt, QUrl, QEvent, QObject, pyqtSlot )
+from PyQt5.QtWidgets import QWidget
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
-from src.app.config import BASEDIR
+from src.app.config import BASEDIR, DEBUG_BROWSER
     
 # WebEngineView - Web engine for viewing userguide help pages
 # -------------------------------
@@ -34,12 +35,20 @@ class WebEngineView(QWebEngineView):
 
     @pyqtSlot(bool)
     def on_load_finished(self, success):
+        """Executes after page loading is complete
+
+        Parameters
+        ----------
+        success : bool
+            Runs upon load
+        """        
         if not success:
-            self.setUrl(QUrl(os.path.abspath('docs/build/html/404.html')))
+            self.show_error_page()
             #self.show_error_page()
 
     @pyqtSlot()
     def on_load_started(self):
+        """Executes when page starts to load."""
         self.parent.statusBar.showMessage("Loading started...")
 
     @pyqtSlot(int)
@@ -54,6 +63,7 @@ class WebEngineView(QWebEngineView):
         self.parent.statusBar.showMessage(f"Loading progress: {progress}%")
 
     def show_error_page(self):
+        """Displays 404 error page."""
         html = f"<html><body><img src={os.path.abspath('docs/build/html/404.html')} /></html>"
         self.setHtml(html)
 
@@ -62,20 +72,54 @@ class WebEngineView(QWebEngineView):
         #print(f"JavaScript Console: {message} at line {line} in {source_id}")
 
 
-class Browser():
+class Browser(QWidget, QObject):
+    """A collection of browser related methods.
+
+    Methods
+    -------
+    eventFilter
+    open_browser :
+        Opens a web browser for use in LaME
+    browser_home_callback :
+        Returns to project homepage.
+    browser_location_callback :
+        Loads location typed into the file line edit field.
+    """    
     def __init__(self, parent=None):
+        super().__init__(parent)
+        QWidget.__init__(self)
         
+        if DEBUG_BROWSER:
+            print("Initializing browser")
+
+        if parent is None:
+            return
+
         self.parent = parent
+
+        self.help_mapping = {
+            parent.centralwidget: 'center_pane',
+            parent.canvasWindow: 'center_pane',
+            parent.dockWidgetLeftToolbox: 'left_toolbox',
+            parent.toolBox: 'left_toolbox',
+            parent.dockWidgetRightToolbox: 'right_toolbox',
+            parent.toolBoxTreeView: 'right_toolbox',
+            parent.dockWidgetBottomTabs: 'lower_tabs',
+            parent.tabWidget: 'lower_tabs'
+        }
 
         self.open_browser()
         #self.parent.browser = WebEngineView(self.parent)
 
-        self.parent.toolButtonBrowserHome.clicked.connect(self.browser_home_callback)
-        self.parent.lineEditBrowserLocation.editingFinished.connect(self.browser_location_callback)
-        self.parent.toolButtonBack.clicked.connect(self.parent.browser.back)
-        self.parent.toolButtonForward.clicked.connect(self.parent.browser.forward)
+        parent.toolButtonBrowserHome.clicked.connect(self.browser_home_callback)
+        parent.lineEditBrowserLocation.editingFinished.connect(self.browser_location_callback)
+        parent.toolButtonBack.clicked.connect(self.engine.back)
+        parent.toolButtonForward.clicked.connect(self.engine.forward)
 
-    def eventFilter(self, source, event):
+        for widget in self.help_mapping.keys():
+            widget.installEventFilter(self)
+
+    def eventFilter(self, obj, event):
         """Event filter to capture mouse press events
 
         If help mode is active, the clicked widget opens the help browser.
@@ -96,45 +140,48 @@ class Browser():
             self.parent.actionHelp.setChecked(False)
             self.setCursor(Qt.ArrowCursor)
 
-            match source:
-                case self.parent.centralwidget | self.parent.canvasWindow:
-                    self.browser_location_callback('center_pane')
-                case self.parent.toolBox | self.parent.dockWidgetLeftToolbox:
-                    self.browser_location_callback('left_toolbox')
-                case self.parent.toolBoxTreeView | self.parent.dockWidgetRightToolbox:
-                    self.browser_location_callback('right_toolbox')
-                case self.parent.dockWidgetBottomTabs | self.parent.tabWidget:
-                    self.browser_location_callback('lower_tabs')
-                case _:
-                    return False
+            if obj in self.help_mapping:
+                self.browser_location_callback(self.help_mapping[obj])
+            else:
+                return False
+
+            if DEBUG_BROWSER:
+                print("Browser.eventFilter: Accessing help page")
+
             self.parent.tabWidget.setCurrentIndex(self.parent.bottom_tab['help'])
 
             return True
 
-        return super().eventFilter(source, event)
+        return super().eventFilter(obj, event)
 
     def open_browser(self):
         """Creates and opens a browser in the bottom tabWidget
 
         A browser for the LaME documentation.  It can access some external sites, but the browser is primarily for help data.
         """        
+        if DEBUG_BROWSER:
+            print("open_browser")
+
         # Open a file dialog to select a local HTML file
         # Create a QWebEngineView widget
-        self.parent.browser = WebEngineView(self.parent)
-        self.parent.verticalLayoutBrowser.addWidget(self.parent.browser)
+        self.engine = WebEngineView(self.parent)
+        self.parent.verticalLayoutBrowser.addWidget(self.engine)
 
         #file_name, _ = QFileDialog.getOpenFileName(self, "Open HTML File", "", "HTML Files (*.html *.htm)")
         self.browser_home_callback()
 
     def browser_home_callback(self):
         """The browser returns to the documentation index.html file"""        
+        if DEBUG_BROWSER:
+            print("browser_home_callback")
+
         filename = os.path.join(BASEDIR,"docs/build/html/index.html")
 
         self.parent.lineEditBrowserLocation.setText(filename)
 
         if filename:
             # Load the selected HTML file into the QWebEngineView
-            self.parent.browser.setUrl(QUrl.fromLocalFile(filename))
+            self.engine.setUrl(QUrl.fromLocalFile(filename))
         
     def browser_location_callback(self, location=None):
         """Tries to load the page given in ``MainWindow.lineEditBrowserLocation``
@@ -144,6 +191,9 @@ class Browser():
         location : str, optional
             Name of webpage (excluding base directory and .html)
         """
+        if DEBUG_BROWSER:
+            print(f"browser_location_callback, location {location}")
+
         if not location:
             location = self.parent.lineEditBrowserLocation.text()
         else:
@@ -153,7 +203,7 @@ class Browser():
 
         try:
             if location:
-                self.parent.browser.setUrl(QUrl.fromLocalFile(location))
+                self.engine.setUrl(QUrl.fromLocalFile(location))
         except:
             pass
             #self.browser.setUrl(QUrl(os.path.abspath('docs/build/html/404.html')))

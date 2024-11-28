@@ -480,7 +480,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionSwapAxes.setEnabled(False)
 
         self.browser = Browser(self)
-        self.actionReportBug.triggered.connect(lambda: self.browser.setUrl(QUrl('https://github.com/dhasterok/LaserMapExplorer/issues')))
+        self.actionReportBug.triggered.connect(lambda: self.browser.engine.setUrl(QUrl('https://github.com/dhasterok/LaserMapExplorer/issues')))
 
         # For light and dark themes, connects actionViewMode
         self.theme = UIThemes(app, self)
@@ -906,7 +906,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Setup Help
         #-------------------------
-        self.actionHelp.triggered.connect(self.toggle_help_mode)
+        self.actionHelp.setCheckable(True)
+        self.actionHelp.toggled.connect(self.toggle_help_mode)
         self.centralwidget.installEventFilter(self)
         self.canvasWindow.installEventFilter(self)
         self.dockWidgetLeftToolbox.installEventFilter(self)

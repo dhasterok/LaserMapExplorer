@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>app &#8212; Laser Map Explorer 0.1 documentation</title>
+    <title>src Modules &#8212; Laser Map Explorer 0.1 documentation</title>
   
   
   
@@ -16,32 +16,36 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!-- 
+    this give us a css class that will be invisible only if js is disabled 
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-
-  
-  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+  <link href="_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css" />
   
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
-  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
 
     <script src="_static/documentation_options.js?v=2709fde1"></script>
-    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/custom.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'modules';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -49,6 +53,7 @@
     <link rel="prev" title="Documentation" href="documentation.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
   </head>
   
   
@@ -64,19 +69,8 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-primary-sidebar-checkbox"/>
-  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-secondary-sidebar-checkbox"/>
-  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="search.html"
       method="get">
@@ -84,7 +78,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -92,8 +85,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -127,7 +120,7 @@
     
     
     <img src="_static/LaME-wide-64.svg" class="logo__image only-light" alt=""/>
-    <script>document.write(`<img src="_static/LaME-wide-green-64.svg" class="logo__image only-dark" alt=""/>`);</script>
+    <img src="_static/LaME-wide-green-64.svg" class="logo__image only-dark pst-js-only" alt=""/>
   
   
     <p class="title logo__title">LaME v.0.0 beta</p>
@@ -189,15 +182,11 @@
         <div class="navbar-item navbar-persistent--container">
           
 
- <script>
- document.write(`
-   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
         </div>
       
       
@@ -235,15 +224,11 @@
   
     <div class="navbar-persistent--mobile">
 
- <script>
- document.write(`
-   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
     </div>
   
 
@@ -262,7 +247,8 @@
       
       
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -359,8 +345,75 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">app</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">src Modules</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="app.html">app package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.html">common package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.html">ui package</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Modules Summary</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="generated/app.html">app</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/app.Actions.html">app.Actions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/app.AnalyteSelectionWindow.html">app.AnalyteSelectionWindow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/app.Browser.html">app.Browser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/app.Calculator.html">app.Calculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/app.CropImage.html">app.CropImage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/app.CustomTableWidget.html">app.CustomTableWidget</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/app.ImageProcessing.html">app.ImageProcessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/app.LameIO.html">app.LameIO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/app.Logger.html">app.Logger</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/app.MapImporter.html">app.MapImporter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/app.PlotTree.html">app.PlotTree</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/app.Profile.html">app.Profile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/app.QuickView.html">app.QuickView</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/app.SpecialFunctions.html">app.SpecialFunctions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/app.SpotImporter.html">app.SpotImporter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/app.StyleToolbox.html">app.StyleToolbox</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/app.UITheme.html">app.UITheme</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/app.Workflow.html">app.Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/app.config.html">app.config</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="generated/ui.html">ui</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/ui.AnalyteSelectionDialog.html">ui.AnalyteSelectionDialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/ui.FileSelectorDialog.html">ui.FileSelectorDialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/ui.IsotopeSelectionDialog.html">ui.IsotopeSelectionDialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/ui.MainWindow.html">ui.MainWindow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/ui.MapImportDialog.html">ui.MapImportDialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/ui.PreferencesWindow.html">ui.PreferencesWindow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/ui.QuickViewDialog.html">ui.QuickViewDialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/ui.SpotImportDialog.html">ui.SpotImportDialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/ui.resources_rc.html">ui.resources_rc</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="generated/common.html">common</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/common.CustomMplCanvas.html">common.CustomMplCanvas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/common.CustomWidgets.html">common.CustomWidgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/common.DataHandling.html">common.DataHandling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/common.ExtendedDF.html">common.ExtendedDF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/common.Masking.html">common.Masking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/common.MolecularWeightCalculator.html">common.MolecularWeightCalculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/common.NoteTaking.html">common.NoteTaking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/common.Polygon.html">common.Polygon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/common.Regression.html">common.Regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/common.SortAnalytes.html">common.SortAnalytes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/common.TableFunctions.html">common.TableFunctions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/common.colorfunc.html">common.colorfunc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/common.csvdict.html">common.csvdict</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/common.format.html">common.format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/common.gausscensor.html">common.gausscensor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/common.outliers.html">common.outliers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/common.plot_spider.html">common.plot_spider</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/common.radar.html">common.radar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/common.radar_factory.html">common.radar_factory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/common.rotated.html">common.rotated</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/common.scalebar.html">common.scalebar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/common.ternary_colormap.html">common.ternary_colormap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/common.ternary_plot.html">common.ternary_plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/common.terncmap.html">common.terncmap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/common.varfunc.html">common.varfunc</a></li>
 </ul>
 </details></li>
 </ul>
@@ -390,8 +443,6 @@
       
         <div class="header-article-item">
 
-
-
 <nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
@@ -403,7 +454,7 @@
     
     <li class="breadcrumb-item"><a href="documentation.html" class="nav-link">Documentation</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">app</li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">src Modules</span></li>
   </ul>
 </nav>
 </div>
@@ -420,32 +471,801 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="app">
-<h1>app<a class="headerlink" href="#app" title="Link to this heading">#</a></h1>
+  <section id="src-modules">
+<h1>src Modules<a class="headerlink" href="#src-modules" title="Link to this heading">#</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="app.html">app package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="app.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="app.html#app-actions-module">app.Actions module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="app.html#app-analyteselectionwindow-module">app.AnalyteSelectionWindow module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="app.html#app-browser-module">app.Browser module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="app.html#app-calculator-module">app.Calculator module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="app.html#app-cropimage-module">app.CropImage module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="app.html#app-customtablewidget-module">app.CustomTableWidget module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="app.html#app-imageprocessing-module">app.ImageProcessing module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="app.html#app-lameio-module">app.LameIO module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="app.html#app-logger-module">app.Logger module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="app.html#app-mapimporter-module">app.MapImporter module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="app.html#app-plottree-module">app.PlotTree module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="app.html#app-profile-module">app.Profile module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="app.html#app-quickview-module">app.QuickView module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="app.html#app-specialfunctions-module">app.SpecialFunctions module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="app.html#app-spotimporter-module">app.SpotImporter module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="app.html#app-styletoolbox-module">app.StyleToolbox module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="app.html#app-uitheme-module">app.UITheme module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="app.html#app-workflow-module">app.Workflow module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="app.html#app-config-module">app.config module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="app.html#module-contents">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.html#module-app.Actions">app.Actions module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="app.html#app.Actions.Actions"><code class="docutils literal notranslate"><span class="pre">Actions</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Actions.Actions.reset_to_full_view"><code class="docutils literal notranslate"><span class="pre">Actions.reset_to_full_view()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="app.html#module-app.AnalyteSelectionWindow">app.AnalyteSelectionWindow module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="app.html#app.AnalyteSelectionWindow.AnalyteDialog"><code class="docutils literal notranslate"><span class="pre">AnalyteDialog</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.AnalyteSelectionWindow.AnalyteDialog.add_analyte_to_list"><code class="docutils literal notranslate"><span class="pre">AnalyteDialog.add_analyte_to_list()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.AnalyteSelectionWindow.AnalyteDialog.calculate_correlation"><code class="docutils literal notranslate"><span class="pre">AnalyteDialog.calculate_correlation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.AnalyteSelectionWindow.AnalyteDialog.cancel_selection"><code class="docutils literal notranslate"><span class="pre">AnalyteDialog.cancel_selection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.AnalyteSelectionWindow.AnalyteDialog.clear_selections"><code class="docutils literal notranslate"><span class="pre">AnalyteDialog.clear_selections()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.AnalyteSelectionWindow.AnalyteDialog.closeEvent"><code class="docutils literal notranslate"><span class="pre">AnalyteDialog.closeEvent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.AnalyteSelectionWindow.AnalyteDialog.color_cell"><code class="docutils literal notranslate"><span class="pre">AnalyteDialog.color_cell()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.AnalyteSelectionWindow.AnalyteDialog.create_colorbar"><code class="docutils literal notranslate"><span class="pre">AnalyteDialog.create_colorbar()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.AnalyteSelectionWindow.AnalyteDialog.done_selection"><code class="docutils literal notranslate"><span class="pre">AnalyteDialog.done_selection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.AnalyteSelectionWindow.AnalyteDialog.event_filter"><code class="docutils literal notranslate"><span class="pre">AnalyteDialog.event_filter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.AnalyteSelectionWindow.AnalyteDialog.generate_colorbar_image"><code class="docutils literal notranslate"><span class="pre">AnalyteDialog.generate_colorbar_image()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.AnalyteSelectionWindow.AnalyteDialog.get_color_for_correlation"><code class="docutils literal notranslate"><span class="pre">AnalyteDialog.get_color_for_correlation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.AnalyteSelectionWindow.AnalyteDialog.get_selected_data"><code class="docutils literal notranslate"><span class="pre">AnalyteDialog.get_selected_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.AnalyteSelectionWindow.AnalyteDialog.listUpdated"><code class="docutils literal notranslate"><span class="pre">AnalyteDialog.listUpdated</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.AnalyteSelectionWindow.AnalyteDialog.load_selection"><code class="docutils literal notranslate"><span class="pre">AnalyteDialog.load_selection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.AnalyteSelectionWindow.AnalyteDialog.populate_analyte_list"><code class="docutils literal notranslate"><span class="pre">AnalyteDialog.populate_analyte_list()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.AnalyteSelectionWindow.AnalyteDialog.remove_analyte_from_list"><code class="docutils literal notranslate"><span class="pre">AnalyteDialog.remove_analyte_from_list()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.AnalyteSelectionWindow.AnalyteDialog.save_selection"><code class="docutils literal notranslate"><span class="pre">AnalyteDialog.save_selection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.AnalyteSelectionWindow.AnalyteDialog.toggle_cell_selection"><code class="docutils literal notranslate"><span class="pre">AnalyteDialog.toggle_cell_selection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.AnalyteSelectionWindow.AnalyteDialog.update_all_combos"><code class="docutils literal notranslate"><span class="pre">AnalyteDialog.update_all_combos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.AnalyteSelectionWindow.AnalyteDialog.update_list"><code class="docutils literal notranslate"><span class="pre">AnalyteDialog.update_list()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.AnalyteSelectionWindow.AnalyteDialog.update_scale"><code class="docutils literal notranslate"><span class="pre">AnalyteDialog.update_scale()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.AnalyteSelectionWindow.AnalyteDialog.update_window_title"><code class="docutils literal notranslate"><span class="pre">AnalyteDialog.update_window_title()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="app.html#module-app.Browser">app.Browser module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="app.html#app.Browser.Browser"><code class="docutils literal notranslate"><span class="pre">Browser</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Browser.Browser.eventFilter"><code class="docutils literal notranslate"><span class="pre">Browser.eventFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Browser.Browser.browser_home_callback"><code class="docutils literal notranslate"><span class="pre">Browser.browser_home_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Browser.Browser.browser_location_callback"><code class="docutils literal notranslate"><span class="pre">Browser.browser_location_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id0"><code class="docutils literal notranslate"><span class="pre">Browser.eventFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Browser.Browser.open_browser"><code class="docutils literal notranslate"><span class="pre">Browser.open_browser()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="app.html#app.Browser.WebEngineView"><code class="docutils literal notranslate"><span class="pre">WebEngineView</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Browser.WebEngineView.handle_console_message"><code class="docutils literal notranslate"><span class="pre">WebEngineView.handle_console_message()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Browser.WebEngineView.on_load_finished"><code class="docutils literal notranslate"><span class="pre">WebEngineView.on_load_finished()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Browser.WebEngineView.on_load_progress"><code class="docutils literal notranslate"><span class="pre">WebEngineView.on_load_progress()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Browser.WebEngineView.on_load_started"><code class="docutils literal notranslate"><span class="pre">WebEngineView.on_load_started()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Browser.WebEngineView.show_error_page"><code class="docutils literal notranslate"><span class="pre">WebEngineView.show_error_page()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="app.html#module-app.Calculator">app.Calculator module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="app.html#app.Calculator.CustomFieldCalculator"><code class="docutils literal notranslate"><span class="pre">CustomFieldCalculator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Calculator.CustomFieldCalculator.calc_add_field"><code class="docutils literal notranslate"><span class="pre">CustomFieldCalculator.calc_add_field()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Calculator.CustomFieldCalculator.calc_delete_formula"><code class="docutils literal notranslate"><span class="pre">CustomFieldCalculator.calc_delete_formula()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Calculator.CustomFieldCalculator.calc_error"><code class="docutils literal notranslate"><span class="pre">CustomFieldCalculator.calc_error()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Calculator.CustomFieldCalculator.calc_evaluate_expr"><code class="docutils literal notranslate"><span class="pre">CustomFieldCalculator.calc_evaluate_expr()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Calculator.CustomFieldCalculator.calc_help"><code class="docutils literal notranslate"><span class="pre">CustomFieldCalculator.calc_help()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Calculator.CustomFieldCalculator.calc_insert_function"><code class="docutils literal notranslate"><span class="pre">CustomFieldCalculator.calc_insert_function()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Calculator.CustomFieldCalculator.calc_insert_operator"><code class="docutils literal notranslate"><span class="pre">CustomFieldCalculator.calc_insert_operator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Calculator.CustomFieldCalculator.calc_load_dict"><code class="docutils literal notranslate"><span class="pre">CustomFieldCalculator.calc_load_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Calculator.CustomFieldCalculator.calc_load_formula"><code class="docutils literal notranslate"><span class="pre">CustomFieldCalculator.calc_load_formula()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Calculator.CustomFieldCalculator.calc_parse"><code class="docutils literal notranslate"><span class="pre">CustomFieldCalculator.calc_parse()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Calculator.CustomFieldCalculator.calc_set_add_formula"><code class="docutils literal notranslate"><span class="pre">CustomFieldCalculator.calc_set_add_formula()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Calculator.CustomFieldCalculator.calculate_new_field"><code class="docutils literal notranslate"><span class="pre">CustomFieldCalculator.calculate_new_field()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="app.html#module-app.CropImage">app.CropImage module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="app.html#app.CropImage.CropTool"><code class="docutils literal notranslate"><span class="pre">CropTool</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.CropImage.CropTool.overlays"><code class="docutils literal notranslate"><span class="pre">CropTool.overlays</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.CropImage.CropTool.apply_crop"><code class="docutils literal notranslate"><span class="pre">CropTool.apply_crop()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.CropImage.CropTool.init_crop"><code class="docutils literal notranslate"><span class="pre">CropTool.init_crop()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.CropImage.CropTool.remove_overlays"><code class="docutils literal notranslate"><span class="pre">CropTool.remove_overlays()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.CropImage.CropTool.update_overlay"><code class="docutils literal notranslate"><span class="pre">CropTool.update_overlay()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="app.html#app.CropImage.ResizableRectItem"><code class="docutils literal notranslate"><span class="pre">ResizableRectItem</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.CropImage.ResizableRectItem.hoverMoveEvent"><code class="docutils literal notranslate"><span class="pre">ResizableRectItem.hoverMoveEvent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.CropImage.ResizableRectItem.mouseMoveEvent"><code class="docutils literal notranslate"><span class="pre">ResizableRectItem.mouseMoveEvent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.CropImage.ResizableRectItem.mousePressEvent"><code class="docutils literal notranslate"><span class="pre">ResizableRectItem.mousePressEvent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.CropImage.ResizableRectItem.mouseReleaseEvent"><code class="docutils literal notranslate"><span class="pre">ResizableRectItem.mouseReleaseEvent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.CropImage.ResizableRectItem.onEdge"><code class="docutils literal notranslate"><span class="pre">ResizableRectItem.onEdge()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.CropImage.ResizableRectItem.resizeRect"><code class="docutils literal notranslate"><span class="pre">ResizableRectItem.resizeRect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.CropImage.ResizableRectItem.validateRect"><code class="docutils literal notranslate"><span class="pre">ResizableRectItem.validateRect()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="app.html#module-app.CustomTableWidget">app.CustomTableWidget module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="app.html#app.CustomTableWidget.TableWidgetDragRows"><code class="docutils literal notranslate"><span class="pre">TableWidgetDragRows</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.CustomTableWidget.TableWidgetDragRows.dropEvent"><code class="docutils literal notranslate"><span class="pre">TableWidgetDragRows.dropEvent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.CustomTableWidget.TableWidgetDragRows.drop_on"><code class="docutils literal notranslate"><span class="pre">TableWidgetDragRows.drop_on()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.CustomTableWidget.TableWidgetDragRows.is_below"><code class="docutils literal notranslate"><span class="pre">TableWidgetDragRows.is_below()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.CustomTableWidget.TableWidgetDragRows.select_rows"><code class="docutils literal notranslate"><span class="pre">TableWidgetDragRows.select_rows()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="app.html#module-app.ImageProcessing">app.ImageProcessing module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="app.html#app.ImageProcessing.ImageProcessing"><code class="docutils literal notranslate"><span class="pre">ImageProcessing</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.ImageProcessing.ImageProcessing.add_edge_detection"><code class="docutils literal notranslate"><span class="pre">ImageProcessing.add_edge_detection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.ImageProcessing.ImageProcessing.gaussian_sigma"><code class="docutils literal notranslate"><span class="pre">ImageProcessing.gaussian_sigma()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.ImageProcessing.ImageProcessing.noise_reduction"><code class="docutils literal notranslate"><span class="pre">ImageProcessing.noise_reduction()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.ImageProcessing.ImageProcessing.noise_reduction_method_callback"><code class="docutils literal notranslate"><span class="pre">ImageProcessing.noise_reduction_method_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.ImageProcessing.ImageProcessing.noise_reduction_option1_callback"><code class="docutils literal notranslate"><span class="pre">ImageProcessing.noise_reduction_option1_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.ImageProcessing.ImageProcessing.noise_reduction_option2_callback"><code class="docutils literal notranslate"><span class="pre">ImageProcessing.noise_reduction_option2_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.ImageProcessing.ImageProcessing.plot_gradient"><code class="docutils literal notranslate"><span class="pre">ImageProcessing.plot_gradient()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.ImageProcessing.ImageProcessing.run_noise_reduction"><code class="docutils literal notranslate"><span class="pre">ImageProcessing.run_noise_reduction()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.ImageProcessing.ImageProcessing.zero_crossing_laplacian"><code class="docutils literal notranslate"><span class="pre">ImageProcessing.zero_crossing_laplacian()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="app.html#module-app.LameIO">app.LameIO module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="app.html#app.LameIO.LameIO"><code class="docutils literal notranslate"><span class="pre">LameIO</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.LameIO.LameIO.import_files"><code class="docutils literal notranslate"><span class="pre">LameIO.import_files()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.LameIO.LameIO.import_spots"><code class="docutils literal notranslate"><span class="pre">LameIO.import_spots()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.LameIO.LameIO.initialize_samples_and_tabs"><code class="docutils literal notranslate"><span class="pre">LameIO.initialize_samples_and_tabs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.LameIO.LameIO.open_directory"><code class="docutils literal notranslate"><span class="pre">LameIO.open_directory()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.LameIO.LameIO.open_project"><code class="docutils literal notranslate"><span class="pre">LameIO.open_project()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.LameIO.LameIO.open_sample"><code class="docutils literal notranslate"><span class="pre">LameIO.open_sample()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.LameIO.LameIO.populate_spot_table"><code class="docutils literal notranslate"><span class="pre">LameIO.populate_spot_table()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.LameIO.LameIO.save_project"><code class="docutils literal notranslate"><span class="pre">LameIO.save_project()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="app.html#module-app.Logger">app.Logger module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="app.html#app.Logger.LoggerDock"><code class="docutils literal notranslate"><span class="pre">LoggerDock</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Logger.LoggerDock.closeEvent"><code class="docutils literal notranslate"><span class="pre">LoggerDock.closeEvent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Logger.LoggerDock.flush"><code class="docutils literal notranslate"><span class="pre">LoggerDock.flush()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Logger.LoggerDock.write"><code class="docutils literal notranslate"><span class="pre">LoggerDock.write()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="app.html#module-app.MapImporter">app.MapImporter module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="app.html#app.MapImporter.FileSelectData"><code class="docutils literal notranslate"><span class="pre">FileSelectData</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.FileSelectData.get_data"><code class="docutils literal notranslate"><span class="pre">FileSelectData.get_data()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="app.html#app.MapImporter.MapImporter"><code class="docutils literal notranslate"><span class="pre">MapImporter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.standard_list"><code class="docutils literal notranslate"><span class="pre">MapImporter.standard_list</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.sample_ids"><code class="docutils literal notranslate"><span class="pre">MapImporter.sample_ids</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.paths"><code class="docutils literal notranslate"><span class="pre">MapImporter.paths</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.add_checkbox"><code class="docutils literal notranslate"><span class="pre">MapImporter.add_checkbox()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.add_combobox"><code class="docutils literal notranslate"><span class="pre">MapImporter.add_combobox()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.add_pushbutton"><code class="docutils literal notranslate"><span class="pre">MapImporter.add_pushbutton()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.add_standard"><code class="docutils literal notranslate"><span class="pre">MapImporter.add_standard()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.change_preview"><code class="docutils literal notranslate"><span class="pre">MapImporter.change_preview()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.data_type_changed"><code class="docutils literal notranslate"><span class="pre">MapImporter.data_type_changed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.fill_sample_id_path"><code class="docutils literal notranslate"><span class="pre">MapImporter.fill_sample_id_path()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.get_metadata"><code class="docutils literal notranslate"><span class="pre">MapImporter.get_metadata()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.guess_analyte_from_filename"><code class="docutils literal notranslate"><span class="pre">MapImporter.guess_analyte_from_filename()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.help"><code class="docutils literal notranslate"><span class="pre">MapImporter.help()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.import_data"><code class="docutils literal notranslate"><span class="pre">MapImporter.import_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.import_la_icp_ms_data"><code class="docutils literal notranslate"><span class="pre">MapImporter.import_la_icp_ms_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.load_metadata"><code class="docutils literal notranslate"><span class="pre">MapImporter.load_metadata()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.method_changed"><code class="docutils literal notranslate"><span class="pre">MapImporter.method_changed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.on_combobox_changed"><code class="docutils literal notranslate"><span class="pre">MapImporter.on_combobox_changed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.on_item_changed"><code class="docutils literal notranslate"><span class="pre">MapImporter.on_item_changed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.open_directory"><code class="docutils literal notranslate"><span class="pre">MapImporter.open_directory()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.parse_filenames"><code class="docutils literal notranslate"><span class="pre">MapImporter.parse_filenames()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.populate_la_icp_ms_table"><code class="docutils literal notranslate"><span class="pre">MapImporter.populate_la_icp_ms_table()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.populate_table"><code class="docutils literal notranslate"><span class="pre">MapImporter.populate_table()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.process_file"><code class="docutils literal notranslate"><span class="pre">MapImporter.process_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.read_ladr_ppm_folder"><code class="docutils literal notranslate"><span class="pre">MapImporter.read_ladr_ppm_folder()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.read_matrix_folder"><code class="docutils literal notranslate"><span class="pre">MapImporter.read_matrix_folder()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.read_metadata_table"><code class="docutils literal notranslate"><span class="pre">MapImporter.read_metadata_table()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.read_raw_folder"><code class="docutils literal notranslate"><span class="pre">MapImporter.read_raw_folder()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.save_metadata"><code class="docutils literal notranslate"><span class="pre">MapImporter.save_metadata()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.select_sample_files"><code class="docutils literal notranslate"><span class="pre">MapImporter.select_sample_files()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.MapImporter.MapImporter.update_table_row"><code class="docutils literal notranslate"><span class="pre">MapImporter.update_table_row()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="app.html#module-app.PlotTree">app.PlotTree module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="app.html#app.PlotTree.PlotTree"><code class="docutils literal notranslate"><span class="pre">PlotTree</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.PlotTree.PlotTree.add_calculated_leaf"><code class="docutils literal notranslate"><span class="pre">PlotTree.add_calculated_leaf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.PlotTree.PlotTree.add_sample"><code class="docutils literal notranslate"><span class="pre">PlotTree.add_sample()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.PlotTree.PlotTree.add_tree_item"><code class="docutils literal notranslate"><span class="pre">PlotTree.add_tree_item()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.PlotTree.PlotTree.clear_tree_data"><code class="docutils literal notranslate"><span class="pre">PlotTree.clear_tree_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.PlotTree.PlotTree.create_item_from_data"><code class="docutils literal notranslate"><span class="pre">PlotTree.create_item_from_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.PlotTree.PlotTree.extract_plot_info"><code class="docutils literal notranslate"><span class="pre">PlotTree.extract_plot_info()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.PlotTree.PlotTree.find_leaf"><code class="docutils literal notranslate"><span class="pre">PlotTree.find_leaf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.PlotTree.PlotTree.get_plot_info_from_tree"><code class="docutils literal notranslate"><span class="pre">PlotTree.get_plot_info_from_tree()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.PlotTree.PlotTree.get_tree_items"><code class="docutils literal notranslate"><span class="pre">PlotTree.get_tree_items()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.PlotTree.PlotTree.initialize_tree"><code class="docutils literal notranslate"><span class="pre">PlotTree.initialize_tree()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.PlotTree.PlotTree.retrieve_plotinfo_from_tree"><code class="docutils literal notranslate"><span class="pre">PlotTree.retrieve_plotinfo_from_tree()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.PlotTree.PlotTree.sort_tree"><code class="docutils literal notranslate"><span class="pre">PlotTree.sort_tree()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.PlotTree.PlotTree.tree_double_click"><code class="docutils literal notranslate"><span class="pre">PlotTree.tree_double_click()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.PlotTree.PlotTree.unhighlight_tree"><code class="docutils literal notranslate"><span class="pre">PlotTree.unhighlight_tree()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.PlotTree.PlotTree.update_tree"><code class="docutils literal notranslate"><span class="pre">PlotTree.update_tree()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="app.html#module-app.Profile">app.Profile module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="app.html#app.Profile.Profile"><code class="docutils literal notranslate"><span class="pre">Profile</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="app.html#app.Profile.Profiling"><code class="docutils literal notranslate"><span class="pre">Profiling</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.add_field_to_listview"><code class="docutils literal notranslate"><span class="pre">Profiling.add_field_to_listview()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.add_samples"><code class="docutils literal notranslate"><span class="pre">Profiling.add_samples()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.calculate_distance"><code class="docutils literal notranslate"><span class="pre">Profiling.calculate_distance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.cart_to_dist"><code class="docutils literal notranslate"><span class="pre">Profiling.cart_to_dist()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.clear_interpolation"><code class="docutils literal notranslate"><span class="pre">Profiling.clear_interpolation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.clear_plot"><code class="docutils literal notranslate"><span class="pre">Profiling.clear_plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.clear_profiles"><code class="docutils literal notranslate"><span class="pre">Profiling.clear_profiles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.compute_profile_points"><code class="docutils literal notranslate"><span class="pre">Profiling.compute_profile_points()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.dist_to_cart"><code class="docutils literal notranslate"><span class="pre">Profiling.dist_to_cart()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.extract_scatter_plot_state"><code class="docutils literal notranslate"><span class="pre">Profiling.extract_scatter_plot_state()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.get_scatter_errorbar_by_gid"><code class="docutils literal notranslate"><span class="pre">Profiling.get_scatter_errorbar_by_gid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.interpolate_points"><code class="docutils literal notranslate"><span class="pre">Profiling.interpolate_points()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.load_profiles"><code class="docutils literal notranslate"><span class="pre">Profiling.load_profiles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.load_profiles_from_directory"><code class="docutils literal notranslate"><span class="pre">Profiling.load_profiles_from_directory()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.on_pick"><code class="docutils literal notranslate"><span class="pre">Profiling.on_pick()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.on_profile_selected"><code class="docutils literal notranslate"><span class="pre">Profiling.on_profile_selected()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.plot_existing_profile"><code class="docutils literal notranslate"><span class="pre">Profiling.plot_existing_profile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.plot_profile_scatter"><code class="docutils literal notranslate"><span class="pre">Profiling.plot_profile_scatter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.plot_profiles"><code class="docutils literal notranslate"><span class="pre">Profiling.plot_profiles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.plot_scatter_points"><code class="docutils literal notranslate"><span class="pre">Profiling.plot_scatter_points()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.populate_combobox"><code class="docutils literal notranslate"><span class="pre">Profiling.populate_combobox()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.process_points"><code class="docutils literal notranslate"><span class="pre">Profiling.process_points()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.reconstruct_profile"><code class="docutils literal notranslate"><span class="pre">Profiling.reconstruct_profile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.recreate_scatter_plot"><code class="docutils literal notranslate"><span class="pre">Profiling.recreate_scatter_plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.remove_field_from_listview"><code class="docutils literal notranslate"><span class="pre">Profiling.remove_field_from_listview()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.save_profiles"><code class="docutils literal notranslate"><span class="pre">Profiling.save_profiles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.toggle_buttons"><code class="docutils literal notranslate"><span class="pre">Profiling.toggle_buttons()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.toggle_edit_mode"><code class="docutils literal notranslate"><span class="pre">Profiling.toggle_edit_mode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.toggle_point_visibility"><code class="docutils literal notranslate"><span class="pre">Profiling.toggle_point_visibility()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.transform_profile_for_pickling"><code class="docutils literal notranslate"><span class="pre">Profiling.transform_profile_for_pickling()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.update_listview_with_fields"><code class="docutils literal notranslate"><span class="pre">Profiling.update_listview_with_fields()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.update_num_subplots"><code class="docutils literal notranslate"><span class="pre">Profiling.update_num_subplots()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Profile.Profiling.update_table_widget"><code class="docutils literal notranslate"><span class="pre">Profiling.update_table_widget()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="app.html#module-app.QuickView">app.QuickView module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="app.html#app.QuickView.QuickView"><code class="docutils literal notranslate"><span class="pre">QuickView</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.QuickView.QuickView.apply_sort"><code class="docutils literal notranslate"><span class="pre">QuickView.apply_sort()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.QuickView.QuickView.populate_table"><code class="docutils literal notranslate"><span class="pre">QuickView.populate_table()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.QuickView.QuickView.save_selected_analytes"><code class="docutils literal notranslate"><span class="pre">QuickView.save_selected_analytes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.QuickView.QuickView.save_to_csv"><code class="docutils literal notranslate"><span class="pre">QuickView.save_to_csv()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.QuickView.QuickView.setup_sort_menu"><code class="docutils literal notranslate"><span class="pre">QuickView.setup_sort_menu()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.QuickView.QuickView.setup_table"><code class="docutils literal notranslate"><span class="pre">QuickView.setup_table()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="app.html#module-app.SpecialFunctions">app.SpecialFunctions module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="app.html#app.SpecialFunctions.SpecialFunctions"><code class="docutils literal notranslate"><span class="pre">SpecialFunctions</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.SpecialFunctions.SpecialFunctions.add_ree"><code class="docutils literal notranslate"><span class="pre">SpecialFunctions.add_ree()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.SpecialFunctions.SpecialFunctions.callback_dating_method"><code class="docutils literal notranslate"><span class="pre">SpecialFunctions.callback_dating_method()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.SpecialFunctions.SpecialFunctions.callback_dating_ratios"><code class="docutils literal notranslate"><span class="pre">SpecialFunctions.callback_dating_ratios()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.SpecialFunctions.SpecialFunctions.compute_date_map"><code class="docutils literal notranslate"><span class="pre">SpecialFunctions.compute_date_map()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.SpecialFunctions.SpecialFunctions.scatter_date"><code class="docutils literal notranslate"><span class="pre">SpecialFunctions.scatter_date()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="app.html#module-app.SpotImporter">app.SpotImporter module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="app.html#app.SpotImporter.SpotImporter"><code class="docutils literal notranslate"><span class="pre">SpotImporter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.SpotImporter.SpotImporter.main_window"><code class="docutils literal notranslate"><span class="pre">SpotImporter.main_window</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.SpotImporter.SpotImporter.ok"><code class="docutils literal notranslate"><span class="pre">SpotImporter.ok</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.SpotImporter.SpotImporter.add_combobox"><code class="docutils literal notranslate"><span class="pre">SpotImporter.add_combobox()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.SpotImporter.SpotImporter.import_spot_table"><code class="docutils literal notranslate"><span class="pre">SpotImporter.import_spot_table()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.SpotImporter.SpotImporter.insert_column"><code class="docutils literal notranslate"><span class="pre">SpotImporter.insert_column()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.SpotImporter.SpotImporter.load_spot_data"><code class="docutils literal notranslate"><span class="pre">SpotImporter.load_spot_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.SpotImporter.SpotImporter.open_context_menu"><code class="docutils literal notranslate"><span class="pre">SpotImporter.open_context_menu()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.SpotImporter.SpotImporter.rename_column"><code class="docutils literal notranslate"><span class="pre">SpotImporter.rename_column()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.SpotImporter.SpotImporter.update_spot_table"><code class="docutils literal notranslate"><span class="pre">SpotImporter.update_spot_table()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="app.html#module-app.StyleToolbox">app.StyleToolbox module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="app.html#app.StyleToolbox.Styling"><code class="docutils literal notranslate"><span class="pre">Styling</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.plot_type"><code class="docutils literal notranslate"><span class="pre">Styling.plot_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.xlim"><code class="docutils literal notranslate"><span class="pre">Styling.xlim</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.xlabel"><code class="docutils literal notranslate"><span class="pre">Styling.xlabel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.xscale"><code class="docutils literal notranslate"><span class="pre">Styling.xscale</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.ylim"><code class="docutils literal notranslate"><span class="pre">Styling.ylim</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.ylabel"><code class="docutils literal notranslate"><span class="pre">Styling.ylabel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.yscale"><code class="docutils literal notranslate"><span class="pre">Styling.yscale</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.zlabel"><code class="docutils literal notranslate"><span class="pre">Styling.zlabel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.aspect_ratio"><code class="docutils literal notranslate"><span class="pre">Styling.aspect_ratio</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.tick_dir"><code class="docutils literal notranslate"><span class="pre">Styling.tick_dir</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.font"><code class="docutils literal notranslate"><span class="pre">Styling.font</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.font_size"><code class="docutils literal notranslate"><span class="pre">Styling.font_size</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.scale_dir"><code class="docutils literal notranslate"><span class="pre">Styling.scale_dir</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.scale_location"><code class="docutils literal notranslate"><span class="pre">Styling.scale_location</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.scale_length"><code class="docutils literal notranslate"><span class="pre">Styling.scale_length</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.overlay_color"><code class="docutils literal notranslate"><span class="pre">Styling.overlay_color</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.marker"><code class="docutils literal notranslate"><span class="pre">Styling.marker</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.marker_size"><code class="docutils literal notranslate"><span class="pre">Styling.marker_size</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.marker_color"><code class="docutils literal notranslate"><span class="pre">Styling.marker_color</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.marker_alpha"><code class="docutils literal notranslate"><span class="pre">Styling.marker_alpha</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.line_width"><code class="docutils literal notranslate"><span class="pre">Styling.line_width</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.line_multiplier"><code class="docutils literal notranslate"><span class="pre">Styling.line_multiplier</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.line_color"><code class="docutils literal notranslate"><span class="pre">Styling.line_color</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.color_field"><code class="docutils literal notranslate"><span class="pre">Styling.color_field</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.color_field_type"><code class="docutils literal notranslate"><span class="pre">Styling.color_field_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.cmap"><code class="docutils literal notranslate"><span class="pre">Styling.cmap</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.cbar_reverse"><code class="docutils literal notranslate"><span class="pre">Styling.cbar_reverse</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.cbar_dir"><code class="docutils literal notranslate"><span class="pre">Styling.cbar_dir</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.clim"><code class="docutils literal notranslate"><span class="pre">Styling.clim</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.clabel"><code class="docutils literal notranslate"><span class="pre">Styling.clabel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.cscale"><code class="docutils literal notranslate"><span class="pre">Styling.cscale</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.resolution"><code class="docutils literal notranslate"><span class="pre">Styling.resolution</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.map_plot_types"><code class="docutils literal notranslate"><span class="pre">Styling.map_plot_types</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.marker_dict"><code class="docutils literal notranslate"><span class="pre">Styling.marker_dict</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.style_dict"><code class="docutils literal notranslate"><span class="pre">Styling.style_dict</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id13"><code class="docutils literal notranslate"><span class="pre">Styling.aspect_ratio</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.aspect_ratio_callback"><code class="docutils literal notranslate"><span class="pre">Styling.aspect_ratio_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.axis_label_edit_callback"><code class="docutils literal notranslate"><span class="pre">Styling.axis_label_edit_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.axis_limit_edit_callback"><code class="docutils literal notranslate"><span class="pre">Styling.axis_limit_edit_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.axis_reset_callback"><code class="docutils literal notranslate"><span class="pre">Styling.axis_reset_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.axis_scale_callback"><code class="docutils literal notranslate"><span class="pre">Styling.axis_scale_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.axis_variable_changed"><code class="docutils literal notranslate"><span class="pre">Styling.axis_variable_changed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.button_color_select"><code class="docutils literal notranslate"><span class="pre">Styling.button_color_select()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id14"><code class="docutils literal notranslate"><span class="pre">Styling.cbar_dir</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.cbar_direction_callback"><code class="docutils literal notranslate"><span class="pre">Styling.cbar_direction_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.cbar_label_callback"><code class="docutils literal notranslate"><span class="pre">Styling.cbar_label_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id15"><code class="docutils literal notranslate"><span class="pre">Styling.cbar_reverse</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id16"><code class="docutils literal notranslate"><span class="pre">Styling.clabel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id17"><code class="docutils literal notranslate"><span class="pre">Styling.clim</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.cluster_color_callback"><code class="docutils literal notranslate"><span class="pre">Styling.cluster_color_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id18"><code class="docutils literal notranslate"><span class="pre">Styling.cmap</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.color_by_field_callback"><code class="docutils literal notranslate"><span class="pre">Styling.color_by_field_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id19"><code class="docutils literal notranslate"><span class="pre">Styling.color_field</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.color_field_callback"><code class="docutils literal notranslate"><span class="pre">Styling.color_field_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id20"><code class="docutils literal notranslate"><span class="pre">Styling.color_field_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.color_field_update"><code class="docutils literal notranslate"><span class="pre">Styling.color_field_update()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.color_norm"><code class="docutils literal notranslate"><span class="pre">Styling.color_norm()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.colormap_direction_callback"><code class="docutils literal notranslate"><span class="pre">Styling.colormap_direction_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.create_custom_colormap"><code class="docutils literal notranslate"><span class="pre">Styling.create_custom_colormap()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id21"><code class="docutils literal notranslate"><span class="pre">Styling.cscale</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.default_scale_length"><code class="docutils literal notranslate"><span class="pre">Styling.default_scale_length()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.disable_style_widgets"><code class="docutils literal notranslate"><span class="pre">Styling.disable_style_widgets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.field_colormap_callback"><code class="docutils literal notranslate"><span class="pre">Styling.field_colormap_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id22"><code class="docutils literal notranslate"><span class="pre">Styling.font</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.font_callback"><code class="docutils literal notranslate"><span class="pre">Styling.font_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id23"><code class="docutils literal notranslate"><span class="pre">Styling.font_size</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.font_size_callback"><code class="docutils literal notranslate"><span class="pre">Styling.font_size_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.get_axis_field"><code class="docutils literal notranslate"><span class="pre">Styling.get_axis_field()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.get_axis_values"><code class="docutils literal notranslate"><span class="pre">Styling.get_axis_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.get_cluster_colormap"><code class="docutils literal notranslate"><span class="pre">Styling.get_cluster_colormap()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.get_colormap"><code class="docutils literal notranslate"><span class="pre">Styling.get_colormap()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.get_style_dict"><code class="docutils literal notranslate"><span class="pre">Styling.get_style_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.initialize_axis_values"><code class="docutils literal notranslate"><span class="pre">Styling.initialize_axis_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.input_theme_name_dlg"><code class="docutils literal notranslate"><span class="pre">Styling.input_theme_name_dlg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.length_multiplier_callback"><code class="docutils literal notranslate"><span class="pre">Styling.length_multiplier_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id24"><code class="docutils literal notranslate"><span class="pre">Styling.line_color</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.line_color_callback"><code class="docutils literal notranslate"><span class="pre">Styling.line_color_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id25"><code class="docutils literal notranslate"><span class="pre">Styling.line_multiplier</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id26"><code class="docutils literal notranslate"><span class="pre">Styling.line_width</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.line_width_callback"><code class="docutils literal notranslate"><span class="pre">Styling.line_width_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.load_theme_names"><code class="docutils literal notranslate"><span class="pre">Styling.load_theme_names()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id31"><code class="docutils literal notranslate"><span class="pre">Styling.marker</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id32"><code class="docutils literal notranslate"><span class="pre">Styling.marker_alpha</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id33"><code class="docutils literal notranslate"><span class="pre">Styling.marker_color</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.marker_color_callback"><code class="docutils literal notranslate"><span class="pre">Styling.marker_color_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id34"><code class="docutils literal notranslate"><span class="pre">Styling.marker_size</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.marker_size_callback"><code class="docutils literal notranslate"><span class="pre">Styling.marker_size_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.marker_symbol_callback"><code class="docutils literal notranslate"><span class="pre">Styling.marker_symbol_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id35"><code class="docutils literal notranslate"><span class="pre">Styling.overlay_color</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.overlay_color_callback"><code class="docutils literal notranslate"><span class="pre">Styling.overlay_color_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.parse_field"><code class="docutils literal notranslate"><span class="pre">Styling.parse_field()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id36"><code class="docutils literal notranslate"><span class="pre">Styling.plot_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.plot_type_callback"><code class="docutils literal notranslate"><span class="pre">Styling.plot_type_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.print_properties"><code class="docutils literal notranslate"><span class="pre">Styling.print_properties()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.read_theme"><code class="docutils literal notranslate"><span class="pre">Styling.read_theme()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.reset_default_styles"><code class="docutils literal notranslate"><span class="pre">Styling.reset_default_styles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id37"><code class="docutils literal notranslate"><span class="pre">Styling.resolution</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.resolution_callback"><code class="docutils literal notranslate"><span class="pre">Styling.resolution_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id38"><code class="docutils literal notranslate"><span class="pre">Styling.scale_dir</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.scale_direction_callback"><code class="docutils literal notranslate"><span class="pre">Styling.scale_direction_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id39"><code class="docutils literal notranslate"><span class="pre">Styling.scale_length</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.scale_length_callback"><code class="docutils literal notranslate"><span class="pre">Styling.scale_length_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id40"><code class="docutils literal notranslate"><span class="pre">Styling.scale_location</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.scale_location_callback"><code class="docutils literal notranslate"><span class="pre">Styling.scale_location_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.select_cluster_group_callback"><code class="docutils literal notranslate"><span class="pre">Styling.select_cluster_group_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.set_axis_widgets"><code class="docutils literal notranslate"><span class="pre">Styling.set_axis_widgets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.set_color_axis_widgets"><code class="docutils literal notranslate"><span class="pre">Styling.set_color_axis_widgets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.set_default_cluster_colors"><code class="docutils literal notranslate"><span class="pre">Styling.set_default_cluster_colors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.set_style_widgets"><code class="docutils literal notranslate"><span class="pre">Styling.set_style_widgets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.slider_alpha_changed"><code class="docutils literal notranslate"><span class="pre">Styling.slider_alpha_changed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.ternary_colormap_changed"><code class="docutils literal notranslate"><span class="pre">Styling.ternary_colormap_changed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id41"><code class="docutils literal notranslate"><span class="pre">Styling.tick_dir</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.tickdir_callback"><code class="docutils literal notranslate"><span class="pre">Styling.tickdir_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.toggle_mass"><code class="docutils literal notranslate"><span class="pre">Styling.toggle_mass()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.toggle_style_labels"><code class="docutils literal notranslate"><span class="pre">Styling.toggle_style_labels()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.toggle_style_widgets"><code class="docutils literal notranslate"><span class="pre">Styling.toggle_style_widgets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.update_color_field_spinbox"><code class="docutils literal notranslate"><span class="pre">Styling.update_color_field_spinbox()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.update_figure_font"><code class="docutils literal notranslate"><span class="pre">Styling.update_figure_font()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id44"><code class="docutils literal notranslate"><span class="pre">Styling.xlabel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id45"><code class="docutils literal notranslate"><span class="pre">Styling.xlim</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id46"><code class="docutils literal notranslate"><span class="pre">Styling.xscale</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id47"><code class="docutils literal notranslate"><span class="pre">Styling.ylabel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id48"><code class="docutils literal notranslate"><span class="pre">Styling.ylim</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id49"><code class="docutils literal notranslate"><span class="pre">Styling.yscale</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#id50"><code class="docutils literal notranslate"><span class="pre">Styling.zlabel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.zlim"><code class="docutils literal notranslate"><span class="pre">Styling.zlim</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.StyleToolbox.Styling.zscale"><code class="docutils literal notranslate"><span class="pre">Styling.zscale</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="app.html#module-app.UITheme">app.UITheme module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="app.html#app.UITheme.UIThemes"><code class="docutils literal notranslate"><span class="pre">UIThemes</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.UITheme.UIThemes.set_dark_theme"><code class="docutils literal notranslate"><span class="pre">UIThemes.set_dark_theme()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.UITheme.UIThemes.set_light_theme"><code class="docutils literal notranslate"><span class="pre">UIThemes.set_light_theme()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.UITheme.UIThemes.switch_view_mode"><code class="docutils literal notranslate"><span class="pre">UIThemes.switch_view_mode()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="app.html#module-app.Workflow">app.Workflow module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="app.html#app.Workflow.BlocklyBridge"><code class="docutils literal notranslate"><span class="pre">BlocklyBridge</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Workflow.BlocklyBridge.convert_numpy_types"><code class="docutils literal notranslate"><span class="pre">BlocklyBridge.convert_numpy_types()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Workflow.BlocklyBridge.executeCode"><code class="docutils literal notranslate"><span class="pre">BlocklyBridge.executeCode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Workflow.BlocklyBridge.getBaseDir"><code class="docutils literal notranslate"><span class="pre">BlocklyBridge.getBaseDir()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Workflow.BlocklyBridge.getFieldList"><code class="docutils literal notranslate"><span class="pre">BlocklyBridge.getFieldList()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Workflow.BlocklyBridge.getFieldTypeList"><code class="docutils literal notranslate"><span class="pre">BlocklyBridge.getFieldTypeList()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Workflow.BlocklyBridge.getRefValueList"><code class="docutils literal notranslate"><span class="pre">BlocklyBridge.getRefValueList()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Workflow.BlocklyBridge.getSavedAnalyteLists"><code class="docutils literal notranslate"><span class="pre">BlocklyBridge.getSavedAnalyteLists()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Workflow.BlocklyBridge.invokeSetStyleWidgets"><code class="docutils literal notranslate"><span class="pre">BlocklyBridge.invokeSetStyleWidgets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Workflow.BlocklyBridge.runCode"><code class="docutils literal notranslate"><span class="pre">BlocklyBridge.runCode()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="app.html#app.Workflow.Workflow"><code class="docutils literal notranslate"><span class="pre">Workflow</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Workflow.Workflow.execute_code"><code class="docutils literal notranslate"><span class="pre">Workflow.execute_code()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Workflow.Workflow.get_saved_analyte_lists"><code class="docutils literal notranslate"><span class="pre">Workflow.get_saved_analyte_lists()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Workflow.Workflow.handleResizeEvent"><code class="docutils literal notranslate"><span class="pre">Workflow.handleResizeEvent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Workflow.Workflow.refresh_analyte_saved_lists_dropdown"><code class="docutils literal notranslate"><span class="pre">Workflow.refresh_analyte_saved_lists_dropdown()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Workflow.Workflow.store_sample_ids"><code class="docutils literal notranslate"><span class="pre">Workflow.store_sample_ids()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="app.html#app.Workflow.Workflow.update_field_type_list"><code class="docutils literal notranslate"><span class="pre">Workflow.update_field_type_list()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="app.html#module-app.config">app.config module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="app.html#app.config.load_stylesheet"><code class="docutils literal notranslate"><span class="pre">load_stylesheet()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="app.html#module-app">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="common.html">common package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="common.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#module-common.CustomMplCanvas">common.CustomMplCanvas module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.CustomMplCanvas.MplCanvas"><code class="docutils literal notranslate"><span class="pre">MplCanvas</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomMplCanvas.MplCanvas.calculate_distance"><code class="docutils literal notranslate"><span class="pre">MplCanvas.calculate_distance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomMplCanvas.MplCanvas.distanceOnClick"><code class="docutils literal notranslate"><span class="pre">MplCanvas.distanceOnClick()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomMplCanvas.MplCanvas.distanceOnMove"><code class="docutils literal notranslate"><span class="pre">MplCanvas.distanceOnMove()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomMplCanvas.MplCanvas.distance_reset"><code class="docutils literal notranslate"><span class="pre">MplCanvas.distance_reset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomMplCanvas.MplCanvas.enterEvent"><code class="docutils literal notranslate"><span class="pre">MplCanvas.enterEvent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomMplCanvas.MplCanvas.leaveEvent"><code class="docutils literal notranslate"><span class="pre">MplCanvas.leaveEvent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomMplCanvas.MplCanvas.load_figure"><code class="docutils literal notranslate"><span class="pre">MplCanvas.load_figure()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomMplCanvas.MplCanvas.mouseLocation"><code class="docutils literal notranslate"><span class="pre">MplCanvas.mouseLocation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomMplCanvas.MplCanvas.plot_line"><code class="docutils literal notranslate"><span class="pre">MplCanvas.plot_line()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomMplCanvas.MplCanvas.plot_text"><code class="docutils literal notranslate"><span class="pre">MplCanvas.plot_text()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomMplCanvas.MplCanvas.restore_view"><code class="docutils literal notranslate"><span class="pre">MplCanvas.restore_view()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomMplCanvas.MplCanvas.setCursorPosition"><code class="docutils literal notranslate"><span class="pre">MplCanvas.setCursorPosition()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomMplCanvas.MplCanvas.set_initial_extent"><code class="docutils literal notranslate"><span class="pre">MplCanvas.set_initial_extent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomMplCanvas.MplCanvas.textOnClick"><code class="docutils literal notranslate"><span class="pre">MplCanvas.textOnClick()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.CustomMplCanvas.MplDialog"><code class="docutils literal notranslate"><span class="pre">MplDialog</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.CustomMplCanvas.SimpleMplCanvas"><code class="docutils literal notranslate"><span class="pre">SimpleMplCanvas</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#module-common.CustomWidgets">common.CustomWidgets module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.CustomWidgets.CustomLineEdit"><code class="docutils literal notranslate"><span class="pre">CustomLineEdit</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.CustomLineEdit.precision"><code class="docutils literal notranslate"><span class="pre">CustomLineEdit.precision</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.CustomLineEdit.threshold"><code class="docutils literal notranslate"><span class="pre">CustomLineEdit.threshold</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.CustomLineEdit.toward"><code class="docutils literal notranslate"><span class="pre">CustomLineEdit.toward</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.CustomLineEdit.value"><code class="docutils literal notranslate"><span class="pre">CustomLineEdit.value</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.CustomWidgets.CustomTableWidget"><code class="docutils literal notranslate"><span class="pre">CustomTableWidget</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.CustomTableWidget.column_to_list"><code class="docutils literal notranslate"><span class="pre">CustomTableWidget.column_to_list()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.CustomTableWidget.extract_widget_data"><code class="docutils literal notranslate"><span class="pre">CustomTableWidget.extract_widget_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.CustomTableWidget.to_dataframe"><code class="docutils literal notranslate"><span class="pre">CustomTableWidget.to_dataframe()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.CustomWidgets.CustomTreeView"><code class="docutils literal notranslate"><span class="pre">CustomTreeView</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.CustomTreeView.add_branch"><code class="docutils literal notranslate"><span class="pre">CustomTreeView.add_branch()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.CustomTreeView.add_leaf"><code class="docutils literal notranslate"><span class="pre">CustomTreeView.add_leaf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.CustomTreeView.branch_exists"><code class="docutils literal notranslate"><span class="pre">CustomTreeView.branch_exists()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.CustomTreeView.clear_tree"><code class="docutils literal notranslate"><span class="pre">CustomTreeView.clear_tree()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.CustomTreeView.find_leaf"><code class="docutils literal notranslate"><span class="pre">CustomTreeView.find_leaf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.CustomTreeView.get_item_path"><code class="docutils literal notranslate"><span class="pre">CustomTreeView.get_item_path()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.CustomTreeView.get_leaf_data"><code class="docutils literal notranslate"><span class="pre">CustomTreeView.get_leaf_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.CustomTreeView.on_double_click"><code class="docutils literal notranslate"><span class="pre">CustomTreeView.on_double_click()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.CustomTreeView.sort_branch"><code class="docutils literal notranslate"><span class="pre">CustomTreeView.sort_branch()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.CustomWidgets.StandardItem"><code class="docutils literal notranslate"><span class="pre">StandardItem</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#module-common.DataHandling">common.DataHandling module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.DataHandling.SampleObj"><code class="docutils literal notranslate"><span class="pre">SampleObj</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.update_crop_mask"><code class="docutils literal notranslate"><span class="pre">SampleObj.update_crop_mask</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.reset_crop"><code class="docutils literal notranslate"><span class="pre">SampleObj.reset_crop</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.update_resolution"><code class="docutils literal notranslate"><span class="pre">SampleObj.update_resolution</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.prep_data"><code class="docutils literal notranslate"><span class="pre">SampleObj.prep_data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.outlier_detection"><code class="docutils literal notranslate"><span class="pre">SampleObj.outlier_detection</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.transform_array"><code class="docutils literal notranslate"><span class="pre">SampleObj.transform_array</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.swap_xy"><code class="docutils literal notranslate"><span class="pre">SampleObj.swap_xy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.raw_data"><code class="docutils literal notranslate"><span class="pre">SampleObj.raw_data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.filter_df"><code class="docutils literal notranslate"><span class="pre">SampleObj.filter_df</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.processed_data"><code class="docutils literal notranslate"><span class="pre">SampleObj.processed_data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.add_columns"><code class="docutils literal notranslate"><span class="pre">SampleObj.add_columns()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.array_size"><code class="docutils literal notranslate"><span class="pre">SampleObj.array_size</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.aspect_ratio"><code class="docutils literal notranslate"><span class="pre">SampleObj.aspect_ratio</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.clip_outliers"><code class="docutils literal notranslate"><span class="pre">SampleObj.clip_outliers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.cluster_data"><code class="docutils literal notranslate"><span class="pre">SampleObj.cluster_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.compute_ratio"><code class="docutils literal notranslate"><span class="pre">SampleObj.compute_ratio()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.crop_mask"><code class="docutils literal notranslate"><span class="pre">SampleObj.crop_mask</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.delete_column"><code class="docutils literal notranslate"><span class="pre">SampleObj.delete_column()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.dx"><code class="docutils literal notranslate"><span class="pre">SampleObj.dx</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.dy"><code class="docutils literal notranslate"><span class="pre">SampleObj.dy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#id0"><code class="docutils literal notranslate"><span class="pre">SampleObj.filter_df</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.get_attribute_dict"><code class="docutils literal notranslate"><span class="pre">SampleObj.get_attribute_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.get_map_data"><code class="docutils literal notranslate"><span class="pre">SampleObj.get_map_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.get_processed_data"><code class="docutils literal notranslate"><span class="pre">SampleObj.get_processed_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.get_vector"><code class="docutils literal notranslate"><span class="pre">SampleObj.get_vector()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.k_optimal_clusters"><code class="docutils literal notranslate"><span class="pre">SampleObj.k_optimal_clusters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.negative_method"><code class="docutils literal notranslate"><span class="pre">SampleObj.negative_method</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.outlier_method"><code class="docutils literal notranslate"><span class="pre">SampleObj.outlier_method</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#id7"><code class="docutils literal notranslate"><span class="pre">SampleObj.prep_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#id8"><code class="docutils literal notranslate"><span class="pre">SampleObj.reset_crop()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.reset_data"><code class="docutils literal notranslate"><span class="pre">SampleObj.reset_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.reset_data_handling"><code class="docutils literal notranslate"><span class="pre">SampleObj.reset_data_handling()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.swap_resolution"><code class="docutils literal notranslate"><span class="pre">SampleObj.swap_resolution()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#id9"><code class="docutils literal notranslate"><span class="pre">SampleObj.swap_xy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#id10"><code class="docutils literal notranslate"><span class="pre">SampleObj.transform_array()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.update_norm"><code class="docutils literal notranslate"><span class="pre">SampleObj.update_norm()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.x"><code class="docutils literal notranslate"><span class="pre">SampleObj.x</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.x_range"><code class="docutils literal notranslate"><span class="pre">SampleObj.x_range</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.xlim"><code class="docutils literal notranslate"><span class="pre">SampleObj.xlim</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.y"><code class="docutils literal notranslate"><span class="pre">SampleObj.y</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.y_range"><code class="docutils literal notranslate"><span class="pre">SampleObj.y_range</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.ylim"><code class="docutils literal notranslate"><span class="pre">SampleObj.ylim</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#module-common.ExtendedDF">common.ExtendedDF module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.ExtendedDF.AttributeDataFrame"><code class="docutils literal notranslate"><span class="pre">AttributeDataFrame</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.ExtendedDF.AttributeDataFrame.attributes_to_dataframe"><code class="docutils literal notranslate"><span class="pre">AttributeDataFrame.attributes_to_dataframe()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.ExtendedDF.AttributeDataFrame.copy_columns"><code class="docutils literal notranslate"><span class="pre">AttributeDataFrame.copy_columns()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.ExtendedDF.AttributeDataFrame.get_attribute"><code class="docutils literal notranslate"><span class="pre">AttributeDataFrame.get_attribute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.ExtendedDF.AttributeDataFrame.get_attribute_dict"><code class="docutils literal notranslate"><span class="pre">AttributeDataFrame.get_attribute_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.ExtendedDF.AttributeDataFrame.is_attribute"><code class="docutils literal notranslate"><span class="pre">AttributeDataFrame.is_attribute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.ExtendedDF.AttributeDataFrame.match_attribute"><code class="docutils literal notranslate"><span class="pre">AttributeDataFrame.match_attribute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.ExtendedDF.AttributeDataFrame.match_attributes"><code class="docutils literal notranslate"><span class="pre">AttributeDataFrame.match_attributes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.ExtendedDF.AttributeDataFrame.set_attribute"><code class="docutils literal notranslate"><span class="pre">AttributeDataFrame.set_attribute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.ExtendedDF.AttributeDataFrame.show_attributes"><code class="docutils literal notranslate"><span class="pre">AttributeDataFrame.show_attributes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.ExtendedDF.AttributeDataFrame.sort_columns"><code class="docutils literal notranslate"><span class="pre">AttributeDataFrame.sort_columns()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#module-common.MolecularWeightCalculator">common.MolecularWeightCalculator module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.MolecularWeightCalculator.MolecularWeightCalculator"><code class="docutils literal notranslate"><span class="pre">MolecularWeightCalculator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.MolecularWeightCalculator.MolecularWeightCalculator.molecular_weight"><code class="docutils literal notranslate"><span class="pre">MolecularWeightCalculator.molecular_weight()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#module-common.NoteTaking">common.NoteTaking module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.NoteTaking.Notes"><code class="docutils literal notranslate"><span class="pre">Notes</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.NoteTaking.Notes.add_header_line"><code class="docutils literal notranslate"><span class="pre">Notes.add_header_line()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.NoteTaking.Notes.add_info_note"><code class="docutils literal notranslate"><span class="pre">Notes.add_info_note()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.NoteTaking.Notes.add_menu"><code class="docutils literal notranslate"><span class="pre">Notes.add_menu()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.NoteTaking.Notes.add_table_note"><code class="docutils literal notranslate"><span class="pre">Notes.add_table_note()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.NoteTaking.Notes.format_note_text"><code class="docutils literal notranslate"><span class="pre">Notes.format_note_text()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.NoteTaking.Notes.notes_add_image"><code class="docutils literal notranslate"><span class="pre">Notes.notes_add_image()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.NoteTaking.Notes.save_notes_file"><code class="docutils literal notranslate"><span class="pre">Notes.save_notes_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.NoteTaking.Notes.save_notes_to_pdf"><code class="docutils literal notranslate"><span class="pre">Notes.save_notes_to_pdf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.NoteTaking.Notes.to_rst_table"><code class="docutils literal notranslate"><span class="pre">Notes.to_rst_table()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#module-common.Polygon">common.Polygon module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.Polygon.Polygon"><code class="docutils literal notranslate"><span class="pre">Polygon</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.Polygon.PolygonManager"><code class="docutils literal notranslate"><span class="pre">PolygonManager</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.Polygon.PolygonManager.increment_pid"><code class="docutils literal notranslate"><span class="pre">PolygonManager.increment_pid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.Polygon.PolygonManager.add_samples"><code class="docutils literal notranslate"><span class="pre">PolygonManager.add_samples()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.Polygon.PolygonManager.clear_lines"><code class="docutils literal notranslate"><span class="pre">PolygonManager.clear_lines()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.Polygon.PolygonManager.clear_plot"><code class="docutils literal notranslate"><span class="pre">PolygonManager.clear_plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.Polygon.PolygonManager.clear_polygons"><code class="docutils literal notranslate"><span class="pre">PolygonManager.clear_polygons()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.Polygon.PolygonManager.distance_to_line_segment"><code class="docutils literal notranslate"><span class="pre">PolygonManager.distance_to_line_segment()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.Polygon.PolygonManager.extract_scatter_plot_state"><code class="docutils literal notranslate"><span class="pre">PolygonManager.extract_scatter_plot_state()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#id23"><code class="docutils literal notranslate"><span class="pre">PolygonManager.increment_pid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.Polygon.PolygonManager.load_polygons"><code class="docutils literal notranslate"><span class="pre">PolygonManager.load_polygons()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.Polygon.PolygonManager.plot_existing_polygon"><code class="docutils literal notranslate"><span class="pre">PolygonManager.plot_existing_polygon()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.Polygon.PolygonManager.plot_polygon_scatter"><code class="docutils literal notranslate"><span class="pre">PolygonManager.plot_polygon_scatter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.Polygon.PolygonManager.reconstruct_polygon"><code class="docutils literal notranslate"><span class="pre">PolygonManager.reconstruct_polygon()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.Polygon.PolygonManager.recreate_scatter_plot"><code class="docutils literal notranslate"><span class="pre">PolygonManager.recreate_scatter_plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.Polygon.PolygonManager.save_polygons"><code class="docutils literal notranslate"><span class="pre">PolygonManager.save_polygons()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.Polygon.PolygonManager.show_polygon_lines"><code class="docutils literal notranslate"><span class="pre">PolygonManager.show_polygon_lines()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.Polygon.PolygonManager.transform_polygon_for_pickling"><code class="docutils literal notranslate"><span class="pre">PolygonManager.transform_polygon_for_pickling()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.Polygon.PolygonManager.update_table_widget"><code class="docutils literal notranslate"><span class="pre">PolygonManager.update_table_widget()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.Polygon.PolygonManager.view_selected_polygon"><code class="docutils literal notranslate"><span class="pre">PolygonManager.view_selected_polygon()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#module-common.Regression">common.Regression module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#module-common.SortAnalytes">common.SortAnalytes module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.SortAnalytes.sort_analytes"><code class="docutils literal notranslate"><span class="pre">sort_analytes()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#module-common.TableFunctions">common.TableFunctions module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.TableFunctions.TableFcn"><code class="docutils literal notranslate"><span class="pre">TableFcn</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.TableFunctions.TableFcn.delete_row"><code class="docutils literal notranslate"><span class="pre">TableFcn.delete_row()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.TableFunctions.TableFcn.move_row_down"><code class="docutils literal notranslate"><span class="pre">TableFcn.move_row_down()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.TableFunctions.TableFcn.move_row_up"><code class="docutils literal notranslate"><span class="pre">TableFcn.move_row_up()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#module-common.colorfunc">common.colorfunc module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.colorfunc.get_hex_color"><code class="docutils literal notranslate"><span class="pre">get_hex_color()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.colorfunc.get_rgb_color"><code class="docutils literal notranslate"><span class="pre">get_rgb_color()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#module-common.csvdict">common.csvdict module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.csvdict.export_dict_to_csv"><code class="docutils literal notranslate"><span class="pre">export_dict_to_csv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.csvdict.export_filtered_dict_to_csv"><code class="docutils literal notranslate"><span class="pre">export_filtered_dict_to_csv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.csvdict.import_csv_to_dict"><code class="docutils literal notranslate"><span class="pre">import_csv_to_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#module-common.format">common.format module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.format.dynamic_format"><code class="docutils literal notranslate"><span class="pre">dynamic_format()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.format.oround"><code class="docutils literal notranslate"><span class="pre">oround()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.format.oround_matrix"><code class="docutils literal notranslate"><span class="pre">oround_matrix()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#module-common.gausscensor">common.gausscensor module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.gausscensor.gausscensor"><code class="docutils literal notranslate"><span class="pre">gausscensor()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#module-common.outliers">common.outliers module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.outliers.chauvenet_criterion"><code class="docutils literal notranslate"><span class="pre">chauvenet_criterion()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.outliers.peirce_dev"><code class="docutils literal notranslate"><span class="pre">peirce_dev()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.outliers.quantile_and_difference"><code class="docutils literal notranslate"><span class="pre">quantile_and_difference()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#module-common.plot_spider">common.plot_spider module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.plot_spider.fillinterval"><code class="docutils literal notranslate"><span class="pre">fillinterval()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.plot_spider.logax"><code class="docutils literal notranslate"><span class="pre">logax()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.plot_spider.ox2ppm"><code class="docutils literal notranslate"><span class="pre">ox2ppm()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.plot_spider.plot_data"><code class="docutils literal notranslate"><span class="pre">plot_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.plot_spider.plot_spider_norm"><code class="docutils literal notranslate"><span class="pre">plot_spider_norm()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#module-common.radar">common.radar module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.radar.Radar"><code class="docutils literal notranslate"><span class="pre">Radar</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.radar.Radar.normalize_vals"><code class="docutils literal notranslate"><span class="pre">Radar.normalize_vals()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.radar.Radar.plot"><code class="docutils literal notranslate"><span class="pre">Radar.plot()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#module-common.radar_factory">common.radar_factory module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.radar_factory.radar_factory"><code class="docutils literal notranslate"><span class="pre">radar_factory()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#module-common.rotated">common.rotated module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.rotated.RotatedHeaderView"><code class="docutils literal notranslate"><span class="pre">RotatedHeaderView</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.rotated.RotatedHeaderView.minimumSizeHint"><code class="docutils literal notranslate"><span class="pre">RotatedHeaderView.minimumSizeHint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.rotated.RotatedHeaderView.paintSection"><code class="docutils literal notranslate"><span class="pre">RotatedHeaderView.paintSection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.rotated.RotatedHeaderView.sectionSizeFromContents"><code class="docutils literal notranslate"><span class="pre">RotatedHeaderView.sectionSizeFromContents()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#module-common.scalebar">common.scalebar module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.scalebar.scalebar"><code class="docutils literal notranslate"><span class="pre">scalebar</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.scalebar.scalebar.create"><code class="docutils literal notranslate"><span class="pre">scalebar.create()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#module-common.ternary_colormap">common.ternary_colormap module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#module-common.ternary_plot">common.ternary_plot module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.ternary_plot.ternary"><code class="docutils literal notranslate"><span class="pre">ternary</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.ternary_plot.ternary.cplane"><code class="docutils literal notranslate"><span class="pre">ternary.cplane()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.ternary_plot.ternary.cplanexy"><code class="docutils literal notranslate"><span class="pre">ternary.cplanexy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.ternary_plot.ternary.hexagon"><code class="docutils literal notranslate"><span class="pre">ternary.hexagon()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.ternary_plot.ternary.tern2xy"><code class="docutils literal notranslate"><span class="pre">ternary.tern2xy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.ternary_plot.ternary.ternaxes"><code class="docutils literal notranslate"><span class="pre">ternary.ternaxes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.ternary_plot.ternary.terncolor"><code class="docutils literal notranslate"><span class="pre">ternary.terncolor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.ternary_plot.ternary.terngrid"><code class="docutils literal notranslate"><span class="pre">ternary.terngrid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.ternary_plot.ternary.ternhex"><code class="docutils literal notranslate"><span class="pre">ternary.ternhex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.ternary_plot.ternary.ternscatter"><code class="docutils literal notranslate"><span class="pre">ternary.ternscatter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.ternary_plot.ternary.ternticks"><code class="docutils literal notranslate"><span class="pre">ternary.ternticks()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.ternary_plot.ternary.xy2tern"><code class="docutils literal notranslate"><span class="pre">ternary.xy2tern()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#module-common.terncmap">common.terncmap module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#module-common">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ui.html">ui package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ui.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.html#module-ui.AnalyteSelectionDialog">ui.AnalyteSelectionDialog module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ui.html#ui.AnalyteSelectionDialog.Ui_Dialog"><code class="docutils literal notranslate"><span class="pre">Ui_Dialog</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ui.html#ui.AnalyteSelectionDialog.Ui_Dialog.retranslateUi"><code class="docutils literal notranslate"><span class="pre">Ui_Dialog.retranslateUi()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ui.html#ui.AnalyteSelectionDialog.Ui_Dialog.setupUi"><code class="docutils literal notranslate"><span class="pre">Ui_Dialog.setupUi()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ui.html#module-ui.FileSelectorDialog">ui.FileSelectorDialog module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ui.html#ui.FileSelectorDialog.Ui_FileSelectorDialog"><code class="docutils literal notranslate"><span class="pre">Ui_FileSelectorDialog</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ui.html#ui.FileSelectorDialog.Ui_FileSelectorDialog.retranslateUi"><code class="docutils literal notranslate"><span class="pre">Ui_FileSelectorDialog.retranslateUi()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ui.html#ui.FileSelectorDialog.Ui_FileSelectorDialog.setupUi"><code class="docutils literal notranslate"><span class="pre">Ui_FileSelectorDialog.setupUi()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ui.html#module-ui.IsotopeSelectionDialog">ui.IsotopeSelectionDialog module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ui.html#ui.IsotopeSelectionDialog.Ui_Dialog"><code class="docutils literal notranslate"><span class="pre">Ui_Dialog</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ui.html#ui.IsotopeSelectionDialog.Ui_Dialog.retranslateUi"><code class="docutils literal notranslate"><span class="pre">Ui_Dialog.retranslateUi()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ui.html#ui.IsotopeSelectionDialog.Ui_Dialog.setupUi"><code class="docutils literal notranslate"><span class="pre">Ui_Dialog.setupUi()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ui.html#module-ui.MainWindow">ui.MainWindow module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ui.html#ui.MainWindow.Ui_MainWindow"><code class="docutils literal notranslate"><span class="pre">Ui_MainWindow</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ui.html#ui.MainWindow.Ui_MainWindow.retranslateUi"><code class="docutils literal notranslate"><span class="pre">Ui_MainWindow.retranslateUi()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ui.html#ui.MainWindow.Ui_MainWindow.setupUi"><code class="docutils literal notranslate"><span class="pre">Ui_MainWindow.setupUi()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ui.html#module-ui.MapImportDialog">ui.MapImportDialog module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ui.html#ui.MapImportDialog.Ui_MapImportDialog"><code class="docutils literal notranslate"><span class="pre">Ui_MapImportDialog</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ui.html#ui.MapImportDialog.Ui_MapImportDialog.retranslateUi"><code class="docutils literal notranslate"><span class="pre">Ui_MapImportDialog.retranslateUi()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ui.html#ui.MapImportDialog.Ui_MapImportDialog.setupUi"><code class="docutils literal notranslate"><span class="pre">Ui_MapImportDialog.setupUi()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ui.html#module-ui.PreferencesWindow">ui.PreferencesWindow module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ui.html#ui.PreferencesWindow.Ui_PreferencesWindow"><code class="docutils literal notranslate"><span class="pre">Ui_PreferencesWindow</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ui.html#ui.PreferencesWindow.Ui_PreferencesWindow.retranslateUi"><code class="docutils literal notranslate"><span class="pre">Ui_PreferencesWindow.retranslateUi()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ui.html#ui.PreferencesWindow.Ui_PreferencesWindow.setupUi"><code class="docutils literal notranslate"><span class="pre">Ui_PreferencesWindow.setupUi()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ui.html#module-ui.QuickViewDialog">ui.QuickViewDialog module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ui.html#ui.QuickViewDialog.Ui_QuickViewDialog"><code class="docutils literal notranslate"><span class="pre">Ui_QuickViewDialog</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ui.html#ui.QuickViewDialog.Ui_QuickViewDialog.retranslateUi"><code class="docutils literal notranslate"><span class="pre">Ui_QuickViewDialog.retranslateUi()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ui.html#ui.QuickViewDialog.Ui_QuickViewDialog.setupUi"><code class="docutils literal notranslate"><span class="pre">Ui_QuickViewDialog.setupUi()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ui.html#module-ui.SpotImportDialog">ui.SpotImportDialog module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ui.html#ui.SpotImportDialog.Ui_SpotImportDialog"><code class="docutils literal notranslate"><span class="pre">Ui_SpotImportDialog</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ui.html#ui.SpotImportDialog.Ui_SpotImportDialog.retranslateUi"><code class="docutils literal notranslate"><span class="pre">Ui_SpotImportDialog.retranslateUi()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ui.html#ui.SpotImportDialog.Ui_SpotImportDialog.setupUi"><code class="docutils literal notranslate"><span class="pre">Ui_SpotImportDialog.setupUi()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ui.html#module-ui.resources_rc">ui.resources_rc module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ui.html#ui.resources_rc.qCleanupResources"><code class="docutils literal notranslate"><span class="pre">qCleanupResources()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ui.html#ui.resources_rc.qInitResources"><code class="docutils literal notranslate"><span class="pre">qInitResources()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ui.html#module-ui">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -487,7 +1307,8 @@
             
             
               
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
   <div class="sidebar-secondary-item">
@@ -512,8 +1333,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
-<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <script defer src="_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -533,7 +1354,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
     <br/>
   </p>
 </div>
@@ -546,7 +1367,7 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
 </p></div>
       
     </div>

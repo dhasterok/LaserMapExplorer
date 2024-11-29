@@ -12,8 +12,8 @@ Importing data into *LaME* is relatively simple using the *Import Tool* from the
 
 1. Select the data type and method (if applicable) from the dropdown menus.
 2. Choose the directory containing the sample files. Each sample should be in its own subdirectory.
-3. A table will appear with options depending on the data type and method chosen.
-4. On the right side of the *Import Tool*, a preview frame is available to display an analyte map from the sample when the preview checkbox is selected. (Note: The preview feature is not currently implemented.)
+3. Select the analytes for each sample, all analytes are selected by default. 
+4. Review your settings and click "Import" to process the data.
 
 After import, files for each sample are saved into a single file for more rapid loading, with the name format *[sample_id].lame.[ftype]*.  In most cases, the file type is \*.csv, though in some instances where color is appropriate, it may be stored as a \*.png.
 
@@ -37,14 +37,15 @@ For a single sample, the data are often stored in a collection of \*.csv or \*.x
 For data collected on quadrupole mass spectrometers, the only requirement for import is the sample ID.  The columns in the table are as follows:
 
 :Import: checkbox indicating whether to include the directory for import.
-:Sample ID: sample identifier and name of the directory which holds the files associated with the sample
-:Standard: select the standard used to calibrate the data or standard to calibrate the data (once we implement calibration).  Note additional calibration files may be added to the standard list.  Standards analyses should follow similar file naming conventions as described below:
-:Swap XY: swap the *X* and *Y* dimensions,
-:Reverse X: reverse the direction of the *X* data,
-:Reverse Y: reverse the direction of the *Y* data,
-:Spot size (µm): laser spot size, used to determine distance between scan lines,
-:Line Dim.: number of data points along each scan line
-:Sweep (s): time to complete a full suite of analytes,
+:Sample ID: sample identifier and name of the directory which holds the files associated with the sample.
+:Select files: opens the Analyte Selection dialog to choose which analytes to import for each sample.
+:Standard: select the standard used to calibrate the data or standard to calibrate the data (once we implement calibration).  Note additional calibration files may be added to the standard list.  Standards analyses should follow similar file naming conventions as described below.
+:Scan axis: the direction of the scan lines, either *X* or *Y*.
+:Swap XY: swap the *X* and *Y* dimensions.
+:X reverse: reverse the direction of the *X* data.
+:Y reverse: reverse the direction of the *Y* data.
+:Spot size (µm): laser spot size, used to determine distance between scan lines.
+:Sweep (s): time to complete a full suite of analytes.
 :Speed (µm/s): rate of travel of the laser.
 
 The distance along the scan line is given by *sweep* \* *speed*.  Though if these parameters are no entered, then the pixels are assumed to be equidimensional (i.e., *dx* = *dy*).  This can be updated after uploading in the *dx* and *dy* edit fields of the *Sample and Fields* tab.
@@ -59,10 +60,10 @@ The distance along the scan line is given by *sweep* \* *speed*.  Though if thes
    - M252-m1 - 6.csv
    - 90-75B-PY-3.csv
    - 121.csv
-   |
-   In all but the last two cases above, the line number came last.  However, the order doesn't matter as LaME will strip away the common patterns to reveal the line number, which it needs along with spot size to determine distance between lines.  This distance is defined as the *X*-direction.
+  
+   In all but the last two cases above, the line number came last.  However, the order doesn't matter as *LaME* will strip away the common patterns to reveal the line number, which it needs along with spot size to determine distance between lines.  This distance is defined as the *X*-direction.
 
-   Each file should include several metadata lines followed by a header and the table of values with results from each analyte in a separate column.  The first column is the time along the line.  The difference in times are the sweep time and should be constant from measurement to measurement.  The sweep time along with the rate of travel of the laser is used to determine the distance along the line.  This distance is the *Y*-direction.  A snippet is shown in the table below, with the first three lines removed.  These three lines do not provide metadata useful to LaME.
+   Each file should include several metadata lines followed by a header and the table of values with results from each analyte in a separate column.  The first column is the time along the line.  The difference in times are the sweep time and should be constant from measurement to measurement.  The sweep time along with the rate of travel of the laser is used to determine the distance along the line.  This distance is the *Y*-direction.  A snippet is shown in the table below, with the first three lines removed.  These three lines do not provide metadata useful to *LaME*.
 
  .. csv-table:: Scan-line file from LA-ICP-MS quadrupole
     :file: _static/tables/la-icp-ms_line_snippet.csv
@@ -71,7 +72,7 @@ The distance along the scan line is given by *sweep* \* *speed*.  Though if thes
 
 *Note:* scan line data may include files with standards.  These standards will sit between scan lines of the sample resulting in non-sequential line numbers for the sample, which is accounted for by *LaME* when converting to distance.
 
-2. An alternative format reports each analyte in a separate file as a matrix (map-form) and may be produced after calibration and/or processing in Iolite or XMapTools, generally used to report data in PPM, though they may still be in CPS.  The filenames are generally constructed from the sample name and the analyte and often include the units and matrix, though the only important component is the analyte, which is use to define the column in the output data.  The order of the mass and symbol can be either mass first or mass last conventions.
+1. An alternative format reports each analyte in a separate file as a matrix (map-form) and may be produced after calibration and/or processing in Iolite or XMapTools, generally used to report data in PPM, though they may still be in CPS.  The filenames are generally constructed from the sample name and the analyte and often include the units and matrix, though the only important component is the analyte, which is use to define the column in the output data.  The order of the mass and symbol can be either mass first or mass last conventions.
 
    Example filenames:
 

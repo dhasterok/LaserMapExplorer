@@ -1,7 +1,7 @@
 Control Toolbox (Left)
 **********************
 
-The Control Toolbox provides essential functions for data management, analysis, and visualization. 
+The *Control Toolbox* provides essential functions for data management, analysis, and visualization. 
 
 Samples and Fields
 ==================
@@ -54,6 +54,8 @@ Noise reduction (|icon-noise-reduction|) smooths data to enhance clarity.  It ca
 * Edge-preserving: Smooths data while maintaining sharp edges, recommended for most cases but may over-smooth within grains.
 * Bilateral: Combines Gaussian smoothing with edge preservation, offering less aggressive smoothing than the edge-preserving method.
 
+Additionally, the Gradient checkbox converts the regular analyte map into a gradient map, highlighting areas of rapid change in analyte concentration. This can be particularly useful for identifying mineral boundaries or compositional zoning.
+
 Histogram
 ---------
 
@@ -88,7 +90,7 @@ Existing polygons can be modified using several editing tools.  To move a point,
 Profiling
 =========
 
-The Profiling tab enables the creation of cross-sections of analytes across maps, allowing for detailed analysis of compositional changes along specific paths in the sample.
+The Profiling tab enables the creation of cross-sections of analytes across maps, allowing for detailed analysis of compositional changes along specific paths in the sample. Click |icon-profile| to begin profiling, then left-click on the map to set the start point of the profile.  The profile will be displayed in the Profile tab in *Lower Tab*. 
 
 .. figure:: _static/screenshots/LaME_Profiling.png
     :align: center
@@ -112,7 +114,7 @@ The Scatter and Heatmaps tab provides tools for creating scatter plots and heatm
 n-Dim
 =====
 
-The n-Dim tab is used for plotting multidimensional data as radar plots or trace element compatibility diagrams (spider plots).  This tab allows for the production of spider plots with data normalized to a set of reference concentrations, as well as radar plots that resemble spider webs, offering versatile options for visualizing complex, multi-element data.
+The n-Dim tab enables visualization of multidimensional data through radar plots and trace element compatibility (spider) diagrams. Users can select reference values for normalization, build custom analyte sets or use predefined groups (majors, full trace, REE, metals), and control data representation through quantile selection.  
 
 .. figure:: _static/screenshots/LaME_n-Dim.png
     :align: center
@@ -136,12 +138,12 @@ The Dimensional Reduction tab offers tools for principal component analysis (PCA
 Clustering
 ==========
 
-The Clustering tab employs unsupervised machine learning to identify data subsets with similar multidimensional characteristics.  This functionality is often used to isolate or exclude specific minerals from analyses.  *LaME* implements two clustering methods:
+The Clustering tab identifies data subsets with similar multidimensional characteristics.  This functionality is often used to isolate or exclude specific minerals from analyses.  *LaME* implements two clustering methods:
 
 1. K-means: A method that optimizes cluster centroids by minimizing the distance of nearest points to each centroid.
 2. Fuzzy c-means: An approach that allows for overlapping clusters, providing an additional score for each cluster alongside the map and assigning each point to the highest-scoring cluster.
 
-The number of clusters can be specified using the 'No. clusters' field. For fine-tuning the clustering process, an 'Exponent' value can be adjusted using a slider when fuzzy c-means is selected, and the 'Distance' metric can be chosen from a dropdown menu.  To ensure reproducibility of results, a 'Starting seed' can be set.  The interface also provides options to incorporate Principal Component Analysis (PCA) and a 'No. basis' field for specifying the number of components to use.  These options provide users with flexibility in how clustering is performed, allowing for customization based on the specific requirements of the data being analyzed.  Note that clustering must be performed before creating a cluster mask.
+The interface provides essential controls for cluster number, distance metrics, and initialization parameters, with options to incorporate dimensional reduction through PCA. Once clusters are computed, they can be used to create masks for subsequent analyses.
 
 .. figure:: _static/screenshots/LaME_Clustering.png
     :align: center
@@ -214,3 +216,5 @@ P-T-t Functions for computing thermometry, barometry, isotopic dating, and multi
 
 .. |icon-launch| image:: _static/icons/icon-launch-64.png
     :height: 2.5ex
+
+.. |icon-profile| image:: _static/icons/icon-profile-64.png

@@ -110,39 +110,39 @@ class SampleObj:
         | 'use' : (bool) -- ``True`` indicates the filter should be used to filter data
         | 'persistent' : (bool) -- ``True`` retains the filter when the sample is changed
     processed_data
-            | 'analyte_info' : (dataframe) -- holds information regarding each analyte in sample id,
-                | 'analytes' (str) -- name of analyte
-                | 'sample_id' (str) -- sample id
-                | 'norm' (str) -- type of normalisation used(linear,log,logit)
-                | 'upper_bound' (float) -- upper bound for autoscaling/scaling
-                | 'lower_bound' (float) -- lower bound for autoscaling/scaling
-                | 'd_l_bound' (float) -- difference lower bound for autoscaling
-                | 'd_u_bound' (float) -- difference upper bound for autoscaling
-                | 'auto_scale' (bool) -- indicates whether auto_scaling is switched on for that analyte, use percentile bounds if False
-                | 'use' (bool) -- indicates whether the analyte is being used in the analysis
-            | 'ratio_info' : (dataframe) -- holds information  regarding computerd ratios 
-                | 'analyte_1' (str) -- name of analyte at numerator of ratio
-                | 'analyte_2' (str) -- name of analyte at denominator of ratio
-                | 'norm' (str) -- type of normalisation used(linear,log,logit)
-                | 'upper_bound' (float) --  upper bound for autoscaling/scaling
-                | 'lower_bound' (float) --  lower bound for autoscaling/scaling
-                | 'd_l_bound' (float) --  difference lower bound for autoscaling
-                | 'd_u_bound' (float) --  difference upper bound for autoscaling
-                | 'auto_scale' (bool) -- indicates whether auto_scaling is switched on for that analyte, use percentile bounds if False
-                | 'use' (bool) -- indicates whether the analyte is being used in the analysis
-            
-            | 'crop' : () --
-            | 'x_max' : () --
-            | 'x_min' : () --
-            | 'y_max' : () --
-            | 'y_min' : () --
-            | 'crop_x_max' : () --
-            | 'crop_x_min' : () --
-            | 'crop_y_max' : () --
-            | 'crop_y_min' : () --
-            | 'processed data': () --
-            | 'raw_data': () -- 
-            | 'cropped_raw_data': () --
+        'analyte_info' : (dataframe) -- holds information regarding each analyte in sample id,
+            | 'analytes' (str) -- name of analyte
+            | 'sample_id' (str) -- sample id
+            | 'norm' (str) -- type of normalisation used(linear,log,logit)
+            | 'upper_bound' (float) -- upper bound for autoscaling/scaling
+            | 'lower_bound' (float) -- lower bound for autoscaling/scaling
+            | 'd_l_bound' (float) -- difference lower bound for autoscaling
+            | 'd_u_bound' (float) -- difference upper bound for autoscaling
+            | 'auto_scale' (bool) -- indicates whether auto_scaling is switched on for that analyte, use percentile bounds if False
+            | 'use' (bool) -- indicates whether the analyte is being used in the analysis
+        'ratio_info' : (dataframe) -- holds information  regarding computerd ratios 
+            | 'analyte_1' (str) -- name of analyte at numerator of ratio
+            | 'analyte_2' (str) -- name of analyte at denominator of ratio
+            | 'norm' (str) -- type of normalisation used(linear,log,logit)
+            | 'upper_bound' (float) --  upper bound for autoscaling/scaling
+            | 'lower_bound' (float) --  lower bound for autoscaling/scaling
+            | 'd_l_bound' (float) --  difference lower bound for autoscaling
+            | 'd_u_bound' (float) --  difference upper bound for autoscaling
+            | 'auto_scale' (bool) -- indicates whether auto_scaling is switched on for that analyte, use percentile bounds if False
+            | 'use' (bool) -- indicates whether the analyte is being used in the analysis
+        
+        | 'crop' : () --
+        | 'x_max' : () --
+        | 'x_min' : () --
+        | 'y_max' : () --
+        | 'y_min' : () --
+        | 'crop_x_max' : () --
+        | 'crop_x_min' : () --
+        | 'crop_y_max' : () --
+        | 'crop_y_min' : () --
+        | 'processed data': () --
+        | 'raw_data': () -- 
+        | 'cropped_raw_data': () --
             
         | 'ratio_info' : (dataframe) --
         | 'crop' : () --
@@ -607,8 +607,10 @@ class SampleObj:
 
             # Set additional attributes
             self.processed_data.set_attribute(column_name, 'norm', 'linear')
-            self.processed_data.set_attribute(column_name, 'auto_scale', False)
             self.processed_data.set_attribute(column_name, 'negative_method', None)
+            self.processed_data.set_attribute(column_name, 'outlier_method', None)
+            self.processed_data.set_attribute(column_name, 'smoothing_method', None)
+            self.processed_data.set_attribute(column_name, 'auto_scale', False)
 
         # Return a message if a single column was added, or the result dictionary for multiple columns
         if len(column_names) == 1:

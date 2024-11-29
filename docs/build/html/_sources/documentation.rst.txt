@@ -14,10 +14,22 @@ Below is the detailed documentation for the main modules of the Laser Map Explor
 
     modules
 
-
 Indices and tables
 ==================
 
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+API Reference
+=============
+
+.. autosummary::
+   :toctree: generated/
+   :caption: Modules Summary
+   :recursive:
+
+   app
+   ui
+   common
+

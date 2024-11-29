@@ -8,11 +8,11 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath('../'))
-sys.path.insert(0, os.path.abspath('../src/'))
-sys.path.insert(0, os.path.abspath('../src/app/'))
-sys.path.insert(0, os.path.abspath('../src/common/'))
-sys.path.insert(0, os.path.abspath('../src/ui/'))
+sys.path.insert(0, os.path.abspath('../../'))
+sys.path.insert(0, os.path.abspath('../../src/'))
+sys.path.insert(0, os.path.abspath('../../src/app/'))
+sys.path.insert(0, os.path.abspath('../../src/common/'))
+sys.path.insert(0, os.path.abspath('../../src/ui/'))
 
 print("sys.path:", sys.path)
 
@@ -38,6 +38,7 @@ extensions = [
     ]
 
 autosummary_generate = True
+autosummary_imported_members = True  # Include members imported in modules
 templates_path = ['_templates']
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints"]
 
@@ -111,6 +112,13 @@ html_context = {
     "github_repo": "LaserMapExplorer", # Repo name
     "github_version": "master", # Version
     "conf_py_path": "/doc/", # Path in the checkout to the docs root
+}
+
+# Add member-wise documentation
+autodoc_default_options = {
+    'members': True,
+    'undoc-members': True,  # Include members without docstrings
+    'show-inheritance': True,
 }
 
 # ------

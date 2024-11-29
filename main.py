@@ -483,7 +483,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.browser = Browser(self)
         self.actionReportBug.triggered.connect(lambda: self.browser.engine.setUrl(QUrl('https://github.com/dhasterok/LaserMapExplorer/issues')))
 
-        self.actionWorkflow.triggered.connect( self.tabWidget.setCurrentIndex(self.bottom_tab['workflow']) )
+        self.actionWorkflowTool.triggered.connect(lambda: self.tabWidget.setCurrentIndex(self.bottom_tab['workflow']))
 
         # For light and dark themes, connects actionViewMode
         self.theme = UIThemes(app, self)
@@ -4339,7 +4339,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             canvas within gui for plotting, by default ``None``
         """
         #print('plot_scatter')
-        plot_type = self.comboBoxPlotType.currentText()
+        plot_type = self.style.plot_type 
 
         # get data for plotting
         scatter_dict = self.get_scatter_data(plot_type)

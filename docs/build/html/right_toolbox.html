@@ -16,30 +16,33 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!-- 
+    this give us a css class that will be invisible only if js is disabled 
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-
-  
-  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+  <link href="_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css" />
   
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
-  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
 
     <script src="_static/documentation_options.js?v=2709fde1"></script>
-    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/custom.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'right_toolbox';</script>
@@ -49,6 +52,7 @@
     <link rel="prev" title="Control Toolbox (Left)" href="left_toolbox.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
   </head>
   
   
@@ -64,19 +68,8 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-primary-sidebar-checkbox"/>
-  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-secondary-sidebar-checkbox"/>
-  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="search.html"
       method="get">
@@ -84,7 +77,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -92,8 +84,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -127,7 +119,7 @@
     
     
     <img src="_static/LaME-wide-64.svg" class="logo__image only-light" alt=""/>
-    <script>document.write(`<img src="_static/LaME-wide-green-64.svg" class="logo__image only-dark" alt=""/>`);</script>
+    <img src="_static/LaME-wide-green-64.svg" class="logo__image only-dark pst-js-only" alt=""/>
   
   
     <p class="title logo__title">LaME v.0.0 beta</p>
@@ -166,33 +158,18 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="modules.html">
-    app
-  </a>
-</li>
-
-
-<li class="nav-item ">
   <a class="nav-link nav-internal" href="contact.html">
     Contact
   </a>
 </li>
 
-            <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
-                    More
-                </button>
-                <ul id="pst-nav-more-links" class="dropdown-menu">
-                    
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="labels.html">
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="labels.html">
     <no title>
   </a>
 </li>
 
-                </ul>
-            </li>
-            
   </ul>
 </nav></div>
       
@@ -204,15 +181,11 @@
         <div class="navbar-item navbar-persistent--container">
           
 
- <script>
- document.write(`
-   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
         </div>
       
       
@@ -250,15 +223,11 @@
   
     <div class="navbar-persistent--mobile">
 
- <script>
- document.write(`
-   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
     </div>
   
 
@@ -277,7 +246,8 @@
       
       
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -309,13 +279,6 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="documentation.html">
     Documentation
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="modules.html">
-    app
   </a>
 </li>
 
@@ -404,6 +367,10 @@
 <li class="toctree-l1"><a class="reference internal" href="notes.html">Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="export.html">Export Formats</a></li>
 </ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Workflow Design</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="workflow.html">Workflow Method Design (WMD)</a></li>
+</ul>
 </div>
 </nav></div>
     </div>
@@ -430,8 +397,6 @@
       
         <div class="header-article-item">
 
-
-
 <nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
@@ -443,7 +408,7 @@
     
     <li class="breadcrumb-item"><a href="userguide.html" class="nav-link">User Guide</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">Plot and...</li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Plot and Property Toolbox (Right)</span></li>
   </ul>
 </nav>
 </div>
@@ -468,96 +433,58 @@
 <p>The plot type dropdown list sits above the <em>Plot Selector</em>. It updates the types of plots available to each of the <em>Control Toolbox</em> tabs. In case the plot does not update automatically, the <a class="reference internal" href="_images/icon-launch-64.png"><img alt="icon-launch" src="_images/icon-launch-64.png" style="height: 2ex;" /></a> button can be clicked.</p>
 <p>The <em>Plot Selector</em> lists the available plots for display.  By default, it includes all analytes and their normalized versions.  Ratios can be added by selecting them from the <em>Analyte Selector</em> in the <em>Main Toolbar</em>.  Other plots will also appear in the list once they’ve been created or explicitly saved.</p>
 <p>Analytes and their normalized equivalents can be sorted alphabetically, by mass, or compatibility using the <a class="reference internal" href="_images/icon-sort-64.png"><img alt="icon-sort" src="_images/icon-sort-64.png" style="height: 2ex;" /></a> button.  To remove plots, use the <a class="reference internal" href="_images/icon-delete-64.png"><img alt="icon-trash" src="_images/icon-delete-64.png" style="height: 2ex;" /></a> button.</p>
-<figure class="align-center" id="id12">
+<figure class="align-center" id="id60">
 <a class="reference internal image-reference" href="_images/LaME_Plot_Selector.png"><img alt="LaME interface: right toolbox, plot selector tab" src="_images/LaME_Plot_Selector.png" style="width: 232px;" />
 </a>
 <figcaption>
-<p><span class="caption-text">The <em>Plot Selector</em> is similar to a file tree.  It lists types of fields, samples and the plots available beneath each.</span><a class="headerlink" href="#id12" title="Link to this image">#</a></p>
+<p><span class="caption-text">The <em>Plot Selector</em> is similar to a file tree.  It lists types of fields, samples and the plots available beneath each.</span><a class="headerlink" href="#id60" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 </section>
 <section id="styling-pane">
 <h2>Styling Pane<a class="headerlink" href="#styling-pane" title="Link to this heading">#</a></h2>
 <p>The Styling Pane controls the appearance of plots generated from functions in the <em>Control Toolbox</em>.  It also controls the type of plot generated (e.g., analyte map, scatter plot, heatmap, etc.).  A complete list is given in the table below along with each of the properties that can be changed.  Not all properties are available for each type of plot.  Styles can be customized and saved using the save ( <a class="reference internal" href="_images/icon-save-file-64.png"><img alt="icon-save" src="_images/icon-save-file-64.png" style="height: 2ex;" /></a> ) button.  Saved themes can be recalled in future sessions.</p>
-<aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id1" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
-<p>for displaying spot data</p>
-</aside>
-<aside class="footnote brackets" id="id2" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
-<p>for displaying polygons</p>
-</aside>
-<aside class="footnote brackets" id="id3" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></span>
-<p>when clusters are selected for color by field</p>
-</aside>
-<aside class="footnote brackets" id="id4" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></span>
-<p>ternary plot</p>
-</aside>
-<aside class="footnote brackets" id="id5" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></span>
-<p>color by field is not none</p>
-</aside>
-<aside class="footnote brackets" id="id6" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span>6<span class="fn-bracket">]</span></span>
-<p>for linear fits</p>
-</aside>
-<aside class="footnote brackets" id="id7" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span>7<span class="fn-bracket">]</span></span>
-<p>for displaying vector components</p>
-</aside>
-<aside class="footnote brackets" id="id8" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span>8<span class="fn-bracket">]</span></span>
-<p>for scores only</p>
-</aside>
-<aside class="footnote brackets" id="id9" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span>9<span class="fn-bracket">]</span></span>
-<p>error bars</p>
-</aside>
-</aside>
 <section id="axes-and-labels">
 <h3>Axes and Labels<a class="headerlink" href="#axes-and-labels" title="Link to this heading">#</a></h3>
 <p>The axes and labels are initially filled with default values but can be edited to update the plot.</p>
-<figure class="align-center" id="id13">
+<figure class="align-center" id="id61">
 <a class="reference internal image-reference" href="_images/LaME_Styling_Axes_Labels.png"><img alt="LaME interface: right toolbox, styling-axes-and-labels tab" src="_images/LaME_Styling_Axes_Labels.png" style="width: 232px;" />
 </a>
 <figcaption>
-<p><span class="caption-text">The Styling &gt; Axes and Labels contains general settings applied to all plots.</span><a class="headerlink" href="#id13" title="Link to this image">#</a></p>
+<p><span class="caption-text">The Styling &gt; Axes and Labels contains general settings applied to all plots.</span><a class="headerlink" href="#id61" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 </section>
 <section id="annotations-and-scales">
 <h3>Annotations and Scales<a class="headerlink" href="#annotations-and-scales" title="Link to this heading">#</a></h3>
-<figure class="align-center" id="id14">
+<p>The Annotations and Scales tab provides settings to add a scale bar to the plot and adjust the legend bar on the side of the plot.</p>
+<figure class="align-center" id="id62">
 <a class="reference internal image-reference" href="_images/LaME_Styling_Annotations.png"><img alt="LaME interface: right toolbox, styling-annotations tab" src="_images/LaME_Styling_Annotations.png" style="width: 232px;" />
 </a>
 <figcaption>
-<p><span class="caption-text">The Styling &gt; Annotations contains font type and font size settings.</span><a class="headerlink" href="#id14" title="Link to this image">#</a></p>
+<p><span class="caption-text">The Styling &gt; Annotations contains font type and font size settings.</span><a class="headerlink" href="#id62" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 </section>
 <section id="markers-and-lines">
 <h3>Markers and Lines<a class="headerlink" href="#markers-and-lines" title="Link to this heading">#</a></h3>
 <p>The Markers tab contains settings for markers and lines used in scatter, ternary, and PCA plots. For other plot types, these settings are grayed out. Symbol options, symbol size, and transparency can be modified in this tab.</p>
-<p>The Lines tab contains settings for line width used in TEC, radar, variance, and PCx plots. Line widths range from 0.25 to 6 pt.</p>
-<figure class="align-center" id="id15">
+<figure class="align-center" id="id63">
 <a class="reference internal image-reference" href="_images/LaME_Styling_Markers.png"><img alt="LaME interface: right toolbox, Styling-markers tab" src="_images/LaME_Styling_Markers.png" style="width: 232px;" />
 </a>
 <figcaption>
-<p><span class="caption-text">The Styling &gt; Markers and Lines tab contains settings for markers and lines used in various plots.</span><a class="headerlink" href="#id15" title="Link to this image">#</a></p>
+<p><span class="caption-text">The Styling &gt; Markers and Lines tab contains settings for markers and lines used in various plots.</span><a class="headerlink" href="#id63" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 </section>
 <section id="coloring">
 <h3>Coloring<a class="headerlink" href="#coloring" title="Link to this heading">#</a></h3>
-<p>The Coloring tab provides a range of options for customizing the color representation of data in plots and maps.  Color by field allows selection of the data aspect to be represented by color.  The Field option specifies which particular analyte or calculated value to use for coloring. Resolution, Colormap, and Scale settings offer further customization of the color representation.  For fine-tuning the color range, Clim (color limits) can be adjusted.  The Cbar label field allows customization of the colorbar label, while Cbar direction determines the orientation of the colorbar on the plot.</p>
-<figure class="align-center" id="id16">
+<p>The Coloring tab provides a range of options for customizing the color representation of data in plots and maps.</p>
+<figure class="align-center" id="id64">
 <a class="reference internal image-reference" href="_images/LaME_Styling_Colors.png"><img alt="LaME interface: right toolbox, Styling-colors tab" src="_images/LaME_Styling_Colors.png" style="width: 232px;" />
 </a>
 <figcaption>
-<p><span class="caption-text">The Styling <a href="#id10"><span class="problematic" id="id11">|</span></a>&gt; Colors contains settings for changing color options.</span><a class="headerlink" href="#id16" title="Link to this image">#</a></p>
+<p><span class="caption-text">The Styling <a href="#id58"><span class="problematic" id="id59">|</span></a>&gt; Colors contains settings for changing color options.</span><a class="headerlink" href="#id64" title="Link to this image">#</a></p>
 <div class="legend">
 </div>
 </figcaption>
@@ -566,23 +493,34 @@
 <section id="clusters">
 <h3>Clusters<a class="headerlink" href="#clusters" title="Link to this heading">#</a></h3>
 <p>Clustered data can be assigned a name and color. Clusters can be linked (<a class="reference internal" href="_images/icon-link-64.png"><img alt="icon-link" src="_images/icon-link-64.png" style="height: 2ex;" /></a>) or unlinked (<a class="reference internal" href="_images/icon-unlink-64.png"><img alt="icon-unlink" src="_images/icon-unlink-64.png" style="height: 2ex;" /></a>). A selected cluster or clusters can be used to mask (<a class="reference internal" href="_images/icon-mask-dark-64.png"><img alt="icon-mask-dark" src="_images/icon-mask-dark-64.png" style="height: 2ex;" /></a>) or reverse mask (<a class="reference internal" href="_images/icon-mask-light-64.png"><img alt="icon-mask-light" src="_images/icon-mask-light-64.png" style="height: 2ex;" /></a>) data in a plot or on a map.</p>
-<figure class="align-center" id="id17">
+<figure class="align-center" id="id65">
 <a class="reference internal image-reference" href="_images/LaME_Styling_Clusters.png"><img alt="LaME interface: right toolbox, styling-clustering tab" src="_images/LaME_Styling_Clusters.png" style="width: 232px;" />
 </a>
 <figcaption>
-<p><span class="caption-text">The Styling &gt; Clustering contains options for working with clustered data</span><a class="headerlink" href="#id17" title="Link to this image">#</a></p>
+<p><span class="caption-text">The Styling &gt; Clustering contains options for working with clustered data</span><a class="headerlink" href="#id65" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 </section>
 </section>
+<section id="regression">
+<h2>Regression<a class="headerlink" href="#regression" title="Link to this heading">#</a></h2>
+<p>Regression is currently under development and not available.</p>
+<figure class="align-center" id="id66">
+<a class="reference internal image-reference" href="_static/screenshots/LaME_Regression.png"><img alt="LaME interface: right toolbox, regression tab" src="_static/screenshots/LaME_Regression.png" style="width: 315px;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Regression tab (functionality not currently available).</span><a class="headerlink" href="#id66" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
 <section id="calculator">
 <h2>Calculator<a class="headerlink" href="#calculator" title="Link to this heading">#</a></h2>
 <p>The calculator (<a class="reference internal" href="_images/icon-calculator-64.png"><img alt="icon-calculator" src="_images/icon-calculator-64.png" style="height: 2ex;" /></a>) can be used to compute custom fields.  These custom fields can be used as dimensions on plots or to set marker color values.  Once created, custom fields will be added to associated drop-down menus.  For detailed information on how to use the calculator and create custom fields, please refer to the <a class="reference internal" href="custom_fields.html"><span class="doc">Custom Fields</span></a> section.</p>
-<figure class="align-center" id="id18">
+<figure class="align-center" id="id67">
 <a class="reference internal image-reference" href="_images/LaME_Calculator.png"><img alt="LaME interface: right toolbox, calculator tab" src="_images/LaME_Calculator.png" style="width: 232px;" />
 </a>
 <figcaption>
-<p><span class="caption-text">The Calculator can be used to compute custom fields.  Expressions can be typed directly into the edit box, by clicking the buttons.</span><a class="headerlink" href="#id18" title="Link to this image">#</a></p>
+<p><span class="caption-text">The Calculator can be used to compute custom fields.  Expressions can be typed directly into the edit box, by clicking the buttons.</span><a class="headerlink" href="#id67" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 </section>
@@ -623,7 +561,8 @@
             
             
               
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
   <div class="sidebar-secondary-item">
@@ -643,6 +582,7 @@
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#clusters">Clusters</a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regression">Regression</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#calculator">Calculator</a></li>
 </ul>
   </nav></div>
@@ -669,8 +609,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
-<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <script defer src="_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -690,7 +630,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
     <br/>
   </p>
 </div>
@@ -703,7 +643,7 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
 </p></div>
       
     </div>

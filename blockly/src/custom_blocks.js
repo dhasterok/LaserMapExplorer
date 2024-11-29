@@ -264,9 +264,10 @@ const select_ref_val = {
     // Function to update the analyte options asynchronously
     updateRefOptions: function() {
       // Call the Python function getAnalyteList through the WebChannel
-      window.blocklyBridge.getRefList().then((response) => {
+      window.blocklyBridge.getRefValueList().then((response) => {
         // Map the response to the required format for Blockly dropdowns
         const options = response.map(option => [option, option]);
+        console.log()
         const dropdown = this.getField('refValueDropdown');
         if (dropdown){
             // Clear existing options and add new ones

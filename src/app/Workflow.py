@@ -64,7 +64,7 @@ class BlocklyBridge(QObject):
     @pyqtSlot(result=list)
     def getRefValueList(self):
         
-        return self.parent.parent.ref_list.values
+        return self.parent.parent.ref_list.tolist()
 
     @pyqtSlot(result=list)
     def getSavedAnalyteLists(self):

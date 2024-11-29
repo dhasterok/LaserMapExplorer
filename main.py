@@ -20,7 +20,6 @@ from pyqtgraph import (
 import numpy as np
 import pandas as pd
 pd.options.mode.copy_on_write = True
-
 import matplotlib
 matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
@@ -504,11 +503,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxRefMaterial.setCurrentIndex(0)
         self.comboBoxNDimRefMaterial.addItems(self.ref_list.values)      # NDim Tab
         self.comboBoxNDimRefMaterial.setCurrentIndex(0)
-        self.comboBoxRefMaterial.activated.connect(lambda: self.change_ref_material(self.comboBoxRefMaterial, self.comboBoxNDimRefMaterial))
-        self.comboBoxNDimRefMaterial.activated.connect(lambda: self.change_ref_material(self.comboBoxNDimRefMaterial, self.comboBoxRefMaterial))
+        self.comboBoxRefMaterial.activated.connect(lambda: self.change_ref_material(self.comboBoxRefMaterial.currentText())) 
+        self.comboBoxNDimRefMaterial.activated.connect(lambda: self.change_ref_material(self.comboBoxNDimRefMaterial.currentText()))
         self.comboBoxRefMaterial.setCurrentIndex(0)
         self.ref_chem = None
-        self.change_ref_material(self.comboBoxRefMaterial, self.comboBoxNDimRefMaterial)
+
         
 
         self.comboBoxCorrelationMethod.activated.connect(self.correlation_method_callback)
@@ -1667,59 +1666,57 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_SV()
 
     # toolbar functions
-    def change_ref_material(self, comboBox1, comboBox2):
+    def change_ref_material(self, ref_val):
         """Changes reference computing normalized analytes
 
         Sets all QComboBox to a common normalizing reference.
 
         Parameters
         ----------
-        comboBox1 : QComboBox
-            user changed QComboBox
-        comboBox2 : QComboBox
-            QComboBox to update
+        ref_index : str
+            Name of reference value from combobox/dropdown
         """
-        comboBox2.setCurrentIndex(comboBox1.currentIndex())
+        ref_index =  self.ref_list.tolist().index(ref_val)
 
-        self.ref_chem = self.ref_data.iloc[comboBox1.currentIndex()]
-        self.ref_chem.index = [col.replace('_ppm', '') for col in self.ref_chem.index]
+        if (ref_index):
+            self.comboBoxRefMaterial.setCurrentIndex(ref_index)
+            self.comboBoxNDimRefMaterial.setCurrentIndex(ref_index)
+            self.ref_chem = self.ref_data.iloc[ref_index]
+            self.ref_chem.index = [col.replace('_ppm', '') for col in self.ref_chem.index]
 
-        # loop through normalized ratios and enable/disable ratios based
-        # on the new reference's analytes
-        if self.sample_id == '':
-            return
+            # loop through normalized ratios and enable/disable ratios based
+            # on the new reference's analytes
+            if self.sample_id == '':
+                return
 
-        tree = 'Ratio (normalized)'
-        branch = self.sample_id
-        for i, row in self.data[branch]['ratio_info'].iterrows():
-            analyte_1 = row['analyte_1']
-            analyte_2 = row['analyte_2']
-            ratio_name = f"{analyte_1} / {analyte_2}"
-            item, check = self.plot_tree.find_leaf(tree, branch, leaf=ratio_name)
+            tree = 'Ratio (normalized)'
+            branch = self.sample_id
+            for ratio in self.data[branch].processed_data.match_attribute('data_type','ratio'):
+                item, check = self.plot_tree.find_leaf(tree, branch, leaf=ratio)
 
-            if check:
-                # ratio normalized
-                # check if ratio can be normalized (note: normalization is not handled here)
-                refval_1 = self.ref_chem[re.sub(r'\d', '', analyte_1).lower()]
-                refval_2 = self.ref_chem[re.sub(r'\d', '', analyte_2).lower()]
-                ratio_flag = False
-                if (refval_1 > 0) and (refval_2 > 0):
-                    ratio_flag = True
-                #print([analyte, refval_1, refval_2, ratio_flag])
+                if check:
+                    # ratio normalized
+                    # check if ratio can be normalized (note: normalization is not handled here)
+                    refval_1 = self.ref_chem[re.sub(r'\d', '', analyte_1).lower()]
+                    refval_2 = self.ref_chem[re.sub(r'\d', '', analyte_2).lower()]
+                    ratio_flag = False
+                    if (refval_1 > 0) and (refval_2 > 0):
+                        ratio_flag = True
+                    #print([analyte, refval_1, refval_2, ratio_flag])
 
-                # if normization cannot be done, make text italic and disable item
-                if ratio_flag:
-                    font = item.font()
-                    font.setItalic(False)
-                    item.setFont(font)
-                    item.setEnabled(True)
-                else:
-                    font = item.font()
-                    font.setItalic(True)
-                    item.setFont(font)
-                    item.setEnabled(False)
+                    # if normization cannot be done, make text italic and disable item
+                    if ratio_flag:
+                        font = item.font()
+                        font.setItalic(False)
+                        item.setFont(font)
+                        item.setEnabled(True)
+                    else:
+                        font = item.font()
+                        font.setItalic(True)
+                        item.setFont(font)
+                        item.setEnabled(False)
 
-        self.update_SV()
+            self.update_SV()
         #self.update_all_plots()
 
      # for a disappearing button

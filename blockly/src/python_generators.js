@@ -53,9 +53,10 @@ pythonGenerator.forBlock['select_analytes'] = function(block) {
   
 // Python code generator for the select_analytes block
 pythonGenerator.forBlock['select_ref_val'] = function(block) {
-    // Generate the Python code to call open_select_analyte_dialog
-    return 'self.parent.open_select_analyte_dialog()\nself.refreshAnalyteDropdown()\n';
-  };
+    const refValue = block.getFieldValue('refValueDropdown'); // Get selected dropdown value
+    const code = `self.parent.change_ref_material('${refValue}')\n`; // Python function call
+    return code;
+};
 
 /*
 // Python Generator: Sample IDs List

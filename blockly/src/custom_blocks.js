@@ -1,7 +1,7 @@
 import * as Blockly from 'blockly/core';
 import {registerFieldColour, FieldColour} from '@blockly/field-colour';
 registerFieldColour();
-import { sample_ids, baseDir } from './globals';
+import { sample_ids,fieldTypeList, baseDir } from './globals';
 import {dynamicStyleUpdate} from './helper_functions'
 var enableSampleIDsBlock = false; // Initially false
 window.Blockly = Blockly.Blocks
@@ -102,6 +102,9 @@ Blockly.Blocks['select_samples'] = select_samples;
  // Block: loop over Sample IDs
  const loop_over_samples = {
     init: function() {
+        this.appendDummyInput('NAME')
+        .setAlign(Blockly.inputs.Align.CENTRE)
+        .appendField('Loop over samples');
         this.appendDummyInput()
             .appendField("for each sample ID in")
             .appendField(new Blockly.FieldVariable("sample_ids"), "SAMPLE_IDS");
@@ -124,16 +127,15 @@ Blockly.common.defineBlocks({ loop_over_samples: loop_over_samples });
 // Block: loop over fields
 const loop_over_fields = {
     init: function() {
+        this.appendDummyInput('NAME')
+        .setAlign(Blockly.inputs.Align.CENTRE)
+        .appendField('Loop over fields');
         this.appendDummyInput()
-            .appendField("for each sample ID in");
-        this.appendDummyInput('fieldType')
+            .appendField("for each field in")
             .appendField('field type')
-            .appendField(new Blockly.FieldDropdown(
-                [['Analyte', 'Analyte'],
-                 ['Analyte (Normalised)', 'Analyte (Normalised)'],
-                 ['PCA Score', 'PCA Score'],
-                 ['Cluster', 'Cluster']]
-            ), 'fieldType');
+            .appendField(new Blockly.FieldDropdown(function() {
+                return fieldTypeList;
+            }), 'fieldType');
         this.appendStatementInput("DO")
             .appendField("do");
 
@@ -145,37 +147,9 @@ const loop_over_fields = {
         if (!enableSampleIDsBlock) {
             this.setDisabledReason(true, "no_sample_ids");
         }
-
-        // Add onchange event listener
-        this.setOnChange(function(event) {
-            if (event.type === Blockly.Events.BLOCK_CHANGE &&
-                event.blockId === this.id &&
-                event.element === 'field' &&
-                event.name === 'fieldType') {
-                // Field 'fieldType' changed
-                this.updateFieldDropdown(event.newValue);
-            }
-        }.bind(this));
-    },
-    /**
-     * Updates the dropdown list dynamically based on the selected field type.
-     * @param {string} fieldType Selected field type
-     */
-    updateFieldDropdown: function(fieldType) {
-        // Call the Python function getFieldList through the WebChannel, handle as a promise
-        window.blocklyBridge.getFieldTypeList(fieldType).then((response) => {
-            const options = response.map(option => [option, option]);
-            const dropdown = this.getField('fieldType');
-
-            // Update the dropdown options
-            dropdown.menuGenerator_ = options;
-            dropdown.setValue(options[0][1]);  // Set the first option as the default
-            dropdown.forceRerender();  // Refresh dropdown to display updated options
-        }).catch(error => {
-            console.error('Error fetching field list:', error);
-        });
     }
 };
+
 
 Blockly.common.defineBlocks({ loop_over_fields: loop_over_fields });
 
@@ -183,15 +157,99 @@ Blockly.common.defineBlocks({ loop_over_fields: loop_over_fields });
 // Define the select_analytes block
 const select_analytes = {
     init: function() {
+        this.appendDummyInput('NAME')
+            .setAlign(Blockly.inputs.Align.CENTRE)
+            .appendField('Select analytes/ratios');
+
+        // Initialize the analyte selector dropdown
+        this.appendDummyInput('SELECTOR')
+            .appendField(new Blockly.FieldLabelSerializable('Analyte/Ratio list from'), 'NAME')
+            .appendField(new Blockly.FieldDropdown(
+                [['Analyte selector', 'Analyte selector'],
+                 ['Current selection', 'Current selection'],
+                 ['Saved lists', 'Saved lists']]
+            ), 'analyteSelectorDropdown');
+
+        // Add the analyte saved lists dropdown, initially hidden
+        this.appendDummyInput('SAVED_LISTS')
+            .appendField('Saved list')
+            .appendField(new Blockly.FieldDropdown([['None', 'None']]), 'analyteSavedListsDropdown')
+            .setVisible(false);
+
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setTooltip('');
+        this.setHelpUrl('');
+        this.setColour(225);
+
+        // Handle the selection change in analyteSelectorDropdown
+        const dropdown = this.getField('analyteSelectorDropdown');
+        dropdown.setValidator(this.analyteSelectorChanged.bind(this));
+    },
+
+    analyteSelectorChanged: function(newValue) {
+        const savedListsInput = this.getInput('SAVED_LISTS');
+        if (newValue === 'Saved lists') {
+            savedListsInput.setVisible(true);
+            // Get current selection if any
+            const savedListDropdown = this.getField('analyteSavedListsDropdown');
+            const currentSelection = savedListDropdown ? savedListDropdown.getValue() : null;
+            // Update the saved lists dropdown options
+            this.updateSavedListsDropdown(currentSelection);
+        } else {
+            savedListsInput.setVisible(false);
+        }
+        // Refresh the block to reflect the visibility change
+        this.render();
+        return newValue;
+    },
+
+    // Updated updateSavedListsDropdown function
+    updateSavedListsDropdown: function(selectedValue) {
+        // Call the Python function getSavedAnalyteLists through the WebChannel
+        window.blocklyBridge.getSavedAnalyteLists().then((response) => {
+            // Map the response to the required format for Blockly dropdowns
+            const options = response.map(option => [option, option]);
+            const dropdown = this.getField('analyteSavedListsDropdown');
+            if (dropdown) {
+                // Update the dropdown options
+                dropdown.menuGenerator_ = options;
+
+                // Preserve the selected value if it exists in the new options
+                if (selectedValue && options.some(opt => opt[1] === selectedValue)) {
+                    dropdown.setValue(selectedValue);
+                } else if (options.length > 0) {
+                    dropdown.setValue(options[0][1]);  // Set the first option as the default
+                }
+
+                dropdown.forceRerender();  // Refresh dropdown to display updated options
+            }
+        }).catch(error => {
+            console.error('Error fetching saved analyte lists:', error);
+        });
+    }
+};
+
+Blockly.common.defineBlocks({ select_analytes: select_analytes });
+
+
+  
+
+ // Define the select_analytes block
+const select_ref_val = {
+    init: function() {
       this.appendDummyInput('NAME')
         .setAlign(Blockly.inputs.Align.CENTRE)
-        .appendField('Select analytes');
+        .appendField('Select Reference value ');
   
-      // Initialize with a placeholder dropdown
-      this.appendDummyInput('NAME')
-        .appendField(new Blockly.FieldLabelSerializable('Analyte list'), 'NAME')
-        .appendField(new Blockly.FieldDropdown([['Loading...', '']]), 'ANALYTELISTDROPDOWN')
-        .appendField(new Blockly.FieldImage(`${baseDir}/resources/icons/icon-atom-64.svg`, 15, 15, { alt: '*', flipRtl: 'FALSE' }));
+      // Reference value selection
+      this.appendDummyInput('refValue')
+      .appendField('Ref. value')
+      .appendField(new Blockly.FieldDropdown([
+          ['bulk silicate Earth [MS95] McD', 'bulk_silicate_earth'],
+          ['option 2', 'option_2']
+      ]), 'refValueDropdown');
+
   
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
@@ -200,16 +258,17 @@ const select_analytes = {
       this.setColour(225);
   
       // Populate dropdown asynchronously
-      this.updateAnalyteOptions();
+      this.updateRefOptions();
     },
   
     // Function to update the analyte options asynchronously
-    updateAnalyteOptions: function() {
+    updateRefOptions: function() {
       // Call the Python function getAnalyteList through the WebChannel
-      window.blocklyBridge.getAnalyteList().then((response) => {
+      window.blocklyBridge.getRefValueList().then((response) => {
         // Map the response to the required format for Blockly dropdowns
         const options = response.map(option => [option, option]);
-        const dropdown = this.getField('ANALYTELISTDROPDOWN');
+        console.log()
+        const dropdown = this.getField('refValueDropdown');
         if (dropdown){
             // Clear existing options and add new ones
         dropdown.menuGenerator_ = options;
@@ -219,14 +278,13 @@ const select_analytes = {
         
 
       }).catch(error => {
-        console.error('Error fetching analyte list:', error);
+        console.error('Error fetching reference list:', error);
       });
     }
   };
   
-  Blockly.common.defineBlocks({ select_analytes: select_analytes });
-  
-                      
+  Blockly.common.defineBlocks({ select_ref_val: select_ref_val }); 
+
 
 const properties = {
     init: function() {

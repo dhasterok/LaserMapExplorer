@@ -1,10 +1,10 @@
 from PyQt5.QtCore import (Qt, pyqtSignal, QObject, QEvent)
-from PyQt5.QtWidgets import (QTableWidget, QDialog, QTableWidgetItem, QLabel, QComboBox, QHeaderView, QFileDialog)
+from PyQt5.QtWidgets import (QMessageBox, QTableWidget, QDialog, QTableWidgetItem, QLabel, QComboBox, QHeaderView, QFileDialog)
 from PyQt5.QtGui import (QImage, QColor, QFont, QPixmap, QPainter, QBrush)
 from src.ui.AnalyteSelectionDialog import Ui_Dialog
 from src.common.rotated import RotatedHeaderView
 from src.app.config import DEBUG_ANALYTE_UI
-
+import os
 # Analyte GUI
 # -------------------------------
 class AnalyteDialog(QDialog, Ui_Dialog):
@@ -42,10 +42,15 @@ class AnalyteDialog(QDialog, Ui_Dialog):
 
         self.analytes = self.data.match_attribute('data_type','analyte')
         self.ratio = self.data.match_attribute('data_type','ratio')
-        for analyte in self.analytes:
+        for analyte in self.analytes+self.ratio:
             self.norm_dict[analyte] = self.data.get_attribute(analyte,'norm')
 
-
+        # Initialize filename and unsaved changes flag
+        self.base_title ='LaME: Select Analytes and Ratios'
+        self.filename = 'untitled'
+        self.unsaved_changes = False
+        self.update_window_title()
+        self.default_dir  = self.os.path.join(self.parent.BASEDIR, "resources", "analyte list"),  # Default directory
         # setup scale (norm) combobox
         self.comboBoxScale.clear()
         self.scale_methods = ['linear','log','logit','mixed']
@@ -135,16 +140,75 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         self.pushButtonSaveSelection.clicked.connect(self.save_selection)
         self.pushButtonLoadSelection.clicked.connect(self.load_selection)
         self.pushButtonDone.clicked.connect(self.done_selection)
-        self.pushButtonCancel.clicked.connect(self.reject)
+        self.pushButtonCancel.clicked.connect(self.cancel_selection)
 
 
         # compute correlations for background colors
         self.calculate_correlation()
+    
+    def update_window_title(self):
+        """Updates the window title based on the filename and unsaved changes."""
+        title = f"{self.base_title} - {self.filename}"
+        if self.unsaved_changes:
+            title += '*'
+        self.setWindowTitle(title)
 
     def done_selection(self):
-        """Executes when `Done` button is clicked."""        
-        self.update_list()
-        self.accept()
+        """Executes when `Done` button is clicked."""
+        if self.unsaved_changes:
+            reply = QMessageBox.question(
+                self, 'Unsaved Changes',
+                "You have unsaved changes. Do you want to save them before exiting?",
+                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel
+            )
+            if reply == QMessageBox.Yes:
+                self.save_selection()
+                self.update_list()
+                self.accept()
+            elif reply == QMessageBox.No:
+                self.update_list()
+                self.accept()
+            else:  # Cancel
+                pass  # Do nothing, stay in dialog
+        else:
+            self.update_list()
+            self.accept()
+
+    def cancel_selection(self):
+        """Handles the Cancel button click."""
+        if self.unsaved_changes:
+            reply = QMessageBox.question(
+                self, 'Unsaved Changes',
+                "You have unsaved changes. Do you want to save them before exiting?",
+                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel
+            )
+            if reply == QMessageBox.Yes:
+                self.save_selection()
+                self.reject()
+            elif reply == QMessageBox.No:
+                self.reject()
+            else:  # Cancel
+                pass  # Do nothing, stay in dialog
+        else:
+            self.reject()
+
+    def closeEvent(self, event):
+        """Overrides the close event to check for unsaved changes."""
+        if self.unsaved_changes:
+            reply = QMessageBox.question(
+                self, 'Unsaved Changes',
+                "You have unsaved changes. Do you want to save them?",
+                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel
+            )
+            if reply == QMessageBox.Yes:
+                self.save_selection()
+                event.accept()
+            elif reply == QMessageBox.No:
+                event.accept()
+            else:  # Cancel
+                event.ignore()
+        else:
+            event.accept()
 
     def update_all_combos(self):
         """Updates the scale combo box (`comboBoxScale`) and the combo boxes within ``tableWidgetSelected`."""
@@ -156,6 +220,10 @@ class AnalyteDialog(QDialog, Ui_Dialog):
             combo = self.tableWidgetSelected.cellWidget(row, 1)
             if combo is not None:  # Make sure there is a combo box in this cell
                 combo.setCurrentText(selected_scale)  # Update the combo box value
+
+        # Mark as unsaved changes
+        self.unsaved_changes = True
+        self.update_window_title()
 
     def update_scale(self):
         """_summary_
@@ -181,6 +249,10 @@ class AnalyteDialog(QDialog, Ui_Dialog):
             self.comboBoxScale.setCurrentText('mixed')
         else:
             self.comboBoxScale.setCurrentText(first_selection)
+
+        # Mark as unsaved changes
+        self.unsaved_changes = True
+        self.update_window_title()
 
     def calculate_correlation(self):
         """Calculates correlation coefficient between two analytes.
@@ -327,6 +399,10 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         self.tableWidgetSelected.setCellWidget(newRow, 1, combo)
         self.update_list()
 
+        # Mark as unsaved changes
+        self.unsaved_changes = True
+        self.update_window_title()
+
     def remove_analyte_from_list(self, row, column):
         """Removes an analyte or ratio from the list to use in ``MainWindow`` related methods.
 
@@ -350,6 +426,9 @@ class AnalyteDialog(QDialog, Ui_Dialog):
                 self.tableWidgetSelected.removeRow(i)
                 self.update_list()
                 break
+        # Mark as unsaved changes
+        self.unsaved_changes = True
+        self.update_window_title()
 
     def get_selected_data(self):
         """Grabs data from `tableWidgetSelected`.
@@ -369,7 +448,7 @@ class AnalyteDialog(QDialog, Ui_Dialog):
 
     def save_selection(self):
         """Saves the list of analytes (and ratios) and their norms so they can be quickly recalled for other samples."""        
-        file_name, _ = QFileDialog.getSaveFileName(self, "Save File", "", "Text Files (*.txt);;All Files (*)")
+        file_name, _ = QFileDialog.getSaveFileName(self, "Save File", self.default_dir, "Text Files (*.txt);;All Files (*)")
         if file_name:
             with open(file_name, 'w') as f:
                 for i in range(self.tableWidgetSelected.rowCount()):
@@ -377,17 +456,45 @@ class AnalyteDialog(QDialog, Ui_Dialog):
                     combo = self.tableWidgetSelected.cellWidget(i, 1)
                     selection = combo.currentText()
                     f.write(f"{analyte_pair},{selection}\n")
+            self.filename = os.path.basename(file_name)
+            self.unsaved_changes = False
+            self.update_window_title()
+        
 
     def load_selection(self):
         """Loads a saved analyte (and ratio) list and fill the analyte table"""
-        file_name, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Text Files (*.txt);;All Files (*)")
+        file_name, _ = QFileDialog.getOpenFileName(self, "Open File", self.default_dir, "Text Files (*.txt);;All Files (*)")
         if file_name:
+            self.clear_selections()
             with open(file_name, 'r') as f:
                 for line in f.readlines():
-                    self.populate_analyte_list(line)
+                    field, norm = line.replace('\n','').split(',')
+                    self.populate_analyte_list(field, norm)
+            self.filename = os.path.basename(file_name)
+            self.unsaved_changes = False
+            self.update_window_title()
             self.update_list()
             self.raise_()
             self.activateWindow()
+    
+    def clear_selections(self):
+        """Clears the current selections in the analyte table and selected list."""
+        # Clear the selected analytes table
+        self.tableWidgetSelected.setRowCount(0)
+        self.tableWidgetSelected.clearContents()
+
+        # Clear selection in the analyte table
+        self.tableWidgetAnalytes.clearSelection()
+
+        # Unselect any selected items in the analyte table
+        for row in range(self.tableWidgetAnalytes.rowCount()):
+            for column in range(self.tableWidgetAnalytes.columnCount()):
+                item = self.tableWidgetAnalytes.item(row, column)
+                if item:
+                    item.setSelected(False)
+
+        self.comboBoxScale.setCurrentIndex(0)
+        self.comboBoxCorrelation.setCurrentIndex(0)
 
     def update_list(self):
         """Update the list of selected analytes""" 
@@ -416,7 +523,7 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         else:
             row_header = col_header = analyte_pair
         # Select the cell in tableWidgetanalyte
-        if row_header in self.analytes:
+        if row_header in self.analytes and col_header in self.analytes:
             row_index = self.analytes.index(row_header)
             col_index = self.analytes.index(col_header)
 

@@ -387,6 +387,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     self.bottom_tab.update({'profile': tid})
                 case 'plot info':
                     self.bottom_tab.update({'plotinfo': tid})
+                case 'workflow':
+                    self.bottom_tab.update({'workflow': tid})
                 case 'help':
                     self.bottom_tab.update({'help': tid})
 
@@ -481,6 +483,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.browser = Browser(self)
         self.actionReportBug.triggered.connect(lambda: self.browser.engine.setUrl(QUrl('https://github.com/dhasterok/LaserMapExplorer/issues')))
+
+        self.actionWorkflow.triggered.connect( self.tabWidget.setCurrentIndex(self.bottom_tab['workflow']) )
 
         # For light and dark themes, connects actionViewMode
         self.theme = UIThemes(app, self)
@@ -1301,7 +1305,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ----------
         tab_name : str
             opens tab, values: 'samples', 'preprocess', 'spot data', 'filter',
-            'scatter', 'ndim', pca', 'clustering', 'profiles', 'Special'
+            'scatter', 'ndim', pca', 'clustering', 'profiles', 'special'
         """
         match tab_name.lower():
             case 'samples':
@@ -2795,7 +2799,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             case 'cluster performance':
                 self.cluster_performance_plot()
 
-        # self.update_plot_info_tab(self.plot_info)
+        self.update_plot_info_tab(self.plot_info)
 
     def add_plotwidget_to_canvas(self, plot_info, position=None):
         """Adds plot to selected view

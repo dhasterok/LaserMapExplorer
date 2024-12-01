@@ -1,8 +1,13 @@
-﻿common.DataHandling
+common.DataHandling
 ===================
 
 .. automodule:: common.DataHandling
 
+   
+   
+   
+
+   
    
    .. rubric:: Functions
 
@@ -12,6 +17,10 @@
       quantile_and_difference
       sort_analytes
       yeojohnson
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -23,3 +32,11 @@
       SampleObj
       StandardScaler
    
+   
+
+   
+   
+   
+
+
+

@@ -1,8 +1,13 @@
-﻿app.StyleToolbox
+app.StyleToolbox
 ================
 
 .. automodule:: app.StyleToolbox
 
+   
+   
+   
+
+   
    
    .. rubric:: Functions
 
@@ -10,6 +15,10 @@
    
       get_hex_color
       get_rgb_color
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -22,5 +31,14 @@
       QInputDialog
       QMessageBox
       QTableWidgetItem
+      Scheduler
       Styling
    
+   
+
+   
+   
+   
+
+
+

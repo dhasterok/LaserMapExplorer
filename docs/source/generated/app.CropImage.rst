@@ -1,8 +1,17 @@
-﻿app.CropImage
+app.CropImage
 =============
 
 .. automodule:: app.CropImage
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -18,3 +27,11 @@
       Qt
       ResizableRectItem
    
+   
+
+   
+   
+   
+
+
+

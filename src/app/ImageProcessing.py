@@ -205,7 +205,7 @@ class ImageProcessing():
 
                 self.parent.actionNoiseReduction.setEnabled(False)
 
-                self.parent.update_SV()
+                self.parent.style.scheduler.schedule_update()
             case _:
                 # set option 1
                 self.parent.spinBoxNoiseOption1.blockSignals(True)

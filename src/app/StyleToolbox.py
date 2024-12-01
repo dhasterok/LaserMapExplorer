@@ -10,6 +10,7 @@ import matplotlib.colors as colors
 import src.common.csvdict as csvdict
 from src.common.colorfunc import get_hex_color, get_rgb_color
 from src.app.config import BASEDIR, DEBUG_STYLE
+from src.common.ScheduleTimer import Scheduler
 
 class Styling():
     """Manages plot styling for different plot types and syncs with main window UI.
@@ -159,6 +160,15 @@ class Styling():
         #super().__init__(parent)
 
         self.parent = parent
+
+        self.scheduler = Scheduler(callback=self.parent.update_SV)
+
+        parent.comboBoxHistType.activated.connect(self.scheduler.schedule_update)
+        parent.toolButtonNDimAnalyteAdd.clicked.connect(self.scheduler.schedule_update)
+        parent.toolButtonNDimAnalyteSetAdd.clicked.connect(self.scheduler.schedule_update)
+        parent.toolButtonNDimUp.clicked.connect(self.scheduler.schedule_update)
+        parent.toolButtonNDimDown.clicked.connect(self.scheduler.schedule_update)
+        parent.toolButtonNDimRemove.clicked.connect(self.scheduler.schedule_update)
 
         # create the default style dictionary (self.style_dict for each plot type)
         self.reset_default_styles()
@@ -542,7 +552,7 @@ class Styling():
                 if self.parent.lineEditScaleLength.value != length:
                     self.parent.lineEditScaleLength.value = length
                 self.style_dict[self._plot_type]['ScaleLength'] = length
-                self.parent.update_SV()
+                self.scheduler.schedule_update()
         else:
             raise TypeError("length must be of type float.")
 
@@ -1698,7 +1708,7 @@ class Styling():
         #self.check_analysis_type()
 
         if update:
-            parent.update_SV()
+            self.scheduler.schedule_update()
 
     # axes
     # -------------------------------------
@@ -1786,7 +1796,7 @@ class Styling():
                     parent.comboBoxZScale.setCurrentText(scale)
                     parent.lineEditZLabel.setText(label)
 
-            parent.update_SV()
+            self.scheduler.schedule_update()
 
         parent.labelXLim.setEnabled(parent.lineEditXLB.isEnabled()) 
         parent.labelYLim.setEnabled(parent.lineEditYLB.isEnabled()) 
@@ -1873,7 +1883,7 @@ class Styling():
             self.style_dict[plot_type][ax.upper()+'Label'] = new_label
 
         # update plot
-        parent.update_SV()
+        self.scheduler.schedule_update()
 
     def axis_limit_edit_callback(self, ax, bound, new_value):
         """Updates axis limit in dictionaries from widget
@@ -1904,7 +1914,7 @@ class Styling():
             return
 
         if ax == 'c' and plot_type in ['heatmap', 'correlation']:
-            parent.update_SV()
+            self.scheduler.schedule_update()
             return
 
         # change label in dictionary
@@ -1930,7 +1940,7 @@ class Styling():
             self.style_dict[plot_type][f'{ax.upper()}Lim'][bound] = new_value
 
         # update plot
-        parent.update_SV()
+        self.scheduler.schedule_update()
 
     def axis_scale_callback(self, comboBox, ax):
         """Updates axis scale when a scale comboBox has changed.
@@ -1968,7 +1978,7 @@ class Styling():
             styles[ax.upper()+'Scale'] = new_value
 
         # update plot
-        parent.update_SV()
+        self.scheduler.schedule_update()
 
     def set_color_axis_widgets(self):
         """Sets the color axis limits and label widgets."""
@@ -2114,7 +2124,7 @@ class Styling():
                     return
 
         self.set_style_widgets()
-        parent.update_SV()
+        self.scheduler.schedule_update()
 
     def get_axis_values(self, field_type, field, ax=None):
         """Gets axis values
@@ -2272,7 +2282,7 @@ class Styling():
             return
 
         self.style_dict[plot_type]['AspectRatio'] = parent.lineEditAspectRatio.text()
-        parent.update_SV()
+        self.scheduler.schedule_update()
 
     def tickdir_callback(self):
         """Updates tick directions in style dictionary from change of ``MainWindow.comboBoxTickDirection``."""        
@@ -2286,7 +2296,7 @@ class Styling():
             return
 
         self.style_dict[plot_type]['TickDir'] = parent.comboBoxTickDirection.currentText()
-        parent.update_SV()
+        self.scheduler.schedule_update()
 
     # text and annotations
     # -------------------------------------
@@ -2302,7 +2312,7 @@ class Styling():
             return
 
         self.style_dict[plot_type]['Font'] = parent.fontComboBox.currentFont().family()
-        parent.update_SV()
+        self.scheduler.schedule_update()
 
     def font_size_callback(self):
         """Updates figure font sizes"""        
@@ -2316,7 +2326,7 @@ class Styling():
             return
 
         self.style_dict[plot_type]['FontSize'] = parent.doubleSpinBoxFontSize.value()
-        parent.update_SV()
+        self.scheduler.schedule_update()
 
     def update_figure_font(self, canvas, font_name):
         """updates figure fonts without the need to recreate the figure.
@@ -2391,7 +2401,7 @@ class Styling():
             else:
                 self.scale_length = self.default_scale_length()
 
-        parent.update_SV()
+        self.scheduler.schedule_update()
 
     def default_scale_length(self):
         """Sets default length of a scale bar for map-type plots
@@ -2436,7 +2446,7 @@ class Styling():
             return
 
         self.style_dict[plot_type]['ScaleLocation'] = parent.comboBoxScaleLocation.currentText()
-        parent.update_SV()
+        self.scheduler.schedule_update()
 
     def scale_length_callback(self):
         """Updates length of scalebar on map-type plots
@@ -2465,7 +2475,7 @@ class Styling():
                 return
 
         # update plot
-        parent.update_SV()
+        self.scheduler.schedule_update()
 
     def overlay_color_callback(self):
         """Updates color of overlay markers
@@ -2488,7 +2498,7 @@ class Styling():
 
         self.style_dict[plot_type]['OverlayColor'] = color
         # update plot
-        parent.update_SV()
+        self.scheduler.schedule_update()
 
     # markers
     # -------------------------------------
@@ -2507,7 +2517,7 @@ class Styling():
             return
         self.style_dict[plot_type]['Marker'] = parent.comboBoxMarker.currentText()
 
-        parent.update_SV()
+        self.scheduler.schedule_update()
 
     def marker_size_callback(self):
         """Updates marker size
@@ -2524,7 +2534,7 @@ class Styling():
             return
         self.style_dict[plot_type]['MarkerSize'] = parent.doubleSpinBoxMarkerSize.value()
 
-        parent.update_SV()
+        self.scheduler.schedule_update()
 
     def slider_alpha_changed(self):
         """Updates transparency on scatter plots.
@@ -2541,7 +2551,7 @@ class Styling():
 
         if parent.horizontalSliderMarkerAlpha.isEnabled():
             self.style_dict[plot_type]['MarkerAlpha'] = float(parent.horizontalSliderMarkerAlpha.value())
-            parent.update_SV()
+            self.scheduler.schedule_update()
 
     # lines
     # -------------------------------------
@@ -2560,7 +2570,7 @@ class Styling():
             return
 
         self.style_dict[plot_type]['LineWidth'] = float(parent.comboBoxLineWidth.currentText())
-        parent.update_SV()
+        self.scheduler.schedule_update()
 
     def length_multiplier_callback(self):
         """Updates line length multiplier
@@ -2584,7 +2594,7 @@ class Styling():
             return
 
         self.style_dict[plot_type]['LineMultiplier'] = value
-        parent.update_SV()
+        self.scheduler.schedule_update()
 
     def line_color_callback(self):
         """Updates color of plot markers
@@ -2607,7 +2617,7 @@ class Styling():
         self.style_dict[plot_type]['LineColor'] = color
 
         # update plot
-        parent.update_SV()
+        self.scheduler.schedule_update()
 
     # colors
     # -------------------------------------
@@ -2632,7 +2642,7 @@ class Styling():
         self.style_dict[plot_type]['MarkerColor'] = color
 
         # update plot
-        parent.update_SV()
+        self.scheduler.schedule_update()
 
     def resolution_callback(self, update_plot=False):
         """Updates heatmap resolution
@@ -2654,7 +2664,7 @@ class Styling():
         style['Resolution'] = parent.spinBoxHeatmapResolution.value()
 
         if update_plot:
-            parent.update_SV()
+            self.scheduler.schedule_update()
 
     # updates scatter styles when ColorByField comboBox is changed
     def color_by_field_callback(self):
@@ -2688,7 +2698,7 @@ class Styling():
 
         # only run update current plot if color field is selected or the color by field is clusters
         if parent.comboBoxColorByField.currentText() != 'None' or parent.comboBoxColorField.currentText() != '' or parent.comboBoxColorByField.currentText() in ['cluster']:
-            parent.update_SV()
+            self.scheduler.schedule_update()
 
     def color_field_callback(self, plot=True):
         """Updates color field and plot
@@ -2725,7 +2735,7 @@ class Styling():
 
         # update plot
         if plot:
-            parent.update_SV()
+            self.scheduler.schedule_update()
 
     def color_field_update(self):
         """Updates ``MainWindow.comboBoxColorField``"""        
@@ -2756,7 +2766,7 @@ class Styling():
         self.toggle_style_widgets()
         self.style_dict[parent.comboBoxPlotType.currentText()]['Colormap'] = parent.comboBoxFieldColormap.currentText()
 
-        parent.update_SV()
+        self.scheduler.schedule_update()
     
     def update_color_field_spinbox(self):
         """Updates ``spinBoxColorField`` using the index of ``comboBoxColorField``"""        
@@ -2780,7 +2790,7 @@ class Styling():
 
         self.style_dict[plot_type]['CbarReverse'] = parent.checkBoxReverseColormap.isChecked()
 
-        parent.update_SV()
+        self.scheduler.schedule_update()
 
     def get_cluster_colormap(self, cluster_dict, alpha=100):
         """Converts hex colors to a colormap
@@ -2938,7 +2948,7 @@ class Styling():
             return
         self.style_dict[plot_type]['CbarDir'] = parent.comboBoxCbarDirection.currentText()
 
-        parent.update_SV()
+        self.scheduler.schedule_update()
 
     def cbar_label_callback(self):
         """Sets color label
@@ -2956,7 +2966,7 @@ class Styling():
         self.style_dict[plot_type]['CLabel'] = parent.lineEditCbarLabel.text()
 
         if parent.comboBoxCbarLabel.isEnabled():
-            parent.update_SV()
+            self.scheduler.schedule_update()
 
     # cluster styles
     # -------------------------------------
@@ -2989,7 +2999,7 @@ class Styling():
 
         # update plot
         if parent.comboBoxColorByField.currentText() == 'cluster':
-            parent.update_SV()
+            self.scheduler.schedule_update()
 
     def set_default_cluster_colors(self, mask=False):
         """Sets cluster group to default colormap

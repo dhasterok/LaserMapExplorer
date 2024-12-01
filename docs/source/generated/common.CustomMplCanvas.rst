@@ -1,8 +1,17 @@
-﻿common.CustomMplCanvas
+common.CustomMplCanvas
 ======================
 
 .. automodule:: common.CustomMplCanvas
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -21,3 +30,11 @@
       Qt
       SimpleMplCanvas
    
+   
+
+   
+   
+   
+
+
+

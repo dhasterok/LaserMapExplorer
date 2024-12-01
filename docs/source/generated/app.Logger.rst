@@ -1,8 +1,17 @@
-﻿app.Logger
+app.Logger
 ==========
 
 .. automodule:: app.Logger
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -14,3 +23,11 @@
       QTextEdit
       Qt
    
+   
+
+   
+   
+   
+
+
+

@@ -1,8 +1,17 @@
-﻿app.AnalyteSelectionWindow
+app.AnalyteSelectionWindow
 ==========================
 
 .. automodule:: app.AnalyteSelectionWindow
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -30,3 +39,11 @@
       Ui_Dialog
       pyqtSignal
    
+   
+
+   
+   
+   
+
+
+

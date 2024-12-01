@@ -113,3 +113,7 @@ import src.common.CustomWidgets as cw
   echo
 
 done
+
+# update blockly for workflow
+cd blockly
+npx webpack --config webpack.config.js

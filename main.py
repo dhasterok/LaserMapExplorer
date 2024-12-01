@@ -384,8 +384,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     self.bottom_tab.update({'filter': tid})
                 case 'profiles':
                     self.bottom_tab.update({'profile': tid})
-                case 'plot info':
-                    self.bottom_tab.update({'plotinfo': tid})
+                case 'info':
+                    self.bottom_tab.update({'info': tid})
                 case 'workflow':
                     self.bottom_tab.update({'workflow': tid})
                 case 'help':
@@ -580,7 +580,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.spinBoxNBins.valueChanged.connect(self.histogram_update_bin_width)
         self.spinBoxBinWidth.valueChanged.connect(self.histogram_update_n_bins)
         self.toolButtonHistogramReset.clicked.connect(self.histogram_reset_bins)
-        self.comboBoxHistType.activated.connect(self.update_SV)
         self.toolButtonHistogramReset.clicked.connect(self.plot_histogram)
 
         #uncheck crop is checked
@@ -745,16 +744,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         #self.comboBoxNDimRefMaterial.addItems(self.ref_list.values) This is done with the Set analyte tab initialization above.
         self.toolButtonNDimAnalyteAdd.clicked.connect(lambda: self.update_ndim_table('analyteAdd'))
-        self.toolButtonNDimAnalyteAdd.clicked.connect(self.update_SV)
         self.toolButtonNDimAnalyteSetAdd.clicked.connect(lambda: self.update_ndim_table('analytesetAdd'))
-        self.toolButtonNDimAnalyteSetAdd.clicked.connect(self.update_SV)
         self.toolButtonNDimUp.clicked.connect(lambda: self.table_fcn.move_row_up(self.tableWidgetNDim))
-        self.toolButtonNDimUp.clicked.connect(self.update_SV)
         self.toolButtonNDimDown.clicked.connect(lambda: self.table_fcn.move_row_down(self.tableWidgetNDim))
-        self.toolButtonNDimDown.clicked.connect(self.update_SV)
         self.toolButtonNDimSelectAll.clicked.connect(self.tableWidgetNDim.selectAll)
         self.toolButtonNDimRemove.clicked.connect(lambda: self.table_fcn.delete_row(self.tableWidgetNDim))
-        self.toolButtonNDimRemove.clicked.connect(self.update_SV)
         self.toolButtonNDimSaveList.clicked.connect(self.save_ndim_list)
 
         # N-dim table
@@ -950,7 +944,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.statusbar.addPermanentWidget(self.toolButtonLeftDock)
         self.statusbar.addPermanentWidget(self.toolButtonBottomDock)
         self.statusbar.addPermanentWidget(self.toolButtonRightDock)
-
 
         self.toolBox.currentChanged.connect(self.toolbox_changed)
 
@@ -1236,7 +1229,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.canvas_changed()
 
         self.update_plot = True
-        self.update_SV()
+        self.style.scheduler.schedule_update()
 
     def open_preferences_dialog(self):
         pass
@@ -1534,7 +1527,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # If canvasWindow is set to SingleView, update the plot
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv'] and update:
-            self.update_SV()
+            self.style.scheduler.schedule_update()
 
     def open_ternary(self):
         """Executes on actionTernary
@@ -1624,7 +1617,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 return
 
         # update plots
-        self.update_SV()
+        self.style.scheduler.schedule_update()
         # self.update_all_plots()
 
     def update_aspect_ratio_controls(self):
@@ -1639,7 +1632,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.data[self.sample_id].update_norm(norm=norm, field=field)
 
-        self.update_SV()
+        self.style.scheduler.schedule_update()
 
     def update_fields(self, sample_id, plot_type, field_type, field,  plot=False):
         # updates comboBoxPlotType,comboBoxColorByField and comboBoxColorField comboboxes using tree, branch and leaf
@@ -1667,7 +1660,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.update_aspect_ratio_controls()
 
-        self.update_SV()
+        self.style.scheduler.schedule_update()
 
     # toolbar functions
     def change_ref_material(self, ref_val):
@@ -1720,7 +1713,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         item.setFont(font)
                         item.setEnabled(False)
 
-            self.update_SV()
+            self.style.scheduler.schedule_update()
         #self.update_all_plots()
 
      # for a disappearing button
@@ -1848,7 +1841,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.update_labels()
         
         self.update_filter_values()
-        self.update_SV()
+        self.style.scheduler.schedule_update()
         #self.show()
         
     def update_neg_handling(self):
@@ -1876,7 +1869,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         self.update_labels()
         self.update_filter_values()
-        self.update_SV()
+        self.style.scheduler.schedule_update()
 
         
 
@@ -2111,7 +2104,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # if single view is active
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
-            self.update_SV()
+            self.style.scheduler.schedule_update()
 
     # Field filter functions
     # -------------------------------
@@ -3247,7 +3240,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.pop_figure.show()
 
             # since the canvas is moved to the dialog, the figure needs to be recreated in the main window
-            self.update_SV()
+            self.style.scheduler.schedule_update()
 
         if function == 'save':
             if isinstance(canvas,mplc.MplCanvas):
@@ -3771,7 +3764,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.comboBoxPlotType.setCurrentText('correlation')
             self.style.set_style_widgets('correlation')
 
-        self.update_SV()
+        self.style.scheduler.schedule_update()
 
     def correlation_squared_callback(self):
         """Produces a plot of the squared correlation."""        
@@ -3791,7 +3784,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             self.correlation_method_callback()
 
-        self.update_SV()
+        self.style.scheduler.schedule_update()
 
     def plot_correlation(self):
         """Creates an image of the correlation matrix"""
@@ -3936,7 +3929,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # update histogram
         if self.comboBoxPlotType.currentText() == 'histogram':
-            self.update_SV()
+            self.style.scheduler.schedule_update()
 
     def histogram_update_n_bins(self):
         """Updates the number of bins
@@ -3957,7 +3950,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # update histogram
         if self.comboBoxPlotType.currentText() == 'histogram':
-            self.update_SV()
+            self.style.scheduler.schedule_update()
 
     def histogram_reset_bins(self):
         """Resets number of histogram bins to default
@@ -3972,7 +3965,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #self.histogram_update_bin_width()
 
         if self.comboBoxPlotType.currentText() == 'histogram':
-            self.update_SV()
+            self.style.scheduler.schedule_update()
 
     def plot_small_histogram(self, current_plot_df):
         """Creates a small histogram on the Samples and Fields tab associated with the selected map
@@ -5497,7 +5490,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.cluster_dict[self.comboBoxClusterMethod.currentText()]['n_clusters'] = self.spinBoxNClusters.value()
 
         self.update_cluster_flag = True
-        self.update_SV()
+        self.style.scheduler.schedule_update()
 
     def cluster_distance_callback(self):
         """Updates cluster dictionary with the new distance metric
@@ -5507,7 +5500,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.cluster_dict[self.comboBoxClusterMethod.currentText()]['distance'] = self.comboBoxClusterDistance.currentText()
 
         self.update_cluster_flag = True
-        self.update_SV()
+        self.style.scheduler.schedule_update()
 
     def cluster_exponent_callback(self):
         """Updates cluster dictionary with the new exponent
@@ -5517,7 +5510,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.cluster_dict[self.comboBoxClusterMethod.currentText()]['exponent'] = self.horizontalSliderClusterExponent.value()/10
 
         self.update_cluster_flag = True
-        self.update_SV()
+        self.style.scheduler.schedule_update()
     
     def cluster_seed_callback(self):
         """Updates cluster dictionary with the new exponent
@@ -5527,7 +5520,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.cluster_dict[self.comboBoxClusterMethod.currentText()]['exponent'] = int(self.lineEditSeed.text())
 
         self.update_cluster_flag = True
-        self.update_SV()
+        self.style.scheduler.schedule_update()
 
     def generate_random_seed(self):
         """Generates a random seed for clustering
@@ -5539,7 +5532,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.cluster_dict[self.comboBoxClusterMethod.currentText()]['seed'] = r
 
         self.update_cluster_flag = True
-        self.update_SV()
+        self.style.scheduler.schedule_update()
 
     def cluster_method_callback(self):
         """Updates clustering-related widgets
@@ -5600,7 +5593,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.lineEditSeed.value = self.cluster_dict[method]['seed']
 
         if self.update_cluster_flag:
-            self.update_SV()
+            self.style.scheduler.schedule_update()
 
     def update_clusters(self):
         """Executed on update to cluster table.
@@ -5626,7 +5619,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             # update plot
             if (self.comboBoxPlotType.currentText() not in ['cluster', 'cluster score']) and (self.comboBoxColorByField.currentText() == 'cluster'):
-                self.update_SV()
+                self.style.scheduler.schedule_update()
 
     # 4. Davies-Bouldin Index
     # The Davies-Bouldin Index (DBI) measures the ratio of within-cluster scatter to between-cluster separation. Lower values indicate better clustering.
@@ -6021,7 +6014,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.cluster_dict[self.cluster_dict['active method']][cluster_id]['name'] = new_name
 
             # update plot with new cluster name
-            self.update_SV()
+            self.style.scheduler.schedule_update()
 
 
     # -------------------------------------

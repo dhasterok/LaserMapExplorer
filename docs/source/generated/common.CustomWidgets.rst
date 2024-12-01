@@ -1,8 +1,17 @@
-﻿common.CustomWidgets
+common.CustomWidgets
 ====================
 
 .. automodule:: common.CustomWidgets
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -23,3 +32,11 @@
       QWidget
       StandardItem
    
+   
+
+   
+   
+   
+
+
+

@@ -1,14 +1,23 @@
-﻿app.UITheme
+app.UITheme
 ===========
 
 .. automodule:: app.UITheme
 
+   
+   
+   
+
+   
    
    .. rubric:: Functions
 
    .. autosummary::
    
       load_stylesheet
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -17,3 +26,11 @@
       QIcon
       UIThemes
    
+   
+
+   
+   
+   
+
+
+

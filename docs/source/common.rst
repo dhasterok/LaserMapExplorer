@@ -36,6 +36,14 @@ common.ExtendedDF module
    :undoc-members:
    :show-inheritance:
 
+common.Masking module
+---------------------
+
+.. automodule:: common.Masking
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 common.MolecularWeightCalculator module
 ---------------------------------------
 
@@ -64,6 +72,14 @@ common.Regression module
 ------------------------
 
 .. automodule:: common.Regression
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+common.ScheduleTimer module
+---------------------------
+
+.. automodule:: common.ScheduleTimer
    :members:
    :undoc-members:
    :show-inheritance:
@@ -184,6 +200,14 @@ common.terncmap module
 ----------------------
 
 .. automodule:: common.terncmap
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+common.varfunc module
+---------------------
+
+.. automodule:: common.varfunc
    :members:
    :undoc-members:
    :show-inheritance:

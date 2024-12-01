@@ -1,8 +1,17 @@
-﻿common.terncmap
+common.terncmap
 ===============
 
 .. automodule:: common.terncmap
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -11,3 +20,11 @@
       Figure
       ternary
    
+   
+
+   
+   
+   
+
+
+

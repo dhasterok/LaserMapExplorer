@@ -1,8 +1,17 @@
-﻿app.LameIO
+app.LameIO
 ==========
 
 .. automodule:: app.LameIO
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -15,3 +24,11 @@
       QPixmap
       QTableWidgetItem
    
+   
+
+   
+   
+   
+
+
+

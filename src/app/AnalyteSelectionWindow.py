@@ -50,7 +50,7 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         self.filename = 'untitled'
         self.unsaved_changes = False
         self.update_window_title()
-        self.default_dir  = self.os.path.join(self.parent.BASEDIR, "resources", "analyte list"),  # Default directory
+        self.default_dir  = os.path.join(parent.BASEDIR, "resources", "analyte list")  # Default directory
         # setup scale (norm) combobox
         self.comboBoxScale.clear()
         self.scale_methods = ['linear','log','logit','mixed']
@@ -448,6 +448,9 @@ class AnalyteDialog(QDialog, Ui_Dialog):
 
     def save_selection(self):
         """Saves the list of analytes (and ratios) and their norms so they can be quickly recalled for other samples."""        
+        if not self.default_dir:
+            return
+
         file_name, _ = QFileDialog.getSaveFileName(self, "Save File", self.default_dir, "Text Files (*.txt);;All Files (*)")
         if file_name:
             with open(file_name, 'w') as f:
@@ -459,6 +462,10 @@ class AnalyteDialog(QDialog, Ui_Dialog):
             self.filename = os.path.basename(file_name)
             self.unsaved_changes = False
             self.update_window_title()
+
+            self.raise_()
+            self.activateWindow()
+            self.show()
         
 
     def load_selection(self):
@@ -476,6 +483,7 @@ class AnalyteDialog(QDialog, Ui_Dialog):
             self.update_list()
             self.raise_()
             self.activateWindow()
+            self.show()
     
     def clear_selections(self):
         """Clears the current selections in the analyte table and selected list."""

@@ -1,8 +1,17 @@
-﻿app.SpotImporter
+app.SpotImporter
 ================
 
 .. automodule:: app.SpotImporter
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -22,3 +31,11 @@
       SpotImporter
       Ui_SpotImportDialog
    
+   
+
+   
+   
+   
+
+
+

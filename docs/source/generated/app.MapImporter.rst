@@ -1,8 +1,17 @@
-﻿app.MapImporter
+app.MapImporter
 ===============
 
 .. automodule:: app.MapImporter
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -33,3 +42,11 @@
       Ui_MapImportDialog
       defaultdict
    
+   
+
+   
+   
+   
+
+
+

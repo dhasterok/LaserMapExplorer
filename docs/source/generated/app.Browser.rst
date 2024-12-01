@@ -1,14 +1,23 @@
-﻿app.Browser
+app.Browser
 ===========
 
 .. automodule:: app.Browser
 
+   
+   
+   
+
+   
    
    .. rubric:: Functions
 
    .. autosummary::
    
       pyqtSlot
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -24,3 +33,11 @@
       Qt
       WebEngineView
    
+   
+
+   
+   
+   
+
+
+

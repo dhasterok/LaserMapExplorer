@@ -7384,7 +7384,7 @@
         <string/>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>3</number>
        </property>
        <property name="tabSpacing">
         <number>2</number>
@@ -11400,7 +11400,7 @@
         <string/>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>3</number>
        </property>
        <widget class="QWidget" name="tabNotes">
         <property name="sizePolicy">
@@ -12991,9 +12991,9 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="tabPlotInfo">
+       <widget class="QWidget" name="tabInfo">
         <attribute name="title">
-         <string>Plot Info</string>
+         <string>Info</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_77">
          <property name="leftMargin">

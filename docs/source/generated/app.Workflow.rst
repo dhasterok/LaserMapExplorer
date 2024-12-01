@@ -1,14 +1,23 @@
-﻿app.Workflow
+app.Workflow
 ============
 
 .. automodule:: app.Workflow
 
+   
+   
+   
+
+   
    
    .. rubric:: Functions
 
    .. autosummary::
    
       pyqtSlot
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -31,3 +40,11 @@
       QWidget
       Workflow
    
+   
+
+   
+   
+   
+
+
+

@@ -1,8 +1,13 @@
-﻿app.ImageProcessing
+app.ImageProcessing
 ===================
 
 .. automodule:: app.ImageProcessing
 
+   
+   
+   
+
+   
    
    .. rubric:: Functions
 
@@ -12,6 +17,10 @@
       decimate
       wiener
    
+   
+
+   
+   
    .. rubric:: Classes
 
    .. autosummary::
@@ -19,3 +28,11 @@
       ImageItem
       ImageProcessing
    
+   
+
+   
+   
+   
+
+
+

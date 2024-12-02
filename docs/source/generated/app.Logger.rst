@@ -19,11 +19,14 @@
    
       LoggerDock
       QDockWidget
+      QGroupBox
+      QHBoxLayout
       QIcon
       QMainWindow
-      QObject
       QTextEdit
       QToolButton
+      QVBoxLayout
+      QWidget
       Qt
    
    

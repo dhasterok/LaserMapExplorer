@@ -51,6 +51,5 @@
    common.scalebar
    common.ternary_colormap
    common.ternary_plot
-   common.terncmap
    common.varfunc
 

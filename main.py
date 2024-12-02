@@ -251,6 +251,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.calc_dict = {}
 
         self.laser_map_dict = {}
+        self.persistent_filters = pd.DataFrame()
+        self.persistent_filters = pd.DataFrame(columns=['use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'persistent'])
 
         #initialise status bar
         self.statusBar = self.statusBar()
@@ -950,13 +952,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.toolBox.currentChanged.connect(self.toolbox_changed)
 
-        # Redirect sys.stdout to the QTextEdit
-        sys.stdout = LoggerDock(self)
+        # logger
+        self.logger_dock = LoggerDock(self)
+        self.actionLogger.triggered.connect(self.logger_dock.show)
+        self.logger_dock.visibilityChanged.connect(self.logger_visibility_change)
 
         # ----start debugging----
         # self.test_get_field_list()
         # ----end debugging----
-    
+
+    def logger_visibility_change(self, visible):
+        """
+        Redirect stdout based on the visibility of the logger dock.
+        """
+        if visible:
+            sys.stdout = self.logger_dock  # Redirect stdout to logger
+        else:
+            sys.stdout = sys.__stdout__  # Restore to default stdout    
+
     # -------------------------------------
     # Reset to start
     # -------------------------------------
@@ -2244,13 +2257,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 chkBoxItem_select.setCheckState(Qt.Unchecked)
                 analyte_1 = field
                 analyte_2 = None
-                scale = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes'] == field)].iloc[0]['norm']
+                scale = self.data[self.sample_id].get_attribute(field,'norm')
             elif 'Ratio' in field_type:
                 chkBoxItem_select.setCheckState(Qt.Unchecked)
                 analyte_1, analyte_2 = field.split(' / ')
-                scale = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['analytes'] == analyte_1)].iloc[0]['norm'].value
-                #norm = self.data[self.sample_id]['ratio_info'].loc[(self.data[self.sample_id]['ratio_info']['analyte_1'] == analyte_1)
-                #        & (self.data[self.sample_id]['ratio_info']['analyte_2'] == analyte_2)].iloc[0]['norm']
+                scale = self.data[self.sample_id].get_attribute(field,'norm')
             else:
                 scale = 'linear'
 
@@ -4092,7 +4103,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #print(nbins)
         #print(bin_width)
         
-        # dscale = temp = self.data[self.sample_id]['analyte_info'].loc[self.data[self.sample_id]['analyte_info']['analytes'] == field,'norm'].values.item()
         if (xscale == 'linear') or (xscale == 'scientific'):
             edges = np.linspace(xmin, xmax, nbins)
         else:

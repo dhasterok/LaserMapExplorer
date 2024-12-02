@@ -188,14 +188,6 @@ common.ternary\_plot module
    :undoc-members:
    :show-inheritance:
 
-common.terncmap module
-----------------------
-
-.. automodule:: common.terncmap
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 common.varfunc module
 ---------------------
 

@@ -9,6 +9,13 @@ import src.common.CustomMplCanvas as mplc
 # File I/O related functions
 # -------------------------------------
 class LameIO():
+    """Handles most I/O for the main window of LaME
+
+    Parameters
+    ----------
+    parent : QObject, optional
+        MainWindow UI, by default None
+    """        
     def __init__(self, parent=None):
         if parent is None:
             return
@@ -217,7 +224,7 @@ class LameIO():
             # Create and configure the QMessageBox
             messageBoxChangeSample = QMessageBox()
             iconWarning = QIcon()
-            iconWarning.addPixmap(QPixmap(":/resources/icons/icon-warning-64.svg"), QIcon.Normal, QIcon.Off)
+            iconWarning.addPixmap(QPixmap(":/resources/icons/icon-warning-64.svg"), QIcon.Normal, QIcon.Off) # type: ignore
 
             messageBoxChangeSample.setWindowIcon(iconWarning)  # Set custom icon
             messageBoxChangeSample.setText("Do you want to save current analysis?")

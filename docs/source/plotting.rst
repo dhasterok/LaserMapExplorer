@@ -3,7 +3,7 @@ Plotting
 
 There are a number of plots that are possible within *LaME*.  A list of plot types and where they are generated is given below.  If you would like a new type of plot or additional options, file a feature request on the GitHub page or contact us (:doc:`contact`).
 
-.. table:: 
+.. table::
     +---------------------------+---------------------------+
     | Plot type                 | Tab                       |
     +===========================+===========================+
@@ -19,13 +19,14 @@ There are a number of plots that are possible within *LaME*.  A list of plot typ
     | - Pearson                 | *Preprocess*              |
     | - Spearman                |                           |
     | - Kendall                 |                           |
+    | - squared correlation     |                           |
     +---------------------------+---------------------------+
     | histogram                 |                           |
     +---------------------------+---------------------------+
     | - normal                  | *Preprocessing*           |
     | - KDE                     |                           |
     +---------------------------+---------------------------+
-    | sctter and heatmaps       |                           |
+    | scatter and heatmaps      |                           |
     +---------------------------+---------------------------+
     | - scatter                 | *Scatter and Heatmaps*    |
     | - 2-D histogram (heatmap) |                           |
@@ -36,7 +37,7 @@ There are a number of plots that are possible within *LaME*.  A list of plot typ
     | - TEC (spider)            | *n-Dim*                   |
     | - radar                   |                           |
     +---------------------------+---------------------------+
-    | PCA                       |                           |
+    | dimensional reduction     |                           |
     +---------------------------+---------------------------+
     | - explained variance      | *PCA*                     |
     | - vector heatmap          |                           |
@@ -50,7 +51,7 @@ There are a number of plots that are possible within *LaME*.  A list of plot typ
     | - cluster scores          |                           |
     | - cluster performance     |                           |
     +---------------------------+---------------------------+
-    | PCA                       |                           |
+    | profile                   |                           |
     +---------------------------+---------------------------+
     | geochemistry profile      | *Profiling*               |
     +---------------------------+---------------------------+
@@ -76,7 +77,7 @@ Histograms
 Histogram plots show the frequency distribution of concentration values (typically in ppm or wt%) for individual analytes within a sample. Available as standard histograms or kernel density estimation (KDE) plots for smoother distribution visualization.
 
 Scatter and Heatmaps
-===================
+====================
 
 This category includes three visualization types:
 - Scatter plots showing relationships between two variables
@@ -87,15 +88,15 @@ Multidimensional
 ================
 
 Trace element compatibility (TEC)
---------------------------------
+---------------------------------
 TEC diagrams (spider plots) display multiple elements normalized to a reference composition, arranged by geochemical compatibility.
 
 Radar
 -----
 Radar plots display multiple variables on radial axes, offering an alternative view of multidimensional relationships.
 
-PCA
-====
+Dimensional deduction methods
+=============================
 
 Principal Component Analysis visualizations include:
 - Explained variance plots showing component significance
@@ -105,7 +106,7 @@ Principal Component Analysis visualizations include:
 - PCA heatmaps displaying density in PC space
 
 Clustering
-=========
+==========
 
 Three main clustering visualizations:
 - Cluster maps showing spatial distribution of groups

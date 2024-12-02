@@ -198,9 +198,8 @@ class SampleObj:
         self._default_difference_upper_bound= 0.995
 
         # filter dataframe
-        self._filter_df = pd.DataFrame()
-        self._filter_df = pd.DataFrame(columns=['use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'persistent'])
-
+        self.filter_df = pd.DataFrame()
+        self.filter_df = pd.DataFrame(columns=['use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'persistent'])
 
         # axis dictionary for plotting
         self.axis_dict = {}
@@ -493,11 +492,6 @@ class SampleObj:
         self._crop_mask = np.ones_like(self.raw_data['X'], dtype=bool)
 
         self.prep_data()
-
-    @property
-    def filter_df(self):
-        """pandas.DataFrame : Field filters applied to data for masking."""
-        return self._filter_df
 
     # validation functions
     def _is_valid_oulier_method(self, text):

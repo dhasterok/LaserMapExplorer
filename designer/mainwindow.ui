@@ -1090,10 +1090,17 @@
     <addaction name="separator"/>
     <addaction name="actionQuit_LaME"/>
    </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Window</string>
+    </property>
+    <addaction name="actionLogger"/>
+   </widget>
    <addaction name="menuLaME"/>
    <addaction name="menuFile"/>
    <addaction name="menuPlot"/>
    <addaction name="menuAnalyze"/>
+   <addaction name="menuTools"/>
   </widget>
   <widget class="QStatusBar" name="statusbar">
    <property name="font">
@@ -11400,7 +11407,7 @@
         <string/>
        </property>
        <property name="currentIndex">
-        <number>3</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="tabNotes">
         <property name="sizePolicy">
@@ -14121,6 +14128,11 @@ Tool</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionLogger">
+   <property name="text">
+    <string>Logger</string>
    </property>
   </action>
  </widget>

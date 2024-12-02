@@ -1,4 +1,4 @@
-app.Logger
+﻿app.Logger
 ==========
 
 .. automodule:: app.Logger
@@ -19,8 +19,11 @@ app.Logger
    
       LoggerDock
       QDockWidget
+      QIcon
       QMainWindow
+      QObject
       QTextEdit
+      QToolButton
       Qt
    
    

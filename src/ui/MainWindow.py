@@ -441,6 +441,8 @@ class Ui_MainWindow(object):
         font.setStyleStrategy(QtGui.QFont.PreferDefault)
         self.menuLaME.setFont(font)
         self.menuLaME.setObjectName("menuLaME")
+        self.menuTools = QtWidgets.QMenu(self.menubar)
+        self.menuTools.setObjectName("menuTools")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         font = QtGui.QFont()
@@ -5174,6 +5176,8 @@ class Ui_MainWindow(object):
         self.actionWorkflowTool.setIcon(icon88)
         self.actionWorkflowTool.setMenuRole(QtWidgets.QAction.NoRole)
         self.actionWorkflowTool.setObjectName("actionWorkflowTool")
+        self.actionLogger = QtWidgets.QAction(MainWindow)
+        self.actionLogger.setObjectName("actionLogger")
         self.menuFile.addAction(self.actionOpenSample)
         self.menuFile.addAction(self.actionOpenDirectory)
         self.menuFile.addAction(self.actionOpenProject)
@@ -5207,10 +5211,12 @@ class Ui_MainWindow(object):
         self.menuLaME.addAction(self.actionPreferences)
         self.menuLaME.addSeparator()
         self.menuLaME.addAction(self.actionQuit_LaME)
+        self.menuTools.addAction(self.actionLogger)
         self.menubar.addAction(self.menuLaME.menuAction())
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuPlot.menuAction())
         self.menubar.addAction(self.menuAnalyze.menuAction())
+        self.menubar.addAction(self.menuTools.menuAction())
         self.toolBar.addAction(self.actionOpenSample)
         self.toolBar.addAction(self.actionOpenDirectory)
         self.toolBar.addAction(self.actionImportFiles)
@@ -5250,7 +5256,7 @@ class Ui_MainWindow(object):
         self.toolBoxTreeView.layout().setSpacing(2)
         self.toolBoxStyle.setCurrentIndex(0)
         self.toolBoxStyle.layout().setSpacing(2)
-        self.tabWidget.setCurrentIndex(3)
+        self.tabWidget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -5290,6 +5296,7 @@ class Ui_MainWindow(object):
         self.menuPlot.setTitle(_translate("MainWindow", "Plot"))
         self.menuAnalyze.setTitle(_translate("MainWindow", "Analyze"))
         self.menuLaME.setTitle(_translate("MainWindow", "LaME"))
+        self.menuTools.setTitle(_translate("MainWindow", "Window"))
         self.dockWidgetLeftToolbox.setWindowTitle(_translate("MainWindow", "Control Toolbox"))
         self.labelReferenceValue.setText(_translate("MainWindow", "Ref. value"))
         self.comboBoxRefMaterial.setToolTip(_translate("MainWindow", "Select reference for normalizing chemistry"))
@@ -6113,6 +6120,7 @@ class Ui_MainWindow(object):
         self.actionWorkflowTool.setIconText(_translate("MainWindow", "Workflow\n"
 "Tool"))
         self.actionWorkflowTool.setToolTip(_translate("MainWindow", "Open, create, and record workflows using the workflow design tool"))
+        self.actionLogger.setText(_translate("MainWindow", "Logger"))
 import resources_rc
 
 

@@ -76,7 +76,10 @@ from src.app.Logger import LoggerDock
 # to prevent segmentation error at startup
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
 setConfigOption('imageAxisOrder', 'row-major') # best performance
+## Run both to compile docstrings into sphinx, the second only when docstrings have not changed
+## sphinx-apidoc -o source ../src
 ## sphinx-build -b html docs/source/ docs/build/html
+
 ## !pyrcc5 resources.qrc -o src/ui/resources_rc.py
 ## !pyuic5 designer/mainwindow.ui -o src/ui/MainWindow.py
 ## !pyuic5 designer/QuickViewDialog.ui -o src/ui/QuickViewDialog.py
@@ -947,10 +950,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.toolBox.currentChanged.connect(self.toolbox_changed)
 
-        show_logger = False
-        if self.show_logger:
-            # Redirect sys.stdout to the QTextEdit
-            sys.stdout = LoggerDock(self)
+        # Redirect sys.stdout to the QTextEdit
+        sys.stdout = LoggerDock(self)
 
         # ----start debugging----
         # self.test_get_field_list()

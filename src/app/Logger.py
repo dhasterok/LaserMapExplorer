@@ -1,11 +1,15 @@
 import sys
-from PyQt5.QtWidgets import QMainWindow, QTextEdit, QDockWidget
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QObject
+from PyQt5.QtWidgets import QMainWindow, QTextEdit, QDockWidget, QToolButton
+from PyQt5.QtGui import QIcon
+import resources_rc
 
-class LoggerDock:
+class LoggerDock(QObject):
     def __init__(self, parent):
         if not isinstance(parent, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
+
+        super().__init__(parent)
 
         # Create QTextEdit for logging
         self.text_edit = QTextEdit()
@@ -20,6 +24,14 @@ class LoggerDock:
         # Example print statements
         print("This message will appear in the floating QDockWidget!")
         print("Logger is active.")
+
+        hide_button = QToolButton()
+        hide_button.setIcon(QIcon(":/icons/icon-reject-64.svg"))
+        hide_button.setToolTip("Hide Dock")
+        hide_button.clicked.connect(self.dockLogger.hide)
+
+        parent.actionLogger.triggered.connect(self.dockLogger.show)
+        self.dockLogger.hide()
 
     def closeEvent(self, event):
         # Restore sys.stdout to its original state when the application closes

@@ -8,8 +8,8 @@ ICONPATH = os.path.join(BASEDIR, 'resources', 'icons')
 # Path to the stylesheet
 SSPATH = os.path.join(BASEDIR, 'resources', 'styles')
 
-DEBUG = True
-DEBUG_PLOT = True
+DEBUG = False
+DEBUG_PLOT = False
 DEBUG_STYLE = True
 DEBUG_DATA = False
 DEBUG_CALCULATOR = False

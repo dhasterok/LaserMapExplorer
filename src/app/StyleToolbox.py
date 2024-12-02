@@ -2129,7 +2129,7 @@ class Styling():
     def get_axis_values(self, field_type, field, ax=None):
         """Gets axis values
 
-        Returns the axis parameters *field_type* \> *field* for plotting, including the minimum and maximum vales,
+        Returns the axis parameters *field_type* > *field* for plotting, including the minimum and maximum vales,
         the scale (``linear`` or ``log``) and the axis label.  For x, y and color axes associated with the plot,
         no axis needs to be supplied.  For a probability axis associated with histogram PDF plots, ``ax=p``.
 

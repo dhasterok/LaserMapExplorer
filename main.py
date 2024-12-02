@@ -947,7 +947,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.toolBox.currentChanged.connect(self.toolbox_changed)
 
-        if DEBUG:
+        show_logger = False
+        if self.show_logger:
             # Redirect sys.stdout to the QTextEdit
             sys.stdout = LoggerDock(self)
 
@@ -6493,6 +6494,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 # -------------------------------
 app = None
 def create_app():
+    """_summary_
+
+    _extended_summary_
+
+    Returns
+    -------
+    _type_
+        _description_
+    """    
     global app
     app = QApplication(sys.argv)
 
@@ -6510,6 +6520,7 @@ def create_app():
     return app
 
 def show_splash():
+    """Creates splash screen while LaME loads"""    
     pixmap = QPixmap("lame_splash.png")
     splash = QSplashScreen(pixmap)
     splash.setMask(pixmap.mask())
@@ -6517,6 +6528,7 @@ def show_splash():
     QTimer.singleShot(3000, splash.close)
 
 def main():
+    """Main function for LaME"""    
     app = create_app()
     show_splash()
 

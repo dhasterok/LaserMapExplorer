@@ -525,10 +525,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.comboBoxOutlierMethod.addItems(['none', 'quantile critera','quantile and distance critera', 'Chauvenet criterion', 'log(n>x) inflection'])
         self.comboBoxOutlierMethod.setCurrentText('Chauvenet criterion')
-        self.comboBoxOutlierMethod.activated.connect(self.update_outlier_removal)
+        self.comboBoxOutlierMethod.activated.connect(lambda: self.update_outlier_removal(self.comboBoxOutlierMethod.currentText()
+))
 
         self.comboBoxNegativeMethod.addItems(['ignore negatives', 'minimum positive', 'gradual shift', 'Yeo-Johnson transform'])
-        self.comboBoxNegativeMethod.activated.connect(self.update_neg_handling)
+        self.comboBoxNegativeMethod.activated.connect(lambda: self.update_neg_handling(self.comboBoxNegativeMethod.currentText()))
 
         # Selecting analytes
         #-------------------------
@@ -1680,18 +1681,37 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Recalculates X and Y for a dataframe
         """
-        self.data[self.sample_id].update_resolution(self.lineEditDX.value, self.lineEditDY.value)
+        self.data[self.sample_id].update_resolution(dx =self.lineEditDX.value, dy =self.lineEditDY.value, ui_update = True)
 
         self.update_aspect_ratio_controls()
 
         # trigger update to plot
         self.style.scheduler.schedule_update()
 
-    # toolbar functions
-    def change_ref_material(self, ref_val):
+    
+    def change_ref_material(self, ref_val, ui_update = True):
         """Changes reference computing normalized analytes
 
-        Sets all QComboBox to a common normalizing reference.
+        Sets all `self.ref_chem` to a common normalizing reference.
+
+        Parameters
+        ----------
+        ref_val : str
+            Name of reference value from combobox/dropdown
+        ui_update : boolean
+            True: Update ref. comboboxes and plot tree 
+        """
+        # update `self.ref_chem`
+        ref_index = self.change_ref_material_BE(ref_val)
+        if ui_update:
+            self.change_ref_material_UI(ref_index)
+    
+    
+    # toolbar functions
+    def change_ref_material_BE(self, ref_val):
+        """Changes reference computing normalized analytes
+
+        Sets all `self.ref_chem` to a common normalizing reference.
 
         Parameters
         ----------
@@ -1701,11 +1721,27 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ref_index =  self.ref_list.tolist().index(ref_val)
 
         if (ref_index):
-            self.comboBoxRefMaterial.setCurrentIndex(ref_index)
-            self.comboBoxNDimRefMaterial.setCurrentIndex(ref_index)
+
             self.ref_chem = self.ref_data.iloc[ref_index]
             self.ref_chem.index = [col.replace('_ppm', '') for col in self.ref_chem.index]
 
+            return ref_index
+
+
+    def change_ref_material_UI(self, ref_index):
+        """Changes reference computing normalized analytes
+
+        Sets all QComboBox to a common normalizing reference.
+
+        Parameters
+        ----------
+        ref_index : int
+            Index of reference value from combobox/dropdown
+        """
+        if ref_index:
+            self.comboBoxRefMaterial.setCurrentIndex(ref_index)
+            self.comboBoxNDimRefMaterial.setCurrentIndex(ref_index)
+            
             # loop through normalized ratios and enable/disable ratios based
             # on the new reference's analytes
             if self.sample_id == '':
@@ -1872,7 +1908,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.style.scheduler.schedule_update()
         #self.show()
         
-    def update_neg_handling(self):
+    def update_neg_handling(self, negative_method):
         """Auto-scales pixel values in map
 
         Executes when the value ``MainWindow.comboBoxNegativeMethod`` is changed.
@@ -1886,13 +1922,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.checkBoxApplyAll.isChecked():
             # Apply to all iolties
             analyte_list = self.data[self.sample_id].processed_data.match_attribute('data_type', 'analyte') + self.data[self.sample_id].processed_data.match_attribute('data_type', 'ratio')
-            self.data[sample_id].negative_method = self.comboBoxNegativeMethod.currentText()
+            self.data[sample_id].negative_method = negative_method
             # clear existing plot info from tree to ensure saved plots using most recent data
             for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
                 self.plot_tree.clear_tree_data(tree)
             self.data[sample_id].prep_data()
         else:
-            self.data[sample_id].negative_method = self.comboBoxNegativeMethod.currentText()
+            self.data[sample_id].negative_method = negative_method
             self.data[sample_id].prep_data(field)
         
         self.update_labels()
@@ -1901,10 +1937,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # trigger update to plot
         self.style.scheduler.schedule_update()
 
-    def update_outlier_removal(self):
+    def update_outlier_removal(self, method):
         """Removes outliers from one or all analytes."""        
-        method = self.comboBoxOutlierMethod.currentText()
-
         if self.data[self.sample_id].outlier_method == method:
             return
 

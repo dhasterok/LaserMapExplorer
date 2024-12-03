@@ -697,9 +697,6 @@ class SampleObj:
         """Swaps DX and DY for a dataframe, updates X and Y
 
         Recalculates X and Y for a dataframe
-        
-
-
         """  
         if DEBUG_DATA:
             print(f"swap_resolution")  
@@ -719,11 +716,6 @@ class SampleObj:
 
         self.processed_data['X'] = self.dx*Xp
         self.processed_data['Y'] = self.dy*Yp
-
-        parent.compute_map_aspect_ratio()
-        parent.update_aspect_ratio_controls()
-
-        parent.update_SV()
 
     def reset_crop(self):
         """Reset the data to the new bounds.

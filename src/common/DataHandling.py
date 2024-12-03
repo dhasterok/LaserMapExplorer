@@ -694,14 +694,12 @@ class SampleObj:
         df = df.sort_values(['Y','X'])
 
     def swap_resolution(self):
-        """Swaps DX and DY for a dataframe
+        """Swaps DX and DY for a dataframe, updates X and Y
 
         Recalculates X and Y for a dataframe
         """
         if DEBUG_DATA:
             print(f"swap_resolution") 
-
-        parent = self.parent
 
         X = round(self.raw_data['X']/self.dx)
         Y = round(self.raw_data['Y']/self.dy)
@@ -713,19 +711,11 @@ class SampleObj:
         self.dx = self.dy
         self.dy = dx
 
-        parent.lineEditDX.value = self.dx
-        parent.lineEditDY.value = self.dy
-
         self.raw_data['X'] = self.dx*X
         self.raw_data['Y'] = self.dy*Y
 
         self.processed_data['X'] = self.dx*Xp
         self.processed_data['Y'] = self.dy*Yp
-
-        parent.compute_map_aspect_ratio()
-        parent.update_aspect_ratio_controls()
-
-        parent.update_SV()
 
     def reset_crop(self):
         """Reset the data to the new bounds.
@@ -751,7 +741,7 @@ class SampleObj:
             Analyte field to be used as denominator of ratio.
         """
         if DEBUG_DATA:
-            print(f"compute_ratio") 
+            print(f"compute_ratio, analyte_1: {analyte_1}, analyte_2: {analyte_2}") 
 
         # Create a mask where both analytes are positive
         mask = (self.processed_data[analyte_1] > 0) & (self.processed_data[analyte_2] > 0)
@@ -846,7 +836,7 @@ class SampleObj:
             run for the first time.
         """ 
         if DEBUG_DATA:
-            print(f"prep_data") 
+            print(f"prep_data, field {field}") 
 
         attribute_df = None
         analyte_columns = []
@@ -983,7 +973,7 @@ class SampleObj:
             Returns the optimal number of k-means clusters.
         """
         if DEBUG_DATA:
-            print(f"k_optimal_clusters") 
+            print(f"k_optimal_clusters, max_clusters: {max_clusters}") 
 
         inertia = []
 
@@ -1195,7 +1185,7 @@ class SampleObj:
             Processed data for plotting. This is only returned if analysis_type is not 'laser' or 'hist'.
         """
         if DEBUG_DATA:
-            print(f"get_map_data\n  field type: {field_type}\n  field: {field}\n  norm: {norm}\n  processed: {processed}")
+            print(f"get_map_data\n  field type: {field_type}\n  field: {field}\n  norm: {norm}\n  ref_chem: {ref_chem}\n  processed: {processed}")
         # ----begin debugging----
         # print('[get_map_data] sample_id: '+sample_id+'   field_type: '+field_type+'   field: '+field)
         # ----end debugging----
@@ -1322,6 +1312,9 @@ class SampleObj:
             Dictionary with array and additional relevant plot data, contains
             'field', 'type', 'label', and 'array'.
         """
+        if DEBUG_DATA:
+            print(f"get_vector\n  field_type: {field_type}\n  field: {field}\n  norm: {norm}\n  ref_chem: {ref_chem}\n  processed: {processed}")
+
         # initialize dictionary
         value_dict = {'type': field_type, 'field': field, 'label': None, 'array': None}
 

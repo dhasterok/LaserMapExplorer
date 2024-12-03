@@ -1000,7 +1000,7 @@
      <x>0</x>
      <y>0</y>
      <width>1123</width>
-     <height>37</height>
+     <height>14</height>
     </rect>
    </property>
    <property name="font">
@@ -1182,7 +1182,7 @@
         <string/>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <property name="tabSpacing">
         <number>2</number>
@@ -7391,7 +7391,7 @@
         <string/>
        </property>
        <property name="currentIndex">
-        <number>3</number>
+        <number>0</number>
        </property>
        <property name="tabSpacing">
         <number>2</number>
@@ -11369,6 +11369,9 @@
    <property name="allowedAreas">
     <set>Qt::BottomDockWidgetArea</set>
    </property>
+   <property name="windowTitle">
+    <string>Auxillary Tools</string>
+   </property>
    <attribute name="dockWidgetArea">
     <number>8</number>
    </attribute>
@@ -11407,7 +11410,7 @@
         <string/>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="tabNotes">
         <property name="sizePolicy">
@@ -11894,7 +11897,7 @@
                 <x>0</x>
                 <y>0</y>
                 <width>510</width>
-                <height>292</height>
+                <height>293</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_72">

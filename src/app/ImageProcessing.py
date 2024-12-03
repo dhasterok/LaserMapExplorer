@@ -55,12 +55,27 @@ class ImageProcessing():
         self.parent.doubleSpinBoxNoiseOption2.valueChanged.connect(self.noise_reduction_option2_callback)
         self.parent.doubleSpinBoxNoiseOption2.setEnabled(False)
         self.parent.labelNoiseOption2.setEnabled(False)
+        self.parent.checkBoxGradient.stateChanged.connect(self.gradient_checked_state_changed)
         self.parent.checkBoxGradient.stateChanged.connect(self.noise_reduction_method_callback)
 
         # add edge detection algorithm to aid in creating polygons
         self.edge_img = None
         self.parent.toolButtonEdgeDetect.clicked.connect(self.add_edge_detection)
         self.parent.comboBoxEdgeDetectMethod.activated.connect(self.add_edge_detection)
+
+    def gradient_checked_state_changed(self):
+        field_type = self.parent.style.field_type
+        field = self.parent.style.field
+        if self.parent.checkBoxGradient.isChecked():
+            self.parent.style.style_dict['gradient map']['ColorFieldType'] = field_type
+            self.parent.style.style_dict['gradient map']['ColorField'] = field
+            self.parent.style.plot_type = 'gradient map'
+        else:
+            if self.parent.comboBoxPlotType.currentText != 'analyte map':
+                self.parent.style.style_dict['analyte map']['ColorFieldType'] = field_type
+                self.parent.style.style_dict['analyte map']['ColorField'] = field
+                self.parent.style.plot_type = 'analyte map'
+
 
     def add_edge_detection(self):
         """Add edge detection to the current laser map plot.
@@ -73,61 +88,63 @@ class ImageProcessing():
             # remove existing filters
             self.parent.plot.removeItem(self.edge_img)
 
-        if self.parent.toolButtonEdgeDetect.isChecked():
-            algorithm = self.parent.comboBoxEdgeDetectMethod.currentText().lower()
-            if algorithm == 'sobel':
-                # Apply Sobel edge detection
-                sobelx = cv2.Sobel(self.array, cv2.CV_64F, 1, 0, ksize=5)
-                sobely = cv2.Sobel(self.array, cv2.CV_64F, 0, 1, ksize=5)
-                edge_detected_image = np.sqrt(sobelx**2 + sobely**2)
-            elif algorithm == 'canny':
+        if not self.parent.toolButtonEdgeDetect.isChecked():
+            return
 
-                # Normalize the array to [0, 1]
-                normalized_array = (self.array - np.nanmin(self.array)) / (np.nanmax(self.array) - np.nanmin(self.array))
+        algorithm = self.parent.comboBoxEdgeDetectMethod.currentText().lower()
+        if algorithm == 'sobel':
+            # Apply Sobel edge detection
+            sobelx = cv2.Sobel(self.array, cv2.CV_64F, 1, 0, ksize=5)
+            sobely = cv2.Sobel(self.array, cv2.CV_64F, 0, 1, ksize=5)
+            edge_detected_image = np.sqrt(sobelx**2 + sobely**2)
+        elif algorithm == 'canny':
 
-                # Scale to [0, 255] and convert to uint8
-                scaled_array = (normalized_array * 255).astype(np.uint8)
+            # Normalize the array to [0, 1]
+            normalized_array = (self.array - np.nanmin(self.array)) / (np.nanmax(self.array) - np.nanmin(self.array))
 
-                # Apply Canny edge detection
-                edge_detected_image = cv2.Canny(scaled_array, 100, 200)
-            elif algorithm == 'zero cross':
-                # Apply Zero Crossing edge detection (This is a placeholder as OpenCV does not have a direct function)
-                # You might need to implement a custom function or find a library that supports Zero Crossing
-                edge_detected_image = self.zero_crossing_laplacian(self.array)  # Placeholder, replace with actual Zero Crossing implementation
-            else:
-                raise ValueError("Unsupported algorithm. Choose 'sobel', 'canny', or 'zero cross'.")
+            # Scale to [0, 255] and convert to uint8
+            scaled_array = (normalized_array * 255).astype(np.uint8)
 
-            # Assuming you have a way to display this edge_detected_image on your plot.
-            # This could be an update to an existing ImageItem or creating a new one if necessary.
-            self.edge_array = edge_detected_image
-            if (np.nanmin(self.edge_array) < 0) or (np.nanmax(self.edge_array) > 255):
-                self.edge_array = (self.edge_array - np.nanmin(self.edge_array)) / (np.nanmax(self.edge_array) - np.nanmin(self.edge_array))
+            # Apply Canny edge detection
+            edge_detected_image = cv2.Canny(scaled_array, 100, 200)
+        elif algorithm == 'zero cross':
+            # Apply Zero Crossing edge detection (This is a placeholder as OpenCV does not have a direct function)
+            # You might need to implement a custom function or find a library that supports Zero Crossing
+            edge_detected_image = self.zero_crossing_laplacian(self.array)  # Placeholder, replace with actual Zero Crossing implementation
+        else:
+            raise ValueError("Unsupported algorithm. Choose 'sobel', 'canny', or 'zero cross'.")
 
-                # Scale to [0, 255] and convert to uint8
-                self.edge_array = (self.edge_array * 255).astype(np.uint8)
+        # Assuming you have a way to display this edge_detected_image on your plot.
+        # This could be an update to an existing ImageItem or creating a new one if necessary.
+        self.edge_array = edge_detected_image
+        if (np.nanmin(self.edge_array) < 0) or (np.nanmax(self.edge_array) > 255):
+            self.edge_array = (self.edge_array - np.nanmin(self.edge_array)) / (np.nanmax(self.edge_array) - np.nanmin(self.edge_array))
 
-            self.edge_img = ImageItem(image=self.edge_array)
-            #set aspect ratio of rectangle
-            #self.edge_img.setRect(0,0,self.x_range,self.y_range)
-            # edge_img.setAs
-            #cm = colormap.get(style['Colors']['Colormap'], source = 'matplotlib')
-            #self.edge_img.setColorMap(cm)
-            #self.plot.addItem(self.edge_img)
+            # Scale to [0, 255] and convert to uint8
+            self.edge_array = (self.edge_array * 255).astype(np.uint8)
 
-            overlay_image = np.zeros(self.edge_array.shape+(4,), dtype=np.uint8)
-            colorlist = self.parent.get_rgb_color(self.parent.style.overlay_color)
-            overlay_image[..., 0] = colorlist[0]  # Red channel
-            overlay_image[..., 1] = colorlist[1]  # Green channel
-            overlay_image[..., 2] = colorlist[2]  # Blue channel
-            overlay_image[..., 3] = 0.9*self.edge_array
+        self.edge_img = ImageItem(image=self.edge_array)
+        #set aspect ratio of rectangle
+        #self.edge_img.setRect(0,0,self.x_range,self.y_range)
+        # edge_img.setAs
+        #cm = colormap.get(style['Colors']['Colormap'], source = 'matplotlib')
+        #self.edge_img.setColorMap(cm)
+        #self.plot.addItem(self.edge_img)
 
-            self.edge_img = ImageItem(image=overlay_image)
+        overlay_image = np.zeros(self.edge_array.shape+(4,), dtype=np.uint8)
+        colorlist = self.parent.get_rgb_color(self.parent.style.overlay_color)
+        overlay_image[..., 0] = colorlist[0]  # Red channel
+        overlay_image[..., 1] = colorlist[1]  # Green channel
+        overlay_image[..., 2] = colorlist[2]  # Blue channel
+        overlay_image[..., 3] = 0.9*self.edge_array
 
-            #set aspect ratio of rectangle
-            x_range = self.parent.data[self.parent.sample_id].x_range
-            y_range = self.parent.data[self.parent.sample_id].y_range
-            self.edge_img.setRect(0,0,x_range,y_range)
-            self.parent.plot.addItem(self.edge_img)
+        self.edge_img = ImageItem(image=overlay_image)
+
+        #set aspect ratio of rectangle
+        x_range = self.parent.data[self.parent.sample_id].x_range
+        y_range = self.parent.data[self.parent.sample_id].y_range
+        self.edge_img.setRect(0,0,x_range,y_range)
+        self.parent.plot.addItem(self.edge_img)
 
     def zero_crossing_laplacian(self,array):
         """Apply Zero Crossing on the Laplacian of the image.
@@ -361,7 +378,6 @@ class ImageProcessing():
         # if self.grad_img:
         #     self.plot.removeItem(self.grad_img)
 
-        # Assuming self.array is the current image data
         # get data for current map
         field_type = self.parent.comboBoxColorByField.currentText()
         field = self.parent.comboBoxColorField.currentText()
@@ -438,7 +454,7 @@ class ImageProcessing():
             return
         else:
             if self.parent.comboBoxPlotType.currentText != 'analyte map':
-                self.parent.comboBoxPlotType.setCurrentText('analyte map')
+                self.parent.style.plot_type = 'analyte map'
 
 
         canvas = mplc.MplCanvas(parent=self.parent)
@@ -492,7 +508,8 @@ class ImageProcessing():
         """
         Produces a gradient map with arrows showing gradient direction and colors indicating magnitude
 
-        Executes only when ``MainWindow.comboBoxNoiseReductionMethod.currentText()`` is not ``none``, computes noise reduction and displays gradient map
+        Executes only when ``MainWindow.comboBoxNoiseReductionMethod.currentText()`` is not ``none``,
+        computes noise reduction and displays gradient map
         """
         # update plot type comboBox
         self.plot_flag = False

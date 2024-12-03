@@ -1244,6 +1244,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.canvas_changed()
 
         self.update_plot = True
+        # trigger update to plot
         self.style.scheduler.schedule_update()
 
     def open_preferences_dialog(self):
@@ -1542,6 +1543,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # If canvasWindow is set to SingleView, update the plot
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv'] and update:
+        # trigger update to plot
             self.style.scheduler.schedule_update()
 
     def open_ternary(self):
@@ -1556,7 +1558,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             while self.comboBoxFieldX.currentText() == self.comboBoxFieldY.currentText():
                 self.comboBoxFieldY.setCurrentIndex(idx)
                 idx += 1
-
 
             if self.comboBoxFieldTypeZ.currentText() == 'None':
                 self.comboBoxFieldTypeZ.setCurrentText('Analyte')
@@ -1631,11 +1632,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             case _:
                 return
 
-        # update plots
+        # trigger update to plot
         self.style.scheduler.schedule_update()
         # self.update_all_plots()
 
     def update_aspect_ratio_controls(self):
+        """Updates aspect ratio controls when ``MainWindow.toolButtonSwapResolution`` is clicked.
+
+        Swaps ``lineEditDX`` and ``lineEditDY``
+        """ 
         self.lineEditDX.value = self.data[self.sample_id].dx
         self.lineEditDY.value = self.data[self.sample_id].dy
 
@@ -1643,10 +1648,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.lineEditResolutionNx.value = array_size[1]
         self.lineEditResolutionNy.value = array_size[0]
 
+        # trigger update to plot
+        self.style.scheduler.schedule_update()
+
     def update_norm(self, norm, field=None):
 
         self.data[self.sample_id].update_norm(norm=norm, field=field)
 
+        # trigger update to plot
         self.style.scheduler.schedule_update()
 
     def update_fields(self, sample_id, plot_type, field_type, field,  plot=False):
@@ -1675,6 +1684,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.update_aspect_ratio_controls()
 
+        # trigger update to plot
         self.style.scheduler.schedule_update()
 
     # toolbar functions
@@ -1728,6 +1738,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         item.setFont(font)
                         item.setEnabled(False)
 
+            # trigger update to plot
             self.style.scheduler.schedule_update()
         #self.update_all_plots()
 
@@ -1856,6 +1867,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.update_labels()
         
         self.update_filter_values()
+
+        # trigger update to plot
         self.style.scheduler.schedule_update()
         #self.show()
         
@@ -1884,9 +1897,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         self.update_labels()
         self.update_filter_values()
-        self.style.scheduler.schedule_update()
 
-        
+        # trigger update to plot
+        self.style.scheduler.schedule_update()
 
     def update_outlier_removal(self):
         """Removes outliers from one or all analytes."""        
@@ -2119,6 +2132,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # if single view is active
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
+            # trigger update to plot
             self.style.scheduler.schedule_update()
 
     # Field filter functions
@@ -3253,6 +3267,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.pop_figure.show()
 
             # since the canvas is moved to the dialog, the figure needs to be recreated in the main window
+            # trigger update to plot        
             self.style.scheduler.schedule_update()
 
         if function == 'save':
@@ -3777,6 +3792,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.comboBoxPlotType.setCurrentText('correlation')
             self.style.set_style_widgets('correlation')
 
+        # trigger update to plot
         self.style.scheduler.schedule_update()
 
     def correlation_squared_callback(self):
@@ -3797,6 +3813,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             self.correlation_method_callback()
 
+        # trigger update to plot
         self.style.scheduler.schedule_update()
 
     def plot_correlation(self):
@@ -3942,6 +3959,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # update histogram
         if self.comboBoxPlotType.currentText() == 'histogram':
+            # trigger update to plot
             self.style.scheduler.schedule_update()
 
     def histogram_update_n_bins(self):
@@ -3963,6 +3981,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # update histogram
         if self.comboBoxPlotType.currentText() == 'histogram':
+            # trigger update to plot
             self.style.scheduler.schedule_update()
 
     def histogram_reset_bins(self):
@@ -3978,6 +3997,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #self.histogram_update_bin_width()
 
         if self.comboBoxPlotType.currentText() == 'histogram':
+            # trigger update to plot
             self.style.scheduler.schedule_update()
 
     def plot_small_histogram(self, current_plot_df):
@@ -5502,6 +5522,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.cluster_dict[self.comboBoxClusterMethod.currentText()]['n_clusters'] = self.spinBoxNClusters.value()
 
         self.update_cluster_flag = True
+        # trigger update to plot
         self.style.scheduler.schedule_update()
 
     def cluster_distance_callback(self):
@@ -5512,6 +5533,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.cluster_dict[self.comboBoxClusterMethod.currentText()]['distance'] = self.comboBoxClusterDistance.currentText()
 
         self.update_cluster_flag = True
+        # trigger update to plot
         self.style.scheduler.schedule_update()
 
     def cluster_exponent_callback(self):
@@ -5522,6 +5544,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.cluster_dict[self.comboBoxClusterMethod.currentText()]['exponent'] = self.horizontalSliderClusterExponent.value()/10
 
         self.update_cluster_flag = True
+        # trigger update to plot
         self.style.scheduler.schedule_update()
     
     def cluster_seed_callback(self):
@@ -5532,6 +5555,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.cluster_dict[self.comboBoxClusterMethod.currentText()]['exponent'] = int(self.lineEditSeed.text())
 
         self.update_cluster_flag = True
+        # trigger update to plot
         self.style.scheduler.schedule_update()
 
     def generate_random_seed(self):
@@ -5544,6 +5568,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.cluster_dict[self.comboBoxClusterMethod.currentText()]['seed'] = r
 
         self.update_cluster_flag = True
+        # trigger update to plot
         self.style.scheduler.schedule_update()
 
     def cluster_method_callback(self):
@@ -5631,6 +5656,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             # update plot
             if (self.comboBoxPlotType.currentText() not in ['cluster', 'cluster score']) and (self.comboBoxColorByField.currentText() == 'cluster'):
+                # trigger update to plot
                 self.style.scheduler.schedule_update()
 
     # 4. Davies-Bouldin Index
@@ -6026,6 +6052,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.cluster_dict[self.cluster_dict['active method']][cluster_id]['name'] = new_name
 
             # update plot with new cluster name
+            # trigger update to plot
             self.style.scheduler.schedule_update()
 
 

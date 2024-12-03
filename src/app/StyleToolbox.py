@@ -170,6 +170,8 @@ class Styling():
         parent.toolButtonNDimDown.clicked.connect(self.scheduler.schedule_update)
         parent.toolButtonNDimRemove.clicked.connect(self.scheduler.schedule_update)
 
+        self._signal_state = True
+
         # create the default style dictionary (self.style_dict for each plot type)
         self.reset_default_styles()
         self.map_plot_types = ['analyte map', 'ternary map', 'PCA score', 'cluster', 'cluster score']
@@ -760,6 +762,18 @@ class Styling():
         else:
             raise TypeError("value must be an integer or None.")
 
+    @property
+    def signal_state(self):
+        return self._signal_state
+    
+    @signal_state.setter
+    def signal_state(self, state):
+        if not isinstance(state, bool):
+            raise TypeError("signal_state must be a bool")
+        
+        self._signal_state = state
+        self.toggle_signals()
+        
     # -------------------------------------
     # Validation functions
     # -------------------------------------
@@ -783,6 +797,70 @@ class Styling():
     def print_properties(self):
         for attr, value in vars(self).items():
             print(f"{attr}: {value}")
+    
+    def toggle_signals(self):
+        """Toggles signals from all style widgets.  Useful when updating many widgets."""        
+
+        if DEBUG_STYLE:
+            print(f"toggle_signals, _signal_state: {self._signal_state}")
+
+        parent = self.parent
+
+        parent.comboBoxPlotType.blockSignals(self._signal_state)
+
+       # x-axis widgets
+        parent.lineEditXLB.blockSignals(self._signal_state)
+        parent.lineEditXUB.blockSignals(self._signal_state)
+        parent.comboBoxXScale.blockSignals(self._signal_state)
+        parent.lineEditXLabel.blockSignals(self._signal_state)
+
+        # y-axis widgets
+        parent.lineEditYLB.blockSignals(self._signal_state)
+        parent.lineEditYUB.blockSignals(self._signal_state)
+        parent.comboBoxYScale.blockSignals(self._signal_state)
+        parent.lineEditYLabel.blockSignals(self._signal_state)
+
+        # z-axis widgets
+        parent.lineEditZLB.blockSignals(self._signal_state)
+        parent.lineEditZUB.blockSignals(self._signal_state)
+        parent.comboBoxZScale.blockSignals(self._signal_state)
+        parent.lineEditZLabel.blockSignals(self._signal_state)
+
+        # other axis properties
+        parent.lineEditAspectRatio.blockSignals(self._signal_state)
+        parent.comboBoxTickDirection.blockSignals(self._signal_state)
+
+        # annotations
+        parent.fontComboBox.blockSignals(self._signal_state)
+        parent.doubleSpinBoxFontSize.blockSignals(self._signal_state)
+        parent.checkBoxShowMass.blockSignals(self._signal_state)
+
+        # scale
+        parent.comboBoxScaleDirection.blockSignals(self._signal_state)
+        parent.comboBoxScaleLocation.blockSignals(self._signal_state)
+        parent.lineEditScaleLength.blockSignals(self._signal_state)
+        parent.toolButtonOverlayColor.blockSignals(self._signal_state)
+
+        # markers and lines
+        parent.comboBoxMarker.blockSignals(self._signal_state)
+        parent.doubleSpinBoxMarkerSize.blockSignals(self._signal_state)
+        parent.toolButtonMarkerColor.blockSignals(self._signal_state)
+        parent.horizontalSliderMarkerAlpha.blockSignals(self._signal_state)
+        parent.comboBoxLineWidth.blockSignals(self._signal_state)
+        parent.toolButtonLineColor.blockSignals(self._signal_state)
+        parent.lineEditLengthMultiplier.blockSignals(self._signal_state)
+
+        # coloring
+        parent.comboBoxColorByField.blockSignals(self._signal_state)
+        parent.comboBoxColorField.blockSignals(self._signal_state)
+        parent.spinBoxHeatmapResolution.blockSignals(self._signal_state)
+        parent.comboBoxFieldColormap.blockSignals(self._signal_state)
+        parent.checkBoxReverseColormap.blockSignals(self._signal_state)
+        parent.lineEditColorLB.blockSignals(self._signal_state)
+        parent.lineEditColorUB.blockSignals(self._signal_state)
+        parent.comboBoxColorScale.blockSignals(self._signal_state)
+        parent.lineEditCbarLabel.blockSignals(self._signal_state)
+        parent.comboBoxCbarDirection.blockSignals(self._signal_state)
 
     # -------------------------------------
     # Style related fuctions/callbacks
@@ -1462,7 +1540,7 @@ class Styling():
 
         # toggle actionSwapAxes
         match plot_type:
-            case 'analyte map':
+            case 'analyte map' | 'gradient map':
                 parent.actionSwapAxes.setEnabled(True)
             case 'scatter' | 'heatmap':
                 parent.actionSwapAxes.setEnabled(True)
@@ -1683,7 +1761,7 @@ class Styling():
         parent.plot_types[parent.toolBox.currentIndex()][0] = parent.comboBoxPlotType.currentIndex()
 
         match self.plot_type.lower():
-            case 'analyte map':
+            case 'analyte map' | 'gradient map':
                 parent.actionSwapAxes.setEnabled(True)
             case 'scatter' | 'heatmap':
                 parent.actionSwapAxes.setEnabled(True)
@@ -1704,7 +1782,9 @@ class Styling():
             case _:
                 parent.actionSwapAxes.setEnabled(False)
 
+        self.signal_state = False
         self.set_style_widgets(plot_type=self.plot_type)
+        self.signal_state = True
         #self.check_analysis_type()
 
         if update:

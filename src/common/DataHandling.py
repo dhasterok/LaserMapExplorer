@@ -693,15 +693,16 @@ class SampleObj:
 
         df = df.sort_values(['Y','X'])
 
-    def swap_resolution(self):
+    def swap_resolution(self, ui_update= True):
         """Swaps DX and DY for a dataframe
 
         Recalculates X and Y for a dataframe
-        """
-        if DEBUG_DATA:
-            print(f"swap_resolution") 
+        
 
-        parent = self.parent
+
+        """  
+        if DEBUG_DATA:
+            print(f"swap_resolution")  
 
         X = round(self.raw_data['X']/self.dx)
         Y = round(self.raw_data['Y']/self.dy)
@@ -709,12 +710,38 @@ class SampleObj:
         Xp = round(self.processed_data['X']/self.dx)
         Yp = round(self.processed_data['Y']/self.dy)
 
-        dx = self.dx
-        self.dx = self.dy
-        self.dy = dx
+        self.raw_data['X'] = self.dx*X
+        self.raw_data['Y'] = self.dy*Y
 
-        parent.lineEditDX.value = self.dx
-        parent.lineEditDY.value = self.dy
+        self.processed_data['X'] = self.dx*Xp
+        self.processed_data['Y'] = self.dy*Yp
+
+        if ui_update:
+            parent = self.parent
+            parent.lineEditDX.value = self.dx
+            parent.lineEditDY.value = self.dy
+
+            parent.compute_map_aspect_ratio()
+            parent.update_aspect_ratio_controls()
+
+            parent.update_SV()
+
+    def update_resolution(self,dx,dy):
+        """Updates DX and DY for a dataframe
+
+        Recalculates X and Y for a dataframe
+        """
+        if DEBUG_DATA:
+            print(f"update_resolution") 
+
+        self.dx = dx
+        self.dy = dy
+
+        X = round(self.raw_data['X']/self.dx)
+        Y = round(self.raw_data['Y']/self.dy)
+
+        Xp = round(self.processed_data['X']/self.dx)
+        Yp = round(self.processed_data['Y']/self.dy)
 
         self.raw_data['X'] = self.dx*X
         self.raw_data['Y'] = self.dy*Y
@@ -722,10 +749,6 @@ class SampleObj:
         self.processed_data['X'] = self.dx*Xp
         self.processed_data['Y'] = self.dy*Yp
 
-        parent.compute_map_aspect_ratio()
-        parent.update_aspect_ratio_controls()
-
-        parent.update_SV()
 
     def reset_crop(self):
         """Reset the data to the new bounds.

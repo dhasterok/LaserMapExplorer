@@ -74,6 +74,16 @@ class BlocklyBridge(QObject):
         saved_lists = self.parent.get_saved_analyte_lists()
         return saved_lists
     
+    @pyqtSlot(result=list)
+    def getCurrentDimensions(self):
+        """
+        Exposed method to JavaScript to get the current dx and dy dimensions.
+        """
+        dx = self.parent.parent.data[self.parent.parent.sample_id].dx
+        dy = self.parent.parent.data[self.parent.parent.sample_id].dy
+        return [dx, dy]
+
+    
 
 
     def convert_numpy_types(self, obj):

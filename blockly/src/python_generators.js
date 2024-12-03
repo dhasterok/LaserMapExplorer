@@ -54,9 +54,45 @@ pythonGenerator.forBlock['select_analytes'] = function(block) {
 // Python code generator for the select_analytes block
 pythonGenerator.forBlock['select_ref_val'] = function(block) {
     const refValue = block.getFieldValue('refValueDropdown'); // Get selected dropdown value
-    const code = `self.parent.change_ref_material('${refValue}')\n`; // Python function call
+    const code = `self.parent.change_ref_material('${refValue}', ui_update=False)\n`; // Python function call
     return code;
 };
+
+pythonGenerator.forBlock['change_pixel_dimensions'] = function(block, generator) {
+    var dx = block.getFieldValue('dx');
+    var dy = block.getFieldValue('dy');
+    var code = 'self.parent.data[self.parent.sample_id].update_resolution(dx ='+dx+ ', dy ='+ dy+', ui_update = False)\n';
+    return code;
+};
+
+
+pythonGenerator.forBlock['swap_pixel_dimensions'] = function(block) {
+    var code = 'self.parent.data[self.parent.sample_id].swap_resolution\n';
+    return code;
+};
+
+pythonGenerator.forBlock['select_outlier_method'] = function(block) {
+    var method = block.getFieldValue('outlierMethodDropdown');
+    var code = '';
+
+    if (method === 'quantile criteria' || method === 'quantile and distance criteria') {
+        var uB = block.getFieldValue('uB');
+        var lB = block.getFieldValue('lB');
+        code += `upper_bound = ${uB}\n`;
+        code += `lower_bound = ${lB}\n`;
+    }
+    if (method === 'quantile and distance criteria') {
+        var dUB = block.getFieldValue('dUB');
+        var dLB = block.getFieldValue('dLB');
+        code += `diff_upper_bound = ${dUB}\n`;
+        code += `diff_lower_bound = ${dLB}\n`;
+    }
+    code += `outlier_method = '${method}'\n`;
+    // Additional code to apply the outlier method...
+    return code;
+};
+
+
 
 /*
 // Python Generator: Sample IDs List

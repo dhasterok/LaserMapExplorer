@@ -267,7 +267,6 @@ const select_ref_val = {
       window.blocklyBridge.getRefValueList().then((response) => {
         // Map the response to the required format for Blockly dropdowns
         const options = response.map(option => [option, option]);
-        console.log()
         const dropdown = this.getField('refValueDropdown');
         if (dropdown){
             // Clear existing options and add new ones
@@ -281,9 +280,131 @@ const select_ref_val = {
         console.error('Error fetching reference list:', error);
       });
     }
+};
+Blockly.common.defineBlocks({ select_ref_val: select_ref_val }); 
+
+// Define the change_pixel_dimensions block
+const change_pixel_dimensions= {
+    init: function() {
+        this.appendDummyInput()
+            .appendField("Set Dimensions");
+        this.appendDummyInput()
+            .appendField("dx")
+            .appendField(new Blockly.FieldNumber(0), "dx");
+        this.appendDummyInput()
+            .appendField("dy")
+            .appendField(new Blockly.FieldNumber(0), "dy");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(160);
+        this.setTooltip("Set the dx and dy dimensions");
+        this.setHelpUrl("");
+
+        // Update the default values of dx and dy
+        this.updateDimensions();
+    },
+
+    updateDimensions: function() {
+        var block = this;
+        // Call the Python function get_current_dimensions through the WebChannel
+        window.blocklyBridge.getCurrentDimensions().then(function(dimensions) {
+            var dx = dimensions[0];
+            var dy = dimensions[1];
+            // Set the field values
+            block.setFieldValue(dx, 'dx');
+            block.setFieldValue(dy, 'dy');
+        }).catch(function(error) {
+            console.error('Error fetching dimensions:', error);
+        });
+    }
+};
+
+Blockly.common.defineBlocks({change_pixel_dimensions: change_pixel_dimensions});
+
+const swap_pixel_dimensions= {
+    init: function() {
+      this.appendDummyInput()
+          .appendField("Swap Dimensions dx ↔ dy");
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour(20);
+      this.setTooltip("Swap the values of dx and dy");
+      this.setHelpUrl("");
+    }
   };
-  
-  Blockly.common.defineBlocks({ select_ref_val: select_ref_val }); 
+
+Blockly.common.defineBlocks({swap_pixel_dimensions: swap_pixel_dimensions});
+
+// Define the select_analytes block
+const select_outlier_method = {
+    init: function() {
+        this.appendDummyInput('NAME')
+            .setAlign(Blockly.inputs.Align.CENTRE)
+            .appendField('Select outlier method');
+
+        // Initialize the analyte selector dropdown
+        this.appendDummyInput('SELECTOR')
+            .appendField(new Blockly.FieldLabelSerializable('Outlier method'), 'NAME')
+            .appendField(new Blockly.FieldDropdown(
+                [['none', 'none'],
+                 ['quantile criteria', 'quantile criteria'],
+                 ['quantile and distance criteria', 'quantile and distance criteria'],
+                 ['Chauvenet criterion', 'chauvenet criterion']
+                 ['log(n>x) inflection', 'log(n>x) inflection']]
+            ), 'outlierMethodDropdown');
+
+        // Add the quantile bounds, initially hidden
+        this.appendDummyInput('QB')
+            .appendField("Quantile bounds")
+            .appendField(new Blockly.FieldNumber(0), "uB")
+            .appendField(new Blockly.FieldNumber(0), "lB")
+            .setVisible(false);
+        // Add the difference bounds, initially hidden
+        this.appendDummyInput('DB')
+            .appendField("Difference bound")
+            .appendField(new Blockly.FieldNumber(0), "dUB")
+            .appendField(new Blockly.FieldNumber(0), "dLB")
+            .setVisible(false);
+
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setTooltip('');
+        this.setHelpUrl('');
+        this.setColour(225);
+
+        // Handle the selection change in analyteSelectorDropdown
+        const dropdown = this.getField('outlierMethodDropdown');
+        dropdown.setValidator(this.outlierMethodChanged.bind(this));
+        // Set initial visibility based on the default selection
+        const initialValue = this.getFieldValue('outlierMethodDropdown');
+        this.outlierMethodChanged(initialValue);
+    },
+
+    outlierMethodChanged: function(newValue) {
+        const qbInput = this.getInput('QB');
+        const dbInput = this.getInput('DB');
+
+        if (newValue === 'quantile criteria') {
+            qbInput.setVisible(true);
+            dbInput.setVisible(false);
+        } else if (newValue === 'quantile and distance criteria') {
+            qbInput.setVisible(true);
+            dbInput.setVisible(true);
+        } else {
+            qbInput.setVisible(false);
+            dbInput.setVisible(false);
+        }
+
+        // Refresh the block to reflect the visibility change
+        this.render();
+
+        return newValue;
+    }
+};
+
+Blockly.common.defineBlocks({ select_outlier_method: select_outlier_method });
+
+
 
 
 const properties = {

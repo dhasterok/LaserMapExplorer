@@ -1,8 +1,7 @@
-import sys, os
+import sys
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QMainWindow, QTextEdit, QDockWidget, QToolButton, QWidget, QHBoxLayout, QVBoxLayout, QGroupBox
+from PyQt5.QtWidgets import ( QMainWindow, QTextEdit, QDockWidget, QToolButton, QWidget, QHBoxLayout, QVBoxLayout, QGroupBox, QSpacerItem, QSizePolicy )
 from PyQt5.QtGui import QIcon
-from src.app.config import BASEDIR
 
 class LoggerDock(QDockWidget):
     """A dock widget that contains a logging display.
@@ -14,7 +13,7 @@ class LoggerDock(QDockWidget):
     parent : QObject
         Calling window.
     """    
-    def __init__(self, parent):
+    def __init__(self, file='temp.log', parent=None):
         if not isinstance(parent, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
 
@@ -31,14 +30,26 @@ class LoggerDock(QDockWidget):
         toolbar_layout.setSpacing(5)  # Spacing between buttons
 
         self.save_button = QToolButton()
-        self.save_button.setIcon(QIcon(":resources/icons/icon-save-file-64.svg"))
-        self.save_button.setToolTip("Save log")
+        save_icon = QIcon(":resources/icons/icon-save-file-64.svg")
+        if not save_icon.isNull():
+            self.save_button.setIcon(save_icon)
+        else:
+            self.save_button.setText("Save")
+        self.save_button.setToolTip("Save log to file")
+
+        # Add spacer
+        spacer = QSpacerItem(20, 0, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         self.clear_button = QToolButton()
-        self.clear_button.setIcon(QIcon(":resources/icons/icon-delete-64.svg"))
+        clear_icon = QIcon(":resources/icons/icon-delete-64.svg")
+        if not clear_icon.isNull():
+            self.clear_button.setIcon(clear_icon)
+        else:
+            self.clear_button.setText("Clear")
         self.clear_button.setToolTip("Clear log")
 
         toolbar_layout.addWidget(self.save_button)
+        toolbar_layout.addItem(spacer)
         toolbar_layout.addWidget(self.clear_button)
 
         logger_layout.addWidget(toolbar)
@@ -71,7 +82,7 @@ class LoggerDock(QDockWidget):
         parent.addDockWidget(Qt.RightDockWidgetArea, self)
 
         # Example print statements
-        self.log_file = os.path.join(BASEDIR,"resources/log/lame.log")
+        self.log_file = file 
 
     def closeEvent(self, event):
         """When closed stdout is restored to ``sys.__stdout__``

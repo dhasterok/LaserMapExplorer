@@ -1,12 +1,11 @@
-import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QTextEdit, QPushButton, QSizePolicy
+import sys, os, json
+from PyQt5.QtWidgets import ( QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QTextEdit, QSizePolicy, QDockWidget, QGroupBox, QToolButton, QSpacerItem )
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWebChannel import QWebChannel
-from PyQt5.QtCore import pyqtSlot, QObject, QUrl, QFile, QIODevice
+from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import pyqtSlot, Qt, QObject, QUrl, QFile, QIODevice
 from src.app.config import BASEDIR
 from PyQt5.QtWebEngineWidgets import QWebEngineSettings
-import os
-import json
 import numpy as np
 os.environ["QTWEBENGINE_REMOTE_DEBUGGING"]="9222" #uncomment to debug in chrome  
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
@@ -101,23 +100,91 @@ class BlocklyBridge(QObject):
         else:
             return obj
         
-class Workflow():
+class Workflow(QDockWidget):
+    """Creates the workflow method design dock.
+
+    Use this tool to create workflows using a customized version of Google's Blockly.
+    This tool allows the user to create a workflow by dragging and dropping code blocks 
+    onto the workspace.  The user can run each of the blocks singlely with a
+    double-click, or the entire block by pressing the run button.  Blocks can be 
+    recorded (to be completed) from LaME and then modified here, or be created from 
+    scratch.
+
+    Parameters
+    ----------
+    parent : QMainWindow, optional
+        MainWindow UI, by default None
+
+    Raises
+    ------
+    TypeError
+        parent must be an instance of QMainWindow.
+    """        
     def __init__(self,parent = None):
+        if not isinstance(parent, QMainWindow):
+            raise TypeError("Parent must be an instance of QMainWindow.")
+
+        super().__init__("Workflow Method Design", parent)
         self.parent = parent
 
+        container = QWidget()
+
         # Create the layout within parent.tabWorkflow
-        self.layout = QVBoxLayout(parent.tabWorkflow)   
+        dock_layout = QVBoxLayout()   
 
         # Create a QTextEdit to display the generated code
         self.output_text_edit = QTextEdit(self.parent)
         self.output_text_edit.setReadOnly(True)
-        self.layout.addWidget(self.output_text_edit)
+        dock_layout.addWidget(self.output_text_edit)
         
-        
-        # Create a button to execute the code
-        self.run_button = QPushButton("Run Code", parent)
+        toolbar = QGroupBox("")
+        toolbar_layout = QHBoxLayout(toolbar)
+        toolbar_layout.setContentsMargins(5, 5, 5, 5)  # Adjust margins as needed
+        toolbar_layout.setSpacing(5)  # Spacing between buttons
+
+        # Run button
+        self.run_button = QToolButton()
+        run_icon = QIcon(":resources/icons/icon-run-64.svg")
+        if not run_icon.isNull():
+            self.run_button.setIcon(run_icon)
+        else:
+            self.run_button.setText("Run")
+        self.run_button.setToolTip("Execute workflow")
+
+        # Export button
+        self.save_button = QToolButton()
+        save_icon = QIcon(":resources/icons/icon-save-file-64.svg")
+        if not save_icon.isNull():
+            self.save_button.setIcon(save_icon)
+        else:
+            self.save_button.setText("Save")
+        self.save_button.setToolTip("Save log to file")
+        self.save_button.setEnabled(False)
+
+        # Add spacer
+        spacer = QSpacerItem(20, 0, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        # Clear button
+        self.clear_button = QToolButton()
+        clear_icon = QIcon(":resources/icons/icon-delete-64.svg")
+        if not clear_icon.isNull():
+            self.clear_button.setIcon(clear_icon)
+        else:
+            self.clear_button.setText("Clear")
+        self.clear_button.setToolTip("Clear log")
+        self.clear_button.setEnabled(False)
+
+        toolbar_layout.addWidget(self.run_button)
+        toolbar_layout.addWidget(self.save_button)
+        toolbar_layout.addItem(spacer)
+        toolbar_layout.addWidget(self.clear_button)
+
+        dock_layout.addWidget(toolbar)
+
+        # Button signals
         self.run_button.clicked.connect(self.execute_code)
-        self.layout.addWidget(self.run_button)
+        #self.save_button.clicked.connect(self.save_workflow)
+        #self.clear_button.clicked.connect(self.clear_workflow)
 
         # Create a web engine view
         self.web_view = QWebEngineView()
@@ -139,10 +206,21 @@ class Workflow():
         #Load the Blockly HTML page
         self.web_view.setUrl(QUrl.fromLocalFile(BASEDIR + '/blockly/index.html'))
         # Add the web view to the layout
-        self.layout.addWidget(self.web_view)
+        dock_layout.addWidget(self.web_view)
 
         # Connect resize event
         parent.resizeEvent = self.handleResizeEvent
+
+        # Set layout to the container
+        container.setLayout(dock_layout)
+        self.setWidget(container)
+
+        self.setFloating(True)
+        self.setWindowTitle("Workflow Method Design")
+
+        self.hide()
+
+        parent.addDockWidget(Qt.RightDockWidgetArea, self)
 
     def handleResizeEvent(self, event):
         self.web_view.page().runJavaScript("resizeBlocklyWorkspace()")

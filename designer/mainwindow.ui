@@ -11410,7 +11410,7 @@
         <string/>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>4</number>
        </property>
        <widget class="QWidget" name="tabNotes">
         <property name="sizePolicy">
@@ -13200,11 +13200,6 @@
           </layout>
          </item>
         </layout>
-       </widget>
-       <widget class="QWidget" name="tabWorkflow">
-        <attribute name="title">
-         <string>Workflow</string>
-        </attribute>
        </widget>
        <widget class="QWidget" name="tabBrowser">
         <attribute name="title">

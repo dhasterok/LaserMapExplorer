@@ -4869,9 +4869,6 @@ class Ui_MainWindow(object):
         self.horizontalLayout_41.addLayout(self.verticalLayout_15)
         self.verticalLayout_77.addLayout(self.horizontalLayout_41)
         self.tabWidget.addTab(self.tabInfo, "")
-        self.tabWorkflow = QtWidgets.QWidget()
-        self.tabWorkflow.setObjectName("tabWorkflow")
-        self.tabWidget.addTab(self.tabWorkflow, "")
         self.tabBrowser = QtWidgets.QWidget()
         self.tabBrowser.setObjectName("tabBrowser")
         self.verticalLayout_20 = QtWidgets.QVBoxLayout(self.tabBrowser)
@@ -5256,7 +5253,7 @@ class Ui_MainWindow(object):
         self.toolBoxTreeView.layout().setSpacing(2)
         self.toolBoxStyle.setCurrentIndex(0)
         self.toolBoxStyle.layout().setSpacing(2)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(4)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -6011,7 +6008,6 @@ class Ui_MainWindow(object):
         self.toolButtonAnnotationsRemove.setToolTip(_translate("MainWindow", "Remove selected annotation(s) from plot"))
         self.toolButtonAnnotationsRemove.setText(_translate("MainWindow", "..."))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabInfo), _translate("MainWindow", "Info"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabWorkflow), _translate("MainWindow", "Workflow"))
         self.toolButtonBrowserHome.setToolTip(_translate("MainWindow", "Return to home view"))
         self.toolButtonBack.setText(_translate("MainWindow", "..."))
         self.toolButtonForward.setText(_translate("MainWindow", "..."))

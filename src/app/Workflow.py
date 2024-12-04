@@ -218,8 +218,6 @@ class Workflow(QDockWidget):
         self.setFloating(True)
         self.setWindowTitle("Workflow Method Design")
 
-        self.hide()
-
         parent.addDockWidget(Qt.RightDockWidgetArea, self)
 
     def handleResizeEvent(self, event):

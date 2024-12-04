@@ -494,8 +494,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 
         # initiate Workflow 
-        self.workflow = Workflow(self)
-        self.actionWorkflowTool.triggered.connect(self.workflow.show)
+        self.actionWorkflowTool.triggered.connect(self.open_workflow)
 
         self.plot_tree = PlotTree(self)
 
@@ -955,10 +954,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolBox.currentChanged.connect(self.toolbox_changed)
 
         # logger
-        logfile = os.path.join(BASEDIR,"resources/log/lame.log")
-        self.logger_dock = LoggerDock(logfile, self)
-        self.actionLogger.triggered.connect(self.logger_dock.show)
-        self.logger_dock.visibilityChanged.connect(self.logger_visibility_change)
+        self.actionLogger.triggered.connect(self.open_logger)
 
         # ----start debugging----
         # self.test_get_field_list()
@@ -1290,6 +1286,28 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     # Other windows/dialogs
     # -------------------------------------
+    def open_workflow(self):
+        """Opens Workflow dock.
+
+        Opens workflow dock, creates on first instance.
+        """        
+        if not hasattr(self, 'workflow'):
+            self.workflow = Workflow(self)
+        else:
+            self.workflow.show()
+
+    def open_logger(self):
+        """Opens Logger dock
+
+        Opens logger dock, creates on first instance.
+        """            
+        if not hasattr(self, 'logger_dock'):
+            logfile = os.path.join(BASEDIR,"resources/log/lame.log")
+            self.logger_dock = LoggerDock(logfile, self)
+            self.logger_dock.visibilityChanged.connect(self.logger_visibility_change)
+        else:
+            self.logger_dock.show()
+
     def open_select_analyte_dialog(self):
         """Opens Select Analyte dialog
 

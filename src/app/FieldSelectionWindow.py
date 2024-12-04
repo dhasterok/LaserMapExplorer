@@ -1,13 +1,13 @@
 from PyQt5.QtCore import (Qt, pyqtSignal, QObject, QEvent)
 from PyQt5.QtWidgets import (QMessageBox, QTableWidget, QDialog, QTableWidgetItem, QLabel, QComboBox, QHeaderView, QFileDialog)
 from PyQt5.QtGui import (QImage, QColor, QFont, QPixmap, QPainter, QBrush)
-from src.ui.FieldSelectionDialog import Ui_Dialog
+from src.ui.FieldSelectionDialog import Ui_FieldDialog
 from src.common.rotated import RotatedHeaderView
 from src.app.config import DEBUG_ANALYTE_UI
 import os
 # Analyte GUI
 # -------------------------------
-class AnalyteDialog(QDialog, Ui_Dialog):
+class FieldDialog(QDialog, Ui_FieldDialog):
     """Creates an dialog to select fields and create custom field lists
 
     Consist of a field type dropdown and a field dropdown which will be populated based on field type drowpdown

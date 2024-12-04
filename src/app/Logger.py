@@ -77,8 +77,6 @@ class LoggerDock(QDockWidget):
         self.save_button.clicked.connect(self.export_log)
         self.clear_button.clicked.connect(self.text_edit.clear)
 
-        self.hide()
-
         parent.addDockWidget(Qt.RightDockWidgetArea, self)
 
         # Example print statements

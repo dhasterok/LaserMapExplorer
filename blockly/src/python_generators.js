@@ -54,7 +54,7 @@ pythonGenerator.forBlock['select_analytes'] = function(block) {
 // Python code generator for the select_analytes block
 pythonGenerator.forBlock['select_ref_val'] = function(block) {
     const refValue = block.getFieldValue('refValueDropdown'); // Get selected dropdown value
-    const code = `self.parent.change_ref_material('${refValue}', ui_update=False)\n`; // Python function call
+    const code = `self.parent.change_ref_material_BE('${refValue}')\n`; // Python function call
     return code;
 };
 
@@ -71,24 +71,37 @@ pythonGenerator.forBlock['swap_pixel_dimensions'] = function(block) {
     return code;
 };
 
+pythonGenerator.forBlock['swap_x_y'] = function(block) {
+    var code = 'self.parent.data[self.parent.sample_id].swap_xy\n';
+    return code;
+};
+
 pythonGenerator.forBlock['select_outlier_method'] = function(block) {
     var method = block.getFieldValue('outlierMethodDropdown');
     var code = '';
 
-    if (method === 'quantile criteria' || method === 'quantile and distance criteria') {
+    if (method === 'quantile criteria') {
         var uB = block.getFieldValue('uB');
         var lB = block.getFieldValue('lB');
-        code += `upper_bound = ${uB}\n`;
-        code += `lower_bound = ${lB}\n`;
+        code += `self.parent.update_bounds(ub=${uB}, lb=${uB})\n`;
     }
     if (method === 'quantile and distance criteria') {
+        var uB = block.getFieldValue('uB');
+        var lB = block.getFieldValue('lB');
         var dUB = block.getFieldValue('dUB');
         var dLB = block.getFieldValue('dLB');
-        code += `diff_upper_bound = ${dUB}\n`;
-        code += `diff_lower_bound = ${dLB}\n`;
+        code += `self.parent.update_bounds(ub=${uB}, lb=${uB}, d_ub=${dUB}, d_lb=${dLB})\n`;
     }
-    code += `outlier_method = '${method}'\n`;
-    // Additional code to apply the outlier method...
+    
+    code += `self.parent.data[self.parent.sample_id].outlier_method='${method}'\n`;
+    return code;
+};
+
+
+pythonGenerator.forBlock['neg_handling_method'] = function(block) {
+    var method = block.getFieldValue('negMethodDropdown');
+    
+     var code = `self.parent.data[self.parent.sample_id].negative_method='${method}'\n`;
     return code;
 };
 

@@ -49,6 +49,7 @@ import src.common.csvdict as csvdict
 from src.common.radar import Radar
 from src.ui.MainWindow import Ui_MainWindow
 #from src.ui.PreferencesWindow import Ui_PreferencesWindow
+from src.app.FieldSelectionWindow import FieldDialog
 from src.app.AnalyteSelectionWindow import AnalyteDialog
 from src.common.TableFunctions import TableFcn as TableFcn
 import src.common.CustomMplCanvas as mplc
@@ -1688,7 +1689,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.style.scheduler.schedule_update()
 
     
-    def change_ref_material(self, ref_val, ui_update = True):
+    def change_ref_material(self, ref_val):
         """Changes reference computing normalized analytes
 
         Sets all `self.ref_chem` to a common normalizing reference.
@@ -1697,13 +1698,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ----------
         ref_val : str
             Name of reference value from combobox/dropdown
-        ui_update : boolean
-            True: Update ref. comboboxes and plot tree 
         """
         # update `self.ref_chem`
         ref_index = self.change_ref_material_BE(ref_val)
-        if ui_update:
-            self.change_ref_material_UI(ref_index)
+        self.change_ref_material_UI(ref_index)
     
     
     # toolbar functions
@@ -1801,7 +1799,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def plot_profile_and_table(self):
         self.profiling.plot_profiles()
         self.profiling.update_table_widget()
-
+    
     def auto_scale(self,update = False):
         """Auto-scales pixel values in map
 
@@ -1825,6 +1823,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             analyte_1 = field
             analyte_2 = None
+
+
 
         lb = self.lineEditLowerQuantile.value
         ub = self.lineEditUpperQuantile.value
@@ -6557,6 +6557,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 analyte_dict[field] = norm
 
         self.update_analyte_ratio_selection(analyte_dict)
+
+
+    def update_bounds(self,ub=None,lb=None,d_ub=None,d_lb=None):
+        sample_id = self.sample_id
+        # Apply to all analytes in sample
+        columns = self.data[self.sample_id].processed_data.columns
+
+        # update column attributes
+        if (lb and ub):
+            self.data[sample_id].set_attribute(columns, 'upper_bound', ub)
+            self.data[sample_id].set_attribute(columns, 'lower_bound', lb)
+        else:
+            self.data[sample_id].set_attribute(columns, 'diff_upper_bound', d_ub)
+            self.data[sample_id].set_attribute(columns, 'diff_lower_bound', d_lb)
+
+        # update data with new auto-scale/negative handling
 
 
 # -------------------------------

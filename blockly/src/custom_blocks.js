@@ -310,6 +310,9 @@ const change_pixel_dimensions= {
         window.blocklyBridge.getCurrentDimensions().then(function(dimensions) {
             var dx = dimensions[0];
             var dy = dimensions[1];
+            // Round dx and dy to 4 decimal places
+            dx = Number(dx.toFixed(4));
+            dy = Number(dy.toFixed(4));
             // Set the field values
             block.setFieldValue(dx, 'dx');
             block.setFieldValue(dy, 'dy');
@@ -335,7 +338,20 @@ const swap_pixel_dimensions= {
 
 Blockly.common.defineBlocks({swap_pixel_dimensions: swap_pixel_dimensions});
 
-// Define the select_analytes block
+const swap_x_y= {
+    init: function() {
+      this.appendDummyInput()
+          .appendField("Swap x ↔ y");
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour(20);
+      this.setTooltip("Swap the values of coordinate axes");
+      this.setHelpUrl("");
+    }
+  };
+
+Blockly.common.defineBlocks({swap_x_y: swap_x_y});
+
 const select_outlier_method = {
     init: function() {
         this.appendDummyInput('NAME')
@@ -349,21 +365,21 @@ const select_outlier_method = {
                 [['none', 'none'],
                  ['quantile criteria', 'quantile criteria'],
                  ['quantile and distance criteria', 'quantile and distance criteria'],
-                 ['Chauvenet criterion', 'chauvenet criterion']
+                 ['Chauvenet criterion', 'chauvenet criterion'],
                  ['log(n>x) inflection', 'log(n>x) inflection']]
             ), 'outlierMethodDropdown');
 
         // Add the quantile bounds, initially hidden
         this.appendDummyInput('QB')
             .appendField("Quantile bounds")
-            .appendField(new Blockly.FieldNumber(0), "uB")
-            .appendField(new Blockly.FieldNumber(0), "lB")
+            .appendField(new Blockly.FieldNumber(0.05), "lB")
+            .appendField(new Blockly.FieldNumber(99.5), "uB")
             .setVisible(false);
         // Add the difference bounds, initially hidden
         this.appendDummyInput('DB')
             .appendField("Difference bound")
-            .appendField(new Blockly.FieldNumber(0), "dUB")
-            .appendField(new Blockly.FieldNumber(0), "dLB")
+            .appendField(new Blockly.FieldNumber(99), "dLB")
+            .appendField(new Blockly.FieldNumber(99), "dUB")
             .setVisible(false);
 
         this.setPreviousStatement(true, null);
@@ -404,6 +420,103 @@ const select_outlier_method = {
 
 Blockly.common.defineBlocks({ select_outlier_method: select_outlier_method });
 
+const neg_handling_method = {
+    init: function() {
+        this.appendDummyInput('NAME')
+            .setAlign(Blockly.inputs.Align.CENTRE)
+            .appendField('Select negative handling method');
+
+        // Initialize the analyte selector dropdown
+        this.appendDummyInput('SELECTOR')
+            .appendField(new Blockly.FieldLabelSerializable('Neg. handling method'), 'NAME')
+            .appendField(new Blockly.FieldDropdown(
+                [['ignore negatives', 'ignore negatives'],
+                 ['minimum positive', 'minimum positive'],
+                 ['gradual shift', 'gradual shift'],
+                 ['Yeo-Johnson transform', 'Yeo-Johnson transform']]
+            ), 'negMethodDropdown');
+
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setTooltip('');
+        this.setHelpUrl('');
+        this.setColour(225);
+    }
+};
+Blockly.common.defineBlocks({ neg_handling_method: neg_handling_method });
+
+
+
+// Define the field_select block
+const field_select = {
+    init: function() {
+        // Add a header with centered alignment
+        this.appendDummyInput('header')
+            .setAlign(Blockly.inputs.Align.CENTRE)
+            .appendField('Select fields');
+
+        // Create the 'Field type' dropdown with options
+        this.appendDummyInput('NAME')
+            .appendField('Field type')
+            .appendField(new Blockly.FieldDropdown(
+                [
+                    ['Analyte', 'Analyte'],
+                    ['Analyte (Normalised)', 'Analyte (Normalised)'],
+                    ['PCA Score', 'PCA Score'],
+                    ['Cluster', 'Cluster']
+                ],
+                this.updateFieldDropdown.bind(this)  // Bind the update function
+            ), 'fieldType');
+
+        // Create the 'field' dropdown, initially empty
+        this.appendDummyInput('FIELD')
+            .appendField('Field')
+            .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'field');
+
+        this.setInputsInline(false);
+        this.setTooltip('Select fields for analysis');
+        this.setHelpUrl('');
+        this.setColour(160);  // Adjust color as needed
+        this.setOutput(true, null);
+
+        // Initialize the 'field' dropdown options based on the default 'fieldType' value
+        const initialFieldType = this.getFieldValue('fieldType');
+        this.updateFieldDropdown(initialFieldType);
+    },
+
+    updateFieldDropdown: function(newValue) {
+        const fieldTypeValue = newValue || this.getFieldValue('fieldType');
+
+        // Call the Python function getFieldList through the WebChannel, handle as a promise
+        window.blocklyBridge.getFieldList(fieldTypeValue).then((response) => {
+            // Map the response to the required format for Blockly dropdowns
+            const options = response.map(option => [option, option]);
+
+            // Add 'none' and 'all' options at the beginning
+            options.unshift(['all', 'all']);
+            options.unshift(['none', 'none']);
+
+            const dropdown = this.getField('field');
+
+            // Update the dropdown options
+            dropdown.menuGenerator_ = options;
+
+            // Set the default value to 'Select...' or to the first option if options are available
+            if (options.length > 0) {
+                dropdown.setValue(options[0][1]);
+            } else {
+                dropdown.setValue('');
+            }
+
+            dropdown.forceRerender();  // Refresh dropdown to display updated options
+        }).catch(error => {
+            console.error('Error fetching field list:', error);
+        });
+    }
+};
+
+// Register the block with Blockly
+Blockly.common.defineBlocks({ field_select: field_select });
 
 
 

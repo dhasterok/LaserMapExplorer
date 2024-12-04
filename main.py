@@ -49,6 +49,7 @@ import src.common.csvdict as csvdict
 from src.common.radar import Radar
 from src.ui.MainWindow import Ui_MainWindow
 #from src.ui.PreferencesWindow import Ui_PreferencesWindow
+from src.app.FieldSelectionWindow import FieldDialog
 from src.app.AnalyteSelectionWindow import AnalyteDialog
 from src.common.TableFunctions import TableFcn as TableFcn
 import src.common.CustomMplCanvas as mplc
@@ -390,8 +391,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     self.bottom_tab.update({'profile': tid})
                 case 'info':
                     self.bottom_tab.update({'info': tid})
-                case 'workflow':
-                    self.bottom_tab.update({'workflow': tid})
                 case 'help':
                     self.bottom_tab.update({'help': tid})
 
@@ -489,7 +488,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.browser = Browser(self)
         self.actionReportBug.triggered.connect(lambda: self.browser.engine.setUrl(QUrl('https://github.com/dhasterok/LaserMapExplorer/issues')))
 
-        self.actionWorkflowTool.triggered.connect(lambda: self.tabWidget.setCurrentIndex(self.bottom_tab['workflow']))
 
         # For light and dark themes, connects actionViewMode
         self.theme = UIThemes(app, self)
@@ -497,6 +495,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # initiate Workflow 
         self.workflow = Workflow(self)
+        self.actionWorkflowTool.triggered.connect(self.workflow.show)
 
         self.plot_tree = PlotTree(self)
 
@@ -956,7 +955,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolBox.currentChanged.connect(self.toolbox_changed)
 
         # logger
-        self.logger_dock = LoggerDock(self)
+        logfile = os.path.join(BASEDIR,"resources/log/lame.log")
+        self.logger_dock = LoggerDock(logfile, self)
         self.actionLogger.triggered.connect(self.logger_dock.show)
         self.logger_dock.visibilityChanged.connect(self.logger_visibility_change)
 
@@ -1269,9 +1269,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #update self.data['norm'] with selection
         for analyte in self.data[self.sample_id].processed_data.match_attribute('data_type','Analyte'):
             if analyte in list(analyte_dict.keys()):
-                self.data[self.sample_id].set_attribute(analyte, 'use', True)
+                self.data[self.sample_id].processed_data.set_attribute(analyte, 'use', True)
             else:
-                self.data[self.sample_id].set_attribute(analyte, 'use', False)
+                self.data[self.sample_id].processed_data.set_attribute(analyte, 'use', False)
 
         for analyte, norm in analyte_dict.items():
             if '/' in analyte:
@@ -1691,7 +1691,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.style.scheduler.schedule_update()
 
     
-    def change_ref_material(self, ref_val, ui_update = True):
+    def change_ref_material(self, ref_val):
         """Changes reference computing normalized analytes
 
         Sets all `self.ref_chem` to a common normalizing reference.
@@ -1700,13 +1700,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ----------
         ref_val : str
             Name of reference value from combobox/dropdown
-        ui_update : boolean
-            True: Update ref. comboboxes and plot tree 
         """
         # update `self.ref_chem`
         ref_index = self.change_ref_material_BE(ref_val)
-        if ui_update:
-            self.change_ref_material_UI(ref_index)
+        self.change_ref_material_UI(ref_index)
     
     
     # toolbar functions
@@ -1804,7 +1801,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def plot_profile_and_table(self):
         self.profiling.plot_profiles()
         self.profiling.update_table_widget()
-
+    
     def auto_scale(self,update = False):
         """Auto-scales pixel values in map
 
@@ -1828,6 +1825,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             analyte_1 = field
             analyte_2 = None
+
+
 
         lb = self.lineEditLowerQuantile.value
         ub = self.lineEditUpperQuantile.value
@@ -1871,12 +1870,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 columns = analyte_1
 
             # update column attributes
-            self.data[sample_id].set_attribute(columns, 'auto_scale', auto_scale)
-            self.data[sample_id].set_attribute(columns, 'upper_bound', ub)
-            self.data[sample_id].set_attribute(columns, 'lower_bound', lb)
-            self.data[sample_id].set_attribute(columns, 'diff_upper_bound', d_ub)
-            self.data[sample_id].set_attribute(columns, 'diff_lower_bound', d_lb)
-            self.data[sample_id].set_attribute(columns, 'negative_method', self.comboBoxNegativeMethod.currentText())
+            self.data[sample_id].processed_data.set_attribute(columns, 'auto_scale', auto_scale)
+            self.data[sample_id].processed_data.set_attribute(columns, 'upper_bound', ub)
+            self.data[sample_id].processed_data.set_attribute(columns, 'lower_bound', lb)
+            self.data[sample_id].processed_data.set_attribute(columns, 'diff_upper_bound', d_ub)
+            self.data[sample_id].processed_data.set_attribute(columns, 'diff_lower_bound', d_lb)
+            self.data[sample_id].processed_data.set_attribute(columns, 'negative_method', self.comboBoxNegativeMethod.currentText())
 
             # update data with new auto-scale/negative handling
             self.prep_data(sample_id)
@@ -2307,11 +2306,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 chkBoxItem_select.setCheckState(Qt.Unchecked)
                 analyte_1 = field
                 analyte_2 = None
-                scale = self.data[self.sample_id].get_attribute(field,'norm')
+                scale = self.data[self.sample_id].processed_data.get_attribute(field,'norm')
             elif 'Ratio' in field_type:
                 chkBoxItem_select.setCheckState(Qt.Unchecked)
                 analyte_1, analyte_2 = field.split(' / ')
-                scale = self.data[self.sample_id].get_attribute(field,'norm')
+                scale = self.data[self.sample_id].processed_data.get_attribute(field,'norm')
             else:
                 scale = 'linear'
 
@@ -2434,7 +2433,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Check if rows in self.data[sample_id]['filter_info'] exist and filter array in current_plot_df
         # by creating a mask based on min and max of the corresponding filter analytes
         for index, filter_row in self.data[sample_id].filter_df.iterrows():
-            if filter_row['use'].any():
+            if filter_row['use']:
                 analyte_df = self.get_map_data(filter_row['field'], filter_row['field_type'])
                 
                 operator = filter_row['operator']
@@ -6115,7 +6114,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.sample_id == '':
             return
 
-        data_type_dict = self.data[self.sample_id].get_attribute_dict('data_type')
+        data_type_dict = self.data[self.sample_id].processed_data.get_attribute_dict('data_type')
 
         match plot_type.lower():
             case 'correlation' | 'histogram' | 'tec':
@@ -6518,7 +6517,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         field_type_list = ['Analyte', 'Analyte (normalized)']
         
-        data_type_dict = self.data[self.sample_id].get_attribute_dict('data_type')
+        data_type_dict = self.data[self.sample_id].processed_data.get_attribute_dict('data_type')
 
         # add check for ratios
         if 'ratio' in data_type_dict:
@@ -6560,6 +6559,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 analyte_dict[field] = norm
 
         self.update_analyte_ratio_selection(analyte_dict)
+
+
+    def update_bounds(self,ub=None,lb=None,d_ub=None,d_lb=None):
+        sample_id = self.sample_id
+        # Apply to all analytes in sample
+        columns = self.data[self.sample_id].processed_data.columns
+
+        # update column attributes
+        if (lb and ub):
+            self.data[sample_id].set_attribute(columns, 'upper_bound', ub)
+            self.data[sample_id].set_attribute(columns, 'lower_bound', lb)
+        else:
+            self.data[sample_id].set_attribute(columns, 'diff_upper_bound', d_ub)
+            self.data[sample_id].set_attribute(columns, 'diff_lower_bound', d_lb)
+
+        # update data with new auto-scale/negative handling
 
 
 # -------------------------------

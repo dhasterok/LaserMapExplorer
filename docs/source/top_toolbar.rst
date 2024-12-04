@@ -8,46 +8,68 @@ The *Main Toolbar* provides quick access to essential functions for data managem
    :alt: LaME interface: Main Toolbar
    :width: 600
 
-   *Main Toolbar* provides quick access to essential functions
+   The *Main Toolbar* with key functions labeled
 
 Data Management
 ===============
 
-This section offers tools for loading, importing, and saving data. Data can be loaded by opening a directory (|icon-add-directory|) containing multiple sample data files or by loading a single sample file (|icon-open-file|). For detailed information about importing data and supported formats, see :doc:`import`. To preserve work, the save session button (|icon-save-session|) stores all analyses and plots. Previously saved sessions can be retrieved using the load session button (|icon-open-session|).ß
+The data management section offers tools for loading, importing, and saving data.  You can load data by opening a directory (|icon-add-directory|) containing multiple sample data files or by loading a single sample file (|icon-open-file|).  For detailed information about importing data and supported formats, see :doc:`import`.  To preserve your work, use the save session button (|icon-save-session|) to store all analyses and plots.  Previously saved sessions can be retrieved using the load session button (|icon-open-session|).
 
 Sample and Analyte Selector
 ===========================
 
-The sample and analyte selector allows for choosing data to analyze.  The sample dropdown enables quick switching between loaded samples.  The analyte selector (|icon-atom|) opens a tool for choosing elements and ratios to analyze.  It's important to note that changing analytes or samples will update the *Plot Selector*, clear any existing clusters and PCA results, remove masks, and recompute correlations.
-
-When using the analyte selector, click on a diagonal cell to select or deselect an analyte.  For ratios, click on the cell where the row (denominator) and column (numerator) of desired elements intersect. Selected ratios will be highlighted and added to the list on the right. The background colors represent correlation coefficients between pairs of fields, helping you identify potentially meaningful ratios.  Once you've made your selections, click 'Done'.  Previously saved sets of analytes and ratios can be loaded using the 'Load Selection' button.
+The sample and analyte selector enables precise control over your analysis data. Use the sample dropdown to switch between loaded samples. The analyte selector (|icon-atom|) opens a tool for choosing elements and ratios to analyze. 
 
 .. figure:: _static/screenshots/LaME_Analyte_Selector.png
     :align: center
-    :alt: *Analyte Selector* provides a tool for choosing analytes and ratios to analyze
+    :alt: Analyte Selector interface
+    :width: 450
+
+    The *Analyte Selector* showing element selection matrix and ratio options
+
+When using the analyte selector, click on a diagonal cell to select or deselect an analyte.  For ratios, click on the cell where the row (denominator) and column (numerator) of desired elements intersect. Selected ratios will be highlighted and added to the list on the right. The background colors represent correlation coefficients between pairs of fields, helping you identify potentially meaningful ratios.  Previously saved sets of analytes and ratios can be loaded using the 'Load Selection' button.
+
+.. note::
+   Changing analytes or samples will update the *Plot Selector*, clear any existing clusters and PCA results, remove masks, and recompute correlations. Consider saving your work before making major changes.
 
 Data Manipulation
 =================
 
-The data manipulation section provides tools for basic operations on data. The current view can be cropped (|icon-crop|) to focus on a specific area of interest, but it's important to note that this modifies the raw data and will clear any existing analyses.  To restore the original extent after cropping, the fit to width button (|icon-fit-to-width|) can be used.
+The data manipulation section provides tools for basic operations on data.  The current view can be cropped (|icon-crop|) to focus on a specific area of interest.  Note that cropping modifies the raw data and will clear any existing analyses.  To restore the original extent after cropping, use the fit to width button (|icon-fit-to-width|).  For more details about how cropping affects your data, see :doc:`basics`.
 
-For different perspectives on data, the X and Y axes (|icon-swap|) of the current plot can be swapped.  The noise reduction toggle (|icon-noise-reduction-off|) applies a smoothing filter when enabled, helping to reduce noise in the data.  
+For different perspectives on data, use the swap axes button (|icon-swap|) to interchange X and Y axes of the current plot.  The noise reduction toggle (|icon-noise-reduction-off|) applies a smoothing filter when enabled.  See :ref:`noise-reduction` in :doc:`left_toolbox` for detailed information about available noise reduction methods.
 
 Filtering
 =========
 
-The filtering section of the toolbar provides quick access to control filters that have been set up in other parts of the program. While the actual setup of these filters occurs elsewhere in *LaME*, the toolbar allows for easily toggling them on and off, either individually or all at once. For detailed information on setting up and using filters in *LaME*, please refer to the :doc:`filtering` page.
+The filtering section of the toolbar provides quick access to control filters that have been set up in other parts of the program. While the actual setup of these filters occurs elsewhere in *LaME*, the toolbar allows for easily toggling them on and off, either individually or all at once.  For detailed information on setting up and using filters in *LaME*, please refer to the :doc:`filtering` page.
+
+.. figure:: _static/screenshots/LaME_Filter_Controls.png
+    :align: center
+    :alt: Filter control buttons in toolbar
+    :width: 800
+
+    Filter controls showing value filters, polygon masks, and cluster masks
 
 Shortcuts
 =========
 
-The shortcuts section offers convenient buttons for frequently used functions. The current plot can be quickly added to the plot tree (|icon-tree|) for easy reference later.  The calculator button (|icon-calculator|) opens a tool for custom computations, allowing for the creation of new fields or ratios based on existing data.
+The shortcuts section offers convenient buttons for frequently used functions.  YOu can add the current plot to the plot tree (|icon-tree|) for easy reference later.  The calculator button (|icon-calculator|) opens the tool for custom computations, enabling the creation of new fields or ratios based on existing data.  For detailed information about creating custom calculations, see :doc:`custom_fields`.
 
 Help and Utilities
-==================
+=================
 
-The help and utilities section provides tools to enhance the experience with *LaME*.  If you encounter any issues, you can report bugs directly through the interface (|icon-bug|).  For guidance on using *LaME*, access the help documentation (|icon-question|).  If a fresh start is needed, the reset interface button (|icon-nuke|) will clear the current session. Lastly, switching between dark and light modes (|icon-sun-and-moon|) is possible to suit visual preference or working environment.
+The help and utilities section enhances your experience with *LaME*.  If you encounter any issues, report bugs directly through the interface using the bug report button (|icon-bug|).  Access comprehensive help documentation through the help button (|icon-question|).  To reset your workspace, use the reset interface button (|icon-nuke|) to clear the current session.  The theme toggle (|icon-sun-and-moon|) switches between dark and light modes to suit your working environment.
 
+.. figure:: _static/screenshots/LaME_Bug_Report.png
+    :align: center
+    :alt: Bug report interface in LaME
+    :width: 800
+
+    Bug report interface showing GitHub integration for issue reporting
+
+.. note::
+   The reset interface button clears all current analyses and plots. Save your work before using this function if you want to preserve your analysis.
 
 .. |icon-add-directory| image:: _static/icons/icon-add-directory-64.png
     :height: 2ex

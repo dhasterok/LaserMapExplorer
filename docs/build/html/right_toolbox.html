@@ -29,7 +29,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css" />
   
@@ -39,7 +39,7 @@
   <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="_static/documentation_options.js?v=2709fde1"></script>
-    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/custom.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'right_toolbox';</script>
@@ -375,8 +375,9 @@
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="filtering.html">Filter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
-<li class="toctree-l1"><a class="reference internal" href="custom_fields.html">Custom Fields</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_fields.html">Calculator</a></li>
 <li class="toctree-l1"><a class="reference internal" href="profiles.html">Profiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis_visualization.html">Analysis Visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multidimensional.html">Multidimensional Methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="additional_functions.html">Additional Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notes.html">Notes</a></li>
@@ -447,61 +448,617 @@
 <p>The <em>Plot and Property Toolbox</em> consists of three major components: the Plot Selector, the Styling Pane, and the Calculator. These tools work together to provide comprehensive control over plot creation, customization, and data manipulation.</p>
 <section id="plot-selector">
 <h2>Plot Selector<a class="headerlink" href="#plot-selector" title="Link to this heading">#</a></h2>
-<p>The plot type dropdown list sits above the <em>Plot Selector</em>. It updates the types of plots available to each of the <em>Control Toolbox</em> tabs. In case the plot does not update automatically, the <a class="reference internal" href="_images/icon-launch-64.png"><img alt="icon-launch" src="_images/icon-launch-64.png" style="height: 2ex;" /></a> button can be clicked.</p>
+<p>The <a class="reference external" href="plotting.html#plot-types">plot type</a> dropdown list sits above the <em>Plot Selector</em>.  It updates the types of plots available to each of the <em>Control Toolbox</em> tabs.  In case the plot does not update automatically, the <a class="reference internal" href="_images/icon-launch-64.png"><img alt="icon-launch" src="_images/icon-launch-64.png" style="height: 2ex;" /></a> button can be clicked.</p>
 <p>The <em>Plot Selector</em> lists the available plots for display.  By default, it includes all analytes and their normalized versions.  Ratios can be added by selecting them from the <em>Analyte Selector</em> in the <em>Main Toolbar</em>.  Other plots will also appear in the list once they’ve been created or explicitly saved.</p>
-<p>Analytes and their normalized equivalents can be sorted alphabetically, by mass, or compatibility using the <a class="reference internal" href="_images/icon-sort-64.png"><img alt="icon-sort" src="_images/icon-sort-64.png" style="height: 2ex;" /></a> button.  To remove plots, use the <a class="reference internal" href="_images/icon-delete-64.png"><img alt="icon-trash" src="_images/icon-delete-64.png" style="height: 2ex;" /></a> button.</p>
-<figure class="align-center" id="id60">
+<figure class="align-center" id="id61">
 <a class="reference internal image-reference" href="_images/LaME_Plot_Selector.png"><img alt="LaME interface: right toolbox, plot selector tab" src="_images/LaME_Plot_Selector.png" style="width: 232px;" />
 </a>
 <figcaption>
-<p><span class="caption-text">The <em>Plot Selector</em> is similar to a file tree.  It lists types of fields, samples and the plots available beneath each.</span><a class="headerlink" href="#id60" title="Link to this image">#</a></p>
+<p><span class="caption-text">The <em>Plot Selector</em> organizes plots in a tree structure by type and sample.</span><a class="headerlink" href="#id61" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
+<p>Analytes and their normalized equivalents can be sorted alphabetically, by mass, or compatibility using the <a class="reference internal" href="_images/icon-sort-64.png"><img alt="icon-sort" src="_images/icon-sort-64.png" style="height: 2ex;" /></a> button.  To remove plots, use the <a class="reference internal" href="_images/icon-delete-64.png"><img alt="icon-trash" src="_images/icon-delete-64.png" style="height: 2ex;" /></a> button.</p>
 </section>
 <section id="styling-pane">
 <h2>Styling Pane<a class="headerlink" href="#styling-pane" title="Link to this heading">#</a></h2>
-<p>The Styling Pane controls the appearance of plots generated from functions in the <em>Control Toolbox</em>.  It also controls the type of plot generated (e.g., analyte map, scatter plot, heatmap, etc.).  A complete list is given in the table below along with each of the properties that can be changed.  Not all properties are available for each type of plot.  Styles can be customized and saved using the save ( <a class="reference internal" href="_images/icon-save-file-64.png"><img alt="icon-save" src="_images/icon-save-file-64.png" style="height: 2ex;" /></a> ) button.  Saved themes can be recalled in future sessions.</p>
+<p>The Styling Pane controls the appearance of plots generated from functions in the <em>Control Toolbox</em>.  A complete list is given in the table below along with each of the properties that can be changed.  Not all properties are available for each type of plot.  Styles can be customized and saved using the save (<a class="reference internal" href="_images/icon-save-file-64.png"><img alt="icon-save" src="_images/icon-save-file-64.png" style="height: 2ex;" /></a>) button and the saved themes can be recalled in future sessions.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>tab</p></th>
+<th class="head" colspan="2"><p>Samples and Fields</p></th>
+<th class="head" colspan="2"><p>Preprocessing</p></th>
+<th class="head" colspan="3"><p>Scatter &amp; Heatmap</p></th>
+<th class="head" colspan="2"><p>n-Dim</p></th>
+<th class="head" colspan="5"><p>PCA</p></th>
+<th class="head" colspan="2"><p>Clustering</p></th>
+<th class="head"><p>Profiling</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>plot type</p></td>
+<td><p>analyte map</p></td>
+<td><p>correlation</p></td>
+<td><p>histogram</p></td>
+<td><p>gradient</p></td>
+<td><p>scatter</p></td>
+<td><p>heatmap</p></td>
+<td><p>ternary map</p></td>
+<td><p>TEC</p></td>
+<td><p>radar</p></td>
+<td><p>variance</p></td>
+<td><p>vectors</p></td>
+<td><p>PCx vs PCy scatter</p></td>
+<td><p>PCx vs PCy heatmap</p></td>
+<td><p>PCA score</p></td>
+<td><p>clusters</p></td>
+<td><p>cluster score</p></td>
+<td><p>profiles</p></td>
+</tr>
+<tr class="row-odd"><td><p>axes &amp; labels</p></td>
+<td colspan="17"></td>
+</tr>
+<tr class="row-even"><td><p>x label</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+</tr>
+<tr class="row-odd"><td><p>y label</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+</tr>
+<tr class="row-even"><td><p>z label</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id52" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a></p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id52" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a></p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+</tr>
+<tr class="row-odd"><td><p>x limits</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+</tr>
+<tr class="row-even"><td><p>y limits</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+</tr>
+<tr class="row-odd"><td><p>aspect ratio</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+</tr>
+<tr class="row-even"><td><p>tick direction</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+</tr>
+<tr class="row-odd"><td><p>annotations</p></td>
+<td colspan="17"></td>
+</tr>
+<tr class="row-even"><td><p>font</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+</tr>
+<tr class="row-odd"><td><p>font size</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+</tr>
+<tr class="row-even"><td><p>scales</p></td>
+<td colspan="17"></td>
+</tr>
+<tr class="row-odd"><td><p>scale direct.</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+</tr>
+<tr class="row-even"><td><p>scale location</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+</tr>
+<tr class="row-odd"><td><p>overlay color</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+</tr>
+<tr class="row-even"><td><p>markers</p></td>
+<td colspan="17"></td>
+</tr>
+<tr class="row-odd"><td><p>symbol</p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id49" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id49" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id49" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id49" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id49" id="id7" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p></td>
+<td><p>Y</p></td>
+</tr>
+<tr class="row-even"><td><p>size</p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id49" id="id8" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id49" id="id9" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id49" id="id10" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id49" id="id11" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id49" id="id12" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p></td>
+<td><p>Y</p></td>
+</tr>
+<tr class="row-odd"><td><p>transparency</p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id49" id="id13" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id49" id="id14" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id49" id="id15" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id49" id="id16" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id49" id="id17" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p></td>
+<td><p>N</p></td>
+</tr>
+<tr class="row-even"><td><p>lines</p></td>
+<td colspan="17"></td>
+</tr>
+<tr class="row-odd"><td><p>line width</p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id50" id="id18" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a></p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id50" id="id19" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a></p></td>
+<td><p>Y <a class="footnote-reference brackets" href="#id54" id="id20" role="doc-noteref"><span class="fn-bracket">[</span>6<span class="fn-bracket">]</span></a>/ N <a class="footnote-reference brackets" href="#id52" id="id21" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a></p></td>
+<td><p>Y <a class="footnote-reference brackets" href="#id54" id="id22" role="doc-noteref"><span class="fn-bracket">[</span>6<span class="fn-bracket">]</span></a>/ N <a class="footnote-reference brackets" href="#id52" id="id23" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a></p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y <a class="footnote-reference brackets" href="#id55" id="id24" role="doc-noteref"><span class="fn-bracket">[</span>7<span class="fn-bracket">]</span></a></p></td>
+<td><p>Y</p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id50" id="id25" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a></p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id50" id="id26" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a></p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id50" id="id27" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a></p></td>
+<td><p>Y <a class="footnote-reference brackets" href="#id57" id="id28" role="doc-noteref"><span class="fn-bracket">[</span>9<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p>colors</p></td>
+<td colspan="17"></td>
+</tr>
+<tr class="row-odd"><td><p>color</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y/N <a class="footnote-reference brackets" href="#id51" id="id29" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></td>
+<td><p>N</p></td>
+<td><p>Y/N <a class="footnote-reference brackets" href="#id53" id="id30" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a></p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y/N <a class="footnote-reference brackets" href="#id51" id="id31" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></td>
+<td><p>Y/N <a class="footnote-reference brackets" href="#id51" id="id32" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y/N <a class="footnote-reference brackets" href="#id53" id="id33" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a></p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+</tr>
+<tr class="row-even"><td><p>color by field</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id53" id="id34" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a></p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+</tr>
+<tr class="row-odd"><td><p>field</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y <a class="footnote-reference brackets" href="#id56" id="id35" role="doc-noteref"><span class="fn-bracket">[</span>8<span class="fn-bracket">]</span></a></p></td>
+<td><p>N</p></td>
+<td><p>Y <a class="footnote-reference brackets" href="#id56" id="id36" role="doc-noteref"><span class="fn-bracket">[</span>8<span class="fn-bracket">]</span></a></p></td>
+<td><p>N</p></td>
+</tr>
+<tr class="row-even"><td><p>colormap</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id51" id="id37" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></td>
+<td><p>Y</p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id53" id="id38" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a></p></td>
+<td><p>Y</p></td>
+<td><p>custom</p></td>
+<td><p>Y <a class="footnote-reference brackets" href="#id51" id="id39" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></td>
+<td><p>Y <a class="footnote-reference brackets" href="#id51" id="id40" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id53" id="id41" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a></p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+</tr>
+<tr class="row-odd"><td><p>color limits</p></td>
+<td><p>Y</p></td>
+<td><p>Y [-1, 1]</p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id51" id="id42" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></td>
+<td><p>Y</p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id53" id="id43" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a></p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id53" id="id44" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a></p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+</tr>
+<tr class="row-even"><td><p>c.bar direct.</p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id53" id="id45" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a></p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id53" id="id46" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a></p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+</tr>
+<tr class="row-odd"><td><p>c.bar label</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id53" id="id47" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a></p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N/Y <a class="footnote-reference brackets" href="#id53" id="id48" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a></p></td>
+<td><p>Y</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+</tr>
+<tr class="row-even"><td><p>resolution</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>Y</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+<td><p>N</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<blockquote>
+<div><aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id49" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id3">1</a>,<a role="doc-backlink" href="#id4">2</a>,<a role="doc-backlink" href="#id5">3</a>,<a role="doc-backlink" href="#id6">4</a>,<a role="doc-backlink" href="#id7">5</a>,<a role="doc-backlink" href="#id8">6</a>,<a role="doc-backlink" href="#id9">7</a>,<a role="doc-backlink" href="#id10">8</a>,<a role="doc-backlink" href="#id11">9</a>,<a role="doc-backlink" href="#id12">10</a>,<a role="doc-backlink" href="#id13">11</a>,<a role="doc-backlink" href="#id14">12</a>,<a role="doc-backlink" href="#id15">13</a>,<a role="doc-backlink" href="#id16">14</a>,<a role="doc-backlink" href="#id17">15</a>)</span>
+<p>for displaying spot data</p>
+</aside>
+<aside class="footnote brackets" id="id50" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id18">1</a>,<a role="doc-backlink" href="#id19">2</a>,<a role="doc-backlink" href="#id25">3</a>,<a role="doc-backlink" href="#id26">4</a>,<a role="doc-backlink" href="#id27">5</a>)</span>
+<p>for displaying polygons</p>
+</aside>
+<aside class="footnote brackets" id="id51" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id29">1</a>,<a role="doc-backlink" href="#id31">2</a>,<a role="doc-backlink" href="#id32">3</a>,<a role="doc-backlink" href="#id37">4</a>,<a role="doc-backlink" href="#id39">5</a>,<a role="doc-backlink" href="#id40">6</a>,<a role="doc-backlink" href="#id42">7</a>)</span>
+<p>when clusters are selected for color by field</p>
+</aside>
+<aside class="footnote brackets" id="id52" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id2">2</a>,<a role="doc-backlink" href="#id21">3</a>,<a role="doc-backlink" href="#id23">4</a>)</span>
+<p>ternary plot</p>
+</aside>
+<aside class="footnote brackets" id="id53" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id30">1</a>,<a role="doc-backlink" href="#id33">2</a>,<a role="doc-backlink" href="#id34">3</a>,<a role="doc-backlink" href="#id38">4</a>,<a role="doc-backlink" href="#id41">5</a>,<a role="doc-backlink" href="#id43">6</a>,<a role="doc-backlink" href="#id44">7</a>,<a role="doc-backlink" href="#id45">8</a>,<a role="doc-backlink" href="#id46">9</a>,<a role="doc-backlink" href="#id47">10</a>,<a role="doc-backlink" href="#id48">11</a>)</span>
+<p>color by field is not none</p>
+</aside>
+<aside class="footnote brackets" id="id54" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>6<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id20">1</a>,<a role="doc-backlink" href="#id22">2</a>)</span>
+<p>for linear fits</p>
+</aside>
+<aside class="footnote brackets" id="id55" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id24">7</a><span class="fn-bracket">]</span></span>
+<p>for displaying vector components</p>
+</aside>
+<aside class="footnote brackets" id="id56" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>8<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id35">1</a>,<a role="doc-backlink" href="#id36">2</a>)</span>
+<p>for scores only</p>
+</aside>
+<aside class="footnote brackets" id="id57" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id28">9</a><span class="fn-bracket">]</span></span>
+<p>error bars</p>
+</aside>
+</aside>
+</div></blockquote>
 <section id="axes-and-labels">
 <h3>Axes and Labels<a class="headerlink" href="#axes-and-labels" title="Link to this heading">#</a></h3>
 <p>The axes and labels are initially filled with default values but can be edited to update the plot.</p>
-<figure class="align-center" id="id61">
+<figure class="align-center" id="id62">
 <a class="reference internal image-reference" href="_images/LaME_Styling_Axes_Labels.png"><img alt="LaME interface: right toolbox, styling-axes-and-labels tab" src="_images/LaME_Styling_Axes_Labels.png" style="width: 232px;" />
 </a>
 <figcaption>
-<p><span class="caption-text">The Styling &gt; Axes and Labels contains general settings applied to all plots.</span><a class="headerlink" href="#id61" title="Link to this image">#</a></p>
+<p><span class="caption-text">The Styling &gt; Axes and Labels contains general settings applied to all plots.</span><a class="headerlink" href="#id62" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 </section>
 <section id="annotations-and-scales">
 <h3>Annotations and Scales<a class="headerlink" href="#annotations-and-scales" title="Link to this heading">#</a></h3>
 <p>The Annotations and Scales tab provides settings to add a scale bar to the plot and adjust the legend bar on the side of the plot.</p>
-<figure class="align-center" id="id62">
+<figure class="align-center" id="id63">
 <a class="reference internal image-reference" href="_images/LaME_Styling_Annotations.png"><img alt="LaME interface: right toolbox, styling-annotations tab" src="_images/LaME_Styling_Annotations.png" style="width: 232px;" />
 </a>
 <figcaption>
-<p><span class="caption-text">The Styling &gt; Annotations contains font type and font size settings.</span><a class="headerlink" href="#id62" title="Link to this image">#</a></p>
+<p><span class="caption-text">The Styling &gt; Annotations contains font type and font size settings.</span><a class="headerlink" href="#id63" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 </section>
 <section id="markers-and-lines">
 <h3>Markers and Lines<a class="headerlink" href="#markers-and-lines" title="Link to this heading">#</a></h3>
 <p>The Markers tab contains settings for markers and lines used in scatter, ternary, and PCA plots. For other plot types, these settings are grayed out. Symbol options, symbol size, and transparency can be modified in this tab.</p>
-<figure class="align-center" id="id63">
+<figure class="align-center" id="id64">
 <a class="reference internal image-reference" href="_images/LaME_Styling_Markers.png"><img alt="LaME interface: right toolbox, Styling-markers tab" src="_images/LaME_Styling_Markers.png" style="width: 232px;" />
 </a>
 <figcaption>
-<p><span class="caption-text">The Styling &gt; Markers and Lines tab contains settings for markers and lines used in various plots.</span><a class="headerlink" href="#id63" title="Link to this image">#</a></p>
+<p><span class="caption-text">The Styling &gt; Markers and Lines tab contains settings for markers and lines used in various plots.</span><a class="headerlink" href="#id64" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 </section>
 <section id="coloring">
 <h3>Coloring<a class="headerlink" href="#coloring" title="Link to this heading">#</a></h3>
 <p>The Coloring tab provides a range of options for customizing the color representation of data in plots and maps.</p>
-<figure class="align-center" id="id64">
+<figure class="align-center" id="id65">
 <a class="reference internal image-reference" href="_images/LaME_Styling_Colors.png"><img alt="LaME interface: right toolbox, Styling-colors tab" src="_images/LaME_Styling_Colors.png" style="width: 232px;" />
 </a>
 <figcaption>
-<p><span class="caption-text">The Styling <a href="#id58"><span class="problematic" id="id59">|</span></a>&gt; Colors contains settings for changing color options.</span><a class="headerlink" href="#id64" title="Link to this image">#</a></p>
+<p><span class="caption-text">The Styling <a href="#id58"><span class="problematic" id="id59">|</span></a>&gt; Colors contains settings for changing color options.</span><a class="headerlink" href="#id65" title="Link to this image">#</a></p>
 <div class="legend">
 </div>
 </figcaption>
@@ -509,35 +1066,28 @@
 </section>
 <section id="clusters">
 <h3>Clusters<a class="headerlink" href="#clusters" title="Link to this heading">#</a></h3>
-<p>Clustered data can be assigned a name and color. Clusters can be linked (<a class="reference internal" href="_images/icon-link-64.png"><img alt="icon-link" src="_images/icon-link-64.png" style="height: 2ex;" /></a>) or unlinked (<a class="reference internal" href="_images/icon-unlink-64.png"><img alt="icon-unlink" src="_images/icon-unlink-64.png" style="height: 2ex;" /></a>). A selected cluster or clusters can be used to mask (<a class="reference internal" href="_images/icon-mask-dark-64.png"><img alt="icon-mask-dark" src="_images/icon-mask-dark-64.png" style="height: 2ex;" /></a>) or reverse mask (<a class="reference internal" href="_images/icon-mask-light-64.png"><img alt="icon-mask-light" src="_images/icon-mask-light-64.png" style="height: 2ex;" /></a>) data in a plot or on a map.</p>
-<figure class="align-center" id="id65">
+<p>Clustered data can be assigned a name and color.  Clusters can be linked (<a class="reference internal" href="_images/icon-link-64.png"><img alt="icon-link" src="_images/icon-link-64.png" style="height: 2ex;" /></a>) or unlinked (<a class="reference internal" href="_images/icon-unlink-64.png"><img alt="icon-unlink" src="_images/icon-unlink-64.png" style="height: 2ex;" /></a>).  A selected cluster or clusters can be used to mask (<a class="reference internal" href="_images/icon-mask-dark-64.png"><img alt="icon-mask-dark" src="_images/icon-mask-dark-64.png" style="height: 2ex;" /></a>) or reverse mask (<a class="reference internal" href="_images/icon-mask-light-64.png"><img alt="icon-mask-light" src="_images/icon-mask-light-64.png" style="height: 2ex;" /></a>) data in a plot or on a map.  See <a class="reference external" href="multidimensional.html#clustering">Clustering</a> for more details on cluster analysis.</p>
+<figure class="align-center" id="id66">
 <a class="reference internal image-reference" href="_images/LaME_Styling_Clusters.png"><img alt="LaME interface: right toolbox, styling-clustering tab" src="_images/LaME_Styling_Clusters.png" style="width: 232px;" />
 </a>
 <figcaption>
-<p><span class="caption-text">The Styling &gt; Clustering contains options for working with clustered data</span><a class="headerlink" href="#id65" title="Link to this image">#</a></p>
+<p><span class="caption-text">The Styling &gt; Clustering contains options for working with clustered data</span><a class="headerlink" href="#id66" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 </section>
 </section>
 <section id="regression">
 <h2>Regression<a class="headerlink" href="#regression" title="Link to this heading">#</a></h2>
-<p>Regression is currently under development and not available.</p>
-<figure class="align-center" id="id66">
-<a class="reference internal image-reference" href="_static/screenshots/LaME_Regression.png"><img alt="LaME interface: right toolbox, regression tab" src="_static/screenshots/LaME_Regression.png" style="width: 315px;" />
-</a>
-<figcaption>
-<p><span class="caption-text">Regression tab (functionality not currently available).</span><a class="headerlink" href="#id66" title="Link to this image">#</a></p>
-</figcaption>
-</figure>
+<p><em>Regression</em> is currently under development and not available.</p>
 </section>
 <section id="calculator">
 <h2>Calculator<a class="headerlink" href="#calculator" title="Link to this heading">#</a></h2>
-<p>The calculator (<a class="reference internal" href="_images/icon-calculator-64.png"><img alt="icon-calculator" src="_images/icon-calculator-64.png" style="height: 2ex;" /></a>) can be used to compute custom fields.  These custom fields can be used as dimensions on plots or to set marker color values.  Once created, custom fields will be added to associated drop-down menus.  For detailed information on how to use the calculator and create custom fields, please refer to the <a class="reference internal" href="custom_fields.html"><span class="doc">Custom Fields</span></a> section.</p>
+<p>The calculator (<a class="reference internal" href="_images/icon-calculator-64.png"><img alt="icon-calculator" src="_images/icon-calculator-64.png" style="height: 2ex;" /></a>) can be used to compute custom fields.  These custom fields can be used as dimensions on plots or to set marker color values.  Once created, custom fields will be added to associated drop-down menus.  For detailed information on how to use the calculator and create custom fields, please refer to <a class="reference external" href="custom_fields.html">Calculator</a>.</p>
 <figure class="align-center" id="id67">
 <a class="reference internal image-reference" href="_images/LaME_Calculator.png"><img alt="LaME interface: right toolbox, calculator tab" src="_images/LaME_Calculator.png" style="width: 232px;" />
 </a>
 <figcaption>
-<p><span class="caption-text">The Calculator can be used to compute custom fields.  Expressions can be typed directly into the edit box, by clicking the buttons.</span><a class="headerlink" href="#id67" title="Link to this image">#</a></p>
+<p><span class="caption-text">The <em>Calculator</em> can be used to compute custom fields.  Expressions can be typed directly into the edit box, or by clicking the buttons.</span><a class="headerlink" href="#id67" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 </section>
@@ -646,7 +1196,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
     <br/>
   </p>
 </div>

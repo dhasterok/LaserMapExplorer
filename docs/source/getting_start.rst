@@ -1,26 +1,18 @@
 A Beginner's Guide
 ******************
 
-This guide walks users through loading data, selecting analytes, and creating their first plot using the Laser Map Explorer (LaME).
 
-Basic navigation
-----------------
+This video provides an overview of the *Laser Map Explorer (LaME)* software, demonstrating its interface and basic navigation.
 
 .. raw:: html
 
    <div align="center">
-   <video width="640" controls>
-     <source src="_static/video/LaME_Intro.mp4" type="video/mp4">
-     Your browser does not support the video tag.
-   </video>
+   <iframe width="640" height="360" 
+   src="https://www.youtube.com/embed/wPuP3z1NJXA"
+   title="Introduction to LaME"
+   frameborder="0" 
+   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+   allowfullscreen>
+   </iframe>
    </div>
 
-This video provides an overview of the *Laser Map Explorer (LaME)* software, demonstrating its main features and basic usage.
-
-Importing your dataset
-----------------------
-[Content for importing dataset goes here]
-
-Creating a map
---------------
-[Content for creating a map goes here]

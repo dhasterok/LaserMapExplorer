@@ -31,6 +31,7 @@ There are two ways to use *LaME*, either as a precompiled executable or using th
     plotting
     custom_fields
     profiles
+    analysis_visualization
     multidimensional
     additional_functions
     notes

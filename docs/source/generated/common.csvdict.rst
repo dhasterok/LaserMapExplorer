@@ -4,11 +4,6 @@ common.csvdict
 .. automodule:: common.csvdict
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
@@ -17,15 +12,3 @@ common.csvdict
       export_filtered_dict_to_csv
       import_csv_to_dict
    
-   
-
-   
-   
-   
-
-   
-   
-   
-
-
-

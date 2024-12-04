@@ -29,7 +29,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css" />
   
@@ -39,7 +39,7 @@
   <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="_static/documentation_options.js?v=2709fde1"></script>
-    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/custom.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'import';</script>
@@ -377,6 +377,7 @@
 <li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="custom_fields.html">Custom Fields</a></li>
 <li class="toctree-l1"><a class="reference internal" href="profiles.html">Profiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis_visualization.html">Analysis Visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multidimensional.html">Multidimensional Methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="additional_functions.html">Additional Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notes.html">Notes</a></li>
@@ -448,18 +449,19 @@
 <p>Currently, <em>LaME</em> primarily handles LA-ICP-MS data, with plans to include additional data types in future updates.</p>
 <section id="using-the-import-tool">
 <h2>Using the Import Tool<a class="headerlink" href="#using-the-import-tool" title="Link to this heading">#</a></h2>
-<p>Importing data into <em>LaME</em> is relatively simple using the <em>Import Tool</em> from the <em>Main Toolbar</em> (<a class="reference internal" href="_images/icon-import-directory-64.png"><img alt="icon-import-directory-64" src="_images/icon-import-directory-64.png" style="height: 2ex;" /></a>).  Here’s an overview of the process:</p>
+<p>Importing data into <em>LaME</em> is straightforward using the <em>Import Tool</em> from the <em>Main Toolbar</em> (<a class="reference internal" href="_images/icon-import-directory-64.png"><img alt="icon-import-directory" src="_images/icon-import-directory-64.png" style="height: 2ex;" /></a>). Here’s an overview of the process:</p>
 <ol class="arabic simple">
-<li><p>Select the data type and method (if applicable) from the dropdown menus.</p></li>
-<li><p>Choose the directory containing the sample files. Each sample should be in its own subdirectory.</p></li>
-<li><p>Select the analytes for each sample, all analytes are selected by default.</p></li>
-<li><p>Review your settings and click “Import” to process the data.</p></li>
+<li><p>Select the data type and method (if applicable) from the dropdown menus</p></li>
+<li><p>Choose the directory containing the sample files - each sample should be in its own subdirectory</p></li>
+<li><p>Select the analytes for each sample (all analytes are selected by default)</p></li>
+<li><p>Review your settings and click “Import” to process the data</p></li>
 </ol>
 <p>After import, files for each sample are saved into a single file for more rapid loading, with the name format <em>[sample_id].lame.[ftype]</em>.  In most cases, the file type is *.csv, though in some instances where color is appropriate, it may be stored as a *.png.</p>
 <figure class="align-center" id="id11">
-<img alt="LaME Import Tool, shown importing LA-ICP-MS data." src="_images/LaME_Import_Tool.png" />
+<a class="reference internal image-reference" href="_images/LaME_Import_Tool.png"><img alt="LaME Import Tool interface" src="_images/LaME_Import_Tool.png" style="width: 600px;" />
+</a>
 <figcaption>
-<p><span class="caption-text"><em>LaME Import Tool</em>, shown importing LA-ICP-MS data.</span><a class="headerlink" href="#id11" title="Link to this image">#</a></p>
+<p><span class="caption-text">The <em>Import Tool</em> interface, shown importing LA-ICP-MS data.</span><a class="headerlink" href="#id11" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 </section>
@@ -467,9 +469,9 @@
 <h2>Supported Data Formats<a class="headerlink" href="#supported-data-formats" title="Link to this heading">#</a></h2>
 <section id="la-icp-ms">
 <h3>LA-ICP-MS<a class="headerlink" href="#la-icp-ms" title="Link to this heading">#</a></h3>
-</section>
+<p>LA-ICP-MS data can be imported using different methods based on the mass spectrometer type and data format:</p>
 <section id="quadrupole">
-<h3>Quadrupole<a class="headerlink" href="#quadrupole" title="Link to this heading">#</a></h3>
+<h4>Quadrupole<a class="headerlink" href="#quadrupole" title="Link to this heading">#</a></h4>
 <p>For a single sample, the data are often stored in a collection of *.csv or *.xlsx files.  <em>LaME</em> can read two formats, which it attempts to autodetect from the filename patterns.  While its ability to handle filename formats are limited, it will probably handle most reasonable naming schemes.  In both cases the collection of files should be stored in a directory given by the sample ID.  Once read in, the data are exported in a single file, common data format with a <em>.lame.csv</em> suffix and extension.</p>
 <p>For data collected on quadrupole mass spectrometers, the only requirement for import is the sample ID.  The columns in the table are as follows:</p>
 <dl class="field-list simple">
@@ -507,9 +509,12 @@
 <dd class="field-odd"><p>rate of travel of the laser.</p>
 </dd>
 </dl>
-<p>The distance along the scan line is given by <em>sweep</em> * <em>speed</em>.  Though if these parameters are no entered, then the pixels are assumed to be equidimensional (i.e., <em>dx</em> = <em>dy</em>).  This can be updated after uploading in the <em>dx</em> and <em>dy</em> edit fields of the <em>Sample and Fields</em> tab.</p>
-<ol class="arabic">
-<li><p>Files include all recorded analytes for a single scan line in each individual file.  This file format is typically used for raw data in CPS. Filenames for this format often include a sample number and a line number separated by a delimiter.  These can come in any order and a variety of delimiters may used.  <em>LaME</em> strips away these common elements to identify the line numbers.</p>
+<p>For data collected on quadrupole mass spectrometers, the requirement for import is the sample ID. The distance along the scan line is given by <em>sweep</em> * <em>speed</em>. If these parameters are not entered, then the pixels are assumed to be equidimensional (i.e., <em>dx</em> = <em>dy</em>). These parameters can be updated after uploading in the <em>dx</em> and <em>dy</em> edit fields of the <em>Sample and Fields</em> tab.</p>
+<p><em>LaME</em> supports two common file formats for quadrupole data:</p>
+</section>
+<section id="scan-line-format">
+<h4>1. Scan Line Format<a class="headerlink" href="#scan-line-format" title="Link to this heading">#</a></h4>
+<p>Files include all recorded analytes for a single scan line in each individual file.  This file format is typically used for raw data in CPS. Filenames for this format often include a sample number and a line number separated by a delimiter.  These can come in any order and a variety of delimiters may used.  <em>LaME</em> strips away these common elements to identify the line numbers.</p>
 <p>Example filenames include:</p>
 <ul class="simple">
 <li><p>RM03-3.csv</p></li>
@@ -521,8 +526,6 @@
 </ul>
 <p>In all but the last two cases above, the line number came last.  However, the order doesn’t matter as <em>LaME</em> will strip away the common patterns to reveal the line number, which it needs along with spot size to determine distance between lines.  This distance is defined as the <em>X</em>-direction.</p>
 <p>Each file should include several metadata lines followed by a header and the table of values with results from each analyte in a separate column.  The first column is the time along the line.  The difference in times are the sweep time and should be constant from measurement to measurement.  The sweep time along with the rate of travel of the laser is used to determine the distance along the line.  This distance is the <em>Y</em>-direction.  A snippet is shown in the table below, with the first three lines removed.  These three lines do not provide metadata useful to <em>LaME</em>.</p>
-</li>
-</ol>
 <blockquote>
 <div><div class="pst-scrollable-table-container"><table class="table" id="id12">
 <caption><span class="caption-text">Scan-line file from LA-ICP-MS quadrupole</span><a class="headerlink" href="#id12" title="Link to this table">#</a></caption>
@@ -614,9 +617,14 @@
 </table>
 </div>
 </div></blockquote>
-<p><em>Note:</em> scan line data may include files with standards.  These standards will sit between scan lines of the sample resulting in non-sequential line numbers for the sample, which is accounted for by <em>LaME</em> when converting to distance.</p>
-<ol class="arabic">
-<li><p>An alternative format reports each analyte in a separate file as a matrix (map-form) and may be produced after calibration and/or processing in Iolite or XMapTools, generally used to report data in PPM, though they may still be in CPS.  The filenames are generally constructed from the sample name and the analyte and often include the units and matrix, though the only important component is the analyte, which is use to define the column in the output data.  The order of the mass and symbol can be either mass first or mass last conventions.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Scan line data may include files with standards.  These standards will sit between scan lines of the sample resulting in non-sequential line numbers for the sample, which is accounted for by <em>LaME</em> when converting to distance.</p>
+</div>
+</section>
+<section id="matrix-format">
+<h4>2. Matrix Format<a class="headerlink" href="#matrix-format" title="Link to this heading">#</a></h4>
+<p>An alternative format reports each analyte in a separate file as a matrix (map-form) and may be produced after calibration and/or processing in Iolite or XMapTools, generally used to report data in PPM, though they may still be in CPS.  The filenames are generally constructed from the sample name and the analyte and often include the units and matrix, though the only important component is the analyte, which is use to define the column in the output data.  The order of the mass and symbol can be either mass first or mass last conventions.</p>
 <p>Example filenames:</p>
 <ul class="simple">
 <li><p>23Na.csv</p></li>
@@ -628,8 +636,6 @@
 <div class="line"><br /></div>
 </div>
 <p>Each file should include a matrix of data without headers, line numbers, distances, or times.  The default reads columns as the <em>X</em> coordinate and rows as the <em>Y</em>.  A snippet is shown in the table below.</p>
-</li>
-</ol>
 <blockquote>
 <div><div class="pst-scrollable-table-container"><table class="table" id="id13">
 <caption><span class="caption-text">Analyte-matrix file from LA-ICP-MS quadrupole</span><a class="headerlink" href="#id13" title="Link to this table">#</a></caption>
@@ -697,6 +703,7 @@
 </div></blockquote>
 </section>
 </section>
+</section>
 <section id="other-data-types-coming-soon">
 <h2>Other Data Types (Coming Soon)<a class="headerlink" href="#other-data-types-coming-soon" title="Link to this heading">#</a></h2>
 <p>The following data types and formats are planned for future implementation:</p>
@@ -759,8 +766,12 @@
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-the-import-tool">Using the Import Tool</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#supported-data-formats">Supported Data Formats</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#la-icp-ms">LA-ICP-MS</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#quadrupole">Quadrupole</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#la-icp-ms">LA-ICP-MS</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#quadrupole">Quadrupole</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#scan-line-format">1. Scan Line Format</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#matrix-format">2. Matrix Format</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#other-data-types-coming-soon">Other Data Types (Coming Soon)</a></li>
@@ -810,7 +821,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
     <br/>
   </p>
 </div>

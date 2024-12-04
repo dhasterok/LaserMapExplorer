@@ -1,14 +1,14 @@
-Custom Fields
-*************
+Calculator
+**********
 
 The calculator can be used to create custom fields in almost any plot.  The user can create custom fields by entering expressions either directly from the keyboard or by using the calculator buttons. These custom fields are saved for use with other samples or can be exported to a file for future sessions.
 
 The calculator has a relatively simple language for developing expressions, including conditional cases.  The key thing to remember is that operations in *LaME* (by way of Python) uses PEMDAS order of operations: 
 
-* parentheses (P)
-* exponents and roots (E)
-* multiplication and division (MD) 
-* addition and subtraction (AS)
+- parentheses (P)
+- exponents and roots (E)
+- multiplication and division (MD) 
+- addition and subtraction (AS)
 
 Operations on the same level e.g., multiplication and division or addition and subtraction are applied from left to right.  When in doubt, add parentheses ensure order.  
 

@@ -4,20 +4,11 @@ app.Workflow
 .. automodule:: app.Workflow
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
    
       pyqtSlot
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -40,11 +31,3 @@ app.Workflow
       QWidget
       Workflow
    
-   
-
-   
-   
-   
-
-
-

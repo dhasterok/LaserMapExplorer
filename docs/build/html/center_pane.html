@@ -29,7 +29,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css" />
   
@@ -39,7 +39,7 @@
   <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="_static/documentation_options.js?v=2709fde1"></script>
-    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/custom.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'center_pane';</script>
@@ -377,6 +377,7 @@
 <li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="custom_fields.html">Custom Fields</a></li>
 <li class="toctree-l1"><a class="reference internal" href="profiles.html">Profiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis_visualization.html">Analysis Visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multidimensional.html">Multidimensional Methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="additional_functions.html">Additional Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notes.html">Notes</a></li>
@@ -444,24 +445,39 @@
                   
   <section id="plot-window-center">
 <h1>Plot Window (Center)<a class="headerlink" href="#plot-window-center" title="Link to this heading">#</a></h1>
-<p>The <em>Plot Window</em> is the primary area for displaying visual representations of your data. It offers three distinct viewing modes to suit different analysis needs.</p>
+<p>The <em>Plot Window</em> serves as the primary area for displaying visual representations of your data.  It offers three distinct viewing modes to suit different analysis needs.</p>
+<section id="single-view">
+<h2>Single View<a class="headerlink" href="#single-view" title="Link to this heading">#</a></h2>
+<p>Single View mode provides focused examination of individual plots.  This mode is ideal for detailed analysis, allowing users to add annotations and labels to enhance plot informativeness.  It’s also the primary mode for creating and editing polygons for data selection, offering precise control over the analysis area.</p>
 <figure class="align-center" id="id1">
-<img alt="LaME interface: Plot Window (Center)" src="_images/LaME_Plot_Window.png" />
+<a class="reference internal image-reference" href="_images/LaME_SingleView.png"><img alt="Single View mode" src="_images/LaME_SingleView.png" style="width: 700px;" />
+</a>
 <figcaption>
 <p><span class="caption-text">The Plot Window displaying single plot in Single View mode.</span><a class="headerlink" href="#id1" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
-<section id="single-view">
-<h2>Single View<a class="headerlink" href="#single-view" title="Link to this heading">#</a></h2>
-<p>Single View mode provides focused examination of individual plots. This mode is ideal for detailed analysis, allowing users to add annotations and labels to enhance plot informativeness. It’s also the primary mode for creating and editing polygons for data selection, offering precise control over the analysis area.</p>
 </section>
 <section id="multi-view">
 <h2>Multi View<a class="headerlink" href="#multi-view" title="Link to this heading">#</a></h2>
-<p>Multi View mode transforms the plot window into a customizable grid for simultaneous display of multiple plots. Users can populate this view by double-clicking plots in the Plot Selector, enabling direct comparison of different analyses or visualizations. This mode excels at revealing relationships between different aspects of the data.</p>
+<p>Multi View mode transforms the plot window into a customizable grid for simultaneous display of multiple plots.  Users can populate this view by double-clicking plots in the Plot Selector, enabling direct comparison of different analyses or visualizations.  This mode excels at revealing relationships between different aspects of the data.</p>
+<figure class="align-center" id="id2">
+<a class="reference internal image-reference" href="_images/LaME_MultiView.png"><img alt="Multi View mode" src="_images/LaME_MultiView.png" style="width: 700px;" />
+</a>
+<figcaption>
+<p><span class="caption-text">The Plot Window displaying three plots in Multi View mode.</span><a class="headerlink" href="#id2" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
 </section>
 <section id="quick-view">
 <h2>Quick View<a class="headerlink" href="#quick-view" title="Link to this heading">#</a></h2>
-<p>Quick View mode offers a comprehensive overview by displaying all analytes in an organized grid layout. This mode proves invaluable for initial data exploration and quality assessment, allowing users to rapidly identify patterns or anomalies across the entire dataset. The displayed analyte set can be customized to focus on elements of interest.</p>
+<p>Quick View mode offers a comprehensive overview by displaying all analytes in an organized grid layout.  This mode proves invaluable for initial data exploration and quality assessment, allowing users to rapidly identify patterns or anomalies across the entire dataset.  The displayed analyte set can be customized to focus on elements of interest.</p>
+<figure class="align-center" id="id3">
+<a class="reference internal image-reference" href="_images/LaME_QuickView.png"><img alt="Quick View mode" src="_images/LaME_QuickView.png" style="width: 700px;" />
+</a>
+<figcaption>
+<p><span class="caption-text">The Plot Window displaying all analytes in Quick View mode.</span><a class="headerlink" href="#id3" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
 </section>
 </section>
 
@@ -560,7 +576,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
     <br/>
   </p>
 </div>

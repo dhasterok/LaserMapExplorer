@@ -23,7 +23,7 @@ Key Features:
 
 The program is currently in beta release.  There are plenty of bugs and some features that have yet to be partially or fully implemented.  This documentation covers all features and functionalities available in this version.  Release notes below detail the progress and future plans.
 
-.. figure:: _static/screenshots/LaME_quickview.png
+.. figure:: _static/screenshots/LaME_overview.png
     :align: center
     :alt: *LaME* interface
 

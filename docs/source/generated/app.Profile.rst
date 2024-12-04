@@ -4,15 +4,6 @@ app.Profile
 .. automodule:: app.Profile
 
    
-   
-   
-
-   
-   
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
@@ -31,11 +22,3 @@ app.Profile
       QWidget
       ScatterPlotItem
    
-   
-
-   
-   
-   
-
-
-

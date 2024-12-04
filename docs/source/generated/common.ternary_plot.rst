@@ -4,15 +4,6 @@ common.ternary\_plot
 .. automodule:: common.ternary_plot
 
    
-   
-   
-
-   
-   
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
@@ -24,11 +15,3 @@ common.ternary\_plot
       Path
       ternary
    
-   
-
-   
-   
-   
-
-
-

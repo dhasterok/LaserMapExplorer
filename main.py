@@ -79,7 +79,6 @@ setConfigOption('imageAxisOrder', 'row-major') # best performance
 ## Run both to compile docstrings into sphinx, the second only when docstrings have not changed
 ## sphinx-apidoc -o source ../src
 ## sphinx-build -b html docs/source/ docs/build/html
-
 ## !pyrcc5 resources.qrc -o src/ui/resources_rc.py
 ## !pyuic5 designer/mainwindow.ui -o src/ui/MainWindow.py
 ## !pyuic5 designer/QuickViewDialog.ui -o src/ui/QuickViewDialog.py
@@ -4782,7 +4781,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             'field_type': [x['type'], y['type'], z['type'], ''],
             'field': [x['field'], y['field'], z['field'], ''],
             'figure': canvas,
-            'style': self.style.axis_dict[self.style.plot_style],
+            'style': self.style.style_dict[self.style.plot_type],
             'cluster_groups': [],
             'view': [True,False],
             'position': [],

@@ -1,14 +1,13 @@
 Tutorials
 *********
 
-The tutorials shown here provide workflows that can be used to do some of the more sophisticated analyses possible within LaME.
+The tutorials shown here provide step-by-step guidance for using LaME, starting with basic operations and progressing to more advanced features.
 
 .. toctree::
     :maxdepth: 1
+    :caption: Beginner's Guide
 
     getting_start
-    process_data
-    exploratory
-   
-
-.. 
+    data_handling 
+    visualization
+    analysis_tools

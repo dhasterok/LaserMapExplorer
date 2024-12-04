@@ -4,20 +4,11 @@ common.NoteTaking
 .. automodule:: common.NoteTaking
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
    
       publish_string
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -33,11 +24,3 @@ common.NoteTaking
       RstToPdf
       datetime
    
-   
-
-   
-   
-   
-
-
-

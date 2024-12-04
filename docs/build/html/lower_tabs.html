@@ -29,7 +29,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css" />
   
@@ -39,7 +39,7 @@
   <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="_static/documentation_options.js?v=2709fde1"></script>
-    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/custom.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'lower_tabs';</script>
@@ -377,6 +377,7 @@
 <li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="custom_fields.html">Custom Fields</a></li>
 <li class="toctree-l1"><a class="reference internal" href="profiles.html">Profiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis_visualization.html">Analysis Visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multidimensional.html">Multidimensional Methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="additional_functions.html">Additional Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notes.html">Notes</a></li>
@@ -444,81 +445,58 @@
                   
   <section id="lower-tabs">
 <h1>Lower Tabs<a class="headerlink" href="#lower-tabs" title="Link to this heading">#</a></h1>
-<p>The Lower Tabs provide additional functionality for note-taking and profile visualization, enhancing your analysis workflow。</p>
-<figure class="align-center" id="id4">
+<p>The <em>Lower Tabs</em> provide additional functionality for documentation, value filtering, profile visualization, enhancing your analysis workflow, and accessing help resources.</p>
+<section id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Link to this heading">#</a></h2>
+<p>The <em>Notes</em> tab is a powerful tool for documenting observations and analyses directly within <em>LaME</em>.  This integrated note-taking system helps you document your analysis workflow and prepare report-style documentation.  The tab supports reStructuredText (reST) formatting for creating well-structured notes that can be exported as PDF documents.  For detailed information about note-taking features and formatting, see <a class="reference internal" href="notes.html"><span class="doc">Notes</span></a>.</p>
+<figure class="align-center" id="id1">
 <a class="reference internal image-reference" href="_images/LaME_Lower_Tab.png"><img alt="LaME interface: lower tab" src="_images/LaME_Lower_Tab.png" style="width: 600px;" />
 </a>
 <figcaption>
-<p><span class="caption-text">The Lower Tabs section of the <em>LaME</em> interface, providing access to Notes and Profiles features.</span><a class="headerlink" href="#id4" title="Link to this image">#</a></p>
+<p><span class="caption-text">The <em>Notes</em> tab showing the text editor and formatting tools.</span><a class="headerlink" href="#id1" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
-<section id="notes">
-<h2>Notes<a class="headerlink" href="#notes" title="Link to this heading">#</a></h2>
-<p>The Notes tab is a powerful tool for documenting observations and analyses directly within <em>LaME</em>. This integrated note-taking capability allows users to store notes on a sample alongside their analysis files. It enables the rapid production of report-style documentation for samples or analyses. The Notes tab supports reStructured Text (reST) formatting, providing a flexible and powerful way to create well-structured notes and allows user to export the note as PDF documents.</p>
-<section id="intro-to-restructured-text-rest">
-<h3>Intro to reStructured Text (reST)<a class="headerlink" href="#intro-to-restructured-text-rest" title="Link to this heading">#</a></h3>
-<p>reST is a simple yet powerful markup language. Here are some basic formatting options:</p>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p>Text</p></th>
-<th class="head"><p>Result</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">*italics*</span></code></p></td>
-<td><p><em>italics</em></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">**bold**</span></code></p></td>
-<td><p><strong>bold</strong></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">reference_</span></code></p></td>
-<td><p><a href="#id5"><span class="problematic" id="id6">reference_</span></a></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">[1]_</span></code></p></td>
-<td><p><a class="footnote-reference brackets" href="#id3" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> footnote</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">[Citation2024]_</span></code></p></td>
-<td><p><a class="reference internal" href="#citation2024" id="id2"><span>[Citation2024]</span></a></p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id3" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
-<p><code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">[1]</span></code> creates a footnote</p>
-</aside>
-</aside>
-<p><code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">_reference:</span> <span class="pre">http://www.this-is-an-external-hyperlink.org</span></code></p>
-<p>To use a phrase as a reference, enclose the words within backticks (`) and end with an underscore (_).</p>
-<div role="list" class="citation-list">
-<div class="citation" id="citation2024" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">Citation2024</a><span class="fn-bracket">]</span></span>
-<p><code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">[Citation2024]</span></code> will produce a journal-like citation (no spaces).</p>
-</div>
-</div>
-<p>To display a special character, use a ‘\’</p>
-<p>Titles, sections, and subsections can be created by including a line of *, =, and - characters, the same length as the heading text. Use the <a class="reference internal" href="_images/icon-heading-64.png"><img alt="icon-heading" src="_images/icon-heading-64.png" style="height: 2ex;" /></a> button to quickly add these symbols.</p>
-</section>
 </section>
 <section id="filters">
 <h2>Filters<a class="headerlink" href="#filters" title="Link to this heading">#</a></h2>
-<p>The Filters tab allows users to apply filters to their data to remove noise and enhance the signal.  For detailed information on how to apply filters, please refer to the <a class="reference internal" href="filtering.html"><span class="doc">Filter</span></a> section.</p>
+<p>The <em>Filters</em> tab allows users to apply filters to their data to remove noise and enhance the signal.  For detailed information on how to apply filters, please refer to the <a class="reference internal" href="filtering.html"><span class="doc">Filter</span></a> section.</p>
+<figure class="align-center" id="id2">
+<a class="reference internal image-reference" href="_images/LaME_Filter_Tab.png"><img alt="Filter tab interface" src="_images/LaME_Filter_Tab.png" style="width: 600px;" />
+</a>
+<figcaption>
+<p><span class="caption-text">The <em>Filters</em> tab showing active filters and their parameters.</span><a class="headerlink" href="#id2" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
 </section>
 <section id="profiles">
 <h2>Profiles<a class="headerlink" href="#profiles" title="Link to this heading">#</a></h2>
-<p>The Profiles tab allows for the visualization of data trends across specific sections of a sample.  Users can create and view profile plots to analyze how various parameters change along a particular path or cross-section of their sample.  For detailed information on how to create profiles, please refer to the <a class="reference internal" href="left_toolbox.html"><span class="doc">Control Toolbox (Left)</span></a> section.</p>
+<p>The Profiles tab visualizes compositional variations along user-defined transects. This functionality proves particularly valuable for examining mineral zoning, reaction boundaries, and diffusion profiles. The tab provides tools for creating, editing, and analyzing profiles, with options for different display styles and error representation. For detailed information about profile analysis, see <a class="reference internal" href="profiles.html"><span class="doc">Profiles</span></a>.</p>
+<figure class="align-center" id="id3">
+<a class="reference internal image-reference" href="_images/LaME_Profile_Plot.png"><img alt="Profile tab interface" src="_images/LaME_Profile_Plot.png" style="width: 600px;" />
+</a>
+<figcaption>
+<p><span class="caption-text">The <em>Profiles</em> tab displaying a compositional profile.</span><a class="headerlink" href="#id3" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
 </section>
 <section id="plot-info">
 <h2>Plot Info<a class="headerlink" href="#plot-info" title="Link to this heading">#</a></h2>
+<p>The <em>Plot Info</em> tab provides detailed information about the plot that is currently displayed in the <em>Plot Window</em>.  Users can view the plot type, the data that is being displayed, and other relevant information about the plot.</p>
+<figure class="align-center" id="id4">
+<a class="reference internal image-reference" href="_images/LaME_Plot_Info.png"><img alt="plot info tab" src="_images/LaME_Plot_Info.png" style="width: 600px;" />
+</a>
+<figcaption>
+<p><span class="caption-text">The <em>Plot Info</em> tab displaying detailed information about the plot.</span><a class="headerlink" href="#id4" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
 </section>
 <section id="workflow">
 <h2>Workflow<a class="headerlink" href="#workflow" title="Link to this heading">#</a></h2>
-<p>The Workflow tab provides a visual representation of the analysis steps that have been applied to the data.  Users can view the order in which the analysis steps were applied and can easily navigate between the steps.  For detailed information on how to use the Workflow tab, please refer to the <a class="reference internal" href="left_toolbox.html"><span class="doc">Control Toolbox (Left)</span></a> section.</p>
+<p>The <em>Workflow</em> tab provides a visual representation of the analysis steps that have been applied to the data.  Users can view the order in which the analysis steps were applied and can easily navigate between the steps.  For detailed information on how to use the Workflow tab, please refer to the <a class="reference internal" href="workflow.html"><span class="doc">Workflow Method Design (WMD)</span></a> section.</p>
 </section>
 <section id="help">
 <h2>Help<a class="headerlink" href="#help" title="Link to this heading">#</a></h2>
-<p>The Help tab provides access to the user manual within the program. It allows users to access detailed documentation and instructions on how to use various features and functionalities of the program.</p>
+<p>The <em>Help</em> tab provides access to the user manual within the program. It allows users to access detailed documentation and instructions on how to use various features and functionalities of the program.</p>
 </section>
 </section>
 
@@ -568,10 +546,7 @@
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#notes">Notes</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#intro-to-restructured-text-rest">Intro to reStructured Text (reST)</a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#notes">Notes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#filters">Filters</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#profiles">Profiles</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-info">Plot Info</a></li>
@@ -623,7 +598,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
     <br/>
   </p>
 </div>

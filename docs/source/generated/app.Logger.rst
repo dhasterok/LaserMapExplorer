@@ -1,17 +1,8 @@
-﻿app.Logger
+app.Logger
 ==========
 
 .. automodule:: app.Logger
 
-   
-   
-   
-
-   
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -29,11 +20,3 @@
       QWidget
       Qt
    
-   
-
-   
-   
-   
-
-
-

@@ -4,15 +4,6 @@ common.ScheduleTimer
 .. automodule:: common.ScheduleTimer
 
    
-   
-   
-
-   
-   
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
@@ -22,11 +13,3 @@ common.ScheduleTimer
       Scheduler
       pyqtSignal
    
-   
-
-   
-   
-   
-
-
-

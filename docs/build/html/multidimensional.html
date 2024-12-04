@@ -29,7 +29,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css" />
   
@@ -39,14 +39,14 @@
   <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="_static/documentation_options.js?v=2709fde1"></script>
-    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/custom.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'multidimensional';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Additional Functions" href="additional_functions.html" />
-    <link rel="prev" title="Profiles" href="profiles.html" />
+    <link rel="prev" title="Analysis Visualization" href="analysis_visualization.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -377,6 +377,7 @@
 <li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="custom_fields.html">Custom Fields</a></li>
 <li class="toctree-l1"><a class="reference internal" href="profiles.html">Profiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis_visualization.html">Analysis Visualization</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Multidimensional Methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="additional_functions.html">Additional Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notes.html">Notes</a></li>
@@ -446,16 +447,77 @@
 <h1>Multidimensional Methods<a class="headerlink" href="#multidimensional-methods" title="Link to this heading">#</a></h1>
 <section id="principal-component-analysis">
 <h2>Principal Component Analysis<a class="headerlink" href="#principal-component-analysis" title="Link to this heading">#</a></h2>
+<p>Principal Component Analysis (PCA) in <em>LaME</em> reduces the dimensionality of complex datasets while preserving important variations. This tool is particularly valuable for identifying dominant compositional trends and relationships between elements.</p>
+<figure class="align-center" id="id2">
+<a class="reference internal image-reference" href="_images/LaME_PCA_Plot.png"><img alt="Plot Window: PCA Variance" src="_images/LaME_PCA_Plot.png" style="width: 600px;" />
+</a>
+<figcaption>
+<p><span class="caption-text">PCA Variance plot.</span><a class="headerlink" href="#id2" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<section id="computing-pca">
+<h3>Computing PCA<a class="headerlink" href="#computing-pca" title="Link to this heading">#</a></h3>
+<p>PCA analysis is automatically computed when you select the <em>Dimensional Reduction</em> tab in the <em>Control Toolbox</em>. The software displays the explained variance plot by default, showing the proportion of variance captured by each principal component.</p>
 </section>
-<section id="clustering-methods">
-<h2>Clustering Methods<a class="headerlink" href="#clustering-methods" title="Link to this heading">#</a></h2>
-<p>Clustering is an unsupervised machine-learning technique that divides a multidimensional dataset into a user specified number of clusters by minimizing the distance between points assigned to clusters and their respective centroids.  The process is iterative, generally improving the location of centroids and the set of points assigned to each with step.  The process concludes when the improvement is below some tolerance or a maximum number of iterations are reached.  As it is unsupervised, clustering does not require the user to train the data.  This provides two advantages: unsupervised methods faster are to train and require less user knowledge and experience to perform.</p>
-<section id="k-means">
-<h3>k-Means<a class="headerlink" href="#k-means" title="Link to this heading">#</a></h3>
-<p>One of the simplest clustering algorithms is k-means, though it is well suited to the task of identifying minerals or zones within minerals.</p>
+<section id="visualization-options">
+<h3>Visualization Options<a class="headerlink" href="#visualization-options" title="Link to this heading">#</a></h3>
+<p><em>LaME</em> offers five complementary ways to visualize PCA results:</p>
+<ul class="simple">
+<li><p>Variance: Shows the proportion of variance explained by each principal component</p></li>
+<li><p>Vector: Displays element contributions to each principal component</p></li>
+<li><p>PCA scatter: Plots samples in principal component space</p></li>
+<li><p>PCA heatmap: Shows density of points in principal component space</p></li>
+<li><p>PCA score: Maps principal component values back to sample space</p></li>
+</ul>
 </section>
-<section id="fuzzy-c-means">
-<h3>Fuzzy c-means<a class="headerlink" href="#fuzzy-c-means" title="Link to this heading">#</a></h3>
+<section id="plot-controls">
+<h3>Plot Controls<a class="headerlink" href="#plot-controls" title="Link to this heading">#</a></h3>
+<p>For scatter plots and heatmaps, use the PC X and PC Y spinboxes to select which principal components to compare. The first principal component (PC1) explains the most variance, with subsequent components capturing progressively less variation.</p>
+</section>
+</section>
+<section id="clustering">
+<h2>Clustering<a class="headerlink" href="#clustering" title="Link to this heading">#</a></h2>
+<p>Clustering in <em>LaME</em> helps identify natural groupings within your data based on compositional similarities. The software offers two clustering methods, each suited to different analytical needs.</p>
+<section id="k-means-clustering">
+<h3>K-Means Clustering<a class="headerlink" href="#k-means-clustering" title="Link to this heading">#</a></h3>
+<p>K-means clustering divides data into a specified number of groups by minimizing the distance between points and their cluster centers:</p>
+<figure class="align-center" id="id3">
+<a class="reference internal image-reference" href="_images/LaME_Cluster_Kmean.png"><img alt="Plot Window: K-means Clustering" src="_images/LaME_Cluster_Kmean.png" style="width: 600px;" />
+</a>
+<figcaption>
+<p><span class="caption-text">K-means Clustering plot.</span><a class="headerlink" href="#id3" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="fuzzy-c-means-clustering">
+<h3>Fuzzy C-Means Clustering<a class="headerlink" href="#fuzzy-c-means-clustering" title="Link to this heading">#</a></h3>
+<p>Fuzzy c-means allows points to belong partially to multiple clusters, providing membership scores for each cluster:</p>
+<figure class="align-center" id="id4">
+<a class="reference internal image-reference" href="_images/LaME_Cluster_Fuzzy.png"><img alt="Plot Window: Fuzzy C-Means Clustering" src="_images/LaME_Cluster_Fuzzy.png" style="width: 600px;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Fuzzy C-Means Clustering plot.</span><a class="headerlink" href="#id4" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="settings">
+<h3>Settings<a class="headerlink" href="#settings" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Number of clusters: Set the desired number of groups</p></li>
+<li><p>Exponent: Control the influence of distance on cluster assignment</p></li>
+<li><p>Distance: Choose between Euclidean, Manhattan, Mahalanobis, or Cosine distance</p></li>
+<li><p>Starting seed: Random or user-defined seed for cluster initialization</p></li>
+<li><p>PCA: Use principal components for clustering</p></li>
+<li><p>Number of bias: Set the number of bias points</p></li>
+</ul>
+</section>
+<section id="id1">
+<h3>Visualization Options<a class="headerlink" href="#id1" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Cluster Map: Spatial distribution of clusters</p></li>
+<li><p>Cluster Scores: Degree of membership in each cluster</p></li>
+<li><p>Cluster Performance: Metrics to help optimize cluster numbers</p></li>
+</ul>
 </section>
 </section>
 </section>
@@ -471,12 +533,12 @@
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="profiles.html"
+       href="analysis_visualization.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Profiles</p>
+        <p class="prev-next-title">Analysis Visualization</p>
       </div>
     </a>
     <a class="right-next"
@@ -506,10 +568,17 @@
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#principal-component-analysis">Principal Component Analysis</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#clustering-methods">Clustering Methods</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#k-means">k-Means</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fuzzy-c-means">Fuzzy c-means</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#principal-component-analysis">Principal Component Analysis</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#computing-pca">Computing PCA</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#visualization-options">Visualization Options</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-controls">Plot Controls</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#clustering">Clustering</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#k-means-clustering">K-Means Clustering</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fuzzy-c-means-clustering">Fuzzy C-Means Clustering</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#settings">Settings</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Visualization Options</a></li>
 </ul>
 </li>
 </ul>
@@ -558,7 +627,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
     <br/>
   </p>
 </div>

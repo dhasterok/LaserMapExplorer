@@ -4,20 +4,11 @@ app.Calculator
 .. automodule:: app.Calculator
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
    
       partial_match
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -28,11 +19,3 @@ app.Calculator
       QMessageBox
       QUrl
    
-   
-
-   
-   
-   
-
-
-

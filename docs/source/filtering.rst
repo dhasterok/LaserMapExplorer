@@ -7,44 +7,71 @@ Filter
 * Polygon masking (|icon-polygon-new|): Managed in the *Polygon* table of the *Control Toolbox*.
 * Cluster masking (|icon-mask-dark|): Set from *Styling > Clusters* in the *Plot and Property Toolbox*.
 
-Users can easily toggle these filters on or off using the *Top Toolbar* for quick access. To disable all filters and masks at once, click the |icon-map| button. 
+These can be used individually or in combination to isolate specific features or exclude unwanted data from analyses.  Users can easily toggle these filters on or off using the *Top Toolbar* for quick access. To disable all filters and masks at once, click the |icon-map| button. 
 
 Filter by value
 ===============
 
+Value filters allow selection of data based on concentration thresholds. These filters can be created and modified in the *Filter* tab of the :doc:`lower_tabs`. Multiple filters can be combined using AND/OR operations for complex selection criteria.
+
 .. figure:: _static/screenshots/LaME_Filter_Tab.png
    :align: center
-   :alt: LaME interface: Lower tab - Filter tab
+   :alt: LLaME plot window: filter by value
+   :width: 600
 
-   *Filter* tab in the *Lower Tab*.
+   Plot displaying the filter by value.
 
-To set a filter by value, use the two drop down menus to select the type of field (upper) and the desired field (lower).  It is possible to filter by value using analytes, ratios, custom fields, principal component score, or cluster score.  Once selected, the ranges for the field will be automatically displayed in the min and max boxes.  Change the values to set the bounds explicitly using the (left boxes) or implicitly by setting the quantile bounds (right boxes).  Once the bounds are set, click the |icon-filter2| button to add the filter to the list.
+To create a value filter:
 
-Multiple filters may be combined to produce more complex filters.  The filters include a boolean operations (*and* and *or*ß) to assist with precisely defining filters to capture the desired regions for analysis and plotting.  In many cases, the overlap between values may make it difficult to separate phases.  In these cases, we suggest targeting specific regions with a polygon or cluster mask.
+1. Select the field type and specific field from the dropdown menus
+2. Set minimum and maximum bounds either as absolute values or percentiles
+3. Click the |icon-filter| button to add the filter
+
+Multiple filters may be combined to produce more complex filters.  The filters include a boolean operator (*and* and *or*) to assist with precisely defining filters to capture the desired regions for analysis and plotting.  In many cases, the overlap between values may make it difficult to separate phases.  In these cases, we suggest targeting specific regions with a polygon or cluster mask.
 
 Polygon Masking
 ===============
 
-Polygons can be used to filter specific regions of your data. For details on how to create and edit polygons, please refer to the :doc:`left_toolbox` guide.
+.. figure:: _static/screenshots/LaME_Polygon_Mask.png
+   :align: center
+   :alt: LaME plot window: Polygon mask
+   :width: 600
+
+   Plot displaying the polygon mask.
+
+Polygons can be used to filter specific regions of your data, to create a polygon mask::
+
+1. Click the New Polygon button (|icon-polygon-new|)
+2. Left-click to place vertices on the map
+3. Right-click to complete the polygon
 
 *LaME* allows you to create multiple polygons, which can be analyzed as separate regions or linked for combined analysis. To link or delink polygons, select multiple entries in the *Polygon Table* and click the |icon-link| or |icon-unlink| button. You can toggle the use of individual polygons in analyses by clicking the associated checkbox in the *Polygon Table*.
 
-The polygons within the table can be stored by clicking the |icon-save-file| button and recalled using the |icon-open-file| button.  See a description of :doc:`file specifications` for more information.
-
-Edge-detection |icon-spotlight|
--------------------------------
+Edge-detection
+--------------
 
 To aid with the identification of mineral boundaries, you can turn on edge detection by clicking the |icon-spotlight| button. There are multiple edge detection methods available (Sobel, Canny, zero-cross) which you can select using the dropdown menu.  Edge-detection is useful for locating the boundaries of polygons.  The use of edge detection does not affect analyses.
 
 Cluster Masking 
 ===============
 
-While cluster masks can be toggled in the :doc:`top_toolbar`, they are set in the *Styling* tab:
+.. figure:: _static/screenshots/LaME_Cluster_Mask.png
+   :align: center
+   :alt: LaME plot window: Cluster mask
+   :width: 600
 
-#. compute clusters first from the *Clustering* pane in the *Control Toolbox*
-#. from the *Styling* tab on the right pane, select the *Clusters* sub-tab and choose the type of clustering from the point grouping drop down
-#. select the cluster(s) that you wish to mask and click the |icon-mask-dark| button to set the cluster mask or
-#. alternatively, select the clusters you wish to use for analysis and click the |icon-mask-light| button to set the other groups as the mask.
+   Plot displaying the cluster mask.
+
+Cluster masks utilize multivariate clustering results to filter data. Before creating cluster masks, clustering must first be performed using the Clustering tab in the :doc:`left_toolbox`.  Once clusters are computed, create masks through the *Styling* tab in the *Plot and Property Toolbox*. 
+
+1. Select one or more clusters in the cluster table
+2. Click either:
+   
+   - Group Mask (|icon-mask-dark|) to mask selected clusters
+   - Inverse Group Mask (|icon-mask-light|) to mask unselected clusters
+3. Toggle the cluster mask using the toolbar button
+
+For detailed information about clustering methods and implementation, see `Clustering <multidimensional.html#clustering>`_.
 
 .. |icon-filter| image:: _static/icons/icon-filter-64.png
     :height: 2.5ex
@@ -73,7 +100,7 @@ While cluster masks can be toggled in the :doc:`top_toolbar`, they are set in th
 .. |icon-polygon-new| image:: _static/icons/icon-polygon-new-64.png
     :height: 2.5ex
 
-.. |icon-spotlight-64| image:: _static/icons/icon-spotlight-64.png
+.. |icon-spotlight| image:: _static/icons/icon-spotlight-64.png
     :height: 2.5ex
 
 .. |icon-polygon-off| image:: _static/icons/icon-polygon-off-64.png

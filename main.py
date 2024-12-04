@@ -484,6 +484,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionSwapAxes.triggered.connect(self.swap_xy)
         self.actionSwapAxes.setEnabled(False)
 
+        self.actionFilters.triggered.connect(lambda: self.bottom_tab['filters'])
+
         self.browser = Browser(self)
         self.actionReportBug.triggered.connect(lambda: self.browser.engine.setUrl(QUrl('https://github.com/dhasterok/LaserMapExplorer/issues')))
 
@@ -866,6 +868,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Notes tab
         #-------------------------
         self.notes = Notes(self)
+        self.actionNotes.triggered.connect(lambda: self.bottom_tab['notes'])
 
         # Plot Info
         #-------------------------

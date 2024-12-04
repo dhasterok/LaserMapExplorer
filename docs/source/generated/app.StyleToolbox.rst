@@ -4,12 +4,21 @@ app.StyleToolbox
 .. automodule:: app.StyleToolbox
 
    
+   
+   
+
+   
+   
    .. rubric:: Functions
 
    .. autosummary::
    
       get_hex_color
       get_rgb_color
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -25,3 +34,11 @@ app.StyleToolbox
       Scheduler
       Styling
    
+   
+
+   
+   
+   
+
+
+

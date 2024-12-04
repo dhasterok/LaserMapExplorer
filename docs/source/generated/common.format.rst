@@ -4,6 +4,11 @@ common.format
 .. automodule:: common.format
 
    
+   
+   
+
+   
+   
    .. rubric:: Functions
 
    .. autosummary::
@@ -12,3 +17,15 @@ common.format
       oround
       oround_matrix
    
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

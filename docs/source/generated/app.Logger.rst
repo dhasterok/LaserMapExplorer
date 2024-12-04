@@ -4,6 +4,15 @@ app.Logger
 .. automodule:: app.Logger
 
    
+   
+   
+
+   
+   
+   
+
+   
+   
    .. rubric:: Classes
 
    .. autosummary::
@@ -20,3 +29,11 @@ app.Logger
       QWidget
       Qt
    
+   
+
+   
+   
+   
+
+
+

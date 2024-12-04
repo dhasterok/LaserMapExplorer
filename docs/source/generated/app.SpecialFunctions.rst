@@ -4,6 +4,15 @@ app.SpecialFunctions
 .. automodule:: app.SpecialFunctions
 
    
+   
+   
+
+   
+   
+   
+
+   
+   
    .. rubric:: Classes
 
    .. autosummary::
@@ -11,3 +20,11 @@ app.SpecialFunctions
       QMessageBox
       SpecialFunctions
    
+   
+
+   
+   
+   
+
+
+

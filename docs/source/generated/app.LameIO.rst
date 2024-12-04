@@ -4,6 +4,15 @@ app.LameIO
 .. automodule:: app.LameIO
 
    
+   
+   
+
+   
+   
+   
+
+   
+   
    .. rubric:: Classes
 
    .. autosummary::
@@ -15,3 +24,11 @@ app.LameIO
       QPixmap
       QTableWidgetItem
    
+   
+
+   
+   
+   
+
+
+

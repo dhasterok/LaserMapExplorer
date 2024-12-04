@@ -1000,7 +1000,7 @@
      <x>0</x>
      <y>0</y>
      <width>1123</width>
-     <height>14</height>
+     <height>37</height>
     </rect>
    </property>
    <property name="font">
@@ -1087,6 +1087,7 @@
     <addaction name="actionAbout"/>
     <addaction name="separator"/>
     <addaction name="actionPreferences"/>
+    <addaction name="actionViewMode"/>
     <addaction name="separator"/>
     <addaction name="actionQuit_LaME"/>
    </widget>
@@ -1095,12 +1096,23 @@
      <string>Window</string>
     </property>
     <addaction name="actionLogger"/>
+    <addaction name="actionWorkflowTool"/>
+    <addaction name="actionNotes"/>
+    <addaction name="actionFilters"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionHelp"/>
+    <addaction name="actionReportBug"/>
    </widget>
    <addaction name="menuLaME"/>
    <addaction name="menuFile"/>
    <addaction name="menuPlot"/>
    <addaction name="menuAnalyze"/>
    <addaction name="menuTools"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar">
    <property name="font">
@@ -8195,7 +8207,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>100</width>
+              <width>98</width>
               <height>72</height>
              </rect>
             </property>
@@ -8593,7 +8605,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>100</width>
+              <width>98</width>
               <height>72</height>
              </rect>
             </property>
@@ -9019,7 +9031,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>100</width>
+              <width>98</width>
               <height>75</height>
              </rect>
             </property>
@@ -9445,7 +9457,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>100</width>
+              <width>98</width>
               <height>72</height>
              </rect>
             </property>
@@ -11897,7 +11909,7 @@
                 <x>0</x>
                 <y>0</y>
                 <width>510</width>
-                <height>293</height>
+                <height>292</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_72">
@@ -14131,6 +14143,16 @@ Tool</string>
   <action name="actionLogger">
    <property name="text">
     <string>Logger</string>
+   </property>
+  </action>
+  <action name="actionNotes">
+   <property name="text">
+    <string>Notes</string>
+   </property>
+  </action>
+  <action name="actionFilters">
+   <property name="text">
+    <string>Filters</string>
    </property>
   </action>
  </widget>

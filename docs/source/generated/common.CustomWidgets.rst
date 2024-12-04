@@ -4,6 +4,15 @@ common.CustomWidgets
 .. automodule:: common.CustomWidgets
 
    
+   
+   
+
+   
+   
+   
+
+   
+   
    .. rubric:: Classes
 
    .. autosummary::
@@ -23,3 +32,11 @@ common.CustomWidgets
       QWidget
       StandardItem
    
+   
+
+   
+   
+   
+
+
+

@@ -1104,9 +1104,9 @@
     <property name="title">
      <string>Help</string>
     </property>
-    <addaction name="actionHelp"/>
-    <addaction name="actionUser_Guide"/>
+    <addaction name="actionUserGuide"/>
     <addaction name="actionTutorials"/>
+    <addaction name="separator"/>
     <addaction name="actionReportBug"/>
    </widget>
    <addaction name="menuLaME"/>
@@ -14158,7 +14158,7 @@ Tool</string>
     <string>Filters</string>
    </property>
   </action>
-  <action name="actionUser_Guide">
+  <action name="actionUserGuide">
    <property name="text">
     <string>User Guide</string>
    </property>

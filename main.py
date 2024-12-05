@@ -64,15 +64,16 @@ from src.common.Polygon import PolygonManager
 from src.app.Calculator import CustomFieldCalculator as cfc
 from src.app.SpecialFunctions import SpecialFunctions as specfun
 from src.common.NoteTaking import Notes
-from src.app.Browser import Browser
+from common.Browser import Browser
 from src.app.Workflow import Workflow
 import src.app.QuickView as QV
-from src.app.config import BASEDIR, ICONPATH, SSPATH, DEBUG, load_stylesheet
+from src.app.config import BASEDIR, ICONPATH, SSPATH, DEBUG, DEBUG_BROWSER, load_stylesheet
 from src.common.ExtendedDF import AttributeDataFrame
 import src.common.format as fmt
 from src.common.colorfunc import get_hex_color, get_rgb_color
 import src.app.config as config
-from src.app.Logger import LoggerDock
+from src.app.help_mapping import create_help_mapping
+from common.Logger import LoggerDock
 
 # to prevent segmentation error at startup
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
@@ -485,8 +486,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.actionFilters.triggered.connect(lambda: self.bottom_tab['filters'])
 
-        self.browser = Browser(self)
-        self.actionReportBug.triggered.connect(lambda: self.browser.engine.setUrl(QUrl('https://github.com/dhasterok/LaserMapExplorer/issues')))
+        self.actionHelp.setCheckable(True)
+        self.actionHelp.toggled.connect(self.toggle_help_mode)
 
 
         # For light and dark themes, connects actionViewMode
@@ -909,13 +910,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Setup Help
         #-------------------------
-        self.actionHelp.setCheckable(True)
-        self.actionHelp.toggled.connect(self.toggle_help_mode)
-        self.centralwidget.installEventFilter(self)
-        self.canvasWindow.installEventFilter(self)
-        self.dockWidgetLeftToolbox.installEventFilter(self)
-        self.dockWidgetRightToolbox.installEventFilter(self)
-        self.dockWidgetBottomTabs.installEventFilter(self)
+        self.actionReportBug.triggered.connect(lambda: self.open_browser('report_bug'))
+        self.actionUserGuide.triggered.connect(lambda: self.open_browser('user_guide'))
+        self.actionTutorials.triggered.connect(lambda: self.open_browser('tutorials'))
+
+        # self.centralwidget.installEventFilter(self)
+        # self.canvasWindow.installEventFilter(self)
+        # self.dockWidgetLeftToolbox.installEventFilter(self)
+        # self.dockWidgetRightToolbox.installEventFilter(self)
+        # self.dockWidgetBottomTabs.installEventFilter(self)
 
         # Create a button to hide/show the dock
         self.toolButtonLeftDock = QToolButton(self)
@@ -1299,7 +1302,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def open_logger(self):
         """Opens Logger dock
 
-        Opens logger dock, creates on first instance.
+        Opens Logger dock, creates on first instance.
         """            
         if not hasattr(self, 'logger_dock'):
             logfile = os.path.join(BASEDIR,"resources/log/lame.log")
@@ -1307,6 +1310,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.logger_dock.visibilityChanged.connect(self.logger_visibility_change)
         else:
             self.logger_dock.show()
+
+    def open_browser(self, action):
+        """Opens Browser dock with documentation
+
+        Opens Browser dock, creates on first instance.
+        """            
+        if not hasattr(self, 'browser'):
+            help_mapping = create_help_mapping(self)
+            self.browser = Browser(self, help_mapping, BASEDIR, DEBUG_BROWSER)
+        else:
+            self.browser.show()
+
+        match action:
+            case 'report_bug':
+                self.browser.engine.setUrl(QUrl('https://github.com/dhasterok/LaserMapExplorer/issues'))
+            case 'user guide':
+                self.browser.go_to_home()
+            case 'tutorials':
+                self.browser.go_to_page(location='tutorials')
 
     def open_select_analyte_dialog(self):
         """Opens Select Analyte dialog

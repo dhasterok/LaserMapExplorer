@@ -114,9 +114,10 @@ class UIThemes():
         parent.toolButtonPointDown.setIcon(QIcon(os.path.join(ICONPATH,'icon-down-arrow-dark-64.svg')))
         parent.toolButtonPointUp.setIcon(QIcon(os.path.join(ICONPATH,'icon-up-arrow-dark-64.svg')))
         # Browser
-        parent.toolButtonBrowserHome.setIcon(QIcon(os.path.join(ICONPATH,'icon-home-dark-64.svg')))
-        parent.toolButtonForward.setIcon(QIcon(os.path.join(ICONPATH,'icon-forward-arrow-dark-64.svg')))
-        parent.toolButtonBack.setIcon(QIcon(os.path.join(ICONPATH,'icon-back-arrow-dark-64.svg')))
+        if hasattr(parent, 'browser'):
+            parent.browser.home_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-home-dark-64.svg')))
+            parent.browser.forward_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-forward-arrow-dark-64.svg')))
+            parent.browser.back_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-back-arrow-dark-64.svg')))
         # Group Box Plot Tools
         parent.toolButtonHome.setIcon(QIcon(os.path.join(ICONPATH,'icon-home-dark-64.svg')))
         parent.toolButtonRemoveAllMVPlots.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-dark-64.svg')))
@@ -221,9 +222,10 @@ class UIThemes():
         parent.toolButtonPointDown.setIcon(QIcon(os.path.join(ICONPATH,'icon-down-arrow-64.svg')))
         parent.toolButtonPointUp.setIcon(QIcon(os.path.join(ICONPATH,'icon-up-arrow-64.svg')))
         # Browser
-        parent.toolButtonBrowserHome.setIcon(QIcon(os.path.join(ICONPATH,'icon-home-64.svg')))
-        parent.toolButtonForward.setIcon(QIcon(os.path.join(ICONPATH,'icon-forward-arrow-64.svg')))
-        parent.toolButtonBack.setIcon(QIcon(os.path.join(ICONPATH,'icon-back-arrow-64.svg')))
+        if hasattr(parent, 'browser'):
+            parent.browser.home_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-home-64.svg')))
+            parent.browser.forward_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-forward-arrow-64.svg')))
+            parent.browser.back_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-back-arrow-64.svg')))
         # Group Box Plot Tools
         parent.toolButtonHome.setIcon(QIcon(os.path.join(ICONPATH,'icon-home-64.svg')))
         parent.toolButtonRemoveAllMVPlots.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))

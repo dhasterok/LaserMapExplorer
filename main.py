@@ -392,8 +392,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     self.bottom_tab.update({'profile': tid})
                 case 'info':
                     self.bottom_tab.update({'info': tid})
-                case 'help':
-                    self.bottom_tab.update({'help': tid})
 
         self.canvas_tab = {}
         for tid in range(self.canvasWindow.count()):
@@ -1322,7 +1320,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             self.browser.show()
 
-        self.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
+        self.browser.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
         match action:
             case 'report_bug':

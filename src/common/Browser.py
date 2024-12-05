@@ -183,6 +183,9 @@ class Browser(QDockWidget):
 
         self.setWindowTitle("Documentation")
 
+        self.setMinimumSize(QSize(300, 150))
+        self.setMaximumSize(QSize(16777215, 16777215))
+
         # open browser
         self.open_browser()
         #self.parent.browser = WebEngineView(self.parent)
@@ -303,31 +306,3 @@ class Browser(QDockWidget):
         except:
             pass
             #self.browser.setUrl(QUrl(os.path.abspath('docs/build/html/404.html')))
-
-
-    def event(self, event):
-        # Handle floating state
-        if event.type() == QEvent.MouseButtonPress and self.isFloating():
-            mouse_event = event  # Cast to QMouseEvent
-            if isinstance(mouse_event, QMouseEvent) and mouse_event.button() == Qt.LeftButton:
-                # Re-dock the widget
-                self.setFloating(False)
-                self.parent.addDockWidget(Qt.BottomDockWidgetArea, self)
-                self.adjust_window_flags(docked=True)
-                return True
-        return super().event(event)
-
-    def adjust_window_flags(self, docked):
-        """Adjust window flags based on the docked state."""
-        if docked:
-            # Reset to docked state (default behavior)
-            self.setWindowFlags(Qt.Widget)
-        else:
-            # Set floating window flags with maximize button
-            self.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
-        self.show()  # Apply the new flags
-
-    def setFloating(self, floating):
-        """Override setFloating to handle window flags."""
-        super().setFloating(floating)
-        self.adjust_window_flags(docked=not floating)

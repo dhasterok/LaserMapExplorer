@@ -1105,6 +1105,8 @@
      <string>Help</string>
     </property>
     <addaction name="actionHelp"/>
+    <addaction name="actionUser_Guide"/>
+    <addaction name="actionTutorials"/>
     <addaction name="actionReportBug"/>
    </widget>
    <addaction name="menuLaME"/>
@@ -1194,7 +1196,7 @@
         <string/>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <property name="tabSpacing">
         <number>2</number>
@@ -6506,7 +6508,7 @@
                 </font>
                </property>
                <property name="currentIndex">
-                <number>2</number>
+                <number>0</number>
                </property>
                <widget class="QWidget" name="tabThermometry">
                 <attribute name="title">
@@ -6577,8 +6579,8 @@
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>151</width>
-                      <height>38</height>
+                      <width>282</width>
+                      <height>234</height>
                      </rect>
                     </property>
                     <layout class="QFormLayout" name="formLayout_17">
@@ -6968,7 +6970,7 @@
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>236</width>
+                      <width>282</width>
                       <height>234</height>
                      </rect>
                     </property>
@@ -7403,7 +7405,7 @@
         <string/>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <property name="tabSpacing">
         <number>2</number>
@@ -7689,7 +7691,7 @@
             <enum>QFrame::Raised</enum>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>2</number>
            </property>
            <property name="tabSpacing">
             <number>2</number>
@@ -8207,8 +8209,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>98</width>
-              <height>72</height>
+              <width>294</width>
+              <height>216</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -8247,7 +8249,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>203</width>
+                  <width>294</width>
                   <height>374</height>
                  </rect>
                 </property>
@@ -8605,8 +8607,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>98</width>
-              <height>72</height>
+              <width>294</width>
+              <height>216</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -8645,7 +8647,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>244</width>
+                  <width>294</width>
                   <height>256</height>
                  </rect>
                 </property>
@@ -9031,8 +9033,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>98</width>
-              <height>75</height>
+              <width>294</width>
+              <height>216</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -9071,7 +9073,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>247</width>
+                  <width>294</width>
                   <height>318</height>
                  </rect>
                 </property>
@@ -9457,8 +9459,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>98</width>
-              <height>72</height>
+              <width>294</width>
+              <height>216</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -9497,8 +9499,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>178</width>
-                  <height>163</height>
+                  <width>294</width>
+                  <height>216</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_39">
@@ -11414,6 +11416,7 @@
        </property>
        <property name="font">
         <font>
+         <family>.AppleSystemUIFont</family>
          <pointsize>11</pointsize>
          <stylestrategy>PreferDefault</stylestrategy>
         </font>
@@ -11422,7 +11425,7 @@
         <string/>
        </property>
        <property name="currentIndex">
-        <number>4</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="tabNotes">
         <property name="sizePolicy">
@@ -14153,6 +14156,16 @@ Tool</string>
   <action name="actionFilters">
    <property name="text">
     <string>Filters</string>
+   </property>
+  </action>
+  <action name="actionUser_Guide">
+   <property name="text">
+    <string>User Guide</string>
+   </property>
+  </action>
+  <action name="actionTutorials">
+   <property name="text">
+    <string>Tutorials</string>
    </property>
   </action>
  </widget>

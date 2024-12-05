@@ -1,8 +1,8 @@
 import os
-from PyQt5.QtCore import ( Qt, QUrl, QEvent, QObject, pyqtSlot, QSize )
-from PyQt5.QtWidgets import ( QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QSizePolicy, QDockWidget, QGroupBox, QToolButton, QSpacerItem, QLabel, QLineEdit )
+from PyQt5.QtCore import ( Qt, QUrl, QEvent, pyqtSlot, QSize )
+from PyQt5.QtWidgets import ( QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QSizePolicy, QDockWidget, QGroupBox, QToolButton, QLabel, QLineEdit )
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QMouseEvent
     
 # WebEngineView - Web engine for viewing userguide help pages
 # -------------------------------
@@ -129,6 +129,7 @@ class Browser(QDockWidget):
         toolbar_layout = QHBoxLayout(toolbar)
         toolbar_layout.setContentsMargins(5, 5, 5, 5)  # Adjust margins as needed
         toolbar_layout.setSpacing(5)  # Spacing between buttons
+        toolbar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         # self.groupBoxBrowserControl = QtWidgets.QGroupBox(self.container)
         # self.groupBoxBrowserControl.setMinimumSize(QtCore.QSize(0, 40))
@@ -162,20 +163,25 @@ class Browser(QDockWidget):
         self.forward_button.setToolTip("Forward")
 
         self.location_label = QLabel()
-        self.browser_location_lineedit = QLineEdit()
-        self.browser_location_lineedit.setMinimumSize(QSize(200, 20))
-        self.browser_location_lineedit.setMaximumSize(QSize(16777215, 20))
-        self.browser_location_lineedit.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.browser_location = QLineEdit()
+        self.browser_location.setMinimumSize(QSize(200, 20))
+        self.browser_location.setMaximumSize(QSize(16777215, 20))
+        self.browser_location.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         toolbar_layout.addWidget(self.home_button)
         toolbar_layout.addWidget(self.back_button)
         toolbar_layout.addWidget(self.forward_button)
         toolbar_layout.addWidget(self.location_label)
-        toolbar_layout.addWidget(self.browser_location_lineedit)
+        toolbar_layout.addWidget(self.browser_location)
 
         self.dock_layout.addWidget(toolbar)
 
         self.setWidget(container)
+
+        self.setFloating(True)
+        self.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
+
+        self.setWindowTitle("Documentation")
 
         # open browser
         self.open_browser()
@@ -183,13 +189,17 @@ class Browser(QDockWidget):
 
         # connect widget slots
         self.home_button.clicked.connect(self.go_to_home)
-        self.browser_location_lineedit.editingFinished.connect(self.go_to_page)
+        self.browser_location.editingFinished.connect(self.go_to_page)
         self.back_button.clicked.connect(self.engine.back)
         self.forward_button.clicked.connect(self.engine.forward)
 
         # install event filter for help
         for widget in self.help_mapping.keys():
             widget.installEventFilter(self)
+
+        parent.addDockWidget(Qt.BottomDockWidgetArea, self)
+
+        self.show()
 
     def eventFilter(self, obj, event):
         """Event filter to capture mouse press and hover events
@@ -263,14 +273,14 @@ class Browser(QDockWidget):
 
         filename = os.path.join(self.base_path,"docs/build/html/index.html")
 
-        self.parent.browser_location_lineedit.setText(filename)
+        self.browser_location.setText(filename)
 
         if filename:
             # Load the selected HTML file into the QWebEngineView
             self.engine.setUrl(QUrl.fromLocalFile(filename))
         
     def go_to_page(self, location=None):
-        """Tries to load the page given in ``MainWindow.browser_location_lineedit``
+        """Tries to load the page given in ``MainWindow.browser_location``
 
         Parameters
         ----------
@@ -281,11 +291,11 @@ class Browser(QDockWidget):
             print(f"go_to_page, location {location}")
 
         if not location:
-            location = self.parent.browser_location_lineedit.text()
+            location = self.browser_location.text()
         else:
             location = os.path.join(self.base_path,"docs/build/html/"+location+".html")
 
-        self.parent.browser_location_lineedit.setText(location)
+        self.browser_location.setText(location)
 
         try:
             if location:
@@ -293,3 +303,31 @@ class Browser(QDockWidget):
         except:
             pass
             #self.browser.setUrl(QUrl(os.path.abspath('docs/build/html/404.html')))
+
+
+    def event(self, event):
+        # Handle floating state
+        if event.type() == QEvent.MouseButtonPress and self.isFloating():
+            mouse_event = event  # Cast to QMouseEvent
+            if isinstance(mouse_event, QMouseEvent) and mouse_event.button() == Qt.LeftButton:
+                # Re-dock the widget
+                self.setFloating(False)
+                self.parent.addDockWidget(Qt.BottomDockWidgetArea, self)
+                self.adjust_window_flags(docked=True)
+                return True
+        return super().event(event)
+
+    def adjust_window_flags(self, docked):
+        """Adjust window flags based on the docked state."""
+        if docked:
+            # Reset to docked state (default behavior)
+            self.setWindowFlags(Qt.Widget)
+        else:
+            # Set floating window flags with maximize button
+            self.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
+        self.show()  # Apply the new flags
+
+    def setFloating(self, floating):
+        """Override setFloating to handle window flags."""
+        super().setFloating(floating)
+        self.adjust_window_flags(docked=not floating)

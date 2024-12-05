@@ -1,4 +1,4 @@
-class create_help_mapping(parent):
+def create_help_mapping(parent):
     """Generates a help mapping for the given parent widget.
 
     Parameters

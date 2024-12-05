@@ -64,7 +64,7 @@ from src.common.Polygon import PolygonManager
 from src.app.Calculator import CustomFieldCalculator as cfc
 from src.app.SpecialFunctions import SpecialFunctions as specfun
 from src.common.NoteTaking import Notes
-from common.Browser import Browser
+from src.common.Browser import Browser
 from src.app.Workflow import Workflow
 import src.app.QuickView as QV
 from src.app.config import BASEDIR, ICONPATH, SSPATH, DEBUG, DEBUG_BROWSER, load_stylesheet
@@ -73,7 +73,7 @@ import src.common.format as fmt
 from src.common.colorfunc import get_hex_color, get_rgb_color
 import src.app.config as config
 from src.app.help_mapping import create_help_mapping
-from common.Logger import LoggerDock
+from src.common.Logger import LoggerDock
 
 # to prevent segmentation error at startup
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
@@ -1321,6 +1321,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.browser = Browser(self, help_mapping, BASEDIR, DEBUG_BROWSER)
         else:
             self.browser.show()
+
+        self.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
         match action:
             case 'report_bug':

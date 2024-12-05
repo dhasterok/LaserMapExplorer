@@ -84,6 +84,7 @@ setConfigOption('imageAxisOrder', 'row-major') # best performance
 ## !pyuic5 designer/mainwindow.ui -o src/ui/MainWindow.py
 ## !pyuic5 designer/QuickViewDialog.ui -o src/ui/QuickViewDialog.py
 ## !pyuic5 -x designer/AnalyteSelectionDialog.ui -o src/ui/AnalyteSelectionDialog.py
+## !pyuic5 -x designer/FieldSelectionDialog.ui -o src/ui/FieldSelectionDialog.py
 ## !pyuic5 -x designer/FileSelectorDialog.ui -o src/ui/FileSelectorDialog.py
 ## !pyuic5 -x designer/PreferencesWindow.ui -o src/ui/PreferencesWindow.py
 ## !pyuic5 -x designer/MapImportDialog.ui -o src/ui/MapImportDialog.py
@@ -956,6 +957,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # logger
         self.actionLogger.triggered.connect(self.open_logger)
 
+        #initiate custom field selector dialog
+        self.field_dialog = FieldDialog(self)
+
         # ----start debugging----
         # self.test_get_field_list()
         # ----end debugging----
@@ -1326,6 +1330,28 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if result == QDialog.Accepted:
             self.update_analyte_ratio_selection(analyte_dict= self.analyte_dialog.norm_dict)   
             self.workflow.refresh_analyte_saved_lists_dropdown() #refresh saved analyte dropdown in blockly 
+        if result == QDialog.Rejected:
+            pass
+
+
+    def open_select_custom_field_dialog(self):
+        """Opens Select Analyte dialog
+
+        Opens a dialog to select analytes for analysis either graphically or in a table.  Selection updates the list of analytes, and ratios in plot selector and comboBoxes.
+        
+        .. seealso::
+            :ref:`AnalyteSelectionWindow` for the dialog
+        """
+        if self.sample_id == '':
+            return
+
+        
+        self.field_dialog.show()
+
+        result = self.field_dialog.exec_()  # Store the result here
+        if result == QDialog.Accepted:
+            self.selected_fields = self.field_dialog.selected_fields
+            self.workflow.refresh_custom_fields_lists_dropdown() #refresh saved analyte dropdown in blockly 
         if result == QDialog.Rejected:
             pass
     
@@ -6289,6 +6315,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # profiles
         self.update_field_type_combobox(self.comboBoxProfileFieldType)
         self.update_field_combobox(self.comboBoxProfileFieldType, self.comboBoxProfileField)
+
+        # field selector window
+        self.update_field_type_combobox(self.field_dialog.comboBoxFieldType)
+        self.update_field_combobox(self.field_dialog.comboBoxFieldType, self.field_dialog.comboBoxField)
+
 
 
         # colors

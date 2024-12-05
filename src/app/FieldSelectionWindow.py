@@ -24,7 +24,6 @@ class FieldDialog(QDialog, Ui_FieldDialog):
     _type_
         _description_
     """    
-    listUpdated = pyqtSignal()
     def __init__(self, parent):
         super().__init__(parent)
         self.setupUi(self)
@@ -32,17 +31,24 @@ class FieldDialog(QDialog, Ui_FieldDialog):
         if parent.sample_id is None or parent.sample_id == '':
             return
 
-        self.data = parent.data[parent.sample_id].processed_data
-
-                # Initialize filename and unsaved changes flag
+        # Initialize filename and unsaved changes flag
         self.base_title ='LaME: Create custom field list'
         self.filename = 'untitled'
         self.unsaved_changes = False
         self.update_window_title()
-        self.default_dir  = os.path.join(parent.BASEDIR, "resources", "field list")  
+        self.default_dir  = os.path.join(parent.BASEDIR, "resources", "field_list")  
+        self.selected_fields = []
+        self.comboBoxField.addItems(self.field_types)
+        self.comboBoxField.currentIndexChanged.connect(self.update_field_dropdown)
 
-        self.field_type_combo.addItems(self.field_types)
-        self.field_type_combo.currentIndexChanged.connect(self.update_field_dropdown)
+         # UI buttons
+        self.toolButtonAddField.clicked.connect(self.add_field)
+        self.toolButtonRemoveField.clicked.connect(self.delete_field)
+        self.pushButtonSave.clicked.connect(self.save_selection)
+        self.pushButtonLoad.clicked.connect(self.load_selection)
+        self.pushButtonDone.clicked.connect(self.done_selection)
+        self.pushButtonCancel.clicked.connect(self.cancel_selection)
+
 
     def update_window_title(self):
         """Updates the window title based on the filename and unsaved changes."""
@@ -59,30 +65,35 @@ class FieldDialog(QDialog, Ui_FieldDialog):
         self.field_combo.addItems(self.fields.get(field_type, []))
 
     def add_field(self):
-        field = self.field_combo.currentText()
+        field = self.comboBoxField.currentText()
         if field and field not in self.selected_fields:
             self.selected_fields.append(field)
             self.update_table()
+            self.unsaved_changes = True
+            self.update_window_title()
         else:
             QMessageBox.warning(self, 'Warning', 'Field already selected or invalid.')
 
     def delete_field(self):
-        selected_row = self.table_widget.currentRow()
-        if selected_row >= 0:
-            field = self.table_widget.item(selected_row, 0).text()
-            self.selected_fields.remove(field)
-            self.table_widget.removeRow(selected_row)
-        else:
+        selected_items = self.listWidgetFieldList.selectedItems()
+        if not selected_items:
             QMessageBox.warning(self, 'Warning', 'No field selected to delete.')
+            return
+        for item in selected_items:
+            field = item.text()
+            self.selected_fields.remove(field)
+            self.listWidgetFieldList.takeItem(self.listWidgetFieldList.row(item))
+        self.unsaved_changes = True
+        self.update_window_title()
 
     def update_table(self):
-        self.table_widget.setRowCount(0)
+        self.listWidgetFieldList.setRowCount(0)
         for field in self.selected_fields:
-            row = self.table_widget.rowCount()
-            self.table_widget.insertRow(row)
-            self.table_widget.setItem(row, 0, QTableWidgetItem(field))
+            row = self.listWidgetFieldList.rowCount()
+            self.listWidgetFieldList.insertRow(row)
+            self.listWidgetFieldList.setItem(row, 0, QTableWidgetItem(field))
 
-    def load_fields(self):
+    def load_selection(self):
         options = QFileDialog.Options()
         file_name, _ = QFileDialog.getOpenFileName(self, "Load Field List", self.default_dir, "Text Files (*.txt);;All Files (*)", options=options)
         if file_name:
@@ -90,8 +101,15 @@ class FieldDialog(QDialog, Ui_FieldDialog):
                 fields = file.read().splitlines()
                 self.selected_fields = fields
                 self.update_table()
+            self.filename = os.path.basename(file_name)
+            self.unsaved_changes = False
+            self.update_window_title()
 
-    def save_fields(self):
+            self.raise_()
+            self.activateWindow()
+            self.show()
+
+    def save_selection(self):
         options = QFileDialog.Options()
         file_name, _ = QFileDialog.getSaveFileName(self, "Save Field List", self.default_dir, "Text Files (*.txt);;All Files (*)", options=options)
         if file_name:
@@ -100,10 +118,66 @@ class FieldDialog(QDialog, Ui_FieldDialog):
                     file.write(f"{field}\n")
             QMessageBox.information(self, 'Success', 'Field list saved successfully.')
 
-    def done_selection(self):
-        # Emit the selected fields
-        self.listUpdated.emit(self.selected_fields)
-        self.accept()
+            self.filename = os.path.basename(file_name)
+            self.unsaved_changes = False
+            self.update_window_title()
+            self.raise_()
+            self.activateWindow()
+            self.show()
 
+    def done_selection(self):
+        """Executes when `Done` button is clicked."""
+        if self.unsaved_changes:
+            reply = QMessageBox.question(
+                self, 'Unsaved Changes',
+                "You have unsaved changes. Do you want to save them before exiting?",
+                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel
+            )
+            if reply == QMessageBox.Yes:
+                self.save_selection()
+                self.update_list()
+                self.accept()
+            elif reply == QMessageBox.No:
+                self.update_list()
+                self.accept()
+            else:  # Cancel
+                pass  # Do nothing, stay in dialog
+        else:
+            self.update_list()
+            self.accept()
+    
     def cancel_selection(self):
-        self.reject()
+        """Handles the Cancel button click."""
+        if self.unsaved_changes:
+            reply = QMessageBox.question(
+                self, 'Unsaved Changes',
+                "You have unsaved changes. Do you want to save them before exiting?",
+                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel
+            )
+            if reply == QMessageBox.Yes:
+                self.save_selection()
+                self.reject()
+            elif reply == QMessageBox.No:
+                self.reject()
+            else:  # Cancel
+                pass  # Do nothing, stay in dialog
+        else:
+            self.reject()
+
+    def closeEvent(self, event):
+        """Overrides the close event to check for unsaved changes."""
+        if self.unsaved_changes:
+            reply = QMessageBox.question(
+                self, 'Unsaved Changes',
+                "You have unsaved changes. Do you want to save them?",
+                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel
+            )
+            if reply == QMessageBox.Yes:
+                self.save_selection()
+                event.accept()
+            elif reply == QMessageBox.No:
+                event.accept()
+            else:  # Cancel
+                event.ignore()
+        else:
+            event.accept()

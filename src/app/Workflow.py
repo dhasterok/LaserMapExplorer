@@ -267,6 +267,25 @@ class Workflow(QDockWidget):
         list
             List of saved analyte list names.
         """
-        directory = os.path.join(self.parent.BASEDIR, 'resources/analytes list')
+        directory = os.path.join(self.parent.BASEDIR, 'resources/analytes_list')
         analyte_list_names = [str(f).replace('.txt', '') for f in os.listdir(directory) if f.endswith('.txt')]
         return analyte_list_names
+    
+    def get_saved_field_lists(self):
+        """
+        Retrieves the names of saved analyte lists from the resources/analytes list directory.
+
+        Returns
+        -------
+        list
+            List of saved analyte list names.
+        """
+        directory = os.path.join(self.parent.BASEDIR, 'resources/field_list')
+        field_list_names = [str(f).replace('.txt', '') for f in os.listdir(directory) if f.endswith('.txt')]
+        return field_list_names
+
+    def refresh_analyte_saved_lists_dropdown(self):
+            """
+            Calls the JavaScript function to refresh the analyteSavedListsDropdown in Blockly.
+            """
+            self.web_view.page().runJavaScript("refreshCustomFieldListsDropdown();")

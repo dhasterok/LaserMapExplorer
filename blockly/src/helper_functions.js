@@ -50,6 +50,26 @@ function refreshAnalyteSavedListsDropdown() {
 
 window.refreshAnalyteSavedListsDropdown = refreshAnalyteSavedListsDropdown;
 
+
+// Global function to refresh the analyteSavedListsDropdown
+function refreshCustomFieldListsDropdown() {
+    // Iterate through all blocks to find 'select_analytes' blocks
+    Blockly.getMainWorkspace().getAllBlocks().forEach(function(block) {
+        if (block.type === 'select_custom_lists') {
+            // Get the current selection
+            const analyteSelectorValue = block.getFieldValue('fieldSelectorDropdown');
+            if (analyteSelectorValue === 'Saved lists') {
+                const savedListDropdown = block.getField('fieldSavedListsDropdown');
+                const currentSelection = savedListDropdown ? savedListDropdown.getValue() : null;
+                // Update the saved lists dropdown while preserving selection
+                block.updateSavedListsDropdown(currentSelection);
+            }
+        }
+    });
+}
+
+window.refreshCustomFieldListsDropdown = refreshCustomFieldListsDropdown;
+
 function updateFieldTypeList(newFieldTypeList) {
     // Clear the existing array
     fieldTypeList.length = 0;

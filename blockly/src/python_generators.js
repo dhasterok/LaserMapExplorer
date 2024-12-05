@@ -105,6 +105,22 @@ pythonGenerator.forBlock['neg_handling_method'] = function(block) {
     return code;
 };
 
+pythonGenerator.forBlock['select_custom_lists'] = function(block) {
+    var analyteSelectorValue = block.getFieldValue('fieldSelectorDropdown');
+    var code = '';
+    
+    if (analyteSelectorValue === 'Current selection') {
+        code = '';
+    } else if (analyteSelectorValue === 'Field selector') {
+        code = 'self.parent.open_select_custom_field_dialog()\n';
+    } else if (analyteSelectorValue === 'Saved lists') {
+        var savedListName = block.getFieldValue('fieldSavedListsDropdown');
+        var quotedListName = generator.quote_(savedListName);
+        code = 'self.parent.update_analyte_selection_from_file(' + quotedListName + ')\n';
+    }
+    return code;
+};
+
 
 
 /*

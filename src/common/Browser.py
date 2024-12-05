@@ -247,7 +247,6 @@ class Browser(QDockWidget):
                 if self.debug_browser:
                     print(f"Browser.eventFilter: Accessing help page {obj}:{self.help_mapping[obj]}")
 
-                self.parent.tabWidget.setCurrentIndex(self.parent.bottom_tab['help'])
                 return True
 
         return super().eventFilter(obj, event)

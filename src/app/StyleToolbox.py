@@ -2273,7 +2273,7 @@ class Styling():
 
         #current_plot_df = pd.DataFrame()
         if field not in ['X','Y']:
-            df = data.get_map_data(field, field_type, ref_chem=self.parent.ref_chem)
+            df = data.get_map_data(field, field_type)
             array = df['array'][data.mask].values if not df.empty else []
         else:
             # field 'X' and 'Y' require separate extraction

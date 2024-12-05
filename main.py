@@ -1139,15 +1139,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.sample_id not in self.data:
             # load sample's *.lame file
             file_path = os.path.join(self.selected_directory, self.csv_files[index])
-            self.data[self.sample_id] = SampleObj(self.sample_id, file_path, self.comboBoxOutlierMethod.currentText(), self.comboBoxNegativeMethod.currentText())
+            self.data[self.sample_id] = SampleObj(self.sample_id, file_path, self.comboBoxOutlierMethod.currentText(), self.comboBoxNegativeMethod.currentText(), self.ref_chem)
+
+            # get selected_analyte columns
+            selected_analytes = self.data[self.sample_id].processed_data.match_attributes({'data_type': 'analyte', 'use': True})
+
             self.update_labels()
 
             # set slot for swapXY button
             self.toolButtonSwapResolution.clicked.connect(self.data[self.sample_id].swap_resolution)
             self.update_aspect_ratio_controls()
-
-            # get selected_analyte columns
-            selected_analytes = self.data[self.sample_id].processed_data.match_attributes({'data_type': 'analyte', 'use': True})
 
             # set analyte map to first available analyte
             if not selected_analytes:
@@ -1232,7 +1233,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.comboBoxPlotType.setCurrentText('analyte map')
         self.toolbox_changed(update=False)
         self.update_all_field_comboboxes()
-        self.update_blockly_field_types()
+        if hasattr(self, 'workflow'):
+            self.update_blockly_field_types()
+
         self.update_field_combobox(self.comboBoxColorByField,self.comboBoxColorField)
         self.spinBoxColorField.setMinimum(0)
         self.spinBoxColorField.setMaximum(self.comboBoxColorField.count() - 1)
@@ -1291,11 +1294,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """Opens Workflow dock.
 
         Opens workflow dock, creates on first instance.
-        """        
+        """
         if not hasattr(self, 'workflow'):
             self.workflow = Workflow(self)
         else:
             self.workflow.show()
+
+        self.workflow.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
     def open_logger(self):
         """Opens Logger dock
@@ -1761,8 +1766,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         if (ref_index):
 
-            self.ref_chem = self.ref_data.iloc[ref_index]
-            self.ref_chem.index = [col.replace('_ppm', '') for col in self.ref_chem.index]
+            ref_chem = self.ref_data.iloc[ref_index]
+            ref_chem.index = [col.replace('_ppm', '') for col in ref_chem.index]
+
+            self.data[self.sample_id].ref_chem = ref_chem
 
             return ref_index
 
@@ -1794,8 +1801,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 if check:
                     # ratio normalized
                     # check if ratio can be normalized (note: normalization is not handled here)
-                    refval_1 = self.ref_chem[re.sub(r'\d', '', analyte_1).lower()]
-                    refval_2 = self.ref_chem[re.sub(r'\d', '', analyte_2).lower()]
+                    refval_1 = self.data[self.sample_id].ref_chem[re.sub(r'\d', '', analyte_1).lower()]
+                    refval_2 = self.data[self.sample_id].ref_chem[re.sub(r'\d', '', analyte_2).lower()]
                     ratio_flag = False
                     if (refval_1 > 0) and (refval_2 > 0):
                         ratio_flag = True
@@ -2132,7 +2139,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         sample_id = self.plot_info['sample_id']
         field_type = self.comboBoxColorByField.currentText()
         field = self.comboBoxColorField.currentText()
-        current_plot_df = self.get_map_data(field, field_type)
+        current_plot_df = self.data[self.sample_id].get_map_data(field, field_type)
         
         self.data[self.sample_id].mask = self.data[self.sample_id].mask[self.data[self.sample_id].crop_mask]
         self.data[self.sample_id].polygon_mask = self.data[self.sample_id].polygon_mask[self.data[self.sample_id].crop_mask]
@@ -2242,7 +2249,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return
 
         try:
-            array = self.get_map_data(self.comboBoxFilterField.currentText(), self.comboBoxFilterFieldType.currentText())['array'].dropna()
+            array = self.data[self.sample_id].get_map_data(self.comboBoxFilterField.currentText(), self.comboBoxFilterFieldType.currentText())['array'].dropna()
         except:
             return
 
@@ -2259,7 +2266,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return
 
         try:
-            array = self.get_map_data(self.comboBoxFilterField.currentText(), self.comboBoxFilterFieldType.currentText())['array'].dropna()
+            array = self.data[self.sample_id].get_map_data(self.comboBoxFilterField.currentText(), self.comboBoxFilterFieldType.currentText())['array'].dropna()
         except:
             return
 
@@ -2269,13 +2276,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def callback_doubleSpinBoxFMinQ(self):
         """Updates ``MainWindow.lineEditFMin.value`` when ``MainWindow.doubleSpinBoxFMinQ.value`` is changed"""        
-        array = self.get_map_data(self.comboBoxFilterField.currentText(), self.comboBoxFilterFieldType.currentText())['array'].dropna()
+        array = self.data[self.sample_id].get_map_data(self.comboBoxFilterField.currentText(), self.comboBoxFilterFieldType.currentText())['array'].dropna()
 
         self.lineEditFMin.value = np.percentile(array, self.doubleSpinBoxFMinQ.value())
 
     def callback_doubleSpinBoxFMaxQ(self):
         """Updates ``MainWindow.lineEditFMax.value`` when ``MainWindow.doubleSpinBoxFMaxQ.value`` is changed"""        
-        array = self.get_map_data(self.comboBoxFilterField.currentText(), self.comboBoxFilterFieldType.currentText())['array'].dropna()
+        array = self.data[self.sample_id].get_map_data(self.comboBoxFilterField.currentText(), self.comboBoxFilterFieldType.currentText())['array'].dropna()
 
         self.lineEditFMax.value = np.percentile(array, self.doubleSpinBoxFMaxQ.value())
 
@@ -2474,7 +2481,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # by creating a mask based on min and max of the corresponding filter analytes
         for index, filter_row in self.data[sample_id].filter_df.iterrows():
             if filter_row['use']:
-                analyte_df = self.get_map_data(filter_row['field'], filter_row['field_type'])
+                analyte_df = self.data[self.sample_id].get_map_data(filter_row['field'], filter_row['field_type'])
                 
                 operator = filter_row['operator']
                 if operator == 'and':
@@ -2810,29 +2817,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     # -------------------------------------
     # General plot functions
     # -------------------------------------
-    def get_map_data(self, field, field_type, norm='linear'):
-        """Wrapper for ``DataHandling.get_map_data`` that ensure proper call from ``MainWindow`` methods.
-
-        Parameters
-        ----------
-        field : str
-            Field requested.
-        field_type : str
-            Field type, if normalized it will include reference chemistry in call.
-        norm : str, optional
-            Sets whether to return the data scaled (linear, log, etc.), by default False
-
-        Returns
-        -------
-        df : pandas.DataFrame
-        """        
-        if 'normalized' in field_type:
-            df = self.data[self.sample_id].get_map_data(field, field_type, norm=norm, ref_chem=self.ref_chem)
-        else:
-            df = self.data[self.sample_id].get_map_data(field, field_type, norm=norm)
-
-        return df
-
     def update_SV(self, plot_type=None, field_type=None, field=None):
         """Updates current plot (not saved to plot selector)
 
@@ -2964,7 +2948,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.sv_widget.show()
 
             if (self.comboBoxPlotType.currentText() == 'analyte map') and (self.toolBox.currentIndex() == self.left_tab['sample']):
-                current_map_df = self.get_map_data(plot_info['plot_name'], plot_info['field_type'], norm=self.style.cscale)
+                current_map_df = self.data[self.sample_id].get_map_data(plot_info['plot_name'], plot_info['field_type'], norm=self.style.cscale)
                 self.plot_small_histogram(current_map_df)
         # add figure to MultiView canvas
         elif self.canvasWindow.currentIndex() == self.canvas_tab['mv']:
@@ -3201,7 +3185,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             row = i // ncol
 
             # get data for current analyte
-            current_plot_df = self.get_map_data(analyte, 'Analyte')
+            current_plot_df = self.data[self.sample_id].get_map_data(analyte, 'Analyte')
             reshaped_array = np.reshape(current_plot_df['array'].values, self.data[self.sample_id].array_size, order=self.data[self.sample_id].order)
 
             # add image to canvas
@@ -3377,11 +3361,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     case 'analyte map':
                         field_type = self.plot_info['field_type']
                         field = self.plot_info['field']
-                        save_data = self.get_map_data(field, field_type)
+                        save_data = self.data[self.sample_id].get_map_data(field, field_type)
                     case 'gradient map':
                         field_type = self.plot_info['field_type']
                         field = self.plot_info['field']
-                        save_data = self.get_map_data(field, field_type)
+                        save_data = self.data[self.sample_id].get_map_data(field, field_type)
                         filtered_image = self.noise_red_array
                     case 'cluster':
                         save_data= self.data[self.sample_id].processed_data[field]
@@ -3580,7 +3564,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # get data for current map
         #scale = self.data[self.sample_id].processed_data.get_attribute(field, 'norm')
         scale = self.style.cscale
-        map_df = self.data[self.sample_id].get_map_data(field, field_type, ref_chem=self.ref_chem)
+        map_df = self.data[self.sample_id].get_map_data(field, field_type)
 
         array_size = self.data[self.sample_id].array_size
         aspect_ratio = self.data[self.sample_id].aspect_ratio
@@ -3679,7 +3663,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # get data for current map
         scale = self.style.cscale
-        map_df = self.get_map_data(field, field_type, norm=scale)
+        map_df = self.data[self.sample_id].get_map_data(field, field_type, norm=scale)
 
         # store map_df to save_data if data needs to be exported
         self.save_data = map_df
@@ -4023,7 +4007,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_bins = False
 
         # get currently selected data
-        current_plot_df = self.get_map_data(self.comboBoxHistField.currentText(), self.comboBoxHistFieldType.currentText())
+        current_plot_df = self.data[self.sample_id].get_map_data(self.comboBoxHistField.currentText(), self.comboBoxHistFieldType.currentText())
 
         # update bin width
         range = (np.nanmax(current_plot_df['array']) - np.nanmin(current_plot_df['array']))
@@ -4048,7 +4032,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_bins = False
 
         # get currently selected data
-        map_df = self.get_map_data(self.comboBoxHistField.currentText(), self.comboBoxHistFieldType.currentText())
+        map_df = self.data[self.sample_id].get_map_data(self.comboBoxHistField.currentText(), self.comboBoxHistFieldType.currentText())
 
         # update n bins
         self.spinBoxBinWidth.setValue( int((np.nanmax(map_df['array']) - np.nanmin(map_df['array'])) / self.spinBoxBinWidth.value()) )
@@ -4919,7 +4903,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     # -------------------------------------
     # PCA functions and plotting
     # -------------------------------------
-    def compute_pca(self):
+    def compute_pca(self, update_ui=True):
         #print('compute_pca')
         self.pca_results = {}
 
@@ -4939,17 +4923,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Add PCA scores to DataFrame for easier plotting
         self.data[self.sample_id].add_columns('pca score',pca_scores.columns,pca_scores.values,self.data[self.sample_id].mask)
 
-        #update min and max of PCA spinboxes
-        if self.pca_results.n_components_ > 0:
-            self.spinBoxPCX.setMinimum(1)
-            self.spinBoxPCY.setMinimum(1)
-            self.spinBoxPCX.setMaximum(self.pca_results.n_components_+1)
-            self.spinBoxPCY.setMaximum(self.pca_results.n_components_+1)
-            if self.spinBoxPCY.value() == 1:
-                self.spinBoxPCY.setValue(int(2))
+        if update_ui:
+             #update min and max of PCA spinboxes
+            if self.pca_results.n_components_ > 0:
+                self.spinBoxPCX.setMinimum(1)
+                self.spinBoxPCY.setMinimum(1)
+                self.spinBoxPCX.setMaximum(self.pca_results.n_components_+1)
+                self.spinBoxPCY.setMaximum(self.pca_results.n_components_+1)
+                if self.spinBoxPCY.value() == 1:
+                    self.spinBoxPCY.setValue(int(2))
 
-        self.update_all_field_comboboxes()
-        self.update_blockly_field_types()
+            self.update_all_field_comboboxes()
+        else:
+            self.update_blockly_field_types()
+
         self.update_pca_flag = False
 
     def plot_pca(self):

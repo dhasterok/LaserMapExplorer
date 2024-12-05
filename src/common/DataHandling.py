@@ -88,6 +88,9 @@ class SampleObj:
     get_vector :
         Creates a dictionary of values for plotting
 
+    ref_chem : dict
+        Reference chemistry. By default `None`.
+
     Attributes
     ----------
     update_crop_mask :
@@ -181,7 +184,7 @@ class SampleObj:
         | 'cluster_mask' : (MaskObj) -- mask created from selected or inverse selected cluster groups.  Once this mask is set, it cannot be reset unless it is turned off, clustering is recomputed, and selected clusters are used to produce a new mask.
         | 'mask' : () -- combined mask, derived from filter_mask & 'polygon_mask' & 'crop_mask'
     """    
-    def __init__(self, sample_id, file_path, outlier_method, negative_method):
+    def __init__(self, sample_id, file_path, outlier_method, negative_method, ref_chem=None):
         if DEBUG_DATA:
             print(f"SampleeObj.__init__\n  sample_id: {sample_id}\n  file_path: {file_path}\n  outlier_method: {outlier_method}\n  negative_method: {negative_method}")
 
@@ -196,6 +199,8 @@ class SampleObj:
 
         self._default_difference_lower_bound= 0.005
         self._default_difference_upper_bound= 0.995
+
+        self._ref_chem = ref_chem
 
         # filter dataframe
         self.filter_df = pd.DataFrame()
@@ -337,6 +342,15 @@ class SampleObj:
     # Define properties and setter functions
     # --------------------------------------
     # note properties are based on the cropped X and Y values
+    @property
+    def ref_chem(self):
+        """dict: Reference chemistry"""
+        return self._ref_chem
+
+    @ref_chem.setter
+    def ref_chem(self, d):
+        self._ref_chem = d
+
     @property
     def x(self):
         """numpy.ndarray: Value of x-coordinate associated with map data"""
@@ -1159,7 +1173,7 @@ class SampleObj:
 
         self.prep_data(field)
 
-    def get_map_data(self, field, field_type='Analyte', norm=False, ref_chem=None, processed=True):
+    def get_map_data(self, field, field_type='Analyte', norm=False, processed=True):
         """
         Retrieves and processes the mapping data for the given sample and analytes
 
@@ -1176,8 +1190,6 @@ class SampleObj:
         norm : str
             Scale data as linear, log, etc. based on stored norm.  If scale_data is `False`, the
             data are returned with a linear scale.  By default `False`.
-        ref_chem : dict
-            Reference chemistry. By default `None`.
 
         Returns
         -------
@@ -1185,7 +1197,7 @@ class SampleObj:
             Processed data for plotting. This is only returned if analysis_type is not 'laser' or 'hist'.
         """
         if DEBUG_DATA:
-            print(f"get_map_data\n  field type: {field_type}\n  field: {field}\n  norm: {norm}\n  ref_chem: {ref_chem}\n  processed: {processed}")
+            print(f"get_map_data\n  field type: {field_type}\n  field: {field}\n  norm: {norm}\n  processed: {processed}")
         # ----begin debugging----
         # print('[get_map_data] sample_id: '+sample_id+'   field_type: '+field_type+'   field: '+field)
         # ----end debugging----
@@ -1223,7 +1235,7 @@ class SampleObj:
                 
                 # normalize
                 if 'normalized' in field_type:
-                    refval = ref_chem[re.sub(r'\d', '', field).lower()]
+                    refval = self.ref_chem[re.sub(r'\d', '', field).lower()]
                     df['array'] = df['array'] / refval
 
             case 'Ratio' | 'Ratio (normalized)':
@@ -1235,8 +1247,8 @@ class SampleObj:
                 
                 # normalize
                 if 'normalized' in field_type:
-                    refval_1 = ref_chem[re.sub(r'\d', '', field_1).lower()]
-                    refval_2 = ref_chem[re.sub(r'\d', '', field_2).lower()]
+                    refval_1 = self.ref_chem[re.sub(r'\d', '', field_1).lower()]
+                    refval_2 = self.ref_chem[re.sub(r'\d', '', field_2).lower()]
                     df['array'] = df['array'] * (refval_2 / refval_1)
 
                 #get norm value
@@ -1303,7 +1315,7 @@ class SampleObj:
         return df, use_analytes
     
     # extracts data for scatter plot
-    def get_vector(self, field_type, field, norm='linear', ref_chem=None, processed=True):
+    def get_vector(self, field_type, field, norm='linear', processed=True):
         """Creates a dictionary of values for plotting
 
         Returns
@@ -1313,7 +1325,7 @@ class SampleObj:
             'field', 'type', 'label', and 'array'.
         """
         if DEBUG_DATA:
-            print(f"get_vector\n  field_type: {field_type}\n  field: {field}\n  norm: {norm}\n  ref_chem: {ref_chem}\n  processed: {processed}")
+            print(f"get_vector\n  field_type: {field_type}\n  field: {field}\n  norm: {norm}\n  processed: {processed}")
 
         # initialize dictionary
         value_dict = {'type': field_type, 'field': field, 'label': None, 'array': None}
@@ -1329,7 +1341,7 @@ class SampleObj:
             value_dict['label'] = value_dict['field'] + ' (' + unit + ')'
 
         # add array
-        df = self.get_map_data(field=field, field_type=field_type, norm='linear', ref_chem=ref_chem, processed=processed)
+        df = self.get_map_data(field=field, field_type=field_type, norm='linear', processed=processed)
         value_dict['array'] = df['array'][self.mask].values if not df.empty else []
 
         return value_dict

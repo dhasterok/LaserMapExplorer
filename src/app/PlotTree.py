@@ -276,11 +276,6 @@ class PlotTree():
             print(f"  {tree}:{branch}:{leaf}")
 
         if tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)', 'Calculated']:
-            #current_plot_df = self.get_map_data(sample_id=level_2_data, field=level_3_data, field_type='Analyte')
-            #self.create_plot(current_plot_df, sample_id=level_2_data, plot_type='analyte', analyte_1=level_3_data)
-            # if leaf in self.plot_widget_dict[tree][branch].keys():
-            #     widget_dict = self.plot_widget_dict[tree][branch][leaf]
-            #     self.add_plotwidget_to_canvas(widget_dict['info'], view=widget_dict['view'], position=widget_dict['position'])
             self.parent.style.initialize_axis_values(tree, leaf)
             self.parent.style.set_style_widgets('analyte map')
             if self.plot_info:
@@ -299,14 +294,6 @@ class PlotTree():
                 # print('tree_double_click: plot_map_pg')
                 if self.parent.toolBox.currentIndex() not in [self.parent.left_tab['sample'], self.parent.left_tab['process'], self.parent.left_tab['polygons'], self.parent.left_tab['profile']]:
                     self.parent.toolBox.setCurrentIndex(self.parent.left_tab['sample'])
-
-                # else:
-                #     pass
-                
-                # if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
-                #     self.plot_map_mpl(sample_id=branch, field_type=tree, field=leaf)
-                # else:
-                #     self.plot_map_pg(sample_id=branch, field_type=tree, field=leaf)
 
                 # updates comboBoxColorByField and comboBoxColorField comboboxes and creates new plot
                 self.parent.update_fields(branch,'analyte map',tree, leaf, plot=True)

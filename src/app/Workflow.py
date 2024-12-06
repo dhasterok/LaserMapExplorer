@@ -216,8 +216,9 @@ class Workflow(QDockWidget):
 
         self.setFloating(True)
         self.setWindowTitle("Workflow Method Design")
+        self.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
-        parent.addDockWidget(Qt.RightDockWidgetArea, self)
+        parent.addDockWidget(Qt.BottomDockWidgetArea, self)
 
         # Initiate Main class from Modules.py
         # self.main will hold instance of Main code without any UI interactions

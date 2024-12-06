@@ -27,10 +27,12 @@
    :toctree:
    :recursive:
 
+   common.Browser
    common.CustomMplCanvas
    common.CustomWidgets
    common.DataHandling
    common.ExtendedDF
+   common.Logger
    common.Masking
    common.MolecularWeightCalculator
    common.NoteTaking

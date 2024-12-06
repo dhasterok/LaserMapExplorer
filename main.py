@@ -384,8 +384,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.bottom_tab = {}
         for tid in range(self.tabWidget.count()):
             match self.tabWidget.tabText(tid).lower():
-                case 'notes':
-                    self.bottom_tab.update({'notes': tid})
                 case 'filters':
                     self.bottom_tab.update({'filter': tid})
                 case 'profiles':
@@ -410,7 +408,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Set initial view
         self.toolBox.setCurrentIndex(self.left_tab['sample'])
-        self.tabWidget.setCurrentIndex(self.bottom_tab['notes'])
+        self.tabWidget.setCurrentIndex(self.bottom_tab['filter'])
         self.toolBoxStyle.setCurrentIndex(0)
         self.toolBoxTreeView.setCurrentIndex(self.right_tab['tree'])
         self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
@@ -864,8 +862,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Notes tab
         #-------------------------
-        self.notes = Notes(self)
-        self.actionNotes.triggered.connect(lambda: self.bottom_tab['notes'])
+        self.actionNotes.triggered.connect(self.open_notes)
 
         # Plot Info
         #-------------------------
@@ -1302,6 +1299,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.workflow.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
+    def open_notes(self):
+        """Opens Notes dock
+
+        Opens Notes dock, creates on first instance.
+        :see also:
+            NoteTaking
+        """            
+        if not hasattr(self, 'notes'):
+            if hasattr(self,'selected_directory') and self.sample_id != '':
+                self.notes_file = os.path.join(self.selected_directory,self.sample_id+'.rst')
+            else:
+                self.notes_file = None
+            self.notes = Notes(self, self.notes_file)
+        else:
+            self.notes.show()
+
+        self.notes.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
+
     def open_logger(self):
         """Opens Logger dock
 
@@ -1313,6 +1328,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.logger_dock.visibilityChanged.connect(self.logger_visibility_change)
         else:
             self.logger_dock.show()
+
+        self.browser.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
     def open_browser(self, action):
         """Opens Browser dock with documentation
@@ -2476,18 +2493,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # apply interval filters
         #print(self.data[sample_id].filter_df)
-
-        # Check if rows in self.data[sample_id]['filter_info'] exist and filter array in current_plot_df
-        # by creating a mask based on min and max of the corresponding filter analytes
-        for index, filter_row in self.data[sample_id].filter_df.iterrows():
-            if filter_row['use']:
-                analyte_df = self.data[self.sample_id].get_map_data(filter_row['field'], filter_row['field_type'])
-                
-                operator = filter_row['operator']
-                if operator == 'and':
-                    self.data[sample_id].filter_mask = self.data[sample_id].filter_mask & ((filter_row['min'] <= analyte_df['array'].values) & (analyte_df['array'].values <= filter_row['max']))
-                elif operator == 'or':
-                    self.data[sample_id].filter_mask = self.data[sample_id].filter_mask | ((filter_row['min'] <= analyte_df['array'].values) & (analyte_df['array'].values <= filter_row['max']))
+        self.data[self.sample_id].apply_field_filters()
 
         if update_plot:
             self.apply_filters(fullmap=False)

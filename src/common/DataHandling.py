@@ -259,7 +259,6 @@ class SampleObj:
         self.x = self.orig_x = self.raw_data['X']
         self.y = self.orig_y = self.raw_data['Y']
 
-
         # initialize X and Y axes bounds for plotting and cropping, initially the entire map
         self._xlim = [self.raw_data['X'].min(), self.raw_data['X'].max()]
         self._ylim = [self.raw_data['Y'].min(), self.raw_data['Y'].max()]
@@ -1457,3 +1456,24 @@ class SampleObj:
     #                 else:
     #                     t_array = np.copy(array)
     #             return t_array
+
+    def apply_field_filters(self):
+        """Applies filters based on field values.
+        
+        Field-based filters are stored in ``self.filter_df``.  This method updates ``self.filter_mask``.
+        """        
+        # Check if rows in self.data[sample_id]['filter_info'] exist and filter array in current_plot_df
+        if self.filter_df.empty:
+            self.filter_mask = np.ones_like(self.processed_data['X'].values, dtype=bool)
+            return
+
+        # by creating a mask based on min and max of the corresponding filter analytes
+        for index, filter_row in self.filter_df.iterrows():
+            if filter_row['use']:
+                field_df = self.get_map_data(filter_row['field'], filter_row['field_type'])
+                
+                operator = filter_row['operator']
+                if operator == 'and':
+                    self.filter_mask = self.filter_mask & ((filter_row['min'] <= field_df['array'].values) & (field_df['array'].values <= filter_row['max']))
+                elif operator == 'or':
+                    self.filter_mask = self.filter_mask | ((filter_row['min'] <= field_df['array'].values) & (field_df['array'].values <= filter_row['max']))

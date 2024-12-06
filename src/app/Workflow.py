@@ -7,6 +7,7 @@ from PyQt5.QtCore import pyqtSlot, Qt, QObject, QUrl, QFile, QIODevice
 from src.app.config import BASEDIR
 from PyQt5.QtWebEngineWidgets import QWebEngineSettings
 import numpy as np
+from src.app.Modules import Main
 os.environ["QTWEBENGINE_REMOTE_DEBUGGING"]="9222" #uncomment to debug in chrome  
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
 
@@ -33,10 +34,10 @@ class BlocklyBridge(QObject):
     def invokeSetStyleWidgets(self, plot_type):
         # Call the set_style_widgets function
         plot_type = plot_type.replace('_',' ')
-        if plot_type in self.parent.parent.style.style_dict.keys():
+        if plot_type in self.parent.main.style.style_dict.keys():
             ### need to add parent.parent to access main code from this class 
-            self.parent.parent.style.set_style_widgets(plot_type)
-            style = self.parent.parent.style.style_dict[plot_type]
+            self.parent.main.style.set_style_widgets(plot_type)
+            style = self.parent.main.style.style_dict[plot_type]
             print('invokeSetStyleWidgets')
             # Convert NumPy types to native Python types (if any)
             style_serializable = self.convert_numpy_types(style)
@@ -49,21 +50,16 @@ class BlocklyBridge(QObject):
     @pyqtSlot(str, result=list)
     def getFieldList(self, field_type):
         print('get_field_list')
-        return self.parent.parent.get_field_list(field_type)
-
-    @pyqtSlot(str, result=list)
-    def getFieldTypeList(self):
-        print('get_field_type_list')
-        return self.parent.parent.get_field_type_list()
+        return self.parent.main.get_field_list(field_type)
     
     @pyqtSlot(result=str)
     def getBaseDir(self):
-        return self.parent.parent.BASEDIR
+        return self.parent.main.BASEDIR
     
     @pyqtSlot(result=list)
     def getRefValueList(self):
         
-        return self.parent.parent.ref_list.tolist()
+        return self.parent.main.ref_list.tolist()
 
     @pyqtSlot(result=list)
     def getSavedAnalyteLists(self):
@@ -78,8 +74,11 @@ class BlocklyBridge(QObject):
         """
         Exposed method to JavaScript to get the current dx and dy dimensions.
         """
-        dx = self.parent.parent.data[self.parent.parent.sample_id].dx
-        dy = self.parent.parent.data[self.parent.parent.sample_id].dy
+        dx =0
+        dy = 0
+        if self.parent.main.sample_id:
+            dx = self.parent.main.data[self.parent.main.sample_id].dx
+            dy = self.parent.main.data[self.parent.main.sample_id].dy
         return [dx, dy]
 
     
@@ -220,6 +219,10 @@ class Workflow(QDockWidget):
 
         parent.addDockWidget(Qt.RightDockWidgetArea, self)
 
+        # Initiate Main class from Modules.py
+        # self.main will hold instance of Main code without any UI interactions
+        self.main = Main()
+
     def handleResizeEvent(self, event):
         self.web_view.page().runJavaScript("resizeBlocklyWorkspace()")
         event.accept()
@@ -243,7 +246,7 @@ class Workflow(QDockWidget):
         Sends sample_ids to JavaScript to update the sample_ids list and refresh dropdowns.
         """
         # Convert the sample_ids list to a format that JavaScript can use (a JSON array)
-        sample_ids_js_array = str(self.parent.sample_ids)
+        sample_ids_js_array = str(self.main.sample_ids)
         self.web_view.page().runJavaScript(f"updateSampleDropdown({sample_ids_js_array})")
 
     def update_field_type_list(self, field_type_list):

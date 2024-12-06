@@ -2,9 +2,36 @@ import numpy as np
 from scipy.stats import norm, mode
 from scipy.special import erfinv,erf
 from scipy.interpolate import interp1d
-def gausscensor(x, scale='linear', q=None , a=3/8):
-    if q is None:
-        q=[0.05, 0.25, 0.5, 0.75, 0.95]
+
+def gausscensor(x, scale='linear', q=[0.05, 0.25, 0.5, 0.75, 0.95] , a=3/8):
+    """Estimates statistical parameters when there are censored data.
+
+    Estimates the mean, and standard deviation when there are censored data.  This method is specifically for use
+    with compositional data that should be positive only.  Values of zero indicate a left censored value, but no
+    detection limit has been reported.  Negative values indicate left censored values with absolute value being 
+    the detection limit.
+
+    *Reference:* Michael, J.R., and W.R. Schucany, 1986, Analysis of Data from Censored Samples, in
+    Goodness-of-Fit-Techniques, eISBN: 9780203753064
+
+    Parameters
+    ----------
+    x : numpy.ndarray
+        Array of data with left-censored values, zero indicates unknown detection limit, absolute value of negative
+        value indicates known detection limit.
+    scale : str, optional
+        Options include ``linear``, ``log`` and ``log10``, by default 'linear'
+    q : list, optional
+        A list of percentiles to estimate the quantile, by default [0.05, 0.25, 0.5, 0.75, 0.95]
+    a : shape parameter, optional
+        Determined by the type of distribution, by default 3/8
+
+    Returns
+    -------
+    dict, list
+        Returns a dictionary with statistical estimates for scale parameters (mu and sigma) and uncertainty of
+        the mean (sigma_mu) and an estimated root-mean-square (rms) misfit.
+    """    
         
     x = np.array(x)
     x = x[~np.isnan(x)]
@@ -60,7 +87,7 @@ def gausscensor(x, scale='linear', q=None , a=3/8):
 
     model = {'mu': mu, 'sigma': sigma, 'rms': rms}
     
-    
+    # Estimate quantiles
     quantile_values = np.zeros((len(q), 2))  # Initialize quantile_values with two columns
     quantile_values[:, 0] = mu + sigma * np.sqrt(2) * erfinv(2 * np.array(q) - 1)
     

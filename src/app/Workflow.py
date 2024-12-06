@@ -217,8 +217,9 @@ class Workflow(QDockWidget):
 
         self.setFloating(True)
         self.setWindowTitle("Workflow Method Design")
+        self.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
-        parent.addDockWidget(Qt.RightDockWidgetArea, self)
+        parent.addDockWidget(Qt.BottomDockWidgetArea, self)
 
     def handleResizeEvent(self, event):
         self.web_view.page().runJavaScript("resizeBlocklyWorkspace()")

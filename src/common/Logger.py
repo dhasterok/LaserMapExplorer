@@ -66,6 +66,7 @@ class LoggerDock(QDockWidget):
 
         self.setFloating(True)
         self.setWindowTitle("LaME Logger")
+        self.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
         # create hide button
         #hide_button = QToolButton()

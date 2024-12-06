@@ -1,7 +1,7 @@
-app.Logger
-==========
+common.Logger
+=============
 
-.. automodule:: app.Logger
+.. automodule:: common.Logger
 
    
    
@@ -23,6 +23,8 @@ app.Logger
       QHBoxLayout
       QIcon
       QMainWindow
+      QSizePolicy
+      QSpacerItem
       QTextEdit
       QToolButton
       QVBoxLayout

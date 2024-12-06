@@ -1,7 +1,7 @@
-app.Browser
-===========
+common.Browser
+==============
 
-.. automodule:: app.Browser
+.. automodule:: common.Browser
 
    
    
@@ -24,9 +24,20 @@ app.Browser
    .. autosummary::
    
       Browser
+      QDockWidget
       QEvent
-      QObject
+      QGroupBox
+      QHBoxLayout
+      QIcon
+      QLabel
+      QLineEdit
+      QMainWindow
+      QMouseEvent
+      QSize
+      QSizePolicy
+      QToolButton
       QUrl
+      QVBoxLayout
       QWebEnginePage
       QWebEngineView
       QWidget

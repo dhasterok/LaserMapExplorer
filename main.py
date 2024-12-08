@@ -61,13 +61,13 @@ from src.app.ImageProcessing import ImageProcessing as ip
 from src.app.StyleToolbox import Styling
 from src.app.Profile import Profiling
 from src.common.Polygon import PolygonManager
-from src.app.Calculator import CustomFieldCalculator as cfc
+from src.common.Calculator import CustomFieldCalculator as cfc
 from src.app.SpecialFunctions import SpecialFunctions as specfun
 from src.common.NoteTaking import Notes
 from src.common.Browser import Browser
 from src.app.Workflow import Workflow
 import src.app.QuickView as QV
-from src.app.config import BASEDIR, ICONPATH, SSPATH, DEBUG, DEBUG_BROWSER, load_stylesheet
+from src.app.config import BASEDIR, ICONPATH, SSPATH, DEBUG, DEBUG_BROWSER, DEBUG_CALCULATOR, load_stylesheet
 from src.common.ExtendedDF import AttributeDataFrame
 import src.common.format as fmt
 from src.common.colorfunc import get_hex_color, get_rgb_color
@@ -846,7 +846,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Calculator tab
         #-------------------------
-        self.calculator = cfc(parent=self) # initalize custom field calculator
+        self.calculator = cfc(parent=self, debug=DEBUG_CALCULATOR) # initalize custom field calculator
+        if hasattr(self,'notes'):
+            self.notes.update_equation_menu()
 
         # Profile filter tab
         #-------------------------
@@ -1114,23 +1116,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #         # Keep only rows where 'persistent' is True
         #         self.filter_info = self.filter_info[self.filter_info['persistent'] == True]
 
-        # stop autosave timer
-        self.notes.save_notes_file()
-        self.notes.autosaveTimer.stop()
+        # if note dock has been open, set notes file to current filename
+        if hasattr(self,'notes'):
+            # change notes file to new sample.  This will initiate the new file and autosave timer.
+            self.notes.notes_file = os.path.join(self.selected_directory,self.sample_id+'.rst')
 
-        # notes and autosave timer
-        self.notes_file = os.path.join(self.selected_directory,self.sample_id+'.rst')
-        # open notes file if it exists
-        if os.path.exists(self.notes_file):
-            try:
-                with open(self.notes_file,'r') as file:
-                    self.textEditNotes.setText(file.read())
-            except:
-                file_name = os.path.basename(self.notes_file)
-                self.statusbar.showMessage(f'Cannot read {file_name}')
-                pass
-        # put current notes into self.textEditNotes
-        self.notes.autosaveTimer.start()
 
         # add sample to sample dictionary
         if self.sample_id not in self.data:
@@ -1308,10 +1298,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """            
         if not hasattr(self, 'notes'):
             if hasattr(self,'selected_directory') and self.sample_id != '':
-                self.notes_file = os.path.join(self.selected_directory,self.sample_id+'.rst')
+                notes_file = os.path.join(self.selected_directory,self.sample_id+'.rst')
             else:
-                self.notes_file = None
-            self.notes = Notes(self, self.notes_file)
+                notes_file = None
+            self.notes = Notes(self, notes_file)
         else:
             self.notes.show()
 

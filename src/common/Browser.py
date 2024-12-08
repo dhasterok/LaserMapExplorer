@@ -16,11 +16,11 @@ class WebEngineView(QWebEngineView):
     QWebEngineView : QWebEngine
         A web engine widget
     """    
-    def __init__(self, parent=None, debug_browser=False):
+    def __init__(self, parent=None, debug=False):
         super().__init__(parent)
 
         self.parent = parent
-        self.debug_browser = debug_browser
+        self.debug = debug
 
         # Connect signals
         self.loadFinished.connect(self.on_load_finished)
@@ -110,9 +110,9 @@ class Browser(QDockWidget):
 
         container = QWidget()
 
-        self.debug_browser = debug_browser
+        self.debug = debug_browser
         
-        if self.debug_browser:
+        if self.debug:
             print("Initializing browser")
 
         if parent is None:
@@ -244,7 +244,7 @@ class Browser(QDockWidget):
                 else:
                     return False
 
-                if self.debug_browser:
+                if self.debug:
                     print(f"Browser.eventFilter: Accessing help page {obj}:{self.help_mapping[obj]}")
 
                 return True
@@ -257,7 +257,7 @@ class Browser(QDockWidget):
 
         A browser for the LaME documentation.  It can access some external sites, but the browser is primarily for help data.
         """        
-        if self.debug_browser:
+        if self.debug:
             print("open_browser")
 
         # Open a file dialog to select a local HTML file
@@ -270,7 +270,7 @@ class Browser(QDockWidget):
 
     def go_to_home(self):
         """The browser returns to the documentation index.html file"""        
-        if self.debug_browser:
+        if self.debug:
             print("go_to_home")
 
         filename = os.path.join(self.base_path,"docs/build/html/index.html")
@@ -289,7 +289,7 @@ class Browser(QDockWidget):
         location : str, optional
             Name of webpage (excluding base directory and .html)
         """
-        if self.debug_browser:
+        if self.debug:
             print(f"go_to_page, location {location}")
 
         if not location:

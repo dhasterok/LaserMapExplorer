@@ -18,15 +18,15 @@ common.Logger
    .. autosummary::
    
       LoggerDock
+      QAction
       QDockWidget
-      QGroupBox
-      QHBoxLayout
       QIcon
       QMainWindow
+      QSize
       QSizePolicy
       QSpacerItem
       QTextEdit
-      QToolButton
+      QToolBar
       QVBoxLayout
       QWidget
       Qt

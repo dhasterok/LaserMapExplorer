@@ -29,7 +29,6 @@
 
    app.Actions
    app.AnalyteSelectionWindow
-   app.Calculator
    app.CropImage
    app.CustomTableWidget
    app.FieldSelectionWindow

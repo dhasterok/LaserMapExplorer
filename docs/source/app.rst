@@ -20,14 +20,6 @@ app.AnalyteSelectionWindow module
    :undoc-members:
    :show-inheritance:
 
-app.Calculator module
----------------------
-
-.. automodule:: app.Calculator
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 app.CropImage module
 --------------------
 

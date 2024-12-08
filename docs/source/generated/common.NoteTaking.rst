@@ -23,25 +23,29 @@ common.NoteTaking
 
    .. autosummary::
    
+      CustomActionMenu
+      CustomLineEdit
+      NoteOptionsDialog
       Notes
+      QAction
       QCursor
+      QDialog
+      QDialogButtonBox
       QDockWidget
+      QDoubleValidator
       QFileDialog
       QFont
-      QGroupBox
-      QHBoxLayout
+      QFormLayout
       QIcon
       QLabel
       QMainWindow
-      QMenu
       QMessageBox
       QSize
       QSizePolicy
-      QSpacerItem
       QTextCursor
       QTextEdit
       QTimer
-      QToolButton
+      QToolBar
       QVBoxLayout
       QWidget
       Qt

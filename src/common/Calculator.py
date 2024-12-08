@@ -1,6 +1,6 @@
 import os, re
 import numexpr as ne
-from src.app.config import BASEDIR, DEBUG_CALCULATOR
+from src.app.config import BASEDIR
 import numpy as np
 import pandas as pd
 from src.common.varfunc import partial_match
@@ -12,12 +12,13 @@ from PyQt5.QtWidgets import ( QMessageBox, QInputDialog )
 # Calculator
 # -------------------------------
 class CustomFieldCalculator():
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, debug=False):
         # super().__init__(self, parent=None)
         if parent is None:
             return
 
         self.parent = parent
+        self.debug = debug
 
         self.calc_filename = os.path.join(BASEDIR,f'resources/app_data/calculator.txt')
         self.calc_load_dict()
@@ -80,14 +81,14 @@ class CustomFieldCalculator():
         Sets ``MainWindow.add_formula`` to ``True``, a flag used by ``MainWindow.calculate_new_field`` to determine
         whether to add an item to ``MainWindow.comboBoxCalcFormula``.
         """        
-        if DEBUG_CALCULATOR:
+        if self.debug:
             print("calc_add_formula")
 
         self.add_formula = True
 
     def calc_help(self):
         """Loads the help webpage associated with the calculator in the Help tab"""
-        if DEBUG_CALCULATOR:
+        if self.debug:
             print("calc_help")
 
         filename = os.path.join(BASEDIR,"docs/build/html/custom_fields.html")
@@ -109,7 +110,7 @@ class CustomFieldCalculator():
         operator : str
             Inserts operators from calculator
         """        
-        if DEBUG_CALCULATOR:
+        if self.debug:
             print(f"calc_insert_operator, operator {operator}")
 
         cursor = self.parent.textEditCalcScreen.textCursor()
@@ -127,7 +128,7 @@ class CustomFieldCalculator():
         operator : str
             Inserts operators from calculator
         """        
-        if DEBUG_CALCULATOR:
+        if self.debug:
             print(f"calc_insert_function, function: {func_name}")
 
         cursor = self.parent.textEditCalcScreen.textCursor()
@@ -152,7 +153,7 @@ class CustomFieldCalculator():
         Adds the selected field as ``{field_type.field}``.  If the field is normalized,
         a ``_N`` is added to the end of the field name, i.e., ``{field_type.field_N}``.
         """        
-        if DEBUG_CALCULATOR:
+        if self.debug:
             print("calc_add_field")
 
         # get field type and name
@@ -184,7 +185,7 @@ class CustomFieldCalculator():
         Loads the file saved in ``self.calc_filename``, unless the file is overridden by user preferences.  The file
         should be formatted as *name: expression*.  The expression may contain mulitple *case(cond, expr)* separated by a ``;``.
         """        
-        if DEBUG_CALCULATOR:
+        if self.debug:
             print("calc_load_dict")
 
         self.calc_dict = {}
@@ -213,7 +214,7 @@ class CustomFieldCalculator():
         Removes the formula from ``MainWindow.comboBoxCalcFormula``, the file given by ``MainWindow.calc_filename`` and 
         ``parent.data[parent.sample_id].processed_data``.
         """
-        if DEBUG_CALCULATOR:
+        if self.debug:
             print("calc_delete_formula")
 
         func = 'calc_delete_formula'
@@ -247,7 +248,7 @@ class CustomFieldCalculator():
     
     def calc_load_formula(self):
         """Loads a predefined formula to use in the calculator"""        
-        if DEBUG_CALCULATOR:
+        if self.debug:
             print("calc_load_formula")
 
         name = self.parent.comboBoxCalcFormula.currentText()
@@ -262,7 +263,7 @@ class CustomFieldCalculator():
 
         Parses ``MainWindow.textEditCalcScreen`` to produce an expression that can be evaluated.
         """
-        if DEBUG_CALCULATOR:
+        if self.debug:
             print(f"calc_parse, text: {txt}")
 
         func = 'calc_parse'
@@ -371,7 +372,7 @@ class CustomFieldCalculator():
         save: bool, optional
             Determines whether to save upon successful calculation, by default ``False``
         """
-        if DEBUG_CALCULATOR:
+        if self.debug:
             print(f"calculate_new_field, save: {save}")
 
         func = 'calculate_new_field'
@@ -504,7 +505,7 @@ class CustomFieldCalculator():
         np.ndarray of float or bool
             Result of evaluated expression.
         """        
-        if DEBUG_CALCULATOR:
+        if self.debug:
             print(f"calc_evaluate_expr\n  expr: {expr}\n  val_dict: {val_dict}\n  keep: {keep}")
 
         func = 'calc_evaluate_expr'
@@ -535,7 +536,7 @@ class CustomFieldCalculator():
         addinfo : str
             Additional info (generally exception raised)
         """        
-        if DEBUG_CALCULATOR:
+        if self.debug:
             print(f"calc_error\n  func: {func}\n  err: {err}\n  addinfo: {addinfo}")
 
         self.parent.labelCalcMessage.setText(f"Error: {err}")

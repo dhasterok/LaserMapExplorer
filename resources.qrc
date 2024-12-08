@@ -176,5 +176,7 @@
         <file>resources/icons/icon-superscript-64.svg</file>
         <file>resources/icons/icon-cite-64.svg</file>
         <file>resources/icons/icon-hyperlink-64.svg</file>
+        <file>resources/icons/icon-formatted-output-64.svg</file>
+        <file>resources/icons/icon-area-64.svg</file>
     </qresource>
 </RCC>

@@ -1,6 +1,9 @@
 import sys
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import ( QMainWindow, QTextEdit, QDockWidget, QToolButton, QWidget, QHBoxLayout, QVBoxLayout, QGroupBox, QSpacerItem, QSizePolicy )
+from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtWidgets import (
+        QMainWindow, QTextEdit, QDockWidget, QWidget, QVBoxLayout,
+        QToolBar, QSpacerItem, QSizePolicy, QAction
+    )
 from PyQt5.QtGui import QIcon
 
 class LoggerDock(QDockWidget):
@@ -23,34 +26,34 @@ class LoggerDock(QDockWidget):
         container = QWidget()
         logger_layout = QVBoxLayout()
 
-        # Export button
-        toolbar = QGroupBox("")
-        toolbar_layout = QHBoxLayout(toolbar)
-        toolbar_layout.setContentsMargins(5, 5, 5, 5)  # Adjust margins as needed
-        toolbar_layout.setSpacing(5)  # Spacing between buttons
+        # Create toolbar
+        toolbar = QToolBar("Notes Toolbar", self)
+        toolbar.setIconSize(QSize(24, 24))
+        toolbar.setMovable(False)  # Optional: Prevent toolbar from being dragged out
 
-        self.save_button = QToolButton()
+        # Export button
+        self.action_save = QAction()
         save_icon = QIcon(":resources/icons/icon-save-file-64.svg")
         if not save_icon.isNull():
-            self.save_button.setIcon(save_icon)
+            self.action_save.setIcon(save_icon)
         else:
-            self.save_button.setText("Save")
-        self.save_button.setToolTip("Save log to file")
+            self.action_save.setText("Save")
+        self.action_save.setToolTip("Save log to file")
 
         # Add spacer
         spacer = QSpacerItem(20, 0, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
-        self.clear_button = QToolButton()
+        self.action_clear = QAction()
         clear_icon = QIcon(":resources/icons/icon-delete-64.svg")
         if not clear_icon.isNull():
-            self.clear_button.setIcon(clear_icon)
+            self.action_clear.setIcon(clear_icon)
         else:
-            self.clear_button.setText("Clear")
-        self.clear_button.setToolTip("Clear log")
+            self.action_clear.setText("Clear")
+        self.action_clear.setToolTip("Clear log")
 
-        toolbar_layout.addWidget(self.save_button)
-        toolbar_layout.addItem(spacer)
-        toolbar_layout.addWidget(self.clear_button)
+        toolbar.addAction(self.action_save)
+        toolbar.addSeparator()
+        toolbar.addAction(self.action_clear)
 
         logger_layout.addWidget(toolbar)
 
@@ -60,6 +63,10 @@ class LoggerDock(QDockWidget):
 
         logger_layout.addWidget(self.text_edit)
 
+        # handle actions
+        self.action_save.triggered.connect(self.export_log)
+        self.action_clear.triggered.connect(self.text_edit.clear)
+
         # Set layout to the container
         container.setLayout(logger_layout)
         self.setWidget(container)
@@ -67,16 +74,6 @@ class LoggerDock(QDockWidget):
         self.setFloating(True)
         self.setWindowTitle("LaME Logger")
         self.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
-
-        # create hide button
-        #hide_button = QToolButton()
-        #hide_button.setIcon(QIcon(":/icons/icon-reject-64.svg"))
-        #hide_button.setToolTip("Hide Dock")
-        #hide_button.clicked.connect(self.hide)
-
-        # handle signals
-        self.save_button.clicked.connect(self.export_log)
-        self.clear_button.clicked.connect(self.text_edit.clear)
 
         parent.addDockWidget(Qt.RightDockWidgetArea, self)
 

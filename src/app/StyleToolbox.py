@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import src.common.csvdict as csvdict
 from src.common.colorfunc import get_hex_color, get_rgb_color
-from src.app.config import BASEDIR, DEBUG_STYLE
+from src.app.config import BASEDIR
 from src.common.ScheduleTimer import Scheduler
 
 class Styling():
@@ -145,21 +145,20 @@ class Styling():
         'CbarDir' : (str) -- colorbar direction, options include ``none``, ``vertical``, and ``horizontal``, set by ``comboBoxCbarDirection``
         'CLabel' : (str) -- colorbar label, set in ``lineEditCbarLabel``
         'Resolution' : (int) -- used to set discritization in 2D and ternary heatmaps, set by ``spinBoxHeatmapResolution``
-    """    
-    def __init__(self, parent):
-        """_summary_
-
-        _extended_summary_
 
         Parameters
         ----------
-        parent : QWidget
-            Parent widget containing UI elements
+        parent : QMainWindow
+            MainWindow with UI controls
+        debug : bool, optional
+            Prints debugging messages to stdout, by default ``False``
 
-        """
+    """    
+    def __init__(self, parent, debug=False):
         #super().__init__(parent)
 
         self.parent = parent
+        self.debug = debug
 
         self.scheduler = Scheduler(callback=self.parent.update_SV)
 
@@ -801,7 +800,7 @@ class Styling():
     def toggle_signals(self):
         """Toggles signals from all style widgets.  Useful when updating many widgets."""        
 
-        if DEBUG_STYLE:
+        if self.debug:
             print(f"toggle_signals, _signal_state: {self._signal_state}")
 
         parent = self.parent
@@ -868,7 +867,7 @@ class Styling():
     def reset_default_styles(self):
         """Resets ``MainWindow.styles`` dictionary to default values."""
 
-        if DEBUG_STYLE:
+        if self.debug:
             print("reset_default_styles")
 
         parent = self.parent
@@ -984,7 +983,7 @@ class Styling():
         Looks for saved style themes (*.sty) in ``resources/styles/`` directory and adds them to
         ``MainWindow.comboBoxStyleTheme``.  After setting list, the comboBox is set to default style.
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("load_theme_names")
 
         parent = self.parent
@@ -1008,7 +1007,7 @@ class Styling():
         
         Executes when the user changes the ``MainWindow.comboBoxStyleTheme.currentIndex()``.
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("load_theme_names")
         parent = self.parent
         name = parent.comboBoxStyleTheme.currentText()
@@ -1031,7 +1030,7 @@ class Styling():
         ``MainWindow.comboBoxStyleTheme`` and the style widget settings for each plot type (``MainWindow.styles``) are saved as a
         dictionary into the theme name with a ``.sty`` extension.
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("input_theme_name_dlg")
         parent = self.parent
 
@@ -1054,7 +1053,7 @@ class Styling():
     # -------------------------------------
     def disable_style_widgets(self):
         """Disables all style related widgets."""        
-        if DEBUG_STYLE:
+        if self.debug:
             print("disable_style_widgets")
         parent = self.parent
 
@@ -1119,7 +1118,7 @@ class Styling():
 
         Toggling of enabled states are based on ``MainWindow.toolBox`` page and the current plot type
         selected in ``MainWindow.comboBoxPlotType."""
-        if DEBUG_STYLE:
+        if self.debug:
             print("toggle_style_widgets")
 
         parent = self.parent
@@ -1444,7 +1443,7 @@ class Styling():
 
     def toggle_style_labels(self):
         """Toggles style labels based on enabled/disabled style widgets."""        
-        if DEBUG_STYLE:
+        if self.debug:
             print("toggle_style_labels")
         parent = self.parent
 
@@ -1520,7 +1519,7 @@ class Styling():
         style : dict, optional
             Style dictionary for the current plot type. Defaults to ``None``
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("set_style_widgets")
         #print('set_style_widgets')
         parent = self.parent
@@ -1695,7 +1694,7 @@ class Styling():
 
     def get_style_dict(self):
         """Get style properties"""        
-        if DEBUG_STYLE:
+        if self.debug:
             print("get_style_dict")
         parent = self.parent
 
@@ -1753,7 +1752,7 @@ class Styling():
         Executes on change of ``MainWindow.comboBoxPlotType``.  Updates ``MainWindow.plot_type[0]`` to the current index of the 
         combobox, then updates the style widgets to match the dictionary entries and updates the plot.
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("plot_type_callback")
         #print('plot_type_callback')
         # set plot flag to false
@@ -1804,7 +1803,7 @@ class Styling():
         ax : str, optional
             axis for plotting, by default "None"
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("axis_variable_changed")
 
         parent = self.parent
@@ -1900,7 +1899,7 @@ class Styling():
         ax : str
             Axis, options include ``x``, ``y``, ``z``, and ``c``
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("get_axis_field")
         parent = self.parent
 
@@ -1939,7 +1938,7 @@ class Styling():
         new_label : str
             New label for bound set by user.
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("axis_label_edit_callback")
 
         parent = self.parent
@@ -1977,7 +1976,7 @@ class Styling():
         new_value : float
             New value for bound set by user.
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("axis_limit_edit_callback")
 
         parent = self.parent
@@ -2032,7 +2031,7 @@ class Styling():
         ax : str
             Axis whos scale been set from comboBox, options include ``x``, ``y``, ``z``, and ``c``.
         """        
-        if DEBUG_STYLE:
+        if self.debug:
             print("axis_scale_callback")
 
         parent = self.parent
@@ -2062,7 +2061,7 @@ class Styling():
 
     def set_color_axis_widgets(self):
         """Sets the color axis limits and label widgets."""
-        if DEBUG_STYLE:
+        if self.debug:
             print("set_color_axis_widgets")
 
         #print('set_color_axis_widgets')
@@ -2089,7 +2088,7 @@ class Styling():
         field : str
             Field plotted on axis, used as key to ``MainWindow.axis_dict``
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("set_axis_widgets")
 
         #print('set_axis_widgets')
@@ -2143,7 +2142,7 @@ class Styling():
         .. seealso::
             :ref: `initialize_axis_values` for initializing the axis dictionary
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print(f"axis_reset_callback, axis: {ax}")
 
         #print('axis_reset_callback')
@@ -2227,7 +2226,7 @@ class Styling():
         float, float, str, float
             Axis parameters: minimum, maximum, scale (``linear`` or ``log``), axis label
         """ 
-        if DEBUG_STYLE:
+        if self.debug:
             print(f"get_axis_values\n  field_type: {field_type}\n  field: {field}\n  axis: {ax}")
 
         #print('get_axis_values')
@@ -2260,7 +2259,7 @@ class Styling():
         field : str
             Field, generally determined by a field combobox.
         """        
-        if DEBUG_STYLE:
+        if self.debug:
             print(f"get_axis_values\n  field_type: {field_type}\n  field: {field}")
 
         #print('initialize_axis_values')
@@ -2338,7 +2337,7 @@ class Styling():
         str, int
             Returns the element symbol and mass.
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print(f"parse_field, field: {field}")
 
         match = re.match(r"([A-Za-z]+)(\d*)", field)
@@ -2352,7 +2351,7 @@ class Styling():
 
         Updates ``MainWindow.style`` dictionary after user change
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print(f"aspect_ratio_callback")
 
         parent = self.parent
@@ -2366,7 +2365,7 @@ class Styling():
 
     def tickdir_callback(self):
         """Updates tick directions in style dictionary from change of ``MainWindow.comboBoxTickDirection``."""        
-        if DEBUG_STYLE:
+        if self.debug:
             print("tickdir_callback")
 
         parent = self.parent
@@ -2382,7 +2381,7 @@ class Styling():
     # -------------------------------------
     def font_callback(self):
         """Updates figure fonts"""        
-        if DEBUG_STYLE:
+        if self.debug:
             print("font_callback")
 
         parent = self.parent
@@ -2396,7 +2395,7 @@ class Styling():
 
     def font_size_callback(self):
         """Updates figure font sizes"""        
-        if DEBUG_STYLE:
+        if self.debug:
             print("font_size_callback")
 
         parent = self.parent
@@ -2418,7 +2417,7 @@ class Styling():
         font_name : str
             Font used on plot.
         """        
-        if DEBUG_STYLE:
+        if self.debug:
             print("update_figure_font")
 
         if font_name == '':
@@ -2446,7 +2445,7 @@ class Styling():
         list
             Output labels with or without mass
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("toggle_mass")
 
         if not self.parent.checkBoxShowMass.isChecked():
@@ -2458,7 +2457,7 @@ class Styling():
     # -------------------------------------
     def scale_direction_callback(self):
         """Sets scale direction on figure"""        
-        if DEBUG_STYLE:
+        if self.debug:
             print("scale_direction_callback")
 
         parent = self.parent
@@ -2491,7 +2490,7 @@ class Styling():
         float
             Length of scalebar dependent on direction of scalebar.
         """        
-        if DEBUG_STYLE:
+        if self.debug:
             print("default_scale_length")
 
         if (self._plot_type not in self.map_plot_types) or (self.style_dict[self._plot_type]['ScaleDir'] == 'none'):
@@ -2515,7 +2514,7 @@ class Styling():
 
     def scale_location_callback(self):
         """Sets scalebar location on map from ``MainWindow.comboBoxScaleLocation``"""        
-        if DEBUG_STYLE:
+        if self.debug:
             print("scale_location_callback")
 
         parent = self.parent
@@ -2533,7 +2532,7 @@ class Styling():
         
         Executes on change of ``MainWindow.lineEditScaleLength``, updates length if within bounds set by plot dimensions, then updates plot.
         """ 
-        if DEBUG_STYLE:
+        if self.debug:
             print("scale_length_callback")
 
         parent = self.parent
@@ -2562,7 +2561,7 @@ class Styling():
 
         Uses ``QColorDialog`` to select new marker color and then updates plot on change of backround ``MainWindow.toolButtonOverlayColor`` color.
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("overlay_color_callback")
 
         parent = self.parent
@@ -2587,7 +2586,7 @@ class Styling():
 
         Updates marker symbols on current plot on change of ``MainWindow.comboBoxMarker.currentText()``.
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("marker_symbol_callback")
 
         parent = self.parent
@@ -2604,7 +2603,7 @@ class Styling():
 
         Updates marker size on current plot on change of ``MainWindow.doubleSpinBoxMarkerSize.value()``.
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("marker_size_callback")
 
         parent = self.parent
@@ -2621,7 +2620,7 @@ class Styling():
 
         Executes on change of ``MainWindow.horizontalSliderMarkerAlpha.value()``.
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("slider_alpha_changed")
 
         parent = self.parent
@@ -2640,7 +2639,7 @@ class Styling():
 
         Updates line width on current plot on change of ``MainWindow.comboBoxLineWidth.currentText().
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("line_width_callback")
 
         parent = self.parent
@@ -2657,7 +2656,7 @@ class Styling():
 
         Used when plotting vector components in multidimensional plots.  Values entered by the user must be (0,10]
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("length_multiplier_callback")
 
         parent = self.parent
@@ -2681,7 +2680,7 @@ class Styling():
 
         Uses ``QColorDialog`` to select new marker color and then updates plot on change of backround ``MainWindow.toolButtonLineColor`` color.
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("line_color_callback")
 
         parent = self.parent
@@ -2706,7 +2705,7 @@ class Styling():
 
         Uses ``QColorDialog`` to select new marker color and then updates plot on change of backround ``MainWindow.toolButtonMarkerColor`` color.
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("marker_color_callback")
 
         parent = self.parent
@@ -2734,7 +2733,7 @@ class Styling():
         update_plot : bool, optional
             Sets the resolution of a heatmap for either Cartesian or ternary plots and both *heatmap* and *pca heatmap*, by default ``False``
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("resolution_callback")
 
         parent = self.parent
@@ -2752,7 +2751,7 @@ class Styling():
         
         Updates style associated with ``MainWindow.comboBoxColorByField``.  Also updates
         ``MainWindow.comboBoxColorField`` and ``MainWindow.comboBoxColorScale``."""
-        if DEBUG_STYLE:
+        if self.debug:
             print("color_by_field_callback")
 
         #print('color_by_field_callback')
@@ -2785,7 +2784,7 @@ class Styling():
 
         Executes on change of ``MainWindow.comboBoxColorField``
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("color_field_callback")
 
         parent = self.parent
@@ -2819,7 +2818,7 @@ class Styling():
 
     def color_field_update(self):
         """Updates ``MainWindow.comboBoxColorField``"""        
-        if DEBUG_STYLE:
+        if self.debug:
             print("color_field_update")
 
         parent = self.parent
@@ -2834,7 +2833,7 @@ class Styling():
 
         Sets the colormap in ``MainWindow.styles`` for the current plot type, set from ``MainWindow.comboBoxFieldColormap``.
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("field_colormap_callback")
 
         parent = self.parent
@@ -2850,7 +2849,7 @@ class Styling():
     
     def update_color_field_spinbox(self):
         """Updates ``spinBoxColorField`` using the index of ``comboBoxColorField``"""        
-        if DEBUG_STYLE:
+        if self.debug:
             print("update_color_field_spinbox")
 
         self.parent.spinBoxColorField.setValue(self.parent.comboBoxColorField.currentIndex())
@@ -2859,7 +2858,7 @@ class Styling():
         """Set colormap direction (normal/reverse)
 
         Reverses colormap if ``MainWindow.checkBoxReverseColormap.isChecked()`` is ``True``."""
-        if DEBUG_STYLE:
+        if self.debug:
             print("colormap_direction_callback")
 
         parent = self.parent
@@ -2889,7 +2888,7 @@ class Styling():
         matplotlib.colormap
             A discrete (colors.ListedColormap) colormap
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("get_cluster_colormap")
 
         n = cluster_dict['n_clusters']
@@ -2926,7 +2925,7 @@ class Styling():
             matplotlib.colors.Norm
                 Color norm for plotting.
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("color_norm")
 
         norm = None
@@ -2960,7 +2959,7 @@ class Styling():
         -------
         matplotlib.colormap.ListedColormap : colormap
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("get_colormap")
 
         parent = self.parent
@@ -3001,7 +3000,7 @@ class Styling():
         matplotlib.LinearSegmentedColormap
             Colormap
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("create_custom_colormap")
 
         if N is None:
@@ -3018,7 +3017,7 @@ class Styling():
 
         Sets the colorbar direction in ``MainWindow.styles`` for the current plot type.
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("cbar_direction_callback")
 
         parent = self.parent
@@ -3035,7 +3034,7 @@ class Styling():
 
         Sets the color label in ``MainWindow.styles`` for the current plot type.
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("cbar_label_callback")
 
         parent = self.parent
@@ -3057,7 +3056,7 @@ class Styling():
         backround ``MainWindow.toolButtonClusterColor`` color.  Also updates ``MainWindow.tableWidgetViewGroups``
         color associated with selected cluster.  The selected cluster is determined by ``MainWindow.spinBoxClusterGroup.value()``
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("cluster_color_callback")
 
         parent = self.parent
@@ -3092,7 +3091,7 @@ class Styling():
         -------
             str : hexcolor
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("set_default_cluster_colors")
 
         #print('set_default_cluster_colors')
@@ -3123,7 +3122,7 @@ class Styling():
 
         Sets ``MainWindow.toolButtonClusterColor`` background on change of ``MainWindow.spinBoxClusterGroup``
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("select_cluster_group_callback")
 
         parent = self.parent
@@ -3137,7 +3136,7 @@ class Styling():
         Updates ternary colormap when swatch colors are changed in the Scatter and Heatmaps >
         Map from Ternary groupbox.  The ternary colored chemical map is updated.
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("ternary_colormap_changed")
 
         parent = self.parent
@@ -3156,7 +3155,7 @@ class Styling():
         button : QPushbutton, QToolbutton
             Button object that was clicked
         """
-        if DEBUG_STYLE:
+        if self.debug:
             print("button_color_select")
 
         old_color = button.palette().color(button.backgroundRole())

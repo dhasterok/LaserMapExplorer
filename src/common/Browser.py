@@ -84,8 +84,8 @@ class Browser(QDockWidget):
         Dictionary with objects as keys and page (excluding html) for navigation
     base_path : str
         Base directory to docs/build/html.
-    debug_browser : bool
-        A verbose mode for the browser
+    debug : bool, optional
+        A verbose mode for the browser, by Default ``False``
 
     Methods
     -------
@@ -103,14 +103,14 @@ class Browser(QDockWidget):
     TypeError :
         Parent must be an instance of QMainWindow
     """    
-    def __init__(self, parent=None, help_mapping={}, base_path='', debug_browser=False):
+    def __init__(self, parent=None, help_mapping={}, base_path='', debug=False):
         if not isinstance(parent, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
         super().__init__(parent)
 
         container = QWidget()
 
-        self.debug = debug_browser
+        self.debug = debug
         
         if self.debug:
             print("Initializing browser")

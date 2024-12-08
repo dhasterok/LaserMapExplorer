@@ -2,7 +2,7 @@ import sys
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtWidgets import (
         QMainWindow, QTextEdit, QDockWidget, QWidget, QVBoxLayout,
-        QToolBar, QSpacerItem, QSizePolicy, QAction
+        QToolBar, QSpacerItem, QSizePolicy, QAction, QDialog, QCheckBox, QDialogButtonBox
     )
 from PyQt5.QtGui import QIcon
 
@@ -21,6 +21,7 @@ class LoggerDock(QDockWidget):
             raise TypeError("Parent must be an instance of QMainWindow.")
 
         super().__init__("Logger", parent)
+        self.parent = parent
 
         # Create container
         container = QWidget()
@@ -43,6 +44,15 @@ class LoggerDock(QDockWidget):
         # Add spacer
         spacer = QSpacerItem(20, 0, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
+        if hasattr(parent,'logger_options'):
+            self.action_settings = QAction()
+            settings_icon = QIcon(":resources/icons/icon-gear-64.svg")
+            if not settings_icon.isNull():
+                self.action_settings.setIcon(settings_icon)
+            else:
+                self.action_settings.setText("Settings")
+            self.action_settings.setToolTip("Logger settings")
+
         self.action_clear = QAction()
         clear_icon = QIcon(":resources/icons/icon-delete-64.svg")
         if not clear_icon.isNull():
@@ -52,6 +62,7 @@ class LoggerDock(QDockWidget):
         self.action_clear.setToolTip("Clear log")
 
         toolbar.addAction(self.action_save)
+        toolbar.addAction(self.action_settings)
         toolbar.addSeparator()
         toolbar.addAction(self.action_clear)
 
@@ -65,6 +76,8 @@ class LoggerDock(QDockWidget):
 
         # handle actions
         self.action_save.triggered.connect(self.export_log)
+        if hasattr(self,'action_settings'):
+            self.action_settings.triggered.connect(self.set_logger_options)
         self.action_clear.triggered.connect(self.text_edit.clear)
 
         # Set layout to the container
@@ -123,3 +136,58 @@ class LoggerDock(QDockWidget):
                 print(f"Failed to export log: {e}")
         else:
             print("No log contents to export.")
+
+    def set_logger_options(self):
+        """ Opens a dialog to edit logger options."""
+        dialog = LoggerOptionsDialog(self.parent.logger_options, self)
+        if dialog.exec() == QDialog.Accepted:
+            self.parent.logger_options = dialog.get_updated_options()
+
+class LoggerOptionsDialog(QDialog):
+    """Allows the user to set logger options.
+
+    The use of these options is determined by the main program, not the logger,
+    this is simply a place to view and change them.
+
+    Parameters
+    ----------
+    options_dict : dict
+        A dictionary of options with key values displayed as the labels and values
+        are bool indicating a set option for logging.
+    parent : LoggerDock, optional
+        Parent logger, by default None
+    """        
+    def __init__(self, options_dict, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Logger Options")
+        self.setLayout(QVBoxLayout())
+
+        # Store references to checkboxes and the dictionary
+        self.options_dict = options_dict.copy()
+        self.checkboxes = {}
+
+        # Create checkboxes based on the dictionary
+        for key, value in self.options_dict.items():
+            checkbox = QCheckBox(key)  # The label is set directly here
+            checkbox.setChecked(value)  # Set initial state from the dictionary
+            self.checkboxes[key] = checkbox
+            self.layout().addWidget(checkbox)
+
+        # Add OK button
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok)
+        button_box.accepted.connect(self.accept)
+        self.layout().addWidget(button_box)
+
+    def get_updated_options(self):
+        """
+        Updates the dictionary with the current state of checkboxes and returns it.
+
+        Returns
+        -------
+        dict
+            Returns the dictionary of boolean logger options
+        """
+        for key, checkbox in self.checkboxes.items():
+            self.options_dict[key] = checkbox.isChecked()
+        return self.options_dict
+

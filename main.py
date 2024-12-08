@@ -67,7 +67,7 @@ from src.common.NoteTaking import Notes
 from src.common.Browser import Browser
 from src.app.Workflow import Workflow
 import src.app.QuickView as QV
-from src.app.config import BASEDIR, ICONPATH, SSPATH, DEBUG, DEBUG_BROWSER, DEBUG_CALCULATOR, load_stylesheet
+from src.app.config import BASEDIR, ICONPATH, SSPATH, DEBUG, load_stylesheet
 from src.common.ExtendedDF import AttributeDataFrame
 import src.common.format as fmt
 from src.common.colorfunc import get_hex_color, get_rgb_color
@@ -254,6 +254,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.laser_map_dict = {}
         self.persistent_filters = pd.DataFrame()
         self.persistent_filters = pd.DataFrame(columns=['use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'persistent'])
+        self.logger_options = {
+                'Input/output': False,
+                'Data': False,
+                'Analyte selector': False,
+                'Plot selector': False,
+                'Plotting': True,
+                'Styles': True,
+                'Calculator': True,
+                'Browser': False
+            }
 
         #initialise status bar
         self.statusBar = self.statusBar()
@@ -545,8 +555,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         pixelwidthvalidator.setBottom(0.0)
         self.lineEditDX.setValidator(pixelwidthvalidator)
         self.lineEditDY.setValidator(pixelwidthvalidator)
-        self.lineEditDX.editingFinished.connect(self.update_resolution)
-        self.lineEditDY.editingFinished.connect(self.update_resolution)
+        self.lineEditDX.editingFinished.connect(lambda: self.update_resolution('x'))
+        self.lineEditDY.editingFinished.connect(lambda: self.update_resolution('y'))
 
         # auto scale
         quantilevalidator = QDoubleValidator(0.0, 100, 3)
@@ -827,7 +837,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         # Styling Tab
         #-------------------------
-        self.style = Styling(self)
+        self.style = Styling(self, debug=self.logger_options['Styles'])
         self.style.load_theme_names()
 
         setattr(self.comboBoxMVPlots, "allItems", lambda: [self.comboBoxMVPlots.itemText(i) for i in range(self.comboBoxMVPlots.count())])
@@ -846,7 +856,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Calculator tab
         #-------------------------
-        self.calculator = cfc(parent=self, debug=DEBUG_CALCULATOR) # initalize custom field calculator
+        self.calculator = cfc(parent=self, debug=self.logger_options['Calculator']) # initalize custom field calculator
         if hasattr(self,'notes'):
             self.notes.update_equation_menu()
 
@@ -1067,7 +1077,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.ProfilingPage.setEnabled(True)
         self.PTtPage.setEnabled(True)
 
-    def change_sample(self, index, save_analysis= True):
+    def change_sample(self, index, save_analysis=True):
         """Changes sample and plots first map
 
         Parameters
@@ -1126,7 +1136,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.sample_id not in self.data:
             # load sample's *.lame file
             file_path = os.path.join(self.selected_directory, self.csv_files[index])
-            self.data[self.sample_id] = SampleObj(self.sample_id, file_path, self.comboBoxOutlierMethod.currentText(), self.comboBoxNegativeMethod.currentText(), self.ref_chem)
+            self.data[self.sample_id] = SampleObj(self.sample_id, file_path, self.comboBoxOutlierMethod.currentText(), self.comboBoxNegativeMethod.currentText(), self.ref_chem, debug=self.logger_options['Data'])
 
             # get selected_analyte columns
             selected_analytes = self.data[self.sample_id].processed_data.match_attributes({'data_type': 'analyte', 'use': True})
@@ -1134,7 +1144,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.update_labels()
 
             # set slot for swapXY button
+            self.actionFullMap.triggered.connect(self.data[self.sample_id].reset_crop)
             self.toolButtonSwapResolution.clicked.connect(self.data[self.sample_id].swap_resolution)
+            #self.toolButtonResolutionReset.clicked.connect(self.data[self.sample_id].reset_crop)
+            self.toolButtonPixelResolutionReset.clicked.connect(self.data[self.sample_id].reset_resolution)
             self.update_aspect_ratio_controls()
 
             # set analyte map to first available analyte
@@ -1233,7 +1246,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # update toolbar
         self.canvas_changed()
 
-        self.update_plot = True
         # trigger update to plot
         self.style.scheduler.schedule_update()
 
@@ -1319,7 +1331,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             self.logger_dock.show()
 
-        self.browser.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
+        self.logger.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
     def open_browser(self, action):
         """Opens Browser dock with documentation
@@ -1328,7 +1340,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """            
         if not hasattr(self, 'browser'):
             help_mapping = create_help_mapping(self)
-            self.browser = Browser(self, help_mapping, BASEDIR, DEBUG_BROWSER)
+            self.browser = Browser(self, help_mapping, BASEDIR, debug=self.logger_options['Browser'])
         else:
             self.browser.show()
 
@@ -1353,7 +1365,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.sample_id == '':
             return
 
-        self.analyte_dialog = AnalyteDialog(self)
+        self.analyte_dialog = AnalyteDialog(self, debug=self.logger_options['Analyte selector'])
         self.analyte_dialog.show()
 
         result = self.analyte_dialog.exec_()  # Store the result here
@@ -1558,7 +1570,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Parameters
         ----------
-        update_plot : bool
+        update : bool
             ``True`` forces update plot, when the canavas window tab is on single view, by default ``True``
         """
         if DEBUG:
@@ -1730,13 +1742,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.comboBoxColorField.setCurrentText(field)
                 self.style.color_field_callback(plot)
             
-    def update_resolution(self):
+    def update_resolution(self, axis):
         """Updates DX and DY for a dataframe
 
-        Recalculates X and Y for a dataframe
-        """
-        self.data[self.sample_id].update_resolution(dx =self.lineEditDX.value, dy =self.lineEditDY.value, ui_update = True)
+        Recalculates X and Y for a dataframe when the user changes the value of
+        ``MainWindow.lineEditDX`` or ``MainWindow.lineEditDY``
 
+        Parameter
+        ---------
+        axis : str
+            Indicates axis to update resolution, 'x' or 'y'.
+        """
+        # update resolution based on user change
+        if axis == 'x':
+            self.data[self.sample_id].dx = self.lineEditDX.value
+        elif axis == 'y':
+            self.data[self.sample_id].dy = self.lineEditDY.value
+
+        # update aspect ratio of maps
         self.update_aspect_ratio_controls()
 
         # trigger update to plot
@@ -1766,7 +1789,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Parameters
         ----------
-        ref_index : str
+        ref_val : str
             Name of reference value from combobox/dropdown
         """
         ref_index =  self.ref_list.tolist().index(ref_val)
@@ -1804,6 +1827,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             branch = self.sample_id
             for ratio in self.data[branch].processed_data.match_attribute('data_type','ratio'):
                 item, check = self.plot_tree.find_leaf(tree, branch, leaf=ratio)
+                if item is None:
+                    raise TypeError(f"Missing item ({ratio}) in plot_tree.")
+                analyte_1, analyte_2 = ratio.split(' / ')
 
                 if check:
                     # ratio normalized
@@ -2029,78 +2055,81 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # no need to run prep_data as it should be run in DataHandling automatically when outlier_method is changed.
         #self.data[self.sample_id].prep_data()
 
+    # unused method, conflicts with parameter self.update_plot of type bool
+    # def update_plot(self,bin_s=True, axis=False, reset=False):
+    #     """"Update plot
 
-    def update_plot(self,bin_s=True, axis=False, reset=False):
-        """"Update plot
-
-        :param bin_s: Defaults to True
-        :type bin_s: bool, optional
-        :param axis: Defaults to False
-        :type axis: bool, optional
-        :param reset: Defaults to False
-        :type reset: bool, optional"""
-        #print('update_plot')
-        if self.update_spinboxes_bool:
-            self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
-            lb = self.doubleSpinBoxLB.value()
-            ub = self.doubleSpinBoxUB.value()
-            d_lb = self.doubleSpinBoxDLB.value()
-            d_ub = self.doubleSpinBoxDUB.value()
-
-
-            bins = self.spinBoxNBins.value()
-            analyte_str = self.current_plot
-            analyte_str_list = analyte_str.split('_')
-            auto_scale = self.toolButtonAutoScale.isChecked()
-            sample_id = self.current_plot_information['sample_id']
-            analyte_1 = self.current_plot_information['analyte_1']
-            analyte_2 = self.current_plot_information['analyte_2']
-            plot_type = self.current_plot_information['plot_type']
-            plot_name = self.current_plot_information['plot_name']
-            current_plot_df = self.current_plot_df
-
-            # Computing data range using the 'array' column
-            data_range = current_plot_df['array'].max() - current_plot_df['array'].min()
-            #change axis range for all plots in sample
-
-            # Removed during DataHandling update
-            # if axis:
-            #     # Filtering rows based on the conditions on 'X' and 'Y' columns
-            #     self.data[self.sample_id].crop_mask = ((current_plot_df['X'] >= self.data[sample_id].crop_x_min) & (current_plot_df['X'] <= self.data[sample_id].crop_x_max) &
-            #                    (current_plot_df['Y'] <= current_plot_df['Y'].max() - self.data[sample_id].crop_y_min) & (current_plot_df['Y'] >= current_plot_df['Y'].max() - self.data[sample_id].crop_y_max))
+    #     Parameters
+    #     ----------
+    #     bin_s : bool, optional
+    #         Defaults to True
+    #     axis : bool, optional
+    #         Defaults to False
+    #     reset : bool, optional
+    #         Defaults to False
+    #     """
+    #     #print('update_plot')
+    #     if self.update_spinboxes_bool:
+    #         self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
+    #         lb = self.doubleSpinBoxLB.value()
+    #         ub = self.doubleSpinBoxUB.value()
+    #         d_lb = self.doubleSpinBoxDLB.value()
+    #         d_ub = self.doubleSpinBoxDUB.value()
 
 
-            #     #crop original_data based on self.data[self.sample_id]['crop_mask']
-            #     self.data[sample_id]['cropped_raw_data'] = self.data[sample_id]['raw_data'][self.data[self.sample_id]['crop_mask']].reset_index(drop=True)
+    #         bins = self.spinBoxNBins.value()
+    #         analyte_str = self.current_plot
+    #         analyte_str_list = analyte_str.split('_')
+    #         auto_scale = self.toolButtonAutoScale.isChecked()
+    #         sample_id = self.current_plot_information['sample_id']
+    #         analyte_1 = self.current_plot_information['analyte_1']
+    #         analyte_2 = self.current_plot_information['analyte_2']
+    #         plot_type = self.current_plot_information['plot_type']
+    #         plot_name = self.current_plot_information['plot_name']
+    #         current_plot_df = self.current_plot_df
+
+    #         # Computing data range using the 'array' column
+    #         data_range = current_plot_df['array'].max() - current_plot_df['array'].min()
+    #         #change axis range for all plots in sample
+
+    #         # Removed during DataHandling update
+    #         # if axis:
+    #         #     # Filtering rows based on the conditions on 'X' and 'Y' columns
+    #         #     self.data[self.sample_id].crop_mask = ((current_plot_df['X'] >= self.data[sample_id].crop_x_min) & (current_plot_df['X'] <= self.data[sample_id].crop_x_max) &
+    #         #                    (current_plot_df['Y'] <= current_plot_df['Y'].max() - self.data[sample_id].crop_y_min) & (current_plot_df['Y'] >= current_plot_df['Y'].max() - self.data[sample_id].crop_y_max))
 
 
-            #     #crop clipped_analyte_data based on self.data[self.sample_id]['crop_mask']
-            #     self.data[sample_id]['processed_data'] = self.data[sample_id]['processed_data'][self.data[self.sample_id]['crop_mask']].reset_index(drop=True)
-
-            #     #crop each df of computed_analyte_data based on self.data[self.sample_id]['crop_mask']
-            #     for analysis_type, df in self.data[sample_id]['computed_data'].items():
-            #         if isinstance(df, pd.DataFrame):
-            #             df = df[self.data[self.sample_id]['crop_mask']].reset_index(drop=True)
+    #         #     #crop original_data based on self.data[self.sample_id]['crop_mask']
+    #         #     self.data[sample_id]['cropped_raw_data'] = self.data[sample_id]['raw_data'][self.data[self.sample_id]['crop_mask']].reset_index(drop=True)
 
 
-            #     self.prep_data(sample_id)
+    #         #     #crop clipped_analyte_data based on self.data[self.sample_id]['crop_mask']
+    #         #     self.data[sample_id]['processed_data'] = self.data[sample_id]['processed_data'][self.data[self.sample_id]['crop_mask']].reset_index(drop=True)
 
-            if plot_type=='histogram':
-                if reset:
-                    n_bins  = self.default_bins
-                # If bin_width is not specified, calculate it
-                if bin_s:
-                    bin_width = data_range / n_bins
-                    self.spinBoxBinWidth.setValue(int(np.floor(bin_width)))
-                else:
-                    bin_width = self.spinBoxBinWidth.value()
+    #         #     #crop each df of computed_analyte_data based on self.data[self.sample_id]['crop_mask']
+    #         #     for analysis_type, df in self.data[sample_id]['computed_data'].items():
+    #         #         if isinstance(df, pd.DataFrame):
+    #         #             df = df[self.data[self.sample_id]['crop_mask']].reset_index(drop=True)
 
-                self.plot_histogram(self.current_plot_df,self.current_plot_information, bin_width )
-            else:
-                self.plot_laser_map(self.current_plot_df, self.current_plot_information)
-            # self.add_plot(isotope_str,clipped_isotope_array)
-            self.run_noise_reduction()
-            self.add_edge_detection()
+
+    #         #     self.prep_data(sample_id)
+
+    #         if plot_type=='histogram':
+    #             if reset:
+    #                 n_bins  = self.default_bins
+    #             # If bin_width is not specified, calculate it
+    #             if bin_s:
+    #                 bin_width = data_range / n_bins
+    #                 self.spinBoxBinWidth.setValue(int(np.floor(bin_width)))
+    #             else:
+    #                 bin_width = self.spinBoxBinWidth.value()
+
+    #             self.plot_histogram()
+    #         else:
+    #             self.plot_laser_map(self.current_plot_df, self.current_plot_information)
+    #         # self.add_plot(isotope_str,clipped_isotope_array)
+    #         self.run_noise_reduction()
+    #         self.add_edge_detection()
 
     def remove_multi_plot(self, selected_plot_name):
         """Removes selected plot from MulitView

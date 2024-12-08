@@ -3,7 +3,6 @@ from PyQt5.QtWidgets import (QMessageBox, QTableWidget, QDialog, QTableWidgetIte
 from PyQt5.QtGui import (QImage, QColor, QFont, QPixmap, QPainter, QBrush)
 from src.ui.AnalyteSelectionDialog import Ui_Dialog
 from src.common.rotated import RotatedHeaderView
-from src.app.config import DEBUG_ANALYTE_UI
 import os
 # Analyte GUI
 # -------------------------------
@@ -29,12 +28,14 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         _description_
     """    
     listUpdated = pyqtSignal()
-    def __init__(self, parent):
+    def __init__(self, parent, debug=False):
         super().__init__(parent)
         self.setupUi(self)
 
         if parent.sample_id is None or parent.sample_id == '':
             return
+
+        self.debug = debug
 
         self.data = parent.data[parent.sample_id].processed_data
 
@@ -573,7 +574,7 @@ class AnalyteDialog(QDialog, Ui_Dialog):
             col = index.column()
 
             # debugging
-            if DEBUG_ANALYTE_UI:
+            if self.debug:
                 print(f"Mouse location: ({row}, {col})")
 
             # Reset the previous row and column to normal font if they exist

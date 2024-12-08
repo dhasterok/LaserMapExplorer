@@ -480,7 +480,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionSwapAxes.triggered.connect(self.swap_xy)
         self.actionSwapAxes.setEnabled(False)
 
-        self.actionFilters.triggered.connect(lambda: self.bottom_tab['filters'])
+        self.actionFilters.triggered.connect(lambda: self.bottom_tab['filter'])
 
         self.actionHelp.setCheckable(True)
         self.actionHelp.toggled.connect(self.toggle_help_mode)

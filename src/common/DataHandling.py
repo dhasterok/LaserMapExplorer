@@ -187,6 +187,8 @@ class SampleObj:
         | 'mask' : () -- combined mask, derived from filter_mask & 'polygon_mask' & 'crop_mask'
     """    
     def __init__(self, sample_id, file_path, outlier_method, negative_method, ref_chem=None, debug=False):
+        self.debug = debug
+
         if self.debug:
             print(f"SampleeObj.__init__\n  sample_id: {sample_id}\n  file_path: {file_path}\n  outlier_method: {outlier_method}\n  negative_method: {negative_method}")
 
@@ -204,7 +206,6 @@ class SampleObj:
 
         self._ref_chem = ref_chem
 
-        self.debug = debug
 
         # filter dataframe
         self.filter_df = pd.DataFrame()

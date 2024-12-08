@@ -237,9 +237,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #Initialize nested data which will hold the main sets of data for analysis
         self.data = {}
         self.BASEDIR = BASEDIR
-        self.clipped_ratio_data = pd.DataFrame()
-        self.analyte_data = {}  #stores orginal analyte data
-        self.clipped_analyte_data = {} # stores processed analyted data
         self.sample_id = ''
 
         self.lasermaps = {}
@@ -1989,13 +1986,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.style.scheduler.schedule_update()
         #self.show()
         
-    def update_neg_handling(self, negative_method):
+    def update_neg_handling(self, method):
         """Auto-scales pixel values in map
 
         Executes when the value ``MainWindow.comboBoxNegativeMethod`` is changed.
 
         Changes how negative values are handled for each analyte, the following options are available:
             Ignore negative values, Minimum positive value, Gradual shift, Yeo-Johnson transformation
+
+        Parameters
+        ----------
+        method : str
+            Method for dealing with negatives
         """
         sample_id = self.plot_info['sample_id']
         field = self.plot_info['field']
@@ -2003,13 +2005,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.checkBoxApplyAll.isChecked():
             # Apply to all iolties
             analyte_list = self.data[self.sample_id].processed_data.match_attribute('data_type', 'analyte') + self.data[self.sample_id].processed_data.match_attribute('data_type', 'ratio')
-            self.data[sample_id].negative_method = negative_method
+            self.data[sample_id].negative_method = method
             # clear existing plot info from tree to ensure saved plots using most recent data
             for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
                 self.plot_tree.clear_tree_data(tree)
             self.data[sample_id].prep_data()
         else:
-            self.data[sample_id].negative_method = negative_method
+            self.data[sample_id].negative_method = method
             self.data[sample_id].prep_data(field)
         
         self.update_labels()
@@ -2019,7 +2021,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.style.scheduler.schedule_update()
 
     def update_outlier_removal(self, method):
-        """Removes outliers from one or all analytes."""        
+        """Removes outliers from one or all analytes.
+        
+        Parameters
+        ----------
+        method : str
+            Method used to remove outliers."""        
         if self.data[self.sample_id].outlier_method == method:
             return
 
@@ -2052,84 +2059,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.lineEditDifferenceLowerQuantile.setEnabled(False)
                 self.lineEditDifferenceUpperQuantile.setEnabled(False)
 
-        # no need to run prep_data as it should be run in DataHandling automatically when outlier_method is changed.
-        #self.data[self.sample_id].prep_data()
-
-    # unused method, conflicts with parameter self.update_plot of type bool
-    # def update_plot(self,bin_s=True, axis=False, reset=False):
-    #     """"Update plot
-
-    #     Parameters
-    #     ----------
-    #     bin_s : bool, optional
-    #         Defaults to True
-    #     axis : bool, optional
-    #         Defaults to False
-    #     reset : bool, optional
-    #         Defaults to False
-    #     """
-    #     #print('update_plot')
-    #     if self.update_spinboxes_bool:
-    #         self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
-    #         lb = self.doubleSpinBoxLB.value()
-    #         ub = self.doubleSpinBoxUB.value()
-    #         d_lb = self.doubleSpinBoxDLB.value()
-    #         d_ub = self.doubleSpinBoxDUB.value()
-
-
-    #         bins = self.spinBoxNBins.value()
-    #         analyte_str = self.current_plot
-    #         analyte_str_list = analyte_str.split('_')
-    #         auto_scale = self.toolButtonAutoScale.isChecked()
-    #         sample_id = self.current_plot_information['sample_id']
-    #         analyte_1 = self.current_plot_information['analyte_1']
-    #         analyte_2 = self.current_plot_information['analyte_2']
-    #         plot_type = self.current_plot_information['plot_type']
-    #         plot_name = self.current_plot_information['plot_name']
-    #         current_plot_df = self.current_plot_df
-
-    #         # Computing data range using the 'array' column
-    #         data_range = current_plot_df['array'].max() - current_plot_df['array'].min()
-    #         #change axis range for all plots in sample
-
-    #         # Removed during DataHandling update
-    #         # if axis:
-    #         #     # Filtering rows based on the conditions on 'X' and 'Y' columns
-    #         #     self.data[self.sample_id].crop_mask = ((current_plot_df['X'] >= self.data[sample_id].crop_x_min) & (current_plot_df['X'] <= self.data[sample_id].crop_x_max) &
-    #         #                    (current_plot_df['Y'] <= current_plot_df['Y'].max() - self.data[sample_id].crop_y_min) & (current_plot_df['Y'] >= current_plot_df['Y'].max() - self.data[sample_id].crop_y_max))
-
-
-    #         #     #crop original_data based on self.data[self.sample_id]['crop_mask']
-    #         #     self.data[sample_id]['cropped_raw_data'] = self.data[sample_id]['raw_data'][self.data[self.sample_id]['crop_mask']].reset_index(drop=True)
-
-
-    #         #     #crop clipped_analyte_data based on self.data[self.sample_id]['crop_mask']
-    #         #     self.data[sample_id]['processed_data'] = self.data[sample_id]['processed_data'][self.data[self.sample_id]['crop_mask']].reset_index(drop=True)
-
-    #         #     #crop each df of computed_analyte_data based on self.data[self.sample_id]['crop_mask']
-    #         #     for analysis_type, df in self.data[sample_id]['computed_data'].items():
-    #         #         if isinstance(df, pd.DataFrame):
-    #         #             df = df[self.data[self.sample_id]['crop_mask']].reset_index(drop=True)
-
-
-    #         #     self.prep_data(sample_id)
-
-    #         if plot_type=='histogram':
-    #             if reset:
-    #                 n_bins  = self.default_bins
-    #             # If bin_width is not specified, calculate it
-    #             if bin_s:
-    #                 bin_width = data_range / n_bins
-    #                 self.spinBoxBinWidth.setValue(int(np.floor(bin_width)))
-    #             else:
-    #                 bin_width = self.spinBoxBinWidth.value()
-
-    #             self.plot_histogram()
-    #         else:
-    #             self.plot_laser_map(self.current_plot_df, self.current_plot_information)
-    #         # self.add_plot(isotope_str,clipped_isotope_array)
-    #         self.run_noise_reduction()
-    #         self.add_edge_detection()
 
     def remove_multi_plot(self, selected_plot_name):
         """Removes selected plot from MulitView

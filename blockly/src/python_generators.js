@@ -11,9 +11,10 @@ import { sample_ids } from './globals';
 pythonGenerator.forBlock['load_directory'] = function(block, generator) {
     var dir_name = generator.quote_(block.getFieldValue('DIR'));
     // Generate code with or without directory parameter
+    // self is instance of Workflow class
     var code = (dir_name === "'directory path'")
-        ? 'self.parent.io.open_directory()\nself.store_sample_ids()\n'
-        : 'self.parent.io.open_directory(' + dir_name + ')\nself.store_sample_ids()\n';
+        ? 'self.main.io.open_directory(ui_update=False)\nself.store_sample_ids()\n'
+        : 'self.main.io.open_directory(' + dir_name + ', ui_update=False)\nself.store_sample_ids()\n';
     return code;
 };
 
@@ -21,8 +22,8 @@ pythonGenerator.forBlock['load_sample'] = function(block, generator) {
     var dir_name = generator.quote_(block.getFieldValue('DIR'));
     // Generate code with or without directory parameter
     var code = (dir_name === "'file path'")
-        ? 'self.parent.io.open_sample()\nself.store_sample_ids()\n'
-        : 'self.parent.io.open_sample(' + dir_name + ')\nself.store_sample_ids()\n';
+        ? 'self.main.io.open_sample(ui_update=False)\nself.store_sample_ids()\n'
+        : 'self.main.io.open_sample(' + dir_name + 'ui_update=False)\nself.store_sample_ids()\n';
     return code;
 };
 
@@ -42,11 +43,13 @@ pythonGenerator.forBlock['select_analytes'] = function(block) {
         code = '';
     } else if (analyteSelectorValue === 'Analyte selector') {
         code = 'self.parent.open_select_analyte_dialog()\n';
-    } else if (analyteSelectorValue === 'Saved lists') {
+        code += 'self.refresh_analyte_saved_lists_dropdown()\n'
+    } else if (analyteSelectorValue === 'Saved lists') {''
         var savedListName = block.getFieldValue('analyteSavedListsDropdown');
         var quotedListName = generator.quote_(savedListName);
         code = 'self.parent.update_analyte_selection_from_file(' + quotedListName + ')\n';
     }
+    code += 'self.main.update_blockly_field_types(self)'
     return code;
 };
   

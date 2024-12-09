@@ -31,7 +31,7 @@ There are two ways to use *LaME*, either as a precompiled executable or using th
     plotting
     custom_fields
     profiles
-    analysis_visualization
+    visualization
     multidimensional
     additional_functions
     notes
@@ -39,6 +39,7 @@ There are two ways to use *LaME*, either as a precompiled executable or using th
 
 .. toctree::
     :maxdepth: 2
-    :caption: Workflow Design
+    :caption: Workflow Method Design
 
-    workflow
+    workflow_basics
+    workflow_reference

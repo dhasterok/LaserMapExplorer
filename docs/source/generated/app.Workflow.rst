@@ -4,26 +4,18 @@ app.Workflow
 .. automodule:: app.Workflow
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
    
       pyqtSlot
    
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
    
       BlocklyBridge
+      Main
       QAction
       QDockWidget
       QFile
@@ -44,11 +36,3 @@ app.Workflow
       Qt
       Workflow
    
-   
-
-   
-   
-   
-
-
-

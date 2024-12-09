@@ -4,15 +4,6 @@ common.Polygon
 .. automodule:: common.Polygon
 
    
-   
-   
-
-   
-   
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
@@ -26,11 +17,3 @@ common.Polygon
       QTableWidgetItem
       ScatterPlotItem
    
-   
-
-   
-   
-   
-
-
-

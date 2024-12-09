@@ -4,11 +4,6 @@ common.DataHandling
 .. automodule:: common.DataHandling
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
@@ -18,10 +13,6 @@ common.DataHandling
       sort_analytes
       yeojohnson
    
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
@@ -29,14 +20,7 @@ common.DataHandling
       AttributeDataFrame
       DBSCAN
       KMeans
+      QMessageBox
       SampleObj
       StandardScaler
    
-   
-
-   
-   
-   
-
-
-

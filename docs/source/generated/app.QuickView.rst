@@ -4,20 +4,11 @@ app.QuickView
 .. automodule:: app.QuickView
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
    
       sort_analytes
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -34,11 +25,3 @@ app.QuickView
       QuickView
       Ui_QuickViewDialog
    
-   
-
-   
-   
-   
-
-
-

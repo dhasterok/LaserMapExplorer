@@ -379,3 +379,22 @@ class CustomActionMenu(QAction):
         if submenu:
             submenu.clear()  # Remove all current actions
             self._add_menu_items(submenu, new_items)
+
+class CustomComboBox(QComboBox):
+    def __init__(self, update_callback=None, *args, **kwargs):
+        """Initialize the CustomComboBox with an option update callback that executes at popup before the items are displayed.
+        
+        Parameters
+        ----------
+        update_callback : callback, optional
+            Executes on showPopup(), by default None
+        """
+        super().__init__(*args, **kwargs)
+        self.update_callback = update_callback
+
+    def showPopup(self):
+        """Update combobox items using callback before displaying items."""
+
+        if self.update_callback:
+            self.update_callback(self)
+        super().showPopup()

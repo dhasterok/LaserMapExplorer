@@ -431,6 +431,8 @@ class CalculatorDock(QDockWidget, UIFieldLogic):
 
         # remove field from Calculated dataframe
         self.parent.data[self.parent.sample_id].delete_column(name)
+
+        self.message_label.setText("Formula, successfully deleted...")
     
     def calc_load_formula(self):
         """Loads a predefined formula to use in the calculator"""        

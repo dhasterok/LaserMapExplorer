@@ -2115,21 +2115,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def apply_crop(self):
         
         sample_id = self.plot_info['sample_id']
+        data = self.data[sample_id]
+
         field_type = self.comboBoxColorByField.currentText()
         field = self.comboBoxColorField.currentText()
         current_plot_df = self.data[self.sample_id].get_map_data(field, field_type)
         
-        self.data[self.sample_id].mask = self.data[self.sample_id].mask[self.data[self.sample_id].crop_mask]
-        self.data[self.sample_id].polygon_mask = self.data[self.sample_id].polygon_mask[self.data[self.sample_id].crop_mask]
-        self.data[self.sample_id].filter_mask = self.data[self.sample_id].filter_mask[self.data[self.sample_id].crop_mask]
-        self.prep_data(sample_id)
+        data.mask = data.mask[data.crop_mask]
+        data.polygon_mask = data.polygon_mask[data.crop_mask]
+        data.filter_mask = data.filter_mask[data.crop_mask]
+        data.prep_data()
         self.update_labels()
 
         # replot after cropping 
         self.plot_map_pg(sample_id, field_type, field)
         
         self.actionCrop.setChecked(False)
-        self.data[self.sample_id]['crop'] = True
+        data.crop = True
 
         # clear existing plot info from tree to ensure plot is using most recent data
         for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:

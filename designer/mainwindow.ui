@@ -1095,10 +1095,13 @@
     <property name="title">
      <string>Window</string>
     </property>
-    <addaction name="actionLogger"/>
-    <addaction name="actionWorkflowTool"/>
-    <addaction name="actionNotes"/>
     <addaction name="actionFilters"/>
+    <addaction name="separator"/>
+    <addaction name="actionLogger"/>
+    <addaction name="actionCalculator"/>
+    <addaction name="actionNotes"/>
+    <addaction name="separator"/>
+    <addaction name="actionWorkflowTool"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -7450,7 +7453,7 @@
         <string/>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>3</number>
        </property>
        <property name="tabSpacing">
         <number>2</number>

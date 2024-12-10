@@ -206,6 +206,8 @@ class SampleObj:
 
         self._ref_chem = ref_chem
 
+        self.polygon = {}
+        self.profile = {}
 
         # filter dataframe
         self.filter_df = pd.DataFrame()

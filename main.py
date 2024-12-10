@@ -68,12 +68,14 @@ from src.common.Browser import Browser
 from src.app.Workflow import Workflow
 import src.app.QuickView as QV
 from src.app.config import BASEDIR, ICONPATH, SSPATH, DEBUG, load_stylesheet
+from src.app.UIControl import UIFieldLogic as uifields
 from src.common.ExtendedDF import AttributeDataFrame
 import src.common.format as fmt
 from src.common.colorfunc import get_hex_color, get_rgb_color
 import src.app.config as config
 from src.app.help_mapping import create_help_mapping
 from src.common.Logger import LoggerDock
+from src.common.CalculatorDock import CustomFieldCalculator as CalculatorDock
 
 # to prevent segmentation error at startup
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
@@ -629,7 +631,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolButtonAddFilter.clicked.connect(self.update_filter_table)
         self.toolButtonAddFilter.clicked.connect(lambda: self.apply_field_filters())
 
-        self.comboBoxFilterFieldType.activated.connect(lambda: self.update_field_combobox(self.comboBoxFilterFieldType, self.comboBoxFilterField))
+        self.comboBoxFilterFieldType.activated.connect(lambda: uifields.update_field_combobox(self.comboBoxFilterFieldType, self.comboBoxFilterField))
         self.comboBoxFilterField.currentIndexChanged.connect(self.update_filter_values)
 
         self.toolButtonFilterUp.clicked.connect(lambda: self.table_fcn.move_row_up(self.tableWidgetFilters))
@@ -655,9 +657,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #-------------------------
         self.toolButtonTernaryMap.clicked.connect(self.plot_ternarymap)
 
-        self.comboBoxFieldTypeX.activated.connect(lambda: self.update_field_combobox(self.comboBoxFieldTypeX, self.comboBoxFieldX))
-        self.comboBoxFieldTypeY.activated.connect(lambda: self.update_field_combobox(self.comboBoxFieldTypeY, self.comboBoxFieldY))
-        self.comboBoxFieldTypeZ.activated.connect(lambda: self.update_field_combobox(self.comboBoxFieldTypeZ, self.comboBoxFieldZ))
+        self.comboBoxFieldTypeX.activated.connect(lambda: uifields.update_field_combobox(self.comboBoxFieldTypeX, self.comboBoxFieldX))
+        self.comboBoxFieldTypeY.activated.connect(lambda: uifields.update_field_combobox(self.comboBoxFieldTypeY, self.comboBoxFieldY))
+        self.comboBoxFieldTypeZ.activated.connect(lambda: uifields.update_field_combobox(self.comboBoxFieldTypeZ, self.comboBoxFieldZ))
 
 
         # polygon table
@@ -800,7 +802,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolButtonProfileAddField.clicked.connect(self.profiling.add_field_to_listview)
         self.toolButtonProfileRemove.clicked.connect(self.profiling.remove_field_from_listview)
         self.toolButtonProfileRemove.clicked.connect(lambda: self.profiling.plot_profiles())
-        self.comboBoxProfileFieldType.activated.connect(lambda: self.update_field_combobox(self.comboBoxProfileFieldType, self.comboBoxProfileField))
+        self.comboBoxProfileFieldType.activated.connect(lambda: uifields.update_field_combobox(self.comboBoxProfileFieldType, self.comboBoxProfileField))
 
         # below line is commented because plot_profiles is automatically triggered when user clicks on map once they are in profiling tab
         # self.toolButtonPlotProfile.clicked.connect(lambda:self.profiling.plot_profiles())
@@ -827,9 +829,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Dating
         self.SpecialFunctions = specfun(parent=self)
-        self.comboBoxIsotopeAgeFieldType1.activated.connect(lambda: self.update_field_combobox(self.comboBoxIsotopeAgeFieldType1, self.comboBoxIsotopeAgeField1))
-        self.comboBoxIsotopeAgeFieldType2.activated.connect(lambda: self.update_field_combobox(self.comboBoxIsotopeAgeFieldType2, self.comboBoxIsotopeAgeField2))
-        self.comboBoxIsotopeAgeFieldType3.activated.connect(lambda: self.update_field_combobox(self.comboBoxIsotopeAgeFieldType3, self.comboBoxIsotopeAgeField3))
+        self.comboBoxIsotopeAgeFieldType1.activated.connect(lambda: uifields.update_field_combobox(self.comboBoxIsotopeAgeFieldType1, self.comboBoxIsotopeAgeField1))
+        self.comboBoxIsotopeAgeFieldType2.activated.connect(lambda: uifields.update_field_combobox(self.comboBoxIsotopeAgeFieldType2, self.comboBoxIsotopeAgeField2))
+        self.comboBoxIsotopeAgeFieldType3.activated.connect(lambda: uifields.update_field_combobox(self.comboBoxIsotopeAgeFieldType3, self.comboBoxIsotopeAgeField3))
 
         
         # Styling Tab
@@ -840,7 +842,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         setattr(self.comboBoxMVPlots, "allItems", lambda: [self.comboBoxMVPlots.itemText(i) for i in range(self.comboBoxMVPlots.count())])
 
         # self.doubleSpinBoxMarkerSize.valueChanged.connect(lambda: self.plot_scatter(save=False))
-        #self.comboBoxColorByField.activated.connect(lambda: self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField))
+        #self.comboBoxColorByField.activated.connect(lambda: uifields.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField))
 
         # cluster table
         header = self.tableWidgetViewGroups.horizontalHeader()
@@ -901,7 +903,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.canvas_changed()
 
         # multi-view tools
-        self.actionCalculator.triggered.connect(lambda: self.toolBoxTreeView.setCurrentIndex(self.right_tab['calculator']))
+        #self.actionCalculator.triggered.connect(lambda: self.toolBoxTreeView.setCurrentIndex(self.right_tab['calculator']))
+        self.actionCalculator.triggered.connect(self.open_calculator)
 
         #reset check boxes to prevent incorrect behaviour during plot click
         self.toolButtonPlotProfile.clicked.connect(lambda: self.reset_checked_items('profiling'))
@@ -962,10 +965,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # logger
         self.actionLogger.triggered.connect(self.open_logger)
-
-        # ----start debugging----
-        # self.test_get_field_list()
-        # ----end debugging----
 
     def logger_visibility_change(self, visible):
         """
@@ -1233,7 +1232,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if hasattr(self, 'workflow'):
             self.update_blockly_field_types()
 
-        self.update_field_combobox(self.comboBoxColorByField,self.comboBoxColorField)
+        uifields.update_field_combobox(self.comboBoxColorByField,self.comboBoxColorField)
         self.spinBoxColorField.setMinimum(0)
         self.spinBoxColorField.setMaximum(self.comboBoxColorField.count() - 1)
 
@@ -1316,13 +1315,27 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.notes.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
+    def open_calculator(self):
+        """Opens Calculator dock
+
+        Opens Calculator dock, creates on first instance.
+        """            
+        if not hasattr(self, 'logger_dock'):
+            calc_file = os.path.join(BASEDIR,f'resources/app_data/calculator.txt')
+            self.calculator = CalculatorDock(self, filename=calc_file, debug=self.logger_options['Calculator'])
+            self.calculator.visibilityChanged.connect(self.logger_visibility_change)
+        else:
+            self.calculator.show()
+
+        self.calculator.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
+
     def open_logger(self):
         """Opens Logger dock
 
         Opens Logger dock, creates on first instance.
         """            
         if not hasattr(self, 'logger_dock'):
-            logfile = os.path.join(BASEDIR,"resources/log/lame.log")
+            logfile = os.path.join(BASEDIR,f'resources/log/lame.log')
             self.logger_dock = LoggerDock(logfile, self)
             self.logger_dock.visibilityChanged.connect(self.logger_visibility_change)
         else:
@@ -3122,7 +3135,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ncol = int(np.sqrt(len(self.QV_analyte_list[key])*ratio))
 
         # fields in current sample
-        fields = self.get_field_list()
+        fields = uifields.get_field_list()
 
         # clear the quickView layout
         self.clear_layout(self.widgetQuickView.layout())
@@ -3935,7 +3948,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     # -------------------------------------
     def histogram_field_type_callback(self):
         """"Executes when the histogram field type is changed"""
-        self.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
+        uifields.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
         if self.comboBoxPlotType.currentText() != 'histogram':
             self.comboBoxPlotType.setCurrentText('histogram')
         self.histogram_update_bin_width()
@@ -4972,7 +4985,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         }
 
         self.update_canvas(canvas)
-        #self.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
+        #uifields.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
 
     def plot_pca_variance(self):
         """Creates a plot of explained variance, individual and cumulative, for PCA
@@ -6071,90 +6084,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # trigger update to plot
             self.style.scheduler.schedule_update()
 
-
-    # -------------------------------------
-    # Field type and field combobox pairs
-    # -------------------------------------
-    # updates field type comboboxes for analyses and plotting
-    def update_field_type_combobox(self, comboBox, addNone=False, plot_type=''):
-        """Updates field type combobox
-        
-        Used to update ``MainWindow.comboBoxHistFieldType``, ``MainWindow.comboBoxFilterFieldType``,
-        ``MainWindow.comboBoxFieldTypeX``, ``MainWindow.comboBoxFieldTypeY``,
-        ``MainWindow.comboBoxFieldTypeZ``, and ``MainWindow.comboBoxColorByField``
-
-        Parameters
-        ----------
-        combobox : QComboBox
-            The combobox to update.
-        addNone : bool
-            Adds ``None`` to the top of the ``combobox`` list
-        plot_type : str
-            The plot type helps to define the set of field types available, by default ``''`` (no change)
-        """
-        if self.sample_id == '':
-            return
-
-        data_type_dict = self.data[self.sample_id].processed_data.get_attribute_dict('data_type')
-
-        match plot_type.lower():
-            case 'correlation' | 'histogram' | 'tec':
-                if 'cluster' in data_type_dict:
-                    field_list = ['cluster']
-                else:
-                    field_list = []
-            case 'cluster score':
-                if 'cluster score' in data_type_dict:
-                    field_list = ['cluster score']
-                else:
-                    field_list = []
-            case 'cluster':
-                if 'cluster' in data_type_dict:
-                    field_list = ['cluster']
-                else:
-                    field_list = ['cluster score']
-            case 'cluster performance':
-                field_list = []
-            case 'pca score':
-                if 'pca score' in data_type_dict:
-                    field_list = ['PCA score']
-                else:
-                    field_list = []
-            case 'ternary map':
-                self.labelCbarDirection.setEnabled(True)
-                self.comboBoxCbarDirection.setEnabled(True)
-            case _:
-                field_list = ['Analyte', 'Analyte (normalized)']
-
-                # add check for ratios
-                if 'ratio' in data_type_dict:
-                    field_list.append('Ratio')
-                    field_list.append('Ratio (normalized)')
-
-                if 'pca score' in data_type_dict:
-                    field_list.append('PCA score')
-
-                if 'cluster' in data_type_dict:
-                    field_list.append('Cluster')
-
-                if 'cluster score' in data_type_dict:
-                    field_list.append('Cluster score')
-
-        self.style.toggle_style_widgets()
-
-        # add None to list?
-        if addNone:
-            field_list.insert(0, 'None')
-
-        # clear comboBox items
-        comboBox.clear()
-        # add new items
-        comboBox.addItems(field_list)
-
-        # ----start debugging----
-        # print('update_field_type_combobox: '+plot_type+',  '+comboBox.currentText())
-        # ----end debugging----
-
     def toggle_color_widgets(self, switch):
         """Toggles enabled state of color related widgets
 
@@ -6192,133 +6121,66 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.labelColorBounds.setEnabled(self.lineEditColorLB.isEnabled())
         self.labelColorScale.setEnabled(self.comboBoxColorScale.isEnabled())
 
-    # updates field comboboxes for analysis and plotting
-    def update_field_combobox(self, parentBox, childBox):
-        """Updates comboBoxes with fields for plots or analysis
-
-        Updates lists of fields in comboBoxes that are used to generate plots or used for analysis.
-        Calls ``MainWindow.get_field_list()`` to construct the list.
-
-        Parameters
-        ----------
-        parentBox : QComboBox, None
-            ComboBox used to select field type ('Analyte', 'Analyte (normalized)', 'Ratio', etc.), if None, then 'Analyte'
-
-        childBox : QComboBox
-            ComboBox with list of field values
-        """
-        if parentBox is None:
-            fields = self.get_field_list('Analyte')
-        else:
-            fields = self.get_field_list(set_name=parentBox.currentText())
-
-        childBox.clear()
-        childBox.addItems(fields)
-
-        # ----start debugging----
-        # if parentBox is not None:
-        #     print('update_field_combobox: '+parentBox.currentText())
-        # else:
-        #     print('update_field_combobox: None')
-        # print(fields)
-        # ----end debugging----
-
-        # get a named list of current fields for sample
 
     # updates all field type and field comboboxes
     def update_all_field_comboboxes(self):
         """Updates all field type and field comboBoxes"""
         # histograms
-        self.update_field_type_combobox(self.comboBoxHistFieldType)
-        self.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
+        uifields.update_field_type_combobox(self.comboBoxHistFieldType)
+        uifields.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
 
         # filters
-        self.update_field_type_combobox(self.comboBoxFilterFieldType)
-        self.update_field_combobox(self.comboBoxFilterFieldType, self.comboBoxFilterField)
+        uifields.update_field_type_combobox(self.comboBoxFilterFieldType)
+        uifields.update_field_combobox(self.comboBoxFilterFieldType, self.comboBoxFilterField)
 
         # scatter and heatmaps
-        self.update_field_type_combobox(self.comboBoxFieldTypeX)
-        self.update_field_combobox(self.comboBoxFieldTypeX, self.comboBoxFieldX)
+        uifields.update_field_type_combobox(self.comboBoxFieldTypeX)
+        uifields.update_field_combobox(self.comboBoxFieldTypeX, self.comboBoxFieldX)
 
-        self.update_field_type_combobox(self.comboBoxFieldTypeY)
-        self.update_field_combobox(self.comboBoxFieldTypeY, self.comboBoxFieldY)
+        uifields.update_field_type_combobox(self.comboBoxFieldTypeY)
+        uifields.update_field_combobox(self.comboBoxFieldTypeY, self.comboBoxFieldY)
 
-        self.update_field_type_combobox(self.comboBoxFieldTypeZ, addNone=True)
-        self.update_field_combobox(self.comboBoxFieldTypeZ, self.comboBoxFieldZ)
+        uifields.update_field_type_combobox(self.comboBoxFieldTypeZ, addNone=True)
+        uifields.update_field_combobox(self.comboBoxFieldTypeZ, self.comboBoxFieldZ)
 
         # n-Dim
-        self.update_field_combobox(None, self.comboBoxNDimAnalyte)
+        uifields.update_field_combobox(None, self.comboBoxNDimAnalyte)
 
         # profiles
-        self.update_field_type_combobox(self.comboBoxProfileFieldType)
-        self.update_field_combobox(self.comboBoxProfileFieldType, self.comboBoxProfileField)
+        uifields.update_field_type_combobox(self.comboBoxProfileFieldType)
+        uifields.update_field_combobox(self.comboBoxProfileFieldType, self.comboBoxProfileField)
 
 
         # colors
         addNone = True
         if self.comboBoxPlotType.currentText() in ['analyte map','PCA score','cluster','cluster score']:
             addNone = False
-        self.update_field_type_combobox(self.comboBoxColorByField, addNone=addNone, plot_type=self.comboBoxPlotType.currentText())
-        self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
+        uifields.update_field_type_combobox(self.comboBoxColorByField, addNone=addNone, plot_type=self.comboBoxPlotType.currentText())
+        uifields.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
         self.spinBoxColorField.setFixedWidth(22)
         self.spinBoxColorField.setMinimum(0)
         self.spinBoxColorField.setMaximum(self.comboBoxColorField.count() - 1)
 
         # calculator
-        self.update_field_combobox(self.comboBoxCalcFieldType, self.comboBoxCalcField)
+        uifields.update_field_type_combobox(self.comboBoxCalcFieldType)
+        uifields.update_field_combobox(self.comboBoxCalcFieldType, self.comboBoxCalcField)
 
         # dating
-        self.update_field_combobox(self.comboBoxIsotopeAgeFieldType1, self.comboBoxIsotopeAgeField1)
-        self.update_field_combobox(self.comboBoxIsotopeAgeFieldType2, self.comboBoxIsotopeAgeField2)
-        self.update_field_combobox(self.comboBoxIsotopeAgeFieldType3, self.comboBoxIsotopeAgeField3)
+        uifields.update_field_combobox(self.comboBoxIsotopeAgeFieldType1, self.comboBoxIsotopeAgeField1)
+        uifields.update_field_combobox(self.comboBoxIsotopeAgeFieldType2, self.comboBoxIsotopeAgeField2)
+        uifields.update_field_combobox(self.comboBoxIsotopeAgeFieldType3, self.comboBoxIsotopeAgeField3)
 
-
-    # gets the set of fields
-    def get_field_list(self, set_name='Analyte'):
-        """Gets the fields associated with a defined set
-
-        Set names are consistent with QComboBox.
-
-        Parameters
-        ----------
-        set_name : str, optional
-            name of set list, options include ``Analyte``, ``Analyte (normalized)``, ``Ratio``, ``Calcualated Field``,
-            ``PCA Score``, ``Cluster``, ``Cluster Score``, ``Special``, Defaults to ``Analyte``
-
-        Returns
-        -------
-        list
-            Set_fields, a list of fields within the input set
-        """
-        if self.sample_id == '':
-            return ['']
-
-        data = self.data[self.sample_id].processed_data
-
-        match set_name:
-            case 'Analyte' | 'Analyte (normalized)':
-                set_fields = data.match_attributes({'data_type': 'analyte', 'use': True})
-            case 'Ratio' | 'Ratio (normalized)':
-                set_fields = data.match_attributes({'data_type': 'ratio', 'use': True})
-            case 'None':
-                return []
-            case _:
-                #populate field name with column names of corresponding dataframe remove 'X', 'Y' is it exists
-                #set_fields = [col for col in self.data[self.sample_id]['computed_data'][set_name].columns.tolist() if col not in ['X', 'Y']]
-                set_fields = data.match_attribute('data_type', set_name.lower())
-
-        return set_fields
 
     def check_analysis_type(self):
         """Updates field type/field paired comboBoxes
         
         .. seealso::
-            ``MainWindow.update_field_type_combobox`` and ``MainWindow.update_field_combobox``
+            ``UIControls.UIFieldLogic.update_field_type_combobox`` and ``UICongrols.UIFieldLogic.update_field_combobox``
         """
         #print('check_analysis_type')
         self.check_analysis = True
-        self.update_field_type_combobox(self.comboBoxColorByField, addNone=True, plot_type=self.comboBoxPlotType.currentText())
-        self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
+        uifields.update_field_type_combobox(self.comboBoxColorByField, addNone=True, plot_type=self.comboBoxPlotType.currentText())
+        uifields.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
         self.spinBoxColorField.setMinimum(0)
         self.spinBoxColorField.setMaximum(self.comboBoxColorField.count() - 1)
         self.check_analysis = False

@@ -277,13 +277,14 @@ class CalculatorDock(QDockWidget, UIFieldLogic):
         if self.debug:
             print("calc_help")
 
-        filename = os.path.join(BASEDIR,"docs/build/html/custom_fields.html")
+        try:
+            if not hasattr(self.parent,"browser"):
+                self.parent.open_browser()
 
-        self.lineEditBrowserLocation.setText(filename)
-
-        if filename and hasattr(self.parent,'browser'):
-            # Load the selected HTML file into the QWebEngineView
-            self.parent.browser.setUrl(QUrl.fromLocalFile(filename))
+            self.parent.browser.show()
+            self.parent.browser.go_to_page('calculator')
+        except Exception as e:
+            print("Could not open browser to load page.")
         
     def calc_insert_operator(self, operator):
         """Inserts an operator into the calculator

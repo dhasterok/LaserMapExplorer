@@ -262,6 +262,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 'Calculator': True,
                 'Browser': False
             }
+        self.help_mapping = create_help_mapping(self)
+        
 
         #initialise status bar
         self.statusBar = self.statusBar()
@@ -1296,6 +1298,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             self.workflow.show()
 
+        self.help_mapping[self.workflow] = 'workflow'
+
         self.workflow.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
     def open_notes(self):
@@ -1314,6 +1318,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             self.notes.show()
 
+        self.help_mapping[self.notes] = 'notes'
+
         self.notes.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
     def open_calculator(self):
@@ -1326,6 +1332,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.calculator = CalculatorDock(self, filename=calc_file, debug=self.logger_options['Calculator'])
         else:
             self.calculator.show()
+
+        self.help_mapping[self.calculator] = 'calculator'
 
         self.calculator.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
@@ -1341,16 +1349,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             self.logger.show()
 
+        self.help_mapping[self.logger] = 'logger'
+
         self.logger.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
-    def open_browser(self, action):
+    def open_browser(self, action=None):
         """Opens Browser dock with documentation
 
         Opens Browser dock, creates on first instance.
         """            
         if not hasattr(self, 'browser'):
-            help_mapping = create_help_mapping(self)
-            self.browser = Browser(self, help_mapping, BASEDIR, debug=self.logger_options['Browser'])
+            self.browser = Browser(self, self.help_mapping, BASEDIR, debug=self.logger_options['Browser'])
         else:
             self.browser.show()
 
@@ -1363,6 +1372,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.browser.go_to_home()
             case 'tutorials':
                 self.browser.go_to_page(location='tutorials')
+            case _:
+                self.browser.go_to_home()
 
     def open_select_analyte_dialog(self):
         """Opens Select Analyte dialog

@@ -20,10 +20,6 @@ def create_help_mapping(parent):
         parent.toolBoxTreeView: 'right_toolbox',
         parent.dockWidgetBottomTabs: 'lower_tabs',
         parent.tabWidget: 'lower_tabs',
-        parent.calculator: 'calculator',
-        parent.logger: 'logger',
-        parent.notes: 'notes',
-        parent.workflow: 'workflow'
     }
 
     return help_mapping

@@ -396,5 +396,5 @@ class CustomComboBox(QComboBox):
         """Update combobox items using callback before displaying items."""
 
         if self.update_callback:
-            self.update_callback(self)
+            self.update_callback()
         super().showPopup()

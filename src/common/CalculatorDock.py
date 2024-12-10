@@ -163,9 +163,9 @@ class CalculatorDock(QDockWidget, UIFieldLogic):
 
 
         # Field Control
-        self.field_type_combobox = CustomComboBox(update_callback=lambda: self.update_field_type_combobox(self.data, self.field_type_combobox))
+        self.field_type_combobox = CustomComboBox(update_callback=lambda: self.update_field_type_combobox(self.field_type_combobox))
         self.field_type_combobox.setToolTip("Select field type")
-        self.field_type_combobox.activated.connect(lambda: self.update_field_combobox(self.data, self.field_type_combobox))
+        self.field_type_combobox.activated.connect(lambda: self.update_field_combobox(self.field_type_combobox, self.field_combobox))
         calculator_layout.addWidget(self.field_type_combobox)
 
         field_layout = QHBoxLayout()
@@ -239,7 +239,7 @@ class CalculatorDock(QDockWidget, UIFieldLogic):
         for label, text, row, col, handler in buttons:
             button = QPushButton()
             button.setContentsMargins(0,0,0,0)
-            button.setMinimumHeight(25)
+            button.setMinimumHeight(30)
             button.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Fixed)
             button.setText(label)
             button_layout.addWidget(button, row, col)

@@ -972,7 +972,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         Redirect stdout based on the visibility of the logger dock.
         """
         if visible:
-            sys.stdout = self.logger_dock  # Redirect stdout to logger
+            sys.stdout = self.logger  # Redirect stdout to logger
         else:
             sys.stdout = sys.__stdout__  # Restore to default stdout    
 
@@ -1321,7 +1321,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Opens Calculator dock, creates on first instance.
         """            
-        if not hasattr(self, 'logger_dock'):
+        if not hasattr(self, 'logger'):
             calc_file = os.path.join(BASEDIR,f'resources/app_data/calculator.txt')
             self.calculator = CalculatorDock(self, filename=calc_file, debug=self.logger_options['Calculator'])
         else:
@@ -1334,12 +1334,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Opens Logger dock, creates on first instance.
         """            
-        if not hasattr(self, 'logger_dock'):
+        if not hasattr(self, 'logger'):
             logfile = os.path.join(BASEDIR,f'resources/log/lame.log')
-            self.logger_dock = LoggerDock(logfile, self)
-            self.logger_dock.visibilityChanged.connect(self.logger_visibility_change)
+            self.logger = LoggerDock(logfile, self)
+            self.logger.visibilityChanged.connect(self.logger_visibility_change)
         else:
-            self.logger_dock.show()
+            self.logger.show()
 
         self.logger.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
@@ -2799,10 +2799,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         plot_type : str
             The plot type helps to define the set of field types available, by default ``''`` (no change)
         """
-        if self.parent.sample_id == '':
+        if self.sample_id == '':
             return
 
-        data_type_dict = self.parent.data[self.parent.sample_id].processed_data.get_attribute_dict('data_type')
+        data_type_dict = self.data[self.sample_id].processed_data.get_attribute_dict('data_type')
 
         match plot_type.lower():
             case 'correlation' | 'histogram' | 'tec':
@@ -2828,8 +2828,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 else:
                     field_list = []
             case 'ternary map':
-                self.parent.labelCbarDirection.setEnabled(True)
-                self.parent.comboBoxCbarDirection.setEnabled(True)
+                self.labelCbarDirection.setEnabled(True)
+                self.comboBoxCbarDirection.setEnabled(True)
             case _:
                 field_list = ['Analyte', 'Analyte (normalized)']
 
@@ -2847,7 +2847,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 if 'cluster score' in data_type_dict:
                     field_list.append('Cluster score')
 
-        self.parent.style.toggle_style_widgets()
+        self.style.toggle_style_widgets()
 
         # add None to list?
         if addNone:
@@ -2919,7 +2919,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.sample_id == '':
             return ['']
 
-        data = self.parent.data[self.parent.sample_id].processed_data
+        data = self.data[self.sample_id].processed_data
 
         if filter not in ['all', 'used']:
             raise ValueError("filter must be 'all' or 'used'.")

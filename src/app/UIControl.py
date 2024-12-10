@@ -9,8 +9,6 @@ class UIFieldLogic():
         Initializes data frame, defaults to None
     """        
     def __init__(self, data=None):
-        if not ((data is None) or (not isinstance(data, AttributeDataFrame))):
-            raise TypeError("data should be an AttributeDataFrame")
         self.data = data
 
     def update_data(self, data):

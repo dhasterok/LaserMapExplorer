@@ -4,15 +4,6 @@ app.FieldSelectionWindow
 .. automodule:: app.FieldSelectionWindow
 
    
-   
-   
-
-   
-   
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
@@ -39,11 +30,3 @@ app.FieldSelectionWindow
       Ui_FieldDialog
       pyqtSignal
    
-   
-
-   
-   
-   
-
-
-

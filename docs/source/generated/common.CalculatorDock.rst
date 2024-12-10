@@ -1,7 +1,7 @@
-common.Calculator
-=================
+common.CalculatorDock
+=====================
 
-.. automodule:: common.Calculator
+.. automodule:: common.CalculatorDock
 
    
    .. rubric:: Functions

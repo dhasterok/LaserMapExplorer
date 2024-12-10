@@ -4,11 +4,6 @@ app.ImageProcessing
 .. automodule:: app.ImageProcessing
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
@@ -17,10 +12,6 @@ app.ImageProcessing
       decimate
       wiener
    
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
@@ -28,11 +19,3 @@ app.ImageProcessing
       ImageItem
       ImageProcessing
    
-   
-
-   
-   
-   
-
-
-

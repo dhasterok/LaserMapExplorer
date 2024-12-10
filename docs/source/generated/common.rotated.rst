@@ -1,13 +1,8 @@
-common.rotated
+﻿common.rotated
 ==============
 
 .. automodule:: common.rotated
 
-   
-   
-   
-
-   
    
    .. rubric:: Functions
 
@@ -90,10 +85,6 @@ common.rotated
       uppercasebase
       uppercasedigits
       ws
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -269,11 +260,3 @@ common.rotated
       pyqtProperty
       pyqtSignal
    
-   
-
-   
-   
-   
-
-
-

@@ -4,15 +4,6 @@ app.SpotImporter
 .. automodule:: app.SpotImporter
 
    
-   
-   
-
-   
-   
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
@@ -31,11 +22,3 @@ app.SpotImporter
       SpotImporter
       Ui_SpotImportDialog
    
-   
-
-   
-   
-   
-
-
-

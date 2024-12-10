@@ -4,21 +4,16 @@ common.Logger
 .. automodule:: common.Logger
 
    
-   
-   
-
-   
-   
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
    
       LoggerDock
+      LoggerOptionsDialog
       QAction
+      QCheckBox
+      QDialog
+      QDialogButtonBox
       QDockWidget
       QIcon
       QMainWindow
@@ -31,11 +26,3 @@ common.Logger
       QWidget
       Qt
    
-   
-
-   
-   
-   
-
-
-

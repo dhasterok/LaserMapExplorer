@@ -18,17 +18,9 @@ def oround(val, order=2, toward=None):
     -------
     float
         rounded matrix values
-    """        
-    if not isinstance(val, (float, int)):
-        raise TypeError("val must be of type float or int")
-    elif val == 0:
+    """
+    if val == 0:
         return 0
-
-    if not isinstance(order, (int)):
-        raise TypeError("order must be of type float or int")
-
-    if not (isinstance(toward, (float, int)) or toward is None):
-        raise TypeError("toward order must be of type float, int or None")
 
     power = np.floor(np.log10(abs(val)))
     if toward == 0:

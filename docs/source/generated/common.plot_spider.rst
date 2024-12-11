@@ -4,6 +4,11 @@ common.plot\_spider
 .. automodule:: common.plot_spider
 
    
+   
+   
+
+   
+   
    .. rubric:: Functions
 
    .. autosummary::
@@ -16,6 +21,10 @@ common.plot\_spider
       plot_spider_norm
       sem
    
+   
+
+   
+   
    .. rubric:: Classes
 
    .. autosummary::
@@ -24,3 +33,11 @@ common.plot\_spider
       LinearNDInterpolator
       MolecularWeightCalculator
    
+   
+
+   
+   
+   
+
+
+

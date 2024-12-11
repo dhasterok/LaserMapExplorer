@@ -4,11 +4,21 @@ common.CustomWidgets
 .. automodule:: common.CustomWidgets
 
    
+   
+   
+
+   
+   
+   
+
+   
+   
    .. rubric:: Classes
 
    .. autosummary::
    
       CustomActionMenu
+      CustomComboBox
       CustomLineEdit
       CustomTableWidget
       CustomTreeView
@@ -30,3 +40,11 @@ common.CustomWidgets
       Qt
       StandardItem
    
+   
+
+   
+   
+   
+
+
+

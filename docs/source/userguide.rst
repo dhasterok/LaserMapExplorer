@@ -15,7 +15,7 @@ There are two ways to use *LaME*, either as a precompiled executable or using th
 
 .. toctree::
     :maxdepth: 2
-    :caption: The Interface
+    :caption: The Basic Interface
 
     top_toolbar
     left_toolbox
@@ -29,17 +29,18 @@ There are two ways to use *LaME*, either as a precompiled executable or using th
 
     filtering
     plotting
-    custom_fields
     profiles
     visualization
     multidimensional
     additional_functions
-    notes
     export
 
 .. toctree::
     :maxdepth: 2
-    :caption: Workflow Method Design
+    :caption: Docks
 
-    workflow_basics
+    calculator
+    notes
+    logger
+    workflow
     workflow_reference

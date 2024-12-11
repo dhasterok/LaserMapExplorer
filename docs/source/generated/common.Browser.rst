@@ -4,11 +4,20 @@ common.Browser
 .. automodule:: common.Browser
 
    
+   
+   
+
+   
+   
    .. rubric:: Functions
 
    .. autosummary::
    
       pyqtSlot
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -35,3 +44,11 @@ common.Browser
       Qt
       WebEngineView
    
+   
+
+   
+   
+   
+
+
+

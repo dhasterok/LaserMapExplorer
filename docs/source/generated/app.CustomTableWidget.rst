@@ -4,6 +4,15 @@ app.CustomTableWidget
 .. automodule:: app.CustomTableWidget
 
    
+   
+   
+
+   
+   
+   
+
+   
+   
    .. rubric:: Classes
 
    .. autosummary::
@@ -16,3 +25,11 @@ app.CustomTableWidget
       Qt
       TableWidgetDragRows
    
+   
+
+   
+   
+   
+
+
+

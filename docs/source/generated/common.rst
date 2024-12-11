@@ -4,38 +4,56 @@
 .. automodule:: common
 
    
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
 .. rubric:: Modules
 
 .. autosummary::
    :toctree:
    :recursive:
 
-   Browser
-   Calculator
-   CalculatorDock
-   CustomMplCanvas
-   CustomWidgets
-   DataHandling
-   ExtendedDF
-   Logger
-   Masking
-   MolecularWeightCalculator
-   NoteTaking
-   Polygon
-   Regression
-   ScheduleTimer
-   SortAnalytes
-   TableFunctions
-   colorfunc
-   csvdict
-   format
-   gausscensor
-   outliers
-   plot_spider
-   radar
-   radar_factory
-   rotated
-   scalebar
-   ternary_colormap
-   ternary_plot
-   varfunc
+   common.Browser
+   common.Calculator
+   common.CalculatorDock
+   common.CustomMplCanvas
+   common.CustomWidgets
+   common.DataHandling
+   common.ExtendedDF
+   common.Logger
+   common.Masking
+   common.MolecularWeightCalculator
+   common.NoteTaking
+   common.Polygon
+   common.Regression
+   common.ScheduleTimer
+   common.SortAnalytes
+   common.TableFunctions
+   common.colorfunc
+   common.csvdict
+   common.format
+   common.gausscensor
+   common.outliers
+   common.plot_spider
+   common.radar
+   common.radar_factory
+   common.rotated
+   common.scalebar
+   common.ternary_colormap
+   common.ternary_plot
+   common.varfunc
+

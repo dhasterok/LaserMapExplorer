@@ -1,7 +1,7 @@
-common.ExtendedDF
-=================
+app.UIControl
+=============
 
-.. automodule:: common.ExtendedDF
+.. automodule:: app.UIControl
 
    
    
@@ -18,6 +18,7 @@ common.ExtendedDF
    .. autosummary::
    
       AttributeDataFrame
+      UIFieldLogic
    
    
 

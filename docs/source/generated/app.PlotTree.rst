@@ -4,11 +4,20 @@ app.PlotTree
 .. automodule:: app.PlotTree
 
    
+   
+   
+
+   
+   
    .. rubric:: Functions
 
    .. autosummary::
    
       sort_analytes
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -24,3 +33,11 @@ app.PlotTree
       Qt
       StandardItem
    
+   
+
+   
+   
+   
+
+
+

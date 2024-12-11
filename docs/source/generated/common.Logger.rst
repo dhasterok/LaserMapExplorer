@@ -4,6 +4,15 @@ common.Logger
 .. automodule:: common.Logger
 
    
+   
+   
+
+   
+   
+   
+
+   
+   
    .. rubric:: Classes
 
    .. autosummary::
@@ -26,3 +35,11 @@ common.Logger
       QWidget
       Qt
    
+   
+
+   
+   
+   
+
+
+

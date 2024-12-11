@@ -4,6 +4,11 @@ app.Modules
 .. automodule:: app.Modules
 
    
+   
+   
+
+   
+   
    .. rubric:: Functions
 
    .. autosummary::
@@ -16,6 +21,10 @@ app.Modules
       plot_spider_norm
       silhouette_score
       yeojohnson
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -52,3 +61,11 @@ app.Modules
       specfun
       ternary
    
+   
+
+   
+   
+   
+
+
+

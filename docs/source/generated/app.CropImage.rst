@@ -4,6 +4,15 @@ app.CropImage
 .. automodule:: app.CropImage
 
    
+   
+   
+
+   
+   
+   
+
+   
+   
    .. rubric:: Classes
 
    .. autosummary::
@@ -18,3 +27,11 @@ app.CropImage
       Qt
       ResizableRectItem
    
+   
+
+   
+   
+   
+
+
+

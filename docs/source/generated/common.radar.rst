@@ -4,6 +4,15 @@ common.radar
 .. automodule:: common.radar
 
    
+   
+   
+
+   
+   
+   
+
+   
+   
    .. rubric:: Classes
 
    .. autosummary::
@@ -11,3 +20,11 @@ common.radar
       Figure
       Radar
    
+   
+
+   
+   
+   
+
+
+

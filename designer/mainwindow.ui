@@ -7453,7 +7453,7 @@
         <string/>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <property name="tabSpacing">
         <number>2</number>
@@ -7609,7 +7609,7 @@
           <x>0</x>
           <y>0</y>
           <width>296</width>
-          <height>392</height>
+          <height>418</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -8656,7 +8656,7 @@
               <x>0</x>
               <y>0</y>
               <width>294</width>
-              <height>216</height>
+              <height>242</height>
              </rect>
             </property>
             <attribute name="icon">
@@ -9846,13 +9846,13 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="regression">
+       <widget class="QWidget" name="RegressionPage">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
           <width>252</width>
-          <height>392</height>
+          <height>418</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -9886,7 +9886,7 @@
               <x>0</x>
               <y>0</y>
               <width>250</width>
-              <height>390</height>
+              <height>416</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_78">

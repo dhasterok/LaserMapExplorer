@@ -1506,7 +1506,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.toolButtonSaveTheme.setEnabled(True)
 
             self.StylingPage.setEnabled(True)
-            self.CalculatorPage.setEnabled(True)
+            self.RegressionPage.setEnabled(True)
 
             if self.duplicate_plot_info:
                 self.add_plotwidget_to_canvas(self.duplicate_plot_info)
@@ -6338,8 +6338,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.spinBoxColorField.setMaximum(self.comboBoxColorField.count() - 1)
 
         # calculator
-        self.update_field_type_combobox(self.comboBoxCalcFieldType)
-        self.update_field_combobox(self.comboBoxCalcFieldType, self.comboBoxCalcField)
+        # self.update_field_type_combobox(self.comboBoxCalcFieldType)
+        # self.update_field_combobox(self.comboBoxCalcFieldType, self.comboBoxCalcField)
 
         # dating
         self.update_field_combobox(self.comboBoxIsotopeAgeFieldType1, self.comboBoxIsotopeAgeField1)

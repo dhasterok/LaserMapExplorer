@@ -1,12 +1,14 @@
 import sys
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtWidgets import (
-        QMainWindow, QTextEdit, QDockWidget, QWidget, QVBoxLayout,
+        QMainWindow, QTextEdit, QWidget, QVBoxLayout,
         QToolBar, QSpacerItem, QSizePolicy, QAction, QDialog, QCheckBox, QDialogButtonBox
     )
 from PyQt5.QtGui import QIcon
 
-class LoggerDock(QDockWidget):
+from src.common.CustomWidgets import CustomDockWidget
+
+class LoggerDock(CustomDockWidget):
     """A dock widget that contains a logging display.
 
     A logging dock widget useful for debugging and recording actions.

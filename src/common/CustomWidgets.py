@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import ( 
-        QLineEdit, QTableWidget, QComboBox, QPushButton, QCheckBox, QWidget, QTreeView, QAction, QMenu
+        QLineEdit, QTableWidget, QComboBox, QPushButton, QCheckBox, QWidget, QTreeView, QAction, QMenu,
+        QDockWidget
     )
 from PyQt5.QtGui import QStandardItem, QStandardItemModel, QFont, QDoubleValidator, QIcon, QCursor 
 from PyQt5.QtCore import Qt
@@ -398,3 +399,16 @@ class CustomComboBox(QComboBox):
         if self.update_callback:
             self.update_callback()
         super().showPopup()
+
+class CustomDockWidget(QDockWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.show()
+
+        self.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
+
+    def closeEvent(self, event):
+        """Override the close event to hide the dock widget instead of closing it."""
+        self.hide()
+        event.ignore()  # Ignore the close event to prevent the widget from being removed.

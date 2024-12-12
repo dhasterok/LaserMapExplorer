@@ -235,8 +235,9 @@ class MplCanvas(FigureCanvas):
         if not ok:
             return
 
-        style = self.parent.styles[self.parent.comboBoxPlotType.currentText()]
-        self.axes.text(x,y,txt, color=style['Scale']['OverlayColor'], fontsize=style['Text']['FontSize'])
+        overlay_color = self.parent.style.overlay_color
+        font_size = self.parent.style.font_size
+        self.axes.text(x,y,txt, color=overlay_color, fontsize=font_size)
         self.draw()
 
     def calculate_distance(self,p1,p2):
@@ -277,11 +278,12 @@ class MplCanvas(FigureCanvas):
             Handle to line
         """        
         plot_type = self.parent.plot_info['plot_type']
-        style = self.parent.styles[plot_type]
+        overlay_color = self.parent.style.overlay_color
+        line_width = self.parent.style.line_width
 
         # plot line (keep only first returned handle)
         p = self.axes.plot([p1[0], p2[0]], [p1[1], p2[1]],
-                ':', c=style['Scale']['OverlayColor'], lw=style['Lines']['LineWidth']
+                ':', c=overlay_color, lw=line_width
             )[0]
 
         return p
@@ -303,7 +305,7 @@ class MplCanvas(FigureCanvas):
             Handle to text.
         """        
         plot_type = self.parent.plot_info['plot_type']
-        style = self.parent.styles[plot_type]
+        style = self.parent.style
 
         # compute distance
         distance = self.calculate_distance(p1, p2)
@@ -339,8 +341,8 @@ class MplCanvas(FigureCanvas):
             valign = 'top'
 
         # text on plot
-        font = {'family':style['Text']['Font'], 'size':style['Text']['FontSize']-2}
-        t = self.axes.text(p2[0]+dx, p2[1]+dy, distance_text, ha=halign, va=valign, fontdict=font, c=style['Scale']['OverlayColor'])
+        font = {'family':style.font, 'size':style.font_size-2}
+        t = self.axes.text(p2[0]+dx, p2[1]+dy, distance_text, ha=halign, va=valign, fontdict=font, c=style.overlay_color)
 
         return t
 

@@ -59,10 +59,10 @@ from src.app.PlotTree import PlotTree
 from src.app.CropImage import CropTool
 from src.app.ImageProcessing import ImageProcessing as ip
 from src.app.StyleToolbox import Styling
-from src.app.Profile import Profiling
+from src.app.Profile import Profiling, ProfileDock
 from src.common.Polygon import PolygonManager
-from src.common.Calculator import CustomFieldCalculator as cfc
-from src.app.SpecialFunctions import SpecialFunctions as specfun
+from src.app.SpotTools import SpotPage
+from src.app.SpecialTools import SpecialPage
 from src.common.NoteTaking import Notes
 from src.common.Browser import Browser
 from src.app.Workflow import Workflow
@@ -148,8 +148,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 | 'pstatus' : (str) -- *auto* or *custom* limits for probability axis on histograms when displayed as a PDF type
                 | 'pmin' : (float) -- minimum probability value
                 | 'pmax' : (float) -- maximum probability value
-        bottom_tab : dict
-            Holds the indices for tabs in ``tabWidget``
+        mask_tab : dict
+            Holds the indices for tabs in ``tabWidgetMask``
         calc_dict : dict
             Holds the custom field names and formulas set by the user in the calculator
         canvas_tab : dict
@@ -355,29 +355,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # code is more resilient if toolbox indices for each page is not hard coded
         # will need to change case text if the page text is changed
         # left toolbox
-        self.left_tab = {}
-        for tid in range(0,self.toolBox.count()):
-            match self.toolBox.itemText(tid).lower():
-                case 'samples and fields':
-                    self.left_tab.update({'sample': tid})
-                case 'preprocess':
-                    self.left_tab.update({'process': tid})
-                case 'spot data':
-                    self.left_tab.update({'spot': tid})
-                case 'polygons':
-                    self.left_tab.update({'polygons': tid})
-                case 'scatter and heatmaps':
-                    self.left_tab.update({'scatter': tid})
-                case 'n-dim':
-                    self.left_tab.update({'ndim': tid})
-                case 'dimensional reduction':
-                    self.left_tab.update({'multidim': tid})
-                case 'clustering':
-                    self.left_tab.update({'cluster': tid})
-                case 'profiling':
-                    self.left_tab.update({'profile': tid})
-                case 'p-t-t functions':
-                    self.left_tab.update({'special': tid})
+        self.reindex_left_tab()
+        self.actionSpotTools.setChecked(False)
+        self.actionSpotTools.triggered.connect(self.toggle_spot_tab)
+
+        self.actionSpecialTools.setChecked(False)
+        self.actionSpecialTools.triggered.connect(self.toggle_special_tab)
 
         # right toolbox
         self.right_tab = {}
@@ -387,21 +370,31 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     self.right_tab.update({'tree': tid})
                 case 'styling':
                     self.right_tab.update({'style': tid})
-                case 'regression':
-                    self.right_tab.update({'regression': tid})
                 case 'calculator':
                     self.right_tab.update({'calculator': tid})
 
-        self.bottom_tab = {}
-        for tid in range(self.tabWidget.count()):
-            match self.tabWidget.tabText(tid).lower():
+        self.mask_tab = {}
+        for tid in range(self.tabWidgetMask.count()):
+            match self.tabWidgetMask.tabText(tid).lower():
                 case 'filters':
-                    self.bottom_tab.update({'filter': tid})
-                case 'profiles':
-                    self.bottom_tab.update({'profile': tid})
-                case 'info':
-                    self.bottom_tab.update({'info': tid})
+                    self.mask_tab.update({'filter': tid})
+                case 'polygons':
+                    self.mask_tab.update({'polygon': tid})
+                case 'clusters':
+                    self.mask_tab.update({'cluster': tid})
 
+        self.info_tab = {}
+        for tid in range(self.tabWidgetInfo.count()):
+            match self.tabWidgetInfo.tabText(tid).lower():
+                case 'plot':
+                    self.info_tab.update({'plot': tid})
+                case 'metadata':
+                    self.info_tab.update({'metadata': tid})
+                case 'data':
+                    self.info_tab.update({'data': tid})
+                case 'fields':
+                    self.info_tab.update({'field': tid})
+        
         self.canvas_tab = {}
         for tid in range(self.canvasWindow.count()):
             match self.canvasWindow.tabText(tid).lower():
@@ -411,6 +404,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     self.canvas_tab.update({'mv': tid})
                 case 'quick view':
                     self.canvas_tab.update({'qv': tid})
+        
+        self.style_tab = {}
+        for tid in range(self.toolBoxStyle.count()):
+            match self.toolBoxStyle.itemText(tid).lower():
+                case 'axes and labels':
+                    self.style_tab.update({'axes': tid})
+                case 'annotations and scale':
+                    self.style_tab.update({'text': tid})
+                case 'markers and lines':
+                    self.style_tab.update({'markers': tid})
+                case 'coloring':
+                    self.style_tab.update({'colors': tid})
+                case 'regression':
+                    self.style_tab.update({'regression': tid})
 
 
         self.toolBar.insertWidget(self.actionSelectAnalytes,self.widgetSampleSelect)
@@ -419,7 +426,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Set initial view
         self.toolBox.setCurrentIndex(self.left_tab['sample'])
-        self.tabWidget.setCurrentIndex(self.bottom_tab['filter'])
+        self.tabWidgetMask.setCurrentIndex(self.mask_tab['filter'])
+        self.tabWidgetInfo.setCurrentIndex(self.info_tab['plot'])
         self.toolBoxStyle.setCurrentIndex(0)
         self.toolBoxTreeView.setCurrentIndex(self.right_tab['tree'])
         self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
@@ -431,8 +439,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.plot_types = {self.left_tab['sample']: [0, 'analyte map', 'correlation'],
             self.left_tab['process']: [0, 'analyte map', 'gradient map', 'histogram'],
             self.left_tab['spot']: [0, 'analyte map', 'gradient map'],
-            self.left_tab['polygons']: [0, 'analyte map'],
-            self.left_tab['profile']: [0, 'analyte map'],
+            self.mask_tab['polygon']: [0, 'analyte map'],
             self.left_tab['scatter']: [0, 'scatter', 'heatmap', 'ternary map'],
             self.left_tab['ndim']: [0, 'TEC', 'Radar'],
             self.left_tab['multidim']: [0, 'variance','vectors','PCA scatter','PCA heatmap','PCA score'],
@@ -453,20 +460,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionQuit_LaME.triggered.connect(self.quit)
 
         # Intialize Tabs as not enabled
-        self.SelectAnalytePage.setEnabled(False)
         self.PreprocessPage.setEnabled(False)
-        self.SpotDataPage.setEnabled(False)
-        self.PolygonPage.setEnabled(False)
+        self.SelectAnalytePage.setEnabled(False)
+        #self.SpotDataPage.setEnabled(False)
+        #self.PolygonPage.setEnabled(False)
         self.ScatterPage.setEnabled(False)
         self.NDIMPage.setEnabled(False)
         self.MultidimensionalPage.setEnabled(False)
         self.ClusteringPage.setEnabled(False)
         self.ProfilingPage.setEnabled(False)
-        self.PTtPage.setEnabled(False)
+        #self.PTtPage.setEnabled(False)
 
         self.actionSavePlotToTree.triggered.connect(self.add_plotwidget_to_tree)
         self.actionSelectAnalytes.triggered.connect(self.open_select_analyte_dialog)
-        self.actionSpotData.triggered.connect(lambda: self.open_tab('spot data'))
+        #self.actionSpotData.triggered.connect(lambda: self.toggle_spot_tab)
 
         #apply filters
         self.actionClearFilters.triggered.connect(lambda: self.apply_filters(fullmap=True))
@@ -491,7 +498,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionSwapAxes.triggered.connect(self.swap_xy)
         self.actionSwapAxes.setEnabled(False)
 
-        self.actionFilters.triggered.connect(lambda: self.bottom_tab['filter'])
+        self.actionFilters.triggered.connect(lambda: self.mask_tab['filter'])
+        self.actionPolygons.triggered.connect(lambda: self.mask_tab['polygon'])
+        self.actionClusters.triggered.connect(lambda: self.mask_tab['cluster'])
+
+        self.actionInfo.triggered.connect(lambda: self.info_tab['plot'])
 
         self.actionHelp.setCheckable(True)
         self.actionHelp.toggled.connect(self.toggle_help_mode)
@@ -609,13 +620,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #-------------------------
         self.spotdata = AttributeDataFrame()
 
-        # spot table
-        header = self.tableWidgetSpots.horizontalHeader()
-        header.setSectionResizeMode(0,QHeaderView.Stretch)
-        header.setSectionResizeMode(1,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(2,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(3,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(4,QHeaderView.Stretch)
 
         # Filter Tabs
         #-------------------------
@@ -771,49 +775,51 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Profile Tab
         #-------------------------
-        self.lineEditPointRadius.setValidator(QIntValidator())
-        self.lineEditYThresh.setValidator(QIntValidator())
-        self.profiling = Profiling(self)
-        self.comboBoxProfileList.addItem('Create New Profile')
-        self.comboBoxProfileList.activated.connect(lambda: self.profiling.on_profile_selected(self.comboBoxProfileList.currentText()))
-        # create new profile or update existing
-        self.toolButtonPlotProfile.clicked.connect(lambda: self.profiling.on_profile_selected(self.comboBoxProfileList.currentText()))
+        #self.lineEditPointRadius.setValidator(QIntValidator())
+        #self.lineEditYThresh.setValidator(QIntValidator())
+        # self.profiling = Profiling(self)
+        # #self.comboBoxProfileList.addItem('Create New Profile')
+        # #self.comboBoxProfileList.activated.connect(lambda: self.profiling.on_profile_selected(self.comboBoxProfileList.currentText()))
 
-        #select entire row
-        header = self.tableWidgetProfilePoints.horizontalHeader()
-        header.setSectionResizeMode(0,QHeaderView.Stretch)
-        header.setSectionResizeMode(1,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(2,QHeaderView.ResizeToContents)
+        # # create new profile or update existing
+        # self.toolButtonPlotProfile.clicked.connect(lambda: self.profiling.on_profile_selected(self.comboBoxProfileList.currentText()))
 
-        self.tableWidgetProfilePoints.setSelectionBehavior(QTableWidget.SelectRows)
-        self.toolButtonPointUp.clicked.connect(lambda: self.table_fcn.move_row_up(self.tableWidgetProfilePoints))
-        self.toolButtonPointDown.clicked.connect(lambda: self.table_fcn.move_row_down(self.tableWidgetProfilePoints))
-        self.toolButtonPointDelete.clicked.connect(lambda: self.table_fcn.delete_row(self.tableWidgetProfilePoints))
-        self.comboBoxProfileSort.currentIndexChanged.connect(self.plot_profile_and_table)
-        self.toolButtonProfileInterpolate.clicked.connect(lambda: self.profiling.interpolate_points(interpolation_distance=int(self.lineEditIntDist.text()), radius= int(self.lineEditPointRadius.text())))
-        # update profile plot when point type is changed
-        self.comboBoxPointType.currentIndexChanged.connect(lambda: self.profiling.plot_profiles())
-        # update profile plot when selected subplot is changed
-        self.spinBoxProfileSelectedSubplot.valueChanged.connect(lambda: self.profiling.plot_profiles())
-        # update profile plot when Num subplot is changed
-        self.spinBoxProfileNumSubplots.valueChanged.connect(lambda: self.profiling.plot_profiles())
-        # update profile plot when field in subplot table is changed
-        self.toolButtonProfileAddField.clicked.connect(lambda: self.profiling.plot_profiles())
+        # #select entire row
+        # header = self.tableWidgetProfilePoints.horizontalHeader()
+        # header.setSectionResizeMode(0,QHeaderView.Stretch)
+        # header.setSectionResizeMode(1,QHeaderView.ResizeToContents)
+        # header.setSectionResizeMode(2,QHeaderView.ResizeToContents)
+
+        # self.tableWidgetProfilePoints.setSelectionBehavior(QTableWidget.SelectRows)
+        # self.toolButtonPointUp.clicked.connect(lambda: self.table_fcn.move_row_up(self.tableWidgetProfilePoints))
+        # self.toolButtonPointDown.clicked.connect(lambda: self.table_fcn.move_row_down(self.tableWidgetProfilePoints))
+        # self.toolButtonPointDelete.clicked.connect(lambda: self.table_fcn.delete_row(self.tableWidgetProfilePoints))
+        # self.comboBoxProfileSort.currentIndexChanged.connect(self.plot_profile_and_table)
+        # self.toolButtonProfileInterpolate.clicked.connect(lambda: self.profiling.interpolate_points(interpolation_distance=int(self.lineEditIntDist.text()), radius= int(self.lineEditPointRadius.text())))
+        # # update profile plot when point type is changed
+        # self.comboBoxPointType.currentIndexChanged.connect(lambda: self.profiling.plot_profiles())
+        # # update profile plot when selected subplot is changed
+        # self.spinBoxProfileSelectedSubplot.valueChanged.connect(lambda: self.profiling.plot_profiles())
+        # # update profile plot when Num subplot is changed
+        # self.spinBoxProfileNumSubplots.valueChanged.connect(lambda: self.profiling.plot_profiles())
+        # self.spinBoxProfileNumSubplots.valueChanged.connect(self.update_profile_spinbox)
+        # # update profile plot when field in subplot table is changed
+        # self.toolButtonProfileAddField.clicked.connect(lambda: self.profiling.plot_profiles())
         
-        # Connect the add and remove field buttons to methods
-        self.toolButtonProfileAddField.clicked.connect(self.profiling.add_field_to_listview)
-        self.toolButtonProfileRemove.clicked.connect(self.profiling.remove_field_from_listview)
-        self.toolButtonProfileRemove.clicked.connect(lambda: self.profiling.plot_profiles())
-        self.comboBoxProfileFieldType.activated.connect(lambda: self.update_field_combobox(self.comboBoxProfileFieldType, self.comboBoxProfileField))
+        # # Connect the add and remove field buttons to methods
+        # self.toolButtonProfileAddField.clicked.connect(self.profiling.add_field_to_listview)
+        # self.toolButtonProfileRemove.clicked.connect(self.profiling.remove_field_from_listview)
+        # self.toolButtonProfileRemove.clicked.connect(lambda: self.profiling.plot_profiles())
+        # self.comboBoxProfileFieldType.activated.connect(lambda: self.update_field_combobox(self.comboBoxProfileFieldType, self.comboBoxProfileField))
 
-        # below line is commented because plot_profiles is automatically triggered when user clicks on map once they are in profiling tab
-        # self.toolButtonPlotProfile.clicked.connect(lambda:self.profiling.plot_profiles())
-        self.toolButtonPointSelectAll.clicked.connect(self.tableWidgetProfilePoints.selectAll)
-        # Connect toolButtonProfileEditToggle's clicked signal to toggle edit mode
-        self.toolButtonProfileEditToggle.clicked.connect(self.profiling.toggle_edit_mode)
+        # # below line is commented because plot_profiles is automatically triggered when user clicks on map once they are in profiling tab
+        # # self.toolButtonPlotProfile.clicked.connect(lambda:self.profiling.plot_profiles())
+        # self.toolButtonPointSelectAll.clicked.connect(self.tableWidgetProfilePoints.selectAll)
+        # # Connect toolButtonProfileEditToggle's clicked signal to toggle edit mode
+        # self.toolButtonProfileEditToggle.clicked.connect(self.profiling.toggle_edit_mode)
 
-        # Connect toolButtonProfilePointToggle's clicked signal to toggle point visibility
-        self.toolButtonProfilePointToggle.clicked.connect(self.profiling.toggle_point_visibility)
+        # # Connect toolButtonProfilePointToggle's clicked signal to toggle point visibility
+        # self.toolButtonProfilePointToggle.clicked.connect(self.profiling.toggle_point_visibility)
 
         # -------
         # These tools are for setting profile plot controls
@@ -829,11 +835,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolButtonZoom.setCheckable(True)
         self.toolButtonZoom.setCheckable(True)
 
-        # Dating
-        self.SpecialFunctions = specfun(parent=self)
-        self.comboBoxIsotopeAgeFieldType1.activated.connect(lambda: self.update_field_combobox(self.comboBoxIsotopeAgeFieldType1, self.comboBoxIsotopeAgeField1))
-        self.comboBoxIsotopeAgeFieldType2.activated.connect(lambda: self.update_field_combobox(self.comboBoxIsotopeAgeFieldType2, self.comboBoxIsotopeAgeField2))
-        self.comboBoxIsotopeAgeFieldType3.activated.connect(lambda: self.update_field_combobox(self.comboBoxIsotopeAgeFieldType3, self.comboBoxIsotopeAgeField3))
 
         
         # Styling Tab
@@ -857,7 +858,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Calculator tab
         #-------------------------
-        #self.calculator = cfc(parent=self, debug=self.logger_options['Calculator']) # initalize custom field calculator
         if hasattr(self,'notes'):
             self.notes.update_equation_menu()
 
@@ -911,8 +911,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.calculator.hide()
 
         #reset check boxes to prevent incorrect behaviour during plot click
-        self.toolButtonPlotProfile.clicked.connect(lambda: self.reset_checked_items('profiling'))
-        self.toolButtonPointMove.clicked.connect(lambda: self.reset_checked_items('profiling'))
+        # self.toolButtonPlotProfile.clicked.connect(lambda: self.reset_checked_items('profiling'))
+        # self.toolButtonPointMove.clicked.connect(lambda: self.reset_checked_items('profiling'))
         self.toolButtonPolyCreate.clicked.connect(lambda: self.reset_checked_items('polygon'))
         self.toolButtonPolyMovePoint.clicked.connect(lambda: self.reset_checked_items('polygon'))
         self.toolButtonPolyAddPoint.clicked.connect(lambda: self.reset_checked_items('polygon'))
@@ -929,7 +929,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # self.canvasWindow.installEventFilter(self)
         # self.dockWidgetLeftToolbox.installEventFilter(self)
         # self.dockWidgetRightToolbox.installEventFilter(self)
-        # self.dockWidgetBottomTabs.installEventFilter(self)
+        # self.dockWidgetMaskToolbox.installEventFilter(self)
 
         # Create a button to hide/show the dock
         self.toolButtonLeftDock = QToolButton(self)
@@ -955,7 +955,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.toolButtonLeftDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.dockWidgetLeftToolbox, button=self.toolButtonLeftDock))
         self.toolButtonRightDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.dockWidgetRightToolbox, button=self.toolButtonRightDock))
-        self.toolButtonBottomDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.dockWidgetBottomTabs, button=self.toolButtonBottomDock))
+        self.toolButtonBottomDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.dockWidgetMaskToolbox, button=self.toolButtonBottomDock))
 
         # Add the button to the status bar
         self.labelInvalidValues = QLabel("Negative/zeros: False, NaNs: False")
@@ -969,6 +969,57 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # logger
         self.actionLogger.triggered.connect(self.open_logger)
+
+        self.dockWidgetLeftToolbox.show()
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.dockWidgetLeftToolbox)
+        self.dockWidgetLeftToolbox.setFloating(False)
+        self.dockWidgetRightToolbox.show()
+        self.addDockWidget(Qt.RightDockWidgetArea, self.dockWidgetRightToolbox)
+        self.dockWidgetRightToolbox.setFloating(False)
+
+    def toggle_spot_tab(self):
+        #self.actionSpotTools.toggle()
+        if self.actionSpotTools.isChecked():
+            self.spot_tools = SpotPage(self.left_tab['sample'], self)
+        else:
+            self.toolBox.removeItem(self.left_tab['spot'])
+        self.reindex_left_tab()
+
+    def toggle_special_tab(self):
+        if self.actionSpecialTools.isChecked():
+            self.special_tools = SpecialPage(self.left_tab['cluster'], self)
+        else:
+            self.toolBox.removeItem(self.left_tab['special'])
+        self.reindex_left_tab()
+
+
+    def reindex_left_tab(self):
+        self.left_tab = {}
+        self.left_tab.update({'spot': None})
+        self.left_tab.update({'special': None})
+        for tid in range(0,self.toolBox.count()):
+            match self.toolBox.itemText(tid).lower():
+                case 'preprocess':
+                    self.left_tab.update({'process': tid})
+                case 'field viewer':
+                    self.left_tab.update({'sample': tid})
+                case 'spot data':
+                    self.left_tab.update({'spot': tid})
+                case 'polygons':
+                    self.left_tab.update({'polygons': tid})
+                case 'profiling':
+                    self.left_tab.update({'profile': tid})
+                case 'scatter and heatmaps':
+                    self.left_tab.update({'scatter': tid})
+                case 'n-dim':
+                    self.left_tab.update({'ndim': tid})
+                case 'dimensional reduction':
+                    self.left_tab.update({'multidim': tid})
+                case 'clustering':
+                    self.left_tab.update({'cluster': tid})
+                case 'p-t-t functions':
+                    self.left_tab.update({'special': tid})
+
 
     def logger_visibility_change(self, visible):
         """
@@ -1049,7 +1100,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.tableWidgetFilters.setRowCount(0)
 
             #clear profiling
-            self.profiling.clear_profiles()
+            if hasattr(self, "profile_dock"):
+                self.profile_dock.profiling.clear_profiles()
 
             #clear polygons
             self.polygon.clear_polygons()
@@ -1068,14 +1120,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     
         self.SelectAnalytePage.setEnabled(True)
         self.PreprocessPage.setEnabled(True)
-        self.SpotDataPage.setEnabled(True)
-        self.PolygonPage.setEnabled(True)
+        #self.SpotDataPage.setEnabled(True)
+        #self.PolygonPage.setEnabled(True)
         self.ScatterPage.setEnabled(True)
         self.NDIMPage.setEnabled(True)
         self.MultidimensionalPage.setEnabled(True)
         self.ClusteringPage.setEnabled(True)
         self.ProfilingPage.setEnabled(True)
-        self.PTtPage.setEnabled(True)
+        #self.PTtPage.setEnabled(True)
 
     def change_sample(self, index, save_analysis=True):
         """Changes sample and plots first map
@@ -1252,7 +1304,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def open_preferences_dialog(self):
         pass
 
-    
+    def update_profile_spinbox(self):
+        """Updates the maximum number of subplots that can be selected.
+
+        Updates ``MainWindow.spinBoxProfileSelectedSubplot.setMaximum()
+        """        
+        n = self.spinBoxProfileNumSubplots.value()
+        self.spinBoxProfileSelectedSubplot.setMaximum(int(n))
     
     def update_analyte_ratio_selection(self,analyte_dict):
         """Updates analytes/ratios in mainwindow and its corresponding scale used for each field
@@ -1299,9 +1357,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             self.workflow.show()
 
-        self.help_mapping[self.workflow] = 'workflow'
+        if self.workflow in self.help_mapping.keys():
+            self.help_mapping[self.workflow] = 'workflow'
 
-        self.workflow.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
+        #self.workflow.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
+
+    def open_profile(self):
+        """Opens Profile dock
+
+        Opens Profile dock, creates on first instance.
+        :see also:
+            Profile
+        """
+        if not hasattr(self, 'profile'):
+            self.profile_dock = ProfileDock(self)
+        else:
+            self.profile_dock.show()
+
+        if self.profile_dock in self.help_mapping.keys():
+            self.help_mapping[self.profile_dock] = 'profiles'
 
     def open_notes(self):
         """Opens Notes dock
@@ -1321,7 +1395,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.help_mapping[self.notes] = 'notes'
 
-        self.notes.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
+        #self.notes.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
     def open_calculator(self):
         """Opens Calculator dock
@@ -1336,7 +1410,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.help_mapping[self.calculator] = 'calculator'
 
-        self.calculator.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
+        #self.calculator.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
     def open_logger(self):
         """Opens Logger dock
@@ -1352,7 +1426,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.help_mapping[self.logger] = 'logger'
 
-        self.logger.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
+        #self.logger.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
     def open_browser(self, action=None):
         """Opens Browser dock with documentation
@@ -1364,7 +1438,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             self.browser.show()
 
-        self.browser.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
+        #self.browser.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
         match action:
             case 'report_bug':
@@ -1418,31 +1492,46 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ----------
         tab_name : str
             opens tab, values: 'samples', 'preprocess', 'spot data', 'filter',
-            'scatter', 'ndim', pca', 'clustering', 'profiles', 'special'
+            'scatter', 'ndim', pca', 'filters',''clustering', 'cluster', 'polygons',
+            'profiles', 'special'
         """
         match tab_name.lower():
             case 'samples':
                 self.toolBox.setCurrentIndex(self.left_tab['sample'])
+                self.toolBox.show()
             case 'preprocess':
                 self.toolBox.setCurrentIndex(self.left_tab['process'])
+                self.toolBox.show()
             case 'spot data':
                 self.toolBox.setCurrentIndex(self.left_tab['spot'])
+                self.toolBox.show()
             case 'polygons':
-                self.toolBox.setCurrentIndex(self.left_tab['polygons'])
-                self.tabWidget.setCurrentIndex(self.bottom_tab['note'])
+                self.tabWidgetMask.setCurrentIndex(self.mask_tab['polygon'])
+                self.tabWidgetMask.show()
             case 'scatter':
                 self.toolBox.setCurrentIndex(self.left_tab['scatter'])
+                self.toolBox.show()
             case 'ndim':
                 self.toolBox.setCurrentIndex(self.left_tab['ndim'])
+                self.toolBox.show()
             case 'multidimensional':
                 self.toolBox.setCurrentIndex(self.left_tab['multidim'])
+                self.toolBox.show()
+            case 'filters':
+                self.tabWidgetMask.setCurrentIndex(self.mask_tab['filter'])
+                self.tabWidgetMask.show()
             case 'clustering':
                 self.toolBox.setCurrentIndex(self.left_tab['cluster'])
-            case 'profiles':
-                self.toolBox.setCurrentIndex(self.left_tab['profile'])
-                self.tabWidget.setCurrentIndex(self.bottom_tab['profile'])
+                self.toolBox.show()
+            case 'clusters':
+                self.tabWidgetMask.setCurrentIndex(self.mask_tab['cluster'])
+                self.tabWidgetMask.show()
             case 'special':
                 self.toolBox.setCurrentIndex(self.left_tab['special'])
+                self.toolBox.show()
+            case 'info':
+                self.tabWidgetInfo.setCurrentIndex(self.info_tab['info'])
+                self.tabWidgetInfo.show()
 
     def canvas_changed(self):
         """Sets visibility of canvas tools and updates canvas plots"""        
@@ -1490,14 +1579,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             self.SelectAnalytePage.setEnabled(True)
             self.PreprocessPage.setEnabled(True)
-            self.SpotDataPage.setEnabled(True)
-            self.PolygonPage.setEnabled(True)
+            #self.SpotDataPage.setEnabled(True)
+            #self.PolygonPage.setEnabled(True)
             self.ScatterPage.setEnabled(True)
             self.NDIMPage.setEnabled(True)
             self.MultidimensionalPage.setEnabled(True)
             self.ClusteringPage.setEnabled(True)
             self.ProfilingPage.setEnabled(True)
-            self.PTtPage.setEnabled(True)
+            #self.PTtPage.setEnabled(True)
 
             self.toolBoxStyle.setEnabled(True)
             self.comboBoxPlotType.setEnabled(True)
@@ -1533,18 +1622,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             self.SelectAnalytePage.setEnabled(False)
             self.PreprocessPage.setEnabled(False)
-            self.SpotDataPage.setEnabled(False)
-            self.PolygonPage.setEnabled(False)
+            #self.SpotDataPage.setEnabled(False)
+            #self.PolygonPage.setEnabled(False)
             self.ScatterPage.setEnabled(False)
             self.NDIMPage.setEnabled(False)
             self.MultidimensionalPage.setEnabled(False)
             self.ClusteringPage.setEnabled(False)
             self.ProfilingPage.setEnabled(True)
-            self.PTtPage.setEnabled(False)
+            #self.PTtPage.setEnabled(False)
 
             self.toolBoxTreeView.setCurrentIndex(self.right_tab['tree'])
             self.StylingPage.setEnabled(False)
-            self.CalculatorPage.setEnabled(False)
             if self.duplicate_plot_info:
                 self.add_plotwidget_to_canvas(self.duplicate_plot_info)
         else:
@@ -1570,18 +1658,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             self.SelectAnalytePage.setEnabled(False)
             self.PreprocessPage.setEnabled(False)
-            self.SpotDataPage.setEnabled(False)
-            self.PolygonPage.setEnabled(False)
+            #self.SpotDataPage.setEnabled(False)
+            #self.PolygonPage.setEnabled(False)
             self.ScatterPage.setEnabled(False)
             self.NDIMPage.setEnabled(False)
             self.MultidimensionalPage.setEnabled(False)
             self.ClusteringPage.setEnabled(False)
             self.ProfilingPage.setEnabled(False)
-            self.PTtPage.setEnabled(False)
+            #self.PTtPage.setEnabled(False)
 
             self.toolBoxTreeView.setCurrentIndex(self.right_tab['tree'])
             self.StylingPage.setEnabled(False)
-            self.CalculatorPage.setEnabled(False)
 
             self.display_QV()
 
@@ -1900,10 +1987,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.labelInvalidValues.setText(f"Negative/zeros: {negative_count}, NaNs: {nan_count}")
 
 
-    def plot_profile_and_table(self):
-        self.profiling.plot_profiles()
-        self.profiling.update_table_widget()
-    
     def auto_scale(self,update = False):
         """Auto-scales pixel values in map
 
@@ -2116,7 +2199,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     
     def update_tables(self):
         self.update_filter_table(reload = True)
-        self.profiling.update_table_widget()
+        self.profile_dock.profiling.update_table_widget()
         self.polygon.update_table_widget()
         pass
 
@@ -2317,7 +2400,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         else:
             # open tabFilterList
-            self.tabWidget.setCurrentIndex(self.bottom_tab['filter'])
+            self.tabWidgetMask.setCurrentIndex(self.mask_tab['filter'])
 
             def on_use_checkbox_state_changed(row, state):
                 # Update the 'use' value in the filter_df for the given row
@@ -2689,7 +2772,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # if event.button() == Qt.LeftButton and self.main_window.pushButtonStartProfile.isChecked():
        #apply profiles
         elif self.toolButtonPlotProfile.isChecked() or self.toolButtonPointMove.isChecked():
-            self.profiling.plot_profile_scatter(event, field,view, plot, x, y,x_i, y_i)
+            self.profile_dock.profiling.plot_profile_scatter(event, field,view, plot, x, y,x_i, y_i)
         #create polygons
         elif self.toolButtonPolyCreate.isChecked() or self.toolButtonPolyMovePoint.isChecked() or self.toolButtonPolyAddPoint.isChecked() or self.toolButtonPolyRemovePoint.isChecked():
             self.polygon.plot_polygon_scatter(event, field, x, y,x_i, y_i)
@@ -2989,13 +3072,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 if not field_type or not field or (field_type == '') or (field == ''):
                     return
 
-                if self.toolBox.currentIndex() in [self.left_tab['polygons'], self.left_tab['profile']]:
+                if self.toolBox.currentIndex() == self.mask_tab['polygon'] or (hasattr(self, "profile_dock") and self.profile_dock.actionControlPoints.isChecked()):
                     self.plot_map_pg(sample_id, field_type, field)
                     # show created profiles if exists
-                    if self.toolBox.currentIndex() == self.left_tab['profile'] and (self.sample_id in self.profiling.profiles):
-                        self.profiling.clear_plot()
-                        self.profiling.plot_existing_profile(self.plot)
-                    elif self.toolBox.currentIndex() == self.left_tab['polygons'] and (self.sample_id in self.polygon.polygons):  
+                    if self.toolBox.currentIndex() == hasattr(self,"profile_dock") and (self.sample_id in self.profile_dock.profiling.profiles):
+                        self.profile_dock.profiling.clear_plot()
+                        self.profile_dock.profiling.plot_existing_profile(self.plot)
+                    elif self.toolBox.currentIndex() == self.mask_tab['polygon'] and (self.sample_id in self.polygon.polygons):  
                         self.polygon.clear_plot()
                         self.polygon.plot_existing_polygon(self.plot)
                 else:
@@ -6333,7 +6416,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             addNone = False
         self.update_field_type_combobox(self.comboBoxColorByField, addNone=addNone, plot_type=self.comboBoxPlotType.currentText())
         self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
-        self.spinBoxColorField.setFixedWidth(22)
+        self.spinBoxColorField.setFixedWidth(20)
         self.spinBoxColorField.setMinimum(0)
         self.spinBoxColorField.setMaximum(self.comboBoxColorField.count() - 1)
 
@@ -6342,9 +6425,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # self.update_field_combobox(self.comboBoxCalcFieldType, self.comboBoxCalcField)
 
         # dating
-        self.update_field_combobox(self.comboBoxIsotopeAgeFieldType1, self.comboBoxIsotopeAgeField1)
-        self.update_field_combobox(self.comboBoxIsotopeAgeFieldType2, self.comboBoxIsotopeAgeField2)
-        self.update_field_combobox(self.comboBoxIsotopeAgeFieldType3, self.comboBoxIsotopeAgeField3)
+        if hasattr(self, "special_tab"):
+            self.update_field_combobox(self.special_tab.comboBoxIsotopeAgeFieldType1, self.special_tab.comboBoxIsotopeAgeField1)
+            self.update_field_combobox(self.special_tab.comboBoxIsotopeAgeFieldType2, self.special_tab.comboBoxIsotopeAgeField2)
+            self.update_field_combobox(self.special_tab.comboBoxIsotopeAgeFieldType3, self.special_tab.comboBoxIsotopeAgeField3)
 
 
     def check_analysis_type(self):
@@ -6505,7 +6589,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #unchecks tool buttons to prevent incorrect behaviour during plot click
         match item:
             case 'crop':
-                self.toolButtonPlotProfile.setChecked(False)
+                self.profile_dock.actionControlPoints.setChecked(False)
                 self.toolButtonPointMove.setChecked(False)
                 self.toolButtonPolyCreate.setChecked(False)
                 self.toolButtonPolyMovePoint.setChecked(False)
@@ -6519,8 +6603,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.toolButtonPolyRemovePoint.setChecked(False)
             case 'polygon':
                 self.actionCrop.setChecked(False)
-                self.toolButtonPlotProfile.setChecked(False)
-                self.toolButtonPointMove.setChecked(False)
+                self.profile_dock.actionControlPoints.setChecked(False)
+                self.profile_dock.actionMovePoint.setChecked(False)
 
     
     # -------------------------------

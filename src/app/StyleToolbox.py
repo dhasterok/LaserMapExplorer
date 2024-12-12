@@ -778,7 +778,7 @@ class Styling():
     # -------------------------------------
     def _is_valid_bounds(self, value):
         """Validates if a the variable has properties consistent with bounds."""
-        return isinstance(value, list) and len(value) == 2 and all(isinstance(b, float) for b in value) and value[1] > value[0]
+        return isinstance(value, list) and len(value) == 2 and value[1] > value[0]
 
     def _is_valid_scale(self, text):
         """Validates if a the variable is a valid string."""

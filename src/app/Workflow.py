@@ -6,6 +6,8 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSlot, Qt, QObject, QUrl, QFile, QIODevice, QSize
 from src.app.config import BASEDIR
 from PyQt5.QtWebEngineWidgets import QWebEngineSettings
+from src.common.CustomWidgets import CustomDockWidget
+
 import numpy as np
 from src.app.Modules import Main
 os.environ["QTWEBENGINE_REMOTE_DEBUGGING"]="9222" #uncomment to debug in chrome  
@@ -99,7 +101,7 @@ class BlocklyBridge(QObject):
         else:
             return obj
         
-class Workflow(QDockWidget):
+class Workflow(CustomDockWidget):
     """Creates the workflow method design dock.
 
     Use this tool to create workflows using a customized version of Google's Blockly.

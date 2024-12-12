@@ -18,8 +18,8 @@ def create_help_mapping(parent):
         parent.toolBox: 'left_toolbox',
         parent.dockWidgetRightToolbox: 'right_toolbox',
         parent.toolBoxTreeView: 'right_toolbox',
-        parent.dockWidgetBottomTabs: 'lower_tabs',
-        parent.tabWidget: 'lower_tabs',
+        parent.dockWidgetMaskToolbox: 'lower_tabs',
+        parent.tabWidgetMask: 'lower_tabs',
     }
 
     return help_mapping

@@ -4,17 +4,17 @@ from src.app.config import BASEDIR
 import numpy as np
 import pandas as pd
 from src.common.varfunc import partial_match
-from src.app.UIControl import UIFieldLogic
 
 from PyQt5.QtCore import Qt, QSize, QUrl
 from PyQt5.QtWidgets import (
-        QMainWindow, QTextEdit, QDockWidget, QWidget, QVBoxLayout, QMessageBox, QInputDialog, QLabel,
+        QMainWindow, QTextEdit, QWidget, QVBoxLayout, QMessageBox, QInputDialog, QLabel,
         QToolBar, QComboBox, QToolButton, QAction, QDialog, QCheckBox, QDialogButtonBox, QPushButton,
-        QGroupBox, QGridLayout, QHBoxLayout, QFrame, QSizePolicy
+        QGroupBox, QGridLayout, QHBoxLayout, QFrame, QSizePolicy, QScrollArea
     )
 from PyQt5.QtGui import QIcon
+
+from src.common.CustomWidgets import CustomComboBox, CustomDockWidget
 from src.app.UIControl import UIFieldLogic
-from src.common.CustomWidgets import CustomComboBox
 
 def calc_error(func, err, addinfo):
     """Raise a calculator-related error
@@ -37,7 +37,7 @@ def calc_error(func, err, addinfo):
 # -------------------------------
 # Calculator
 # -------------------------------
-class CalculatorDock(QDockWidget, UIFieldLogic):
+class CalculatorDock(CustomDockWidget, UIFieldLogic):
     """Creates a CustomFieldCalculator with UI controls inside a dock widget that can be added to a QMainWindow
 
     Parameters
@@ -64,7 +64,7 @@ class CalculatorDock(QDockWidget, UIFieldLogic):
         if not isinstance(parent, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
         
-        super().__init__("Calculator", parent)
+        super().__init__(parent)
 
         self.parent = parent
         if parent.sample_id == '':
@@ -86,6 +86,9 @@ class CalculatorDock(QDockWidget, UIFieldLogic):
             self.calc_filename = filename
 
         # Create container
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+
         container = QWidget()
         calculator_layout = QVBoxLayout()
 
@@ -253,11 +256,12 @@ class CalculatorDock(QDockWidget, UIFieldLogic):
 
         # Set layout to the container
         container.setLayout(calculator_layout)
-        self.setWidget(container)
+        scroll_area.setWidget(container)
+
+        self.setWidget(scroll_area)
 
         self.setFloating(True)
         self.setWindowTitle("LaME Calculator")
-        self.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
         parent.addDockWidget(Qt.RightDockWidgetArea, self)
 

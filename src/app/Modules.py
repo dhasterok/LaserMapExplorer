@@ -43,7 +43,7 @@ from src.app.StyleToolbox import Styling
 from src.app.Profile import Profiling
 from src.common.Polygon import PolygonManager
 from src.common.Calculator import CustomFieldCalculator as cfc
-from src.app.SpecialFunctions import SpecialFunctions as specfun
+from src.app.SpecialTools import SpecialFunctions as specfun
 from src.common.NoteTaking import Notes
 from src.common.Browser import Browser
 import src.app.QuickView as QV

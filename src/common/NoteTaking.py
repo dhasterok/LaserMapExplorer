@@ -12,12 +12,12 @@ import pandas as pd
 from rst2pdf.createpdf import RstToPdf
 from docutils.core import publish_string
 import src.common.format as fmt
-from src.common.CustomWidgets import CustomLineEdit, CustomActionMenu
+from src.common.CustomWidgets import CustomLineEdit, CustomActionMenu, CustomDockWidget
 
 # -------------------------------
 # Notes functions
 # -------------------------------
-class Notes(QDockWidget):
+class Notes(CustomDockWidget):
     """A dock that can be used to take notes in ReStructured Text (ReST) including formatted output.
 
     Notes are automatically saved at regular intervals and upon close of the dock.  The
@@ -180,8 +180,8 @@ class Notes(QDockWidget):
         # math button and menu
         math_icon = ":resources/icons/icon-equation-64.svg"
         math_menu_items = [
-            ('Inline math', lambda: self.format_math('inline')),
-            ('Display math', lambda: self.format_math('display')),
+            ('Inline math', lambda: self.format_text('inline math')),
+            ('Display math', lambda: self.format_text('display math')),
             ('Calculated field', [
                 (eq_name, callback) for eq_name, callback in self.parent.calc_dict.items()
             ])

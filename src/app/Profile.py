@@ -3,8 +3,8 @@ from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QStandardItem, QStandardItemModel, QIcon, QFont, QIntValidator
 from PyQt5.QtWidgets import ( 
         QMessageBox, QInputDialog, QWidget, QTableWidgetItem, QVBoxLayout, QHBoxLayout, QGroupBox,
-        QToolButton, QComboBox, QSpinBox, QSpacerItem, QSizePolicy, QFormLayout, QListView, QToolBar,
-        QAction, QLabel, QHeaderView, QTableWidget, QScrollArea
+        QToolButton, QComboBox, QSpinBox, QSizePolicy, QFormLayout, QListView, QToolBar,
+        QAction, QLabel, QHeaderView, QTableWidget, QScrollArea, QMainWindow
     )
 from src.common.CustomWidgets import CustomDockWidget, CustomLineEdit, CustomComboBox
 from src.app.UIControl import UIFieldLogic
@@ -17,6 +17,8 @@ import numpy as np
 
 class ProfileDock(CustomDockWidget, UIFieldLogic):
     def __init__(self, parent=None):
+        if not isinstance(parent, QMainWindow):
+            raise TypeError("Parent must be an instance of QMainWindow.")
 
         super().__init__(parent)
         self.profiling = Profiling(self)
@@ -286,7 +288,7 @@ class ProfileDock(CustomDockWidget, UIFieldLogic):
         self.setFloating(True)
         self.setWindowTitle("LaME Profiles")
 
-        parent.addDockWidget(Qt.BottomDockWidgetArea, self)
+        parent.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self)
 
 
         # connections for point tools
@@ -326,13 +328,20 @@ class ProfileDock(CustomDockWidget, UIFieldLogic):
         self.actionControlPoints.triggered.connect(self.profiling.toggle_edit_mode)
 
         # Connect toolButtonProfilePointToggle's clicked signal to toggle point visibility
-        self.actionEdit.checkedStateChanged.connect(lambda: self.actionTogglePoint.setEnabled(self.actionEdit.isChecked()))
+        self.actionEdit.triggered.connect(lambda: self.actionTogglePoint.setEnabled(self.actionEdit.isChecked()))
         self.actionEdit.setChecked(False)
         self.actionTogglePoint.triggered.connect(self.profiling.toggle_point_visibility)
         
         self.actionControlPoints.triggered.connect(lambda: self.parent.reset_checked_items('profiling'))
         self.actionMovePoint.triggered.connect(lambda: self.parent.reset_checked_items('profiling'))
         
+    def update_profile_spinbox(self):
+        """Updates the maximum number of subplots that can be selected.
+
+        Updates ``MainWindow.spinBoxProfileSelectedSubplot.setMaximum()
+        """        
+        n = self.num_subplots_spinbox.value()
+        self.selected_subplot_spinbox.setMaximum(int(n))
 
 # Profiles
 # -------------------------------
@@ -765,19 +774,19 @@ class Profiling:
         scatter_points = self.profiles[self.sample_id][self.profile_name].scatter_points
 
         radius = int(self.parent.lineEditPointRadius.text())
-        if event.button() == Qt.RightButton and self.parent.toolButtonPlotProfile.isChecked():
+        if event.button() == Qt.MouseButton.RightButton and self.parent.toolButtonPlotProfile.isChecked():
             # Turn off profiling points
             self.parent.toolButtonPlotProfile.setChecked(False)
             self.parent.toolButtonPointMove.setEnabled(True)
             return
-        elif event.button() == Qt.RightButton and self.parent.toolButtonPointMove.isChecked():
+        elif event.button() == Qt.MouseButton.RightButton and self.parent.toolButtonPointMove.isChecked():
             # Turn off moving point, reset point_selected
             self.parent.toolButtonPointMove.setChecked(False)
             self.point_selected = False
             return
-        elif event.button() == Qt.RightButton or event.button() == Qt.MiddleButton:
+        elif event.button() == Qt.MouseButton.RightButton or event.button() == Qt.MouseButton.MiddleButton:
             return
-        elif event.button() == Qt.LeftButton and not (self.parent.toolButtonPlotProfile.isChecked()) and self.parent.toolButtonPointMove.isChecked():
+        elif event.button() == Qt.MouseButton.LeftButton and not (self.parent.toolButtonPlotProfile.isChecked()) and self.parent.toolButtonPointMove.isChecked():
             # move point
             if self.point_selected:
                 self.plot_scatter_points(scatter_points, x, y,point_index=self.point_index)
@@ -800,7 +809,7 @@ class Profiling:
                         self.point_index = i
                 if not (round(mindist * self.array_x / self.data.x_range) < 50):
                     self.point_selected = True
-        elif event.button() == Qt.LeftButton:  # plot profile scatter
+        elif event.button() == Qt.MouseButton.LeftButton:  # plot profile scatter
             # Add the scatter item to all plots
             self.plot_scatter_points(scatter_points, x, y)
             # compute profile value for all fields 
@@ -1259,7 +1268,7 @@ class Profiling:
             profile_points = self.profiles[self.parent.sample_id][self.profile_name].points
 
         # Get style and colormap
-        style = self.parent.style
+        style = self.parent.plot_style
         cmap = style.get_colormap()
 
         # Clear existing plot
@@ -1460,15 +1469,10 @@ class Profiling:
         """Clear profile data and plots.
 
         Removes all profile scatter points from the plots and clears profile data from the table.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
         """
+        if self.parent.sample_id == '':
+            return
+
         if self.parent.sample_id in self.profiles:  # if profiles have been initiated for the samples
             if self.profile_name in self.profiles[self.parent.sample_id]:  # if profiles for that sample exist
                 # Clear all scatter plot items from the lasermaps
@@ -1615,7 +1619,7 @@ class Profiling:
         -------
         None
         """
-        style = self.parent.style
+        style = self.parent.plot_style
 
         if self.edit_mode_enabled and isinstance(event.artist, PathCollection):
             # The picked scatter plot

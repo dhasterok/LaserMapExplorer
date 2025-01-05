@@ -4,10 +4,10 @@ Analysis Features
 A systematic approach to data analysis helps ensure quality results and meaningful interpretations.  This section guides you through the progression from initial data exploration to advanced analysis techniques.
 
 Exploratory Analysis
-===================
+====================
 
 Initial Data Assessment
-----------------------
+--------------_--------
 When first examining a new dataset:
 
 1. Start with Quick View visualization of all analytes to:
@@ -28,7 +28,7 @@ When first examining a new dataset:
    - Bilateral filters preserve edges while smoothing
 
 Basic Visualization
-==================
+===================
 
 .. raw:: html
 
@@ -50,7 +50,7 @@ Key Visualization Tools:
 - Correlation matrices for element associations
 
 Pattern Recognition
-------------------
+-------------------
 1. Correlation Analysis:
    
    - Choose between Pearson, Spearman, or Kendall correlations based on data characteristics
@@ -71,7 +71,7 @@ Pattern Recognition
    - Utilize Multi View capabilities for simultaneous visualization
 
 Advanced Analysis
-===============
+=================
 For detailed investigations, LaME offers several sophisticated analysis tools:
 
 1. Principal Component Analysis (PCA):

@@ -661,7 +661,11 @@ class Styling():
     @color_field_type.setter
     def color_field_type(self, field_type):
         if (field_type is None) or isinstance(field_type, str):
-            self.style_dict[self._plot_type]['ColorFieldType'] = field_type
+            #self.style_dict[self._plot_type]['ColorFieldType'] = field_type
+            if self.parent.comboBoxColorByField.currentText() != field_type:
+                self.parent.comboBoxColorByField.setCurrentText(field_type)
+
+                self.color_by_field_callback()
         else:
             raise TypeError("field_type must be of type str.")
 
@@ -673,7 +677,12 @@ class Styling():
     @color_field.setter
     def color_field(self, field):
         if (field is None) or isinstance(field, str):
-            self.style_dict[self._plot_type]['ColorField'] = field
+            #self.style_dict[self._plot_type]['ColorField'] = field
+            # update color field and associated style widgets
+            if self.parent.comboBoxColorField.currentText() != field:
+                self.parent.comboBoxColorField.setCurrentText(field)
+
+                self.color_field_callback() 
         else:
             raise TypeError("field must be of type str or None.")
 

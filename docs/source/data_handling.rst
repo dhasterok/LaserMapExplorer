@@ -1,10 +1,10 @@
-Data Management
-***************
+Data Handling
+*************
 
 Effective data management is crucial for successful analysis.  This section covers data import, organization, and selection.
 
 Loading and Selecting Data
-=========================
+==========================
 
 This video demonstrates the process of loading data into *LaME* and selecting samples for analysis.
 
@@ -31,5 +31,5 @@ Key Topics:
 For detailed information about supported file formats, see :doc:`import`.
 
 Data Processing Fundamentals
-==========================
+============================
 [Add content about basic data processing steps]

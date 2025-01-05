@@ -1,16 +1,16 @@
 Frequently Asked Questions
-************************
+**************************
 
 Common Questions & Solutions
-==========================
+============================
 
 This section addresses common questions and issues you may encounter while using LaME.  We encourage users to review these solutions before submitting bug reports.  If you encounter an issue not covered here, please submit a bug report using the bug icon in the main toolbar.
 
 Installation & Setup
-------------------
+--------------------
 
 Q: I'm having trouble installing LaME. What should I check first?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Common installation issues can often be resolved by:
 
@@ -28,7 +28,7 @@ Common installation issues can often be resolved by:
    Common installation errors and their resolutions
 
 Q: Why can't LaME find my data files?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This usually occurs due to:
 
@@ -38,13 +38,13 @@ This usually occurs due to:
 * Network connectivity problems when accessing remote drives
 
 Performance Optimization
-======================
+========================
 
 Memory Management
----------------
+-----------------
 
 Q: LaME becomes slow with large datasets. How can I improve performance?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To optimize performance:
 
@@ -63,10 +63,10 @@ To optimize performance:
    Key tools for optimizing LaME performance
 
 Display Issues
--------------
+--------------
 
 Q: My plots aren't updating after making changes. What should I check?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If plots aren't updating after making changes:
 
@@ -78,13 +78,13 @@ If plots aren't updating after making changes:
 6. Check that your analysis masks haven't excluded all data points
 
 Data Analysis Troubleshooting
-============================
+=============================
 
 Filtering & Masks
----------------
+-----------------
 
 Q: Why are my filters not working as expected?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Common filter issues arise from:
 
@@ -109,10 +109,10 @@ Solutions:
    Filter settings panel showing common configuration options
 
 Advanced Analysis
----------------
+-----------------
 
 Q: My clustering results look unexpected. How can I validate them?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To validate clustering results:
 
@@ -124,15 +124,15 @@ To validate clustering results:
 * Consider the effects of data scaling on cluster results
 
 Best Practices
-=============
+==============
 
 Recommended Workflows
-------------------
+---------------------
 
 Here are some recommended workflows for common tasks in LaME:
 
 New Sample Analysis
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 
 1. Start with data quality assessment:
    
@@ -169,7 +169,7 @@ New Sample Analysis
    Example workflow showing recommended analysis steps
 
 Data Organization
----------------
+-----------------
 
 Organize your files effectively:
 
@@ -190,7 +190,7 @@ Organize your files effectively:
 * Maintain regular backups
 
 Error Reporting
-=============
+===============
 
 When encountering errors:
 
@@ -201,7 +201,7 @@ When encountering errors:
 5. Describe both expected and actual behavior
 
 Additional Resources
-==================
+====================
 
 * :doc:`installation` - Detailed installation instructions
 * :doc:`import` - Supported file formats and import procedures

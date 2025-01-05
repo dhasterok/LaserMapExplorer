@@ -60,6 +60,9 @@ class MplCanvas(FigureCanvas):
         Projection, by default None
     """    
     def __init__(self,fig=None, sub=111, parent=None, width=5, height=4, proj=None):
+        if parent is None:
+            return
+
         #create MPLCanvas with existing figure (required when loading saved projects)
         if fig:
             self.fig = fig
@@ -91,7 +94,7 @@ class MplCanvas(FigureCanvas):
         self.saved_dtext = []
         self.array = None
         if self.parent is not None and self.parent.sample_id in self.parent.data:
-            if self.parent.comboBoxPlotType.currentText() in self.parent.style.map_plot_types:
+            if self.parent.comboBoxPlotType.currentText() in self.parent.plot_style.map_plot_types:
                 self.map_flag = True
             else:
                 self.map_flag = False
@@ -101,9 +104,11 @@ class MplCanvas(FigureCanvas):
             self.mpl_connect('motion_notify_event', self.distanceOnMove)
             self.mpl_connect('motion_notify_event', self.mouseLocation)
 
+        self.annotations = {}
+
     def enterEvent(self, event):
         # Set cursor to cross when the mouse enters the window
-        self.setCursor(Qt.CrossCursor)
+        self.setCursor(Qt.CursorShape.CrossCursor)
 
     def leaveEvent(self, event):
         # Reset cursor to default when the mouse leaves the window
@@ -119,8 +124,8 @@ class MplCanvas(FigureCanvas):
         event : event data
             Includes the location of mouse pointer.
         """   
-        x= 0
-        y= 0     
+        x = 0
+        y = 0     
         if (not event.inaxes) or (event.xdata is None) or (event.ydata is None):
             return
 
@@ -181,7 +186,7 @@ class MplCanvas(FigureCanvas):
         """
         xlim = self.axes.get_xlim()
         ylim = self.axes.get_ylim()
-        self.initial_extent = [xlim[0], xlim[1], ylim[0], ylim[1]]
+        self.initial_extent = (xlim[0], xlim[1], ylim[0], ylim[1])
         #print(f"Initial extent set to: {self.initial_extent}")
 
     def restore_view(self):
@@ -235,10 +240,12 @@ class MplCanvas(FigureCanvas):
         if not ok:
             return
 
-        overlay_color = self.parent.style.overlay_color
-        font_size = self.parent.style.font_size
-        self.axes.text(x,y,txt, color=overlay_color, fontsize=font_size)
+        overlay_color = self.parent.plot_style.overlay_color
+        font_size = self.parent.plot_style.font_size
+        annotation = self.axes.text(x,y,txt, color=overlay_color, fontsize=font_size)
         self.draw()
+
+        self.annotations[annotation] = {"Type":"Text", "Value":txt, "Visible":True}
 
     def calculate_distance(self,p1,p2):
         """Calculuates distance on a figure
@@ -278,8 +285,8 @@ class MplCanvas(FigureCanvas):
             Handle to line
         """        
         plot_type = self.parent.plot_info['plot_type']
-        overlay_color = self.parent.style.overlay_color
-        line_width = self.parent.style.line_width
+        overlay_color = self.parent.plot_style.overlay_color
+        line_width = self.parent.plot_style.line_width
 
         # plot line (keep only first returned handle)
         p = self.axes.plot([p1[0], p2[0]], [p1[1], p2[1]],
@@ -305,7 +312,7 @@ class MplCanvas(FigureCanvas):
             Handle to text.
         """        
         plot_type = self.parent.plot_info['plot_type']
-        style = self.parent.style
+        style = self.parent.plot_style
 
         # compute distance
         distance = self.calculate_distance(p1, p2)
@@ -318,10 +325,10 @@ class MplCanvas(FigureCanvas):
         if self.map_flag:
             xrange = self.parent.data[self.parent.sample_id].x.nunique()*self.parent.data[self.parent.sample_id].aspect_ratio
             yrange = self.parent.data[self.parent.sample_id].y.nunique()
-        else:
-            xl = self.axes.get_xlim
+
+            xl = self.axes.get_xlim()
             xrange = xl[1] - xl[0]
-            yl = self.axes.get_ylim
+            yl = self.axes.get_ylim()
             xrange = yl[1] - yl[0]
 
         # x-shift for text
@@ -358,7 +365,7 @@ class MplCanvas(FigureCanvas):
         event : MouseEvent
             Mouse click event.
         """        
-        self.setCursor(Qt.CrossCursor)
+        self.setCursor(Qt.CursorShape.CrossCursor)
         if self.parent.toolButtonDistance.isChecked():
             if event.inaxes:
                 if self.first_point is None:
@@ -387,7 +394,7 @@ class MplCanvas(FigureCanvas):
         event : MouseEvent
             Mouse click event.
         """        
-        self.setCursor(Qt.CrossCursor)
+        self.setCursor(Qt.CursorShape.CrossCursor)
         if (self.parent.toolButtonDistance.isChecked()) and (self.first_point is not None) and event.inaxes:
             if self.line:
                 self.line.remove()

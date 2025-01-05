@@ -27,7 +27,7 @@ class WebEngineView(QWebEngineView):
         self.loadStarted.connect(self.on_load_started)
         self.loadProgress.connect(self.on_load_progress)
         self.page().profile().setHttpAcceptLanguage("en-US,en;q=0.9")
-        self.page().profile().setHttpUserAgent("MyBrowser 1.0")
+        self.page().profile().setHttpUserAgent("LaME Browser 1.0")
 
         # Set up a JavaScript console message handler
         self.page().setWebChannel(None)
@@ -179,7 +179,7 @@ class Browser(QDockWidget):
         self.setWidget(container)
 
         self.setFloating(True)
-        self.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
+        self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowMinMaxButtonsHint | Qt.WindowType.WindowCloseButtonHint)
 
         self.setWindowTitle("Documentation")
 
@@ -200,7 +200,7 @@ class Browser(QDockWidget):
         for widget in self.help_mapping.keys():
             widget.installEventFilter(self)
 
-        parent.addDockWidget(Qt.BottomDockWidgetArea, self)
+        parent.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self)
 
         self.show()
 
@@ -225,19 +225,19 @@ class Browser(QDockWidget):
             # Handle hover events
             if event.type() == QEvent.Enter:
                 if obj in self.help_mapping:
-                    self.parent.setCursor(Qt.WhatsThisCursor)
+                    self.parent.setCursor(Qt.CursorShape.WhatsThisCursor)
                 else:
-                    self.parent.setCursor(Qt.ForbiddenCursor)
+                    self.parent.setCursor(Qt.CursorShape.ForbiddenCursor)
                 return True
             elif event.type() == QEvent.Leave:
                 # Reset cursor when leaving a widget
-                self.parent.setCursor(Qt.WhatsThisCursor)
+                self.parent.setCursor(Qt.CursorShape.WhatsThisCursor)
                 return True
 
             # Handle mouse press events
             if event.type() == QEvent.MouseButtonPress:
                 self.parent.actionHelp.setChecked(False)
-                self.parent.setCursor(Qt.ArrowCursor)
+                self.parent.setCursor(Qt.CursorShape.ArrowCursor)
 
                 if obj in self.help_mapping:
                     self.go_to_page(self.help_mapping[obj])

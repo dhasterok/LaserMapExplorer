@@ -5,59 +5,232 @@ import numpy as np
 import pandas as pd
 from src.common.varfunc import partial_match
 
-from PyQt5.QtCore import ( QUrl)
-from PyQt5.QtWidgets import ( QMessageBox, QInputDialog )
+from PyQt5.QtCore import Qt, QSize, QUrl
+from PyQt5.QtWidgets import (
+        QMainWindow, QTextEdit, QWidget, QVBoxLayout, QMessageBox, QInputDialog, QLabel,
+        QToolBar, QComboBox, QToolButton, QAction, QDialog, QCheckBox, QDialogButtonBox, QPushButton,
+        QGroupBox, QGridLayout, QHBoxLayout, QFrame, QSizePolicy, QScrollArea
+    )
+from PyQt5.QtGui import QIcon
+
+from src.common.CustomWidgets import CustomComboBox, CustomDockWidget
+from src.app.UIControl import UIFieldLogic
+
+def calc_error(func, err, addinfo):
+    """Raise a calculator-related error
+
+    Parameters
+    ----------
+    func : str
+        Function that threw the error
+    err : str
+        Error string
+    addinfo : str
+        Additional info (generally exception raised)
+    """        
+    if self.debug:
+        print(f"calc_error\n  func: {func}\n  err: {err}\n  addinfo: {addinfo}")
+
+    self.message_label.setText(f"Error: {err}")
+    QMessageBox.warning(self,'Calculation Error',f"Error: {err}\n\n({func}) {addinfo}")
 
 # -------------------------------
 # Calculator
 # -------------------------------
-class CustomFieldCalculator():
-    def __init__(self, parent=None, debug=False):
+class CalculatorDock(CustomDockWidget, UIFieldLogic):
+    """Creates a CustomFieldCalculator with UI controls inside a dock widget that can be added to a QMainWindow
+
+    Parameters
+    ----------
+    parent : QMainWindow, optional
+        _description_, by default None
+    filename : str, optional
+        Filename for saving calculator functions, by default None
+    debug : bool, optional
+        When ``True``, will create verbose output, by default False
+
+    Returns
+    -------
+    _type_
+        _description_
+
+    Raises
+    ------
+    TypeError
+        Parent must be an instance of QMainWindow.
+    """        
+    def __init__(self, parent=None, filename=None, debug=False):
         # super().__init__(self, parent=None)
-        if parent is None:
-            return
+        if not isinstance(parent, QMainWindow):
+            raise TypeError("Parent must be an instance of QMainWindow.")
+        
+        super().__init__(parent)
 
         self.parent = parent
+        if parent.sample_id == '':
+            self.data = None
+        else:
+            self.data = parent.data[parent.sample_id].processed_data
+
+        UIFieldLogic.__init__(self, self.data)
+
+        # create an instance of CustomFieldCalculator for the heavy lifting
+        if parent.sample_id != '':
+            self.cfc = CustomFieldCalculator(debug)
+
         self.debug = debug
 
-        self.calc_filename = os.path.join(BASEDIR,f'resources/app_data/calculator.txt')
-        self.calc_load_dict()
-        self.add_formula = True
-        self.precalculate_custom_fields = False
-        self.parent.labelCalcMessage.setWordWrap(True)
-        self.parent.textEditCalcScreen.textChanged.connect(self.calc_set_add_formula)
+        if filename is None:
+            self.calc_filename = os.path.join(BASEDIR,f'resources/app_data/calculator.txt')
+        else:
+            self.calc_filename = filename
+
+        # Create container
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+
+        container = QWidget()
+        calculator_layout = QVBoxLayout()
+
+        # Create toolbar
+        toolbar = QToolBar("Calculator Toolbar", self)
+        toolbar.setIconSize(QSize(24, 24))
+        toolbar.setMovable(False)  # Optional: Prevent toolbar from being dragged out
+
+        # calculate new field based on formula entered by user
+        self.action_calculate = QAction()
+        self.action_calculate.setIcon(QIcon(":resources/icons/icon-calculator-64.svg"))
+        self.action_calculate.setToolTip("Calculate field")
+        toolbar.addAction(self.action_calculate)
+
+        # save the current formula to a  dictionary
+        self.action_save = QAction()
+        self.action_save.setIcon(QIcon(":resources/icons/icon-save-file-64.svg"))
+        self.action_save.setToolTip("Calculate and save field")
+        toolbar.addAction(self.action_save)
+
+        # clear the calculator screen
+        self.action_clear = QAction()
+        self.action_clear.setIcon(QIcon(":resources/icons/icon-reject-64.svg"))
+        self.action_clear.setToolTip("Clear current formula")
+        toolbar.addAction(self.action_clear)
+
+        # link the calculator to help
+        self.action_help = QAction()
+        self.action_help.setIcon(QIcon(':resources/icons/icon-info-64.svg'))
+        self.action_help.triggered.connect(self.calc_help)
+        self.action_help.setToolTip("Get help calculating fields")
+        toolbar.addAction(self.action_help)
+
+        calculator_layout.addWidget(toolbar)
+
+        # calculator screen
+        screen_group_box = QGroupBox()
+        screen_group_box.setTitle("Enter Formula")
+        screen_layout = QVBoxLayout()
+        screen_layout.setContentsMargins(3,3,3,3)
+
+        self.calc_text_edit = QTextEdit()
+        self.calc_text_edit.textChanged.connect(self.calc_set_add_formula)
+        screen_layout.addWidget(self.calc_text_edit)
+
+        # calculator status
+        self.message_label = QLabel()
+        self.message_label.setWordWrap(True)
+        self.message_label.setFrameShape(QFrame.Box)
+        self.message_label.setFrameShadow(QFrame.Raised)
+        self.message_label.setAlignment(Qt.AlignmentFlag.AlignLeading | Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        self.message_label.setWordWrap(True)
+        self.message_label.setText("Ready..")
+        screen_layout.addWidget(self.message_label)
+        screen_group_box.setLayout(screen_layout)
+        calculator_layout.addWidget(screen_group_box)
+
+        # Equations
+        equation_select_layout = QHBoxLayout()
+        self.formula_combobox = QComboBox()
+        self.formula_combobox.activated.connect(self.calc_load_formula)
+
+        self.delete_formula_button = QToolButton()
+        delete_icon = QIcon(":resources/icons/icon-delete-64.svg")
+        if not delete_icon.isNull():
+            self.delete_formula_button.setIcon(delete_icon)
+        else:
+            self.delete_formula_button.setText("Delete")
+        self.delete_formula_button.setToolTip("Delete selected equation")
+        self.delete_formula_button.clicked.connect(self.calc_delete_formula)
+
+        equation_select_layout.addWidget(self.formula_combobox)
+        equation_select_layout.addWidget(self.delete_formula_button)
+        calculator_layout.addLayout(equation_select_layout)
+
+
+        # Field Control
+        self.field_type_combobox = CustomComboBox(update_callback=lambda: self.update_field_type_combobox(self.field_type_combobox))
+        self.field_type_combobox.setToolTip("Select field type")
+        self.field_type_combobox.activated.connect(lambda: self.update_field_combobox(self.field_type_combobox, self.field_combobox))
+        calculator_layout.addWidget(self.field_type_combobox)
+
+        field_layout = QHBoxLayout()
+        self.field_combobox = QComboBox()
+        self.field_combobox.setToolTip("Select field")
+
+        self.add_field_button = QToolButton()
+        add_icon = QIcon(":resources/icons/icon-accept-64.svg")
+        if not add_icon.isNull():
+            self.add_field_button.setIcon(add_icon)
+        else:
+            self.add_field_button.setText("Select a field to add it to the formula")
+        self.add_field_button.clicked.connect(self.calc_add_field)
+
+        field_layout.addWidget(self.field_combobox)
+        field_layout.addWidget(self.add_field_button)
+        calculator_layout.addLayout(field_layout)
+
+        self.update_field_combobox(self.field_type_combobox, self.field_combobox)
+
+        # keypad_checkbox
+        keypad_checkbox = QCheckBox()
+
+        calculator_layout.addWidget(keypad_checkbox)
+
+        # field/equation controls
+        self.button_group = QGroupBox()
+        self.button_group.setMinimumHeight(202)
+        button_layout = QGridLayout()
+        button_layout.setContentsMargins(3,3,3,3)
+        button_layout.setHorizontalSpacing(3)
+        button_layout.setVerticalSpacing(3)
+
+        # buttons
         buttons = [
-                ('+', self.parent.pushButtonAdd, self.calc_insert_operator),
-                ('-', self.parent.pushButtonSubtract, self.calc_insert_operator),
-                ('*', self.parent.pushButtonMultiply, self.calc_insert_operator),
-                ('/', self.parent.pushButtonDivide, self.calc_insert_operator),
-                ('^()', self.parent.pushButtonPower, self.calc_insert_operator),
-                ('^2', self.parent.pushButtonSquare, self.calc_insert_operator),
-                ('^-1', self.parent.pushButtonInverse, self.calc_insert_operator),
-                ('10^()', self.parent.pushButtonPower10, self.calc_insert_operator),
-                ('()', self.parent.pushButtonBrackets, self.calc_insert_operator),
-                ('sqrt', self.parent.pushButtonSqrt, self.calc_insert_function),
-                ('exp', self.parent.pushButtonExp, self.calc_insert_function),
-                ('ln', self.parent.pushButtonLn, self.calc_insert_function),
-                ('log', self.parent.pushButtonLog, self.calc_insert_function),
-                ('abs', self.parent.pushButtonAbs, self.calc_insert_function),
-                ('case', self.parent.pushButtonCase, self.calc_insert_function),
-                ('otherwise', self.parent.pushButtonOtherwise, self.calc_insert_function),
-                ('grad', self.parent.pushButtonCalcGrad, self.calc_insert_function),
-                ('area', self.parent.pushButtonCalcArea, self.calc_insert_function),
-                (' < ', self.parent.pushButtonLessThan, self.calc_insert_operator),
-                (' > ', self.parent.pushButtonGreaterThan, self.calc_insert_operator),
-                (' <= ', self.parent.pushButtonLessThanEqualTo, self.calc_insert_operator),
-                (' >= ', self.parent.pushButtonGreaterThanEqualTo, self.calc_insert_operator),
-                (' == ', self.parent.pushButtonEqualTo, self.calc_insert_operator),
-                (' != ', self.parent.pushButtonNotEqualTo, self.calc_insert_operator),
-                (' and ', self.parent.pushButtonAnd, self.calc_insert_operator),
-                (' or ', self.parent.pushButtonOr, self.calc_insert_operator),
-                (' not ', self.parent.pushButtonNot, self.calc_insert_operator),
-                (None, self.parent.toolButtonCalcHelp, self.calc_help),
-                (None, self.parent.toolButtonCalcAddField, self.calc_add_field),
-                (None, self.parent.toolButtonCalcDelete, self.calc_delete_formula),
-                (None, self.parent.toolButtonCalculate, self.calculate_new_field)
+                ('+',      '+',         6,0, self.calc_insert_operator),
+                ('-',      '-',         6,1, self.calc_insert_operator),
+                ('*',      '*',         6,2, self.calc_insert_operator),
+                ('/',      '/',         6,3, self.calc_insert_operator),
+                ('x^y',    '^()',       4,0, self.calc_insert_operator),
+                ('x^2',    '^2',        5,1, self.calc_insert_operator),
+                ('x^-1',   '^-1',       4,1, self.calc_insert_operator),
+                ('10^x',   '10^()',     4,2, self.calc_insert_operator),
+                ('()',     '()',        5,0, self.calc_insert_operator),
+                ('sqrt()', 'sqrt',      5,2, self.calc_insert_function),
+                ('exp()',  'exp',       5,3, self.calc_insert_function),
+                ('ln()',   'ln',        4,3, self.calc_insert_function),
+                ('log()',  'log',       3,3, self.calc_insert_function),
+                ('abs()',  'abs',       2,3, self.calc_insert_function),
+                ('case()', 'case',      0,0, self.calc_insert_function),
+                ('otw()',  'otherwise', 0,1, self.calc_insert_function),
+                ('grad()', 'grad',      0,2, self.calc_insert_function),
+                ('area()', 'area',      0,3, self.calc_insert_function),
+                ('<',      ' < ',       2,0, self.calc_insert_operator),
+                ('>',      ' > ',       2,1, self.calc_insert_operator),
+                ('<=',     ' <= ',      3,0, self.calc_insert_operator),
+                ('>=',     ' >= ',      3,1, self.calc_insert_operator),
+                ('==',     ' == ',      2,2, self.calc_insert_operator),
+                ('!=',     ' != ',      3,2, self.calc_insert_operator),
+                ('and',    ' and ',     1,0, self.calc_insert_operator),
+                ('or',     ' or ',      1,1, self.calc_insert_operator),
+                ('not',    ' not ',     1,2, self.calc_insert_operator)
             ]
         
         def create_handler(handler, text=None):
@@ -66,44 +239,62 @@ class CustomFieldCalculator():
             else:
                 return handler
 
-        for text, button, handler in buttons:
+        for label, text, row, col, handler in buttons:
+            button = QPushButton()
+            button.setContentsMargins(0,0,0,0)
+            button.setMinimumHeight(30)
+            button.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Fixed)
+            button.setText(label)
+            button_layout.addWidget(button, row, col)
             button.clicked.connect(create_handler(handler, text))
+        
+        self.button_group.setLayout(button_layout)
+        calculator_layout.addWidget(self.button_group)
 
-        self.parent.toolButtonCalcSave.clicked.connect(lambda: self.calculate_new_field(save=True))
-        self.parent.comboBoxCalcFormula.activated.connect(self.calc_load_formula)
-        self.parent.comboBoxCalcFieldType.currentIndexChanged.connect(lambda: self.parent.update_field_combobox(self.parent.comboBoxCalcFieldType, self.parent.comboBoxCalcField))
-        self.parent.toolButtonCalcClear.clicked.connect(self.parent.textEditCalcScreen.clear)
-        self.parent.update_field_combobox(self.parent.comboBoxCalcFieldType, self.parent.comboBoxCalcField)
+        keypad_checkbox.setChecked(True)
+        keypad_checkbox.stateChanged.connect(lambda: self.button_group.setVisible(keypad_checkbox.isChecked()))
 
-    def calc_set_add_formula(self):
-        """Sets whether to add a new function
+        # Set layout to the container
+        container.setLayout(calculator_layout)
+        scroll_area.setWidget(container)
 
-        Sets ``MainWindow.add_formula`` to ``True``, a flag used by ``MainWindow.calculate_new_field`` to determine
-        whether to add an item to ``MainWindow.comboBoxCalcFormula``.
-        """        
-        if self.debug:
-            print("calc_add_formula")
+        self.setWidget(scroll_area)
 
+        self.setFloating(True)
+        self.setWindowTitle("LaME Calculator")
+
+        parent.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self)
+
+        # connect actions to methods
+        self.action_calculate.triggered.connect(self.calculate_new_field)
+        self.action_save.triggered.connect(lambda: self.calculate_new_field(save=True))
+        self.action_clear.triggered.connect(self.calc_text_edit.clear)
+        self.action_clear.triggered.connect(lambda: self.message_label.setText("Ready..."))
+
+        # update UI with pre-saved formulas
+        self.calc_load_dict()
         self.add_formula = True
+        self.precalculate_custom_fields = False
 
     def calc_help(self):
         """Loads the help webpage associated with the calculator in the Help tab"""
         if self.debug:
             print("calc_help")
 
-        filename = os.path.join(BASEDIR,"docs/build/html/custom_fields.html")
+        try:
+            if not hasattr(self.parent,"browser"):
+                self.parent.open_browser()
 
-        self.parent.lineEditBrowserLocation.setText(filename)
-
-        if filename:
-            # Load the selected HTML file into the QWebEngineView
-            self.parent.browser.setUrl(QUrl.fromLocalFile(filename))
+            self.parent.browser.show()
+            self.parent.browser.go_to_page('calculator')
+        except Exception as e:
+            print("Could not open browser to load page.")
         
     def calc_insert_operator(self, operator):
         """Inserts an operator into the calculator
 
         When the user pushes an operator button on the calculator, *operator* is inserted 
-        into ``MainWindow.textEditCalcScreen``.
+        into ``MainWindow.calc_text_edit``.
 
         Parameters
         ----------
@@ -113,14 +304,14 @@ class CustomFieldCalculator():
         if self.debug:
             print(f"calc_insert_operator, operator {operator}")
 
-        cursor = self.parent.textEditCalcScreen.textCursor()
+        cursor = self.calc_text_edit.textCursor()
         cursor.insertText(operator)
-    
+
     def calc_insert_function(self, func_name):
         """Inserts a func_name into the calculator
 
         When the user pushes a function button on the calculator, *operator* is inserted 
-        into ``MainWindow.textEditCalcScreen``.  The ``case()`` function inserts ``(cond, expr)``
+        into ``MainWindow.calc_text_edit``.  The ``case()`` function inserts ``(cond, expr)``
         as both a condition and expression are required to compute.  
 
         Parameters
@@ -131,7 +322,7 @@ class CustomFieldCalculator():
         if self.debug:
             print(f"calc_insert_function, function: {func_name}")
 
-        cursor = self.parent.textEditCalcScreen.textCursor()
+        cursor = self.calc_text_edit.textCursor()
         if cursor.hasSelection():
             cursor.insertText(f"{func_name}({cursor.selectedText()})")
             # add semicolon to end of case and otherwise functions
@@ -157,8 +348,8 @@ class CustomFieldCalculator():
             print("calc_add_field")
 
         # get field type and name
-        field_type = self.parent.comboBoxCalcFieldType.currentText()
-        field = self.parent.comboBoxCalcField.currentText()
+        field_type = self.field_type_combobox.currentText()
+        field = self.field_combobox.currentText()
 
         # combine name in calculator style
         match field_type:
@@ -173,11 +364,11 @@ class CustomFieldCalculator():
                     fieldname = f'{field_type}.{field}'
 
         # add to calculation screen
-        cursor = self.parent.textEditCalcScreen.textCursor()
+        cursor = self.calc_text_edit.textCursor()
         cursor.insertText(f"{{{fieldname}}}")
 
     #def calc_clear_text(self):
-    #    self.textEditCalcScreen.clear()
+    #    self.calc_text_edit.clear()
 
     def calc_load_dict(self):
         """Loads saved calculated fields
@@ -200,18 +391,18 @@ class CustomFieldCalculator():
                         expression = expression.strip()  # Remove any leading/trailing whitespace from expression
                         self.calc_dict[name] = expression
 
-                # update comboBoxCalcFormula
-                self.parent.comboBoxCalcFormula.clear()
+                # update formula_combobox
+                self.formula_combobox.clear()
                 name_list = list(self.calc_dict.keys())
-                self.parent.comboBoxCalcFormula.addItems(name_list)
+                self.formula_combobox.addItems(name_list)
         except FileNotFoundError as e:
             # Return an empty dictionary if the file does not exist
-            QMessageBox.warning(self.parent,'Warning','Could not load custom calculated fields.\n Starting with empty custom field dictionary.')
+            QMessageBox.warning(self,'Warning','Could not load custom calculated fields.\n Starting with empty custom field dictionary.')
 
     def calc_delete_formula(self):
         """Deletes a previously stored formula
         
-        Removes the formula from ``MainWindow.comboBoxCalcFormula``, the file given by ``MainWindow.calc_filename`` and 
+        Removes the formula from ``MainWindow.formula_combobox``, the file given by ``MainWindow.calc_filename`` and 
         ``parent.data[parent.sample_id].processed_data``.
         """
         if self.debug:
@@ -220,10 +411,10 @@ class CustomFieldCalculator():
         func = 'calc_delete_formula'
 
         # get name of formula
-        name = self.parent.comboBoxCalcFormula.currentText()
+        name = self.formula_combobox.currentText()
 
-        # remove name from comboBoxCalcFormula
-        self.parent.comboBoxCalcFormula.removeItem(self.parent.comboBoxCalcFormula.currentIndex())
+        # remove name from formula_combobox
+        self.formula_combobox.removeItem(self.formula_combobox.currentIndex())
 
         # remove line with name from calculator formula file
         try:
@@ -240,39 +431,123 @@ class CustomFieldCalculator():
 
         except FileNotFoundError as e:
             err = 'could not find file'
-            self.calc_error(func, err, e)
+            calc_error(func, err, e)
             pass
 
         # remove field from Calculated dataframe
         self.parent.data[self.parent.sample_id].delete_column(name)
+
+        self.message_label.setText("Formula, successfully deleted...")
     
     def calc_load_formula(self):
         """Loads a predefined formula to use in the calculator"""        
         if self.debug:
             print("calc_load_formula")
 
-        name = self.parent.comboBoxCalcFormula.currentText()
+        name = self.formula_combobox.currentText()
 
-        self.parent.textEditCalcScreen.clear()
-        self.parent.textEditCalcScreen.setText(self.calc_dict[name])
+        self.calc_text_edit.clear()
+        self.calc_text_edit.setText(self.calc_dict[name])
 
         self.add_formula = False
+    
+    def calc_set_add_formula(self):
+        """Sets whether to add a new function
+
+        Sets ``MainWindow.add_formula`` to ``True``, a flag used by ``MainWindow.calculate_new_field`` to determine
+        whether to add an item to ``MainWindow.formula_combobox``.
+        """        
+        if self.debug:
+            print("calc_add_formula")
+
+        self.add_formula = True
+
+    def calculate_new_field(self, save=False):
+        """Calculates a new field from ``CalculatorDock.calc_text_edit`` and updates UI
+
+        When ``CalculatorDock.toolButtonCalculate`` is clicked, ...
+
+        If ``save == True``, the formula to ``resources/app_data/calculator.txt`` file so it can be recalled
+        and used at a future time or in another sample.  Pushing ``CalculatorDock.toolButtonCalcSave``,
+        opens a dialog prompting the user to input the name for the newly calculated field.
+
+        Parameters
+        ----------
+        data : AttributeDataFrame
+            Data used to compute custom field
+        save : bool, optional
+            Determines whether to save upon successful calculation, by default ``False``
+        """
+        func = 'CalculatorDock.calculate_new_field'
+        # open dialog to get new field
+        if self.add_formula:
+            new_field, ok = QInputDialog.getText(self, 'Save expression', 'Enter custon field name:')
+            if ok:
+                # check for valid field name
+                if partial_match(['_N',':'],new_field)[0]:
+                    err = "new field name cannot have an '_N' or ':' in the name"
+                    calc_error(func, err, '')
+                    ok = False
+                    
+            if not ok:
+                return
+        else:
+            new_field = self.formula_combobox.currentText()
+
+        # Use CustomFieldCalculator to compute new field
+        self.cfc.calculate_new_field(self.parent.data[self.parent.sample_id].processed_data, self.parent.ref_chem, new_field)
+
+        # update formula_combobox
+        self.formula_combobox.addItem(new_field)
+        self.formula_combobox.setCurrentText(new_field)
+
+        # add new calculated field to self.treeView
+        self.parent.plot_tree.add_calculated_leaf(new_field)
+
+        if self.parent.field_type_combobox.currentText == 'Calculated':
+            self.update_field_combobox(self.field_type_combobox, self.field_combobox)
+
+        # get the formula and add to custom field dictionary
+        formula = self.calc_text_edit.toPlainText()
+        self.calc_dict.update({'field':new_field, 'expr':formula})
+
+        # append calculator file
+        if save:
+            try:
+                with open(self.calc_filename, 'a') as file:
+                    file.write(f"{new_field}: {formula}\n")
+            except Exception as e:
+                # throw a warning that nam
+                err = 'could not save expression, problem with write.'
+                calc_error(func, err, e)
+                return
+
+ 
+
+class CustomFieldCalculator():
+    def __init__(self, debug=False):
+        self.debug = debug
         
-    def calc_parse(self, txt=None):
+    def calc_parse(self, data, ref_chem, txt=None):
         """Prepares expression for calculating a custom field 
 
-        Parses ``MainWindow.textEditCalcScreen`` to produce an expression that can be evaluated.
+        Parses ``MainWindow.calc_text_edit`` to produce an expression that can be evaluated.
+
+        Parameters
+        ----------
+        data : AttributeDataFrame
+            Data used to compute custom field
+        ref_chem : pandas.DataFrame
+            Reference chemistry used when normalization is required
+        txt : str
         """
         if self.debug:
             print(f"calc_parse, text: {txt}")
 
-        func = 'calc_parse'
+        func = 'CustomFieldCalculator.calc_parse'
 
-        # Get text 
-        if txt is None:
-            txt = self.parent.textEditCalcScreen.toPlainText()
-            txt = ''.join(txt.split())
-        print(txt)
+        # remove whitespace
+        txt = ''.join(txt.split())
 
         txt = txt.replace('^','**')
         txt = txt.replace('log(','log10(')
@@ -301,12 +576,12 @@ class CustomFieldCalculator():
                     cond_temp, expr_temp = c.split(',')
                 except Exception as e:
                     err = "a case statement must include a conditional and an expression separated by a comma, ',' and end with a ';'."
-                    self.calc_error(func, err, e)
+                    calc_error(func, err, e)
                     return None, None
 
                 # parse conditional and expression
-                _, cond_temp = self.calc_parse(txt=cond_temp)
-                _, expr_temp = self.calc_parse(txt=expr_temp)
+                _, cond_temp = self.calc_parse(data, ref_chem, txt=cond_temp)
+                _, expr_temp = self.calc_parse(data, ref_chem, txt=expr_temp)
 
                 # append list
                 cond = cond + cond_temp
@@ -318,12 +593,12 @@ class CustomFieldCalculator():
 
         if txt.count('(') != txt.count(')'):
             'mismatched parentheses in expr'
-            self.calc_error(func, err, '')
+            calc_error(func, err, '')
             return None
 
         if txt.count('{') != txt.count('}'):
             'mismatched braces in expr'
-            self.calc_error(func, err, '')
+            calc_error(func, err, '')
             return None
         
         field_list = re.findall(r'\{.*?\}', txt)
@@ -336,7 +611,7 @@ class CustomFieldCalculator():
                 field_type, field = field_str.split('.')
             except Exception as e:
                 err = "field type and field must be separated by a '.'"
-                self.calc_error(func, err, e)
+                calc_error(func, err, e)
             if field[-2:] == '_N':
                 field = field[:-2]
                 if field_type in ['Analyte', 'Ratio']:
@@ -345,7 +620,7 @@ class CustomFieldCalculator():
             if field in list(var.keys()):
                 continue
 
-            df = self.parent.data[self.parent.sample_id].get_map_data(field, field_type, ref_chem=self.parent.ref_chem)
+            df = data.get_map_data(field, field_type, ref_chem=ref_chem)
             var.update({field: df['array']})
 
             txt = txt.replace(f"{{{field_str}}}", f"{field}")
@@ -358,8 +633,8 @@ class CustomFieldCalculator():
 
         return cond, expr
 
-    def calculate_new_field(self, save=False):
-        """Calculates a new field from ``MainWindow.textEditCalcScreen``
+    def calculate_new_field(self, data, ref_chem, new_field):
+        """Calculates a new field from ``MainWindow.calc_text_edit``
 
         When ``MainWindow.toolButtonCalculate`` is clicked, ...
 
@@ -369,43 +644,30 @@ class CustomFieldCalculator():
 
         Parameters
         ----------
-        save: bool, optional
-            Determines whether to save upon successful calculation, by default ``False``
+        data : AttributeDataFrame
+            Data used to compute custom field
+        new_field : str
+            Name of new field to be computed
         """
         if self.debug:
-            print(f"calculate_new_field, save: {save}")
+            print(f"calculate_new_field, new_field: {new_field}")
 
         func = 'calculate_new_field'
 
-        # open dialog to get new field
-        if self.add_formula:
-            new_field, ok = QInputDialog.getText(self.parent, 'Save expression', 'Enter custon field name:')
-            if ok:
-                # check for valid field name
-                if partial_match(['_N',':'],new_field)[0]:
-                    err = "new field name cannot have an '_N' or ':' in the name"
-                    self.calc_error(func, err, '')
-                    ok = False
-                    
-            if not ok:
-                return
-        else:
-            new_field = self.parent.comboBoxCalcFormula.currentText()
-
         # parse the expression
-        cond, expr = self.calc_parse()
+        cond, expr = self.calc_parse(data, ref_chem)
         if cond is None:    # no conditionals
             result = self.calc_evaluate_expr(expr[0], val_dict=expr[1])
             if result is None:
                 return
-            self.parent.data[self.parent.sample_id].add_columns('computed', new_field, result)
+            data.add_columns('computed', new_field, result)
         elif expr is None:
             err = "expr returned 'None' could not evaluate formula. Check syntax."
-            self.calc_error(func, err, '')
+            calc_error(func, err, '')
             return
         else:   # conditionals
             # start with empty dataFrame
-            result = pd.DataFrame({new_field: np.nan*np.zeros_like(self.parent.data[self.parent.sample_id].processed_data.iloc[:,0])})
+            result = pd.DataFrame({new_field: np.nan*np.zeros_like(data.processed_data.iloc[:,0])})
 
             # loop over cases (cond, expr)
             for i in range(0,len(cond),2):
@@ -414,9 +676,9 @@ class CustomFieldCalculator():
                         res = self.calc_evaluate_expr(expr[0], val_dict=expr[1])
                     except Exception as e:
                         err = "could not evaluate otherwise expression. Check syntax."
-                        self.calc_error(func, err, e)
+                        calc_error(func, err, e)
                         return
-                    self.parent.data[self.parent.sample_id].add_columns('computed', new_field, result)
+                    data.add_columns('computed', new_field, result)
                     continue
 
                 # conditional yields boolean numpy.ndarray keep
@@ -424,24 +686,24 @@ class CustomFieldCalculator():
                     keep = self.calc_evaluate_expr(cond[i], val_dict=cond[i+1])
                 except Exception as e:
                     err = "could not evaluate conditional statement. Check syntax."
-                    self.calc_error(func, err, e)
+                    calc_error(func, err, e)
                     return
 
                 # check for missing or incorrectly type for conditional
                 if keep is None:
                     err = 'conditional did not return boolean result.'
-                    self.calc_error(func, err, '')
+                    calc_error(func, err, '')
                     return
                 elif not isinstance(keep, np.ndarray):
                     if not np.issubdtype(keep.dtype, np.bool_):
                         err = 'conditional did not return boolean result.\n  Did you swap the conditional and expression?'
-                        self.calc_error(func, err, '')
+                        calc_error(func, err, '')
                         return
 
                 # check for size error
                 if keep.shape[0] != result.shape[0]:
                     err = 'the conditional size does not match the size of expected computed array.'
-                    self.calc_error(func, err, '')
+                    calc_error(func, err, '')
                     return
 
                 # compute expression for indexes where keep==`True`
@@ -449,42 +711,18 @@ class CustomFieldCalculator():
                     res = self.calc_evaluate_expr(expr[i], val_dict=expr[i+1], keep=keep)
                 except Exception as e:
                     err = "could not evaluate expression. Check syntax."
-                    self.calc_error(func, err, e)
+                    calc_error(func, err, e)
                     return
 
                 if res is None:
                     err = 'the expression failed to return an array of values.'
-                    self.calc_error(func, err, '')
+                    calc_error(func, err, '')
                     return
 
                 result.loc[keep,new_field] = res
 
-            self.parent.data[self.parent.sample_id].add_columns('computed', new_field, result)
+            data.add_columns('computed', new_field, result)
 
-        # update comboBoxCalcFormula
-        self.parent.comboBoxCalcFormula.addItem(new_field)
-        self.parent.comboBoxCalcFormula.setCurrentText(new_field)
-
-        # add new calculated field to self.treeView
-        self.parent.plot_tree.add_calculated_leaf(new_field)
-
-        if self.parent.comboBoxCalcFieldType.currentText == 'Calculated':
-            self.parent.update_field_combobox(self.parent.comboBoxCalcFieldType, self.parent.comboBoxCalcField)
-
-        # get the formula and add to custom field dictionary
-        formula = self.parent.textEditCalcScreen.toPlainText()
-        self.calc_dict.update({'field':new_field, 'expr':formula})
-
-        # append calculator file
-        if save:
-            try:
-                with open(self.calc_filename, 'a') as file:
-                    file.write(f"{new_field}: {formula}\n")
-            except Exception as e:
-                # throw a warning that nam
-                err = 'could not save expression, problem with write.'
-                self.calc_error(func, err, e)
-                return
 
     def calc_evaluate_expr(self, expr, val_dict=None, keep=None):
         """Evaluates an expression and returns the result
@@ -514,30 +752,12 @@ class CustomFieldCalculator():
                 result = ne.evaluate(expr)
             else:
                 result = ne.evaluate(expr, local_dict=val_dict)
-            self.parent.labelCalcMessage.setText("Success")
+            self.message_label.setText("Success")
             if keep is None or result.ndim == 0:
                 return result
             else:
                 return result[keep]
         except Exception as e:
             err = 'unable to evaluate expression.'
-            self.calc_error(func, err, e)
+            calc_error(func, err, e)
             return None
-
-    def calc_error(self, func, err, addinfo):
-        """Raise a calculator-related error
-
-        Parameters
-        ----------
-        func : str
-            Function that threw the error
-        err : str
-            Error string
-        addinfo : str
-            Additional info (generally exception raised)
-        """        
-        if self.debug:
-            print(f"calc_error\n  func: {func}\n  err: {err}\n  addinfo: {addinfo}")
-
-        self.parent.labelCalcMessage.setText(f"Error: {err}")
-        QMessageBox.warning(self.parent,'Calculation Error',f"Error: {err}\n\n({func}) {addinfo}")

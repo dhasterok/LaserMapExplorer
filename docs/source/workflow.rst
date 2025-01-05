@@ -29,7 +29,7 @@ The WMD tool requires Google's Blockly javascript library. Follow these steps to
 A successful build will show output listing various modules and assets.
 
 Getting Started
-=============
+===============
 
 Basic Workflow Creation:
 

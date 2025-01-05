@@ -2,15 +2,15 @@ Block Reference & Interface
 ***************************
 
 Interface Components
-==================
+====================
 The WMD interface provides an intuitive environment for creating and managing workflows:
 
 Block Palette
------------
+-------------
 Located on the left side of the Workflow tab, contains all available blocks organized by category.
 
 Workspace
---------
+---------
 Central area where you assemble your workflow by connecting blocks. Blocks connect using specific symbols:
 
 - < : Left connection
@@ -23,14 +23,14 @@ Central area where you assemble your workflow by connecting blocks. Blocks conne
 - \+ : External window connection
 
 Preview Panel
------------
+-------------
 Shows real-time feedback as you build and test your workflow.
 
 Available Blocks
-==============
+================
 
 Global Settings
--------------
+---------------
 - Theme settings
 - Notes configuration
 - Filter settings
@@ -39,7 +39,7 @@ Global Settings
 - Batch samples for analysis (x)
 
 File Operations
--------------
+---------------
 - Load Directory (v) - Opens file browser for directory selection
 - Load Sample (x) - Opens file browser for sample selection
 - Export Figure Data (<) - Text field for filename
@@ -49,7 +49,7 @@ File Operations
 - Subsample Data (<) - Method selection and sample size
 
 Sample and Fields
----------------
+-----------------
 - Analyte Select Tool (x) - Saved list selection with dialog
 - Reference Value (x) - Reference chemistry selection
 - Change Pixel Dimensions (<) - dx, dy text fields
@@ -62,13 +62,13 @@ Sample and Fields
 - Compute Custom Field (<) - Use defined custom fields
 
 Image Processing
---------------
+----------------
 - Noise Reduction (x) - Method selection and parameters
 - Edge Detection (x) - Method selection
 - Gradient Options - Additional processing capabilities
 
 Plotting
--------
+--------
 - Map (x) - Field selection with styling options
 - Correlation (x) - Method selection and export options
 - Histogram (x) - Type selection and styling
@@ -83,7 +83,7 @@ Plotting
 - Regression (<) - Statistical analysis
 
 Multidimensional Analysis
-----------------------
+-------------------------
 - Dimensional Reduction (x) - Method selection
 - Clustering (x) - Method selection and options
 - Seed (<) - Random number generation
@@ -91,11 +91,11 @@ Multidimensional Analysis
 - PCA Preconditioning (<) - Basis vector settings
 
 Filtering
---------
+---------
 - Load Polygons (x) - Multiple polygon selection
 
 Styling
-------
+-------
 - Modify Style (<) - Dynamic styling options
 - Axis Controls (<) - X, Y, Z, C axis properties
 - Tick Direction (<) - Tick mark display options
@@ -111,7 +111,7 @@ Styling
 - Color by Cluster (<) - Cluster-based coloring
 
 Block Connections
-===============
+=================
 Connection Rules:
 - Vertical connections (v, ^) create sequences
 - Horizontal connections (<, >) indicate data flow

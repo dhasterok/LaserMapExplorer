@@ -38,7 +38,7 @@ class CustomLineEdit(QLineEdit):
         self._toward = toward
         self.textChanged.connect(self._update_value_from_text)
         self.setValidator(validator)
-        self.setAlignment(Qt.AlignRight)
+        self.setAlignment(Qt.AlignmentFlag.AlignRight)
 
     @property
     def value(self):
@@ -393,6 +393,8 @@ class CustomComboBox(QComboBox):
         super().__init__(*args, **kwargs)
         self.update_callback = update_callback
 
+        setattr(self, "allItems", lambda: [self.itemText(i) for i in range(self.count())])
+
     def showPopup(self):
         """Update combobox items using callback before displaying items."""
 
@@ -406,7 +408,7 @@ class CustomDockWidget(QDockWidget):
 
         self.show()
 
-        self.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
+        self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowMinMaxButtonsHint | Qt.WindowType.WindowCloseButtonHint)
 
     def closeEvent(self, event):
         """Override the close event to hide the dock widget instead of closing it."""

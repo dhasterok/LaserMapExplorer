@@ -1,8 +1,8 @@
 Analysis Visualization
-********************
+**********************
 
 Scatter and Heatmaps
-===================
+====================
 
 Scatter plots and heatmaps are common tools for visualizing relationships between analytes in two or three dimensions. These visualization techniques are fundamental in analyzing and understanding complex datasets.
 
@@ -21,7 +21,7 @@ Scatter plots and heatmaps are common tools for visualizing relationships betwee
     3D Ternary plot.
 
 Visulization Options
--------------------
+--------------------
 
 - Scatter: Shows the relationship between two analytes
 - Heatmap: Shows the distribution of a variable across two dimensions
@@ -29,7 +29,7 @@ Visulization Options
 
 
 n-Dim Analysis
-=============
+==============
 
 n-Dimensional analysis is a powerful tool for visualizing complex datasets and understanding relationships between analytes in multiple dimensions. In addition, *LaME* provides options for customizing the analysis, such as setting reference values, selecting specific analytes, using predefined settings, and calculating quantiles. However, please note that the radar plot feature is currently not working.
 

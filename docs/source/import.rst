@@ -107,10 +107,10 @@ The following data types and formats are planned for future implementation:
 
 - TOF (HDF5)
 - MLA
-- XRF (*.png, *.tif)
+- XRF (\*.png, \*.tif)
 - SEM
 - CL
-- Petrography (*.png, *.jpg, *.tif)
+- Petrography (\*.png, \*.jpg, \*.tif)
 
 .. |icon-import-directory| image:: _static/icons/icon-import-directory-64.png
     :height: 2ex

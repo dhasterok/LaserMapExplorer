@@ -19,7 +19,7 @@ class UIFieldLogic():
         data : AttributeDataFrame
             New data frame
         """        
-        if not ((data is None) or (not isinstance(data, AttributeDataFrame))):
+        if not ((data is None) and (not isinstance(data, AttributeDataFrame))):
             raise TypeError("data should be an AttributeDataFrame")
         self.data = data
 

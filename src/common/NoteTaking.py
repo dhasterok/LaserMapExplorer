@@ -1,11 +1,11 @@
 import re, os
-from PyQt5.QtCore import ( Qt, QTimer, QSize )
+from PyQt5.QtCore import ( Qt, QTimer, QSize, QUrl )
 from PyQt5.QtWidgets import (
-        QMainWindow, QMessageBox, QFileDialog, QDockWidget, QWidget,
-        QVBoxLayout, QFormLayout, QTextEdit, QSizePolicy,
-        QLabel, QDialog, QDialogButtonBox, QToolBar, QAction 
+        QMainWindow, QMessageBox, QFileDialog, QWidget, QVBoxLayout, QFormLayout, QTextEdit, QSizePolicy,
+        QLabel, QDialog, QDialogButtonBox, QToolBar, QAction , QHBoxLayout
     )
 from PyQt5.QtGui import ( QFont, QTextCursor, QIcon, QCursor, QDoubleValidator)
+from PyQt5.QtWebEngineWidgets import QWebEngineView
 from datetime import datetime
 import numpy as np
 import pandas as pd   
@@ -45,7 +45,7 @@ class Notes(CustomDockWidget):
         if not isinstance(parent, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
 
-        super().__init__("Workflow Method Design", parent)
+        super().__init__(parent)
         self.parent = parent
 
         self._notes_file = None
@@ -70,7 +70,6 @@ class Notes(CustomDockWidget):
         ]
         self.action_header = CustomActionMenu(header_icon, "Header", header_menu_items)
         self.action_header.setToolTip("Format a heading")
-        toolbar.addAction(self.action_header)
 
         # bold button
         self.action_bold = QAction()
@@ -80,8 +79,6 @@ class Notes(CustomDockWidget):
         else:
             self.action_bold.setText("Bold")
         self.action_bold.setToolTip("Bold selected text")
-        self.action_bold.triggered.connect(lambda: self.format_text('bold'))
-        toolbar.addAction(self.action_bold)
 
         # italic button
         self.action_italic = QAction()
@@ -91,8 +88,6 @@ class Notes(CustomDockWidget):
         else:
             self.action_italic.setText("Italic")
         self.action_italic.setToolTip("Italicize selected text")
-        self.action_italic.triggered.connect(lambda: self.format_text('italic'))
-        toolbar.addAction(self.action_italic)
 
         # literal button
         self.action_literal = QAction()
@@ -102,8 +97,6 @@ class Notes(CustomDockWidget):
         else:
             self.action_literal.setText("Literal")
         self.action_literal.setToolTip("Display selected text as a literal")
-        self.action_literal.triggered.connect(lambda: self.format_text('literal'))
-        toolbar.addAction(self.action_literal)
 
         # superscript button
         self.action_superscript = QAction()
@@ -113,8 +106,6 @@ class Notes(CustomDockWidget):
         else:
             self.action_superscript.setText("Subscript")
         self.action_superscript.setToolTip("Superscript selected text")
-        self.action_superscript.triggered.connect(lambda: self.format_text('superscript'))
-        toolbar.addAction(self.action_superscript)
 
         # subscript button
         self.action_subscript = QAction()
@@ -124,8 +115,6 @@ class Notes(CustomDockWidget):
         else:
             self.action_subscript.setText("Subscript")
         self.action_subscript.setToolTip("Subscript selected text")
-        self.action_subscript.triggered.connect(lambda: self.format_text('subscript'))
-        toolbar.addAction(self.action_subscript)
 
         toolbar.addSeparator()
 
@@ -137,8 +126,6 @@ class Notes(CustomDockWidget):
         else:
             self.action_bullet.setText("Bulleted List")
         self.action_bullet.setToolTip("Format bulleted list")
-        self.action_bullet.triggered.connect(lambda: self.format_list('bullet'))
-        toolbar.addAction(self.action_bullet)
 
         # numbered list button
         self.action_enumerate = QAction()
@@ -148,10 +135,6 @@ class Notes(CustomDockWidget):
         else:
             self.action_enumerate.setText("Numbered List")
         self.action_enumerate.setToolTip("Format enumerated list")
-        self.action_enumerate.triggered.connect(lambda: self.format_list('enumerate'))
-        toolbar.addAction(self.action_enumerate)
-
-        toolbar.addSeparator()
 
         # citation button
         self.action_cite = QAction()
@@ -161,8 +144,6 @@ class Notes(CustomDockWidget):
         else:
             self.action_cite.setText("Cite")
         self.action_cite.setToolTip("Insert citation")
-        self.action_cite.triggered.connect(lambda: self.format_text('citation'))
-        toolbar.addAction(self.action_cite)
 
         # hyperlink button
         self.action_hyperlink = QAction()
@@ -172,10 +153,6 @@ class Notes(CustomDockWidget):
         else:
             self.action_hyperlink.setText("Hyperlink")
         self.action_hyperlink.setToolTip("Insert hyperlink")
-        self.action_hyperlink.triggered.connect(lambda: self.format_text('hyperlink'))
-        toolbar.addAction(self.action_hyperlink)
-
-        toolbar.addSeparator()
 
         # math button and menu
         math_icon = ":resources/icons/icon-equation-64.svg"
@@ -188,7 +165,6 @@ class Notes(CustomDockWidget):
         ]
         self.action_math = CustomActionMenu(math_icon, "Insert equation", math_menu_items, self)
         self.action_math.setToolTip("Insert equation")
-        toolbar.addAction(self.action_math)
 
 
         # image button
@@ -199,8 +175,6 @@ class Notes(CustomDockWidget):
         else:
             self.action_image.setText("Figure")
         self.action_image.setToolTip("Insert figure")
-        self.action_image.triggered.connect(self.insert_image)
-        toolbar.addAction(self.action_image)
 
         # info button and menu
         info_icon = ":resources/icons/icon-formatted-output-64.svg"
@@ -214,7 +188,6 @@ class Notes(CustomDockWidget):
         ]
         self.action_info = CustomActionMenu(info_icon, "Formatted Info", info_menu_items)
         self.action_info.setToolTip("Insert formatted info")
-        toolbar.addAction(self.action_info)
 
         # options button, opens options dialog
         self.action_options = QAction()
@@ -224,11 +197,6 @@ class Notes(CustomDockWidget):
         else:
             self.action_options.setText("Options")
         self.action_options.setToolTip("Options")
-        self.action_options.triggered.connect(self.open_note_options)
-        toolbar.addAction(self.action_options)
-
-        toolbar.addSeparator()
-
         # export as rst2pdf button
         self.action_export = QAction()
         export_icon = QIcon(":resources/icons/icon-pdf-64.svg")
@@ -237,22 +205,69 @@ class Notes(CustomDockWidget):
         else:
             self.action_export.setText("Save")
         self.action_export.setToolTip("Save notes as PDF (must have rst2pdf installed)")
-        self.action_export.triggered.connect(self.save_notes_to_pdf) # compile rst
+
+        # pdf previewer
+        self.action_preview_pdf = QAction()
+        preview_icon = QIcon(":resources/icons/icon-show-hide-64.svg")
+        if not preview_icon.isNull():
+            self.action_preview_pdf.setIcon(preview_icon)
+        else:
+            self.action_preview_pdf.setText("Preview")
+        self.action_preview_pdf.setToolTip("Preview PDF")
+        self.action_preview_pdf.setCheckable(True)
+        self.action_preview_pdf.setChecked(False)
+        self.action_preview_pdf.setEnabled(False)
+
+        # add buttons to toolbar
+        toolbar.addAction(self.action_header)
+        toolbar.addAction(self.action_bold)
+        toolbar.addAction(self.action_italic)
+        toolbar.addAction(self.action_literal)
+        toolbar.addAction(self.action_superscript)
+        toolbar.addAction(self.action_subscript)
+        toolbar.addAction(self.action_bullet)
+        toolbar.addAction(self.action_enumerate)
+
+        toolbar.addSeparator()
+        toolbar.addAction(self.action_cite)
+        toolbar.addAction(self.action_hyperlink)
+
+        toolbar.addSeparator()
+        toolbar.addAction(self.action_math)
+        toolbar.addAction(self.action_image)
+        toolbar.addAction(self.action_info)
+        toolbar.addAction(self.action_options)
+
+        toolbar.addSeparator()
+
         toolbar.addAction(self.action_export)
+        toolbar.addAction(self.action_preview_pdf)
+
+        widget_layout = QHBoxLayout()
 
         self.text_edit = QTextEdit()
         self.text_edit.setFont(QFont("Monaco", 10))
         self.text_edit.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.text_edit.setMaximumSize(QSize(524287, 524287))
-        self.text_edit.viewport().setProperty("cursor", QCursor(Qt.IBeamCursor))
+        self.text_edit.viewport().setProperty("cursor", QCursor(Qt.CursorShape.IBeamCursor))
 
         if self._notes_file is None:
             self.file_label = QLabel("File: [load sample to display file]")
         else:
             self.file_label = QLabel("File: "+self._notes_file)
 
+        # Create a QWebEngineView
+        self.pdf_browser = QWebEngineView()
+
+        # Load the PDF file
+        self.pdf_browser.setUrl(QUrl(self.notes_file))
+
+        # Add the web view to the layout
+        widget_layout.addWidget(self.text_edit)
+        widget_layout.addWidget(self.pdf_browser)
+
         dock_layout.addWidget(toolbar)
-        dock_layout.addWidget(self.text_edit)
+        dock_layout.addLayout(widget_layout)
         dock_layout.addWidget(self.file_label)
 
         # Connect resize event
@@ -264,10 +279,24 @@ class Notes(CustomDockWidget):
 
         self.setFloating(True)
         self.setWindowTitle(title)
-        self.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
+        self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowMinMaxButtonsHint | Qt.WindowType.WindowCloseButtonHint)
 
-        parent.addDockWidget(Qt.BottomDockWidgetArea, self)
+        parent.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self)
 
+        self.action_bold.triggered.connect(lambda: self.format_text('bold'))
+        self.action_italic.triggered.connect(lambda: self.format_text('italic'))
+        self.action_literal.triggered.connect(lambda: self.format_text('literal'))
+        self.action_superscript.triggered.connect(lambda: self.format_text('superscript'))
+        self.action_subscript.triggered.connect(lambda: self.format_text('subscript'))
+        self.action_bullet.triggered.connect(lambda: self.format_list('bullet'))
+        self.action_enumerate.triggered.connect(lambda: self.format_list('enumerate'))
+        self.action_cite.triggered.connect(lambda: self.format_text('citation'))
+        self.action_hyperlink.triggered.connect(lambda: self.format_text('hyperlink'))
+        self.action_image.triggered.connect(self.insert_image)
+        self.action_options.triggered.connect(self.open_note_options)
+        self.action_export.triggered.connect(self.save_notes_to_pdf) # compile rst
+        self.action_preview_pdf.triggered.connect(self.toggle_preview_notes) # compile rst
+        self.action_export.triggered.connect(lambda: self.action_preview_pdf.setEnabled(True)) # compile rst
 
         # autosave notes
         self.autosaveTimer = QTimer()
@@ -390,14 +419,14 @@ class Notes(CustomDockWidget):
         filenames : list of str
             A list of filenames to add images 
         """
-        if filenames is None:
+        if filename is None:
             dialog = QFileDialog()
             dialog.setFileMode(QFileDialog.ExistingFiles)
             dialog.setNameFilter("Image Files (*.jpg *.png *.tif)")
-            filenames = []
+            filename = []
 
             if dialog.exec_():
-                filenames = dialog.selectedFiles()
+                filename = dialog.selectedFiles()
             else:
                 return
 
@@ -773,6 +802,11 @@ class Notes(CustomDockWidget):
             #    pdf_file.write(pdf_content)
             
             self.parent.statusBar.showMessage("PDF successfully generated...")
+            
+            # view pdf
+            if self.action_preview_pdf.isChecked():
+                self.update_pdf()
+
         except Exception as e:
             # if it doesn't work
             QMessageBox.warning(self, "Error", "Could not save to pdf.\n"+str(e))
@@ -828,6 +862,21 @@ class Notes(CustomDockWidget):
                 print(f"Number of Columns: {columns}")
             if variance:
                 print(f"Cumulative Variance: {variance}%")
+
+    def toggle_preview_notes(self):
+        """Shows/hides the PDF preview browser"""
+        if self.action_preview_pdf.isChecked():
+            # show previewer
+            self.pdf_browser.show()
+
+            self.update_pdf()
+        else:
+            # hide previewer
+            self.pdf_browser.hide()
+
+    def update_pdf(self):
+        """Opens the compiled PDF, ``self.notes_file``, for viewing"""
+        self.pdf_browser.setUrl(QUrl(self.notes_file))
 
 class NoteOptionsDialog(QDialog):
     """Opens when ``Notes.action_options`` is triggered.

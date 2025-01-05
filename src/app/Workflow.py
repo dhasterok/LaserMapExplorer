@@ -125,7 +125,7 @@ class Workflow(CustomDockWidget):
         if not isinstance(parent, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
 
-        super().__init__("Workflow Method Design", parent)
+        super().__init__(parent)
         self.parent = parent
 
         container = QWidget()

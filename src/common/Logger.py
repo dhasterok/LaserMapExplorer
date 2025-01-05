@@ -22,7 +22,7 @@ class LoggerDock(CustomDockWidget):
         if not isinstance(parent, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
 
-        super().__init__("Logger", parent)
+        super().__init__(parent)
         self.parent = parent
 
         # Create container
@@ -88,9 +88,9 @@ class LoggerDock(CustomDockWidget):
 
         self.setFloating(True)
         self.setWindowTitle("LaME Logger")
-        self.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
+        self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowMinMaxButtonsHint | Qt.WindowType.WindowCloseButtonHint)
 
-        parent.addDockWidget(Qt.RightDockWidgetArea, self)
+        parent.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self)
 
         # Example print statements
         self.log_file = file 

@@ -66,6 +66,7 @@ from src.app.SpecialTools import SpecialPage
 from src.common.NoteTaking import Notes
 from src.common.Browser import Browser
 from src.app.Workflow import Workflow
+from src.app.InfoViewer import InfoDock
 import src.app.QuickView as QV
 from src.app.config import BASEDIR, ICONPATH, SSPATH, DEBUG, load_stylesheet
 from src.common.ExtendedDF import AttributeDataFrame
@@ -75,6 +76,7 @@ import src.app.config as config
 from src.app.help_mapping import create_help_mapping
 from src.common.Logger import LoggerDock
 from src.common.CalculatorDock import CalculatorDock
+from src.common.varfunc import ObservableDict
 
 # to prevent segmentation error at startup
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
@@ -245,8 +247,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.prev_plot = ''
         self.pyqtgraph_widget = None
         self.isUpdatingTable = False
-        self.cursor = False
-        self.duplicate_plot_info= None
+        self.default_cursor = False
+        self.duplicate_plot_info = None
         
         self.calc_dict = {}
 
@@ -327,11 +329,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # bottom tab plot layout
         # profile view
-        layout_profile_view = QVBoxLayout()
-        layout_profile_view.setSpacing(0)
-        layout_profile_view.setContentsMargins(0, 0, 0, 0)
-        self.widgetProfilePlot.setLayout(layout_profile_view)
-        self.widgetProfilePlot.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        # layout_profile_view = QVBoxLayout()
+        # layout_profile_view.setSpacing(0)
+        # layout_profile_view.setContentsMargins(0, 0, 0, 0)
+        # self.widgetProfilePlot.setLayout(layout_profile_view)
+        # self.widgetProfilePlot.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         #Flags to prevent plotting when widgets change
         self.point_selected = False
@@ -341,11 +343,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_pca_flag = True
         self.plot_flag = True
 
-        self.plot_info = {}
+        self.plot_info = ObservableDict()
 
-        # set locations of doc widgets
-        self.setCorner(0x00002,0x1) # sets left toolbox to bottom left corner
-        self.setCorner(0x00003,0x2) # sets right toolbox to bottom right corner
+        # set locations of dock widgets
+        #self.setCorner(0x00002,0x1) # sets left toolbox to bottom left corner
+        #self.setCorner(0x00003,0x2) # sets right toolbox to bottom right corner
+        self.setCorner(Qt.Corner.BottomLeftCorner, Qt.DockWidgetArea.LeftDockWidgetArea)
+        self.setCorner(Qt.Corner.BottomRightCorner, Qt.DockWidgetArea.RightDockWidgetArea)
 
         # preferences
         self.default_preferences = {'Units':{'Concentration': 'ppm', 'Distance': 'µm', 'Temperature':'°C', 'Pressure':'MPa', 'Date':'Ma', 'FontSize':11, 'TickDir':'out'}}
@@ -383,18 +387,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 case 'clusters':
                     self.mask_tab.update({'cluster': tid})
 
-        self.info_tab = {}
-        for tid in range(self.tabWidgetInfo.count()):
-            match self.tabWidgetInfo.tabText(tid).lower():
-                case 'plot':
-                    self.info_tab.update({'plot': tid})
-                case 'metadata':
-                    self.info_tab.update({'metadata': tid})
-                case 'data':
-                    self.info_tab.update({'data': tid})
-                case 'fields':
-                    self.info_tab.update({'field': tid})
-        
         self.canvas_tab = {}
         for tid in range(self.canvasWindow.count()):
             match self.canvasWindow.tabText(tid).lower():
@@ -427,7 +419,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Set initial view
         self.toolBox.setCurrentIndex(self.left_tab['sample'])
         self.tabWidgetMask.setCurrentIndex(self.mask_tab['filter'])
-        self.tabWidgetInfo.setCurrentIndex(self.info_tab['plot'])
         self.toolBoxStyle.setCurrentIndex(0)
         self.toolBoxTreeView.setCurrentIndex(self.right_tab['tree'])
         self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
@@ -436,8 +427,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # create dictionaries for default plot styles
         #-------------------------
 
-        self.plot_types = {self.left_tab['sample']: [0, 'analyte map', 'correlation'],
-            self.left_tab['process']: [0, 'analyte map', 'gradient map', 'histogram'],
+        self.plot_types = {self.left_tab['sample']: [0, 'analyte map', 'histogram', 'correlation'],
+            self.left_tab['process']: [0, 'analyte map', 'gradient map'],
             self.left_tab['spot']: [0, 'analyte map', 'gradient map'],
             self.mask_tab['polygon']: [0, 'analyte map'],
             self.left_tab['scatter']: [0, 'scatter', 'heatmap', 'ternary map'],
@@ -492,7 +483,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionBiPlot.triggered.connect(lambda: self.open_tab('scatter'))
         self.actionTernary.triggered.connect(self.open_ternary)
         self.actionTEC.triggered.connect(lambda: self.open_tab('ndim'))
-        self.actionProfiles.triggered.connect(lambda: self.open_tab('profiles'))
+        self.actionProfiles.triggered.connect(self.open_profile)
         self.actionCluster.triggered.connect(lambda: self.open_tab('clustering'))
         self.actionReset.triggered.connect(lambda: self.reset_analysis())
         self.actionSwapAxes.triggered.connect(self.swap_xy)
@@ -502,7 +493,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionPolygons.triggered.connect(lambda: self.mask_tab['polygon'])
         self.actionClusters.triggered.connect(lambda: self.mask_tab['cluster'])
 
-        self.actionInfo.triggered.connect(lambda: self.info_tab['plot'])
+        self.info_tab = {}
+        self.actionInfo.triggered.connect(self.open_info_dock)
 
         self.actionHelp.setCheckable(True)
         self.actionHelp.toggled.connect(self.toggle_help_mode)
@@ -555,10 +547,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxSampleId.activated.connect(lambda: self.change_sample(self.comboBoxSampleId.currentIndex()))
         self.canvasWindow.currentChanged.connect(self.canvas_changed)
 
-        #normalising
-        self.comboBoxNorm.clear()
-        self.comboBoxNorm.addItems(['linear','log','logit'])
-        self.comboBoxNorm.activated.connect(lambda: self.update_norm(self.comboBoxNorm.currentText()))
 
         self.lineEditResolutionNx.precision = None
         self.lineEditResolutionNy.precision = None
@@ -730,8 +718,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.tableWidgetViewGroups.setSelectionMode(QAbstractItemView.MultiSelection)
         self.tableWidgetViewGroups.itemChanged.connect(self.cluster_label_changed)
 
-        self.comboBoxColorField.currentText() == 'none'
+        self.comboBoxColorField.setPlaceholderText("None")
         self.spinBoxColorField.lineEdit().setReadOnly(True)
+        self.spinBoxFieldIndex.lineEdit().setReadOnly(True)
         self.tableWidgetViewGroups.selectionModel().selectionChanged.connect(self.update_clusters)
 
         # Scatter and Ternary Tab
@@ -839,8 +828,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         # Styling Tab
         #-------------------------
-        self.style = Styling(self, debug=self.logger_options['Styles'])
-        self.style.load_theme_names()
+        self.plot_style = Styling(self, debug=self.logger_options['Styles'])
+        self.plot_style.load_theme_names()
 
         setattr(self.comboBoxMVPlots, "allItems", lambda: [self.comboBoxMVPlots.itemText(i) for i in range(self.comboBoxMVPlots.count())])
 
@@ -877,13 +866,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #-------------------------
         self.actionNotes.triggered.connect(self.open_notes)
 
-        # Plot Info
-        #-------------------------
-        self.textEditPlotInfo.setReadOnly(True)
         
-        # Browser
-        #-------------------------
-
         # Plot toolbars
         #-------------------------
 
@@ -971,10 +954,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionLogger.triggered.connect(self.open_logger)
 
         self.dockWidgetLeftToolbox.show()
-        self.addDockWidget(Qt.LeftDockWidgetArea, self.dockWidgetLeftToolbox)
+        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.dockWidgetLeftToolbox)
         self.dockWidgetLeftToolbox.setFloating(False)
         self.dockWidgetRightToolbox.show()
-        self.addDockWidget(Qt.RightDockWidgetArea, self.dockWidgetRightToolbox)
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.dockWidgetRightToolbox)
         self.dockWidgetRightToolbox.setFloating(False)
 
     def toggle_spot_tab(self):
@@ -1081,7 +1064,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.change_sample(self.comboBoxSampleId.currentIndex())
 
                 # reset styles
-                self.style.reset_default_styles()
+                self.plot_style.reset_default_styles()
 
                 # reset plot layouts
                 self.clear_layout(self.widgetSingleView.layout())
@@ -1107,13 +1090,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.polygon.clear_polygons()
 
 
-    def toggle_dock_visibility(self, dock, button):
+    def toggle_dock_visibility(self, dock, button=None):
+        """Toggles the visibility and checked state of a dock and its controlling button
+
+        _extended_summary_
+
+        Parameters
+        ----------
+        dock : QDockWidget
+            Dock widget to show or hide.
+        button : QToolButton, QPushButton, QAction, optional
+            Changes the checked state of button, by default None
+        """        
         if dock.isVisible():
             dock.hide()
-            button.setChecked(False)
+            if button is not None:
+                button.setChecked(False)
         else:
             dock.show()
-            button.setChecked(True)
+            if button is not None:
+                button.setChecked(True)
         
     def init_tabs(self):
         self.toolBox.setCurrentIndex(self.left_tab['sample'])
@@ -1204,7 +1200,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             # set analyte map to first available analyte
             if not selected_analytes:
-                self.style.color_field = selected_analytes[0]
+                self.plot_style.color_field = selected_analytes[0]
 
             self.plot_tree.add_sample(self.sample_id)
             self.plot_tree.update_tree()
@@ -1232,6 +1228,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.update_tables()
 
             #return
+        
+        if hasattr(self,"info_dock"):
+            self.info_dock.update_tab_widget()
 
         # update slot connections that depend on the sample
         self.toolButtonOutlierReset.clicked.connect(lambda: self.data[self.sample_id].reset_data_handling(self.comboBoxOutlierMethod.currentText(), self.comboBoxNegativeMethod.currentText()))
@@ -1277,20 +1276,27 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolBoxStyle.setCurrentIndex(0)
         self.toolBoxTreeView.setCurrentIndex(self.right_tab['tree'])
         self.toolBox.setCurrentIndex(self.left_tab['sample'])
-        self.style.set_style_widgets(self.comboBoxPlotType.currentText())
+        self.plot_style.set_style_widgets(self.comboBoxPlotType.currentText())
 
-        self.style.color_field_type = 'Analyte'
-        self.style.color_field = analyte_list[0]
-        if self.comboBoxPlotType.currentText() != 'analyte map':
-            self.comboBoxPlotType.setCurrentText('analyte map')
-        self.toolbox_changed(update=False)
+        # update comboboxes to reflect list of available field types and fields
         self.update_all_field_comboboxes()
+        #self.update_field_combobox(self.comboBoxColorByField,self.comboBoxColorField)
+
+        # set color field and hist field as 'Analyte'
+        self.plot_style.color_field_type = 'Analyte'
+
+        self.plot_style.color_field = analyte_list[0]
+        if self.plot_style.plot_type != 'analyte map':
+            self.plot_style.plot_type = 'analyte map'
+        self.toolbox_changed(update=False)
         if hasattr(self, 'workflow'):
             self.update_blockly_field_types()
 
-        self.update_field_combobox(self.comboBoxColorByField,self.comboBoxColorField)
         self.spinBoxColorField.setMinimum(0)
         self.spinBoxColorField.setMaximum(self.comboBoxColorField.count() - 1)
+        self.spinBoxFieldIndex.setMinimum(0)
+        self.spinBoxFieldIndex.setMaximum(self.comboBoxHistField.count() - 1)
+        self.spinBoxFieldIndex.valueChanged.connect(self.hist_field_update)
 
         self.update_filter_values()
         self.histogram_update_bin_width()
@@ -1299,18 +1305,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.canvas_changed()
 
         # trigger update to plot
-        self.style.scheduler.schedule_update()
+        self.plot_style.scheduler.schedule_update()
+
+    def hist_field_update(self):
+        self.spinBoxFieldIndex.blockSignals(True)
+        self.comboBoxHistField.setCurrentIndex(self.spinBoxFieldIndex.value())
+
+        self.spinBoxColorField.setValue(self.spinBoxFieldIndex.value())
+
+        self.spinBoxFieldIndex.blockSignals(False)
 
     def open_preferences_dialog(self):
         pass
 
-    def update_profile_spinbox(self):
-        """Updates the maximum number of subplots that can be selected.
-
-        Updates ``MainWindow.spinBoxProfileSelectedSubplot.setMaximum()
-        """        
-        n = self.spinBoxProfileNumSubplots.value()
-        self.spinBoxProfileSelectedSubplot.setMaximum(int(n))
     
     def update_analyte_ratio_selection(self,analyte_dict):
         """Updates analytes/ratios in mainwindow and its corresponding scale used for each field
@@ -1411,6 +1418,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.help_mapping[self.calculator] = 'calculator'
 
         #self.calculator.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
+
+    def open_info_dock(self):
+        if not hasattr(self, 'info_dock'):
+            self.info_dock = InfoDock(self, "LaME Info")
+
+            for tid in range(self.info_dock.info_tab_widget.count()):
+                match self.info_dock.info_tab_widget.tabText(tid).lower():
+                    case 'plot':
+                        self.info_tab.update({'plot': tid})
+                    case 'metadata':
+                        self.info_tab.update({'metadata': tid})
+                    case 'data':
+                        self.info_tab.update({'data': tid})
+                    case 'fields':
+                        self.info_tab.update({'field': tid})
+        
+        else:
+            self.info_dock.show()
+
+            self.help_mapping[self.info_dock] = 'info_tool'
 
     def open_logger(self):
         """Opens Logger dock
@@ -1595,7 +1622,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.toolButtonSaveTheme.setEnabled(True)
 
             self.StylingPage.setEnabled(True)
-            self.RegressionPage.setEnabled(True)
 
             if self.duplicate_plot_info:
                 self.add_plotwidget_to_canvas(self.duplicate_plot_info)
@@ -1697,7 +1723,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxPlotType.blockSignals(False)
 
         # set to most used plot type on selected tab
-        self.style.plot_type = self.plot_types[tab_id][self.plot_types[tab_id][0]+1]
+        self.plot_style.plot_type = self.plot_types[tab_id][self.plot_types[tab_id][0]+1]
         
         match self.plot_types[tab_id][0]:
             case 'cluster' | 'cluster score':
@@ -1715,12 +1741,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # get the current plot type
         #plot_type = self.comboBoxPlotType.currentText()
-        #self.style.set_style_widgets(plot_type=plot_type, style=self.style.plot_type[plot_type])
+        #self.plot_style.set_style_widgets(plot_type=plot_type, style=self.plot_style.plot_type[plot_type])
 
         # If canvasWindow is set to SingleView, update the plot
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv'] and update:
         # trigger update to plot
-            self.style.scheduler.schedule_update()
+            self.plot_style.scheduler.schedule_update()
 
     def open_ternary(self):
         """Executes on actionTernary
@@ -1809,7 +1835,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 return
 
         # trigger update to plot
-        self.style.scheduler.schedule_update()
+        self.plot_style.scheduler.schedule_update()
         # self.update_all_plots()
 
     def update_aspect_ratio_controls(self):
@@ -1825,14 +1851,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.lineEditResolutionNy.value = array_size[0]
 
         # trigger update to plot
-        self.style.scheduler.schedule_update()
+        self.plot_style.scheduler.schedule_update()
 
     def update_norm(self, norm, field=None):
 
         self.data[self.sample_id].update_norm(norm=norm, field=field)
 
         # trigger update to plot
-        self.style.scheduler.schedule_update()
+        self.plot_style.scheduler.schedule_update()
 
     def update_fields(self, sample_id, plot_type, field_type, field,  plot=False):
         # updates comboBoxPlotType,comboBoxColorByField and comboBoxColorField comboboxes using tree, branch and leaf
@@ -1845,11 +1871,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     self.comboBoxColorByField.setCurrentText('Calculated')
                 else:
                     self.comboBoxColorByField.setCurrentText(field_type)
-                self.style.color_by_field_callback() # added color by field callback to update color field
+                self.plot_style.color_by_field_callback() # added color by field callback to update color field
 
             if field != self.comboBoxColorField.currentText():
                 self.comboBoxColorField.setCurrentText(field)
-                self.style.color_field_callback(plot)
+                self.plot_style.color_field_callback(plot)
             
     def update_resolution(self, axis):
         """Updates DX and DY for a dataframe
@@ -1872,7 +1898,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_aspect_ratio_controls()
 
         # trigger update to plot
-        self.style.scheduler.schedule_update()
+        self.plot_style.scheduler.schedule_update()
 
     
     def change_ref_material(self, ref_val):
@@ -1963,7 +1989,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         item.setEnabled(False)
 
             # trigger update to plot
-            self.style.scheduler.schedule_update()
+            self.plot_style.scheduler.schedule_update()
         #self.update_all_plots()
 
      # for a disappearing button
@@ -2091,7 +2117,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_filter_values()
 
         # trigger update to plot
-        self.style.scheduler.schedule_update()
+        self.plot_style.scheduler.schedule_update()
         #self.show()
         
     def update_neg_handling(self, method):
@@ -2126,7 +2152,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_filter_values()
 
         # trigger update to plot
-        self.style.scheduler.schedule_update()
+        self.plot_style.scheduler.schedule_update()
 
     def update_outlier_removal(self, method):
         """Removes outliers from one or all analytes.
@@ -2290,7 +2316,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # if single view is active
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
             # trigger update to plot
-            self.style.scheduler.schedule_update()
+            self.plot_style.scheduler.schedule_update()
 
     # Field filter functions
     # -------------------------------
@@ -2709,9 +2735,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
                 # if hover within lasermap array
                 if 0 <= x_i < array.shape[1] and 0 <= y_i < array.shape[0] :
-                    if not self.cursor and not self.actionCrop.isChecked():
+                    if not self.default_cursor and not self.actionCrop.isChecked():
                         QApplication.setOverrideCursor(Qt.BlankCursor)
-                        self.cursor = True
+                        self.default_cursor = True
                     any_plot_hovered = True
                     value = array[y_i, x_i]  # assuming self.array is numpy self.array
 
@@ -2744,7 +2770,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 # break
         if not any_plot_hovered and not self.actionCrop.isChecked():
             QApplication.restoreOverrideCursor()
-            self.cursor = False
+            self.default_cursor = False
             for target, _, _ in self.lasermaps.values():
                 target.hide() # Hide crosshairs if no plot is hovered
             # hide zoom view
@@ -2867,7 +2893,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.zoomImg.setRect(0,0,x_range,y_range)
         self.zoomViewBox.setRange(zoomRect) # Set the zoom area in the image
-        self.zoomImg.setColorMap(colormap.get(self.style.cmap, source = 'matplotlib'))
+        self.zoomImg.setColorMap(colormap.get(self.plot_style.cmap, source = 'matplotlib'))
         self.zoomTarget.setPos(x, y)  # Update target position
         self.zoomTarget.show()
         self.zoomViewBox.setZValue(1e10)
@@ -2944,7 +2970,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 if 'cluster score' in data_type_dict:
                     field_list.append('Cluster score')
 
-        self.style.toggle_style_widgets()
+        self.plot_style.toggle_style_widgets()
 
         # add None to list?
         if addNone:
@@ -3117,7 +3143,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             case 'cluster performance':
                 self.cluster_performance_plot()
 
-        self.update_plot_info_tab(self.plot_info)
+        if hasattr(self,"info_dock"):
+            self.info_dock.plot_info_tab.update_plot_info_tab(self.plot_info)
 
     def add_plotwidget_to_canvas(self, plot_info, position=None):
         """Adds plot to selected view
@@ -3174,7 +3201,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.sv_widget.show()
 
             if (self.comboBoxPlotType.currentText() == 'analyte map') and (self.toolBox.currentIndex() == self.left_tab['sample']):
-                current_map_df = self.data[self.sample_id].get_map_data(plot_info['plot_name'], plot_info['field_type'], norm=self.style.cscale)
+                current_map_df = self.data[self.sample_id].get_map_data(plot_info['plot_name'], plot_info['field_type'], norm=self.plot_style.cscale)
                 self.plot_small_histogram(current_map_df)
         # add figure to MultiView canvas
         elif self.canvasWindow.currentIndex() == self.canvas_tab['mv']:
@@ -3415,14 +3442,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             reshaped_array = np.reshape(current_plot_df['array'].values, self.data[self.sample_id].array_size, order=self.data[self.sample_id].order)
 
             # add image to canvas
-            cmap = self.style.get_colormap()
+            cmap = self.plot_style.get_colormap()
             cax = canvas.axes.imshow(reshaped_array, cmap=cmap,  aspect=self.data[self.sample_id].aspect_ratio, interpolation='none')
             font = {'family': 'sans-serif', 'stretch': 'condensed', 'size': 8, 'weight': 'semibold'}
             canvas.axes.text( 0.025*self.data[self.sample_id].array_size[0],
                     0.1*self.data[self.sample_id].array_size[1],
                     analyte,
                     fontdict=font,
-                    color=self.style.overlay_color,
+                    color=self.plot_style.overlay_color,
                     ha='left', va='top' )
             canvas.axes.set_axis_off()
             canvas.fig.tight_layout()
@@ -3553,7 +3580,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             # since the canvas is moved to the dialog, the figure needs to be recreated in the main window
             # trigger update to plot        
-            self.style.scheduler.schedule_update()
+            self.plot_style.scheduler.schedule_update()
 
         if function == 'save':
             if isinstance(canvas,mplc.MplCanvas):
@@ -3618,8 +3645,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             Axes to place scalebar on.
         """        
         # add scalebar
-        direction = self.style.scale_dir
-        length = self.style.scale_length
+        direction = self.plot_style.scale_dir
+        length = self.plot_style.scale_length
         if (length is not None) and (direction != 'none'):
             if direction == 'horizontal':
                 dd = self.data[self.sample_id].dx
@@ -3628,9 +3655,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             sb = scalebar( width=length,
                     pixel_width=dd,
                     units=self.preferences['Units']['Distance'],
-                    location=self.style.scale_location,
+                    location=self.plot_style.scale_location,
                     orientation=direction,
-                    color=self.style.overlay_color,
+                    color=self.plot_style.overlay_color,
                     ax=ax )
 
             sb.create()
@@ -3654,7 +3681,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #print("add_colorbar")
         # Add a colorbar
         cbar = None
-        if self.style.cbar_dir == 'none':
+        if self.plot_style.cbar_dir == 'none':
             return
 
         # discrete colormap - plot as a legend
@@ -3668,45 +3695,45 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             for i, label in enumerate(grouplabels):
                 p[i] = Patch(facecolor=groupcolors[i], edgecolor='#111111', linewidth=0.5, label=label)
 
-            if self.style.cbar_dir == 'vertical':
+            if self.plot_style.cbar_dir == 'vertical':
                 canvas.axes.legend(
                         handles=p,
                         handlelength=1,
                         loc='upper left',
                         bbox_to_anchor=(1.025,1),
-                        fontsize=self.style.font_size,
+                        fontsize=self.plot_style.font_size,
                         frameon=False,
                         ncol=1
                     )
-            elif self.style.cbar_dir == 'horizontal':
+            elif self.plot_style.cbar_dir == 'horizontal':
                 canvas.axes.legend(
                         handles=p,
                         handlelength=1,
                         loc='upper center',
                         bbox_to_anchor=(0.5,-0.1),
-                        fontsize=self.style.font_size,
+                        fontsize=self.plot_style.font_size,
                         frameon=False,
                         ncol=3
                     )
         # continuous colormap - plot with colorbar
         else:
-            if self.style.cbar_dir == 'vertical':
+            if self.plot_style.cbar_dir == 'vertical':
                 if self.comboBoxPlotType.currentText() == 'correlation':
                     loc = 'left'
                 else:
                     loc = 'right'
                 cbar = canvas.fig.colorbar( cax,
                         ax=canvas.axes,
-                        orientation=self.style.cbar_dir,
+                        orientation=self.plot_style.cbar_dir,
                         location=loc,
                         shrink=0.62,
                         fraction=0.1,
                         alpha=1
                     )
-            elif self.style.cbar_dir == 'horizontal':
+            elif self.plot_style.cbar_dir == 'horizontal':
                 cbar = canvas.fig.colorbar( cax,
                         ax=canvas.axes,
-                        orientation=self.style.cbar_dir,
+                        orientation=self.plot_style.cbar_dir,
                         location='bottom',
                         shrink=0.62,
                         fraction=0.1,
@@ -3714,11 +3741,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     )
             else:
                 # should never reach this point
-                assert self.style.cbar_dir == 'none', "Colorbar direction is set to none, but is trying to generate anyway."
+                assert self.plot_style.cbar_dir == 'none', "Colorbar direction is set to none, but is trying to generate anyway."
                 return
 
-            cbar.set_label(self.style.clabel, size=self.style.font_size)
-            cbar.ax.tick_params(labelsize=self.style.font_size)
+            cbar.set_label(self.plot_style.clabel, size=self.plot_style.font_size)
+            cbar.ax.tick_params(labelsize=self.plot_style.font_size)
             cbar.set_alpha(1)
 
         # adjust tick marks if labels are given
@@ -3750,7 +3777,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Step 1: Normalize your data array for colormap application
         norm = colors.Normalize(vmin=np.nanmin(array), vmax=np.nanmax(array))
-        cmap = self.style.get_colormap()
+        cmap = self.plot_style.get_colormap()
 
         # Step 2: Apply the colormap to get RGB values, then normalize to [0, 255] for QImage
         rgb_array = cmap(norm(array))[:, :, :3]  # Drop the alpha channel returned by cmap
@@ -3784,12 +3811,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # set color limits
         if field not in self.data[self.sample_id].axis_dict:
-            self.style.initialize_axis_values(field_type,field)
-            self.style.set_style_widgets()
+            self.plot_style.initialize_axis_values(field_type,field)
+            self.plot_style.set_style_widgets()
 
         # get data for current map
         #scale = self.data[self.sample_id].processed_data.get_attribute(field, 'norm')
-        scale = self.style.cscale
+        scale = self.plot_style.cscale
         map_df = self.data[self.sample_id].get_map_data(field, field_type)
 
         array_size = self.data[self.sample_id].array_size
@@ -3808,17 +3835,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # plot map
         reshaped_array = np.reshape(map_df['array'].values, array_size, order=self.data[self.sample_id].order)
             
-        norm = self.style.color_norm()
+        norm = self.plot_style.color_norm()
 
-        cax = canvas.axes.imshow(reshaped_array, cmap=self.style.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
+        cax = canvas.axes.imshow(reshaped_array, cmap=self.plot_style.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
 
         self.add_colorbar(canvas, cax)
-        match self.style.cscale:
+        match self.plot_style.cscale:
             case 'linear':
-                clim = self.style.clim
+                clim = self.plot_style.clim
             case 'log':
-                clim = self.style.clim
-                #clim = np.log10(self.style.clim)
+                clim = self.plot_style.clim
+                #clim = np.log10(self.plot_style.clim)
             case 'logit':
                 print('Color limits for logit are not currently implemented')
 
@@ -3858,7 +3885,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             'field_type': field_type,
             'field': field,
             'figure': canvas,
-            'style': self.style.style_dict[self.style.plot_type],
+            'style': self.plot_style.style_dict[self.plot_style.plot_type],
             'cluster_groups': None,
             'view': [True,False],
             'position': None
@@ -3888,7 +3915,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # ----end debugging----
 
         # get data for current map
-        scale = self.style.cscale
+        scale = self.plot_style.cscale
         map_df = self.data[self.sample_id].get_map_data(field, field_type, norm=scale)
 
         # store map_df to save_data if data needs to be exported
@@ -3949,9 +3976,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         plotWindow.setMenuEnabled(False)
 
         # colorbar
-        cmap = colormap.get(self.style.cmap, source = 'matplotlib')
-        #clb,cub,cscale,clabel = self.style.get_axis_values(field_type,field)
-        # cbar = ColorBarItem(values=(clb,cub), width=25, colorMap=cmap, label=clabel, interactive=False, limits=(clb,cub), orientation=self.style.cbar_dir, pen='black')
+        cmap = colormap.get(self.plot_style.cmap, source = 'matplotlib')
+        #clb,cub,cscale,clabel = self.plot_style.get_axis_values(field_type,field)
+        # cbar = ColorBarItem(values=(clb,cub), width=25, colorMap=cmap, label=clabel, interactive=False, limits=(clb,cub), orientation=self.plot_style.cbar_dir, pen='black')
         img_item.setLookupTable(cmap.getLookupTable())
         # graphicWidget.addItem(cbar)
         pg.setConfigOption('leftButtonPan', False)
@@ -4033,7 +4060,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             'field_type': field_type,
             'field': field,
             'figure': graphicWidget,
-            'style': self.style.style_dict[self.style.plot_type],
+            'style': self.plot_style.style_dict[self.plot_style.plot_type],
             'cluster_groups': None,
             'view': tmp,
             'position': None
@@ -4056,7 +4083,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def correlation_method_callback(self):
         """Updates colorbar label for correlation plots"""
         method = self.comboBoxCorrelationMethod.currentText()
-        if self.style.clabel == method:
+        if self.plot_style.clabel == method:
             return
 
         if self.checkBoxCorrelationSquared.isChecked():
@@ -4067,28 +4094,28 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # update colorbar label for change in method
         match method:
             case 'Pearson':
-                self.style.clabel = method + "'s $r" + power + "$"
+                self.plot_style.clabel = method + "'s $r" + power + "$"
             case 'Spearman':
-                self.style.clabel = method + "'s $\\rho" + power + "$"
+                self.plot_style.clabel = method + "'s $\\rho" + power + "$"
             case 'Kendall':
-                self.style.clabel = method + "'s $\\tau" + power + "$"
+                self.plot_style.clabel = method + "'s $\\tau" + power + "$"
 
         if self.comboBoxPlotType.currentText() != 'correlation':
             self.comboBoxPlotType.setCurrentText('correlation')
-            self.style.set_style_widgets('correlation')
+            self.plot_style.set_style_widgets('correlation')
 
         # trigger update to plot
-        self.style.scheduler.schedule_update()
+        self.plot_style.scheduler.schedule_update()
 
     def correlation_squared_callback(self):
         """Produces a plot of the squared correlation."""        
         # update color limits and colorbar
         if self.checkBoxCorrelationSquared.isChecked():
-            self.style.clim = [0,1]
-            self.style.cmap = 'cmc.oslo'
+            self.plot_style.clim = [0,1]
+            self.plot_style.cmap = 'cmc.oslo'
         else:
-            self.style.clim = [-1,1]
-            self.style.cmap = 'RdBu'
+            self.plot_style.clim = [-1,1]
+            self.plot_style.cmap = 'RdBu'
 
         # update label
         if self.plot_flag:
@@ -4099,7 +4126,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.correlation_method_callback()
 
         # trigger update to plot
-        self.style.scheduler.schedule_update()
+        self.plot_style.scheduler.schedule_update()
 
     def plot_correlation(self):
         """Creates an image of the correlation matrix"""
@@ -4126,22 +4153,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         columns = correlation_matrix.columns
 
-        font = {'size':self.style.font_size}
+        font = {'size':self.plot_style.font_size}
 
         # mask lower triangular matrix to show only upper triangle
         mask = np.zeros_like(correlation_matrix, dtype=bool)
         mask[np.tril_indices_from(mask)] = True
         correlation_matrix = np.ma.masked_where(mask, correlation_matrix)
 
-        norm = self.style.color_norm()
+        norm = self.plot_style.color_norm()
 
         # plot correlation or correlation^2
         square_flag = self.checkBoxCorrelationSquared.isChecked()
         if square_flag:
-            cax = canvas.axes.imshow(correlation_matrix**2, cmap=self.style.get_colormap(), norm=norm)
+            cax = canvas.axes.imshow(correlation_matrix**2, cmap=self.plot_style.get_colormap(), norm=norm)
             canvas.array = correlation_matrix**2
         else:
-            cax = canvas.axes.imshow(correlation_matrix, cmap=self.style.get_colormap(), norm=norm)
+            cax = canvas.axes.imshow(correlation_matrix, cmap=self.plot_style.get_colormap(), norm=norm)
             canvas.array = correlation_matrix
             
         # store correlation_matrix to save_data if data needs to be exported
@@ -4156,7 +4183,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.add_colorbar(canvas, cax)
 
         # set color limits
-        cax.set_clim(self.style.clim[0], self.style.clim[1])
+        cax.set_clim(self.plot_style.clim[0], self.plot_style.clim[1])
 
         # Set tick labels
         ticks = np.arange(len(columns))
@@ -4167,14 +4194,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         canvas.axes.set_yticks(ticks, minor=False)
         canvas.axes.set_xticks(ticks, minor=False)
 
-        labels = self.style.toggle_mass(columns)
+        labels = self.plot_style.toggle_mass(columns)
 
         canvas.axes.set_xticklabels(labels, rotation=90, ha='center', va='bottom', fontproperties=font)
         canvas.axes.set_yticklabels(labels, ha='left', va='center', fontproperties=font)
 
         canvas.axes.set_title('')
 
-        self.style.update_figure_font(canvas, self.style.font)
+        self.plot_style.update_figure_font(canvas, self.plot_style.font)
 
         if square_flag:
             plot_name = method+'_squared'
@@ -4191,7 +4218,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             'field_type': None,
             'field': None,
             'figure': canvas,
-            'style': self.style.style_dict[self.style.plot_type],
+            'style': self.plot_style.style_dict[self.plot_style.plot_type],
             'cluster_groups': [],
             'view': [True,False],
             'position': [],
@@ -4208,15 +4235,27 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def histogram_field_type_callback(self):
         """"Executes when the histogram field type is changed"""
         self.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
-        if self.comboBoxPlotType.currentText() != 'histogram':
-            self.comboBoxPlotType.setCurrentText('histogram')
+        #if self.comboBoxPlotType.currentText() != 'histogram':
+        #    self.comboBoxPlotType.setCurrentText('histogram')
+        if self.comboBoxPlotType.currentText() == 'analyte map':
+            self.plot_style.color_field_type = self.comboBoxHistFieldType.currentText()
+
         self.histogram_update_bin_width()
+
+        self.spinBoxFieldIndex.setMaximum(self.comboBoxHistField.count())
+
+        self.plot_style.scheduler.schedule_update()
 
     def histogram_field_callback(self):
         """Executes when the histogram field is changed"""
-        if self.comboBoxPlotType.currentText() != 'histogram':
-            self.comboBoxPlotType.setCurrentText('histogram')
+        #if self.comboBoxPlotType.currentText() != 'histogram':
+        #    self.comboBoxPlotType.setCurrentText('histogram')
+        if self.comboBoxPlotType.currentText() == 'analyte map':
+            self.plot_style.color_field = self.comboBoxHistField.currentText()
+        self.spinBoxFieldIndex.setValue(self.comboBoxHistField.currentIndex())
         self.histogram_update_bin_width()
+
+        self.plot_style.scheduler.schedule_update()
 
     def histogram_update_bin_width(self):
         """Updates the bin width
@@ -4245,7 +4284,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # update histogram
         if self.comboBoxPlotType.currentText() == 'histogram':
             # trigger update to plot
-            self.style.scheduler.schedule_update()
+            self.plot_style.scheduler.schedule_update()
 
     def histogram_update_n_bins(self):
         """Updates the number of bins
@@ -4267,7 +4306,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # update histogram
         if self.comboBoxPlotType.currentText() == 'histogram':
             # trigger update to plot
-            self.style.scheduler.schedule_update()
+            self.plot_style.scheduler.schedule_update()
 
     def histogram_reset_bins(self):
         """Resets number of histogram bins to default
@@ -4283,7 +4322,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         if self.comboBoxPlotType.currentText() == 'histogram':
             # trigger update to plot
-            self.style.scheduler.schedule_update()
+            self.plot_style.scheduler.schedule_update()
 
     def plot_small_histogram(self, current_plot_df):
         """Creates a small histogram on the Samples and Fields tab associated with the selected map
@@ -4304,7 +4343,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Histogram
         #remove by mask and drop rows with na
         mask = self.data[self.sample_id].mask
-        if self.style.cscale == 'log' or 'logit':
+        if self.plot_style.cscale == 'log' or 'logit':
             mask = mask & current_plot_df['array'].notna() & (current_plot_df['array'] > 0)
         else:
             mask = mask & current_plot_df['array'].notna()
@@ -4313,7 +4352,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         logflag = False
         # check the analyte map cscale, the histogram needs to be the same
-        if self.style.cscale == 'log':
+        if self.plot_style.cscale == 'log':
             print('log scale')
             logflag = True
             if any(array <= 0):
@@ -4330,7 +4369,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 density=True, 
                 color='#b3b3b3', 
                 edgecolor=None, 
-                linewidth=self.style.line_width, 
+                linewidth=self.plot_style.line_width, 
                 log=logflag, 
                 alpha=0.6, 
                 label='unmasked' )
@@ -4338,15 +4377,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         _, _, patches = canvas.axes.hist(array,
                 bins=edges,
                 density=True,
-                color=self.style.marker_color,
+                color=self.plot_style.marker_color,
                 edgecolor=None,
-                linewidth=self.style.line_width,
+                linewidth=self.plot_style.line_width,
                 log=logflag,
                 alpha=0.6 )
 
         # color histogram bins by analyte colormap?
         if self.checkBoxShowHistCmap.isChecked():
-            cmap = self.style.get_colormap()
+            cmap = self.plot_style.get_colormap()
             for j, p in enumerate(patches):
                 p.set_facecolor(cmap(j / len(patches)))
 
@@ -4359,7 +4398,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Set ticks and labels labels
         canvas.axes.tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
         canvas.axes.tick_params(axis='x', which='both', bottom=True, top=False, labelbottom=True, labelsize=8)
-        canvas.axes.set_xlabel(self.style.clabel, fontdict={'size':8})
+        canvas.axes.set_xlabel(self.plot_style.clabel, fontdict={'size':8})
 
         # Size the histogram in the widget
         canvas.axes.margins(x=0)
@@ -4396,9 +4435,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             x = self.get_scatter_data('histogram', processed=True)['x']
 
         # determine edges
-        xmin,xmax,xscale,xlbl = self.style.get_axis_values(x['type'],x['field'])
-        self.style.xlim = [xmin, xmax]
-        self.style.xscale = xscale
+        xmin,xmax,xscale,xlbl = self.plot_style.get_axis_values(x['type'],x['field'])
+        self.plot_style.xlim = [xmin, xmax]
+        self.plot_style.xscale = xscale
         #if xscale == 'log':
         #    x['array'] = np.log10(x['array'])
         #    xmin = np.log10(xmin)
@@ -4416,7 +4455,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #print(edges)
 
         # histogram style
-        lw = self.style.line_width
+        lw = self.plot_style.line_width
         if lw > 0:
             htype = 'step'
         else:
@@ -4434,7 +4473,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             method = self.cluster_dict['active method']
 
             # Get the cluster labels for the data
-            cluster_color, cluster_label, _ = self.style.get_cluster_colormap(self.cluster_dict[method],alpha=self.style.marker_alpha)
+            cluster_color, cluster_label, _ = self.plot_style.get_cluster_colormap(self.cluster_dict[method],alpha=self.plot_style.marker_alpha)
             cluster_group = self.data[self.sample_id].processed_data.loc[:,method]
             clusters = self.cluster_dict[method]['selected_clusters']
 
@@ -4456,7 +4495,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                             color=bar_color, edgecolor=ecolor,
                             linewidth=lw,
                             label=cluster_label[int(i)],
-                            alpha=self.style.marker_alpha/100,
+                            alpha=self.plot_style.marker_alpha/100,
                             density=True
                         )
                 else:
@@ -4474,14 +4513,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     canvas.axes.plot(log_values, log_counts, label=cluster_label[int(i)], color=bar_color, lw=lw)
 
             # Add a legend
-            self.add_colorbar(canvas, None, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color, alpha=self.style.marker_alpha/100)
+            self.add_colorbar(canvas, None, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color, alpha=self.plot_style.marker_alpha/100)
             #canvas.axes.legend()
         else:
             clusters = None
             # Regular histogram
-            bar_color = self.style.marker_color
+            bar_color = self.plot_style.marker_color
             if htype == 'step':
-                ecolor = self.style.line_color
+                ecolor = self.plot_style.line_color
             else:
                 ecolor = None
 
@@ -4492,7 +4531,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         bins=edges,
                         color=bar_color, edgecolor=ecolor,
                         linewidth=lw,
-                        alpha=self.style.marker_alpha/100,
+                        alpha=self.plot_style.marker_alpha/100,
                         density=True
                     )
             else:
@@ -4508,14 +4547,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
                 # Plot the data
                 #canvas.axes.plot(log_values, log_counts, label=cluster_label[int(i)], color=bar_color, lw=lw)
-                canvas.axes.plot(sorted_data, counts, color=bar_color, lw=lw, alpha=self.style.marker_alpha/100)
+                canvas.axes.plot(sorted_data, counts, color=bar_color, lw=lw, alpha=self.plot_style.marker_alpha/100)
 
         # axes
         # label font
         if 'font' == '':
-            font = {'size':self.style.font}
+            font = {'size':self.plot_style.font}
         else:
-            font = {'font':self.style.font, 'size':self.style.font_size}
+            font = {'font':self.plot_style.font, 'size':self.plot_style.font_size}
 
         # set y-limits as p-axis min and max in self.data[self.sample_id].axis_dict
         if self.comboBoxHistType.currentText() != 'log-scaling' :
@@ -4529,17 +4568,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 ymin, ymax = canvas.axes.get_ylim()
                 d = {'pstatus':'auto', 'pmin':fmt.oround(ymin,order=2,toward=0), 'pmax':fmt.oround(ymax,order=2,toward=1)}
                 self.data[self.sample_id].axis_dict[x['field']].update(d)
-                self.style.set_axis_widgets('y', x['field'])
+                self.plot_style.set_axis_widgets('y', x['field'])
 
             # grab probablility axes limits
-            _, _, _, _, ymin, ymax = self.style.get_axis_values(x['type'],x['field'],ax='p')
+            _, _, _, _, ymin, ymax = self.plot_style.get_axis_values(x['type'],x['field'],ax='p')
 
             # x-axis
             canvas.axes.set_xlabel(xlbl, fontdict=font)
             if xscale == 'log':
             #    self.logax(canvas.axes, [xmin,xmax], axis='x', label=xlbl)
                 canvas.axes.set_xscale(xscale,base=10)
-            # if self.style.xscale == 'linear':
+            # if self.plot_style.xscale == 'linear':
             # else:
             #     canvas.axes.set_xlim(xmin,xmax)
             canvas.axes.set_xlim(xmin,xmax)
@@ -4557,10 +4596,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             canvas.axes.set_xlabel(r"$\log_{10}($" + f"{field}" + r"$)$", fontdict=font)
             canvas.axes.set_ylabel(r"$\log_{10}(N > \log_{10}$" + f"{field}" + r"$)$", fontdict=font)
 
-        canvas.axes.tick_params(labelsize=self.style.font_size,direction=self.style.tick_dir)
-        canvas.axes.set_box_aspect(self.style.aspect_ratio)
+        canvas.axes.tick_params(labelsize=self.plot_style.font_size,direction=self.plot_style.tick_dir)
+        canvas.axes.set_box_aspect(self.plot_style.aspect_ratio)
 
-        self.style.update_figure_font(canvas, self.style.font)
+        self.plot_style.update_figure_font(canvas, self.plot_style.font)
 
         canvas.fig.tight_layout()
 
@@ -4574,7 +4613,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             'type': self.comboBoxHistType.currentText(),
             'nbins': nbins,
             'figure': canvas,
-            'style': self.style.style_dict[self.style.plot_type],
+            'style': self.plot_style.style_dict[self.plot_style.plot_type],
             'cluster_groups': clusters,
             'view': [True,False],
             'position': [],
@@ -4598,42 +4637,42 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         match plot_type:
             case 'histogram':
                 if processed or self.comboBoxHistFieldType.currentText() != 'Analyte':
-                    scatter_dict['x'] = self.data[self.sample_id].get_vector(self.comboBoxHistFieldType.currentText(), self.comboBoxHistField.currentText(), norm=self.style.xscale)
+                    scatter_dict['x'] = self.data[self.sample_id].get_vector(self.comboBoxHistFieldType.currentText(), self.comboBoxHistField.currentText(), norm=self.plot_style.xscale)
                 else:
-                    scatter_dict['x'] = self.data[self.sample_id].get_vector(self.comboBoxHistFieldType.currentText(), self.comboBoxHistField.currentText(), norm=self.style.xscale, processed=False)
+                    scatter_dict['x'] = self.data[self.sample_id].get_vector(self.comboBoxHistFieldType.currentText(), self.comboBoxHistField.currentText(), norm=self.plot_style.xscale, processed=False)
             case 'PCA scatter' | 'PCA heatmap':
-                scatter_dict['x'] = self.data[self.sample_id].get_vector('PCA score', f'PC{self.spinBoxPCX.value()}', norm=self.style.xscale)
-                scatter_dict['y'] = self.data[self.sample_id].get_vector('PCA score', f'PC{self.spinBoxPCY.value()}', norm=self.style.yscale)
+                scatter_dict['x'] = self.data[self.sample_id].get_vector('PCA score', f'PC{self.spinBoxPCX.value()}', norm=self.plot_style.xscale)
+                scatter_dict['y'] = self.data[self.sample_id].get_vector('PCA score', f'PC{self.spinBoxPCY.value()}', norm=self.plot_style.yscale)
                 if (self.comboBoxColorByField.currentText() is None) or (self.comboBoxColorByField.currentText != ''):
                     scatter_dict['c'] = self.data[self.sample_id].get_vector(self.comboBoxColorByField.currentText(), self.comboBoxColorField.currentText())
             case _:
-                scatter_dict['x'] = self.data[self.sample_id].get_vector(self.comboBoxFieldTypeX.currentText(), self.comboBoxFieldX.currentText(), norm=self.style.xscale)
-                scatter_dict['y'] = self.data[self.sample_id].get_vector(self.comboBoxFieldTypeY.currentText(), self.comboBoxFieldY.currentText(), norm=self.style.yscale)
+                scatter_dict['x'] = self.data[self.sample_id].get_vector(self.comboBoxFieldTypeX.currentText(), self.comboBoxFieldX.currentText(), norm=self.plot_style.xscale)
+                scatter_dict['y'] = self.data[self.sample_id].get_vector(self.comboBoxFieldTypeY.currentText(), self.comboBoxFieldY.currentText(), norm=self.plot_style.yscale)
                 if (self.comboBoxColorByField.currentText() is not None) and (self.comboBoxColorByField.currentText() != ''):
-                    scatter_dict['z'] = self.data[self.sample_id].get_vector(self.comboBoxFieldTypeZ.currentText(), self.comboBoxFieldZ.currentText(), norm=self.style.zscale)
+                    scatter_dict['z'] = self.data[self.sample_id].get_vector(self.comboBoxFieldTypeZ.currentText(), self.comboBoxFieldZ.currentText(), norm=self.plot_style.zscale)
                 elif (self.comboBoxFieldZ.currentText() is not None) and (self.comboBoxFieldZ.currentText() != ''):
-                    scatter_dict['c'] = self.data[self.sample_id].get_vector(self.comboBoxColorByField.currentText(), self.comboBoxColorField.currentText(), norm=self.style.cscale)
+                    scatter_dict['c'] = self.data[self.sample_id].get_vector(self.comboBoxColorByField.currentText(), self.comboBoxColorField.currentText(), norm=self.plot_style.cscale)
 
         # set axes widgets
         if (scatter_dict['x']['field'] is not None) and (scatter_dict['y']['field'] != ''):
             if scatter_dict['x']['field'] not in self.data[self.sample_id].axis_dict.keys():
-                self.style.initialize_axis_values(scatter_dict['x']['type'], scatter_dict['x']['field'])
-                self.style.set_axis_widgets('x', scatter_dict['x']['field'])
+                self.plot_style.initialize_axis_values(scatter_dict['x']['type'], scatter_dict['x']['field'])
+                self.plot_style.set_axis_widgets('x', scatter_dict['x']['field'])
 
         if (scatter_dict['y']['field'] is not None) and (scatter_dict['y']['field'] != ''):
             if scatter_dict['y']['field'] not in self.data[self.sample_id].axis_dict.keys():
-                self.style.initialize_axis_values(scatter_dict['y']['type'], scatter_dict['y']['field'])
-                self.style.set_axis_widgets('y', scatter_dict['y']['field'])
+                self.plot_style.initialize_axis_values(scatter_dict['y']['type'], scatter_dict['y']['field'])
+                self.plot_style.set_axis_widgets('y', scatter_dict['y']['field'])
 
         if (scatter_dict['z']['field'] is not None) and (scatter_dict['z']['field'] != ''):
             if scatter_dict['z']['field'] not in self.data[self.sample_id].axis_dict.keys():
-                self.style.initialize_axis_values(scatter_dict['z']['type'], scatter_dict['z']['field'])
-                self.style.set_axis_widgets('z', scatter_dict['z']['field'])
+                self.plot_style.initialize_axis_values(scatter_dict['z']['type'], scatter_dict['z']['field'])
+                self.plot_style.set_axis_widgets('z', scatter_dict['z']['field'])
 
         if (scatter_dict['c']['field'] is not None) and (scatter_dict['c']['field'] != ''):
             if scatter_dict['c']['field'] not in self.data[self.sample_id].axis_dict.keys():
-                self.style.set_color_axis_widgets()
-                self.style.set_axis_widgets('c', scatter_dict['c']['field'])
+                self.plot_style.set_color_axis_widgets()
+                self.plot_style.set_axis_widgets('c', scatter_dict['c']['field'])
 
         return scatter_dict
 
@@ -4649,7 +4688,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             canvas within gui for plotting, by default ``None``
         """
         #print('plot_scatter')
-        plot_type = self.style.plot_type 
+        plot_type = self.plot_style.plot_type 
 
         # get data for plotting
         scatter_dict = self.get_scatter_data(plot_type)
@@ -4684,7 +4723,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         canvas.axes.margins(x=0)
 
         if plot_flag:
-            self.style.update_figure_font(canvas, self.style.font)
+            self.plot_style.update_figure_font(canvas, self.plot_style.font)
             self.clear_layout(self.widgetSingleView.layout())
             self.widgetSingleView.layout().addWidget(canvas)
 
@@ -4708,16 +4747,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         if (c['field'] is None) or (c['field'] == ''):
             # single color
-            canvas.axes.scatter(x['array'], y['array'], c=self.style.marker_color,
-                s=self.style.marker_size,
-                marker=self.style.marker_dict[self.style.marker],
+            canvas.axes.scatter(x['array'], y['array'], c=self.plot_style.marker_color,
+                s=self.plot_style.marker_size,
+                marker=self.plot_style.marker_dict[self.plot_style.marker],
                 edgecolors='none',
-                alpha=self.style.marker_alpha/100)
+                alpha=self.plot_style.marker_alpha/100)
             cb = None
             
             plot_data = pd.DataFrame(np.vstack((x['array'], y['array'])).T, columns = ['x','y'])
             
-        elif self.style.color_field_type == 'cluster':
+        elif self.plot_style.color_field_type == 'cluster':
             # color by cluster
             method = self.comboBoxColorField.currentText()
             if method not in list(self.cluster_dict.keys()):
@@ -4726,33 +4765,33 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 if 0 not in list(self.cluster_dict[method].keys()):
                     return
 
-            cluster_color, cluster_label, cmap = self.style.get_cluster_colormap(self.cluster_dict[method],alpha=self.style.marker_alpha)
+            cluster_color, cluster_label, cmap = self.plot_style.get_cluster_colormap(self.cluster_dict[method],alpha=self.plot_style.marker_alpha)
             cluster_group = self.data[self.sample_id].processed_data.loc[:,method]
             selected_clusters = self.cluster_dict[method]['selected_clusters']
 
             ind = np.isin(cluster_group, selected_clusters)
 
-            norm = self.style.color_norm(self.cluster_dict[method]['n_clusters'])
+            norm = self.plot_style.color_norm(self.cluster_dict[method]['n_clusters'])
 
             cb = canvas.axes.scatter(x['array'][ind], y['array'][ind], c=c['array'][ind],
-                s=self.style.marker_size,
-                marker=self.style.marker_dict[self.style.marker],
+                s=self.plot_style.marker_size,
+                marker=self.plot_style.marker_dict[self.plot_style.marker],
                 edgecolors='none',
                 cmap=cmap,
-                alpha=self.style.marker_alpha/100,
+                alpha=self.plot_style.marker_alpha/100,
                 norm=norm)
 
             self.add_colorbar(canvas, cb, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color)
             plot_data = pd.DataFrame(np.vstack((x['array'][ind],y['array'][ind], c['array'][ind], cluster_group[ind])).T, columns = ['x','y','c','cluster_group'])
         else:
             # color by field
-            norm = self.style.color_norm()
+            norm = self.plot_style.color_norm()
             cb = canvas.axes.scatter(x['array'], y['array'], c=c['array'],
-                s=self.style.marker_size,
-                marker=self.style.marker_dict[self.style.marker],
+                s=self.plot_style.marker_size,
+                marker=self.plot_style.marker_dict[self.plot_style.marker],
                 edgecolors='none',
-                cmap=self.style.get_colormap(),
-                alpha=self.style.marker_alpha/100,
+                cmap=self.plot_style.get_colormap(),
+                alpha=self.plot_style.marker_alpha/100,
                 norm=norm)
 
             self.add_colorbar(canvas, cb)
@@ -4760,11 +4799,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             
 
         # axes
-        xmin, xmax, xscale, xlbl = self.style.get_axis_values(x['type'],x['field'])
-        ymin, ymax, yscale, ylbl = self.style.get_axis_values(y['type'],y['field'])
+        xmin, xmax, xscale, xlbl = self.plot_style.get_axis_values(x['type'],x['field'])
+        ymin, ymax, yscale, ylbl = self.plot_style.get_axis_values(y['type'],y['field'])
 
         # labels
-        font = {'size':self.style.font_size}
+        font = {'size':self.plot_style.font_size}
         canvas.axes.set_xlabel(xlbl, fontdict=font)
         canvas.axes.set_ylabel(ylbl, fontdict=font)
 
@@ -4773,13 +4812,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         canvas.axes.set_ylim(ymin,ymax)
 
         # tick marks
-        canvas.axes.tick_params(direction=self.style.tick_dir,
-            labelsize=self.style.font_size,
+        canvas.axes.tick_params(direction=self.plot_style.tick_dir,
+            labelsize=self.plot_style.font_size,
             labelbottom=True, labeltop=False, labelleft=True, labelright=False,
             bottom=True, top=True, left=True, right=True)
 
         # aspect ratio
-        canvas.axes.set_box_aspect(self.style.aspect_ratio)
+        canvas.axes.set_box_aspect(self.plot_style.aspect_ratio)
         canvas.fig.tight_layout()
 
         if xscale == 'log':
@@ -4802,7 +4841,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             'field_type': [x['type'], y['type'], '', c['type']],
             'field': [x['field'], y['field'], '', c['field']],
             'figure': canvas,
-            'style': self.style.style_dict[self.style.plot_type],
+            'style': self.plot_style.style_dict[self.plot_style.plot_type],
             'cluster_groups': [],
             'view': [True,False],
             'position': [],
@@ -4832,15 +4871,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         if (c['field'] is None) or (c['field'] == ''):
             tp.ternscatter( x['array'], y['array'], z['array'],
-                    marker=self.style.marker_dict[self.style.marker],
-                    size=self.style.marker_size,
-                    color=self.style.marker_color,
-                    alpha=self.style.marker_alpha/100,
+                    marker=self.plot_style.marker_dict[self.plot_style.marker],
+                    size=self.plot_style.marker_size,
+                    color=self.plot_style.marker_color,
+                    alpha=self.plot_style.marker_alpha/100,
                 )
             cb = None
             plot_data = pd.DataFrame(np.vstack((x['array'],y['array'], z['array'])).T, columns = ['x','y','z'])
             
-        elif self.style.color_field_type == 'cluster':
+        elif self.plot_style.color_field_type == 'cluster':
             # color by cluster
             method = self.comboBoxColorField.currentText()
             if method not in list(self.cluster_dict.keys()):
@@ -4849,37 +4888,37 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 if 0 not in list(self.cluster_dict[method].keys()):
                     return
 
-            cluster_color, cluster_label, cmap = self.style.get_cluster_colormap(self.cluster_dict[method],alpha=self.style.marker_alpha)
+            cluster_color, cluster_label, cmap = self.plot_style.get_cluster_colormap(self.cluster_dict[method],alpha=self.plot_style.marker_alpha)
             cluster_group = self.data[self.sample_id].processed_data.loc[:,method]
             selected_clusters = self.cluster_dict[method]['selected_clusters']
 
             ind = np.isin(cluster_group, selected_clusters)
 
-            norm = self.style.color_norm(self.cluster_dict[method]['n_clusters'])
+            norm = self.plot_style.color_norm(self.cluster_dict[method]['n_clusters'])
 
             _, cb = tp.ternscatter( x['array'][ind], y['array'][ind], z['array'][ind],
                     categories=c['array'][ind],
-                    marker=self.marker_dict[self.style.marker],
-                    size=self.style.marker_size,
+                    marker=self.marker_dict[self.plot_style.marker],
+                    size=self.plot_style.marker_size,
                     cmap=cmap,
                     norm=norm,
                     labels=True,
-                    alpha=self.style.marker_alpha/100,
+                    alpha=self.plot_style.marker_alpha/100,
                     orientation='None' )
 
             self.add_colorbar(canvas, cb, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color)
             plot_data = pd.DataFrame(np.vstack((x['array'][ind],y['array'][ind], z['array'][ind], cluster_group[ind])).T, columns = ['x','y','z','cluster_group'])
         else:
             # color field
-            norm = self.style.color_norm()
+            norm = self.plot_style.color_norm()
             _, cb = tp.ternscatter(x['array'], y['array'], z['array'],
                     categories=c['array'],
-                    marker=self.style.marker_dict[self.style.marker],
-                    size=self.style.marker_size,
-                    cmap=self.style.cmap,
+                    marker=self.plot_style.marker_dict[self.plot_style.marker],
+                    size=self.plot_style.marker_size,
+                    cmap=self.plot_style.cmap,
                     norm=norm,
-                    alpha=self.style.marker_alpha/100,
-                    orientation=self.style.cbar_dir )
+                    alpha=self.plot_style.marker_alpha/100,
+                    orientation=self.plot_style.cbar_dir )
             
             if cb:
                 cb.set_label(c['label'])
@@ -4898,7 +4937,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             'field_type': [x['type'], y['type'], z['type'], c['type']],
             'field': [x['field'], y['field'], z['field'], c['field']],
             'figure': canvas,
-            'style': self.style.style_dict[self.style.plot_type],
+            'style': self.plot_style.style_dict[self.plot_style.plot_type],
             'cluster_groups': [],
             'view': [True,False],
             'position': [],
@@ -4920,16 +4959,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             Y-axis dictionary
         """
         # color by field
-        norm = self.style.color_norm()
-        h = canvas.axes.hist2d(x['array'], y['array'], bins=self.style.resolution, norm=norm, cmap=self.style.get_colormap())
+        norm = self.plot_style.color_norm()
+        h = canvas.axes.hist2d(x['array'], y['array'], bins=self.plot_style.resolution, norm=norm, cmap=self.plot_style.get_colormap())
         self.add_colorbar(canvas, h[3])
 
         # axes
-        xmin, xmax, xscale, xlbl = self.style.get_axis_values(x['type'],x['field'])
-        ymin, ymax, yscale, ylbl = self.style.get_axis_values(y['type'],y['field'])
+        xmin, xmax, xscale, xlbl = self.plot_style.get_axis_values(x['type'],x['field'])
+        ymin, ymax, yscale, ylbl = self.plot_style.get_axis_values(y['type'],y['field'])
 
         # labels
-        font = {'size':self.style.font_size}
+        font = {'size':self.plot_style.font_size}
         canvas.axes.set_xlabel(xlbl, fontdict=font)
         canvas.axes.set_ylabel(ylbl, fontdict=font)
 
@@ -4943,13 +4982,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             canvas.axes.ticklabel_format(axis='y', style=yscale)
 
         # tick marks
-        canvas.axes.tick_params(direction=self.style.tick_dir,
-                        labelsize=self.style.font_size,
+        canvas.axes.tick_params(direction=self.plot_style.tick_dir,
+                        labelsize=self.plot_style.font_size,
                         labelbottom=True, labeltop=False, labelleft=True, labelright=False,
                         bottom=True, top=True, left=True, right=True)
 
         # aspect ratio
-        canvas.axes.set_box_aspect(self.style.aspect_ratio)
+        canvas.axes.set_box_aspect(self.plot_style.aspect_ratio)
 
         if xscale == 'log':
             canvas.axes.set_xscale(xscale,base=10)
@@ -4970,7 +5009,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             'field_type': [x['type'], y['type'], '', ''],
             'field': [x['field'], y['field'], '', ''],
             'figure': canvas,
-            'style': self.style.style_dict[self.style.plot_type],
+            'style': self.plot_style.style_dict[self.plot_style.plot_type],
             'cluster_groups': [],
             'view': [True,False],
             'position': [],
@@ -5001,12 +5040,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if (c['field'] is None) or (c['field'] == ''):
             tp = ternary(canvas.axes, labels, 'heatmap')
 
-            norm = self.style.color_norm()
+            norm = self.plot_style.color_norm()
             hexbin_df, cb = tp.ternhex(a=x['array'], b=y['array'], c=z['array'],
-                bins=self.style.resolution,
+                bins=self.plot_style.resolution,
                 plotfield='n',
-                cmap=self.style.cmap,
-                orientation=self.style.cbar_dir,
+                cmap=self.plot_style.cmap,
+                orientation=self.plot_style.cbar_dir,
                 norm=norm)
 
             if cb is not None:
@@ -5018,11 +5057,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # for idx, ax in enumerate(axs):
             #     tps[idx] = ternary(ax, labels, 'heatmap')
 
-            # hexbin_df = ternary.ternhex(a=x['array'], b=y['array'], c=z['array'], val=c['array'], bins=self.style.resolution)
+            # hexbin_df = ternary.ternhex(a=x['array'], b=y['array'], c=z['array'], val=c['array'], bins=self.plot_style.resolution)
 
             # cb.set_label(c['label'])
 
-            # #tp.ternhex(hexbin_df=hexbin_df, plotfield='n', cmap=self.style.cmap, orientation='vertical')
+            # #tp.ternhex(hexbin_df=hexbin_df, plotfield='n', cmap=self.plot_style.cmap, orientation='vertical')
 
         plot_name = f"{x['field']}_{y['field']}_{z['field']}_{'heatmap'}"
         self.plot_info = {
@@ -5033,7 +5072,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             'field_type': [x['type'], y['type'], z['type'], ''],
             'field': [x['field'], y['field'], z['field'], ''],
             'figure': canvas,
-            'style': self.style.style_dict[self.style.plot_type],
+            'style': self.plot_style.style_dict[self.plot_style.plot_type],
             'cluster_groups': [],
             'view': [True,False],
             'position': [],
@@ -5044,7 +5083,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """Creates map colored by ternary coordinate positions"""
         if self.comboBoxPlotType.currentText() != 'ternary map':
             self.comboBoxPlotType.setCurrentText('ternary map')
-            self.style.set_style_widgets('ternary map')
+            self.plot_style.set_style_widgets('ternary map')
 
         canvas = mplc.MplCanvas(sub=121,parent=self)
 
@@ -5078,9 +5117,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.add_scalebar(canvas.axes)
 
         grid = None
-        if self.style.cbar_dir == 'vertical':
+        if self.plot_style.cbar_dir == 'vertical':
             grid = gs.GridSpec(5,1)
-        elif self.style.cbar_dir == 'horizontal':
+        elif self.plot_style.cbar_dir == 'horizontal':
             grid = gs.GridSpec(1,5)
         else:
             self.clear_layout(self.widgetSingleView.layout())
@@ -5116,7 +5155,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 ''],
             'field': [afield, bfield, cfield, ''],
             'figure': canvas,
-            'style': self.style.style_dict[self.style.plot_type],
+            'style': self.plot_style.style_dict[self.plot_style.plot_type],
             'cluster_groups': [],
             'view': [True,False],
             'position': [],
@@ -5144,7 +5183,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # compute pca scores
         pca_scores = pd.DataFrame(self.pca_results.fit_transform(df_scaled), columns=[f'PC{i+1}' for i in range(self.pca_results.n_components_)])
-        self.style.clim = [np.amin(self.pca_results.components_), np.amax(self.pca_results.components_)]
+        self.plot_style.clim = [np.amin(self.pca_results.components_), np.amax(self.pca_results.components_)]
 
         # Add PCA scores to DataFrame for easier plotting
         self.data[self.sample_id].add_columns('pca score',pca_scores.columns,pca_scores.values,self.data[self.sample_id].mask)
@@ -5226,7 +5265,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 print(f'Unknown PCA plot type: {plot_type}')
                 return
 
-        self.style.update_figure_font(canvas, self.style.font)
+        self.plot_style.update_figure_font(canvas, self.plot_style.font)
 
         self.plot_info = {
             'tree': 'Multidimensional Analysis',
@@ -5236,7 +5275,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             'field_type':self.comboBoxColorByField.currentText(),
             'field':  self.comboBoxColorField.currentText(),
             'figure': canvas,
-            'style': self.style.style_dict[self.style.plot_type],
+            'style': self.plot_style.style_dict[self.plot_style.plot_type],
             'cluster_groups': [],
             'view': [True,False],
             'position': [],
@@ -5262,32 +5301,32 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         cumulative_variances = variances.cumsum()  # Calculate cumulative explained variance
 
         # Plotting the explained variance
-        canvas.axes.plot(n_components, variances, linestyle='-', linewidth=self.style.line_width,
-            marker=self.style.marker_dict[self.style.marker], markeredgecolor=self.style.marker_color, markerfacecolor='none', markersize=self.style.marker_size,
-            color=self.style.marker_color, label='Explained Variance')
+        canvas.axes.plot(n_components, variances, linestyle='-', linewidth=self.plot_style.line_width,
+            marker=self.plot_style.marker_dict[self.plot_style.marker], markeredgecolor=self.plot_style.marker_color, markerfacecolor='none', markersize=self.plot_style.marker_size,
+            color=self.plot_style.marker_color, label='Explained Variance')
 
         # Plotting the cumulative explained variance
-        canvas.axes.plot(n_components, cumulative_variances, linestyle='-', linewidth=self.style.line_width,
-            marker=self.style.marker_dict[self.style.marker], markersize=self.style.marker_size,
-            color=self.style.marker_color, label='Cumulative Variance')
+        canvas.axes.plot(n_components, cumulative_variances, linestyle='-', linewidth=self.plot_style.line_width,
+            marker=self.plot_style.marker_dict[self.plot_style.marker], markersize=self.plot_style.marker_size,
+            color=self.plot_style.marker_color, label='Cumulative Variance')
 
         # Adding labels, title, and legend
         xlbl = 'Principal Component'
         ylbl = 'Variance Ratio'
 
-        canvas.axes.legend(fontsize=self.style.font_size)
+        canvas.axes.legend(fontsize=self.plot_style.font_size)
 
         # Adjust the y-axis limit to make sure the plot includes all markers and lines
         canvas.axes.set_ylim([0, 1.0])  # Assuming variance ratios are between 0 and 1
 
         # labels
-        font = {'size':self.style.font_size}
+        font = {'size':self.plot_style.font_size}
         canvas.axes.set_xlabel(xlbl, fontdict=font)
         canvas.axes.set_ylabel(ylbl, fontdict=font)
 
         # tick marks
-        canvas.axes.tick_params(direction=self.style.tick_dir,
-            labelsize=self.style.font_size,
+        canvas.axes.tick_params(direction=self.plot_style.tick_dir,
+            labelsize=self.plot_style.font_size,
             labelbottom=True, labeltop=False, labelleft=True, labelright=False,
             bottom=True, top=True, left=True, right=True)
 
@@ -5295,7 +5334,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         canvas.axes.set_xticks(n_components, minor=True)
 
         # aspect ratio
-        canvas.axes.set_box_aspect(self.style.aspect_ratio)
+        canvas.axes.set_box_aspect(self.plot_style.aspect_ratio)
         
         plot_data = pd.DataFrame(np.vstack((n_components, variances, cumulative_variances)).T, columns = ['Components','Variance','Cumulative Variance'])
         return canvas, plot_data
@@ -5319,22 +5358,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         n_components = components.shape[0]
         n_variables = components.shape[1]
 
-        norm = self.style.color_norm()
-        cax = canvas.axes.imshow(components, cmap=self.style.get_colormap(), aspect=1.0, norm=norm)
+        norm = self.plot_style.color_norm()
+        cax = canvas.axes.imshow(components, cmap=self.plot_style.get_colormap(), aspect=1.0, norm=norm)
         canvas.array = components
 
         # Add a colorbar
         self.add_colorbar(canvas, cax)
-        # if self.style.cbar_dir == 'vertical':
-        #     cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=self.style.cbar_dir, location='right', shrink=0.62, fraction=0.1)
-        #     cbar.set_label('PCA score', size=self.style.font_size)
-        #     cbar.ax.tick_params(labelsize=self.style.font_size)
-        # elif self.style.cbar_dir == 'horizontal':
-        #     cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=self.style.cbar_dir, location='bottom', shrink=0.62, fraction=0.1)
-        #     cbar.set_label('PCA score', size=self.style.font_size)
-        #     cbar.ax.tick_params(labelsize=self.style.font_size)
+        # if self.plot_style.cbar_dir == 'vertical':
+        #     cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=self.plot_style.cbar_dir, location='right', shrink=0.62, fraction=0.1)
+        #     cbar.set_label('PCA score', size=self.plot_style.font_size)
+        #     cbar.ax.tick_params(labelsize=self.plot_style.font_size)
+        # elif self.plot_style.cbar_dir == 'horizontal':
+        #     cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=self.plot_style.cbar_dir, location='bottom', shrink=0.62, fraction=0.1)
+        #     cbar.set_label('PCA score', size=self.plot_style.font_size)
+        #     cbar.ax.tick_params(labelsize=self.plot_style.font_size)
         # else:
-        #     cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=self.style.cbar_dir, location='bottom', shrink=0.62, fraction=0.1)
+        #     cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=self.plot_style.cbar_dir, location='bottom', shrink=0.62, fraction=0.1)
 
 
         xlbl = 'Principal Components'
@@ -5343,18 +5382,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # plt.xticks(rotation=45)
 
         # labels
-        font = {'size':self.style.font_size}
+        font = {'size':self.plot_style.font_size}
         canvas.axes.set_xlabel(xlbl, fontdict=font)
 
         # tickmarks and labels
-        canvas.axes.tick_params(labelsize=self.style.font_size)
-        canvas.axes.tick_params(axis='x', direction=self.style.tick_dir,
-                        labelsize=self.style.font_size,
+        canvas.axes.tick_params(labelsize=self.plot_style.font_size)
+        canvas.axes.tick_params(axis='x', direction=self.plot_style.tick_dir,
+                        labelsize=self.plot_style.font_size,
                         labelbottom=False, labeltop=True,
                         bottom=True, top=True)
 
-        canvas.axes.tick_params(axis='y', length=0, direction=self.style.tick_dir,
-                        labelsize=self.style.font_size,
+        canvas.axes.tick_params(axis='y', length=0, direction=self.plot_style.tick_dir,
+                        labelsize=self.plot_style.font_size,
                         labelleft=True, labelright=False,
                         left=True, right=True)
 
@@ -5364,7 +5403,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         #ax.set_yticks(n_components, labels=[f'Var{i+1}' for i in range(len(n_components))])
         canvas.axes.set_yticks(range(0, n_variables,1), minor=False)
-        canvas.axes.set_yticklabels(self.style.toggle_mass(analytes), ha='right', va='center')
+        canvas.axes.set_yticklabels(self.plot_style.toggle_mass(analytes), ha='right', va='center')
 
         canvas.fig.tight_layout()
         plot_data = pd.DataFrame(components, columns = list(map(str, range(n_variables))))
@@ -5382,7 +5421,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             ``MainWindow.plot_pca_vectors``
         """
         #print('plot_pca_components')
-        if self.style.line_width == 0:
+        if self.plot_style.line_width == 0:
             return
 
         # field labels
@@ -5397,23 +5436,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         y = self.pca_results.components_[:,pc_y]
 
         # mulitiplier for scale
-        m = self.style.line_multiplier #np.min(np.abs(np.sqrt(x**2 + y**2)))
+        m = self.plot_style.line_multiplier #np.min(np.abs(np.sqrt(x**2 + y**2)))
 
         # arrows
-        canvas.axes.quiver(np.zeros(nfields), np.zeros(nfields), m*x, m*y, color=self.style.line_color,
+        canvas.axes.quiver(np.zeros(nfields), np.zeros(nfields), m*x, m*y, color=self.plot_style.line_color,
             angles='xy', scale_units='xy', scale=1, # arrow angle and scale set relative to the data
-            linewidth=self.style.line_width, headlength=2, headaxislength=2) # arrow properties
+            linewidth=self.plot_style.line_width, headlength=2, headaxislength=2) # arrow properties
 
         # labels
         for i, analyte in enumerate(analytes):
             if x[i] > 0 and y[i] > 0:
-                canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='left', va='bottom', color=self.style.line_color)
+                canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='left', va='bottom', color=self.plot_style.line_color)
             elif x[i] < 0 and y[i] > 0:
-                canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='left', va='top', color=self.style.line_color)
+                canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='left', va='top', color=self.plot_style.line_color)
             elif x[i] > 0 and y[i] < 0:
-                canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='right', va='bottom', color=self.style.line_color)
+                canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='right', va='bottom', color=self.plot_style.line_color)
             elif x[i] < 0 and y[i] < 0:
-                canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='right', va='top', color=self.style.line_color)
+                canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='right', va='top', color=self.plot_style.line_color)
 
         plot_data = pd.DataFrame(np.vstack((x,y)).T, columns = ['PC x', 'PC Y'])
         return plot_data
@@ -5444,7 +5483,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         reshaped_array = np.reshape(self.data[self.sample_id].processed_data[field].values, self.data[self.sample_id].array_size, order=self.data[self.sample_id].order)
 
-        cax = canvas.axes.imshow(reshaped_array, cmap=self.style.cmap, aspect=self.data[self.sample_id].aspect_ratio, interpolation='none')
+        cax = canvas.axes.imshow(reshaped_array, cmap=self.plot_style.cmap, aspect=self.data[self.sample_id].aspect_ratio, interpolation='none')
         canvas.array = reshaped_array
 
          # Add a colorbar
@@ -5480,13 +5519,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         n_clusters = len(np.unique(groups))
 
-        cluster_color, cluster_label, cmap = self.style.get_cluster_colormap(self.cluster_dict[method], alpha=self.style.marker_alpha)
+        cluster_color, cluster_label, cmap = self.plot_style.get_cluster_colormap(self.cluster_dict[method], alpha=self.plot_style.marker_alpha)
 
         #boundaries = np.arange(-0.5, n_clusters, 1)
         #norm = colors.BoundaryNorm(boundaries, cmap.N, clip=True)
-        norm = self.style.color_norm(n_clusters)
+        norm = self.plot_style.color_norm(n_clusters)
 
-        #cax = canvas.axes.imshow(self.array.astype('float'), cmap=self.style.cmap, norm=norm, aspect = self.data[self.sample_id].aspect_ratio)
+        #cax = canvas.axes.imshow(self.array.astype('float'), cmap=self.plot_style.cmap, norm=norm, aspect = self.data[self.sample_id].aspect_ratio)
         cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect=self.data[self.sample_id].aspect_ratio)
         canvas.array = reshaped_array
         #cax.cmap.set_under(style['Scale']['OverlayColor'])
@@ -5556,43 +5595,43 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Plot inertia
         canvas = mplc.MplCanvas(parent=self)
 
-        canvas.axes.plot(range(1, max_clusters+1), inertia, linestyle='-', linewidth=self.style.line_width,
-            marker=self.style.marker_dict[self.style.marker], markeredgecolor=self.style.marker_color, markerfacecolor='none', markersize=self.style.marker_size,
-            color=self.style.marker_color, label='Inertia')
+        canvas.axes.plot(range(1, max_clusters+1), inertia, linestyle='-', linewidth=self.plot_style.line_width,
+            marker=self.plot_style.marker_dict[self.plot_style.marker], markeredgecolor=self.plot_style.marker_color, markerfacecolor='none', markersize=self.plot_style.marker_size,
+            color=self.plot_style.marker_color, label='Inertia')
 
         # Plotting the cumulative explained variance
 
         canvas.axes.set_xlabel('Number of clusters')
-        canvas.axes.set_ylabel('Inertia', color=self.style.marker_color)
-        canvas.axes.tick_params(axis='y', labelcolor=self.style.marker_color)
+        canvas.axes.set_ylabel('Inertia', color=self.plot_style.marker_color)
+        canvas.axes.tick_params(axis='y', labelcolor=self.plot_style.marker_color)
         canvas.axes.set_title(f'Cluster performance: {method}')
         #canvas.axes.axvline(x=optimal_k, linestyle='--', color='m', label=f'Elbow at k={optimal_k}')
 
         # aspect ratio
-        canvas.axes.set_box_aspect(self.style.aspect_ratio)
+        canvas.axes.set_box_aspect(self.plot_style.aspect_ratio)
 
         # Create a secondary y-axis to plot the second derivative
         canvas.axes2 = canvas.axes.twinx()
-        canvas.axes2.plot(range(2, max_clusters), second_derivative, linestyle='-', linewidth=self.style.line_width,
-            marker=self.style.marker_dict[self.style.marker], markersize=self.style.marker_size,
+        canvas.axes2.plot(range(2, max_clusters), second_derivative, linestyle='-', linewidth=self.plot_style.line_width,
+            marker=self.plot_style.marker_dict[self.plot_style.marker], markersize=self.plot_style.marker_size,
             color='r', label='3nd Derivative')
 
         canvas.axes2.set_ylabel('2nd Derivative', color='r')
         canvas.axes2.tick_params(axis='y', labelcolor='r')
 
         # aspect ratio
-        canvas.axes2.set_box_aspect(self.style.aspect_ratio)
+        canvas.axes2.set_box_aspect(self.plot_style.aspect_ratio)
 
         canvas.axes3 = canvas.axes.twinx()
-        canvas.axes3.plot(range(1, max_clusters+1), silhouette_scores, linestyle='-', linewidth=self.style.line_width,
-            marker=self.style.marker_dict[self.style.marker], markeredgecolor='orange', markerfacecolor='none', markersize=self.style.marker_size,
+        canvas.axes3.plot(range(1, max_clusters+1), silhouette_scores, linestyle='-', linewidth=self.plot_style.line_width,
+            marker=self.plot_style.marker_dict[self.plot_style.marker], markeredgecolor='orange', markerfacecolor='none', markersize=self.plot_style.marker_size,
             color='orange', label='Silhouette Scores')
 
         canvas.axes3.spines['right'].set_position(('outward', 60))  # Move it outward by 60 points
         canvas.axes3.set_ylabel('Silhouette score', color='orange')
         canvas.axes3.tick_params(axis='y', labelcolor='orange')
 
-        canvas.axes3.set_box_aspect(self.style.aspect_ratio)
+        canvas.axes3.set_box_aspect(self.plot_style.aspect_ratio)
 
 
         #print(f"Second derivative of inertia: {second_derivative}")
@@ -5610,7 +5649,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             'field_type':self.comboBoxColorByField.currentText(),
             'field':  self.comboBoxColorField.currentText(),
             'figure': canvas,
-            'style': self.style.style_dict[self.style.plot_type],
+            'style': self.plot_style.style_dict[self.plot_style.plot_type],
             'cluster_groups': self.cluster_dict[method],
             'view': [True,False],
             'position': [],
@@ -5782,7 +5821,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 print(f'Unknown PCA plot type: {plot_type}')
                 return
 
-        self.style.update_figure_font(canvas, self.style.font)
+        self.plot_style.update_figure_font(canvas, self.plot_style.font)
 
         self.plot_info = {
             'tree': 'Multidimensional Analysis',
@@ -5792,7 +5831,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             'field_type':self.comboBoxColorByField.currentText(),
             'field':  self.comboBoxColorField.currentText(),
             'figure': canvas,
-            'style': self.style.style_dict[self.style.plot_type],
+            'style': self.plot_style.style_dict[self.plot_style.plot_type],
             'cluster_groups': self.cluster_dict[method],
             'view': [True,False],
             'position': [],
@@ -5811,7 +5850,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.update_cluster_flag = True
         # trigger update to plot
-        self.style.scheduler.schedule_update()
+        self.plot_style.scheduler.schedule_update()
 
     def cluster_distance_callback(self):
         """Updates cluster dictionary with the new distance metric
@@ -5822,7 +5861,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.update_cluster_flag = True
         # trigger update to plot
-        self.style.scheduler.schedule_update()
+        self.plot_style.scheduler.schedule_update()
 
     def cluster_exponent_callback(self):
         """Updates cluster dictionary with the new exponent
@@ -5833,7 +5872,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.update_cluster_flag = True
         # trigger update to plot
-        self.style.scheduler.schedule_update()
+        self.plot_style.scheduler.schedule_update()
     
     def cluster_seed_callback(self):
         """Updates cluster dictionary with the new exponent
@@ -5844,7 +5883,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.update_cluster_flag = True
         # trigger update to plot
-        self.style.scheduler.schedule_update()
+        self.plot_style.scheduler.schedule_update()
 
     def generate_random_seed(self):
         """Generates a random seed for clustering
@@ -5857,7 +5896,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.update_cluster_flag = True
         # trigger update to plot
-        self.style.scheduler.schedule_update()
+        self.plot_style.scheduler.schedule_update()
 
     def cluster_method_callback(self):
         """Updates clustering-related widgets
@@ -5918,7 +5957,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.lineEditSeed.value = self.cluster_dict[method]['seed']
 
         if self.update_cluster_flag:
-            self.style.scheduler.schedule_update()
+            self.plot_style.scheduler.schedule_update()
 
     def update_clusters(self):
         """Executed on update to cluster table.
@@ -5945,7 +5984,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # update plot
             if (self.comboBoxPlotType.currentText() not in ['cluster', 'cluster score']) and (self.comboBoxColorByField.currentText() == 'cluster'):
                 # trigger update to plot
-                self.style.scheduler.schedule_update()
+                self.plot_style.scheduler.schedule_update()
 
     # 4. Davies-Bouldin Index
     # The Davies-Bouldin Index (DBI) measures the ratio of within-cluster scatter to between-cluster separation. Lower values indicate better clustering.
@@ -5995,14 +6034,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         df_filtered, _  = self.data[self.sample_id].get_processed_data()
 
-        match self.comboBoxNorm.currentText():
-            case 'log':
-                df_filtered.loc[:,:] = 10**df_filtered.values
-            case 'mixed':
-                pass
-            case 'linear':
-                # do nothing
-                pass
+        # match self.comboBoxNorm.currentText():
+        #     case 'log':
+        #         df_filtered.loc[:,:] = 10**df_filtered.values
+        #     case 'mixed':
+        #         pass
+        #     case 'linear':
+        #         # do nothing
+        #         pass
         df_filtered = df_filtered[self.data[self.sample_id].mask]
 
         ref_i = self.comboBoxNDimRefMaterial.currentIndex()
@@ -6026,12 +6065,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             angle = 45
         else:
             angle = 0
-        labels = self.style.toggle_mass(self.ndim_list)
+        labels = self.plot_style.toggle_mass(self.ndim_list)
             
         if self.comboBoxColorByField.currentText() == 'cluster' and self.comboBoxColorField.currentText() != '':
             method = self.comboBoxColorField.currentText()
             cluster_dict = self.cluster_dict[method]
-            cluster_color, cluster_label, cmap = self.style.get_cluster_colormap(cluster_dict, alpha=self.style.marker_alpha)
+            cluster_color, cluster_label, cmap = self.plot_style.get_cluster_colormap(cluster_dict, alpha=self.plot_style.marker_alpha)
 
             clusters = cluster_dict['selected_clusters']
             if 0 in list(cluster_dict.keys()):
@@ -6121,7 +6160,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             plot_name = f"{plot_type}_all"
 
-        self.style.update_figure_font(canvas, self.style.font)
+        self.plot_style.update_figure_font(canvas, self.plot_style.font)
 
         self.plot_info = {
             'tree': 'Geochemistry',
@@ -6131,7 +6170,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             'field_type': 'analyte',
             'field': self.ndim_list,
             'figure': canvas,
-            'style': self.style.style_dict[self.style.plot_type],
+            'style': self.plot_style.style_dict[self.plot_style.plot_type],
             'cluster_groups': cluster_dict,
             'view': [True,False],
             'position': [],
@@ -6269,12 +6308,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     self.tableWidgetViewGroups.setRowCount(len(clusters)-1)
                     self.spinBoxClusterGroup.setMaximum(len(clusters)-1)
 
-                    hexcolor = self.style.set_default_cluster_colors(mask=True)
+                    hexcolor = self.plot_style.set_default_cluster_colors(mask=True)
                 else:
                     self.tableWidgetViewGroups.setRowCount(len(clusters))
                     self.spinBoxClusterGroup.setMaximum(len(clusters))
 
-                    hexcolor = self.style.set_default_cluster_colors(mask=False)
+                    hexcolor = self.plot_style.set_default_cluster_colors(mask=False)
 
                 for c in clusters:
                     if c == 99:
@@ -6288,7 +6327,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     self.isUpdatingTable = True
                     self.tableWidgetViewGroups.setItem(c, 0, QTableWidgetItem(cluster_name))
                     self.tableWidgetViewGroups.setItem(c, 1, QTableWidgetItem(''))
-                    # colors in table are set by self.style.set_default_cluster_colors()
+                    # colors in table are set by self.plot_style.set_default_cluster_colors()
                     #self.tableWidgetViewGroups.setItem(i, 2, QTableWidgetItem(cluster_color))
                     self.tableWidgetViewGroups.selectRow(c)
                     
@@ -6341,7 +6380,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             # update plot with new cluster name
             # trigger update to plot
-            self.style.scheduler.schedule_update()
+            self.plot_style.scheduler.schedule_update()
 
     def toggle_color_widgets(self, switch):
         """Toggles enabled state of color related widgets
@@ -6443,6 +6482,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
         self.spinBoxColorField.setMinimum(0)
         self.spinBoxColorField.setMaximum(self.comboBoxColorField.count() - 1)
+        self.spinBoxFieldIndex.setMinimum(0)
+        self.spinBoxFieldIndex.setMaximum(self.comboBoxHistField.count() - 1)
         self.check_analysis = False
 
     def update_spinboxes(self, field, field_type='Analyte'):
@@ -6523,56 +6564,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.setCursor(Qt.ArrowCursor)
 
 
-    # -------------------------------
-    # Plot Info Tab functions
-    # -------------------------------
-    def update_plot_info_tab(self, plot_info, write_info=True, level=0):
-        """Prints plot info in the information tab
-        
-        Prints ``plot_info`` into the bottom information tab ``MainWindow.textEditPlotInfo``.
-
-        Parameters
-        ----------
-        plot_info : dict
-            Plot information dictionary.
-        write_info : bool
-            Flag to write dictionary contents when ``True``. When calling ``update_plot_info`` is used
-            recursively to handle dictionaries within dictionaries, the flag is set to ``False``. By default ``True``
-        level : int
-            Indent level, by default ``0``
-
-        Returns
-        -------
-        str
-            When called recursively, a string is returned
-        """
-        content = ''
-        if level > 0:
-            indent = '&nbsp;'*(4*level)
-        else:
-            indent = ''
-
-        for key, value in plot_info.items():
-            if isinstance(value,str):
-                if value == '':
-                    content += f"{indent}<b>{key}:</b> ''<br>"
-                else:
-                    content += f"{indent}<b>{key}:</b> {value}<br>"
-            elif isinstance(value,list) | isinstance(value,int) | isinstance(value,float):
-                content += f"{indent}<b>{key}:</b> {value}<br>"
-            elif isinstance(value,dict):
-                content += f"{indent}<b>{key}:</b><br>"
-                content += self.update_plot_info_tab(value, write_info=False, level=level+1)
-            elif value is None:
-                content += f"{indent}<b>{key}:</b> None<br>"
-            else:
-                content += f"{indent}<b>{key}:</b> {str(type(value))}<br>"
-            
-        if write_info: 
-            self.textEditPlotInfo.clear()
-            self.textEditPlotInfo.setText(content)
-        else:
-            return content
 
 
     # -------------------------------
@@ -6636,7 +6627,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if 'cluster score' in data_type_dict:
             field_type_list.append('Cluster score')
         
-        self.workflow.update_field_type_list(field_type_list) #invoke workflow function to update blockly 'fieldType' dropdowns
+        if hasattr(self, "workflow"):
+            self.workflow.update_field_type_list(field_type_list) #invoke workflow function to update blockly 'fieldType' dropdowns
 
     def update_blockly_analyte_dropdown(self,filename, unsaved_changes):
         """update analyte/ratio lists dropdown with the selected analytes/ratios

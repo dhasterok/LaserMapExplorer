@@ -743,6 +743,7 @@ class Styling():
     def clabel(self, label):
         if label is None or isinstance(label, str):
             self.style_dict[self._plot_type]['CLabel'] = label
+            self.parent.lineEditCbarLabel.setText(label)
         else:
             raise TypeError("label must be of type str or None.")
 
@@ -2818,6 +2819,9 @@ class Styling():
             if plot_type not in ['correlation']:
                 self.style_dict[plot_type]['CLim'] = [data.axis_dict[field]['min'], data.axis_dict[field]['max']]
                 self.style_dict[plot_type]['CLabel'] = data.axis_dict[field]['label']
+
+                self.clim = [data.axis_dict[field]['min'], data.axis_dict[field]['max']]
+                self.clabel = data.axis_dict[field]['label']
         else:
             parent.lineEditCbarLabel.setText('')
 

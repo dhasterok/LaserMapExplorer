@@ -75,7 +75,7 @@ from src.common.colorfunc import get_hex_color, get_rgb_color
 import src.app.config as config
 from src.app.help_mapping import create_help_mapping
 from src.common.Logger import LoggerDock
-from common.Calculator import CalculatorDock
+from src.common.Calculator import CalculatorDock
 from src.common.varfunc import ObservableDict
 
 # to prevent segmentation error at startup
@@ -430,7 +430,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.plot_types = {self.left_tab['sample']: [0, 'analyte map', 'histogram', 'correlation'],
             self.left_tab['process']: [0, 'analyte map', 'gradient map'],
             self.left_tab['spot']: [0, 'analyte map', 'gradient map'],
-            self.mask_tab['polygon']: [0, 'analyte map'],
+            # self.mask_tab['polygon']: [0, 'analyte map'],
             self.left_tab['scatter']: [0, 'scatter', 'heatmap', 'ternary map'],
             self.left_tab['ndim']: [0, 'TEC', 'Radar'],
             self.left_tab['multidim']: [0, 'variance','vectors','PCA scatter','PCA heatmap','PCA score'],
@@ -3098,7 +3098,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 if not field_type or not field or (field_type == '') or (field == ''):
                     return
 
-                if self.toolBox.currentIndex() == self.mask_tab['polygon'] or (hasattr(self, "profile_dock") and self.profile_dock.actionControlPoints.isChecked()):
+                if (self.dockWidgetMaskToolbox.isVisible() and self.tabWidgetMask.currentIndex() == self.mask_tab['polygon']) or (hasattr(self, "profile_dock") and self.profile_dock.actionControlPoints.isChecked()):
                     self.plot_map_pg(sample_id, field_type, field)
                     # show created profiles if exists
                     if self.toolBox.currentIndex() == hasattr(self,"profile_dock") and (self.sample_id in self.profile_dock.profiling.profiles):
@@ -3765,11 +3765,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def array_to_image(self, map_df):
         """Prepares map for display by converting to RGBA image
 
-        :param map_df: contains map data to convert
-        :type map_df: pandas.DataFrame
+        Parameters
+        ----------
+        map_df : pandas.DataFrame
+            Map data to convert
 
-        :returns: an rgba array
-        :rtype: numpy.ndarray
+        Returns
+        -------
+        numpy.ndarray
+            An rgba array
         """
         mask = self.data[self.sample_id].mask
 

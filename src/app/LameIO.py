@@ -193,7 +193,7 @@ class LameIO():
                 # Saving data to the directory structure
                 data_dict = {
                     'data': parent.data,
-                    'styles': parent.styles,
+                    'styles': parent.plot_style,
                     'plot_infos': parent.plot_tree.get_plot_info_from_tree(parent.treeModel),
                     'sample_id': parent.sample_id,
                     'sample_ids': parent.sample_ids
@@ -265,7 +265,7 @@ class LameIO():
                         data_dict = pickle.load(file)
                     if data_dict:
                         parent.data = data_dict['data']
-                        parent.styles = data_dict['styles']
+                        parent.plot_style = data_dict['styles']
                         parent.sample_ids = data_dict['sample_ids']
                         parent.sample_id = data_dict['sample_id']
                         
@@ -315,11 +315,11 @@ class LameIO():
                             parent.polygon.load_polygons(project_dir, sample_id)
 
                         # Plot first analyte as lasermap
-                        parent.styles['analyte map']['Colors']['ColorByField'] = 'Analyte'
-                        parent.comboBoxColorByField.setCurrentText(parent.styles['analyte map']['Colors']['ColorByField'])
+                        parent.plot_style.color_field_type = 'Analyte'
+                        parent.comboBoxColorByField.setCurrentText(parent.plot_style.color_field_type)
                         parent.color_by_field_callback()
                         fields = parent.get_field_list('Analyte')
-                        parent.styles['analyte map']['Colors']['Field'] = fields[0]
+                        parent.plot_style.color_field = fields[0]
                         parent.comboBoxColorField.setCurrentText(fields[0])
                         parent.color_field_callback()
 
@@ -357,8 +357,8 @@ class LameIO():
             self.parent.canvasWindow.setCurrentIndex(self.parent.canvas_tab['sv'])
             self.parent.change_sample(0)
             self.parent.init_tabs()
-            self.parent.profiling.add_samples()
-            self.parent.polygon.add_samples()
+            # self.parent.profile_dock.profiling.add_samples()
+            # self.parent.polygon.add_samples()
         self.parent.change_sample(0)
 
     def import_files(self):

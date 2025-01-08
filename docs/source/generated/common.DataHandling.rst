@@ -29,6 +29,7 @@ common.DataHandling
       AttributeDataFrame
       DBSCAN
       KMeans
+      QMessageBox
       SampleObj
       StandardScaler
    

@@ -19,3 +19,24 @@ def partial_match(array: list[str], string: str) -> list[bool]:
             matches[i] = True
 
     return matches
+
+class ObservableDict(dict):
+    def __init__(self, *args, callback=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._callback = callback
+
+    def _trigger_change(self):
+        if self._callback:
+            self._callback(self)
+
+    def __setitem__(self, key, value):
+        super().__setitem__(key, value)
+        self._trigger_change()
+
+    def __delitem__(self, key):
+        super().__delitem__(key)
+        self._trigger_change()
+
+    def update(self, *args, **kwargs):
+        super().update(*args, **kwargs)
+        self._trigger_change()

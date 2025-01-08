@@ -1,9 +1,14 @@
 import sys
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import ( QMainWindow, QTextEdit, QDockWidget, QToolButton, QWidget, QHBoxLayout, QVBoxLayout, QGroupBox, QSpacerItem, QSizePolicy )
+from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtWidgets import (
+        QMainWindow, QTextEdit, QWidget, QVBoxLayout,
+        QToolBar, QSpacerItem, QSizePolicy, QAction, QDialog, QCheckBox, QDialogButtonBox
+    )
 from PyQt5.QtGui import QIcon
 
-class LoggerDock(QDockWidget):
+from src.common.CustomWidgets import CustomDockWidget
+
+class LoggerDock(CustomDockWidget):
     """A dock widget that contains a logging display.
 
     A logging dock widget useful for debugging and recording actions.
@@ -17,40 +22,51 @@ class LoggerDock(QDockWidget):
         if not isinstance(parent, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
 
-        super().__init__("Logger", parent)
+        super().__init__(parent)
+        self.parent = parent
 
         # Create container
         container = QWidget()
         logger_layout = QVBoxLayout()
 
-        # Export button
-        toolbar = QGroupBox("")
-        toolbar_layout = QHBoxLayout(toolbar)
-        toolbar_layout.setContentsMargins(5, 5, 5, 5)  # Adjust margins as needed
-        toolbar_layout.setSpacing(5)  # Spacing between buttons
+        # Create toolbar
+        toolbar = QToolBar("Notes Toolbar", self)
+        toolbar.setIconSize(QSize(24, 24))
+        toolbar.setMovable(False)  # Optional: Prevent toolbar from being dragged out
 
-        self.save_button = QToolButton()
+        # Export button
+        self.action_save = QAction()
         save_icon = QIcon(":resources/icons/icon-save-file-64.svg")
         if not save_icon.isNull():
-            self.save_button.setIcon(save_icon)
+            self.action_save.setIcon(save_icon)
         else:
-            self.save_button.setText("Save")
-        self.save_button.setToolTip("Save log to file")
+            self.action_save.setText("Save")
+        self.action_save.setToolTip("Save log to file")
 
         # Add spacer
         spacer = QSpacerItem(20, 0, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
-        self.clear_button = QToolButton()
+        if hasattr(parent,'logger_options'):
+            self.action_settings = QAction()
+            settings_icon = QIcon(":resources/icons/icon-gear-64.svg")
+            if not settings_icon.isNull():
+                self.action_settings.setIcon(settings_icon)
+            else:
+                self.action_settings.setText("Settings")
+            self.action_settings.setToolTip("Logger settings")
+
+        self.action_clear = QAction()
         clear_icon = QIcon(":resources/icons/icon-delete-64.svg")
         if not clear_icon.isNull():
-            self.clear_button.setIcon(clear_icon)
+            self.action_clear.setIcon(clear_icon)
         else:
-            self.clear_button.setText("Clear")
-        self.clear_button.setToolTip("Clear log")
+            self.action_clear.setText("Clear")
+        self.action_clear.setToolTip("Clear log")
 
-        toolbar_layout.addWidget(self.save_button)
-        toolbar_layout.addItem(spacer)
-        toolbar_layout.addWidget(self.clear_button)
+        toolbar.addAction(self.action_save)
+        toolbar.addAction(self.action_settings)
+        toolbar.addSeparator()
+        toolbar.addAction(self.action_clear)
 
         logger_layout.addWidget(toolbar)
 
@@ -60,25 +76,21 @@ class LoggerDock(QDockWidget):
 
         logger_layout.addWidget(self.text_edit)
 
+        # handle actions
+        self.action_save.triggered.connect(self.export_log)
+        if hasattr(self,'action_settings'):
+            self.action_settings.triggered.connect(self.set_logger_options)
+        self.action_clear.triggered.connect(self.text_edit.clear)
+
         # Set layout to the container
         container.setLayout(logger_layout)
         self.setWidget(container)
 
         self.setFloating(True)
         self.setWindowTitle("LaME Logger")
-        self.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
+        self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowMinMaxButtonsHint | Qt.WindowType.WindowCloseButtonHint)
 
-        # create hide button
-        #hide_button = QToolButton()
-        #hide_button.setIcon(QIcon(":/icons/icon-reject-64.svg"))
-        #hide_button.setToolTip("Hide Dock")
-        #hide_button.clicked.connect(self.hide)
-
-        # handle signals
-        self.save_button.clicked.connect(self.export_log)
-        self.clear_button.clicked.connect(self.text_edit.clear)
-
-        parent.addDockWidget(Qt.RightDockWidgetArea, self)
+        parent.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self)
 
         # Example print statements
         self.log_file = file 
@@ -126,3 +138,58 @@ class LoggerDock(QDockWidget):
                 print(f"Failed to export log: {e}")
         else:
             print("No log contents to export.")
+
+    def set_logger_options(self):
+        """ Opens a dialog to edit logger options."""
+        dialog = LoggerOptionsDialog(self.parent.logger_options, self)
+        if dialog.exec() == QDialog.Accepted:
+            self.parent.logger_options = dialog.get_updated_options()
+
+class LoggerOptionsDialog(QDialog):
+    """Allows the user to set logger options.
+
+    The use of these options is determined by the main program, not the logger,
+    this is simply a place to view and change them.
+
+    Parameters
+    ----------
+    options_dict : dict
+        A dictionary of options with key values displayed as the labels and values
+        are bool indicating a set option for logging.
+    parent : LoggerDock, optional
+        Parent logger, by default None
+    """        
+    def __init__(self, options_dict, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Logger Options")
+        self.setLayout(QVBoxLayout())
+
+        # Store references to checkboxes and the dictionary
+        self.options_dict = options_dict.copy()
+        self.checkboxes = {}
+
+        # Create checkboxes based on the dictionary
+        for key, value in self.options_dict.items():
+            checkbox = QCheckBox(key)  # The label is set directly here
+            checkbox.setChecked(value)  # Set initial state from the dictionary
+            self.checkboxes[key] = checkbox
+            self.layout().addWidget(checkbox)
+
+        # Add OK button
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok)
+        button_box.accepted.connect(self.accept)
+        self.layout().addWidget(button_box)
+
+    def get_updated_options(self):
+        """
+        Updates the dictionary with the current state of checkboxes and returns it.
+
+        Returns
+        -------
+        dict
+            Returns the dictionary of boolean logger options
+        """
+        for key, checkbox in self.checkboxes.items():
+            self.options_dict[key] = checkbox.isChecked()
+        return self.options_dict
+

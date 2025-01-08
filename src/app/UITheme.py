@@ -1,6 +1,14 @@
 import os, darkdetect
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QFont
 from src.app.config import ICONPATH, load_stylesheet
+
+def default_font():
+    # set default font for application
+    font = QFont()
+    font.setPointSize(11)
+    font.setStyleStrategy(QFont.PreferDefault)
+
+    return font
 
 class UIThemes():
     def __init__(self, app, parent):
@@ -52,13 +60,14 @@ class UIThemes():
         parent.actionSwapAxes.setIcon(QIcon(os.path.join(ICONPATH,'icon-swap-dark-64.svg')))
         parent.toolButtonSwapResolution.setIcon(QIcon(os.path.join(ICONPATH,'icon-swap-resolution-dark-64.svg')))
         # Notes
-        parent.toolButtonNotesHeading.setIcon(QIcon(os.path.join(ICONPATH,'icon-heading-dark-64.svg')))
-        parent.toolButtonNotesBold.setIcon(QIcon(os.path.join(ICONPATH,'icon-bold-dark-64.svg')))
-        parent.toolButtonNotesItalic.setIcon(QIcon(os.path.join(ICONPATH,'icon-italics-dark-64.svg')))
-        parent.toolButtonNotesBulletList.setIcon(QIcon(os.path.join(ICONPATH,'icon-bullet-list-dark-64.svg')))
-        parent.toolButtonNotesNumList.setIcon(QIcon(os.path.join(ICONPATH,'icon-numbered-list-dark-64.svg')))
-        parent.toolButtonNotesImage.setIcon(QIcon(os.path.join(ICONPATH,'icon-image-64.svg')))
-        parent.toolButtonNotesSave.setIcon(QIcon(os.path.join(ICONPATH,'icon-pdf-dark-64.svg')))
+        if hasattr(parent,'notes') and parent.notes.isVisible():
+            parent.notes.header_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-heading-dark-64.svg')))
+            parent.notes.bold_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-bold-dark-64.svg')))
+            parent.notes.italic_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-italics-dark-64.svg')))
+            parent.notes.bullet_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-bullet-list-dark-64.svg')))
+            parent.notes.number_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-numbered-list-dark-64.svg')))
+            parent.notes.image_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-image-64.svg')))
+            parent.notes.save_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-pdf-dark-64.svg')))
         # Reset Buttons
         parent.toolButtonXAxisReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-dark-64.svg')))
         parent.toolButtonYAxisReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-dark-64.svg')))
@@ -78,11 +87,12 @@ class UIThemes():
         parent.toolBox.setItemIcon(parent.left_tab['cluster'],QIcon(os.path.join(ICONPATH,'icon-cluster-dark-64.svg')))
         parent.toolBox.setItemIcon(parent.left_tab['scatter'],QIcon(os.path.join(ICONPATH,'icon-ternary-dark-64.svg')))
         # Spot Data
-        parent.toolButtonSpotMove.setIcon(QIcon(os.path.join(ICONPATH,'icon-move-point-dark-64.svg')))
-        parent.toolButtonSpotToggle.setIcon(QIcon(os.path.join(ICONPATH,'icon-show-hide-dark-64.svg')))
-        parent.toolButtonSpotSelectAll.setIcon(QIcon(os.path.join(ICONPATH,'icon-select-all-dark-64.svg')))
-        parent.toolButtonSpotAnalysis.setIcon(QIcon(os.path.join(ICONPATH,'icon-analysis-dark-64.svg')))
-        parent.toolButtonSpotRemove.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-dark-64.svg')))
+        if hasattr(parent,"spot_tools"):
+            parent.toolButtonSpotMove.setIcon(QIcon(os.path.join(ICONPATH,'icon-move-point-dark-64.svg')))
+            parent.toolButtonSpotToggle.setIcon(QIcon(os.path.join(ICONPATH,'icon-show-hide-dark-64.svg')))
+            parent.toolButtonSpotSelectAll.setIcon(QIcon(os.path.join(ICONPATH,'icon-select-all-dark-64.svg')))
+            parent.toolButtonSpotAnalysis.setIcon(QIcon(os.path.join(ICONPATH,'icon-analysis-dark-64.svg')))
+            parent.toolButtonSpotRemove.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-dark-64.svg')))
         # N-Dim
         parent.toolBox.setItemIcon(parent.left_tab['ndim'],QIcon(os.path.join(ICONPATH,'icon-TEC-dark-64.svg')))
         parent.toolButtonNDimDown.setIcon(QIcon(os.path.join(ICONPATH,'icon-down-arrow-dark-64.svg')))
@@ -129,17 +139,18 @@ class UIThemes():
         # Regression
         parent.toolBoxTreeView.setItemIcon(parent.right_tab['regression'],QIcon(os.path.join(ICONPATH,'icon-regression-dark-64.svg')))
         # Calculator
-        parent.toolButtonCalculate.setIcon(QIcon(os.path.join(ICONPATH,'icon-calculator-dark-64.svg')))
         parent.actionCalculator.setIcon(QIcon(os.path.join(ICONPATH,'icon-calculator-dark-64.svg')))
-        parent.toolBoxTreeView.setItemIcon(parent.right_tab['calculator'],QIcon(os.path.join(ICONPATH,'icon-calculator-dark-64.svg')))
-        parent.toolButtonCalcDelete.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-dark-64.svg')))
+        if hasattr(parent,'calculator'):
+            parent.calculate_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-calculator-dark-64.svg')))
+            parent.delete_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-dark-64.svg')))
         # Style Toolbox
-        parent.toolBoxStyle.setItemIcon(0,QIcon(os.path.join(ICONPATH,'icon-axes-dark-64.svg')))
-        parent.toolBoxStyle.setItemIcon(1,QIcon(os.path.join(ICONPATH,'icon-text-and-scales-dark-64.svg')))
-        parent.toolBoxStyle.setItemIcon(2,QIcon(os.path.join(ICONPATH,'icon-marker-and-lines-dark-64.svg')))
-        parent.toolBoxStyle.setItemIcon(3,QIcon(os.path.join(ICONPATH,'icon-rgb-dark-64.svg')))
+        parent.toolBoxStyle.setItemIcon(parent.style_tab['axes'],QIcon(os.path.join(ICONPATH,'icon-axes-dark-64.svg')))
+        parent.toolBoxStyle.setItemIcon(parent.style_tab['text'],QIcon(os.path.join(ICONPATH,'icon-text-and-scales-dark-64.svg')))
+        parent.toolBoxStyle.setItemIcon(parent.style_tab['markers'],QIcon(os.path.join(ICONPATH,'icon-marker-and-lines-dark-64.svg')))
+        parent.toolBoxStyle.setItemIcon(parent.style_tab['colors'],QIcon(os.path.join(ICONPATH,'icon-rgb-dark-64.svg')))
+        parent.toolBoxStyle.setItemIcon(parent.style_tab['regression'],QIcon(os.path.join(ICONPATH,'icon-regression-dark-64.svg')))
         # Cluster tab
-        parent.toolBoxStyle.setItemIcon(4,QIcon(os.path.join(ICONPATH,'icon-cluster-dark-64.svg')))
+        parent.tabWidgetMask.setItemIcon(parent.mask_tab['cluster'],QIcon(os.path.join(ICONPATH,'icon-cluster-dark-64.svg')))
         parent.toolButtonClusterLink.setIcon(QIcon(os.path.join(ICONPATH,'icon-link-dark-64.svg')))
         parent.toolButtonClusterDelink.setIcon(QIcon(os.path.join(ICONPATH,'icon-unlink-dark-64.svg')))
 
@@ -160,13 +171,20 @@ class UIThemes():
         parent.actionSwapAxes.setIcon(QIcon(os.path.join(ICONPATH,'icon-swap-64.svg')))
         parent.toolButtonSwapResolution.setIcon(QIcon(os.path.join(ICONPATH,'icon-swap-resolution-64.svg')))
         # Notes
-        parent.toolButtonNotesHeading.setIcon(QIcon(os.path.join(ICONPATH,'icon-heading-64.svg')))
-        parent.toolButtonNotesBold.setIcon(QIcon(os.path.join(ICONPATH,'icon-bold-64.svg')))
-        parent.toolButtonNotesItalic.setIcon(QIcon(os.path.join(ICONPATH,'icon-italics-64.svg')))
-        parent.toolButtonNotesBulletList.setIcon(QIcon(os.path.join(ICONPATH,'icon-bullet-list-64.svg')))
-        parent.toolButtonNotesNumList.setIcon(QIcon(os.path.join(ICONPATH,'icon-numbered-list-64.svg')))
-        parent.toolButtonNotesImage.setIcon(QIcon(os.path.join(ICONPATH,'icon-image-dark-64.svg')))
-        parent.toolButtonNotesSave.setIcon(QIcon(os.path.join(ICONPATH,'icon-pdf-64.svg')))
+        if hasattr(parent,'notes') and parent.notes.isVisible():
+            parent.notes.header_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-heading-64.svg')))
+            parent.notes.bold_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-bold-64.svg')))
+            parent.notes.italic_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-italics-64.svg')))
+            parent.notes.literal_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-literal-64.svg')))
+            parent.notes.subscript_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-subscript-64.svg')))
+            parent.notes.superscript_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-superscript-64.svg')))
+            parent.notes.math_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-equation-64.svg')))
+            parent.notes.hyperlink_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-hyperlink-64.svg')))
+            parent.notes.cite_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-cite-64.svg')))
+            parent.notes.bullet_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-bullet-list-64.svg')))
+            parent.notes.number_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-numbered-list-64.svg')))
+            parent.notes.image_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-image-dark-64.svg')))
+            parent.notes.save_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-pdf-64.svg')))
         # Reset Buttons
         parent.toolButtonXAxisReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-64.svg')))
         parent.toolButtonYAxisReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-64.svg')))
@@ -186,11 +204,12 @@ class UIThemes():
         parent.toolBox.setItemIcon(parent.left_tab['cluster'],QIcon(os.path.join(ICONPATH,'icon-cluster-64.svg')))
         parent.toolBox.setItemIcon(parent.left_tab['scatter'],QIcon(os.path.join(ICONPATH,'icon-ternary-64.svg')))
         # Spot Data
-        parent.toolButtonSpotMove.setIcon(QIcon(os.path.join(ICONPATH,'icon-move-point-64.svg')))
-        parent.toolButtonSpotToggle.setIcon(QIcon(os.path.join(ICONPATH,'icon-show-hide-64.svg')))
-        parent.toolButtonSpotSelectAll.setIcon(QIcon(os.path.join(ICONPATH,'icon-select-all-64.svg')))
-        parent.toolButtonSpotAnalysis.setIcon(QIcon(os.path.join(ICONPATH,'icon-analysis-64.svg')))
-        parent.toolButtonSpotRemove.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
+        if hasattr(parent,"spot_tools"):
+            parent.toolButtonSpotMove.setIcon(QIcon(os.path.join(ICONPATH,'icon-move-point-64.svg')))
+            parent.toolButtonSpotToggle.setIcon(QIcon(os.path.join(ICONPATH,'icon-show-hide-64.svg')))
+            parent.toolButtonSpotSelectAll.setIcon(QIcon(os.path.join(ICONPATH,'icon-select-all-64.svg')))
+            parent.toolButtonSpotAnalysis.setIcon(QIcon(os.path.join(ICONPATH,'icon-analysis-64.svg')))
+            parent.toolButtonSpotRemove.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
         # N-Dim
         parent.toolBox.setItemIcon(parent.left_tab['ndim'],QIcon(os.path.join(ICONPATH,'icon-TEC-64.svg')))
         parent.toolButtonNDimDown.setIcon(QIcon(os.path.join(ICONPATH,'icon-down-arrow-64.svg')))
@@ -203,7 +222,7 @@ class UIThemes():
         parent.toolButtonFilterDown.setIcon(QIcon(os.path.join(ICONPATH,'icon-down-arrow-64.svg')))
         parent.toolButtonFilterRemove.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
         # Polygons
-        parent.toolBox.setItemIcon(parent.left_tab['polygons'],QIcon(os.path.join(ICONPATH,'icon-polygon-new-64.svg')))
+        parent.toolBox.setItemIcon(parent.mask_tab['polygon'],QIcon(os.path.join(ICONPATH,'icon-polygon-new-64.svg')))
         parent.toolButtonPolyCreate.setIcon(QIcon(os.path.join(ICONPATH,'icon-polygon-new-64.svg')))
         parent.toolButtonPolyAddPoint.setIcon(QIcon(os.path.join(ICONPATH,'icon-add-point-64.svg')))
         parent.toolButtonPolyRemovePoint.setIcon(QIcon(os.path.join(ICONPATH,'icon-remove-point-64.svg')))
@@ -234,20 +253,19 @@ class UIThemes():
         parent.toolButtonPan.setIcon(QIcon(os.path.join(ICONPATH,'icon-move-64.svg')))
         parent.toolButtonZoom.setIcon(QIcon(os.path.join(ICONPATH,'icon-zoom-64.svg')))
         parent.toolButtonDistance.setIcon(QIcon(os.path.join(ICONPATH,'icon-distance-64.svg')))
-        # Regression
-        parent.toolBoxTreeView.setItemIcon(parent.right_tab['regression'],QIcon(os.path.join(ICONPATH,'icon-regression-64.svg')))
         # Calculator
-        parent.toolButtonCalculate.setIcon(QIcon(os.path.join(ICONPATH,'icon-calculator-64.svg')))
         parent.actionCalculator.setIcon(QIcon(os.path.join(ICONPATH,'icon-calculator-64.svg')))
-        parent.toolBoxTreeView.setItemIcon(parent.right_tab['calculator'],QIcon(os.path.join(ICONPATH,'icon-calculator-64.svg')))
-        parent.toolButtonCalcDelete.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
+        if hasattr(parent,'calculator'):
+            parent.calculator.calculate_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-calculator-64.svg')))
+            parent.calculator.delete_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
         # Style Toolbox
-        parent.toolBoxStyle.setItemIcon(0,QIcon(os.path.join(ICONPATH,'icon-axes-64.svg')))
-        parent.toolBoxStyle.setItemIcon(1,QIcon(os.path.join(ICONPATH,'icon-text-and-scales-64.svg')))
-        parent.toolBoxStyle.setItemIcon(2,QIcon(os.path.join(ICONPATH,'icon-marker-and-lines-64.svg')))
-        parent.toolBoxStyle.setItemIcon(3,QIcon(os.path.join(ICONPATH,'icon-rgb-64.svg')))
+        parent.toolBoxStyle.setItemIcon(parent.style_tab['axes'],QIcon(os.path.join(ICONPATH,'icon-axes-64.svg')))
+        parent.toolBoxStyle.setItemIcon(parent.style_tab['text'],QIcon(os.path.join(ICONPATH,'icon-text-and-scales-64.svg')))
+        parent.toolBoxStyle.setItemIcon(parent.style_tab['markers'],QIcon(os.path.join(ICONPATH,'icon-marker-and-lines-64.svg')))
+        parent.toolBoxStyle.setItemIcon(parent.style_tab['colors'],QIcon(os.path.join(ICONPATH,'icon-rgb-64.svg')))
+        parent.toolBoxStyle.setItemIcon(parent.style_tab['regression'],QIcon(os.path.join(ICONPATH,'icon-regression-64.svg')))
         # Cluster tab
-        parent.toolBoxStyle.setItemIcon(4,QIcon(os.path.join(ICONPATH,'icon-cluster-64.svg')))
+        parent.tabWidgetMask.setTabIcon(parent.mask_tab['cluster'],QIcon(os.path.join(ICONPATH,'icon-cluster-64.svg')))
         parent.toolButtonClusterLink.setIcon(QIcon(os.path.join(ICONPATH,'icon-link-64.svg')))
         parent.toolButtonClusterDelink.setIcon(QIcon(os.path.join(ICONPATH,'icon-unlink-64.svg')))
 

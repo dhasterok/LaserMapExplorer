@@ -1,7 +1,7 @@
-app.Calculator
-==============
+common.Calculator
+=================
 
-.. automodule:: app.Calculator
+.. automodule:: common.Calculator
 
    
    

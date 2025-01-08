@@ -64,17 +64,17 @@ class ImageProcessing():
         self.parent.comboBoxEdgeDetectMethod.activated.connect(self.add_edge_detection)
 
     def gradient_checked_state_changed(self):
-        field_type = self.parent.style.field_type
-        field = self.parent.style.field
+        field_type = self.parent.plot_style.field_type
+        field = self.parent.plot_style.field
         if self.parent.checkBoxGradient.isChecked():
-            self.parent.style.style_dict['gradient map']['ColorFieldType'] = field_type
-            self.parent.style.style_dict['gradient map']['ColorField'] = field
-            self.parent.style.plot_type = 'gradient map'
+            self.parent.plot_style.style_dict['gradient map']['ColorFieldType'] = field_type
+            self.parent.plot_style.style_dict['gradient map']['ColorField'] = field
+            self.parent.plot_style.plot_type = 'gradient map'
         else:
             if self.parent.comboBoxPlotType.currentText != 'analyte map':
-                self.parent.style.style_dict['analyte map']['ColorFieldType'] = field_type
-                self.parent.style.style_dict['analyte map']['ColorField'] = field
-                self.parent.style.plot_type = 'analyte map'
+                self.parent.plot_style.style_dict['analyte map']['ColorFieldType'] = field_type
+                self.parent.plot_style.style_dict['analyte map']['ColorField'] = field
+                self.parent.plot_style.plot_type = 'analyte map'
 
 
     def add_edge_detection(self):
@@ -132,7 +132,7 @@ class ImageProcessing():
         #self.plot.addItem(self.edge_img)
 
         overlay_image = np.zeros(self.edge_array.shape+(4,), dtype=np.uint8)
-        colorlist = self.parent.get_rgb_color(self.parent.style.overlay_color)
+        colorlist = self.parent.get_rgb_color(self.parent.plot_style.overlay_color)
         overlay_image[..., 0] = colorlist[0]  # Red channel
         overlay_image[..., 1] = colorlist[1]  # Green channel
         overlay_image[..., 2] = colorlist[2]  # Blue channel
@@ -222,7 +222,7 @@ class ImageProcessing():
 
                 self.parent.actionNoiseReduction.setEnabled(False)
 
-                self.parent.style.scheduler.schedule_update()
+                self.parent.plot_style.scheduler.schedule_update()
             case _:
                 # set option 1
                 self.parent.spinBoxNoiseOption1.blockSignals(True)
@@ -454,17 +454,17 @@ class ImageProcessing():
             return
         else:
             if self.parent.comboBoxPlotType.currentText != 'analyte map':
-                self.parent.style.plot_type = 'analyte map'
+                self.parent.plot_style.plot_type = 'analyte map'
 
 
         canvas = mplc.MplCanvas(parent=self.parent)
 
-        norm = self.parent.style.color_norm()
-        cax = canvas.axes.imshow(filtered_image, cmap=self.parent.style.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
+        norm = self.parent.plot_style.color_norm()
+        cax = canvas.axes.imshow(filtered_image, cmap=self.parent.plot_style.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
 
         # set color limits
         self.parent.add_colorbar(canvas, cax)
-        cax.set_clim(self.parent.style.clim[0], self.parent.style.clim[1])
+        cax.set_clim(self.parent.plot_style.clim[0], self.parent.plot_style.clim[1])
 
         # use mask to create an alpha layer
         mask = self.parent.data[self.parent.sample_id].mask.astype(float)
@@ -493,7 +493,7 @@ class ImageProcessing():
             'field_type': self.parent.comboBoxColorByField.currentText(),
             'field': field,
             'figure': canvas,
-            'style': self.parent.style.style_dict[self.parent.style.plot_type],
+            'style': self.parent.plot_style.style_dict[self.parent.plot_style.plot_type],
             'cluster_groups': None,
             'view': [True,False],
             'position': None
@@ -536,8 +536,8 @@ class ImageProcessing():
         q = np.quantile(self.grad_mag.flatten(), q=[0.025, 0.975])
         norm = colors.Normalize(q[0],q[1], clip=False)
 
-        cax = canvas.axes.imshow(self.grad_mag, cmap=self.parent.style.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
-        canvas.axes.quiver(X,Y,dx,dy, color=self.parent.style.overlay_color, linewidth=0.5)
+        cax = canvas.axes.imshow(self.grad_mag, cmap=self.parent.plot_style.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
+        canvas.axes.quiver(X,Y,dx,dy, color=self.parent.plot_style.overlay_color, linewidth=0.5)
 
         # set color limits
         #self.add_colorbar(canvas, cax, style)
@@ -572,7 +572,7 @@ class ImageProcessing():
             'field_type': self.parent.comboBoxColorByField.currentText(),
             'field': field,
             'figure': canvas,
-            'style': self.parent.style.style_dict[self.parent.style.plot_type],
+            'style': self.parent.plot_style.style_dict[self.parent.plot_style.plot_type],
             'cluster_groups': None,
             'view': [True,False],
             'position': None

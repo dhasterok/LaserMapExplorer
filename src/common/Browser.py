@@ -16,18 +16,18 @@ class WebEngineView(QWebEngineView):
     QWebEngineView : QWebEngine
         A web engine widget
     """    
-    def __init__(self, parent=None, debug_browser=False):
+    def __init__(self, parent=None, debug=False):
         super().__init__(parent)
 
         self.parent = parent
-        self.debug_browser = debug_browser
+        self.debug = debug
 
         # Connect signals
         self.loadFinished.connect(self.on_load_finished)
         self.loadStarted.connect(self.on_load_started)
         self.loadProgress.connect(self.on_load_progress)
         self.page().profile().setHttpAcceptLanguage("en-US,en;q=0.9")
-        self.page().profile().setHttpUserAgent("MyBrowser 1.0")
+        self.page().profile().setHttpUserAgent("LaME Browser 1.0")
 
         # Set up a JavaScript console message handler
         self.page().setWebChannel(None)
@@ -84,8 +84,8 @@ class Browser(QDockWidget):
         Dictionary with objects as keys and page (excluding html) for navigation
     base_path : str
         Base directory to docs/build/html.
-    debug_browser : bool
-        A verbose mode for the browser
+    debug : bool, optional
+        A verbose mode for the browser, by Default ``False``
 
     Methods
     -------
@@ -103,16 +103,16 @@ class Browser(QDockWidget):
     TypeError :
         Parent must be an instance of QMainWindow
     """    
-    def __init__(self, parent=None, help_mapping={}, base_path='', debug_browser=False):
+    def __init__(self, parent=None, help_mapping={}, base_path='', debug=False):
         if not isinstance(parent, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
         super().__init__(parent)
 
         container = QWidget()
 
-        self.debug_browser = debug_browser
+        self.debug = debug
         
-        if self.debug_browser:
+        if self.debug:
             print("Initializing browser")
 
         if parent is None:
@@ -179,7 +179,7 @@ class Browser(QDockWidget):
         self.setWidget(container)
 
         self.setFloating(True)
-        self.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
+        self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowMinMaxButtonsHint | Qt.WindowType.WindowCloseButtonHint)
 
         self.setWindowTitle("Documentation")
 
@@ -200,7 +200,7 @@ class Browser(QDockWidget):
         for widget in self.help_mapping.keys():
             widget.installEventFilter(self)
 
-        parent.addDockWidget(Qt.BottomDockWidgetArea, self)
+        parent.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self)
 
         self.show()
 
@@ -225,26 +225,26 @@ class Browser(QDockWidget):
             # Handle hover events
             if event.type() == QEvent.Enter:
                 if obj in self.help_mapping:
-                    self.parent.setCursor(Qt.WhatsThisCursor)
+                    self.parent.setCursor(Qt.CursorShape.WhatsThisCursor)
                 else:
-                    self.parent.setCursor(Qt.ForbiddenCursor)
+                    self.parent.setCursor(Qt.CursorShape.ForbiddenCursor)
                 return True
             elif event.type() == QEvent.Leave:
                 # Reset cursor when leaving a widget
-                self.parent.setCursor(Qt.WhatsThisCursor)
+                self.parent.setCursor(Qt.CursorShape.WhatsThisCursor)
                 return True
 
             # Handle mouse press events
             if event.type() == QEvent.MouseButtonPress:
                 self.parent.actionHelp.setChecked(False)
-                self.parent.setCursor(Qt.ArrowCursor)
+                self.parent.setCursor(Qt.CursorShape.ArrowCursor)
 
                 if obj in self.help_mapping:
                     self.go_to_page(self.help_mapping[obj])
                 else:
                     return False
 
-                if self.debug_browser:
+                if self.debug:
                     print(f"Browser.eventFilter: Accessing help page {obj}:{self.help_mapping[obj]}")
 
                 return True
@@ -257,7 +257,7 @@ class Browser(QDockWidget):
 
         A browser for the LaME documentation.  It can access some external sites, but the browser is primarily for help data.
         """        
-        if self.debug_browser:
+        if self.debug:
             print("open_browser")
 
         # Open a file dialog to select a local HTML file
@@ -270,7 +270,7 @@ class Browser(QDockWidget):
 
     def go_to_home(self):
         """The browser returns to the documentation index.html file"""        
-        if self.debug_browser:
+        if self.debug:
             print("go_to_home")
 
         filename = os.path.join(self.base_path,"docs/build/html/index.html")
@@ -289,7 +289,7 @@ class Browser(QDockWidget):
         location : str, optional
             Name of webpage (excluding base directory and .html)
         """
-        if self.debug_browser:
+        if self.debug:
             print(f"go_to_page, location {location}")
 
         if not location:

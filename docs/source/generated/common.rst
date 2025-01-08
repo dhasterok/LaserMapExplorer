@@ -28,6 +28,8 @@
    :recursive:
 
    common.Browser
+   common.Calculator
+   common.CalculatorDock
    common.CustomMplCanvas
    common.CustomWidgets
    common.DataHandling

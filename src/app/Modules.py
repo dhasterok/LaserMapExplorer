@@ -42,12 +42,12 @@ from src.app.ImageProcessing import ImageProcessing as ip
 from src.app.StyleToolbox import Styling
 from src.app.Profile import Profiling
 from src.common.Polygon import PolygonManager
-from src.app.Calculator import CustomFieldCalculator as cfc
-from src.app.SpecialFunctions import SpecialFunctions as specfun
+from src.common.Calculator import CustomFieldCalculator as cfc
+from src.app.SpecialTools import SpecialFunctions as specfun
 from src.common.NoteTaking import Notes
 from src.common.Browser import Browser
 import src.app.QuickView as QV
-from src.app.config import BASEDIR, ICONPATH, SSPATH, DEBUG, DEBUG_BROWSER, load_stylesheet
+from src.app.config import BASEDIR, ICONPATH, SSPATH, DEBUG, load_stylesheet
 from src.common.ExtendedDF import AttributeDataFrame
 import src.common.format as fmt
 from src.common.colorfunc import get_hex_color, get_rgb_color
@@ -62,9 +62,6 @@ class Main():
         #Initialize nested data which will hold the main sets of data for analysis
         self.data = {}
         self.BASEDIR = BASEDIR
-        self.clipped_ratio_data = pd.DataFrame()
-        self.analyte_data = {}  #stores orginal analyte data
-        self.clipped_analyte_data = {} # stores processed analyted data
         self.sample_id = ''
         self.sample_ids =[]
         self.lasermaps = {}
@@ -165,10 +162,6 @@ class Main():
             # load sample's *.lame file
             file_path = os.path.join(self.selected_directory, self.csv_files[index])
             self.data[self.sample_id] = SampleObj(self.sample_id, file_path, self.outlier_method, self.negative_method)
-
-
-
-    
 
     # -------------------------------------
     # Reset to start

@@ -50,7 +50,7 @@
    <property name="currentIndex">
     <number>0</number>
    </property>
-   <widget class="QWidget" name="stackedWidgetPage1" native="true">
+   <widget class="QWidget" name="stackedWidgetPage1">
     <widget class="QWidget" name="formLayoutWidget">
      <property name="geometry">
       <rect>
@@ -317,13 +317,13 @@
      </layout>
     </widget>
    </widget>
-   <widget class="QWidget" name="stackedWidgetPage2" native="true">
+   <widget class="QWidget" name="stackedWidgetPage2">
     <widget class="QWidget" name="formLayoutWidget_2">
      <property name="geometry">
       <rect>
        <x>10</x>
        <y>10</y>
-       <width>279</width>
+       <width>314</width>
        <height>337</height>
       </rect>
      </property>

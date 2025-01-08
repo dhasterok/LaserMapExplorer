@@ -1,7 +1,7 @@
-common.NoteTaking
-=================
+common.CalculatorDock
+=====================
 
-.. automodule:: common.NoteTaking
+.. automodule:: common.CalculatorDock
 
    
    
@@ -13,7 +13,8 @@ common.NoteTaking
 
    .. autosummary::
    
-      publish_string
+      calc_error
+      partial_match
    
    
 
@@ -23,34 +24,35 @@ common.NoteTaking
 
    .. autosummary::
    
-      CustomActionMenu
-      CustomLineEdit
-      NoteOptionsDialog
-      Notes
+      CalculatorDock
+      CustomComboBox
+      CustomFieldCalculator
       QAction
-      QCursor
+      QCheckBox
+      QComboBox
       QDialog
       QDialogButtonBox
       QDockWidget
-      QDoubleValidator
-      QFileDialog
-      QFont
-      QFormLayout
+      QFrame
+      QGridLayout
+      QGroupBox
+      QHBoxLayout
       QIcon
+      QInputDialog
       QLabel
       QMainWindow
       QMessageBox
+      QPushButton
       QSize
       QSizePolicy
-      QTextCursor
       QTextEdit
-      QTimer
       QToolBar
+      QToolButton
+      QUrl
       QVBoxLayout
       QWidget
       Qt
-      RstToPdf
-      datetime
+      UIFieldLogic
    
    
 

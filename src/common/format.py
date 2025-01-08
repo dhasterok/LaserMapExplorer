@@ -18,7 +18,7 @@ def oround(val, order=2, toward=None):
     -------
     float
         rounded matrix values
-    """        
+    """
     if val == 0:
         return 0
 
@@ -27,8 +27,10 @@ def oround(val, order=2, toward=None):
         return np.floor(val / 10**(power-order)) * 10**(power - order)
     elif toward == 1:
         return np.ceil(val / 10**(power-order)) * 10**(power - order)
-    else:
+    elif toward is None:
         return np.round(val / 10**(power-order)) * 10**(power - order)
+    else:
+        raise ValueError("Valid values of toward may be 0, 1, or None.")
 
 def oround_matrix(val, order=2, toward=None):
     """Rounds a matrix of values to n digits

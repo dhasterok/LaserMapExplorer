@@ -24,18 +24,18 @@ app.Workflow
    .. autosummary::
    
       BlocklyBridge
+      Main
+      QAction
       QDockWidget
       QFile
-      QGroupBox
-      QHBoxLayout
       QIODevice
       QIcon
       QMainWindow
       QObject
+      QSize
       QSizePolicy
-      QSpacerItem
       QTextEdit
-      QToolButton
+      QToolBar
       QUrl
       QVBoxLayout
       QWebChannel

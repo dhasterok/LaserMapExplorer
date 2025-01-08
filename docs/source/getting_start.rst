@@ -1,8 +1,7 @@
-A Beginner's Guide
-******************
+Getting Started
+***************
 
-
-This video provides an overview of the *Laser Map Explorer (LaME)* software, demonstrating its interface and basic navigation.
+Welcome to Laser Map Explorer (*LaME*)! This video provides a comprehensive overview of the software interface and basic navigation.
 
 .. raw:: html
 
@@ -16,3 +15,13 @@ This video provides an overview of the *Laser Map Explorer (LaME)* software, dem
    </iframe>
    </div>
 
+Key Topics Covered:
+
+- Interface overview and layout
+- Basic navigation
+- Toolbar functionality
+- View modes (Single View, Multi View, Quick View)
+- Essential settings and preferences
+
+Next Steps:
+After familiarizing yourself with the interface, proceed to :doc:`data_handling` to learn about importing and managing your data.

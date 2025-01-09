@@ -1,4 +1,5 @@
 import * as Blockly from 'blockly/core';
+import * as BlockDynamicConnection from '@blockly/block-dynamic-connection';
 import {registerFieldColour, FieldColour} from '@blockly/field-colour';
 registerFieldColour();
 import { sample_ids,fieldTypeList, baseDir } from './globals';
@@ -704,99 +705,228 @@ const scatter_and_heatmaps = {
 Blockly.common.defineBlocks({ scatter_and_heatmaps: scatter_and_heatmaps });
 
 
-// Block: Plot 
-const plot = {
-    init: function() {
-        // Style and Save inputs
-        this.appendValueInput('analysisType')
-            .appendField('Analysis type');
-        this.appendDummyInput('plot_header')
-            .setAlign(Blockly.inputs.Align.CENTRE)
-            .appendField('Plot type')
-            .appendField(new Blockly.FieldDropdown([
-                ['Analyte Map', 'analyte map'],
-                ['Histogram', 'histogram'],
-                ['Correlation', 'correlation'],
-                ['Gradient Map', 'gradient map'],
-                ['Scatter', 'scatter'],
-                ['Heatmap', 'heatmap'],
-                ['Ternary Map', 'ternary map'],
-                ['TEC', 'tec'],
-                ['Radar', 'radar'],
-                ['Variance', 'variance'],
-                ['Vectors', 'vectors'],
-                ['PCA Scatter', 'pca scatter'],
-                ['PCA Heatmap', 'pca heatmap'],
-                ['PCA Score', 'pca score'],
-                ['Clusters', 'clusters'],
-                ['Cluster Score', 'cluster score'],
-                ['Profile', 'profile']
-            ]), 'plot_type_dropdown');
+// // Block: Plot 
+// const plot_map = {
+//     init: function() {
+//         this.appendDummyInput('header')
+//         .appendField('Plot Map')
+//         .setAlign(Blockly.inputs.Align.CENTRE)
+//         // Create the 'Field type' dropdown with options
+//         this.appendDummyInput('NAME')
+//         .appendField('Field type')
+//         .appendField(new Blockly.FieldDropdown(
+//             [
+//                 ['Analyte', 'Analyte'],
+//                 ['Analyte (Normalised)', 'Analyte (Normalised)'],
+//                 ['PCA Score', 'PCA Score'],
+//                 ['Cluster', 'Cluster']
+//             ],
+//             this.updateFieldDropdown.bind(this)  // Bind the update function
+//         ), 'fieldType');
+
+//         // Create the 'field' dropdown, initially empty
+//         this.appendDummyInput('FIELD')
+//             .appendField('Field')
+//             .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'field');
+
         
-        // Style and Save inputs
-        this.appendValueInput('style')
-            .appendField('Style');
-        this.appendValueInput('save')
-            .appendField('Save');
+//         // Style and Save inputs
+//         this.appendValueInput('style')
+//             .appendField('Style');
+//         this.appendValueInput('save')
+//             .appendField('Save');
         
+//         this.setPreviousStatement(true, null);
+//         this.setNextStatement(true, null);
+//         this.setTooltip('Configure and render a plot with specified type and settings.');
+//         this.setHelpUrl('');
+//         this.setColour(285);
+//         this.setInputsInline(false)
+//         // Initialize internal properties
+//         this.plotType = null;
+//         this.connectedStyleBlocks = {}; // To store references to connected style blocks
+
+//         // Automatically disable the block if sample IDs are not enabled
+//         if (!enableSampleIDsBlock) {
+//             this.setDisabledReason(true, "no_sample_ids");
+//         }
+//     },
+
+//     updateFieldDropdown: function(newValue) {
+//         const fieldTypeValue = newValue || this.getFieldValue('fieldType');
+
+//         // Call the Python function getFieldList through the WebChannel, handle as a promise
+//         window.blocklyBridge.getFieldList(fieldTypeValue).then((response) => {
+//             // Map the response to the required format for Blockly dropdowns
+//             const options = response.map(option => [option, option]);
+
+//             // Add 'none' and 'all' options at the beginning
+//             options.unshift(['all', 'all']);
+//             options.unshift(['none', 'none']);
+
+//             const dropdown = this.getField('field');
+
+//             // Update the dropdown options
+//             dropdown.menuGenerator_ = options;
+
+//             // Set the default value to 'Select...' or to the first option if options are available
+//             if (options.length > 0) {
+//                 dropdown.setValue(options[0][1]);
+//             } else {
+//                 dropdown.setValue('');
+//             }
+
+//             dropdown.forceRerender();  // Refresh dropdown to display updated options
+//         }).catch(error => {
+//             console.error('Error fetching field list:', error);
+//         });
+//     },
+    
+//     updateConnectedStyleBlocks: function() {
+//         // Get the style block connected to the 'style' input
+//         const styleBlock = this.getInputTargetBlock('style');
+        
+//         if (styleBlock && styleBlock.type === 'styles') {
+//             const connectedBlocks = this.getStyleSubBlocks(styleBlock);
+//             this.connectedStyleBlocks = connectedBlocks;
+
+//             // Trigger style updates
+//             dynamicStyleUpdate(this.plotType, connectedBlocks);
+//         }
+//         else{
+//             this.plotType = null;
+//             this.clearConnectedStyleBlocks();
+//         }
+//     },
+
+//     clearConnectedStyleBlocks: function() {
+//         this.connectedStyleBlocks = {};
+//     },
+
+//     getStyleSubBlocks: function(styleBlock) {
+//         const connectedBlocks = {};
+
+//         ['axisAndLabels', 'annotAndScale', 'marksAndLines', 'coloring'].forEach((type) => {
+//             const subBlock = styleBlock.getInputTargetBlock(type);
+//             if (subBlock) connectedBlocks[type] = subBlock;
+//         });
+
+//         return connectedBlocks;
+//     }
+// };
+// Blockly.common.defineBlocks({ plot_map: plot_map });
+
+
+Blockly.Blocks['plot_map'] = {
+    init: function () {
+        this.appendDummyInput('header')
+            .appendField('Plot Map')
+            .setAlign(Blockly.inputs.Align.CENTRE);
+    
+        // Field type dropdown
+        this.appendDummyInput('NAME')
+            .appendField('Field type')
+            .appendField(
+            new Blockly.FieldDropdown([
+                ['Analyte', 'Analyte'],
+                ['Analyte (Normalised)', 'Analyte (Normalised)'],
+                ['PCA Score', 'PCA Score'],
+                ['Cluster', 'Cluster'],
+            ]),
+            'fieldType'
+            );
+    
+        // Field dropdown
+        this.appendDummyInput('FIELD')
+            .appendField('Field')
+            .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'field');
+    
+        // Add dynamic statement input for styling
+        const stylingInput = this.appendStatementInput('Styling')
+            .setCheck('Styling')
+            .appendField('Styling');
+        
+        // Decorate the connection with the dynamic plugin
+        BlockDynamicConnection.decorateConnection(stylingInput.connection, {
+            category: 'Styling',
+            types: ['Styling'], // Only allow connections with blocks of type 'Styling'
+        });
+    
+        // Save input
+        this.appendValueInput('save').appendField('Save');
+    
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
         this.setTooltip('Configure and render a plot with specified type and settings.');
         this.setHelpUrl('');
         this.setColour(285);
-        this.setInputsInline(false)
-        // Initialize internal properties
-        this.plotType = null;
-        this.connectedStyleBlocks = {}; // To store references to connected style blocks
 
-        // Automatically disable the block if sample IDs are not enabled
-        if (!enableSampleIDsBlock) {
-            this.setDisabledReason(true, "no_sample_ids");
-        }
+        // Initialize the 'field' dropdown options based on the default 'fieldType' value
+        const initialFieldType = this.getFieldValue('fieldType');
+        this.updateFieldDropdown(initialFieldType);
     },
+    updateFieldDropdown: function(newValue) {
+        const fieldTypeValue = newValue || this.getFieldValue('fieldType');
 
-    onchange: function() {
-        const selectedPlotType = this.getFieldValue('plot_type_dropdown');
-        if (selectedPlotType && selectedPlotType !== this.plotType) {
-            this.plotType = selectedPlotType;
-            console.log()
-            this.updateConnectedStyleBlocks();
-        } 
-    },
+        // Call the Python function getFieldList through the WebChannel, handle as a promise
+        window.blocklyBridge.getFieldList(fieldTypeValue).then((response) => {
+            // Map the response to the required format for Blockly dropdowns
+            const options = response.map(option => [option, option]);
 
-    updateConnectedStyleBlocks: function() {
-        // Get the style block connected to the 'style' input
-        const styleBlock = this.getInputTargetBlock('style');
-        
-        if (styleBlock && styleBlock.type === 'styles') {
-            const connectedBlocks = this.getStyleSubBlocks(styleBlock);
-            this.connectedStyleBlocks = connectedBlocks;
+            // Add 'none' and 'all' options at the beginning
+            options.unshift(['all', 'all']);
+            options.unshift(['none', 'none']);
 
-            // Trigger style updates
-            dynamicStyleUpdate(this.plotType, connectedBlocks);
-        }
-        else{
-            this.plotType = null;
-            this.clearConnectedStyleBlocks();
-        }
-    },
+            const dropdown = this.getField('field');
 
-    clearConnectedStyleBlocks: function() {
-        this.connectedStyleBlocks = {};
-    },
+            // Update the dropdown options
+            dropdown.menuGenerator_ = options;
 
-    getStyleSubBlocks: function(styleBlock) {
-        const connectedBlocks = {};
+            // Set the default value to 'Select...' or to the first option if options are available
+            if (options.length > 0) {
+                dropdown.setValue(options[0][1]);
+            } else {
+                dropdown.setValue('');
+            }
 
-        ['axisAndLabels', 'annotAndScale', 'marksAndLines', 'coloring'].forEach((type) => {
-            const subBlock = styleBlock.getInputTargetBlock(type);
-            if (subBlock) connectedBlocks[type] = subBlock;
+            dropdown.forceRerender();  // Refresh dropdown to display updated options
+        }).catch(error => {
+            console.error('Error fetching field list:', error);
         });
-
-        return connectedBlocks;
     }
-};
-Blockly.common.defineBlocks({ plot: plot });
+  };
+Blockly.common.defineBlocks({ plot_map: plot_map });
+
+
+////// styles ////////////
+Blockly.Blocks['x_axis'] = {
+    init: function () {
+      this.appendDummyInput()
+        .appendField('X Axis')
+        .appendField(new Blockly.FieldTextInput('Enter value'), 'value');
+      this.setPreviousStatement(true, 'Styling');
+      this.setNextStatement(true, 'Styling');
+      this.setColour(200);
+      this.setTooltip('Set X Axis styling');
+      this.setHelpUrl('');
+    },
+  };
+  
+  Blockly.Blocks['y_axis'] = {
+    init: function () {
+      this.appendDummyInput()
+        .appendField('Y Axis')
+        .appendField(new Blockly.FieldTextInput('Enter value'), 'value');
+      this.setPreviousStatement(true, 'Styling');
+      this.setNextStatement(true, 'Styling');
+      this.setColour(200);
+      this.setTooltip('Set Y Axis styling');
+      this.setHelpUrl('');
+    },
+  };
+
+  
+  
 
 const styles = {
     init: function() {

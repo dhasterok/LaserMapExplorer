@@ -66,7 +66,7 @@ from src.app.SpecialTools import SpecialPage
 from src.common.NoteTaking import Notes
 from src.common.Browser import Browser
 from src.app.Workflow import Workflow
-from src.app.InfoViewer import InfoDock
+# from src.app.InfoViewer import InfoDock
 import src.app.QuickView as QV
 from src.app.config import BASEDIR, ICONPATH, SSPATH, DEBUG, load_stylesheet
 from src.common.ExtendedDF import AttributeDataFrame

@@ -1,5 +1,6 @@
 // Import Blockly core.
 import * as Blockly from 'blockly/core';
+import * as BlockDynamicConnection from '@blockly/block-dynamic-connection';
 // Import a message file.
 import * as En from 'blockly/msg/en';
 import 'blockly/blocks';  // Import default blocks
@@ -11,8 +12,18 @@ import './helper_functions';  // Import helper functions
 
 Blockly.setLocale(En);  // Set the locale to English
 
-var workspace = Blockly.inject('blocklyDiv',
-    {toolbox: document.getElementById('toolbox')});
+// Inject the Blockly workspace and configure it with the dynamic connection plugin
+var workspace = Blockly.inject('blocklyDiv', {
+    toolbox: document.getElementById('toolbox'), // Your toolbox configuration
+    plugins: {
+        connectionPreviewer: BlockDynamicConnection.decoratePreviewer(
+            Blockly.InsertionMarkerPreviewer // Default previewer enhanced with dynamic connections
+        ),
+    },
+});
+
+// Add a change listener to finalize connections dynamically when blocks are removed or rearranged
+workspace.addChangeListener(BlockDynamicConnection.finalizeConnections);
 
 window.workspace = workspace;
 window.Blockly = Blockly

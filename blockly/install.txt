@@ -11,7 +11,7 @@ npx webpack --config webpack.config.js
 
 
 /*
-Summary of Naming Conventions:
+Summary of Naming Conventions:r
 
 JavaScript
 Use camelCase for variables and functions.

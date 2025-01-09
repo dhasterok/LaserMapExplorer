@@ -2,6 +2,7 @@
  * Helper Functions
  ******************************/
 import * as Blockly from 'blockly/core';
+import * as BlockDynamicConnection from '@blockly/block-dynamic-connection';
 import { sample_ids,fieldTypeList, updateSampleIds, spot_data } from './globals';
 import {enableSampleIDsBlockFunction} from './custom_blocks'
 

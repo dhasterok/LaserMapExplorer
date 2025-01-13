@@ -1151,6 +1151,177 @@ Blockly.Blocks['coloring'] = {
     },
 };
 
+Blockly.Blocks['add_scale'] = {
+    init: function () {
+        this.appendDummyInput('scaleHeader')
+        .setAlign(Blockly.inputs.Align.CENTRE)
+        .appendField('Add Scale');
+        this.appendDummyInput('colorSelect')
+        .appendField('Color')
+        .appendField(new Blockly.FieldColour('#ff0000'), 'scaleColor');
+        this.appendDummyInput('unitsHeader')
+        .appendField('Units')
+        .appendField(new Blockly.FieldTextInput(''), 'scaleUnits');
+        this.appendDummyInput('lengthHeader')
+        .appendField('Length')
+        .appendField(new Blockly.FieldTextInput(''), 'scaleLength');
+        this.appendDummyInput('directionHeader')
+        .appendField('Direction')
+        .appendField(new Blockly.FieldDropdown([
+            ['Horizontal', 'horizontal'],
+            ['Vertical', 'vertical']
+            ]), 'scaleDirection');
+        this.setPreviousStatement(true, 'Styling');
+        this.setNextStatement(true, 'Styling');
+        this.setColour(220);
+        this.setTooltip('Add a scale to the plot.');
+        this.setHelpUrl('');
+    },
+};
+
+Blockly.Blocks['marker_properties'] = {
+    init: function () {
+        this.appendDummyInput('markerHeader')
+        .setAlign(Blockly.inputs.Align.CENTRE)
+        .appendField('Marker Properties');
+        this.appendDummyInput('symbolHeader')
+        .appendField('Symbol')
+        .appendField(new Blockly.FieldDropdown([
+            ['Circle', 'circle'],
+            ['Square', 'square'],
+            ['Diamond', 'diamond'],
+            ['Triangle (Up)', 'triangleUp'],
+            ['Triangle (Down)', 'triangleDown']
+            ]), 'markerSymbol');
+        this.appendDummyInput('sizeHeader')
+        .appendField('Size')
+        .appendField(new Blockly.FieldNumber(6, 1, 50), 'markerSize');
+        this.appendDummyInput('colorSelect')
+        .appendField('Color')
+        .appendField(new Blockly.FieldColour('#ff0000'), 'markerColor');
+        this.setPreviousStatement(true, 'Styling');
+        this.setNextStatement(true, 'Styling');
+        this.setColour(230);
+        this.setTooltip('Set marker properties for the plot.');
+        this.setHelpUrl('');
+    },
+};
+
+Blockly.Blocks['line_properties'] = {
+    init: function () {
+        this.appendDummyInput('lineHeader')
+        .setAlign(Blockly.inputs.Align.CENTRE)
+        .appendField('Line Properties');
+        this.appendDummyInput('lineWidthHeader')
+        .appendField('Width')
+        .appendField(new Blockly.FieldNumber(1, 0.1, 10, 0.1), 'lineWidth');
+        this.appendDummyInput('lineColorHeader')
+        .appendField('Color')
+        .appendField(new Blockly.FieldColour('#000000'), 'lineColor');
+        this.setPreviousStatement(true, 'Styling');
+        this.setNextStatement(true, 'Styling');
+        this.setColour(230);
+        this.setTooltip('Set line properties for the plot.');
+        this.setHelpUrl('');
+    },
+};
+
+Blockly.Blocks['color_select'] = {
+    init: function () {
+        this.appendDummyInput('colorHeader')
+        .appendField('Color Select')
+        .appendField(new Blockly.FieldColour('#ff0000'), 'colorPicker');
+        this.setOutput(true, null);
+        this.setColour(240);
+        this.setTooltip('Select a color.');
+        this.setHelpUrl('');
+    },
+};
+
+Blockly.Blocks['color_field'] = {
+    init: function () {
+        this.appendDummyInput('colorFieldHeader')
+        .setAlign(Blockly.inputs.Align.CENTRE)
+        .appendField('Color Field');
+        this.appendDummyInput('fieldTypeHeader')
+        .appendField('Field Type')
+        .appendField(new Blockly.FieldDropdown([
+            ['Type A', 'typeA'],
+            ['Type B', 'typeB']
+            ]), 'fieldType');
+        this.appendDummyInput('fieldHeader')
+        .appendField('Field')
+        .appendField(new Blockly.FieldDropdown([
+            ['Option 1', 'option1'],
+            ['Option 2', 'option2']
+            ]), 'field');
+        this.setPreviousStatement(true, 'Styling');
+        this.setNextStatement(true, 'Styling');
+        this.setColour(245);
+        this.setTooltip('Select a field for coloring.');
+        this.setHelpUrl('');
+    },
+};
+
+Blockly.Blocks['colormap'] = {
+    init: function () {
+        this.appendDummyInput('colormapHeader')
+        .setAlign(Blockly.inputs.Align.CENTRE)
+        .appendField('Colormap');
+        this.appendDummyInput('mapHeader')
+        .appendField('Colormap')
+        .appendField(new Blockly.FieldDropdown([
+            ['Jet', 'jet'],
+            ['Viridis', 'viridis'],
+            ['Plasma', 'plasma']
+            ]), 'colormap');
+        this.appendDummyInput('reverseHeader')
+        .appendField('Reverse')
+        .appendField(new Blockly.FieldCheckbox('FALSE'), 'reverse');
+        this.appendDummyInput('directionHeader')
+        .appendField('Direction')
+        .appendField(new Blockly.FieldDropdown([
+            ['Horizontal', 'horizontal'],
+            ['Vertical', 'vertical']
+            ]), 'direction');
+        this.setPreviousStatement(true, 'Styling');
+        this.setNextStatement(true, 'Styling');
+        this.setColour(250);
+        this.setTooltip('Set colormap properties.');
+        this.setHelpUrl('');
+    },
+};
+
+Blockly.Blocks['show_mass'] = {
+    init: function () {
+        this.appendDummyInput('massHeader')
+        .appendField('Show Mass')
+        .appendField(new Blockly.FieldCheckbox('FALSE'), 'showMass');
+        this.setPreviousStatement(true, 'Styling');
+        this.setNextStatement(true, 'Styling');
+        this.setColour(255);
+        this.setTooltip('Toggle visibility of mass in the plot.');
+        this.setHelpUrl('');
+    },
+};
+
+Blockly.Blocks['color_by_cluster'] = {
+    init: function () {
+        this.appendDummyInput('clusterHeader')
+        .appendField('Color by Cluster');
+        this.appendDummyInput('clusterOptions')
+        .appendField(new Blockly.FieldDropdown([
+            ['Cluster 1', 'cluster1'],
+            ['Cluster 2', 'cluster2']
+            ]), 'clusterType');
+        this.setPreviousStatement(true, 'Styling');
+        this.setNextStatement(true, 'Styling');
+        this.setColour(255);
+        this.setTooltip('Color plot based on cluster classification.');
+        this.setHelpUrl('');
+    },
+};
+
 const styles = {
     init: function() {
         this.appendDummyInput('stylesHeader')

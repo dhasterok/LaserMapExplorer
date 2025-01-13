@@ -1,16 +1,16 @@
 import re, copy
-from src.app.config import DEBUG_DATA, DEBUG_PLOT
+from src.app.config import DEBUG_PLOT
 import numpy as np
 import pandas as pd
 from src.common.ExtendedDF import AttributeDataFrame
 from scipy.stats import yeojohnson
 # from kneed import KneeLocator
-from sklearn.cluster import DBSCAN
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 from src.common.SortAnalytes import sort_analytes
 from src.common.outliers import chauvenet_criterion, quantile_and_difference
+from PyQt5.QtWidgets import QMessageBox
 
 class SampleObj:
     """Creates a sample object to store and manipulate geochemical data in map form
@@ -27,8 +27,14 @@ class SampleObj:
         Sample identifier.
     file_path : str
         Path to data file for sample_id
+    outlier_method : str
+        Method used ot handle outliers in the dataset
     negative_method : str
         Method used to handle negative values in the dataset
+    ref_chem : pandas.DataFrame
+        Reference chemistry for normalizing data
+    debug : bool, optional
+        If true, will result in verbose output to stdout
     
     Methods
     -------
@@ -88,17 +94,15 @@ class SampleObj:
     get_vector :
         Creates a dictionary of values for plotting
 
+    ref_chem : dict
+        Reference chemistry. By default `None`.
+
     Attributes
     ----------
     update_crop_mask :
         Automatically update the crop_mask whenever crop bounds change.
     reset_crop : 
         Resets dataframe to original bounds.
-    update_resolution :
-    prep_data :
-    outlier_detection :
-    transform_array :
-    swap_xy :
     raw_data :
     filter_df : (pandas.DataFrame) -- stores filters for each sample
         | 'field_type' : (str) -- field type
@@ -181,8 +185,10 @@ class SampleObj:
         | 'cluster_mask' : (MaskObj) -- mask created from selected or inverse selected cluster groups.  Once this mask is set, it cannot be reset unless it is turned off, clustering is recomputed, and selected clusters are used to produce a new mask.
         | 'mask' : () -- combined mask, derived from filter_mask & 'polygon_mask' & 'crop_mask'
     """    
-    def __init__(self, sample_id, file_path, outlier_method, negative_method):
-        if DEBUG_DATA:
+    def __init__(self, sample_id, file_path, outlier_method, negative_method, ref_chem=None, debug=False):
+        self.debug = debug
+
+        if self.debug:
             print(f"SampleeObj.__init__\n  sample_id: {sample_id}\n  file_path: {file_path}\n  outlier_method: {outlier_method}\n  negative_method: {negative_method}")
 
         self.sample_id = sample_id
@@ -196,6 +202,11 @@ class SampleObj:
 
         self._default_difference_lower_bound= 0.005
         self._default_difference_upper_bound= 0.995
+
+        self._ref_chem = ref_chem
+
+        self.polygon = {}
+        self.profile = {}
 
         # filter dataframe
         self.filter_df = pd.DataFrame()
@@ -220,7 +231,7 @@ class SampleObj:
 
         What is not reset?
         """        
-        if DEBUG_DATA:
+        if self.debug:
             print("reset_data")
 
         # load data
@@ -251,9 +262,10 @@ class SampleObj:
         self.raw_data = AttributeDataFrame(data=sample_df)
         self.raw_data.set_attribute(list(self.raw_data.columns), 'data_type', data_type)
 
-        self.x = self.orig_x = self.raw_data['X']
-        self.y = self.orig_y = self.raw_data['Y']
-
+        self.x = self._orig_x = self.raw_data['X']
+        self.y = self._orig_y = self.raw_data['Y']
+        self._orig_dx = self.dx
+        self._orig_dy = self.dy
 
         # initialize X and Y axes bounds for plotting and cropping, initially the entire map
         self._xlim = [self.raw_data['X'].min(), self.raw_data['X'].max()]
@@ -285,7 +297,7 @@ class SampleObj:
 
         _extended_summary_
         """        
-        if DEBUG_DATA:
+        if self.debug:
             print("reset_data_handling")
 
         coordinate_columns = self.raw_data.match_attribute(attribute='data_type',value='coordinate')
@@ -337,6 +349,15 @@ class SampleObj:
     # Define properties and setter functions
     # --------------------------------------
     # note properties are based on the cropped X and Y values
+    @property
+    def ref_chem(self):
+        """dict: Reference chemistry"""
+        return self._ref_chem
+
+    @ref_chem.setter
+    def ref_chem(self, d):
+        self._ref_chem = d
+
     @property
     def x(self):
         """numpy.ndarray: Value of x-coordinate associated with map data"""
@@ -536,7 +557,7 @@ class SampleObj:
             If a mask is provided, its length must match the height of `processed_data`, and the number of `True` values
             in the mask must match the number of rows in `array`.
         """
-        if DEBUG_DATA:
+        if self.debug:
             print(f"add_columns") 
 
         # Ensure column_names is a list, even if adding a single column
@@ -625,7 +646,7 @@ class SampleObj:
         ValueError
             Raises an error if the column is not a member of the AttributeDataFrame.
         """        
-        if DEBUG_DATA:
+        if self.debug:
             print(f"delete_column") 
 
         # Check if the column exists
@@ -655,10 +676,16 @@ class SampleObj:
             A dictionary with attribute_values and columns that match.
         """
         return self.processed_data.get_attribute_dict(attribute_name)
+
+    def reset_resolution(self):
+        """Resets dx and dy to initial values
+        """        
+        self.dx = self._orig_dx
+        self.dy = self._orig_dy
         
     def swap_xy(self):
         """Swaps data in a SampleObj."""        
-        if DEBUG_DATA:
+        if self.debug:
             print(f"swap_xy") 
 
         self.is_swapped = not self.is_swapped
@@ -674,6 +701,9 @@ class SampleObj:
         self.x = self.raw_data['X']
         self.y = self.raw_data['Y']
 
+        # swap orientation of original dx and dy to be consistent with X and Y
+        self._orig_dx, self._orig_dy = self._orig_dy, self._orig_dx
+
     def _swap_xy(self, df):
         """Swaps X and Y of a dataframe
 
@@ -684,7 +714,7 @@ class SampleObj:
         df : pandas.DataFrame
             data frame to swap X and Y coordinates
         """
-        if DEBUG_DATA:
+        if self.debug:
             print(f"_swap_xy") 
 
         xtemp = df['Y']
@@ -698,7 +728,7 @@ class SampleObj:
 
         Recalculates X and Y for a dataframe
         """  
-        if DEBUG_DATA:
+        if self.debug:
             print(f"swap_resolution")  
 
         X = round(self.raw_data['X']/self.dx)
@@ -718,12 +748,17 @@ class SampleObj:
         self.processed_data['Y'] = self.dy*Yp
 
     def reset_crop(self):
-        """Reset the data to the new bounds.
+        """Reset the data to the original bounds.
 
-        _extended_summary_
+        Reseting the data to the original bounds results in deleting progress on analyses,
+        computations, etc.
         """
-        if DEBUG_DATA:
+        if self.debug:
             print(f"reset_crop") 
+
+        # bring up dialog asking if user wishes to proceed
+        if not self.confirm_reset():
+            return
 
         # Need to update to keep computed columns?
         self.reset_data()
@@ -740,7 +775,7 @@ class SampleObj:
         analyte_2 : str
             Analyte field to be used as denominator of ratio.
         """
-        if DEBUG_DATA:
+        if self.debug:
             print(f"compute_ratio, analyte_1: {analyte_1}, analyte_2: {analyte_2}") 
 
         # Create a mask where both analytes are positive
@@ -760,7 +795,7 @@ class SampleObj:
 
         _extended_summary_
         """
-        if DEBUG_DATA:
+        if self.debug:
             print(f"cluster_data") 
 
         # Step 1: Clustering
@@ -835,7 +870,7 @@ class SampleObj:
             processed_data has not yet been initialized.  processed_data should be created when the sample is initialized and prep_data is
             run for the first time.
         """ 
-        if DEBUG_DATA:
+        if self.debug:
             print(f"prep_data, field {field}") 
 
         attribute_df = None
@@ -946,7 +981,7 @@ class SampleObj:
                 transformed_data = self.clip_outliers(self.processed_data[col][cluster_mask], lq, uq, d_lq, d_uq)
                 self.processed_data.loc[cluster_mask, col] = transformed_data
 
-                if DEBUG_DATA:
+                if self.debug:
                     print(f"outlier_detection\n  percentiles: {[pl, pu, dpl, dpu]}\n  compositional: {compositional}\n  max_val: {max_val}")
 
                 transformed_data = self.quantile_and_difference(self.processed_data[col][cluster_mask], lq, uq, d_lq, d_uq, compositional, max_val)
@@ -972,7 +1007,7 @@ class SampleObj:
         int
             Returns the optimal number of k-means clusters.
         """
-        if DEBUG_DATA:
+        if self.debug:
             print(f"k_optimal_clusters, max_clusters: {max_clusters}") 
 
         inertia = []
@@ -1055,7 +1090,7 @@ class SampleObj:
         numpy.ndarray
             Clipped data vector
         """        
-        if DEBUG_DATA:
+        if self.debug:
             print(f"clip_outliers\n  outlier_method: {outlier_method}\n  pl: {pl}\n  pu: {pu}\n  dpl: {dpl}\n  dpu: {dpu}")
 
         t_array = np.copy(array)
@@ -1102,7 +1137,7 @@ class SampleObj:
         numpy.ndarray
             Transformed data
         """
-        if DEBUG_DATA:
+        if self.debug:
             print(f"transform_array:  negative_method: {negative_method}")
 
         match negative_method.lower():
@@ -1149,7 +1184,7 @@ class SampleObj:
         update : bool, optional
             Update the scale information of the data, by default False
         """ 
-        if DEBUG_DATA:
+        if self.debug:
             print(f"update_norm:  field: {field},  norm: {norm}")
 
         if field is not None: #if normalising single analyte
@@ -1159,7 +1194,7 @@ class SampleObj:
 
         self.prep_data(field)
 
-    def get_map_data(self, field, field_type='Analyte', norm=False, ref_chem=None, processed=True):
+    def get_map_data(self, field, field_type='Analyte', norm=False, processed=True):
         """
         Retrieves and processes the mapping data for the given sample and analytes
 
@@ -1176,16 +1211,14 @@ class SampleObj:
         norm : str
             Scale data as linear, log, etc. based on stored norm.  If scale_data is `False`, the
             data are returned with a linear scale.  By default `False`.
-        ref_chem : dict
-            Reference chemistry. By default `None`.
 
         Returns
         -------
         pandas.DataFrame
             Processed data for plotting. This is only returned if analysis_type is not 'laser' or 'hist'.
         """
-        if DEBUG_DATA:
-            print(f"get_map_data\n  field type: {field_type}\n  field: {field}\n  norm: {norm}\n  ref_chem: {ref_chem}\n  processed: {processed}")
+        if self.debug:
+            print(f"get_map_data\n  field type: {field_type}\n  field: {field}\n  norm: {norm}\n  processed: {processed}")
         # ----begin debugging----
         # print('[get_map_data] sample_id: '+sample_id+'   field_type: '+field_type+'   field: '+field)
         # ----end debugging----
@@ -1223,7 +1256,7 @@ class SampleObj:
                 
                 # normalize
                 if 'normalized' in field_type:
-                    refval = ref_chem[re.sub(r'\d', '', field).lower()]
+                    refval = self.ref_chem[re.sub(r'\d', '', field).lower()]
                     df['array'] = df['array'] / refval
 
             case 'Ratio' | 'Ratio (normalized)':
@@ -1235,8 +1268,8 @@ class SampleObj:
                 
                 # normalize
                 if 'normalized' in field_type:
-                    refval_1 = ref_chem[re.sub(r'\d', '', field_1).lower()]
-                    refval_2 = ref_chem[re.sub(r'\d', '', field_2).lower()]
+                    refval_1 = self.ref_chem[re.sub(r'\d', '', field_1).lower()]
+                    refval_2 = self.ref_chem[re.sub(r'\d', '', field_2).lower()]
                     df['array'] = df['array'] * (refval_2 / refval_1)
 
                 #get norm value
@@ -1266,7 +1299,7 @@ class SampleObj:
         bool
             Analytes included from processed data
         """
-        if DEBUG_DATA:
+        if self.debug:
             print("get_processed_data")
 
         if self.sample_id == '':
@@ -1303,7 +1336,7 @@ class SampleObj:
         return df, use_analytes
     
     # extracts data for scatter plot
-    def get_vector(self, field_type, field, norm='linear', ref_chem=None, processed=True):
+    def get_vector(self, field_type, field, norm='linear', processed=True):
         """Creates a dictionary of values for plotting
 
         Returns
@@ -1312,8 +1345,8 @@ class SampleObj:
             Dictionary with array and additional relevant plot data, contains
             'field', 'type', 'label', and 'array'.
         """
-        if DEBUG_DATA:
-            print(f"get_vector\n  field_type: {field_type}\n  field: {field}\n  norm: {norm}\n  ref_chem: {ref_chem}\n  processed: {processed}")
+        if self.debug:
+            print(f"get_vector\n  field_type: {field_type}\n  field: {field}\n  norm: {norm}\n  processed: {processed}")
 
         # initialize dictionary
         value_dict = {'type': field_type, 'field': field, 'label': None, 'array': None}
@@ -1329,7 +1362,7 @@ class SampleObj:
             value_dict['label'] = value_dict['field'] + ' (' + unit + ')'
 
         # add array
-        df = self.get_map_data(field=field, field_type=field_type, norm='linear', ref_chem=ref_chem, processed=processed)
+        df = self.get_map_data(field=field, field_type=field_type, norm='linear', processed=processed)
         value_dict['array'] = df['array'][self.mask].values if not df.empty else []
 
         return value_dict
@@ -1445,3 +1478,49 @@ class SampleObj:
     #                 else:
     #                     t_array = np.copy(array)
     #             return t_array
+
+    def apply_field_filters(self):
+        """Applies filters based on field values.
+        
+        Field-based filters are stored in ``self.filter_df``.  This method updates ``self.filter_mask``.
+        """        
+        # Check if rows in self.data[sample_id]['filter_info'] exist and filter array in current_plot_df
+        if self.filter_df.empty:
+            self.filter_mask = np.ones_like(self.processed_data['X'].values, dtype=bool)
+            return
+
+        # by creating a mask based on min and max of the corresponding filter analytes
+        for index, filter_row in self.filter_df.iterrows():
+            if filter_row['use']:
+                field_df = self.get_map_data(filter_row['field'], filter_row['field_type'])
+                
+                operator = filter_row['operator']
+                if operator == 'and':
+                    self.filter_mask = self.filter_mask & ((filter_row['min'] <= field_df['array'].values) & (field_df['array'].values <= filter_row['max']))
+                elif operator == 'or':
+                    self.filter_mask = self.filter_mask | ((filter_row['min'] <= field_df['array'].values) & (field_df['array'].values <= filter_row['max']))
+
+    def confirm_reset():
+        """A simple dialog that ensures the user wishes to reset data
+
+        Returns
+        -------
+        bool
+            ``True`` indicates user clicked ``Yes``, ``False`` for ``No``
+        """        
+        # Create a message box
+        msg_box = QMessageBox()
+        msg_box.setIcon(QMessageBox.Warning)
+        msg_box.setWindowTitle("Confirm Reset")
+        msg_box.setText("Resetting to the full map will delete all analyses, computed fields, and reset filters.")
+        msg_box.setInformativeText("Do you wish to proceed?")
+        msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        msg_box.setDefaultButton(QMessageBox.No)
+
+        # Show the message box and get the user's response
+        response = msg_box.exec()
+
+        # Check the user's response
+        if response == QMessageBox.No:
+            return False  # User chose not to proceed
+        return True  # User chose to proceed

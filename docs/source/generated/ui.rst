@@ -28,6 +28,7 @@
    :recursive:
 
    ui.AnalyteSelectionDialog
+   ui.FieldSelectionDialog
    ui.FileSelectorDialog
    ui.IsotopeSelectionDialog
    ui.MainWindow

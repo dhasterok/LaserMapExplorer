@@ -57,7 +57,7 @@ Shortcuts
 The shortcuts section offers convenient buttons for frequently used functions.  YOu can add the current plot to the plot tree (|icon-tree|) for easy reference later.  The calculator button (|icon-calculator|) opens the tool for custom computations, enabling the creation of new fields or ratios based on existing data.  For detailed information about creating custom calculations, see :doc:`custom_fields`.
 
 Help and Utilities
-=================
+==================
 
 The help and utilities section enhances your experience with *LaME*.  If you encounter any issues, report bugs directly through the interface using the bug report button (|icon-bug|).  Access comprehensive help documentation through the help button (|icon-question|).  To reset your workspace, use the reset interface button (|icon-nuke|) to clear the current session.  The theme toggle (|icon-sun-and-moon|) switches between dark and light modes to suit your working environment.
 

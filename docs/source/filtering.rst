@@ -39,7 +39,7 @@ Polygon Masking
 
    Plot displaying the polygon mask.
 
-Polygons can be used to filter specific regions of your data, to create a polygon mask::
+Polygons can be used to filter specific regions of your data, to create a polygon mask:
 
 1. Click the New Polygon button (|icon-polygon-new|)
 2. Left-click to place vertices on the map

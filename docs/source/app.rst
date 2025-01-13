@@ -20,22 +20,6 @@ app.AnalyteSelectionWindow module
    :undoc-members:
    :show-inheritance:
 
-app.Browser module
-------------------
-
-.. automodule:: app.Browser
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-app.Calculator module
----------------------
-
-.. automodule:: app.Calculator
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 app.CropImage module
 --------------------
 
@@ -64,14 +48,6 @@ app.LameIO module
 -----------------
 
 .. automodule:: app.LameIO
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-app.Logger module
------------------
-
-.. automodule:: app.Logger
    :members:
    :undoc-members:
    :show-inheritance:

@@ -20,6 +20,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
+    "@blockly/block-dynamic-connection": "^0.7.12",
     "@blockly/field-colour": "^5.0.9",
     "ajv-formats": "^3.0.1",
     "schema-utils": "^4.2.0"

@@ -1,3 +1,4 @@
+
 # This file is used to ignore files which are generated
 # ----------------------------------------------------------------------------
 
@@ -82,4 +83,3 @@ blockly/node_modules
 # --------
 *.dll
 *.exe
-

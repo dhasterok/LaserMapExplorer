@@ -1,7 +1,13 @@
 import os, pickle
-from PyQt5 import QtCore
-from PyQt5.QtGui import QStandardItem, QStandardItemModel
-from PyQt5.QtWidgets import ( QMessageBox, QInputDialog, QWidget, QTableWidgetItem, QVBoxLayout )
+from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtGui import QStandardItem, QStandardItemModel, QIcon, QFont, QIntValidator
+from PyQt5.QtWidgets import ( 
+        QMessageBox, QInputDialog, QWidget, QTableWidgetItem, QVBoxLayout, QHBoxLayout, QGroupBox,
+        QToolButton, QComboBox, QSpinBox, QSizePolicy, QFormLayout, QListView, QToolBar,
+        QAction, QLabel, QHeaderView, QTableWidget, QScrollArea, QMainWindow
+    )
+from src.common.CustomWidgets import CustomDockWidget, CustomLineEdit, CustomComboBox
+from src.app.UIControl import UIFieldLogic
 from pyqtgraph import ( ScatterPlotItem )
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -9,6 +15,333 @@ import matplotlib.colors as colors
 from matplotlib.collections import PathCollection
 import numpy as np
 
+class ProfileDock(CustomDockWidget, UIFieldLogic):
+    def __init__(self, parent=None):
+        if not isinstance(parent, QMainWindow):
+            raise TypeError("Parent must be an instance of QMainWindow.")
+
+        super().__init__(parent)
+        self.profiling = Profiling(self)
+
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+
+        container = QWidget()
+        container_layout = QVBoxLayout()
+
+        # create toolbar for editing profile plots
+        toolbar = QToolBar("Profile Toolbar", self)
+        toolbar.setIconSize(QSize(24, 24))
+        toolbar.setMovable(False)  # Optional: Prevent toolbar from being dragged out
+
+        # open profiles
+        self.actionOpenProfile = QAction()
+        self.actionOpenProfile.setIcon(QIcon(":resources/icons/icon-open-file-64.svg"))
+        self.actionOpenProfile.setToolTip("Open profiles")
+
+        # profile list
+        self.profile_label = QLabel()
+        self.profile_label.setText("Profile:")
+        self.profile_combobox = QComboBox()
+        self.profile_combobox.setMinimumWidth(200)
+        self.profile_combobox.setToolTip("Select a profile to view/edit")
+        self.profile_combobox.setPlaceholderText("Add or load a profile...")
+
+        # delete profiles
+        self.actionDeleteProfile = QAction()
+        self.actionDeleteProfile.setIcon(QIcon(":resources/icons/icon-delete-64.svg"))
+        self.actionDeleteProfile.setToolTip("Delete profile")
+
+        # create new profile and set control points
+        self.actionControlPoints = QAction()
+        self.actionControlPoints.setIcon(QIcon(":resources/icons/icon-profile-64.svg"))
+        self.actionControlPoints.setToolTip("Create new profile and set control points")
+        self.actionControlPoints.setCheckable(True)
+        self.actionControlPoints.setChecked(False)
+
+        # Interpolate profile
+        self.actionInterpolate = QAction()
+        self.actionInterpolate.setIcon(QIcon(":resources/icons/icon-interpolate-64.svg"))
+        self.actionInterpolate.setToolTip("Interpolate between control points")
+        self.actionInterpolate.setCheckable(True)
+        self.actionInterpolate.setChecked(False)
+        self.actionInterpolate.setEnabled(False)
+
+        # Move control point
+        self.actionMovePoint = QAction()
+        self.actionMovePoint.setIcon(QIcon(":resources/icons/icon-move-point-64.svg"))
+        self.actionMovePoint.setToolTip("Move a control point")
+        self.actionMovePoint.setCheckable(True)
+        self.actionMovePoint.setChecked(False)
+        self.actionMovePoint.setEnabled(False)
+
+        # Add control point
+        self.actionAddPoint = QAction()
+        self.actionAddPoint.setIcon(QIcon(":resources/icons/icon-add-point-64.svg"))
+        self.actionAddPoint.setToolTip("Add a control point")
+        self.actionAddPoint.setCheckable(True)
+        self.actionAddPoint.setChecked(False)
+        self.actionAddPoint.setEnabled(False)
+
+        # Remove control point
+        self.actionRemovePoint = QAction()
+        self.actionRemovePoint.setIcon(QIcon(":resources/icons/icon-remove-point-64.svg"))
+        self.actionRemovePoint.setToolTip("Remove a control point")
+        self.actionRemovePoint.setCheckable(True)
+        self.actionRemovePoint.setChecked(False)
+        self.actionRemovePoint.setEnabled(False)
+
+        # edit profile button
+        self.actionEdit = QAction()
+        self.actionEdit.setIcon(QIcon(":resources/icons/icon-edit-64.svg"))
+        self.actionEdit.setToolTip("Toggle profile editing mode")
+        self.actionEdit.setCheckable(True)
+        self.actionEdit.setChecked(False)
+
+        # point toggle button
+        self.actionTogglePoint = QAction()
+        self.actionTogglePoint.setIcon(QIcon(":resources/icons/icon-show-hide-64.svg"))
+        self.actionTogglePoint.setToolTip("Toggle point visibility")
+        self.actionTogglePoint.setCheckable(True)
+        self.actionTogglePoint.setChecked(False)
+        self.actionTogglePoint.setEnabled(False)
+
+        # export profile figure button
+        self.actionExport = QAction()
+        self.actionExport.setIcon(QIcon(":resources/icons/icon-save-file-64.svg"))
+        self.actionExport.setToolTip("Export profile image or data")
+
+        toolbar.addAction(self.actionOpenProfile)
+        toolbar.addWidget(self.profile_label)
+        toolbar.addWidget(self.profile_combobox)
+        toolbar.addAction(self.actionDeleteProfile)
+        toolbar.addSeparator()
+        toolbar.addAction(self.actionControlPoints)
+        toolbar.addAction(self.actionInterpolate)
+        toolbar.addAction(self.actionMovePoint)
+        toolbar.addAction(self.actionAddPoint)
+        toolbar.addAction(self.actionRemovePoint)
+        toolbar.addSeparator()
+        toolbar.addAction(self.actionEdit)
+        toolbar.addAction(self.actionTogglePoint)
+        toolbar.addAction(self.actionExport)
+
+        container_layout.addWidget(toolbar)
+
+        dock_layout = QHBoxLayout()
+
+        left_layout = QVBoxLayout()
+        dock_layout.addLayout(left_layout)
+
+        # create widget for placing profile plots
+        self.widgetProfilePlot = QWidget()
+        self.widgetProfilePlot.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        dock_layout.addWidget(self.widgetProfilePlot)
+        # create profile controls
+
+        profile_tools = QGroupBox()
+        profile_tools.setTitle("Profile Options")
+        profile_tools.setMinimumWidth(180)
+        profile_tools.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+        profile_tools.setContentsMargins(3,3,3,3)
+        profile_tools_layout = QFormLayout()
+        profile_group_layout = QVBoxLayout()
+        profile_group_layout.addLayout(profile_tools_layout)
+        profile_group_layout.setContentsMargins(3,3,3,3)
+        profile_tools.setLayout(profile_group_layout)
+
+        self.point_sort_combobox = QComboBox()
+        self.point_sort_combobox.addItems(['no','x','y'])
+        self.point_sort_combobox.setToolTip("Sort the control points")
+        self.radius_line_edit = CustomLineEdit()
+        self.radius_line_edit.value = 5
+        self.radius_line_edit.setToolTip("Set radius for averaging points")
+        self.threshold_line_edit = CustomLineEdit()
+        self.threshold_line_edit.value = 500
+        self.threshold_line_edit.setToolTip("")
+        self.spacing_line_edit = CustomLineEdit()
+        self.spacing_line_edit.value = 50
+        self.spacing_line_edit.setToolTip("Distance between interpolated points")
+        self.point_type_combobox = QComboBox()
+        self.point_type_combobox.addItems(['median + IQR', 'mean + stdev', 'mean + stderr'])
+        self.point_type_combobox.setToolTip("Statistic for estimating point value")
+
+        profile_tools_layout.addRow("Point sort",self.point_sort_combobox)
+        profile_tools_layout.addRow("Point radius",self.radius_line_edit)
+        profile_tools_layout.addRow("Y-Axis threshold",self.threshold_line_edit)
+        profile_tools_layout.addRow("Interp. distance",self.spacing_line_edit)
+        profile_tools_layout.addRow("Point type",self.point_type_combobox)
+
+
+        self.control_points_table = QTableWidget()
+        font = QFont()
+        font.setPointSize(11)
+        font.setStyleStrategy(QFont.PreferDefault)
+        self.control_points_table.setFont(font)
+        #self.control_points_table.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
+        self.control_points_table.setObjectName("control_points_table")
+        self.control_points_table.setColumnCount(3)
+        self.control_points_table.setRowCount(0)
+        item = QTableWidgetItem()
+        item.setText("Point")
+        font = QFont()
+        font.setPointSize(11)
+        item.setFont(font)
+        self.control_points_table.setHorizontalHeaderItem(0, item)
+        item = QTableWidgetItem()
+        item.setText("X")
+        font = QFont()
+        font.setPointSize(11)
+        item.setFont(font)
+        self.control_points_table.setHorizontalHeaderItem(1, item)
+        item = QTableWidgetItem()
+        item.setText("Y")
+        font = QFont()
+        font.setPointSize(11)
+        item.setFont(font)
+        self.control_points_table.setHorizontalHeaderItem(2, item)
+        self.control_points_table.horizontalHeader().setDefaultSectionSize(80)
+        self.control_points_table.horizontalHeader().setStretchLastSection(True)
+        self.control_points_table.setSelectionBehavior(QTableWidget.SelectRows)
+
+        header = self.control_points_table.horizontalHeader()
+        header.setSectionResizeMode(0,QHeaderView.Stretch)
+        header.setSectionResizeMode(1,QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(2,QHeaderView.ResizeToContents)
+
+        profile_group_layout.addWidget(self.control_points_table)
+
+        left_layout.addWidget(profile_tools)
+
+        
+        # create profile plot controls
+        axis_tools = QGroupBox()
+        axis_tools.setTitle("Axis Options")
+        axis_tools.setMinimumWidth(180)
+        axis_tools.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+        axis_tools.setContentsMargins(3,3,3,3)
+        axis_tools_layout = QVBoxLayout()
+        axis_tools_layout.setContentsMargins(3,3,3,3)
+        axis_tools.setLayout(axis_tools_layout)
+
+        subplot_layout = QFormLayout()
+
+        # Create first spin box and label
+        self.num_subplots_spinbox = QSpinBox()
+        self.num_subplots_spinbox.setRange(1, 6)  # Set range for spin box
+        self.num_subplots_spinbox.setValue(1)     # Set default value
+
+        # Create second spin box and label
+        self.selected_subplot_spinbox = QSpinBox()
+        self.selected_subplot_spinbox.setRange(1, 1)
+        self.selected_subplot_spinbox.setValue(1)
+
+        # Add the spin boxes and labels to the form layout
+        subplot_layout.addRow("No. subplots", self.num_subplots_spinbox)
+        subplot_layout.addRow("Selected subplot", self.selected_subplot_spinbox)
+
+        self.field_type_combobox = CustomComboBox(update_callback=lambda: self.update_field_type_combobox(self.field_type_combobox))
+        self.field_type_combobox.setToolTip("Select field type")
+
+        field_layout = QHBoxLayout()
+
+        self.field_combobox = QComboBox()
+        self.field_combobox.setToolTip("Select field")
+
+
+        self.add_field_button = QToolButton()
+        add_icon = QIcon(":resources/icons/icon-accept-64.svg")
+        if not add_icon.isNull():
+            self.add_field_button.setIcon(add_icon)
+        else:
+            self.add_field_button.setText("Select a field to add it to the selected subplot")
+
+        self.remove_field_button = QToolButton()
+        add_icon = QIcon(":resources/icons/icon-reject-64.svg")
+        if not add_icon.isNull():
+            self.remove_field_button.setIcon(add_icon)
+        else:
+            self.remove_field_button.setText("Select a field in the list below to remove it from the selected subplot")
+
+        field_layout.addWidget(self.field_combobox)
+        field_layout.addWidget(self.add_field_button)
+        field_layout.addWidget(self.remove_field_button)
+
+        self.listViewProfile = QListView()
+
+        self.remove_field_button = QToolButton()
+
+
+        axis_tools_layout.addLayout(subplot_layout)
+        axis_tools_layout.addWidget(self.field_type_combobox)
+        axis_tools_layout.addLayout(field_layout)
+        axis_tools_layout.addWidget(self.listViewProfile)
+
+        left_layout.addWidget(axis_tools)
+
+        container_layout.addLayout(dock_layout)
+        container.setLayout(container_layout)
+        scroll_area.setWidget(container)
+
+        self.setWidget(scroll_area)
+
+        self.setFloating(True)
+        self.setWindowTitle("LaME Profiles")
+
+        parent.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self)
+
+
+        # connections for point tools
+        self.point_sort_combobox.currentIndexChanged.connect(self.profiling.plot_profile_and_table)
+        self.radius_line_edit.setValidator(QIntValidator())
+        self.threshold_line_edit.setValidator(QIntValidator())
+        self.actionControlPoints.triggered.connect(lambda: self.parent.comboBoxPlotType.setCurrentText("analyte map"))
+        self.actionControlPoints.triggered.connect(lambda: self.profiling.on_profile_selected(self.profile_combobox.currentText()))
+        # not implemented
+        #self.toolButtonPointUp.clicked.connect(lambda: self.table_fcn.move_row_up(self.tableWidgetProfilePoints))
+        #self.toolButtonPointDown.clicked.connect(lambda: self.table_fcn.move_row_down(self.tableWidgetProfilePoints))
+        #self.toolButtonPointDelete.clicked.connect(lambda: self.table_fcn.delete_row(self.tableWidgetProfilePoints))
+        #self.comboBoxProfileSort.currentIndexChanged.connect(self.profiling.plot_profile_and_table)
+        #self.toolButtonPointSelectAll.clicked.connect(self.tableWidgetProfilePoints.selectAll)
+
+        self.actionInterpolate.triggered.connect(lambda: self.profiling.interpolate_points(interpolation_distance=int(self.spacing_line_edit.text()), radius= int(self.radius_line_edit.text())))
+        # update profile plot when point type is changed
+        self.point_type_combobox.currentIndexChanged.connect(lambda: self.profiling.plot_profiles())
+        # update profile plot when selected subplot is changed
+        self.num_subplots_spinbox.valueChanged.connect(lambda: self.profiling.plot_profiles())
+        # update profile plot when Num subplot is changed
+        self.num_subplots_spinbox.valueChanged.connect(lambda: self.profiling.plot_profiles())
+        self.num_subplots_spinbox.valueChanged.connect(self.update_profile_spinbox)
+        # update profile plot when field in subplot table is changed
+        
+        # Connect the add and remove field buttons to methods
+        self.field_type_combobox.activated.connect(lambda: self.update_field_combobox(self.field_type_combobox, self.field_combobox))
+        self.add_field_button.clicked.connect(self.profiling.add_field_to_listview)
+        self.add_field_button.clicked.connect(lambda: self.profiling.plot_profiles())
+        self.remove_field_button.clicked.connect(self.profiling.remove_field_from_listview)
+        self.remove_field_button.clicked.connect(lambda: self.profiling.plot_profiles())
+        self.field_type_combobox.activated.connect(lambda: self.update_field_combobox(self.comboBoxProfileFieldType, self.comboBoxProfileField))
+
+        # below line is commented because plot_profiles is automatically triggered when user clicks on map once they are in profiling tab
+        # self.toolButtonPlotProfile.clicked.connect(lambda:self.profiling.plot_profiles())
+        # Connect toolButtonProfileEditToggle's clicked signal to toggle edit mode
+        self.actionControlPoints.triggered.connect(self.profiling.toggle_edit_mode)
+
+        # Connect toolButtonProfilePointToggle's clicked signal to toggle point visibility
+        self.actionEdit.triggered.connect(lambda: self.actionTogglePoint.setEnabled(self.actionEdit.isChecked()))
+        self.actionEdit.setChecked(False)
+        self.actionTogglePoint.triggered.connect(self.profiling.toggle_point_visibility)
+        
+        self.actionControlPoints.triggered.connect(lambda: self.parent.reset_checked_items('profiling'))
+        self.actionMovePoint.triggered.connect(lambda: self.parent.reset_checked_items('profiling'))
+        
+    def update_profile_spinbox(self):
+        """Updates the maximum number of subplots that can be selected.
+
+        Updates ``MainWindow.spinBoxProfileSelectedSubplot.setMaximum()
+        """        
+        n = self.num_subplots_spinbox.value()
+        self.selected_subplot_spinbox.setMaximum(int(n))
 
 # Profiles
 # -------------------------------
@@ -441,19 +774,19 @@ class Profiling:
         scatter_points = self.profiles[self.sample_id][self.profile_name].scatter_points
 
         radius = int(self.parent.lineEditPointRadius.text())
-        if event.button() == QtCore.Qt.RightButton and self.parent.toolButtonPlotProfile.isChecked():
+        if event.button() == Qt.MouseButton.RightButton and self.parent.toolButtonPlotProfile.isChecked():
             # Turn off profiling points
             self.parent.toolButtonPlotProfile.setChecked(False)
             self.parent.toolButtonPointMove.setEnabled(True)
             return
-        elif event.button() == QtCore.Qt.RightButton and self.parent.toolButtonPointMove.isChecked():
+        elif event.button() == Qt.MouseButton.RightButton and self.parent.toolButtonPointMove.isChecked():
             # Turn off moving point, reset point_selected
             self.parent.toolButtonPointMove.setChecked(False)
             self.point_selected = False
             return
-        elif event.button() == QtCore.Qt.RightButton or event.button() == QtCore.Qt.MiddleButton:
+        elif event.button() == Qt.MouseButton.RightButton or event.button() == Qt.MouseButton.MiddleButton:
             return
-        elif event.button() == QtCore.Qt.LeftButton and not (self.parent.toolButtonPlotProfile.isChecked()) and self.parent.toolButtonPointMove.isChecked():
+        elif event.button() == Qt.MouseButton.LeftButton and not (self.parent.toolButtonPlotProfile.isChecked()) and self.parent.toolButtonPointMove.isChecked():
             # move point
             if self.point_selected:
                 self.plot_scatter_points(scatter_points, x, y,point_index=self.point_index)
@@ -476,7 +809,7 @@ class Profiling:
                         self.point_index = i
                 if not (round(mindist * self.array_x / self.data.x_range) < 50):
                     self.point_selected = True
-        elif event.button() == QtCore.Qt.LeftButton:  # plot profile scatter
+        elif event.button() == Qt.MouseButton.LeftButton:  # plot profile scatter
             # Add the scatter item to all plots
             self.plot_scatter_points(scatter_points, x, y)
             # compute profile value for all fields 
@@ -935,7 +1268,7 @@ class Profiling:
             profile_points = self.profiles[self.parent.sample_id][self.profile_name].points
 
         # Get style and colormap
-        style = self.parent.style
+        style = self.parent.plot_style
         cmap = style.get_colormap()
 
         # Clear existing plot
@@ -1136,15 +1469,10 @@ class Profiling:
         """Clear profile data and plots.
 
         Removes all profile scatter points from the plots and clears profile data from the table.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
         """
+        if self.parent.sample_id == '':
+            return
+
         if self.parent.sample_id in self.profiles:  # if profiles have been initiated for the samples
             if self.profile_name in self.profiles[self.parent.sample_id]:  # if profiles for that sample exist
                 # Clear all scatter plot items from the lasermaps
@@ -1157,10 +1485,10 @@ class Profiling:
                 # profile.clear()
 
                 # Clear all data from the table
-                self.parent.tableWidgetProfilePoints.clearContents()
+                self.parent.control_points_table.clearContents()
 
                 # Remove all rows
-                self.parent.tableWidgetProfilePoints.setRowCount(0)
+                self.parent.control_points_table.setRowCount(0)
 
                 # Clear the profile plot widget
                 layout = self.parent.widgetProfilePlot.layout()
@@ -1244,19 +1572,19 @@ class Profiling:
                 x_coords = profile_points.get('x', [])
                 y_coords = profile_points.get('y', [])
 
-                self.parent.tableWidgetProfilePoints.setRowCount(0)
+                self.parent.control_points_table.setRowCount(0)
                 for idx, (x, y) in enumerate(zip(x_coords, y_coords)):
-                    row_position = self.parent.tableWidgetProfilePoints.rowCount()
-                    self.parent.tableWidgetProfilePoints.insertRow(row_position)
+                    row_position = self.parent.control_points_table.rowCount()
+                    self.parent.control_points_table.insertRow(row_position)
 
                     # Fill in the data
-                    self.parent.tableWidgetProfilePoints.setItem(row_position, 0, QTableWidgetItem(str(idx)))
-                    self.parent.tableWidgetProfilePoints.setItem(row_position, 1, QTableWidgetItem(str(round(x))))
-                    self.parent.tableWidgetProfilePoints.setItem(row_position, 2, QTableWidgetItem(str(round(y))))
-                    self.parent.tableWidgetProfilePoints.setRowHeight(row_position, 20)
+                    self.parent.control_points_table.setItem(row_position, 0, QTableWidgetItem(str(idx)))
+                    self.parent.control_points_table.setItem(row_position, 1, QTableWidgetItem(str(round(x))))
+                    self.parent.control_points_table.setItem(row_position, 2, QTableWidgetItem(str(round(y))))
+                    self.parent.control_points_table.setRowHeight(row_position, 20)
 
                 # Enable or disable buttons based on the presence of points
-                self.toggle_buttons(self.parent.tableWidgetProfilePoints.rowCount() > 0)
+                self.toggle_buttons(self.parent.control_points_table.rowCount() > 0)
 
 
     def toggle_buttons(self, enable):
@@ -1291,7 +1619,7 @@ class Profiling:
         -------
         None
         """
-        style = self.parent.style
+        style = self.parent.plot_style
 
         if self.edit_mode_enabled and isinstance(event.artist, PathCollection):
             # The picked scatter plot
@@ -1543,5 +1871,10 @@ class Profiling:
         for field in fields:
             item = QStandardItem(field)
             model.appendRow(item)
+            
+    def plot_profile_and_table(self):
+        self.plot_profiles()
+        self.update_table_widget()
+    
 
     

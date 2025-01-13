@@ -90,7 +90,7 @@ This category includes three visualization types:
 ================================================================
 
 Trace element compatibility (TEC)
---------------------------------
+---------------------------------
 TEC diagrams (spider plots) display multiple elements normalized to a reference composition, arranged by geochemical compatibility.
 
 Radar
@@ -98,7 +98,7 @@ Radar
 Radar plots display multiple variables on radial axes, offering an alternative view of multidimensional relationships.
 
 `PCA <multidimensional.html#principal-component-analysis>`_
-====
+===========================================================
 
 Principal Component Analysis visualizations include:
 
@@ -109,7 +109,7 @@ Principal Component Analysis visualizations include:
 - PCA heatmaps displaying density in PC space
 
 `Clustering <multidimensional.html#clustering>`_
-=========
+================================================
 
 Three main clustering visualizations:
 

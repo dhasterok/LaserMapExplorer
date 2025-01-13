@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import (QMessageBox, QTableWidget, QDialog, QTableWidgetIte
 from PyQt5.QtGui import (QImage, QColor, QFont, QPixmap, QPainter, QBrush)
 from src.ui.FieldSelectionDialog import Ui_FieldDialog
 from src.common.rotated import RotatedHeaderView
-from src.app.config import DEBUG_ANALYTE_UI
+from src.app.config import BASEDIR
 import os
 # Analyte GUI
 # -------------------------------

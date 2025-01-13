@@ -26,7 +26,7 @@ Profile Controls
 The *Profile* tab provides several options for data extraction and visualization:
 
 Point Settings
--------------
+--------------
 
 - Point sort: Choose between sorting points by X or Y coordinates, useful for different profile orientations
 - Point radius: Set the perpendicular sampling width (in pixels) for data collection along the profile
@@ -39,17 +39,17 @@ Point Settings
   - Standard Error: Indicates uncertainty in the mean value
 
 Display Options
--------------
+---------------
 The *Profile* tab offers flexible visualization controls:
 
 Subplot Configuration
-^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^
 - Use the "Number of Subplots" spinbox to set how many profiles to display simultaneously
 - Arrange profiles vertically for easy comparison
 - Each subplot maintains independent y-axis scaling for optimal visibility
 
 Adding Analytes
-^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^
 - Click the "Add Analyte" button to include additional elements in your profile
 - Select analytes from the dropdown menu
 - Each new analyte appears in a different color for clear distinction

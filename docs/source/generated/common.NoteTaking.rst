@@ -23,13 +23,32 @@ common.NoteTaking
 
    .. autosummary::
    
+      CustomActionMenu
+      CustomLineEdit
+      NoteOptionsDialog
       Notes
+      QAction
+      QCursor
+      QDialog
+      QDialogButtonBox
+      QDockWidget
+      QDoubleValidator
       QFileDialog
       QFont
-      QMenu
+      QFormLayout
+      QIcon
+      QLabel
+      QMainWindow
       QMessageBox
+      QSize
+      QSizePolicy
       QTextCursor
+      QTextEdit
       QTimer
+      QToolBar
+      QVBoxLayout
+      QWidget
+      Qt
       RstToPdf
       datetime
    

@@ -16,20 +16,20 @@ class LameIO():
     parent : QObject, optional
         MainWindow UI, by default None
     """        
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, ui_update= True):
         if parent is None:
             return
-
-        parent.actionOpenSample.triggered.connect(self.open_sample)
-        parent.actionOpenDirectory.triggered.connect(lambda: self.open_directory(path=None))
-        parent.actionImportSpots.triggered.connect(self.import_spots)
-        parent.actionOpenProject.triggered.connect(lambda: self.open_project())
-        parent.actionSaveProject.triggered.connect(lambda: self.save_project())
-        parent.actionImportFiles.triggered.connect(lambda: self.import_files())
+        if ui_update:
+            parent.actionOpenSample.triggered.connect(self.open_sample)
+            parent.actionOpenDirectory.triggered.connect(lambda: self.open_directory(path=None))
+            parent.actionImportSpots.triggered.connect(self.import_spots)
+            parent.actionOpenProject.triggered.connect(lambda: self.open_project())
+            parent.actionSaveProject.triggered.connect(lambda: self.save_project())
+            parent.actionImportFiles.triggered.connect(lambda: self.import_files())
 
         self.parent = parent
 
-    def open_sample(self, path =None):
+    def open_sample(self, path =None, ui_update= True):
         """Opens a single \\*.lame.csv file.
 
         Opens files created by MapImporter.
@@ -58,11 +58,11 @@ class LameIO():
             # warning dialog
             parent.statusBar.showMessage("No valid csv file found.")
             return
-            
-        self.initialize_samples_and_tabs()
+        
+        self.initialize_samples_and_tabs(ui_update)
 
 
-    def open_directory(self, path=None):
+    def open_directory(self, path=None, ui_update= True):
         """Open directory with samples in \\*.lame.csv files.
 
         Executes on ``MainWindow.actionOpen`` and ``MainWindow.actionOpenDirectory``.  Opening a directory, enables
@@ -107,7 +107,7 @@ class LameIO():
             return
                 #clear the current analysis
         self.parent.reset_analysis()
-        self.initialize_samples_and_tabs()
+        self.initialize_samples_and_tabs( ui_update)
 
 
     def import_spots(self):
@@ -193,7 +193,7 @@ class LameIO():
                 # Saving data to the directory structure
                 data_dict = {
                     'data': parent.data,
-                    'styles': parent.styles,
+                    'styles': parent.plot_style,
                     'plot_infos': parent.plot_tree.get_plot_info_from_tree(parent.treeModel),
                     'sample_id': parent.sample_id,
                     'sample_ids': parent.sample_ids
@@ -265,7 +265,7 @@ class LameIO():
                         data_dict = pickle.load(file)
                     if data_dict:
                         parent.data = data_dict['data']
-                        parent.styles = data_dict['styles']
+                        parent.plot_style = data_dict['styles']
                         parent.sample_ids = data_dict['sample_ids']
                         parent.sample_id = data_dict['sample_id']
                         
@@ -315,11 +315,11 @@ class LameIO():
                             parent.polygon.load_polygons(project_dir, sample_id)
 
                         # Plot first analyte as lasermap
-                        parent.styles['analyte map']['Colors']['ColorByField'] = 'Analyte'
-                        parent.comboBoxColorByField.setCurrentText(parent.styles['analyte map']['Colors']['ColorByField'])
+                        parent.plot_style.color_field_type = 'Analyte'
+                        parent.comboBoxColorByField.setCurrentText(parent.plot_style.color_field_type)
                         parent.color_by_field_callback()
                         fields = parent.get_field_list('Analyte')
-                        parent.styles['analyte map']['Colors']['Field'] = fields[0]
+                        parent.plot_style.color_field = fields[0]
                         parent.comboBoxColorField.setCurrentText(fields[0])
                         parent.color_field_callback()
 
@@ -328,7 +328,7 @@ class LameIO():
 
                         parent.statusBar.showMessage("Project loaded successfully")
 
-    def initialize_samples_and_tabs(self):
+    def initialize_samples_and_tabs(self,ui_update = True):
         """
         Initialize samples and tabs in the application.
 
@@ -349,17 +349,17 @@ class LameIO():
 
         ###
         self.parent.sample_ids = [os.path.splitext(file)[0].replace('.lame','') for file in self.parent.csv_files]
-        # set first sample id as default
-        self.parent.comboBoxSampleId.addItems(self.parent.sample_ids)
-        self.parent.comboBoxSampleId.setCurrentIndex(0)
-        # Populate the sampleidcomboBox with the file names
-        self.parent.canvasWindow.setCurrentIndex(self.parent.canvas_tab['sv'])
+        if ui_update:
+            # set first sample id as default
+            self.parent.comboBoxSampleId.addItems(self.parent.sample_ids)
+            self.parent.comboBoxSampleId.setCurrentIndex(0)
+            # Populate the sampleidcomboBox with the file names
+            self.parent.canvasWindow.setCurrentIndex(self.parent.canvas_tab['sv'])
+            self.parent.change_sample(0)
+            self.parent.init_tabs()
+            # self.parent.profile_dock.profiling.add_samples()
+            # self.parent.polygon.add_samples()
         self.parent.change_sample(0)
-        self.parent.init_tabs()
-        self.parent.profiling.add_samples()
-        self.parent.polygon.add_samples()
-        #add sample ids to workflow and activate sample id dependent blocks
-        self.parent.workflow.store_sample_ids()
 
     def import_files(self):
         """Opens an import dialog from ``MapImporter`` to open selected data directories."""

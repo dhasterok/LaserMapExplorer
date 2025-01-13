@@ -36,3 +36,30 @@ pip install -U scikit-fuzzy
 # Step 6: Run main.py on spyder or on terminal 
 
 python3 main.py
+
+
+# libraries needed
+darkdetect
+PyQt5
+pyqtgraph
+pandas
+matplotlib
+cmcrameri
+scipy
+numpy
+scikit-learn
+scikit-learn-extra
+scikit-fuzzy
+opencv-python
+numexpr
+rst2pdf
+PyQtWebEngine
+openpyxl
+
+you'll also need blockly
+so you'll need to install npm and Node.js and from the blockly directory, run
+
+rm -rf node_modules
+npm install
+npx webpack --config webpack.config.js
+

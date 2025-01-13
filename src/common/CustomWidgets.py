@@ -1,16 +1,44 @@
-from PyQt5.QtWidgets import QLineEdit, QTableWidget, QComboBox, QPushButton, QCheckBox, QWidget, QTreeView
-from PyQt5.QtGui import QStandardItem, QStandardItemModel, QFont
+from PyQt5.QtWidgets import ( 
+        QLineEdit, QTableWidget, QComboBox, QPushButton, QCheckBox, QWidget, QTreeView, QAction, QMenu,
+        QDockWidget
+    )
+from PyQt5.QtGui import QStandardItem, QStandardItemModel, QFont, QDoubleValidator, QIcon, QCursor 
+from PyQt5.QtCore import Qt
 import src.common.format as fmt
 import pandas as pd
 
 class CustomLineEdit(QLineEdit):
-    def __init__(self, parent=None, value=0.0, precision=4, threshold=1e4, toward=None):
+    def __init__(self, parent=None, value=0.0, precision=4, threshold=1e4, toward=None, validator=QDoubleValidator()):
+        """Custom line edit widget, when the only input should be of type float
+
+        Adds additional functionality to QLineEdit by installing a validator and methods for limiting the
+        precision of the displayed value in the UI.  Note that full precision of the value is stored in
+        self.value, only a 'pretty' number is displayed.
+
+        Parameters
+        ----------
+        parent : _type_, optional
+            _description_, by default None
+        value : float, optional
+            _description_, by default 0.0
+        precision : int, optional
+            _description_, by default 4
+        threshold : _type_, optional
+            _description_, by default 1e4
+        toward : int, optional
+            _description_, by default None
+        validator : QValidator, optional
+            Provide a validator to automatically text inputs for appropriate type and
+            ranges, by default QDoubleValidator
+        """        
         super().__init__(parent)
         self._value = value
         self._precision = precision
         self._threshold = threshold
         self._toward = toward
         self.textChanged.connect(self._update_value_from_text)
+        self.setValidator(validator)
+        self.setAlignment(Qt.AlignmentFlag.AlignRight)
 
     @property
     def value(self):
@@ -42,11 +70,12 @@ class CustomLineEdit(QLineEdit):
 
     @property
     def toward(self):
+        """int | float: sets whether to round towards 0, 1, or nearest integer"""
         return self._toward
     
     @toward.setter
-    def toward(self, new_toward):
-        self._toward = new_toward
+    def toward(self, val):
+        self._toward = val
         self._update_text_from_value
 
     def _update_text_from_value(self):
@@ -298,3 +327,90 @@ class CustomTreeView(QTreeView):
             self.treeModel.clear()
         except Exception as e:
             print(f"Error while clearing model: {e}")
+
+class CustomActionMenu(QAction):
+    """A QAction with an attached menu that displays on click.
+
+    Parameters
+    ----------
+    icon : str
+        Path to icon
+    text : str
+        Action text
+    menu_items : list of tuple
+        List of tuples where each tuple is (displayed text, callback function) or (displayed text, submenu items).
+    parent : QObject, optional
+        Parent widget.
+    """    
+    def __init__(self, icon, text, menu_items, parent=None):
+        super().__init__(QIcon(icon), text, parent)
+        
+        # Create the main menu
+        self.menu = QMenu(parent)
+
+        # Dictionary to hold references to dynamically updatable submenus
+        self.submenu_references = {}
+
+        # Populate the menu
+        self._add_menu_items(self.menu, menu_items)
+
+        # Function to display the menu
+        def show_menu():
+            self.menu.exec_(QCursor.pos())
+
+        # Connect the action to the show_menu function
+        self.triggered.connect(show_menu)
+
+    def _add_menu_items(self, menu, items):
+        """Recursively add items and submenus to a menu."""
+        for item_text, callback_or_submenu in items:
+            if isinstance(callback_or_submenu, list):
+                # Create a submenu
+                submenu = QMenu(item_text, menu)
+                self.submenu_references[item_text] = submenu  # Store a reference
+                self._add_menu_items(submenu, callback_or_submenu)
+                menu.addMenu(submenu)
+            else:
+                # Add a regular action
+                menu.addAction(item_text, callback_or_submenu)
+
+    def update_submenu(self, submenu_name, new_items):
+        """Update a submenu with new items."""
+        submenu = self.submenu_references.get(submenu_name)
+        if submenu:
+            submenu.clear()  # Remove all current actions
+            self._add_menu_items(submenu, new_items)
+
+class CustomComboBox(QComboBox):
+    def __init__(self, update_callback=None, *args, **kwargs):
+        """Initialize the CustomComboBox with an option update callback that executes at popup before the items are displayed.
+        
+        Parameters
+        ----------
+        update_callback : callback, optional
+            Executes on showPopup(), by default None
+        """
+        super().__init__(*args, **kwargs)
+        self.update_callback = update_callback
+
+        setattr(self, "allItems", lambda: [self.itemText(i) for i in range(self.count())])
+
+    def showPopup(self):
+        """Update combobox items using callback before displaying items."""
+
+        if self.update_callback:
+            self.update_callback()
+        super().showPopup()
+
+class CustomDockWidget(QDockWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.show()
+
+        self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowMinMaxButtonsHint | Qt.WindowType.WindowCloseButtonHint)
+
+    def closeEvent(self, event):
+        """Override the close event to hide the dock widget instead of closing it."""
+        self.hide()
+        event.ignore()  # Ignore the close event to prevent the widget from being removed.

@@ -25,14 +25,16 @@ class CropTool:
     def init_crop(self):
         """Sets intial crop region as full map extent."""
 
+        data = self.parent.data[self.parent.sample_id]
+
 
         if self.parent.actionCrop.isChecked():
-            if self.parent.data[self.parent.sample_id]['crop']:
+            if data.crop:
                 # reset to full view and remove overlays if user unselects crop tool
                 self.parent.toolbar_action.reset_to_full_view()
             # Original extent of map
-            self.x_range = self.parent.x_range
-            self.y_range = self.parent.y_range
+            self.x_range = data.x_range
+            self.y_range = data.y_range
 
             # Central crop rectangle dimensions (half width and height of the plot)
             crop_rect_width = self.x_range / 2
@@ -45,7 +47,8 @@ class CropTool:
             self.crop_rect = ResizableRectItem(parent=self, rect=QRectF(crop_rect_x, crop_rect_y, crop_rect_width, crop_rect_height))
             self.crop_rect.setPen(QPen(QColor(255, 255, 255), 4, Qt.DashLine))
             self.crop_rect.setZValue(1e9)
-            self.parent.plot.addItem(self.crop_rect)
+            
+            self.parent.sv_widget.scene().addItem(self.crop_rect)
 
             for _ in range(4):
                 overlay = QGraphicsRectItem()

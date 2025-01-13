@@ -24,20 +24,25 @@ app.Workflow
    .. autosummary::
    
       BlocklyBridge
-      QApplication
+      Main
+      QAction
+      QDockWidget
       QFile
       QIODevice
+      QIcon
       QMainWindow
       QObject
-      QPushButton
+      QSize
       QSizePolicy
       QTextEdit
+      QToolBar
       QUrl
       QVBoxLayout
       QWebChannel
       QWebEngineSettings
       QWebEngineView
       QWidget
+      Qt
       Workflow
    
    

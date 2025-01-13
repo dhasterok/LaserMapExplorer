@@ -240,7 +240,7 @@ class PlotTree():
         # print(tree+':'+branch+':'+leaf)
         # ----end debugging----
 
-        plot_info = item.data(role=Qt.UserRole)
+        plot_info = item.data(role=Qt.ItemDataRole.UserRole)
 
         # ----start debugging----
         # print(plot_info)
@@ -276,13 +276,8 @@ class PlotTree():
             print(f"  {tree}:{branch}:{leaf}")
 
         if tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)', 'Calculated']:
-            #current_plot_df = self.get_map_data(sample_id=level_2_data, field=level_3_data, field_type='Analyte')
-            #self.create_plot(current_plot_df, sample_id=level_2_data, plot_type='analyte', analyte_1=level_3_data)
-            # if leaf in self.plot_widget_dict[tree][branch].keys():
-            #     widget_dict = self.plot_widget_dict[tree][branch][leaf]
-            #     self.add_plotwidget_to_canvas(widget_dict['info'], view=widget_dict['view'], position=widget_dict['position'])
-            self.parent.style.initialize_axis_values(tree, leaf)
-            self.parent.style.set_style_widgets('analyte map')
+            self.parent.plot_style.initialize_axis_values(tree, leaf)
+            self.parent.plot_style.set_style_widgets('analyte map')
             if self.plot_info:
                 if DEBUG_TREE:
                     print(f"  plot_info exists, adding to canvas")
@@ -300,14 +295,6 @@ class PlotTree():
                 if self.parent.toolBox.currentIndex() not in [self.parent.left_tab['sample'], self.parent.left_tab['process'], self.parent.left_tab['polygons'], self.parent.left_tab['profile']]:
                     self.parent.toolBox.setCurrentIndex(self.parent.left_tab['sample'])
 
-                # else:
-                #     pass
-                
-                # if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
-                #     self.plot_map_mpl(sample_id=branch, field_type=tree, field=leaf)
-                # else:
-                #     self.plot_map_pg(sample_id=branch, field_type=tree, field=leaf)
-
                 # updates comboBoxColorByField and comboBoxColorField comboboxes and creates new plot
                 self.parent.update_fields(branch,'analyte map',tree, leaf, plot=True)
 
@@ -318,8 +305,8 @@ class PlotTree():
 
             if self.plot_info:
                 self.parent.add_plotwidget_to_canvas(self.plot_info)
-                self.parent.style.style_dict[self.plot_info.plot_type] = self.plot_info.style
-                self.parent.style.plot_type = self.plot_info.plot_type
+                self.parent.plot_style.style_dict[self.plot_info.plot_type] = self.plot_info.style
+                self.parent.plot_style.plot_type = self.plot_info.plot_type
                 # updates comboBoxColorByField and comboBoxColorField comboboxes 
                 #self.parent.update_fields(self.parent.plot_info['sample_id'], self.parent.plot_info['plot_type'],self.parent.plot_info['field_type'], self.parent.plot_info['field'])
 
@@ -461,7 +448,7 @@ class PlotTree():
             plot_item = StandardItem(leaf)
 
             # store plot dictionary in leaf
-            plot_item.setData(plot_info, role=Qt.UserRole)
+            plot_item.setData(plot_info, role=Qt.ItemDataRole.UserRole)
 
             sample_id_item.appendRow(plot_item)
             tree_items.appendRow(sample_id_item)
@@ -476,7 +463,7 @@ class PlotTree():
             plot_item = StandardItem(leaf)
 
             # store plot dictionary in leaf
-            plot_item.setData(plot_info, role=Qt.UserRole)
+            plot_item.setData(plot_info, role=Qt.ItemDataRole.UserRole)
 
             #item is sample id item (branch)
             item.appendRow(plot_item)
@@ -487,7 +474,7 @@ class PlotTree():
         # sample id item exists and plot item exists
         elif item is not None and check: 
             # store plot dictionary in tree
-            item.setData(plot_info, role=Qt.UserRole)
+            item.setData(plot_info, role=Qt.ItemDataRole.UserRole)
             
             # self.item_refs[(tree, sample_id, leaf)] = item
  
@@ -584,7 +571,7 @@ class PlotTree():
 
         def clear_item_data(item):
             """Recursively clear data from the item and its children"""
-            item.setData(None, role=Qt.UserRole)
+            item.setData(None, role=Qt.ItemDataRole.UserRole)
             for index in range(item.rowCount()):
                 child_item = item.child(index)
                 clear_item_data(child_item)
@@ -614,7 +601,7 @@ class PlotTree():
             print(f"extract_plot_info")
 
         # Retrieve the plot_info from the UserRole data
-        plot_info = item.data(Qt.UserRole)
+        plot_info = item.data(Qt.ItemDataRole.UserRole)
         if isinstance(plot_info, dict) and 'figure' in plot_info:
             # Check if it contains an mplc.MplCanvas object
             if isinstance(plot_info['figure'], mplc.MplCanvas):
@@ -640,7 +627,7 @@ class PlotTree():
             canvas = mplc.MplCanvas(fig=data['plot_info']['figure'])
             data['plot_info']['figure'] = canvas
             #store plot dictionary in tree
-            item.setData(data['plot_info'], role=Qt.UserRole)
+            item.setData(data['plot_info'], role=Qt.ItemDataRole.UserRole)
         for child_data in data['children']:
             child_item = self.create_item_from_data(child_data)
             item.appendRow(child_item)

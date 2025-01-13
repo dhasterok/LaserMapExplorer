@@ -1,6 +1,6 @@
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import ( QTableWidget, QTableWidgetItem, QCheckBox, QAbstractItemView )
+from PyQt5.QtWidgets import ( QTableWidget, QTableWidgetItem, QCheckBox, QAbstractItemView  )
 from PyQt5.QtGui import ( QDropEvent )
 # TableWidgetDragRows
 # -------------------------------

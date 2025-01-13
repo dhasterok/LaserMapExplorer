@@ -1,12 +1,15 @@
 import sys, os, json
-from PyQt5.QtWidgets import ( QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QTextEdit, QSizePolicy, QDockWidget, QGroupBox, QToolButton, QSpacerItem )
+from PyQt5.QtWidgets import ( QMainWindow, QVBoxLayout, QWidget, QTextEdit, QSizePolicy, QDockWidget, QToolBar, QAction )
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWebChannel import QWebChannel
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import pyqtSlot, Qt, QObject, QUrl, QFile, QIODevice
+from PyQt5.QtCore import pyqtSlot, Qt, QObject, QUrl, QFile, QIODevice, QSize
 from src.app.config import BASEDIR
 from PyQt5.QtWebEngineWidgets import QWebEngineSettings
+from src.common.CustomWidgets import CustomDockWidget
+
 import numpy as np
+from src.app.Modules import Main
 os.environ["QTWEBENGINE_REMOTE_DEBUGGING"]="9222" #uncomment to debug in chrome  
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
 
@@ -33,10 +36,10 @@ class BlocklyBridge(QObject):
     def invokeSetStyleWidgets(self, plot_type):
         # Call the set_style_widgets function
         plot_type = plot_type.replace('_',' ')
-        if plot_type in self.parent.parent.style.style_dict.keys():
+        if plot_type in self.parent.main.style.style_dict.keys():
             ### need to add parent.parent to access main code from this class 
-            self.parent.parent.style.set_style_widgets(plot_type)
-            style = self.parent.parent.style.style_dict[plot_type]
+            self.parent.main.style.set_style_widgets(plot_type)
+            style = self.parent.main.style.style_dict[plot_type]
             print('invokeSetStyleWidgets')
             # Convert NumPy types to native Python types (if any)
             style_serializable = self.convert_numpy_types(style)
@@ -49,21 +52,16 @@ class BlocklyBridge(QObject):
     @pyqtSlot(str, result=list)
     def getFieldList(self, field_type):
         print('get_field_list')
-        return self.parent.parent.get_field_list(field_type)
-
-    @pyqtSlot(str, result=list)
-    def getFieldTypeList(self):
-        print('get_field_type_list')
-        return self.parent.parent.get_field_type_list()
+        return self.parent.main.get_field_list(field_type)
     
     @pyqtSlot(result=str)
     def getBaseDir(self):
-        return self.parent.parent.BASEDIR
+        return self.parent.main.BASEDIR
     
     @pyqtSlot(result=list)
     def getRefValueList(self):
         
-        return self.parent.parent.ref_list.tolist()
+        return self.parent.main.ref_list.tolist()
 
     @pyqtSlot(result=list)
     def getSavedAnalyteLists(self):
@@ -78,8 +76,11 @@ class BlocklyBridge(QObject):
         """
         Exposed method to JavaScript to get the current dx and dy dimensions.
         """
-        dx = self.parent.parent.data[self.parent.parent.sample_id].dx
-        dy = self.parent.parent.data[self.parent.parent.sample_id].dy
+        dx =0
+        dy = 0
+        if self.parent.main.sample_id:
+            dx = self.parent.main.data[self.parent.main.sample_id].dx
+            dy = self.parent.main.data[self.parent.main.sample_id].dy
         return [dx, dy]
 
     
@@ -100,7 +101,7 @@ class BlocklyBridge(QObject):
         else:
             return obj
         
-class Workflow(QDockWidget):
+class Workflow(CustomDockWidget):
     """Creates the workflow method design dock.
 
     Use this tool to create workflows using a customized version of Google's Blockly.
@@ -124,7 +125,7 @@ class Workflow(QDockWidget):
         if not isinstance(parent, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
 
-        super().__init__("Workflow Method Design", parent)
+        super().__init__(parent)
         self.parent = parent
 
         container = QWidget()
@@ -137,54 +138,50 @@ class Workflow(QDockWidget):
         self.output_text_edit.setReadOnly(True)
         dock_layout.addWidget(self.output_text_edit)
         
-        toolbar = QGroupBox("")
-        toolbar_layout = QHBoxLayout(toolbar)
-        toolbar_layout.setContentsMargins(5, 5, 5, 5)  # Adjust margins as needed
-        toolbar_layout.setSpacing(5)  # Spacing between buttons
+        toolbar = QToolBar("Notes Toolbar", self)
+        toolbar.setIconSize(QSize(24, 24))
+        toolbar.setMovable(False)  # Optional: Prevent toolbar from being dragged out
 
         # Run button
-        self.run_button = QToolButton()
+        self.run_action = QAction()
         run_icon = QIcon(":resources/icons/icon-run-64.svg")
         if not run_icon.isNull():
-            self.run_button.setIcon(run_icon)
+            self.run_action.setIcon(run_icon)
         else:
-            self.run_button.setText("Run")
-        self.run_button.setToolTip("Execute workflow")
+            self.run_action.setText("Run")
+        self.run_action.setToolTip("Execute workflow")
 
         # Export button
-        self.save_button = QToolButton()
+        self.save_action = QAction()
         save_icon = QIcon(":resources/icons/icon-save-file-64.svg")
         if not save_icon.isNull():
-            self.save_button.setIcon(save_icon)
+            self.save_action.setIcon(save_icon)
         else:
-            self.save_button.setText("Save")
-        self.save_button.setToolTip("Save log to file")
-        self.save_button.setEnabled(False)
-
-        # Add spacer
-        spacer = QSpacerItem(20, 0, QSizePolicy.Expanding, QSizePolicy.Minimum)
+            self.save_action.setText("Save")
+        self.save_action.setToolTip("Save log to file")
+        self.save_action.setEnabled(False)
 
         # Clear button
-        self.clear_button = QToolButton()
+        self.clear_action = QAction()
         clear_icon = QIcon(":resources/icons/icon-delete-64.svg")
         if not clear_icon.isNull():
-            self.clear_button.setIcon(clear_icon)
+            self.clear_action.setIcon(clear_icon)
         else:
-            self.clear_button.setText("Clear")
-        self.clear_button.setToolTip("Clear log")
-        self.clear_button.setEnabled(False)
+            self.clear_action.setText("Clear")
+        self.clear_action.setToolTip("Clear log")
+        self.clear_action.setEnabled(False)
 
-        toolbar_layout.addWidget(self.run_button)
-        toolbar_layout.addWidget(self.save_button)
-        toolbar_layout.addItem(spacer)
-        toolbar_layout.addWidget(self.clear_button)
+        toolbar.addAction(self.run_action)
+        toolbar.addAction(self.save_action)
+        toolbar.addSeparator()
+        toolbar.addAction(self.clear_action)
 
         dock_layout.addWidget(toolbar)
 
         # Button signals
-        self.run_button.clicked.connect(self.execute_code)
-        #self.save_button.clicked.connect(self.save_workflow)
-        #self.clear_button.clicked.connect(self.clear_workflow)
+        self.run_action.triggered.connect(self.execute_code)
+        #self.save_action.triggered.connect(self.save_workflow)
+        #self.clear_action.triggered.connect(self.clear_workflow)
 
         # Create a web engine view
         self.web_view = QWebEngineView()
@@ -217,8 +214,13 @@ class Workflow(QDockWidget):
 
         self.setFloating(True)
         self.setWindowTitle("Workflow Method Design")
+        self.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
-        parent.addDockWidget(Qt.RightDockWidgetArea, self)
+        parent.addDockWidget(Qt.BottomDockWidgetArea, self)
+
+        # Initiate Main class from Modules.py
+        # self.main will hold instance of Main code without any UI interactions
+        self.main = Main()
 
     def handleResizeEvent(self, event):
         self.web_view.page().runJavaScript("resizeBlocklyWorkspace()")
@@ -243,7 +245,7 @@ class Workflow(QDockWidget):
         Sends sample_ids to JavaScript to update the sample_ids list and refresh dropdowns.
         """
         # Convert the sample_ids list to a format that JavaScript can use (a JSON array)
-        sample_ids_js_array = str(self.parent.sample_ids)
+        sample_ids_js_array = str(self.main.sample_ids)
         self.web_view.page().runJavaScript(f"updateSampleDropdown({sample_ids_js_array})")
 
     def update_field_type_list(self, field_type_list):

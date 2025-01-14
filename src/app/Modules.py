@@ -85,6 +85,8 @@ class Main():
 
         self.io = LameIO(self, ui_update= False)
 
+        self.plot_style = Styling(self, ui= False)
+
         # # Noise reduction
         # self.noise_reduction = ip(self)
 

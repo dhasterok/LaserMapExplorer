@@ -101,6 +101,191 @@ function updateFieldTypeList(newFieldTypeList) {
 }
 window.updateFieldTypeList = updateFieldTypeList;
 
+/**
+ * Retrieve and update all blocks connected to the "Styling" input.
+ * @param {Blockly.Block} plotMapBlock - The plot_map block instance.
+ * @param {String} plotType - The dictionary containing styling values.
+ */
+
+export function updateStylingChain(plotBlock, plotType) {
+    // 1) Get the first block connected to "Styling".
+    let stylingBlock = plotBlock.getInputTargetBlock('Styling');
+    
+    // If you want to explicitly set the plotType:
+    // this.plotType = 'analyte map';
+  
+    // 2) Call the style widgets function with the current plotType.
+    window.blocklyBridge.invokeSetStyleWidgets(plotType, (style) => {
+      // 3a) Check if the style dictionary is empty
+      if (style.constructor === Object && Object.keys(style).length === 0) {
+        console.warn('Style dictionary not provided for plotType:', this.plotType);
+        return; // Exit if style is not available
+      } else {
+        console.log('updating styles');
+        
+        // Store the style object in styleDict for clarity.
+        let styleDict = style;
+        
+        // 3b) Traverse the chain of styling blocks
+        while (stylingBlock) {
+          // 3c) Identify the block by type and update
+          switch (stylingBlock.type) {
+            case 'x_axis':
+              updateXAxisBlock(stylingBlock, styleDict);
+              break;
+            case 'y_axis':
+              updateYAxisBlock(stylingBlock, styleDict);
+              break;
+            case 'z_axis':
+              updateZAxisBlock(stylingBlock, styleDict);
+              break;
+            case 'c_axis':
+              updateCAxisBlock(stylingBlock, styleDict);
+              break;
+            case 'font':
+              updateFontBlock(stylingBlock, styleDict);
+              break;
+            case 'tick_direction':
+              updateTickDirectionBlock(stylingBlock, styleDict);
+              break;
+            case 'aspect_ratio':
+              updateAspectRatioBlock(stylingBlock, styleDict);
+              break;
+            case 'coloring':
+              updateColoringBlock(stylingBlock, styleDict);
+              break;
+            case 'add_scale':
+              updateAddScaleBlock(stylingBlock, styleDict);
+              break;
+            case 'marker_properties':
+              updateMarkerPropertiesBlock(stylingBlock, styleDict);
+              break;
+            case 'line_properties':
+              updateLinePropertiesBlock(stylingBlock, styleDict);
+              break;
+            case 'color_field':
+              updateColorFieldBlock(stylingBlock, styleDict);
+              break;
+            case 'colormap':
+              updateColormapBlock(stylingBlock, styleDict);
+              break;
+            case 'show_mass':
+              updateShowMassBlock(stylingBlock, styleDict);
+              break;
+            case 'color_by_cluster':
+              updateColorByClusterBlock(stylingBlock, styleDict);
+              break;
+            default:
+              // Optionally handle unsupported block types
+              console.warn('Unsupported styling block:', stylingBlock.type);
+          }
+          
+          // Move to the next block in the chain
+          stylingBlock = stylingBlock.getNextBlock();
+        }
+      }
+    });
+  }
+  
+  
+  /**
+   * Example update function for an X Axis block.
+   * Adjust it to match your style dictionary keys.
+   */
+  function updateXAxisBlock(block, styleDict) {
+    // For example, if your style dictionary has the following keys:
+    // styleDict = {
+    //   "xLabel": "X Axis Title",
+    //   "xLimMin": "0",
+    //   "xLimMax": "100",
+    //   "xScale": "linear",
+    // }
+    if (styleDict.xLabel) {
+      block.setFieldValue(styleDict.xLabel, 'xLabel');
+    }
+    if (styleDict.xLimMin) {
+      block.setFieldValue(styleDict.xLimMin, 'xLimMin');
+    }
+    if (styleDict.xLimMax) {
+      block.setFieldValue(styleDict.xLimMax, 'xLimMax');
+    }
+    if (styleDict.xScale) {
+      block.setFieldValue(styleDict.xScale, 'xScaleDropdown');
+    }
+    // Re-render to visually update the block
+    block.render();
+  }
+  
+  /** 
+   * Similarly define update functions for y_axis, z_axis, c_axis, etc. 
+   * Adjust them based on the fields you want to update and the keys in your style dictionary.
+  */
+  function updateYAxisBlock(block, styleDict) {
+    // ...
+    block.render();
+  }
+  
+  function updateZAxisBlock(block, styleDict) {
+    // ...
+    block.render();
+  }
+  
+  function updateCAxisBlock(block, styleDict) {
+    // ...
+    block.render();
+  }
+  
+  function updateFontBlock(block, styleDict) {
+    // ...
+    block.render();
+  }
+  
+  function updateTickDirectionBlock(block, styleDict) {
+    // ...
+    block.render();
+  }
+  
+  function updateAspectRatioBlock(block, styleDict) {
+    // ...
+    block.render();
+  }
+  
+  function updateAddScaleBlock(block, styleDict) {
+    // ...
+    block.render();
+  }
+  
+  function updateMarkerPropertiesBlock(block, styleDict) {
+    // ...
+    block.render();
+  }
+  
+  function updateLinePropertiesBlock(block, styleDict) {
+    // ...
+    block.render();
+  }
+  
+  function updateColorFieldBlock(block, styleDict) {
+    // ...
+    block.render();
+  }
+  
+  function updateColormapBlock(block, styleDict) {
+    // ...
+    block.render();
+  }
+  
+  function updateShowMassBlock(block, styleDict) {
+    // ...
+    block.render();
+  }
+  
+  function updateColorByClusterBlock(block, styleDict) {
+    // ...
+    block.render();
+  }
+
+
 // Function to dynamically update connected style blocks
 export function dynamicStyleUpdate(plotType, connectedBlocks) {
     // Call the backend to get updated styles for the specific plot type

@@ -36,10 +36,10 @@ class BlocklyBridge(QObject):
     def invokeSetStyleWidgets(self, plot_type):
         # Call the set_style_widgets function
         plot_type = plot_type.replace('_',' ')
-        if plot_type in self.parent.main.style.style_dict.keys():
+        if plot_type in self.parent.main.plot_style.style_dict.keys():
             ### need to add parent.parent to access main code from this class 
-            self.parent.main.style.set_style_widgets(plot_type)
-            style = self.parent.main.style.style_dict[plot_type]
+            self.parent.main.plot_style.set_style_widgets(plot_type)
+            style = self.parent.main.plot_style.style_dict[plot_type]
             print('invokeSetStyleWidgets')
             # Convert NumPy types to native Python types (if any)
             style_serializable = self.convert_numpy_types(style)

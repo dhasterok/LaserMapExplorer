@@ -160,14 +160,14 @@ pythonGenerator.forBlock['plot_map'] = function(block, generator) {
     // Initialize an empty code string
     var code = '';
 
-    // Check if a `style` block is connected
-    var styleCode = generator.valueToCode(block, 'style', Order.NONE);
-    if (styleCode && styleCode !== '{}') {
-        code += `
-self.parent.style.style_dict[${plot_type}] = {**self.parent.style.style_dict[${plot_type}], **${styleCode}}
-self.parent.style.set_style_widgets(${plot_type})
-`;
-    }
+//     // Check if a `style` block is connected
+//     var styleCode = generator.valueToCode(block, 'style', Order.NONE);
+//     if (styleCode && styleCode !== '{}') {
+//         code += `
+// self.parent.style.style_dict[${plot_type}] = {**self.parent.style.style_dict[${plot_type}], **${styleCode}}
+// self.parent.style.set_style_widgets(${plot_type})
+// `;
+//     }
 
     // Update the visualization regardless of the style connection
     code += `self.parent.update_SV(${plot_type})\n`;

@@ -3,7 +3,7 @@ import * as BlockDynamicConnection from '@blockly/block-dynamic-connection';
 import {registerFieldColour, FieldColour} from '@blockly/field-colour';
 registerFieldColour();
 import { sample_ids,fieldTypeList, baseDir } from './globals';
-import {dynamicStyleUpdate} from './helper_functions'
+import {updateStylingChain} from './helper_functions'
 var enableSampleIDsBlock = false; // Initially false
 window.Blockly = Blockly.Blocks
 
@@ -899,26 +899,26 @@ const plot_map = {
             .appendField('Plot Map')
             .setAlign(Blockly.inputs.Align.CENTRE);
 
-        // Field type dropdown
+        
+        // Create the 'Field type' dropdown with options
         this.appendDummyInput('NAME')
             .appendField('Field type')
-            .appendField(
-                new Blockly.FieldDropdown([
+            .appendField(new Blockly.FieldDropdown(
+                [
                     ['Analyte', 'Analyte'],
                     ['Analyte (Normalised)', 'Analyte (Normalised)'],
                     ['PCA Score', 'PCA Score'],
-                    ['Cluster', 'Cluster'],
-                ]),
-                'fieldType'
-            );
-
-        // Field dropdown
+                    ['Cluster', 'Cluster']
+                ],
+                this.updateFieldDropdown.bind(this)  // Bind the update function
+            ), 'fieldType');
+        
+        //Create the 'field' dropdown, initially empty
         this.appendDummyInput('FIELD')
             .appendField('Field')
             .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'field');
-
         // Add dynamic statement input for styling
-        this.appendStatementInput('Styling')
+        const stylingInput = this.appendStatementInput('Styling')
             .setCheck('Styling')
             .appendField('Styling');
         
@@ -933,16 +933,25 @@ const plot_map = {
         this.setHelpUrl('');
         this.setColour(285);
 
+
+        // Add default blocks to Styling input only in the toolbox
+        if (this.isInFlyout) {
+            this.addDefaultStylingBlocks();
+        }
+
         const initialFieldType = this.getFieldValue('fieldType');
         this.updateFieldDropdown(initialFieldType);
+
+        // update style dictionaries
+        updateStylingChain(this, 'analyte map');
     },
     updateFieldDropdown: function (newValue) {
         const fieldTypeValue = newValue || this.getFieldValue('fieldType');
         window.blocklyBridge.getFieldList(fieldTypeValue).then((response) => {
             const options = response.map(option => [option, option]);
             const dropdown = this.getField('field');
-            dropdown.menuGenerator_ = options;
             if (options.length > 0) {
+                dropdown.menuGenerator_ = options;
                 dropdown.setValue(options[0][1]);
             } else {
                 dropdown.setValue('');
@@ -951,7 +960,26 @@ const plot_map = {
         }).catch(error => {
             console.error('Error fetching field list:', error);
         });
-    }
+    },
+    addDefaultStylingBlocks: function () {
+        const workspace = this.workspace;
+
+        // Default block types
+        const defaultBlocks = ['x_axis', 'y_axis', 'font', 'coloring'];
+
+        // Add each default block to the Styling input
+        defaultBlocks.forEach(blockType => {
+            const block = workspace.newBlock(blockType);
+            block.initSvg();
+            block.render();
+
+            // Connect the block to the Styling input
+            const connection = this.getInput('Styling').connection;
+            if (connection) {
+                block.previousConnection.connect(connection);
+            }
+        });
+    },
 };
 Blockly.common.defineBlocks({ plot_map: plot_map });
 
@@ -1522,65 +1550,65 @@ const marks_and_lines = {
 };
 Blockly.common.defineBlocks({marks_and_lines: marks_and_lines});
             
-const coloring = {
-    init: function() {
-        this.appendDummyInput('Coloring')
-        .setAlign(Blockly.inputs.Align.CENTRE)
-        .appendField('Coloring');
-        this.appendDummyInput('colorByField')
-        .appendField('Color by Field')
-        .appendField(new Blockly.FieldDropdown([
-            ['option', 'OPTIONNAME'],
-            ['option', 'OPTIONNAME'],
-            ['option', 'OPTIONNAME']
-            ]), 'colorByField');
-        this.appendDummyInput('field')
-        .appendField('Field')
-        .appendField(new Blockly.FieldDropdown([
-            ['option', 'OPTIONNAME'],
-            ['option', 'OPTIONNAME'],
-            ['option', 'OPTIONNAME']
-            ]), 'field');
-        this.appendDummyInput('resolution')
-        .appendField('Resolution')
-        .appendField(new Blockly.FieldNumber(10, 0), 'resolution');
-        this.appendDummyInput('colormap')
-        .appendField('Colormap')
-        .appendField(new Blockly.FieldDropdown([
-            ['option', 'OPTIONNAME'],
-            ['option', 'OPTIONNAME'],
-            ['option', 'OPTIONNAME']
-            ]), 'colormap');
-        this.appendDummyInput('reverse')
-        .appendField('Reverse')
-        .appendField(new Blockly.FieldCheckbox('FALSE'), 'reverse');
-        this.appendDummyInput('scale')
-        .appendField('Scale')
-        .appendField(new Blockly.FieldDropdown([
-            ['linear', 'linear'],
-            ['log', 'log'],
-            ]), 'cScale');
-        this.appendDummyInput('cLim')
-        .appendField('Clim')
-        .appendField(new Blockly.FieldTextInput(''), 'cLimMin')
-        .appendField(new Blockly.FieldTextInput(''), 'cLimMax');
-        this.appendDummyInput('cBarLabel')
-        .appendField('Cbar label')
-        .appendField(new Blockly.FieldTextInput(''), 'cBarLabel');
-        this.appendDummyInput('cBarDirection')
-        .appendField('Cbar direction')
-        .appendField(new Blockly.FieldDropdown([
-            ['none', 'none'],
-            ['Horizontal', 'horizontal'],
-            ['Vertical', 'vertical']
-            ]), 'cBarDirection');
-        this.setOutput(true, null);
-        this.setTooltip('');
-        this.setHelpUrl('');
-        this.setColour(225);
-    }
-};
-Blockly.common.defineBlocks({coloring: coloring});
+// const coloring = {
+//     init: function() {
+//         this.appendDummyInput('Coloring')
+//         .setAlign(Blockly.inputs.Align.CENTRE)
+//         .appendField('Coloring');
+//         this.appendDummyInput('colorByField')
+//         .appendField('Color by Field')
+//         .appendField(new Blockly.FieldDropdown([
+//             ['option', 'OPTIONNAME'],
+//             ['option', 'OPTIONNAME'],
+//             ['option', 'OPTIONNAME']
+//             ]), 'colorByField');
+//         this.appendDummyInput('field')
+//         .appendField('Field')
+//         .appendField(new Blockly.FieldDropdown([
+//             ['option', 'OPTIONNAME'],
+//             ['option', 'OPTIONNAME'],
+//             ['option', 'OPTIONNAME']
+//             ]), 'field');
+//         this.appendDummyInput('resolution')
+//         .appendField('Resolution')
+//         .appendField(new Blockly.FieldNumber(10, 0), 'resolution');
+//         this.appendDummyInput('colormap')
+//         .appendField('Colormap')
+//         .appendField(new Blockly.FieldDropdown([
+//             ['option', 'OPTIONNAME'],
+//             ['option', 'OPTIONNAME'],
+//             ['option', 'OPTIONNAME']
+//             ]), 'colormap');
+//         this.appendDummyInput('reverse')
+//         .appendField('Reverse')
+//         .appendField(new Blockly.FieldCheckbox('FALSE'), 'reverse');
+//         this.appendDummyInput('scale')
+//         .appendField('Scale')
+//         .appendField(new Blockly.FieldDropdown([
+//             ['linear', 'linear'],
+//             ['log', 'log'],
+//             ]), 'cScale');
+//         this.appendDummyInput('cLim')
+//         .appendField('Clim')
+//         .appendField(new Blockly.FieldTextInput(''), 'cLimMin')
+//         .appendField(new Blockly.FieldTextInput(''), 'cLimMax');
+//         this.appendDummyInput('cBarLabel')
+//         .appendField('Cbar label')
+//         .appendField(new Blockly.FieldTextInput(''), 'cBarLabel');
+//         this.appendDummyInput('cBarDirection')
+//         .appendField('Cbar direction')
+//         .appendField(new Blockly.FieldDropdown([
+//             ['none', 'none'],
+//             ['Horizontal', 'horizontal'],
+//             ['Vertical', 'vertical']
+//             ]), 'cBarDirection');
+//         this.setOutput(true, null);
+//         this.setTooltip('');
+//         this.setHelpUrl('');
+//         this.setColour(225);
+//     }
+// };
+// Blockly.common.defineBlocks({coloring: coloring});
 
 
 /* alternatives */

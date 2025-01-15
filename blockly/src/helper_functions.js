@@ -6,6 +6,7 @@ import * as BlockDynamicConnection from '@blockly/block-dynamic-connection';
 import { sample_ids,fieldTypeList, updateSampleIds, spot_data } from './globals';
 import {enableSampleIDsBlockFunction} from './custom_blocks'
 
+
 // Function: Update Sample Dropdown with IDs
 function updateSampleDropdown(sampleIds) {
     // Step 1: Store sample IDs in the global variableaxis_and_labels
@@ -469,6 +470,119 @@ if (style['ClusterType'] !== undefined) {
 block.render();
 }
 
+
+/**
+ * A helper function to gather all blocks under the "Styling" statement,
+ * categorize them into "Axes", "Text", "Markers", "Colors", and merge
+ * them into a single dictionary string for Python code.
+ * @param {Blockly.Block} plotBlock - The main block (e.g. "plot_map") that has a "Styling" input.
+ * @param {Object} generator - The Python generator object (e.g. pythonGenerator).
+ * @return {String} - The final merged JSON string, e.g. '{"Axes": {...}, "Text": {...}, ...}'.
+ */
+export function getCategorizedStyleDictCode(plotBlock, generator) {
+    // 1) Provide a category mapping function or inline switch
+    function getCategoryForType(blockType) {
+      switch (blockType) {
+        // Axes
+        case 'x_axis':
+        case 'y_axis':
+        case 'z_axis':
+        case 'c_axis':
+        case 'tick_direction':
+        case 'aspect_ratio':
+          return 'Axes';
+  
+        // Text
+        case 'font':
+        case 'add_scale':
+          return 'Text';
+  
+        // Markers
+        case 'marker_properties':
+        case 'line_properties':
+          return 'Markers';
+  
+        // Colors
+        case 'coloring':
+        case 'colormap':
+        case 'color_field':
+        case 'show_mass':
+        case 'color_by_cluster':
+          return 'Colors';
+  
+        default:
+          console.warn('No category mapping for block type:', blockType);
+          return null;
+      }
+    }
+  
+    // 2) Prepare an object to hold arrays of dictionary strings
+    const subBlocksCode = {
+      Axes: [],
+      Text: [],
+      Markers: [],
+      Colors: []
+    };
+  
+    // 3) Traverse the chain of blocks connected to "Styling"
+    let currentBlock = plotBlock.getInputTargetBlock('Styling');
+    while (currentBlock) {
+      const bType = currentBlock.type;
+      // Generate code for this sub-block
+      const tuple = generator.blockToCode(currentBlock, true); 
+      let dictString = Array.isArray(tuple) ? tuple[0] : tuple; 
+      if (!dictString) dictString = '{}';
+  
+      // Determine category
+      const cat = getCategoryForType(bType);
+      if (cat && dictString !== '{}' && dictString.trim() !== '{}') {
+        subBlocksCode[cat].push(dictString);
+      }
+  
+      currentBlock = currentBlock.getNextBlock();
+    }
+  
+    // 4) Merge all sub-blocks in each category into a single dict
+    const mergedCategories = {};
+    for (let cat of ['Axes','Text','Markers','Colors']) {
+      const dicts = subBlocksCode[cat]; // array of strings like '{ "XLabel": "Foo" }'
+      if (dicts.length > 0) {
+        let mergedKeyVals = [];
+        for (let dStr of dicts) {
+          const trimmed = dStr.trim();
+          if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+            const content = trimmed.slice(1, -1).trim(); // remove outer braces
+            if (content) mergedKeyVals.push(content);
+          }
+        }
+        mergedCategories[cat] = mergedKeyVals.length > 0
+          ? `{${mergedKeyVals.join(', ')}}`
+          : '{}';
+      } else {
+        mergedCategories[cat] = '{}';
+      }
+    }
+  
+    // 5) Now build the final big dictionary, ignoring empty '{}'
+    const styleDictParts = [];
+    if (mergedCategories['Axes'] !== '{}') {
+      styleDictParts.push(`"Axes": ${mergedCategories['Axes']}`);
+    }
+    if (mergedCategories['Text'] !== '{}') {
+      styleDictParts.push(`"Text": ${mergedCategories['Text']}`);
+    }
+    if (mergedCategories['Markers'] !== '{}') {
+      styleDictParts.push(`"Markers": ${mergedCategories['Markers']}`);
+    }
+    if (mergedCategories['Colors'] !== '{}') {
+      styleDictParts.push(`"Colors": ${mergedCategories['Colors']}`);
+    }
+  
+    // 6) Join them into one dictionary string
+    const styleDictCode = `{${styleDictParts.join(', ')}}`;
+    return styleDictCode;
+  }
+  
 
 // Function to dynamically update connected style blocks
 export function dynamicStyleUpdate(plotType, connectedBlocks) {

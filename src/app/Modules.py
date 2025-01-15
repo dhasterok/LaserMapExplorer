@@ -1,3 +1,4 @@
+import sys, os, re, copy, random, darkdetect
 import numpy as np
 import pandas as pd
 pd.options.mode.copy_on_write = True
@@ -73,7 +74,7 @@ class Main():
         self.laser_map_dict = {}
         self.persistent_filters = pd.DataFrame()
         self.persistent_filters = pd.DataFrame(columns=['use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'persistent'])
-
+        self.plot_type = 'analyte_map'
         # Plot Selector
         #-------------------------
         self.sort_method = 'mass'
@@ -82,10 +83,13 @@ class Main():
 
          # preferences
         self.default_preferences = {'Units':{'Concentration': 'ppm', 'Distance': 'µm', 'Temperature':'°C', 'Pressure':'MPa', 'Date':'Ma', 'FontSize':11, 'TickDir':'out'}}
+        self.preferences = copy.deepcopy(self.default_preferences)
 
         self.io = LameIO(self, ui_update= False)
 
         self.plot_style = Styling(self, ui= False)
+        
+
 
         # # Noise reduction
         # self.noise_reduction = ip(self)
@@ -237,6 +241,232 @@ class Main():
 
             self.data[self.sample_id].processed_data.set_attribute(analyte,'norm',norm)
 
+
+    
+
+
+    # -------------------------------------
+    # laser map functions and plotting
+    # -------------------------------------
+    def plot_map_mpl(self, sample_id, field_type, field):
+        """Create a matplotlib canvas for plotting a map
+
+        Create a map using ``mplc.MplCanvas``.
+
+        Parameters
+        ----------
+        sample_id : str
+            Sample identifier
+        field_type : str
+            Type of field for plotting
+        field : str
+            Field for plotting
+        """        
+        # create plot canvas
+        canvas = mplc.MplCanvas(parent=self)
+
+        # set color limits
+        if field not in self.data[self.sample_id].axis_dict:
+            self.plot_style.initialize_axis_values(field_type,field)
+            self.plot_style.set_style_widgets()
+
+        # get data for current map
+        #scale = self.data[self.sample_id].processed_data.get_attribute(field, 'norm')
+        scale = self.plot_style.cscale
+        map_df = self.data[self.sample_id].get_map_data(field, field_type)
+
+        array_size = self.data[self.sample_id].array_size
+        aspect_ratio = self.data[self.sample_id].aspect_ratio
+
+        # store map_df to save_data if data needs to be exported
+        self.save_data = map_df.copy()
+
+        # # equalized color bins to CDF function
+        # if self.toolButtonScaleEqualize.isChecked():
+        #     sorted_data = map_df['array'].sort_values()
+        #     cum_sum = sorted_data.cumsum()
+        #     cdf = cum_sum / cum_sum.iloc[-1]
+        #     map_df.loc[sorted_data.index, 'array'] = cdf.values
+
+        # plot map
+        reshaped_array = np.reshape(map_df['array'].values, array_size, order=self.data[self.sample_id].order)
+            
+        norm = self.plot_style.color_norm()
+
+        cax = canvas.axes.imshow(reshaped_array, cmap=self.plot_style.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
+
+        self.add_colorbar(canvas, cax)
+        match self.plot_style.cscale:
+            case 'linear':
+                clim = self.plot_style.clim
+            case 'log':
+                clim = self.plot_style.clim
+                #clim = np.log10(self.plot_style.clim)
+            case 'logit':
+                print('Color limits for logit are not currently implemented')
+
+        cax.set_clim(clim[0], clim[1])
+
+        # use mask to create an alpha layer
+        mask = self.data[self.sample_id].mask.astype(float)
+        reshaped_mask = np.reshape(mask, array_size, order=self.data[self.sample_id].order)
+
+        alphas = colors.Normalize(0, 1, clip=False)(reshaped_mask)
+        alphas = np.clip(alphas, .4, 1)
+
+        alpha_mask = np.where(reshaped_mask == 0, 0.5, 0)  
+        canvas.axes.imshow(np.ones_like(alpha_mask), aspect=aspect_ratio, interpolation='none', cmap='Greys', alpha=alpha_mask)
+        canvas.array = reshaped_array
+
+        canvas.axes.tick_params(direction=None,
+            labelbottom=False, labeltop=False, labelright=False, labelleft=False,
+            bottom=False, top=False, left=False, right=False)
+
+        canvas.set_initial_extent()
+        
+        # add scalebar
+        self.add_scalebar(canvas.axes)
+
+        canvas.fig.tight_layout()
+
+        self.plot_info = {
+            'tree': field_type,
+            'sample_id': sample_id,
+            'plot_name': field,
+            'plot_type': 'analyte map',
+            'field_type': field_type,
+            'field': field,
+            'figure': canvas,
+            'style': self.plot_style.style_dict[self.plot_style.plot_type],
+            'cluster_groups': None,
+            'view': [True,False],
+            'position': None
+            }
+    
+    # -------------------------------------
+    # General plot functions
+    # -------------------------------------    
+    def add_scalebar(self, ax):
+        """Add a scalebar to a map
+
+        Parameters
+        ----------
+        ax : 
+            Axes to place scalebar on.
+        """        
+        # add scalebar
+        direction = self.plot_style.scale_dir
+        length = self.plot_style.scale_length
+        if (length is not None) and (direction != 'none'):
+            if direction == 'horizontal':
+                dd = self.data[self.sample_id].dx
+            else:
+                dd = self.data[self.sample_id].dy
+            sb = scalebar( width=length,
+                    pixel_width=dd,
+                    units=self.preferences['Units']['Distance'],
+                    location=self.plot_style.scale_location,
+                    orientation=direction,
+                    color=self.plot_style.overlay_color,
+                    ax=ax )
+
+            sb.create()
+        else:
+            return
+
+        
+    def add_colorbar(self, canvas, cax, cbartype='continuous', grouplabels=None, groupcolors=None):
+        """Adds a colorbar to a MPL figure
+
+        Parameters
+        ----------
+        canvas : mplc.MplCanvas
+            canvas object
+        cax : axes
+            color axes object
+        cbartype : str
+            Type of colorbar, ``dicrete`` or ``continuous``, Defaults to continuous
+        grouplabels : list of str, optional
+            category/group labels for tick marks
+        """
+        #print("add_colorbar")
+        # Add a colorbar
+        cbar = None
+        if self.plot_style.cbar_dir == 'none':
+            return
+
+        # discrete colormap - plot as a legend
+        if cbartype == 'discrete':
+
+            if grouplabels is None or groupcolors is None:
+                return
+
+            # create patches for legend items
+            p = [None]*len(grouplabels)
+            for i, label in enumerate(grouplabels):
+                p[i] = Patch(facecolor=groupcolors[i], edgecolor='#111111', linewidth=0.5, label=label)
+
+            if self.plot_style.cbar_dir == 'vertical':
+                canvas.axes.legend(
+                        handles=p,
+                        handlelength=1,
+                        loc='upper left',
+                        bbox_to_anchor=(1.025,1),
+                        fontsize=self.plot_style.font_size,
+                        frameon=False,
+                        ncol=1
+                    )
+            elif self.plot_style.cbar_dir == 'horizontal':
+                canvas.axes.legend(
+                        handles=p,
+                        handlelength=1,
+                        loc='upper center',
+                        bbox_to_anchor=(0.5,-0.1),
+                        fontsize=self.plot_style.font_size,
+                        frameon=False,
+                        ncol=3
+                    )
+        # continuous colormap - plot with colorbar
+        else:
+            if self.plot_style.cbar_dir == 'vertical':
+                if self.plot_type == 'correlation':
+                    loc = 'left'
+                else:
+                    loc = 'right'
+                cbar = canvas.fig.colorbar( cax,
+                        ax=canvas.axes,
+                        orientation=self.plot_style.cbar_dir,
+                        location=loc,
+                        shrink=0.62,
+                        fraction=0.1,
+                        alpha=1
+                    )
+            elif self.plot_style.cbar_dir == 'horizontal':
+                cbar = canvas.fig.colorbar( cax,
+                        ax=canvas.axes,
+                        orientation=self.plot_style.cbar_dir,
+                        location='bottom',
+                        shrink=0.62,
+                        fraction=0.1,
+                        alpha=1
+                    )
+            else:
+                # should never reach this point
+                assert self.plot_style.cbar_dir == 'none', "Colorbar direction is set to none, but is trying to generate anyway."
+                return
+
+            cbar.set_label(self.plot_style.clabel, size=self.plot_style.font_size)
+            cbar.ax.tick_params(labelsize=self.plot_style.font_size)
+            cbar.set_alpha(1)
+
+        # adjust tick marks if labels are given
+        if cbartype == 'continuous' or grouplabels is None:
+            ticks = None
+        # elif cbartype == 'discrete':
+        #     ticks = np.arange(0, len(grouplabels))
+        #     cbar.set_ticks(ticks=ticks, labels=grouplabels, minor=False)
+        #else:
+        #    print('(add_colorbar) Unknown type: '+cbartype)
 
     # -------------------------------
     # Blockly functions

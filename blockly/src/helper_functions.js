@@ -102,6 +102,39 @@ function updateFieldTypeList(newFieldTypeList) {
 window.updateFieldTypeList = updateFieldTypeList;
 
 /**
+ * Retrieve an array of all blocks connected to the 'Styling' input
+ * in a linear chain (via next/previous statements).
+ * @param {Blockly.Block} plotBlock - The main block that has a 'Styling' statement input.
+ * @return {Blockly.Block[]} Array of connected blocks.
+ */
+function getStylingBlocks(plotBlock) {
+    // 1) Get the 'Styling' input object
+    const stylingInput = plotBlock.getInput('Styling');
+    if (!stylingInput) {
+      // Input not found; perhaps the block doesn't have a 'Styling' input?
+      console.warn("No 'Styling' input found on block:", plotBlock);
+      return [];
+    }
+    
+    // 2) Get the top-most connected block on this input
+    const firstBlock = stylingInput.connection
+      ? stylingInput.connection.targetBlock()
+      : null;
+  
+    // 3) Traverse the chain of connected blocks
+    const stylingBlocks = [];
+    let currentBlock = firstBlock;
+    while (currentBlock) {
+      stylingBlocks.push(currentBlock);
+      currentBlock = currentBlock.getNextBlock();
+    }
+  
+    return stylingBlocks;
+}
+  
+
+
+/**
  * Retrieve and update all blocks connected to the "Styling" input.
  * @param {Blockly.Block} plotMapBlock - The plot_map block instance.
  * @param {String} plotType - The dictionary containing styling values.
@@ -109,14 +142,15 @@ window.updateFieldTypeList = updateFieldTypeList;
 
 export function updateStylingChain(plotBlock, plotType) {
     // 1) Get the first block connected to "Styling".
-    let stylingBlock = plotBlock.getInputTargetBlock('Styling');
+    const stylingBlocks = getStylingBlocks(plotBlock);
     
     // If you want to explicitly set the plotType:
     // this.plotType = 'analyte map';
   
     // 2) Call the style widgets function with the current plotType.
-    window.blocklyBridge.invokeSetStyleWidgets(plotType, (style) => {
+    window.blocklyBridge.invokeSetStyleWidgets(plotType, (styleStr) => {
       // 3a) Check if the style dictionary is empty
+      const style = JSON.parse(styleStr);
       if (style.constructor === Object && Object.keys(style).length === 0) {
         console.warn('Style dictionary not provided for plotType:', this.plotType);
         return; // Exit if style is not available
@@ -127,163 +161,313 @@ export function updateStylingChain(plotBlock, plotType) {
         let styleDict = style;
         
         // 3b) Traverse the chain of styling blocks
-        while (stylingBlock) {
+        for (const block of stylingBlocks) {
           // 3c) Identify the block by type and update
-          switch (stylingBlock.type) {
+          switch (block.type) {
             case 'x_axis':
-              updateXAxisBlock(stylingBlock, styleDict);
+              updateXAxisBlock(block, styleDict);
               break;
             case 'y_axis':
-              updateYAxisBlock(stylingBlock, styleDict);
+              updateYAxisBlock(block, styleDict);
               break;
             case 'z_axis':
-              updateZAxisBlock(stylingBlock, styleDict);
+              updateZAxisBlock(block, styleDict);
               break;
             case 'c_axis':
-              updateCAxisBlock(stylingBlock, styleDict);
+              updateCAxisBlock(block, styleDict);
               break;
             case 'font':
-              updateFontBlock(stylingBlock, styleDict);
+              updateFontBlock(block, styleDict);
               break;
             case 'tick_direction':
-              updateTickDirectionBlock(stylingBlock, styleDict);
+              updateTickDirectionBlock(block, styleDict);
               break;
             case 'aspect_ratio':
-              updateAspectRatioBlock(stylingBlock, styleDict);
+              updateAspectRatioBlock(block, styleDict);
               break;
             case 'coloring':
-              updateColoringBlock(stylingBlock, styleDict);
+              updateColormapBlock(block, styleDict);
               break;
             case 'add_scale':
-              updateAddScaleBlock(stylingBlock, styleDict);
+              updateAddScaleBlock(block, styleDict);
               break;
             case 'marker_properties':
-              updateMarkerPropertiesBlock(stylingBlock, styleDict);
+              updateMarkerPropertiesBlock(block, styleDict);
               break;
             case 'line_properties':
-              updateLinePropertiesBlock(stylingBlock, styleDict);
+              updateLinePropertiesBlock(block, styleDict);
               break;
             case 'color_field':
-              updateColorFieldBlock(stylingBlock, styleDict);
+              updateColorFieldBlock(block, styleDict);
               break;
             case 'colormap':
-              updateColormapBlock(stylingBlock, styleDict);
+              updateColormapBlock(block, styleDict);
               break;
             case 'show_mass':
-              updateShowMassBlock(stylingBlock, styleDict);
+              updateShowMassBlock(block, styleDict);
               break;
             case 'color_by_cluster':
-              updateColorByClusterBlock(stylingBlock, styleDict);
+              updateColorByClusterBlock(block, styleDict);
               break;
             default:
               // Optionally handle unsupported block types
-              console.warn('Unsupported styling block:', stylingBlock.type);
+              console.warn('Unsupported styling block:', block.type);
           }
-          
-          // Move to the next block in the chain
-          stylingBlock = stylingBlock.getNextBlock();
         }
       }
     });
-  }
+}
   
   
-  /**
-   * Example update function for an X Axis block.
-   * Adjust it to match your style dictionary keys.
-   */
-  function updateXAxisBlock(block, styleDict) {
-    // For example, if your style dictionary has the following keys:
-    // styleDict = {
-    //   "xLabel": "X Axis Title",
-    //   "xLimMin": "0",
-    //   "xLimMax": "100",
-    //   "xScale": "linear",
-    // }
-    if (styleDict.xLabel) {
-      block.setFieldValue(styleDict.xLabel, 'xLabel');
-    }
-    if (styleDict.xLimMin) {
-      block.setFieldValue(styleDict.xLimMin, 'xLimMin');
-    }
-    if (styleDict.xLimMax) {
-      block.setFieldValue(styleDict.xLimMax, 'xLimMax');
-    }
-    if (styleDict.xScale) {
-      block.setFieldValue(styleDict.xScale, 'xScaleDropdown');
-    }
-    // Re-render to visually update the block
-    block.render();
-  }
-  
-  /** 
-   * Similarly define update functions for y_axis, z_axis, c_axis, etc. 
-   * Adjust them based on the fields you want to update and the keys in your style dictionary.
-  */
-  function updateYAxisBlock(block, styleDict) {
-    // ...
-    block.render();
-  }
-  
-  function updateZAxisBlock(block, styleDict) {
-    // ...
-    block.render();
-  }
-  
-  function updateCAxisBlock(block, styleDict) {
-    // ...
-    block.render();
-  }
-  
-  function updateFontBlock(block, styleDict) {
-    // ...
-    block.render();
-  }
-  
-  function updateTickDirectionBlock(block, styleDict) {
-    // ...
-    block.render();
-  }
-  
-  function updateAspectRatioBlock(block, styleDict) {
-    // ...
-    block.render();
-  }
-  
-  function updateAddScaleBlock(block, styleDict) {
-    // ...
-    block.render();
-  }
-  
-  function updateMarkerPropertiesBlock(block, styleDict) {
-    // ...
-    block.render();
-  }
-  
-  function updateLinePropertiesBlock(block, styleDict) {
-    // ...
-    block.render();
-  }
-  
-  function updateColorFieldBlock(block, styleDict) {
-    // ...
-    block.render();
-  }
-  
-  function updateColormapBlock(block, styleDict) {
-    // ...
-    block.render();
-  }
-  
-  function updateShowMassBlock(block, styleDict) {
-    // ...
-    block.render();
-  }
-  
-  function updateColorByClusterBlock(block, styleDict) {
-    // ...
-    block.render();
-  }
+function updateXAxisBlock(block, style) {
+// e.g. style might contain:
+// {
+//   "XLabel": "X Axis Title",
+//   "XLim": ["0", "100"],   // an array: [min, max]
+//   "XScale": "linear"
+// }
+if (style['XLabel'] !== undefined) {
+    block.setFieldValue(style['XLabel'], 'xLabel');
+}
+if (style['XLim'] && Array.isArray(style['XLim'])) {
+    block.setFieldValue(style['XLim'][0], 'xLimMin');
+    block.setFieldValue(style['XLim'][1], 'xLimMax');
+}
+if (style['XScale'] !== undefined) {
+    block.setFieldValue(style['XScale'], 'xScaleDropdown');
+}
+block.render();
+}
+
+function updateYAxisBlock(block, style) {
+// e.g. style might contain:
+// {
+//   "YLabel": "Y Axis Title",
+//   "YLim": ["0", "100"],
+//   "YScale": "log"
+// }
+if (style['YLabel'] !== undefined) {
+    block.setFieldValue(style['YLabel'], 'yLabel');
+}
+if (style['YLim'] && Array.isArray(style['YLim'])) {
+    block.setFieldValue(style['YLim'][0], 'yLimMin');
+    block.setFieldValue(style['YLim'][1], 'yLimMax');
+}
+if (style['YScale'] !== undefined) {
+    block.setFieldValue(style['YScale'], 'yScaleDropdown');
+}
+block.render();
+}
+
+
+function updateZAxisBlock(block, style) {
+// e.g. style might contain:
+// {
+//   "ZLabel": "Z Axis Title",
+//   "ZLim": ["0", "100"],
+//   "ZScale": "linear"
+// }
+if (style['ZLabel'] !== undefined) {
+    block.setFieldValue(style['ZLabel'], 'zLabel');
+}
+if (style['ZLim'] && Array.isArray(style['ZLim'])) {
+    block.setFieldValue(style['ZLim'][0], 'zLimMin');
+    block.setFieldValue(style['ZLim'][1], 'zLimMax');
+}
+if (style['ZScale'] !== undefined) {
+    block.setFieldValue(style['ZScale'], 'zScaleDropdown');
+}
+block.render();
+}
+
+
+
+function updateCAxisBlock(block, style) {
+// e.g. style might contain:
+// {
+//   "CLabel": "Concentration",
+//   "CLim": ["0", "500"],
+//   "CScale": "log"
+// }
+if (style['CLabel'] !== undefined) {
+    block.setFieldValue(style['CLabel'], 'cLabel');
+}
+if (style['CLim'] && Array.isArray(style['CLim'])) {
+    block.setFieldValue(style['CLim'][0], 'cLimMin');
+    block.setFieldValue(style['CLim'][1], 'cLimMax');
+}
+if (style['CScale'] !== undefined) {
+    block.setFieldValue(style['CScale'], 'cScaleDropdown');
+}
+block.render();
+}
+
+
+function updateFontBlock(block, style) {
+// e.g. style might contain:
+// {
+//   "FontName": "Arial",
+//   "FontSize": 12
+// }
+if (style['FontName'] !== undefined) {
+    block.setFieldValue(style['FontName'], 'font');
+}
+if (style['FontSize'] !== undefined) {
+    block.setFieldValue(String(style['FontSize']), 'fontSize');
+}
+block.render();
+}
+
+
+function updateTickDirectionBlock(block, style) {
+// e.g. style might contain:
+// { "TickDir": "out" }
+if (style['TickDir'] !== undefined) {
+    block.setFieldValue(style['TickDir'], 'tickDirectionDropdown');
+}
+block.render();
+}
+
+
+function updateAspectRatioBlock(block, style) {
+// e.g. style might contain:
+// {
+//   "AspectRatio": "1.0",
+//   "TickDir": "in"
+// }
+if (style['AspectRatio'] !== undefined) {
+    block.setFieldValue(String(style['AspectRatio']), 'aspectRatio');
+}
+if (style['TickDir'] !== undefined) {
+    block.setFieldValue(style['TickDir'], 'tickDirectionDropdown');
+}
+block.render();
+}
+
+
+function updateAddScaleBlock(block, style) {
+// e.g. style might contain:
+// {
+//   "ScaleColor": "#FF0000",
+//   "ScaleUnits": "m",
+//   "ScaleLength": "50",
+//   "ScaleDirection": "horizontal"
+// }
+if (style['ScaleColor'] !== undefined) {
+    block.setFieldValue(style['ScaleColor'], 'scaleColor');
+}
+if (style['ScaleUnits'] !== undefined) {
+    block.setFieldValue(style['ScaleUnits'], 'scaleUnits');
+}
+if (style['ScaleLength'] !== undefined) {
+    block.setFieldValue(style['ScaleLength'], 'scaleLength');
+}
+if (style['ScaleDirection'] !== undefined) {
+    block.setFieldValue(style['ScaleDirection'], 'scaleDirection');
+}
+block.render();
+}
+
+
+function updateMarkerPropertiesBlock(block, style) {
+// e.g. style might contain:
+// {
+//   "MarkerSymbol": "circle",
+//   "MarkerSize": 8,
+//   "MarkerColor": "#FFFF00",
+//   "MarkerAlpha": 0.5  // if you want transparency
+// }
+if (style['MarkerSymbol'] !== undefined) {
+    block.setFieldValue(style['MarkerSymbol'], 'markerSymbol');
+}
+if (style['MarkerSize'] !== undefined) {
+    block.setFieldValue(String(style['MarkerSize']), 'markerSize');
+}
+if (style['MarkerColor'] !== undefined) {
+    block.setFieldValue(style['MarkerColor'], 'markerColor');
+}
+// If you handle marker alpha:
+// block.setFieldValue(String(style['MarkerAlpha']), 'transparency');
+block.render();
+}
+
+
+function updateLinePropertiesBlock(block, style) {
+// e.g. style might contain:
+// {
+//   "LineWidth": 2,
+//   "LineColor": "#00FF00"
+// }
+if (style['LineWidth'] !== undefined) {
+    block.setFieldValue(String(style['LineWidth']), 'lineWidth');
+}
+if (style['LineColor'] !== undefined) {
+    block.setFieldValue(style['LineColor'], 'lineColor');
+}
+block.render();
+}
+
+
+function updateColorFieldBlock(block, style) {
+// e.g. style might contain:
+// {
+//   "ColorFieldType": "typeA",
+//   "ColorFieldOption": "option1"
+// }
+if (style['ColorFieldType'] !== undefined) {
+    block.setFieldValue(style['ColorFieldType'], 'fieldType');
+}
+if (style['ColorFieldOption'] !== undefined) {
+    block.setFieldValue(style['ColorFieldOption'], 'field');
+}
+block.render();
+}
+
+
+function updateColormapBlock(block, style) {
+// e.g. style might contain:
+// {
+//   "ColormapName": "viridis",
+//   "Reverse": true,
+//   "Direction": "vertical"
+// }
+if (style['ColormapName'] !== undefined) {
+    block.setFieldValue(style['ColormapName'], 'colormap');
+}
+if (style['Reverse'] !== undefined) {
+    // FieldCheckbox expects "TRUE" or "FALSE"
+    const checkboxVal = style['Reverse'] ? 'TRUE' : 'FALSE';
+    block.setFieldValue(checkboxVal, 'reverse');
+}
+if (style['Direction'] !== undefined) {
+    block.setFieldValue(style['Direction'], 'direction');
+}
+block.render();
+}
+
+
+function updateShowMassBlock(block, style) {
+// e.g. style might contain:
+// {
+//   "ShowMass": true
+// }
+if (style['ShowMass'] !== undefined) {
+    const checkboxVal = style['ShowMass'] ? 'TRUE' : 'FALSE';
+    block.setFieldValue(checkboxVal, 'showMass');
+}
+block.render();
+}
+
+function updateColorByClusterBlock(block, style) {
+// e.g. style might contain:
+// {
+//   "ClusterType": "cluster1"
+// }
+if (style['ClusterType'] !== undefined) {
+    block.setFieldValue(style['ClusterType'], 'clusterType');
+}
+block.render();
+}
 
 
 // Function to dynamically update connected style blocks
@@ -863,23 +1047,23 @@ function updateMarksAndLinesBlock(block, style) {
     block.render();
 }
 
-function updateColoringBlock(block, style) {
-    // Update Colormap, Scale, and CLim
-    block.setFieldValue(style['Colormap'], 'colormap');
-    block.setFieldValue(style['CScale'], 'cScale');
+// function updateColoringBlock(block, style) {
+//     // Update Colormap, Scale, and CLim
+//     block.setFieldValue(style['Colormap'], 'colormap');
+//     block.setFieldValue(style['CScale'], 'cScale');
     
-    block.setFieldValue(style['CLim'][0], 'cLimMin');
-    block.setFieldValue(style['CLim'][1], 'cLimMax');
+//     block.setFieldValue(style['CLim'][0], 'cLimMin');
+//     block.setFieldValue(style['CLim'][1], 'cLimMax');
     
-    // Update the Cbar label and direction
-    block.setFieldValue(style['CLabel'], 'cBarLabel');
-    block.setFieldValue(style['CbarDir'], 'cBarDirection');
+//     // Update the Cbar label and direction
+//     block.setFieldValue(style['CLabel'], 'cBarLabel');
+//     block.setFieldValue(style['CbarDir'], 'cBarDirection');
 
-    block.setFieldValue(style['Resolution'], 'resolution');
+//     block.setFieldValue(style['Resolution'], 'resolution');
 
-    block.setFieldValue(style['CbarReverse'], 'reverse');
+//     block.setFieldValue(style['CbarReverse'], 'reverse');
     
-    // Render the updated block
-    block.render();
-}
+//     // Render the updated block
+//     block.render();
+// }
 

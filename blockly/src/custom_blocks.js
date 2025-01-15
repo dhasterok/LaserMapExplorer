@@ -936,27 +936,31 @@ const plot_map = {
 
         // Add default blocks to Styling input only in the toolbox
         if (this.isInFlyout) {
-            this.addDefaultStylingBlocks();
+            
         }
-
-        const initialFieldType = this.getFieldValue('fieldType');
-        this.updateFieldDropdown(initialFieldType);
-
-        // update style dictionaries
-        updateStylingChain(this, 'analyte map');
+        else{
+            const initialFieldType = this.getFieldValue('fieldType');
+            this.updateFieldDropdown(initialFieldType);
+            this.addDefaultStylingBlocks();
+            // update style dictionaries
+            updateStylingChain(this, 'analyte map');
+        }
     },
     updateFieldDropdown: function (newValue) {
         const fieldTypeValue = newValue || this.getFieldValue('fieldType');
         window.blocklyBridge.getFieldList(fieldTypeValue).then((response) => {
             const options = response.map(option => [option, option]);
             const dropdown = this.getField('field');
-            if (options.length > 0) {
-                dropdown.menuGenerator_ = options;
-                dropdown.setValue(options[0][1]);
-            } else {
-                dropdown.setValue('');
-            }
-            dropdown.forceRerender();
+            if (dropdown){
+                if (options.length > 0) {
+                    dropdown.menuGenerator_ = options;
+                    dropdown.setValue(options[0][1]);
+                } else {
+                    dropdown.menuGenerator_ = [['Select...', '']];
+                    dropdown.setValue('');
+                }
+                dropdown.forceRerender();
+        }
         }).catch(error => {
             console.error('Error fetching field list:', error);
         });
@@ -965,19 +969,22 @@ const plot_map = {
         const workspace = this.workspace;
 
         // Default block types
-        const defaultBlocks = ['x_axis', 'y_axis', 'font', 'coloring'];
+        const defaultBlocks = ['x_axis', 'y_axis', 'font', 'colormap'];
 
-        // Add each default block to the Styling input
+        let lastConnection = this.getInput('Styling').connection;
+
+        // 2) For each block type, connect it in a chain.
         defaultBlocks.forEach(blockType => {
             const block = workspace.newBlock(blockType);
             block.initSvg();
             block.render();
 
-            // Connect the block to the Styling input
-            const connection = this.getInput('Styling').connection;
-            if (connection) {
-                block.previousConnection.connect(connection);
-            }
+            // Attach this block to the "lastConnection"
+            block.previousConnection.connect(lastConnection);
+
+            // Now set "lastConnection" to this block's .nextConnection
+            // so the next block in the loop attaches to the previous block.
+            lastConnection = block.nextConnection;
         });
     },
 };
@@ -1161,23 +1168,6 @@ Blockly.Blocks['aspect_ratio'] = {
     },
 };
 
-
-Blockly.Blocks['coloring'] = {
-    init: function () {
-        this.appendDummyInput('colormap')
-        .appendField('Colormap')
-        .appendField(new Blockly.FieldDropdown([
-            ['option', 'OPTIONNAME'],
-            ['option', 'OPTIONNAME'],
-            ['option', 'OPTIONNAME']
-            ]), 'colormap');
-        this.setPreviousStatement(true, 'Styling');
-        this.setNextStatement(true, 'Styling');
-        this.setColour(200);
-        this.setTooltip('Set Y axis scale');
-        this.setHelpUrl('');
-    },
-};
 
 Blockly.Blocks['add_scale'] = {
     init: function () {

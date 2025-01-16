@@ -158,6 +158,8 @@ pythonGenerator.forBlock['plot_map'] = function(block, generator) {
     const field_type = generator.quote_(block.getFieldValue('fieldType'));
     // Retrieve the stored field from the block
     const field = generator.quote_(block.getFieldValue('field'));
+
+    const plot_type = generator.quote_('analyte map');
     let code = '';
     code += `axes_dict = {}\n`;
     code += `text_dict = {}\n`;
@@ -184,12 +186,12 @@ pythonGenerator.forBlock['plot_map'] = function(block, generator) {
     code += `if colors_dict:\n`;
     code += `    style_dict["Colors"] = colors_dict\n\n`;
   
-    // Then do something with style_dict, e.g.:
-    code += `self.parent.style.style_dict["analyte map"] = {\n`;
-    code += `    **self.parent.style.style_dict.get("analyte map", {}),\n`;
-    code += `    **style_dict\n`;
-    code += `}\n`;
-    code += `self.parent.plot_map_mpl(self.parent.sample_id, field_type = ${field_type},field = ${field})`;
+    // update self.parent.style.style_dict with `style_dict`
+    code += `if (style_dict):\n` +
+    generator.INDENT +`self.main.plot_style.style_dict[${plot_type}] = {**self.main.plot_style.style_dict[${plot_type}], **style_dict}\n`+
+    generator.INDENT +`self.main.plot_style.set_style_dictionary(${plot_type})\n`;
+    code += `self.main.plot_map_mpl(self.main.sample_id, field_type = ${field_type},field = ${field})\n`;
+    code += `self.main.plot_viewer.show()`
     return code;
 };
 
@@ -205,8 +207,8 @@ pythonGenerator.forBlock['plot'] = function(block, generator) {
     var styleCode = generator.valueToCode(block, 'style', Order.NONE);
     if (styleCode && styleCode !== '{}') {
         code += `
-self.parent.style.style_dict[${plot_type}] = {**self.parent.style.style_dict[${plot_type}], **${styleCode}}
-self.parent.style.set_style_widgets(${plot_type})
+self.parent.plot_style.style_dict[${plot_type}] = {**self.parent.plot_style.style_dict[${plot_type}], **${styleCode}}
+self.parent.plot_style.set_style_widgets(${plot_type})
 `;
     }
 

@@ -443,7 +443,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxPlotType.clear()
         self.comboBoxPlotType.addItems(self.plot_types[self.toolBox.currentIndex()][1:])
         self.comboBoxPlotType.setCurrentIndex(self.plot_types[self.toolBox.currentIndex()][0])
-        
+        self.comboBoxPlotType.currentIndexChanged.connect(self.on_plot_type_changed)
+        # Initialize a variable to store the current plot type
+        self.plot_type = None
+
         # Menu and Toolbar
         #-------------------------
         self.io = LameIO(self)
@@ -833,6 +836,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.plot_style.load_theme_names()
 
         setattr(self.comboBoxMVPlots, "allItems", lambda: [self.comboBoxMVPlots.itemText(i) for i in range(self.comboBoxMVPlots.count())])
+        
+        # Connect the signal to your handler
+        self.field = None
+        self.comboBoxColorField.currentIndexChanged.connect(self.on_field_changed)
+        self.field_type = None
+        self.comboBoxColorByField.currentIndexChanged.connect(self.on_field_type_changed)
 
         # self.doubleSpinBoxMarkerSize.valueChanged.connect(lambda: self.plot_scatter(save=False))
         #self.comboBoxColorByField.activated.connect(lambda: self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField))
@@ -1013,6 +1022,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             sys.stdout = self.logger  # Redirect stdout to logger
         else:
             sys.stdout = sys.__stdout__  # Restore to default stdout    
+
+    
+    def on_plot_type_changed(self):
+        # Update self.plot_type whenever combo box changes
+        self.plot_type = self.comboBoxPlotType.currentText()
+
+    def on_field_type_changed(self):
+        # Update self.field_type whenever combo box changes
+        self.field_type = self.comboBoxColorByField.currentText()
+
+    def on_field_changed(self):
+        # Update self.field_type whenever combo box changes
+        self.field = self.comboBoxColorField.currentText()
 
     # -------------------------------------
     # Reset to start
@@ -1277,7 +1299,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolBoxStyle.setCurrentIndex(0)
         self.toolBoxTreeView.setCurrentIndex(self.right_tab['tree'])
         self.toolBox.setCurrentIndex(self.left_tab['sample'])
-        self.plot_style.set_style_widgets(self.comboBoxPlotType.currentText())
+        self.plot_style.set_style_widgets(self.plot_type)
 
         # update comboboxes to reflect list of available field types and fields
         self.update_all_field_comboboxes()
@@ -1763,7 +1785,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 
         # get the current plot type
-        #plot_type = self.comboBoxPlotType.currentText()
+        #plot_type = self.plot_type
         #self.plot_style.set_style_widgets(plot_type=plot_type, style=self.plot_style.plot_type[plot_type])
 
         # If canvasWindow is set to SingleView, update the plot
@@ -1816,7 +1838,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Executes on ``MainWindow.toolButtonSwapXY.clicked``.  Updates data dictionary and other map related derived results.
         """
-        match self.comboBoxPlotType.currentText():
+        match self.plot_type:
             case 'analyte map':
                 # swap x and y
                 self.data[self.sample_id].swap_xy()
@@ -1886,17 +1908,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def update_fields(self, sample_id, plot_type, field_type, field,  plot=False):
         # updates comboBoxPlotType,comboBoxColorByField and comboBoxColorField comboboxes using tree, branch and leaf
         if sample_id == self.sample_id:
-            if plot_type != self.comboBoxPlotType.currentText():
+            if plot_type != self.plot_type:
                 self.comboBoxPlotType.setCurrentText(plot_type)
 
-            if field_type != self.comboBoxColorByField.currentText():
+            if field_type != self.field_type:
                 if field_type =='Calculated':  # correct name 
                     self.comboBoxColorByField.setCurrentText('Calculated')
                 else:
                     self.comboBoxColorByField.setCurrentText(field_type)
                 self.plot_style.color_by_field_callback() # added color by field callback to update color field
 
-            if field != self.comboBoxColorField.currentText():
+            if field != self.field:
                 self.comboBoxColorField.setCurrentText(field)
                 self.plot_style.color_field_callback(plot)
             
@@ -2261,8 +2283,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         sample_id = self.plot_info['sample_id']
         data = self.data[sample_id]
 
-        field_type = self.comboBoxColorByField.currentText()
-        field = self.comboBoxColorField.currentText()
+        field_type = self.field_type
+        field = self.field
         current_plot_df = self.data[self.sample_id].get_map_data(field, field_type)
         
         data.mask = data.mask[data.crop_mask]
@@ -3103,20 +3125,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if DEBUG:
             print(f"update_SV\n  plot_type: {plot_type}\n  field_type: {field_type}\n  field: {field}")
 
-        if self.sample_id == '' or not self.comboBoxPlotType.currentText():
+        if self.sample_id == '' or not self.plot_type:
             return
 
         if not plot_type:
-            plot_type = self.comboBoxPlotType.currentText()
+            plot_type = self.plot_type
         
         match plot_type:
             case 'analyte map':
                 sample_id = self.sample_id
                 if not field_type:
-                    field_type = self.comboBoxColorByField.currentText()
+                    field_type = self.field_type
                 
                 if not field:
-                    field = self.comboBoxColorField.currentText()
+                    field = self.field
 
                 if not field_type or not field or (field_type == '') or (field == ''):
                     return
@@ -3223,7 +3245,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.update_canvas(self.sv_widget)
             self.sv_widget.show()
 
-            if (self.comboBoxPlotType.currentText() == 'analyte map') and (self.toolBox.currentIndex() == self.left_tab['sample']):
+            if (self.plot_type == 'analyte map') and (self.toolBox.currentIndex() == self.left_tab['sample']):
                 current_map_df = self.data[self.sample_id].get_map_data(plot_info['plot_name'], plot_info['field_type'], norm=self.plot_style.cscale)
                 self.plot_small_histogram(current_map_df)
         # add figure to MultiView canvas
@@ -3741,7 +3763,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # continuous colormap - plot with colorbar
         else:
             if self.plot_style.cbar_dir == 'vertical':
-                if self.comboBoxPlotType.currentText() == 'correlation':
+                if self.plot_type == 'correlation':
                     loc = 'left'
                 else:
                     loc = 'right'
@@ -4127,7 +4149,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             case 'Kendall':
                 self.plot_style.clabel = method + "'s $\\tau" + power + "$"
 
-        if self.comboBoxPlotType.currentText() != 'correlation':
+        if self.plot_type != 'correlation':
             self.comboBoxPlotType.setCurrentText('correlation')
             self.plot_style.set_style_widgets('correlation')
 
@@ -4167,10 +4189,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Calculate the correlation matrix
         method = self.comboBoxCorrelationMethod.currentText().lower()
-        if self.comboBoxColorByField.currentText().lower() == 'none':
+        if self.field_type.lower() == 'none':
             correlation_matrix = df_filtered.corr(method=method)
         else:
-            algorithm = self.comboBoxColorField.currentText()
+            algorithm = self.field
             cluster_group = self.data[self.sample_id].processed_data.loc[:,algorithm]
             selected_clusters = self.cluster_dict[algorithm]['selected_clusters']
 
@@ -4262,9 +4284,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def histogram_field_type_callback(self):
         """"Executes when the histogram field type is changed"""
         self.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
-        #if self.comboBoxPlotType.currentText() != 'histogram':
+        #if self.plot_type != 'histogram':
         #    self.comboBoxPlotType.setCurrentText('histogram')
-        if self.comboBoxPlotType.currentText() == 'analyte map':
+        if self.plot_type == 'analyte map':
             self.plot_style.color_field_type = self.comboBoxHistFieldType.currentText()
 
         self.histogram_update_bin_width()
@@ -4275,9 +4297,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def histogram_field_callback(self):
         """Executes when the histogram field is changed"""
-        #if self.comboBoxPlotType.currentText() != 'histogram':
+        #if self.plot_type != 'histogram':
         #    self.comboBoxPlotType.setCurrentText('histogram')
-        if self.comboBoxPlotType.currentText() == 'analyte map':
+        if self.plot_type == 'analyte map':
             self.plot_style.color_field = self.comboBoxHistField.currentText()
         self.spinBoxFieldIndex.setValue(self.comboBoxHistField.currentIndex())
         self.histogram_update_bin_width()
@@ -4309,7 +4331,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_bins = True
 
         # update histogram
-        if self.comboBoxPlotType.currentText() == 'histogram':
+        if self.plot_type == 'histogram':
             # trigger update to plot
             self.plot_style.scheduler.schedule_update()
 
@@ -4331,7 +4353,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_bins = True
 
         # update histogram
-        if self.comboBoxPlotType.currentText() == 'histogram':
+        if self.plot_type == 'histogram':
             # trigger update to plot
             self.plot_style.scheduler.schedule_update()
 
@@ -4347,7 +4369,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # update bin width
         #self.histogram_update_bin_width()
 
-        if self.comboBoxPlotType.currentText() == 'histogram':
+        if self.plot_type == 'histogram':
             # trigger update to plot
             self.plot_style.scheduler.schedule_update()
 
@@ -4496,7 +4518,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 cumflag = False
 
         # Check if the algorithm is in the current group and if results are available
-        if self.comboBoxColorByField.currentText() == 'cluster' and self.comboBoxColorField.currentText() != '':
+        if self.field_type == 'cluster' and self.field != '':
             method = self.cluster_dict['active method']
 
             # Get the cluster labels for the data
@@ -4670,15 +4692,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             case 'PCA scatter' | 'PCA heatmap':
                 scatter_dict['x'] = self.data[self.sample_id].get_vector('PCA score', f'PC{self.spinBoxPCX.value()}', norm=self.plot_style.xscale)
                 scatter_dict['y'] = self.data[self.sample_id].get_vector('PCA score', f'PC{self.spinBoxPCY.value()}', norm=self.plot_style.yscale)
-                if (self.comboBoxColorByField.currentText() is None) or (self.comboBoxColorByField.currentText != ''):
-                    scatter_dict['c'] = self.data[self.sample_id].get_vector(self.comboBoxColorByField.currentText(), self.comboBoxColorField.currentText())
+                if (self.field_type is None) or (self.comboBoxColorByField.currentText != ''):
+                    scatter_dict['c'] = self.data[self.sample_id].get_vector(self.field_type, self.field)
             case _:
                 scatter_dict['x'] = self.data[self.sample_id].get_vector(self.comboBoxFieldTypeX.currentText(), self.comboBoxFieldX.currentText(), norm=self.plot_style.xscale)
                 scatter_dict['y'] = self.data[self.sample_id].get_vector(self.comboBoxFieldTypeY.currentText(), self.comboBoxFieldY.currentText(), norm=self.plot_style.yscale)
-                if (self.comboBoxColorByField.currentText() is not None) and (self.comboBoxColorByField.currentText() != ''):
+                if (self.field_type is not None) and (self.field_type != ''):
                     scatter_dict['z'] = self.data[self.sample_id].get_vector(self.comboBoxFieldTypeZ.currentText(), self.comboBoxFieldZ.currentText(), norm=self.plot_style.zscale)
                 elif (self.comboBoxFieldZ.currentText() is not None) and (self.comboBoxFieldZ.currentText() != ''):
-                    scatter_dict['c'] = self.data[self.sample_id].get_vector(self.comboBoxColorByField.currentText(), self.comboBoxColorField.currentText(), norm=self.plot_style.cscale)
+                    scatter_dict['c'] = self.data[self.sample_id].get_vector(self.field_type, self.field, norm=self.plot_style.cscale)
 
         # set axes widgets
         if (scatter_dict['x']['field'] is not None) and (scatter_dict['y']['field'] != ''):
@@ -4785,7 +4807,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             
         elif self.plot_style.color_field_type == 'cluster':
             # color by cluster
-            method = self.comboBoxColorField.currentText()
+            method = self.field
             if method not in list(self.cluster_dict.keys()):
                 return
             else:
@@ -4908,7 +4930,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             
         elif self.plot_style.color_field_type == 'cluster':
             # color by cluster
-            method = self.comboBoxColorField.currentText()
+            method = self.field
             if method not in list(self.cluster_dict.keys()):
                 return
             else:
@@ -5108,7 +5130,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def plot_ternarymap(self, canvas):
         """Creates map colored by ternary coordinate positions"""
-        if self.comboBoxPlotType.currentText() != 'ternary map':
+        if self.plot_type != 'ternary map':
             self.comboBoxPlotType.setCurrentText('ternary map')
             self.plot_style.set_style_widgets('ternary map')
 
@@ -5251,7 +5273,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.compute_pca()
 
         # Determine which PCA plot to create based on the combobox selection
-        plot_type = self.comboBoxPlotType.currentText()
+        plot_type = self.plot_type
 
         match plot_type.lower():
             # make a plot of explained variance
@@ -5282,12 +5304,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             # make a map of a principal component score
             case 'pca score':
-                if self.comboBoxColorByField.currentText().lower() == 'none' or self.comboBoxColorField.currentText() == '':
+                if self.field_type.lower() == 'none' or self.field == '':
                     return
 
                 # Assuming pca_df contains scores for the principal components
                 canvas, plot_data = self.plot_score_map()
-                plot_name = plot_type+f'_{self.comboBoxColorField.currentText()}'
+                plot_name = plot_type+f'_{self.field}'
             case _:
                 print(f'Unknown PCA plot type: {plot_type}')
                 return
@@ -5298,9 +5320,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             'tree': 'Multidimensional Analysis',
             'sample_id': self.sample_id,
             'plot_name': plot_name,
-            'plot_type': self.comboBoxPlotType.currentText(),
-            'field_type':self.comboBoxColorByField.currentText(),
-            'field':  self.comboBoxColorField.currentText(),
+            'plot_type': self.plot_type,
+            'field_type':self.field_type,
+            'field':  self.field,
             'figure': canvas,
             'style': self.plot_style.style_dict[self.plot_style.plot_type],
             'cluster_groups': [],
@@ -5493,7 +5515,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         canvas = mplc.MplCanvas(parent=self)
 
-        plot_type = self.comboBoxPlotType.currentText()
+        plot_type = self.plot_type
 
         # data frame for plotting
         match plot_type:
@@ -5503,7 +5525,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             case 'cluster score':
                 #idx = int(self.comboBoxColorField.currentIndex())
                 #field = f'{idx}'
-                field = self.comboBoxColorField.currentText()
+                field = self.field
             case _:
                 print('(MainWindow.plot_score_map) Unknown score type'+plot_type)
                 return canvas
@@ -5535,7 +5557,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         print('plot_cluster_map')
         canvas = mplc.MplCanvas(parent=self)
 
-        plot_type = self.comboBoxPlotType.currentText()
+        plot_type = self.plot_type
         method = self.comboBoxClusterMethod.currentText()
 
         # data frame for plotting
@@ -5664,7 +5686,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #print(f"Second derivative of inertia: {second_derivative}")
         #print(f"Optimal number of clusters: {optimal_k}")
 
-        plot_type = self.comboBoxPlotType.currentText()
+        plot_type = self.plot_type
         plot_name = f"{plot_type}_{method}"
         plot_data = {'inertia': inertia, '2nd derivative': second_derivative}
 
@@ -5672,9 +5694,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             'tree': 'Multidimensional Analysis',
             'sample_id': self.sample_id,
             'plot_name': plot_name,
-            'plot_type': self.comboBoxPlotType.currentText(),
-            'field_type':self.comboBoxColorByField.currentText(),
-            'field':  self.comboBoxColorField.currentText(),
+            'plot_type': self.plot_type,
+            'field_type':self.field_type,
+            'field':  self.field,
             'figure': canvas,
             'style': self.plot_style.style_dict[self.plot_style.plot_type],
             'cluster_groups': self.cluster_dict[method],
@@ -5834,7 +5856,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.cluster_dict['active method'] = method
 
-        plot_type = self.comboBoxPlotType.currentText()
+        plot_type = self.plot_type
 
         match plot_type:
             case 'cluster':
@@ -5842,7 +5864,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 plot_name = f"{plot_type}_{method}_map"
                 canvas, plot_data = self.plot_cluster_map()
             case 'cluster score':
-                plot_name = f"{plot_type}_{method}_{self.comboBoxColorField.currentText()}_score_map"
+                plot_name = f"{plot_type}_{method}_{self.field}_score_map"
                 canvas, plot_data = self.plot_score_map()
             case _:
                 print(f'Unknown PCA plot type: {plot_type}')
@@ -5854,9 +5876,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             'tree': 'Multidimensional Analysis',
             'sample_id': self.sample_id,
             'plot_name': plot_name,
-            'plot_type': self.comboBoxPlotType.currentText(),
-            'field_type':self.comboBoxColorByField.currentText(),
-            'field':  self.comboBoxColorField.currentText(),
+            'plot_type': self.plot_type,
+            'field_type':self.field_type,
+            'field':  self.field,
             'figure': canvas,
             'style': self.plot_style.style_dict[self.plot_style.plot_type],
             'cluster_groups': self.cluster_dict[method],
@@ -6009,7 +6031,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.cluster_dict[method]['selected_clusters'] = []
 
             # update plot
-            if (self.comboBoxPlotType.currentText() not in ['cluster', 'cluster score']) and (self.comboBoxColorByField.currentText() == 'cluster'):
+            if (self.plot_type not in ['cluster', 'cluster score']) and (self.field_type == 'cluster'):
                 # trigger update to plot
                 self.plot_style.scheduler.schedule_update()
 
@@ -6073,7 +6095,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         ref_i = self.comboBoxNDimRefMaterial.currentIndex()
 
-        plot_type = self.comboBoxPlotType.currentText()
+        plot_type = self.plot_type
         plot_data = None
 
         # Get quantile for plotting TEC & radar plots
@@ -6094,8 +6116,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             angle = 0
         labels = self.plot_style.toggle_mass(self.ndim_list)
             
-        if self.comboBoxColorByField.currentText() == 'cluster' and self.comboBoxColorField.currentText() != '':
-            method = self.comboBoxColorField.currentText()
+        if self.field_type == 'cluster' and self.field != '':
+            method = self.field
             cluster_dict = self.cluster_dict[method]
             cluster_color, cluster_label, cmap = self.plot_style.get_cluster_colormap(cluster_dict, alpha=self.plot_style.marker_alpha)
 
@@ -6483,9 +6505,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # colors
         addNone = True
-        if self.comboBoxPlotType.currentText() in ['analyte map','PCA score','cluster','cluster score']:
+        if self.plot_type in ['analyte map','PCA score','cluster','cluster score']:
             addNone = False
-        self.update_field_type_combobox(self.comboBoxColorByField, addNone=addNone, plot_type=self.comboBoxPlotType.currentText())
+        self.update_field_type_combobox(self.comboBoxColorByField, addNone=addNone, plot_type=self.plot_type)
         self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
         self.spinBoxColorField.setFixedWidth(20)
         self.spinBoxColorField.setMinimum(0)
@@ -6510,7 +6532,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         #print('check_analysis_type')
         self.check_analysis = True
-        self.update_field_type_combobox(self.comboBoxColorByField, addNone=True, plot_type=self.comboBoxPlotType.currentText())
+        self.update_field_type_combobox(self.comboBoxColorByField, addNone=True, plot_type=self.plot_type)
         self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
         self.spinBoxColorField.setMinimum(0)
         self.spinBoxColorField.setMaximum(self.comboBoxColorField.count() - 1)

@@ -103,7 +103,8 @@ class LameIO():
         parent.csv_files = [file for file in file_list if file.endswith('.lame.csv')]
         if parent.csv_files == []:
             # warning dialog
-            parent.statusBar.showMessage("No valid csv files found.")
+            if hasattr(parent,'statusBar'):
+                parent.statusBar.showMessage("No valid csv files found.")
             return
                 #clear the current analysis
         self.parent.reset_analysis()

@@ -4,6 +4,7 @@ import pandas as pd
 pd.options.mode.copy_on_write = True
 import matplotlib
 matplotlib.use('Qt5Agg')
+from PyQt5.QtWidgets import QWidget, QDialog
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 #from matplotlib.figure import Figure
 #from matplotlib.projections.polar import PolarAxes
@@ -33,8 +34,10 @@ from src.ui.MainWindow import Ui_MainWindow
 #from src.ui.PreferencesWindow import Ui_PreferencesWindow
 from src.app.FieldSelectionWindow import FieldDialog
 from src.app.AnalyteSelectionWindow import AnalyteDialog
+
 from src.common.TableFunctions import TableFcn as TableFcn
 import src.common.CustomMplCanvas as mplc
+from src.app.PlotViewerWindow import PlotViewer
 from src.app.Actions import Actions
 from src.common.DataHandling import SampleObj
 from src.app.PlotTree import PlotTree
@@ -57,6 +60,8 @@ from src.app.help_mapping import create_help_mapping
 from src.common.Logger import LoggerDock
 import os
 
+
+
 class Main():
     def __init__(self, *args, **kwargs):
 
@@ -74,7 +79,7 @@ class Main():
         self.laser_map_dict = {}
         self.persistent_filters = pd.DataFrame()
         self.persistent_filters = pd.DataFrame(columns=['use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'persistent'])
-        self.plot_type = 'analyte_map'
+        self.plot_type = 'analyte map'
         # Plot Selector
         #-------------------------
         self.sort_method = 'mass'
@@ -89,7 +94,9 @@ class Main():
 
         self.plot_style = Styling(self, ui= False)
         
-
+        # Initialise plotviewer form
+        self.plot_viewer = PlotViewer(self)
+        
 
         # # Noise reduction
         # self.noise_reduction = ip(self)
@@ -263,12 +270,12 @@ class Main():
             Field for plotting
         """        
         # create plot canvas
-        canvas = mplc.MplCanvas(parent=self)
+        canvas = mplc.MplCanvas(parent=self, ui= self.plot_viewer)
 
         # set color limits
         if field not in self.data[self.sample_id].axis_dict:
             self.plot_style.initialize_axis_values(field_type,field)
-            self.plot_style.set_style_widgets()
+            self.plot_style.set_style_dictionary()
 
         # get data for current map
         #scale = self.data[self.sample_id].processed_data.get_attribute(field, 'norm')
@@ -342,10 +349,15 @@ class Main():
             'view': [True,False],
             'position': None
             }
+        
+        self.plot_viewer.add_plotwidget_to_plot_viewer(self.plot_info)
+
     
     # -------------------------------------
     # General plot functions
     # -------------------------------------    
+    
+
     def add_scalebar(self, ax):
         """Add a scalebar to a map
 

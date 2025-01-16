@@ -37,7 +37,6 @@ class BlocklyBridge(QObject):
         # Call the set_style_widgets function
         plot_type = plot_type.replace('_',' ')
         if plot_type in self.parent.main.plot_style.style_dict.keys():
-            ### need to add parent.parent to access main code from this class 
             self.parent.main.plot_style.set_style_dictionary(plot_type)
             style = self.parent.main.plot_style.style_dict[plot_type]
             print('invokeSetStyleWidgets')

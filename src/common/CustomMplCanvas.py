@@ -59,7 +59,7 @@ class MplCanvas(FigureCanvas):
     proj : str, optional
         Projection, by default None
     """    
-    def __init__(self,fig=None, sub=111, parent=None, width=5, height=4, proj=None):
+    def __init__(self,fig=None, sub=111, parent=None, width=5, height=4, proj=None, ui= None):
         if parent is None:
             return
 
@@ -75,7 +75,12 @@ class MplCanvas(FigureCanvas):
         super(MplCanvas, self).__init__(self.fig)
 
         self.parent = parent
-
+        
+        # if ui components does are not part of parent initialise them seperately
+        if ui:
+            self.ui = ui
+        else:
+            self.ui = parent
         # for placing text annotations
         # --------------------
         self.setCursorPosition()
@@ -94,7 +99,7 @@ class MplCanvas(FigureCanvas):
         self.saved_dtext = []
         self.array = None
         if self.parent is not None and self.parent.sample_id in self.parent.data:
-            if self.parent.comboBoxPlotType.currentText() in self.parent.plot_style.map_plot_types:
+            if self.parent.plot_type in self.parent.plot_style.map_plot_types:
                 self.map_flag = True
             else:
                 self.map_flag = False
@@ -160,7 +165,7 @@ class MplCanvas(FigureCanvas):
         else:
             x = event.xdata
             y = event.ydata
-            self.parent.labelSVInfoValue.setText(f"V: N/A")
+            self.ui.labelSVInfoValue.setText(f"V: N/A")
 
             if self.array is not None:
                 x_i = round(x)
@@ -172,12 +177,12 @@ class MplCanvas(FigureCanvas):
         if self.array is not None:
             value = self.array[y_i][x_i]
             txt = f"V: {value:.4g}{label}"
-            self.parent.labelSVInfoValue.setText(txt)
+            self.ui.labelSVInfoValue.setText(txt)
 
         txt = f'X: {x:.4g}'
-        self.parent.labelSVInfoX.setText(txt)
+        self.ui.labelSVInfoX.setText(txt)
         txt = f'Y: {y:.4g}'
-        self.parent.labelSVInfoY.setText(txt)
+        self.ui.labelSVInfoY.setText(txt)
 
     def set_initial_extent(self):
         """Initial extent of the plot
@@ -231,7 +236,7 @@ class MplCanvas(FigureCanvas):
         event : MouseEvent
             Mouse click event.
         """        
-        if (self.parent.canvasWindow.currentIndex() != self.parent.canvas_tab['sv']) or (not self.parent.toolButtonAnnotate.isChecked()):
+        if (self.ui.canvasWindow.currentIndex() != self.ui.canvas_tab['sv']) or (not self.ui.toolButtonAnnotate.isChecked()):
             return
 
         x,y = event.xdata, event.ydata
@@ -366,12 +371,12 @@ class MplCanvas(FigureCanvas):
             Mouse click event.
         """        
         self.setCursor(Qt.CursorShape.CrossCursor)
-        if self.parent.toolButtonDistance.isChecked():
+        if self.ui.toolButtonDistance.isChecked():
             if event.inaxes:
                 if self.first_point is None:
                     # First click
                     self.first_point = (event.xdata, event.ydata)
-                    self.parent.labelSVInfoDistance.setText(f"D: 0 {self.parent.preferences['Units']['Distance']}")
+                    self.ui.labelSVInfoDistance.setText(f"D: 0 {self.parent.preferences['Units']['Distance']}")
                 else:
                     # Second click
                     second_point = (event.xdata, event.ydata)
@@ -395,7 +400,7 @@ class MplCanvas(FigureCanvas):
             Mouse click event.
         """        
         self.setCursor(Qt.CursorShape.CrossCursor)
-        if (self.parent.toolButtonDistance.isChecked()) and (self.first_point is not None) and event.inaxes:
+        if (self.ui.toolButtonDistance.isChecked()) and (self.first_point is not None) and event.inaxes:
             if self.line:
                 self.line.remove()
             if self.dtext:
@@ -422,8 +427,8 @@ class MplCanvas(FigureCanvas):
             self.dtext.remove()
             self.dtext = None
         self.draw()
-        if not self.parent.toolButtonDistance.isChecked():
-            self.parent.labelSVInfoDistance.setText("D: N/A")
+        if not self.ui.toolButtonDistance.isChecked():
+            self.ui.labelSVInfoDistance.setText("D: N/A")
 
 
 class MplDialog(QDialog):

@@ -207,7 +207,7 @@ class Styling():
             parent.comboBoxMarker.clear()
             parent.comboBoxMarker.addItems(self.marker_dict.keys())
 
-            self._plot_type = self.parent.comboBoxPlotType.currentText()
+            self._plot_type = self.parent.plot_type
 
             # set style theme
             parent.comboBoxStyleTheme.activated.connect(self.read_theme)
@@ -359,7 +359,7 @@ class Styling():
     def plot_type(self, new_plot_type):
         if new_plot_type != self._plot_type:
             self._plot_type = new_plot_type
-            if self.parent.comboBoxPlotType.currentText() != new_plot_type:
+            if self.parent.plot_type != new_plot_type:
                 self.parent.comboBoxPlotType.setCurrentText(new_plot_type)
             self.plot_type_callback(update=True)
 
@@ -1546,6 +1546,9 @@ class Styling():
 
         style = self.style_dict[self.plot_type]
 
+        if not plot_type:
+            plot_type = self.plot_type
+                
         if plot_type.lower() in self.map_plot_types:
             if ('X' not in list(data.axis_dict.keys())) or ('Y' not in list(data.axis_dict.keys())):
                 # initialize 'X' and 'Y' axes
@@ -2937,7 +2940,7 @@ class Styling():
 
         parent = self.parent
 
-        plot_type = self.parent.comboBoxPlotType.currentText()
+        plot_type = self.parent.plot_type
         if self.style_dict[plot_type]['CbarReverse'] == parent.checkBoxReverseColormap.isChecked():
             return
 
@@ -3038,10 +3041,16 @@ class Styling():
 
         parent = self.parent
 
-        if parent.canvasWindow.currentIndex() == parent.canvas_tab['qv']:
+        if hasattr(parent,'canvasWindow'):
+            canvas_window_index = parent.canvasWindow.currentIndex()
+        else:
+            canvas_window_index = parent.plot_viewer.canvasWindow.currentIndex()
+
+        
+        if canvas_window_index == parent.canvas_tab['qv']:
             plot_type = 'analyte map'
         else:
-            plot_type = self.parent.comboBoxPlotType.currentText()
+            plot_type = self.parent.plot_type
 
         name = self.style_dict[plot_type]['Colormap']
         if name in self.mpl_colormaps:
@@ -3096,7 +3105,7 @@ class Styling():
 
         parent = self.parent
 
-        plot_type = self.parent.comboBoxPlotType.currentText()
+        plot_type = self.parent.plot_type
         if self.style_dict[plot_type]['CbarDir'] == parent.comboBoxCbarDirection.currentText():
             return
         self.style_dict[plot_type]['CbarDir'] = parent.comboBoxCbarDirection.currentText()

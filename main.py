@@ -445,7 +445,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxPlotType.setCurrentIndex(self.plot_types[self.toolBox.currentIndex()][0])
         self.comboBoxPlotType.currentIndexChanged.connect(self.on_plot_type_changed)
         # Initialize a variable to store the current plot type
-        self.plot_type = None
+        self.plot_type = 'analyte map'
 
         # Menu and Toolbar
         #-------------------------
@@ -1532,8 +1532,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         if self.sample_id == '':
             return
-
         
+        self.field_dialog = FieldDialog()
         self.field_dialog.show()
 
         result = self.field_dialog.exec_()  # Store the result here
@@ -6497,9 +6497,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_field_type_combobox(self.comboBoxProfileFieldType)
         self.update_field_combobox(self.comboBoxProfileFieldType, self.comboBoxProfileField)
 
-        # field selector window
-        self.update_field_type_combobox(self.field_dialog.comboBoxFieldType)
-        self.update_field_combobox(self.field_dialog.comboBoxFieldType, self.field_dialog.comboBoxField)
+        if hasattr(self, 'field_dialog'):
+            # field selector window
+            self.update_field_type_combobox(self.field_dialog.comboBoxFieldType)
+            self.update_field_combobox(self.field_dialog.comboBoxFieldType, self.field_dialog.comboBoxField)
 
 
 

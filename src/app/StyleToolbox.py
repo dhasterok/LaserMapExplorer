@@ -3041,16 +3041,11 @@ class Styling():
 
         parent = self.parent
 
-        if hasattr(parent,'canvasWindow'):
-            canvas_window_index = parent.canvasWindow.currentIndex()
-        else:
-            canvas_window_index = parent.plot_viewer.canvasWindow.currentIndex()
+        plot_type = self.parent.plot_type
+        if hasattr(parent,'canvas_tab') and hasattr(parent,'canvasWindow'):
+            if parent.canvasWindow.currentIndex() == parent.canvas_tab['qv']:
+                plot_type = 'analyte map'
 
-        
-        if canvas_window_index == parent.canvas_tab['qv']:
-            plot_type = 'analyte map'
-        else:
-            plot_type = self.parent.plot_type
 
         name = self.style_dict[plot_type]['Colormap']
         if name in self.mpl_colormaps:

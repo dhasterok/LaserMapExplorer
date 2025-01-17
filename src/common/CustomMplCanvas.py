@@ -235,9 +235,14 @@ class MplCanvas(FigureCanvas):
         ----------
         event : MouseEvent
             Mouse click event.
-        """        
-        if (self.ui.canvasWindow.currentIndex() != self.ui.canvas_tab['sv']) or (not self.ui.toolButtonAnnotate.isChecked()):
-            return
+        """ 
+
+        if hasattr(self.ui,'canvas_tab') and hasattr(self.ui,'canvasWindow'):
+            if (self.ui.canvasWindow.currentIndex() != self.ui.canvas_tab['sv']) or (not self.ui.toolButtonAnnotate.isChecked()):
+                return
+        else:
+            if (not self.ui.toolButtonAnnotate.isChecked()):
+                return
 
         x,y = event.xdata, event.ydata
         # get text

@@ -161,10 +161,7 @@ pythonGenerator.forBlock['plot_map'] = function(block, generator) {
 
     const plot_type = generator.quote_('analyte map');
     let code = '';
-    code += `axes_dict = {}\n`;
-    code += `text_dict = {}\n`;
-    code += `markers_dict = {}\n`;
-    code += `colors_dict = {}\n`;
+    code += `style_dict = {}\n`;
     code += '\n';
     
     // Insert sub-block statements
@@ -175,45 +172,14 @@ pythonGenerator.forBlock['plot_map'] = function(block, generator) {
 
     code += subBlocksCode + '\n';
   
-    // Merge them into style_dict
-    code += `style_dict = {}\n`;
-    code += `if axes_dict:\n`;
-    code += `    style_dict["Axes"] = axes_dict\n`;
-    code += `if text_dict:\n`;
-    code += `    style_dict["Text"] = text_dict\n`;
-    code += `if markers_dict:\n`;
-    code += `    style_dict["Markers"] = markers_dict\n`;
-    code += `if colors_dict:\n`;
-    code += `    style_dict["Colors"] = colors_dict\n\n`;
-  
     // update self.parent.style.style_dict with `style_dict`
     code += `if (style_dict):\n` +
     generator.INDENT +`self.main.plot_style.style_dict[${plot_type}] = {**self.main.plot_style.style_dict[${plot_type}], **style_dict}\n`+
+    generator.INDENT +`print(self.main.plot_style.style_dict[${plot_type}])\n`;
     generator.INDENT +`self.main.plot_style.set_style_dictionary(${plot_type})\n`;
+    // 5) Plot
     code += `self.main.plot_map_mpl(self.main.sample_id, field_type = ${field_type},field = ${field})\n`;
     code += `self.main.plot_viewer.show()`
-    return code;
-};
-
-
-pythonGenerator.forBlock['plot'] = function(block, generator) {
-    // Retrieve the stored plotType from the block
-    var plot_type = block.plotType ? generator.quote_(block.plotType) : 'None';
-
-    // Initialize an empty code string
-    var code = '';
-
-    // Check if a `style` block is connected
-    var styleCode = generator.valueToCode(block, 'style', Order.NONE);
-    if (styleCode && styleCode !== '{}') {
-        code += `
-self.parent.plot_style.style_dict[${plot_type}] = {**self.parent.plot_style.style_dict[${plot_type}], **${styleCode}}
-self.parent.plot_style.set_style_widgets(${plot_type})
-`;
-    }
-
-    // Update the visualization regardless of the style connection
-    code += `self.parent.update_SV(${plot_type})\n`;
     return code;
 };
 
@@ -234,7 +200,7 @@ const xLimMax = block.getFieldValue('xLimMax') || 'None';
 const rawXScale = block.getFieldValue('xScaleDropdown');
 const xScale = rawXScale ? generator.quote_(rawXScale) : null;   // skip if blank?
 
-// 2) Build a partial dict in Python. We'll call it `tmp_dict` and merge it into `axes_dict`.
+// 2) Build a partial dict in Python. We'll call it `tmp_dict` and merge it into `style_dict`.
 // Conditionally add lines if non-empty.
 const codeLines = [];
 if (xLabel)    codeLines.push(`"XLabel": ${xLabel}`);
@@ -255,7 +221,7 @@ let code = '# x_axis block\n';
 code += 'tmp_dict = {\n';
 code += '  ' + codeLines.join(',\n  ') + '\n';
 code += '}\n';
-code += 'axes_dict.update(tmp_dict)\n\n';
+code += 'style_dict.update(tmp_dict)\n\n';
 return code;
 };
   
@@ -288,7 +254,7 @@ pythonGenerator.forBlock['y_axis'] = function(block, generator) {
     code += 'tmp_dict = {\n';
     code += '  ' + codeLines.join(',\n  ') + '\n';
     code += '}\n';
-    code += 'axes_dict.update(tmp_dict)\n\n';
+    code += 'style_dict.update(tmp_dict)\n\n';
     return code;
 };
   
@@ -296,7 +262,7 @@ pythonGenerator.forBlock['y_axis'] = function(block, generator) {
   /***********************************************
    * Z Axis, C Axis, etc.
    ***********************************************/
-  // Repeat the same pattern, each updating `axes_dict` if you want them all in "Axes"
+  // Repeat the same pattern, each updating `style_dict` if you want them all in "Axes"
   // or separate them if c_axis is conceptually different.
   pythonGenerator.forBlock['z_axis'] = function(block, generator) {
     const rawZLabel = block.getFieldValue('zLabel');
@@ -321,7 +287,7 @@ pythonGenerator.forBlock['y_axis'] = function(block, generator) {
     code += 'tmp_dict = {\n';
     code += '  ' + codeLines.join(',\n  ') + '\n';
     code += '}\n';
-    code += 'axes_dict.update(tmp_dict)\n\n';
+    code += 'style_dict.update(tmp_dict)\n\n';
     return code;
   };
   
@@ -348,13 +314,13 @@ pythonGenerator.forBlock['y_axis'] = function(block, generator) {
     code += 'tmp_dict = {\n';
     code += '  ' + codeLines.join(',\n  ') + '\n';
     code += '}\n';
-    code += 'axes_dict.update(tmp_dict)\n\n';
+    code += 'style_dict.update(tmp_dict)\n\n';
     return code;
   };
   
   
   /***********************************************
-   * Font Block => text_dict
+   * Font Block => style_dict
    ***********************************************/
   
   pythonGenerator.forBlock['font'] = function(block, generator) {
@@ -375,7 +341,7 @@ pythonGenerator.forBlock['y_axis'] = function(block, generator) {
     code += 'tmp_dict = {\n';
     code += '  ' + codeLines.join(',\n  ') + '\n';
     code += '}\n';
-    code += 'text_dict.update(tmp_dict)\n\n';  // goes to text_dict
+    code += 'style_dict.update(tmp_dict)\n\n';  // goes to style_dict
     return code;
   };
   
@@ -395,7 +361,7 @@ pythonGenerator.forBlock['y_axis'] = function(block, generator) {
     code += `tmp_dict = {\n`;
     code += `  "TickDir": ${tickDir}\n`;
     code += `}\n`;
-    code += `axes_dict.update(tmp_dict)\n\n`;
+    code += `style_dict.update(tmp_dict)\n\n`;
     return code;
   };
   
@@ -419,13 +385,13 @@ pythonGenerator.forBlock['y_axis'] = function(block, generator) {
     if (tickDir) code += `  "TickDir": ${tickDir},\n`;
     code += `  "AspectRatio": ${aspectRatio}\n`;
     code += `}\n`;
-    code += `axes_dict.update(tmp_dict)\n\n`;
+    code += `style_dict.update(tmp_dict)\n\n`;
     return code;
   };
   
   
   /***********************************************
-   * Coloring => colors_dict
+   * Coloring => style_dict
    ***********************************************/
   pythonGenerator.forBlock['coloring'] = function(block, generator) {
     const rawMap = block.getFieldValue('colormap');
@@ -439,13 +405,13 @@ pythonGenerator.forBlock['y_axis'] = function(block, generator) {
     code += `tmp_dict = {\n`;
     code += `  "Colormap": ${colormap}\n`;
     code += `}\n`;
-    code += `colors_dict.update(tmp_dict)\n\n`;
+    code += `style_dict.update(tmp_dict)\n\n`;
     return code;
   };
   
   
   /***********************************************
-   * Add Scale => text_dict or maybe Axes? 
+   * Add Scale => style_dict or maybe Axes? 
    ***********************************************/
   pythonGenerator.forBlock['add_scale'] = function(block, generator) {
     const rawScaleColor = block.getFieldValue('scaleColor');
@@ -474,13 +440,13 @@ pythonGenerator.forBlock['y_axis'] = function(block, generator) {
     code += '  ' + codeLines.join(',\n  ') + '\n';
     code += '}\n';
     // Suppose we treat scale info as "Text"
-    code += 'text_dict.update(tmp_dict)\n\n';
+    code += 'style_dict.update(tmp_dict)\n\n';
     return code;
   };
   
   
   /***********************************************
-   * Marker Properties => markers_dict
+   * Marker Properties => style_dict
    ***********************************************/
   pythonGenerator.forBlock['marker_properties'] = function(block, generator) {
     const rawSymbol = block.getFieldValue('markerSymbol');
@@ -504,13 +470,13 @@ pythonGenerator.forBlock['y_axis'] = function(block, generator) {
     code += 'tmp_dict = {\n';
     code += '  ' + codeLines.join(',\n  ') + '\n';
     code += '}\n';
-    code += 'markers_dict.update(tmp_dict)\n\n';
+    code += 'style_dict.update(tmp_dict)\n\n';
     return code;
   };
   
   
   /***********************************************
-   * Line Properties => markers_dict or a separate lines_dict
+   * Line Properties => style_dict or a separate lines_dict
    ***********************************************/
   pythonGenerator.forBlock['line_properties'] = function(block, generator) {
     const lineWidth = block.getFieldValue('lineWidth') || 'None';
@@ -531,14 +497,14 @@ pythonGenerator.forBlock['y_axis'] = function(block, generator) {
     code += 'tmp_dict = {\n';
     code += '  ' + codeLines.join(',\n  ') + '\n';
     code += '}\n';
-    code += 'markers_dict.update(tmp_dict)\n\n'; 
+    code += 'style_dict.update(tmp_dict)\n\n'; 
     // or lines_dict.update if you prefer a separate dict
     return code;
   };
   
   
   /***********************************************
-   * Color Field => colors_dict
+   * Color Field => style_dict
    ***********************************************/
   pythonGenerator.forBlock['color_field'] = function(block, generator) {
     const rawFieldType = block.getFieldValue('fieldType');
@@ -556,13 +522,13 @@ pythonGenerator.forBlock['y_axis'] = function(block, generator) {
     if (field)     code += `  "Field": ${field},\n`;
     code = code.replace(/,\n$/, '\n');  // remove trailing comma
     code += '}\n';
-    code += 'colors_dict.update(tmp_dict)\n\n';
+    code += 'style_dict.update(tmp_dict)\n\n';
     return code;
   };
   
   
   /***********************************************
-   * Colormap => colors_dict
+   * Colormap => style_dict
    ***********************************************/
   pythonGenerator.forBlock['colormap'] = function(block, generator) {
     const cm = block.getFieldValue('colormap');
@@ -582,13 +548,13 @@ pythonGenerator.forBlock['y_axis'] = function(block, generator) {
     if (direction) code += `  "Direction": ${direction},\n`;
     code = code.replace(/,\n$/, '\n'); // remove trailing comma
     code += '}\n';
-    code += 'colors_dict.update(tmp_dict)\n\n';
+    code += 'style_dict.update(tmp_dict)\n\n';
     return code;
   };
   
   
   /***********************************************
-   * Show Mass => colors_dict or markers_dict or up to you
+   * Show Mass => style_dict or style_dict or up to you
    ***********************************************/
   pythonGenerator.forBlock['show_mass'] = function(block, generator) {
     const showMass = block.getFieldValue('showMass') === 'TRUE';
@@ -602,13 +568,13 @@ pythonGenerator.forBlock['y_axis'] = function(block, generator) {
     code += 'tmp_dict = {\n';
     code += `  "ShowMass": true\n`;
     code += '}\n';
-    code += 'colors_dict.update(tmp_dict)\n\n';
+    code += 'style_dict.update(tmp_dict)\n\n';
     return code;
   };
   
   
   /***********************************************
-   * Color By Cluster => colors_dict
+   * Color By Cluster => style_dict
    ***********************************************/
   pythonGenerator.forBlock['color_by_cluster'] = function(block, generator) {
     const rawCluster = block.getFieldValue('clusterType');
@@ -622,7 +588,7 @@ pythonGenerator.forBlock['y_axis'] = function(block, generator) {
     code += 'tmp_dict = {\n';
     code += `  "ClusterType": ${clusterType}\n`;
     code += '}\n';
-    code += 'colors_dict.update(tmp_dict)\n\n';
+    code += 'style_dict.update(tmp_dict)\n\n';
     return code;
   };
   

@@ -330,6 +330,15 @@ class Main():
             bottom=False, top=False, left=False, right=False)
 
         canvas.set_initial_extent()
+
+        # axes
+        xmin, xmax, xscale, xlbl = self.plot_style.get_axis_values(None,field= 'X')
+        ymin, ymax, yscale, ylbl = self.plot_style.get_axis_values(None,field= 'Y')
+
+
+        # axes limits
+        canvas.axes.set_xlim(xmin,xmax)
+        canvas.axes.set_ylim(ymin,ymax)
         
         # add scalebar
         self.add_scalebar(canvas.axes)

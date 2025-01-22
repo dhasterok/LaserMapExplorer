@@ -225,7 +225,7 @@ class PlotViewer(QWidget, Ui_widgetPlotViewer):
             self.toolButtonAnnotate.setChecked(False)
 
             if isinstance(canvas,mplc.MplCanvas):
-                self.pop_figure = mplc.MplDialog(self,canvas,self.plot_info['plot_name'])
+                self.pop_figure = mplc.MplDialog(self,canvas,self.parent.plot_info['plot_name'])
                 self.pop_figure.show()
 
             # since the canvas is moved to the dialog, the figure needs to be recreated in the main window

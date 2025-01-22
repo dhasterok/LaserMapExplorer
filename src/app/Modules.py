@@ -596,3 +596,30 @@ class Main():
                 set_fields = data.match_attribute('data_type', set_name.lower())
 
         return set_fields
+
+
+    def update_axis_limits(self,style_dict, field =None):
+        # Check if user changed XLim, YLim, ZLim, or CLim
+        if "XLim" in style_dict:
+            lowerVal = style_dict["XLim"][0]
+            upperVal = style_dict["XLim"][1]
+            self.plot_style.axis_limit_edit_callback("x", 0, float(lowerVal), field = 'X', ui_update=False)
+            self.plot_style.axis_limit_edit_callback("x", 1, float(upperVal), field = 'X', ui_update=False)
+
+        if "YLim" in style_dict:
+            lowerVal = style_dict["YLim"][0]
+            upperVal = style_dict["YLim"][1]
+            self.plot_style.axis_limit_edit_callback("y", 0, float(lowerVal), field = 'Y', ui_update=False)
+            self.plot_style.axis_limit_edit_callback("y", 1, float(upperVal), field = 'Y', ui_update=False)
+
+        if "ZLim" in style_dict:
+            lowerVal = style_dict["ZLim"][0]
+            upperVal = style_dict["ZLim"][1]
+            self.plot_style.axis_limit_edit_callback("z", 0, float(lowerVal), ui_update=False)
+            self.plot_style.axis_limit_edit_callback("z", 1, float(upperVal), ui_update=False)
+
+        if "CLim" in style_dict:
+            lowerVal = style_dict["CLim"][0]
+            upperVal = style_dict["CLim"][1]
+            self.plot_style.axis_limit_edit_callback("c", 0, float(lowerVal), field, ui_update=False)
+            self.plot_style.axis_limit_edit_callback("c", 1, float(upperVal), field, ui_update=False)

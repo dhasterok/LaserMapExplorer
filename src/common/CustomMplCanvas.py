@@ -145,13 +145,13 @@ class MplCanvas(FigureCanvas):
             if x_i < 0:
                 x_i = 0
             elif x_i > self.array.shape[1]-1:
-                x_i = self.array.shape[1]
+                x_i = self.array.shape[1]-1
             
             y_i = round(event.ydata)
             if y_i < 0:
                 y_i = 0
             elif y_i > self.array.shape[0]-1:
-                y_i = self.array.shape[0]
+                y_i = self.array.shape[0]-1
             
             #x = x_i*self.parent.dx
             #y = y_i*self.parent.dy

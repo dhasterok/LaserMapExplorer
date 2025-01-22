@@ -175,8 +175,10 @@ pythonGenerator.forBlock['plot_map'] = function(block, generator) {
     // update self.parent.style.style_dict with `style_dict`
     code += `if (style_dict):\n` +
     generator.INDENT +`self.main.plot_style.style_dict[${plot_type}] = {**self.main.plot_style.style_dict[${plot_type}], **style_dict}\n`+
-    generator.INDENT +`print(self.main.plot_style.style_dict[${plot_type}])\n`;
-    generator.INDENT +`self.main.plot_style.set_style_dictionary(${plot_type})\n`;
+    generator.INDENT +`print(self.main.plot_style.style_dict[${plot_type}])\n`+
+    generator.INDENT +`self.main.plot_style.set_style_dictionary(${plot_type})\n`+
+    generator.INDENT +`self.main.update_axis_limits(style_dict, ${field})\n`;
+
     // 5) Plot
     code += `self.main.plot_map_mpl(self.main.sample_id, field_type = ${field_type},field = ${field})\n`;
     code += `self.main.plot_viewer.show()`
@@ -255,6 +257,7 @@ pythonGenerator.forBlock['y_axis'] = function(block, generator) {
     code += '  ' + codeLines.join(',\n  ') + '\n';
     code += '}\n';
     code += 'style_dict.update(tmp_dict)\n\n';
+    
     return code;
 };
   

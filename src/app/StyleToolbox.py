@@ -2038,7 +2038,7 @@ class Styling():
         # update plot
         self.scheduler.schedule_update()
 
-    def axis_limit_edit_callback(self, ax, bound, new_value):
+    def axis_limit_edit_callback(self, ax, bound, new_value,field= None, ui_update= True):
         """Updates axis limit in dictionaries from widget
 
         Parameters
@@ -2055,7 +2055,10 @@ class Styling():
 
         parent = self.parent
         axis_dict = parent.data[parent.sample_id].axis_dict
-        plot_type = parent.comboBoxPlotType.currentText()
+        if ui_update:
+            plot_type = parent.comboBoxPlotType.currentText()
+        else:
+            plot_type = self.plot_type
 
         if ax == 'c':
             old_value = self.style_dict[plot_type]['CLim'][bound]
@@ -2066,12 +2069,13 @@ class Styling():
         if old_value == new_value:
             return
 
-        if ax == 'c' and plot_type in ['heatmap', 'correlation']:
-            self.scheduler.schedule_update()
-            return
-
-        # change label in dictionary
-        field = self.get_axis_field(ax)
+        if ui_update:
+            if ax == 'c' and plot_type in ['heatmap', 'correlation']:
+                self.scheduler.schedule_update()
+                return
+        if not field:
+            # change label in dictionary
+            field = self.get_axis_field(ax)
         if bound:
             if plot_type == 'histogram' and ax == 'y':
                 axis_dict[field]['pmax'] = new_value
@@ -2092,8 +2096,9 @@ class Styling():
         else:
             self.style_dict[plot_type][f'{ax.upper()}Lim'][bound] = new_value
 
-        # update plot
-        self.scheduler.schedule_update()
+        if ui_update:
+            # update plot
+            self.scheduler.schedule_update()
 
     def axis_scale_callback(self, comboBox, ax):
         """Updates axis scale when a scale comboBox has changed.

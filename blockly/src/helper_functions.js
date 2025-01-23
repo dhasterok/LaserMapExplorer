@@ -102,36 +102,157 @@ function updateFieldTypeList(newFieldTypeList) {
 }
 window.updateFieldTypeList = updateFieldTypeList;
 
+
+// Function to update the Field dropdown
+export function updateFieldDropdown(block, newValue) {
+    const fieldTypeValue = newValue || block.getFieldValue('fieldType');
+    window.blocklyBridge.getFieldList(fieldTypeValue).then((response) => {
+        const options = response.map(option => [option, option]);
+        const dropdown = block.getField('field');
+        if (dropdown) {
+            if (options.length > 0) {
+                dropdown.menuGenerator_ = options;
+                dropdown.setValue(options[0][1]);
+            } else {
+                dropdown.menuGenerator_ = [['Select...', '']];
+                dropdown.setValue('');
+            }
+            dropdown.forceRerender();
+        }
+    }).catch(error => {
+        console.error('Error fetching field list:', error);
+    });
+}
+
+
+// Function to add default styling blocks
+export function addDefaultStylingBlocks(block, workspace, defaultBlocks) {
+
+    let lastConnection = block.getInput('Styling').connection;
+
+    // Chain the default styling blocks
+    defaultBlocks.forEach(blockType => {
+        const newBlock = workspace.newBlock(blockType);
+        newBlock.initSvg();
+        newBlock.render();
+
+        // Attach this block to the "lastConnection"
+        newBlock.previousConnection.connect(lastConnection);
+
+        // Update lastConnection to this block's nextConnection
+        lastConnection = newBlock.nextConnection;
+    });
+}
+
+
 /**
  * Retrieve an array of all blocks connected to the 'Styling' input
  * in a linear chain (via next/previous statements).
  * @param {Blockly.Block} plotBlock - The main block that has a 'Styling' statement input.
  * @return {Blockly.Block[]} Array of connected blocks.
  */
-function getStylingBlocks(plotBlock) {
+function getConnectedBlocks(plotBlock, blockName) {
     // 1) Get the 'Styling' input object
-    const stylingInput = plotBlock.getInput('Styling');
-    if (!stylingInput) {
+    const connectedInput = plotBlock.getInput(blockName);
+    if (!connectedInput) {
       // Input not found; perhaps the block doesn't have a 'Styling' input?
       console.warn("No 'Styling' input found on block:", plotBlock);
       return [];
     }
     
     // 2) Get the top-most connected block on this input
-    const firstBlock = stylingInput.connection
-      ? stylingInput.connection.targetBlock()
+    const firstBlock = connectedInput.connection
+      ? connectedInput.connection.targetBlock()
       : null;
   
     // 3) Traverse the chain of connected blocks
-    const stylingBlocks = [];
+    const connectedBlocks = [];
     let currentBlock = firstBlock;
     while (currentBlock) {
-      stylingBlocks.push(currentBlock);
+      connectedBlocks.push(currentBlock);
       currentBlock = currentBlock.getNextBlock();
     }
   
-    return stylingBlocks;
+    return connectedBlocks;
 }
+
+
+export function updateHistogramOptions(plotBlock, plotType) {
+    // 1) Get the first block connected to "HISTOGRAM_OPTIONS".
+    const histogramOptions = getConnectedBlocks(plotBlock, 'HISTOGRAM_OPTIONS');
+    const field = plotBlock.getFieldValue('field');
+    const fieldType = plotBlock.getFieldValue('fieldType');
+
+    // 2) Fetch histogram range via the bridge.
+    window.blocklyBridge.getHistogramRange(fieldType, field, (range) => {
+        if (range === undefined || range === null) {
+            console.error('Histogram range not available.');
+            return;
+        }
+
+        // 3) Traverse the chain of histogramOptions blocks
+        for (const block of histogramOptions) {
+            // 4) Identify the block by type and update it
+            switch (block.type) {
+                case 'bin_width':
+                    updateBinWidthBlock(block, range);
+                    break;
+                case 'num_bins':
+                    updateNBinsBlock(block, range);
+                    break;
+            }
+        }
+    });
+}
+
+function updateBinWidthBlock(block, range) {
+    const binWidthField = block.getInputTargetBlock('VALUE');
+    if (binWidthField) {
+        const numBinsBlock = findConnectedBlock(block, 'num_bins');
+        let numBins = 100; // Default number of bins
+        if (numBinsBlock) {
+            const numBinsValue = numBinsBlock.getFieldValue('VALUE');
+            numBins = parseInt(numBinsValue, 10) || numBins;
+        }
+
+        // Calculate bin width range based on total range and numBins
+        const binWidthMin = range / 500; // Max numBins
+        const binWidthMax = range;      // Min numBins (1 bin)
+        const currentBinWidth = binWidthField.getFieldValue('VALUE');
+
+        // Clamp the current value within the range
+        const clampedBinWidth = Math.max(binWidthMin, Math.min(binWidthMax, currentBinWidth || binWidthMin));
+        binWidthField.setValue(clampedBinWidth);
+
+        // Update tooltip
+        block.setTooltip(`Specify the bin width for the histogram. Range: ${binWidthMin.toFixed(2)} - ${binWidthMax.toFixed(2)}`);
+    }
+}
+function updateNBinsBlock(block, range) {
+    const numBinsField = block.getInputTargetBlock('VALUE');
+    if (numBinsField) {
+        const currentNumBins = numBinsField.getFieldValue('VALUE');
+        const clampedNumBins = Math.max(1, Math.min(500, currentNumBins || 100)); // Default: 100 bins
+
+        // Update field value
+        numBinsField.setValue(clampedNumBins);
+
+        // Update tooltip
+        block.setTooltip(`Specify the number of bins for the histogram. Range: 1 - 500`);
+
+        // If bin width needs to be updated, find it and adjust based on numBins
+        const binWidthBlock = findConnectedBlock(block, 'bin_width');
+        if (binWidthBlock) {
+            const binWidth = range / clampedNumBins;
+            binWidthBlock.setFieldValue(binWidth.toFixed(2), 'VALUE');
+        }
+    }
+}
+
+
+
+
+
   
 
 
@@ -143,7 +264,7 @@ function getStylingBlocks(plotBlock) {
 
 export function updateStylingChain(plotBlock, plotType) {
     // 1) Get the first block connected to "Styling".
-    const stylingBlocks = getStylingBlocks(plotBlock);
+    const stylingBlocks = getConnectedBlocks(plotBlock, 'styling');
     
     // If you want to explicitly set the plotType:
     // this.plotType = 'analyte map';
@@ -471,153 +592,7 @@ block.render();
 }
 
 
-/**
- * A helper function to gather all blocks under the "Styling" statement,
- * categorize them into "Axes", "Text", "Markers", "Colors", and merge
- * them into a single dictionary string for Python code.
- * @param {Blockly.Block} plotBlock - The main block (e.g. "plot_map") that has a "Styling" input.
- * @param {Object} generator - The Python generator object (e.g. pythonGenerator).
- * @return {String} - The final merged JSON string, e.g. '{"Axes": {...}, "Text": {...}, ...}'.
- */
-export function getCategorizedStyleDictCode(plotBlock, generator) {
-    // 1) Provide a category mapping function or inline switch
-    function getCategoryForType(blockType) {
-      switch (blockType) {
-        // Axes
-        case 'x_axis':
-        case 'y_axis':
-        case 'z_axis':
-        case 'c_axis':
-        case 'tick_direction':
-        case 'aspect_ratio':
-          return 'Axes';
-  
-        // Text
-        case 'font':
-        case 'add_scale':
-          return 'Text';
-  
-        // Markers
-        case 'marker_properties':
-        case 'line_properties':
-          return 'Markers';
-  
-        // Colors
-        case 'coloring':
-        case 'colormap':
-        case 'color_field':
-        case 'show_mass':
-        case 'color_by_cluster':
-          return 'Colors';
-  
-        default:
-          console.warn('No category mapping for block type:', blockType);
-          return null;
-      }
-    }
-  
-    // 2) Prepare an object to hold arrays of dictionary strings
-    const subBlocksCode = {
-      Axes: [],
-      Text: [],
-      Markers: [],
-      Colors: []
-    };
-  
-    // 3) Traverse the chain of blocks connected to "Styling"
-    let currentBlock = plotBlock.getInputTargetBlock('Styling');
-    while (currentBlock) {
-      const bType = currentBlock.type;
-      // Generate code for this sub-block
-      const tuple = generator.blockToCode(currentBlock, true); 
-      let dictString = Array.isArray(tuple) ? tuple[0] : tuple; 
-      if (!dictString) dictString = '{}';
-  
-      // Determine category
-      const cat = getCategoryForType(bType);
-      if (cat && dictString !== '{}' && dictString.trim() !== '{}') {
-        subBlocksCode[cat].push(dictString);
-      }
-  
-      currentBlock = currentBlock.getNextBlock();
-    }
-  
-    // 4) Merge all sub-blocks in each category into a single dict
-    const mergedCategories = {};
-    for (let cat of ['Axes','Text','Markers','Colors']) {
-      const dicts = subBlocksCode[cat]; // array of strings like '{ "XLabel": "Foo" }'
-      if (dicts.length > 0) {
-        let mergedKeyVals = [];
-        for (let dStr of dicts) {
-          const trimmed = dStr.trim();
-          if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
-            const content = trimmed.slice(1, -1).trim(); // remove outer braces
-            if (content) mergedKeyVals.push(content);
-          }
-        }
-        mergedCategories[cat] = mergedKeyVals.length > 0
-          ? `{${mergedKeyVals.join(', ')}}`
-          : '{}';
-      } else {
-        mergedCategories[cat] = '{}';
-      }
-    }
-  
-    // 5) Now build the final big dictionary, ignoring empty '{}'
-    const styleDictParts = [];
-    if (mergedCategories['Axes'] !== '{}') {
-      styleDictParts.push(`"Axes": ${mergedCategories['Axes']}`);
-    }
-    if (mergedCategories['Text'] !== '{}') {
-      styleDictParts.push(`"Text": ${mergedCategories['Text']}`);
-    }
-    if (mergedCategories['Markers'] !== '{}') {
-      styleDictParts.push(`"Markers": ${mergedCategories['Markers']}`);
-    }
-    if (mergedCategories['Colors'] !== '{}') {
-      styleDictParts.push(`"Colors": ${mergedCategories['Colors']}`);
-    }
-  
-    // 6) Join them into one dictionary string
-    const styleDictCode = `{${styleDictParts.join(', ')}}`;
-    return styleDictCode;
-  }
-  
 
-// Function to dynamically update connected style blocks
-export function dynamicStyleUpdate(plotType, connectedBlocks) {
-    // Call the backend to get updated styles for the specific plot type
-    console.log(connectedBlocks)
-    window.blocklyBridge.callSetStyleWidgets(plotType, function(style) {
-        if (style.constructor === Object && Object.keys(style).length === 0){
-            console.warn("Style dictionary not provided for plotType:", plotType);
-            return; // Exit if style is not available
-        }
-        else{
-            console.log('updating styles')
-            Object.entries(connectedBlocks).forEach(([blockType, block]) => {
-                updateFieldsBasedOnPlotType(plotType, block); // Adjust fields per plot type
-                switch (blockType) {
-                    case 'styles':
-                        updateStylesBlock(block, style);
-                        break;
-                    case 'axis_and_labels':
-                        updateAxisAndLabelsBlock(block, style);
-                        break;
-                    case 'annot_and_scale':
-                        updateAnnotAndScaleBlock(block, style);
-                        break;
-                    case 'marks_and_lines':
-                        updateMarksAndLinesBlock(block, style);
-                        break;
-                    case 'coloring':
-                        updateColoringBlock(block, style);
-                        break;
-                }
-            });
-        };
-    });
-}
 
 // Function to update fields based on plot type in style blocks
 function updateFieldsBasedOnPlotType(plotType, block) {

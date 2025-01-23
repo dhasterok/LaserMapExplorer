@@ -361,6 +361,55 @@ class Main():
         
         self.plot_viewer.add_plotwidget_to_plot_viewer(self.plot_info)
 
+
+    # -------------------------------------
+    # Histogram functions and plotting
+    # -------------------------------------
+    def histogram_get_range(self, field_type, field):
+        """Updates the bin width
+
+        Generally called when the number of bins is changed by the user.  Updates the plot.
+        """
+        if not self.update_bins:
+            return
+
+        if (field_type == '') or (field == ''):
+            return
+
+        # get currently selected data
+        current_plot_df = self.data[self.sample_id].get_map_data(field, field_type)
+
+        # update bin width
+        range = (np.nanmax(current_plot_df['array']) - np.nanmin(current_plot_df['array']))
+
+        return  range
+
+
+
+    def histogram_update_n_bins(self):
+        """Updates the number of bins
+
+        Generally called when the bin width is changed by the user.  Updates the plot.
+        """
+        if not self.update_bins:
+            return
+        #print('update_n_bins')
+        self.update_bins = False
+
+        # get currently selected data
+        map_df = self.data[self.sample_id].get_map_data(self.comboBoxHistField.currentText(), self.comboBoxHistFieldType.currentText())
+
+        # update n bins
+        self.spinBoxBinWidth.setValue( int((np.nanmax(map_df['array']) - np.nanmin(map_df['array'])) / self.spinBoxBinWidth.value()) )
+        self.update_bins = True
+
+        # update histogram
+        if self.plot_type == 'histogram':
+            # trigger update to plot
+            self.plot_style.scheduler.schedule_update()
+
+
+
     
     # -------------------------------------
     # General plot functions

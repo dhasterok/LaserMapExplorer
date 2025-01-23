@@ -3,7 +3,7 @@ import * as BlockDynamicConnection from '@blockly/block-dynamic-connection';
 import {registerFieldColour, FieldColour} from '@blockly/field-colour';
 registerFieldColour();
 import { sample_ids,fieldTypeList, baseDir } from './globals';
-import {updateStylingChain} from './helper_functions'
+import {updateFieldDropdown,addDefaultStylingBlocks,updateStylingChain, updateHistogramOptions} from './helper_functions'
 var enableSampleIDsBlock = false; // Initially false
 window.Blockly = Blockly.Blocks
 
@@ -910,7 +910,7 @@ const plot_map = {
                     ['PCA Score', 'PCA Score'],
                     ['Cluster', 'Cluster']
                 ],
-                this.updateFieldDropdown.bind(this)  // Bind the update function
+                updateFieldDropdown.bind(this, null)  // Bind the update function
             ), 'fieldType');
         
         //Create the 'field' dropdown, initially empty
@@ -940,55 +940,110 @@ const plot_map = {
         }
         else{
             const initialFieldType = this.getFieldValue('fieldType');
-            this.updateFieldDropdown(initialFieldType);
-            this.addDefaultStylingBlocks();
+            const defaultBlocks = ['x_axis', 'y_axis', 'font', 'colormap'];
+            updateFieldDropdown(this,initialFieldType);
+            addDefaultStylingBlocks(this,this.workspace, defaultBlocks);
             // update style dictionaries
             updateStylingChain(this, 'analyte map');
         }
-    },
-    updateFieldDropdown: function (newValue) {
-        const fieldTypeValue = newValue || this.getFieldValue('fieldType');
-        window.blocklyBridge.getFieldList(fieldTypeValue).then((response) => {
-            const options = response.map(option => [option, option]);
-            const dropdown = this.getField('field');
-            if (dropdown){
-                if (options.length > 0) {
-                    dropdown.menuGenerator_ = options;
-                    dropdown.setValue(options[0][1]);
-                } else {
-                    dropdown.menuGenerator_ = [['Select...', '']];
-                    dropdown.setValue('');
-                }
-                dropdown.forceRerender();
-        }
-        }).catch(error => {
-            console.error('Error fetching field list:', error);
-        });
-    },
-    addDefaultStylingBlocks: function () {
-        const workspace = this.workspace;
-
-        // Default block types
-        const defaultBlocks = ['x_axis', 'y_axis', 'font', 'colormap'];
-
-        let lastConnection = this.getInput('Styling').connection;
-
-        // 2) For each block type, connect it in a chain.
-        defaultBlocks.forEach(blockType => {
-            const block = workspace.newBlock(blockType);
-            block.initSvg();
-            block.render();
-
-            // Attach this block to the "lastConnection"
-            block.previousConnection.connect(lastConnection);
-
-            // Now set "lastConnection" to this block's .nextConnection
-            // so the next block in the loop attaches to the previous block.
-            lastConnection = block.nextConnection;
-        });
-    },
+    }
 };
 Blockly.common.defineBlocks({ plot_map: plot_map });
+
+const correlation_analysis = {
+    init: function() {
+        this.appendDummyInput('VARIABLE1')
+            .appendField('Correlation');
+        this.appendDummyInput()
+            .appendField('Method')
+            .appendField(new Blockly.FieldDropdown([
+                ['Pearson', 'pearson'],
+                ['Spearman', 'spearman'],
+                ['Kendall', 'kendall']
+            ]), 'METHOD');
+        this.appendDummyInput()
+            .appendField('R^2')
+            .appendField(new Blockly.FieldCheckbox('TRUE'), 'rSquared');
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(210);
+        this.setTooltip('Performs correlation analysis between two variables.');
+        this.setHelpUrl('');
+    }
+};
+Blockly.Blocks['correlation_analysis'] = correlation_analysis;
+
+
+const plot_histogram = {
+    init: function () {
+        this.appendDummyInput('header')
+            .appendField('Plot Histogram')
+            .setAlign(Blockly.inputs.Align.CENTRE);
+
+        // Type dropdown
+        this.appendDummyInput('TYPE')
+            .appendField('Type')
+            .appendField(new Blockly.FieldDropdown([
+                ['Frequency', 'Frequency'],
+                ['Density', 'Density']
+            ]), 'type');
+
+        // Field type dropdown
+        this.appendDummyInput('FIELD_TYPE')
+            .appendField('Field type')
+            .appendField(new Blockly.FieldDropdown([
+                ['Analyte', 'Analyte'],
+                ['Analyte (Normalised)', 'Analyte (Normalised)'],
+                ['PCA Score', 'PCA Score'],
+                ['Cluster', 'Cluster']
+            ], updateFieldDropdown.bind(this,null)), 'fieldType');
+
+        // Field dropdown
+        this.appendDummyInput('FIELD')
+            .appendField('Field')
+            .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'field');
+
+        // Add statement input for histogram options
+        this.appendStatementInput('HISTOGRAM_OPTIONS')
+            .setCheck('HistogramOptions')
+            .appendField('histogramOptions');
+
+        // Add dynamic statement input for styling
+        const stylingInput = this.appendStatementInput('Styling')
+            .setCheck('Styling')
+            .appendField('Styling');
+
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setTooltip('Configure and render a histogram plot with specified settings.');
+        this.setHelpUrl('');
+        this.setColour(210);
+
+        // Add default blocks for styling only if not in flyout
+        if (!this.isInFlyout) {
+            const initialFieldType = this.getFieldValue('fieldType');
+            const defaultBlocks = [
+                'aspect_ratio',
+                'tick_direction',
+                'x_axis',
+                'y_axis',
+                'line_properties',
+                'transparency',
+                'font_properties'
+            ];
+            updateFieldDropdown(this,initialFieldType);
+            addDefaultStylingBlocks(this,this.workspace, defaultBlocks);
+            // update style dictionaries
+            updateStylingChain(this, 'analyte map');
+            // update style dictionaries
+            updateHistogramOptions(this);
+        }
+    }
+};
+Blockly.common.defineBlocks({ plot_histogram: plot_histogram });
+
+
+
 
 
 ////// styles ////////////
@@ -1339,6 +1394,43 @@ Blockly.Blocks['color_by_cluster'] = {
         this.setHelpUrl('');
     },
 };
+
+///// histogram options ////////
+
+Blockly.Blocks['bin_width'] = {
+    init: function () {
+        this.appendDummyInput()
+            .appendField('Bin Width');
+        this.appendValueInput('VALUE')
+            .setCheck('Number');
+        this.setOutput(true, 'Number');
+        this.setPreviousStatement(true, 'HistogramOptions');
+        this.setNextStatement(true, 'HistogramOptions');
+        this.setTooltip('Specify the bin width for the histogram.');
+        this.setHelpUrl('');
+        this.setColour(180);
+    }
+};
+
+
+Blockly.Blocks['num_bins'] = {
+    init: function () {
+        this.appendDummyInput()
+            .appendField('Number of Bins');
+        this.appendValueInput('VALUE')
+            .setCheck('Number');
+        this.setOutput(true, 'Number');
+        this.setPreviousStatement(true, 'HistogramOptions');
+        this.setNextStatement(true, 'HistogramOptions');
+        this.setTooltip('Specify the number of bins for the histogram.');
+        this.setHelpUrl('');
+        this.setColour(180);
+    }
+};
+
+
+
+
 
 const styles = {
     init: function() {
@@ -1798,25 +1890,7 @@ const data_filtering = {
 };
 Blockly.Blocks['data_filtering'] = data_filtering;
 
-const correlation_analysis = {
-    init: function() {
-        this.appendDummyInput('VARIABLE1')
-            .appendField('Correlation');
-        this.appendDummyInput()
-            .appendField('Method')
-            .appendField(new Blockly.FieldDropdown([
-                ['Pearson', 'pearson'],
-                ['Spearman', 'spearman'],
-                ['Kendall', 'kendall']
-            ]), 'METHOD');
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(210);
-        this.setTooltip('Performs correlation analysis between two variables.');
-        this.setHelpUrl('');
-    }
-};
-Blockly.Blocks['correlation_analysis'] = correlation_analysis;
+
 
 const clustering = {
     init: function() {

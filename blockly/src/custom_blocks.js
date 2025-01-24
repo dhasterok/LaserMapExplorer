@@ -918,7 +918,7 @@ const plot_map = {
             .appendField('Field')
             .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'field');
         // Add dynamic statement input for styling
-        const stylingInput = this.appendStatementInput('Styling')
+        const stylingInput = this.appendStatementInput('styling')
             .setCheck('Styling')
             .appendField('Styling');
         
@@ -1004,12 +1004,12 @@ const plot_histogram = {
             .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'field');
 
         // Add statement input for histogram options
-        this.appendStatementInput('HISTOGRAM_OPTIONS')
+        this.appendStatementInput('histogram_options')
             .setCheck('HistogramOptions')
-            .appendField('histogramOptions');
+            .appendField('Histogram options');
 
         // Add dynamic statement input for styling
-        const stylingInput = this.appendStatementInput('Styling')
+        const stylingInput = this.appendStatementInput('styling')
             .setCheck('Styling')
             .appendField('Styling');
 
@@ -1029,7 +1029,7 @@ const plot_histogram = {
                 'y_axis',
                 'line_properties',
                 'transparency',
-                'font_properties'
+                'font'
             ];
             updateFieldDropdown(this,initialFieldType);
             addDefaultStylingBlocks(this,this.workspace, defaultBlocks);
@@ -1231,7 +1231,7 @@ Blockly.Blocks['add_scale'] = {
         .appendField('Add Scale');
         this.appendDummyInput('colorSelect')
         .appendField('Color')
-        .appendField(new Blockly.FieldColour('#ff0000'), 'scaleColor');
+        .appendField(new FieldColour('#ff0000'), 'scaleColor');
         this.appendDummyInput('unitsHeader')
         .appendField('Units')
         .appendField(new Blockly.FieldTextInput(''), 'scaleUnits');
@@ -1271,7 +1271,7 @@ Blockly.Blocks['marker_properties'] = {
         .appendField(new Blockly.FieldNumber(6, 1, 50), 'markerSize');
         this.appendDummyInput('colorSelect')
         .appendField('Color')
-        .appendField(new Blockly.FieldColour('#ff0000'), 'markerColor');
+        .appendField(new FieldColour('#ff0000'), 'markerColor');
         this.setPreviousStatement(true, 'Styling');
         this.setNextStatement(true, 'Styling');
         this.setColour(230);
@@ -1290,7 +1290,7 @@ Blockly.Blocks['line_properties'] = {
         .appendField(new Blockly.FieldNumber(1, 0.1, 10, 0.1), 'lineWidth');
         this.appendDummyInput('lineColorHeader')
         .appendField('Color')
-        .appendField(new Blockly.FieldColour('#000000'), 'lineColor');
+        .appendField(new FieldColour('#000000'), 'lineColor');
         this.setPreviousStatement(true, 'Styling');
         this.setNextStatement(true, 'Styling');
         this.setColour(230);
@@ -1303,7 +1303,7 @@ Blockly.Blocks['color_select'] = {
     init: function () {
         this.appendDummyInput('colorHeader')
         .appendField('Color Select')
-        .appendField(new Blockly.FieldColour('#ff0000'), 'colorPicker');
+        .appendField(new FieldColour('#ff0000'), 'colorPicker');
         this.setOutput(true, null);
         this.setColour(240);
         this.setTooltip('Select a color.');
@@ -1395,6 +1395,21 @@ Blockly.Blocks['color_by_cluster'] = {
     },
 };
 
+
+
+Blockly.Blocks['transparency'] = {
+    init: function () {
+        this.appendDummyInput('transparency')
+        .appendField('Transparency')
+        .appendField(new Blockly.FieldNumber(100, 0, 100), 'transparency');
+        this.setPreviousStatement(true, 'Styling');
+        this.setNextStatement(true, 'Styling');
+        this.setColour(255);
+        this.setTooltip('Adjust transparency of plot');
+        this.setHelpUrl('');
+    },
+};
+
 ///// histogram options ////////
 
 Blockly.Blocks['bin_width'] = {
@@ -1404,8 +1419,8 @@ Blockly.Blocks['bin_width'] = {
         this.appendValueInput('VALUE')
             .setCheck('Number');
         this.setOutput(true, 'Number');
-        this.setPreviousStatement(true, 'HistogramOptions');
-        this.setNextStatement(true, 'HistogramOptions');
+        this.setPreviousStatement(true, 'histogramOptions');
+        this.setNextStatement(true, 'histogramOptions');
         this.setTooltip('Specify the bin width for the histogram.');
         this.setHelpUrl('');
         this.setColour(180);
@@ -1420,8 +1435,8 @@ Blockly.Blocks['num_bins'] = {
         this.appendValueInput('VALUE')
             .setCheck('Number');
         this.setOutput(true, 'Number');
-        this.setPreviousStatement(true, 'HistogramOptions');
-        this.setNextStatement(true, 'HistogramOptions');
+        this.setPreviousStatement(true, 'histogramOptions');
+        this.setNextStatement(true, 'histogramOptions');
         this.setTooltip('Specify the number of bins for the histogram.');
         this.setHelpUrl('');
         this.setColour(180);

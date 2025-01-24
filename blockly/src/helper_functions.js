@@ -108,16 +108,18 @@ export function updateFieldDropdown(block, newValue) {
     const fieldTypeValue = newValue || block.getFieldValue('fieldType');
     window.blocklyBridge.getFieldList(fieldTypeValue).then((response) => {
         const options = response.map(option => [option, option]);
-        const dropdown = block.getField('field');
-        if (dropdown) {
-            if (options.length > 0) {
-                dropdown.menuGenerator_ = options;
-                dropdown.setValue(options[0][1]);
-            } else {
-                dropdown.menuGenerator_ = [['Select...', '']];
-                dropdown.setValue('');
+        if (block) {
+            const dropdown = block.getField('field');
+            if (dropdown) {
+                if (options.length > 0) {
+                    dropdown.menuGenerator_ = options;
+                    dropdown.setValue(options[0][1]);
+                } else {
+                    dropdown.menuGenerator_ = [['Select...', '']];
+                    dropdown.setValue('');
+                }
+                dropdown.forceRerender();
             }
-            dropdown.forceRerender();
         }
     }).catch(error => {
         console.error('Error fetching field list:', error);
@@ -128,7 +130,7 @@ export function updateFieldDropdown(block, newValue) {
 // Function to add default styling blocks
 export function addDefaultStylingBlocks(block, workspace, defaultBlocks) {
 
-    let lastConnection = block.getInput('Styling').connection;
+    let lastConnection = block.getInput('styling').connection;
 
     // Chain the default styling blocks
     defaultBlocks.forEach(blockType => {
@@ -177,9 +179,9 @@ function getConnectedBlocks(plotBlock, blockName) {
 }
 
 
-export function updateHistogramOptions(plotBlock, plotType) {
+export function updateHistogramOptions(plotBlock) {
     // 1) Get the first block connected to "HISTOGRAM_OPTIONS".
-    const histogramOptions = getConnectedBlocks(plotBlock, 'HISTOGRAM_OPTIONS');
+    const histogramOptions = getConnectedBlocks(plotBlock, 'histogram_options');
     const field = plotBlock.getFieldValue('field');
     const fieldType = plotBlock.getFieldValue('fieldType');
 

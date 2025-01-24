@@ -165,7 +165,7 @@ pythonGenerator.forBlock['plot_map'] = function(block, generator) {
     code += '\n';
     
     // Insert sub-block statements
-    let subBlocksCode = generator.statementToCode(block, 'Styling') || ''
+    let subBlocksCode = generator.statementToCode(block, 'styling') || ''
 
     // remove *all* leading spaces:
     subBlocksCode = subBlocksCode.replace(/^ +/gm, '');
@@ -197,7 +197,7 @@ pythonGenerator.forBlock['plot_map'] = function(block, generator) {
     code += '\n';
     
     // Insert sub-block statements
-    let subBlocksCode = generator.statementToCode(block, 'Styling') || ''
+    let subBlocksCode = generator.statementToCode(block, 'styling') || ''
 
     // remove *all* leading spaces:
     subBlocksCode = subBlocksCode.replace(/^ +/gm, '');
@@ -216,6 +216,44 @@ pythonGenerator.forBlock['plot_map'] = function(block, generator) {
     code += `self.main.plot_viewer.show()`
     return code;
 };
+
+pythonGenerator.forBlock['plot_histogram'] = function(block, generator) {
+  // Retrieve the stored fieldType from the block
+  const field_type = generator.quote_(block.getFieldValue('fieldType'));
+  // Retrieve the stored field from the block
+  const field = generator.quote_(block.getFieldValue('field'));
+
+  const plot_type = generator.quote_('histogram');
+  let code = '';
+  code += `style_dict = {}\n`;
+  code += '\n';
+  
+  // Insert sub-block statements
+  let subBlocksCode = generator.statementToCode(block, 'styling') || ''
+
+  // remove *all* leading spaces:
+  subBlocksCode = subBlocksCode.replace(/^ +/gm, '');
+
+  code += subBlocksCode + '\n';
+
+  // update self.parent.style.style_dict with `style_dict`
+  code += `if (style_dict):\n` +
+  generator.INDENT +`self.main.plot_style.style_dict[${plot_type}] = {**self.main.plot_style.style_dict[${plot_type}], **style_dict}\n`+
+  generator.INDENT +`print(self.main.plot_style.style_dict[${plot_type}])\n`+
+  generator.INDENT +`self.main.plot_style.set_style_dictionary(${plot_type})\n`+
+  generator.INDENT +`self.main.update_axis_limits(style_dict, ${field})\n`;
+
+  // 5) Plot
+  code += `self.main.plot_histogram(self.main.sample_id, field_type = ${field_type},field = ${field})\n`;
+  code += `self.main.plot_viewer.show()`
+  return code;
+};
+
+
+
+
+
+
 
 
 

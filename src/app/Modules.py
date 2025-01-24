@@ -408,6 +408,215 @@ class Main():
             # trigger update to plot
             self.plot_style.scheduler.schedule_update()
 
+    def plot_histogram(self, analysis, field, nbins):
+        """Plots a histogramn in the canvas window"""
+        
+        plot_data = None
+        #print('plot histogram')
+        # create Mpl canvas
+        canvas = mplc.MplCanvas(parent=self)
+
+        #if analysis == 'Ratio':
+        #    analyte_1 = field.split(' / ')[0]
+        #    analyte_2 = field.split(' / ')[1]
+
+        if self.comboBoxHistType.currentText() == 'log-scaling' and self.comboBoxHistFieldType.currentText() == 'Analyte':
+            print('raw_data for log-scaling')
+            x = self.get_scatter_data('histogram', processed=False)['x']
+        else:
+            print('processed_data for histogram')
+            x = self.get_scatter_data('histogram', processed=True)['x']
+
+        # determine edges
+        xmin,xmax,xscale,xlbl = self.plot_style.get_axis_values(x['type'],x['field'])
+        self.plot_style.xlim = [xmin, xmax]
+        self.plot_style.xscale = xscale
+        #if xscale == 'log':
+        #    x['array'] = np.log10(x['array'])
+        #    xmin = np.log10(xmin)
+        #    xmax = np.log10(xmax)
+
+        #bin_width = (xmax - xmin) / nbins
+        #print(nbins)
+        #print(bin_width)
+        
+        if (xscale == 'linear') or (xscale == 'scientific'):
+            edges = np.linspace(xmin, xmax, nbins)
+        else:
+            edges = np.linspace(10**xmin, 10**xmax, nbins)
+
+        #print(edges)
+
+        # histogram style
+        lw = self.plot_style.line_width
+        if lw > 0:
+            htype = 'step'
+        else:
+            htype = 'bar'
+
+        # CDF or PDF
+        match self.comboBoxHistType.currentText():
+            case 'CDF':
+                cumflag = True
+            case _:
+                cumflag = False
+
+        # Check if the algorithm is in the current group and if results are available
+        if self.field_type == 'cluster' and self.field != '':
+            method = self.cluster_dict['active method']
+
+            # Get the cluster labels for the data
+            cluster_color, cluster_label, _ = self.plot_style.get_cluster_colormap(self.cluster_dict[method],alpha=self.plot_style.marker_alpha)
+            cluster_group = self.data[self.sample_id].processed_data.loc[:,method]
+            clusters = self.cluster_dict[method]['selected_clusters']
+
+            # Plot histogram for all clusters
+            for i in clusters:
+                cluster_data = x['array'][cluster_group == i]
+
+                bar_color = cluster_color[int(i)]
+                if htype == 'step':
+                    ecolor = bar_color
+                else:
+                    ecolor = None
+
+                if self.comboBoxHistType.currentText() != 'log-scaling' :
+                    plot_data = canvas.axes.hist( cluster_data,
+                            cumulative=cumflag,
+                            histtype=htype,
+                            bins=edges,
+                            color=bar_color, edgecolor=ecolor,
+                            linewidth=lw,
+                            label=cluster_label[int(i)],
+                            alpha=self.plot_style.marker_alpha/100,
+                            density=True
+                        )
+                else:
+                    # Filter out NaN and zero values
+                    filtered_data = cluster_data[~np.isnan(cluster_data) & (cluster_data > 0)]
+
+                    # Sort the data in ascending order
+                    sorted_data = np.sort(filtered_data)
+
+                    # Calculate log(number of values > x)
+                    log_values = np.log10(sorted_data)
+                    log_counts = np.log10(len(sorted_data) - np.arange(len(sorted_data)))
+
+                    # Plot the data
+                    canvas.axes.plot(log_values, log_counts, label=cluster_label[int(i)], color=bar_color, lw=lw)
+
+            # Add a legend
+            self.add_colorbar(canvas, None, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color, alpha=self.plot_style.marker_alpha/100)
+            #canvas.axes.legend()
+        else:
+            clusters = None
+            # Regular histogram
+            bar_color = self.plot_style.marker_color
+            if htype == 'step':
+                ecolor = self.plot_style.line_color
+            else:
+                ecolor = None
+
+            if self.comboBoxHistType.currentText() != 'log-scaling' :
+                plot_data = canvas.axes.hist( x['array'],
+                        cumulative=cumflag,
+                        histtype=htype,
+                        bins=edges,
+                        color=bar_color, edgecolor=ecolor,
+                        linewidth=lw,
+                        alpha=self.plot_style.marker_alpha/100,
+                        density=True
+                    )
+            else:
+                # Filter out NaN and zero values
+                filtered_data = x['array'][~np.isnan(x['array']) & (x['array'] > 0)]
+
+                # Sort the data in ascending order
+                sorted_data = np.sort(filtered_data)
+
+                # Calculate log(number of values > x)
+                #log_values = np.log10(sorted_data)
+                counts = len(sorted_data) - np.arange(len(sorted_data))
+
+                # Plot the data
+                #canvas.axes.plot(log_values, log_counts, label=cluster_label[int(i)], color=bar_color, lw=lw)
+                canvas.axes.plot(sorted_data, counts, color=bar_color, lw=lw, alpha=self.plot_style.marker_alpha/100)
+
+        # axes
+        # label font
+        if 'font' == '':
+            font = {'size':self.plot_style.font}
+        else:
+            font = {'font':self.plot_style.font, 'size':self.plot_style.font_size}
+
+        # set y-limits as p-axis min and max in self.data[self.sample_id].axis_dict
+        if self.comboBoxHistType.currentText() != 'log-scaling' :
+            pflag = False
+            if 'pstatus' not in self.data[self.sample_id].axis_dict[x['field']]:
+                pflag = True
+            elif self.data[self.sample_id].axis_dict[x['field']]['pstatus'] == 'auto':
+                pflag = True
+
+            if pflag:
+                ymin, ymax = canvas.axes.get_ylim()
+                d = {'pstatus':'auto', 'pmin':fmt.oround(ymin,order=2,toward=0), 'pmax':fmt.oround(ymax,order=2,toward=1)}
+                self.data[self.sample_id].axis_dict[x['field']].update(d)
+                self.plot_style.set_axis_widgets('y', x['field'])
+
+            # grab probablility axes limits
+            _, _, _, _, ymin, ymax = self.plot_style.get_axis_values(x['type'],x['field'],ax='p')
+
+            # x-axis
+            canvas.axes.set_xlabel(xlbl, fontdict=font)
+            if xscale == 'log':
+            #    self.logax(canvas.axes, [xmin,xmax], axis='x', label=xlbl)
+                canvas.axes.set_xscale(xscale,base=10)
+            # if self.plot_style.xscale == 'linear':
+            # else:
+            #     canvas.axes.set_xlim(xmin,xmax)
+            canvas.axes.set_xlim(xmin,xmax)
+
+            if xscale == 'scientific':
+                canvas.axes.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
+
+            # y-axis
+            canvas.axes.set_ylabel(self.comboBoxHistType.currentText(), fontdict=font)
+            canvas.axes.set_ylim(ymin,ymax)
+        else:
+            canvas.axes.set_xscale('log',base=10)
+            canvas.axes.set_yscale('log',base=10)
+
+            canvas.axes.set_xlabel(r"$\log_{10}($" + f"{field}" + r"$)$", fontdict=font)
+            canvas.axes.set_ylabel(r"$\log_{10}(N > \log_{10}$" + f"{field}" + r"$)$", fontdict=font)
+
+        canvas.axes.tick_params(labelsize=self.plot_style.font_size,direction=self.plot_style.tick_dir)
+        canvas.axes.set_box_aspect(self.plot_style.aspect_ratio)
+
+        self.plot_style.update_figure_font(canvas, self.plot_style.font)
+
+        canvas.fig.tight_layout()
+
+        self.plot_info = {
+            'tree': 'Histogram',
+            'sample_id': self.sample_id,
+            'plot_name': analysis+'_'+field,
+            'field_type': analysis,
+            'field': field,
+            'plot_type': 'histogram',
+            'type': self.comboBoxHistType.currentText(),
+            'nbins': nbins,
+            'figure': canvas,
+            'style': self.plot_style.style_dict[self.plot_style.plot_type],
+            'cluster_groups': clusters,
+            'view': [True,False],
+            'position': [],
+            'data': plot_data
+        }
+
+        self.clear_layout(self.widgetSingleView.layout())
+        self.widgetSingleView.layout().addWidget(canvas)
+
+
 
 
     

@@ -96,7 +96,7 @@ class Main():
         
         # Initialise plotviewer form
         self.plot_viewer = PlotViewer(self)
-        
+        self.update_bins = False
 
         # # Noise reduction
         # self.noise_reduction = ip(self)
@@ -116,11 +116,11 @@ class Main():
         # # Clustering
         # #-------------------------
         # # cluster dictionary
-        # self.cluster_dict = {
-        #     'active method' : 'k-means',
-        #     'k-means':{'n_clusters':5, 'seed':23, 'selected_clusters':[]},
-        #     'fuzzy c-means':{'n_clusters':5, 'exponent':2.1, 'distance':'euclidean', 'seed':23, 'selected_clusters':[]}
-        # }
+        self.cluster_dict = {
+            'active method' : 'k-means',
+            'k-means':{'n_clusters':5, 'seed':23, 'selected_clusters':[]},
+            'fuzzy c-means':{'n_clusters':5, 'exponent':2.1, 'distance':'euclidean', 'seed':23, 'selected_clusters':[]}
+        }
 
         # distance_metrics = ['euclidean', 'manhattan', 'mahalanobis', 'cosine']
         
@@ -386,7 +386,7 @@ class Main():
 
 
 
-    def histogram_update_n_bins(self):
+    def histogram_update_n_bins(self,field,field_type):
         """Updates the number of bins
 
         Generally called when the bin width is changed by the user.  Updates the plot.
@@ -397,7 +397,7 @@ class Main():
         self.update_bins = False
 
         # get currently selected data
-        map_df = self.data[self.sample_id].get_map_data(self.comboBoxHistField.currentText(), self.comboBoxHistFieldType.currentText())
+        map_df = self.data[self.sample_id].get_map_data(field, field_type)
 
         # update n bins
         self.spinBoxBinWidth.setValue( int((np.nanmax(map_df['array']) - np.nanmin(map_df['array'])) / self.spinBoxBinWidth.value()) )
@@ -408,9 +408,9 @@ class Main():
             # trigger update to plot
             self.plot_style.scheduler.schedule_update()
 
-    def plot_histogram(self, analysis, field, nbins):
+    def plot_histogram(self, hist_type, analysis, field, n_bins):
         """Plots a histogramn in the canvas window"""
-        
+        field_type= analysis
         plot_data = None
         #print('plot histogram')
         # create Mpl canvas
@@ -420,7 +420,7 @@ class Main():
         #    analyte_1 = field.split(' / ')[0]
         #    analyte_2 = field.split(' / ')[1]
 
-        if self.comboBoxHistType.currentText() == 'log-scaling' and self.comboBoxHistFieldType.currentText() == 'Analyte':
+        if hist_type == 'log-scaling' and field_type == 'Analyte':
             print('raw_data for log-scaling')
             x = self.get_scatter_data('histogram', processed=False)['x']
         else:
@@ -436,14 +436,14 @@ class Main():
         #    xmin = np.log10(xmin)
         #    xmax = np.log10(xmax)
 
-        #bin_width = (xmax - xmin) / nbins
-        #print(nbins)
+        #bin_width = (xmax - xmin) / n_bins
+        #print(n_bins)
         #print(bin_width)
         
         if (xscale == 'linear') or (xscale == 'scientific'):
-            edges = np.linspace(xmin, xmax, nbins)
+            edges = np.linspace(xmin, xmax, n_bins)
         else:
-            edges = np.linspace(10**xmin, 10**xmax, nbins)
+            edges = np.linspace(10**xmin, 10**xmax, n_bins)
 
         #print(edges)
 
@@ -455,14 +455,14 @@ class Main():
             htype = 'bar'
 
         # CDF or PDF
-        match self.comboBoxHistType.currentText():
+        match hist_type:
             case 'CDF':
                 cumflag = True
             case _:
                 cumflag = False
 
         # Check if the algorithm is in the current group and if results are available
-        if self.field_type == 'cluster' and self.field != '':
+        if field_type == 'cluster' and field != '':
             method = self.cluster_dict['active method']
 
             # Get the cluster labels for the data
@@ -480,7 +480,7 @@ class Main():
                 else:
                     ecolor = None
 
-                if self.comboBoxHistType.currentText() != 'log-scaling' :
+                if hist_type != 'log-scaling' :
                     plot_data = canvas.axes.hist( cluster_data,
                             cumulative=cumflag,
                             histtype=htype,
@@ -517,7 +517,7 @@ class Main():
             else:
                 ecolor = None
 
-            if self.comboBoxHistType.currentText() != 'log-scaling' :
+            if hist_type != 'log-scaling' :
                 plot_data = canvas.axes.hist( x['array'],
                         cumulative=cumflag,
                         histtype=htype,
@@ -550,7 +550,7 @@ class Main():
             font = {'font':self.plot_style.font, 'size':self.plot_style.font_size}
 
         # set y-limits as p-axis min and max in self.data[self.sample_id].axis_dict
-        if self.comboBoxHistType.currentText() != 'log-scaling' :
+        if hist_type != 'log-scaling' :
             pflag = False
             if 'pstatus' not in self.data[self.sample_id].axis_dict[x['field']]:
                 pflag = True
@@ -580,7 +580,7 @@ class Main():
                 canvas.axes.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
 
             # y-axis
-            canvas.axes.set_ylabel(self.comboBoxHistType.currentText(), fontdict=font)
+            canvas.axes.set_ylabel(hist_type, fontdict=font)
             canvas.axes.set_ylim(ymin,ymax)
         else:
             canvas.axes.set_xscale('log',base=10)
@@ -603,8 +603,8 @@ class Main():
             'field_type': analysis,
             'field': field,
             'plot_type': 'histogram',
-            'type': self.comboBoxHistType.currentText(),
-            'nbins': nbins,
+            'type': hist_type,
+            'n_bins': n_bins,
             'figure': canvas,
             'style': self.plot_style.style_dict[self.plot_style.plot_type],
             'cluster_groups': clusters,
@@ -613,11 +613,60 @@ class Main():
             'data': plot_data
         }
 
-        self.clear_layout(self.widgetSingleView.layout())
-        self.widgetSingleView.layout().addWidget(canvas)
+        self.plot_viewer.add_plotwidget_to_plot_viewer(self.plot_info)
 
 
+        # -------------------------------------
+    # Scatter/Heatmap functions
+    # -------------------------------------
+    def get_scatter_data(self, plot_type,field_type=None, field= None, processed=True, field_type_x= None, field_type_y=None, field_type_z=None, field_x=None, field_y= None, field_z= None, color_by_field =None):
 
+        scatter_dict = {'x': {'type': None, 'field': None, 'label': None, 'array': None},
+                'y': {'type': None, 'field': None, 'label': None, 'array': None},
+                'z': {'type': None, 'field': None, 'label': None, 'array': None},
+                'c': {'type': None, 'field': None, 'label': None, 'array': None}}
+
+        match plot_type:
+            case 'histogram':
+                if processed or field_type != 'Analyte':
+                    scatter_dict['x'] = self.data[self.sample_id].get_vector(field_type, field, norm=self.plot_style.xscale)
+                else:
+                    scatter_dict['x'] = self.data[self.sample_id].get_vector(field_type, field, norm=self.plot_style.xscale, processed=False)
+            case 'PCA scatter' | 'PCA heatmap':
+                scatter_dict['x'] = self.data[self.sample_id].get_vector('PCA score', f'PC{self.spinBoxPCX.value()}', norm=self.plot_style.xscale)
+                scatter_dict['y'] = self.data[self.sample_id].get_vector('PCA score', f'PC{self.spinBoxPCY.value()}', norm=self.plot_style.yscale)
+                if (field_type is None) or (self.comboBoxColorByField.currentText != ''):
+                    scatter_dict['c'] = self.data[self.sample_id].get_vector(field_type, field)
+            case _:
+                scatter_dict['x'] = self.data[self.sample_id].get_vector(field_type_x, field_x, norm=self.plot_style.xscale)
+                scatter_dict['y'] = self.data[self.sample_id].get_vector(field_type_y, field_y, norm=self.plot_style.yscale)
+                if (field_type is not None) and (field_type != ''):
+                    scatter_dict['z'] = self.data[self.sample_id].get_vector(field_type_z, field_z, norm=self.plot_style.zscale)
+                elif (field_z is not None) and (field_z != ''):
+                    scatter_dict['c'] = self.data[self.sample_id].get_vector(field_type, field, norm=self.plot_style.cscale)
+
+        # set axes widgets
+        if (scatter_dict['x']['field'] is not None) and (scatter_dict['y']['field'] != ''):
+            if scatter_dict['x']['field'] not in self.data[self.sample_id].axis_dict.keys():
+                self.plot_style.initialize_axis_values(scatter_dict['x']['type'], scatter_dict['x']['field'])
+                self.plot_style.set_axis_widgets('x', scatter_dict['x']['field'])
+
+        if (scatter_dict['y']['field'] is not None) and (scatter_dict['y']['field'] != ''):
+            if scatter_dict['y']['field'] not in self.data[self.sample_id].axis_dict.keys():
+                self.plot_style.initialize_axis_values(scatter_dict['y']['type'], scatter_dict['y']['field'])
+                self.plot_style.set_axis_widgets('y', scatter_dict['y']['field'])
+
+        if (scatter_dict['z']['field'] is not None) and (scatter_dict['z']['field'] != ''):
+            if scatter_dict['z']['field'] not in self.data[self.sample_id].axis_dict.keys():
+                self.plot_style.initialize_axis_values(scatter_dict['z']['type'], scatter_dict['z']['field'])
+                self.plot_style.set_axis_widgets('z', scatter_dict['z']['field'])
+
+        if (scatter_dict['c']['field'] is not None) and (scatter_dict['c']['field'] != ''):
+            if scatter_dict['c']['field'] not in self.data[self.sample_id].axis_dict.keys():
+                self.plot_style.set_color_axis_widgets()
+                self.plot_style.set_axis_widgets('c', scatter_dict['c']['field'])
+
+        return scatter_dict
 
     
     # -------------------------------------

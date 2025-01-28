@@ -919,7 +919,7 @@ const plot_map = {
             .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'field');
         // Add dynamic statement input for styling
         const stylingInput = this.appendStatementInput('styling')
-            .setCheck('Styling')
+            .setCheck('styling')
             .appendField('Styling');
         
         // Add dynamic statement input for styling
@@ -984,9 +984,10 @@ const plot_histogram = {
         this.appendDummyInput('TYPE')
             .appendField('Type')
             .appendField(new Blockly.FieldDropdown([
-                ['Frequency', 'Frequency'],
-                ['Density', 'Density']
-            ]), 'type');
+                ['PDF', 'PDF'],
+                ['CDF', 'CDF'],
+                ['log-scaling', 'log-scaling'],
+            ]), 'HistType');
 
         // Field type dropdown
         this.appendDummyInput('FIELD_TYPE')
@@ -1004,13 +1005,13 @@ const plot_histogram = {
             .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'field');
 
         // Add statement input for histogram options
-        this.appendStatementInput('histogram_options')
-            .setCheck('HistogramOptions')
+        this.appendStatementInput('histogramOptions')
+            .setCheck('histogramOptions')
             .appendField('Histogram options');
 
         // Add dynamic statement input for styling
         const stylingInput = this.appendStatementInput('styling')
-            .setCheck('Styling')
+            .setCheck('styling')
             .appendField('Styling');
 
         this.setPreviousStatement(true, null);
@@ -1038,6 +1039,22 @@ const plot_histogram = {
             // update style dictionaries
             updateHistogramOptions(this);
         }
+        this.setOnChange(function(event) {
+            // 1) If we have no workspace or we're in the flyout, do nothing.
+            if (!this.workspace || this.isInFlyout) {
+              return;
+            }
+            // 2) We only care about block create/move/delete events,
+            //    because that indicates a sub-block is added or removed.
+            if (
+              event.type === Blockly.Events.BLOCK_CREATE ||
+              event.type === Blockly.Events.BLOCK_MOVE ||
+              event.type === Blockly.Events.BLOCK_DELETE
+            ) {
+
+              updateHistogramOptions(this);
+            }
+        });
     }
 };
 Blockly.common.defineBlocks({ plot_histogram: plot_histogram });
@@ -1079,8 +1096,8 @@ Blockly.Blocks['x_axis'] = {
             ['Log', 'log'],
             ['Logit', 'logit'],
             ]), 'xScaleDropdown');
-        this.setPreviousStatement(true, 'Styling');
-        this.setNextStatement(true, 'Styling');
+        this.setPreviousStatement(true, 'styling');
+        this.setNextStatement(true, 'styling');
         this.setColour(200);
         this.setTooltip('Set X axis properties');
         this.setHelpUrl('');
@@ -1106,8 +1123,8 @@ Blockly.Blocks['y_axis'] = {
             ['Log', 'log'],
             ['Logit', 'logit'],
             ]), 'yScaleDropdown');
-        this.setPreviousStatement(true, 'Styling');
-        this.setNextStatement(true, 'Styling');
+        this.setPreviousStatement(true, 'styling');
+        this.setNextStatement(true, 'styling');
         this.setColour(200);
         this.setTooltip('Set Y axis properties');
         this.setHelpUrl('');
@@ -1133,8 +1150,8 @@ Blockly.Blocks['z_axis'] = {
             ['Log', 'log'],
             ['Logit', 'logit'],
             ]), 'zScaleDropdown');
-        this.setPreviousStatement(true, 'Styling');
-        this.setNextStatement(true, 'Styling');
+        this.setPreviousStatement(true, 'styling');
+        this.setNextStatement(true, 'styling');
         this.setColour(200);
         this.setTooltip('Set Z axis properties');
         this.setHelpUrl('');
@@ -1160,8 +1177,8 @@ Blockly.Blocks['c_axis'] = {
             ['Log', 'log'],
             ['Logit', 'logit'],
             ]), 'cScaleDropdown');
-        this.setPreviousStatement(true, 'Styling');
-        this.setNextStatement(true, 'Styling');
+        this.setPreviousStatement(true, 'styling');
+        this.setNextStatement(true, 'styling');
         this.setColour(200);
         this.setTooltip('Set C axis properties');
         this.setHelpUrl('');
@@ -1178,8 +1195,8 @@ Blockly.Blocks['font'] = {
         this.appendDummyInput('fontSize')
         .appendField('Font size')
         .appendField(new Blockly.FieldNumber(11, 4, 100), 'fontSize');
-        this.setPreviousStatement(true, 'Styling');
-        this.setNextStatement(true, 'Styling');
+        this.setPreviousStatement(true, 'styling');
+        this.setNextStatement(true, 'styling');
         this.setColour(200);
         this.setTooltip('Set axis label/annotation font');
         this.setHelpUrl('');
@@ -1197,8 +1214,8 @@ Blockly.Blocks['tick_direction'] = {
             ['inout', 'inout'],
             ['none', 'none']
             ]), 'tickDirectionDropdown');
-        this.setPreviousStatement(true, 'Styling');
-        this.setNextStatement(true, 'Styling');
+        this.setPreviousStatement(true, 'styling');
+        this.setNextStatement(true, 'styling');
         this.setColour(200);
         this.setTooltip('Set tick direction');
         this.setHelpUrl('');
@@ -1207,18 +1224,13 @@ Blockly.Blocks['tick_direction'] = {
 
 Blockly.Blocks['aspect_ratio'] = {
     init: function () {
-        this.appendDummyInput('tickDirectionHeader')
-        .appendField('Tick direction')
-        .appendField(new Blockly.FieldDropdown([
-            ['out', 'out'],
-            ['in', 'in'],
-            ['inout', 'inout'],
-            ['none', 'none']
-            ]), 'tickDirectionDropdown');
-        this.setPreviousStatement(true, 'Styling');
-        this.setNextStatement(true, 'Styling');
+        this.appendDummyInput('aspectRatioHeader')
+        .appendField('Aspect ratio')
+        .appendField(new Blockly.FieldTextInput(''), 'aspectRatio');
+        this.setPreviousStatement(true, 'styling');
+        this.setNextStatement(true, 'styling');
         this.setColour(200);
-        this.setTooltip('Set tick direction');
+        this.setTooltip('Set aspect ratio');
         this.setHelpUrl('');
     },
 };
@@ -1244,8 +1256,8 @@ Blockly.Blocks['add_scale'] = {
             ['Horizontal', 'horizontal'],
             ['Vertical', 'vertical']
             ]), 'scaleDirection');
-        this.setPreviousStatement(true, 'Styling');
-        this.setNextStatement(true, 'Styling');
+        this.setPreviousStatement(true, 'styling');
+        this.setNextStatement(true, 'styling');
         this.setColour(220);
         this.setTooltip('Add a scale to the plot.');
         this.setHelpUrl('');
@@ -1272,13 +1284,27 @@ Blockly.Blocks['marker_properties'] = {
         this.appendDummyInput('colorSelect')
         .appendField('Color')
         .appendField(new FieldColour('#ff0000'), 'markerColor');
-        this.setPreviousStatement(true, 'Styling');
-        this.setNextStatement(true, 'Styling');
+        this.setPreviousStatement(true, 'styling');
+        this.setNextStatement(true, 'styling');
         this.setColour(230);
         this.setTooltip('Set marker properties for the plot.');
         this.setHelpUrl('');
     },
 };
+
+Blockly.Blocks['transparency'] = {
+    init: function () {
+        this.appendDummyInput('transparency')
+        .appendField('Transparency')
+        .appendField(new Blockly.FieldNumber(100, 0, 100), 'transparency');
+        this.setPreviousStatement(true, 'styling');
+        this.setNextStatement(true, 'styling');
+        this.setColour(255);
+        this.setTooltip('Adjust transparency of plot');
+        this.setHelpUrl('');
+    },
+};
+
 
 Blockly.Blocks['line_properties'] = {
     init: function () {
@@ -1291,8 +1317,8 @@ Blockly.Blocks['line_properties'] = {
         this.appendDummyInput('lineColorHeader')
         .appendField('Color')
         .appendField(new FieldColour('#000000'), 'lineColor');
-        this.setPreviousStatement(true, 'Styling');
-        this.setNextStatement(true, 'Styling');
+        this.setPreviousStatement(true, 'styling');
+        this.setNextStatement(true, 'styling');
         this.setColour(230);
         this.setTooltip('Set line properties for the plot.');
         this.setHelpUrl('');
@@ -1328,8 +1354,8 @@ Blockly.Blocks['color_field'] = {
             ['Option 1', 'option1'],
             ['Option 2', 'option2']
             ]), 'field');
-        this.setPreviousStatement(true, 'Styling');
-        this.setNextStatement(true, 'Styling');
+        this.setPreviousStatement(true, 'styling');
+        this.setNextStatement(true, 'styling');
         this.setColour(245);
         this.setTooltip('Select a field for coloring.');
         this.setHelpUrl('');
@@ -1357,8 +1383,8 @@ Blockly.Blocks['colormap'] = {
             ['Horizontal', 'horizontal'],
             ['Vertical', 'vertical']
             ]), 'direction');
-        this.setPreviousStatement(true, 'Styling');
-        this.setNextStatement(true, 'Styling');
+        this.setPreviousStatement(true, 'styling');
+        this.setNextStatement(true, 'styling');
         this.setColour(250);
         this.setTooltip('Set colormap properties.');
         this.setHelpUrl('');
@@ -1370,8 +1396,8 @@ Blockly.Blocks['show_mass'] = {
         this.appendDummyInput('massHeader')
         .appendField('Show Mass')
         .appendField(new Blockly.FieldCheckbox('FALSE'), 'showMass');
-        this.setPreviousStatement(true, 'Styling');
-        this.setNextStatement(true, 'Styling');
+        this.setPreviousStatement(true, 'styling');
+        this.setNextStatement(true, 'styling');
         this.setColour(255);
         this.setTooltip('Toggle visibility of mass in the plot.');
         this.setHelpUrl('');
@@ -1387,8 +1413,8 @@ Blockly.Blocks['color_by_cluster'] = {
             ['Cluster 1', 'cluster1'],
             ['Cluster 2', 'cluster2']
             ]), 'clusterType');
-        this.setPreviousStatement(true, 'Styling');
-        this.setNextStatement(true, 'Styling');
+        this.setPreviousStatement(true, 'styling');
+        this.setNextStatement(true, 'styling');
         this.setColour(255);
         this.setTooltip('Color plot based on cluster classification.');
         this.setHelpUrl('');
@@ -1397,50 +1423,40 @@ Blockly.Blocks['color_by_cluster'] = {
 
 
 
-Blockly.Blocks['transparency'] = {
-    init: function () {
-        this.appendDummyInput('transparency')
-        .appendField('Transparency')
-        .appendField(new Blockly.FieldNumber(100, 0, 100), 'transparency');
-        this.setPreviousStatement(true, 'Styling');
-        this.setNextStatement(true, 'Styling');
-        this.setColour(255);
-        this.setTooltip('Adjust transparency of plot');
-        this.setHelpUrl('');
-    },
-};
+
 
 ///// histogram options ////////
 
 Blockly.Blocks['bin_width'] = {
-    init: function () {
-        this.appendDummyInput()
-            .appendField('Bin Width');
-        this.appendValueInput('VALUE')
-            .setCheck('Number');
-        this.setOutput(true, 'Number');
-        this.setPreviousStatement(true, 'histogramOptions');
-        this.setNextStatement(true, 'histogramOptions');
-        this.setTooltip('Specify the bin width for the histogram.');
-        this.setHelpUrl('');
-        this.setColour(180);
-    }
+  init: function () {
+    this.appendDummyInput()
+      .appendField('Bin Width')
+      .appendField(
+        new Blockly.FieldNumber(1, 0, Infinity, 1),
+        "binWidth"
+      );
+    this.setPreviousStatement(true, 'histogramOptions');
+    this.setNextStatement(true, 'histogramOptions');
+    this.setTooltip('Specify the bin width for the histogram.');
+    this.setHelpUrl('');
+    this.setColour(180);
+  }
 };
 
-
 Blockly.Blocks['num_bins'] = {
-    init: function () {
-        this.appendDummyInput()
-            .appendField('Number of Bins');
-        this.appendValueInput('VALUE')
-            .setCheck('Number');
-        this.setOutput(true, 'Number');
-        this.setPreviousStatement(true, 'histogramOptions');
-        this.setNextStatement(true, 'histogramOptions');
-        this.setTooltip('Specify the number of bins for the histogram.');
-        this.setHelpUrl('');
-        this.setColour(180);
-    }
+  init: function () {
+    this.appendDummyInput()
+      .appendField('Num. bins')
+      .appendField(
+        new Blockly.FieldNumber(0, 1, 500, 1),
+        "nBins"
+      );
+    this.setPreviousStatement(true, 'histogramOptions');
+    this.setNextStatement(true, 'histogramOptions');
+    this.setTooltip('Specify the number of bins for the histogram.');
+    this.setHelpUrl('');
+    this.setColour(180);
+  }
 };
 
 

@@ -180,77 +180,105 @@ function getConnectedBlocks(plotBlock, blockName) {
 
 
 export function updateHistogramOptions(plotBlock) {
-    // 1) Get the first block connected to "HISTOGRAM_OPTIONS".
-    const histogramOptions = getConnectedBlocks(plotBlock, 'histogram_options');
+    // 1) Gather sub-blocks from 'histogram_options'
+    const histogramOptions = getConnectedBlocks(plotBlock, 'histogramOptions');
+  
+    // 2) Fetch 'field' and 'fieldType' from the main block
     const field = plotBlock.getFieldValue('field');
     const fieldType = plotBlock.getFieldValue('fieldType');
-
-    // 2) Fetch histogram range via the bridge.
+  
+    // 3) Call your backend to get the range
     window.blocklyBridge.getHistogramRange(fieldType, field, (range) => {
-        if (range === undefined || range === null) {
-            console.error('Histogram range not available.');
-            return;
+      if (range === undefined || range === null) {
+        console.error('Histogram range not available.');
+        return;
+      }
+      // 4) Traverse each block in the chain
+      for (const block of histogramOptions) {
+        switch (block.type) {
+          case 'bin_width':
+            updateBinWidthBlock(block, range, histogramOptions);
+            break;
+          case 'num_bins':
+            updateNumBinsBlock(block, range, histogramOptions);
+            break;
         }
-
-        // 3) Traverse the chain of histogramOptions blocks
-        for (const block of histogramOptions) {
-            // 4) Identify the block by type and update it
-            switch (block.type) {
-                case 'bin_width':
-                    updateBinWidthBlock(block, range);
-                    break;
-                case 'num_bins':
-                    updateNBinsBlock(block, range);
-                    break;
-            }
-        }
+      }
     });
-}
+  }
+  
 
-function updateBinWidthBlock(block, range) {
-    const binWidthField = block.getInputTargetBlock('VALUE');
-    if (binWidthField) {
-        const numBinsBlock = findConnectedBlock(block, 'num_bins');
-        let numBins = 100; // Default number of bins
-        if (numBinsBlock) {
-            const numBinsValue = numBinsBlock.getFieldValue('VALUE');
-            numBins = parseInt(numBinsValue, 10) || numBins;
-        }
-
-        // Calculate bin width range based on total range and numBins
-        const binWidthMin = range / 500; // Max numBins
-        const binWidthMax = range;      // Min numBins (1 bin)
-        const currentBinWidth = binWidthField.getFieldValue('VALUE');
-
-        // Clamp the current value within the range
-        const clampedBinWidth = Math.max(binWidthMin, Math.min(binWidthMax, currentBinWidth || binWidthMin));
-        binWidthField.setValue(clampedBinWidth);
-
-        // Update tooltip
-        block.setTooltip(`Specify the bin width for the histogram. Range: ${binWidthMin.toFixed(2)} - ${binWidthMax.toFixed(2)}`);
+  function updateBinWidthBlock(binWidthBlock, range, histogramOptionsChain) {
+    // 1) Current binWidth from the block
+    let currentWidth = parseFloat(binWidthBlock.getFieldValue('binWidth')) || 1;
+  
+    // 2) Determine valid bounds for bin width:
+    //    - If we want max bins = 500 => min bin width = range/500
+    //    - If we want at least 1 bin => max bin width = range
+    const minWidth = range / 500; 
+    const maxWidth = range;
+  
+    // 3) Clamp currentWidth
+    currentWidth = Math.max(minWidth, Math.min(maxWidth, currentWidth));
+  
+    // 4) Update the bin_width field if we changed it
+    binWidthBlock.setFieldValue(currentWidth.toFixed(2), 'binWidth');
+  
+    // 5) Possibly update the "num_bins" block in the same chain
+    const numBinsBlock = findBlockByType(histogramOptionsChain, 'num_bins');
+    if (numBinsBlock) {
+      // new nBins = range / currentWidth
+      let nBins = range / currentWidth;
+      // clamp to [1..500]
+      nBins = Math.max(1, Math.min(500, nBins));
+      // round to nearest integer
+      nBins = Math.round(nBins);
+  
+      numBinsBlock.setFieldValue(nBins, 'nBins');
     }
-}
-function updateNBinsBlock(block, range) {
-    const numBinsField = block.getInputTargetBlock('VALUE');
-    if (numBinsField) {
-        const currentNumBins = numBinsField.getFieldValue('VALUE');
-        const clampedNumBins = Math.max(1, Math.min(500, currentNumBins || 100)); // Default: 100 bins
-
-        // Update field value
-        numBinsField.setValue(clampedNumBins);
-
-        // Update tooltip
-        block.setTooltip(`Specify the number of bins for the histogram. Range: 1 - 500`);
-
-        // If bin width needs to be updated, find it and adjust based on numBins
-        const binWidthBlock = findConnectedBlock(block, 'bin_width');
-        if (binWidthBlock) {
-            const binWidth = range / clampedNumBins;
-            binWidthBlock.setFieldValue(binWidth.toFixed(2), 'VALUE');
-        }
+  
+    // 6) Update tooltip on bin_width block
+    binWidthBlock.setTooltip(
+      `Specify the bin width for the histogram. Range: ${minWidth(2)} to ${maxWidth.toFixed(2)}`
+    );
+  }
+  
+  function updateNumBinsBlock(nBinsBlock, range, histogramOptionsChain) {
+    // 1) Current nBins from the block
+    let currentBins = parseInt(nBinsBlock.getFieldValue('nBins'), 10) || 100;
+  
+    // 2) clamp to [1..500]
+    currentBins = Math.max(1, Math.min(500, currentBins));
+  
+    // 3) Update 'nBins' field if changed
+    nBinsBlock.setFieldValue(currentBins, 'nBins');
+  
+    // 4) Possibly update "bin_width" block in the same chain
+    const binWidthBlock = findBlockByType(histogramOptionsChain, 'bin_width');
+    if (binWidthBlock) {
+      // new binWidth = range / currentBins
+      const newWidth = range / currentBins;
+      // clamp to [range/500..range]
+      const minWidth = range / 500;
+      const maxWidth = range;
+      let clampedWidth = Math.max(minWidth, Math.min(maxWidth, newWidth));
+  
+      binWidthBlock.setFieldValue(clampedWidth.toFixed(2), 'binWidth');
     }
-}
-
+  
+    // 5) Update tooltip
+    nBinsBlock.setTooltip('Specify the number of bins (1–500).');
+  }
+  
+  function findBlockByType(blockChain, type) {
+    for (const block of blockChain) {
+      if (block.type === type) {
+        return block;
+      }
+    }
+    return null;
+  }
+  
 
 
 
@@ -461,9 +489,6 @@ function updateAspectRatioBlock(block, style) {
 // }
 if (style['AspectRatio'] !== undefined) {
     block.setFieldValue(String(style['AspectRatio']), 'aspectRatio');
-}
-if (style['TickDir'] !== undefined) {
-    block.setFieldValue(style['TickDir'], 'tickDirectionDropdown');
 }
 block.render();
 }

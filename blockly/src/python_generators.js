@@ -218,6 +218,8 @@ pythonGenerator.forBlock['plot_map'] = function(block, generator) {
 };
 
 pythonGenerator.forBlock['plot_histogram'] = function(block, generator) {
+  // Retrieve the stored type from the block
+  const hist_type = generator.quote_(block.getFieldValue('HistType'));
   // Retrieve the stored fieldType from the block
   const field_type = generator.quote_(block.getFieldValue('fieldType'));
   // Retrieve the stored field from the block
@@ -244,7 +246,7 @@ pythonGenerator.forBlock['plot_histogram'] = function(block, generator) {
   generator.INDENT +`self.main.update_axis_limits(style_dict, ${field})\n`;
 
   // 5) Plot
-  code += `self.main.plot_histogram(self.main.sample_id, field_type = ${field_type},field = ${field})\n`;
+  code += `self.main.plot_histogram(hist_type = ${hist_type}, field_type = ${field_type},field = ${field})\n`;
   code += `self.main.plot_viewer.show()`
   return code;
 };
@@ -444,19 +446,16 @@ pythonGenerator.forBlock['y_axis'] = function(block, generator) {
    * Aspect Ratio => also Axes
    ***********************************************/
   pythonGenerator.forBlock['aspect_ratio'] = function(block, generator) {
-    const rawTickDir = block.getFieldValue('tickDirectionDropdown');
-    const tickDir = rawTickDir ? generator.quote_(rawTickDir) : null;
     const rawAspect = block.getFieldValue('aspectRatio') || '';
     const aspectRatio = rawAspect ? rawAspect : 'None';
   
     // If user typed nothing for tickDir and aspectRatio, skip
-    if (!tickDir && (!rawAspect || rawAspect.trim() === '')) {
+    if ((!rawAspect || rawAspect.trim() === '')) {
       return '# aspect_ratio block: no fields set\n';
     }
   
     let code = '# aspect_ratio block\n';
     code += `tmp_dict = {\n`;
-    if (tickDir) code += `  "TickDir": ${tickDir},\n`;
     code += `  "AspectRatio": ${aspectRatio}\n`;
     code += `}\n`;
     code += `style_dict.update(tmp_dict)\n\n`;
@@ -548,7 +547,28 @@ pythonGenerator.forBlock['y_axis'] = function(block, generator) {
     return code;
   };
   
+  /***********************************************
+   * transparency => style_dict
+   ***********************************************/
+  pythonGenerator.forBlock['transparency'] = function(block, generator) {
+    const transparency = block.getFieldValue('transparency') || 'None';
   
+    let codeLines = [];
+    if (!transparency) {
+      return '# transparency block: no fields set\n';
+    }
+    codeLines.push(`"MarkerAlpha": ${transparency}`); // always add, even if 'None'
+  
+    let code = '# transparency block\n';
+    code += 'tmp_dict = {\n';
+    code += '  ' + codeLines.join(',\n  ') + '\n';
+    code += '}\n';
+    code += 'style_dict.update(tmp_dict)\n\n';
+    return code;
+  };
+
+
+
   /***********************************************
    * Line Properties => style_dict or a separate lines_dict
    ***********************************************/

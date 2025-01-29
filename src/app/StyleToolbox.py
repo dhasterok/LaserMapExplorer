@@ -12,6 +12,9 @@ from src.common.colorfunc import get_hex_color, get_rgb_color
 from src.app.config import BASEDIR
 from src.common.ScheduleTimer import Scheduler
 
+class StyleObj():
+    pass
+
 class Styling():
     """Manages plot styling for different plot types and syncs with main window UI.
 

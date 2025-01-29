@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 64 64">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #323232;
+      }
+
+      .cls-2 {
+        fill: #e6e6e6;
+      }
+
+      .cls-3 {
+        fill: url(#linear-gradient);
+      }
+    </style>
+    <linearGradient id="linear-gradient" x1="32" y1="1.28" x2="32" y2="21.37" gradientTransform="translate(64 -1.28) rotate(-180) scale(1 -1)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#176be4"/>
+      <stop offset="1" stop-color="#80ace4"/>
+    </linearGradient>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer 1">
+    <g id="Smart_Rectangle" data-name="Smart Rectangle">
+      <path class="cls-2" d="M0,4C0,1.79,1.79,0,4,0h56.01C62.21,0,64,1.79,64,4v56.01c0,2.21-1.79,4-4,4H4C1.79,64,0,62.21,0,60V4Z"/>
+      <path class="cls-1" d="M1,4c0-1.65,1.34-3,3-3h56.01c1.65,0,3,1.34,3,3v56.01c0,1.65-1.34,3-3,3H4c-1.65,0-3-1.34-3-3V4h0ZM0,4v56.01c0,2.21,1.79,4,4,4q23.58,0,47.16,0h8.84c2.21,0,4-1.79,4-4q0-8.09,0-16.18V4C64,1.79,62.21,0,60,0H4C1.79,0,0,1.79,0,4H0Z"/>
+    </g>
+    <g id="Smart_Rectangle-2" data-name="Smart Rectangle">
+      <path class="cls-3" d="M64,20.1V4.01C64,1.8,62.2,0,59.99,0H4.01C1.8,0,0,1.8,0,4.01v16.09h64Z"/>
+      <path class="cls-1" d="M63.5,19.1H.5l.5.5V4.01c0-1.66,1.35-3.01,3.01-3.01h55.98c1.66,0,3.01,1.35,3.01,3.01v15.59l.5-.5ZM63.5,20.1c.28,0,.5-.22.5-.5q0-7.79,0-15.59C64,1.8,62.2,0,59.99,0H4.01C1.8,0,0,1.8,0,4.01v15.59C0,19.87.22,20.1.5,20.1h63Z"/>
+    </g>
+  </g>
+</svg>

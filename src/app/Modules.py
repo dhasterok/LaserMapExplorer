@@ -370,8 +370,6 @@ class Main():
 
         Generally called when the number of bins is changed by the user.  Updates the plot.
         """
-        if not self.update_bins:
-            return
 
         if (field_type == '') or (field == ''):
             return
@@ -729,7 +727,7 @@ class Main():
             if grouplabels is None or groupcolors is None:
                 return
 
-            # create patches for legend items
+            # create for legend items
             p = [None]*len(grouplabels)
             for i, label in enumerate(grouplabels):
                 p[i] = Patch(facecolor=groupcolors[i], edgecolor='#111111', linewidth=0.5, label=label)

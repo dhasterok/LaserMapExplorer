@@ -51,7 +51,7 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         self.filename = 'untitled'
         self.unsaved_changes = False
         self.update_window_title()
-        self.default_dir  = os.path.join(parent.BASEDIR, "resources", "analyte list")  # Default directory
+        self.default_dir  = os.path.join(parent.BASEDIR, "resources", "analyte_list")  # Default directory
         # setup scale (norm) combobox
         self.comboBoxScale.clear()
         self.scale_methods = ['linear','log','logit','mixed']
@@ -515,7 +515,6 @@ class AnalyteDialog(QDialog, Ui_Dialog):
 
             # update norm in data
             self.data.set_attribute(analyte_pair,'norm',comboBox.currentText())
-        self.listUpdated.emit()
 
     def populate_analyte_list(self, analyte_pair, norm='linear'):
         """Populates the list of selected analytes

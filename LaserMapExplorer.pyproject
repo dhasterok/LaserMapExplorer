@@ -12,6 +12,7 @@
         "designer/SpotImportDialog.ui",
         "designer/WorkflowDesigner.ui",
         "designer/FileSelectorDialog.ui",
-        "designer/FieldSelectionDialog.ui"
+        "designer/FieldSelectionDialog.ui",
+        "designer/PlotViewer.ui"
     ]
 }

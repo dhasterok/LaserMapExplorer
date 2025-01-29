@@ -45,7 +45,7 @@
             <block type="swap_x_y"></block> <!-- Custom Loop Block -->
             <block type="select_outlier_method"></block> <!-- Custom Loop Block -->
             <block type="neg_handling_method"></block> <!-- Custom Loop Block -->
-            <block type="field_select"></block> <!-- Custom Loop Block -->
+            <block type="select_custom_lists"></block> <!-- Custom Loop Block -->
         </category>
         <!-- Analysis -->
         <category name="Analysis" colour="160">
@@ -65,18 +65,31 @@
         </category>
         <!-- Plot Category -->
         <category name="Plot" colour="285">
-            <block type="plot"></block> 
-            <block type="export_data"></block> 
+            <block type="plot_map"></block> 
+            <block type="correlation_analysis"></block>
+            <block type="plot_histogram"></block> 
+            <block type="bin_width"></block> 
+            <block type="num_bins"></block> 
         </category>
         <!-- Style Category -->
         <category name="Style" colour="285">
-            <block type="styles"></block>
-            <block type="axis_and_labels"></block>
-            <block type="annot_and_scale"></block>
-            <block type="marks_and_lines"></block>
-            <block type="coloring"></block>    
-            <block type="x_axis_settings"></block> 
-            <block type="y_axis_settings"></block> 
+            <block type="modify_styles"></block>
+            <block type="x_axis"></block>
+            <block type="y_axis"></block>
+            <block type="z_axis"></block>
+            <block type="c_axis"></block>
+            <block type="font"></block>
+            <block type="tick_direction"></block>
+            <block type="aspect_ratio"></block>
+            <block type="add_scale"></block>
+            <block type="marker_properties"></block>    
+            <block type="transparency"></block>    
+            <block type="line_properties"></block>    
+            <block type="color_select"></block>    
+            <block type="color_field"></block>   
+            <block type="colormap"></block>    
+            <block type="show_mass"></block>
+            <block type="color_by_cluster"></block>
         </category>
     </xml>
     <!-- Load qwebchannel.js -->

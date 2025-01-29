@@ -6,6 +6,7 @@ import * as BlockDynamicConnection from '@blockly/block-dynamic-connection';
 import { sample_ids,fieldTypeList, updateSampleIds, spot_data } from './globals';
 import {enableSampleIDsBlockFunction} from './custom_blocks'
 
+
 // Function: Update Sample Dropdown with IDs
 function updateSampleDropdown(sampleIds) {
     // Step 1: Store sample IDs in the global variableaxis_and_labels
@@ -51,6 +52,26 @@ function refreshAnalyteSavedListsDropdown() {
 
 window.refreshAnalyteSavedListsDropdown = refreshAnalyteSavedListsDropdown;
 
+
+// Global function to refresh the analyteSavedListsDropdown
+function refreshCustomFieldListsDropdown() {
+    // Iterate through all blocks to find 'select_analytes' blocks
+    Blockly.getMainWorkspace().getAllBlocks().forEach(function(block) {
+        if (block.type === 'select_custom_lists') {
+            // Get the current selection
+            const analyteSelectorValue = block.getFieldValue('fieldSelectorDropdown');
+            if (analyteSelectorValue === 'Saved lists') {
+                const savedListDropdown = block.getField('fieldSavedListsDropdown');
+                const currentSelection = savedListDropdown ? savedListDropdown.getValue() : null;
+                // Update the saved lists dropdown while preserving selection
+                block.updateSavedListsDropdown(currentSelection);
+            }
+        }
+    });
+}
+
+window.refreshCustomFieldListsDropdown = refreshCustomFieldListsDropdown;
+
 function updateFieldTypeList(newFieldTypeList) {
     // Clear the existing array
     fieldTypeList.length = 0;
@@ -81,40 +102,524 @@ function updateFieldTypeList(newFieldTypeList) {
 }
 window.updateFieldTypeList = updateFieldTypeList;
 
-// Function to dynamically update connected style blocks
-export function dynamicStyleUpdate(plotType, connectedBlocks) {
-    // Call the backend to get updated styles for the specific plot type
-    console.log(connectedBlocks)
-    window.blocklyBridge.callSetStyleWidgets(plotType, function(style) {
-        if (style.constructor === Object && Object.keys(style).length === 0){
-            console.warn("Style dictionary not provided for plotType:", plotType);
-            return; // Exit if style is not available
-        }
-        else{
-            console.log('updating styles')
-            Object.entries(connectedBlocks).forEach(([blockType, block]) => {
-                updateFieldsBasedOnPlotType(plotType, block); // Adjust fields per plot type
-                switch (blockType) {
-                    case 'styles':
-                        updateStylesBlock(block, style);
-                        break;
-                    case 'axis_and_labels':
-                        updateAxisAndLabelsBlock(block, style);
-                        break;
-                    case 'annot_and_scale':
-                        updateAnnotAndScaleBlock(block, style);
-                        break;
-                    case 'marks_and_lines':
-                        updateMarksAndLinesBlock(block, style);
-                        break;
-                    case 'coloring':
-                        updateColoringBlock(block, style);
-                        break;
+
+// Function to update the Field dropdown
+export function updateFieldDropdown(block, newValue) {
+    const fieldTypeValue = newValue || block.getFieldValue('fieldType');
+    window.blocklyBridge.getFieldList(fieldTypeValue).then((response) => {
+        const options = response.map(option => [option, option]);
+        if (block) {
+            const dropdown = block.getField('field');
+            if (dropdown) {
+                if (options.length > 0) {
+                    dropdown.menuGenerator_ = options;
+                    dropdown.setValue(options[0][1]);
+                } else {
+                    dropdown.menuGenerator_ = [['Select...', '']];
+                    dropdown.setValue('');
                 }
-            });
-        };
+                dropdown.forceRerender();
+            }
+        }
+    }).catch(error => {
+        console.error('Error fetching field list:', error);
     });
 }
+
+
+// Function to add default styling blocks
+export function addDefaultStylingBlocks(block, workspace, defaultBlocks) {
+
+    let lastConnection = block.getInput('styling').connection;
+
+    // Chain the default styling blocks
+    defaultBlocks.forEach(blockType => {
+        const newBlock = workspace.newBlock(blockType);
+        newBlock.initSvg();
+        newBlock.render();
+
+        // Attach this block to the "lastConnection"
+        newBlock.previousConnection.connect(lastConnection);
+
+        // Update lastConnection to this block's nextConnection
+        lastConnection = newBlock.nextConnection;
+    });
+}
+
+
+/**
+ * Retrieve an array of all blocks connected to the 'Styling' input
+ * in a linear chain (via next/previous statements).
+ * @param {Blockly.Block} plotBlock - The main block that has a 'Styling' statement input.
+ * @return {Blockly.Block[]} Array of connected blocks.
+ */
+function getConnectedBlocks(plotBlock, blockName) {
+    // 1) Get the 'Styling' input object
+    const connectedInput = plotBlock.getInput(blockName);
+    if (!connectedInput) {
+      // Input not found; perhaps the block doesn't have a 'Styling' input?
+      console.warn("No 'Styling' input found on block:", plotBlock);
+      return [];
+    }
+    
+    // 2) Get the top-most connected block on this input
+    const firstBlock = connectedInput.connection
+      ? connectedInput.connection.targetBlock()
+      : null;
+  
+    // 3) Traverse the chain of connected blocks
+    const connectedBlocks = [];
+    let currentBlock = firstBlock;
+    while (currentBlock) {
+      connectedBlocks.push(currentBlock);
+      currentBlock = currentBlock.getNextBlock();
+    }
+  
+    return connectedBlocks;
+}
+
+
+export function updateHistogramOptions(plotBlock) {
+    // 1) Gather sub-blocks from 'histogram_options'
+    const histogramOptions = getConnectedBlocks(plotBlock, 'histogramOptions');
+  
+    // 2) Fetch 'field' and 'fieldType' from the main block
+    const field = plotBlock.getFieldValue('field');
+    const fieldType = plotBlock.getFieldValue('fieldType');
+  
+    // 3) Call your backend to get the range
+    window.blocklyBridge.getHistogramRange(fieldType, field, (range) => {
+      if (range === undefined || range === null) {
+        console.error('Histogram range not available.');
+        return;
+      }
+      // 4) Traverse each block in the chain
+      for (const block of histogramOptions) {
+        switch (block.type) {
+          case 'bin_width':
+            updateBinWidthBlock(block, range, histogramOptions);
+            break;
+          case 'num_bins':
+            updateNumBinsBlock(block, range, histogramOptions);
+            break;
+        }
+      }
+    });
+  }
+  
+
+  function updateBinWidthBlock(binWidthBlock, range, histogramOptionsChain) {
+    // 1) Current binWidth from the block
+    let currentWidth = parseFloat(binWidthBlock.getFieldValue('binWidth')) || 1;
+  
+    // 2) Determine valid bounds for bin width:
+    //    - If we want max bins = 500 => min bin width = range/500
+    //    - If we want at least 1 bin => max bin width = range
+    const minWidth = range / 500; 
+    const maxWidth = range;
+  
+    // 3) Clamp currentWidth
+    currentWidth = Math.max(minWidth, Math.min(maxWidth, currentWidth));
+  
+    // 4) Update the bin_width field if we changed it
+    binWidthBlock.setFieldValue(currentWidth.toFixed(2), 'binWidth');
+  
+    // 5) Possibly update the "num_bins" block in the same chain
+    const numBinsBlock = findBlockByType(histogramOptionsChain, 'num_bins');
+    if (numBinsBlock) {
+      // new nBins = range / currentWidth
+      let nBins = range / currentWidth;
+      // clamp to [1..500]
+      nBins = Math.max(1, Math.min(500, nBins));
+      // round to nearest integer
+      nBins = Math.round(nBins);
+  
+      numBinsBlock.setFieldValue(nBins, 'nBins');
+    }
+  
+    // 6) Update tooltip on bin_width block
+    binWidthBlock.setTooltip(
+      `Specify the bin width for the histogram. Range: ${minWidth(2)} to ${maxWidth.toFixed(2)}`
+    );
+  }
+  
+  function updateNumBinsBlock(nBinsBlock, range, histogramOptionsChain) {
+    // 1) Current nBins from the block
+    let currentBins = parseInt(nBinsBlock.getFieldValue('nBins'), 10) || 100;
+  
+    // 2) clamp to [1..500]
+    currentBins = Math.max(1, Math.min(500, currentBins));
+  
+    // 3) Update 'nBins' field if changed
+    nBinsBlock.setFieldValue(currentBins, 'nBins');
+  
+    // 4) Possibly update "bin_width" block in the same chain
+    const binWidthBlock = findBlockByType(histogramOptionsChain, 'bin_width');
+    if (binWidthBlock) {
+      // new binWidth = range / currentBins
+      const newWidth = range / currentBins;
+      // clamp to [range/500..range]
+      const minWidth = range / 500;
+      const maxWidth = range;
+      let clampedWidth = Math.max(minWidth, Math.min(maxWidth, newWidth));
+  
+      binWidthBlock.setFieldValue(clampedWidth.toFixed(2), 'binWidth');
+    }
+  
+    // 5) Update tooltip
+    nBinsBlock.setTooltip('Specify the number of bins (1–500).');
+  }
+  
+  function findBlockByType(blockChain, type) {
+    for (const block of blockChain) {
+      if (block.type === type) {
+        return block;
+      }
+    }
+    return null;
+  }
+  
+
+
+
+
+  
+
+
+/**
+ * Retrieve and update all blocks connected to the "Styling" input.
+ * @param {Blockly.Block} plotMapBlock - The plot_map block instance.
+ * @param {String} plotType - The dictionary containing styling values.
+ */
+
+export function updateStylingChain(plotBlock, plotType) {
+    // 1) Get the first block connected to "Styling".
+    const stylingBlocks = getConnectedBlocks(plotBlock, 'styling');
+    
+    // If you want to explicitly set the plotType:
+    // this.plotType = 'analyte map';
+  
+    // 2) Call the style widgets function with the current plotType.
+    window.blocklyBridge.invokeSetStyleWidgets(plotType, (styleStr) => {
+      // 3a) Check if the style dictionary is empty
+      const style = JSON.parse(styleStr);
+      if (style.constructor === Object && Object.keys(style).length === 0) {
+        console.warn('Style dictionary not provided for plotType:', this.plotType);
+        return; // Exit if style is not available
+      } else {
+        console.log('updating styles');
+        
+        // Store the style object in styleDict for clarity.
+        let styleDict = style;
+        
+        // 3b) Traverse the chain of styling blocks
+        for (const block of stylingBlocks) {
+          // 3c) Identify the block by type and update
+          switch (block.type) {
+            case 'x_axis':
+              updateXAxisBlock(block, styleDict);
+              break;
+            case 'y_axis':
+              updateYAxisBlock(block, styleDict);
+              break;
+            case 'z_axis':
+              updateZAxisBlock(block, styleDict);
+              break;
+            case 'c_axis':
+              updateCAxisBlock(block, styleDict);
+              break;
+            case 'font':
+              updateFontBlock(block, styleDict);
+              break;
+            case 'tick_direction':
+              updateTickDirectionBlock(block, styleDict);
+              break;
+            case 'aspect_ratio':
+              updateAspectRatioBlock(block, styleDict);
+              break;
+            case 'coloring':
+              updateColormapBlock(block, styleDict);
+              break;
+            case 'add_scale':
+              updateAddScaleBlock(block, styleDict);
+              break;
+            case 'marker_properties':
+              updateMarkerPropertiesBlock(block, styleDict);
+              break;
+            case 'line_properties':
+              updateLinePropertiesBlock(block, styleDict);
+              break;
+            case 'color_field':
+              updateColorFieldBlock(block, styleDict);
+              break;
+            case 'colormap':
+              updateColormapBlock(block, styleDict);
+              break;
+            case 'show_mass':
+              updateShowMassBlock(block, styleDict);
+              break;
+            case 'color_by_cluster':
+              updateColorByClusterBlock(block, styleDict);
+              break;
+            default:
+              // Optionally handle unsupported block types
+              console.warn('Unsupported styling block:', block.type);
+          }
+        }
+      }
+    });
+}
+  
+  
+function updateXAxisBlock(block, style) {
+// e.g. style might contain:
+// {
+//   "XLabel": "X Axis Title",
+//   "XLim": ["0", "100"],   // an array: [min, max]
+//   "XScale": "linear"
+// }
+if (style['XLabel'] !== undefined) {
+    block.setFieldValue(style['XLabel'], 'xLabel');
+}
+if (style['XLim'] && Array.isArray(style['XLim'])) {
+    block.setFieldValue(style['XLim'][0], 'xLimMin');
+    block.setFieldValue(style['XLim'][1], 'xLimMax');
+}
+if (style['XScale'] !== undefined) {
+    block.setFieldValue(style['XScale'], 'xScaleDropdown');
+}
+block.render();
+}
+
+function updateYAxisBlock(block, style) {
+// e.g. style might contain:
+// {
+//   "YLabel": "Y Axis Title",
+//   "YLim": ["0", "100"],
+//   "YScale": "log"
+// }
+if (style['YLabel'] !== undefined) {
+    block.setFieldValue(style['YLabel'], 'yLabel');
+}
+if (style['YLim'] && Array.isArray(style['YLim'])) {
+    block.setFieldValue(style['YLim'][0], 'yLimMin');
+    block.setFieldValue(style['YLim'][1], 'yLimMax');
+}
+if (style['YScale'] !== undefined) {
+    block.setFieldValue(style['YScale'], 'yScaleDropdown');
+}
+block.render();
+}
+
+
+function updateZAxisBlock(block, style) {
+// e.g. style might contain:
+// {
+//   "ZLabel": "Z Axis Title",
+//   "ZLim": ["0", "100"],
+//   "ZScale": "linear"
+// }
+if (style['ZLabel'] !== undefined) {
+    block.setFieldValue(style['ZLabel'], 'zLabel');
+}
+if (style['ZLim'] && Array.isArray(style['ZLim'])) {
+    block.setFieldValue(style['ZLim'][0], 'zLimMin');
+    block.setFieldValue(style['ZLim'][1], 'zLimMax');
+}
+if (style['ZScale'] !== undefined) {
+    block.setFieldValue(style['ZScale'], 'zScaleDropdown');
+}
+block.render();
+}
+
+
+
+function updateCAxisBlock(block, style) {
+// e.g. style might contain:
+// {
+//   "CLabel": "Concentration",
+//   "CLim": ["0", "500"],
+//   "CScale": "log"
+// }
+if (style['CLabel'] !== undefined) {
+    block.setFieldValue(style['CLabel'], 'cLabel');
+}
+if (style['CLim'] && Array.isArray(style['CLim'])) {
+    block.setFieldValue(style['CLim'][0], 'cLimMin');
+    block.setFieldValue(style['CLim'][1], 'cLimMax');
+}
+if (style['CScale'] !== undefined) {
+    block.setFieldValue(style['CScale'], 'cScaleDropdown');
+}
+block.render();
+}
+
+
+function updateFontBlock(block, style) {
+// e.g. style might contain:
+// {
+//   "FontName": "Arial",
+//   "FontSize": 12
+// }
+if (style['FontName'] !== undefined) {
+    block.setFieldValue(style['FontName'], 'font');
+}
+if (style['FontSize'] !== undefined) {
+    block.setFieldValue(String(style['FontSize']), 'fontSize');
+}
+block.render();
+}
+
+
+function updateTickDirectionBlock(block, style) {
+// e.g. style might contain:
+// { "TickDir": "out" }
+if (style['TickDir'] !== undefined) {
+    block.setFieldValue(style['TickDir'], 'tickDirectionDropdown');
+}
+block.render();
+}
+
+
+function updateAspectRatioBlock(block, style) {
+// e.g. style might contain:
+// {
+//   "AspectRatio": "1.0",
+//   "TickDir": "in"
+// }
+if (style['AspectRatio'] !== undefined) {
+    block.setFieldValue(String(style['AspectRatio']), 'aspectRatio');
+}
+block.render();
+}
+
+
+function updateAddScaleBlock(block, style) {
+// e.g. style might contain:
+// {
+//   "ScaleColor": "#FF0000",
+//   "ScaleUnits": "m",
+//   "ScaleLength": "50",
+//   "ScaleDirection": "horizontal"
+// }
+if (style['ScaleColor'] !== undefined) {
+    block.setFieldValue(style['ScaleColor'], 'scaleColor');
+}
+if (style['ScaleUnits'] !== undefined) {
+    block.setFieldValue(style['ScaleUnits'], 'scaleUnits');
+}
+if (style['ScaleLength'] !== undefined) {
+    block.setFieldValue(style['ScaleLength'], 'scaleLength');
+}
+if (style['ScaleDirection'] !== undefined) {
+    block.setFieldValue(style['ScaleDirection'], 'scaleDirection');
+}
+block.render();
+}
+
+
+function updateMarkerPropertiesBlock(block, style) {
+// e.g. style might contain:
+// {
+//   "MarkerSymbol": "circle",
+//   "MarkerSize": 8,
+//   "MarkerColor": "#FFFF00",
+//   "MarkerAlpha": 0.5  // if you want transparency
+// }
+if (style['MarkerSymbol'] !== undefined) {
+    block.setFieldValue(style['MarkerSymbol'], 'markerSymbol');
+}
+if (style['MarkerSize'] !== undefined) {
+    block.setFieldValue(String(style['MarkerSize']), 'markerSize');
+}
+if (style['MarkerColor'] !== undefined) {
+    block.setFieldValue(style['MarkerColor'], 'markerColor');
+}
+// If you handle marker alpha:
+// block.setFieldValue(String(style['MarkerAlpha']), 'transparency');
+block.render();
+}
+
+
+function updateLinePropertiesBlock(block, style) {
+// e.g. style might contain:
+// {
+//   "LineWidth": 2,
+//   "LineColor": "#00FF00"
+// }
+if (style['LineWidth'] !== undefined) {
+    block.setFieldValue(String(style['LineWidth']), 'lineWidth');
+}
+if (style['LineColor'] !== undefined) {
+    block.setFieldValue(style['LineColor'], 'lineColor');
+}
+block.render();
+}
+
+
+function updateColorFieldBlock(block, style) {
+// e.g. style might contain:
+// {
+//   "ColorFieldType": "typeA",
+//   "ColorFieldOption": "option1"
+// }
+if (style['ColorFieldType'] !== undefined) {
+    block.setFieldValue(style['ColorFieldType'], 'fieldType');
+}
+if (style['ColorFieldOption'] !== undefined) {
+    block.setFieldValue(style['ColorFieldOption'], 'field');
+}
+block.render();
+}
+
+
+function updateColormapBlock(block, style) {
+// e.g. style might contain:
+// {
+//   "ColormapName": "viridis",
+//   "Reverse": true,
+//   "Direction": "vertical"
+// }
+if (style['ColormapName'] !== undefined) {
+    block.setFieldValue(style['ColormapName'], 'colormap');
+}
+if (style['Reverse'] !== undefined) {
+    // FieldCheckbox expects "TRUE" or "FALSE"
+    const checkboxVal = style['Reverse'] ? 'TRUE' : 'FALSE';
+    block.setFieldValue(checkboxVal, 'reverse');
+}
+if (style['Direction'] !== undefined) {
+    block.setFieldValue(style['Direction'], 'direction');
+}
+block.render();
+}
+
+
+function updateShowMassBlock(block, style) {
+// e.g. style might contain:
+// {
+//   "ShowMass": true
+// }
+if (style['ShowMass'] !== undefined) {
+    const checkboxVal = style['ShowMass'] ? 'TRUE' : 'FALSE';
+    block.setFieldValue(checkboxVal, 'showMass');
+}
+block.render();
+}
+
+function updateColorByClusterBlock(block, style) {
+// e.g. style might contain:
+// {
+//   "ClusterType": "cluster1"
+// }
+if (style['ClusterType'] !== undefined) {
+    block.setFieldValue(style['ClusterType'], 'clusterType');
+}
+block.render();
+}
+
+
+
 
 // Function to update fields based on plot type in style blocks
 function updateFieldsBasedOnPlotType(plotType, block) {
@@ -658,23 +1163,23 @@ function updateMarksAndLinesBlock(block, style) {
     block.render();
 }
 
-function updateColoringBlock(block, style) {
-    // Update Colormap, Scale, and CLim
-    block.setFieldValue(style['Colormap'], 'colormap');
-    block.setFieldValue(style['CScale'], 'cScale');
+// function updateColoringBlock(block, style) {
+//     // Update Colormap, Scale, and CLim
+//     block.setFieldValue(style['Colormap'], 'colormap');
+//     block.setFieldValue(style['CScale'], 'cScale');
     
-    block.setFieldValue(style['CLim'][0], 'cLimMin');
-    block.setFieldValue(style['CLim'][1], 'cLimMax');
+//     block.setFieldValue(style['CLim'][0], 'cLimMin');
+//     block.setFieldValue(style['CLim'][1], 'cLimMax');
     
-    // Update the Cbar label and direction
-    block.setFieldValue(style['CLabel'], 'cBarLabel');
-    block.setFieldValue(style['CbarDir'], 'cBarDirection');
+//     // Update the Cbar label and direction
+//     block.setFieldValue(style['CLabel'], 'cBarLabel');
+//     block.setFieldValue(style['CbarDir'], 'cBarDirection');
 
-    block.setFieldValue(style['Resolution'], 'resolution');
+//     block.setFieldValue(style['Resolution'], 'resolution');
 
-    block.setFieldValue(style['CbarReverse'], 'reverse');
+//     block.setFieldValue(style['CbarReverse'], 'reverse');
     
-    // Render the updated block
-    block.render();
-}
+//     // Render the updated block
+//     block.render();
+// }
 

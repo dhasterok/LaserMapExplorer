@@ -3,7 +3,7 @@ import * as BlockDynamicConnection from '@blockly/block-dynamic-connection';
 import {registerFieldColour, FieldColour} from '@blockly/field-colour';
 registerFieldColour();
 import { sample_ids,fieldTypeList, baseDir } from './globals';
-import {dynamicStyleUpdate} from './helper_functions'
+import {updateFieldDropdown,addDefaultStylingBlocks,updateStylingChain, updateHistogramOptions} from './helper_functions'
 var enableSampleIDsBlock = false; // Initially false
 window.Blockly = Blockly.Blocks
 
@@ -519,6 +519,83 @@ const field_select = {
 // Register the block with Blockly
 Blockly.common.defineBlocks({ field_select: field_select });
 
+// Define the select_analytes block
+const select_custom_lists = {
+    init: function() {
+        this.appendDummyInput('NAME')
+            .setAlign(Blockly.inputs.Align.CENTRE)
+            .appendField('Select saved custom list');
+
+        // Initialize the analyte selector dropdown
+        this.appendDummyInput('SELECTOR')
+            .appendField(new Blockly.FieldLabelSerializable('Custom field list from'), 'NAME')
+            .appendField(new Blockly.FieldDropdown(
+                [['Field selector', 'Field selector'],
+                 ['Current selection', 'Current selection'],
+                 ['Saved lists', 'Saved lists']]
+            ), 'fieldSelectorDropdown');
+
+        // Add the analyte saved lists dropdown, initially hidden
+        this.appendDummyInput('SAVED_LISTS')
+            .appendField('Saved list')
+            .appendField(new Blockly.FieldDropdown([['None', 'None']]), 'fieldSavedListsDropdown')
+            .setVisible(false);
+
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setTooltip('');
+        this.setHelpUrl('');
+        this.setColour(225);
+
+        // Handle the selection change in analyteSelectorDropdown
+        const dropdown = this.getField('fieldSavedListsDropdown');
+        dropdown.setValidator(this.fieldSelectorChanged.bind(this));
+    },
+
+    fieldSelectorChanged: function(newValue) {
+        const savedListsInput = this.getInput('SAVED_LISTS');
+        if (newValue === 'Saved lists') {
+            savedListsInput.setVisible(true);
+            // Get current selection if any
+            const savedListDropdown = this.getField('fieldSavedListsDropdown');
+            const currentSelection = savedListDropdown ? savedListDropdown.getValue() : null;
+            // Update the saved lists dropdown options
+            this.updateSavedListsDropdown(currentSelection);
+        } else {
+            savedListsInput.setVisible(false);
+        }
+        // Refresh the block to reflect the visibility change
+        this.render();
+        return newValue;
+    },
+
+    // Updated updateSavedListsDropdown function
+    updateSavedListsDropdown: function(selectedValue) {
+        // Call the Python function getSavedAnalyteLists through the WebChannel
+        window.blocklyBridge.getSavedFieldLists().then((response) => {
+            // Map the response to the required format for Blockly dropdowns
+            const options = response.map(option => [option, option]);
+            const dropdown = this.getField('analyteSavedListsDropdown');
+            if (dropdown) {
+                // Update the dropdown options
+                dropdown.menuGenerator_ = options;
+
+                // Preserve the selected value if it exists in the new options
+                if (selectedValue && options.some(opt => opt[1] === selectedValue)) {
+                    dropdown.setValue(selectedValue);
+                } else if (options.length > 0) {
+                    dropdown.setValue(options[0][1]);  // Set the first option as the default
+                }
+
+                dropdown.forceRerender();  // Refresh dropdown to display updated options
+            }
+        }).catch(error => {
+            console.error('Error fetching saved analyte lists:', error);
+        });
+    }
+};
+
+Blockly.common.defineBlocks({ select_custom_lists: select_custom_lists });
 
 
 const properties = {
@@ -816,117 +893,575 @@ Blockly.common.defineBlocks({ scatter_and_heatmaps: scatter_and_heatmaps });
 // };
 // Blockly.common.defineBlocks({ plot_map: plot_map });
 
-
-Blockly.Blocks['plot_map'] = {
+const plot_map = {
     init: function () {
         this.appendDummyInput('header')
             .appendField('Plot Map')
             .setAlign(Blockly.inputs.Align.CENTRE);
-    
-        // Field type dropdown
+
+        
+        // Create the 'Field type' dropdown with options
         this.appendDummyInput('NAME')
             .appendField('Field type')
-            .appendField(
-            new Blockly.FieldDropdown([
-                ['Analyte', 'Analyte'],
-                ['Analyte (Normalised)', 'Analyte (Normalised)'],
-                ['PCA Score', 'PCA Score'],
-                ['Cluster', 'Cluster'],
-            ]),
-            'fieldType'
-            );
-    
-        // Field dropdown
+            .appendField(new Blockly.FieldDropdown(
+                [
+                    ['Analyte', 'Analyte'],
+                    ['Analyte (Normalised)', 'Analyte (Normalised)'],
+                    ['PCA Score', 'PCA Score'],
+                    ['Cluster', 'Cluster']
+                ],
+                updateFieldDropdown.bind(this, null)  // Bind the update function
+            ), 'fieldType');
+        
+        //Create the 'field' dropdown, initially empty
         this.appendDummyInput('FIELD')
             .appendField('Field')
             .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'field');
-    
         // Add dynamic statement input for styling
-        const stylingInput = this.appendStatementInput('Styling')
-            .setCheck('Styling')
+        const stylingInput = this.appendStatementInput('styling')
+            .setCheck('styling')
             .appendField('Styling');
         
-        // Decorate the connection with the dynamic plugin
-        BlockDynamicConnection.decorateConnection(stylingInput.connection, {
-            category: 'Styling',
-            types: ['Styling'], // Only allow connections with blocks of type 'Styling'
-        });
-    
-        // Save input
-        this.appendValueInput('save').appendField('Save');
-    
+        // Add dynamic statement input for styling
+        this.appendStatementInput('Polygons')
+            .setCheck('Polygons')
+            .appendField('Polygons');
+
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
         this.setTooltip('Configure and render a plot with specified type and settings.');
         this.setHelpUrl('');
         this.setColour(285);
 
-        // Initialize the 'field' dropdown options based on the default 'fieldType' value
-        const initialFieldType = this.getFieldValue('fieldType');
-        this.updateFieldDropdown(initialFieldType);
-    },
-    updateFieldDropdown: function(newValue) {
-        const fieldTypeValue = newValue || this.getFieldValue('fieldType');
 
-        // Call the Python function getFieldList through the WebChannel, handle as a promise
-        window.blocklyBridge.getFieldList(fieldTypeValue).then((response) => {
-            // Map the response to the required format for Blockly dropdowns
-            const options = response.map(option => [option, option]);
+        // Add default blocks to Styling input only in the toolbox
+        if (this.isInFlyout) {
+            
+        }
+        else{
+            const initialFieldType = this.getFieldValue('fieldType');
+            const defaultBlocks = ['x_axis', 'y_axis', 'font', 'colormap'];
+            updateFieldDropdown(this,initialFieldType);
+            addDefaultStylingBlocks(this,this.workspace, defaultBlocks);
+            // update style dictionaries
+            updateStylingChain(this, 'analyte map');
+        }
+    }
+};
+Blockly.common.defineBlocks({ plot_map: plot_map });
 
-            // Add 'none' and 'all' options at the beginning
-            options.unshift(['all', 'all']);
-            options.unshift(['none', 'none']);
+const correlation_analysis = {
+    init: function() {
+        this.appendDummyInput('VARIABLE1')
+            .appendField('Correlation');
+        this.appendDummyInput()
+            .appendField('Method')
+            .appendField(new Blockly.FieldDropdown([
+                ['Pearson', 'pearson'],
+                ['Spearman', 'spearman'],
+                ['Kendall', 'kendall']
+            ]), 'METHOD');
+        this.appendDummyInput()
+            .appendField('R^2')
+            .appendField(new Blockly.FieldCheckbox('TRUE'), 'rSquared');
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(210);
+        this.setTooltip('Performs correlation analysis between two variables.');
+        this.setHelpUrl('');
+    }
+};
+Blockly.Blocks['correlation_analysis'] = correlation_analysis;
 
-            const dropdown = this.getField('field');
 
-            // Update the dropdown options
-            dropdown.menuGenerator_ = options;
+const plot_histogram = {
+    init: function () {
+        this.appendDummyInput('header')
+            .appendField('Plot Histogram')
+            .setAlign(Blockly.inputs.Align.CENTRE);
 
-            // Set the default value to 'Select...' or to the first option if options are available
-            if (options.length > 0) {
-                dropdown.setValue(options[0][1]);
-            } else {
-                dropdown.setValue('');
+        // Type dropdown
+        this.appendDummyInput('TYPE')
+            .appendField('Type')
+            .appendField(new Blockly.FieldDropdown([
+                ['PDF', 'PDF'],
+                ['CDF', 'CDF'],
+                ['log-scaling', 'log-scaling'],
+            ]), 'HistType');
+
+        // Field type dropdown
+        this.appendDummyInput('FIELD_TYPE')
+            .appendField('Field type')
+            .appendField(new Blockly.FieldDropdown([
+                ['Analyte', 'Analyte'],
+                ['Analyte (Normalised)', 'Analyte (Normalised)'],
+                ['PCA Score', 'PCA Score'],
+                ['Cluster', 'Cluster']
+            ], updateFieldDropdown.bind(this,null)), 'fieldType');
+
+        // Field dropdown
+        this.appendDummyInput('FIELD')
+            .appendField('Field')
+            .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'field');
+
+        // Add statement input for histogram options
+        this.appendStatementInput('histogramOptions')
+            .setCheck('histogramOptions')
+            .appendField('Histogram options');
+
+        // Add dynamic statement input for styling
+        const stylingInput = this.appendStatementInput('styling')
+            .setCheck('styling')
+            .appendField('Styling');
+
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setTooltip('Configure and render a histogram plot with specified settings.');
+        this.setHelpUrl('');
+        this.setColour(210);
+
+        // Add default blocks for styling only if not in flyout
+        if (!this.isInFlyout) {
+            const initialFieldType = this.getFieldValue('fieldType');
+            const defaultBlocks = [
+                'aspect_ratio',
+                'tick_direction',
+                'x_axis',
+                'y_axis',
+                'line_properties',
+                'transparency',
+                'font'
+            ];
+            updateFieldDropdown(this,initialFieldType);
+            addDefaultStylingBlocks(this,this.workspace, defaultBlocks);
+            // update style dictionaries
+            updateStylingChain(this, 'analyte map');
+            // update style dictionaries
+            updateHistogramOptions(this);
+        }
+        this.setOnChange(function(event) {
+            // 1) If we have no workspace or we're in the flyout, do nothing.
+            if (!this.workspace || this.isInFlyout) {
+              return;
             }
+            // 2) We only care about block create/move/delete events,
+            //    because that indicates a sub-block is added or removed.
+            if (
+              event.type === Blockly.Events.BLOCK_CREATE ||
+              event.type === Blockly.Events.BLOCK_MOVE ||
+              event.type === Blockly.Events.BLOCK_DELETE
+            ) {
 
-            dropdown.forceRerender();  // Refresh dropdown to display updated options
-        }).catch(error => {
-            console.error('Error fetching field list:', error);
+              updateHistogramOptions(this);
+            }
         });
     }
-  };
-Blockly.common.defineBlocks({ plot_map: plot_map });
+};
+Blockly.common.defineBlocks({ plot_histogram: plot_histogram });
+
+
+
 
 
 ////// styles ////////////
+Blockly.Blocks['modify_styles'] = {
+    init: function () {
+        this.appendDummyInput('axisHeader')
+        .setAlign(Blockly.inputs.Align.CENTRE)
+        .appendField('Modify style');
+        this.appendStatementInput('STACK')
+            .setCheck('styling_item');
+        this.setColour(230);
+        this.setTooltip('Container for styling items.');
+        this.contextMenu = false; // Hide from regular workspace context menu
+    }
+};
+
 Blockly.Blocks['x_axis'] = {
     init: function () {
-      this.appendDummyInput()
-        .appendField('X Axis')
-        .appendField(new Blockly.FieldTextInput('Enter value'), 'value');
-      this.setPreviousStatement(true, 'Styling');
-      this.setNextStatement(true, 'Styling');
-      this.setColour(200);
-      this.setTooltip('Set X Axis styling');
-      this.setHelpUrl('');
+        this.appendDummyInput('axisHeader')
+        .setAlign(Blockly.inputs.Align.CENTRE)
+        .appendField('X Axis');
+        this.appendDummyInput('xLabelHeader')
+        .appendField('X Label')
+        .appendField(new Blockly.FieldTextInput(''), 'xLabel');
+        this.appendDummyInput('xLimitsHeader')
+        .appendField('X Limits')
+        .appendField(new Blockly.FieldTextInput(''), 'xLimMin')
+        .appendField(new Blockly.FieldTextInput(''), 'xLimMax');
+        this.appendDummyInput('xScaleHeader')
+        .appendField('X Scale')
+        .appendField(new Blockly.FieldDropdown([
+            ['Linear', 'linear'],
+            ['Log', 'log'],
+            ['Logit', 'logit'],
+            ]), 'xScaleDropdown');
+        this.setPreviousStatement(true, 'styling');
+        this.setNextStatement(true, 'styling');
+        this.setColour(200);
+        this.setTooltip('Set X axis properties');
+        this.setHelpUrl('');
     },
-  };
-  
-  Blockly.Blocks['y_axis'] = {
-    init: function () {
-      this.appendDummyInput()
-        .appendField('Y Axis')
-        .appendField(new Blockly.FieldTextInput('Enter value'), 'value');
-      this.setPreviousStatement(true, 'Styling');
-      this.setNextStatement(true, 'Styling');
-      this.setColour(200);
-      this.setTooltip('Set Y Axis styling');
-      this.setHelpUrl('');
-    },
-  };
+};
 
-  
-  
+Blockly.Blocks['y_axis'] = {
+    init: function () {
+        this.appendDummyInput('axisHeader')
+        .setAlign(Blockly.inputs.Align.CENTRE)
+        .appendField('Y Axis');
+        this.appendDummyInput('yLabelHeader')
+        .appendField('Y Label')
+        .appendField(new Blockly.FieldTextInput(''), 'yLabel');
+        this.appendDummyInput('yLimitsHeader')
+        .appendField('Y Limits')
+        .appendField(new Blockly.FieldTextInput(''), 'yLimMin')
+        .appendField(new Blockly.FieldTextInput(''), 'yLimMax');
+        this.appendDummyInput('yScaleHeader')
+        .appendField('Y Scale')
+        .appendField(new Blockly.FieldDropdown([
+            ['Linear', 'linear'],
+            ['Log', 'log'],
+            ['Logit', 'logit'],
+            ]), 'yScaleDropdown');
+        this.setPreviousStatement(true, 'styling');
+        this.setNextStatement(true, 'styling');
+        this.setColour(200);
+        this.setTooltip('Set Y axis properties');
+        this.setHelpUrl('');
+    },
+};
+
+Blockly.Blocks['z_axis'] = {
+    init: function () {
+        this.appendDummyInput('axisHeader')
+        .setAlign(Blockly.inputs.Align.CENTRE)
+        .appendField('Z Axis');
+        this.appendDummyInput('zLabelHeader')
+        .appendField('Z Label')
+        .appendField(new Blockly.FieldTextInput(''), 'zLabel');
+        this.appendDummyInput('zLimitsHeader')
+        .appendField('Z Limits')
+        .appendField(new Blockly.FieldTextInput(''), 'zLimMin')
+        .appendField(new Blockly.FieldTextInput(''), 'zLimMax');
+        this.appendDummyInput('zScaleHeader')
+        .appendField('Z Scale')
+        .appendField(new Blockly.FieldDropdown([
+            ['Linear', 'linear'],
+            ['Log', 'log'],
+            ['Logit', 'logit'],
+            ]), 'zScaleDropdown');
+        this.setPreviousStatement(true, 'styling');
+        this.setNextStatement(true, 'styling');
+        this.setColour(200);
+        this.setTooltip('Set Z axis properties');
+        this.setHelpUrl('');
+    },
+};
+
+Blockly.Blocks['c_axis'] = {
+    init: function () {
+        this.appendDummyInput('axisHeader')
+        .setAlign(Blockly.inputs.Align.CENTRE)
+        .appendField('C Axis');
+        this.appendDummyInput('cLabelHeader')
+        .appendField('C Label')
+        .appendField(new Blockly.FieldTextInput(''), 'cLabel');
+        this.appendDummyInput('cLimitsHeader')
+        .appendField('C Limits')
+        .appendField(new Blockly.FieldTextInput(''), 'cLimMin')
+        .appendField(new Blockly.FieldTextInput(''), 'cLimMax');
+        this.appendDummyInput('cScaleHeader')
+        .appendField('c Scale')
+        .appendField(new Blockly.FieldDropdown([
+            ['Linear', 'linear'],
+            ['Log', 'log'],
+            ['Logit', 'logit'],
+            ]), 'cScaleDropdown');
+        this.setPreviousStatement(true, 'styling');
+        this.setNextStatement(true, 'styling');
+        this.setColour(200);
+        this.setTooltip('Set C axis properties');
+        this.setHelpUrl('');
+    },
+};
+
+Blockly.Blocks['font'] = {
+    init: function () {
+        this.appendDummyInput('font')
+        .appendField('Font')
+        .appendField(new Blockly.FieldDropdown([
+            ['none', 'none'],
+            ]), 'font');
+        this.appendDummyInput('fontSize')
+        .appendField('Font size')
+        .appendField(new Blockly.FieldNumber(11, 4, 100), 'fontSize');
+        this.setPreviousStatement(true, 'styling');
+        this.setNextStatement(true, 'styling');
+        this.setColour(200);
+        this.setTooltip('Set axis label/annotation font');
+        this.setHelpUrl('');
+    },
+};
+
+
+Blockly.Blocks['tick_direction'] = {
+    init: function () {
+        this.appendDummyInput('tickDirectionHeader')
+        .appendField('Tick direction')
+        .appendField(new Blockly.FieldDropdown([
+            ['out', 'out'],
+            ['in', 'in'],
+            ['inout', 'inout'],
+            ['none', 'none']
+            ]), 'tickDirectionDropdown');
+        this.setPreviousStatement(true, 'styling');
+        this.setNextStatement(true, 'styling');
+        this.setColour(200);
+        this.setTooltip('Set tick direction');
+        this.setHelpUrl('');
+    },
+};
+
+Blockly.Blocks['aspect_ratio'] = {
+    init: function () {
+        this.appendDummyInput('aspectRatioHeader')
+        .appendField('Aspect ratio')
+        .appendField(new Blockly.FieldTextInput(''), 'aspectRatio');
+        this.setPreviousStatement(true, 'styling');
+        this.setNextStatement(true, 'styling');
+        this.setColour(200);
+        this.setTooltip('Set aspect ratio');
+        this.setHelpUrl('');
+    },
+};
+
+
+Blockly.Blocks['add_scale'] = {
+    init: function () {
+        this.appendDummyInput('scaleHeader')
+        .setAlign(Blockly.inputs.Align.CENTRE)
+        .appendField('Add Scale');
+        this.appendDummyInput('colorSelect')
+        .appendField('Color')
+        .appendField(new FieldColour('#ff0000'), 'scaleColor');
+        this.appendDummyInput('unitsHeader')
+        .appendField('Units')
+        .appendField(new Blockly.FieldTextInput(''), 'scaleUnits');
+        this.appendDummyInput('lengthHeader')
+        .appendField('Length')
+        .appendField(new Blockly.FieldTextInput(''), 'scaleLength');
+        this.appendDummyInput('directionHeader')
+        .appendField('Direction')
+        .appendField(new Blockly.FieldDropdown([
+            ['Horizontal', 'horizontal'],
+            ['Vertical', 'vertical']
+            ]), 'scaleDirection');
+        this.setPreviousStatement(true, 'styling');
+        this.setNextStatement(true, 'styling');
+        this.setColour(220);
+        this.setTooltip('Add a scale to the plot.');
+        this.setHelpUrl('');
+    },
+};
+
+Blockly.Blocks['marker_properties'] = {
+    init: function () {
+        this.appendDummyInput('markerHeader')
+        .setAlign(Blockly.inputs.Align.CENTRE)
+        .appendField('Marker Properties');
+        this.appendDummyInput('symbolHeader')
+        .appendField('Symbol')
+        .appendField(new Blockly.FieldDropdown([
+            ['Circle', 'circle'],
+            ['Square', 'square'],
+            ['Diamond', 'diamond'],
+            ['Triangle (Up)', 'triangleUp'],
+            ['Triangle (Down)', 'triangleDown']
+            ]), 'markerSymbol');
+        this.appendDummyInput('sizeHeader')
+        .appendField('Size')
+        .appendField(new Blockly.FieldNumber(6, 1, 50), 'markerSize');
+        this.appendDummyInput('colorSelect')
+        .appendField('Color')
+        .appendField(new FieldColour('#ff0000'), 'markerColor');
+        this.setPreviousStatement(true, 'styling');
+        this.setNextStatement(true, 'styling');
+        this.setColour(230);
+        this.setTooltip('Set marker properties for the plot.');
+        this.setHelpUrl('');
+    },
+};
+
+Blockly.Blocks['transparency'] = {
+    init: function () {
+        this.appendDummyInput('transparency')
+        .appendField('Transparency')
+        .appendField(new Blockly.FieldNumber(100, 0, 100), 'transparency');
+        this.setPreviousStatement(true, 'styling');
+        this.setNextStatement(true, 'styling');
+        this.setColour(255);
+        this.setTooltip('Adjust transparency of plot');
+        this.setHelpUrl('');
+    },
+};
+
+
+Blockly.Blocks['line_properties'] = {
+    init: function () {
+        this.appendDummyInput('lineHeader')
+        .setAlign(Blockly.inputs.Align.CENTRE)
+        .appendField('Line Properties');
+        this.appendDummyInput('lineWidthHeader')
+        .appendField('Width')
+        .appendField(new Blockly.FieldNumber(1, 0.1, 10, 0.1), 'lineWidth');
+        this.appendDummyInput('lineColorHeader')
+        .appendField('Color')
+        .appendField(new FieldColour('#000000'), 'lineColor');
+        this.setPreviousStatement(true, 'styling');
+        this.setNextStatement(true, 'styling');
+        this.setColour(230);
+        this.setTooltip('Set line properties for the plot.');
+        this.setHelpUrl('');
+    },
+};
+
+Blockly.Blocks['color_select'] = {
+    init: function () {
+        this.appendDummyInput('colorHeader')
+        .appendField('Color Select')
+        .appendField(new FieldColour('#ff0000'), 'colorPicker');
+        this.setOutput(true, null);
+        this.setColour(240);
+        this.setTooltip('Select a color.');
+        this.setHelpUrl('');
+    },
+};
+
+Blockly.Blocks['color_field'] = {
+    init: function () {
+        this.appendDummyInput('colorFieldHeader')
+        .setAlign(Blockly.inputs.Align.CENTRE)
+        .appendField('Color Field');
+        this.appendDummyInput('fieldTypeHeader')
+        .appendField('Field Type')
+        .appendField(new Blockly.FieldDropdown([
+            ['Type A', 'typeA'],
+            ['Type B', 'typeB']
+            ]), 'fieldType');
+        this.appendDummyInput('fieldHeader')
+        .appendField('Field')
+        .appendField(new Blockly.FieldDropdown([
+            ['Option 1', 'option1'],
+            ['Option 2', 'option2']
+            ]), 'field');
+        this.setPreviousStatement(true, 'styling');
+        this.setNextStatement(true, 'styling');
+        this.setColour(245);
+        this.setTooltip('Select a field for coloring.');
+        this.setHelpUrl('');
+    },
+};
+
+Blockly.Blocks['colormap'] = {
+    init: function () {
+        this.appendDummyInput('colormapHeader')
+        .setAlign(Blockly.inputs.Align.CENTRE)
+        .appendField('Colormap');
+        this.appendDummyInput('mapHeader')
+        .appendField('Colormap')
+        .appendField(new Blockly.FieldDropdown([
+            ['Jet', 'jet'],
+            ['Viridis', 'viridis'],
+            ['Plasma', 'plasma']
+            ]), 'colormap');
+        this.appendDummyInput('reverseHeader')
+        .appendField('Reverse')
+        .appendField(new Blockly.FieldCheckbox('FALSE'), 'reverse');
+        this.appendDummyInput('directionHeader')
+        .appendField('Direction')
+        .appendField(new Blockly.FieldDropdown([
+            ['Horizontal', 'horizontal'],
+            ['Vertical', 'vertical']
+            ]), 'direction');
+        this.setPreviousStatement(true, 'styling');
+        this.setNextStatement(true, 'styling');
+        this.setColour(250);
+        this.setTooltip('Set colormap properties.');
+        this.setHelpUrl('');
+    },
+};
+
+Blockly.Blocks['show_mass'] = {
+    init: function () {
+        this.appendDummyInput('massHeader')
+        .appendField('Show Mass')
+        .appendField(new Blockly.FieldCheckbox('FALSE'), 'showMass');
+        this.setPreviousStatement(true, 'styling');
+        this.setNextStatement(true, 'styling');
+        this.setColour(255);
+        this.setTooltip('Toggle visibility of mass in the plot.');
+        this.setHelpUrl('');
+    },
+};
+
+Blockly.Blocks['color_by_cluster'] = {
+    init: function () {
+        this.appendDummyInput('clusterHeader')
+        .appendField('Color by Cluster');
+        this.appendDummyInput('clusterOptions')
+        .appendField(new Blockly.FieldDropdown([
+            ['Cluster 1', 'cluster1'],
+            ['Cluster 2', 'cluster2']
+            ]), 'clusterType');
+        this.setPreviousStatement(true, 'styling');
+        this.setNextStatement(true, 'styling');
+        this.setColour(255);
+        this.setTooltip('Color plot based on cluster classification.');
+        this.setHelpUrl('');
+    },
+};
+
+
+
+
+
+///// histogram options ////////
+
+Blockly.Blocks['bin_width'] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField('Bin Width')
+      .appendField(
+        new Blockly.FieldNumber(1, 0, Infinity, 1),
+        "binWidth"
+      );
+    this.setPreviousStatement(true, 'histogramOptions');
+    this.setNextStatement(true, 'histogramOptions');
+    this.setTooltip('Specify the bin width for the histogram.');
+    this.setHelpUrl('');
+    this.setColour(180);
+  }
+};
+
+Blockly.Blocks['num_bins'] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField('Num. bins')
+      .appendField(
+        new Blockly.FieldNumber(0, 1, 500, 1),
+        "nBins"
+      );
+    this.setPreviousStatement(true, 'histogramOptions');
+    this.setNextStatement(true, 'histogramOptions');
+    this.setTooltip('Specify the number of bins for the histogram.');
+    this.setHelpUrl('');
+    this.setColour(180);
+  }
+};
+
+
+
+
 
 const styles = {
     init: function() {
@@ -1128,65 +1663,65 @@ const marks_and_lines = {
 };
 Blockly.common.defineBlocks({marks_and_lines: marks_and_lines});
             
-const coloring = {
-    init: function() {
-        this.appendDummyInput('Coloring')
-        .setAlign(Blockly.inputs.Align.CENTRE)
-        .appendField('Coloring');
-        this.appendDummyInput('colorByField')
-        .appendField('Color by Field')
-        .appendField(new Blockly.FieldDropdown([
-            ['option', 'OPTIONNAME'],
-            ['option', 'OPTIONNAME'],
-            ['option', 'OPTIONNAME']
-            ]), 'colorByField');
-        this.appendDummyInput('field')
-        .appendField('Field')
-        .appendField(new Blockly.FieldDropdown([
-            ['option', 'OPTIONNAME'],
-            ['option', 'OPTIONNAME'],
-            ['option', 'OPTIONNAME']
-            ]), 'field');
-        this.appendDummyInput('resolution')
-        .appendField('Resolution')
-        .appendField(new Blockly.FieldNumber(10, 0), 'resolution');
-        this.appendDummyInput('colormap')
-        .appendField('Colormap')
-        .appendField(new Blockly.FieldDropdown([
-            ['option', 'OPTIONNAME'],
-            ['option', 'OPTIONNAME'],
-            ['option', 'OPTIONNAME']
-            ]), 'colormap');
-        this.appendDummyInput('reverse')
-        .appendField('Reverse')
-        .appendField(new Blockly.FieldCheckbox('FALSE'), 'reverse');
-        this.appendDummyInput('scale')
-        .appendField('Scale')
-        .appendField(new Blockly.FieldDropdown([
-            ['linear', 'linear'],
-            ['log', 'log'],
-            ]), 'cScale');
-        this.appendDummyInput('cLim')
-        .appendField('Clim')
-        .appendField(new Blockly.FieldTextInput(''), 'cLimMin')
-        .appendField(new Blockly.FieldTextInput(''), 'cLimMax');
-        this.appendDummyInput('cBarLabel')
-        .appendField('Cbar label')
-        .appendField(new Blockly.FieldTextInput(''), 'cBarLabel');
-        this.appendDummyInput('cBarDirection')
-        .appendField('Cbar direction')
-        .appendField(new Blockly.FieldDropdown([
-            ['none', 'none'],
-            ['Horizontal', 'horizontal'],
-            ['Vertical', 'vertical']
-            ]), 'cBarDirection');
-        this.setOutput(true, null);
-        this.setTooltip('');
-        this.setHelpUrl('');
-        this.setColour(225);
-    }
-};
-Blockly.common.defineBlocks({coloring: coloring});
+// const coloring = {
+//     init: function() {
+//         this.appendDummyInput('Coloring')
+//         .setAlign(Blockly.inputs.Align.CENTRE)
+//         .appendField('Coloring');
+//         this.appendDummyInput('colorByField')
+//         .appendField('Color by Field')
+//         .appendField(new Blockly.FieldDropdown([
+//             ['option', 'OPTIONNAME'],
+//             ['option', 'OPTIONNAME'],
+//             ['option', 'OPTIONNAME']
+//             ]), 'colorByField');
+//         this.appendDummyInput('field')
+//         .appendField('Field')
+//         .appendField(new Blockly.FieldDropdown([
+//             ['option', 'OPTIONNAME'],
+//             ['option', 'OPTIONNAME'],
+//             ['option', 'OPTIONNAME']
+//             ]), 'field');
+//         this.appendDummyInput('resolution')
+//         .appendField('Resolution')
+//         .appendField(new Blockly.FieldNumber(10, 0), 'resolution');
+//         this.appendDummyInput('colormap')
+//         .appendField('Colormap')
+//         .appendField(new Blockly.FieldDropdown([
+//             ['option', 'OPTIONNAME'],
+//             ['option', 'OPTIONNAME'],
+//             ['option', 'OPTIONNAME']
+//             ]), 'colormap');
+//         this.appendDummyInput('reverse')
+//         .appendField('Reverse')
+//         .appendField(new Blockly.FieldCheckbox('FALSE'), 'reverse');
+//         this.appendDummyInput('scale')
+//         .appendField('Scale')
+//         .appendField(new Blockly.FieldDropdown([
+//             ['linear', 'linear'],
+//             ['log', 'log'],
+//             ]), 'cScale');
+//         this.appendDummyInput('cLim')
+//         .appendField('Clim')
+//         .appendField(new Blockly.FieldTextInput(''), 'cLimMin')
+//         .appendField(new Blockly.FieldTextInput(''), 'cLimMax');
+//         this.appendDummyInput('cBarLabel')
+//         .appendField('Cbar label')
+//         .appendField(new Blockly.FieldTextInput(''), 'cBarLabel');
+//         this.appendDummyInput('cBarDirection')
+//         .appendField('Cbar direction')
+//         .appendField(new Blockly.FieldDropdown([
+//             ['none', 'none'],
+//             ['Horizontal', 'horizontal'],
+//             ['Vertical', 'vertical']
+//             ]), 'cBarDirection');
+//         this.setOutput(true, null);
+//         this.setTooltip('');
+//         this.setHelpUrl('');
+//         this.setColour(225);
+//     }
+// };
+// Blockly.common.defineBlocks({coloring: coloring});
 
 
 /* alternatives */
@@ -1386,25 +1921,7 @@ const data_filtering = {
 };
 Blockly.Blocks['data_filtering'] = data_filtering;
 
-const correlation_analysis = {
-    init: function() {
-        this.appendDummyInput('VARIABLE1')
-            .appendField('Correlation');
-        this.appendDummyInput()
-            .appendField('Method')
-            .appendField(new Blockly.FieldDropdown([
-                ['Pearson', 'pearson'],
-                ['Spearman', 'spearman'],
-                ['Kendall', 'kendall']
-            ]), 'METHOD');
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(210);
-        this.setTooltip('Performs correlation analysis between two variables.');
-        this.setHelpUrl('');
-    }
-};
-Blockly.Blocks['correlation_analysis'] = correlation_analysis;
+
 
 const clustering = {
     init: function() {

@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>290</x>
-     <y>100</y>
+     <y>60</y>
      <width>151</width>
      <height>32</height>
     </rect>
@@ -75,26 +75,13 @@
    <property name="geometry">
     <rect>
      <x>290</x>
-     <y>60</y>
+     <y>100</y>
      <width>151</width>
      <height>32</height>
     </rect>
    </property>
    <property name="toolTip">
     <string>Select profile field</string>
-   </property>
-  </widget>
-  <widget class="QListView" name="listViewProfile">
-   <property name="geometry">
-    <rect>
-     <x>30</x>
-     <y>40</y>
-     <width>221</width>
-     <height>321</height>
-    </rect>
-   </property>
-   <property name="toolTip">
-    <string>List of fields on current subplot</string>
    </property>
   </widget>
   <widget class="QToolButton" name="toolButtonRemoveField">
@@ -141,7 +128,7 @@
     </size>
    </property>
   </widget>
-  <widget class="QToolButton" name="toolButtonProfileAddField">
+  <widget class="QToolButton" name="toolButtonAddField">
    <property name="geometry">
     <rect>
      <x>450</x>
@@ -265,6 +252,16 @@
    </property>
    <property name="popupMode">
     <enum>QToolButton::InstantPopup</enum>
+   </property>
+  </widget>
+  <widget class="QListWidget" name="listWidgetFieldList">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>20</y>
+     <width>256</width>
+     <height>341</height>
+    </rect>
    </property>
   </widget>
  </widget>

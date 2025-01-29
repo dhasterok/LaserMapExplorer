@@ -1,8 +1,10 @@
+import sys, os, re, copy, random, darkdetect
 import numpy as np
 import pandas as pd
 pd.options.mode.copy_on_write = True
 import matplotlib
 matplotlib.use('Qt5Agg')
+from PyQt5.QtWidgets import QWidget, QDialog
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 #from matplotlib.figure import Figure
 #from matplotlib.projections.polar import PolarAxes
@@ -32,8 +34,10 @@ from src.ui.MainWindow import Ui_MainWindow
 #from src.ui.PreferencesWindow import Ui_PreferencesWindow
 from src.app.FieldSelectionWindow import FieldDialog
 from src.app.AnalyteSelectionWindow import AnalyteDialog
+
 from src.common.TableFunctions import TableFcn as TableFcn
 import src.common.CustomMplCanvas as mplc
+from src.app.PlotViewerWindow import PlotViewer
 from src.app.Actions import Actions
 from src.common.DataHandling import SampleObj
 from src.app.PlotTree import PlotTree
@@ -56,6 +60,8 @@ from src.app.help_mapping import create_help_mapping
 from src.common.Logger import LoggerDock
 import os
 
+
+
 class Main():
     def __init__(self, *args, **kwargs):
 
@@ -73,7 +79,7 @@ class Main():
         self.laser_map_dict = {}
         self.persistent_filters = pd.DataFrame()
         self.persistent_filters = pd.DataFrame(columns=['use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'persistent'])
-
+        self.plot_type = 'analyte map'
         # Plot Selector
         #-------------------------
         self.sort_method = 'mass'
@@ -82,8 +88,15 @@ class Main():
 
          # preferences
         self.default_preferences = {'Units':{'Concentration': 'ppm', 'Distance': 'µm', 'Temperature':'°C', 'Pressure':'MPa', 'Date':'Ma', 'FontSize':11, 'TickDir':'out'}}
+        self.preferences = copy.deepcopy(self.default_preferences)
 
         self.io = LameIO(self, ui_update= False)
+
+        self.plot_style = Styling(self, ui= False)
+        
+        # Initialise plotviewer form
+        self.plot_viewer = PlotViewer(self)
+        self.update_bins = False
 
         # # Noise reduction
         # self.noise_reduction = ip(self)
@@ -103,11 +116,11 @@ class Main():
         # # Clustering
         # #-------------------------
         # # cluster dictionary
-        # self.cluster_dict = {
-        #     'active method' : 'k-means',
-        #     'k-means':{'n_clusters':5, 'seed':23, 'selected_clusters':[]},
-        #     'fuzzy c-means':{'n_clusters':5, 'exponent':2.1, 'distance':'euclidean', 'seed':23, 'selected_clusters':[]}
-        # }
+        self.cluster_dict = {
+            'active method' : 'k-means',
+            'k-means':{'n_clusters':5, 'seed':23, 'selected_clusters':[]},
+            'fuzzy c-means':{'n_clusters':5, 'exponent':2.1, 'distance':'euclidean', 'seed':23, 'selected_clusters':[]}
+        }
 
         # distance_metrics = ['euclidean', 'manhattan', 'mahalanobis', 'cosine']
         
@@ -236,6 +249,553 @@ class Main():
             self.data[self.sample_id].processed_data.set_attribute(analyte,'norm',norm)
 
 
+    
+
+
+    # -------------------------------------
+    # laser map functions and plotting
+    # -------------------------------------
+    def plot_map_mpl(self, sample_id, field_type, field):
+        """Create a matplotlib canvas for plotting a map
+
+        Create a map using ``mplc.MplCanvas``.
+
+        Parameters
+        ----------
+        sample_id : str
+            Sample identifier
+        field_type : str
+            Type of field for plotting
+        field : str
+            Field for plotting
+        """        
+        # create plot canvas
+        canvas = mplc.MplCanvas(parent=self, ui= self.plot_viewer)
+
+        # set color limits
+        if field not in self.data[self.sample_id].axis_dict:
+            self.plot_style.initialize_axis_values(field_type,field)
+            self.plot_style.set_style_dictionary()
+
+        # get data for current map
+        #scale = self.data[self.sample_id].processed_data.get_attribute(field, 'norm')
+        scale = self.plot_style.cscale
+        map_df = self.data[self.sample_id].get_map_data(field, field_type)
+
+        array_size = self.data[self.sample_id].array_size
+        aspect_ratio = self.data[self.sample_id].aspect_ratio
+
+        # store map_df to save_data if data needs to be exported
+        self.save_data = map_df.copy()
+
+        # # equalized color bins to CDF function
+        # if self.toolButtonScaleEqualize.isChecked():
+        #     sorted_data = map_df['array'].sort_values()
+        #     cum_sum = sorted_data.cumsum()
+        #     cdf = cum_sum / cum_sum.iloc[-1]
+        #     map_df.loc[sorted_data.index, 'array'] = cdf.values
+
+        # plot map
+        reshaped_array = np.reshape(map_df['array'].values, array_size, order=self.data[self.sample_id].order)
+            
+        norm = self.plot_style.color_norm()
+
+        cax = canvas.axes.imshow(reshaped_array, cmap=self.plot_style.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
+
+        self.add_colorbar(canvas, cax)
+        match self.plot_style.cscale:
+            case 'linear':
+                clim = self.plot_style.clim
+            case 'log':
+                clim = self.plot_style.clim
+                #clim = np.log10(self.plot_style.clim)
+            case 'logit':
+                print('Color limits for logit are not currently implemented')
+
+        cax.set_clim(clim[0], clim[1])
+
+        # use mask to create an alpha layer
+        mask = self.data[self.sample_id].mask.astype(float)
+        reshaped_mask = np.reshape(mask, array_size, order=self.data[self.sample_id].order)
+
+        alphas = colors.Normalize(0, 1, clip=False)(reshaped_mask)
+        alphas = np.clip(alphas, .4, 1)
+
+        alpha_mask = np.where(reshaped_mask == 0, 0.5, 0)  
+        canvas.axes.imshow(np.ones_like(alpha_mask), aspect=aspect_ratio, interpolation='none', cmap='Greys', alpha=alpha_mask)
+        canvas.array = reshaped_array
+
+        canvas.axes.tick_params(direction=None,
+            labelbottom=False, labeltop=False, labelright=False, labelleft=False,
+            bottom=False, top=False, left=False, right=False)
+
+        canvas.set_initial_extent()
+
+        # axes
+        xmin, xmax, xscale, xlbl = self.plot_style.get_axis_values(None,field= 'X')
+        ymin, ymax, yscale, ylbl = self.plot_style.get_axis_values(None,field= 'Y')
+
+
+        # axes limits
+        canvas.axes.set_xlim(xmin,xmax)
+        canvas.axes.set_ylim(ymin,ymax)
+        
+        # add scalebar
+        self.add_scalebar(canvas.axes)
+
+        canvas.fig.tight_layout()
+
+        self.plot_info = {
+            'tree': field_type,
+            'sample_id': sample_id,
+            'plot_name': field,
+            'plot_type': 'analyte map',
+            'field_type': field_type,
+            'field': field,
+            'figure': canvas,
+            'style': self.plot_style.style_dict[self.plot_style.plot_type],
+            'cluster_groups': None,
+            'view': [True,False],
+            'position': None
+            }
+        
+        self.plot_viewer.add_plotwidget_to_plot_viewer(self.plot_info)
+
+
+    # -------------------------------------
+    # Histogram functions and plotting
+    # -------------------------------------
+    def histogram_get_range(self, field_type, field):
+        """Updates the bin width
+
+        Generally called when the number of bins is changed by the user.  Updates the plot.
+        """
+        if not self.update_bins:
+            return
+
+        if (field_type == '') or (field == ''):
+            return
+
+        # get currently selected data
+        current_plot_df = self.data[self.sample_id].get_map_data(field, field_type)
+
+        # update bin width
+        range = (np.nanmax(current_plot_df['array']) - np.nanmin(current_plot_df['array']))
+
+        return  range
+
+
+
+    def histogram_update_n_bins(self,field,field_type):
+        """Updates the number of bins
+
+        Generally called when the bin width is changed by the user.  Updates the plot.
+        """
+        if not self.update_bins:
+            return
+        #print('update_n_bins')
+        self.update_bins = False
+
+        # get currently selected data
+        map_df = self.data[self.sample_id].get_map_data(field, field_type)
+
+        # update n bins
+        self.spinBoxBinWidth.setValue( int((np.nanmax(map_df['array']) - np.nanmin(map_df['array'])) / self.spinBoxBinWidth.value()) )
+        self.update_bins = True
+
+        # update histogram
+        if self.plot_type == 'histogram':
+            # trigger update to plot
+            self.plot_style.scheduler.schedule_update()
+
+    def plot_histogram(self, hist_type, analysis, field, n_bins):
+        """Plots a histogramn in the canvas window"""
+        field_type= analysis
+        plot_data = None
+        #print('plot histogram')
+        # create Mpl canvas
+        canvas = mplc.MplCanvas(parent=self)
+
+        #if analysis == 'Ratio':
+        #    analyte_1 = field.split(' / ')[0]
+        #    analyte_2 = field.split(' / ')[1]
+
+        if hist_type == 'log-scaling' and field_type == 'Analyte':
+            print('raw_data for log-scaling')
+            x = self.get_scatter_data('histogram', processed=False)['x']
+        else:
+            print('processed_data for histogram')
+            x = self.get_scatter_data('histogram', processed=True)['x']
+
+        # determine edges
+        xmin,xmax,xscale,xlbl = self.plot_style.get_axis_values(x['type'],x['field'])
+        self.plot_style.xlim = [xmin, xmax]
+        self.plot_style.xscale = xscale
+        #if xscale == 'log':
+        #    x['array'] = np.log10(x['array'])
+        #    xmin = np.log10(xmin)
+        #    xmax = np.log10(xmax)
+
+        #bin_width = (xmax - xmin) / n_bins
+        #print(n_bins)
+        #print(bin_width)
+        
+        if (xscale == 'linear') or (xscale == 'scientific'):
+            edges = np.linspace(xmin, xmax, n_bins)
+        else:
+            edges = np.linspace(10**xmin, 10**xmax, n_bins)
+
+        #print(edges)
+
+        # histogram style
+        lw = self.plot_style.line_width
+        if lw > 0:
+            htype = 'step'
+        else:
+            htype = 'bar'
+
+        # CDF or PDF
+        match hist_type:
+            case 'CDF':
+                cumflag = True
+            case _:
+                cumflag = False
+
+        # Check if the algorithm is in the current group and if results are available
+        if field_type == 'cluster' and field != '':
+            method = self.cluster_dict['active method']
+
+            # Get the cluster labels for the data
+            cluster_color, cluster_label, _ = self.plot_style.get_cluster_colormap(self.cluster_dict[method],alpha=self.plot_style.marker_alpha)
+            cluster_group = self.data[self.sample_id].processed_data.loc[:,method]
+            clusters = self.cluster_dict[method]['selected_clusters']
+
+            # Plot histogram for all clusters
+            for i in clusters:
+                cluster_data = x['array'][cluster_group == i]
+
+                bar_color = cluster_color[int(i)]
+                if htype == 'step':
+                    ecolor = bar_color
+                else:
+                    ecolor = None
+
+                if hist_type != 'log-scaling' :
+                    plot_data = canvas.axes.hist( cluster_data,
+                            cumulative=cumflag,
+                            histtype=htype,
+                            bins=edges,
+                            color=bar_color, edgecolor=ecolor,
+                            linewidth=lw,
+                            label=cluster_label[int(i)],
+                            alpha=self.plot_style.marker_alpha/100,
+                            density=True
+                        )
+                else:
+                    # Filter out NaN and zero values
+                    filtered_data = cluster_data[~np.isnan(cluster_data) & (cluster_data > 0)]
+
+                    # Sort the data in ascending order
+                    sorted_data = np.sort(filtered_data)
+
+                    # Calculate log(number of values > x)
+                    log_values = np.log10(sorted_data)
+                    log_counts = np.log10(len(sorted_data) - np.arange(len(sorted_data)))
+
+                    # Plot the data
+                    canvas.axes.plot(log_values, log_counts, label=cluster_label[int(i)], color=bar_color, lw=lw)
+
+            # Add a legend
+            self.add_colorbar(canvas, None, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color, alpha=self.plot_style.marker_alpha/100)
+            #canvas.axes.legend()
+        else:
+            clusters = None
+            # Regular histogram
+            bar_color = self.plot_style.marker_color
+            if htype == 'step':
+                ecolor = self.plot_style.line_color
+            else:
+                ecolor = None
+
+            if hist_type != 'log-scaling' :
+                plot_data = canvas.axes.hist( x['array'],
+                        cumulative=cumflag,
+                        histtype=htype,
+                        bins=edges,
+                        color=bar_color, edgecolor=ecolor,
+                        linewidth=lw,
+                        alpha=self.plot_style.marker_alpha/100,
+                        density=True
+                    )
+            else:
+                # Filter out NaN and zero values
+                filtered_data = x['array'][~np.isnan(x['array']) & (x['array'] > 0)]
+
+                # Sort the data in ascending order
+                sorted_data = np.sort(filtered_data)
+
+                # Calculate log(number of values > x)
+                #log_values = np.log10(sorted_data)
+                counts = len(sorted_data) - np.arange(len(sorted_data))
+
+                # Plot the data
+                #canvas.axes.plot(log_values, log_counts, label=cluster_label[int(i)], color=bar_color, lw=lw)
+                canvas.axes.plot(sorted_data, counts, color=bar_color, lw=lw, alpha=self.plot_style.marker_alpha/100)
+
+        # axes
+        # label font
+        if 'font' == '':
+            font = {'size':self.plot_style.font}
+        else:
+            font = {'font':self.plot_style.font, 'size':self.plot_style.font_size}
+
+        # set y-limits as p-axis min and max in self.data[self.sample_id].axis_dict
+        if hist_type != 'log-scaling' :
+            pflag = False
+            if 'pstatus' not in self.data[self.sample_id].axis_dict[x['field']]:
+                pflag = True
+            elif self.data[self.sample_id].axis_dict[x['field']]['pstatus'] == 'auto':
+                pflag = True
+
+            if pflag:
+                ymin, ymax = canvas.axes.get_ylim()
+                d = {'pstatus':'auto', 'pmin':fmt.oround(ymin,order=2,toward=0), 'pmax':fmt.oround(ymax,order=2,toward=1)}
+                self.data[self.sample_id].axis_dict[x['field']].update(d)
+                self.plot_style.set_axis_widgets('y', x['field'])
+
+            # grab probablility axes limits
+            _, _, _, _, ymin, ymax = self.plot_style.get_axis_values(x['type'],x['field'],ax='p')
+
+            # x-axis
+            canvas.axes.set_xlabel(xlbl, fontdict=font)
+            if xscale == 'log':
+            #    self.logax(canvas.axes, [xmin,xmax], axis='x', label=xlbl)
+                canvas.axes.set_xscale(xscale,base=10)
+            # if self.plot_style.xscale == 'linear':
+            # else:
+            #     canvas.axes.set_xlim(xmin,xmax)
+            canvas.axes.set_xlim(xmin,xmax)
+
+            if xscale == 'scientific':
+                canvas.axes.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
+
+            # y-axis
+            canvas.axes.set_ylabel(hist_type, fontdict=font)
+            canvas.axes.set_ylim(ymin,ymax)
+        else:
+            canvas.axes.set_xscale('log',base=10)
+            canvas.axes.set_yscale('log',base=10)
+
+            canvas.axes.set_xlabel(r"$\log_{10}($" + f"{field}" + r"$)$", fontdict=font)
+            canvas.axes.set_ylabel(r"$\log_{10}(N > \log_{10}$" + f"{field}" + r"$)$", fontdict=font)
+
+        canvas.axes.tick_params(labelsize=self.plot_style.font_size,direction=self.plot_style.tick_dir)
+        canvas.axes.set_box_aspect(self.plot_style.aspect_ratio)
+
+        self.plot_style.update_figure_font(canvas, self.plot_style.font)
+
+        canvas.fig.tight_layout()
+
+        self.plot_info = {
+            'tree': 'Histogram',
+            'sample_id': self.sample_id,
+            'plot_name': analysis+'_'+field,
+            'field_type': analysis,
+            'field': field,
+            'plot_type': 'histogram',
+            'type': hist_type,
+            'n_bins': n_bins,
+            'figure': canvas,
+            'style': self.plot_style.style_dict[self.plot_style.plot_type],
+            'cluster_groups': clusters,
+            'view': [True,False],
+            'position': [],
+            'data': plot_data
+        }
+
+        self.plot_viewer.add_plotwidget_to_plot_viewer(self.plot_info)
+
+
+        # -------------------------------------
+    # Scatter/Heatmap functions
+    # -------------------------------------
+    def get_scatter_data(self, plot_type,field_type=None, field= None, processed=True, field_type_x= None, field_type_y=None, field_type_z=None, field_x=None, field_y= None, field_z= None, color_by_field =None):
+
+        scatter_dict = {'x': {'type': None, 'field': None, 'label': None, 'array': None},
+                'y': {'type': None, 'field': None, 'label': None, 'array': None},
+                'z': {'type': None, 'field': None, 'label': None, 'array': None},
+                'c': {'type': None, 'field': None, 'label': None, 'array': None}}
+
+        match plot_type:
+            case 'histogram':
+                if processed or field_type != 'Analyte':
+                    scatter_dict['x'] = self.data[self.sample_id].get_vector(field_type, field, norm=self.plot_style.xscale)
+                else:
+                    scatter_dict['x'] = self.data[self.sample_id].get_vector(field_type, field, norm=self.plot_style.xscale, processed=False)
+            case 'PCA scatter' | 'PCA heatmap':
+                scatter_dict['x'] = self.data[self.sample_id].get_vector('PCA score', f'PC{self.spinBoxPCX.value()}', norm=self.plot_style.xscale)
+                scatter_dict['y'] = self.data[self.sample_id].get_vector('PCA score', f'PC{self.spinBoxPCY.value()}', norm=self.plot_style.yscale)
+                if (field_type is None) or (self.comboBoxColorByField.currentText != ''):
+                    scatter_dict['c'] = self.data[self.sample_id].get_vector(field_type, field)
+            case _:
+                scatter_dict['x'] = self.data[self.sample_id].get_vector(field_type_x, field_x, norm=self.plot_style.xscale)
+                scatter_dict['y'] = self.data[self.sample_id].get_vector(field_type_y, field_y, norm=self.plot_style.yscale)
+                if (field_type is not None) and (field_type != ''):
+                    scatter_dict['z'] = self.data[self.sample_id].get_vector(field_type_z, field_z, norm=self.plot_style.zscale)
+                elif (field_z is not None) and (field_z != ''):
+                    scatter_dict['c'] = self.data[self.sample_id].get_vector(field_type, field, norm=self.plot_style.cscale)
+
+        # set axes widgets
+        if (scatter_dict['x']['field'] is not None) and (scatter_dict['y']['field'] != ''):
+            if scatter_dict['x']['field'] not in self.data[self.sample_id].axis_dict.keys():
+                self.plot_style.initialize_axis_values(scatter_dict['x']['type'], scatter_dict['x']['field'])
+                self.plot_style.set_axis_widgets('x', scatter_dict['x']['field'])
+
+        if (scatter_dict['y']['field'] is not None) and (scatter_dict['y']['field'] != ''):
+            if scatter_dict['y']['field'] not in self.data[self.sample_id].axis_dict.keys():
+                self.plot_style.initialize_axis_values(scatter_dict['y']['type'], scatter_dict['y']['field'])
+                self.plot_style.set_axis_widgets('y', scatter_dict['y']['field'])
+
+        if (scatter_dict['z']['field'] is not None) and (scatter_dict['z']['field'] != ''):
+            if scatter_dict['z']['field'] not in self.data[self.sample_id].axis_dict.keys():
+                self.plot_style.initialize_axis_values(scatter_dict['z']['type'], scatter_dict['z']['field'])
+                self.plot_style.set_axis_widgets('z', scatter_dict['z']['field'])
+
+        if (scatter_dict['c']['field'] is not None) and (scatter_dict['c']['field'] != ''):
+            if scatter_dict['c']['field'] not in self.data[self.sample_id].axis_dict.keys():
+                self.plot_style.set_color_axis_widgets()
+                self.plot_style.set_axis_widgets('c', scatter_dict['c']['field'])
+
+        return scatter_dict
+
+    
+    # -------------------------------------
+    # General plot functions
+    # -------------------------------------    
+    
+
+    def add_scalebar(self, ax):
+        """Add a scalebar to a map
+
+        Parameters
+        ----------
+        ax : 
+            Axes to place scalebar on.
+        """        
+        # add scalebar
+        direction = self.plot_style.scale_dir
+        length = self.plot_style.scale_length
+        if (length is not None) and (direction != 'none'):
+            if direction == 'horizontal':
+                dd = self.data[self.sample_id].dx
+            else:
+                dd = self.data[self.sample_id].dy
+            sb = scalebar( width=length,
+                    pixel_width=dd,
+                    units=self.preferences['Units']['Distance'],
+                    location=self.plot_style.scale_location,
+                    orientation=direction,
+                    color=self.plot_style.overlay_color,
+                    ax=ax )
+
+            sb.create()
+        else:
+            return
+
+        
+    def add_colorbar(self, canvas, cax, cbartype='continuous', grouplabels=None, groupcolors=None):
+        """Adds a colorbar to a MPL figure
+
+        Parameters
+        ----------
+        canvas : mplc.MplCanvas
+            canvas object
+        cax : axes
+            color axes object
+        cbartype : str
+            Type of colorbar, ``dicrete`` or ``continuous``, Defaults to continuous
+        grouplabels : list of str, optional
+            category/group labels for tick marks
+        """
+        #print("add_colorbar")
+        # Add a colorbar
+        cbar = None
+        if self.plot_style.cbar_dir == 'none':
+            return
+
+        # discrete colormap - plot as a legend
+        if cbartype == 'discrete':
+
+            if grouplabels is None or groupcolors is None:
+                return
+
+            # create patches for legend items
+            p = [None]*len(grouplabels)
+            for i, label in enumerate(grouplabels):
+                p[i] = Patch(facecolor=groupcolors[i], edgecolor='#111111', linewidth=0.5, label=label)
+
+            if self.plot_style.cbar_dir == 'vertical':
+                canvas.axes.legend(
+                        handles=p,
+                        handlelength=1,
+                        loc='upper left',
+                        bbox_to_anchor=(1.025,1),
+                        fontsize=self.plot_style.font_size,
+                        frameon=False,
+                        ncol=1
+                    )
+            elif self.plot_style.cbar_dir == 'horizontal':
+                canvas.axes.legend(
+                        handles=p,
+                        handlelength=1,
+                        loc='upper center',
+                        bbox_to_anchor=(0.5,-0.1),
+                        fontsize=self.plot_style.font_size,
+                        frameon=False,
+                        ncol=3
+                    )
+        # continuous colormap - plot with colorbar
+        else:
+            if self.plot_style.cbar_dir == 'vertical':
+                if self.plot_type == 'correlation':
+                    loc = 'left'
+                else:
+                    loc = 'right'
+                cbar = canvas.fig.colorbar( cax,
+                        ax=canvas.axes,
+                        orientation=self.plot_style.cbar_dir,
+                        location=loc,
+                        shrink=0.62,
+                        fraction=0.1,
+                        alpha=1
+                    )
+            elif self.plot_style.cbar_dir == 'horizontal':
+                cbar = canvas.fig.colorbar( cax,
+                        ax=canvas.axes,
+                        orientation=self.plot_style.cbar_dir,
+                        location='bottom',
+                        shrink=0.62,
+                        fraction=0.1,
+                        alpha=1
+                    )
+            else:
+                # should never reach this point
+                assert self.plot_style.cbar_dir == 'none', "Colorbar direction is set to none, but is trying to generate anyway."
+                return
+
+            cbar.set_label(self.plot_style.clabel, size=self.plot_style.font_size)
+            cbar.ax.tick_params(labelsize=self.plot_style.font_size)
+            cbar.set_alpha(1)
+
+        # adjust tick marks if labels are given
+        if cbartype == 'continuous' or grouplabels is None:
+            ticks = None
+        # elif cbartype == 'discrete':
+        #     ticks = np.arange(0, len(grouplabels))
+        #     cbar.set_ticks(ticks=ticks, labels=grouplabels, minor=False)
+        #else:
+        #    print('(add_colorbar) Unknown type: '+cbartype)
+
     # -------------------------------
     # Blockly functions
     # -------------------------------
@@ -343,3 +903,30 @@ class Main():
                 set_fields = data.match_attribute('data_type', set_name.lower())
 
         return set_fields
+
+
+    def update_axis_limits(self,style_dict, field =None):
+        # Check if user changed XLim, YLim, ZLim, or CLim
+        if "XLim" in style_dict:
+            lowerVal = style_dict["XLim"][0]
+            upperVal = style_dict["XLim"][1]
+            self.plot_style.axis_limit_edit_callback("x", 0, float(lowerVal), field = 'X', ui_update=False)
+            self.plot_style.axis_limit_edit_callback("x", 1, float(upperVal), field = 'X', ui_update=False)
+
+        if "YLim" in style_dict:
+            lowerVal = style_dict["YLim"][0]
+            upperVal = style_dict["YLim"][1]
+            self.plot_style.axis_limit_edit_callback("y", 0, float(lowerVal), field = 'Y', ui_update=False)
+            self.plot_style.axis_limit_edit_callback("y", 1, float(upperVal), field = 'Y', ui_update=False)
+
+        if "ZLim" in style_dict:
+            lowerVal = style_dict["ZLim"][0]
+            upperVal = style_dict["ZLim"][1]
+            self.plot_style.axis_limit_edit_callback("z", 0, float(lowerVal), ui_update=False)
+            self.plot_style.axis_limit_edit_callback("z", 1, float(upperVal), ui_update=False)
+
+        if "CLim" in style_dict:
+            lowerVal = style_dict["CLim"][0]
+            upperVal = style_dict["CLim"][1]
+            self.plot_style.axis_limit_edit_callback("c", 0, float(lowerVal), field, ui_update=False)
+            self.plot_style.axis_limit_edit_callback("c", 1, float(upperVal), field, ui_update=False)

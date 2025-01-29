@@ -13,13 +13,28 @@ import './helper_functions';  // Import helper functions
 Blockly.setLocale(En);  // Set the locale to English
 
 // Inject the Blockly workspace and configure it with the dynamic connection plugin
-var workspace = Blockly.inject('blocklyDiv', {
-    toolbox: document.getElementById('toolbox'), // Your toolbox configuration
-    plugins: {
-        connectionPreviewer: BlockDynamicConnection.decoratePreviewer(
-            Blockly.InsertionMarkerPreviewer // Default previewer enhanced with dynamic connections
-        ),
+const workspace = Blockly.inject('blocklyDiv', {
+    toolbox: document.getElementById('toolbox'),
+    grid: {
+        spacing: 20,
+        length: 3,
+        colour: '#ccc',
+        snap: true,
     },
+    zoom: {
+        controls: true,
+        wheel: false,
+        startScale: 1,
+        maxScale: 3,
+        minScale: 0.3,
+        scaleSpeed: 1.2,
+    },
+    trashcan: true,
+    collapse: true,
+    comments: true,  // Allow comments
+    disable: false,
+    sounds: true,
+    rtl: false,
 });
 
 // Add a change listener to finalize connections dynamically when blocks are removed or rearranged

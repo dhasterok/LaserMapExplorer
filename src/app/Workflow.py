@@ -36,10 +36,9 @@ class BlocklyBridge(QObject):
     def invokeSetStyleWidgets(self, plot_type):
         # Call the set_style_widgets function
         plot_type = plot_type.replace('_',' ')
-        if plot_type in self.parent.main.style.style_dict.keys():
-            ### need to add parent.parent to access main code from this class 
-            self.parent.main.style.set_style_widgets(plot_type)
-            style = self.parent.main.style.style_dict[plot_type]
+        if plot_type in self.parent.main.plot_style.style_dict.keys():
+            self.parent.main.plot_style.set_style_dictionary(plot_type)
+            style = self.parent.main.plot_style.style_dict[plot_type]
             print('invokeSetStyleWidgets')
             # Convert NumPy types to native Python types (if any)
             style_serializable = self.convert_numpy_types(style)
@@ -48,6 +47,10 @@ class BlocklyBridge(QObject):
             style_serializable = {}
         # Return the style dictionary as a JSON string
         return json.dumps(style_serializable)
+    
+    @pyqtSlot(str,str, result=str)
+    def getHistogramRange(self, fieldType, field):
+        return self.parent.main.histogram_get_range(fieldType, field)
     
     @pyqtSlot(str, result=list)
     def getFieldList(self, field_type):
@@ -269,6 +272,25 @@ class Workflow(CustomDockWidget):
         list
             List of saved analyte list names.
         """
-        directory = os.path.join(self.parent.BASEDIR, 'resources/analytes list')
+        directory = os.path.join(self.parent.BASEDIR, 'resources/analytes_list')
         analyte_list_names = [str(f).replace('.txt', '') for f in os.listdir(directory) if f.endswith('.txt')]
         return analyte_list_names
+    
+    def get_saved_field_lists(self):
+        """
+        Retrieves the names of saved analyte lists from the resources/analytes list directory.
+
+        Returns
+        -------
+        list
+            List of saved analyte list names.
+        """
+        directory = os.path.join(self.parent.BASEDIR, 'resources/field_list')
+        field_list_names = [str(f).replace('.txt', '') for f in os.listdir(directory) if f.endswith('.txt')]
+        return field_list_names
+
+    def refresh_analyte_saved_lists_dropdown(self):
+            """
+            Calls the JavaScript function to refresh the analyteSavedListsDropdown in Blockly.
+            """
+            self.web_view.page().runJavaScript("refreshCustomFieldListsDropdown();")

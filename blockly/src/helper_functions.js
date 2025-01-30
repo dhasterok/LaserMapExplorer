@@ -179,174 +179,69 @@ function getConnectedBlocks(plotBlock, blockName) {
 }
 
 
+/**
+ * Helper function: check if the block with given blockId is in
+ * the chain of blocks connected under a statement input.
+ * @param {Blockly.Block} chainRoot - The topmost block attached to the statement input.
+ * @param {string} blockId - The ID of the block to look for.
+ */
+export function isBlockInChain(chainRoot, blockId) {
+    let currentBlock = chainRoot;
+    while (currentBlock) {
+      if (currentBlock.id === blockId) {
+        return true;
+      }
+      currentBlock = currentBlock.getNextBlock();
+    }
+    return false;
+  }
+
 export function updateHistogramOptions(plotBlock) {
-    // 1) Grab all blocks in the "histogramOptions" chain
-    const histogramBlocks = getConnectedBlocks(plotBlock, 'histogramOptions');
-  
-    // 2) Retrieve user’s field & fieldType from the main block
+    // 1) Get the first block connected to "histogramOptions".
+    const histogramOptions = getConnectedBlocks(plotBlock, 'histogramOptions');
     const field = plotBlock.getFieldValue('field');
     const fieldType = plotBlock.getFieldValue('fieldType');
-  
-    // 3) Fetch the histogram range from your backend
-    window.blocklyBridge.getHistogramRange(fieldType, field, (range) => {
-      if (range === undefined || range === null) {
-        console.error('Histogram range not available for', fieldType, field);
-        return;
-      }
-  
-      // 4) Identify bin_width and num_bins blocks if present
-      let binWidthBlock = histogramBlocks.find(b => b.type === 'bin_width');
-      let nBinsBlock    = histogramBlocks.find(b => b.type === 'num_bins');
-  
-      // 5) Attach validators so changing one updates the other
-      attachHistogramBlockCallbacks(binWidthBlock, nBinsBlock, range);
-    });
-  }
-  
-  function attachHistogramBlockCallbacks(binWidthBlock, nBinsBlock, range) {
-    // To avoid potential infinite “feedback loops” when each validator sets the other,
-    // we can track if we’re in the middle of an update:
-    let isUpdating = false;
-  
-    // 1) If a binWidth block is found, attach a validator
-    if (binWidthBlock) {
-      const binWidthField = binWidthBlock.getField("binWidth");
-      if (binWidthField) {
-        binWidthField.setValidator(function(newValue) {
-          if (isUpdating) return null; // reject changes while we're updating
-          isUpdating = true;
-  
-          // parse float
-          let val = parseFloat(newValue) || 0;
-          // clamp the bin width
-          const minBW = range / 500;
-          const maxBW = range;
-          if (val < minBW) val = minBW;
-          if (val > maxBW) val = maxBW;
-  
-          // recalc nBins if we have nBinsBlock
-          if (nBinsBlock) {
-            const nBinsField = nBinsBlock.getField("nBins");
-            if (nBinsField) {
-              let newNBins = Math.round(range / val);
-              if (newNBins < 1)   newNBins = 1;
-              if (newNBins > 500) newNBins = 500;
-              nBinsField.setValue(newNBins);
+    if (!(field == "" || fieldType == "")){
+        // 2) Fetch histogram range via the bridge.
+        window.blocklyBridge.getHistogramRange(fieldType, field, (range) => {
+            if (range === undefined || range === null) {
+                console.error('Histogram range not available.');
+                return;
             }
-          }
-  
-          isUpdating = false;
-          // Return the final validated binWidth to set in this field
-          return String(val);
-        });
-      }
-    }
-  
-    // 2) If a nBins block is found, attach a validator
-    if (nBinsBlock) {
-      const nBinsField = nBinsBlock.getField("nBins");
-      if (nBinsField) {
-        nBinsField.setValidator(function(newValue) {
-          if (isUpdating) return null; // avoid loop
-          isUpdating = true;
-  
-          let val = parseInt(newValue, 10) || 1;
-          if (val < 1)   val = 1;
-          if (val > 500) val = 500;
-  
-          // recalc binWidth if binWidthBlock
-          if (binWidthBlock) {
-            const binWidthField = binWidthBlock.getField("binWidth");
-            if (binWidthField) {
-              let newBW = range / val;
-              // clamp [range/500..range]
-              const minBW = range / 500;
-              if (newBW < minBW) newBW = minBW;
-              if (newBW > range) newBW = range;
-              binWidthField.setValue(newBW.toFixed(2));
+
+            // 3) Traverse the chain of histogramOptions blocks
+            for (const block of histogramOptions) {
+                // 4) Identify the block by type and update it
+                switch (block.type) {
+                    case 'histogram_options':
+                        updateBinWidthAndNBins(block, range);
+                        break;
+                }
             }
-          }
-  
-          isUpdating = false;
-          return String(val);
         });
-      }
     }
-  }
+}
   
 
-  function updateBinWidthBlock(binWidthBlock, range, histogramOptionsChain) {
-    // 1) Current binWidth from the block
-    let currentWidth = parseFloat(binWidthBlock.getFieldValue('binWidth')) || 1;
-  
-    // 2) Determine valid bounds for bin width:
-    //    - If we want max bins = 500 => min bin width = range/500
-    //    - If we want at least 1 bin => max bin width = range
-    const minWidth = range / 500; 
-    const maxWidth = range;
-  
-    // 3) Clamp currentWidth
-    currentWidth = Math.max(minWidth, Math.min(maxWidth, currentWidth));
-  
-    // 4) Update the bin_width field if we changed it
-    binWidthBlock.setFieldValue(currentWidth.toFixed(2), 'binWidth');
-  
-    // 5) Possibly update the "num_bins" block in the same chain
-    const numBinsBlock = findBlockByType(histogramOptionsChain, 'num_bins');
-    if (numBinsBlock) {
-      // new nBins = range / currentWidth
-      let nBins = range / currentWidth;
-      // clamp to [1..500]
-      nBins = Math.max(1, Math.min(500, nBins));
-      // round to nearest integer
-      nBins = Math.round(nBins);
-  
-      numBinsBlock.setFieldValue(nBins, 'nBins');
+function updateBinWidthAndNBins(block, range) {
+    if (range <= 0) {
+      console.warn("Histogram range is invalid or zero in size:", range);
+      return;
     }
   
-    // 6) Update tooltip on bin_width block
-    binWidthBlock.setTooltip(
-      `Specify the bin width for the histogram. Range: ${minWidth.toFixed(2)} to ${maxWidth.toFixed(2)}`
-    );
+    // Store the range so the block's onChange can see it
+    block.histRange = range;
+  
+    // Suppose we pick the user’s existing nBins, or default to 10 if none
+    let nBinsVal = parseFloat(block.getFieldValue('nBins')) || 10;
+    // Recompute binWidth
+    let binWidthVal = range / nBinsVal;
+  
+    // Set them on the block
+    block.setFieldValue(String(nBinsVal), 'nBins');
+    block.setFieldValue(String(binWidthVal), 'binWidth');
   }
   
-  function updateNumBinsBlock(nBinsBlock, range, histogramOptionsChain) {
-    // 1) Current nBins from the block
-    let currentBins = parseInt(nBinsBlock.getFieldValue('nBins'), 10) || 100;
-  
-    // 2) clamp to [1..500]
-    currentBins = Math.max(1, Math.min(500, currentBins));
-  
-    // 3) Update 'nBins' field if changed
-    nBinsBlock.setFieldValue(currentBins, 'nBins');
-  
-    // 4) Possibly update "bin_width" block in the same chain
-    const binWidthBlock = findBlockByType(histogramOptionsChain, 'bin_width');
-    if (binWidthBlock) {
-      // new binWidth = range / currentBins
-      const newWidth = range / currentBins;
-      // clamp to [range/500..range]
-      const minWidth = range / 500;
-      const maxWidth = range;
-      let clampedWidth = Math.max(minWidth, Math.min(maxWidth, newWidth));
-  
-      binWidthBlock.setFieldValue(clampedWidth.toFixed(2), 'binWidth');
-    }
-  
-    // 5) Update tooltip
-    nBinsBlock.setTooltip('Specify the number of bins (1–500).');
-  }
-  
-  function findBlockByType(blockChain, type) {
-    for (const block of blockChain) {
-      if (block.type === type) {
-        return block;
-      }
-    }
-    return null;
-  }
-  
-
 
 
 
@@ -356,13 +251,12 @@ export function updateHistogramOptions(plotBlock) {
 /**
  * Retrieve and update all blocks connected to the "Styling" input.
  * @param {Blockly.Block} plotMapBlock - The plot_map block instance.
- * @param {String} plotType - The dictionary containing styling values.
  */
 
-export function updateStylingChain(plotBlock, plotType) {
+export function updateStylingChain(plotBlock) {
     // 1) Get the first block connected to "Styling".
     const stylingBlocks = getConnectedBlocks(plotBlock, 'styling');
-    
+    const plotType = plotBlock.plotType
     // If you want to explicitly set the plotType:
     // this.plotType = 'analyte map';
   

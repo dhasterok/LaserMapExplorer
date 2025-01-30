@@ -3,7 +3,7 @@ import * as BlockDynamicConnection from '@blockly/block-dynamic-connection';
 import {registerFieldColour, FieldColour} from '@blockly/field-colour';
 registerFieldColour();
 import { sample_ids,fieldTypeList, baseDir } from './globals';
-import {updateFieldDropdown,addDefaultStylingBlocks,updateStylingChain, updateHistogramOptions} from './helper_functions'
+import {updateFieldDropdown,addDefaultStylingBlocks,updateStylingChain, updateHistogramOptions, isBlockInChain} from './helper_functions'
 var enableSampleIDsBlock = false; // Initially false
 window.Blockly = Blockly.Blocks
 
@@ -933,19 +933,48 @@ const plot_map = {
         this.setHelpUrl('');
         this.setColour(285);
 
-
+        this.plotType = 'analyte_map'
         // Add default blocks to Styling input only in the toolbox
-        if (this.isInFlyout) {
-            
-        }
-        else{
+        if (!this.isInFlyout) {
             const initialFieldType = this.getFieldValue('fieldType');
             const defaultBlocks = ['x_axis', 'y_axis', 'font', 'colormap'];
             updateFieldDropdown(this,initialFieldType);
             addDefaultStylingBlocks(this,this.workspace, defaultBlocks);
             // update style dictionaries
-            updateStylingChain(this, 'analyte map');
+            updateStylingChain(this);
+            // 3) Attach validators to fieldType and field
+            const fieldTypeDropdown = this.getField('fieldType');
+            fieldTypeDropdown.setValidator((newValue) => {
+                // update style dictionaries
+                updateStylingChain(this);
+                return newValue;
+            });
+
+            const fieldDropdown = this.getField('field');
+            fieldDropdown.setValidator((newValue) => {
+                // update style dictionaries
+                updateStylingChain(this);
+                return newValue;
+            });
         }
+        this.setOnChange(function(event) {
+            // 1) If no workspace or block is in the flyout, do nothing
+            if (!this.workspace || this.isInFlyout) return;
+          
+            // 2) Only care about create/move/delete events
+            if (
+              event.type === Blockly.Events.BLOCK_CREATE ||
+              event.type === Blockly.Events.BLOCK_MOVE ||
+              event.type === Blockly.Events.BLOCK_DELETE
+            ) {
+              // 3) Check if the changed block is in the "styling" chain
+              //    For instance, we can do:
+              if (isBlockInChain(this.getInputTargetBlock('styling'), event.blockId)) {
+                // 4) Call updateStylingChain(...)
+                updateStylingChain(this);
+              }
+            }
+        })
     }
 };
 Blockly.common.defineBlocks({ plot_map: plot_map });
@@ -1019,7 +1048,7 @@ const plot_histogram = {
         this.setTooltip('Configure and render a histogram plot with specified settings.');
         this.setHelpUrl('');
         this.setColour(210);
-
+        this.plotType = 'histogram'
         // Add default blocks for styling only if not in flyout
         if (!this.isInFlyout) {
             const initialFieldType = this.getFieldValue('fieldType');
@@ -1035,26 +1064,51 @@ const plot_histogram = {
             updateFieldDropdown(this,initialFieldType);
             addDefaultStylingBlocks(this,this.workspace, defaultBlocks);
             // update style dictionaries
-            updateStylingChain(this, 'analyte map');
+            updateStylingChain(this);
             // update style dictionaries
             updateHistogramOptions(this);
+
+            // 3) Attach validators to fieldType and field
+            const fieldTypeDropdown = this.getField('fieldType');
+            fieldTypeDropdown.setValidator((newValue) => {
+                // update style dictionaries
+                updateStylingChain(this);
+                // update style dictionaries
+                updateHistogramOptions(this);
+                return newValue;
+            });
+
+            const fieldDropdown = this.getField('field');
+            fieldDropdown.setValidator((newValue) => {
+                // update style dictionaries
+                updateStylingChain(this);
+                // update style dictionaries
+                updateHistogramOptions(this);
+                return newValue;
+            });
         }
         this.setOnChange(function(event) {
-            // 1) If we have no workspace or we're in the flyout, do nothing.
-            if (!this.workspace || this.isInFlyout) {
-              return;
-            }
-            // 2) We only care about block create/move/delete events,
-            //    because that indicates a sub-block is added or removed.
+            // 1) If no workspace or block is in the flyout, do nothing
+            if (!this.workspace || this.isInFlyout) return;
+          
+            // 2) Only care about create/move/delete events
             if (
               event.type === Blockly.Events.BLOCK_CREATE ||
               event.type === Blockly.Events.BLOCK_MOVE ||
               event.type === Blockly.Events.BLOCK_DELETE
             ) {
-
-              updateHistogramOptions(this);
+              // 3) Check if the changed block is in the "styling" chain
+              //    For instance, we can do:
+              if (isBlockInChain(this.getInputTargetBlock('styling'), event.blockId)) {
+                // 4) Call updateStylingChain(...)
+                updateStylingChain(this);
+              }
+              if (isBlockInChain(this.getInputTargetBlock('histogramOptions'), event.blockId)) {
+                // 4) Call updateStylingChain(...)
+                updateHistogramOptions(this);
+              }
             }
-        });
+          });
     }
 };
 Blockly.common.defineBlocks({ plot_histogram: plot_histogram });
@@ -1427,40 +1481,82 @@ Blockly.Blocks['color_by_cluster'] = {
 
 ///// histogram options ////////
 
-Blockly.Blocks['bin_width'] = {
-  init: function () {
-    this.appendDummyInput()
-      .appendField('Bin Width')
-      .appendField(
-        new Blockly.FieldNumber(1, 0, Infinity, 1),
-        "binWidth"
-      );
-    this.setPreviousStatement(true, 'histogramOptions');
-    this.setNextStatement(true, 'histogramOptions');
-    this.setTooltip('Specify the bin width for the histogram.');
-    this.setHelpUrl('');
-    this.setColour(180);
-  }
-};
-
-Blockly.Blocks['num_bins'] = {
-  init: function () {
-    this.appendDummyInput()
-      .appendField('Num. bins')
-      .appendField(
-        new Blockly.FieldNumber(0, 1, 500, 1),
-        "nBins"
-      );
-    this.setPreviousStatement(true, 'histogramOptions');
-    this.setNextStatement(true, 'histogramOptions');
-    this.setTooltip('Specify the number of bins for the histogram.');
-    this.setHelpUrl('');
-    this.setColour(180);
-  }
-};
-
-
-
+Blockly.Blocks['histogram_options'] = {
+    init: function () {
+      // 1) Fields
+      this.appendDummyInput()
+        .appendField('Bin Width')
+        .appendField(
+          new Blockly.FieldNumber(1, 0, Infinity, 1),
+          "binWidth"
+        );
+      this.appendDummyInput()
+        .appendField('Num. bins')
+        .appendField(
+          new Blockly.FieldNumber(10, 1, 500, 1),
+          "nBins"
+        );
+  
+      // 2) Statement-chaining
+      this.setPreviousStatement(true, 'histogramOptions');
+      this.setNextStatement(true, 'histogramOptions');
+  
+      this.setTooltip('Specify bin width / num. bins for the histogram.');
+      this.setHelpUrl('');
+      this.setColour(180);
+  
+      // 3) We store a property for the histogram range
+      //    If updateHistogramOptions fetches [min,max], we can store it here
+      //    so that onChange can do the math.
+      this.histRange = 1; // default, will be overwritten
+  
+      // 4) Track old values so we see which field changed
+      this.oldBinWidth = this.getFieldValue('binWidth');
+      this.oldNBins    = this.getFieldValue('nBins');
+  
+      // 5) OnChange
+      this.setOnChange(function(event) {
+        // If not on workspace or is in flyout, ignore
+        if (!this.workspace || this.isInFlyout) return;
+  
+        // We only care about changes to *this* block's fields
+        if (event.type === Blockly.Events.CHANGE && event.blockId === this.id && event.element === 'field') {
+          // Which field was changed?
+          const fieldName = event.name; // e.g. "binWidth" or "nBins"
+          const newValue = this.getFieldValue(fieldName);
+  
+          const totalRange = this.histRange;
+          if (totalRange <= 0) {
+            console.warn("Histogram range is invalid or zero in size:", this.histRange);
+            return;
+          }
+  
+          if (fieldName === 'binWidth') {
+            // user typed a new binWidth => recalc nBins
+            // nBins = totalRange / binWidth
+            const binWidthNum = parseFloat(newValue);
+            if (binWidthNum > 0) {
+              const computedNBins = Math.round(totalRange / binWidthNum);
+              this.setFieldValue(computedNBins, 'nBins');
+            }
+          } else if (fieldName === 'nBins') {
+            // user typed a new nBins => recalc binWidth
+            const nBinsNum = parseFloat(newValue);
+            if (nBinsNum > 0) {
+              const computedBinWidth = totalRange / nBinsNum;
+              // optionally round to some decimal
+              this.setFieldValue(String(computedBinWidth), 'binWidth');
+            }
+          }
+  
+          // Finally, update old values
+          this.oldBinWidth = this.getFieldValue('binWidth');
+          this.oldNBins    = this.getFieldValue('nBins');
+        }
+      });
+    }
+  };
+  
 
 
 const styles = {

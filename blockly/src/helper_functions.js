@@ -33,24 +33,79 @@ function updateSampleDropdown(sampleIds) {
 }
 window.updateSampleDropdown = updateSampleDropdown;
 
-// Global function to refresh the analyteSavedListsDropdown
-function refreshAnalyteSavedListsDropdown() {
-    // Iterate through all blocks to find 'select_analytes' blocks
+// Global function to refresh the analyteSavedListsDropdown or fieldSavedListsDropdown
+function refreshListsDropdown(type) {
+    let blockType, selectorValueName, savedListDropdownName;
+    if (type === "analyte"){
+        blockType = 'select_analytes';
+        selectorValueName = 'analyteSelectorDropdown';
+        savedListDropdownName = 'analyteSavedListsDropdown';
+    }
+    else if (type === "field"){
+        blockType = 'select_fields';
+        selectorValueName = 'fieldSelectorDropdown';
+        savedListDropdownName = 'fieldSavedListsDropdown';
+    }
+
+    // Iterate through all blocks to find the relevant ones
     Blockly.getMainWorkspace().getAllBlocks().forEach(function(block) {
-        if (block.type === 'select_analytes') {
-            // Get the current selection
-            const analyteSelectorValue = block.getFieldValue('analyteSelectorDropdown');
-            if (analyteSelectorValue === 'Saved lists') {
-                const savedListDropdown = block.getField('analyteSavedListsDropdown');
+        if (block.type === blockType) {
+            const selectorValue = block.getFieldValue(selectorValueName);
+            if (selectorValue === 'Saved lists') {
+                const savedListDropdown = block.getField(savedListDropdownName);
                 const currentSelection = savedListDropdown ? savedListDropdown.getValue() : null;
-                // Update the saved lists dropdown while preserving selection
-                block.updateSavedListsDropdown(currentSelection);
+                updateSavedListsDropdown(currentSelection, block, type);
             }
         }
     });
 }
 
-window.refreshAnalyteSavedListsDropdown = refreshAnalyteSavedListsDropdown;
+// Common handler for dropdown changes (Analyzer/Field selector)
+export function listSelectorChanged(newValue, block, type) {
+    // Show or hide the “Saved list” dropdown
+    const savedListsInput = block.getInput('SAVED_LISTS');
+    if (newValue === 'Saved lists') {
+        savedListsInput.setVisible(true);
+        // Get current selection if any
+        const savedListDropdown = block.getField(type + 'SavedListsDropdown');
+        const currentSelection = savedListDropdown ? savedListDropdown.getValue() : null;
+        updateSavedListsDropdown(currentSelection, block, type);
+    } else {
+        savedListsInput.setVisible(false);
+    }
+    // Re-render block to reflect new visibility
+    block.render();
+    return newValue;
+}
+
+// Common function to update the “Saved lists” dropdown
+function updateSavedListsDropdown(selectedValue, block, type) {
+    // Example: pass 'analyte' or 'field' as an argument
+    window.blocklyBridge.getSavedLists(type)
+        .then((response) => {
+            // Format response into the [[label, value], ...] form
+            const options = response.map(option => [option, option]);
+            const dropdownField = block.getField(type + 'SavedListsDropdown');
+            if (dropdownField) {
+                dropdownField.menuGenerator_ = options;
+                // Try to preserve previously selected value
+                if (selectedValue && options.some(opt => opt[1] === selectedValue)) {
+                    dropdownField.setValue(selectedValue);
+                } else if (options.length > 0) {
+                    dropdownField.setValue(options[0][1]);
+                }
+                dropdownField.forceRerender();
+            }
+        })
+        .catch(error => {
+            console.error(`Error fetching saved ${type} lists:`, error);
+        });
+}
+
+// Make sure they’re accessible globally if needed
+window.refreshListsDropdown = refreshListsDropdown;
+window.updateSavedListsDropdown = updateSavedListsDropdown;
+
 
 
 // Global function to refresh the analyteSavedListsDropdown
@@ -307,6 +362,9 @@ export function updateStylingChain(plotBlock) {
             case 'marker_properties':
               updateMarkerPropertiesBlock(block, styleDict);
               break;
+            case 'transparency':
+                updateTransparencyBlock(block, styleDict);
+                break;
             case 'line_properties':
               updateLinePropertiesBlock(block, styleDict);
               break;
@@ -500,6 +558,17 @@ if (style['MarkerColor'] !== undefined) {
 // block.setFieldValue(String(style['MarkerAlpha']), 'transparency');
 block.render();
 }
+
+function updateTransparencyBlock(block, style) {
+    // e.g. style might contain:
+    // {
+    //   "MarkerAlpha": 0.5  // if you want transparency
+    // }
+    if (style['MarkerAlpha'] !== undefined) {
+        block.setFieldValue(String(style['MarkerAlpha']), 'transparency');
+    }
+    block.render();
+    }
 
 
 function updateLinePropertiesBlock(block, style) {

@@ -221,6 +221,27 @@ class Main():
             
         if result == QDialog.Rejected:
             pass
+    
+    def open_field_selector_dialog(self):
+        """Opens Select Analyte dialog
+
+        Opens a dialog to select analytes for analysis either graphically or in a table.  Selection updates the list of analytes, and ratios in plot selector and comboBoxes.
+        
+        .. seealso::
+            :ref:`AnalyteSelectionWindow` for the dialog
+        """
+        if self.sample_id == '':
+            return
+
+        self.field_selection_dialog = FieldDialog(self)
+        self.field_selection_dialog.show()
+
+        result = self.field_selection_dialog.exec_()  # Store the result here
+        if result == QDialog.Accepted:
+            self.selected_fields =  self.field_selection_dialog.selected_fields
+            
+        if result == QDialog.Rejected:
+            pass
 
     def update_analyte_ratio_selection(self,analyte_dict):
         """Updates analytes/ratios in mainwindow and its corresponding scale used for each field
@@ -406,15 +427,14 @@ class Main():
             # trigger update to plot
             self.plot_style.scheduler.schedule_update()
 
-    def plot_histogram(self, hist_type, analysis, field, n_bins):
+    def plot_histogram(self, hist_type, field_type, field, n_bins):
         """Plots a histogramn in the canvas window"""
-        field_type= analysis
         plot_data = None
         #print('plot histogram')
         # create Mpl canvas
         canvas = mplc.MplCanvas(parent=self)
 
-        #if analysis == 'Ratio':
+        #if field_type == 'Ratio':
         #    analyte_1 = field.split(' / ')[0]
         #    analyte_2 = field.split(' / ')[1]
 
@@ -597,8 +617,8 @@ class Main():
         self.plot_info = {
             'tree': 'Histogram',
             'sample_id': self.sample_id,
-            'plot_name': analysis+'_'+field,
-            'field_type': analysis,
+            'plot_name': field_type+'_'+field,
+            'field_type': field_type,
             'field': field,
             'plot_type': 'histogram',
             'type': hist_type,

@@ -29,7 +29,10 @@ class AnalyteDialog(QDialog, Ui_Dialog):
     """    
     listUpdated = pyqtSignal()
     def __init__(self, parent, debug=False):
-        super().__init__(parent)
+        if (parent.__class__.__name__ == 'Main'):
+            super().__init__() #initialisng with no parent widget
+        else:
+            super().__init__(parent) #initialise with mainWindow as parentWidget
         self.setupUi(self)
 
         if parent.sample_id is None or parent.sample_id == '':

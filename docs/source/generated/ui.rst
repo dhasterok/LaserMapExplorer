@@ -33,6 +33,7 @@
    ui.IsotopeSelectionDialog
    ui.MainWindow
    ui.MapImportDialog
+   ui.PlotViewer
    ui.PreferencesWindow
    ui.QuickViewDialog
    ui.SpotImportDialog

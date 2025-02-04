@@ -19,6 +19,7 @@ common.CustomWidgets
    
       CustomActionMenu
       CustomComboBox
+      CustomDockWidget
       CustomLineEdit
       CustomTableWidget
       CustomTreeView
@@ -26,6 +27,7 @@ common.CustomWidgets
       QCheckBox
       QComboBox
       QCursor
+      QDockWidget
       QDoubleValidator
       QFont
       QIcon

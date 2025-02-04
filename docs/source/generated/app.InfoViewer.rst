@@ -1,7 +1,7 @@
-common.Calculator
-=================
+app.InfoViewer
+==============
 
-.. automodule:: common.Calculator
+.. automodule:: app.InfoViewer
 
    
    
@@ -13,8 +13,11 @@ common.Calculator
 
    .. autosummary::
    
-      calc_error
+      create_checkbox
+      default_font
       partial_match
+      update_dataframe
+      update_numpy_array
    
    
 
@@ -24,28 +27,38 @@ common.Calculator
 
    .. autosummary::
    
-      CalculatorDock
       CustomComboBox
       CustomDockWidget
-      CustomFieldCalculator
+      DataFrameTab
+      FieldTab
+      InfoDock
+      InfoWindow
+      MetadataTab
+      MplCanvas
+      PlotInfoTab
+      QAbstractItemView
       QAction
       QCheckBox
       QComboBox
       QDialog
       QDialogButtonBox
-      QFrame
-      QGridLayout
+      QFont
+      QFormLayout
       QGroupBox
       QHBoxLayout
+      QHeaderView
       QIcon
       QInputDialog
       QLabel
       QMainWindow
       QMessageBox
       QPushButton
-      QScrollArea
       QSize
       QSizePolicy
+      QSpacerItem
+      QTabWidget
+      QTableWidget
+      QTableWidgetItem
       QTextEdit
       QToolBar
       QToolButton

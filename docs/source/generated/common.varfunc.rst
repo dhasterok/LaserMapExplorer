@@ -19,6 +19,12 @@ common.varfunc
 
    
    
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      ObservableDict
+   
    
 
    

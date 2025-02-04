@@ -17,13 +17,13 @@ common.Logger
 
    .. autosummary::
    
+      CustomDockWidget
       LoggerDock
       LoggerOptionsDialog
       QAction
       QCheckBox
       QDialog
       QDialogButtonBox
-      QDockWidget
       QIcon
       QMainWindow
       QSize

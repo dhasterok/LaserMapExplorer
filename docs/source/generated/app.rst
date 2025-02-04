@@ -33,14 +33,17 @@
    app.CustomTableWidget
    app.FieldSelectionWindow
    app.ImageProcessing
+   app.InfoViewer
    app.LameIO
    app.MapImporter
    app.Modules
    app.PlotTree
+   app.PlotViewerWindow
    app.Profile
    app.QuickView
-   app.SpecialFunctions
+   app.SpecialTools
    app.SpotImporter
+   app.SpotTools
    app.StyleToolbox
    app.UIControl
    app.UITheme

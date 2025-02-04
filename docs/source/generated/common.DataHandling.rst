@@ -27,7 +27,6 @@ common.DataHandling
    .. autosummary::
    
       AttributeDataFrame
-      DBSCAN
       KMeans
       QMessageBox
       SampleObj

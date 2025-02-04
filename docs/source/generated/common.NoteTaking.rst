@@ -24,6 +24,7 @@ common.NoteTaking
    .. autosummary::
    
       CustomActionMenu
+      CustomDockWidget
       CustomLineEdit
       NoteOptionsDialog
       Notes
@@ -31,11 +32,11 @@ common.NoteTaking
       QCursor
       QDialog
       QDialogButtonBox
-      QDockWidget
       QDoubleValidator
       QFileDialog
       QFont
       QFormLayout
+      QHBoxLayout
       QIcon
       QLabel
       QMainWindow
@@ -46,7 +47,9 @@ common.NoteTaking
       QTextEdit
       QTimer
       QToolBar
+      QUrl
       QVBoxLayout
+      QWebEngineView
       QWidget
       Qt
       RstToPdf

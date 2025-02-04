@@ -24,6 +24,7 @@ app.Workflow
    .. autosummary::
    
       BlocklyBridge
+      CustomDockWidget
       Main
       QAction
       QDockWidget

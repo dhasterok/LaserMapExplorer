@@ -32,6 +32,7 @@ app.StyleToolbox
       QMessageBox
       QTableWidgetItem
       Scheduler
+      StyleObj
       Styling
    
    

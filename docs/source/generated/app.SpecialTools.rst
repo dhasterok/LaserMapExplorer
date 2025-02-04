@@ -1,7 +1,7 @@
-app.Profile
-===========
+app.SpecialTools
+================
 
-.. automodule:: app.Profile
+.. automodule:: app.SpecialTools
 
    
    
@@ -17,44 +17,34 @@ app.Profile
 
    .. autosummary::
    
-      CustomComboBox
-      CustomDockWidget
       CustomLineEdit
-      Figure
-      FigureCanvas
-      PathCollection
-      Profile
-      ProfileDock
-      Profiling
-      QAction
+      QCheckBox
       QComboBox
       QFont
       QFormLayout
+      QFrame
+      QGridLayout
       QGroupBox
       QHBoxLayout
       QHeaderView
       QIcon
-      QInputDialog
-      QIntValidator
       QLabel
-      QListView
-      QMainWindow
       QMessageBox
+      QPushButton
+      QRect
       QScrollArea
       QSize
       QSizePolicy
-      QSpinBox
-      QStandardItem
-      QStandardItemModel
+      QSpacerItem
+      QTabWidget
       QTableWidget
       QTableWidgetItem
-      QToolBar
       QToolButton
       QVBoxLayout
       QWidget
       Qt
-      ScatterPlotItem
-      UIFieldLogic
+      SpecialFunctions
+      SpecialPage
    
    
 

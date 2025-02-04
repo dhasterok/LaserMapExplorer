@@ -13,6 +13,7 @@ app.UITheme
 
    .. autosummary::
    
+      default_font
       load_stylesheet
    
    
@@ -23,6 +24,7 @@ app.UITheme
 
    .. autosummary::
    
+      QFont
       QIcon
       UIThemes
    

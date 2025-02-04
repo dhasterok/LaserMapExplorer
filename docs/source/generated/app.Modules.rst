@@ -47,8 +47,11 @@ app.Modules
       Patch
       Path
       PlotTree
+      PlotViewer
       PolygonManager
       Profiling
+      QDialog
+      QWidget
       Radar
       SampleObj
       StandardScaler

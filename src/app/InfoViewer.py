@@ -113,7 +113,7 @@ class InfoDock(CustomDockWidget, UIFieldLogic):
         Window title, by default "Info Tools"
     """        
     def __init__(self, parent=None, title="Info Tools"):
-        super().__init__(parent.data[parent.sample_id].processed_data)
+        super().__init__(parent)
 
         self.parent = parent
 
@@ -618,7 +618,7 @@ class FieldTab(UIFieldLogic):
 
         if not parent.data:
             return
-        self.data = parent.data[parent.sample_id].processed_data
+        self.data = parent.parent.data[parent.parent.sample_id]
 
         self.field_tab = QWidget()
         self.field_tab.setObjectName("field_tab")

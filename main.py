@@ -4354,13 +4354,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return
         #print('update_n_bins')
         self.update_bins = False
+        try:
+            # get currently selected data
+            map_df = self.data[self.sample_id].get_map_data(self.comboBoxHistField.currentText(), self.comboBoxHistFieldType.currentText())
 
-        # get currently selected data
-        map_df = self.data[self.sample_id].get_map_data(self.comboBoxHistField.currentText(), self.comboBoxHistFieldType.currentText())
-
-        # update n bins
-        self.spinBoxBinWidth.setValue( int((np.nanmax(map_df['array']) - np.nanmin(map_df['array'])) / self.spinBoxBinWidth.value()) )
-        self.update_bins = True
+            # update n bins
+            self.spinBoxNBins.setValue( int((np.nanmax(map_df['array']) - np.nanmin(map_df['array'])) / self.spinBoxBinWidth.value()) )
+            self.update_bins = True
+        except:
+            self.update_bins = True
+            return
 
         # update histogram
         if self.plot_type == 'histogram':

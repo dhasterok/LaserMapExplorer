@@ -31,7 +31,7 @@ pythonGenerator.forBlock['load_sample'] = function(block, generator) {
 // Python Generator: Select Samples
 pythonGenerator.forBlock['select_samples'] = function(block, generator) {
     var sample_id = generator.quote_(block.getFieldValue('SAMPLE_IDS'));
-    var code = 'self.parent.change_sample(self.parent.sample_ids.index(' + sample_id + '))\n';
+    var code = 'self.main.change_sample(self.main.sample_ids.index(' + sample_id + '))\n';
     return code;
 };
 
@@ -42,12 +42,12 @@ pythonGenerator.forBlock['select_analytes'] = function(block) {
     if (analyteSelectorValue === 'Current selection') {
         code = '';
     } else if (analyteSelectorValue === 'Analyte selector') {
-        code = 'self.parent.open_select_analyte_dialog()\n';
-        code += 'self.refresh_analyte_saved_lists_dropdown()\n'
+        code = 'self.main.open_select_analyte_dialog()\n';
+        code += `self.refresh_saved_lists_dropdown('analyte')\n`
     } else if (analyteSelectorValue === 'Saved lists') {''
         var savedListName = block.getFieldValue('analyteSavedListsDropdown');
         var quotedListName = generator.quote_(savedListName);
-        code = 'self.parent.update_analyte_selection_from_file(' + quotedListName + ')\n';
+        code = 'self.main.update_analyte_selection_from_file(' + quotedListName + ')\n';
     }
     code += 'self.main.update_blockly_field_types(self)'
     return code;
@@ -57,25 +57,25 @@ pythonGenerator.forBlock['select_analytes'] = function(block) {
 // Python code generator for the select_analytes block
 pythonGenerator.forBlock['select_ref_val'] = function(block) {
     const refValue = block.getFieldValue('refValueDropdown'); // Get selected dropdown value
-    const code = `self.parent.change_ref_material_BE('${refValue}')\n`; // Python function call
+    const code = `self.main.change_ref_material_BE('${refValue}')\n`; // Python function call
     return code;
 };
 
 pythonGenerator.forBlock['change_pixel_dimensions'] = function(block, generator) {
     var dx = block.getFieldValue('dx');
     var dy = block.getFieldValue('dy');
-    var code = 'self.parent.data[self.parent.sample_id].update_resolution(dx ='+dx+ ', dy ='+ dy+', ui_update = False)\n';
+    var code = 'self.main.data[self.main.sample_id].update_resolution(dx ='+dx+ ', dy ='+ dy+', ui_update = False)\n';
     return code;
 };
 
 
 pythonGenerator.forBlock['swap_pixel_dimensions'] = function(block) {
-    var code = 'self.parent.data[self.parent.sample_id].swap_resolution\n';
+    var code = 'self.main.data[self.main.sample_id].swap_resolution\n';
     return code;
 };
 
 pythonGenerator.forBlock['swap_x_y'] = function(block) {
-    var code = 'self.parent.data[self.parent.sample_id].swap_xy\n';
+    var code = 'self.main.data[self.main.sample_id].swap_xy\n';
     return code;
 };
 
@@ -86,17 +86,17 @@ pythonGenerator.forBlock['select_outlier_method'] = function(block) {
     if (method === 'quantile criteria') {
         var uB = block.getFieldValue('uB');
         var lB = block.getFieldValue('lB');
-        code += `self.parent.update_bounds(ub=${uB}, lb=${uB})\n`;
+        code += `self.main.update_bounds(ub=${uB}, lb=${uB})\n`;
     }
     if (method === 'quantile and distance criteria') {
         var uB = block.getFieldValue('uB');
         var lB = block.getFieldValue('lB');
         var dUB = block.getFieldValue('dUB');
         var dLB = block.getFieldValue('dLB');
-        code += `self.parent.update_bounds(ub=${uB}, lb=${uB}, d_ub=${dUB}, d_lb=${dLB})\n`;
+        code += `self.main.update_bounds(ub=${uB}, lb=${uB}, d_ub=${dUB}, d_lb=${dLB})\n`;
     }
     
-    code += `self.parent.data[self.parent.sample_id].outlier_method='${method}'\n`;
+    code += `self.main.data[self.main.sample_id].outlier_method='${method}'\n`;
     return code;
 };
 
@@ -104,7 +104,7 @@ pythonGenerator.forBlock['select_outlier_method'] = function(block) {
 pythonGenerator.forBlock['neg_handling_method'] = function(block) {
     var method = block.getFieldValue('negMethodDropdown');
     
-     var code = `self.parent.data[self.parent.sample_id].negative_method='${method}'\n`;
+     var code = `self.main.data[self.main.sample_id].negative_method='${method}'\n`;
     return code;
 };
 
@@ -115,11 +115,11 @@ pythonGenerator.forBlock['select_custom_lists'] = function(block) {
     if (analyteSelectorValue === 'Current selection') {
         code = '';
     } else if (analyteSelectorValue === 'Field selector') {
-        code = 'self.parent.open_select_custom_field_dialog()\n';
+        code = 'self.main.open_select_custom_field_dialog()\n';
     } else if (analyteSelectorValue === 'Saved lists') {
         var savedListName = block.getFieldValue('fieldSavedListsDropdown');
         var quotedListName = generator.quote_(savedListName);
-        code = 'self.parent.update_analyte_selection_from_file(' + quotedListName + ')\n';
+        code = 'self.main.update_analyte_selection_from_file(' + quotedListName + ')\n';
     }
     return code;
 };
@@ -138,7 +138,7 @@ pythonGenerator.forBlock['loop_over_samples'] = function(block, generator) {
     var variable_sample_ids = JSON.stringify(sample_ids);
     var statements_do = generator.statementToCode(block, 'DO');
     var code = 'for field in ' + variable_sample_ids + ':\n' +
-        generator.INDENT + 'self.parent.change_sample(self.parent.sample_ids.index(sample_id), save_analysis= False)\n' +
+        generator.INDENT + 'self.main.change_sample(self.main.sample_ids.index(sample_id), save_analysis= False)\n' +
         statements_do;
     return code;
 };
@@ -172,7 +172,7 @@ pythonGenerator.forBlock['plot_map'] = function(block, generator) {
 
     code += subBlocksCode + '\n';
   
-    // update self.parent.style.style_dict with `style_dict`
+    // update self.main.style.style_dict with `style_dict`
     code += `if (style_dict):\n` +
     generator.INDENT +`self.main.plot_style.style_dict[${plot_type}] = {**self.main.plot_style.style_dict[${plot_type}], **style_dict}\n`+
     generator.INDENT +`print(self.main.plot_style.style_dict[${plot_type}])\n`+
@@ -204,7 +204,7 @@ pythonGenerator.forBlock['plot_map'] = function(block, generator) {
 
     code += subBlocksCode + '\n';
   
-    // update self.parent.style.style_dict with `style_dict`
+    // update self.main.style.style_dict with `style_dict`
     code += `if (style_dict):\n` +
     generator.INDENT +`self.main.plot_style.style_dict[${plot_type}] = {**self.main.plot_style.style_dict[${plot_type}], **style_dict}\n`+
     generator.INDENT +`print(self.main.plot_style.style_dict[${plot_type}])\n`+
@@ -238,16 +238,24 @@ pythonGenerator.forBlock['plot_histogram'] = function(block, generator) {
 
   code += subBlocksCode + '\n';
 
-  // update self.parent.style.style_dict with `style_dict`
+  // update self.main.plot_style.style.style_dict with `style_dict`
   code += `if (style_dict):\n` +
   generator.INDENT +`self.main.plot_style.style_dict[${plot_type}] = {**self.main.plot_style.style_dict[${plot_type}], **style_dict}\n`+
   generator.INDENT +`print(self.main.plot_style.style_dict[${plot_type}])\n`+
   generator.INDENT +`self.main.plot_style.set_style_dictionary(${plot_type})\n`+
   generator.INDENT +`self.main.update_axis_limits(style_dict, ${field})\n`;
 
+  // 5) Get nBins from "histogramOptions" or default to 100
+  let nBinsVal = '100';
+  const histOptionsBlock = block.getInputTargetBlock('histogramOptions');
+  if (histOptionsBlock && histOptionsBlock.type === 'histogram_options') {
+    // If user left it blank or typed 0, we still fallback to "100"
+    const userNBins = histOptionsBlock.getFieldValue('nBins') || '100';
+    nBinsVal = userNBins;
+  }
   // 5) Plot
-  code += `self.main.plot_histogram(hist_type = ${hist_type}, field_type = ${field_type},field = ${field})\n`;
-  code += `self.main.plot_viewer.show()`
+  code += `self.main.plot_histogram(hist_type =${hist_type}, field_type =${field_type},field =${field}, n_bins = ${nBinsVal})\n`;
+  code += `self.main.plot_viewer.show()\n`
   return code;
 };
 

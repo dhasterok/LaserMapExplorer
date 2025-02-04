@@ -33,24 +33,79 @@ function updateSampleDropdown(sampleIds) {
 }
 window.updateSampleDropdown = updateSampleDropdown;
 
-// Global function to refresh the analyteSavedListsDropdown
-function refreshAnalyteSavedListsDropdown() {
-    // Iterate through all blocks to find 'select_analytes' blocks
+// Global function to refresh the analyteSavedListsDropdown or fieldSavedListsDropdown
+function refreshListsDropdown(type) {
+    let blockType, selectorValueName, savedListDropdownName;
+    if (type === "analyte"){
+        blockType = 'select_analytes';
+        selectorValueName = 'analyteSelectorDropdown';
+        savedListDropdownName = 'analyteSavedListsDropdown';
+    }
+    else if (type === "field"){
+        blockType = 'select_fields';
+        selectorValueName = 'fieldSelectorDropdown';
+        savedListDropdownName = 'fieldSavedListsDropdown';
+    }
+
+    // Iterate through all blocks to find the relevant ones
     Blockly.getMainWorkspace().getAllBlocks().forEach(function(block) {
-        if (block.type === 'select_analytes') {
-            // Get the current selection
-            const analyteSelectorValue = block.getFieldValue('analyteSelectorDropdown');
-            if (analyteSelectorValue === 'Saved lists') {
-                const savedListDropdown = block.getField('analyteSavedListsDropdown');
+        if (block.type === blockType) {
+            const selectorValue = block.getFieldValue(selectorValueName);
+            if (selectorValue === 'Saved lists') {
+                const savedListDropdown = block.getField(savedListDropdownName);
                 const currentSelection = savedListDropdown ? savedListDropdown.getValue() : null;
-                // Update the saved lists dropdown while preserving selection
-                block.updateSavedListsDropdown(currentSelection);
+                updateSavedListsDropdown(currentSelection, block, type);
             }
         }
     });
 }
 
-window.refreshAnalyteSavedListsDropdown = refreshAnalyteSavedListsDropdown;
+// Common handler for dropdown changes (Analyzer/Field selector)
+export function listSelectorChanged(newValue, block, type) {
+    // Show or hide the “Saved list” dropdown
+    const savedListsInput = block.getInput('SAVED_LISTS');
+    if (newValue === 'Saved lists') {
+        savedListsInput.setVisible(true);
+        // Get current selection if any
+        const savedListDropdown = block.getField(type + 'SavedListsDropdown');
+        const currentSelection = savedListDropdown ? savedListDropdown.getValue() : null;
+        updateSavedListsDropdown(currentSelection, block, type);
+    } else {
+        savedListsInput.setVisible(false);
+    }
+    // Re-render block to reflect new visibility
+    block.render();
+    return newValue;
+}
+
+// Common function to update the “Saved lists” dropdown
+function updateSavedListsDropdown(selectedValue, block, type) {
+    // Example: pass 'analyte' or 'field' as an argument
+    window.blocklyBridge.getSavedLists(type)
+        .then((response) => {
+            // Format response into the [[label, value], ...] form
+            const options = response.map(option => [option, option]);
+            const dropdownField = block.getField(type + 'SavedListsDropdown');
+            if (dropdownField) {
+                dropdownField.menuGenerator_ = options;
+                // Try to preserve previously selected value
+                if (selectedValue && options.some(opt => opt[1] === selectedValue)) {
+                    dropdownField.setValue(selectedValue);
+                } else if (options.length > 0) {
+                    dropdownField.setValue(options[0][1]);
+                }
+                dropdownField.forceRerender();
+            }
+        })
+        .catch(error => {
+            console.error(`Error fetching saved ${type} lists:`, error);
+        });
+}
+
+// Make sure they’re accessible globally if needed
+window.refreshListsDropdown = refreshListsDropdown;
+window.updateSavedListsDropdown = updateSavedListsDropdown;
+
 
 
 // Global function to refresh the analyteSavedListsDropdown
@@ -179,107 +234,69 @@ function getConnectedBlocks(plotBlock, blockName) {
 }
 
 
+/**
+ * Helper function: check if the block with given blockId is in
+ * the chain of blocks connected under a statement input.
+ * @param {Blockly.Block} chainRoot - The topmost block attached to the statement input.
+ * @param {string} blockId - The ID of the block to look for.
+ */
+export function isBlockInChain(chainRoot, blockId) {
+    let currentBlock = chainRoot;
+    while (currentBlock) {
+      if (currentBlock.id === blockId) {
+        return true;
+      }
+      currentBlock = currentBlock.getNextBlock();
+    }
+    return false;
+  }
+
 export function updateHistogramOptions(plotBlock) {
-    // 1) Gather sub-blocks from 'histogram_options'
+    // 1) Get the first block connected to "histogramOptions".
     const histogramOptions = getConnectedBlocks(plotBlock, 'histogramOptions');
-  
-    // 2) Fetch 'field' and 'fieldType' from the main block
     const field = plotBlock.getFieldValue('field');
     const fieldType = plotBlock.getFieldValue('fieldType');
-  
-    // 3) Call your backend to get the range
-    window.blocklyBridge.getHistogramRange(fieldType, field, (range) => {
-      if (range === undefined || range === null) {
-        console.error('Histogram range not available.');
-        return;
-      }
-      // 4) Traverse each block in the chain
-      for (const block of histogramOptions) {
-        switch (block.type) {
-          case 'bin_width':
-            updateBinWidthBlock(block, range, histogramOptions);
-            break;
-          case 'num_bins':
-            updateNumBinsBlock(block, range, histogramOptions);
-            break;
-        }
-      }
-    });
-  }
+    if (!(field == "" || fieldType == "")){
+        // 2) Fetch histogram range via the bridge.
+        window.blocklyBridge.getHistogramRange(fieldType, field, (range) => {
+            if (range === undefined || range === null) {
+                console.error('Histogram range not available.');
+                return;
+            }
+
+            // 3) Traverse the chain of histogramOptions blocks
+            for (const block of histogramOptions) {
+                // 4) Identify the block by type and update it
+                switch (block.type) {
+                    case 'histogram_options':
+                        updateBinWidthAndNBins(block, range);
+                        break;
+                }
+            }
+        });
+    }
+}
   
 
-  function updateBinWidthBlock(binWidthBlock, range, histogramOptionsChain) {
-    // 1) Current binWidth from the block
-    let currentWidth = parseFloat(binWidthBlock.getFieldValue('binWidth')) || 1;
-  
-    // 2) Determine valid bounds for bin width:
-    //    - If we want max bins = 500 => min bin width = range/500
-    //    - If we want at least 1 bin => max bin width = range
-    const minWidth = range / 500; 
-    const maxWidth = range;
-  
-    // 3) Clamp currentWidth
-    currentWidth = Math.max(minWidth, Math.min(maxWidth, currentWidth));
-  
-    // 4) Update the bin_width field if we changed it
-    binWidthBlock.setFieldValue(currentWidth.toFixed(2), 'binWidth');
-  
-    // 5) Possibly update the "num_bins" block in the same chain
-    const numBinsBlock = findBlockByType(histogramOptionsChain, 'num_bins');
-    if (numBinsBlock) {
-      // new nBins = range / currentWidth
-      let nBins = range / currentWidth;
-      // clamp to [1..500]
-      nBins = Math.max(1, Math.min(500, nBins));
-      // round to nearest integer
-      nBins = Math.round(nBins);
-  
-      numBinsBlock.setFieldValue(nBins, 'nBins');
+function updateBinWidthAndNBins(block, range) {
+    if (range <= 0) {
+      console.warn("Histogram range is invalid or zero in size:", range);
+      return;
     }
   
-    // 6) Update tooltip on bin_width block
-    binWidthBlock.setTooltip(
-      `Specify the bin width for the histogram. Range: ${minWidth(2)} to ${maxWidth.toFixed(2)}`
-    );
+    // Store the range so the block's onChange can see it
+    block.histRange = range;
+  
+    // Suppose we pick the user’s existing nBins, or default to 10 if none
+    let nBinsVal = parseFloat(block.getFieldValue('nBins')) || 10;
+    // Recompute binWidth
+    let binWidthVal = range / nBinsVal;
+  
+    // Set them on the block
+    block.setFieldValue(String(nBinsVal), 'nBins');
+    block.setFieldValue(String(binWidthVal), 'binWidth');
   }
   
-  function updateNumBinsBlock(nBinsBlock, range, histogramOptionsChain) {
-    // 1) Current nBins from the block
-    let currentBins = parseInt(nBinsBlock.getFieldValue('nBins'), 10) || 100;
-  
-    // 2) clamp to [1..500]
-    currentBins = Math.max(1, Math.min(500, currentBins));
-  
-    // 3) Update 'nBins' field if changed
-    nBinsBlock.setFieldValue(currentBins, 'nBins');
-  
-    // 4) Possibly update "bin_width" block in the same chain
-    const binWidthBlock = findBlockByType(histogramOptionsChain, 'bin_width');
-    if (binWidthBlock) {
-      // new binWidth = range / currentBins
-      const newWidth = range / currentBins;
-      // clamp to [range/500..range]
-      const minWidth = range / 500;
-      const maxWidth = range;
-      let clampedWidth = Math.max(minWidth, Math.min(maxWidth, newWidth));
-  
-      binWidthBlock.setFieldValue(clampedWidth.toFixed(2), 'binWidth');
-    }
-  
-    // 5) Update tooltip
-    nBinsBlock.setTooltip('Specify the number of bins (1–500).');
-  }
-  
-  function findBlockByType(blockChain, type) {
-    for (const block of blockChain) {
-      if (block.type === type) {
-        return block;
-      }
-    }
-    return null;
-  }
-  
-
 
 
 
@@ -289,13 +306,12 @@ export function updateHistogramOptions(plotBlock) {
 /**
  * Retrieve and update all blocks connected to the "Styling" input.
  * @param {Blockly.Block} plotMapBlock - The plot_map block instance.
- * @param {String} plotType - The dictionary containing styling values.
  */
 
-export function updateStylingChain(plotBlock, plotType) {
+export function updateStylingChain(plotBlock) {
     // 1) Get the first block connected to "Styling".
     const stylingBlocks = getConnectedBlocks(plotBlock, 'styling');
-    
+    const plotType = plotBlock.plotType
     // If you want to explicitly set the plotType:
     // this.plotType = 'analyte map';
   
@@ -346,6 +362,9 @@ export function updateStylingChain(plotBlock, plotType) {
             case 'marker_properties':
               updateMarkerPropertiesBlock(block, styleDict);
               break;
+            case 'transparency':
+                updateTransparencyBlock(block, styleDict);
+                break;
             case 'line_properties':
               updateLinePropertiesBlock(block, styleDict);
               break;
@@ -539,6 +558,17 @@ if (style['MarkerColor'] !== undefined) {
 // block.setFieldValue(String(style['MarkerAlpha']), 'transparency');
 block.render();
 }
+
+function updateTransparencyBlock(block, style) {
+    // e.g. style might contain:
+    // {
+    //   "MarkerAlpha": 0.5  // if you want transparency
+    // }
+    if (style['MarkerAlpha'] !== undefined) {
+        block.setFieldValue(String(style['MarkerAlpha']), 'transparency');
+    }
+    block.render();
+    }
 
 
 function updateLinePropertiesBlock(block, style) {

@@ -1,4 +1,4 @@
-app.FieldSelectionWindow
+﻿app.FieldSelectionWindow
 ========================
 
 .. automodule:: app.FieldSelectionWindow
@@ -18,6 +18,7 @@ app.FieldSelectionWindow
    .. autosummary::
    
       FieldDialog
+      QAbstractItemView
       QBrush
       QColor
       QComboBox
@@ -28,6 +29,7 @@ app.FieldSelectionWindow
       QHeaderView
       QImage
       QLabel
+      QListWidget
       QMessageBox
       QObject
       QPainter

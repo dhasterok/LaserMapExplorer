@@ -1197,6 +1197,7 @@
        </property>
        <property name="font">
         <font>
+         <family>.AppleSystemUIFont</family>
          <pointsize>12</pointsize>
          <stylestrategy>PreferDefault</stylestrategy>
         </font>
@@ -1219,7 +1220,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>373</height>
+          <height>399</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -1957,7 +1958,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>373</height>
+          <height>399</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -2663,772 +2664,6 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="ProfilingPage">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>300</width>
-          <height>373</height>
-         </rect>
-        </property>
-        <attribute name="icon">
-         <iconset resource="../resources.qrc">
-          <normaloff>:/resources/icons/icon-profile-64.svg</normaloff>:/resources/icons/icon-profile-64.svg</iconset>
-        </attribute>
-        <attribute name="label">
-         <string>Profiling</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_62">
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <item>
-          <widget class="QScrollArea" name="scrollAreaProfiles">
-           <property name="frameShape">
-            <enum>QFrame::NoFrame</enum>
-           </property>
-           <property name="frameShadow">
-            <enum>QFrame::Plain</enum>
-           </property>
-           <property name="widgetResizable">
-            <bool>true</bool>
-           </property>
-           <widget class="QWidget" name="scrollAreaWidgetContentsProfiles">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>0</y>
-              <width>300</width>
-              <height>484</height>
-             </rect>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_63">
-             <property name="leftMargin">
-              <number>6</number>
-             </property>
-             <property name="topMargin">
-              <number>6</number>
-             </property>
-             <property name="rightMargin">
-              <number>6</number>
-             </property>
-             <property name="bottomMargin">
-              <number>6</number>
-             </property>
-             <item>
-              <widget class="QGroupBox" name="groupBoxProfileProperties">
-               <property name="font">
-                <font>
-                 <pointsize>11</pointsize>
-                 <stylestrategy>PreferDefault</stylestrategy>
-                </font>
-               </property>
-               <property name="title">
-                <string>Generation</string>
-               </property>
-               <layout class="QVBoxLayout" name="verticalLayout_33">
-                <property name="leftMargin">
-                 <number>3</number>
-                </property>
-                <property name="topMargin">
-                 <number>3</number>
-                </property>
-                <property name="rightMargin">
-                 <number>3</number>
-                </property>
-                <property name="bottomMargin">
-                 <number>3</number>
-                </property>
-                <item>
-                 <layout class="QHBoxLayout" name="horizontalLayoutProfileTools">
-                  <item>
-                   <widget class="QToolButton" name="toolButtonProfileLoad">
-                    <property name="minimumSize">
-                     <size>
-                      <width>32</width>
-                      <height>32</height>
-                     </size>
-                    </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>32</width>
-                      <height>32</height>
-                     </size>
-                    </property>
-                    <property name="toolTip">
-                     <string>Load profile</string>
-                    </property>
-                    <property name="text">
-                     <string>...</string>
-                    </property>
-                    <property name="icon">
-                     <iconset resource="../resources.qrc">
-                      <normaloff>:/resources/icons/icon-open-file-64.svg</normaloff>:/resources/icons/icon-open-file-64.svg</iconset>
-                    </property>
-                    <property name="iconSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <spacer name="horizontalSpacerProfiles">
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>40</width>
-                      <height>20</height>
-                     </size>
-                    </property>
-                   </spacer>
-                  </item>
-                  <item>
-                   <widget class="QToolButton" name="toolButtonPlotProfile">
-                    <property name="minimumSize">
-                     <size>
-                      <width>32</width>
-                      <height>32</height>
-                     </size>
-                    </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>32</width>
-                      <height>32</height>
-                     </size>
-                    </property>
-                    <property name="font">
-                     <font>
-                      <pointsize>11</pointsize>
-                      <stylestrategy>PreferDefault</stylestrategy>
-                     </font>
-                    </property>
-                    <property name="toolTip">
-                     <string>Create profile control points</string>
-                    </property>
-                    <property name="text">
-                     <string>Toggle profiling</string>
-                    </property>
-                    <property name="icon">
-                     <iconset resource="../resources.qrc">
-                      <normaloff>:/resources/icons/icon-profile-64.svg</normaloff>:/resources/icons/icon-profile-64.svg</iconset>
-                    </property>
-                    <property name="iconSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
-                    </property>
-                    <property name="checkable">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QToolButton" name="toolButtonProfileInterpolate">
-                    <property name="enabled">
-                     <bool>true</bool>
-                    </property>
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                    <property name="minimumSize">
-                     <size>
-                      <width>32</width>
-                      <height>32</height>
-                     </size>
-                    </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>32</width>
-                      <height>32</height>
-                     </size>
-                    </property>
-                    <property name="font">
-                     <font>
-                      <pointsize>11</pointsize>
-                      <stylestrategy>PreferDefault</stylestrategy>
-                     </font>
-                    </property>
-                    <property name="toolTip">
-                     <string>Interpolate between control points</string>
-                    </property>
-                    <property name="text">
-                     <string>Interpolate profile</string>
-                    </property>
-                    <property name="icon">
-                     <iconset resource="../resources.qrc">
-                      <normaloff>:/resources/icons/icon-interpolate-64.svg</normaloff>:/resources/icons/icon-interpolate-64.svg</iconset>
-                    </property>
-                    <property name="iconSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
-                    </property>
-                    <property name="checkable">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QToolButton" name="toolButtonPointMove">
-                    <property name="enabled">
-                     <bool>true</bool>
-                    </property>
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                    <property name="minimumSize">
-                     <size>
-                      <width>32</width>
-                      <height>32</height>
-                     </size>
-                    </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>32</width>
-                      <height>32</height>
-                     </size>
-                    </property>
-                    <property name="toolTip">
-                     <string>Adjust profile point location</string>
-                    </property>
-                    <property name="text">
-                     <string>...</string>
-                    </property>
-                    <property name="icon">
-                     <iconset resource="../resources.qrc">
-                      <normaloff>:/resources/icons/icon-move-point-64.svg</normaloff>:/resources/icons/icon-move-point-64.svg</iconset>
-                    </property>
-                    <property name="iconSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
-                    </property>
-                    <property name="checkable">
-                     <bool>true</bool>
-                    </property>
-                    <property name="checked">
-                     <bool>false</bool>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-                <item>
-                 <layout class="QFormLayout" name="formLayoutProfileParams">
-                  <item row="0" column="0">
-                   <widget class="QLabel" name="labelProfileList">
-                    <property name="text">
-                     <string>Profile</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="0">
-                   <widget class="QLabel" name="labelPointSort">
-                    <property name="text">
-                     <string>Point sort</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="1">
-                   <widget class="QComboBox" name="comboBoxProfileSort">
-                    <property name="maximumSize">
-                     <size>
-                      <width>16777215</width>
-                      <height>16777215</height>
-                     </size>
-                    </property>
-                    <property name="toolTip">
-                     <string>Change sort of control points</string>
-                    </property>
-                    <item>
-                     <property name="text">
-                      <string>no</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>x</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>y</string>
-                     </property>
-                    </item>
-                   </widget>
-                  </item>
-                  <item row="2" column="0">
-                   <widget class="QLabel" name="labelPointRadius">
-                    <property name="text">
-                     <string>Point radius</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="1">
-                   <widget class="QLineEdit" name="lineEditPointRadius">
-                    <property name="maximumSize">
-                     <size>
-                      <width>16777215</width>
-                      <height>16777215</height>
-                     </size>
-                    </property>
-                    <property name="toolTip">
-                     <string>Radius for determining point statistics</string>
-                    </property>
-                    <property name="text">
-                     <string>5</string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="3" column="0">
-                   <widget class="QLabel" name="labelPointThreshold">
-                    <property name="text">
-                     <string>Y-axis threshold</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="3" column="1">
-                   <widget class="QLineEdit" name="lineEditYThresh">
-                    <property name="maximumSize">
-                     <size>
-                      <width>16777215</width>
-                      <height>16777215</height>
-                     </size>
-                    </property>
-                    <property name="text">
-                     <string>500</string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="4" column="0">
-                   <widget class="QLabel" name="labelPointInterpDistance">
-                    <property name="text">
-                     <string>Interp. distance</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="4" column="1">
-                   <widget class="QLineEdit" name="lineEditIntDist">
-                    <property name="maximumSize">
-                     <size>
-                      <width>16777215</width>
-                      <height>16777215</height>
-                     </size>
-                    </property>
-                    <property name="toolTip">
-                     <string>Distance between interpolated points</string>
-                    </property>
-                    <property name="text">
-                     <string>50</string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="5" column="0">
-                   <widget class="QLabel" name="labelPointStats">
-                    <property name="text">
-                     <string>Point &amp; error type</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="5" column="1">
-                   <widget class="QComboBox" name="comboBoxPointType">
-                    <property name="maximumSize">
-                     <size>
-                      <width>110</width>
-                      <height>16777215</height>
-                     </size>
-                    </property>
-                    <property name="toolTip">
-                     <string>Statistic for estimating point value</string>
-                    </property>
-                    <item>
-                     <property name="text">
-                      <string>median + IQR</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>mean + standard deviation</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>mean + standard error</string>
-                     </property>
-                    </item>
-                   </widget>
-                  </item>
-                  <item row="0" column="1">
-                   <layout class="QHBoxLayout" name="horizontalLayout_11">
-                    <item>
-                     <widget class="QComboBox" name="comboBoxProfileList">
-                      <property name="maximumSize">
-                       <size>
-                        <width>16777215</width>
-                        <height>16777215</height>
-                       </size>
-                      </property>
-                      <property name="toolTip">
-                       <string>Select profile</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <spacer name="horizontalSpacer_21">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>40</width>
-                        <height>20</height>
-                       </size>
-                      </property>
-                     </spacer>
-                    </item>
-                    <item>
-                     <widget class="QToolButton" name="toolButtonClearProfile">
-                      <property name="sizePolicy">
-                       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                        <horstretch>0</horstretch>
-                        <verstretch>0</verstretch>
-                       </sizepolicy>
-                      </property>
-                      <property name="minimumSize">
-                       <size>
-                        <width>32</width>
-                        <height>32</height>
-                       </size>
-                      </property>
-                      <property name="maximumSize">
-                       <size>
-                        <width>32</width>
-                        <height>32</height>
-                       </size>
-                      </property>
-                      <property name="font">
-                       <font>
-                        <pointsize>11</pointsize>
-                        <stylestrategy>PreferDefault</stylestrategy>
-                       </font>
-                      </property>
-                      <property name="toolTip">
-                       <string>Delete profile</string>
-                      </property>
-                      <property name="text">
-                       <string>Delete profiile</string>
-                      </property>
-                      <property name="icon">
-                       <iconset resource="../resources.qrc">
-                        <normaloff>:/resources/icons/icon-delete-64.svg</normaloff>:/resources/icons/icon-delete-64.svg</iconset>
-                      </property>
-                      <property name="iconSize">
-                       <size>
-                        <width>24</width>
-                        <height>24</height>
-                       </size>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
-                  </item>
-                 </layout>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item>
-              <widget class="QGroupBox" name="groupBoxProfilePoints">
-               <property name="title">
-                <string>Control points</string>
-               </property>
-               <layout class="QHBoxLayout" name="horizontalLayout_6">
-                <property name="leftMargin">
-                 <number>3</number>
-                </property>
-                <property name="topMargin">
-                 <number>3</number>
-                </property>
-                <property name="rightMargin">
-                 <number>3</number>
-                </property>
-                <property name="bottomMargin">
-                 <number>3</number>
-                </property>
-                <item>
-                 <widget class="QTableWidget" name="tableWidgetProfilePoints">
-                  <property name="font">
-                   <font>
-                    <pointsize>11</pointsize>
-                    <stylestrategy>PreferDefault</stylestrategy>
-                   </font>
-                  </property>
-                  <property name="accessibleName">
-                   <string>Profiling</string>
-                  </property>
-                  <property name="sizeAdjustPolicy">
-                   <enum>QAbstractScrollArea::AdjustToContents</enum>
-                  </property>
-                  <property name="sortingEnabled">
-                   <bool>false</bool>
-                  </property>
-                  <attribute name="horizontalHeaderDefaultSectionSize">
-                   <number>80</number>
-                  </attribute>
-                  <attribute name="horizontalHeaderStretchLastSection">
-                   <bool>true</bool>
-                  </attribute>
-                  <column>
-                   <property name="text">
-                    <string>Point</string>
-                   </property>
-                   <property name="font">
-                    <font>
-                     <pointsize>11</pointsize>
-                    </font>
-                   </property>
-                  </column>
-                  <column>
-                   <property name="text">
-                    <string>X</string>
-                   </property>
-                   <property name="font">
-                    <font>
-                     <pointsize>11</pointsize>
-                    </font>
-                   </property>
-                  </column>
-                  <column>
-                   <property name="text">
-                    <string>Y</string>
-                   </property>
-                   <property name="font">
-                    <font>
-                     <pointsize>11</pointsize>
-                    </font>
-                   </property>
-                  </column>
-                 </widget>
-                </item>
-                <item>
-                 <layout class="QVBoxLayout" name="verticalLayoutPointTools">
-                  <item>
-                   <widget class="QToolButton" name="toolButtonPointSelectAll">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                    <property name="minimumSize">
-                     <size>
-                      <width>32</width>
-                      <height>32</height>
-                     </size>
-                    </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>32</width>
-                      <height>32</height>
-                     </size>
-                    </property>
-                    <property name="font">
-                     <font>
-                      <pointsize>11</pointsize>
-                      <stylestrategy>PreferDefault</stylestrategy>
-                     </font>
-                    </property>
-                    <property name="toolTip">
-                     <string>Select all profile points</string>
-                    </property>
-                    <property name="text">
-                     <string>Select All</string>
-                    </property>
-                    <property name="icon">
-                     <iconset resource="../resources.qrc">
-                      <normaloff>:/resources/icons/icon-select-all-64.svg</normaloff>:/resources/icons/icon-select-all-64.svg</iconset>
-                    </property>
-                    <property name="iconSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QToolButton" name="toolButtonPointUp">
-                    <property name="minimumSize">
-                     <size>
-                      <width>32</width>
-                      <height>32</height>
-                     </size>
-                    </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>32</width>
-                      <height>32</height>
-                     </size>
-                    </property>
-                    <property name="font">
-                     <font>
-                      <pointsize>11</pointsize>
-                      <stylestrategy>PreferDefault</stylestrategy>
-                     </font>
-                    </property>
-                    <property name="toolTip">
-                     <string>Move selected point up</string>
-                    </property>
-                    <property name="text">
-                     <string>Move up</string>
-                    </property>
-                    <property name="icon">
-                     <iconset resource="../resources.qrc">
-                      <normaloff>:/resources/icons/icon-up-arrow-64.svg</normaloff>:/resources/icons/icon-up-arrow-64.svg</iconset>
-                    </property>
-                    <property name="iconSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QToolButton" name="toolButtonPointDown">
-                    <property name="minimumSize">
-                     <size>
-                      <width>32</width>
-                      <height>32</height>
-                     </size>
-                    </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>32</width>
-                      <height>32</height>
-                     </size>
-                    </property>
-                    <property name="font">
-                     <font>
-                      <pointsize>11</pointsize>
-                      <stylestrategy>PreferDefault</stylestrategy>
-                     </font>
-                    </property>
-                    <property name="toolTip">
-                     <string>Move selected point down</string>
-                    </property>
-                    <property name="text">
-                     <string>Move down</string>
-                    </property>
-                    <property name="icon">
-                     <iconset resource="../resources.qrc">
-                      <normaloff>:/resources/icons/icon-down-arrow-64.svg</normaloff>:/resources/icons/icon-down-arrow-64.svg</iconset>
-                    </property>
-                    <property name="iconSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <spacer name="verticalSpacer_6">
-                    <property name="orientation">
-                     <enum>Qt::Vertical</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>20</width>
-                      <height>40</height>
-                     </size>
-                    </property>
-                   </spacer>
-                  </item>
-                  <item>
-                   <widget class="QToolButton" name="toolButtonPointDelete">
-                    <property name="minimumSize">
-                     <size>
-                      <width>32</width>
-                      <height>32</height>
-                     </size>
-                    </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>32</width>
-                      <height>32</height>
-                     </size>
-                    </property>
-                    <property name="font">
-                     <font>
-                      <pointsize>11</pointsize>
-                      <stylestrategy>PreferDefault</stylestrategy>
-                     </font>
-                    </property>
-                    <property name="toolTip">
-                     <string>Delete point(s)</string>
-                    </property>
-                    <property name="text">
-                     <string>Delete points</string>
-                    </property>
-                    <property name="icon">
-                     <iconset resource="../resources.qrc">
-                      <normaloff>:/resources/icons/icon-delete-64.svg</normaloff>:/resources/icons/icon-delete-64.svg</iconset>
-                    </property>
-                    <property name="iconSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-               </layout>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </widget>
-         </item>
-        </layout>
-       </widget>
        <widget class="QWidget" name="ScatterPage">
         <property name="enabled">
          <bool>true</bool>
@@ -3438,7 +2673,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>373</height>
+          <height>399</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -3478,7 +2713,7 @@
               <x>0</x>
               <y>0</y>
               <width>351</width>
-              <height>373</height>
+              <height>399</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_52">
@@ -4125,7 +3360,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>373</height>
+          <height>399</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -4729,7 +3964,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>373</height>
+          <height>399</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -4775,7 +4010,7 @@
               <x>0</x>
               <y>0</y>
               <width>301</width>
-              <height>373</height>
+              <height>399</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_57">
@@ -4962,7 +4197,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>373</height>
+          <height>399</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5002,7 +4237,7 @@
               <x>0</x>
               <y>0</y>
               <width>300</width>
-              <height>373</height>
+              <height>399</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_60">
@@ -5565,7 +4800,7 @@
         <string/>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <property name="tabSpacing">
         <number>2</number>
@@ -5771,7 +5006,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>296</width>
+          <width>254</width>
           <height>444</height>
          </rect>
         </property>
@@ -5902,7 +5137,7 @@
             <enum>QFrame::Raised</enum>
            </property>
            <property name="currentIndex">
-            <number>4</number>
+            <number>3</number>
            </property>
            <property name="tabSpacing">
             <number>2</number>
@@ -7244,7 +6479,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>294</width>
+              <width>252</width>
               <height>268</height>
              </rect>
             </property>
@@ -7284,7 +6519,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>294</width>
+                  <width>252</width>
                   <height>318</height>
                  </rect>
                 </property>
@@ -7309,7 +6544,7 @@
                    <item row="0" column="0">
                     <widget class="QLabel" name="labelColorByField">
                      <property name="text">
-                      <string>Color by field</string>
+                      <string>Field type</string>
                      </property>
                      <property name="alignment">
                       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -7670,7 +6905,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>294</width>
+              <width>252</width>
               <height>268</height>
              </rect>
             </property>
@@ -7704,7 +6939,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>292</width>
+                  <width>250</width>
                   <height>266</height>
                  </rect>
                 </property>

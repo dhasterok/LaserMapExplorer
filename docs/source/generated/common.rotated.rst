@@ -1,4 +1,4 @@
-common.rotated
+﻿common.rotated
 ==============
 
 .. automodule:: common.rotated
@@ -23,7 +23,6 @@ common.rotated
       Q_FLAG
       Q_FLAGS
       Q_RETURN_ARG
-      Slot
       bin_
       bom
       center
@@ -99,7 +98,6 @@ common.rotated
 
    .. autosummary::
    
-      Property
       QAbstractAnimation
       QAbstractEventDispatcher
       QAbstractItemModel
@@ -264,7 +262,6 @@ common.rotated
       Qt
       QtMsgType
       RotatedHeaderView
-      Signal
       pyqtBoundSignal
       pyqtProperty
       pyqtSignal

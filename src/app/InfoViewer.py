@@ -20,6 +20,8 @@ from src.app.UIControl import UIFieldLogic
 from src.app.UITheme import default_font
 from src.common.CustomMplCanvas import MplCanvas
 
+PRECISION = 5
+
 def create_checkbox(is_checked, callback, key):
     checkbox = QCheckBox()
     checkbox.setChecked(is_checked)
@@ -57,7 +59,7 @@ def update_numpy_array(array, table_widget):
     # Add the data to the table
     for row_idx, row in enumerate(array):
         for col_idx, value in enumerate(row):
-            item = QTableWidgetItem(str(value))
+            item = QTableWidgetItem(f"{value:.{PRECISION}g}")
             item.setFlags(item.flags() & ~Qt.ItemIsEditable)
             table_widget.setItem(row_idx, col_idx, item)
 
@@ -168,7 +170,8 @@ class InfoDock(CustomDockWidget, UIFieldLogic):
                 update_dataframe(self.parent.data[self.parent.sample_id].processed_data, self.dataframe_tab.data_table)
             case "field":
                 field = self.field_tab.field_combobox.currentText()
-                update_numpy_array(self.parent.data[self.parent.sample_id].get_map_data(field), self.field_tab.field_table)
+                if not (field == ''):
+                    update_numpy_array(self.parent.data[self.parent.sample_id].get_map_data(field), self.field_tab.field_table)
 
 # -------------------------------
 # Plot Info Tab functions
@@ -658,8 +661,21 @@ class FieldTab(UIFieldLogic):
 
         parent.info_tab_widget.addTab(self.field_tab, "Field")
 
+        # when field type combobox is updated
+        self.field_type_combobox.activated.connect(lambda: self.update_field_combobox(self.field_type_combobox, self.field_combobox))
+        self.field_type_combobox.activated.connect(self.update_field_table)
+
         self.update_field_combobox(self.field_type_combobox, self.field_combobox)
 
+        # when field combobox is updated
+        self.field_combobox.activated.connect(self.update_field_table)
 
-        map_data = self.data.get_map_data(self.field_combobox.currentText())
-        update_numpy_array(map_data['array'], self.field_table)
+        self.update_field_table()
+
+    def update_field_table(self):
+        if self.field_combobox.currentText() == '' or self.field_type_combobox.currentText() == '':
+            return
+
+        map_df = self.data.get_map_data(self.field_combobox.currentText(), self.field_type_combobox.currentText())
+        reshaped_array = np.reshape(map_df['array'].values, self.data.array_size, order=self.data.order)
+        update_numpy_array(reshaped_array, self.field_table)

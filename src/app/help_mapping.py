@@ -16,8 +16,8 @@ def create_help_mapping(parent):
         parent.canvasWindow: 'center_pane',
         parent.dockWidgetLeftToolbox: 'left_toolbox',
         parent.toolBox: 'left_toolbox',
-        parent.dockWidgetRightToolbox: 'right_toolbox',
-        parent.toolBoxTreeView: 'right_toolbox',
+        parent.dockWidgetPlotTree: 'right_toolbox',
+        parent.dockWidgetStyling: 'right_toolbox',
         parent.dockWidgetMaskToolbox: 'lower_tabs',
         parent.tabWidgetMask: 'lower_tabs',
     }

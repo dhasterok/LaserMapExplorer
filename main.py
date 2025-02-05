@@ -207,8 +207,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 :ref:`add_plotwidget_to_tree` for details about saving *plot_info* to the tree (Plot Selector)
         QVAnalyteList : list of str
             ordered set of analytes to display in on the Quick View tab
-        right_tab : dict
-            Holds the indices for pages in ``toolBoxTreeView``
         sample_id : str
             The name of the current sample, chosen by the user with ``comboBoxSampleID``.  *sample_id* is used as the key into several dictionaries.
         sort_method : str
@@ -369,15 +367,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionSpecialTools.triggered.connect(self.toggle_special_tab)
 
         # right toolbox
-        self.right_tab = {}
-        for tid in range(self.toolBoxTreeView.count()):
-            match self.toolBoxTreeView.itemText(tid).lower():
-                case 'plot selector':
-                    self.right_tab.update({'tree': tid})
-                case 'styling':
-                    self.right_tab.update({'style': tid})
-                case 'calculator':
-                    self.right_tab.update({'calculator': tid})
+        self.style_tab = {}
+        for tid in range(self.toolBoxStyle.count()):
+            match self.toolBoxStyle.itemText(tid).lower():
+                case 'axes and labels':
+                    self.style_tab.update({'axes': tid})
+                case 'annotations and scale':
+                    self.style_tab.update({'annotations': tid})
+                case 'markers and lines':
+                    self.style_tab.update({'markers': tid})
+                case 'coloring':
+                    self.style_tab.update({'colors': tid})
+                case 'regression':
+                    self.style_tab.update({'regression': tid})
 
         self.mask_tab = {}
         for tid in range(self.tabWidgetMask.count()):
@@ -415,6 +417,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 
         self.toolBar.insertWidget(self.actionSelectAnalytes,self.widgetSampleSelect)
+        self.toolBar.insertWidget(self.actionUpdatePlot,self.widgetPlotTypeSelect)
 
         self.toolbar_actio = Actions(self)
 
@@ -422,7 +425,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolBox.setCurrentIndex(self.left_tab['sample'])
         self.tabWidgetMask.setCurrentIndex(self.mask_tab['filter'])
         self.toolBoxStyle.setCurrentIndex(0)
-        self.toolBoxTreeView.setCurrentIndex(self.right_tab['tree'])
         self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
 
 
@@ -464,7 +466,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.NDIMPage.setEnabled(False)
         self.MultidimensionalPage.setEnabled(False)
         self.ClusteringPage.setEnabled(False)
-        self.ProfilingPage.setEnabled(False)
+        #self.ProfilingPage.setEnabled(False)
         #self.PTtPage.setEnabled(False)
 
         self.actionSavePlotToTree.triggered.connect(self.add_plotwidget_to_tree)
@@ -899,7 +901,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.canvas_changed()
 
         # multi-view tools
-        #self.actionCalculator.triggered.connect(lambda: self.toolBoxTreeView.setCurrentIndex(self.right_tab['calculator']))
         self.actionCalculator.triggered.connect(self.open_calculator)
         self.open_calculator()
         self.calculator.hide()
@@ -948,8 +949,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolButtonBottomDock.toggled.connect(lambda checked: self.toolButtonBottomDock.setIcon(QIcon(':/resources/icons/icon-bottom_toolbar_show-64.svg') if checked else QIcon(':/resources/icons/icon-bottom_toolbar_hide-64.svg')))
 
         self.toolButtonLeftDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.dockWidgetLeftToolbox, button=self.toolButtonLeftDock))
-        self.toolButtonRightDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.dockWidgetRightToolbox, button=self.toolButtonRightDock))
+        self.toolButtonRightDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.dockWidgetPlotTree, button=None))
+        self.toolButtonRightDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.dockWidgetStyling, button=self.toolButtonRightDock))
         self.toolButtonBottomDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.dockWidgetMaskToolbox, button=self.toolButtonBottomDock))
+
 
         # Add the button to the status bar
         self.labelInvalidValues = QLabel("Negative/zeros: False, NaNs: False")
@@ -967,9 +970,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.dockWidgetLeftToolbox.show()
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.dockWidgetLeftToolbox)
         self.dockWidgetLeftToolbox.setFloating(False)
-        self.dockWidgetRightToolbox.show()
-        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.dockWidgetRightToolbox)
-        self.dockWidgetRightToolbox.setFloating(False)
+        self.dockWidgetPlotTree.show()
+        self.dockWidgetStyling.show()
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.dockWidgetPlotTree)
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.dockWidgetStyling)
+        self.dockWidgetPlotTree.setFloating(False)
+        self.dockWidgetStyling.setFloating(False)
+
+        self.dockWidgetMaskToolbox.show()
+        self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.dockWidgetMaskToolbox)
+        self.dockWidgetMaskToolbox.setFloating(False)
+
+        self.toggle_dock_visibility(dock=self.dockWidgetMaskToolbox, button=self.toolButtonBottomDock)
 
     def toggle_spot_tab(self):
         #self.actionSpotTools.toggle()
@@ -1146,7 +1158,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.NDIMPage.setEnabled(True)
         self.MultidimensionalPage.setEnabled(True)
         self.ClusteringPage.setEnabled(True)
-        self.ProfilingPage.setEnabled(True)
+        #self.ProfilingPage.setEnabled(True)
         #self.PTtPage.setEnabled(True)
 
     def change_sample(self, index, save_analysis=True):
@@ -1298,7 +1310,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # set to single-view, tree view, and sample and fields tab
         self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
         self.toolBoxStyle.setCurrentIndex(0)
-        self.toolBoxTreeView.setCurrentIndex(self.right_tab['tree'])
         self.toolBox.setCurrentIndex(self.left_tab['sample'])
         self.plot_style.set_style_widgets(self.plot_type)
 
@@ -1627,6 +1638,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.widgetPlotInfoMV.hide()
             self.comboBoxQVList.setVisible(False)
             self.toolButtonNewList.setVisible(False)
+
+            self.actionUpdatePlot.setEnabled(False)
+            self.actionSavePlotToTree.setEnabled(False)
             return
 
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
@@ -1658,13 +1672,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.NDIMPage.setEnabled(True)
             self.MultidimensionalPage.setEnabled(True)
             self.ClusteringPage.setEnabled(True)
-            self.ProfilingPage.setEnabled(True)
+            #self.ProfilingPage.setEnabled(True)
             #self.PTtPage.setEnabled(True)
 
             self.toolBoxStyle.setEnabled(True)
             self.comboBoxPlotType.setEnabled(True)
             self.comboBoxStyleTheme.setEnabled(True)
-            self.toolButtonUpdatePlot.setEnabled(True)
+            self.actionUpdatePlot.setEnabled(True)
+            self.actionSavePlotToTree.setEnabled(True)
             self.toolButtonSaveTheme.setEnabled(True)
 
             self.StylingPage.setEnabled(True)
@@ -1700,10 +1715,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.NDIMPage.setEnabled(False)
             self.MultidimensionalPage.setEnabled(False)
             self.ClusteringPage.setEnabled(False)
-            self.ProfilingPage.setEnabled(True)
+            #self.ProfilingPage.setEnabled(True)
             #self.PTtPage.setEnabled(False)
 
-            self.toolBoxTreeView.setCurrentIndex(self.right_tab['tree'])
+            self.actionUpdatePlot.setEnabled(False)
+            self.actionSavePlotToTree.setEnabled(False)
+
             self.StylingPage.setEnabled(False)
             if self.duplicate_plot_info:
                 self.add_plotwidget_to_canvas(self.duplicate_plot_info)
@@ -1736,11 +1753,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.NDIMPage.setEnabled(False)
             self.MultidimensionalPage.setEnabled(False)
             self.ClusteringPage.setEnabled(False)
-            self.ProfilingPage.setEnabled(False)
+            #self.ProfilingPage.setEnabled(False)
             #self.PTtPage.setEnabled(False)
 
-            self.toolBoxTreeView.setCurrentIndex(self.right_tab['tree'])
             self.StylingPage.setEnabled(False)
+            self.actionUpdatePlot.setEnabled(False)
+            self.actionSavePlotToTree.setEnabled(False)
 
             self.display_QV()
 

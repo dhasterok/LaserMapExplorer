@@ -1682,7 +1682,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.actionSavePlotToTree.setEnabled(True)
             self.toolButtonSaveTheme.setEnabled(True)
 
-            self.StylingPage.setEnabled(True)
+            self.dockWidgetStyling.setEnabled(True)
 
             if self.duplicate_plot_info:
                 self.add_plotwidget_to_canvas(self.duplicate_plot_info)
@@ -1721,7 +1721,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.actionUpdatePlot.setEnabled(False)
             self.actionSavePlotToTree.setEnabled(False)
 
-            self.StylingPage.setEnabled(False)
+            self.dockWidgetStyling.setEnabled(False)
             if self.duplicate_plot_info:
                 self.add_plotwidget_to_canvas(self.duplicate_plot_info)
         else:
@@ -1756,7 +1756,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             #self.ProfilingPage.setEnabled(False)
             #self.PTtPage.setEnabled(False)
 
-            self.StylingPage.setEnabled(False)
+            self.dockWidgetStyling.setEnabled(False)
             self.actionUpdatePlot.setEnabled(False)
             self.actionSavePlotToTree.setEnabled(False)
 

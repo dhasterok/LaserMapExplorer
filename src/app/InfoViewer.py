@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import (
         QGroupBox, QHBoxLayout, QSpacerItem, QSizePolicy, QTableWidgetItem, QTableWidget, QTabWidget,
         QAbstractItemView, QFormLayout, QHeaderView
     )
-from PyQt5.QtGui import QIcon, QFont
+from PyQt5.QtGui import QIcon, QFont, QPixmap
 
 from src.common.CustomWidgets import CustomComboBox, CustomDockWidget
 from src.app.UIControl import UIFieldLogic
@@ -93,10 +93,10 @@ class InfoWindow(QWidget):
         self.info_tab_widget = QTabWidget(self.info_window)
         self.info_tab_widget.setObjectName("info_tab_widget")
 
-        self.plot_info_tab = self.PlotInfoTab(self)
         self.metadata_tab = self.MetadataTab(self)
         self.dataframe_tab = self.DataFrameTab(self)
         self.field_tab = self.FieldTab(self)
+        self.plot_info_tab = self.PlotInfoTab(self)
 
         window_layout.addWidget(self.info_tab_widget)
         self.setWidget(self.info_window)
@@ -142,10 +142,10 @@ class InfoDock(CustomDockWidget, UIFieldLogic):
         self.info_tab_widget = QTabWidget(self.dockWidgetInfo)
         self.info_tab_widget.setObjectName("info_tab_widget")
 
-        self.plot_info_tab = PlotInfoTab(self)
         self.metadata_tab = MetadataTab(self)
         self.dataframe_tab = DataFrameTab(self)
         self.field_tab = FieldTab(self)
+        self.plot_info_tab = PlotInfoTab(self)
 
         dock_layout.addWidget(self.info_tab_widget)
         self.setWidget(self.dockWidgetInfo)
@@ -162,8 +162,6 @@ class InfoDock(CustomDockWidget, UIFieldLogic):
     def update_tab_widget(self):
         idx = self.info_tab_widget.currentIndex()
         match self.info_tab_widget.tabText(idx).lower():
-            case "plot info":
-                self.plot_info_tab.update_plot_info_tab(self.parent.plot_info)
             case "metadata":
                 self.metadata_tab.update_metadata(self.parent.data[self.parent.sample_id].processed_data.column_attributes)
             case "data":
@@ -172,6 +170,8 @@ class InfoDock(CustomDockWidget, UIFieldLogic):
                 field = self.field_tab.field_combobox.currentText()
                 if not (field == ''):
                     update_numpy_array(self.parent.data[self.parent.sample_id].get_map_data(field), self.field_tab.field_table)
+            case "plot info":
+                self.plot_info_tab.update_plot_info_tab(self.parent.plot_info)
 
 # -------------------------------
 # Plot Info Tab functions
@@ -371,6 +371,8 @@ class MetadataTab():
 
         self.metadata_tab = QWidget()
         self.metadata_tab.setObjectName("metadata_tab")
+        self.rows_flag = True
+        self.columns_flag = True
         tab_layout = QVBoxLayout(self.metadata_tab)
         tab_layout.setContentsMargins(6, 6, 6, 6)
 
@@ -391,20 +393,20 @@ class MetadataTab():
         self.field_combobox.setObjectName("field_combobox")
 
         # select all columns
-        self.select_all_columns_action = QAction("Select All Columns", toolbar)
+        self.action_select_all_columns = QAction("Select All Columns", toolbar)
         select_columns_icon = QIcon(":resources/icons/icon-top_toolbar_show-64.svg")
-        self.select_all_columns_action.setIcon(select_columns_icon)
-        self.select_all_columns_action.setCheckable(True)
-        self.select_all_columns_action.toggled.connect(self.toggle_all_columns)
-        self.select_all_columns_action.setToolTip("Select/deselect all columns")
+        self.action_select_all_columns.setIcon(select_columns_icon)
+        self.action_select_all_columns.setCheckable(True)
+        self.action_select_all_columns.toggled.connect(self.toggle_all_columns)
+        self.action_select_all_columns.setToolTip("Select/deselect all columns")
 
         # select all rows
-        self.select_all_rows_action = QAction("Select All Rows", toolbar)
+        self.action_select_all_rows = QAction("Select All Rows", toolbar)
         select_rows_icon = QIcon(":resources/icons/icon-left_toolbar_show-64.svg")
-        self.select_all_rows_action.setIcon(select_rows_icon)
-        self.select_all_rows_action.setCheckable(True)
-        self.select_all_rows_action.toggled.connect(self.toggle_all_rows)
-        self.select_all_rows_action.setToolTip("Select/deselect all rows")
+        self.action_select_all_rows.setIcon(select_rows_icon)
+        self.action_select_all_rows.setCheckable(True)
+        self.action_select_all_rows.toggled.connect(self.toggle_all_rows)
+        self.action_select_all_rows.setToolTip("Select/deselect all rows")
 
         # set the norm method for all samples
         scaling_label = QLabel(self.metadata_tab)
@@ -420,23 +422,35 @@ class MetadataTab():
         # self.norm_combobox.activated.connect(lambda: self.update_norm(self.norm_combobox.currentText()))
         self.norm_combobox.setToolTip("Set the norm for all analytes")
 
+        # view/hide
+        self.action_toggle_view = QAction("Show/hide columns and rows", toolbar)
+        self.action_toggle_view.setCheckable(True)
+        self.action_toggle_view.setChecked(True)
+        self.action_toggle_view.toggled.connect(self.toggle_view)
+        self.toggle_view_icon = QIcon()
+        self.toggle_view_icon.addPixmap(QPixmap(":resources/icons/icon-show-hide-64.svg"), QIcon.Normal, QIcon.Off)
+        self.toggle_view_icon.addPixmap(QPixmap(":resources/icons/icon-show-64.svg"), QIcon.Normal, QIcon.On)
+        self.action_toggle_view.setIcon(self.toggle_view_icon)
+        self.action_toggle_view.setToolTip("Click to toggle visibility of unselected columns/rows")
+
         # export metadata table
-        self.export_metadata_action = QAction("Export Metadata", toolbar)
-        self.export_metadata_action.toggled.connect(self.export_metadata)
+        self.action_export_metadata = QAction("Export Metadata", toolbar)
+        self.action_export_metadata.triggered.connect(self.export_metadata)
         export_notes_icon = QIcon(":resources/icons/icon-save-notes-64.svg")
-        self.export_metadata_action.setIcon(export_notes_icon)
-        self.export_metadata_action.setToolTip("Export metadata to notes")
+        self.action_export_metadata.setIcon(export_notes_icon)
+        self.action_export_metadata.setToolTip("Export metadata to notes")
 
         # add actions and widgets to toolbar
         toolbar.addWidget(field_label)
         toolbar.addWidget(self.field_combobox)
-        toolbar.addAction(self.select_all_columns_action)
-        toolbar.addAction(self.select_all_rows_action)
+        toolbar.addAction(self.action_select_all_columns)
+        toolbar.addAction(self.action_select_all_rows)
+        toolbar.addAction(self.action_toggle_view)
         toolbar.addSeparator()
         toolbar.addWidget(scaling_label)
         toolbar.addWidget(self.norm_combobox)
         toolbar.addSeparator()
-        toolbar.addAction(self.export_metadata_action)
+        toolbar.addAction(self.action_export_metadata)
 
         self.metadata_table = QTableWidget(self.metadata_tab)
         self.metadata_table.setObjectName("metadata_table")
@@ -454,6 +468,9 @@ class MetadataTab():
 
         data = self.parent.data[self.parent.sample_id].processed_data.column_attributes
         self.update_metadata(data)
+
+    def toggle_view(self):
+        pass
 
     def update_metadata(self, data):
         """Update the info dock with metadata
@@ -481,7 +498,7 @@ class MetadataTab():
         selected_option = self.field_combobox.currentText()
 
         # Get rows and columns to display
-        rows = [key for column in data.values() for key in column.keys()]
+        rows = set([key for column in data.values() for key in column.keys()])
         columns = list(data.keys())
 
         rows_to_display = [
@@ -548,17 +565,23 @@ class MetadataTab():
         if self.field_combobox.currentText() == "Selected":
             self.update_table()
 
-    def toggle_all_columns(self, checked):
+    def toggle_all_columns(self):
         """Toggle all columns based on toolbar action."""
-        if checked:
+        if not self.columns_flag:
             self.selected_columns = set(self.parent.data[self.parent.sample_id].processed_data.column_attributes.keys())
         else:
             self.selected_columns.clear()
+
+        self.columns_flag = not self.columns_flag
+        if self.columns_flag:
+            self.field_combobox.setCurrentText("All")
+        else:
+            self.field_combobox.setCurrentText("Selected")
         self.update_table()
 
-    def toggle_all_rows(self, checked):
+    def toggle_all_rows(self):
         """Toggle all rows based on toolbar action."""
-        if checked:
+        if not self.rows_flag:
             rows = set(
                 key for column in self.parent.data[self.parent.sample_id].processed_data.column_attributes.values()
                 for key in column.keys()
@@ -566,6 +589,8 @@ class MetadataTab():
             self.selected_rows = rows
         else:
             self.selected_rows.clear()
+
+        self.rows_flag = not self.rows_flag
         self.update_table()
 
     def export_metadata(self):
@@ -646,10 +671,24 @@ class FieldTab(UIFieldLogic):
         self.field_combobox = QComboBox(self.field_tab)
         self.field_combobox.setObjectName("field_combobox")
 
+        self.action_sigfigs_more = QAction("Increase Significant Figures", toolbar)
+        sigfigs_more_icon = QIcon(":resources/icons/icon-sigfigs-add-64.svg")
+        self.action_sigfigs_more.setIcon(sigfigs_more_icon)
+        self.action_sigfigs_more.triggered.connect(self.increase_precision)
+        self.action_sigfigs_more.setToolTip("Increase the number of displayed digits")
+
+        self.action_sigfigs_less = QAction("Decrease Significant Figures", toolbar)
+        sigfigs_less_icon = QIcon(":resources/icons/icon-sigfigs-remove-64.svg")
+        self.action_sigfigs_less.setIcon(sigfigs_less_icon)
+        self.action_sigfigs_less.triggered.connect(self.decrease_precision)
+        self.action_sigfigs_less.setToolTip("Reduce the number of displayed digits")
+
         toolbar.addWidget(field_type_label)
         toolbar.addWidget(self.field_type_combobox)
         toolbar.addWidget(field_label)
         toolbar.addWidget(self.field_combobox)
+        toolbar.addAction(self.action_sigfigs_more)
+        toolbar.addAction(self.action_sigfigs_less)
 
         self.field_table = QTableWidget(self.field_tab)
         self.field_table.setObjectName("field_table")
@@ -679,3 +718,20 @@ class FieldTab(UIFieldLogic):
         map_df = self.data.get_map_data(self.field_combobox.currentText(), self.field_type_combobox.currentText())
         reshaped_array = np.reshape(map_df['array'].values, self.data.array_size, order=self.data.order)
         update_numpy_array(reshaped_array, self.field_table)
+
+    def increase_precision(self):
+        global PRECISION
+
+        if PRECISION == 16:
+            return
+        PRECISION += 1
+        self.update_field_table()
+    
+    def decrease_precision(self):
+        global PRECISION
+
+        if PRECISION == 1:
+            return
+        PRECISION -= 1
+        self.update_field_table()
+

@@ -247,7 +247,7 @@ class Styling():
             parent.comboBoxPlotType.currentTextChanged.connect(lambda: setattr(self, 'plot_type', parent.comboBoxPlotType.currentText()))
             #parent.comboBoxPlotType.currentIndexChanged.connect(lambda: self.plot_type_callback(update=True))
 
-            parent.toolButtonUpdatePlot.clicked.connect(parent.update_SV)
+            parent.actionUpdatePlot.triggered.connect(parent.update_SV)
             parent.toolButtonSaveTheme.clicked.connect(self.input_theme_name_dlg)
             # axes
             parent.lineEditXLabel.editingFinished.connect(lambda: self.axis_label_edit_callback('x',parent.lineEditXLabel.text()))

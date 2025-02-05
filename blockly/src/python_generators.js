@@ -108,18 +108,18 @@ pythonGenerator.forBlock['neg_handling_method'] = function(block) {
     return code;
 };
 
-pythonGenerator.forBlock['select_custom_lists'] = function(block) {
-    var analyteSelectorValue = block.getFieldValue('fieldSelectorDropdown');
+pythonGenerator.forBlock['select_fields_list'] = function(block) {
+    var fieldSelectorDropdownValue = block.getFieldValue('fieldSelectorDropdown');
     var code = '';
     
-    if (analyteSelectorValue === 'Current selection') {
+    if (fieldSelectorDropdownValue === 'Current selection') {
         code = '';
-    } else if (analyteSelectorValue === 'Field selector') {
-        code = 'self.main.open_select_custom_field_dialog()\n';
-    } else if (analyteSelectorValue === 'Saved lists') {
+    } else if (fieldSelectorDropdownValue === 'Field selector') {
+        code = 'self.main.open_field_selector_dialog()\n';
+    } else if (fieldSelectorDropdownValue === 'Saved lists') {
         var savedListName = block.getFieldValue('fieldSavedListsDropdown');
         var quotedListName = generator.quote_(savedListName);
-        code = 'self.main.update_analyte_selection_from_file(' + quotedListName + ')\n';
+        code = 'self.main.update_field_list_from_file(' + quotedListName + ')\n';
     }
     return code;
 };

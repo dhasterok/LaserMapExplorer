@@ -80,6 +80,7 @@ class Main():
         self.persistent_filters = pd.DataFrame()
         self.persistent_filters = pd.DataFrame(columns=['use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'persistent'])
         self.plot_type = 'analyte map'
+        self.field_type_list = ['Analyte', 'Analyte (normalized)']
         # Plot Selector
         #-------------------------
         self.sort_method = 'mass'
@@ -432,7 +433,7 @@ class Main():
         plot_data = None
         #print('plot histogram')
         # create Mpl canvas
-        canvas = mplc.MplCanvas(parent=self)
+        canvas = mplc.MplCanvas(parent=self, ui= self.plot_viewer)
 
         #if field_type == 'Ratio':
         #    analyte_1 = field.split(' / ')[0]
@@ -440,10 +441,10 @@ class Main():
 
         if hist_type == 'log-scaling' and field_type == 'Analyte':
             print('raw_data for log-scaling')
-            x = self.get_scatter_data('histogram', processed=False)['x']
+            x = self.get_scatter_data(plot_type='histogram', processed=False, field_type=field_type,field = field)['x']
         else:
             print('processed_data for histogram')
-            x = self.get_scatter_data('histogram', processed=True)['x']
+            x = self.get_scatter_data(plot_type='histogram', processed=True, field_type=field_type,field = field)['x']
 
         # determine edges
         xmin,xmax,xscale,xlbl = self.plot_style.get_axis_values(x['type'],x['field'])
@@ -579,7 +580,7 @@ class Main():
                 ymin, ymax = canvas.axes.get_ylim()
                 d = {'pstatus':'auto', 'pmin':fmt.oround(ymin,order=2,toward=0), 'pmax':fmt.oround(ymax,order=2,toward=1)}
                 self.data[self.sample_id].axis_dict[x['field']].update(d)
-                self.plot_style.set_axis_widgets('y', x['field'])
+                # self.plot_style.set_axis_widgets('y', x['field'])
 
             # grab probablility axes limits
             _, _, _, _, ymin, ymax = self.plot_style.get_axis_values(x['type'],x['field'],ax='p')
@@ -634,7 +635,7 @@ class Main():
         self.plot_viewer.add_plotwidget_to_plot_viewer(self.plot_info)
 
 
-        # -------------------------------------
+    # -------------------------------------
     # Scatter/Heatmap functions
     # -------------------------------------
     def get_scatter_data(self, plot_type,field_type=None, field= None, processed=True, field_type_x= None, field_type_y=None, field_type_z=None, field_x=None, field_y= None, field_z= None, color_by_field =None):
@@ -667,22 +668,22 @@ class Main():
         if (scatter_dict['x']['field'] is not None) and (scatter_dict['y']['field'] != ''):
             if scatter_dict['x']['field'] not in self.data[self.sample_id].axis_dict.keys():
                 self.plot_style.initialize_axis_values(scatter_dict['x']['type'], scatter_dict['x']['field'])
-                self.plot_style.set_axis_widgets('x', scatter_dict['x']['field'])
+                # self.plot_style.set_axis_widgets('x', scatter_dict['x']['field'])
 
         if (scatter_dict['y']['field'] is not None) and (scatter_dict['y']['field'] != ''):
             if scatter_dict['y']['field'] not in self.data[self.sample_id].axis_dict.keys():
                 self.plot_style.initialize_axis_values(scatter_dict['y']['type'], scatter_dict['y']['field'])
-                self.plot_style.set_axis_widgets('y', scatter_dict['y']['field'])
+                # self.plot_style.set_axis_widgets('y', scatter_dict['y']['field'])
 
         if (scatter_dict['z']['field'] is not None) and (scatter_dict['z']['field'] != ''):
             if scatter_dict['z']['field'] not in self.data[self.sample_id].axis_dict.keys():
                 self.plot_style.initialize_axis_values(scatter_dict['z']['type'], scatter_dict['z']['field'])
-                self.plot_style.set_axis_widgets('z', scatter_dict['z']['field'])
+                # self.plot_style.set_axis_widgets('z', scatter_dict['z']['field'])
 
         if (scatter_dict['c']['field'] is not None) and (scatter_dict['c']['field'] != ''):
             if scatter_dict['c']['field'] not in self.data[self.sample_id].axis_dict.keys():
                 self.plot_style.set_color_axis_widgets()
-                self.plot_style.set_axis_widgets('c', scatter_dict['c']['field'])
+                # self.plot_style.set_axis_widgets('c', scatter_dict['c']['field'])
 
         return scatter_dict
 
@@ -814,40 +815,121 @@ class Main():
         #else:
         #    print('(add_colorbar) Unknown type: '+cbartype)
 
+    # -------------------------------------
+    # Field type and field combobox pairs
+    # -------------------------------------
+    # updates field type comboboxes for analyses and plotting
+    def update_field_type_combobox(self, comboBox, addNone=False, plot_type=''):
+        """Updates field type combobox
+        
+        Used to update ``MainWindow.comboBoxHistFieldType``, ``MainWindow.comboBoxFilterFieldType``,
+        ``MainWindow.comboBoxFieldTypeX``, ``MainWindow.comboBoxFieldTypeY``,
+        ``MainWindow.comboBoxFieldTypeZ``, and ``MainWindow.comboBoxColorByField``
+
+        Parameters
+        ----------
+        combobox : QComboBox
+            The combobox to update.
+        addNone : bool
+            Adds ``None`` to the top of the ``combobox`` list
+        plot_type : str
+            The plot type helps to define the set of field types available, by default ``''`` (no change)
+        """
+        if self.sample_id == '':
+            return
+
+        data_type_dict = self.data[self.sample_id].processed_data.get_attribute_dict('data_type')
+
+        match plot_type.lower():
+            case 'correlation' | 'histogram' | 'tec':
+                if 'cluster' in data_type_dict:
+                    field_list = ['cluster']
+                else:
+                    field_list = []
+            case 'cluster score':
+                if 'cluster score' in data_type_dict:
+                    field_list = ['cluster score']
+                else:
+                    field_list = []
+            case 'cluster':
+                if 'cluster' in data_type_dict:
+                    field_list = ['cluster']
+                else:
+                    field_list = ['cluster score']
+            case 'cluster performance':
+                field_list = []
+            case 'pca score':
+                if 'pca score' in data_type_dict:
+                    field_list = ['PCA score']
+                else:
+                    field_list = []
+            case 'ternary map':
+                self.labelCbarDirection.setEnabled(True)
+                self.comboBoxCbarDirection.setEnabled(True)
+            case _:
+                field_list = ['Analyte', 'Analyte (normalized)']
+
+                # add check for ratios
+                if 'ratio' in data_type_dict:
+                    field_list.append('Ratio')
+                    field_list.append('Ratio (normalized)')
+
+                if 'pca score' in data_type_dict:
+                    field_list.append('PCA score')
+
+                if 'cluster' in data_type_dict:
+                    field_list.append('Cluster')
+
+                if 'cluster score' in data_type_dict:
+                    field_list.append('Cluster score')
+
+        # self.plot_style.toggle_style_widgets()
+
+        # add None to list?
+        if addNone:
+            field_list.insert(0, 'None')
+
+        # clear comboBox items
+        comboBox.clear()
+        # add new items
+        comboBox.addItems(field_list)
+
+
     # -------------------------------
     # Blockly functions
     # -------------------------------
     # gets the set of fields types
-    def update_blockly_field_types(self,workflow):
+    def update_blockly_field_types(self,workflow = None):
         """Gets the fields types available and invokes workflow function
           which updates field type dropdown in blockly workflow
 
         Set names are consistent with QComboBox.
         """
-
-        field_type_list = ['Analyte', 'Analyte (normalized)']
         
         data_type_dict = self.data[self.sample_id].processed_data.get_attribute_dict('data_type')
-
         # add check for ratios
         if 'ratio' in data_type_dict:
-            field_type_list.append('Ratio')
-            field_type_list.append('Ratio (normalized)')
+            self.field_type_list.append('Ratio')
+            self.field_type_list.append('Ratio (normalized)')
 
         if 'pca score' in data_type_dict:
-            field_type_list.append('PCA score')
+            self.field_type_list.append('PCA score')
 
         if 'cluster' in data_type_dict:
-            field_type_list.append('Cluster')
+            self.field_type_list.append('Cluster')
 
         if 'cluster score' in data_type_dict:
-            field_type_list.append('Cluster score')
+            self.field_type_list.append('Cluster score')
+
+        if hasattr(self,'field_selection_dialog'):
+            self.field_selection_dialog.update_field_type_list() 
         
-        workflow.update_field_type_list(field_type_list) #invoke workflow function to update blockly 'fieldType' dropdowns
+        if workflow:
+            workflow.update_field_type_list(self.field_type_list) #invoke workflow function to update blockly 'fieldType' dropdowns
 
     def update_blockly_analyte_dropdown(self,filename, unsaved_changes):
         """update analyte/ratio lists dropdown with the selected analytes/ratios
-
+  
         Parameters
             ----------
             filename: str
@@ -861,7 +943,7 @@ class Main():
         self.workflow.refresh_analyte_dropdown(analyte_list_names)
 
     def update_analyte_selection_from_file(self,filename):
-        filepath = os.path.join(self.BASEDIR, 'resources/analytes list', filename+'.txt')
+        filepath = os.path.join(self.BASEDIR, 'resources/analytes_list', filename+'.txt')
         analyte_dict ={}
         with open(filepath, 'r') as f:
             for line in f.readlines():
@@ -870,6 +952,16 @@ class Main():
 
         self.update_analyte_ratio_selection(analyte_dict)
 
+
+    def update_field_list_from_file(self,filename):
+        filepath = os.path.join(self.BASEDIR, 'resources/fields_list', filename+'.txt')
+        field_dict ={}
+        with open(filepath, 'r') as f:
+            for line in f.readlines():
+                field, field_type = line.replace('\n','').split('||')
+                field_dict[field_type] = field
+
+        print(field_dict)
 
     def update_bounds(self,ub=None,lb=None,d_ub=None,d_lb=None):
         sample_id = self.sample_id

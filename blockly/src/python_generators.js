@@ -35,7 +35,7 @@ pythonGenerator.forBlock['select_samples'] = function(block, generator) {
     return code;
 };
 
-pythonGenerator.forBlock['select_analytes'] = function(block) {
+pythonGenerator.forBlock['select_analytes'] = function(block,generator) {
     var analyteSelectorValue = block.getFieldValue('analyteSelectorDropdown');
     var code = '';
     
@@ -53,7 +53,33 @@ pythonGenerator.forBlock['select_analytes'] = function(block) {
     return code;
 };
   
-  
+pythonGenerator.forBlock['select_field_from_type'] = function(block, generator) {
+  // 1) Retrieve the user-chosen values
+  const fieldTypeValue = block.getFieldValue('fieldType') || '';
+  const fieldValue     = block.getFieldValue('field') || '';
+
+  // 2) Build some Python statements
+  //    For example, maybe we call a Python method 'select_field'
+  //    with the chosen fieldType and field. Adjust as needed:
+  let code = '';
+
+  // If user left it at default ('' or 'Select...'), skip
+  if (fieldValue !== '' && fieldValue !== 'Select...') {
+    const quotedFieldType = generator.quote_(fieldTypeValue);
+    const quotedField     = generator.quote_(fieldValue);
+
+    code += `# select_field_from_type block\n`;
+    code += `self.main.select_field_from_type(${quotedFieldType}, ${quotedField})\n`;
+  } else {
+    code += `# select_field_from_type block: no field selected\n`;
+  }
+
+  // 3) Return statement code
+  return code;
+}; 
+
+
+
 // Python code generator for the select_analytes block
 pythonGenerator.forBlock['select_ref_val'] = function(block) {
     const refValue = block.getFieldValue('refValueDropdown'); // Get selected dropdown value
@@ -108,18 +134,18 @@ pythonGenerator.forBlock['neg_handling_method'] = function(block) {
     return code;
 };
 
-pythonGenerator.forBlock['select_custom_lists'] = function(block) {
-    var analyteSelectorValue = block.getFieldValue('fieldSelectorDropdown');
+pythonGenerator.forBlock['select_fields_list'] = function(block,generator) {
+    var fieldSelectorDropdownValue = block.getFieldValue('fieldSelectorDropdown');
     var code = '';
     
-    if (analyteSelectorValue === 'Current selection') {
+    if (fieldSelectorDropdownValue === 'Current selection') {
         code = '';
-    } else if (analyteSelectorValue === 'Field selector') {
-        code = 'self.main.open_select_custom_field_dialog()\n';
-    } else if (analyteSelectorValue === 'Saved lists') {
+    } else if (fieldSelectorDropdownValue === 'Field selector') {
+        code = 'self.main.open_field_selector_dialog()\n';
+    } else if (fieldSelectorDropdownValue === 'Saved lists') {
         var savedListName = block.getFieldValue('fieldSavedListsDropdown');
         var quotedListName = generator.quote_(savedListName);
-        code = 'self.main.update_analyte_selection_from_file(' + quotedListName + ')\n';
+        code = 'self.main.update_field_list_from_file(' + quotedListName + ')\n';
     }
     return code;
 };
@@ -185,34 +211,24 @@ pythonGenerator.forBlock['plot_map'] = function(block, generator) {
     return code;
 };
 
-pythonGenerator.forBlock['plot_map'] = function(block, generator) {
+pythonGenerator.forBlock['plot_correlation'] = function(block, generator) {
     // Retrieve the stored fieldType from the block
     const field_type = generator.quote_(block.getFieldValue('fieldType'));
     // Retrieve the stored field from the block
-    const field = generator.quote_(block.getFieldValue('field'));
+    const r_2 = generator.quote_(block.getFieldValue('rSquared'));
 
-    const plot_type = generator.quote_('analyte map');
+    const corr_method = generator.quote_(block.getFieldValue('method'));
     let code = '';
-    code += `style_dict = {}\n`;
-    code += '\n';
     
     // Insert sub-block statements
-    let subBlocksCode = generator.statementToCode(block, 'styling') || ''
+    let subBlocksCode = generator.statementToCode(block, 'Export') || ''
 
     // remove *all* leading spaces:
     subBlocksCode = subBlocksCode.replace(/^ +/gm, '');
 
     code += subBlocksCode + '\n';
-  
-    // update self.main.style.style_dict with `style_dict`
-    code += `if (style_dict):\n` +
-    generator.INDENT +`self.main.plot_style.style_dict[${plot_type}] = {**self.main.plot_style.style_dict[${plot_type}], **style_dict}\n`+
-    generator.INDENT +`print(self.main.plot_style.style_dict[${plot_type}])\n`+
-    generator.INDENT +`self.main.plot_style.set_style_dictionary(${plot_type})\n`+
-    generator.INDENT +`self.main.update_axis_limits(style_dict, ${field})\n`;
-
     // 5) Plot
-    code += `self.main.plot_map_mpl(self.main.sample_id, field_type = ${field_type},field = ${field})\n`;
+    code += `self.main.plot_correlation(corr_method = ${corr_method},squared =${r_2}, field_type = ${field_type},field = ${field})\n`;
     code += `self.main.plot_viewer.show()`
     return code;
 };
@@ -260,7 +276,25 @@ pythonGenerator.forBlock['plot_histogram'] = function(block, generator) {
 };
 
 
+pythonGenerator.forBlock['export_table'] = function(block, generator) {
+  // 1) Gather any statements from sub-blocks attached to FIELDS
+  //    For example, a 'select_fields_list' block might generate code like:
+  //    "fields_data.append(...)"
+  let fieldsCode = generator.statementToCode(block, 'FIELDS') || '';
+  
+  // 2) Remove leading spaces (optional, if indentation is unwanted)
+  fieldsCode = fieldsCode.replace(/^ +/gm, '');
 
+  // 3) Build final statement code
+  let code = `
+fields_data = []
+${fieldsCode}
+self.main.export_table(fields_data)
+`.trimStart();
+
+  // Return the statement code
+  return code + '\n';
+};
 
 
 

@@ -32,7 +32,7 @@ class FieldDialog(QDialog, Ui_FieldDialog):
         # Example: only continue if sample_id is given in the parent (this is your existing logic).
         if not getattr(parent, 'sample_id', None):
             return
-
+        self.parent = parent
         # Store the reference to BASEDIR from parent (if needed).
         self.default_dir = os.path.join(parent.BASEDIR, "resources", "field_list") \
                            if hasattr(parent, "BASEDIR") else os.getcwd()
@@ -68,6 +68,8 @@ class FieldDialog(QDialog, Ui_FieldDialog):
         # Connect signals/slots
         # You should have a comboBoxFieldType in your .ui for selecting the field type.
         # If you named it differently, adjust accordingly.
+        
+        self.update_field_type_list() 
         self.comboBoxFieldType.currentIndexChanged.connect(self.update_field_list)
 
         self.toolButtonAddField.clicked.connect(self.add_fields)
@@ -83,7 +85,7 @@ class FieldDialog(QDialog, Ui_FieldDialog):
 
     # --------------------------------------------------------------------------
     # UI helpers
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def update_window_title(self):
         """Updates the window title based on the filename and unsaved changes."""
         title = f"{self.base_title} - {self.filename}"
@@ -91,13 +93,21 @@ class FieldDialog(QDialog, Ui_FieldDialog):
             title += '*'
         self.setWindowTitle(title)
 
+    def update_field_type_list(self):
+        """Populate the comboBoxfieldTypes with available field types."""
+        self.comboBoxFieldType.clear()
+        field_type_list = self.parent.field_type_list
+        for f in field_type_list:
+            self.comboBoxFieldType.addItem(f)
+    
     def update_field_list(self):
         """Populate the listWidgetFieldList with fields for the current field type."""
         self.listWidgetFieldList.clear()
         field_type = self.comboBoxFieldType.currentText()
-        if field_type in self.fields:
-            for f in self.fields[field_type]:
-                self.listWidgetFieldList.addItem(f)
+        
+        field_list = self.parent.get_field_list(field_type)
+        for f in field_list:
+            self.listWidgetFieldList.addItem(f)
 
     def update_table(self):
         """Refresh the tableWidgetSelectedFields to match self.selected_fields."""

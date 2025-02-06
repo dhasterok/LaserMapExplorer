@@ -329,7 +329,7 @@ class MplCanvas(FigureCanvas):
 
         # Update distance label in widget 
         distance_text = f"{distance:.4g} {self.parent.preferences['Units']['Distance']}"
-        self.parent.labelSVInfoDistance.setText(f"D: {distance_text}")
+        self.ui.labelSVInfoDistance.setText(f"D: {distance_text}")
 
         # Update distance label on map
         if self.map_flag:

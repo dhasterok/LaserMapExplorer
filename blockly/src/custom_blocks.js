@@ -196,6 +196,9 @@ Blockly.common.defineBlocks({
 Blockly.common.defineBlocks({
     select_field_from_type:{
     init: function() {
+        this.appendDummyInput('NAME')
+                .setAlign(Blockly.inputs.Align.CENTRE)
+                .appendField('Select fields from field type');
         // Field type dropdown
         this.appendDummyInput('FIELD_TYPE')
             .appendField('Field type')
@@ -205,7 +208,7 @@ Blockly.common.defineBlocks({
                     ['Analyte (Normalised)', 'Analyte (Normalised)'],
                     ['PCA Score', 'PCA Score'],
                     ['Cluster', 'Cluster']
-                ], updateFieldDropdown.bind(this)), // bind the callback
+                ], updateFieldDropdown.bind(this,null)), // bind the callback
                 'fieldType'
             );
 
@@ -223,6 +226,11 @@ Blockly.common.defineBlocks({
         this.setColour(225);
         this.setTooltip('Select a field type and a specific field.');
         this.setHelpUrl('');
+
+        if (!this.isInFlyout) {
+            const initialFieldType = this.getFieldValue('fieldType');
+            updateFieldDropdown(this,initialFieldType);
+        }
     }
 }
 });
@@ -232,7 +240,7 @@ Blockly.common.defineBlocks({
         init: function() {
             this.appendDummyInput('NAME')
                 .setAlign(Blockly.inputs.Align.CENTRE)
-                .appendField('Select fields');
+                .appendField('Select fields from');
 
             // Initialize the field selector dropdown
             this.appendDummyInput('SELECTOR')
@@ -570,84 +578,6 @@ const field_select = {
 
 // Register the block with Blockly
 Blockly.common.defineBlocks({ field_select: field_select });
-
-// Define the select_analytes block
-const select_custom_lists = {
-    init: function() {
-        this.appendDummyInput('NAME')
-            .setAlign(Blockly.inputs.Align.CENTRE)
-            .appendField('Select saved custom list');
-
-        // Initialize the analyte selector dropdown
-        this.appendDummyInput('SELECTOR')
-            .appendField(new Blockly.FieldLabelSerializable('Custom field list from'), 'NAME')
-            .appendField(new Blockly.FieldDropdown(
-                [['Field selector', 'Field selector'],
-                 ['Current selection', 'Current selection'],
-                 ['Saved lists', 'Saved lists']]
-            ), 'fieldSelectorDropdown');
-
-        // Add the analyte saved lists dropdown, initially hidden
-        this.appendDummyInput('SAVED_LISTS')
-            .appendField('Saved list')
-            .appendField(new Blockly.FieldDropdown([['None', 'None']]), 'fieldSavedListsDropdown')
-            .setVisible(false);
-
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setTooltip('');
-        this.setHelpUrl('');
-        this.setColour(225);
-
-        // Handle the selection change in analyteSelectorDropdown
-        const dropdown = this.getField('fieldSavedListsDropdown');
-        dropdown.setValidator(this.fieldSelectorChanged.bind(this));
-    },
-
-    fieldSelectorChanged: function(newValue) {
-        const savedListsInput = this.getInput('SAVED_LISTS');
-        if (newValue === 'Saved lists') {
-            savedListsInput.setVisible(true);
-            // Get current selection if any
-            const savedListDropdown = this.getField('fieldSavedListsDropdown');
-            const currentSelection = savedListDropdown ? savedListDropdown.getValue() : null;
-            // Update the saved lists dropdown options
-            this.updateSavedListsDropdown(currentSelection);
-        } else {
-            savedListsInput.setVisible(false);
-        }
-        // Refresh the block to reflect the visibility change
-        this.render();
-        return newValue;
-    },
-
-    // Updated updateSavedListsDropdown function
-    updateSavedListsDropdown: function(selectedValue) {
-        // Call the Python function getSavedAnalyteLists through the WebChannel
-        window.blocklyBridge.getSavedFieldLists().then((response) => {
-            // Map the response to the required format for Blockly dropdowns
-            const options = response.map(option => [option, option]);
-            const dropdown = this.getField('analyteSavedListsDropdown');
-            if (dropdown) {
-                // Update the dropdown options
-                dropdown.menuGenerator_ = options;
-
-                // Preserve the selected value if it exists in the new options
-                if (selectedValue && options.some(opt => opt[1] === selectedValue)) {
-                    dropdown.setValue(selectedValue);
-                } else if (options.length > 0) {
-                    dropdown.setValue(options[0][1]);  // Set the first option as the default
-                }
-
-                dropdown.forceRerender();  // Refresh dropdown to display updated options
-            }
-        }).catch(error => {
-            console.error('Error fetching saved analyte lists:', error);
-        });
-    }
-};
-
-Blockly.common.defineBlocks({ select_custom_lists: select_custom_lists });
 
 
 const properties = {
@@ -1031,7 +961,7 @@ const plot_map = {
 };
 Blockly.common.defineBlocks({ plot_map: plot_map });
 
-const correlation_analysis = {
+const plot_correlation = {
     init: function() {
         this.appendDummyInput('VARIABLE1')
             .appendField('Correlation');
@@ -1041,7 +971,7 @@ const correlation_analysis = {
                 ['Pearson', 'pearson'],
                 ['Spearman', 'spearman'],
                 ['Kendall', 'kendall']
-            ]), 'METHOD');
+            ]), 'method');
         this.appendDummyInput()
             .appendField('R^2')
             .appendField(new Blockly.FieldCheckbox('TRUE'), 'rSquared');
@@ -1055,7 +985,7 @@ const correlation_analysis = {
         this.setHelpUrl('');
     }
 };
-Blockly.Blocks['correlation_analysis'] = correlation_analysis;
+Blockly.Blocks['plot_correlation'] = plot_correlation;
 
 
 const plot_histogram = {

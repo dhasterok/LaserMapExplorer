@@ -1,0 +1,7 @@
+Analyte,Ho165
+Analyte,Zr91
+Analyte,Ca43
+Analyte,Li7
+Analyte (normalized),Dy163
+Analyte (normalized),Nd146
+Analyte (normalized),Th232

@@ -1,11 +1,13 @@
 from PyQt5.QtWidgets import ( 
-        QLineEdit, QTableWidget, QComboBox, QPushButton, QCheckBox, QWidget, QTreeView, QAction, QMenu,
+        QWidget, QLineEdit, QTableWidget, QComboBox, QPushButton, QCheckBox, QWidget, QTreeView, QAction, QMenu,
         QDockWidget
     )
-from PyQt5.QtGui import QStandardItem, QStandardItemModel, QFont, QDoubleValidator, QIcon, QCursor 
-from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QStandardItem, QStandardItemModel, QFont, QDoubleValidator, QIcon, QCursor, QPainter, QColor
+from PyQt5.QtCore import Qt, QRect, QPropertyAnimation, pyqtProperty, pyqtSignal
 import src.common.format as fmt
 import pandas as pd
+
+from src.common.colorfunc import is_valid_hex_color
 
 class CustomLineEdit(QLineEdit):
     def __init__(self, parent=None, value=0.0, precision=4, threshold=1e4, toward=None, validator=QDoubleValidator()):
@@ -414,3 +416,84 @@ class CustomDockWidget(QDockWidget):
         """Override the close event to hide the dock widget instead of closing it."""
         self.hide()
         event.ignore()  # Ignore the close event to prevent the widget from being removed.
+
+class ToggleSwitch(QWidget):
+    stateChanged = pyqtSignal(bool)  # Signal emitted when the state changes
+
+    def __init__(self, parent=None, height=24, duration=100, fg_color=None, bg_left_color=None, bg_right_color=None):
+        super().__init__(parent)
+        self.height = height
+        self.width = height * 2
+        self.setFixedSize(self.width, self.height)
+        self._checked = False
+        self._thumb_pos = 2  # Initial position
+        self.animation = QPropertyAnimation(self, b"thumb_pos")
+        self.animation.setDuration(duration)  # Smooth animation
+
+        if is_valid_hex_color(fg_color):
+            self.fg_color = fg_color
+        else:
+            self.fg_color = "#f0f0f0"
+
+        # background colors
+        if is_valid_hex_color(bg_left_color):
+            self.bg_left_color = bg_left_color
+        else:
+            self.bg_left_color = "#ffffff"
+        if is_valid_hex_color(bg_right_color):
+            self.bg_right_color = bg_right_color
+        else:
+            self.bg_right_color="#478ae4"
+
+    def toggle(self):
+        """Toggle switch state and emit signal"""
+        self._checked = not self._checked
+        self.animation.setStartValue(self._thumb_pos)
+        self.animation.setEndValue(self.width - self.height + 2 if self._checked else 2)
+        self.animation.start()
+
+        self.stateChanged.emit(self._checked)  # Emit signal
+
+    def setChecked(self, state):
+        if not isinstance(state, bool):
+            TypeError("ToggleSwitch requires state argument to be a bool")
+
+        if state == self._checked:
+            return
+
+        self.toggle()
+
+
+    def isChecked(self):
+        """Return the current state of the toggle switch"""
+        return self._checked
+
+    def mousePressEvent(self, event):
+        """Toggle switch on click"""
+        if event.button() == Qt.LeftButton:
+            self.toggle()
+
+    def paintEvent(self, event):
+        """Draw switch"""
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+
+        # Draw background
+        bg_color = QColor(self.bg_right_color) if self._checked else QColor(self.bg_left_color)
+        painter.setBrush(bg_color)
+        painter.setPen(Qt.NoPen)
+        painter.drawRoundedRect(0, 0, self.width, self.height, self.height // 2, self.height // 2)
+
+        # Draw sliding thumb
+        thumb_size = self.height - 4
+        painter.setBrush(QColor(self.fg_color))
+        painter.drawEllipse(QRect(self._thumb_pos, 2, thumb_size, thumb_size))
+
+    def get_thumb_pos(self):
+        return self._thumb_pos
+
+    def set_thumb_pos(self, pos):
+        self._thumb_pos = pos
+        self.update()  # Redraw switch
+
+    thumb_pos = pyqtProperty(int, get_thumb_pos, set_thumb_pos)

@@ -215,14 +215,14 @@ class AnalyteDialog(QDialog, Ui_Dialog):
             event.accept()
 
     def update_all_combos(self):
-        """Updates the scale combo box (`comboBoxScale`) and the combo boxes within ``tableWidgetSelected`."""
+        """Updates the scale combo box (``comboBoxScale``) and the combo boxes within ``tableWidgetSelected``."""
         # Get the currently selected value in comboBoxScale
         selected_scale = self.comboBoxScale.currentText()
 
         # Iterate through all rows in tableWidgetSelected to update combo boxes
         for row in range(self.tableWidgetSelected.rowCount()):
             combo = self.tableWidgetSelected.cellWidget(row, 1)
-            if combo is not None:  # Make sure there is a combo box in this cell
+            if isinstance(combo,QComboBox):  # Make sure there is a combo box in this cell
                 combo.setCurrentText(selected_scale)  # Update the combo box value
 
         # Mark as unsaved changes
@@ -514,6 +514,8 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         for i in range(self.tableWidgetSelected.rowCount()):
             analyte_pair = self.tableWidgetSelected.item(i, 0).text()
             comboBox = self.tableWidgetSelected.cellWidget(i, 1)
+            if not isinstance(comboBox, QComboBox):
+                return
             self.norm_dict[analyte_pair] = comboBox.currentText()
 
             # update norm in data

@@ -4,9 +4,9 @@ from PyQt5.QtGui import QStandardItem, QStandardItemModel, QIcon, QFont, QIntVal
 from PyQt5.QtWidgets import ( 
         QMessageBox, QInputDialog, QWidget, QTableWidgetItem, QVBoxLayout, QHBoxLayout, QGroupBox,
         QToolButton, QComboBox, QSpinBox, QSizePolicy, QFormLayout, QListView, QToolBar,
-        QAction, QLabel, QHeaderView, QTableWidget, QScrollArea, QMainWindow
+        QAction, QLabel, QHeaderView, QTableWidget, QScrollArea, QMainWindow, QWidgetAction
     )
-from src.common.CustomWidgets import CustomDockWidget, CustomLineEdit, CustomComboBox
+from src.common.CustomWidgets import CustomDockWidget, CustomLineEdit, CustomComboBox, ToggleSwitch
 from src.app.UIControl import UIFieldLogic
 from pyqtgraph import ( ScatterPlotItem )
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
@@ -21,6 +21,8 @@ class ProfileDock(CustomDockWidget, UIFieldLogic):
             raise TypeError("Parent must be an instance of QMainWindow.")
 
         super().__init__(parent)
+        self.main_window = parent
+
         self.profiling = Profiling(self)
 
         scroll_area = QScrollArea()
@@ -33,6 +35,13 @@ class ProfileDock(CustomDockWidget, UIFieldLogic):
         toolbar = QToolBar("Profile Toolbar", self)
         toolbar.setIconSize(QSize(24, 24))
         toolbar.setMovable(False)  # Optional: Prevent toolbar from being dragged out
+
+        # profile toggle
+        self.profile_toggle = ToggleSwitch(self, height=18, bg_left_color="#D8ADAB", bg_right_color="#A8B078")
+        self.profile_toggle.setChecked(False)
+        self.action_profile_toggle = QWidgetAction(self)
+        self.action_profile_toggle.setDefaultWidget(self.profile_toggle)
+        self.profile_toggle.stateChanged.connect(self.profile_state_changed)
 
         # open profiles
         self.actionOpenProfile = QAction()
@@ -111,6 +120,8 @@ class ProfileDock(CustomDockWidget, UIFieldLogic):
         self.actionExport.setIcon(QIcon(":resources/icons/icon-save-file-64.svg"))
         self.actionExport.setToolTip("Export profile image or data")
 
+        toolbar.addAction(self.action_profile_toggle)
+        toolbar.addSeparator()
         toolbar.addAction(self.actionOpenProfile)
         toolbar.addWidget(self.profile_label)
         toolbar.addWidget(self.profile_combobox)
@@ -295,7 +306,7 @@ class ProfileDock(CustomDockWidget, UIFieldLogic):
         self.point_sort_combobox.currentIndexChanged.connect(self.profiling.plot_profile_and_table)
         self.radius_line_edit.setValidator(QIntValidator())
         self.threshold_line_edit.setValidator(QIntValidator())
-        self.actionControlPoints.triggered.connect(lambda: self.parent.comboBoxPlotType.setCurrentText("analyte map"))
+        self.actionControlPoints.triggered.connect(lambda: self.main_window.comboBoxPlotType.setCurrentText("analyte map"))
         self.actionControlPoints.triggered.connect(lambda: self.profiling.on_profile_selected(self.profile_combobox.currentText()))
         # not implemented
         #self.toolButtonPointUp.clicked.connect(lambda: self.table_fcn.move_row_up(self.tableWidgetProfilePoints))
@@ -332,8 +343,20 @@ class ProfileDock(CustomDockWidget, UIFieldLogic):
         self.actionEdit.setChecked(False)
         self.actionTogglePoint.triggered.connect(self.profiling.toggle_point_visibility)
         
-        self.actionControlPoints.triggered.connect(lambda: self.parent.reset_checked_items('profiling'))
-        self.actionMovePoint.triggered.connect(lambda: self.parent.reset_checked_items('profiling'))
+        self.actionControlPoints.triggered.connect(lambda: self.main_window.reset_checked_items('profiling'))
+        self.actionMovePoint.triggered.connect(lambda: self.main_window.reset_checked_items('profiling'))
+
+        self.visibilityChanged.connect(self.update_dock_visibility)
+
+    def update_dock_visibility(self):
+        if not self.profile_toggle.isChecked():
+            return
+
+        self.main_window.profile_state = False
+        self.profile_toggle.setChecked(False)
+
+        self.main_window.update_SV()
+
         
     def update_profile_spinbox(self):
         """Updates the maximum number of subplots that can be selected.
@@ -342,6 +365,13 @@ class ProfileDock(CustomDockWidget, UIFieldLogic):
         """        
         n = self.num_subplots_spinbox.value()
         self.selected_subplot_spinbox.setMaximum(int(n))
+
+    def profile_state_changed(self):
+        self.main_window.profile_state = self.profile_toggle.isChecked()
+        if self.profile_toggle.isChecked():
+            pass
+
+        self.main_window.update_SV()
 
 # Profiles
 # -------------------------------
@@ -387,7 +417,8 @@ class Profiling:
         parent : object
             The main window object that the profiling class interacts with.
         """
-        self.parent = parent
+        self.profile_dock = parent
+        self.main_window = parent.main_window
         # Initialize other necessary attributes
         # Initialize variables and states as needed
         self.profiles = {} # holds profile information in format:  {sample_id: {profile_name:Profile instance}} 
@@ -415,7 +446,7 @@ class Profiling:
         None
         """
         # add sample id to dictionary
-        for sample_id in self.parent.sample_ids:
+        for sample_id in self.main_window.sample_ids:
             if sample_id not in self.profiles:
                 self.profiles[sample_id] = {}
 
@@ -606,10 +637,10 @@ class Profiling:
         -------
         None
         """
-        self.parent.comboBoxProfileList.clear()
-        self.parent.comboBoxProfileList.addItem('Create New Profile')
-        for profile_name in self.profiles[self.parent.sample_id].keys():
-            self.parent.comboBoxProfileList.addItem(profile_name)
+        self.profile_dock.comboBoxProfileList.clear()
+        self.profile_dock.comboBoxProfileList.addItem('Create New Profile')
+        for profile_name in self.profiles[self.main_window.sample_id].keys():
+            self.profile_dock.comboBoxProfileList.addItem(profile_name)
 
         self.new_plot = True #resets new plot flag
 
@@ -656,39 +687,39 @@ class Profiling:
         """
         self.new_plot= True #reset new plot flag
         if profile_name == 'Create New Profile':  # create a new profile instance and store instance in self.profiles
-            new_profile_name, ok = QInputDialog.getText(self.parent, 'New Profile', 'Enter new profile name:')
+            new_profile_name, ok = QInputDialog.getText(self.profile_dock.parent, 'New Profile', 'Enter new profile name:')
             if ok and new_profile_name:
-                if new_profile_name in self.profiles[self.parent.sample_id]:
-                    QMessageBox.warning(self.parent, 'Error', 'Profile name already exists!')
+                if new_profile_name in self.profiles[self.profile_dock.sample_id]:
+                    QMessageBox.warning(self.profile_dock.parent, 'Error', 'Profile name already exists!')
                 else:
                     self.clear_profiles()  # clear profiling plots and  contents
                     # obtain metadata of profiles from UI
-                    sort = self.parent.comboBoxProfileSort.currentText()
-                    radius = self.parent.lineEditPointRadius.text()
-                    thresh = self.parent.lineEditPointRadius.text()
-                    int_dist = self.parent.lineEditIntDist.text()
-                    point_error = self.parent.comboBoxPointType.currentText()
+                    sort = self.profile_dock.comboBoxProfileSort.currentText()
+                    radius = self.profile_dock.lineEditPointRadius.text()
+                    thresh = self.profile_dock.lineEditPointRadius.text()
+                    int_dist = self.profile_dock.lineEditIntDist.text()
+                    point_error = self.profile_dock.comboBoxPointType.currentText()
 
                     # create new profile instance
-                    self.profiles[self.parent.sample_id][new_profile_name] = Profile(new_profile_name, sort, radius, thresh, int_dist, point_error)
+                    self.profiles[self.main_window.sample_id][new_profile_name] = Profile(new_profile_name, sort, radius, thresh, int_dist, point_error)
                     # add profile name to profile table
-                    self.parent.comboBoxProfileList.addItem(new_profile_name)
-                    self.parent.comboBoxProfileList.setCurrentText(new_profile_name)
+                    self.profile_dock.comboBoxProfileList.addItem(new_profile_name)
+                    self.profile_dock.comboBoxProfileList.setCurrentText(new_profile_name)
                     self.profile_name = new_profile_name
             else:
-                self.parent.comboBoxProfileList.setCurrentIndex(0)  # Reset to 'Create New Profile'
+                self.profile_dock.comboBoxProfileList.setCurrentIndex(0)  # Reset to 'Create New Profile'
         else:
             if profile_name != self.profile_name: #if new profile is selected
                 self.clear_profiles()  # clear profiling plots and  contents
                 # plot existing profile and load profile metadata from dictionary
                 self.profile_name = profile_name
-                self.plot_existing_profile(self.parent.plot)
-                profile = self.profiles[self.parent.sample_id][self.profile_name]
-                self.parent.comboBoxProfileSort.setCurrentText(profile.sort)
-                self.parent.lineEditPointRadius.setText(profile.radius)
-                self.parent.lineEditPointRadius.setText(profile.y_axis_thresh)
-                self.parent.lineEditIntDist.setText(profile.int_dist)
-                self.parent.comboBoxPointType.setCurrentText(profile.point_error)
+                self.plot_existing_profile(self.profile_dock.plot)
+                profile = self.profiles[self.main_window.sample_id][self.profile_name]
+                self.profile_dock.comboBoxProfileSort.setCurrentText(profile.sort)
+                self.profile_dock.lineEditPointRadius.setText(profile.radius)
+                self.profile_dock.lineEditPointRadius.setText(profile.y_axis_thresh)
+                self.profile_dock.lineEditIntDist.setText(profile.int_dist)
+                self.profile_dock.comboBoxPointType.setCurrentText(profile.point_error)
                 self.plot_profiles()
                 self.update_table_widget()
 
@@ -764,8 +795,8 @@ class Profiling:
         -------
         None
         """
-        self.sample_id = self.parent.sample_id
-        self.data = self.parent.data[self.sample_id]
+        self.sample_id = self.main_window.sample_id
+        self.data = self.main_window.data[self.sample_id]
         self.array_x = self.data.array_size[1]  # no of columns
         self.array_y = self.data.array_size[0]  # no of rows
         interpolate = False
@@ -773,30 +804,29 @@ class Profiling:
         profile_points = self.profiles[self.sample_id][self.profile_name].points
         scatter_points = self.profiles[self.sample_id][self.profile_name].scatter_points
 
-        radius = int(self.parent.lineEditPointRadius.text())
-        if event.button() == Qt.MouseButton.RightButton and self.parent.toolButtonPlotProfile.isChecked():
+        radius = int(self.profile_dock.lineEditPointRadius.text())
+        if event.button() == Qt.MouseButton.RightButton and self.profile_dock.toolButtonPlotProfile.isChecked():
             # Turn off profiling points
-            self.parent.toolButtonPlotProfile.setChecked(False)
-            self.parent.toolButtonPointMove.setEnabled(True)
+            self.profile_dock.toolButtonPlotProfile.setChecked(False)
+            self.profile_dock.toolButtonPointMove.setEnabled(True)
             return
-        elif event.button() == Qt.MouseButton.RightButton and self.parent.toolButtonPointMove.isChecked():
+        elif event.button() == Qt.MouseButton.RightButton and self.profile_dock.toolButtonPointMove.isChecked():
             # Turn off moving point, reset point_selected
-            self.parent.toolButtonPointMove.setChecked(False)
+            self.profile_dock.toolButtonPointMove.setChecked(False)
             self.point_selected = False
             return
         elif event.button() == Qt.MouseButton.RightButton or event.button() == Qt.MouseButton.MiddleButton:
             return
-        elif event.button() == Qt.MouseButton.LeftButton and not (self.parent.toolButtonPlotProfile.isChecked()) and self.parent.toolButtonPointMove.isChecked():
+        elif event.button() == Qt.MouseButton.LeftButton and not (self.profile_dock.toolButtonPlotProfile.isChecked()) and self.profile_dock.toolButtonPointMove.isChecked():
             # move point
             if self.point_selected:
                 self.plot_scatter_points(scatter_points, x, y,point_index=self.point_index)
                 self.compute_profile_points(profile_points, radius, x, y, x_i, y_i, self.point_index)
                 self.point_index = -1              # reset index 
-                if self.parent.toolButtonProfileInterpolate.isChecked():  # reset interpolation if selected
+                if self.profile_dock.toolButtonProfileInterpolate.isChecked():  # reset interpolation if selected
                     self.clear_interpolation()
-                    self.interpolate_points(interpolation_distance=int(self.parent.lineEditIntDist.text()), radius=int(self.parent.lineEditPointRadius.text()))
+                    self.interpolate_points(interpolation_distance=int(self.profile_dock.lineEditIntDist.text()), radius=int(self.profile_dock.lineEditPointRadius.text()))
                 # switch to profile tab
-                self.parent.tabWidget.setCurrentIndex(self.parent.bottom_tab['profile'])
                 self.plot_profiles()  # Plot averaged profile value on profiles plots with error bars
                 self.update_table_widget()
             else:
@@ -815,7 +845,6 @@ class Profiling:
             # compute profile value for all fields 
             self.compute_profile_points(profile_points, radius, x, y, x_i, y_i)
             # switch to profile tab
-            self.parent.tabWidget.setCurrentIndex(self.parent.bottom_tab['profile'])
             if self.new_plot: #add field name to profile list view if its a new plot
                 self.add_field_to_listview(field)
                 self.new_plot = False
@@ -842,8 +871,8 @@ class Profiling:
         -------
         None
         """
-        for (field,view), (_, plot,  array) in self.parent.lasermaps.items():
-            canvas_view  =self.parent.canvasWindow.currentIndex() #check if plot on single view or multi view
+        for (field,view), (_, plot,  array) in self.main_window.lasermaps.items():
+            canvas_view  =self.main_window.canvasWindow.currentIndex() #check if plot on single view or multi view
             if view == canvas_view and self.array_x ==array.shape[1] and self.array_y ==array.shape[0] : #ensure points within boundaries of plot
                 # Create a scatter plot item at the clicked position
                 scatter = ScatterPlotItem([x], [y], symbol=symbol, size=size)
@@ -1048,7 +1077,7 @@ class Profiling:
         """
         # Clear existing plots
         self.clear_plot()
-        sample_id = self.parent.sample_id
+        sample_id = self.main_window.sample_id
         profile_name = self.profile_name
 
         if profile_name in self.profiles[sample_id]:
@@ -1081,7 +1110,7 @@ class Profiling:
         -------
         None
         """
-        # Corrected: Use self.parent.sample_id consistently
+        # Corrected: Use self.main_window.sample_id consistently
         sample_id = self.sample_id
         profile_name = self.profile_name
 
@@ -1100,7 +1129,7 @@ class Profiling:
         # Corrected: Use string literals 'x' and 'y' in the set
         fields = [field for field in profile_points.keys() if field not in {'x', 'y'}]
 
-        if self.parent.toolButtonProfileInterpolate.isChecked():
+        if self.profile_dock.toolButtonProfileInterpolate.isChecked():
             interpolate = True
             # Initialize i_profile_points dictionaries
             i_profile_points.clear()
@@ -1180,13 +1209,13 @@ class Profiling:
         -------
         None
         """
-        if self.parent.sample_id in self.profiles:
-            for profile_name, profile in self.profiles[self.parent.sample_id].items():
+        if self.main_window.sample_id in self.profiles:
+            for profile_name, profile in self.profiles[self.main_window.sample_id].items():
                 scatter_points = profile.scatter_points
                 # Clear scatter points from the plots
                 for (field, view), scatter_list in scatter_points.items():
                     for scatter_item in scatter_list:
-                        plot = self.parent.lasermaps[(field, view)][1]
+                        plot = self.main_window.lasermaps[(field, view)][1]
                         plot.removeItem(scatter_item)
                 # Clear the scatter_points dictionary
                 scatter_points.clear()
@@ -1204,12 +1233,12 @@ class Profiling:
         -------
         None
         """
-        i_profile_points = self.profiles[self.parent.sample_id][self.profile_name].i_points
-        scatter_points = self.profiles[self.parent.sample_id][self.profile_name].scatter_points
+        i_profile_points = self.profiles[self.main_window.sample_id][self.profile_name].i_points
+        scatter_points = self.profiles[self.main_window.sample_id][self.profile_name].scatter_points
         # Remove interpolated scatter points
         for (field, view), scatter_list in scatter_points.items():
             for scatter_item in scatter_list:
-                plot = self.parent.lasermaps[(field, view)][1]
+                plot = self.main_window.lasermaps[(field, view)][1]
                 plot.removeItem(scatter_item)
         # Clear the interpolated profile points and scatter_points
         i_profile_points.clear()
@@ -1227,26 +1256,26 @@ class Profiling:
         fields : list of str, optional
             List of fields to plot. If None, fields are obtained from self.fields_per_subplot.
         num_subplots : int, optional
-            Number of subplots to create. If None, value is obtained from self.parent.spinBoxProfileNumSubplots.
+            Number of subplots to create. If None, value is obtained from self.profile_dock.spinBoxProfileNumSubplots.
         selected_subplot : int, optional
-            Index of the selected subplot to plot on (1-based). If None, value is obtained from self.parent.spinBoxProfileSelectedSubplot.
+            Index of the selected subplot to plot on (1-based). If None, value is obtained from self.profile_dock.spinBoxProfileSelectedSubplot.
         interpolate : bool, optional
             Whether to use interpolated points. Default is None, which checks the UI state.
         sort_axis : str, optional
-            Axis to sort the profile points by ('x' or 'y'). If None, obtained from self.parent.comboBoxProfileSort.
+            Axis to sort the profile points by ('x' or 'y'). If None, obtained from self.profile_dock.comboBoxProfileSort.
 
         Returns
         -------
         None
         """
         if interpolate is None:
-            interpolate = self.parent.toolButtonProfileInterpolate.isChecked()
+            interpolate = self.profile_dock.toolButtonProfileInterpolate.isChecked()
 
         # Get num_subplots and selected_subplot from UI if not provided
         if num_subplots is None:
-            num_subplots = self.parent.spinBoxProfileNumSubplots.value()
+            num_subplots = self.profile_dock.spinBoxProfileNumSubplots.value()
         if selected_subplot is None:
-            selected_subplot = self.parent.spinBoxProfileSelectedSubplot.value()
+            selected_subplot = self.profile_dock.spinBoxProfileSelectedSubplot.value()
 
         # Ensure fields_per_subplot has entries for all subplots
         for i in range(num_subplots):
@@ -1254,25 +1283,25 @@ class Profiling:
                 self.fields_per_subplot[i] = []
 
         # Get the point type
-        point_type_text = self.parent.comboBoxPointType.currentText()
+        point_type_text = self.profile_dock.comboBoxPointType.currentText()
         point_type = 'median' if point_type_text == 'median + IQR' else 'mean'
 
         # Get sort axis if not provided
         if sort_axis is None:
-            sort_axis = self.parent.comboBoxProfileSort.currentText().lower()
+            sort_axis = self.profile_dock.comboBoxProfileSort.currentText().lower()
 
         # Decide whether to use interpolated points
         if interpolate:
-            profile_points = self.profiles[self.parent.sample_id][self.profile_name].i_points
+            profile_points = self.profiles[self.main_window.sample_id][self.profile_name].i_points
         else:
-            profile_points = self.profiles[self.parent.sample_id][self.profile_name].points
+            profile_points = self.profiles[self.main_window.sample_id][self.profile_name].points
 
         # Get style and colormap
-        style = self.parent.plot_style
+        style = self.main_window.plot_style
         cmap = style.get_colormap()
 
         # Clear existing plot
-        layout = self.parent.widgetProfilePlot.layout()
+        layout = self.profile_dock.widgetProfilePlot.layout()
         while layout.count():
             child = layout.takeAt(0)
             if child.widget():
@@ -1383,7 +1412,7 @@ class Profiling:
         widget.setLayout(layout)
 
         # Add the new plot widget to the layout
-        self.parent.widgetProfilePlot.layout().addWidget(widget)
+        self.profile_dock.widgetProfilePlot.layout().addWidget(widget)
         widget.show()
 
 
@@ -1470,13 +1499,13 @@ class Profiling:
 
         Removes all profile scatter points from the plots and clears profile data from the table.
         """
-        if self.parent.sample_id == '':
+        if self.main_window.sample_id == '':
             return
 
-        if self.parent.sample_id in self.profiles:  # if profiles have been initiated for the samples
-            if self.profile_name in self.profiles[self.parent.sample_id]:  # if profiles for that sample exist
+        if self.main_window.sample_id in self.profiles:  # if profiles have been initiated for the samples
+            if self.profile_name in self.profiles[self.main_window.sample_id]:  # if profiles for that sample exist
                 # Clear all scatter plot items from the lasermaps
-                for _, (_, plot, _) in self.parent.lasermaps.items():
+                for _, (_, plot, _) in self.main_window.lasermaps.items():
                     items_to_remove = [item for item in plot.listDataItems() if isinstance(item, ScatterPlotItem)]
                     for item in items_to_remove:
                         plot.removeItem(item)
@@ -1485,20 +1514,20 @@ class Profiling:
                 # profile.clear()
 
                 # Clear all data from the table
-                self.parent.control_points_table.clearContents()
+                self.profile_dock.control_points_table.clearContents()
 
                 # Remove all rows
-                self.parent.control_points_table.setRowCount(0)
+                self.profile_dock.control_points_table.setRowCount(0)
 
                 # Clear the profile plot widget
-                layout = self.parent.widgetProfilePlot.layout()
+                layout = self.profile_dock.widgetProfilePlot.layout()
                 while layout.count():
                     child = layout.takeAt(0)
                     if child.widget():
                         child.widget().deleteLater()
                 
                 # reset listviewprfile
-                model = self.parent.listViewProfile.model()
+                model = self.profile_dock.listViewProfile.model()
                 if model: 
                     model.clear()
 
@@ -1514,20 +1543,20 @@ class Profiling:
                 self.new_plot = False #checks if new profile is being plotted
 
                 #reset UI widgets
-                self.parent.toolButtonPlotProfile.setChecked(False)
-                self.parent.toolButtonPointMove.setEnabled(False)
-                self.parent.toolButtonProfileInterpolate.setChecked(False)
+                self.profile_dock.toolButtonPlotProfile.setChecked(False)
+                self.profile_dock.toolButtonPointMove.setEnabled(False)
+                self.profile_dock.toolButtonProfileInterpolate.setChecked(False)
                 # Block signals
-                self.parent.spinBoxProfileSelectedSubplot.blockSignals(True)
-                self.parent.spinBoxProfileNumSubplots.blockSignals(True)
+                self.profile_dock.spinBoxProfileSelectedSubplot.blockSignals(True)
+                self.profile_dock.spinBoxProfileNumSubplots.blockSignals(True)
                 # Change the value programmatically
-                self.parent.spinBoxProfileSelectedSubplot.setValue(1)
-                self.parent.spinBoxProfileNumSubplots.setValue(1)
+                self.profile_dock.spinBoxProfileSelectedSubplot.setValue(1)
+                self.profile_dock.spinBoxProfileNumSubplots.setValue(1)
                 # Unblock signals
-                self.parent.spinBoxProfileSelectedSubplot.blockSignals(False)
-                self.parent.spinBoxProfileNumSubplots.blockSignals(False)
-                self.parent.comboBoxProfileFieldType.setCurrentIndex(0)
-                self.parent.comboBoxProfileFieldType.setCurrentIndex(0)
+                self.profile_dock.spinBoxProfileSelectedSubplot.blockSignals(False)
+                self.profile_dock.spinBoxProfileNumSubplots.blockSignals(False)
+                self.profile_dock.comboBoxProfileFieldType.setCurrentIndex(0)
+                self.profile_dock.comboBoxProfileFieldType.setCurrentIndex(0)
 
     def calculate_distance(self, point1, point2):
         """Calculate the Euclidean distance between two points.
@@ -1566,25 +1595,25 @@ class Profiling:
         -------
         None
         """
-        if self.parent.sample_id in self.profiles:
-            if self.profile_name in self.profiles[self.parent.sample_id]:
-                profile_points = self.profiles[self.parent.sample_id][self.profile_name].points
+        if self.main_window.sample_id in self.profiles:
+            if self.profile_name in self.profiles[self.main_window.sample_id]:
+                profile_points = self.profiles[self.main_window.sample_id][self.profile_name].points
                 x_coords = profile_points.get('x', [])
                 y_coords = profile_points.get('y', [])
 
-                self.parent.control_points_table.setRowCount(0)
+                self.profile_dock.control_points_table.setRowCount(0)
                 for idx, (x, y) in enumerate(zip(x_coords, y_coords)):
-                    row_position = self.parent.control_points_table.rowCount()
-                    self.parent.control_points_table.insertRow(row_position)
+                    row_position = self.profile_dock.control_points_table.rowCount()
+                    self.profile_dock.control_points_table.insertRow(row_position)
 
                     # Fill in the data
-                    self.parent.control_points_table.setItem(row_position, 0, QTableWidgetItem(str(idx)))
-                    self.parent.control_points_table.setItem(row_position, 1, QTableWidgetItem(str(round(x))))
-                    self.parent.control_points_table.setItem(row_position, 2, QTableWidgetItem(str(round(y))))
-                    self.parent.control_points_table.setRowHeight(row_position, 20)
+                    self.profile_dock.control_points_table.setItem(row_position, 0, QTableWidgetItem(str(idx)))
+                    self.profile_dock.control_points_table.setItem(row_position, 1, QTableWidgetItem(str(round(x))))
+                    self.profile_dock.control_points_table.setItem(row_position, 2, QTableWidgetItem(str(round(y))))
+                    self.profile_dock.control_points_table.setRowHeight(row_position, 20)
 
                 # Enable or disable buttons based on the presence of points
-                self.toggle_buttons(self.parent.control_points_table.rowCount() > 0)
+                self.toggle_buttons(self.profile_dock.control_points_table.rowCount() > 0)
 
 
     def toggle_buttons(self, enable):
@@ -1601,9 +1630,9 @@ class Profiling:
         -------
         None
         """
-        self.parent.toolButtonPointUp.setEnabled(enable)
-        self.parent.toolButtonPointDown.setEnabled(enable)
-        self.parent.toolButtonPointDelete.setEnabled(enable)
+        self.profile_dock.toolButtonPointUp.setEnabled(enable)
+        self.profile_dock.toolButtonPointDown.setEnabled(enable)
+        self.profile_dock.toolButtonPointDelete.setEnabled(enable)
 
     def on_pick(self, event):
         """Handle pick events on the profile plot.
@@ -1619,7 +1648,7 @@ class Profiling:
         -------
         None
         """
-        style = self.parent.plot_style
+        style = self.main_window.plot_style
 
         if self.edit_mode_enabled and isinstance(event.artist, PathCollection):
             # The picked scatter plot
@@ -1775,13 +1804,13 @@ class Profiling:
     def add_field_to_listview(self, field=None, update=True):
         """Add selected fields to the profile list view and update the fields per subplot."""
         # Get the currently selected subplot index
-        selected_subplot = self.parent.spinBoxProfileSelectedSubplot.value() - 1  # 0-based index
+        selected_subplot = self.profile_dock.spinBoxProfileSelectedSubplot.value() - 1  # 0-based index
 
         # Get available fields (assuming you have a method to retrieve them)
         if not field:
-            field = self.parent.comboBoxProfileField.currentText()
+            field = self.profile_dock.comboBoxProfileField.currentText()
         if not field:
-            QMessageBox.warning(self.parent, 'No Fields', 'There are no available fields to add.')
+            QMessageBox.warning(self.profile_dock, 'No Fields', 'There are no available fields to add.')
             return
 
         # Add selected field to the fields_per_subplot
@@ -1796,23 +1825,23 @@ class Profiling:
                 # Update the plot
                 self.plot_profiles()
         else:
-            QMessageBox.information(self.parent, 'Field Exists', f'The field "{field}" is already in the list.')
+            QMessageBox.information(self.profile_dock, 'Field Exists', f'The field "{field}" is already in the list.')
 
     def remove_field_from_listview(self):
         """Remove selected fields from the profile list view and update the fields per subplot."""
         # Get the currently selected subplot index
-        selected_subplot = self.parent.spinBoxProfileSelectedSubplot.value() - 1  # 0-based index
+        selected_subplot = self.profile_dock.spinBoxProfileSelectedSubplot.value() - 1  # 0-based index
 
         # Get selected indices
-        selection_model = self.parent.listViewProfile.selectionModel()
+        selection_model = self.profile_dock.listViewProfile.selectionModel()
         indexes = selection_model.selectedIndexes()
 
         if not indexes:
-            QMessageBox.warning(self.parent, 'No Selection', 'Please select a field to remove.')
+            QMessageBox.warning(self.profile_dock, 'No Selection', 'Please select a field to remove.')
             return
 
         # Remove selected items from the fields_per_subplot and list view
-        model = self.parent.listViewProfile.model()
+        model = self.profile_dock.listViewProfile.model()
         fields_removed = []
         for index in sorted(indexes, reverse=True):
             field = model.item(index.row()).text()
@@ -1828,7 +1857,7 @@ class Profiling:
         self.plot_profiles()
 
     def update_num_subplots(self):
-        num_subplots = self.parent.spinBoxProfileNumSubplots.value()
+        num_subplots = self.profile_dock.spinBoxProfileNumSubplots.value()
         # Adjust fields_per_subplot
         existing_subplots = list(self.fields_per_subplot.keys())
         if num_subplots < len(existing_subplots):
@@ -1842,9 +1871,9 @@ class Profiling:
                 self.fields_per_subplot[idx] = []
 
         # Ensure selected subplot is within the new range
-        selected_subplot = self.parent.spinBoxProfileSelectedSubplot.value()
+        selected_subplot = self.profile_dock.spinBoxProfileSelectedSubplot.value()
         if selected_subplot > num_subplots:
-            self.parent.spinBoxProfileSelectedSubplot.setValue(num_subplots)
+            self.profile_dock.spinBoxProfileSelectedSubplot.setValue(num_subplots)
 
         # Update the plot
         self.plot_profiles()
@@ -1861,10 +1890,10 @@ class Profiling:
         -------
         None
         """
-        model = self.parent.listViewProfile.model()
+        model = self.profile_dock.listViewProfile.model()
         if not model:
             model = QStandardItemModel()
-            self.parent.listViewProfile.setModel(model)
+            self.profile_dock.listViewProfile.setModel(model)
         else:
             model.clear()  # Clear existing items
 

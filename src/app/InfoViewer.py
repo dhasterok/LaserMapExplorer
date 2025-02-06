@@ -22,6 +22,20 @@ from src.common.CustomMplCanvas import MplCanvas
 
 PRECISION = 5
 
+def increase_precision():
+    global PRECISION
+
+    if PRECISION == 16:
+        return
+    PRECISION += 1
+    
+def decrease_precision():
+    global PRECISION
+
+    if PRECISION == 1:
+        return
+    PRECISION -= 1
+
 def create_checkbox(is_checked, callback, key):
     checkbox = QCheckBox()
     checkbox.setChecked(is_checked)
@@ -29,6 +43,8 @@ def create_checkbox(is_checked, callback, key):
     return checkbox
 
 def update_dataframe(dataframe, table_widget):
+    global PRECISION
+
     """Load the DataFrame data into the QTableWidget."""
     # Set the row and column count
     table_widget.setRowCount(len(dataframe))
@@ -40,10 +56,12 @@ def update_dataframe(dataframe, table_widget):
     # Add the data to the table
     for row_idx, row in dataframe.iterrows():
         for col_idx, value in enumerate(row):
-            item = QTableWidgetItem(str(value))
+            item = QTableWidgetItem(f"{value:.{PRECISION}g}")
             table_widget.setItem(row_idx, col_idx, item)
 
 def update_numpy_array(array, table_widget):
+    global PRECISION
+
     """Load numpy.ndarray data into the QTableWidget."""
     if not isinstance(array, np.ndarray):
         raise TypeError("Input must be a numpy.ndarray")
@@ -614,6 +632,30 @@ class DataFrameTab():
         self.data_tab.setObjectName("data_tab")
         layout = QVBoxLayout(self.data_tab)
         layout.setContentsMargins(6, 6, 6, 6)
+
+        toolbar = QToolBar()
+        toolbar.setIconSize(QSize(24, 24))
+        toolbar.setMovable(False)  # Optional: Prevent toolbar from being dragged out
+
+        layout.addWidget(toolbar)
+
+        self.action_sigfigs_more = QAction("Increase Significant Figures", toolbar)
+        sigfigs_more_icon = QIcon(":resources/icons/icon-sigfigs-add-64.svg")
+        self.action_sigfigs_more.setIcon(sigfigs_more_icon)
+        self.action_sigfigs_more.triggered.connect(increase_precision)
+        self.action_sigfigs_more.triggered.connect(lambda: update_dataframe(self.data, self.data_table))
+        self.action_sigfigs_more.setToolTip("Increase the number of displayed digits")
+
+        self.action_sigfigs_less = QAction("Decrease Significant Figures", toolbar)
+        sigfigs_less_icon = QIcon(":resources/icons/icon-sigfigs-remove-64.svg")
+        self.action_sigfigs_less.setIcon(sigfigs_less_icon)
+        self.action_sigfigs_less.triggered.connect(decrease_precision)
+        self.action_sigfigs_less.triggered.connect(lambda: update_dataframe(self.data, self.data_table))
+        self.action_sigfigs_less.setToolTip("Reduce the number of displayed digits")
+
+        toolbar.addAction(self.action_sigfigs_more)
+        toolbar.addAction(self.action_sigfigs_less)
+
         self.data_table = QTableWidget(self.data_tab)
         self.data_table.setObjectName("data_table")
         self.data_table.setColumnCount(0)
@@ -674,13 +716,15 @@ class FieldTab(UIFieldLogic):
         self.action_sigfigs_more = QAction("Increase Significant Figures", toolbar)
         sigfigs_more_icon = QIcon(":resources/icons/icon-sigfigs-add-64.svg")
         self.action_sigfigs_more.setIcon(sigfigs_more_icon)
-        self.action_sigfigs_more.triggered.connect(self.increase_precision)
+        self.action_sigfigs_more.triggered.connect(increase_precision)
+        self.action_sigfigs_more.triggered.connect(self.update_field_table)
         self.action_sigfigs_more.setToolTip("Increase the number of displayed digits")
 
         self.action_sigfigs_less = QAction("Decrease Significant Figures", toolbar)
         sigfigs_less_icon = QIcon(":resources/icons/icon-sigfigs-remove-64.svg")
         self.action_sigfigs_less.setIcon(sigfigs_less_icon)
-        self.action_sigfigs_less.triggered.connect(self.decrease_precision)
+        self.action_sigfigs_less.triggered.connect(decrease_precision)
+        self.action_sigfigs_less.triggered.connect(self.update_field_table)
         self.action_sigfigs_less.setToolTip("Reduce the number of displayed digits")
 
         toolbar.addWidget(field_type_label)
@@ -719,19 +763,4 @@ class FieldTab(UIFieldLogic):
         reshaped_array = np.reshape(map_df['array'].values, self.data.array_size, order=self.data.order)
         update_numpy_array(reshaped_array, self.field_table)
 
-    def increase_precision(self):
-        global PRECISION
-
-        if PRECISION == 16:
-            return
-        PRECISION += 1
-        self.update_field_table()
-    
-    def decrease_precision(self):
-        global PRECISION
-
-        if PRECISION == 1:
-            return
-        PRECISION -= 1
-        self.update_field_table()
 

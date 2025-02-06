@@ -249,6 +249,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.default_cursor = False
         self.duplicate_plot_info = None
         self.update_ui = True
+        self.profile_state = False
+        self.polygon_state = False
         
         self.calc_dict = {}
 
@@ -362,6 +364,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.reindex_left_tab()
         self.actionSpotTools.setChecked(False)
         self.actionSpotTools.triggered.connect(self.toggle_spot_tab)
+        self.actionImportSpots.setVisible(False)
 
         self.actionSpecialTools.setChecked(False)
         self.actionSpecialTools.triggered.connect(self.toggle_special_tab)
@@ -439,13 +442,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.left_tab['ndim']: [0, 'TEC', 'Radar'],
             self.left_tab['multidim']: [0, 'variance','vectors','PCA scatter','PCA heatmap','PCA score'],
             self.left_tab['cluster']: [0, 'cluster', 'cluster score', 'cluster performance'],
-            self.left_tab['special']: [0,'analyte map', 'gradient map', 'cluster score', 'PCA score', 'profile']}
+            self.left_tab['special']: [0,'analyte map', 'gradient map', 'cluster score', 'PCA score', 'profile'],
+            -1: [0, 'analyte map']}
 
 
         # initalize self.comboBoxPlotType
         self.comboBoxPlotType.clear()
-        self.comboBoxPlotType.addItems(self.plot_types[self.toolBox.currentIndex()][1:])
-        self.comboBoxPlotType.setCurrentIndex(self.plot_types[self.toolBox.currentIndex()][0])
+        if self.profile_state == True or self.polygon_state == True:
+            plot_idx = -1
+        else:
+            plot_idx = self.toolBox.currentIndex()
+
+        self.comboBoxPlotType.addItems(self.plot_types[plot_idx][1:])
+        self.comboBoxPlotType.setCurrentIndex(self.plot_types[plot_idx][0])
+
         self.comboBoxPlotType.currentIndexChanged.connect(self.on_plot_type_changed)
         # Initialize a variable to store the current plot type
         self.plot_type = 'analyte map'
@@ -817,10 +827,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # # Connect toolButtonProfilePointToggle's clicked signal to toggle point visibility
         # self.toolButtonProfilePointToggle.clicked.connect(self.profiling.toggle_point_visibility)
 
-        # -------
-        # These tools are for setting profile plot controls
-        self.groupBoxProfilePlotControl.setVisible(True)
-        # -------
 
         # Special Tab
         #------------------------
@@ -987,8 +993,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #self.actionSpotTools.toggle()
         if self.actionSpotTools.isChecked():
             self.spot_tools = SpotPage(self.left_tab['sample'], self)
+            self.actionImportSpots.setVisible(True)
         else:
             self.toolBox.removeItem(self.left_tab['spot'])
+            self.actionImportSpots.setVisible(False)
         self.reindex_left_tab()
 
     def toggle_special_tab(self):
@@ -1121,6 +1129,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             #clear profiling
             if hasattr(self, "profile_dock"):
                 self.profile_dock.profiling.clear_profiles()
+                self.profile_dock.profile_toggle.setChecked(False)
 
             #clear polygons
             self.polygon.clear_polygons()
@@ -1428,7 +1437,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """            
         if not hasattr(self, 'notes'):
             if hasattr(self,'selected_directory') and self.sample_id != '':
-                notes_file = os.path.join(self.selected_directory,self.sample_id+'.rst')
+                notes_file = os.path.join(self.selected_directory,f"{self.sample_id}.rst")
             else:
                 notes_file = None
             self.notes = Notes(self, notes_file)
@@ -3937,13 +3946,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         canvas.set_initial_extent()
         
         # axes
-        xmin, xmax, xscale, xlbl = self.plot_style.get_axis_values(None,field= 'X')
-        ymin, ymax, yscale, ylbl = self.plot_style.get_axis_values(None,field= 'Y')
+        #xmin, xmax, xscale, xlbl = self.plot_style.get_axis_values(None,field= 'X')
+        #ymin, ymax, yscale, ylbl = self.plot_style.get_axis_values(None,field= 'Y')
 
 
         # axes limits
-        canvas.axes.set_xlim(xmin,xmax)
-        canvas.axes.set_ylim(ymin,ymax)
+        #canvas.axes.set_xlim(xmin,xmax)
+        #canvas.axes.set_ylim(ymin,ymax)
 
         # add scalebar
         self.add_scalebar(canvas.axes)
@@ -6525,9 +6534,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_field_combobox(None, self.comboBoxNDimAnalyte)
 
         # profiles
-        self.update_field_type_combobox(self.comboBoxProfileFieldType)
-        self.update_field_combobox(self.comboBoxProfileFieldType, self.comboBoxProfileField)
+        #self.update_field_type_combobox(self.comboBoxProfileFieldType)
+        #self.update_field_combobox(self.comboBoxProfileFieldType, self.comboBoxProfileField)
 
+        # field dialog
         if hasattr(self, 'field_dialog'):
             # field selector window
             self.update_field_type_combobox(self.field_dialog.comboBoxFieldType)

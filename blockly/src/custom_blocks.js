@@ -961,7 +961,7 @@ const plot_map = {
 };
 Blockly.common.defineBlocks({ plot_map: plot_map });
 
-const correlation_analysis = {
+const plot_correlation = {
     init: function() {
         this.appendDummyInput('VARIABLE1')
             .appendField('Correlation');
@@ -971,7 +971,7 @@ const correlation_analysis = {
                 ['Pearson', 'pearson'],
                 ['Spearman', 'spearman'],
                 ['Kendall', 'kendall']
-            ]), 'METHOD');
+            ]), 'method');
         this.appendDummyInput()
             .appendField('R^2')
             .appendField(new Blockly.FieldCheckbox('TRUE'), 'rSquared');
@@ -985,7 +985,7 @@ const correlation_analysis = {
         this.setHelpUrl('');
     }
 };
-Blockly.Blocks['correlation_analysis'] = correlation_analysis;
+Blockly.Blocks['plot_correlation'] = plot_correlation;
 
 
 const plot_histogram = {

@@ -1784,6 +1784,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxPlotType.blockSignals(True)
         self.comboBoxPlotType.clear()
         self.comboBoxPlotType.addItems(self.plot_types[tab_id][1:])
+        self.comboBoxPlotType.setCurrentIndex(self.plot_types[self.toolBox.currentIndex()][0])
         self.comboBoxPlotType.blockSignals(False)
 
         # set to most used plot type on selected tab
@@ -3905,7 +3906,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             
         norm = self.plot_style.color_norm()
 
-        cax = canvas.axes.imshow(reshaped_array, cmap=self.plot_style.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
+        # axes
+        xmin, xmax, xscale, xlbl = self.plot_style.get_axis_values(None,field= 'X')
+        ymin, ymax, yscale, ylbl = self.plot_style.get_axis_values(None,field= 'Y')
+
+
+        cax = canvas.axes.imshow(reshaped_array,
+                                cmap=self.plot_style.get_colormap(),
+                                aspect=aspect_ratio, interpolation='none',
+                                norm=norm)
+        
+        
+        # # axes limits
+        canvas.axes.set_xlim(xmin, xmax)
+        canvas.axes.set_ylim(ymin, ymax)
 
         self.add_colorbar(canvas, cax)
         match self.plot_style.cscale:
@@ -3936,14 +3950,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         canvas.set_initial_extent()
         
-        # axes
-        xmin, xmax, xscale, xlbl = self.plot_style.get_axis_values(None,field= 'X')
-        ymin, ymax, yscale, ylbl = self.plot_style.get_axis_values(None,field= 'Y')
+ 
 
 
-        # axes limits
-        canvas.axes.set_xlim(xmin,xmax)
-        canvas.axes.set_ylim(ymin,ymax)
 
         # add scalebar
         self.add_scalebar(canvas.axes)

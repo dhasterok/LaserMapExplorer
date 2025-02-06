@@ -331,7 +331,7 @@ class Main():
             case 'log':
                 clim = self.plot_style.clim
                 #clim = np.log10(self.plot_style.clim)
-            case 'logit':
+            case 'logit':  
                 print('Color limits for logit are not currently implemented')
 
         cax.set_clim(clim[0], clim[1])
@@ -353,14 +353,7 @@ class Main():
 
         canvas.set_initial_extent()
 
-        # axes
-        xmin, xmax, xscale, xlbl = self.plot_style.get_axis_values(None,field= 'X')
-        ymin, ymax, yscale, ylbl = self.plot_style.get_axis_values(None,field= 'Y')
 
-
-        # axes limits
-        canvas.axes.set_xlim(xmin,xmax)
-        canvas.axes.set_ylim(ymin,ymax)
         
         # add scalebar
         self.add_scalebar(canvas.axes)
@@ -634,6 +627,104 @@ class Main():
 
         self.plot_viewer.add_plotwidget_to_plot_viewer(self.plot_info)
 
+    def plot_correlation(self, corr_method, squared = False,field_type = None, field = None):
+        """Creates an image of the correlation matrix"""
+        #print('plot_correlation')
+
+        canvas = mplc.MplCanvas(parent=self, ui= self.plot_viewer)
+        canvas.axes.clear()
+
+        # get the data for computing correlations
+        df_filtered, analytes = self.data[self.sample_id].get_processed_data()
+
+        # Calculate the correlation matrix
+        method = corr_method.lower()
+        if field_type == 'none':
+            correlation_matrix = df_filtered.corr(method=method)
+        else:
+            algorithm = field
+            cluster_group = self.data[self.sample_id].processed_data.loc[:,algorithm]
+            selected_clusters = self.cluster_dict[algorithm]['selected_clusters']
+
+            ind = np.isin(cluster_group, selected_clusters)
+
+            correlation_matrix = df_filtered[ind].corr(method=method)
+        
+        columns = correlation_matrix.columns
+
+        font = {'size':self.plot_style.font_size}
+
+        # mask lower triangular matrix to show only upper triangle
+        mask = np.zeros_like(correlation_matrix, dtype=bool)
+        mask[np.tril_indices_from(mask)] = True
+        correlation_matrix = np.ma.masked_where(mask, correlation_matrix)
+
+        norm = self.plot_style.color_norm()
+
+        # plot correlation or correlation^2
+        square_flag = squared
+        if square_flag:
+            cax = canvas.axes.imshow(correlation_matrix**2, cmap=self.plot_style.get_colormap(), norm=norm)
+            canvas.array = correlation_matrix**2
+        else:
+            cax = canvas.axes.imshow(correlation_matrix, cmap=self.plot_style.get_colormap(), norm=norm)
+            canvas.array = correlation_matrix
+            
+        # store correlation_matrix to save_data if data needs to be exported
+        self.save_data = canvas.array
+
+        canvas.axes.spines['top'].set_visible(False)
+        canvas.axes.spines['bottom'].set_visible(False)
+        canvas.axes.spines['left'].set_visible(False)
+        canvas.axes.spines['right'].set_visible(False)
+
+        # Add colorbar to the plot
+        self.add_colorbar(canvas, cax)
+
+        # set color limits
+        cax.set_clim(self.plot_style.clim[0], self.plot_style.clim[1])
+
+        # Set tick labels
+        ticks = np.arange(len(columns))
+        canvas.axes.tick_params(length=0, labelsize=8,
+                        labelbottom=False, labeltop=True, labelleft=False, labelright=True,
+                        bottom=False, top=True, left=False, right=True)
+
+        canvas.axes.set_yticks(ticks, minor=False)
+        canvas.axes.set_xticks(ticks, minor=False)
+
+        labels = self.plot_style.toggle_mass(columns)
+
+        canvas.axes.set_xticklabels(labels, rotation=90, ha='center', va='bottom', fontproperties=font)
+        canvas.axes.set_yticklabels(labels, ha='left', va='center', fontproperties=font)
+
+        canvas.axes.set_title('')
+
+        self.plot_style.update_figure_font(canvas, self.plot_style.font)
+
+        if square_flag:
+            plot_name = method+'_squared'
+        else:
+            plot_name = method
+
+        self.plot_info = {
+            'tree': 'Correlation',
+            'sample_id': self.sample_id,
+            'plot_name': plot_name,
+            'plot_type': 'correlation',
+            'method': method,
+            'square_flag': square_flag,
+            'field_type': None,
+            'field': None,
+            'figure': canvas,
+            'style': self.plot_style.style_dict[self.plot_style.plot_type],
+            'cluster_groups': [],
+            'view': [True,False],
+            'position': [],
+            'data': correlation_matrix,
+        }
+
+        self.plot_viewer.add_plotwidget_to_plot_viewer(self.plot_info)
 
     # -------------------------------------
     # Scatter/Heatmap functions

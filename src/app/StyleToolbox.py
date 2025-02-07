@@ -163,7 +163,7 @@ class Styling():
         
         #super().__init__(parent)
         self._signal_state = True
-
+        self.ui = ui
         # create the default style dictionary (self.style_dict for each plot type)
         self.reset_default_styles(ui)
         self.map_plot_types = ['analyte map', 'ternary map', 'PCA score', 'cluster', 'cluster score']
@@ -2529,8 +2529,8 @@ class Styling():
         """
         if self.debug:
             print("toggle_mass")
-
-        if not self.parent.checkBoxShowMass.isChecked():
+    
+        if not self.parent.showMass:
             labels = [re.sub(r'\d', '', col) for col in labels]
 
         return labels

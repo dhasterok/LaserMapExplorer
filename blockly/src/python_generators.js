@@ -212,8 +212,6 @@ pythonGenerator.forBlock['plot_map'] = function(block, generator) {
 };
 
 pythonGenerator.forBlock['plot_correlation'] = function(block, generator) {
-    // Retrieve the stored fieldType from the block
-    const field_type = generator.quote_(block.getFieldValue('fieldType'));
     // Retrieve the stored field from the block
     const r_2 = generator.quote_(block.getFieldValue('rSquared'));
 
@@ -221,14 +219,16 @@ pythonGenerator.forBlock['plot_correlation'] = function(block, generator) {
     let code = '';
     
     // Insert sub-block statements
-    let subBlocksCode = generator.statementToCode(block, 'Export') || ''
+    let subBlocksCode = generator.statementToCode(block, 'exportTable') || ''
 
     // remove *all* leading spaces:
-    subBlocksCode = subBlocksCode.replace(/^ +/gm, '');
+    if (subBlocksCode !== '' && subBlocksCode !== null){
+        subBlocksCode = subBlocksCode.replace(/^ +/gm, '');
 
-    code += subBlocksCode + '\n';
+        code += subBlocksCode + '\n';
+    }
     // 5) Plot
-    code += `self.main.plot_correlation(corr_method = ${corr_method},squared =${r_2}, field_type = ${field_type},field = ${field})\n`;
+    code += `self.main.plot_correlation(corr_method = ${corr_method},squared =${r_2})\n`;
     code += `self.main.plot_viewer.show()`
     return code;
 };
@@ -280,20 +280,22 @@ pythonGenerator.forBlock['export_table'] = function(block, generator) {
   // 1) Gather any statements from sub-blocks attached to FIELDS
   //    For example, a 'select_fields_list' block might generate code like:
   //    "fields_data.append(...)"
-  let fieldsCode = generator.statementToCode(block, 'FIELDS') || '';
+  let fieldsCode = generator.statementToCode(block, 'fields') || '';
+  if (fieldsCode != '' || fieldsCode != null) {
+    // 2) Remove leading spaces (optional, if indentation is unwanted)
+    fieldsCode = fieldsCode.replace(/^ +/gm, '');
+
+    // 3) Build final statement code
+    let code = `
+    fields_data = []
+    ${fieldsCode}
+    self.main.export_table(fields_data)
+    `.trimStart();
+    // Return the statement code
+    return code + '\n';
+  }
   
-  // 2) Remove leading spaces (optional, if indentation is unwanted)
-  fieldsCode = fieldsCode.replace(/^ +/gm, '');
-
-  // 3) Build final statement code
-  let code = `
-fields_data = []
-${fieldsCode}
-self.main.export_table(fields_data)
-`.trimStart();
-
-  // Return the statement code
-  return code + '\n';
+  
 };
 
 

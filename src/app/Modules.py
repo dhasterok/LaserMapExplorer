@@ -99,6 +99,7 @@ class Main():
         self.plot_viewer = PlotViewer(self)
         self.update_bins = False
 
+        self.showMass = False
         # # Noise reduction
         # self.noise_reduction = ip(self)
 
@@ -639,7 +640,7 @@ class Main():
 
         # Calculate the correlation matrix
         method = corr_method.lower()
-        if field_type == 'none':
+        if not field_type:
             correlation_matrix = df_filtered.corr(method=method)
         else:
             algorithm = field

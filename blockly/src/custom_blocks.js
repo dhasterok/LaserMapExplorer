@@ -275,24 +275,25 @@ Blockly.common.defineBlocks({
 });
 
 Blockly.common.defineBlocks({
-    export_table: {
+  export_table: {
     init: function() {
-        this.appendDummyInput()
+      this.appendDummyInput()
+            .setAlign(Blockly.inputs.Align.CENTRE)
             .appendField('Export Table');
 
-        // Statement input that can hold select_fields_list or select_field_from_type
-        this.appendStatementInput('FIELDS')
-            .setCheck(['select_fields_list', 'select_field_from_type'])
-            .appendField('Fields to export');
+      // Statement input that can hold select_fields_list or select_field_from_type
+      this.appendStatementInput('fields')
+          .setCheck(['select_fields_list', 'select_field_from_type'])
+          .appendField('Fields to export');
 
-        // So it can be attached to the "exportTable" Value Input in correlation_analysis:
-        this.setOutput(true, 'export_table');
+      // So it can be attached to the "exportTable" Value Input in correlation_analysis:
+      this.setOutput(true, 'export_table');
 
-        this.setColour(230);
-        this.setTooltip('Exports selected fields as a table.');
-        this.setHelpUrl('');
+      this.setColour(230);
+      this.setTooltip('Exports selected fields as a table.');
+      this.setHelpUrl('');
     }
-}
+  }
 });
 
 

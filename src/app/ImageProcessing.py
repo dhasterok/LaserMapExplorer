@@ -60,8 +60,6 @@ class ImageProcessing():
 
         # add edge detection algorithm to aid in creating polygons
         self.edge_img = None
-        self.parent.toolButtonEdgeDetect.clicked.connect(self.add_edge_detection)
-        self.parent.comboBoxEdgeDetectMethod.activated.connect(self.add_edge_detection)
 
     def gradient_checked_state_changed(self):
         field_type = self.parent.plot_style.field_type

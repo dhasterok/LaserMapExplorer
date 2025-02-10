@@ -1,4 +1,4 @@
-common.CustomWidgets
+﻿common.CustomWidgets
 ====================
 
 .. automodule:: common.CustomWidgets
@@ -8,6 +8,12 @@ common.CustomWidgets
    
 
    
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      is_valid_hex_color
    
    
 
@@ -25,6 +31,7 @@ common.CustomWidgets
       CustomTreeView
       QAction
       QCheckBox
+      QColor
       QComboBox
       QCursor
       QDockWidget
@@ -33,7 +40,10 @@ common.CustomWidgets
       QIcon
       QLineEdit
       QMenu
+      QPainter
+      QPropertyAnimation
       QPushButton
+      QRect
       QStandardItem
       QStandardItemModel
       QTableWidget
@@ -41,6 +51,9 @@ common.CustomWidgets
       QWidget
       Qt
       StandardItem
+      ToggleSwitch
+      pyqtProperty
+      pyqtSignal
    
    
 

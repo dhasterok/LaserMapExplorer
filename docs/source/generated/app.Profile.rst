@@ -1,4 +1,4 @@
-app.Profile
+﻿app.Profile
 ===========
 
 .. automodule:: app.Profile
@@ -52,8 +52,10 @@ app.Profile
       QToolButton
       QVBoxLayout
       QWidget
+      QWidgetAction
       Qt
       ScatterPlotItem
+      ToggleSwitch
       UIFieldLogic
    
    

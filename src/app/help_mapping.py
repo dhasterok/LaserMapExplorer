@@ -18,8 +18,9 @@ def create_help_mapping(parent):
         parent.toolBox: 'left_toolbox',
         parent.dockWidgetPlotTree: 'right_toolbox',
         parent.dockWidgetStyling: 'right_toolbox',
-        parent.dockWidgetMaskToolbox: 'lower_tabs',
-        parent.tabWidgetMask: 'lower_tabs',
     }
+    if hasattr(parent, "mask_dock"):
+        help_mapping[parent.mask_dock] = 'lower_tabs'
+        help_mapping[parent.mask_tab_widget] = 'lower_tabs'
 
     return help_mapping

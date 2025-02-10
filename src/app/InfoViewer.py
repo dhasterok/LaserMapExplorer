@@ -206,7 +206,7 @@ class PlotInfoTab():
         self.parent = parent
 
         self.plot_info_tab = QWidget()
-        self.plot_info_tab.setObjectName("plot_info_tab")
+        self.plot_info_tab.setObjectName("Plot Info Tab")
         tab_layout = QVBoxLayout(self.plot_info_tab)
         tab_layout.setContentsMargins(6, 6, 6, 6)
         self.plot_info_tab.setLayout(tab_layout)
@@ -387,10 +387,11 @@ class MetadataTab():
     def __init__(self, parent):
         self.parent = parent
 
-        self.metadata_tab = QWidget()
-        self.metadata_tab.setObjectName("metadata_tab")
         self.rows_flag = True
         self.columns_flag = True
+
+        self.metadata_tab = QWidget()
+        self.metadata_tab.setObjectName("Metadata Tab")
         tab_layout = QVBoxLayout(self.metadata_tab)
         tab_layout.setContentsMargins(6, 6, 6, 6)
 
@@ -629,7 +630,7 @@ class DataFrameTab():
         self.parent = parent
 
         self.data_tab = QWidget()
-        self.data_tab.setObjectName("data_tab")
+        self.data_tab.setObjectName("Data Tab")
         layout = QVBoxLayout(self.data_tab)
         layout.setContentsMargins(6, 6, 6, 6)
 
@@ -691,7 +692,7 @@ class FieldTab(UIFieldLogic):
         self.data = parent.parent.data[parent.parent.sample_id]
 
         self.field_tab = QWidget()
-        self.field_tab.setObjectName("field_tab")
+        self.field_tab.setObjectName("Field Tab")
         tab_layout = QVBoxLayout(self.field_tab)
         tab_layout.setContentsMargins(6, 6, 6, 6)
 

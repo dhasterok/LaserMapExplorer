@@ -23,6 +23,7 @@
       Q_FLAG
       Q_FLAGS
       Q_RETURN_ARG
+      Slot
       bin_
       bom
       center
@@ -98,6 +99,7 @@
 
    .. autosummary::
    
+      Property
       QAbstractAnimation
       QAbstractEventDispatcher
       QAbstractItemModel
@@ -262,6 +264,7 @@
       Qt
       QtMsgType
       RotatedHeaderView
+      Signal
       pyqtBoundSignal
       pyqtProperty
       pyqtSignal

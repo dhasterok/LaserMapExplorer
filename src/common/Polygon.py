@@ -360,7 +360,6 @@ class PolygonManager:
         self.p_id_gen = 0  # Polygon ID generator
         self.point_index = None             # index for move point
         # plot selected polygon from table
-        self.main_window.tableWidgetPolyPoints.selectionModel().selectionChanged.connect(lambda: self.view_selected_polygon)
 
     def add_samples(self):
         for sample_id in self.main_window.sample_ids:

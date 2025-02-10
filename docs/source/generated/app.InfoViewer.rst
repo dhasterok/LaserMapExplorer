@@ -1,4 +1,4 @@
-app.InfoViewer
+﻿app.InfoViewer
 ==============
 
 .. automodule:: app.InfoViewer
@@ -14,7 +14,9 @@ app.InfoViewer
    .. autosummary::
    
       create_checkbox
+      decrease_precision
       default_font
+      increase_precision
       partial_match
       update_dataframe
       update_numpy_array
@@ -52,6 +54,7 @@ app.InfoViewer
       QLabel
       QMainWindow
       QMessageBox
+      QPixmap
       QPushButton
       QSize
       QSizePolicy

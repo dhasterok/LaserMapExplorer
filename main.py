@@ -56,6 +56,7 @@ import src.common.CustomMplCanvas as mplc
 from src.app.Actions import Actions
 from src.common.DataHandling import SampleObj
 from src.app.PlotTree import PlotTree
+from src.common.Masking import MaskDock
 from src.app.CropImage import CropTool
 from src.app.ImageProcessing import ImageProcessing as ip
 from src.app.StyleToolbox import Styling
@@ -112,8 +113,6 @@ setConfigOption('imageAxisOrder', 'row-major') # best performance
 #     QToolButton:checked {
 #         background-color: #c8c8c8; /* Change background color on hover */
 #     }
-
-
 class MainWindow(QMainWindow, Ui_MainWindow):
     """MainWindow
 
@@ -384,16 +383,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 case 'regression':
                     self.style_tab.update({'regression': tid})
 
-        self.mask_tab = {}
-        for tid in range(self.tabWidgetMask.count()):
-            match self.tabWidgetMask.tabText(tid).lower():
-                case 'filters':
-                    self.mask_tab.update({'filter': tid})
-                case 'polygons':
-                    self.mask_tab.update({'polygon': tid})
-                case 'clusters':
-                    self.mask_tab.update({'cluster': tid})
-
         self.canvas_tab = {}
         for tid in range(self.canvasWindow.count()):
             match self.canvasWindow.tabText(tid).lower():
@@ -426,7 +415,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Set initial view
         self.toolBox.setCurrentIndex(self.left_tab['sample'])
-        self.tabWidgetMask.setCurrentIndex(self.mask_tab['filter'])
+        if hasattr(self, "mask_dock"):
+            self.mask_dock.tabWidgetMask.setCurrentIndex(self.mask_tab['filter'])
         self.toolBoxStyle.setCurrentIndex(0)
         self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
 
@@ -447,16 +437,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 
         # initalize self.comboBoxPlotType
-        self.comboBoxPlotType.clear()
-        if self.profile_state == True or self.polygon_state == True:
-            plot_idx = -1
-        else:
-            plot_idx = self.toolBox.currentIndex()
-
-        self.comboBoxPlotType.addItems(self.plot_types[plot_idx][1:])
-        self.comboBoxPlotType.setCurrentIndex(self.plot_types[plot_idx][0])
-
+        self.update_plot_type_combobox()
         self.comboBoxPlotType.currentIndexChanged.connect(self.on_plot_type_changed)
+
         # Initialize a variable to store the current plot type
         self.plot_type = 'analyte map'
 
@@ -506,9 +489,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionSwapAxes.triggered.connect(self.swap_xy)
         self.actionSwapAxes.setEnabled(False)
 
-        self.actionFilters.triggered.connect(lambda: self.mask_tab['filter'])
-        self.actionPolygons.triggered.connect(lambda: self.mask_tab['polygon'])
-        self.actionClusters.triggered.connect(lambda: self.mask_tab['cluster'])
+        self.actionFilters.triggered.connect(lambda: self.open_mask_dock('filter'))
+        self.actionPolygons.triggered.connect(lambda: self.open_mask_dock('polygon'))
+        self.actionClusters.triggered.connect(lambda: self.open_mask_dock('cluster'))
 
         self.info_tab = {}
         self.actionInfo.triggered.connect(self.open_info_dock)
@@ -628,41 +611,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Filter Tabs
         #-------------------------
-        self.load_filter_tables()
-        self.lineEditFMin.precision = 8
-        self.lineEditFMin.toward = 0
-        self.lineEditFMax.precision = 8
-        self.lineEditFMax.toward = 1
-
-        self.lineEditFMin.editingFinished.connect(self.callback_lineEditFMin)
-        self.lineEditFMax.editingFinished.connect(self.callback_lineEditFMax)
-        self.doubleSpinBoxFMinQ.valueChanged.connect(self.callback_doubleSpinBoxFMinQ)
-        self.doubleSpinBoxFMaxQ.valueChanged.connect(self.callback_doubleSpinBoxFMaxQ)
-
-        self.toolButtonAddFilter.clicked.connect(self.update_filter_table)
-        self.toolButtonAddFilter.clicked.connect(lambda: self.apply_field_filters())
-
-        self.comboBoxFilterFieldType.activated.connect(lambda: self.update_field_combobox(self.comboBoxFilterFieldType, self.comboBoxFilterField))
-        self.comboBoxFilterField.currentIndexChanged.connect(self.update_filter_values)
-
-        self.toolButtonFilterUp.clicked.connect(lambda: self.table_fcn.move_row_up(self.tableWidgetFilters))
-        self.toolButtonFilterUp.clicked.connect(lambda: self.apply_field_filters(update_plot=True))
-        self.toolButtonFilterDown.clicked.connect(lambda: self.table_fcn.move_row_down(self.tableWidgetFilters))
-        self.toolButtonFilterDown.clicked.connect(lambda: self.apply_field_filters(update_plot=True))
-        # There is currently a special function for removing rows, convert to table_fcn.delete_row
-        self.toolButtonFilterRemove.clicked.connect(self.remove_selected_rows)
-        self.toolButtonFilterRemove.clicked.connect(lambda: self.table_fcn.delete_row(self.tableWidgetFilters))
-        self.toolButtonFilterRemove.clicked.connect(lambda: self.apply_field_filters(update_plot=True))
-        self.toolButtonFilterSelectAll.clicked.connect(self.tableWidgetFilters.selectAll)
-
-        self.toolButtonFilterSave.clicked.connect(self.save_filter_table)
-        self.comboBoxFilterPresets.activated.connect(self.read_filter_table)
-
-        # initiate Polygon class
-        self.polygon = PolygonManager(self)
-        self.toolButtonPolyCreate.clicked.connect(self.polygon.increment_pid)
-        self.toolButtonPolyDelete.clicked.connect(lambda: self.table_fcn.delete_row(self.tableWidgetPolyPoints))
-
 
         # Scatter and Ternary Tab
         #-------------------------
@@ -672,14 +620,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxFieldTypeY.activated.connect(lambda: self.update_field_combobox(self.comboBoxFieldTypeY, self.comboBoxFieldY))
         self.comboBoxFieldTypeZ.activated.connect(lambda: self.update_field_combobox(self.comboBoxFieldTypeZ, self.comboBoxFieldZ))
 
-
-        # polygon table
-        header = self.tableWidgetPolyPoints.horizontalHeader()
-        header.setSectionResizeMode(0,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(1,QHeaderView.Stretch)
-        header.setSectionResizeMode(2,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(3,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(4,QHeaderView.ResizeToContents)
 
         # Multidimensional Tab
         #------------------------
@@ -731,14 +671,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Connect cluster method comboBox to slot
         self.comboBoxClusterMethod.currentIndexChanged.connect(self.group_changed)
 
-        # Connect the itemChanged signal to a slot
-        self.tableWidgetViewGroups.setSelectionMode(QAbstractItemView.MultiSelection)
-        self.tableWidgetViewGroups.itemChanged.connect(self.cluster_label_changed)
-
         self.comboBoxColorField.setPlaceholderText("None")
         self.spinBoxColorField.lineEdit().setReadOnly(True)
         self.spinBoxFieldIndex.lineEdit().setReadOnly(True)
-        self.tableWidgetViewGroups.selectionModel().selectionChanged.connect(self.update_clusters)
 
         # Scatter and Ternary Tab
         #-------------------------
@@ -841,7 +776,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         # Styling Tab
         #-------------------------
-        self.plot_style = Styling(self, debug=self.logger_options['Styles'])
+        self.plot_style = Styling(self, debug=self.logger_options['Styles'], ui=True)
         self.plot_style.load_theme_names()
 
         setattr(self.comboBoxMVPlots, "allItems", lambda: [self.comboBoxMVPlots.itemText(i) for i in range(self.comboBoxMVPlots.count())])
@@ -855,15 +790,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # self.doubleSpinBoxMarkerSize.valueChanged.connect(lambda: self.plot_scatter(save=False))
         #self.comboBoxColorByField.activated.connect(lambda: self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField))
 
-        # cluster table
-        header = self.tableWidgetViewGroups.horizontalHeader()
-        header.setSectionResizeMode(0,QHeaderView.Stretch)
-        header.setSectionResizeMode(1,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(2,QHeaderView.ResizeToContents)
-        self.toolButtonGroupMask.clicked.connect(lambda: self.apply_cluster_mask(inverse=False))
-        self.toolButtonGroupMaskInverse.clicked.connect(lambda: self.apply_cluster_mask(inverse=True))
-
-
         # Calculator tab
         #-------------------------
         if hasattr(self,'notes'):
@@ -871,15 +797,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Profile filter tab
         #-------------------------
-        header = self.tableWidgetFilters.horizontalHeader()
-        header.setSectionResizeMode(0,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(1,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(2,QHeaderView.Stretch)
-        header.setSectionResizeMode(3,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(4,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(5,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(6,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(7,QHeaderView.ResizeToContents)
 
         # Notes tab
         #-------------------------
@@ -910,15 +827,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionCalculator.triggered.connect(self.open_calculator)
         self.open_calculator()
         self.calculator.hide()
-
-        #reset check boxes to prevent incorrect behaviour during plot click
-        # self.toolButtonPlotProfile.clicked.connect(lambda: self.reset_checked_items('profiling'))
-        # self.toolButtonPointMove.clicked.connect(lambda: self.reset_checked_items('profiling'))
-        self.toolButtonPolyCreate.clicked.connect(lambda: self.reset_checked_items('polygon'))
-        self.toolButtonPolyMovePoint.clicked.connect(lambda: self.reset_checked_items('polygon'))
-        self.toolButtonPolyAddPoint.clicked.connect(lambda: self.reset_checked_items('polygon'))
-        self.toolButtonPolyRemovePoint.clicked.connect(lambda: self.reset_checked_items('polygon'))
-
 
         # Setup Help
         #-------------------------
@@ -957,7 +865,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolButtonLeftDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.dockWidgetLeftToolbox, button=self.toolButtonLeftDock))
         self.toolButtonRightDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.dockWidgetPlotTree, button=None))
         self.toolButtonRightDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.dockWidgetStyling, button=self.toolButtonRightDock))
-        self.toolButtonBottomDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.dockWidgetMaskToolbox, button=self.toolButtonBottomDock))
 
 
         # Add the button to the status bar
@@ -983,11 +890,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.dockWidgetPlotTree.setFloating(False)
         self.dockWidgetStyling.setFloating(False)
 
-        self.dockWidgetMaskToolbox.show()
-        self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.dockWidgetMaskToolbox)
-        self.dockWidgetMaskToolbox.setFloating(False)
-
-        self.toggle_dock_visibility(dock=self.dockWidgetMaskToolbox, button=self.toolButtonBottomDock)
 
     def toggle_spot_tab(self):
         #self.actionSpotTools.toggle()
@@ -1405,13 +1307,47 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         if not hasattr(self, 'workflow'):
             self.workflow = Workflow(self)
-        else:
-            self.workflow.show()
 
-        if self.workflow in self.help_mapping.keys():
-            self.help_mapping[self.workflow] = 'workflow'
+            if not (self.workflow in self.help_mapping.keys()):
+                self.help_mapping[self.workflow] = 'workflow'
+
+        self.workflow.show()
+
 
         #self.workflow.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
+
+    def open_mask_dock(self, tab_name=None):
+        """Opens Mask dock
+
+        Opens mask dock, creates on first instance.
+        """
+        if not hasattr(self, 'mask_dock'):
+            self.polygon = PolygonManager(self)
+            self.mask_dock = MaskDock(self)
+
+            self.mask_tab = {}
+            for tid in range(self.mask_dock.tabWidgetMask.count()):
+                match self.mask_dock.tabWidgetMask.tabText(tid).lower():
+                    case 'filters':
+                        self.mask_tab.update({'filter': tid})
+                    case 'polygons':
+                        self.mask_tab.update({'polygon': tid})
+                    case 'clusters':
+                        self.mask_tab.update({'cluster': tid})
+
+            self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.mask_dock)
+            self.mask_dock.setFloating(False)
+
+            self.toolButtonBottomDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.mask_dock, button=self.toolButtonBottomDock))
+
+            if not (self.mask_dock in self.help_mapping.keys()):
+                self.help_mapping[self.mask_dock] = 'filtering'
+
+        self.mask_dock.show()
+
+        if tab_name is not None:
+            self.mask_dock.tabWidgetMask.setCurrentIndex(self.mask_tab[tab_name])
+
 
     def open_profile(self):
         """Opens Profile dock
@@ -1422,11 +1358,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         if not hasattr(self, 'profile'):
             self.profile_dock = ProfileDock(self)
-        else:
-            self.profile_dock.show()
 
-        if self.profile_dock in self.help_mapping.keys():
-            self.help_mapping[self.profile_dock] = 'profiles'
+            if not (self.profile_dock in self.help_mapping.keys()):
+                self.help_mapping[self.profile_dock] = 'profiles'
+
+        self.profile_dock.show()
+
 
     def open_notes(self):
         """Opens Notes dock
@@ -1440,13 +1377,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 notes_file = os.path.join(self.selected_directory,f"{self.sample_id}.rst")
             else:
                 notes_file = None
+
             self.notes = Notes(self, notes_file)
-        else:
-            self.notes.show()
 
-        self.help_mapping[self.notes] = 'notes'
+            if not (self.notes in self.help_mapping.keys()):
+                self.help_mapping[self.notes] = 'notes'
 
+        self.notes.show()
         #self.notes.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
+
 
     def open_calculator(self):
         """Opens Calculator dock
@@ -1456,10 +1395,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if not hasattr(self, 'logger'):
             calc_file = os.path.join(BASEDIR,f'resources/app_data/calculator.txt')
             self.calculator = CalculatorDock(self, filename=calc_file, debug=self.logger_options['Calculator'])
-        else:
-            self.calculator.show()
 
-        self.help_mapping[self.calculator] = 'calculator'
+            if not (self.calculator in self.help_mapping.keys()):
+                self.help_mapping[self.calculator] = 'calculator'
+
+        self.calculator.show()
+
+
 
         #self.calculator.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
@@ -1771,6 +1713,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             self.display_QV()
 
+    def update_plot_type_combobox(self):
+        """Updates plot type combobox based on current toolbox index or certain dock widget controls."""
+        self.comboBoxPlotType.clear()
+        if self.profile_state == True or self.polygon_state == True:
+            plot_idx = -1
+        else:
+            plot_idx = self.toolBox.currentIndex()
+
+        self.comboBoxPlotType.addItems(self.plot_types[plot_idx][1:])
+        self.comboBoxPlotType.setCurrentIndex(self.plot_types[plot_idx][0])
+        self.plot_type = self.comboBoxPlotType.currentText()
+        if hasattr(self,"plot_style"):
+            self.plot_style.set_style_widgets(self.plot_type)
+
     def toolbox_changed(self, update=True):
         """Updates styles associated with toolbox page
 
@@ -1791,8 +1747,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # update the plot type comboBox options
         self.comboBoxPlotType.blockSignals(True)
-        self.comboBoxPlotType.clear()
-        self.comboBoxPlotType.addItems(self.plot_types[tab_id][1:])
+        self.update_plot_type_combobox()
         self.comboBoxPlotType.setCurrentIndex(self.plot_types[self.toolBox.currentIndex()][0])
         self.comboBoxPlotType.blockSignals(False)
 
@@ -2394,241 +2349,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     # Field filter functions
     # -------------------------------
-    def update_filter_values(self):
-        """Updates widgets that display the filter bounds for a selected field.
-
-        Updates ``MainWindow.lineEditFMin`` and ``MainWindow.lineEditFMax`` values for display when the
-        field in ``MainWindow.comboBoxFilterField`` is changed.
-        """
-        if self.sample_id == '':
-            return
-        
-        # field = self.comboBoxFilterField.currentText()
-        # if not field:
-        #     return
-        if not (field := self.comboBoxFilterField.currentText()): return
-        
-        data = self.data[self.sample_id].processed_data
-
-        self.lineEditFMin.value = data[field].min()
-        self.callback_lineEditFMin()
-        self.lineEditFMax.value = data[field].max()
-        self.callback_lineEditFMax()
-
-    def callback_lineEditFMin(self):
-        """Updates ``MainWindow.doubleSpinBoxFMinQ.value`` when ``MainWindow.lineEditFMin.value`` is changed"""        
-        if self.sample_id == '':
-            return
-
-        if (self.comboBoxFilterField.currentText() == '') or (self.comboBoxFilterFieldType.currentText() == ''):
-            return
-
-        try:
-            array = self.data[self.sample_id].get_map_data(self.comboBoxFilterField.currentText(), self.comboBoxFilterFieldType.currentText())['array'].dropna()
-        except:
-            return
-
-        self.doubleSpinBoxFMinQ.blockSignals(True)
-        self.doubleSpinBoxFMinQ.setValue(percentileofscore(array, self.lineEditFMin.value))
-        self.doubleSpinBoxFMinQ.blockSignals(False)
-
-    def callback_lineEditFMax(self):
-        """Updates ``MainWindow.doubleSpinBoxFMaxQ.value`` when ``MainWindow.lineEditFMax.value`` is changed"""        
-        if self.sample_id == '':
-            return
-
-        if (self.comboBoxFilterField.currentText() == '') or (self.comboBoxFilterFieldType.currentText() == ''):
-            return
-
-        try:
-            array = self.data[self.sample_id].get_map_data(self.comboBoxFilterField.currentText(), self.comboBoxFilterFieldType.currentText())['array'].dropna()
-        except:
-            return
-
-        self.doubleSpinBoxFMaxQ.blockSignals(True)
-        self.doubleSpinBoxFMaxQ.setValue(percentileofscore(array, self.lineEditFMax.value))
-        self.doubleSpinBoxFMaxQ.blockSignals(False)
-
-    def callback_doubleSpinBoxFMinQ(self):
-        """Updates ``MainWindow.lineEditFMin.value`` when ``MainWindow.doubleSpinBoxFMinQ.value`` is changed"""        
-        array = self.data[self.sample_id].get_map_data(self.comboBoxFilterField.currentText(), self.comboBoxFilterFieldType.currentText())['array'].dropna()
-
-        self.lineEditFMin.value = np.percentile(array, self.doubleSpinBoxFMinQ.value())
-
-    def callback_doubleSpinBoxFMaxQ(self):
-        """Updates ``MainWindow.lineEditFMax.value`` when ``MainWindow.doubleSpinBoxFMaxQ.value`` is changed"""        
-        array = self.data[self.sample_id].get_map_data(self.comboBoxFilterField.currentText(), self.comboBoxFilterFieldType.currentText())['array'].dropna()
-
-        self.lineEditFMax.value = np.percentile(array, self.doubleSpinBoxFMaxQ.value())
-
-    def update_filter_table(self, reload = False):
-        """Update data for analysis when fiter table is updated.
-
-        Parameters
-        ----------
-        reload : bool, optional
-            Reload ``True`` updates the filter table, by default False
-        """
-        # If reload is True, clear the table and repopulate it from 'filter_info'
-        if reload:
-            # Clear the table
-            self.tableWidgetFilters.setRowCount(0)
-
-            # Repopulate the table from 'filter_info'
-            for index, row in self.data[self.sample_id].filter_df.iterrows():
-                current_row = self.tableWidgetFilters.rowCount()
-                self.tableWidgetFilters.insertRow(current_row)
-
-                # Create and set the checkbox for 'use'
-                chkBoxItem_use = QCheckBox()
-                chkBoxItem_use.setCheckState(Qt.Checked if row['use'] else Qt.Unchecked)
-                chkBoxItem_use.stateChanged.connect(lambda state, row=current_row: on_use_checkbox_state_changed(row, state))
-                self.tableWidgetFilters.setCellWidget(current_row, 0, chkBoxItem_use)
-
-                # Add other items from the row
-                self.tableWidgetFilters.setItem(current_row, 1, QTableWidgetItem(row['field_type']))
-                self.tableWidgetFilters.setItem(current_row, 2, QTableWidgetItem(row['field']))
-                self.tableWidgetFilters.setItem(current_row, 3, QTableWidgetItem(row['scale']))
-                self.tableWidgetFilters.setItem(current_row, 4, QTableWidgetItem(fmt.dynamic_format(row['min'])))
-                self.tableWidgetFilters.setItem(current_row, 5, QTableWidgetItem(fmt.dynamic_format(row['max'])))
-                self.tableWidgetFilters.setItem(current_row, 6, QTableWidgetItem(row['operator']))
-
-                # Create and set the checkbox for selection (assuming this is a checkbox similar to 'use')
-                chkBoxItem_select = QCheckBox()
-                chkBoxItem_select.setCheckState(Qt.Checked if row.get('select', False) else Qt.Unchecked)
-                self.tableWidgetFilters.setCellWidget(current_row, 7, chkBoxItem_select)
-
-        else:
-            # open tabFilterList
-            self.tabWidgetMask.setCurrentIndex(self.mask_tab['filter'])
-
-            def on_use_checkbox_state_changed(row, state):
-                # Update the 'use' value in the filter_df for the given row
-                self.data[self.sample_id].filter_df.at[row, 'use'] = state == Qt.Checked
-
-            field_type = self.comboBoxFilterFieldType.currentText()
-            field = self.comboBoxFilterField.currentText()
-            f_min = self.lineEditFMin.value
-            f_max = self.lineEditFMax.value
-            operator = self.comboBoxFilterOperator.currentText()
-            # Add a new row at the end of the table
-            row = self.tableWidgetFilters.rowCount()
-            self.tableWidgetFilters.insertRow(row)
-
-            # Create a QCheckBox for the 'use' column
-            chkBoxItem_use = QCheckBox()
-            chkBoxItem_use.setCheckState(Qt.Checked)
-            chkBoxItem_use.stateChanged.connect(lambda state, row=row: on_use_checkbox_state_changed(row, state))
-
-            chkBoxItem_select = QTableWidgetItem()
-            chkBoxItem_select.setFlags(Qt.ItemIsUserCheckable |
-                                Qt.ItemIsEnabled)
-
-            if 'Analyte' in field_type:
-                chkBoxItem_select.setCheckState(Qt.Unchecked)
-                analyte_1 = field
-                analyte_2 = None
-                scale = self.data[self.sample_id].processed_data.get_attribute(field,'norm')
-            elif 'Ratio' in field_type:
-                chkBoxItem_select.setCheckState(Qt.Unchecked)
-                analyte_1, analyte_2 = field.split(' / ')
-                scale = self.data[self.sample_id].processed_data.get_attribute(field,'norm')
-            else:
-                scale = 'linear'
-
-            self.tableWidgetFilters.setCellWidget(row, 0, chkBoxItem_use)
-            self.tableWidgetFilters.setItem(row, 1, QTableWidgetItem(field_type))
-            self.tableWidgetFilters.setItem(row, 2, QTableWidgetItem(field))
-            self.tableWidgetFilters.setItem(row, 3, QTableWidgetItem(scale))
-            self.tableWidgetFilters.setItem(row, 4, QTableWidgetItem(fmt.dynamic_format(f_min)))
-            self.tableWidgetFilters.setItem(row, 5, QTableWidgetItem(fmt.dynamic_format(f_max)))
-            self.tableWidgetFilters.setItem(row, 6, QTableWidgetItem(operator))
-            self.tableWidgetFilters.setItem(row, 7, chkBoxItem_select)
-
-            filter_info = {'use':True, 'field_type': field_type, 'field': field, 'norm':scale ,'min': f_min,'max':f_max, 'operator':operator, 'persistent':True}
-            self.data[self.sample_id].filter_df.loc[len(self.data[self.sample_id].filter_df)] = filter_info
-
-        self.apply_field_filters()
-
-    def remove_selected_rows(self):
-        """Remove selected rows from filter table.
-
-        Removes selected rows from ``MainWindow.tableWidgetFilter``.
-        """
-        sample_id = self.sample_id
-
-        print(self.tableWidgetFilters.selectedIndexes())
-
-        # We loop in reverse to avoid issues when removing rows
-        for row in range(self.tableWidgetFilters.rowCount()-1, -1, -1):
-            chkBoxItem = self.tableWidgetFilters.item(row, 7)
-            field_type = self.tableWidgetFilters.item(row, 1).text()
-            field = self.tableWidgetFilters.item(row, 2).text()
-            if chkBoxItem.checkState() == Qt.Checked:
-                self.tableWidgetFilters.removeRow(row)
-                self.data[sample_id].filter_df.drop(self.data[sample_id].filter_df[(self.data[sample_id].filter_df['field'] == field)].index, inplace=True)
-
-        self.apply_field_filters(sample_id)
-
-    def save_filter_table(self):
-        """Opens a dialog to save filter table
-
-        Executes on ``MainWindow.toolButtonFilterSave`` is clicked.  The filter is added to
-        ``MainWindow.tableWidgetFilters`` and save into a dictionary to a file with a ``.fltr`` extension.
-        """
-        name, ok = QInputDialog.getText(self, 'Save filter table', 'Enter filter table name:')
-        if ok:
-            # file name for saving
-            filter_file = os.path.join(BASEDIR,f'resources/filters/{name}.fltr')
-
-            # save dictionary to file
-            self.data[self.sample_id].filter_df.to_csv(filter_file, index=False)
-
-            # update comboBox
-            self.comboBoxFilterPresets.addItem(name)
-            self.comboBoxFilterPresets.setCurrentText(name)
-
-            self.statusBar.showMessage(f'Filters successfully saved as {filter_file}')
-        else:
-            # throw a warning that name is not saved
-            QMessageBox.warning(self,'Error','could not save filter table.')
-
-            return
-
-    def load_filter_tables(self):
-        """Loads filter names and adds them to the filter presets comboBox
-        
-        Looks for saved filter tables (*.fltr) in ``resources/filters/`` directory and adds them to
-        ``MainWindow.comboBoxFilterPresets``.
-        """
-        # read filenames with *.sty
-        file_list = os.listdir(os.path.join(BASEDIR,'resources/filters/'))
-        filter_list = [file.replace('.fltr','') for file in file_list if file.endswith('.fltr')]
-
-        # add default to list
-        filter_list.insert(0,'')
-
-        # update theme comboBox
-        self.comboBoxFilterPresets.clear()
-        self.comboBoxFilterPresets.addItems(filter_list)
-        self.comboBoxFilterPresets.setCurrentIndex(0)
-
-    def read_filter_table(self):
-        filter_name = self.comboBoxFilterPresets.currentText()
-
-        # If no filter_name is chosen, return
-        if filter_name == '':
-            return
-
-        # open filter with name filter_name
-        filter_file = os.path.join(BASEDIR,f'resources/filters/{filter_name}.fltr')
-        filter_info = pd.read_csv(filter_file)
-
-        # put filter_info into data and table
-        self.data[self.sample_id].filter_df = filter_info
-
-        self.update_filter_table()
-
     def apply_field_filters(self, update_plot=True):
         """Creates the field filter for masking data
 
@@ -2960,8 +2680,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Update the zoom view's displayed region
         # self.zoomViewBox.setRange(rect=zoomRect, padding=0)
-        if self.toolButtonEdgeDetect.isChecked():
-            self.zoomImg.setImage(image=self.edge_array)  # user edge_array too zoom with edge_det
+        if self.mask_dock.polygon_tab.action_edge_detect.isChecked():
+            self.zoomImg.setImage(image=self.noise_reduction.edge_array)  # user edge_array too zoom with edge_det
         else:
             self.zoomImg.setImage(image=self.array)  # Make sure this uses the current image data
 
@@ -2983,7 +2703,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def update_field_type_combobox(self, comboBox, addNone=False, plot_type=''):
         """Updates field type combobox
         
-        Used to update ``MainWindow.comboBoxHistFieldType``, ``MainWindow.comboBoxFilterFieldType``,
+        Used to update ``MainWindow.comboBoxHistFieldType``, ``mask_dock.filter_tab.comboBoxFilterFieldType``,
         ``MainWindow.comboBoxFieldTypeX``, ``MainWindow.comboBoxFieldTypeY``,
         ``MainWindow.comboBoxFieldTypeZ``, and ``MainWindow.comboBoxColorByField``
 
@@ -3172,13 +2892,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 if not field_type or not field or (field_type == '') or (field == ''):
                     return
 
-                if (self.dockWidgetMaskToolbox.isVisible() and self.tabWidgetMask.currentIndex() == self.mask_tab['polygon']) or (hasattr(self, "profile_dock") and self.profile_dock.actionControlPoints.isChecked()):
+                if (hasattr(self, "mask_dock") and self.mask_dock.polygon_tab.polygon_toggle.isChecked()) or (hasattr(self, "profile_dock") and self.profile_dock.profile_toggle.isChecked()):
                     self.plot_map_pg(sample_id, field_type, field)
                     # show created profiles if exists
-                    if self.toolBox.currentIndex() == hasattr(self,"profile_dock") and (self.sample_id in self.profile_dock.profiling.profiles):
+                    if (hasattr(self, "profile_dock") and self.profile_dock.profile_toggle.isChecked()) and (self.sample_id in self.profile_dock.profiling.profiles):
                         self.profile_dock.profiling.clear_plot()
                         self.profile_dock.profiling.plot_existing_profile(self.plot)
-                    elif self.toolBox.currentIndex() == self.mask_tab['polygon'] and (self.sample_id in self.polygon.polygons):  
+                    elif (hasattr(self, "mask_dock") and self.mask_dock.polygon_tab.polygon_toggle.isChecked()) and (self.sample_id in self.polygon.polygons):  
                         self.polygon.clear_plot()
                         self.polygon.plot_existing_polygon(self.plot)
                 else:
@@ -3915,20 +3635,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             
         norm = self.plot_style.color_norm()
 
-        # axes
-        xmin, xmax, xscale, xlbl = self.plot_style.get_axis_values(None,field= 'X')
-        ymin, ymax, yscale, ylbl = self.plot_style.get_axis_values(None,field= 'Y')
-
-
         cax = canvas.axes.imshow(reshaped_array,
                                 cmap=self.plot_style.get_colormap(),
                                 aspect=aspect_ratio, interpolation='none',
                                 norm=norm)
         
         
-        # # axes limits
-        canvas.axes.set_xlim(xmin, xmax)
-        canvas.axes.set_ylim(ymin, ymax)
 
         self.add_colorbar(canvas, cax)
         match self.plot_style.cscale:
@@ -4130,7 +3842,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.prev_plot = field
             self.init_zoom_view()
             # uncheck edge detection
-            self.toolButtonEdgeDetect.setChecked(False)
+            self.mask_dock.polygon_tab.action_edge_detect.setChecked(False)
 
 
         # Create a SignalProxy to handle mouse movement events
@@ -4142,8 +3854,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         plotWindow.getViewBox().autoRange()
 
         # add edge detection
-        if self.toolButtonEdgeDetect.isChecked():
-            self.add_edge_detection()
+        if self.mask_dock.polygon_tab.action_edge_detect.isChecked():
+            self.noise_reduction.add_edge_detection()
 
         if view == 0 and self.plot_info:
             self.plot_info['view'][0] = False
@@ -6531,8 +6243,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
 
         # filters
-        self.update_field_type_combobox(self.comboBoxFilterFieldType)
-        self.update_field_combobox(self.comboBoxFilterFieldType, self.comboBoxFilterField)
+        self.update_field_type_combobox(self.mask_dock.filter_tab.comboBoxFilterFieldType)
+        self.update_field_combobox(self.mask_dock.filter_tab.comboBoxFilterFieldType, self.mask_dock.filter_tab.comboBoxFilterField)
 
         # scatter and heatmaps
         self.update_field_type_combobox(self.comboBoxFieldTypeX)
@@ -6648,10 +6360,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.comboBoxNegativeMethod.setCurrentIndex(index)
             
             # Update filter UI 
-            self.lineEditFMin.value = data[field].min()
-            self.lineEditFMax.value = data[field].max()
-            self.callback_lineEditFMin()
-            self.callback_lineEditFMax()
+            self.mask_dock.filter_tab.lineEditFMin.value = data[field].min()
+            self.mask_dock.filter_tab.lineEditFMax.value = data[field].max()
+            self.mask_dock.filter_tab.callback_lineEditFMin()
+            self.mask_dock.filter_tab.callback_lineEditFMax()
 
     def update_ratio_df(self,sample_id,analyte_1, analyte_2,norm):
         parameter = self.data[sample_id]['ratio_info'].loc[(self.data[sample_id]['ratio_info']['analyte_1'] == analyte_1) & (self.data[sample_id]['ratio_info']['analyte_2'] == analyte_2)]
@@ -6660,7 +6372,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                             'upper_bound':np.nan,'lower_bound':np.nan,'d_bound':np.nan,'use': True,'auto_scale': True}
             self.data[sample_id]['ratio_info'].loc[len(self.data[sample_id]['ratio_info'])] = ratio_info
 
-            self.prep_data(sample_id, analyte_1=analyte_1, analyte_2=analyte_2)
+            self.data[self.sample_id].prep_data(sample_id, analyte_1=analyte_1, analyte_2=analyte_2)
             self.update_labels()
 
     def toggle_help_mode(self):
@@ -6691,17 +6403,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         match item:
             case 'crop':
                 self.profile_dock.actionControlPoints.setChecked(False)
-                self.toolButtonPointMove.setChecked(False)
-                self.toolButtonPolyCreate.setChecked(False)
-                self.toolButtonPolyMovePoint.setChecked(False)
-                self.toolButtonPolyAddPoint.setChecked(False)
-                self.toolButtonPolyRemovePoint.setChecked(False)
+                self.actionPointMove.setChecked(False)
+                self.actionPolyCreate.setChecked(False)
+                self.actionPolyMovePoint.setChecked(False)
+                self.actionPolyAddPoint.setChecked(False)
+                self.actionPolyRemovePoint.setChecked(False)
             case 'profiling':
                 self.actionCrop.setChecked(False)
-                self.toolButtonPolyCreate.setChecked(False)
-                self.toolButtonPolyMovePoint.setChecked(False)
-                self.toolButtonPolyAddPoint.setChecked(False)
-                self.toolButtonPolyRemovePoint.setChecked(False)
+                self.actionPolyCreate.setChecked(False)
+                self.actionPolyMovePoint.setChecked(False)
+                self.actionPolyAddPoint.setChecked(False)
+                self.actionPolyRemovePoint.setChecked(False)
             case 'polygon':
                 self.actionCrop.setChecked(False)
                 self.profile_dock.actionControlPoints.setChecked(False)

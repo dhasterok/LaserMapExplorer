@@ -37,9 +37,9 @@ class ProfileDock(CustomDockWidget, UIFieldLogic):
         toolbar.setMovable(False)  # Optional: Prevent toolbar from being dragged out
 
         # profile toggle
-        self.profile_toggle = ToggleSwitch(self, height=18, bg_left_color="#D8ADAB", bg_right_color="#A8B078")
+        self.profile_toggle = ToggleSwitch(toolbar, height=18, bg_left_color="#D8ADAB", bg_right_color="#A8B078")
         self.profile_toggle.setChecked(False)
-        self.action_profile_toggle = QWidgetAction(self)
+        self.action_profile_toggle = QWidgetAction(toolbar)
         self.action_profile_toggle.setDefaultWidget(self.profile_toggle)
         self.profile_toggle.stateChanged.connect(self.profile_state_changed)
 
@@ -74,31 +74,27 @@ class ProfileDock(CustomDockWidget, UIFieldLogic):
         self.actionInterpolate.setToolTip("Interpolate between control points")
         self.actionInterpolate.setCheckable(True)
         self.actionInterpolate.setChecked(False)
-        self.actionInterpolate.setEnabled(False)
 
         # Move control point
-        self.actionMovePoint = QAction()
-        self.actionMovePoint.setIcon(QIcon(":resources/icons/icon-move-point-64.svg"))
-        self.actionMovePoint.setToolTip("Move a control point")
-        self.actionMovePoint.setCheckable(True)
-        self.actionMovePoint.setChecked(False)
-        self.actionMovePoint.setEnabled(False)
+        self.actionPointMove = QAction()
+        self.actionPointMove.setIcon(QIcon(":resources/icons/icon-move-point-64.svg"))
+        self.actionPointMove.setToolTip("Move a control point")
+        self.actionPointMove.setCheckable(True)
+        self.actionPointMove.setChecked(False)
 
         # Add control point
-        self.actionAddPoint = QAction()
-        self.actionAddPoint.setIcon(QIcon(":resources/icons/icon-add-point-64.svg"))
-        self.actionAddPoint.setToolTip("Add a control point")
-        self.actionAddPoint.setCheckable(True)
-        self.actionAddPoint.setChecked(False)
-        self.actionAddPoint.setEnabled(False)
+        self.actionPointAdd = QAction()
+        self.actionPointAdd.setIcon(QIcon(":resources/icons/icon-add-point-64.svg"))
+        self.actionPointAdd.setToolTip("Add a control point")
+        self.actionPointAdd.setCheckable(True)
+        self.actionPointAdd.setChecked(False)
 
         # Remove control point
-        self.actionRemovePoint = QAction()
-        self.actionRemovePoint.setIcon(QIcon(":resources/icons/icon-remove-point-64.svg"))
-        self.actionRemovePoint.setToolTip("Remove a control point")
-        self.actionRemovePoint.setCheckable(True)
-        self.actionRemovePoint.setChecked(False)
-        self.actionRemovePoint.setEnabled(False)
+        self.actionPointRemove = QAction()
+        self.actionPointRemove.setIcon(QIcon(":resources/icons/icon-remove-point-64.svg"))
+        self.actionPointRemove.setToolTip("Remove a control point")
+        self.actionPointRemove.setCheckable(True)
+        self.actionPointRemove.setChecked(False)
 
         # edit profile button
         self.actionEdit = QAction()
@@ -113,7 +109,6 @@ class ProfileDock(CustomDockWidget, UIFieldLogic):
         self.actionTogglePoint.setToolTip("Toggle point visibility")
         self.actionTogglePoint.setCheckable(True)
         self.actionTogglePoint.setChecked(False)
-        self.actionTogglePoint.setEnabled(False)
 
         # export profile figure button
         self.actionExport = QAction()
@@ -125,17 +120,17 @@ class ProfileDock(CustomDockWidget, UIFieldLogic):
         toolbar.addAction(self.actionOpenProfile)
         toolbar.addWidget(self.profile_label)
         toolbar.addWidget(self.profile_combobox)
+        toolbar.addAction(self.actionExport)
         toolbar.addAction(self.actionDeleteProfile)
         toolbar.addSeparator()
         toolbar.addAction(self.actionControlPoints)
         toolbar.addAction(self.actionInterpolate)
-        toolbar.addAction(self.actionMovePoint)
-        toolbar.addAction(self.actionAddPoint)
-        toolbar.addAction(self.actionRemovePoint)
+        toolbar.addAction(self.actionPointMove)
+        toolbar.addAction(self.actionPointAdd)
+        toolbar.addAction(self.actionPointRemove)
         toolbar.addSeparator()
         toolbar.addAction(self.actionEdit)
         toolbar.addAction(self.actionTogglePoint)
-        toolbar.addAction(self.actionExport)
 
         container_layout.addWidget(toolbar)
 
@@ -184,43 +179,43 @@ class ProfileDock(CustomDockWidget, UIFieldLogic):
         profile_tools_layout.addRow("Point type",self.point_type_combobox)
 
 
-        self.control_points_table = QTableWidget()
+        self.tableWidgetControlPoints = QTableWidget()
         font = QFont()
         font.setPointSize(11)
         font.setStyleStrategy(QFont.PreferDefault)
-        self.control_points_table.setFont(font)
-        #self.control_points_table.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
-        self.control_points_table.setObjectName("control_points_table")
-        self.control_points_table.setColumnCount(3)
-        self.control_points_table.setRowCount(0)
+        self.tableWidgetControlPoints.setFont(font)
+        #self.tableWidgetControlPoints.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
+        self.tableWidgetControlPoints.setObjectName("tableWidgetControlPoints")
+        self.tableWidgetControlPoints.setColumnCount(3)
+        self.tableWidgetControlPoints.setRowCount(0)
         item = QTableWidgetItem()
         item.setText("Point")
         font = QFont()
         font.setPointSize(11)
         item.setFont(font)
-        self.control_points_table.setHorizontalHeaderItem(0, item)
+        self.tableWidgetControlPoints.setHorizontalHeaderItem(0, item)
         item = QTableWidgetItem()
         item.setText("X")
         font = QFont()
         font.setPointSize(11)
         item.setFont(font)
-        self.control_points_table.setHorizontalHeaderItem(1, item)
+        self.tableWidgetControlPoints.setHorizontalHeaderItem(1, item)
         item = QTableWidgetItem()
         item.setText("Y")
         font = QFont()
         font.setPointSize(11)
         item.setFont(font)
-        self.control_points_table.setHorizontalHeaderItem(2, item)
-        self.control_points_table.horizontalHeader().setDefaultSectionSize(80)
-        self.control_points_table.horizontalHeader().setStretchLastSection(True)
-        self.control_points_table.setSelectionBehavior(QTableWidget.SelectRows)
+        self.tableWidgetControlPoints.setHorizontalHeaderItem(2, item)
+        self.tableWidgetControlPoints.horizontalHeader().setDefaultSectionSize(80)
+        self.tableWidgetControlPoints.horizontalHeader().setStretchLastSection(True)
+        self.tableWidgetControlPoints.setSelectionBehavior(QTableWidget.SelectRows)
 
-        header = self.control_points_table.horizontalHeader()
+        header = self.tableWidgetControlPoints.horizontalHeader()
         header.setSectionResizeMode(0,QHeaderView.Stretch)
         header.setSectionResizeMode(1,QHeaderView.ResizeToContents)
         header.setSectionResizeMode(2,QHeaderView.ResizeToContents)
 
-        profile_group_layout.addWidget(self.control_points_table)
+        profile_group_layout.addWidget(self.tableWidgetControlPoints)
 
         left_layout.addWidget(profile_tools)
 
@@ -344,9 +339,11 @@ class ProfileDock(CustomDockWidget, UIFieldLogic):
         self.actionTogglePoint.triggered.connect(self.profiling.toggle_point_visibility)
         
         self.actionControlPoints.triggered.connect(lambda: self.main_window.reset_checked_items('profiling'))
-        self.actionMovePoint.triggered.connect(lambda: self.main_window.reset_checked_items('profiling'))
+        self.actionPointMove.triggered.connect(lambda: self.main_window.reset_checked_items('profiling'))
 
         self.visibilityChanged.connect(self.update_dock_visibility)
+        
+        self.toggle_profile_actions()
 
     def update_dock_visibility(self):
         if not self.profile_toggle.isChecked():
@@ -356,6 +353,47 @@ class ProfileDock(CustomDockWidget, UIFieldLogic):
         self.profile_toggle.setChecked(False)
 
         self.main_window.update_SV()
+
+    def toggle_profile_actions(self):
+        if self.profile_toggle.isChecked():
+            self.actionInterpolate.setEnabled(False)
+            self.actionControlPoints.setEnabled(False)
+            self.actionPointMove.setEnabled(False)
+            self.actionPointAdd.setEnabled(False)
+            self.actionPointRemove.setEnabled(False)
+            self.actionEdit.setEnabled(False)
+            self.actionTogglePoint.setEnabled(False)
+        else:
+            self.actionControlPoints.setEnabled(True)
+            if not self.actionControlPoints.isChecked() and self.tableWidgetControlPoints.rowCount() > 1:
+                self.actionInterpolate.setEnabled(True)
+            else:
+                self.actionInterpolate.setEnabled(False)
+
+            if self.tableWidgetControlPoints.rowCount() > 0:
+                if self.tableWidgetControlPoints.rowCount() > 1:
+                    self.actionInterpolate.setEnabled(True)
+                else:
+                    self.actionInterpolate.setEnabled(False)
+                self.actionPointMove.setEnabled(True)
+                self.actionPointAdd.setEnabled(True)
+                self.actionPointRemove.setEnabled(True)
+                self.actionEdit.setEnabled(True)
+                self.actionTogglePoint.setEnabled(True)
+            else:
+                self.actionInterpolate.setEnabled(False)
+                self.actionPointMove.setEnabled(False)
+                self.actionPointAdd.setEnabled(False)
+                self.actionPointRemove.setEnabled(False)
+                self.actionEdit.setEnabled(False)
+                self.actionTogglePoint.setEnabled(False)
+
+        if self.tableWidgetControlPoints.rowCount() > 1:
+            self.actionExport.setEnabled(True)
+            self.actionDeleteProfile.setEnabled(True)
+        else:
+            self.actionExport.setEnabled(False)
+            self.actionDeleteProfile.setEnabled(False)
 
         
     def update_profile_spinbox(self):
@@ -369,7 +407,9 @@ class ProfileDock(CustomDockWidget, UIFieldLogic):
     def profile_state_changed(self):
         self.main_window.profile_state = self.profile_toggle.isChecked()
         if self.profile_toggle.isChecked():
-            pass
+            self.main_window.update_plot_type_combobox()
+            self.main_window.mask_dock.polygon_tab.polygon_toggle.setChecked(False)
+            self.main_window.mask_dock.polygon_tab.toggle_polygon_actions()
 
         self.main_window.update_SV()
 
@@ -1514,10 +1554,10 @@ class Profiling:
                 # profile.clear()
 
                 # Clear all data from the table
-                self.profile_dock.control_points_table.clearContents()
+                self.profile_dock.tableWidgetControlPoints.clearContents()
 
                 # Remove all rows
-                self.profile_dock.control_points_table.setRowCount(0)
+                self.profile_dock.tableWidgetControlPoints.setRowCount(0)
 
                 # Clear the profile plot widget
                 layout = self.profile_dock.widgetProfilePlot.layout()
@@ -1601,19 +1641,19 @@ class Profiling:
                 x_coords = profile_points.get('x', [])
                 y_coords = profile_points.get('y', [])
 
-                self.profile_dock.control_points_table.setRowCount(0)
+                self.profile_dock.tableWidgetControlPoints.setRowCount(0)
                 for idx, (x, y) in enumerate(zip(x_coords, y_coords)):
-                    row_position = self.profile_dock.control_points_table.rowCount()
-                    self.profile_dock.control_points_table.insertRow(row_position)
+                    row_position = self.profile_dock.tableWidgetControlPoints.rowCount()
+                    self.profile_dock.tableWidgetControlPoints.insertRow(row_position)
 
                     # Fill in the data
-                    self.profile_dock.control_points_table.setItem(row_position, 0, QTableWidgetItem(str(idx)))
-                    self.profile_dock.control_points_table.setItem(row_position, 1, QTableWidgetItem(str(round(x))))
-                    self.profile_dock.control_points_table.setItem(row_position, 2, QTableWidgetItem(str(round(y))))
-                    self.profile_dock.control_points_table.setRowHeight(row_position, 20)
+                    self.profile_dock.tableWidgetControlPoints.setItem(row_position, 0, QTableWidgetItem(str(idx)))
+                    self.profile_dock.tableWidgetControlPoints.setItem(row_position, 1, QTableWidgetItem(str(round(x))))
+                    self.profile_dock.tableWidgetControlPoints.setItem(row_position, 2, QTableWidgetItem(str(round(y))))
+                    self.profile_dock.tableWidgetControlPoints.setRowHeight(row_position, 20)
 
                 # Enable or disable buttons based on the presence of points
-                self.toggle_buttons(self.profile_dock.control_points_table.rowCount() > 0)
+                self.toggle_buttons(self.profile_dock.tableWidgetControlPoints.rowCount() > 0)
 
 
     def toggle_buttons(self, enable):

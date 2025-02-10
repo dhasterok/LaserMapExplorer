@@ -190,7 +190,8 @@ class UIThemes():
         parent.toolButtonYAxisReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-64.svg')))
         parent.toolButtonZAxisReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-64.svg')))
         parent.toolButtonCAxisReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-64.svg')))
-        parent.toolButtonClusterColorReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-64.svg')))
+        if hasattr(parent,"mask_dock"):
+            parent.mask_dock.actionClusterColorReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-64.svg')))
         parent.toolButtonHistogramReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-64.svg')))
         # Plot Tree
         parent.toolButtonSortAnalyte.setIcon(QIcon(os.path.join(ICONPATH,'icon-sort-64.svg')))
@@ -217,19 +218,20 @@ class UIThemes():
         parent.toolButtonNDimSelectAll.setIcon(QIcon(os.path.join(ICONPATH,'icon-select-all-64.svg')))
         parent.toolButtonNDimRemove.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
         # Filter
-        parent.toolButtonFilterSelectAll.setIcon(QIcon(os.path.join(ICONPATH,'icon-select-all-64.svg')))
-        parent.toolButtonFilterUp.setIcon(QIcon(os.path.join(ICONPATH,'icon-up-arrow-64.svg')))
-        parent.toolButtonFilterDown.setIcon(QIcon(os.path.join(ICONPATH,'icon-down-arrow-64.svg')))
-        parent.toolButtonFilterRemove.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
-        # Polygons
-        parent.toolBox.setItemIcon(parent.mask_tab['polygon'],QIcon(os.path.join(ICONPATH,'icon-polygon-new-64.svg')))
-        parent.toolButtonPolyCreate.setIcon(QIcon(os.path.join(ICONPATH,'icon-polygon-new-64.svg')))
-        parent.toolButtonPolyAddPoint.setIcon(QIcon(os.path.join(ICONPATH,'icon-add-point-64.svg')))
-        parent.toolButtonPolyRemovePoint.setIcon(QIcon(os.path.join(ICONPATH,'icon-remove-point-64.svg')))
-        parent.toolButtonPolyMovePoint.setIcon(QIcon(os.path.join(ICONPATH,'icon-move-point-64.svg')))
-        parent.toolButtonPolyLink.setIcon(QIcon(os.path.join(ICONPATH,'icon-link-64.svg')))
-        parent.toolButtonPolyDelink.setIcon(QIcon(os.path.join(ICONPATH,'icon-unlink-64.svg')))
-        parent.toolButtonPolyDelete.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
+        if hasattr(parent,"mask_dock"):
+            parent.actionFilterSelectAll.setIcon(QIcon(os.path.join(ICONPATH,'icon-select-all-64.svg')))
+            parent.actionFilterUp.setIcon(QIcon(os.path.join(ICONPATH,'icon-up-arrow-64.svg')))
+            parent.actionFilterDown.setIcon(QIcon(os.path.join(ICONPATH,'icon-down-arrow-64.svg')))
+            parent.actionFilterRemove.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
+            # Polygons
+            parent.toolBox.setItemIcon(parent.mask_tab['polygon'],QIcon(os.path.join(ICONPATH,'icon-polygon-new-64.svg')))
+            parent.actionPolyCreate.setIcon(QIcon(os.path.join(ICONPATH,'icon-polygon-new-64.svg')))
+            parent.actionPolyAddPoint.setIcon(QIcon(os.path.join(ICONPATH,'icon-add-point-64.svg')))
+            parent.actionPolyRemovePoint.setIcon(QIcon(os.path.join(ICONPATH,'icon-remove-point-64.svg')))
+            parent.actionPolyMovePoint.setIcon(QIcon(os.path.join(ICONPATH,'icon-move-point-64.svg')))
+            parent.actionPolyLink.setIcon(QIcon(os.path.join(ICONPATH,'icon-link-64.svg')))
+            parent.actionPolyDelink.setIcon(QIcon(os.path.join(ICONPATH,'icon-unlink-64.svg')))
+            parent.actionPolyDelete.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
         # Profile
         #parent.toolBox.setItemIcon(parent.left_tab['profile'],QIcon(os.path.join(ICONPATH,'icon-profile-64.svg')))
         #parent.toolButtonClearProfile.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
@@ -265,8 +267,9 @@ class UIThemes():
         parent.toolBoxStyle.setItemIcon(parent.style_tab['colors'],QIcon(os.path.join(ICONPATH,'icon-rgb-64.svg')))
         parent.toolBoxStyle.setItemIcon(parent.style_tab['regression'],QIcon(os.path.join(ICONPATH,'icon-regression-64.svg')))
         # Cluster tab
-        parent.tabWidgetMask.setTabIcon(parent.mask_tab['cluster'],QIcon(os.path.join(ICONPATH,'icon-cluster-64.svg')))
-        parent.toolButtonClusterLink.setIcon(QIcon(os.path.join(ICONPATH,'icon-link-64.svg')))
-        parent.toolButtonClusterDelink.setIcon(QIcon(os.path.join(ICONPATH,'icon-unlink-64.svg')))
+        if hasattr(parent, "mask_dock"):
+            parent.mask_dock.cluster_tab.setTabIcon(parent.mask_tab['cluster'],QIcon(os.path.join(ICONPATH,'icon-cluster-64.svg')))
+            parent.actionClusterLink.setIcon(QIcon(os.path.join(ICONPATH,'icon-link-64.svg')))
+            parent.actionClusterDelink.setIcon(QIcon(os.path.join(ICONPATH,'icon-unlink-64.svg')))
 
 

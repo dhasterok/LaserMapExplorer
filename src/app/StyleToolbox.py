@@ -224,11 +224,9 @@ class Styling():
             parent.toolButtonOverlayColor.clicked.connect(self.overlay_color_callback)
             parent.toolButtonMarkerColor.clicked.connect(self.marker_color_callback)
             parent.toolButtonLineColor.clicked.connect(self.line_color_callback)
-            parent.toolButtonClusterColor.clicked.connect(self.cluster_color_callback)
             parent.toolButtonXAxisReset.clicked.connect(lambda: self.axis_reset_callback('x'))
             parent.toolButtonYAxisReset.clicked.connect(lambda: self.axis_reset_callback('y'))
             parent.toolButtonCAxisReset.clicked.connect(lambda: self.axis_reset_callback('c'))
-            parent.toolButtonClusterColorReset.clicked.connect(self.set_default_cluster_colors)
             #self.toolButtonOverlayColor.setStyleSheet("background-color: white;")
 
             setattr(parent.comboBoxMarker, "allItems", lambda: [parent.comboBoxMarker.itemText(i) for i in range(parent.comboBoxMarker.count())])
@@ -329,8 +327,6 @@ class Styling():
             parent.comboBoxCbarDirection.activated.connect(self.cbar_direction_callback)
             # resolution
             parent.spinBoxHeatmapResolution.valueChanged.connect(lambda: self.resolution_callback(update_plot=True))
-            # clusters
-            parent.spinBoxClusterGroup.valueChanged.connect(self.select_cluster_group_callback)
 
             # ternary colormaps
             
@@ -362,7 +358,7 @@ class Styling():
     def plot_type(self, new_plot_type):
         if new_plot_type != self._plot_type:
             self._plot_type = new_plot_type
-            if self.parent.plot_type != new_plot_type:
+            if self.parent.plot_type != new_plot_type and ui:
                 self.parent.comboBoxPlotType.setCurrentText(new_plot_type)
             self.plot_type_callback(update=True)
 
@@ -3135,36 +3131,6 @@ class Styling():
 
     # cluster styles
     # -------------------------------------
-    def cluster_color_callback(self):
-        """Updates color of a cluster
-
-        Uses ``QColorDialog`` to select new cluster color and then updates plot on change of
-        backround ``MainWindow.toolButtonClusterColor`` color.  Also updates ``MainWindow.tableWidgetViewGroups``
-        color associated with selected cluster.  The selected cluster is determined by ``MainWindow.spinBoxClusterGroup.value()``
-        """
-        if self.debug:
-            print("cluster_color_callback")
-
-        parent = self.parent
-        #print('cluster_color_callback')
-        if parent.tableWidgetViewGroups.rowCount() == 0:
-            return
-
-        selected_cluster = parent.spinBoxClusterGroup.value()-1
-
-        # change color
-        self.button_color_select(parent.toolButtonClusterColor)
-        color = get_hex_color(parent.toolButtonClusterColor.palette().button().color())
-        parent.cluster_dict[parent.cluster_dict['active method']][selected_cluster]['color'] = color
-        if parent.tableWidgetViewGroups.item(selected_cluster,2).text() == color:
-            return
-
-        # update_table
-        parent.tableWidgetViewGroups.setItem(selected_cluster,2,QTableWidgetItem(color))
-
-        # update plot
-        if parent.comboBoxColorByField.currentText() == 'cluster':
-            self.scheduler.schedule_update()
 
     def set_default_cluster_colors(self, mask=False):
         """Sets cluster group to default colormap
@@ -3181,7 +3147,7 @@ class Styling():
             print("set_default_cluster_colors")
 
         #print('set_default_cluster_colors')
-        parent = self.parent
+        cluster_tab = self.parent.mask_dock.cluster_tab
 
         # cluster colormap
         cmap = self.get_colormap(N=self.parent.tableWidgetViewGroups.rowCount())
@@ -3190,31 +3156,18 @@ class Styling():
         colors = [cmap(i) for i in range(cmap.N)]
 
         hexcolor = []
-        for i in range(parent.tableWidgetViewGroups.rowCount()):
+        for i in range(cluster_tab.tableWidgetViewGroups.rowCount()):
             hexcolor.append(get_hex_color(colors[i]))
-            parent.tableWidgetViewGroups.blockSignals(True)
-            parent.tableWidgetViewGroups.setItem(i,2,QTableWidgetItem(hexcolor[i]))
-            parent.tableWidgetViewGroups.blockSignals(False)
+            cluster_tab.tableWidgetViewGroups.blockSignals(True)
+            cluster_tab.tableWidgetViewGroups.setItem(i,2,QTableWidgetItem(hexcolor[i]))
+            cluster_tab.tableWidgetViewGroups.blockSignals(False)
 
         if mask:
             hexcolor.append(self.style_dict['cluster']['OverlayColor'])
 
-        parent.toolButtonClusterColor.setStyleSheet("background-color: %s;" % parent.tableWidgetViewGroups.item(parent.spinBoxClusterGroup.value()-1,2).text())
+        cluster_tab.toolButtonClusterColor.setStyleSheet("background-color: %s;" % cluster_tab.tableWidgetViewGroups.item(cluster_tab.spinBoxClusterGroup.value()-1,2).text())
 
         return hexcolor
-
-    def select_cluster_group_callback(self):
-        """Set cluster color button background after change of selected cluster group
-
-        Sets ``MainWindow.toolButtonClusterColor`` background on change of ``MainWindow.spinBoxClusterGroup``
-        """
-        if self.debug:
-            print("select_cluster_group_callback")
-
-        parent = self.parent
-        if parent.tableWidgetViewGroups.rowCount() == 0:
-            return
-        parent.toolButtonClusterColor.setStyleSheet("background-color: %s;" % parent.tableWidgetViewGroups.item(parent.spinBoxClusterGroup.value()-1,2).text())
 
     def ternary_colormap_changed(self):
         """Changes toolButton backgrounds associated with ternary colormap

@@ -787,6 +787,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.field_type = None
         self.comboBoxColorByField.currentIndexChanged.connect(self.on_field_type_changed)
 
+        # Connect the checkbox's stateChanged signal to our update function
+        self.showMass = False
+        self.checkBoxShowMass.stateChanged.connect(self.on_checkBoxShowMass_changed)
         # self.doubleSpinBoxMarkerSize.valueChanged.connect(lambda: self.plot_scatter(save=False))
         #self.comboBoxColorByField.activated.connect(lambda: self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField))
 
@@ -958,6 +961,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def on_field_changed(self):
         # Update self.field_type whenever combo box changes
         self.field = self.comboBoxColorField.currentText()
+
+    def on_checkBoxShowMass_changed(self, state):
+        """
+        Update self.showMass whenever the checkbox changes.
+        state is an int, so we convert it to bool by checking if it equals QtCore.Qt.Checked.
+        """
+        self.showMass = (state == Qt.Checked)
 
     # -------------------------------------
     # Reset to start

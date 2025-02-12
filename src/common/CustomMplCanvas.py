@@ -98,8 +98,8 @@ class MplCanvas(FigureCanvas):
         self.saved_line = []
         self.saved_dtext = []
         self.array = None
-        if self.parent is not None and self.parent.sample_id in self.parent.data:
-            if self.parent.plot_type in self.parent.plot_style.map_plot_types:
+        if self.parent is not None and self.parent.app_data.sample_id in self.parent.app_data.data:
+            if self.parent.plot_style.plot_type in self.parent.plot_style.map_plot_types:
                 self.map_flag = True
             else:
                 self.map_flag = False
@@ -155,13 +155,13 @@ class MplCanvas(FigureCanvas):
             
             #x = x_i*self.parent.dx
             #y = y_i*self.parent.dy
-            if self.parent.sample_id in self.parent.data:
-                x = x_i*self.parent.data[self.parent.sample_id].dx
-                y = y_i*self.parent.data[self.parent.sample_id].dy
+            if self.parent.app_data.sample_id in self.parent.app_data.data:
+                x = x_i*self.parent.app_data.data[self.parent.app_data.sample_id].dx
+                y = y_i*self.parent.app_data.data[self.parent.app_data.sample_id].dy
             else:
                 return
 
-            label =  f" {self.parent.preferences['Units']['Concentration']}"
+            label =  f" {self.parent.app_data.preferences['Units']['Concentration']}"
         else:
             x = event.xdata
             y = event.ydata
@@ -273,8 +273,8 @@ class MplCanvas(FigureCanvas):
             Distance between two given points.
         """
         if self.map_flag:
-            dx = self.parent.data[self.parent.sample_id].dx
-            dy = self.parent.data[self.parent.sample_id].dy
+            dx = self.parent.app_data.data[self.parent.app_data.sample_id].dx
+            dy = self.parent.app_data.data[self.parent.app_data.sample_id].dy
         else:
             dx = 1
             dy = 1
@@ -294,7 +294,7 @@ class MplCanvas(FigureCanvas):
         matplotlib.plot
             Handle to line
         """        
-        plot_type = self.parent.plot_info['plot_type']
+        plot_type = self.parent.app_data.plot_info['plot_type']
         overlay_color = self.parent.plot_style.overlay_color
         line_width = self.parent.plot_style.line_width
 
@@ -321,20 +321,20 @@ class MplCanvas(FigureCanvas):
         matplotlib.text
             Handle to text.
         """        
-        plot_type = self.parent.plot_info['plot_type']
+        plot_type = self.parent.app_data.plot_info['plot_type']
         style = self.parent.plot_style
 
         # compute distance
         distance = self.calculate_distance(p1, p2)
 
         # Update distance label in widget 
-        distance_text = f"{distance:.4g} {self.parent.preferences['Units']['Distance']}"
+        distance_text = f"{distance:.4g} {self.parent.app_data.preferences['Units']['Distance']}"
         self.ui.labelSVInfoDistance.setText(f"D: {distance_text}")
 
         # Update distance label on map
         if self.map_flag:
-            xrange = self.parent.data[self.parent.sample_id].x.nunique()*self.parent.data[self.parent.sample_id].aspect_ratio
-            yrange = self.parent.data[self.parent.sample_id].y.nunique()
+            xrange = self.parent.app_data.data[self.parent.app_data.sample_id].x.nunique()*self.parent.app_data.data[self.parent.app_data.sample_id].aspect_ratio
+            yrange = self.parent.app_data.data[self.parent.app_data.sample_id].y.nunique()
 
             xl = self.axes.get_xlim()
             xrange = xl[1] - xl[0]
@@ -381,7 +381,7 @@ class MplCanvas(FigureCanvas):
                 if self.first_point is None:
                     # First click
                     self.first_point = (event.xdata, event.ydata)
-                    self.ui.labelSVInfoDistance.setText(f"D: 0 {self.parent.preferences['Units']['Distance']}")
+                    self.ui.labelSVInfoDistance.setText(f"D: 0 {self.parent.app_data.preferences['Units']['Distance']}")
                 else:
                     # Second click
                     second_point = (event.xdata, event.ydata)

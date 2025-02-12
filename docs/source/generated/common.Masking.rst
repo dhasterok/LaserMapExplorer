@@ -14,6 +14,9 @@
    .. autosummary::
    
       default_font
+      get_hex_color
+      get_rgb_color
+      percentileofscore
    
    
 
@@ -36,6 +39,7 @@
       PolygonTab
       QAbstractItemView
       QAction
+      QCheckBox
       QComboBox
       QDockWidget
       QDoubleSpinBox
@@ -45,6 +49,7 @@
       QHBoxLayout
       QHeaderView
       QIcon
+      QInputDialog
       QIntValidator
       QLabel
       QListView
@@ -53,7 +58,6 @@
       QScrollArea
       QSize
       QSizePolicy
-      QSpinBox
       QStandardItem
       QStandardItemModel
       QTabWidget
@@ -66,6 +70,7 @@
       QWidgetAction
       Qt
       ScatterPlotItem
+      TableFcn
       ToggleSwitch
       UIFieldLogic
    

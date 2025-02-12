@@ -75,7 +75,7 @@ class PlotTree():
             return
 
         # assign the two objects needed from self.parent
-        data = self.parent.data[sample_id].processed_data
+        data = self.parent.app_data.data[sample_id].processed_data
         treeView = self.parent.treeView
 
         # add sample_id to analyte branch
@@ -132,7 +132,7 @@ class PlotTree():
     def add_calculated_leaf(self, new_field):
 
         # assign the two objects needed from self.parent
-        sample_id = self.parent.sample_id
+        sample_id = self.parent.app_data.sample_id
         treeView = self.parent.treeView
 
         calculated_branch = treeView.branch_exists(self.tree['Calculated'], sample_id)
@@ -162,7 +162,7 @@ class PlotTree():
             method = action.text()
             self.sort_method = method
 
-        data = self.parent.data[self.parent.sample_id]
+        data = self.parent.app_data.data[self.parent.app_data.sample_id]
         treeView = self.parent.treeView
 
         # retrieve analyte_list
@@ -330,7 +330,7 @@ class PlotTree():
             print(f"update_tree, norm_update: {norm_update}")
 
         #print('update_tree')
-        sample_id = self.parent.sample_id
+        sample_id = self.parent.app_data.sample_id
         if sample_id == '':
             return
 
@@ -339,7 +339,7 @@ class PlotTree():
         else:
             hexcolor = self.parent.theme.highlight_color_light
 
-        data = self.parent.data[sample_id]
+        data = self.parent.app_data.data[sample_id]
         ref_chem = self.parent.ref_chem
 
         # Un-highlight all leaf in the trees

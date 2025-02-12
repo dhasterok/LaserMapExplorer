@@ -1,4 +1,4 @@
-﻿app.InfoViewer
+app.InfoViewer
 ==============
 
 .. automodule:: app.InfoViewer

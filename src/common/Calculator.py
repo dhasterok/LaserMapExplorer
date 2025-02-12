@@ -67,15 +67,15 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
         super().__init__(parent)
 
         self.parent = parent
-        if parent.sample_id == '':
+        if parent.app_data.sample_id == '':
             self.data = None
         else:
-            self.data = parent.data[parent.sample_id].processed_data
+            self.data = parent.app_data.data[parent.app_data.sample_id].processed_data
 
         UIFieldLogic.__init__(self, self.data)
 
         # create an instance of CustomFieldCalculator for the heavy lifting
-        if parent.sample_id != '':
+        if parent.app_data.sample_id != '':
             self.cfc = CustomFieldCalculator(debug)
 
         self.debug = debug
@@ -403,7 +403,7 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
         """Deletes a previously stored formula
         
         Removes the formula from ``MainWindow.formula_combobox``, the file given by ``MainWindow.calc_filename`` and 
-        ``parent.data[parent.sample_id].processed_data``.
+        ``parent.app_data.data[parent.app_data.sample_id].processed_data``.
         """
         if self.debug:
             print("calc_delete_formula")
@@ -435,7 +435,7 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
             pass
 
         # remove field from Calculated dataframe
-        self.parent.data[self.parent.sample_id].delete_column(name)
+        self.parent.app_data.data[self.parent.app_data.sample_id].delete_column(name)
 
         self.message_label.setText("Formula, successfully deleted...")
     
@@ -495,7 +495,7 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
             new_field = self.formula_combobox.currentText()
 
         # Use CustomFieldCalculator to compute new field
-        self.cfc.calculate_new_field(self.parent.data[self.parent.sample_id].processed_data, self.parent.ref_chem, new_field)
+        self.cfc.calculate_new_field(self.parent.app_data.data[self.parent.app_data.sample_id].processed_data, self.parent.ref_chem, new_field)
 
         # update formula_combobox
         self.formula_combobox.addItem(new_field)

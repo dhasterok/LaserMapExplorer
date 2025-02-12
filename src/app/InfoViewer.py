@@ -108,15 +108,15 @@ class InfoWindow(QWidget):
         self.info_window.setObjectName("info_window")
         window_layout = QVBoxLayout(self.info_window)
 
-        self.info_tab_widget = QTabWidget(self.info_window)
-        self.info_tab_widget.setObjectName("info_tab_widget")
+        self.tabWidgetInfo = QTabWidget(self.info_window)
+        self.tabWidgetInfo.setObjectName("tabWidgetInfo")
 
         self.metadata_tab = self.MetadataTab(self)
         self.dataframe_tab = self.DataFrameTab(self)
         self.field_tab = self.FieldTab(self)
         self.plot_info_tab = self.PlotInfoTab(self)
 
-        window_layout.addWidget(self.info_tab_widget)
+        window_layout.addWidget(self.tabWidgetInfo)
         self.setWidget(self.info_window)
 
 
@@ -157,15 +157,15 @@ class InfoDock(CustomDockWidget, UIFieldLogic):
         self.dockWidgetInfo.setObjectName("dockWidgetInfo")
         dock_layout = QVBoxLayout(self.dockWidgetInfo)
 
-        self.info_tab_widget = QTabWidget(self.dockWidgetInfo)
-        self.info_tab_widget.setObjectName("info_tab_widget")
+        self.tabWidgetInfo = QTabWidget(self.dockWidgetInfo)
+        self.tabWidgetInfo.setObjectName("tabWidgetInfo")
 
         self.metadata_tab = MetadataTab(self)
         self.dataframe_tab = DataFrameTab(self)
         self.field_tab = FieldTab(self)
         self.plot_info_tab = PlotInfoTab(self)
 
-        dock_layout.addWidget(self.info_tab_widget)
+        dock_layout.addWidget(self.tabWidgetInfo)
         self.setWidget(self.dockWidgetInfo)
 
         self.setFloating(True)
@@ -175,11 +175,11 @@ class InfoDock(CustomDockWidget, UIFieldLogic):
         parent.addDockWidget(Qt.BottomDockWidgetArea, self)
 
         self.visibilityChanged.connect(self.update_tab_widget)
-        self.info_tab_widget.currentChanged.connect(self.update_tab_widget)
+        self.tabWidgetInfo.currentChanged.connect(self.update_tab_widget)
 
     def update_tab_widget(self):
-        idx = self.info_tab_widget.currentIndex()
-        match self.info_tab_widget.tabText(idx).lower():
+        idx = self.tabWidgetInfo.currentIndex()
+        match self.tabWidgetInfo.tabText(idx).lower():
             case "metadata":
                 self.metadata_tab.update_metadata(self.parent.data[self.parent.sample_id].processed_data.column_attributes)
             case "data":
@@ -272,7 +272,7 @@ class PlotInfoTab():
 
         tab_layout.addLayout(tab_widgets_layout)
 
-        self.parent.info_tab_widget.addTab(self.plot_info_tab, "Plot Info")
+        self.parent.tabWidgetInfo.addTab(self.plot_info_tab, "Plot Info")
 
         if hasattr(self.parent,"plot_info") and self.parent.plot_info:
             self.update_plot_info_tab(self.parent.plot_info)
@@ -478,7 +478,7 @@ class MetadataTab():
         tab_layout.addWidget(self.metadata_table)
 
         # set metadata 
-        self.parent.info_tab_widget.addTab(self.metadata_tab, "Metadata")
+        self.parent.tabWidgetInfo.addTab(self.metadata_tab, "Metadata")
 
         # Track selected columns
         self.metadata_selected_columns = []
@@ -664,7 +664,7 @@ class DataFrameTab():
         self.data_table.setEditTriggers(self.data_table.NoEditTriggers)
         layout.addWidget(self.data_table)
 
-        self.parent.info_tab_widget.addTab(self.data_tab, "Data")
+        self.parent.tabWidgetInfo.addTab(self.data_tab, "Data")
 
         if not self.parent.data:
             return
@@ -743,7 +743,7 @@ class FieldTab(UIFieldLogic):
 
         tab_layout.addWidget(self.field_table)
 
-        parent.info_tab_widget.addTab(self.field_tab, "Field")
+        parent.tabWidgetInfo.addTab(self.field_tab, "Field")
 
         # when field type combobox is updated
         self.field_type_combobox.activated.connect(lambda: self.update_field_combobox(self.field_type_combobox, self.field_combobox))

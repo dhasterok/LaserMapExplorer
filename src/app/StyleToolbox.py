@@ -553,7 +553,7 @@ class Styling():
     def scale_length(self, length):
         if length is None or isinstance(length, float):
             # check constraints on length
-            data = self.parent.data[self.parent.sample_id]
+            data = self.parent.app_data.data[self.parent.app_data.sample_id]
             scale_dir = self.style_dict[self._plot_type]['ScaleDir']
             if (length is None) or ((length <= 0) or (scale_dir == 'horizontal' and length > data.x_range) or (scale_dir == 'vertical' and length > data.y_range)):
                 length = self.default_scale_length()
@@ -1541,7 +1541,7 @@ class Styling():
             Style dictionary for the current plot type. Defaults to ``None``
         """
         parent = self.parent
-        data = parent.data[parent.sample_id]
+        data = parent.app_data.data[parent.app_data.sample_id]
 
         style = self.style_dict[self.plot_type]
 
@@ -1564,7 +1564,7 @@ class Styling():
             style['YLim'] = [ymin, ymax]
             style['YScale'] = yscale
             style['YLabel'] = 'Y'
-            style['AspectRatio'] = parent.data[parent.sample_id].aspect_ratio
+            style['AspectRatio'] = parent.app_data.data[parent.app_data.sample_id].aspect_ratio
 
         if (style['ScaleLength'] is None) and (plot_type in self.map_plot_types):
             style['ScaleLength'] = self.default_scale_length()
@@ -1593,7 +1593,7 @@ class Styling():
             print("set_style_widgets")
         #print('set_style_widgets')
         parent = self.parent
-        data = parent.data[parent.sample_id]
+        data = parent.app_data.data[parent.app_data.sample_id]
 
         tab_id = parent.toolBox.currentIndex()
 
@@ -1639,7 +1639,7 @@ class Styling():
             style['YLim'] = [ymin, ymax]
             style['YScale'] = yscale
             style['YLabel'] = 'Y'
-            style['AspectRatio'] = parent.data[parent.sample_id].aspect_ratio
+            style['AspectRatio'] = parent.app_data.data[parent.app_data.sample_id].aspect_ratio
 
             # do not round axes limits for maps
             parent.lineEditXLB.precision = None
@@ -2028,7 +2028,7 @@ class Styling():
 
         # change label in dictionary
         field = self.get_axis_field(ax)
-        parent.data[parent.sample_id].axis_dict[field]['label'] = new_label
+        parent.app_data.data[parent.app_data.sample_id].axis_dict[field]['label'] = new_label
         if ax == 'c':
             self.style_dict[plot_type][ax.upper()+'Label'] = new_label
         else:
@@ -2053,7 +2053,7 @@ class Styling():
             print("axis_limit_edit_callback")
 
         parent = self.parent
-        axis_dict = parent.data[parent.sample_id].axis_dict
+        axis_dict = parent.app_data.data[parent.app_data.sample_id].axis_dict
         if ui_update:
             plot_type = parent.comboBoxPlotType.currentText()
         else:
@@ -2127,7 +2127,7 @@ class Styling():
         field = self.get_axis_field(ax)
 
         if plot_type != 'heatmap':
-            parent.data[parent.sample_id].axis_dict[field]['scale'] = new_value
+            parent.app_data.data[parent.app_data.sample_id].axis_dict[field]['scale'] = new_value
 
         if ax == 'c':
             styles['CScale'] = new_value
@@ -2145,7 +2145,7 @@ class Styling():
         #print('set_color_axis_widgets')
         parent = self.parent
 
-        axis_dict = parent.data[parent.sample_id].axis_dict
+        axis_dict = parent.app_data.data[parent.app_data.sample_id].axis_dict
 
         field = parent.comboBoxColorField.currentText()
         if field == '':
@@ -2177,33 +2177,33 @@ class Styling():
         match ax:
             case 'x':
                 if field == 'X':
-                    parent.lineEditXLB.value = parent.data[parent.sample_id].axis_dict[field]['min']
-                    parent.lineEditXUB.value = parent.data[parent.sample_id].axis_dict[field]['max']
+                    parent.lineEditXLB.value = parent.app_data.data[parent.app_data.sample_id].axis_dict[field]['min']
+                    parent.lineEditXUB.value = parent.app_data.data[parent.app_data.sample_id].axis_dict[field]['max']
                 else:
-                    parent.lineEditXLB.value = parent.data[parent.sample_id].axis_dict[field]['min']
-                    parent.lineEditXUB.value = parent.data[parent.sample_id].axis_dict[field]['max']
-                parent.lineEditXLabel.setText(parent.data[parent.sample_id].axis_dict[field]['label'])
-                parent.comboBoxXScale.setCurrentText(parent.data[parent.sample_id].axis_dict[field]['scale'])
+                    parent.lineEditXLB.value = parent.app_data.data[parent.app_data.sample_id].axis_dict[field]['min']
+                    parent.lineEditXUB.value = parent.app_data.data[parent.app_data.sample_id].axis_dict[field]['max']
+                parent.lineEditXLabel.setText(parent.app_data.data[parent.app_data.sample_id].axis_dict[field]['label'])
+                parent.comboBoxXScale.setCurrentText(parent.app_data.data[parent.app_data.sample_id].axis_dict[field]['scale'])
             case 'y':
                 if parent.comboBoxPlotType.currentText() == 'histogram':
-                    parent.lineEditYLB.value = parent.data[parent.sample_id].axis_dict[field]['pmin']
-                    parent.lineEditYUB.value = parent.data[parent.sample_id].axis_dict[field]['pmax']
+                    parent.lineEditYLB.value = parent.app_data.data[parent.app_data.sample_id].axis_dict[field]['pmin']
+                    parent.lineEditYUB.value = parent.app_data.data[parent.app_data.sample_id].axis_dict[field]['pmax']
                     parent.lineEditYLabel.setText(parent.comboBoxHistType.currentText())
                     parent.comboBoxYScale.setCurrentText('linear')
                 else:
                     if field == 'X':
-                        parent.lineEditYLB.value = parent.data[parent.sample_id].axis_dict[field]['min']
-                        parent.lineEditYUB.value = parent.data[parent.sample_id].axis_dict[field]['max']
+                        parent.lineEditYLB.value = parent.app_data.data[parent.app_data.sample_id].axis_dict[field]['min']
+                        parent.lineEditYUB.value = parent.app_data.data[parent.app_data.sample_id].axis_dict[field]['max']
                     else:
-                        parent.lineEditYLB.value = parent.data[parent.sample_id].axis_dict[field]['min']
-                        parent.lineEditYUB.value = parent.data[parent.sample_id].axis_dict[field]['max']
-                    parent.lineEditYLabel.setText(parent.data[parent.sample_id].axis_dict[field]['label'])
-                    parent.comboBoxYScale.setCurrentText(parent.data[parent.sample_id].axis_dict[field]['scale'])
+                        parent.lineEditYLB.value = parent.app_data.data[parent.app_data.sample_id].axis_dict[field]['min']
+                        parent.lineEditYUB.value = parent.app_data.data[parent.app_data.sample_id].axis_dict[field]['max']
+                    parent.lineEditYLabel.setText(parent.app_data.data[parent.app_data.sample_id].axis_dict[field]['label'])
+                    parent.comboBoxYScale.setCurrentText(parent.app_data.data[parent.app_data.sample_id].axis_dict[field]['scale'])
             case 'z':
-                parent.lineEditZLB.value = parent.data[parent.sample_id].axis_dict[field]['min']
-                parent.lineEditZUB.value = parent.data[parent.sample_id].axis_dict[field]['max']
-                parent.lineEditZLabel.setText(parent.data[parent.sample_id].axis_dict[field]['label'])
-                parent.comboBoxZScale.setCurrentText(parent.data[parent.sample_id].axis_dict[field]['scale'])
+                parent.lineEditZLB.value = parent.app_data.data[parent.app_data.sample_id].axis_dict[field]['min']
+                parent.lineEditZUB.value = parent.app_data.data[parent.app_data.sample_id].axis_dict[field]['max']
+                parent.lineEditZLabel.setText(parent.app_data.data[parent.app_data.sample_id].axis_dict[field]['label'])
+                parent.comboBoxZScale.setCurrentText(parent.app_data.data[parent.app_data.sample_id].axis_dict[field]['scale'])
 
     def axis_reset_callback(self, ax):
         """Resets axes widgets and plot axes to auto values
@@ -2250,7 +2250,7 @@ class Styling():
                         self.initialize_axis_values(field_type, field)
                         self.set_axis_widgets(ax, field)
                     else:
-                        parent.data[parent.sample_id].axis_dict[field].update({'pstatus':'auto', 'pmin':None, 'pmax':None})
+                        parent.app_data.data[parent.app_data.sample_id].axis_dict[field].update({'pstatus':'auto', 'pmin':None, 'pmax':None})
 
                 case 'scatter' | 'heatmap':
                     match ax:
@@ -2308,7 +2308,7 @@ class Styling():
             print(f"get_axis_values\n  field_type: {field_type}\n  field: {field}\n  axis: {ax}")
 
         #print('get_axis_values')
-        axis_dict = self.parent.data[self.parent.sample_id].axis_dict
+        axis_dict = self.parent.app_data.data[self.parent.app_data.sample_id].axis_dict
 
         if field not in axis_dict.keys():
             self.initialize_axis_values(field_type, field)
@@ -2341,7 +2341,7 @@ class Styling():
             print(f"get_axis_values\n  field_type: {field_type}\n  field: {field}")
 
         #print('initialize_axis_values')
-        data = self.parent.data[self.parent.sample_id]
+        data = self.parent.app_data.data[self.parent.app_data.sample_id]
 
         # initialize variables
         if field not in data.axis_dict.keys():
@@ -2574,7 +2574,7 @@ class Styling():
         if (self._plot_type not in self.map_plot_types) or (self.style_dict[self._plot_type]['ScaleDir'] == 'none'):
             return None
 
-        data = self.parent.data[self.parent.sample_id]
+        data = self.parent.app_data.data[self.parent.app_data.sample_id]
 
         x_range = data.x_range
         y_range = data.y_range
@@ -2614,7 +2614,7 @@ class Styling():
             print("scale_length_callback")
 
         parent = self.parent
-        data = parent.data[parent.sample_id]
+        data = parent.app_data.data[parent.app_data.sample_id]
 
         if self._plot_type in self.map_plot_types:
             # make sure user input is within bounds, do not change
@@ -2868,7 +2868,7 @@ class Styling():
         parent = self.parent
 
         #print('color_field_callback')
-        data = parent.data[parent.sample_id]
+        data = parent.app_data.data[parent.app_data.sample_id]
 
         plot_type = parent.comboBoxPlotType.currentText()
         field = parent.comboBoxColorField.currentText()

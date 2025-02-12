@@ -10,12 +10,13 @@ import matplotlib.colors as colors
 import src.common.csvdict as csvdict
 from src.common.colorfunc import get_hex_color, get_rgb_color
 from src.app.config import BASEDIR
+import src.common.Observable
 from src.common.ScheduleTimer import Scheduler
 
 class StyleObj():
     pass
 
-class Styling():
+class Styling(Observable):
     """Manages plot styling for different plot types and syncs with main window UI.
 
     Attributes

@@ -8,11 +8,12 @@ from scipy.stats import yeojohnson
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
+import src.common.Observable
 from src.common.SortAnalytes import sort_analytes
 from src.common.outliers import chauvenet_criterion, quantile_and_difference
 from PyQt5.QtWidgets import QMessageBox
 
-class SampleObj:
+class SampleObj(Observable):
     """Creates a sample object to store and manipulate geochemical data in map form
     
     The sample object is initially constructed from the data within a *.lame.csv file and loaded into

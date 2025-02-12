@@ -1,32 +1,7 @@
 import copy
 import numpy as np
 
-class Observable:
-    def __init__(self):
-        self._observers = []
-
-    def add_observer(self, callback):
-        """Register a callback function to be called when a property changes.
-        
-        Properties
-        ----------
-        callback : method
-            Callback method to be executed when a property changes.
-        """
-        self._observers.append(callback)
-
-    def notify_observers(self, prop_name, value):
-        """Notify all registered observers.
-        
-        Properties
-        ----------
-        prop_name : str
-            Name of property to observe.
-        value : any
-            New value of property.
-        """
-        for callback in self._observers:
-            callback(prop_name, value)
+import src.common.Observable
 
 class AppData(Observable):
     def __init__(self):
@@ -38,7 +13,6 @@ class AppData(Observable):
         self.data = {}
         self._sample_id = ""
 
-        self._plot_type = ""
         self.plot_info = {}
 
         # histogram related data and methods
@@ -91,19 +65,6 @@ class AppData(Observable):
 
         self._sample_id = new_sample_id
         self.notify_observers("sample_id", new_sample_id)
-
-    @property
-    def plot_type(self):
-        return self._plot_type
-
-    @plot_type.setter
-    def plot_type(self, new_plot_type):
-        if new_plot_type == self._plot_type:
-            return
-        
-        #self.validate_plot_type()
-        self._plot_type = new_plot_type
-
 
     @property
     def hist_field_type(self):

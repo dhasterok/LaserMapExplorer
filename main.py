@@ -701,21 +701,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # N-Dim Tab
         #-------------------------
-        # get N-Dim lists
-        self.ndim_list = []
-        self.ndim_list_filename = 'resources/app_data/TEC_presets.csv'
-        try:
-            self.ndim_list_dict = csvdict.import_csv_to_dict(os.path.join(BASEDIR,self.ndim_list_filename))
-        except:
-            self.ndim_list_dict = {
-                    'majors': ['Si','Ti','Al','Fe','Mn','Mg','Ca','Na','K','P'],
-                    'full trace': ['Cs','Rb','Ba','Th','U','K','Nb','Ta','La','Ce','Pb','Mo','Pr','Sr','P','Ga','Zr','Hf','Nd','Sm','Eu','Li','Ti','Gd','Dy','Ho','Y','Er','Yb','Lu'],
-                    'REE': ['La','Ce','Pr','Nd','Pm','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb','Lu'],
-                    'metals': ['Na','Al','Ca','Zn','Sc','Cu','Fe','Mn','V','Co','Mg','Ni','Cr']
-                }
         # setup comboBoxNDIM
         self.comboBoxNDimAnalyteSet.clear()
-        self.comboBoxNDimAnalyteSet.addItems(list(self.ndim_list_dict.keys()))
+        self.comboBoxNDimAnalyteSet.addItems(list(self.app_data.ndim_list_dict.keys()))
 
         #self.comboBoxNDimRefMaterial.addItems(self.ref_list.values) This is done with the Set analyte tab initialization above.
         self.toolButtonNDimAnalyteAdd.clicked.connect(lambda: self.update_ndim_table('analyteAdd'))

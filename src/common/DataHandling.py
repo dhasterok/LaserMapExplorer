@@ -8,7 +8,7 @@ from scipy.stats import yeojohnson
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
-import src.common.Observable
+from src.common.Observable import Observable
 from src.common.SortAnalytes import sort_analytes
 from src.common.outliers import chauvenet_criterion, quantile_and_difference
 from PyQt5.QtWidgets import QMessageBox
@@ -465,6 +465,18 @@ class SampleObj(Observable):
         return (self._y.nunique(), self._x.nunique())
 
     @property
+    def apply_outlier_to_all(self):
+        return self._apply_outlier_to_all
+    
+    @apply_outlier_to_all.setter
+    def apply_outlier_to_all(self, new_apply_outlier_to_all):
+        if new_apply_outlier_to_all == self._apply_outlier_to_all:
+            return
+    
+        self._apply_outlier_to_all = new_apply_outlier_to_all
+        self.notify_observers("apply_outlier_to_all", new_apply_outlier_to_all)
+
+    @property
     def outlier_method(self):
         """str: Method for predicting and clipping outliers."""        
         return self._outlier_method
@@ -475,6 +487,7 @@ class SampleObj(Observable):
             return
         self._outlier_method = method
         self.prep_data()
+        self.notify_observers("outlier_method", method)
 
     @property
     def negative_method(self):
@@ -487,6 +500,55 @@ class SampleObj(Observable):
             return
         self._negative_method = method
         self.prep_data()
+        self.notify_observers("negative_method", method)
+
+    @property
+    def data_min_quantile(self):
+        return self._data_min_quantile
+    
+    @data_min_quantile.setter
+    def data_min_quantile(self, new_data_min_quantile):
+        if new_data_min_quantile == self._data_min_quantile:
+            return
+    
+        self._data_min_quantile = new_data_min_quantile
+        self.notify_observers("data_min_quantile", new_data_min_quantile)
+
+    @property
+    def data_max_quantile(self):
+        return self._data_max_quantile
+    
+    @data_max_quantile.setter
+    def data_max_quantile(self, new_data_max_quantile):
+        if new_data_max_quantile == self._data_max_quantile:
+            return
+    
+        self._data_max_quantile = new_data_max_quantile
+        self.notify_observers("data_max_quantile", new_data_max_quantile)
+
+    @property
+    def data_min_diff_quantile(self):
+        return self._data_min_diff_quantile
+    
+    @data_min_diff_quantile.setter
+    def data_min_diff_quantile(self, new_data_min_diff_quantile):
+        if new_data_min_diff_quantile == self._data_min_diff_quantile:
+            return
+    
+        self._data_min_diff_quantile = new_data_min_diff_quantile
+        self.notify_observers("data_min_diff_quantile", new_data_min_diff_quantile)
+
+    @property
+    def data_max_diff_quantile(self):
+        return self._data_max_diff_quantile
+    
+    @data_max_diff_quantile.setter
+    def data_max_diff_quantile(self, new_data_max_diff_quantile):
+        if new_data_max_diff_quantile == self._data_max_diff_quantile:
+            return
+    
+        self._data_max_diff_quantile = new_data_max_diff_quantile
+        self.notify_observers("data_max_diff_quantile", new_data_max_diff_quantile)
 
     @property
     def crop_mask(self):

@@ -76,7 +76,7 @@ import src.common.format as fmt
 from src.common.colorfunc import get_hex_color, get_rgb_color
 import src.app.config as config
 from src.app.help_mapping import create_help_mapping
-from src.common.Logger import LoggerDock
+from src.common.Logger import LoggetrDock
 from src.common.Calculator import CalculatorDock
 from src.common.varfunc import ObservableDict
 from src.app.AppData import AppData

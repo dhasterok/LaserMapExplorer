@@ -1,0 +1,2215 @@
+<html>
+  <body>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+      <div class="mermaid">
+    
+        classDiagram
+          class Actions {
+            parent
+            reset_to_full_view()
+          }
+          class AnalyteDialog {
+            analytes
+            base_title : str
+            correlation_matrix : NoneType
+            correlation_methods : list
+            data
+            debug : bool
+            default_dir
+            filename : str
+            listUpdated
+            norm_dict : dict
+            prev_col : NoneType
+            prev_row : NoneType
+            ratio
+            scale_methods : list
+            unsaved_changes : bool
+            add_analyte_to_list(row, column)
+            calculate_correlation()
+            cancel_selection()
+            clear_selections()
+            closeEvent(event)
+            color_cell(row, column, correlation)
+            create_colorbar()
+            done_selection()
+            event_filter(obj, event)
+            generate_colorbar_image(width, height)
+            get_color_for_correlation(correlation)
+            get_selected_data()
+            load_selection()
+            populate_analyte_list(analyte_pair, norm)
+            remove_analyte_from_list(row, column)
+            save_selection()
+            toggle_cell_selection(row, column)
+            update_all_combos()
+            update_list()
+            update_scale()
+            update_window_title()
+          }
+          class AppData {
+            c_field_type
+            cluster_dict : dict
+            cluster_type
+            data : dict
+            default_preferences : dict
+            hist_bin_widt
+            hist_bin_width
+            hist_field
+            hist_field : str
+            hist_field_type
+            hist_num_bins
+            hist_num_bins
+            hist_plot_style
+            plot_info : dict
+            preferences : dict
+            sample_id
+            update_bin_width : bool
+            update_num_bins : bool
+            x_field
+            x_field_type
+            y_field_type
+            z_field_type
+            get_field_list(set_name, filter)
+            update_hist_bin_width()
+            update_hist_num_bins()
+            validate_field(field_type, new_field)
+            validate_field_type(new_field_type)
+          }
+          class AttributeDataFrame {
+            column_attributes
+            columns
+            attributes_to_dataframe(attributes)
+            copy_columns(columns)
+            get_attribute(columns, attribute)
+            get_attribute_dict(attribute_name)
+            is_attribute(column, attribute)
+            match_attribute(attribute, value)
+            match_attributes(attributes_dict)
+            set_attribute(columns, attribute, values)
+            show_attributes(column)
+            sort_columns(sorted_columns)
+          }
+          class BlocklyBridge {
+            output_text_edit
+            runCode(code)
+          }
+          class BlocklyBridge {
+            output_text_edit
+            parent
+            convert_numpy_types(obj)
+            executeCode(code)
+            getBaseDir()
+            getCurrentDimensions()
+            getFieldList(field_type)
+            getHistogramRange(fieldType, field)
+            getRefValueList()
+            getSavedLists(type)
+            invokeSetStyleWidgets(plot_type)
+            runCode(code)
+          }
+          class Browser {
+            back_button
+            base_path : str
+            browser_location
+            debug : bool
+            dock_layout
+            engine
+            forward_button
+            help_mapping : dict
+            home_button
+            location_label
+            parent : NoneType
+            eventFilter(obj, event)
+            go_to_home()
+            go_to_page(location)
+            open_browser()
+          }
+          class CalculatorDock {
+            action_calculate
+            action_clear
+            action_help
+            action_save
+            add_field_button
+            add_formula : bool
+            button_group
+            calc_dict : dict
+            calc_filename
+            calc_text_edit
+            cfc
+            data : NoneType
+            debug : bool
+            delete_formula_button
+            field_combobox
+            field_type_combobox
+            formula_combobox
+            message_label
+            parent : NoneType
+            precalculate_custom_fields : bool
+            calc_add_field()
+            calc_delete_formula()
+            calc_help()
+            calc_insert_function(func_name)
+            calc_insert_operator(operator)
+            calc_load_dict()
+            calc_load_formula()
+            calc_set_add_formula()
+            calculate_new_field(save)
+          }
+          class ClusterTab {
+            actionClusterColorReset
+            actionClusterDelink
+            actionClusterLink
+            actionGroupMask
+            actionGroupMaskInverse
+            cluster_tab
+            main_window
+            parent
+            spinBoxClusterGroup
+            tableWidgetViewGroups
+            table_fcn
+            toolButtonClusterColor
+            cluster_color_callback()
+            select_cluster_group_callback()
+            toggle_cluster_actions()
+          }
+          class CropTool {
+            crop_rect
+            overlays : list
+            parent
+            x_range
+            y_range
+            apply_crop()
+            init_crop()
+            remove_overlays()
+            update_overlay(rect)
+          }
+          class CustomActionMenu {
+            menu
+            submenu_references : dict
+            update_submenu(submenu_name, new_items)
+          }
+          class CustomComboBox {
+            update_callback : NoneType
+            showPopup()
+          }
+          class CustomDockWidget {
+            closeEvent(event)
+          }
+          class CustomFieldCalculator {
+            debug : bool
+            calc_evaluate_expr(expr, val_dict, keep)
+            calc_parse(data, ref_chem, txt)
+            calculate_new_field(data, ref_chem, new_field)
+          }
+          class CustomLineEdit {
+            precision
+            threshold
+            toward
+            value
+          }
+          class CustomTableWidget {
+            column_to_list(column)
+            extract_widget_data(widget: QWidget)
+            to_dataframe() pd.DataFrame
+          }
+          class CustomTreeView {
+            root_node
+            treeModel
+            add_branch(parent_item, branch_name, data)
+            add_leaf(branch_item, leaf_name, data)
+            branch_exists(parent_item, branch_name)
+            clear_tree()
+            find_leaf(branch_item, leaf_name)
+            get_item_path(item)
+            get_leaf_data(parent_item, branch_name, leaf_name)
+            on_double_click(index)
+            sort_branch(branch, order_list)
+          }
+          class DataFrameTab {
+            action_sigfigs_less
+            action_sigfigs_more
+            data
+            data_tab
+            data_table
+            parent
+          }
+          class FieldDialog {
+            base_title : str
+            default_dir
+            fields : dict
+            filename : str
+            parent
+            selected_fields : list
+            unsaved_changes : bool
+            add_fields()
+            cancel_selection()
+            closeEvent(event)
+            delete_fields()
+            done_selection()
+            load_selection()
+            save_selection()
+            update_field_list()
+            update_field_type_list()
+            update_table()
+            update_window_title()
+          }
+          class FieldTab {
+            action_sigfigs_less
+            action_sigfigs_more
+            data
+            field_combobox
+            field_tab
+            field_table
+            field_type_combobox
+            update_field_table()
+          }
+          class FileSelectData {
+            parent : NoneType
+            get_data()
+          }
+          class FilterTab {
+            actionFilterAdd
+            actionFilterDown
+            actionFilterRemove
+            actionFilterSave
+            actionFilterSelectAll
+            actionFilterUp
+            comboBoxFilterField
+            comboBoxFilterFieldType
+            comboBoxFilterOperator
+            comboBoxFilterPresets
+            doubleSpinBoxFMaxQ
+            doubleSpinBoxFMinQ
+            filter_tab
+            lineEditFMax
+            lineEditFMin
+            parent
+            tableWidgetFilters
+            table_fcn
+            callback_doubleSpinBoxFMaxQ()
+            callback_doubleSpinBoxFMinQ()
+            callback_lineEditFMax()
+            callback_lineEditFMin()
+            load_filter_tables()
+            read_filter_table()
+            remove_selected_rows()
+            save_filter_table()
+            update_filter_table(reload)
+            update_filter_values()
+          }
+          class ImageProcessing {
+            array
+            edge_array : ndarray
+            edge_img : NoneType, ImageItem
+            grad_img : NoneType
+            grad_mag
+            noise_red_array : ndarray
+            noise_red_img : NoneType
+            noise_red_options : dict
+            parent
+            plot_flag : bool
+            plot_flat : bool
+            plot_info : dict
+            update_noise1_flag : bool
+            update_noise2_flag : bool
+            add_edge_detection()
+            gaussian_sigma(ksize)
+            gradient_checked_state_changed()
+            noise_reduction(algorithm, val1, val2)
+            noise_reduction_method_callback()
+            noise_reduction_option1_callback()
+            noise_reduction_option2_callback()
+            plot_gradient()
+            run_noise_reduction()
+            zero_crossing_laplacian(array)
+          }
+          class InfoDock {
+            data : NoneType
+            dataframe_tab
+            dockWidgetInfo
+            field_tab
+            font
+            metadata_tab
+            parent : NoneType
+            plot_info : NoneType
+            plot_info_tab
+            sample_id : str
+            tabWidgetInfo
+            update_tab_widget()
+          }
+          class InfoWindow {
+            data
+            dataframe_tab
+            field_tab
+            font
+            info_window
+            metadata_tab
+            parent : NoneType
+            plot_info
+            plot_info_tab
+            tabWidgetInfo
+          }
+          class LameIO {
+            importDialog
+            parent : NoneType
+            spotDialog
+            import_files()
+            import_spots()
+            initialize_samples_and_tabs(ui_update)
+            open_directory(path, ui_update)
+            open_project()
+            open_sample(path, ui_update)
+            populate_spot_table()
+            save_project()
+          }
+          class LoggerDock {
+            action_clear
+            action_save
+            action_settings
+            log_file : str
+            parent : NoneType
+            text_edit
+            closeEvent(event)
+            export_log()
+            flush()*
+            set_logger_options()
+            write(message)
+          }
+          class LoggerOptionsDialog {
+            checkboxes : dict
+            options_dict
+            get_updated_options()
+          }
+          class Main {
+            BASEDIR
+            analyte_dialog
+            calc_dict : dict
+            cluster_dict : dict
+            csv_files : list
+            data : dict
+            default_preferences : dict
+            field_selection_dialog
+            field_type_list : list
+            io
+            laser_map_dict : dict
+            lasermaps : dict
+            multi_view_index : list
+            multiview_info_label : dict
+            ndim_list : list
+            negative_method : str
+            outlier_method : str
+            persistent_filters : DataFrame
+            plot_flag : bool
+            plot_info : dict
+            plot_style
+            plot_type : str
+            plot_viewer
+            preferences : dict
+            ref_chem : NoneType
+            ref_data : NoneType
+            ref_list
+            sample_id : str, NoneType
+            sample_ids : list
+            save_data
+            selected_directory : str
+            selected_fields
+            showMass : bool
+            sort_method : str
+            update_bins : bool
+            add_colorbar(canvas, cax, cbartype, grouplabels, groupcolors)
+            add_scalebar(ax)
+            change_sample(index, save_analysis)
+            get_field_list(set_name)
+            get_scatter_data(plot_type, field_type, field, processed, field_type_x, field_type_y, field_type_z, field_x, field_y, field_z, color_by_field)
+            histogram_get_range(field_type, field)
+            histogram_update_n_bins(field, field_type)
+            open_field_selector_dialog()
+            open_select_analyte_dialog()
+            plot_correlation(corr_method, squared, field_type, field)
+            plot_histogram(hist_type, field_type, field, n_bins)
+            plot_map_mpl(sample_id, field_type, field)
+            reset_analysis(selection)
+            update_analyte_ratio_selection(analyte_dict)
+            update_analyte_selection_from_file(filename)
+            update_axis_limits(style_dict, field)
+            update_blockly_analyte_dropdown(filename, unsaved_changes)
+            update_blockly_field_types(workflow)
+            update_bounds(ub, lb, d_ub, d_lb)
+            update_field_list_from_file(filename)
+            update_field_type_combobox(comboBox, addNone, plot_type)
+          }
+          class MainWindow {
+            BASEDIR
+            QV_analyte_list : dict
+            SV_plot_name
+            analyte_dialog
+            app_data
+            array
+            array_x
+            array_y
+            browser
+            buttons_layout : NoneType
+            calc_dict : dict
+            calculator
+            canvas_tab : dict
+            check_analysis : bool
+            crop_tool
+            default_bins : int
+            default_cursor : bool
+            default_preferences : dict
+            duplicate_plot_info : NoneType
+            field : NoneType
+            field_dialog
+            field_type : NoneType
+            help_mapping
+            info_dock
+            info_tab : dict
+            io
+            isUpdatingTable : bool
+            labelInvalidValues
+            laser_map_dict : dict
+            lasermaps : dict
+            left_tab : dict
+            logger
+            logger_options : dict
+            mask_dock
+            mask_tab : dict
+            mpl_toolbar : NoneType, NavigationToolbar2QT
+            multi_view_index : list
+            multiview_info_label : dict
+            ndim_list : list
+            ndim_list_dict : dict
+            ndim_list_filename : str
+            noise_reduction
+            notes
+            pca_results : list, dict, PCA
+            persistent_filters : DataFrame
+            plot
+            plot_flag : bool
+            plot_info : dict
+            plot_style
+            plot_tree
+            plot_type : str
+            plot_types : dict
+            point_selected : bool
+            polygon
+            polygon_state : bool
+            pop_figure
+            preferences : dict
+            prev_plot : str
+            profile_dock
+            profile_state : bool
+            property_update_map : dict
+            pyqtgraph_widget : NoneType
+            ref_chem : NoneType
+            ref_data : NoneType
+            ref_list
+            save_data
+            selected_fields
+            showMass : bool
+            sort_method : str
+            special_tools
+            spot_tools
+            spotdata
+            statusBar
+            style_tab : dict
+            sv_widget
+            table_fcn
+            theme
+            toolButtonBottomDock
+            toolButtonLeftDock
+            toolButtonRightDock
+            toolbar_actio
+            update_bins : bool
+            update_cluster_flag : bool
+            update_pca_flag : bool
+            update_ui : bool
+            workflow
+            zoomImg : ImageItem
+            zoomLevel : float
+            zoomTarget : TargetItem
+            zoomViewBox : ViewBox
+            add_colorbar(canvas, cax, cbartype, grouplabels, groupcolors)
+            add_plotwidget_to_canvas(plot_info, position)
+            add_plotwidget_to_tree()
+            add_scalebar(ax)
+            apply_cluster_mask(inverse, update_plot)
+            apply_crop()
+            apply_field_filters(update_plot)
+            apply_filters(fullmap)
+            apply_polygon_mask(update_plot)
+            array_to_image(map_df)
+            auto_scale(update)
+            biplot(canvas, x, y, c)
+            canvas_changed()
+            change_ref_material(ref_val)
+            change_ref_material_BE(ref_val)
+            change_ref_material_UI(ref_index)
+            change_sample(index, save_analysis)
+            check_analysis_type()
+            clear_layout(layout)
+            cluster_distance_callback()
+            cluster_exponent_callback()
+            cluster_label_changed(item)
+            cluster_method_callback()
+            cluster_performance_plot()
+            cluster_seed_callback()
+            compute_clusters(max_clusters)
+            compute_pca(update_ui)
+            correlation_method_callback()
+            correlation_squared_callback()
+            display_QV()
+            generate_random_seed()
+            get_SV_widget(index)
+            get_field_list(set_name, filter)
+            group_changed()
+            hist2dbiplot(canvas, x, y)
+            hist2dternplot(canvas, x, y, z, c)
+            hist_field_update()
+            histogram_field_callback()
+            histogram_field_type_callback()
+            histogram_reset_bins()
+            histogram_update_bin_width()
+            histogram_update_n_bins()
+            init_tabs()
+            init_zoom_view()
+            input_ternary_name_dlg()
+            logax(ax, lim, axis, label, tick_label_rotation)
+            logger_visibility_change(visible)
+            mouse_moved_pg(event, plot)
+            move_widget_between_layouts(source_layout, target_layout, widget, row, col)
+            number_of_clusters_callback()
+            on_checkBoxShowMass_changed(state)
+            on_field_changed()
+            on_field_type_changed()
+            on_plot_type_changed()
+            open_browser(action)
+            open_calculator()
+            open_info_dock()
+            open_logger()
+            open_mask_dock(tab_name)
+            open_notes()
+            open_preferences_dialog()*
+            open_profile()
+            open_select_analyte_dialog()
+            open_select_custom_field_dialog()
+            open_tab(tab_name)
+            open_ternary()
+            open_workflow()
+            plot_clicked(event, array, field, plot, radius)
+            plot_cluster_map()
+            plot_clusters()
+            plot_correlation()
+            plot_laser_map_cont(layout, array, img, p1, cm, view)
+            plot_map_mpl(app_data, plot_style, field_type, field)
+            plot_map_pg(sample_id, field_type, field)
+            plot_ndim()
+            plot_pca()
+            plot_pca_components(canvas)
+            plot_pca_variance()
+            plot_pca_vectors()
+            plot_scatter(canvas)
+            plot_score_map()
+            plot_small_histogram(current_plot_df)
+            plot_ternarymap(canvas)
+            quit()
+            reindex_left_tab()
+            remove_multi_plot(selected_plot_name)
+            reset_analysis(selection)
+            reset_checked_items(item)
+            reset_zoom(vb, histogram)
+            save_ndim_list()
+            save_plot(action)
+            swap_xy()
+            ternary_scatter(canvas, x, y, z, c)
+            toggle_color_widgets(switch)
+            toggle_distance_tool()
+            toggle_dock_visibility(dock, button)
+            toggle_help_mode()
+            toggle_special_tab()
+            toggle_spot_tab()
+            toolbar_plotting(function, view, enable)
+            toolbox_changed(update)
+            update_SV(plot_type, field_type, field)
+            update_all_field_comboboxes()
+            update_analyte_ratio_selection(analyte_dict)
+            update_analyte_selection_from_file(filename)
+            update_aspect_ratio_controls()
+            update_blockly_analyte_dropdown(filename, unsaved_changes)
+            update_blockly_field_types()
+            update_bounds(ub, lb, d_ub, d_lb)
+            update_c_field(value)
+            update_c_field_type(value)
+            update_canvas(new_canvas)
+            update_clusters()
+            update_field(value, ax)*
+            update_field_combobox(parentBox, childBox)
+            update_field_type(value, ax)*
+            update_field_type_combobox(comboBox, addNone, plot_type)
+            update_fields(sample_id, plot_type, field_type, field, plot)
+            update_hist_bin_width(value)
+            update_hist_field(value)
+            update_hist_field_type(value)
+            update_hist_num_bins(value)
+            update_labels()
+            update_ndim_table(calling_widget)
+            update_neg_handling(method)
+            update_norm(norm, field)
+            update_outlier_removal(method)
+            update_plot_type_combobox()
+            update_ratio_df(sample_id, analyte_1, analyte_2, norm)
+            update_resolution(axis)
+            update_sample_id(value)
+            update_spinboxes(field, field_type)
+            update_tables()
+            update_widgets(prop_name, value)
+            update_x_field(value)
+            update_x_field_type(value)
+            update_y_field(value)
+            update_y_field_type(value)
+            update_z_field(value)
+            update_z_field_type(value)
+            update_zoom_view_position(x, y)
+          }
+          class MapImporter {
+            metadata : dict
+            ok : bool
+            parent : NoneType
+            paths : list
+            preview_index : NoneType
+            progressBar
+            root_path
+            sample_ids : list
+            standard_list
+            standards_dict
+            table_update : bool
+            add_checkbox(row, col, state)
+            add_combobox(row, col, items, default_index)
+            add_pushbutton(row, col)
+            add_standard()
+            change_preview(next)
+            data_type_changed()
+            fill_sample_id_path(root_path)
+            get_metadata()
+            guess_analyte_from_filename(filename)
+            help()
+            import_data()
+            import_la_icp_ms_data(save_path)
+            load_metadata()
+            method_changed()
+            on_combobox_changed(row, column)
+            on_item_changed(curr_item, prev_item)
+            open_directory()
+            parse_filenames(sample_id, files)
+            populate_la_icp_ms_table()
+            populate_table()
+            process_file(filepath, analyte, units)
+            read_ladr_ppm_folder(file_name, file_path)
+            read_matrix_folder(analyte, file_path, swap_xy, reverse_x, reverse_y, dx, dy)
+            read_metadata_table()
+            read_raw_folder(line_no, file_path, swap_xy, dx, dy)
+            save_metadata()
+            select_sample_files(row)
+            update_table_row(row_pos, row_data)
+          }
+          class MaskDock {
+            cluster_tab
+            filter_tab
+            font
+            main_window : NoneType
+            polygon_tab
+            tabWidgetMask
+          }
+          class MaskObj {
+            value
+            register_callback(callback)
+          }
+          class MetadataTab {
+            action_export_metadata
+            action_select_all_columns
+            action_select_all_rows
+            action_toggle_view
+            columns_flag : bool
+            field_combobox
+            metadata_selected_columns : list
+            metadata_tab
+            metadata_table
+            norm_combobox
+            parent
+            rows_flag : bool
+            selected_columns : set, list
+            selected_rows : list, set
+            toggle_view_icon
+            export_metadata()*
+            toggle_all_columns()
+            toggle_all_rows()
+            toggle_column_selection(state, column)
+            toggle_row_selection(state, row)
+            toggle_view()*
+            update_metadata(data)
+            update_table()
+          }
+          class MolecularWeightCalculator {
+            element_data : dict
+            molecular_weight(formula)
+          }
+          class MplCanvas {
+            annotations : dict
+            array : NoneType
+            axes
+            cid
+            dtext : NoneType
+            fig : Figure, NoneType
+            first_point : NoneType, tuple
+            initial_extent : NoneType, tuple
+            line : NoneType
+            map_flag : bool
+            parent : NoneType
+            saved_dtext : list
+            saved_line : list
+            ui : NoneType
+            calculate_distance(p1, p2)
+            distanceOnClick(event)
+            distanceOnMove(event)
+            distance_reset()
+            enterEvent(event)
+            leaveEvent(event)
+            load_figure(fig)
+            mouseLocation(event)
+            plot_line(p1, p2)
+            plot_text(p1, p2)
+            restore_view()
+            setCursorPosition()
+            set_initial_extent()
+            textOnClick(event)
+          }
+          class MplDialog {
+            parent
+            toolbar : NavigationToolbar2QT
+          }
+          class NoteOptionsDialog {
+            columns_input
+            dialog_buttons
+            options : dict
+            parent : NoneType
+            variance_input
+            get_options()
+            update_maxcolumns()
+            update_maxvariance()
+            update_options_dict()
+          }
+          class Notes {
+            action_bold
+            action_bullet
+            action_cite
+            action_enumerate
+            action_export
+            action_header
+            action_hyperlink
+            action_image
+            action_info
+            action_italic
+            action_literal
+            action_math
+            action_options
+            action_preview_pdf
+            action_subscript
+            action_superscript
+            autosaveTimer
+            file_label
+            notes_file
+            notes_file : NoneType
+            options : dict
+            parent : NoneType
+            pdf_browser
+            text_edit
+            add_menu(menu_items, menu_obj)
+            add_table_note(matrix, row_labels, col_labels)
+            closeEvent(event)
+            format_citation(cursor, key)
+            format_header(level)
+            format_hyperlink(cursor, key, url)
+            format_list(style)
+            format_text(style)
+            insert_image(filename, halign, width, alt_text, caption)
+            insert_info(infotype)
+            open_note_options()
+            save_notes_file()
+            save_notes_to_pdf()
+            to_rst_table(df)
+            toggle_preview_notes()
+            update_equation_menu()
+            update_pdf()
+            write_equation(equation)
+          }
+          class Observable {
+            add_observer(callback)
+            notify_observers(prop_name, value)
+          }
+          class ObservableDict {
+            update()
+          }
+          class PlotInfoTab {
+            action_remove
+            action_select_all
+            action_show_hide
+            annotations_label
+            annotations_layout
+            annotations_table
+            parent
+            plot_info_label
+            plot_info_tab
+            plot_info_text_edit
+            toggle_annotation(state, annotation)
+            update_annotation_from_table(item)
+            update_annotation_table()
+            update_plot_info_tab(plot_info, write_info, level)
+          }
+          class PlotTree {
+            parent
+            plot_info : NoneType
+            plot_info_list : list
+            sort_method
+            tree : dict
+            add_calculated_leaf(new_field)
+            add_sample(sample_id)
+            add_tree_item(plot_info)
+            clear_tree_data(tree)
+            create_item_from_data(data)
+            extract_plot_info(item)
+            find_leaf(tree, branch, leaf)
+            get_plot_info_from_tree(model)
+            get_tree_items(tree)
+            initialize_tree()
+            retrieve_plotinfo_from_tree(tree_index, tree, branch, leaf)
+            sort_tree(action, method)
+            tree_double_click(tree_index)
+            unhighlight_tree(tree)
+            update_tree(norm_update)
+          }
+          class PlotViewer {
+            duplicate_plot_info : NoneType
+            mpl_toolbar : NoneType, NavigationToolbar2QT
+            parent
+            pop_figure
+            sv_widget
+            add_plotwidget_to_plot_viewer(plot_info, position)
+            clear_layout(layout)
+            save_plot(action)
+            toggle_distance_tool()
+            toolbar_plotting(function, view, enable)
+            update_canvas(new_canvas)
+          }
+          class Polygon {
+            lines : list
+            p_id
+            points : list
+          }
+          class PolygonManager {
+            array_x
+            array_y
+            main_window
+            p_id : int, NoneType
+            p_id_gen : int
+            point_index : NoneType
+            polygons : dict
+            add_samples()
+            clear_lines()
+            clear_plot()
+            clear_polygons()
+            distance_to_line_segment(px, py, x1, y1, x2, y2)
+            extract_scatter_plot_state(scatter)
+            increment_pid()
+            load_polygons(project_dir, sample_id)
+            plot_existing_polygon(plot, p_id)
+            plot_polygon_scatter(event, k, x, y, x_i, y_i)
+            reconstruct_polygon(serializable_polygon)
+            recreate_scatter_plot(state)
+            save_polygons(project_dir, sample_id)
+            show_polygon_lines(x, y, complete)
+            transform_polygon_for_pickling(polygon)
+            update_table_widget()
+            view_selected_polygon()
+          }
+          class PolygonTab {
+            actionEdgeDetect
+            actionPolyAddPoint
+            actionPolyCreate
+            actionPolyDelete
+            actionPolyDelink
+            actionPolyLink
+            actionPolyLoad
+            actionPolyMovePoint
+            actionPolyRemovePoint
+            actionPolySave
+            actionPolyToggle
+            comboBoxEdgeDetectMethod
+            parent
+            polygon_tab
+            polygon_toggle
+            tableWidgetPolyPoints
+            table_fcn
+            polygon_state_changed()
+            toggle_polygon_actions()
+          }
+          class Profile {
+            i_points : dict
+            int_dist
+            name
+            point_error
+            points : dict
+            radius
+            scatter_points : dict
+            sort
+            y_axis_thresh
+          }
+          class ProfileDock {
+            actionControlPoints
+            actionDeleteProfile
+            actionEdit
+            actionExport
+            actionInterpolate
+            actionOpenProfile
+            actionPointAdd
+            actionPointMove
+            actionPointRemove
+            actionTogglePoint
+            action_profile_toggle
+            add_field_button
+            field_combobox
+            field_type_combobox
+            listViewProfile
+            main_window : NoneType
+            num_subplots_spinbox
+            point_sort_combobox
+            point_type_combobox
+            profile_combobox
+            profile_label
+            profile_toggle
+            profiling
+            radius_line_edit
+            remove_field_button
+            selected_subplot_spinbox
+            spacing_line_edit
+            tableWidgetControlPoints
+            threshold_line_edit
+            widgetProfilePlot
+            profile_state_changed()
+            toggle_profile_actions()
+            update_dock_visibility()
+            update_profile_spinbox()
+          }
+          class Profiling {
+            all_errorbars : list
+            array_x
+            array_y
+            data
+            edit_mode_enabled : bool
+            fields_per_subplot : dict
+            fig : Figure
+            main_window
+            new_plot : bool
+            original_colors : dict
+            point_index : int
+            point_selected : bool
+            profile_dock
+            profile_name : NoneType
+            profiles : dict
+            sample_id
+            selected_points : dict
+            add_field_to_listview(field, update)
+            add_samples()
+            calculate_distance(point1, point2)
+            cart_to_dist(pixel: int, direction) float
+            clear_interpolation()
+            clear_plot()
+            clear_profiles()
+            compute_profile_points(profile_points, radius, x, y, x_i, y_i, point_index)
+            dist_to_cart(dist: float, direction) int
+            extract_scatter_plot_state(scatter)
+            get_scatter_errorbar_by_gid(gid)
+            interpolate_points(interpolation_distance, radius)
+            load_profiles(project_dir, sample_id)
+            load_profiles_from_directory(project_dir, sample_id)
+            on_pick(event)
+            on_profile_selected(profile_name)
+            plot_existing_profile(plot)
+            plot_profile_and_table()
+            plot_profile_scatter(event, field, view, plot, x, y, x_i, y_i)
+            plot_profiles(fields, num_subplots, selected_subplot, interpolate, sort_axis)
+            plot_scatter_points(scatter_points, x, y, point_index, symbol, size)
+            populate_combobox()
+            process_points(x, y, circ_values, sort_axis)
+            reconstruct_profile(serializable_profile)
+            recreate_scatter_plot(state)
+            remove_field_from_listview()
+            save_profiles(project_dir, sample_id)
+            toggle_buttons(enable)
+            toggle_edit_mode()
+            toggle_point_visibility()
+            transform_profile_for_pickling(profile)
+            update_listview_with_fields(fields)
+            update_num_subplots()
+            update_table_widget(update)
+          }
+          class QuickView {
+            analyte_list
+            main_window : NoneType
+            tableWidget
+            view_name
+            apply_sort(action)
+            populate_table()
+            save_selected_analytes()
+            save_to_csv()
+            setup_sort_menu()
+            setup_table()
+          }
+          class Radar {
+            ax
+            axes_interval : int
+            data
+            fieldlabels
+            fieldmax : ndarray
+            fieldmin : ndarray
+            fields
+            fig : Figure
+            groups : NoneType
+            normalized_axis_increment : float
+            quantiles : NoneType
+            radius : float
+            vals : ndarray
+            normalize_vals()
+            plot(cmap)
+          }
+          class RadarAxes {
+            PolarTransform
+            name : str
+            fill()
+            plot()
+            set_dotted_grid_lines()
+            set_rgrids(radii)
+            set_varlabels(labels)
+          }
+          class RadarTransform {
+            transform_path_non_affine(path)
+          }
+          class ResizableRectItem {
+            cursorChangeThreshold : int
+            dragStartPos : NoneType
+            dragStartRect : NoneType
+            edgeTolerance : int
+            parent : NoneType
+            pos : str, NoneType
+            resizing : bool
+            hoverMoveEvent(event)
+            mouseMoveEvent(event)
+            mousePressEvent(event)
+            mouseReleaseEvent(event)
+            onEdge(pos)
+            resizeRect(newPos)
+            validateRect(rect)
+          }
+          class RotatedHeaderView {
+            minimumSizeHint()
+            paintSection(painter, rect, logicalIndex)
+            sectionSizeFromContents(logicalIndex)
+          }
+          class SampleObj {
+            array_size
+            aspect_ratio
+            axis_dict : dict
+            cluster_labels : ndarray
+            cluster_mask : ndarray
+            crop : bool
+            crop_mask
+            debug : bool
+            dx
+            dx
+            dy
+            dy
+            file_path
+            filter_df : DataFrame
+            filter_mask : ndarray
+            is_swapped : bool
+            mask
+            negative_method
+            order : str
+            outlier_method
+            polygon : dict
+            polygon_mask : ndarray
+            processed_data
+            profile : dict
+            raw_data
+            ref_chem
+            sample_id
+            x
+            x
+            x_range
+            xlim
+            y
+            y
+            y_range
+            ylim
+            add_columns(data_type, column_names, array, mask)
+            apply_field_filters()
+            clip_outliers(array, outlier_method, pl, pu, dpl, dpu)
+            cluster_data()
+            compute_ratio(analyte_1, analyte_2)
+            confirm_reset()
+            delete_column(column_name)
+            get_attribute_dict(attribute_name)
+            get_map_data(field, field_type, norm, processed)
+            get_processed_data()
+            get_vector(field_type, field, norm, processed)
+            k_optimal_clusters(data, max_clusters)
+            prep_data(field)
+            reset_crop()
+            reset_data()
+            reset_data_handling()
+            reset_resolution()
+            swap_resolution()
+            swap_xy()
+            transform_array(array, negative_method)
+            update_norm(norm, field)
+          }
+          class Scheduler {
+            callback : NoneType
+            timeout
+            update_timer
+            is_active()
+            reset_timer()
+            schedule_update()
+            set_delay(delay)
+            stop()
+          }
+          class SimpleMplCanvas {
+            axes
+            fig : Figure
+            parent : NoneType
+          }
+          class SpecialFunctions {
+            parent : NoneType
+            add_ree(sample_df)
+            callback_dating_method()
+            callback_dating_ratios()
+            compute_date_map()
+            scatter_date(x, y, y0)
+          }
+          class SpecialPage {
+            ComboBoxBarometryMethod
+            ComboBoxDiffusionMethod
+            ComboBoxThermometryMethod
+            checkBoxComputeRatios
+            comboBoxDatingMethod
+            comboBoxDiffusionProfile
+            comboBoxDimensionality
+            comboBoxIsotopeAgeField1
+            comboBoxIsotopeAgeField2
+            comboBoxIsotopeAgeField3
+            comboBoxIsotopeAgeFieldType1
+            comboBoxIsotopeAgeFieldType2
+            comboBoxIsotopeAgeFieldType3
+            comboBoxRegion
+            formLayoutDatingMethod
+            formLayoutDiffusion
+            formLayout_16
+            formLayout_17
+            gridLayoutDatingParams
+            horizontalLayout_8
+            labelBarometryMethod
+            labelComputeRatios
+            labelDatingDiffusionMethod
+            labelDatingMethod
+            labelDecayConstant
+            labelDiffusionProfile
+            labelDimensionality
+            labelIsotope1
+            labelIsotope2
+            labelIsotope3
+            labelRegion
+            labelThermometryMethod
+            lineEditDecayConstant
+            lineEditDecayConstantUncertainty
+            parent : NoneType
+            pushButtonComputeAge
+            scrollAreaBarometry
+            scrollAreaDating
+            scrollAreaDiffusion
+            scrollAreaSpecial
+            scrollAreaWidgetContentsBarometry
+            scrollAreaWidgetContentsDiffusion
+            scrollAreaWidgetContentsSpecial
+            scrollAreaWidgetContents_2
+            tabBarometry
+            tabDating
+            tabDiffusion
+            tabThermometry
+            tabWidgetSpecialFcn
+            tableWidgetDiffusionConstants
+            toolButtonDiffusionLoad
+            verticalLayoutDatingParams
+            verticalLayout_10
+            verticalLayout_58
+            verticalLayout_64
+            verticalLayout_65
+            verticalLayout_66
+            verticalLayout_67
+            verticalLayout_68
+            verticalLayout_69
+          }
+          class SpotImporter {
+            import_df
+            main_window : NoneType
+            ok : bool
+            spotdata : NoneType, DataFrame
+            add_combobox(col)
+            import_spot_table()
+            insert_column(currentColumn)
+            load_spot_data()
+            open_context_menu(position)
+            rename_column(currentColumn)
+            update_spot_table()
+          }
+          class SpotPage {
+            groupBox
+            parent : NoneType
+            scrollAreaSpots
+            scrollAreaWidgetContentsSpots
+            tableWidgetSpots
+            toolButtonSpotAnalysis
+            toolButtonSpotLocate
+            toolButtonSpotMove
+            toolButtonSpotRemove
+            toolButtonSpotSelectAll
+            toolButtonSpotToggle
+            toolbar
+            verticalLayout_44
+            verticalLayout_45
+            verticalLayout_46
+          }
+          class StandardItem {
+          }
+          class StyleObj {
+          }
+          class Styling {
+            aspect_ratio
+            cbar_dir
+            cbar_reverse
+            clabel
+            clabel
+            clim
+            clim : list
+            cmap
+            color_field
+            color_field_type
+            cscale
+            custom_color_dict
+            debug : bool
+            font
+            font_size
+            line_color
+            line_multiplier
+            line_width
+            map_plot_types : list
+            marker
+            marker_alpha
+            marker_color
+            marker_dict : dict
+            marker_size
+            mpl_colormaps
+            overlay_color
+            parent
+            plot_type
+            resolution
+            scale_dir
+            scale_length
+            scale_length : NoneType
+            scale_location
+            scheduler
+            signal_state
+            signal_state : bool
+            style_dict : dict
+            ternary_colormaps
+            tick_dir
+            ui : bool
+            xlabel
+            xlim
+            xscale
+            ylabel
+            ylim
+            yscale
+            zlabel
+            zlim
+            zscale
+            aspect_ratio_callback()
+            axis_label_edit_callback(ax, new_label)
+            axis_limit_edit_callback(ax, bound, new_value, field, ui_update)
+            axis_reset_callback(ax)
+            axis_scale_callback(comboBox, ax)
+            axis_variable_changed(fieldtype, field, ax)
+            button_color_select(button)
+            cbar_direction_callback()
+            cbar_label_callback()
+            color_by_field_callback()
+            color_field_callback(plot)
+            color_field_update()
+            color_norm(N)
+            colormap_direction_callback()
+            create_custom_colormap(name, N)
+            default_scale_length()
+            disable_style_widgets()
+            field_colormap_callback()
+            font_callback()
+            font_size_callback()
+            get_axis_field(ax)
+            get_axis_values(field_type, field, ax)
+            get_cluster_colormap(cluster_dict, alpha)
+            get_colormap(N)
+            get_style_dict()
+            initialize_axis_values(field_type, field)
+            input_theme_name_dlg()
+            length_multiplier_callback()
+            line_color_callback()
+            line_width_callback()
+            load_theme_names()
+            marker_color_callback()
+            marker_size_callback()
+            marker_symbol_callback()
+            overlay_color_callback()
+            parse_field(field)
+            plot_type_callback(update)
+            print_properties()
+            read_theme()
+            reset_default_styles(ui)
+            resolution_callback(update_plot)
+            scale_direction_callback()
+            scale_length_callback()
+            scale_location_callback()
+            set_axis_widgets(ax, field)
+            set_color_axis_widgets()
+            set_default_cluster_colors(mask)
+            set_style_dictionary(plot_type, style)
+            set_style_widgets(plot_type, style)
+            slider_alpha_changed()
+            ternary_colormap_changed()
+            tickdir_callback()
+            toggle_mass(labels)
+            toggle_signals()
+            toggle_style_labels()
+            toggle_style_widgets()
+            update_color_field_spinbox()
+            update_figure_font(canvas, font_name)
+          }
+          class TableFcn {
+            parent : NoneType
+            delete_row(table)
+            move_row_down(table)
+            move_row_up(table)
+          }
+          class TableWidgetDragRows {
+            dropEvent(event: QDropEvent)
+            drop_on(event)
+            is_below(pos, index)
+            select_rows(start_row, num_rows)
+          }
+          class ToggleSwitch {
+            animation
+            bg_left_color : NoneType, str
+            bg_right_color : str, NoneType
+            fg_color : NoneType, str
+            height : int
+            stateChanged
+            thumb_pos
+            width : int
+            get_thumb_pos()
+            isChecked()
+            mousePressEvent(event)
+            paintEvent(event)
+            setChecked(state)
+            set_thumb_pos(pos)
+            toggle()
+          }
+          class UIFieldLogic {
+            data : NoneType
+            get_field_list(set_name, filter)
+            update_data(data)
+            update_field_combobox(parentBox, childBox)
+            update_field_type_combobox(comboBox, addNone, plot_type)
+          }
+          class UIThemes {
+            app
+            highlight_color_dark : str
+            highlight_color_light : str
+            parent
+            view_mode : int
+            set_dark_theme()
+            set_light_theme()
+            switch_view_mode(view_mode)
+          }
+          class Ui_Dialog {
+            comboBoxCorrelation
+            comboBoxScale
+            gridLayout
+            label
+            labelColorbar
+            label_2
+            pushButtonCancel
+            pushButtonDone
+            pushButtonLoadSelection
+            pushButtonSaveSelection
+            tableWidgetIsotopes
+            tableWidgetSelected
+            retranslateUi(Dialog)
+            setupUi(Dialog)
+          }
+          class Ui_Dialog {
+            comboBoxCorrelation
+            comboBoxScale
+            gridLayout
+            label
+            labelColorbar
+            label_2
+            pushButtonCancel
+            pushButtonDone
+            pushButtonLoadSelection
+            pushButtonSaveSelection
+            tableWidgetAnalytes
+            tableWidgetSelected
+            retranslateUi(Dialog)
+            setupUi(Dialog)
+          }
+          class Ui_FieldDialog {
+            comboBoxFieldType
+            horizontalLayout
+            horizontalLayoutWidget
+            listWidgetFieldList
+            pushButtonCancel
+            pushButtonDone
+            pushButtonLoad
+            pushButtonSave
+            tableWidgetSelectedFields
+            toolButtonAddField
+            toolButtonRemoveField
+            toolButtonSortFieldList
+            toolButtonSortSelectedFields
+            retranslateUi(FieldDialog)
+            setupUi(FieldDialog)
+          }
+          class Ui_FileSelectorDialog {
+            buttonBox
+            horizontalLayout
+            labelDialog
+            labelDirectory
+            lineEditDirectory
+            tableWidgetFileMetadata
+            verticalLayout
+            retranslateUi(FileSelectorDialog)
+            setupUi(FileSelectorDialog)
+          }
+          class Ui_MainWindow {
+            ClusteringPage
+            ComboBoxDimRedTechnique
+            LabelTernaryColors
+            MultidimensionalPage
+            NDIMPage
+            PreprocessPage
+            ScatterPage
+            SelectAnalytePage
+            StyleAnnotations
+            StyleAxes
+            StyleColors
+            StyleMarkers
+            StyleRegression
+            actionAbout
+            actionBatch_Process
+            actionBiPlot
+            actionCalculator
+            actionClearFilters
+            actionCluster
+            actionClusterMask
+            actionClusters
+            actionCompare_Spot_Map
+            actionCopy
+            actionCorrelation
+            actionCrop
+            actionCut
+            actionFilterToggle
+            actionFilters
+            actionFullMap
+            actionHelp
+            actionHistograms
+            actionImportFiles
+            actionImportSpots
+            actionInfo
+            actionLogger
+            actionNoiseReduction
+            actionNotes
+            actionOpenDirectory
+            actionOpenProject
+            actionOpenSample
+            actionPolygonMask
+            actionPolygons
+            actionPreferences
+            actionProfiles
+            actionQuit_LaME
+            actionRadar
+            actionReportBug
+            actionReset
+            actionSave
+            actionSavePlotToTree
+            actionSaveProject
+            actionSelectAnalytes
+            actionShortcuts
+            actionSpecialTools
+            actionSpotData
+            actionSpotTools
+            actionSwapAxes
+            actionTEC
+            actionTernary
+            actionTutorials
+            actionUndo
+            actionUpdatePlot
+            actionUserGuide
+            actionViewMode
+            actionWorkflowTool
+            canvasWindow
+            centralwidget
+            checkBox
+            checkBoxApplyAll
+            checkBoxCorrelationSquared
+            checkBoxGradient
+            checkBoxReverseColormap
+            checkBoxShowHistCmap
+            checkBoxShowMass
+            checkBoxWithPCA
+            checkBox_2
+            comboBoxApplyNoiseReduction
+            comboBoxCbarDirection
+            comboBoxClusterDistance
+            comboBoxClusterMethod
+            comboBoxColorByField
+            comboBoxColorField
+            comboBoxColorScale
+            comboBoxCorrelationMethod
+            comboBoxFieldColormap
+            comboBoxFieldTypeX
+            comboBoxFieldTypeY
+            comboBoxFieldTypeZ
+            comboBoxFieldX
+            comboBoxFieldY
+            comboBoxFieldZ
+            comboBoxHeatmaps
+            comboBoxHistField
+            comboBoxHistFieldType
+            comboBoxHistType
+            comboBoxLineWidth
+            comboBoxMVPlots
+            comboBoxMarker
+            comboBoxNDimAnalyte
+            comboBoxNDimAnalyteSet
+            comboBoxNDimQuantiles
+            comboBoxNDimRefMaterial
+            comboBoxNegativeMethod
+            comboBoxNoiseReductionMethod
+            comboBoxOutlierMethod
+            comboBoxPlotType
+            comboBoxQVList
+            comboBoxRefMaterial
+            comboBoxRegressionMethod
+            comboBoxSampleId
+            comboBoxScaleDirection
+            comboBoxScaleLocation
+            comboBoxScatterPreset
+            comboBoxStyleTheme
+            comboBoxTernaryColormap
+            comboBoxTickDirection
+            comboBoxXScale
+            comboBoxYScale
+            comboBoxZScale
+            dockWidgetContents
+            dockWidgetContentsLeftToolbox
+            dockWidgetContentsRightToolbox
+            dockWidgetLeftToolbox
+            dockWidgetPlotTree
+            dockWidgetStyling
+            doubleSpinBoxBinWidth
+            doubleSpinBoxFontSize
+            doubleSpinBoxMarkerSize
+            doubleSpinBoxNoiseOption2
+            fontComboBox
+            formLayout
+            formLayoutMarkers
+            formLayoutStyleMaps
+            formLayout_10
+            formLayout_11
+            formLayout_12
+            formLayout_13
+            formLayout_14
+            formLayout_15
+            formLayout_19
+            formLayout_2
+            formLayout_3
+            formLayout_4
+            formLayout_7
+            formLayout_9
+            gridLayout
+            gridLayoutAxes
+            gridLayoutMVInfo
+            gridLayoutStyleTheme
+            gridLayout_8
+            groupBoxAutoscale
+            groupBoxAxes
+            groupBoxClustering
+            groupBoxHistogram
+            groupBoxNDim
+            groupBoxNoiseReduction
+            groupBoxPlotToolBar
+            groupBoxSampleOptions
+            groupBoxTernaryMap
+            groupBox_10
+            groupBox_3
+            horizontalLayout
+            horizontalLayoutTernaryColors
+            horizontalLayout_13
+            horizontalLayout_16
+            horizontalLayout_17
+            horizontalLayout_18
+            horizontalLayout_19
+            horizontalLayout_2
+            horizontalLayout_20
+            horizontalLayout_21
+            horizontalLayout_22
+            horizontalLayout_23
+            horizontalLayout_24
+            horizontalLayout_25
+            horizontalLayout_27
+            horizontalLayout_28
+            horizontalLayout_29
+            horizontalLayout_3
+            horizontalLayout_30
+            horizontalLayout_31
+            horizontalLayout_32
+            horizontalLayout_33
+            horizontalLayout_34
+            horizontalLayout_38
+            horizontalLayout_39
+            horizontalLayout_40
+            horizontalLayout_42
+            horizontalLayout_44
+            horizontalLayout_45
+            horizontalLayout_46
+            horizontalLayout_47
+            horizontalLayout_48
+            horizontalLayout_49
+            horizontalLayout_5
+            horizontalLayout_7
+            horizontalSliderClusterExponent
+            horizontalSliderMarkerAlpha
+            labelApplyAll
+            labelApplySmoothing
+            labelAspectRatio
+            labelBinWidth
+            labelCbarDirection
+            labelCbarLabel
+            labelClusterDistance
+            labelClusterExponent
+            labelClusterMax
+            labelClusterMethod
+            labelClusterStartingSeed
+            labelClusterWithPCA
+            labelColorBounds
+            labelColorByField
+            labelColorField
+            labelColorScale
+            labelCorrelationMethod
+            labelDX
+            labelDY
+            labelDifferenceBounds
+            labelDimRedTechnique
+            labelExponent
+            labelFieldColormap
+            labelFont
+            labelFontSize
+            labelGradient
+            labelHeatmapResolution
+            labelHeatmaps
+            labelHistType
+            labelLengthMultiplier
+            labelLineColor
+            labelLineWidth
+            labelMVInfoLabel
+            labelMVInfoX
+            labelMVInfoY
+            labelMarker
+            labelMarkerAlpha
+            labelMarkerColor
+            labelMarkerSize
+            labelMaxCols
+            labelMaxRows
+            labelMethods
+            labelNClusters
+            labelNDimAnalyte
+            labelNDimPredefined
+            labelNDimQuantiles
+            labelNDimRefValues
+            labelNegativeMethod
+            labelNoBins
+            labelNoiseOption1
+            labelNoiseOption2
+            labelOutlierMethod
+            labelOverlayColor
+            labelPCANumBasis
+            labelPCX
+            labelPCY
+            labelPixelResolution
+            labelPlotType
+            labelQuantileBounds
+            labelReferenceValue
+            labelResolutionNx
+            labelResolutionNy
+            labelReverseColormap
+            labelSVInfoDistance
+            labelSVInfoStatsLabel
+            labelSVInfoValue
+            labelSVInfoX
+            labelSVInfoY
+            labelSample
+            labelSampleResolution
+            labelScaleDirection
+            labelScaleLength
+            labelScaleLocation
+            labelScatterPreset
+            labelShowMass
+            labelStyleTheme
+            labelTernaryColormap
+            labelTickDirection
+            labelTransparency
+            labelXAnalyte
+            labelXLabel
+            labelXLim
+            labelXScale
+            labelYAnalyte
+            labelYLabel
+            labelYLim
+            labelYScale
+            labelZAnalyte
+            labelZLabel
+            labelZLim
+            labelZScale
+            label_2
+            label_3
+            label_4
+            line
+            lineAnnotation
+            lineEditAspectRatio
+            lineEditCbarLabel
+            lineEditColorLB
+            lineEditColorUB
+            lineEditDX
+            lineEditDY
+            lineEditDifferenceLowerQuantile
+            lineEditDifferenceUpperQuantile
+            lineEditLengthMultiplier
+            lineEditLowerQuantile
+            lineEditResolutionNx
+            lineEditResolutionNy
+            lineEditScaleLength
+            lineEditSeed
+            lineEditUpperQuantile
+            lineEditXLB
+            lineEditXLabel
+            lineEditXUB
+            lineEditYLB
+            lineEditYLabel
+            lineEditYUB
+            lineEditZLB
+            lineEditZLabel
+            lineEditZUB
+            lineMarker
+            line_2
+            menuAnalyze
+            menuFile
+            menuHelp
+            menuLaME
+            menuPlot
+            menuTools
+            menubar
+            multiViewTab
+            quickViewTab
+            scrollAreaAnalyte
+            scrollAreaAnnotations
+            scrollAreaAxes
+            scrollAreaClustering
+            scrollAreaColors
+            scrollAreaMarkers
+            scrollAreaMultiDim
+            scrollAreaNDim
+            scrollAreaPreprocess
+            scrollAreaRegression
+            scrollAreaScatter
+            scrollAreaWidgetContents
+            scrollAreaWidgetContentsAnalyte
+            scrollAreaWidgetContentsAnnotations
+            scrollAreaWidgetContentsAxes
+            scrollAreaWidgetContentsClustering
+            scrollAreaWidgetContentsColors
+            scrollAreaWidgetContentsMarkers
+            scrollAreaWidgetContentsMultiDim
+            scrollAreaWidgetContentsPreprocess
+            scrollAreaWidgetContentsRegression
+            scrollAreaWidgetContentsScatter
+            singleViewTab
+            spinBoxClusterMax
+            spinBoxColorField
+            spinBoxFieldIndex
+            spinBoxHeatmapResolution
+            spinBoxMaxCols
+            spinBoxMaxRows
+            spinBoxNBins
+            spinBoxNClusters
+            spinBoxNoiseOption1
+            spinBoxPCANumBasis
+            spinBoxPCX
+            spinBoxPCY
+            statusbar
+            tableWidgetAnnotation
+            tableWidgetNDim
+            toolBar
+            toolBox
+            toolBoxStyle
+            toolButtonAnnotate
+            toolButtonAnnotationDelete
+            toolButtonAnnotationSelectAll
+            toolButtonAutoScale
+            toolButtonCAxisReset
+            toolButtonDistance
+            toolButtonHistogramReset
+            toolButtonHome
+            toolButtonLineColor
+            toolButtonMarkerColor
+            toolButtonNDimAnalyteAdd
+            toolButtonNDimAnalyteSetAdd
+            toolButtonNDimDown
+            toolButtonNDimRemove
+            toolButtonNDimSaveList
+            toolButtonNDimSelectAll
+            toolButtonNDimUp
+            toolButtonNewList
+            toolButtonOutlierReset
+            toolButtonOverlayColor
+            toolButtonPan
+            toolButtonPixelResolutionReset
+            toolButtonPopFigure
+            toolButtonRandomSeed
+            toolButtonRemoveAllMVPlots
+            toolButtonRemoveMVPlot
+            toolButtonRemovePlot
+            toolButtonResolutionReset
+            toolButtonSave
+            toolButtonSaveTernaryColormap
+            toolButtonSaveTheme
+            toolButtonScaleEqualize
+            toolButtonScatterSavePreset
+            toolButtonSortAnalyte
+            toolButtonSwapResolution
+            toolButtonTCmapMColor
+            toolButtonTCmapXColor
+            toolButtonTCmapYColor
+            toolButtonTCmapZColor
+            toolButtonTernaryMap
+            toolButtonXAxisReset
+            toolButtonYAxisReset
+            toolButtonZAxisReset
+            toolButtonZoom
+            treeView
+            verticalLayout
+            verticalLayout_10
+            verticalLayout_11
+            verticalLayout_13
+            verticalLayout_14
+            verticalLayout_16
+            verticalLayout_17
+            verticalLayout_18
+            verticalLayout_21
+            verticalLayout_22
+            verticalLayout_29
+            verticalLayout_3
+            verticalLayout_31
+            verticalLayout_32
+            verticalLayout_34
+            verticalLayout_35
+            verticalLayout_36
+            verticalLayout_37
+            verticalLayout_38
+            verticalLayout_4
+            verticalLayout_41
+            verticalLayout_42
+            verticalLayout_43
+            verticalLayout_47
+            verticalLayout_48
+            verticalLayout_5
+            verticalLayout_51
+            verticalLayout_52
+            verticalLayout_53
+            verticalLayout_54
+            verticalLayout_55
+            verticalLayout_56
+            verticalLayout_57
+            verticalLayout_6
+            verticalLayout_60
+            verticalLayout_61
+            verticalLayout_7
+            verticalLayout_70
+            verticalLayout_78
+            widgetHistView
+            widgetMultiView
+            widgetPlotInfoMV
+            widgetPlotInfoSV
+            widgetPlotTypeSelect
+            widgetQuickView
+            widgetSampleSelect
+            widgetSingleView
+            retranslateUi(MainWindow)
+            setupUi(MainWindow)
+          }
+          class Ui_MapImportDialog {
+            checkBoxApplyAll
+            checkBoxPreview
+            checkBoxSaveToRoot
+            comboBoxDataType
+            comboBoxMethod
+            framePreviewSample
+            horizontalLayout
+            horizontalLayout_2
+            horizontalLayout_3
+            horizontalLayout_4
+            horizontalLayout_5
+            horizontalLayout_6
+            horizontalLayout_7
+            horizontalLayout_8
+            label
+            labelAddStandard
+            labelDataType
+            labelMethod
+            labelResolution
+            labelRootDirectory
+            labelSampleID
+            label_2
+            layoutWidget
+            lineEditRootDirectory
+            pushButtonCancel
+            pushButtonImport
+            pushButtonLoad
+            pushButtonSave
+            statusBar
+            tableWidgetMetadata
+            toolButton
+            toolButtonAddStandard
+            toolButtonNextSample
+            toolButtonOpenDirectory
+            toolButtonPrevSample
+            verticalLayoutMetadataTable
+            verticalLayout_2
+            verticalLayout_3
+            retranslateUi(MapImportDialog)
+            setupUi(MapImportDialog)
+          }
+          class Ui_PreferencesWindow {
+            LabelAnalyteScale
+            abundanceModelsLabel
+            abundanceModelsLineEdit
+            analyteListsLabel
+            analyteListsLineEdit
+            buttonBox
+            checkBox
+            colormapsLabel
+            colormapsLineEdit
+            comboBox
+            comboBoxAnalyteScale
+            comboBoxDateUnits
+            comboBoxDefaultSort
+            comboBoxDefaultTheme
+            comboBoxPUnits
+            comboBoxTUnits
+            comboBox_2
+            fontComboBox
+            fontSizeDoubleSpinBox
+            formLayout
+            formLayoutWidget
+            formLayoutWidget_2
+            formLayout_2
+            horizontalLayout
+            horizontalLayout_2
+            horizontalLayout_3
+            horizontalLayout_4
+            label
+            labelAnalyteUnits
+            labelDate
+            labelDefaultSort
+            labelDefaultTheme
+            labelFontSize
+            labelPressure
+            labelScaleUnits
+            labelTemperature
+            label_2
+            label_3
+            label_4
+            label_5
+            lineEdit
+            lineEditAnalyteUnits
+            lineEditScaleUnits
+            pushButton_2
+            pushButton_3
+            pushButton_4
+            stackedWidget
+            stackedWidgetPage1
+            stackedWidgetPage2
+            toolButton
+            toolButton_2
+            toolButton_3
+            toolButton_4
+            verticalLayout
+            verticalLayoutWidget
+            retranslateUi(PreferencesWindow)
+            setupUi(PreferencesWindow)
+          }
+          class Ui_QuickViewDialog {
+            horizontalLayout
+            horizontalLayout_3
+            label
+            lineEditViewName
+            pushButtonClose
+            toolButtonSave
+            toolButtonSort
+            verticalLayout
+            retranslateUi(QuickViewDialog)
+            setupUi(QuickViewDialog)
+          }
+          class Ui_SpotImportDialog {
+            checkBoxApplyAll
+            checkBoxSaveToRoot
+            horizontalLayout
+            horizontalLayout_4
+            horizontalLayout_5
+            horizontalLayout_6
+            horizontalLayout_7
+            horizontalLayout_8
+            label
+            labelSpotFile
+            label_2
+            lineEditSpotFile
+            pushButtonCancel
+            pushButtonImport
+            tableWidgetSpotData
+            toolButton
+            toolButtonOpenSpotFile
+            verticalLayout
+            verticalLayoutMetadataTable
+            retranslateUi(SpotImportDialog)
+            setupUi(SpotImportDialog)
+          }
+          class Ui_widgetPlotViewer {
+            gridLayout_8
+            groupBoxPlotToolBar
+            horizontalLayout_27
+            labelSVInfoDistance
+            labelSVInfoStatsLabel
+            labelSVInfoValue
+            labelSVInfoX
+            labelSVInfoY
+            toolButtonAnnotate
+            toolButtonDistance
+            toolButtonHome
+            toolButtonPan
+            toolButtonPopFigure
+            toolButtonSave
+            toolButtonZoom
+            verticalLayout
+            verticalLayout_17
+            verticalLayout_18
+            verticalLayout_29
+            widgetPlotInfoSV
+            widgetSampleSelect
+            widgetSingleView
+            retranslateUi(widgetPlotViewer)
+            setupUi(widgetPlotViewer)
+          }
+          class WebEngineView {
+            debug : bool
+            parent : NoneType
+            handle_console_message(level, message, line, source_id)*
+            on_load_finished(success)
+            on_load_progress(progress)
+            on_load_started()
+            show_error_page()
+          }
+          class Workflow {
+            bridge
+            central_widget
+            channel
+            layout
+            output_text_edit
+            web_view
+          }
+          class Workflow {
+            bridge
+            channel
+            clear_action
+            main
+            output_text_edit
+            parent : NoneType
+            run_action
+            save_action
+            web_view
+            execute_code(code)
+            get_saved_lists(type)
+            handleResizeEvent(event)
+            refresh_saved_lists_dropdown(type)
+            store_sample_ids()
+            update_field_type_list(field_type_list)
+          }
+          class scalebar {
+            ax
+            color : list
+            location : str
+            orientation : str
+            pixel_width
+            units : NoneType
+            width
+            create()
+          }
+          class ternary {
+            ax
+            labels : NoneType
+            plot_type : str
+            style : str
+            cplane(a, b, c, ca, cb, cc, p, cp)
+            cplanexy(xd, yd, xp, yp, cp, x1, y1, cv1, x2, y2, cv2)
+            hexagon(bins)
+            tern2xy(a, b, c)
+            ternaxes(labels)
+            terncolor(a, b, c, ca, cb, cc, p, cp)
+            terngrid(spacing)
+            ternhex(a, b, c, val, hexbin_df, plotfield, bins, cmap, orientation, norm)
+            ternscatter(a, b, c, d, size, cmap, color, categories, labels, alpha, marker, edgecolors, ax, orientation, norm)
+            ternticks(spacing)
+            xy2tern(x, y)
+          }
+          BlocklyBridge --* Workflow : bridge
+          ResizableRectItem --* CropTool : crop_rect
+          DataFrameTab --* InfoDock : dataframe_tab
+          FieldTab --* InfoDock : field_tab
+          MetadataTab --* InfoDock : metadata_tab
+          PlotInfoTab --* InfoDock : plot_info_tab
+          Profiling --* ProfileDock : profiling
+          BlocklyBridge --* Workflow : bridge
+          WebEngineView --* Browser : engine
+          CustomFieldCalculator --* CalculatorDock : cfc
+          ClusterTab --* MaskDock : cluster_tab
+          FilterTab --* MaskDock : filter_tab
+          PolygonTab --* MaskDock : polygon_tab
+          RadarTransform --* RadarAxes : PolarTransform
+  
+       </div>
+  </body>
+</html>

@@ -1,4 +1,4 @@
-app.StyleToolbox
+﻿app.StyleToolbox
 ================
 
 .. automodule:: app.StyleToolbox
@@ -24,6 +24,7 @@ app.StyleToolbox
 
    .. autosummary::
    
+      Observable
       QColorDialog
       QDoubleValidator
       QFont

@@ -1,4 +1,4 @@
-﻿common.Masking
+common.Masking
 ==============
 
 .. automodule:: common.Masking

@@ -29,6 +29,7 @@
 
    common.Browser
    common.Calculator
+   common.ChemPlot
    common.CustomMplCanvas
    common.CustomWidgets
    common.DataHandling
@@ -37,6 +38,7 @@
    common.Masking
    common.MolecularWeightCalculator
    common.NoteTaking
+   common.Observable
    common.Polygon
    common.Regression
    common.ScheduleTimer

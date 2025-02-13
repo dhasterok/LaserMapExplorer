@@ -223,6 +223,8 @@ class SampleObj(Observable):
         self.is_swapped = False
         self.order = 'F'
 
+        self.spotdata = AttributeDataFrame()
+
         self.reset_data()
 
     def reset_data(self):

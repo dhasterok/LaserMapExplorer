@@ -3123,6 +3123,7 @@ class Ui_MainWindow(object):
         self.toolBar.addSeparator()
         self.toolBar.addAction(self.actionUpdatePlot)
         self.toolBar.addAction(self.actionSavePlotToTree)
+        self.toolBar.addSeparator()
         self.toolBar.addAction(self.actionNotes)
         self.toolBar.addAction(self.actionCalculator)
         self.toolBar.addSeparator()
@@ -3133,10 +3134,10 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         self.canvasWindow.setCurrentIndex(0)
-        self.toolBox.setCurrentIndex(1)
+        self.toolBox.setCurrentIndex(0)
         self.toolBox.layout().setSpacing(2)
         self.comboBoxNDimQuantiles.setCurrentIndex(2)
-        self.toolBoxStyle.setCurrentIndex(0)
+        self.toolBoxStyle.setCurrentIndex(3)
         self.toolBoxStyle.layout().setSpacing(2)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 

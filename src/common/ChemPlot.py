@@ -313,6 +313,105 @@ def add_colorbar(plot_style, canvas, cax, cbartype='continuous', grouplabels=Non
     #else:
     #    print('(add_colorbar) Unknown type: '+cbartype)
 
+def plot_correlation(parent, app_data, plot_style):
+    """Creates an image of the correlation matrix"""
+    #print('plot_correlation')
+
+    canvas = mplc.MplCanvas(parent=parent)
+    canvas.axes.clear()
+
+    # get the data for computing correlations
+    df_filtered, analytes = app_data.data[app_data.sample_id].get_processed_data()
+
+    # Calculate the correlation matrix
+    method = app_data.corr_plot_style.lower()
+    if app_data.hist_field_type.lower() == 'none':
+        correlation_matrix = df_filtered.corr(method=method)
+    else:
+        algorithm = app_data.hist_field_type
+        cluster_group = app_data.data[app_data.sample_id].processed_data.loc[:,algorithm]
+        selected_clusters = app_data.cluster_dict[algorithm]['selected_clusters']
+
+        ind = np.isin(cluster_group, selected_clusters)
+
+        correlation_matrix = df_filtered[ind].corr(method=method)
+    
+    columns = correlation_matrix.columns
+
+    font = {'size':plot_style.font_size}
+
+    # mask lower triangular matrix to show only upper triangle
+    mask = np.zeros_like(correlation_matrix, dtype=bool)
+    mask[np.tril_indices_from(mask)] = True
+    correlation_matrix = np.ma.masked_where(mask, correlation_matrix)
+
+    norm = plot_style.color_norm()
+
+    # plot correlation or correlation^2
+    square_flag = app_data.corr_squared
+    if square_flag:
+        cax = canvas.axes.imshow(correlation_matrix**2, cmap=plot_style.get_colormap(), norm=norm)
+        canvas.array = correlation_matrix**2
+    else:
+        cax = canvas.axes.imshow(correlation_matrix, cmap=plot_style.get_colormap(), norm=norm)
+        canvas.array = correlation_matrix
+        
+    # store correlation_matrix to save_data if data needs to be exported
+    parent.save_data = canvas.array
+
+    canvas.axes.spines['top'].set_visible(False)
+    canvas.axes.spines['bottom'].set_visible(False)
+    canvas.axes.spines['left'].set_visible(False)
+    canvas.axes.spines['right'].set_visible(False)
+
+    # Add colorbar to the plot
+    add_colorbar(plot_style, canvas, cax)
+
+    # set color limits
+    cax.set_clim(plot_style.clim[0], plot_style.clim[1])
+
+    # Set tick labels
+    ticks = np.arange(len(columns))
+    canvas.axes.tick_params(length=0, labelsize=8,
+                    labelbottom=False, labeltop=True, labelleft=False, labelright=True,
+                    bottom=False, top=True, left=False, right=True)
+
+    canvas.axes.set_yticks(ticks, minor=False)
+    canvas.axes.set_xticks(ticks, minor=False)
+
+    labels = plot_style.toggle_mass(columns)
+
+    canvas.axes.set_xticklabels(labels, rotation=90, ha='center', va='bottom', fontproperties=font)
+    canvas.axes.set_yticklabels(labels, ha='left', va='center', fontproperties=font)
+
+    canvas.axes.set_title('')
+
+    plot_style.update_figure_font(canvas, plot_style.font)
+
+    if square_flag:
+        plot_name = method+'_squared'
+    else:
+        plot_name = method
+
+    plot_info = {
+        'tree': 'Correlation',
+        'sample_id': app_data.sample_id,
+        'plot_name': plot_name,
+        'plot_type': 'correlation',
+        'method': method,
+        'square_flag': square_flag,
+        'field_type': None,
+        'field': None,
+        'figure': canvas,
+        'style': plot_style.style_dict[plot_style.plot_type],
+        'cluster_groups': [],
+        'view': [True,False],
+        'position': [],
+        'data': correlation_matrix,
+    }
+
+    return canvas, plot_info
+
 def get_scatter_data(app_data, plot_style, processed=True):
 
     scatter_dict = {'x': {'type': None, 'field': None, 'label': None, 'array': None},

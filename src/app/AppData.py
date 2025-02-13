@@ -15,7 +15,11 @@ class AppData(Observable):
         self._sample_list = []
         self.csv_files = []
 
+        # a dictionary of sample_id containing SampleObj data class
         self.data = {}
+        # a dictionary of the field_types in self.data[sample_id].processed_data.  "coord" is excluded.
+        self._field_dict = {}
+
         self._sample_id = ""
 
         self.plot_info = {}
@@ -178,7 +182,7 @@ class AppData(Observable):
             return
 
         # update hist_field_type
-        self.validate_field_type(new_field_type)
+        #self.validate_field_type(new_field_type)
         self._hist_field_type = new_field_type
         self.notify_observers("hist_field_type", new_field_type)
 
@@ -196,7 +200,7 @@ class AppData(Observable):
         if new_field == self._hist_field:
             return
 
-        self.validate_field(self._hist_field_type, new_field)
+        #self.validate_field(self._hist_field_type, new_field)
         self._hist_field = new_field
         self.notify_observers("hist_field", new_field)
 
@@ -668,6 +672,14 @@ class AppData(Observable):
     
         self._selected_clusters = new_selected_clusters
         self.notify_observers("selected_clusters", new_selected_clusters)
+
+    @property
+    def field_dict(self):
+        """A dictionary of the field_types in the self.data[sample_id].processed_data dataframe, with "coord" excluded."""
+        self._field_dict = self.data[self.sample_id].processed_data.get_attribute_dict('data_type')
+        if 'coordinate' in self._field_dict:
+            self._field_dict.pop("coordinate")
+        return self._field_dict
 
     def get_field_list(self, set_name='Analyte', filter='all'):
         """Gets the fields associated with a defined set

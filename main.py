@@ -40,7 +40,7 @@ from sklearn.metrics import silhouette_score
 import skfuzzy as fuzz
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-from src.common.ChemPlot import plot_histogram, get_scatter_data
+from src.common.ChemPlot import plot_histogram, plot_correlation, get_scatter_data
 from src.common.ternary_plot import ternary
 from src.common.plot_spider import plot_spider_norm
 from src.common.scalebar import scalebar
@@ -975,34 +975,39 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             New field type.
         """
         self.comboBoxHistFieldType.setCurrentText(value)
-        if self.app_data.plot_type == "histogram":
+        if self.toolBox.currentIndex() == self.left_tab['sample']:
             self.plot_style.scheduler.schedule_update()
 
     def update_hist_field_type(self, value):
         self.comboBoxHistField.setCurrentText(value)
-        if self.plot_style.plot_type == "histogram":
+        self.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
+
+        if self.toolBox.currentIndex() == self.left_tab['sample']:
             self.plot_style.scheduler.schedule_update()
 
     def update_hist_bin_width(self, value):
         self.doubleSpinBoxBinWidth.setValue(value)
-        if self.plot_style.plot_type == "histogram":
+        if self.toolBox.currentIndex() == self.left_tab['sample'] and self.plot_style.plot_type == "histogram":
             self.plot_style.scheduler.schedule_update()
 
     def update_hist_num_bins(self, value):
         self.spinBoxNBins.setValue(value)
-        if self.plot_style.plot_type == "histogram":
+        if self.toolBox.currentIndex() == self.left_tab['sample'] and self.plot_style.plot_type == "histogram":
             self.plot_style.scheduler.schedule_update()
 
     def update_hist_plot_style(self, new_hist_plot_style):
-        if self.toolBox.currentIndex() == self.left_tab['sample']:
+        self.comboBoxHistType.setCurrentText(new_hist_plot_style)
+        if self.toolBox.currentIndex() == self.left_tab['sample'] and self.plot_style.plot_type == "histogram":
             self.plot_style.scheduler.schedule_update()
 
     def update_corr_plot_style(self, new_corr_plot_style):
-        if self.toolBox.currentIndex() == self.left_tab['sample']:
+        self.comboBoxCorrelationMethod.setCurrentText(new_corr_plot_style)
+        if self.toolBox.currentIndex() == self.left_tab['sample'] and self.plot_style.plot_type == "correlation":
             self.plot_style.scheduler.schedule_update()
 
     def update_corr_squared(self, new_corr_squared):
-        if self.toolBox.currentIndex() == self.left_tab['sample']:
+        self.checkBoxCorrelationSquared.setChecked(new_corr_squared)
+        if self.toolBox.currentIndex() == self.left_tab['sample'] and self.plot_style.plot_type == "correlation":
             self.plot_style.scheduler.schedule_update()
     
     def update_noise_red_method(self, new_noise_red_method):
@@ -3027,28 +3032,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.app_data.sample_id == '':
             return
 
-        data_type_dict = self.app_data.data[self.app_data.sample_id].processed_data.get_attribute_dict('data_type')
-
         match plot_type.lower():
             case 'correlation' | 'histogram' | 'tec':
-                if 'cluster' in data_type_dict:
-                    field_list = ['cluster']
+                if 'cluster' in self.app_data.field_dict:
+                    field_list = ['Cluster']
                 else:
                     field_list = []
             case 'cluster score':
-                if 'cluster score' in data_type_dict:
-                    field_list = ['cluster score']
+                if 'cluster score' in self.app_data.field_dict:
+                    field_list = ['Cluster score']
                 else:
                     field_list = []
             case 'cluster':
-                if 'cluster' in data_type_dict:
-                    field_list = ['cluster']
+                if 'cluster' in self.app_data.field_dict:
+                    field_list = ['Cluster']
                 else:
-                    field_list = ['cluster score']
+                    field_list = ['Cluster score']
             case 'cluster performance':
                 field_list = []
             case 'pca score':
-                if 'pca score' in data_type_dict:
+                if 'pca score' in self.app_data.field_dict:
                     field_list = ['PCA score']
                 else:
                     field_list = []
@@ -3059,17 +3062,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 field_list = ['Analyte', 'Analyte (normalized)']
 
                 # add check for ratios
-                if 'ratio' in data_type_dict:
+                if 'ratio' in self.app_data.field_dict:
                     field_list.append('Ratio')
                     field_list.append('Ratio (normalized)')
 
-                if 'pca score' in data_type_dict:
+                if 'pca score' in self.app_data.field_dict:
                     field_list.append('PCA score')
 
-                if 'cluster' in data_type_dict:
+                if 'cluster' in self.app_data.field_dict:
                     field_list.append('Cluster')
 
-                if 'cluster score' in data_type_dict:
+                if 'cluster score' in self.app_data.field_dict:
                     field_list.append('Cluster score')
 
         self.plot_style.toggle_style_widgets()
@@ -3092,20 +3095,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """Updates comboBoxes with fields for plots or analysis
 
         Updates lists of fields in comboBoxes that are used to generate plots or used for analysis.
-        Calls ``MainWindow.get_field_list()`` to construct the list.
 
         Parameters
         ----------
         parentBox : QComboBox, None
-            ComboBox used to select field type ('Analyte', 'Analyte (normalized)', 'Ratio', etc.), if None, then 'Analyte'
+            ComboBox used to select field type
 
         childBox : QComboBox
             ComboBox with list of field values
         """
+
         if parentBox is None:
-            fields = self.get_field_list('Analyte')
+            fields = self.app_data.field_dict['analyte']
         else:
-            fields = self.get_field_list(set_name=parentBox.currentText())
+            if parentBox.currentText() == 'None':
+                childBox.clear()
+                return
+            field_type = parentBox.currentText()
+            if 'normalized' in field_type:
+                field_type = field_type.replace(' (normalized)','')
+            fields = self.app_data.field_dict[field_type.lower()]
 
         childBox.clear()
         childBox.addItems(fields)
@@ -3121,52 +3130,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # get a named list of current fields for sample
 
         # gets the set of fields
-
-    def get_field_list(self, set_name='Analyte', filter='all'):
-        """Gets the fields associated with a defined set
-
-        Set names are consistent with QComboBox.
-
-        Parameters
-        ----------
-        set_name : str, optional
-            name of set list, options include ``Analyte``, ``Analyte (normalized)``, ``Ratio``, ``Calcualated Field``,
-            ``PCA Score``, ``Cluster``, ``Cluster Score``, ``Special``, Defaults to ``Analyte``
-        filter : str, optional
-            Optionally filters data to columns selected for analysis, options are ``'all'`` and ``'used'``,
-            by default `'all'`
-
-        Returns
-        -------
-        list
-            Set_fields, a list of fields within the input set
-        """
-        if self.app_data.sample_id == '':
-            return ['']
-
-        data = self.app_data.data[self.app_data.sample_id].processed_data
-
-        if filter not in ['all', 'used']:
-            raise ValueError("filter must be 'all' or 'used'.")
-
-        match set_name:
-            case 'Analyte' | 'Analyte (normalized)':
-                if filter == 'used':
-                    set_fields = data.match_attributes({'data_type': 'analyte', 'use': True})
-                else:
-                    set_fields = data.match_attribute('data_type', 'analyte')
-            case 'Ratio' | 'Ratio (normalized)':
-                if filter == 'used':
-                    set_fields = data.match_attributes({'data_type': 'ratio', 'use': True})
-                else:
-                    set_fields = data.match_attribute('data_type', 'ratio')
-            case 'None':
-                return []
-            case _:
-                set_fields = data.match_attribute('data_type', set_name.lower())
-
-        return set_fields    
-
 
     # -------------------------------------
     # General plot functions
@@ -3226,7 +3189,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             case 'correlation':
                 if self.comboBoxCorrelationMethod.currentText() == 'none':
                     return
-                self.plot_correlation()
+                canvas, plot_info = plot_correlation(self, self.app_data, self.plot_style)
+
+                self.clear_layout(self.widgetSingleView.layout())
+                self.widgetSingleView.layout().addWidget(canvas)
 
             case 'TEC' | 'Radar':
                 self.plot_ndim()
@@ -3529,7 +3495,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ncol = int(np.sqrt(len(self.QV_analyte_list[key])*ratio))
 
         # fields in current sample
-        fields = self.get_field_list()
+        fields = self.app_data.field_dict['analyte']
 
         # clear the quickView layout
         self.clear_layout(self.widgetQuickView.layout())
@@ -4251,105 +4217,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # trigger update to plot
         self.plot_style.scheduler.schedule_update()
 
-    def plot_correlation(self):
-        """Creates an image of the correlation matrix"""
-        #print('plot_correlation')
-
-        canvas = mplc.MplCanvas(parent=self)
-        canvas.axes.clear()
-
-        # get the data for computing correlations
-        df_filtered, analytes = self.app_data.data[self.app_data.sample_id].get_processed_data()
-
-        # Calculate the correlation matrix
-        method = self.comboBoxCorrelationMethod.currentText().lower()
-        if self.field_type.lower() == 'none':
-            correlation_matrix = df_filtered.corr(method=method)
-        else:
-            algorithm = self.field
-            cluster_group = self.app_data.data[self.app_data.sample_id].processed_data.loc[:,algorithm]
-            selected_clusters = self.cluster_dict[algorithm]['selected_clusters']
-
-            ind = np.isin(cluster_group, selected_clusters)
-
-            correlation_matrix = df_filtered[ind].corr(method=method)
-        
-        columns = correlation_matrix.columns
-
-        font = {'size':self.plot_style.font_size}
-
-        # mask lower triangular matrix to show only upper triangle
-        mask = np.zeros_like(correlation_matrix, dtype=bool)
-        mask[np.tril_indices_from(mask)] = True
-        correlation_matrix = np.ma.masked_where(mask, correlation_matrix)
-
-        norm = self.plot_style.color_norm()
-
-        # plot correlation or correlation^2
-        square_flag = self.checkBoxCorrelationSquared.isChecked()
-        if square_flag:
-            cax = canvas.axes.imshow(correlation_matrix**2, cmap=self.plot_style.get_colormap(), norm=norm)
-            canvas.array = correlation_matrix**2
-        else:
-            cax = canvas.axes.imshow(correlation_matrix, cmap=self.plot_style.get_colormap(), norm=norm)
-            canvas.array = correlation_matrix
-            
-        # store correlation_matrix to save_data if data needs to be exported
-        self.save_data = canvas.array
-
-        canvas.axes.spines['top'].set_visible(False)
-        canvas.axes.spines['bottom'].set_visible(False)
-        canvas.axes.spines['left'].set_visible(False)
-        canvas.axes.spines['right'].set_visible(False)
-
-        # Add colorbar to the plot
-        self.add_colorbar(canvas, cax)
-
-        # set color limits
-        cax.set_clim(self.plot_style.clim[0], self.plot_style.clim[1])
-
-        # Set tick labels
-        ticks = np.arange(len(columns))
-        canvas.axes.tick_params(length=0, labelsize=8,
-                        labelbottom=False, labeltop=True, labelleft=False, labelright=True,
-                        bottom=False, top=True, left=False, right=True)
-
-        canvas.axes.set_yticks(ticks, minor=False)
-        canvas.axes.set_xticks(ticks, minor=False)
-
-        labels = self.plot_style.toggle_mass(columns)
-
-        canvas.axes.set_xticklabels(labels, rotation=90, ha='center', va='bottom', fontproperties=font)
-        canvas.axes.set_yticklabels(labels, ha='left', va='center', fontproperties=font)
-
-        canvas.axes.set_title('')
-
-        self.plot_style.update_figure_font(canvas, self.plot_style.font)
-
-        if square_flag:
-            plot_name = method+'_squared'
-        else:
-            plot_name = method
-
-        self.plot_info = {
-            'tree': 'Correlation',
-            'sample_id': self.app_data.sample_id,
-            'plot_name': plot_name,
-            'plot_type': 'correlation',
-            'method': method,
-            'square_flag': square_flag,
-            'field_type': None,
-            'field': None,
-            'figure': canvas,
-            'style': self.plot_style.style_dict[self.plot_style.plot_type],
-            'cluster_groups': [],
-            'view': [True,False],
-            'position': [],
-            'data': correlation_matrix,
-        }
-
-        self.clear_layout(self.widgetSingleView.layout())
-        self.widgetSingleView.layout().addWidget(canvas)
 
 
     # -------------------------------------

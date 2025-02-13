@@ -324,11 +324,11 @@ def plot_correlation(parent, app_data, plot_style):
     df_filtered, analytes = app_data.data[app_data.sample_id].get_processed_data()
 
     # Calculate the correlation matrix
-    method = app_data.corr_plot_style.lower()
-    if app_data.hist_field_type.lower() == 'none':
+    method = app_data.corr_method.lower()
+    if app_data.cluster_method not in app_data.data[app_data.sample_id].processed_data.columns:
         correlation_matrix = df_filtered.corr(method=method)
     else:
-        algorithm = app_data.hist_field_type
+        algorithm = app_data.cluster_method
         cluster_group = app_data.data[app_data.sample_id].processed_data.loc[:,algorithm]
         selected_clusters = app_data.cluster_dict[algorithm]['selected_clusters']
 

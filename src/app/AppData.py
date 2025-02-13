@@ -32,7 +32,7 @@ class AppData(Observable):
         self._hist_plot_style = "PDF"
         self.update_bin_width = True
         self.update_num_bins = True
-        self._corr_plot_style = "none"
+        self._corr_method = "none"
         self._corr_squared = False
 
         self._noise_red_method = 'none'
@@ -106,22 +106,22 @@ class AppData(Observable):
         self._dim_red_x = 0
         self._dim_red_y = 1
 
-        self._cluster_type = "k-means"
+        self._cluster_method = "k-means"
         self.cluster_dict = {
             'k-means':{'n_clusters':5, 'seed':23, 'selected_clusters':[]},
             'fuzzy c-means':{'n_clusters':5, 'exponent':2.1, 'distance':'euclidean', 'seed':23, 'selected_clusters':[]}
         }
-        self._num_clusters = self.cluster_dict[self._cluster_type]['n_clusters']
-        if 'distance' in self.cluster_dict[self._cluster_type].keys():
-            self._cluster_distance = self.cluster_dict[self._cluster_type]['distance']
+        self._num_clusters = self.cluster_dict[self._cluster_method]['n_clusters']
+        if 'distance' in self.cluster_dict[self._cluster_method].keys():
+            self._cluster_distance = self.cluster_dict[self._cluster_method]['distance']
         else:
             self._cluster_distance = 0
-        if 'exponent' in self.cluster_dict[self._cluster_type].keys():
-            self._cluster_exponent = self.cluster_dict[self._cluster_type]['exponent']
+        if 'exponent' in self.cluster_dict[self._cluster_method].keys():
+            self._cluster_exponent = self.cluster_dict[self._cluster_method]['exponent']
         else:
             self._cluster_distance = 0
-        self._cluster_seed = self.cluster_dict[self._cluster_type]['seed']
-        self._selected_clusters = self.cluster_dict[self._cluster_type]['selected_clusters']
+        self._cluster_seed = self.cluster_dict[self._cluster_method]['seed']
+        self._selected_clusters = self.cluster_dict[self._cluster_method]['selected_clusters']
 
         
 
@@ -308,18 +308,18 @@ class AppData(Observable):
         self.notify_observers("hist_plot_style", new_plot_style)
 
     @property
-    def corr_plot_style(self):
-        return self._corr_plot_style
+    def corr_method(self):
+        return self._corr_method
     
-    @corr_plot_style.setter
-    def corr_plot_style(self, new_corr_plot_style):
-        if new_corr_plot_style == self._corr_plot_style:
+    @corr_method.setter
+    def corr_method(self, new_corr_method):
+        if new_corr_method == self._corr_method:
             return
-        elif new_corr_plot_style not in ['none', 'Pearson', 'Spearman', 'Kendall']:
+        elif new_corr_method not in ['none', 'Pearson', 'Spearman', 'Kendall']:
             ValueError("Unknow correlation plot type")
     
-        self._corr_plot_style = new_corr_plot_style
-        self.notify_observers("corr_plot_style", new_corr_plot_style)
+        self._corr_method = new_corr_method
+        self.notify_observers("corr_method", new_corr_method)
 
     @property
     def corr_squared(self):
@@ -645,18 +645,18 @@ class AppData(Observable):
 
     ### Cluster Properties ###
     @property
-    def cluster_type(self):
-        return self._cluster_type
+    def cluster_method(self):
+        return self._cluster_method
     
-    @cluster_type.setter
-    def cluster_type(self, new_cluster_type):
-        if new_cluster_type == self._cluster_type:
+    @cluster_method.setter
+    def cluster_method(self, new_cluster_method):
+        if new_cluster_method == self._cluster_method:
             return
-        elif new_cluster_type not in list(self.cluster_dict.keys()):
-            ValueError(f"Unknown cluster type ({new_cluster_type})")
+        elif new_cluster_method not in list(self.cluster_dict.keys()):
+            ValueError(f"Unknown cluster type ({new_cluster_method})")
 
-        self._cluster_type = new_cluster_type
-        self.notify_observers("cluster_type", new_cluster_type)
+        self._cluster_method = new_cluster_method
+        self.notify_observers("cluster_method", new_cluster_method)
 
     @property
     def num_clusters(self):

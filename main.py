@@ -248,7 +248,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "hist_bin_width": self.update_hist_bin_width,
             "hist_num_bins": self.update_hist_num_bins,
             "hist_plot_style": self.update_hist_plot_style,
-            "corr_plot_style": self.update_corr_plot_style,
+            "corr_method": self.update_corr_method_combobox,
             "corr_squared": self.update_corr_squared,
             "noise_red_method": self.update_noise_red_method,
             "noise_red_option1": self.update_noise_red_option1,
@@ -274,7 +274,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "dim_red_method": self.update_dim_red_method,
             "dim_red_x": self.update_dim_red_x,
             "dim_red_y": self.update_dim_red_y,
-            "cluster_type": self.update_cluster_type,
+            "cluster_method": self.update_cluster_method,
             "num_clusters": self.update_num_clusters,
             "cluster_seed": self.update_cluster_seed,
             "cluster_exponent": self.update_cluster_exponent,
@@ -577,7 +577,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         
 
-        self.comboBoxCorrelationMethod.activated.connect(self.correlation_method_callback)
+        self.comboBoxCorrelationMethod.activated.connect(self.update_corr_method)
         self.checkBoxCorrelationSquared.stateChanged.connect(self.correlation_squared_callback)
 
 
@@ -1000,8 +1000,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.toolBox.currentIndex() == self.left_tab['sample'] and self.plot_style.plot_type == "histogram":
             self.plot_style.scheduler.schedule_update()
 
-    def update_corr_plot_style(self, new_corr_plot_style):
-        self.comboBoxCorrelationMethod.setCurrentText(new_corr_plot_style)
+    def update_corr_method_combobox(self, new_corr_method):
+        self.comboBoxCorrelationMethod.setCurrentText(new_corr_method)
         if self.toolBox.currentIndex() == self.left_tab['sample'] and self.plot_style.plot_type == "correlation":
             self.plot_style.scheduler.schedule_update()
 
@@ -1161,7 +1161,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.toolBox.currentIndex() == self.left_tab['multidim']:
             self.plot_style.scheduler.schedule_update()
 
-    def update_cluster_type(self, new_cluster_type):
+    def update_cluster_method(self, new_cluster_method):
         if self.toolBox.currentIndex() == self.left_tab['cluster']:
             self.plot_style.scheduler.schedule_update()
 
@@ -1192,6 +1192,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.app_data.sample_id = self.comboBoxSampleId.currentText()
         self.change_sample()
+
+    def update_corr_method(self):
+        self.app_data.corr_method = self.comboBoxCorrelationMethod.currentText()
+
+        self.correlation_method_callback()
 
     def toggle_spot_tab(self):
         #self.actionSpotTools.toggle()

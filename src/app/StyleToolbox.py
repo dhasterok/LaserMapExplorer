@@ -1169,7 +1169,7 @@ class Styling(Observable):
                 parent.toolButtonOverlayColor.setEnabled(True)
 
                 # marker properties
-                if len(parent.spotdata) != 0:
+                if len(parent.app_data.data[parent.app_data.sample_id].spotdata) != 0:
                     parent.comboBoxMarker.setEnabled(True)
                     parent.doubleSpinBoxMarkerSize.setEnabled(True)
                     parent.horizontalSliderMarkerAlpha.setEnabled(True)

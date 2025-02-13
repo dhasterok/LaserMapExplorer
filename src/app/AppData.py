@@ -12,6 +12,9 @@ class AppData(Observable):
         # in future will be set from preference ui
         self.preferences = copy.deepcopy(self.default_preferences)
 
+        self._sample_list = []
+        self.csv_files = []
+
         self.data = {}
         self._sample_id = ""
 
@@ -135,6 +138,22 @@ class AppData(Observable):
     #         return true
     #     else:
     #         valueerror("field not found.")
+
+    @property
+    def sample_list(self):
+        return self._sample_list
+
+    @sample_list.setter
+    def sample_list(self, new_sample_list):
+        if new_sample_list == self._sample_list:
+            return
+        
+        # update sample list and id of current sample
+        self._sample_list = new_sample_list
+        self._sample_id = new_sample_list[0]
+
+        # notify observers to update widgets
+        self.notify_observers("sample_list", new_sample_list)
 
     @property
     def sample_id(self):

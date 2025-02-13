@@ -76,7 +76,7 @@ import src.common.format as fmt
 from src.common.colorfunc import get_hex_color, get_rgb_color
 import src.app.config as config
 from src.app.help_mapping import create_help_mapping
-from src.common.Logger import LoggetrDock
+from src.common.Logger import LoggerDock
 from src.common.Calculator import CalculatorDock
 from src.common.varfunc import ObservableDict
 from src.app.AppData import AppData
@@ -241,19 +241,45 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.app_data.add_observer(self.update_widgets)
 
         self.property_update_map = {
-            "sample_id": self.update_sample_id,
+            "sample_list": self.update_sample_list,
+            "sample_id": self.update_sample_id_combobox,
             "hist_field_type": self.update_hist_field_type,
             "hist_field": self.update_hist_field,
             "hist_bin_width": self.update_hist_bin_width,
             "hist_num_bins": self.update_hist_num_bins,
+            "hist_plot_style": self.update_hist_plot_style,
+            "corr_plot_style": self.update_corr_plot_style,
+            "corr_squared": self.update_corr_squared,
+            "noise_red_method": self.update_noise_red_method,
+            "noise_red_option1": self.update_noise_red_option1,
+            "noise_red_option2": self.update_noise_red_option2,
+            "gradient_flag": self.update_gradient_flag,
             "x_field_type": self.update_x_field_type,
-            "x_field": self.update_x_field,
             "y_field_type": self.update_y_field_type,
-            "y_field": self.update_y_field,
             "z_field_type": self.update_z_field_type,
-            "z_field": self.update_z_field,
             "c_field_type": self.update_c_field_type,
+            "x_field": self.update_x_field,
+            "y_field": self.update_y_field,
+            "z_field": self.update_z_field,
             "c_field": self.update_c_field,
+            "scatter_preset": self.update_scatter_preset,
+            "heatmap_style": self.update_heatmap_style,
+            "ternary_colormap": self.update_ternary_colormap,
+            "ternary_color_x": self.update_ternary_color_x,
+            "ternary_color_y": self.update_ternary_color_y,
+            "ternary_color_z": self.update_ternary_color_z,
+            "norm_reference": self.update_norm_reference,
+            "ndim_analyte_set": self.update_ndim_analyte_set,
+            "ndim_quantile_index": self.update_quantile_index,
+            "dim_red_method": self.update_dim_red_method,
+            "dim_red_x": self.update_dim_red_x,
+            "dim_red_y": self.update_dim_red_y,
+            "cluster_type": self.update_cluster_type,
+            "num_clusters": self.update_num_clusters,
+            "cluster_seed": self.update_cluster_seed,
+            "cluster_exponent": self.update_cluster_exponent,
+            "cluster_distance": self.update_cluster_distance,
+            "selected_clusters": self.update_selected_clusters
         }
 
         self.buttons_layout = None  # create a reference to your layout
@@ -279,7 +305,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.persistent_filters = pd.DataFrame()
         self.persistent_filters = pd.DataFrame(columns=['use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'persistent'])
         self.logger_options = {
-                'Input/output': False,
+                'IO': False,
                 'Data': False,
                 'Analyte selector': False,
                 'Plot selector': False,
@@ -467,7 +493,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Menu and Toolbar
         #-------------------------
-        self.io = LameIO(self)
+        self.io = LameIO(parent=self, connect_actions=True, debug=self.logger_options['IO'])
 
         # Connect the "Open" action to a function
         self.actionQuit_LaME.triggered.connect(self.quit)
@@ -566,7 +592,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Selecting analytes
         #-------------------------
         # Connect the currentIndexChanged signal of comboBoxSampleId to load_data method
-        self.comboBoxSampleId.activated.connect(lambda: self.change_sample(self.comboBoxSampleId.currentIndex()))
+        self.comboBoxSampleId.activated.connect(self.update_sample_id)
         self.canvasWindow.currentChanged.connect(self.canvas_changed)
 
 
@@ -627,9 +653,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.crop_tool = CropTool(self)
         self.actionCrop.triggered.connect(self.crop_tool.init_crop)
 
-        # Spot Data Tab
-        #-------------------------
-        self.spotdata = AttributeDataFrame()
 
 
         # Filter Tabs
@@ -903,31 +926,99 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if prop_name in self.property_update_map:
             self.property_update_map[prop_name](value)
 
-    def update_sample_id(self, value):
+    def update_sample_list(self, new_sample_list):
+        """Updates ``MainWindow.comboBoxSampleID.items()``
+
+        Called as an update to ``app_data.sample_list``.  Updates sample ID list.
+
+        Parameters
+        ----------
+        value : str
+            New sample ID.
+        """
+
+        # Populate the comboBoxSampleId with the sample names
+        self.comboBoxSampleId.clear()
+        self.comboBoxSampleId.addItems(new_sample_list)
+        self.comboBoxSampleId.setCurrentIndex(0)
+
+        self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
+        self.init_tabs()
+        self.change_sample()
+        # self.profile_dock.profiling.add_samples()
+        # self.polygon.add_samples()
+
+    def update_sample_id_combobox(self, new_sample_id):
+        """Updates ``MainWindow.comboBoxSampleID.currentText()``
+
+        Called as an update to ``app_data.sample_id``.  Updates sample ID and calls ``change_sample``
+
+        Parameters
+        ----------
+        value : str
+            New sample ID.
+        """
         if value == self.comboBoxSampleId.currentText():
             return
 
-        self.comboBoxSampleId.setCurrentText(value)
-        self.change_sample(self.comboBoxSampleId.currentIndex())
+        self.comboBoxSampleId.setCurrentText(new_sample_id)
+        self.change_sample()
 
     def update_hist_field(self, value):
+        """Updates ``MainWindow.comboBoxHistFieldType.currentText()``
+
+        Called as an update to ``app_data.hist_field_type``.  Updates the histogram field type (also controls analyte maps).  Schedules a plot update.
+
+        Parameters
+        ----------
+        value : str
+            New field type.
+        """
         self.comboBoxHistFieldType.setCurrentText(value)
         if self.app_data.plot_type == "histogram":
             self.plot_style.scheduler.schedule_update()
 
     def update_hist_field_type(self, value):
         self.comboBoxHistField.setCurrentText(value)
-        if self.app_data.plot_type == "histogram":
+        if self.plot_style.plot_type == "histogram":
             self.plot_style.scheduler.schedule_update()
 
     def update_hist_bin_width(self, value):
         self.doubleSpinBoxBinWidth.setValue(value)
-        if self.app_data.plot_type == "histogram":
+        if self.plot_style.plot_type == "histogram":
             self.plot_style.scheduler.schedule_update()
 
     def update_hist_num_bins(self, value):
         self.spinBoxNBins.setValue(value)
-        if self.app_data.plot_type == "histogram":
+        if self.plot_style.plot_type == "histogram":
+            self.plot_style.scheduler.schedule_update()
+
+    def update_hist_plot_style(self, new_hist_plot_style):
+        if self.toolBox.currentIndex() == self.left_tab['sample']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_corr_plot_style(self, new_corr_plot_style):
+        if self.toolBox.currentIndex() == self.left_tab['sample']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_corr_squared(self, new_corr_squared):
+        if self.toolBox.currentIndex() == self.left_tab['sample']:
+            self.plot_style.scheduler.schedule_update()
+    
+    def update_noise_red_method(self, new_noise_red_method):
+        if self.toolBox.currentIndex() == self.left_tab['sample']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_noise_red_option1(self, new_noise_red_option1):
+        if self.toolBox.currentIndex() == self.left_tab['sample']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_noise_red_option2(self, new_noise_red_option2):
+        if self.toolBox.currentIndex() == self.left_tab['sample']:
+            self.plot_style.scheduler.schedule_update()
+    
+    def update_gradient_flag(self, new_gradient_flag):
+        if self.toolBox.currentIndex() == self.left_tab['sample']:
             self.plot_style.scheduler.schedule_update()
 
     def update_x_field_type(self, value):
@@ -1009,9 +1100,98 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #     case self.left_tab['special']:
         #         pass
 
+    def update_scatter_preset(self, new_scatter_preset):
+        if self.toolBox.currentIndex() == self.left_tab['scatter']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_heatmap_style(self, new_heatmap_style):
+        if self.toolBox.currentIndex() == self.left_tab['scatter']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_ternary_colormap(self, new_ternary_colormap):
+        if self.toolBox.currentIndex() == self.left_tab['scatter']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_ternary_colorx(self, new_ternary_colorx):
+        if self.toolBox.currentIndex() == self.left_tab['scatter']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_ternary_color_x(self, new_ternary_color_x):
+        if self.toolBox.currentIndex() == self.left_tab['scatter']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_ternary_color_y(self, new_ternary_color_y):
+        if self.toolBox.currentIndex() == self.left_tab['scatter']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_ternary_color_z(self, new_ternary_color_z):
+        if self.toolBox.currentIndex() == self.left_tab['scatter']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_norm_reference(self, new_norm_reference):
+        if self.toolBox.currentIndex() == self.left_tab['ndim']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_ndim_analyte_set(self, new_ndim_analyte_set):
+        if self.toolBox.currentIndex() == self.left_tab['ndim']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_ndim_quantile_index(self, new_ndim_quantile_index):
+        if self.toolBox.currentIndex() == self.left_tab['ndim']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_quantile_index(self, new_quantile_index):
+        if self.toolBox.currentIndex() == self.left_tab['ndim']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_dim_red_method(self, new_dim_red_method):
+        if self.toolBox.currentIndex() == self.left_tab['multidim']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_dim_red_x(self, new_dim_red_x):
+        if self.toolBox.currentIndex() == self.left_tab['multidim']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_dim_red_y(self, new_dim_red_y):
+        if self.toolBox.currentIndex() == self.left_tab['multidim']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_cluster_type(self, new_cluster_type):
+        if self.toolBox.currentIndex() == self.left_tab['cluster']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_num_clusters(self, new_num_clusters):
+        if self.toolBox.currentIndex() == self.left_tab['cluster']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_cluster_seed(self, new_cluster_seed):
+        if self.toolBox.currentIndex() == self.left_tab['cluster']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_cluster_exponent(self, new_cluster_exponent):
+        if self.toolBox.currentIndex() == self.left_tab['cluster']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_cluster_distance(self, new_cluster_distance):
+        if self.toolBox.currentIndex() == self.left_tab['cluster']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_selected_clusters(self, new_selected_clusters):
+        if self.toolBox.currentIndex() == self.left_tab['cluster']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_sample_id(self):
+        """Updates ``app_data.sample_id``"""
+        if self.app_data.sample_id == self.comboBoxSampleId.currentText():
+            return
+
+        self.app_data.sample_id = self.comboBoxSampleId.currentText()
+        self.change_sample()
+
     def toggle_spot_tab(self):
         #self.actionSpotTools.toggle()
         if self.actionSpotTools.isChecked():
+            # add spot page to MainWindow.toolBox
             self.spot_tools = SpotPage(self.left_tab['sample'], self)
             self.actionImportSpots.setVisible(True)
         else:
@@ -1091,8 +1271,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.app_data.sample_id == '':
             return
 
-
-
         if selection =='full':
             if self.app_data.data:
                 # show dialog to to get confirmation from user
@@ -1113,7 +1291,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 elif response == QMessageBox.Save:
                     self.io.save_project()
 
-
                 #reset self.app_data.data
                 self.app_data.data = {}
                 # self.plot_widget_dict = {
@@ -1132,7 +1309,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 #self.treeModel.clear()
                 self.prev_plot = ''
                 self.plot_tree = PlotTree(self)
-                self.change_sample(self.comboBoxSampleId.currentIndex())
 
                 # reset styles
                 self.plot_style.reset_default_styles()
@@ -1142,9 +1318,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.clear_layout(self.widgetMultiView.layout())
                 self.clear_layout(self.widgetQuickView.layout())
 
-                # make the first plot
-                self.plot_flag = True
-                # self.update_SV()
+                # trigger update to plot
+                self.plot_style.scheduler.schedule_update()
+
             # reset_sample id
             self.app_data.sample_id = None
         elif selection == 'sample': #sample is changed
@@ -1199,7 +1375,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #self.ProfilingPage.setEnabled(True)
         #self.PTtPage.setEnabled(True)
 
-    def change_sample(self, index, save_analysis=True):
+    def change_sample(self, save_analysis=True):
         """Changes sample and plots first map
 
         Parameters
@@ -1208,12 +1384,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             index of sample name for identifying data.  The values are based on the
             comboBoxSampleID
         """
-        if DEBUG:
-            print(f"change_sample, index: {index}")
-
-        if self.app_data.sample_id == self.sample_ids[index]:
-            # if selected sample id is same as previous
-            return
+        if self.logger_options['Data']:
+            print(f"change_sample: {self.app_data.sample_id}\n  save_analyis: {save_analysis}")
 
         if self.app_data.data and save_analysis:
             # Create and configure the QMessageBox
@@ -1237,8 +1409,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.comboBoxSampleId.setCurrentText(self.app_data.sample_id)
                 return
             
-            
-        self.app_data.sample_id = self.sample_ids[index]
         self.reset_analysis('sample')
         ######
         # THIS DOESN'T DO ANYTHING ANYMORE, BUT WHEN A NEW SAMPLE IS LOADED, IT NEEDS TO CHECK FOR PERSISTANT FILTERS AND THEN ADD THEM TO THE NEW SAMPLEOBJ
@@ -1253,16 +1423,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # change notes file to new sample.  This will initiate the new file and autosave timer.
             self.notes.notes_file = os.path.join(self.selected_directory,self.app_data.sample_id+'.rst')
 
+        # obtain index of current sample
+        index = self.app_data.sample_list.index(self.app_data.sample_id)
 
         # add sample to sample dictionary
         if self.app_data.sample_id not in self.app_data.data:
             # load sample's *.lame file
-            file_path = os.path.join(self.selected_directory, self.csv_files[index])
+            file_path = os.path.join(self.selected_directory, self.app_data.csv_files[index])
             self.app_data.data[self.app_data.sample_id] = SampleObj(self.app_data.sample_id, file_path, self.comboBoxOutlierMethod.currentText(), self.comboBoxNegativeMethod.currentText(), self.ref_chem, debug=self.logger_options['Data'])
 
             # get selected_analyte columns
             selected_analytes = self.app_data.data[self.app_data.sample_id].processed_data.match_attributes({'data_type': 'analyte', 'use': True})
 
+            # updates a label on the statusBar that displays the
+            # number of negatives/zeros and nan values
             self.update_labels()
 
             # set slot for swapXY button
@@ -1301,8 +1475,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             self.update_tables()
 
-            #return
-
         self.init_tabs()
         
         if hasattr(self,"info_dock"):
@@ -1312,7 +1484,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolButtonOutlierReset.clicked.connect(lambda: self.app_data.data[self.app_data.sample_id].reset_data_handling(self.comboBoxOutlierMethod.currentText(), self.comboBoxNegativeMethod.currentText()))
 
         # add spot data
-        if not self.spotdata.empty:
+        if not self.app_data.data[self.app_data.sample_id].spotdata.empty:
             self.populate_spot_table()
 
         # reset filters
@@ -1374,7 +1546,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.spinBoxFieldIndex.setMaximum(self.comboBoxHistField.count() - 1)
         self.spinBoxFieldIndex.valueChanged.connect(self.hist_field_update)
 
-        self.update_filter_values()
+        if hasattr(self,"mask_dock"):
+            self.mask_dock.filter_tab.update_filter_values()
         self.histogram_update_bin_width()
 
         # update toolbar
@@ -2276,7 +2449,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.prep_data(sample_id, analyte_1,analyte_2)
                 self.update_labels()
         
-        self.update_filter_values()
+        if hasattr(self,"mask_dock"):
+            self.mask_dock.filter_tab.update_filter_values()
 
         # trigger update to plot
         self.plot_style.scheduler.schedule_update()
@@ -2311,7 +2485,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.app_data.data[sample_id].prep_data(field)
         
         self.update_labels()
-        self.update_filter_values()
+        if hasattr(self,"mask_dock"):
+            self.mask_dock.filter_tab.update_filter_values()
 
         # trigger update to plot
         self.plot_style.scheduler.schedule_update()

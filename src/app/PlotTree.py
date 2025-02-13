@@ -182,7 +182,7 @@ class PlotTree():
          
         # Reorder tree items according to the new analyte list
         # Sort the tree branches associated with analytes
-        for sample_id in self.parent.sample_ids:
+        for sample_id in self.parent.app_data.sample_list:
             sample_branch = treeView.find_leaf(self.tree['Analyte'], sample_id)
             if sample_branch:
                 treeView.sort_branch(sample_branch, sorted_analyte_list)

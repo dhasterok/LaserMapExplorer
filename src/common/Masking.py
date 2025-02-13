@@ -94,9 +94,14 @@ class MaskDock(CustomDockWidget, UIFieldLogic):
         self.setWidget(container)
 
 
-        #self.visibilityChanged.connect(self.update_tab_widget)
+        self.visibilityChanged.connect(self.update_tab_widget)
         #self.tabWidgetMask.currentChanged.connect(self.update_tab_widget)
 
+    def update_tab_widget(self):
+        if not self.isVisible():
+            return
+
+        self.filter_tab.update_filter_values()
 
 class FilterTab():
     def __init__(self, parent):
@@ -311,6 +316,7 @@ class FilterTab():
         self.lineEditFMax.editingFinished.connect(self.callback_lineEditFMax)
         self.doubleSpinBoxFMaxQ.valueChanged.connect(self.callback_doubleSpinBoxFMaxQ)
 
+        self.update_filter_values()
         self.load_filter_tables()
 
     def update_filter_values(self):

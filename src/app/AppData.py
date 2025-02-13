@@ -148,6 +148,51 @@ class AppData(Observable):
         self._sample_id = new_sample_id
         self.notify_observers("sample_id", new_sample_id)
 
+    @property
+    def d_x(self):
+        return self._d_x
+    
+    @d_x.setter
+    def d_x(self, new_d_x):
+        if new_d_x == self._d_x:
+            return
+        self._d_x = new_d_x
+        self.notify_observers("d_x", new_d_x)
+
+    @property
+    def d_y(self):
+        return self._d_y
+    
+    @d_y.setter
+    def d_y(self, new_d_y):
+        if new_d_y == self._d_y:
+            return
+        self._d_y = new_d_y
+        self.notify_observers("d_y", new_d_y)
+    
+    @property
+    def n_x(self):
+        return self._n_x
+    
+    @n_x.setter
+    def n_x(self, new_n_x):
+        if new_n_x == self._n_x:
+            return
+        self._n_x = new_n_x
+        self.notify_observers("n_x", new_n_x)
+
+    @property
+    def n_y(self):
+        return self._n_y
+    
+    @n_y.setter
+    def n_y(self, new_n_y):
+        if new_n_y == self._n_y:
+            return
+        self._n_y = new_n_y
+        self.notify_observers("n_y", new_n_y)
+    
+
     ### Histogram Properties ###
     @property
     def hist_field_type(self):
@@ -725,3 +770,19 @@ class AppData(Observable):
         # update n bins
         range = np.nanmax(map_df['array']) - np.nanmin(map_df['array'])
         self.hist_num_bins = int( range / self._hist_bin_width.value() )
+
+
+    def update_aspect_ratio_controls(self):
+        """Updates aspect ratio controls when user swaps resolution.
+
+        Swaps Dx and Dy
+        """ 
+        self.d_x = self.data[self.sample_id].dx
+        self.d_y = self.data[self.sample_id].dy
+
+        array_size = self.data[self.sample_id].array_size
+        self.n_x = array_size[1]
+        self.n_y = array_size[0]
+
+        # trigger update to plot
+        self.plot_style.scheduler.schedule_update()

@@ -15,7 +15,11 @@ class AppData(Observable):
         self._sample_list = []
         self.csv_files = []
 
+        # a dictionary of sample_id containing SampleObj data class
         self.data = {}
+        # a dictionary of the field_types in self.data[sample_id].processed_data.  "coord" is excluded.
+        self._field_dict = {}
+
         self._sample_id = ""
 
         self.plot_info = {}
@@ -28,7 +32,7 @@ class AppData(Observable):
         self._hist_plot_style = "PDF"
         self.update_bin_width = True
         self.update_num_bins = True
-        self._corr_plot_style = "none"
+        self._corr_method = "none"
         self._corr_squared = False
 
         self._noise_red_method = 'none'
@@ -102,22 +106,25 @@ class AppData(Observable):
         self._dim_red_x = 0
         self._dim_red_y = 1
 
-        self._cluster_type = "k-means"
+        self._cluster_method = "k-means"
         self.cluster_dict = {
             'k-means':{'n_clusters':5, 'seed':23, 'selected_clusters':[]},
             'fuzzy c-means':{'n_clusters':5, 'exponent':2.1, 'distance':'euclidean', 'seed':23, 'selected_clusters':[]}
         }
-        self._num_clusters = self.cluster_dict[self._cluster_type]['n_clusters']
-        if 'distance' in self.cluster_dict[self._cluster_type].keys():
-            self._cluster_distance = self.cluster_dict[self._cluster_type]['distance']
+        self._max_clusters = 10
+        self._num_clusters = self.cluster_dict[self._cluster_method]['n_clusters']
+        if 'distance' in self.cluster_dict[self._cluster_method].keys():
+            self._cluster_distance = self.cluster_dict[self._cluster_method]['distance']
         else:
             self._cluster_distance = 0
-        if 'exponent' in self.cluster_dict[self._cluster_type].keys():
-            self._cluster_exponent = self.cluster_dict[self._cluster_type]['exponent']
+        if 'exponent' in self.cluster_dict[self._cluster_method].keys():
+            self._cluster_exponent = self.cluster_dict[self._cluster_method]['exponent']
         else:
             self._cluster_distance = 0
-        self._cluster_seed = self.cluster_dict[self._cluster_type]['seed']
-        self._selected_clusters = self.cluster_dict[self._cluster_type]['selected_clusters']
+        self._cluster_seed = self.cluster_dict[self._cluster_method]['seed']
+        self._selected_clusters = self.cluster_dict[self._cluster_method]['selected_clusters']
+        self._dim_red_precondition = False
+        self._num_basis_for_precondition = 0
 
         
 
@@ -178,7 +185,7 @@ class AppData(Observable):
             return
 
         # update hist_field_type
-        self.validate_field_type(new_field_type)
+        #self.validate_field_type(new_field_type)
         self._hist_field_type = new_field_type
         self.notify_observers("hist_field_type", new_field_type)
 
@@ -196,7 +203,7 @@ class AppData(Observable):
         if new_field == self._hist_field:
             return
 
-        self.validate_field(self._hist_field_type, new_field)
+        #self.validate_field(self._hist_field_type, new_field)
         self._hist_field = new_field
         self.notify_observers("hist_field", new_field)
 
@@ -259,18 +266,18 @@ class AppData(Observable):
         self.notify_observers("hist_plot_style", new_plot_style)
 
     @property
-    def corr_plot_style(self):
-        return self._corr_plot_style
+    def corr_method(self):
+        return self._corr_method
     
-    @corr_plot_style.setter
-    def corr_plot_style(self, new_corr_plot_style):
-        if new_corr_plot_style == self._corr_plot_style:
+    @corr_method.setter
+    def corr_method(self, new_corr_method):
+        if new_corr_method == self._corr_method:
             return
-        elif new_corr_plot_style not in ['none', 'Pearson', 'Spearman', 'Kendall']:
+        elif new_corr_method not in ['none', 'Pearson', 'Spearman', 'Kendall']:
             ValueError("Unknow correlation plot type")
     
-        self._corr_plot_style = new_corr_plot_style
-        self.notify_observers("corr_plot_style", new_corr_plot_style)
+        self._corr_method = new_corr_method
+        self.notify_observers("corr_method", new_corr_method)
 
     @property
     def corr_squared(self):
@@ -596,21 +603,35 @@ class AppData(Observable):
 
     ### Cluster Properties ###
     @property
-    def cluster_type(self):
-        return self._cluster_type
+    def cluster_method(self):
+        return self._cluster_method
     
-    @cluster_type.setter
-    def cluster_type(self, new_cluster_type):
-        if new_cluster_type == self._cluster_type:
+    @cluster_method.setter
+    def cluster_method(self, new_cluster_method):
+        if new_cluster_method == self._cluster_method:
             return
-        elif new_cluster_type not in list(self.cluster_dict.keys()):
-            ValueError(f"Unknown cluster type ({new_cluster_type})")
+        elif new_cluster_method not in list(self.cluster_dict.keys()):
+            ValueError(f"Unknown cluster type ({new_cluster_method})")
 
-        self._cluster_type = new_cluster_type
-        self.notify_observers("cluster_type", new_cluster_type)
+        self._cluster_method = new_cluster_method
+        self.notify_observers("cluster_method", new_cluster_method)
+
+    @property
+    def max_clusters(self):
+        """The maximum number of clusters to test when producing estimates of the optimal number of clusters"""
+        return self._max_clusters
+    
+    @max_clusters.setter
+    def max_clusters(self, new_max_clusters):
+        if new_max_clusters == self._max_clusters:
+            return
+    
+        self._max_clusters = new_max_clusters
+        self.notify_observers("max_clusters", new_max_clusters)
 
     @property
     def num_clusters(self):
+        """The number of clusters used to classify the data"""
         return self._num_clusters
     
     @num_clusters.setter
@@ -668,6 +689,38 @@ class AppData(Observable):
     
         self._selected_clusters = new_selected_clusters
         self.notify_observers("selected_clusters", new_selected_clusters)
+
+    @property
+    def dim_red_precondition(self):
+        return self._dim_red_precondition
+    
+    @dim_red_precondition.setter
+    def dim_red_precondition(self, new_dim_red_precondition):
+        if new_dim_red_precondition == self._dim_red_precondition:
+            return
+    
+        self._dim_red_precondition = new_dim_red_precondition
+        self.notify_observers("dim_red_precondition", new_dim_red_precondition)
+
+    @property
+    def num_basis_for_precondition(self):
+        return self._num_basis_for_precondition
+    
+    @num_basis_for_precondition.setter
+    def num_basis_for_precondition(self, new_num_basis_for_precondition):
+        if new_num_basis_for_precondition == self._num_basis_for_precondition:
+            return
+    
+        self._num_basis_for_precondition = new_num_basis_for_precondition
+        self.notify_observers("num_basis_for_precondition", new_num_basis_for_precondition)
+
+    @property
+    def field_dict(self):
+        """A dictionary of the field_types in the self.data[sample_id].processed_data dataframe, with "coord" excluded."""
+        self._field_dict = self.data[self.sample_id].processed_data.get_attribute_dict('data_type')
+        if 'coordinate' in self._field_dict:
+            self._field_dict.pop("coordinate")
+        return self._field_dict
 
     def get_field_list(self, set_name='Analyte', filter='all'):
         """Gets the fields associated with a defined set

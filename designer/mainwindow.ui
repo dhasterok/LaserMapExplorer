@@ -1268,7 +1268,7 @@
         <string/>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <property name="tabSpacing">
         <number>2</number>
@@ -5072,6 +5072,7 @@
    <addaction name="separator"/>
    <addaction name="actionUpdatePlot"/>
    <addaction name="actionSavePlotToTree"/>
+   <addaction name="separator"/>
    <addaction name="actionNotes"/>
    <addaction name="actionCalculator"/>
    <addaction name="separator"/>
@@ -5220,7 +5221,7 @@
         <enum>QFrame::Raised</enum>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>3</number>
        </property>
        <property name="tabSpacing">
         <number>2</number>

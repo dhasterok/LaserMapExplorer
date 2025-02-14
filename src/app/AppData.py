@@ -111,6 +111,7 @@ class AppData(Observable):
             'k-means':{'n_clusters':5, 'seed':23, 'selected_clusters':[]},
             'fuzzy c-means':{'n_clusters':5, 'exponent':2.1, 'distance':'euclidean', 'seed':23, 'selected_clusters':[]}
         }
+        self._max_clusters = 10
         self._num_clusters = self.cluster_dict[self._cluster_method]['n_clusters']
         if 'distance' in self.cluster_dict[self._cluster_method].keys():
             self._cluster_distance = self.cluster_dict[self._cluster_method]['distance']
@@ -122,6 +123,8 @@ class AppData(Observable):
             self._cluster_distance = 0
         self._cluster_seed = self.cluster_dict[self._cluster_method]['seed']
         self._selected_clusters = self.cluster_dict[self._cluster_method]['selected_clusters']
+        self._dim_red_precondition = False
+        self._num_basis_for_precondition = 0
 
         
 
@@ -659,7 +662,21 @@ class AppData(Observable):
         self.notify_observers("cluster_method", new_cluster_method)
 
     @property
+    def max_clusters(self):
+        """The maximum number of clusters to test when producing estimates of the optimal number of clusters"""
+        return self._max_clusters
+    
+    @max_clusters.setter
+    def max_clusters(self, new_max_clusters):
+        if new_max_clusters == self._max_clusters:
+            return
+    
+        self._max_clusters = new_max_clusters
+        self.notify_observers("max_clusters", new_max_clusters)
+
+    @property
     def num_clusters(self):
+        """The number of clusters used to classify the data"""
         return self._num_clusters
     
     @num_clusters.setter
@@ -717,6 +734,30 @@ class AppData(Observable):
     
         self._selected_clusters = new_selected_clusters
         self.notify_observers("selected_clusters", new_selected_clusters)
+
+    @property
+    def dim_red_precondition(self):
+        return self._dim_red_precondition
+    
+    @dim_red_precondition.setter
+    def dim_red_precondition(self, new_dim_red_precondition):
+        if new_dim_red_precondition == self._dim_red_precondition:
+            return
+    
+        self._dim_red_precondition = new_dim_red_precondition
+        self.notify_observers("dim_red_precondition", new_dim_red_precondition)
+
+    @property
+    def num_basis_for_precondition(self):
+        return self._num_basis_for_precondition
+    
+    @num_basis_for_precondition.setter
+    def num_basis_for_precondition(self, new_num_basis_for_precondition):
+        if new_num_basis_for_precondition == self._num_basis_for_precondition:
+            return
+    
+        self._num_basis_for_precondition = new_num_basis_for_precondition
+        self.notify_observers("num_basis_for_precondition", new_num_basis_for_precondition)
 
     @property
     def field_dict(self):

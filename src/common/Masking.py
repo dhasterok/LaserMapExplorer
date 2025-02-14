@@ -51,12 +51,13 @@ class MaskObj:
 # remove lines from approx 1980 to 2609 in MainWindow.py (Masking Toolbox dockWidgetMaskToolbox) when complete
 
 class MaskDock(CustomDockWidget, UIFieldLogic):
-    def __init__(self, parent=None, title="Masking Toolbox"):
+    def __init__(self, parent=None, title="Masking Toolbox", debug=False):
         if not isinstance(parent, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
 
         super().__init__(parent)
         self.main_window = parent
+        self.debug = debug
 
         self.font = default_font
 

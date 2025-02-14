@@ -982,6 +982,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.lineEditDX.value = value
         if self.toolBox.currentIndex() == self.left_tab['process']:
             self.plot_style.scheduler.schedule_update()
+            field = "X"
+            # update x axis limits in style_dict 
+            self.plot_style.initialize_axis_values(self.field_type, field)
+            # update limits in styling tabs
+            self.plot_style.set_axis_widgets("x",field)
 
     def update_dy(self,value):
         """Updates ``MainWindow.lineEditDY.value``
@@ -995,6 +1000,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.lineEditDY.value = value
         if self.toolBox.currentIndex() == self.left_tab['process']:
             self.plot_style.scheduler.schedule_update()
+            field = "Y"
+            # update y axis limits in style_dict 
+            self.plot_style.initialize_axis_values(self.field_type, field)
+            # update limits in styling tabs
+            self.plot_style.set_axis_widgets("y",field)
 
     def update_nx(self,value):
         """Updates ``MainWindow.lineEditResolutionNx.value``
@@ -1022,7 +1032,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.toolBox.currentIndex() == self.left_tab['process']:
             self.plot_style.scheduler.schedule_update()
 
-    def update_hist_field(self, value):
+    def update_hist_field_type_combobox(self, value):
         """Updates ``MainWindow.comboBoxHistFieldType.currentText()``
 
         Called as an update to ``app_data.hist_field_type``.  Updates the histogram field type (also controls analyte maps).  Schedules a plot update.

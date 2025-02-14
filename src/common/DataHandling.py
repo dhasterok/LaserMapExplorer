@@ -187,6 +187,7 @@ class SampleObj(Observable):
         | 'mask' : () -- combined mask, derived from filter_mask & 'polygon_mask' & 'crop_mask'
     """    
     def __init__(self, sample_id, file_path, outlier_method, negative_method, ref_chem=None, debug=False):
+        super().__init__()
         self.debug = debug
 
         if self.debug:
@@ -205,6 +206,11 @@ class SampleObj(Observable):
         self._default_difference_upper_bound= 0.995
 
         self._ref_chem = ref_chem
+
+        self._nx = 0
+        self._ny = 0
+        self._dx = 0
+        self._dy = 0
 
         self.polygon = {}
         self.profile = {}
@@ -371,7 +377,8 @@ class SampleObj(Observable):
         if not self._updating:
             self._updating = True
             self._x = new_x
-            self._dx = self.x_range / new_x.nunique() 
+            self._dx = self.x_range / new_x.nunique()
+            self._nx = new_x.nunique()
             self._updating = False
 
     # Define the y property
@@ -386,11 +393,13 @@ class SampleObj(Observable):
             self._updating = True
             self._y = new_y
             self._dy = self.y_range / new_y.nunique() 
+            self._ny = new_y.nunique()
             self._updating = False
 
     @property
     def dx(self):
         """float: Width of pixels in x-direction."""
+        self.notify_observers("dx", self._dx)
         return self._dx
 
     @dx.setter
@@ -400,19 +409,23 @@ class SampleObj(Observable):
 
             # Recalculates X for self.raw_data
             # (does not use self.processed_data because the x limits will otherwise be incorrect)
-            X = round(self.raw_data['X']/self._dx)
+            # X = round(self.raw_data['X']/self._dx)
+            X = self.raw_data['X']/self._dx
             self._dx = new_dx
             X_new = new_dx*X
 
             # Extract cropped region and update self.processed_data
             self._x = X_new[self.crop_mask]
             self.processed_data['X'] = self._x
-
+            
             self._updating = False
+        
+            
 
     @property
     def dy(self):
         """float: Width of pixels in y-direction."""
+        self.notify_observers("dy", self._dy)
         return self._dy
 
     @dy.setter
@@ -422,15 +435,41 @@ class SampleObj(Observable):
 
             # Recalculates Y for self.raw_data
             # (does not use self.processed_data because the y limits will otherwise be incorrect)
-            Y = round(self.raw_data['Y']/self._dy)
+            Y = self.raw_data['Y']/self._dy
             self._dy = new_dy
             Y_new = new_dy*Y
 
             # Extract cropped region and update self.processed_data
             self._y = Y_new[self.crop_mask]
             self.processed_data['Y'] = self._y
-
+            
             self._updating = False
+        
+
+    @property
+    def nx(self):
+        self.notify_observers("nx", self._nx)
+        return self._nx
+    
+    @nx.setter
+    def nx(self, new_nx):
+        if new_nx == self._nx:
+            return
+        self._nx = new_nx
+        
+
+    @property
+    def ny(self):
+        self.notify_observers("ny", self._ny)   
+        return self._ny
+    
+    @ny.setter
+    def ny(self, new_ny):
+        if new_ny == self._ny:
+            return
+        self._ny = new_ny
+        
+            
 
     # Cropped X-axis limits
     @property
@@ -747,6 +786,7 @@ class SampleObj(Observable):
         """        
         self.dx = self._orig_dx
         self.dy = self._orig_dy
+        self.update_aspect_ratio_controls()
         
     def swap_xy(self):
         """Swaps data in a SampleObj."""        
@@ -787,6 +827,40 @@ class SampleObj(Observable):
         df['X'] = xtemp
 
         df = df.sort_values(['Y','X'])
+
+    def update_resolution(self, axis, value):
+        """Updates DX and DY for a dataframe
+
+        Recalculates X and Y for a dataframe when the user changes the value of
+        pixel dimensions Dx or Dy
+
+        Parameter
+        ---------
+        axis : str
+            Indicates axis to update resolution, 'x' or 'y'.
+        value: float
+            Holds the new value that is used to update.
+        """
+        # update resolution based on user change
+        if axis == 'x':
+            self.dx = value
+            dx = self.dx
+        elif axis == 'y':
+            self.dy = value
+            dy = self.dy
+
+        #self.update_aspect_ratio_controls()
+
+    def update_aspect_ratio_controls(self):
+        """Updates aspect ratio controls when user updates/swaps pixel resolution.
+
+        Executes setter functions for dx, dy, nx and ny and updates corresponding UI components s if observers exist.
+        """ 
+       
+        dy = self.dy
+        dx = self.dx
+        nx = self.nx
+        ny = self.ny
 
     def swap_resolution(self):
         """Swaps DX and DY for a dataframe, updates X and Y

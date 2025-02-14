@@ -243,6 +243,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.property_update_map = {
             "sample_list": self.update_sample_list,
             "sample_id": self.update_sample_id_combobox,
+            "nx": self.update_nx,
+            "ny": self.update_ny,
+            "dx": self.update_dx,
+            "dy": self.update_dy,
             "hist_field_type": self.update_hist_field_type,
             "hist_field": self.update_hist_field,
             "hist_bin_width": self.update_hist_bin_width,
@@ -603,8 +607,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         pixelwidthvalidator.setBottom(0.0)
         self.lineEditDX.setValidator(pixelwidthvalidator)
         self.lineEditDY.setValidator(pixelwidthvalidator)
-        self.lineEditDX.editingFinished.connect(lambda: self.update_resolution('x'))
-        self.lineEditDY.editingFinished.connect(lambda: self.update_resolution('y'))
 
         # auto scale
         quantilevalidator = QDoubleValidator(0.0, 100, 3)
@@ -958,11 +960,64 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         value : str
             New sample ID.
         """
-        if value == self.comboBoxSampleId.currentText():
+        if new_sample_id == self.comboBoxSampleId.currentText():
             return
 
         self.comboBoxSampleId.setCurrentText(new_sample_id)
         self.change_sample()
+
+
+    def update_dx(self,value):
+        """Updates ``MainWindow.lineEditDX.value``
+        Called as an update to ``app_data.d_x``.  Updates Dx and  Schedules a plot update.
+
+        Parameters
+        ----------
+        value : str
+            x dimension.
+        """
+        self.lineEditDX.value = value
+        if self.toolBox.currentIndex() == self.left_tab['process']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_dy(self,value):
+        """Updates ``MainWindow.lineEditDY.value``
+        Called as an update to ``app_data.d_y``.  Updates Dy and  Schedules a plot update.
+
+        Parameters
+        ----------
+        value : str
+            x dimension.
+        """
+        self.lineEditDY.value = value
+        if self.toolBox.currentIndex() == self.left_tab['process']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_nx(self,value):
+        """Updates ``MainWindow.lineEditResolutionNx.value``
+        Called as an update to ``app_data.n_x``.  Updates Nx and  Schedules a plot update.
+
+        Parameters
+        ----------
+        value : str
+            x dimension.
+        """
+        self.lineEditResolutionNx.value = value
+        if self.toolBox.currentIndex() == self.left_tab['process']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_ny(self,value):
+        """Updates ``MainWindow.lineEditResolutionNx.value``
+        Called as an update to ``app_data.N_y``.  Updates Nx and  Schedules a plot update.
+
+        Parameters
+        ----------
+        value : str
+            x dimension.
+        """
+        self.lineEditResolutionNy.value = value
+        if self.toolBox.currentIndex() == self.left_tab['process']:
+            self.plot_style.scheduler.schedule_update()
 
     def update_hist_field(self, value):
         """Updates ``MainWindow.comboBoxHistFieldType.currentText()``
@@ -975,7 +1030,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             New field type.
         """
         self.comboBoxHistFieldType.setCurrentText(value)
-        if self.app_data.plot_type == "histogram":
+        if self.plot_style.plot_type == "histogram":
             self.plot_style.scheduler.schedule_update()
 
     def update_hist_field_type(self, value):
@@ -1431,21 +1486,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # load sample's *.lame file
             file_path = os.path.join(self.selected_directory, self.app_data.csv_files[index])
             self.app_data.data[self.app_data.sample_id] = SampleObj(self.app_data.sample_id, file_path, self.comboBoxOutlierMethod.currentText(), self.comboBoxNegativeMethod.currentText(), self.ref_chem, debug=self.logger_options['Data'])
-
+            self.app_data.data[self.app_data.sample_id].add_observer(self.update_widgets)
+            
             # get selected_analyte columns
             selected_analytes = self.app_data.data[self.app_data.sample_id].processed_data.match_attributes({'data_type': 'analyte', 'use': True})
 
             # updates a label on the statusBar that displays the
             # number of negatives/zeros and nan values
             self.update_labels()
+            
+            self.lineEditDX.editingFinished.connect(lambda: self.app_data.data[self.app_data.sample_id].update_resolution('x',  self.lineEditDX.value))
+            self.lineEditDY.editingFinished.connect(lambda: self.app_data.data[self.app_data.sample_id].update_resolution('y',  self.lineEditDY.value))
 
             # set slot for swapXY button
             self.actionFullMap.triggered.connect(self.app_data.data[self.app_data.sample_id].reset_crop)
             self.toolButtonSwapResolution.clicked.connect(self.app_data.data[self.app_data.sample_id].swap_resolution)
             #self.toolButtonResolutionReset.clicked.connect(self.app_data.data[self.app_data.sample_id].reset_crop)
             self.toolButtonPixelResolutionReset.clicked.connect(self.app_data.data[self.app_data.sample_id].reset_resolution)
-            self.update_aspect_ratio_controls()
-
+            # update data handling parameters
+            self.app_data.data[self.app_data.sample_id].update_aspect_ratio_controls()
             # set analyte map to first available analyte
             if not selected_analytes:
                 self.plot_style.color_field = selected_analytes[0]
@@ -2133,8 +2192,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 # swap x and y
                 self.app_data.data[self.app_data.sample_id].swap_xy()
 
-                self.update_aspect_ratio_controls()
-
             case 'scatter' | 'heatmap':
                 if self.comboBoxFieldZ.currentText() != '':
                     y_field_type = self.comboBoxFieldTypeX.currentText()
@@ -2211,8 +2268,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if field != self.field:
                 self.comboBoxColorField.setCurrentText(field)
                 self.plot_style.color_field_callback(plot)
-            
-    def update_resolution(self, axis):
+    def update_resolution(self, axis ):  
         """Updates DX and DY for a dataframe
 
         Recalculates X and Y for a dataframe when the user changes the value of
@@ -2230,7 +2286,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.app_data.data[self.app_data.sample_id].dy = self.lineEditDY.value
 
         # update aspect ratio of maps
-        self.update_aspect_ratio_controls()
+        self.app_data.update_aspect_ratio_controls()
 
         # trigger update to plot
         self.plot_style.scheduler.schedule_update()

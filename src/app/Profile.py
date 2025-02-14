@@ -16,12 +16,13 @@ from matplotlib.collections import PathCollection
 import numpy as np
 
 class ProfileDock(CustomDockWidget, UIFieldLogic):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, debug=False):
         if not isinstance(parent, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
 
         super().__init__(parent)
         self.main_window = parent
+        self.debug = debug
 
         self.profiling = Profiling(self)
 

@@ -40,8 +40,7 @@ from sklearn.metrics import silhouette_score
 import skfuzzy as fuzz
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-from src.common.ChemPlot import plot_histogram, plot_correlation, get_scatter_data
-from src.common.ternary_plot import ternary
+from src.common.ChemPlot import plot_map_mpl, plot_small_histogram, plot_histogram, plot_correlation, get_scatter_data, plot_scatter, plot_ternarymap
 from src.common.plot_spider import plot_spider_norm
 from src.common.scalebar import scalebar
 from src.app.LameIO import LameIO
@@ -60,7 +59,7 @@ from src.app.PlotTree import PlotTree
 from src.common.Masking import MaskDock
 from src.app.CropImage import CropTool
 from src.app.ImageProcessing import ImageProcessing as ip
-from src.app.StyleToolbox import Styling
+from src.app.StyleToolbox import StylingDock
 from src.app.Profile import Profiling, ProfileDock
 from src.common.Polygon import PolygonManager
 from src.app.SpotTools import SpotPage
@@ -247,6 +246,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "ny": self.update_ny,
             "dx": self.update_dx,
             "dy": self.update_dy,
+            "equalize_color_scale": self.update_equalize_color_scale_toolbutton,
             "hist_field_type": self.update_hist_field_type_combobox,
             "hist_field": self.update_hist_field_combobox,
             "hist_bin_width": self.update_hist_bin_width_spinbox,
@@ -317,6 +317,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 'Analyte selector': False,
                 'Plot selector': False,
                 'Plotting': True,
+                'Polygon': False,
+                'Profile': False,
+                'Masking': True,
                 'Styles': True,
                 'Calculator': True,
                 'Browser': False
@@ -573,6 +576,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.ref_data = self.ref_data[self.ref_data['sigma']!=1]
         self.ref_list = self.ref_data['layer']+' ['+self.ref_data['model']+'] '+ self.ref_data['reference']
 
+        self.toolButtonScaleEqualize.clicked.connect(self.update_equalize_color_scale)
         self.comboBoxRefMaterial.addItems(self.ref_list.values)          # Select analyte Tab
         self.comboBoxRefMaterial.setCurrentIndex(0)
         self.comboBoxNDimRefMaterial.addItems(self.ref_list.values)      # NDim Tab
@@ -580,6 +584,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxRefMaterial.activated.connect(lambda: self.change_ref_material(self.comboBoxRefMaterial.currentText())) 
         self.comboBoxNDimRefMaterial.activated.connect(lambda: self.change_ref_material(self.comboBoxNDimRefMaterial.currentText()))
         self.comboBoxRefMaterial.setCurrentIndex(0)
+        self.spinBoxFieldIndex.valueChanged.connect(self.hist_field_update)
         self.ref_chem = None
 
         
@@ -645,7 +650,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.spinBoxNBins.setValue(self.default_bins)
         self.spinBoxNBins.valueChanged.connect(self.update_histogram_num_bins)
         self.doubleSpinBoxBinWidth.valueChanged.connect(self.update_histogram_bin_width)
-        self.toolButtonHistogramReset.clicked.connect(self.histogram_reset_bins)
+        self.toolButtonHistogramReset.clicked.connect(self.app_data.histogram_reset_bins)
         self.toolButtonHistogramReset.clicked.connect(lambda: plot_histogram(self, self.app_data, self.plot_style))
 
         #uncheck crop is checked
@@ -665,7 +670,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Scatter and Ternary Tab
         #-------------------------
-        self.toolButtonTernaryMap.clicked.connect(self.plot_ternarymap)
+        self.toolButtonTernaryMap.clicked.connect(lambda: plot_ternarymap(self, self.app_data, self.plot_style))
 
         self.comboBoxFieldTypeX.activated.connect(lambda: self.update_field_combobox(self.comboBoxFieldTypeX, self.comboBoxFieldX))
         self.comboBoxFieldTypeY.activated.connect(lambda: self.update_field_combobox(self.comboBoxFieldTypeY, self.comboBoxFieldY))
@@ -722,9 +727,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Scatter and Ternary Tab
         #-------------------------
-        self.comboBoxFieldX.activated.connect(lambda: self.plot_scatter())
-        self.comboBoxFieldY.activated.connect(lambda: self.plot_scatter())
-        self.comboBoxFieldZ.activated.connect(lambda: self.plot_scatter())
+        self.comboBoxFieldX.activated.connect(lambda: plot_scatter(self, self.app_data, self.plot_style))
+        self.comboBoxFieldY.activated.connect(lambda: plot_scatter(self, self.app_data, self.plot_style))
+        self.comboBoxFieldZ.activated.connect(lambda: plot_scatter(self, self.app_data, self.plot_style))
 
 
         # N-Dim Tab
@@ -809,7 +814,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         # Styling Tab
         #-------------------------
-        self.plot_style = Styling(self, debug=self.logger_options['Styles'], ui=True)
+        self.plot_style = StylingDock(self, debug=self.logger_options['Styles'])
         self.plot_style.load_theme_names()
 
         setattr(self.comboBoxMVPlots, "allItems", lambda: [self.comboBoxMVPlots.itemText(i) for i in range(self.comboBoxMVPlots.count())])
@@ -967,8 +972,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return
 
         self.comboBoxSampleId.setCurrentText(new_sample_id)
+
         self.change_sample()
 
+
+    def update_equalize_color_scale_toolbutton(self, value):
+        self.toolButtonScaleEqualize.setChecked(value)
+
+        if self.plot_style.plot_type == 'analyte map':
+            self.plot_style.scheduler.schedule_update()
 
     def update_dx(self,value):
         """Updates ``MainWindow.lineEditDX.value``
@@ -1057,7 +1069,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             New field type.
         """
         self.comboBoxHistField.setCurrentText(value)
+
+        # update 
+        self.spinBoxFieldIndex.setMinimum(0)
+        self.spinBoxFieldIndex.setMaximum(self.comboBoxHistField.count() - 1)
+        self.spinBoxFieldIndex.setValue(self.comboBoxHistField.currentIndex())
+
         if self.toolBox.currentIndex() == self.left_tab['sample'] and self.plot_style.plot_type in ['analyte map','histogram','correlation']:
+            self.plot_style.color_field_type = self.comboBoxHistFieldType.currentText()
+            self.plot_style.color_field = self.comboBoxHistField.currentText()
+
             self.plot_style.scheduler.schedule_update()
 
     def update_hist_bin_width_spinbox(self, value):
@@ -1281,10 +1302,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.app_data.sample_id = self.comboBoxSampleId.currentText()
         self.change_sample()
 
+    def update_equalize_color_scale(self):
+        self.app_data.equalize_color_scale = self.toolButtonScaleEqualize.isChecked()
+
     def update_corr_method(self):
         self.app_data.corr_method = self.comboBoxCorrelationMethod.currentText()
 
         self.correlation_method_callback()
+
+    def update_color_field_combobox(self, value):
+        self.spinBoxColorField.setMinimum(0)
+        self.spinBoxColorField.setMaximum(self.comboBoxColorField.count() - 1)
+        #self.spinBoxFieldIndex.valueChanged.connect(self.hist_field_update)
 
     def toggle_spot_tab(self):
         #self.actionSpotTools.toggle()
@@ -1642,15 +1671,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if hasattr(self, 'workflow'):
             self.update_blockly_field_types()
 
-        self.spinBoxColorField.setMinimum(0)
-        self.spinBoxColorField.setMaximum(self.comboBoxColorField.count() - 1)
-        self.spinBoxFieldIndex.setMinimum(0)
-        self.spinBoxFieldIndex.setMaximum(self.comboBoxHistField.count() - 1)
-        self.spinBoxFieldIndex.valueChanged.connect(self.hist_field_update)
 
         if hasattr(self,"mask_dock"):
             self.mask_dock.filter_tab.update_filter_values()
-        self.histogram_update_bin_width()
+        self.update_histogram_bin_width()
 
         # update toolbar
         self.canvas_changed()
@@ -1727,8 +1751,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         Opens mask dock, creates on first instance.
         """
         if not hasattr(self, 'mask_dock'):
-            self.polygon = PolygonManager(self)
-            self.mask_dock = MaskDock(self)
+            self.polygon = PolygonManager(self, debug=self.logger_options['Polygon'])
+            self.mask_dock = MaskDock(self, debug=self.logger_options['Masking'])
 
             self.mask_tab = {}
             for tid in range(self.mask_dock.tabWidgetMask.count()):
@@ -1765,7 +1789,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             Profile
         """
         if not hasattr(self, 'profile'):
-            self.profile_dock = ProfileDock(self)
+            self.profile_dock = ProfileDock(self, debug=self.logger_options['Profile'])
 
             if not (self.profile_dock in self.help_mapping.keys()):
                 self.help_mapping[self.profile_dock] = 'profiles'
@@ -3236,7 +3260,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         save : bool, optional
             save plot to plot selector, Defaults to False.
         """
-        if DEBUG:
+        if self.logger_options['Plotting']:
             print(f"update_SV\n  plot_type: {plot_type}\n  field_type: {field_type}\n  field: {field}")
 
         if self.app_data.sample_id == '' or not self.plot_type:
@@ -3267,7 +3291,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         self.polygon.clear_plot()
                         self.polygon.plot_existing_polygon(self.plot)
                 else:
-                    canvas, plot_info = self.plot_map_mpl(self.app_data, self.plot_style, field_type, field)
+                    if self.toolBox.currentIndex() == self.left_tab['process']:
+                        canvas, plot_info = plot_map_mpl(self, self.app_data, self.plot_style, field_type, field, add_histogram=True)
+                    else:
+                        canvas, plot_info = plot_map_mpl(self, self.app_data, self.plot_style, field_type, field, add_histogram=False)
 
                     self.add_plotwidget_to_canvas(plot_info)
                     self.plot_tree.add_tree_item(plot_info)
@@ -3283,24 +3310,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             case 'correlation':
                 if self.comboBoxCorrelationMethod.currentText() == 'none':
                     return
-                canvas, plot_info = plot_correlation(self, self.app_data, self.plot_style)
+                canvas, self.plot_info = plot_correlation(self, self.app_data, self.plot_style)
 
-                self.clear_layout(self.widgetSingleView.layout())
-                self.widgetSingleView.layout().addWidget(canvas)
 
             case 'TEC' | 'Radar':
                 self.plot_ndim()
 
             case 'histogram':
-                canvas, plot_info = plot_histogram(self, self.app_data, self.plot_style)
+                canvas, self.plot_info = plot_histogram(self, self.app_data, self.plot_style)
 
-                self.clear_layout(self.widgetSingleView.layout())
-                self.widgetSingleView.layout().addWidget(canvas)
 
             case 'scatter' | 'heatmap':
                 if self.comboBoxFieldX.currentText() == self.comboBoxFieldY.currentText():
                     return
-                self.plot_scatter()
+                canvas, self.plot_info = plot_scatter(self, self.app_data, self.plot_style)
+
 
             case 'variance' | 'vectors' | 'PCA scatter' | 'PCA heatmap' | 'PCA score':
                 self.plot_pca()
@@ -3310,6 +3334,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             
             case 'cluster performance':
                 self.cluster_performance_plot()
+
+        self.clear_layout(self.widgetSingleView.layout())
+        self.widgetSingleView.layout().addWidget(canvas)
 
         if hasattr(self,"info_dock"):
             self.info_dock.plot_info_tab.update_plot_info_tab(self.plot_info)
@@ -3370,7 +3397,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             if (self.plot_type == 'analyte map') and (self.toolBox.currentIndex() == self.left_tab['sample']):
                 current_map_df = self.app_data.data[self.app_data.sample_id].get_map_data(plot_info['plot_name'], plot_info['field_type'], norm=self.plot_style.cscale)
-                self.plot_small_histogram(current_map_df)
+                plot_small_histogram(self, self.app_data, self.plot_style, current_map_df)
         # add figure to MultiView canvas
         elif self.canvasWindow.currentIndex() == self.canvas_tab['mv']:
             #print('add_plotwidget_to_canvas: MV')
@@ -3804,33 +3831,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 
 
 
-    def add_scalebar(self, ax):
-        """Add a scalebar to a map
-
-        Parameters
-        ----------
-        ax : 
-            Axes to place scalebar on.
-        """        
-        # add scalebar
-        direction = self.plot_style.scale_dir
-        length = self.plot_style.scale_length
-        if (length is not None) and (direction != 'none'):
-            if direction == 'horizontal':
-                dd = self.app_data.data[self.app_data.sample_id].dx
-            else:
-                dd = self.app_data.data[self.app_data.sample_id].dy
-            sb = scalebar( width=length,
-                    pixel_width=dd,
-                    units=self.preferences['Units']['Distance'],
-                    location=self.plot_style.scale_location,
-                    orientation=direction,
-                    color=self.plot_style.overlay_color,
-                    ax=ax )
-
-            sb.create()
-        else:
-            return
 
     def add_colorbar(self, canvas, cax, cbartype='continuous', grouplabels=None, groupcolors=None):
         """Adds a colorbar to a MPL figure
@@ -3964,120 +3964,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         return array, rgba_array
 
-    def plot_map_mpl(self, app_data, plot_style, field_type, field):
-        """Create a matplotlib canvas for plotting a map
-
-        Create a map using ``mplc.MplCanvas``.
-
-        Parameters
-        ----------
-        sample_id : str
-            Sample identifier
-        field_type : str
-            Type of field for plotting
-        field : str
-            Field for plotting
-        """        
-        # create plot canvas
-        canvas = mplc.MplCanvas(parent=self)
-
-        # set color limits
-        if field not in self.app_data.data[app_data.sample_id].axis_dict:
-            plot_style.initialize_axis_values(field_type,field)
-            plot_style.set_style_widgets()
-
-        # get data for current map
-        #scale = app_data.data[app_data.sample_id].processed_data.get_attribute(field, 'norm')
-        scale = plot_style.cscale
-        map_df = app_data.data[app_data.sample_id].get_map_data(field, field_type)
-
-        array_size = app_data.data[app_data.sample_id].array_size
-        aspect_ratio = app_data.data[app_data.sample_id].aspect_ratio
-
-        # store map_df to save_data if data needs to be exported
-        self.save_data = map_df.copy()
-
-        # equalized color bins to CDF function
-        if self.toolButtonScaleEqualize.isChecked():
-            sorted_data = map_df['array'].sort_values()
-            cum_sum = sorted_data.cumsum()
-            cdf = cum_sum / cum_sum.iloc[-1]
-            map_df.loc[sorted_data.index, 'array'] = cdf.values
-
-        # plot map
-        reshaped_array = np.reshape(map_df['array'].values, array_size, order=app_data.data[app_data.sample_id].order)
-            
-        norm = plot_style.color_norm()
-
-        cax = canvas.axes.imshow(reshaped_array,
-                                cmap=plot_style.get_colormap(),
-                                aspect=aspect_ratio, interpolation='none',
-                                norm=norm)
-        
-        
-
-        self.add_colorbar(canvas, cax)
-        match plot_style.cscale:
-            case 'linear':
-                clim = plot_style.clim
-            case 'log':
-                clim = plot_style.clim
-                #clim = np.log10(plot_style.clim)
-            case 'logit':
-                print('Color limits for logit are not currently implemented')
-
-        cax.set_clim(clim[0], clim[1])
-
-        # use mask to create an alpha layer
-        mask = app_data.data[app_data.sample_id].mask.astype(float)
-        reshaped_mask = np.reshape(mask, array_size, order=app_data.data[app_data.sample_id].order)
-
-        alphas = colors.Normalize(0, 1, clip=False)(reshaped_mask)
-        alphas = np.clip(alphas, .4, 1)
-
-        alpha_mask = np.where(reshaped_mask == 0, 0.5, 0)  
-        canvas.axes.imshow(np.ones_like(alpha_mask), aspect=aspect_ratio, interpolation='none', cmap='Greys', alpha=alpha_mask)
-        canvas.array = reshaped_array
-
-        canvas.axes.tick_params(direction=None,
-            labelbottom=False, labeltop=False, labelright=False, labelleft=False,
-            bottom=False, top=False, left=False, right=False)
-
-        canvas.set_initial_extent()
-        
-        # axes
-        #xmin, xmax, xscale, xlbl = plot_style.get_axis_values(None,field= 'X')
-        #ymin, ymax, yscale, ylbl = plot_style.get_axis_values(None,field= 'Y')
-
-
-        # axes limits
-        #canvas.axes.set_xlim(xmin,xmax)
-        #canvas.axes.set_ylim(ymin,ymax)
-
-        # add scalebar
-        self.add_scalebar(canvas.axes)
-
-        canvas.fig.tight_layout()
-
-        # add small histogram
-        if (self.toolBox.currentIndex() == self.left_tab['sample']) and (self.canvasWindow.currentIndex() == self.canvas_tab['sv']):
-            self.plot_small_histogram(map_df)
-
-        plot_info = {
-            'tree': field_type,
-            'sample_id': app_data.sample_id,
-            'plot_name': field,
-            'plot_type': 'analyte map',
-            'field_type': field_type,
-            'field': field,
-            'figure': canvas,
-            'style': plot_style.style_dict[plot_style.plot_type],
-            'cluster_groups': None,
-            'view': [True,False],
-            'position': None
-            }
-        
-        return canvas, plot_info
 
     def plot_map_pg(self, sample_id, field_type, field):
         """Create a graphic widget for plotting a map
@@ -4257,7 +4143,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # add small histogram
         if (self.toolBox.currentIndex() == self.left_tab['sample']) and (view == self.canvas_tab['sv']):
-            self.plot_small_histogram(map_df)
+            plot_small_histogram(self, self.app_data, self.plot_style, map_df)
 
 
     # -------------------------------------
@@ -4340,7 +4226,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.plot_type == 'analyte map':
             self.plot_style.color_field = self.comboBoxHistField.currentText()
         self.spinBoxFieldIndex.setValue(self.comboBoxHistField.currentIndex())
-        self.histogram_update_bin_width()
+        self.update_histogram_bin_width()
 
         self.plot_style.scheduler.schedule_update()
 
@@ -4359,7 +4245,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_bins = False
 
         # update app_data.histogram_num_bins
-        self.app_data.histogram_num_bins = self.spinBoxNBins.value()
+        self.app_data.hist_num_bins = self.spinBoxNBins.value()
 
         # get currently selected data
         current_plot_df = self.app_data.data[self.app_data.sample_id].get_map_data(self.comboBoxHistField.currentText(), self.comboBoxHistFieldType.currentText())
@@ -4402,601 +4288,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # trigger update to plot
             self.plot_style.scheduler.schedule_update()
 
-    def histogram_reset_bins(self):
-        """Resets number of histogram bins to default
-
-        Resets ``MainWindow.spinBoxNBins.value()`` to default number of bins.  Updates bin width
-        ``MainWindow.doubleSpinBoxBinWidth.value()`` if an analysis and field are selected
-        """
-        # update number of bins (should automatically trigger update of histogram bin widths)
-        self.spinBoxNBins.setValue(self.default_bins)
-
-        # update bin width
-        #self.histogram_update_bin_width()
-
-        if self.plot_type == 'histogram':
-            # trigger update to plot
-            self.plot_style.scheduler.schedule_update()
-
-    def plot_small_histogram(self, current_plot_df):
-        """Creates a small histogram on the Samples and Fields tab associated with the selected map
-
-        Parameters
-        ----------
-        current_plot_df : dict
-            Current data for plotting
-        field : str
-            Name of field to plot
-        """
-        #print('plot_small_histogram')
-        # create Mpl canvas
-        canvas = mplc.SimpleMplCanvas()
-        #canvas.axes.clear()
-
-
-        # Histogram
-        #remove by mask and drop rows with na
-        mask = self.app_data.data[self.app_data.sample_id].mask
-        if self.plot_style.cscale == 'log' or 'logit':
-            mask = mask & current_plot_df['array'].notna() & (current_plot_df['array'] > 0)
-        else:
-            mask = mask & current_plot_df['array'].notna()
-
-        array = current_plot_df['array'][mask].values
-
-        logflag = False
-        # check the analyte map cscale, the histogram needs to be the same
-        if self.plot_style.cscale == 'log':
-            print('log scale')
-            logflag = True
-            if any(array <= 0):
-                print(f"Warning issues with values <= 0, (-): {sum(array < 0)}, (0): {sum(array == 0)}")
-                return
-
-        bin_width = (np.nanmax(array) - np.nanmin(array)) / self.default_bins
-        edges = np.arange(np.nanmin(array), np.nanmax(array) + bin_width, bin_width)
-
-        if sum(mask) != len(mask):
-            canvas.axes.hist( 
-                current_plot_df['array'], 
-                bins=edges, 
-                density=True, 
-                color='#b3b3b3', 
-                edgecolor=None, 
-                linewidth=self.plot_style.line_width, 
-                log=logflag, 
-                alpha=0.6, 
-                label='unmasked' )
-
-        _, _, patches = canvas.axes.hist(array,
-                bins=edges,
-                density=True,
-                color=self.plot_style.marker_color,
-                edgecolor=None,
-                linewidth=self.plot_style.line_width,
-                log=logflag,
-                alpha=0.6 )
-
-        # color histogram bins by analyte colormap?
-        if self.checkBoxShowHistCmap.isChecked():
-            cmap = self.plot_style.get_colormap()
-            for j, p in enumerate(patches):
-                p.set_facecolor(cmap(j / len(patches)))
-
-        # Turn off axis box
-        canvas.axes.spines['top'].set_visible(False)
-        canvas.axes.spines['bottom'].set_visible(True)
-        canvas.axes.spines['left'].set_visible(False)
-        canvas.axes.spines['right'].set_visible(False)
-
-        # Set ticks and labels labels
-        canvas.axes.tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
-        canvas.axes.tick_params(axis='x', which='both', bottom=True, top=False, labelbottom=True, labelsize=8)
-        canvas.axes.set_xlabel(self.plot_style.clabel, fontdict={'size':8})
-
-        # Size the histogram in the widget
-        canvas.axes.margins(x=0)
-        pos = canvas.axes.get_position()
-        canvas.axes.set_position((pos.x0/2, 3*pos.y0, pos.width+pos.x0, pos.height-1.5*pos.y0))
-
-        self.clear_layout(self.widgetHistView.layout())
-        self.widgetHistView.layout().addWidget(canvas)
 
         #self.widgetHistView.hide()
         #self.widgetHistView.show()
 
-    # -------------------------------------
-    # Scatter/Heatmap functions
-    # -------------------------------------
-
-
-    def plot_scatter(self, canvas=None):
-        """Creates a plots from self.toolBox Scatter page.
-
-        Creates both scatter and heatmaps (spatial histograms) for bi- and ternary plots.
-
-        Parameters
-        ----------
-        canvas : MplCanvas
-            canvas within gui for plotting, by default ``None``
-        """
-        #print('plot_scatter')
-        plot_type = self.plot_style.plot_type 
-
-        # get data for plotting
-        scatter_dict = self.get_scatter_data(plot_type)
-        if (scatter_dict['x']['field'] == '') or (scatter_dict['y']['field'] == ''):
-            return
-
-        if canvas is None:
-            plot_flag = True
-            canvas = mplc.MplCanvas(parent=self)
-        else:
-            plot_flag = False
-
-        match plot_type.split()[-1]:
-            # scatter
-            case 'scatter':
-                if (scatter_dict['z']['field'] is None) or (scatter_dict['z']['field'] == ''):
-                    # biplot
-                    self.biplot(canvas,scatter_dict['x'],scatter_dict['y'],scatter_dict['c'])
-                else:
-                    # ternary
-                    self.ternary_scatter(canvas,scatter_dict['x'],scatter_dict['y'],scatter_dict['z'],scatter_dict['c'])
-
-            # heatmap
-            case 'heatmap':
-                # biplot
-                if (scatter_dict['z']['field'] is None) or (scatter_dict['z']['field'] == ''):
-                    self.hist2dbiplot(canvas,scatter_dict['x'],scatter_dict['y'])
-                # ternary
-                else:
-                    self.hist2dternplot(canvas,scatter_dict['x'],scatter_dict['y'],scatter_dict['z'],scatter_dict['c'])
-
-        canvas.axes.margins(x=0)
-
-        if plot_flag:
-            self.plot_style.update_figure_font(canvas, self.plot_style.font)
-            self.clear_layout(self.widgetSingleView.layout())
-            self.widgetSingleView.layout().addWidget(canvas)
-
-    def biplot(self, canvas, x, y, c):
-        """Creates scatter bi-plots
-
-        A general function for creating scatter plots of 2-dimensions.
-
-        Parameters
-        ----------
-        canvas : MplCanvas
-            Canvas to be added to main window
-        x : dict
-            Data associated with field ``MainWindow.comboBoxFieldX.currentText()`` as x coordinate
-        y : dict
-            Data associated with field ``MainWindow.comboBoxFieldX.currentText()`` as y coordinate
-        c : dict
-            Data associated with field ``MainWindow.comboBoxColorField.currentText()`` as marker colors
-        style : dict
-            Style parameters
-        """
-        if (c['field'] is None) or (c['field'] == ''):
-            # single color
-            canvas.axes.scatter(x['array'], y['array'], c=self.plot_style.marker_color,
-                s=self.plot_style.marker_size,
-                marker=self.plot_style.marker_dict[self.plot_style.marker],
-                edgecolors='none',
-                alpha=self.plot_style.marker_alpha/100)
-            cb = None
-            
-            plot_data = pd.DataFrame(np.vstack((x['array'], y['array'])).T, columns = ['x','y'])
-            
-        elif self.plot_style.color_field_type == 'cluster':
-            # color by cluster
-            method = self.field
-            if method not in list(self.cluster_dict.keys()):
-                return
-            else:
-                if 0 not in list(self.cluster_dict[method].keys()):
-                    return
-
-            cluster_color, cluster_label, cmap = self.plot_style.get_cluster_colormap(self.cluster_dict[method],alpha=self.plot_style.marker_alpha)
-            cluster_group = self.app_data.data[self.app_data.sample_id].processed_data.loc[:,method]
-            selected_clusters = self.cluster_dict[method]['selected_clusters']
-
-            ind = np.isin(cluster_group, selected_clusters)
-
-            norm = self.plot_style.color_norm(self.cluster_dict[method]['n_clusters'])
-
-            cb = canvas.axes.scatter(x['array'][ind], y['array'][ind], c=c['array'][ind],
-                s=self.plot_style.marker_size,
-                marker=self.plot_style.marker_dict[self.plot_style.marker],
-                edgecolors='none',
-                cmap=cmap,
-                alpha=self.plot_style.marker_alpha/100,
-                norm=norm)
-
-            self.add_colorbar(canvas, cb, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color)
-            plot_data = pd.DataFrame(np.vstack((x['array'][ind],y['array'][ind], c['array'][ind], cluster_group[ind])).T, columns = ['x','y','c','cluster_group'])
-        else:
-            # color by field
-            norm = self.plot_style.color_norm()
-            cb = canvas.axes.scatter(x['array'], y['array'], c=c['array'],
-                s=self.plot_style.marker_size,
-                marker=self.plot_style.marker_dict[self.plot_style.marker],
-                edgecolors='none',
-                cmap=self.plot_style.get_colormap(),
-                alpha=self.plot_style.marker_alpha/100,
-                norm=norm)
-
-            self.add_colorbar(canvas, cb)
-            plot_data = pd.DataFrame(np.vstack((x['array'], y['array'], c['array'])).T, columns = ['x','y','c'])
-            
-
-        # axes
-        xmin, xmax, xscale, xlbl = self.plot_style.get_axis_values(x['type'],x['field'])
-        ymin, ymax, yscale, ylbl = self.plot_style.get_axis_values(y['type'],y['field'])
-
-        # labels
-        font = {'size':self.plot_style.font_size}
-        canvas.axes.set_xlabel(xlbl, fontdict=font)
-        canvas.axes.set_ylabel(ylbl, fontdict=font)
-
-        # axes limits
-        canvas.axes.set_xlim(xmin,xmax)
-        canvas.axes.set_ylim(ymin,ymax)
-
-        # tick marks
-        canvas.axes.tick_params(direction=self.plot_style.tick_dir,
-            labelsize=self.plot_style.font_size,
-            labelbottom=True, labeltop=False, labelleft=True, labelright=False,
-            bottom=True, top=True, left=True, right=True)
-
-        # aspect ratio
-        canvas.axes.set_box_aspect(self.plot_style.aspect_ratio)
-        canvas.fig.tight_layout()
-
-        if xscale == 'log':
-            canvas.axes.set_xscale(xscale,base=10)
-        if yscale == 'log':
-            canvas.axes.set_yscale(yscale,base=10)
-
-        if xscale == 'scientific':
-            canvas.axes.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
-        if yscale == 'scientific':
-            canvas.axes.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
-
-        plot_name = f"{x['field']}_{y['field']}_{'scatter'}"
-
-        self.plot_info = {
-            'tree': 'Geochemistry',
-            'sample_id': self.app_data.sample_id,
-            'plot_name': plot_name,
-            'plot_type': 'scatter',
-            'field_type': [x['type'], y['type'], '', c['type']],
-            'field': [x['field'], y['field'], '', c['field']],
-            'figure': canvas,
-            'style': self.plot_style.style_dict[self.plot_style.plot_type],
-            'cluster_groups': [],
-            'view': [True,False],
-            'position': [],
-            'data':  plot_data
-        }
-
-    def ternary_scatter(self, canvas, x, y, z, c):
-        """Creates ternary scatter plots
-
-        A general function for creating ternary scatter plots.
-
-        Parameters
-        ----------
-        canvas : MplCanvas
-            Canvas that contains axes and figure
-        x : dict
-            coordinate associated with top vertex
-        y : dict
-            coordinate associated with left vertex
-        z : dict
-            coordinate associated with right vertex
-        c : dict
-            color dimension
-        """
-        labels = [x['field'], y['field'], z['field']]
-        tp = ternary(canvas.axes, labels, 'scatter')
-
-        if (c['field'] is None) or (c['field'] == ''):
-            tp.ternscatter( x['array'], y['array'], z['array'],
-                    marker=self.plot_style.marker_dict[self.plot_style.marker],
-                    size=self.plot_style.marker_size,
-                    color=self.plot_style.marker_color,
-                    alpha=self.plot_style.marker_alpha/100,
-                )
-            cb = None
-            plot_data = pd.DataFrame(np.vstack((x['array'],y['array'], z['array'])).T, columns = ['x','y','z'])
-            
-        elif self.plot_style.color_field_type == 'cluster':
-            # color by cluster
-            method = self.field
-            if method not in list(self.cluster_dict.keys()):
-                return
-            else:
-                if 0 not in list(self.cluster_dict[method].keys()):
-                    return
-
-            cluster_color, cluster_label, cmap = self.plot_style.get_cluster_colormap(self.cluster_dict[method],alpha=self.plot_style.marker_alpha)
-            cluster_group = self.app_data.data[self.app_data.sample_id].processed_data.loc[:,method]
-            selected_clusters = self.cluster_dict[method]['selected_clusters']
-
-            ind = np.isin(cluster_group, selected_clusters)
-
-            norm = self.plot_style.color_norm(self.cluster_dict[method]['n_clusters'])
-
-            _, cb = tp.ternscatter( x['array'][ind], y['array'][ind], z['array'][ind],
-                    categories=c['array'][ind],
-                    marker=self.marker_dict[self.plot_style.marker],
-                    size=self.plot_style.marker_size,
-                    cmap=cmap,
-                    norm=norm,
-                    labels=True,
-                    alpha=self.plot_style.marker_alpha/100,
-                    orientation='None' )
-
-            self.add_colorbar(canvas, cb, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color)
-            plot_data = pd.DataFrame(np.vstack((x['array'][ind],y['array'][ind], z['array'][ind], cluster_group[ind])).T, columns = ['x','y','z','cluster_group'])
-        else:
-            # color field
-            norm = self.plot_style.color_norm()
-            _, cb = tp.ternscatter(x['array'], y['array'], z['array'],
-                    categories=c['array'],
-                    marker=self.plot_style.marker_dict[self.plot_style.marker],
-                    size=self.plot_style.marker_size,
-                    cmap=self.plot_style.cmap,
-                    norm=norm,
-                    alpha=self.plot_style.marker_alpha/100,
-                    orientation=self.plot_style.cbar_dir )
-            
-            if cb:
-                cb.set_label(c['label'])
-                plot_data = pd.DataFrame(np.vstack((x['array'], y['array'], c['array'])).T, columns = ['x','y','c'])
-
-        # axes limits
-        canvas.axes.set_xlim(-1.01,1.01)
-        canvas.axes.set_ylim(-0.01,1)
-
-        plot_name = f"{x['field']}_{y['field']}_{z['field']}_{'ternscatter'}"
-        self.plot_info = {
-            'tree': 'Geochemistry',
-            'sample_id': self.app_data.sample_id,
-            'plot_name': plot_name,
-            'plot_type': 'scatter',
-            'field_type': [x['type'], y['type'], z['type'], c['type']],
-            'field': [x['field'], y['field'], z['field'], c['field']],
-            'figure': canvas,
-            'style': self.plot_style.style_dict[self.plot_style.plot_type],
-            'cluster_groups': [],
-            'view': [True,False],
-            'position': [],
-            'data': plot_data
-        }
-
-    def hist2dbiplot(self, canvas, x, y):
-        """Creates 2D histogram figure
-
-        A general function for creating 2D histograms (heatmaps).
-
-        Parameters
-        ----------
-        canvas : MplCanvas
-            plotting canvas
-        x : dict
-            X-axis dictionary
-        y : dict
-            Y-axis dictionary
-        """
-        # color by field
-        norm = self.plot_style.color_norm()
-        h = canvas.axes.hist2d(x['array'], y['array'], bins=self.plot_style.resolution, norm=norm, cmap=self.plot_style.get_colormap())
-        self.add_colorbar(canvas, h[3])
-
-        # axes
-        xmin, xmax, xscale, xlbl = self.plot_style.get_axis_values(x['type'],x['field'])
-        ymin, ymax, yscale, ylbl = self.plot_style.get_axis_values(y['type'],y['field'])
-
-        # labels
-        font = {'size':self.plot_style.font_size}
-        canvas.axes.set_xlabel(xlbl, fontdict=font)
-        canvas.axes.set_ylabel(ylbl, fontdict=font)
-
-        # axes limits
-        canvas.axes.set_xlim(xmin,xmax)
-        canvas.axes.set_ylim(ymin,ymax)
-
-        if yscale == 'scientific':
-            canvas.axes.ticklabel_format(axis='y', style=yscale)
-        if yscale == 'scientific':
-            canvas.axes.ticklabel_format(axis='y', style=yscale)
-
-        # tick marks
-        canvas.axes.tick_params(direction=self.plot_style.tick_dir,
-                        labelsize=self.plot_style.font_size,
-                        labelbottom=True, labeltop=False, labelleft=True, labelright=False,
-                        bottom=True, top=True, left=True, right=True)
-
-        # aspect ratio
-        canvas.axes.set_box_aspect(self.plot_style.aspect_ratio)
-
-        if xscale == 'log':
-            canvas.axes.set_xscale(xscale,base=10)
-        if yscale == 'log':
-            canvas.axes.set_yscale(yscale,base=10)
-
-        if xscale == 'scientific':
-            canvas.axes.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
-        if yscale == 'scientific':
-            canvas.axes.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
-
-        plot_name = f"{x['field']}_{y['field']}_{'heatmap'}"
-        self.plot_info = {
-            'tree': 'Geochemistry',
-            'sample_id': self.app_data.sample_id,
-            'plot_name': plot_name,
-            'plot_type': 'heatmap',
-            'field_type': [x['type'], y['type'], '', ''],
-            'field': [x['field'], y['field'], '', ''],
-            'figure': canvas,
-            'style': self.plot_style.style_dict[self.plot_style.plot_type],
-            'cluster_groups': [],
-            'view': [True,False],
-            'position': [],
-            'data': pd.DataFrame(np.vstack((x['array'],y['array'])).T, columns = ['x','y'])
-        }
-
-    def hist2dternplot(self, canvas, x, y, z, c):
-        """Creates a ternary histogram figure
-
-        A general function for creating scatter plots of 2-dimensions.
-
-        Parameters
-        ----------
-        fig : matplotlib.figure
-            Figure object
-        x, y, z : dict
-            Coordinates associated with top, left and right vertices, respectively
-        style:  dict
-            Style parameters
-        save : bool
-            Saves figure widget to plot tree
-        c : str
-            Display, mean, median, standard deviation plots for a fourth dimension in
-            addition to histogram map. Default is None, which produces a histogram.
-        """
-        labels = [x['field'], y['field'], z['field']]
-
-        if (c['field'] is None) or (c['field'] == ''):
-            tp = ternary(canvas.axes, labels, 'heatmap')
-
-            norm = self.plot_style.color_norm()
-            hexbin_df, cb = tp.ternhex(a=x['array'], b=y['array'], c=z['array'],
-                bins=self.plot_style.resolution,
-                plotfield='n',
-                cmap=self.plot_style.cmap,
-                orientation=self.plot_style.cbar_dir,
-                norm=norm)
-
-            if cb is not None:
-                cb.set_label('log(N)')
-        else:
-            pass
-            # axs = fig.subplot_mosaic([['left','upper right'],['left','lower right']], layout='constrained', width_ratios=[1.5, 1])
-
-            # for idx, ax in enumerate(axs):
-            #     tps[idx] = ternary(ax, labels, 'heatmap')
-
-            # hexbin_df = ternary.ternhex(a=x['array'], b=y['array'], c=z['array'], val=c['array'], bins=self.plot_style.resolution)
-
-            # cb.set_label(c['label'])
-
-            # #tp.ternhex(hexbin_df=hexbin_df, plotfield='n', cmap=self.plot_style.cmap, orientation='vertical')
-
-        plot_name = f"{x['field']}_{y['field']}_{z['field']}_{'heatmap'}"
-        self.plot_info = {
-            'tree': 'Geochemistry',
-            'sample_id': self.app_data.sample_id,
-            'plot_name': plot_name,
-            'plot_type': 'heatmap',
-            'field_type': [x['type'], y['type'], z['type'], ''],
-            'field': [x['field'], y['field'], z['field'], ''],
-            'figure': canvas,
-            'style': self.plot_style.style_dict[self.plot_style.plot_type],
-            'cluster_groups': [],
-            'view': [True,False],
-            'position': [],
-            'data' : pd.DataFrame(np.vstack((x['array'],y['array'], z['array'])).T, columns = ['x','y','z'])
-        }
-
-    def plot_ternarymap(self, canvas):
-        """Creates map colored by ternary coordinate positions"""
-        if self.plot_type != 'ternary map':
-            self.comboBoxPlotType.setCurrentText('ternary map')
-            self.plot_style.set_style_widgets('ternary map')
-
-        canvas = mplc.MplCanvas(sub=121,parent=self)
-
-        afield = self.comboBoxFieldX.currentText()
-        bfield = self.comboBoxFieldY.currentText()
-        cfield = self.comboBoxFieldZ.currentText()
-
-        a = self.app_data.data[self.app_data.sample_id].processed_data.loc[:,afield].values
-        b = self.app_data.data[self.app_data.sample_id].processed_data.loc[:,bfield].values
-        c = self.app_data.data[self.app_data.sample_id].processed_data.loc[:,cfield].values
-
-        ca = get_rgb_color(get_hex_color(self.toolButtonTCmapXColor.palette().button().color()))
-        cb = get_rgb_color(get_hex_color(self.toolButtonTCmapYColor.palette().button().color()))
-        cc = get_rgb_color(get_hex_color(self.toolButtonTCmapZColor.palette().button().color()))
-        cm = get_rgb_color(get_hex_color(self.toolButtonTCmapMColor.palette().button().color()))
-
-        t = ternary(canvas.axes)
-
-        cval = t.terncolor(a, b, c, ca, cb, cc, cp=cm)
-
-        M, N = self.app_data.data[self.app_data.sample_id].array_size
-
-        # Reshape the array into MxNx3
-        map_data = np.zeros((M, N, 3), dtype=np.uint8)
-        map_data[:len(cval), :, :] = cval.reshape(M, N, 3, order=self.app_data.data[self.app_data.sample_id].order)
-
-        canvas.axes.imshow(map_data, aspect=self.app_data.data[self.app_data.sample_id].aspect_ratio)
-        canvas.array = map_data
-
-        # add scalebar
-        self.add_scalebar(canvas.axes)
-
-        grid = None
-        if self.plot_style.cbar_dir == 'vertical':
-            grid = gs.GridSpec(5,1)
-        elif self.plot_style.cbar_dir == 'horizontal':
-            grid = gs.GridSpec(1,5)
-        else:
-            self.clear_layout(self.widgetSingleView.layout())
-            self.widgetSingleView.layout().addWidget(canvas)
-            return
-
-        canvas.axes.set_position(grid[0:4].get_position(canvas.fig))
-        canvas.axes.set_subplotspec(grid[0:4])              # only necessary if using tight_layout()
-
-        canvas.axes2 = canvas.fig.add_subplot(grid[4])
-
-        canvas.fig.tight_layout()
-
-        t2 = ternary(canvas.axes2, labels=[afield,bfield,cfield])
-
-        hbin = t2.hexagon(10)
-        xc = np.array([v['xc'] for v in hbin])
-        yc = np.array([v['yc'] for v in hbin])
-        at,bt,ct = t2.xy2tern(xc,yc)
-        cv = t2.terncolor(at,bt,ct, ca=ca, cb=cb, cc=cc, cp=cm)
-        for i, hb in enumerate(hbin):
-            t2.ax.fill(hb['xv'], hb['yv'], color=cv[i]/255, edgecolor='none')
-
-        plot_name = f'{afield}_{bfield}_{cfield}_ternarymap'
-        self.plot_info = {
-            'tree': 'Geochemistry',
-            'sample_id': self.app_data.sample_id,
-            'plot_name': plot_name,
-            'plot_type': 'ternary map',
-            'field_type': [self.comboBoxFieldTypeX.currentText(),
-                self.comboBoxFieldTypeY.currentText(),
-                self.comboBoxFieldTypeZ.currentText(),
-                ''],
-            'field': [afield, bfield, cfield, ''],
-            'figure': canvas,
-            'style': self.plot_style.style_dict[self.plot_style.plot_type],
-            'cluster_groups': [],
-            'view': [True,False],
-            'position': [],
-            'data': map_data
-        }
-
-        self.clear_layout(self.widgetSingleView.layout())
-        self.widgetSingleView.layout().addWidget(canvas)
 
     # -------------------------------------
     # PCA functions and plotting
@@ -5082,7 +4377,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 # Assuming pca_df contains scores for the principal components
                 # uncomment to use plot scatter instead of ax.scatter
                 canvas = mplc.MplCanvas(parent=self)
-                self.plot_scatter(canvas=canvas)
+                plot_scatter(self, self.app_data, self.plot_style, canvas=canvas)
 
                 plot_data= self.plot_pca_components(canvas)
 

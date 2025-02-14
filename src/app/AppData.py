@@ -25,8 +25,10 @@ class AppData(Observable):
         self.plot_info = {}
 
         # histogram related data and methods
+        self._equalize_color_scale = False
         self._hist_field_type = ""
         self._hist_field = ""
+        self._default_hist_num_bins = 100
         self._hist_bin_width = 0
         self._hist_num_bins = 100
         self._hist_plot_style = "PDF"
@@ -126,8 +128,6 @@ class AppData(Observable):
         self._dim_red_precondition = False
         self._num_basis_for_precondition = 0
 
-        
-
 
     def validate_field_type(self, new_field_type):
         if self.sample_id == "":
@@ -176,6 +176,18 @@ class AppData(Observable):
 
     ### Histogram Properties ###
     @property
+    def equalize_color_scale(self):
+        return self._equalize_color_scale
+    
+    @equalize_color_scale.setter
+    def equalize_color_scale(self, new_equalize_color_scale):
+        if new_equalize_color_scale == self._equalize_color_scale:
+            return
+    
+        self._equalize_color_scale = new_equalize_color_scale
+        self.notify_observers("equalize_color_scale", new_equalize_color_scale)
+
+    @property
     def hist_field_type(self):
         return self._hist_field_type
     
@@ -211,6 +223,11 @@ class AppData(Observable):
         self.update_num_bins = False
         self.update_hist_bin_width()
         self.update_num_bins = True
+
+    @property
+    def default_hist_num_bins(self):
+        """Default bin width for histograms."""
+        return self._default_hist_num_bins
 
 
     @property
@@ -798,5 +815,8 @@ class AppData(Observable):
         range = np.nanmax(map_df['array']) - np.nanmin(map_df['array'])
         self.hist_num_bins = int( range / self._hist_bin_width)
 
+    def histogram_reset_bins(self):
+        """Resets number of histogram bins to default"""
+        self.hist_num_bins = self.default_hist_num_bins
 
 

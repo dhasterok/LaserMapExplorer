@@ -292,7 +292,7 @@ class PlotTree():
                     print(f"  plot_info does not exist, creating map")
 
                 # print('tree_double_click: plot_map_pg')
-                if self.parent.toolBox.currentIndex() not in [self.parent.left_tab['sample'], self.parent.left_tab['process'], self.parent.left_tab['polygons'], self.parent.left_tab['profile']]:
+                if self.parent.toolBox.currentIndex() not in [self.parent.left_tab['sample'], self.parent.left_tab['process']]:
                     self.parent.toolBox.setCurrentIndex(self.parent.left_tab['sample'])
 
                 # updates comboBoxColorByField and comboBoxColorField comboboxes and creates new plot

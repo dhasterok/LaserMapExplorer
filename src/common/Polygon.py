@@ -7,10 +7,12 @@ from pyqtgraph import ( ScatterPlotItem, PlotDataItem )
 # Polygons
 # -------------------------------
 class Polygon:
-    def __init__(self, p_id):
+    def __init__(self, p_id, debug=False):
         self.p_id = p_id
         self.points = []  # List to store points as (x, y, scatter)
         self.lines = []  # List to store lines as graphical items
+
+        self.debug = debug
 
 # class PolygonManager:
 #     """Operations related to polygon generation and manipulation

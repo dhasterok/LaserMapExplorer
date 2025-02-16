@@ -61,12 +61,10 @@ class AppData(Observable):
         self._x_field_type = ""
         self._y_field_type = ""
         self._z_field_type = ""
-        self._c_field_type = ""
 
         self._x_field = ""
         self._y_field = ""
         self._z_field = ""
-        self._c_field = ""
 
         self._scatter_preset = ""
         self._heatmap_style = "counts"
@@ -406,18 +404,6 @@ class AppData(Observable):
             self.notify_observers("z_field_type", new_field_type)
 
     @property
-    def c_field_type(self):
-        """str: Plot type used to determine plot method and associated style settings."""
-        return self._c_field_type
-
-    @c_field_type.setter
-    def c_field_type(self, new_field_type):
-        if new_field_type != self._c_field_type:
-            self.validate_field_type(new_field_type)
-            self._c_field_type = new_field_type
-            self.notify_observers("c_field_type", new_field_type)
-
-    @property
     def x_field(self):
         return self._x_field
     
@@ -452,18 +438,6 @@ class AppData(Observable):
     
         self._z_field = new_z_field
         self.notify_observers("z_field", new_z_field)
-
-    @property
-    def c_field(self):
-        return self._c_field
-    
-    @c_field.setter
-    def c_field(self, new_c_field):
-        if new_c_field == self._c_field:
-            return
-    
-        self._c_field = new_c_field
-        self.notify_observers("c_field", new_c_field)
 
     @property
     def scatter_preset(self):

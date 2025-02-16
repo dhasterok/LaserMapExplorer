@@ -261,11 +261,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "x_field_type": self.update_x_field_type_combobox,
             "y_field_type": self.update_y_field_type_combobox,
             "z_field_type": self.update_z_field_type_combobox,
-            "c_field_type": self.update_c_field_type_combobox,
             "x_field": self.update_x_field_combobox,
             "y_field": self.update_y_field_combobox,
             "z_field": self.update_z_field_combobox,
-            "c_field": self.update_c_field_combobox,
             "scatter_preset": self.update_scatter_preset_combobox,
             "heatmap_style": self.update_heatmap_style_combobox,
             "ternary_colormap": self.update_ternary_colormap_combobox,
@@ -286,7 +284,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "cluster_distance": self.update_cluster_distance_combobox,
             "dim_red_precondition": self.update_dim_red_precondition_checkbox,
             "num_basis_for_precondition": self.update_num_basis_for_precondition_spinbox,
-            "selected_clusters": self.update_selected_clusters_spinbox
+            "selected_clusters": self.update_selected_clusters_spinbox,
+            ### styling widgets
+            "plot_type": self.update_plot_type_combobox,
+            "xlim": self.update_xlim_lineedits,
+            "xlabel": self.update_xlabel_lineedit,
+            "xscale": self.update_xscale_combobox,
+            "ylim": self.update_ylim_lineedits,
+            "ylabel": self.update_ylabel_lineedit,
+            "yscale": self.update_yscale_combobox
         }
 
         self.buttons_layout = None  # create a reference to your layout
@@ -494,12 +500,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             -1: [0, 'analyte map']}
 
 
-        # initalize self.comboBoxPlotType
-        self.update_plot_type_combobox()
-        self.comboBoxPlotType.currentIndexChanged.connect(self.on_plot_type_changed)
-
-        # Initialize a variable to store the current plot type
-        self.plot_type = 'analyte map'
 
         # Menu and Toolbar
         #-------------------------
@@ -816,6 +816,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #-------------------------
         self.plot_style = StylingDock(self, debug=self.logger_options['Styles'])
         self.plot_style.load_theme_names()
+        self.plot_style.add_observer(self.update_widgets)
+
+        # initalize self.comboBoxPlotType
+        self.update_plot_type_combobox_options()
+        self.comboBoxPlotType.currentIndexChanged.connect(self.on_plot_type_changed)
+
+        # Initialize a variable to store the current plot type
+        self.plot_style.plot_type = 'analyte map'
+
 
         setattr(self.comboBoxMVPlots, "allItems", lambda: [self.comboBoxMVPlots.itemText(i) for i in range(self.comboBoxMVPlots.count())])
         
@@ -958,6 +967,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # self.profile_dock.profiling.add_samples()
         # self.polygon.add_samples()
 
+        self.plot_style.scheduler.schedule_update()
+
     def update_sample_id_combobox(self, new_sample_id):
         """Updates ``MainWindow.comboBoxSampleID.currentText()``
 
@@ -974,6 +985,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxSampleId.setCurrentText(new_sample_id)
 
         self.change_sample()
+        self.plot_style.scheduler.schedule_update()
 
 
     def update_equalize_color_scale_toolbutton(self, value):
@@ -1126,94 +1138,47 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.toolBox.currentIndex() == self.left_tab['sample']:
             self.plot_style.scheduler.schedule_update()
 
-    def update_x_field_type_combobox(self, value):
-        self.update_field_type(value, 'x')
+    def update_x_field_type_combobox(self, new_field_type):
+        self.comboBoxFieldTypeX.setCurrentText(new_field_type)
+        if self.toolBox.currentIndex() == self.left_tab['scatter']:
+            self.plot_style.scheduler.schedule_update()
 
-    def update_y_field_type_combobox(self, value):
-        self.update_field_type(value, 'y')
+    def update_y_field_type_combobox(self, new_field_type):
+        self.comboBoxFieldTypeY.setCurrentText(new_field_type)
+        if self.toolBox.currentIndex() == self.left_tab['scatter']:
+            self.plot_style.scheduler.schedule_update()
 
-    def update_z_field_type_combobox(self, value):
-        self.update_field_type(value, 'z')
+    def update_z_field_type_combobox(self, new_field_type):
+        self.comboBoxFieldTypeZ.setCurrentText(new_field_type)
+        if self.toolBox.currentIndex() == self.left_tab['scatter']:
+            self.plot_style.scheduler.schedule_update()
 
-    def update_c_field_type_combobox(self, value):
-        self.update_field_type(value, 'c')
+    def update_x_field_combobox(self, new_field):
+        self.comboBoxFieldX.setCurrentText(new_field)
+        if self.toolBox.currentIndex() == self.left_tab['scatter']:
+            self.plot_style.scheduler.schedule_update()
 
-    def update_field_type(self, value, ax):
-        pass
-        # match self.toolBox.currentIndex():
-        #     case self.left_tab['sample']:
-        #         if ax == 'c':
-        #             self.comboBoxHistFieldType.setCurrentText(value)
-        #     case self.left_tab['process']:
-        #         pass
-        #     case self.left_tab['spot']:
-        #         pass
-        #     case self.left_tab['scatter']:
-        #         match ax:
-        #             case 'x':
-        #                 self.comboBoxFieldTypeX.setCurrentText(value)
-        #             case 'y':
-        #                 self.comboBoxFieldTypeY.setCurrentText(value)
-        #             case 'z':
-        #                 self.comboBoxFieldTypeZ.setCurrentText(value)
-        #     case self.left_tab['ndim']:
-        #         pass
-        #     case self.left_tab['multidim']:
-        #         pass
-        #     case self.left_tab['cluster']:
-        #         pass
-        #     case self.left_tab['special']:
-        #         pass
+    def update_y_field_combobox(self, new_field):
+        self.comboBoxFieldY.setCurrentText(new_field)
+        if self.toolBox.currentIndex() == self.left_tab['scatter']:
+            self.plot_style.scheduler.schedule_update()
 
-
-    def update_x_field_combobox(self, value):
-        self.update_field(value,'x')
-
-    def update_y_field_combobox(self, value):
-        self.update_field(value,'y')
-
-    def update_z_field_combobox(self, value):
-        self.update_field(value,'z')
-
-    def update_c_field_combobox(self, value):
-        self.update_field(value,'c')
-
-    def update_field(self, value, ax):
-        pass
-        # match self.toolBox.currentIndex():
-        #     case self.left_tab['sample']:
-        #         if ax == 'c':
-        #             self.comboBoxHistField.setCurrentText(value)
-        #     case self.left_tab['process']:
-        #         pass
-        #     case self.left_tab['spot']:
-        #         pass
-        #     case self.left_tab['scatter']:
-        #         match ax:
-        #             case 'x':
-        #                 self.comboBoxFieldX.setCurrentText(value)
-        #             case 'y':
-        #                 self.comboBoxFieldY.setCurrentText(value)
-        #             case 'z':
-        #                 self.comboBoxFieldZ.setCurrentText(value)
-        #     case self.left_tab['ndim']:
-        #         pass
-        #     case self.left_tab['multidim']:
-        #         pass
-        #     case self.left_tab['cluster']:
-        #         pass
-        #     case self.left_tab['special']:
-        #         pass
+    def update_z_field_combobox(self, new_field):
+        self.comboBoxFieldZ.setCurrentText(new_field)
+        if self.toolBox.currentIndex() == self.left_tab['scatter']:
+            self.plot_style.scheduler.schedule_update()
 
     def update_scatter_preset_combobox(self, new_scatter_preset):
         if self.toolBox.currentIndex() == self.left_tab['scatter']:
             self.plot_style.scheduler.schedule_update()
 
     def update_heatmap_style_combobox(self, new_heatmap_style):
+        self.comboBoxHeatmaps.setCurrentText(new_heatmap_style)
         if self.toolBox.currentIndex() == self.left_tab['scatter']:
             self.plot_style.scheduler.schedule_update()
 
     def update_ternary_colormap_combobox(self, new_ternary_colormap):
+        self.comboBoxTernaryColormap.setCurrentText(new_ternary_colormap)
         if self.toolBox.currentIndex() == self.left_tab['scatter']:
             self.plot_style.scheduler.schedule_update()
 
@@ -1234,46 +1199,52 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.plot_style.scheduler.schedule_update()
 
     def update_ndim_analyte_set_combobox(self, new_ndim_analyte_set):
+        self.comboBoxNDimAnalyteSet.setCurrentText(new_ndim_analyte_set)
         if self.toolBox.currentIndex() == self.left_tab['ndim']:
             self.plot_style.scheduler.schedule_update()
 
     def update_ndim_quantile_index_combobox(self, new_ndim_quantile_index):
-        if self.toolBox.currentIndex() == self.left_tab['ndim']:
-            self.plot_style.scheduler.schedule_update()
-
-    def update_quantile_index(self, new_quantile_index):
+        self.comboBoxNDimQuantiles.setCurrentIndex(new_ndim_quantile_index)
         if self.toolBox.currentIndex() == self.left_tab['ndim']:
             self.plot_style.scheduler.schedule_update()
 
     def update_dim_red_method_combobox(self, new_dim_red_method):
+        self.comboBoxNoiseReductionMethod.setCurrentText(new_dim_red_method)
         if self.toolBox.currentIndex() == self.left_tab['multidim']:
             self.plot_style.scheduler.schedule_update()
 
     def update_dim_red_x_spinbox(self, new_dim_red_x):
+        self.spinBoxPCX.setValue(int(new_dim_red_x))
         if self.toolBox.currentIndex() == self.left_tab['multidim']:
             self.plot_style.scheduler.schedule_update()
 
     def update_dim_red_y_spinbox(self, new_dim_red_y):
+        self.spinBoxPCY.setValue(int(new_dim_red_y))
         if self.toolBox.currentIndex() == self.left_tab['multidim']:
             self.plot_style.scheduler.schedule_update()
 
     def update_cluster_method_combobox(self, new_cluster_method):
+        self.comboBoxClusterMethod.setCurrentText(new_cluster_method)
         if self.toolBox.currentIndex() == self.left_tab['cluster']:
             self.plot_style.scheduler.schedule_update()
 
     def update_max_clusters_spinbox(self, new_max_clusters):
+        self.spinBoxClusterMax.setValue(int(new_max_clusters))
         if self.toolBox.currentIndex() == self.left_tab['cluster']:
             self.plot_style.scheduler.schedule_update()
 
     def update_num_clusters_spinbox(self, new_num_clusters):
+        self.spinBoxNClusters.setValue(int(new_num_clusters))
         if self.toolBox.currentIndex() == self.left_tab['cluster']:
             self.plot_style.scheduler.schedule_update()
 
     def update_cluster_seed_lineedit(self, new_cluster_seed):
+        self.lineEditSeed.setText(str(new_cluster_seed))
         if self.toolBox.currentIndex() == self.left_tab['cluster']:
             self.plot_style.scheduler.schedule_update()
 
     def update_cluster_exponent_slider(self, new_cluster_exponent):
+        self.horizontalSliderClusterExponent.setValue(new_cluster_exponent)
         if self.toolBox.currentIndex() == self.left_tab['cluster']:
             self.plot_style.scheduler.schedule_update()
 
@@ -1304,6 +1275,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def update_equalize_color_scale(self):
         self.app_data.equalize_color_scale = self.toolButtonScaleEqualize.isChecked()
+        if self.plot_style.plot_type == "analyte map":
+            self.plot_style.scheduler.schedule_update()
 
     def update_corr_method(self):
         self.app_data.corr_method = self.comboBoxCorrelationMethod.currentText()
@@ -1373,8 +1346,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     
     def on_plot_type_changed(self):
-        # Update self.plot_type whenever combo box changes
-        self.plot_type = self.comboBoxPlotType.currentText()
+        # Update self.plot_style.plot_type whenever combo box changes
+        self.plot_style.plot_type = self.comboBoxPlotType.currentText()
 
     def on_field_type_changed(self):
         # Update self.field_type whenever combo box changes
@@ -1655,7 +1628,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
         self.toolBoxStyle.setCurrentIndex(0)
         self.toolBox.setCurrentIndex(self.left_tab['sample'])
-        self.plot_style.set_style_widgets(self.plot_type)
+        self.plot_style.set_style_widgets(self.plot_style.plot_type)
 
         # update comboboxes to reflect list of available field types and fields
         self.update_all_field_comboboxes()
@@ -2145,7 +2118,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             self.display_QV()
 
-    def update_plot_type_combobox(self):
+    def update_plot_type_combobox_options(self):
         """Updates plot type combobox based on current toolbox index or certain dock widget controls."""
         self.comboBoxPlotType.clear()
         if self.profile_state == True or self.polygon_state == True:
@@ -2155,9 +2128,42 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.comboBoxPlotType.addItems(self.plot_types[plot_idx][1:])
         self.comboBoxPlotType.setCurrentIndex(self.plot_types[plot_idx][0])
-        self.plot_type = self.comboBoxPlotType.currentText()
+        self.plot_style.plot_type = self.comboBoxPlotType.currentText()
         if hasattr(self,"plot_style"):
-            self.plot_style.set_style_widgets(self.plot_type)
+            self.plot_style.set_style_widgets(self.plot_style.plot_type)
+
+    def update_plot_type_combobox(self, new_plot_type):
+        self.comboBoxPlotType.currentText(new_plot_type)
+        self.plot_style.scheduler.schedule_update()
+
+    def update_xlim_lineedits(self, new_xlim):
+        self.lineEditXLB.value = new_xlim[0]
+        self.lineEditXUB.value = new_xlim[1]
+        self.plot_style.scheduler.schedule_update()
+
+    def update_xlabel_lineedit(self, new_label):
+        self.lineEditXLabel.setText(new_label)
+        self.plot_style.scheduler.schedule_update()
+        
+    def update_xscale_combobox(self, new_scale):
+        self.comboBoxXScale.setCurrentText(new_scale)
+        self.plot_style.scheduler.schedule_update()
+
+    def update_ylim_lineedits(self, new_ylim):
+        self.lineEditYLB.value = new_ylim[0]
+        self.lineEditYUB.value = new_ylim[1]
+        self.plot_style.scheduler.schedule_update()
+
+    def update_ylabel_lineedit(self, new_label):
+        self.lineEditYLabel.setText(new_label)
+        self.plot_style.scheduler.schedule_update()
+
+    def update_yscale_combobox(self, new_scale):
+        self.comboBoxYScale.setCurrentText(new_scale)
+        self.plot_style.scheduler.schedule_update()
+
+
+
 
     def toolbox_changed(self, update=True):
         """Updates styles associated with toolbox page
@@ -2179,7 +2185,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # update the plot type comboBox options
         self.comboBoxPlotType.blockSignals(True)
-        self.update_plot_type_combobox()
+        self.update_plot_type_combobox_options()
         self.comboBoxPlotType.setCurrentIndex(self.plot_types[self.toolBox.currentIndex()][0])
         self.comboBoxPlotType.blockSignals(False)
 
@@ -2201,7 +2207,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 
         # get the current plot type
-        #plot_type = self.plot_type
+        #plot_type = self.plot_style.plot_type
         #self.plot_style.set_style_widgets(plot_type=plot_type, style=self.plot_style.plot_type[plot_type])
 
         # If canvasWindow is set to SingleView, update the plot
@@ -2254,7 +2260,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Executes on ``MainWindow.toolButtonSwapXY.clicked``.  Updates data dictionary and other map related derived results.
         """
-        match self.plot_type:
+        match self.plot_style.plot_type:
             case 'analyte map':
                 # swap x and y
                 self.app_data.data[self.app_data.sample_id].swap_xy()
@@ -2322,7 +2328,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def update_fields(self, sample_id, plot_type, field_type, field,  plot=False):
         # updates comboBoxPlotType,comboBoxColorByField and comboBoxColorField comboboxes using tree, branch and leaf
         if sample_id == self.app_data.sample_id:
-            if plot_type != self.plot_type:
+            if plot_type != self.plot_style.plot_type:
                 self.comboBoxPlotType.setCurrentText(plot_type)
 
             if field_type != self.field_type:
@@ -3263,11 +3269,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.logger_options['Plotting']:
             print(f"update_SV\n  plot_type: {plot_type}\n  field_type: {field_type}\n  field: {field}")
 
-        if self.app_data.sample_id == '' or not self.plot_type:
+        if self.app_data.sample_id == '' or not self.plot_style.plot_type:
             return
 
         if not plot_type:
-            plot_type = self.plot_type
+            plot_type = self.plot_style.plot_type
         
         match plot_type:
             case 'analyte map':
@@ -3395,7 +3401,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.update_canvas(self.sv_widget)
             self.sv_widget.show()
 
-            if (self.plot_type == 'analyte map') and (self.toolBox.currentIndex() == self.left_tab['sample']):
+            if (self.plot_style.plot_type == 'analyte map') and (self.toolBox.currentIndex() == self.left_tab['sample']):
                 current_map_df = self.app_data.data[self.app_data.sample_id].get_map_data(plot_info['plot_name'], plot_info['field_type'], norm=self.plot_style.cscale)
                 plot_small_histogram(self, self.app_data, self.plot_style, current_map_df)
         # add figure to MultiView canvas
@@ -3886,7 +3892,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # continuous colormap - plot with colorbar
         else:
             if self.plot_style.cbar_dir == 'vertical':
-                if self.plot_type == 'correlation':
+                if self.plot_style.plot_type == 'correlation':
                     loc = 'left'
                 else:
                     loc = 'right'
@@ -4151,11 +4157,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     # -------------------------------------
     def correlation_method_callback(self):
         """Updates colorbar label for correlation plots"""
-        method = self.comboBoxCorrelationMethod.currentText()
+        method = self.app_data.corr_method
         if self.plot_style.clabel == method:
             return
 
-        if self.checkBoxCorrelationSquared.isChecked():
+        if self.app_data.corr_squared:
             power = '^2'
         else:
             power = ''
@@ -4169,8 +4175,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             case 'Kendall':
                 self.plot_style.clabel = method + "'s $\\tau" + power + "$"
 
-        if self.plot_type != 'correlation':
-            self.comboBoxPlotType.setCurrentText('correlation')
+        if self.plot_style.plot_type != 'correlation':
             self.plot_style.set_style_widgets('correlation')
 
         # trigger update to plot
@@ -4206,9 +4211,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """"Executes when the histogram field type is changed"""
         self.app_data.hist_field_type = self.comboBoxHistFieldType.currentText()
         self.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
-        #if self.plot_type != 'histogram':
+        #if self.plot_style.plot_type != 'histogram':
         #    self.comboBoxPlotType.setCurrentText('histogram')
-        if self.plot_type == 'analyte map':
+        if self.plot_style.plot_type == 'analyte map':
             self.plot_style.color_field_type = self.comboBoxHistFieldType.currentText()
 
         self.histogram_update_bin_width()
@@ -4219,11 +4224,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def update_histogram_field(self):
         """Executes when the histogram field is changed"""
-        #if self.plot_type != 'histogram':
+        #if self.plot_style.plot_type != 'histogram':
         #    self.comboBoxPlotType.setCurrentText('histogram')
         self.app_data.hist_field = self.comboBoxHistField.currentText()
 
-        if self.plot_type == 'analyte map':
+        if self.plot_style.plot_type == 'analyte map':
             self.plot_style.color_field = self.comboBoxHistField.currentText()
         self.spinBoxFieldIndex.setValue(self.comboBoxHistField.currentIndex())
         self.update_histogram_bin_width()
@@ -4258,7 +4263,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_bins = True
 
         # update histogram
-        if self.plot_type == 'histogram':
+        if self.plot_style.plot_type == 'histogram':
             # trigger update to plot
             self.plot_style.scheduler.schedule_update()
 
@@ -4284,7 +4289,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return
 
         # update histogram
-        if self.plot_type == 'histogram':
+        if self.plot_style.plot_type == 'histogram':
             # trigger update to plot
             self.plot_style.scheduler.schedule_update()
 
@@ -4352,7 +4357,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.compute_pca()
 
         # Determine which PCA plot to create based on the combobox selection
-        plot_type = self.plot_type
+        plot_type = self.plot_style.plot_type
 
         match plot_type.lower():
             # make a plot of explained variance
@@ -4399,7 +4404,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             'tree': 'Multidimensional Analysis',
             'sample_id': self.app_data.sample_id,
             'plot_name': plot_name,
-            'plot_type': self.plot_type,
+            'plot_type': self.plot_style.plot_type,
             'field_type':self.field_type,
             'field':  self.field,
             'figure': canvas,
@@ -4594,7 +4599,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         canvas = mplc.MplCanvas(parent=self)
 
-        plot_type = self.plot_type
+        plot_type = self.plot_style.plot_type
 
         # data frame for plotting
         match plot_type:
@@ -4636,7 +4641,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         print('plot_cluster_map')
         canvas = mplc.MplCanvas(parent=self)
 
-        plot_type = self.plot_type
+        plot_type = self.plot_style.plot_type
         method = self.comboBoxClusterMethod.currentText()
 
         # data frame for plotting
@@ -4765,7 +4770,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #print(f"Second derivative of inertia: {second_derivative}")
         #print(f"Optimal number of clusters: {optimal_k}")
 
-        plot_type = self.plot_type
+        plot_type = self.plot_style.plot_type
         plot_name = f"{plot_type}_{method}"
         plot_data = {'inertia': inertia, '2nd derivative': second_derivative}
 
@@ -4773,7 +4778,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             'tree': 'Multidimensional Analysis',
             'sample_id': self.app_data.sample_id,
             'plot_name': plot_name,
-            'plot_type': self.plot_type,
+            'plot_type': self.plot_style.plot_type,
             'field_type':self.field_type,
             'field':  self.field,
             'figure': canvas,
@@ -4935,7 +4940,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.cluster_dict['active method'] = method
 
-        plot_type = self.plot_type
+        plot_type = self.plot_style.plot_type
 
         match plot_type:
             case 'cluster':
@@ -4955,7 +4960,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             'tree': 'Multidimensional Analysis',
             'sample_id': self.app_data.sample_id,
             'plot_name': plot_name,
-            'plot_type': self.plot_type,
+            'plot_type': self.plot_style.plot_type,
             'field_type':self.field_type,
             'field':  self.field,
             'figure': canvas,
@@ -5110,7 +5115,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.cluster_dict[method]['selected_clusters'] = []
 
             # update plot
-            if (self.plot_type not in ['cluster', 'cluster score']) and (self.field_type == 'cluster'):
+            if (self.plot_style.plot_type not in ['cluster', 'cluster score']) and (self.field_type == 'cluster'):
                 # trigger update to plot
                 self.plot_style.scheduler.schedule_update()
 
@@ -5174,7 +5179,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         ref_i = self.comboBoxNDimRefMaterial.currentIndex()
 
-        plot_type = self.plot_type
+        plot_type = self.plot_style.plot_type
         plot_data = None
 
         # Get quantile for plotting TEC & radar plots
@@ -5587,9 +5592,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # colors
         addNone = True
-        if self.plot_type in ['analyte map','PCA score','cluster','cluster score']:
+        if self.plot_style.plot_type in ['analyte map','PCA score','cluster','cluster score']:
             addNone = False
-        self.update_field_type_combobox(self.comboBoxColorByField, addNone=addNone, plot_type=self.plot_type)
+        self.update_field_type_combobox(self.comboBoxColorByField, addNone=addNone, plot_type=self.plot_style.plot_type)
         self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
         self.spinBoxColorField.setFixedWidth(20)
         self.spinBoxColorField.setMinimum(0)
@@ -5614,7 +5619,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         #print('check_analysis_type')
         self.check_analysis = True
-        self.update_field_type_combobox(self.comboBoxColorByField, addNone=True, plot_type=self.plot_type)
+        self.update_field_type_combobox(self.comboBoxColorByField, addNone=True, plot_type=self.plot_style.plot_type)
         self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
         self.spinBoxColorField.setMinimum(0)
         self.spinBoxColorField.setMaximum(self.comboBoxColorField.count() - 1)

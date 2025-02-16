@@ -159,6 +159,7 @@ class Styling(Observable):
 
     """    
     def __init__(self, parent, debug=False):
+        super().__init__()
         self.parent = parent
         self.debug = debug
         
@@ -203,11 +204,13 @@ class Styling(Observable):
 
     @plot_type.setter
     def plot_type(self, new_plot_type):
-        if new_plot_type != self._plot_type:
-            self._plot_type = new_plot_type
-            if self.parent.plot_type != new_plot_type and ui:
-                self.parent.comboBoxPlotType.setCurrentText(new_plot_type)
-            self.plot_type_callback(update=True)
+        if new_plot_type == self._plot_type:
+            return
+        self._plot_type = new_plot_type
+        if self.parent.plot_type != new_plot_type and ui:
+            self.parent.comboBoxPlotType.setCurrentText(new_plot_type)
+        self.plot_type_callback(update=True)
+        self.notify_observers("plot_type", new_plot_type)
 
     # xlim
     @property
@@ -215,9 +218,10 @@ class Styling(Observable):
         return self.style_dict[self._plot_type]['XLim']
 
     @xlim.setter
-    def xlim(self, value):
-        if value is None or self._is_valid_bounds(value):
-            self.style_dict[self._plot_type]['XLim'] = value
+    def xlim(self, new_value):
+        if new_value is None or self._is_valid_bounds(new_value):
+            self.style_dict[self._plot_type]['XLim'] = new_value
+            self.notify_observers("xlim", new_value)
         else:
             raise ValueError("xlim must be a list of two floats or None.")
 
@@ -227,9 +231,10 @@ class Styling(Observable):
         return self.style_dict[self._plot_type]['XLabel']
 
     @xlabel.setter
-    def xlabel(self, label):
-        if label is None or isinstance(label, str):
-            self.style_dict[self._plot_type]['XLabel'] = label
+    def xlabel(self, new_label):
+        if new_label is None or isinstance(new_label, str):
+            self.style_dict[self._plot_type]['XLabel'] = new_label
+            self.notify_observers("xlabel", new_label)
         else:
             raise TypeError("label must be of type str or None.")
 
@@ -239,9 +244,10 @@ class Styling(Observable):
         return self.style_dict[self._plot_type]['XScale']
 
     @xscale.setter
-    def xscale(self, scale):
-        if self._is_valid_scale(scale):
-            self.style_dict[self._plot_type]['XScale'] = scale
+    def xscale(self, new_scale):
+        if self._is_valid_scale(new_scale):
+            self.style_dict[self._plot_type]['XScale'] = new_scale
+            self.notify_observers("xscale", new_scale)
         else:
             raise TypeError("scale must be linear, log or logit.")
 
@@ -251,9 +257,10 @@ class Styling(Observable):
         return self.style_dict[self._plot_type]['YLim']
 
     @ylim.setter
-    def ylim(self, value):
-        if value is None or self._is_valid_bounds(value):
-            self.style_dict[self._plot_type]['YLim'] = value
+    def ylim(self, new_value):
+        if new_value is None or self._is_valid_bounds(new_value):
+            self.style_dict[self._plot_type]['YLim'] = new_value
+            self.notify_observers("ylim", new_value)
         else:
             raise ValueError("ylim must be a list of two floats or None.")
 
@@ -263,9 +270,10 @@ class Styling(Observable):
         return self.style_dict[self._plot_type]['YLabel']
 
     @ylabel.setter
-    def ylabel(self, label):
-        if label is None or isinstance(label, str):
-            self.style_dict[self._plot_type]['YLabel'] = label
+    def ylabel(self, new_label):
+        if new_label is None or isinstance(new_label, str):
+            self.style_dict[self._plot_type]['YLabel'] = new_label
+            self.notify_observers("ylabel", new_label)
         else:
             raise TypeError("label must be of type str or None.")
 
@@ -275,9 +283,10 @@ class Styling(Observable):
         return self.style_dict[self._plot_type]['YScale']
 
     @yscale.setter
-    def yscale(self, scale):
-        if self._is_valid_scale(scale):
-            self.style_dict[self._plot_type]['YScale'] = scale
+    def yscale(self, new_scale):
+        if self._is_valid_scale(new_scale):
+            self.style_dict[self._plot_type]['YScale'] = new_scale
+            self.notify_observers("yscale", new_scale)
         else:
             raise TypeError("scale must be linear, log or logit.")
 
@@ -855,6 +864,7 @@ class StylingDock(Styling):
 
         self.parent = parent
         self.debug = debug
+        self.add_observer(parent.update_widgets)
 
         self._signal_state = True
 
@@ -873,7 +883,7 @@ class StylingDock(Styling):
         parent.comboBoxMarker.clear()
         parent.comboBoxMarker.addItems(self.marker_dict.keys())
 
-        self._plot_type = self.parent.plot_type
+        self._plot_type = "analyte map"
 
         # set style theme
         parent.comboBoxStyleTheme.activated.connect(self.read_theme)
@@ -1595,8 +1605,12 @@ class StylingDock(Styling):
         """
         if self.debug:
             print("set_style_widgets")
+
         #print('set_style_widgets')
         parent = self.parent
+        if parent.app_data.sample_id == '':
+            return
+
         data = parent.app_data.data[parent.app_data.sample_id]
 
         tab_id = parent.toolBox.currentIndex()

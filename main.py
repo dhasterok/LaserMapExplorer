@@ -40,7 +40,7 @@ from sklearn.metrics import silhouette_score
 import skfuzzy as fuzz
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-from src.common.ChemPlot import plot_map_mpl, plot_small_histogram, plot_histogram, plot_correlation, get_scatter_data, plot_scatter, plot_ternarymap
+from src.common.ChemPlot import plot_map_mpl, plot_small_histogram, plot_histogram, plot_correlation, get_scatter_data, plot_scatter, plot_ternary_map
 from src.common.plot_spider import plot_spider_norm
 from src.common.scalebar import scalebar
 from src.app.LameIO import LameIO
@@ -236,12 +236,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Add this line to set the size policy
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
+        # The data dictionary will hold the data with a key for each sample
+        self.data = {}
+
         # initialize the application data
         #   contains:
         #       critical UI properties
         #       notifiers when properties change
-        #       data structure and properties (DataHandling), app_data.data
-        self.app_data = AppData()
+        #       data structure and properties (DataHandling), data
+        self.app_data = AppData(self.data)
         self.app_data.add_observer(self.update_widgets)
 
         # [convention] maps notifier properties with their associated UI update functions
@@ -279,6 +282,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "ternary_color_x": self.update_ternary_color_x_toolbutton,
             "ternary_color_y": self.update_ternary_color_y_toolbutton,
             "ternary_color_z": self.update_ternary_color_z_toolbutton,
+            "ternary_color_m": self.update_ternary_color_m_toolbutton,
             "norm_reference": self.update_norm_reference_combobox,
             "ndim_analyte_set": self.update_ndim_analyte_set_combobox,
             "ndim_quantile_index": self.update_ndim_quantile_index_combobox,
@@ -635,7 +639,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Selecting analytes
         #-------------------------
         # Connect the currentIndexChanged signal of comboBoxSampleId to load_data method
-        self.comboBoxSampleId.activated.connect(self.update_sample_id)
+        self.comboBoxSampleId.currentTextChanged.connect(self.update_sample_id)
         self.canvasWindow.currentChanged.connect(self.canvas_changed)
 
 
@@ -701,7 +705,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Scatter and Ternary Tab
         #-------------------------
-        self.toolButtonTernaryMap.clicked.connect(lambda: plot_ternarymap(self, self.app_data, self.plot_style))
+        self.toolButtonTernaryMap.clicked.connect(lambda: plot_ternary_map(self, self.data[self.app_data.sample_id], self.app_data, self.plot_style))
 
         self.comboBoxFieldTypeX.activated.connect(lambda: self.update_field_combobox(self.comboBoxFieldTypeX, self.comboBoxFieldX))
         self.comboBoxFieldTypeY.activated.connect(lambda: self.update_field_combobox(self.comboBoxFieldTypeY, self.comboBoxFieldY))
@@ -845,7 +849,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         # Styling Tab
         #-------------------------
-        self.plot_style = StylingDock(self, debug=self.logger_options['Styles'])
+        self.plot_style = StylingDock(self, self.data, debug=self.logger_options['Styles'])
         self.plot_style.load_theme_names()
         self.plot_style.add_observer(self.update_widgets)
 
@@ -1213,18 +1217,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.toolBox.currentIndex() == self.left_tab['scatter']:
             self.plot_style.scheduler.schedule_update()
 
-    def update_ternary_color_x_toolbutton(self, new_ternary_color_x):
+    def update_ternary_color_x_toolbutton(self, new_color):
         self.toolButtonTCmapXColor.setStyleSheet("background-color: %s;" % new_color)
         if self.toolBox.currentIndex() == self.left_tab['scatter']:
             self.plot_style.scheduler.schedule_update()
 
-    def update_ternary_color_y_toolbutton(self, new_ternary_color_y):
+    def update_ternary_color_y_toolbutton(self, new_color):
         self.toolButtonTCmapYColor.setStyleSheet("background-color: %s;" % new_color)
         if self.toolBox.currentIndex() == self.left_tab['scatter']:
             self.plot_style.scheduler.schedule_update()
 
-    def update_ternary_color_z_toolbutton(self, new_ternary_color_z):
+    def update_ternary_color_z_toolbutton(self, new_color):
         self.toolButtonTCmapZColor.setStyleSheet("background-color: %s;" % new_color)
+        if self.toolBox.currentIndex() == self.left_tab['scatter']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_ternary_color_m_toolbutton(self, new_color):
+        self.toolButtonTCmapMColor.setStyleSheet("background-color: %s;" % new_color)
         if self.toolBox.currentIndex() == self.left_tab['scatter']:
             self.plot_style.scheduler.schedule_update()
 
@@ -1545,7 +1554,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return
 
         if selection =='full':
-            if self.app_data.data:
+            if self.data:
                 # show dialog to to get confirmation from user
                 messageBoxResetSample = QMessageBox()
                 iconWarning = QIcon()
@@ -1564,8 +1573,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 elif response == QMessageBox.Save:
                     self.io.save_project()
 
-                #reset self.app_data.data
-                self.app_data.data = {}
+                #reset self.data
+                self.data = {}
                 # self.plot_widget_dict = {
                 #     'Analyte':{},
                 #     'Histogram':{},
@@ -1660,7 +1669,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.logger_options['Data']:
             print(f"change_sample: {self.app_data.sample_id}\n  save_analyis: {save_analysis}")
 
-        if self.app_data.data and save_analysis:
+        if self.data and save_analysis:
             # Create and configure the QMessageBox
             messageBoxChangeSample = QMessageBox()
             iconWarning = QIcon()
@@ -1700,29 +1709,29 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         index = self.app_data.sample_list.index(self.app_data.sample_id)
 
         # add sample to sample dictionary
-        if self.app_data.sample_id not in self.app_data.data:
+        if self.app_data.sample_id not in self.data:
             # load sample's *.lame file
             file_path = os.path.join(self.selected_directory, self.app_data.csv_files[index])
-            self.app_data.data[self.app_data.sample_id] = SampleObj(self.app_data.sample_id, file_path, self.comboBoxOutlierMethod.currentText(), self.comboBoxNegativeMethod.currentText(), self.ref_chem, debug=self.logger_options['Data'])
-            self.app_data.data[self.app_data.sample_id].add_observer(self.update_widgets)
+            self.data[self.app_data.sample_id] = SampleObj(self.app_data.sample_id, file_path, self.comboBoxOutlierMethod.currentText(), self.comboBoxNegativeMethod.currentText(), self.ref_chem, debug=self.logger_options['Data'])
+            self.data[self.app_data.sample_id].add_observer(self.update_widgets)
             
             # get selected_analyte columns
-            selected_analytes = self.app_data.data[self.app_data.sample_id].processed_data.match_attributes({'data_type': 'analyte', 'use': True})
+            selected_analytes = self.data[self.app_data.sample_id].processed_data.match_attributes({'data_type': 'analyte', 'use': True})
 
             # updates a label on the statusBar that displays the
             # number of negatives/zeros and nan values
             self.update_labels()
             
-            self.lineEditDX.editingFinished.connect(lambda: self.app_data.data[self.app_data.sample_id].update_resolution('x',  self.lineEditDX.value))
-            self.lineEditDY.editingFinished.connect(lambda: self.app_data.data[self.app_data.sample_id].update_resolution('y',  self.lineEditDY.value))
+            self.lineEditDX.editingFinished.connect(lambda: self.data[self.app_data.sample_id].update_resolution('x',  self.lineEditDX.value))
+            self.lineEditDY.editingFinished.connect(lambda: self.data[self.app_data.sample_id].update_resolution('y',  self.lineEditDY.value))
 
             # set slot for swapXY button
-            self.actionFullMap.triggered.connect(self.app_data.data[self.app_data.sample_id].reset_crop)
-            self.toolButtonSwapResolution.clicked.connect(self.app_data.data[self.app_data.sample_id].swap_resolution)
-            #self.toolButtonResolutionReset.clicked.connect(self.app_data.data[self.app_data.sample_id].reset_crop)
-            self.toolButtonPixelResolutionReset.clicked.connect(self.app_data.data[self.app_data.sample_id].reset_resolution)
+            self.actionFullMap.triggered.connect(self.data[self.app_data.sample_id].reset_crop)
+            self.toolButtonSwapResolution.clicked.connect(self.data[self.app_data.sample_id].swap_resolution)
+            #self.toolButtonResolutionReset.clicked.connect(self.data[self.app_data.sample_id].reset_crop)
+            self.toolButtonPixelResolutionReset.clicked.connect(self.data[self.app_data.sample_id].reset_resolution)
             # update data handling parameters
-            self.app_data.data[self.app_data.sample_id].update_aspect_ratio_controls()
+            self.data[self.app_data.sample_id].update_aspect_ratio_controls()
             # set analyte map to first available analyte
             if not selected_analytes:
                 self.plot_style.color_field = selected_analytes[0]
@@ -1732,19 +1741,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             #update filters, polygon, profiles with existing data
             self.actionClearFilters.setEnabled(False)
-            if np.all(self.app_data.data[self.app_data.sample_id].filter_mask):
+            if np.all(self.data[self.app_data.sample_id].filter_mask):
                 self.actionFilterToggle.setEnabled(False)
             else:
                 self.actionFilterToggle.setEnabled(True)
                 self.actionClearFilters.setEnabled(True)
 
-            if np.all(self.app_data.data[self.app_data.sample_id].polygon_mask):
+            if np.all(self.data[self.app_data.sample_id].polygon_mask):
                 self.actionPolygonMask.setEnabled(False)
             else:
                 self.actionPolygonMask.setEnabled(True)
                 self.actionClearFilters.setEnabled(True)
 
-            if np.all(self.app_data.data[self.app_data.sample_id].cluster_mask):
+            if np.all(self.data[self.app_data.sample_id].cluster_mask):
                 self.actionClusterMask.setEnabled(False)
             else:
                 self.actionClusterMask.setEnabled(True)
@@ -1758,10 +1767,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.info_dock.update_tab_widget()
 
         # update slot connections that depend on the sample
-        self.toolButtonOutlierReset.clicked.connect(lambda: self.app_data.data[self.app_data.sample_id].reset_data_handling(self.comboBoxOutlierMethod.currentText(), self.comboBoxNegativeMethod.currentText()))
+        self.toolButtonOutlierReset.clicked.connect(lambda: self.data[self.app_data.sample_id].reset_data_handling(self.comboBoxOutlierMethod.currentText(), self.comboBoxNegativeMethod.currentText()))
 
         # add spot data
-        if not self.app_data.data[self.app_data.sample_id].spotdata.empty:
+        if not self.data[self.app_data.sample_id].spotdata.empty:
             self.populate_spot_table()
 
         # reset filters
@@ -1784,13 +1793,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # precalculate custom fields
         if self.calculator.precalculate_custom_fields:
             for name in self.calc_dict.keys():
-                if name in self.app_data.data[self.app_data.sample_id].processed_data.columns:
+                if name in self.data[self.app_data.sample_id].processed_data.columns:
                     continue
                 self.comboBoxCalcFormula.setCurrentText(name)
                 self.calculate_new_field(save=False)
 
         #update UI with auto scale and neg handling parameters from 'Analyte Info'
-        analyte_list = self.app_data.data[self.app_data.sample_id].processed_data.match_attribute('data_type','analyte')
+        analyte_list = self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','analyte')
 
         self.update_spinboxes(field_type='Analyte', field=analyte_list[0])
 
@@ -1851,20 +1860,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 key: Analyte/Ratio name
                 value: scale used (linear/log/logit)
         """
-        #update self.app_data.data['norm'] with selection
-        for analyte in self.app_data.data[self.app_data.sample_id].processed_data.match_attribute('data_type','Analyte'):
+        #update self.data['norm'] with selection
+        for analyte in self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','Analyte'):
             if analyte in list(analyte_dict.keys()):
-                self.app_data.data[self.app_data.sample_id].processed_data.set_attribute(analyte, 'use', True)
+                self.data[self.app_data.sample_id].processed_data.set_attribute(analyte, 'use', True)
             else:
-                self.app_data.data[self.app_data.sample_id].processed_data.set_attribute(analyte, 'use', False)
+                self.data[self.app_data.sample_id].processed_data.set_attribute(analyte, 'use', False)
 
         for analyte, norm in analyte_dict.items():
             if '/' in analyte:
-                if analyte not in self.app_data.data[self.app_data.sample_id].processed_data.columns:
+                if analyte not in self.data[self.app_data.sample_id].processed_data.columns:
                     analyte_1, analyte_2 = analyte.split(' / ') 
-                    self.app_data.data[self.app_data.sample_id].compute_ratio(analyte_1, analyte_2)
+                    self.data[self.app_data.sample_id].compute_ratio(analyte_1, analyte_2)
 
-            self.app_data.data[self.app_data.sample_id].processed_data.set_attribute(analyte,'norm',norm)
+            self.data[self.app_data.sample_id].processed_data.set_attribute(analyte,'norm',norm)
 
         self.plot_tree.update_tree(norm_update=True)
         #update analysis type combo in styles
@@ -2453,7 +2462,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         match self.plot_style.plot_type:
             case 'analyte map':
                 # swap x and y
-                self.app_data.data[self.app_data.sample_id].swap_xy()
+                self.data[self.app_data.sample_id].swap_xy()
 
             case 'scatter' | 'heatmap':
                 if self.comboBoxFieldZ.currentText() != '':
@@ -2498,10 +2507,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Swaps ``lineEditDX`` and ``lineEditDY``
         """ 
-        self.lineEditDX.value = self.app_data.data[self.app_data.sample_id].dx
-        self.lineEditDY.value = self.app_data.data[self.app_data.sample_id].dy
+        self.lineEditDX.value = self.data[self.app_data.sample_id].dx
+        self.lineEditDY.value = self.data[self.app_data.sample_id].dy
 
-        array_size = self.app_data.data[self.app_data.sample_id].array_size
+        array_size = self.data[self.app_data.sample_id].array_size
         self.lineEditResolutionNx.value = array_size[1]
         self.lineEditResolutionNy.value = array_size[0]
 
@@ -2510,7 +2519,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def update_norm(self, norm, field=None):
 
-        self.app_data.data[self.app_data.sample_id].update_norm(norm=norm, field=field)
+        self.data[self.app_data.sample_id].update_norm(norm=norm, field=field)
 
         # trigger update to plot
         self.plot_style.scheduler.schedule_update()
@@ -2566,7 +2575,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             ref_chem = self.ref_data.iloc[ref_index]
             ref_chem.index = [col.replace('_ppm', '') for col in ref_chem.index]
 
-            self.app_data.data[self.app_data.sample_id].ref_chem = ref_chem
+            self.data[self.app_data.sample_id].ref_chem = ref_chem
 
             return ref_index
 
@@ -2592,7 +2601,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             tree = 'Ratio (normalized)'
             branch = self.app_data.sample_id
-            for ratio in self.app_data.data[branch].processed_data.match_attribute('data_type','ratio'):
+            for ratio in self.data[branch].processed_data.match_attribute('data_type','ratio'):
                 item, check = self.plot_tree.find_leaf(tree, branch, leaf=ratio)
                 if item is None:
                     raise TypeError(f"Missing item ({ratio}) in plot_tree.")
@@ -2601,8 +2610,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 if check:
                     # ratio normalized
                     # check if ratio can be normalized (note: normalization is not handled here)
-                    refval_1 = self.app_data.data[self.app_data.sample_id].ref_chem[re.sub(r'\d', '', analyte_1).lower()]
-                    refval_2 = self.app_data.data[self.app_data.sample_id].ref_chem[re.sub(r'\d', '', analyte_2).lower()]
+                    refval_1 = self.data[self.app_data.sample_id].ref_chem[re.sub(r'\d', '', analyte_1).lower()]
+                    refval_2 = self.data[self.app_data.sample_id].ref_chem[re.sub(r'\d', '', analyte_2).lower()]
                     ratio_flag = False
                     if (refval_1 > 0) and (refval_2 > 0):
                         ratio_flag = True
@@ -2636,7 +2645,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def update_labels(self):
         """Updates flags on statusbar indicating negative/zero and nan values within the processed_data_frame"""        
 
-        data = self.app_data.data[self.app_data.sample_id].processed_data
+        data = self.data[self.app_data.sample_id].processed_data
 
         columns = data.match_attributes({'data_type': 'analyte', 'use': True}) + data.match_attributes({'data_type': 'ratio', 'use': True})
         negative_count = any(data[columns] <= 0)
@@ -2704,7 +2713,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if analyte_1 and not analyte_2:
             if self.checkBoxApplyAll.isChecked():
                 # Apply to all analytes in sample
-                columns = self.app_data.data[sample_id].processed_data.columns
+                columns = self.data[sample_id].processed_data.columns
 
                 # clear existing plot info from tree to ensure saved plots using most recent data
                 for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
@@ -2713,12 +2722,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 columns = analyte_1
 
             # update column attributes
-            self.app_data.data[sample_id].processed_data.set_attribute(columns, 'auto_scale', auto_scale)
-            self.app_data.data[sample_id].processed_data.set_attribute(columns, 'upper_bound', ub)
-            self.app_data.data[sample_id].processed_data.set_attribute(columns, 'lower_bound', lb)
-            self.app_data.data[sample_id].processed_data.set_attribute(columns, 'diff_upper_bound', d_ub)
-            self.app_data.data[sample_id].processed_data.set_attribute(columns, 'diff_lower_bound', d_lb)
-            self.app_data.data[sample_id].processed_data.set_attribute(columns, 'negative_method', self.comboBoxNegativeMethod.currentText())
+            self.data[sample_id].processed_data.set_attribute(columns, 'auto_scale', auto_scale)
+            self.data[sample_id].processed_data.set_attribute(columns, 'upper_bound', ub)
+            self.data[sample_id].processed_data.set_attribute(columns, 'lower_bound', lb)
+            self.data[sample_id].processed_data.set_attribute(columns, 'diff_upper_bound', d_ub)
+            self.data[sample_id].processed_data.set_attribute(columns, 'diff_lower_bound', d_lb)
+            self.data[sample_id].processed_data.set_attribute(columns, 'negative_method', self.comboBoxNegativeMethod.currentText())
 
             # update data with new auto-scale/negative handling
             self.prep_data(sample_id)
@@ -2727,21 +2736,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             if self.checkBoxApplyAll.isChecked():
                 # Apply to all ratios in sample
-                self.app_data.data[sample_id]['ratio_info']['auto_scale'] = auto_scale
-                self.app_data.data[sample_id]['ratio_info']['upper_bound']= ub
-                self.app_data.data[sample_id]['ratio_info']['lower_bound'] = lb
-                self.app_data.data[sample_id]['ratio_info']['d_l_bound'] = d_lb
-                self.app_data.data[sample_id]['ratio_info']['d_u_bound'] = d_ub
+                self.data[sample_id]['ratio_info']['auto_scale'] = auto_scale
+                self.data[sample_id]['ratio_info']['upper_bound']= ub
+                self.data[sample_id]['ratio_info']['lower_bound'] = lb
+                self.data[sample_id]['ratio_info']['d_l_bound'] = d_lb
+                self.data[sample_id]['ratio_info']['d_u_bound'] = d_ub
                 # clear existing plot info from tree to ensure saved plots using most recent data
                 for tree in ['Ratio', 'Ratio (normalized)']:
                     self.plot_tree.clear_tree_data(tree)
                 self.prep_data(sample_id)
                 self.update_labels()
             else:
-                self.app_data.data[sample_id]['ratio_info'].loc[ (self.app_data.data[sample_id]['ratio_info']['analyte_1']==analyte_1)
-                                            & (self.app_data.data[sample_id]['ratio_info']['analyte_2']==analyte_2),'auto_scale']  = auto_scale
-                self.app_data.data[sample_id]['ratio_info'].loc[ (self.app_data.data[sample_id]['ratio_info']['analyte_1']==analyte_1)
-                                            & (self.app_data.data[sample_id]['ratio_info']['analyte_2']==analyte_2),
+                self.data[sample_id]['ratio_info'].loc[ (self.data[sample_id]['ratio_info']['analyte_1']==analyte_1)
+                                            & (self.data[sample_id]['ratio_info']['analyte_2']==analyte_2),'auto_scale']  = auto_scale
+                self.data[sample_id]['ratio_info'].loc[ (self.data[sample_id]['ratio_info']['analyte_1']==analyte_1)
+                                            & (self.data[sample_id]['ratio_info']['analyte_2']==analyte_2),
                                             ['upper_bound','lower_bound','d_l_bound', 'd_u_bound']] = [ub,lb,d_lb, d_ub]
                 self.prep_data(sample_id, analyte_1,analyte_2)
                 self.update_labels()
@@ -2771,15 +2780,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             
         if self.checkBoxApplyAll.isChecked():
             # Apply to all iolties
-            analyte_list = self.app_data.data[self.app_data.sample_id].processed_data.match_attribute('data_type', 'analyte') + self.app_data.data[self.app_data.sample_id].processed_data.match_attribute('data_type', 'ratio')
-            self.app_data.data[sample_id].negative_method = method
+            analyte_list = self.data[self.app_data.sample_id].processed_data.match_attribute('data_type', 'analyte') + self.data[self.app_data.sample_id].processed_data.match_attribute('data_type', 'ratio')
+            self.data[sample_id].negative_method = method
             # clear existing plot info from tree to ensure saved plots using most recent data
             for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
                 self.plot_tree.clear_tree_data(tree)
-            self.app_data.data[sample_id].prep_data()
+            self.data[sample_id].prep_data()
         else:
-            self.app_data.data[sample_id].negative_method = method
-            self.app_data.data[sample_id].prep_data(field)
+            self.data[sample_id].negative_method = method
+            self.data[sample_id].prep_data(field)
         
         self.update_labels()
         if hasattr(self,"mask_dock"):
@@ -2795,10 +2804,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ----------
         method : str
             Method used to remove outliers."""        
-        if self.app_data.data[self.app_data.sample_id].outlier_method == method:
+        if self.data[self.app_data.sample_id].outlier_method == method:
             return
 
-        self.app_data.data[self.app_data.sample_id].outlier_method = method
+        self.data[self.app_data.sample_id].outlier_method = method
 
         match method.lower():
             case 'none':
@@ -2870,11 +2879,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def apply_crop(self):
         
         sample_id = self.plot_info['sample_id']
-        data = self.app_data.data[sample_id]
+        data = self.data[sample_id]
 
         field_type = self.field_type
         field = self.field
-        current_plot_df = self.app_data.data[self.app_data.sample_id].get_map_data(field, field_type)
+        current_plot_df = self.data[self.app_data.sample_id].get_map_data(field, field_type)
         
         data.mask = data.mask[data.crop_mask]
         data.polygon_mask = data.polygon_mask[data.crop_mask]
@@ -2923,29 +2932,29 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.actionPolygonMask.setEnabled(False)
             self.actionClusterMask.setEnabled(False)
 
-            self.app_data.data[sample_id].mask = np.ones_like(self.app_data.data[sample_id].mask, dtype=bool)
+            self.data[sample_id].mask = np.ones_like(self.data[sample_id].mask, dtype=bool)
             return
 
         # apply interval filters
         if self.actionFilterToggle.isChecked():
-            filter_mask = self.app_data.data[sample_id].filter_mask
+            filter_mask = self.data[sample_id].filter_mask
         else:
-            filter_mask = np.ones_like( self.app_data.data[sample_id].mask, dtype=bool)
+            filter_mask = np.ones_like( self.data[sample_id].mask, dtype=bool)
 
         # apply polygon filters
         if self.actionPolygonMask.isChecked():
-            polygon_mask = self.app_data.data[sample_id].polygon_mask
+            polygon_mask = self.data[sample_id].polygon_mask
         else:
-            polygon_mask = np.ones_like( self.app_data.data[sample_id].mask, dtype=bool)
+            polygon_mask = np.ones_like( self.data[sample_id].mask, dtype=bool)
 
         # apply cluster mask
         if self.actionClusterMask.isChecked():
             # apply map mask
-            cluster_mask = self.app_data.data[sample_id].cluster_mask
+            cluster_mask = self.data[sample_id].cluster_mask
         else:
-            cluster_mask = np.ones_like( self.app_data.data[sample_id].mask, dtype=bool)
+            cluster_mask = np.ones_like( self.data[sample_id].mask, dtype=bool)
 
-        self.app_data.data[sample_id].mask = filter_mask & polygon_mask & cluster_mask
+        self.data[sample_id].mask = filter_mask & polygon_mask & cluster_mask
 
         # if single view is active
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
@@ -2967,7 +2976,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         sample_id = self.app_data.sample_id
 
         # create array of all true
-        self.app_data.data[sample_id].filter_mask = np.ones_like(self.app_data.data[sample_id].mask, dtype=bool)
+        self.data[sample_id].filter_mask = np.ones_like(self.data[sample_id].mask, dtype=bool)
 
         # remove all masks
         self.actionClearFilters.setEnabled(True)
@@ -2975,8 +2984,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionFilterToggle.setChecked(True)
 
         # apply interval filters
-        #print(self.app_data.data[sample_id].filter_df)
-        self.app_data.data[self.app_data.sample_id].apply_field_filters()
+        #print(self.data[sample_id].filter_df)
+        self.data[self.app_data.sample_id].apply_field_filters()
 
         if update_plot:
             self.apply_filters(fullmap=False)
@@ -2996,7 +3005,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         sample_id = self.app_data.sample_id
 
         # create array of all true
-        self.app_data.data[sample_id].polygon_mask = np.ones_like(self.app_data.data[sample_id].mask, dtype=bool)
+        self.data[sample_id].polygon_mask = np.ones_like(self.data[sample_id].mask, dtype=bool)
 
         # remove all masks
         self.actionClearFilters.setEnabled(True)
@@ -3021,15 +3030,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 # Create a grid of points covering the entire array
                 # x, y = np.meshgrid(np.arange(self.array.shape[1]), np.arange(self.array.shape[0]))
 
-                points = pd.concat([self.app_data.data[sample_id].processed_data['X'], self.app_data.data[sample_id].processed_data['Y']] , axis=1).values
+                points = pd.concat([self.data[sample_id].processed_data['X'], self.data[sample_id].processed_data['Y']] , axis=1).values
                 # Use the path to determine which points are inside the polygon
                 inside_polygon = path.contains_points(points)
 
                 # Reshape the result back to the shape of self.array
-                inside_polygon_mask = np.array(inside_polygon).reshape(self.app_data.data[self.app_data.sample_id].array_size, order =  'C')
+                inside_polygon_mask = np.array(inside_polygon).reshape(self.data[self.app_data.sample_id].array_size, order =  'C')
                 inside_polygon = inside_polygon_mask.flatten('F')
                 # Update the polygon mask - include points that are inside this polygon
-                self.app_data.data[sample_id].polygon_mask &= inside_polygon
+                self.data[sample_id].polygon_mask &= inside_polygon
 
                 #clear existing polygon lines
                 #self.polygon.clear_lines()
@@ -3066,9 +3075,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             selected_clusters = [cluster_idx for cluster_idx in range(self.cluster_dict[method]['n_clusters']) if cluster_idx not in selected_clusters]
 
         # create boolean array with selected_clusters == True
-        cluster_group = self.app_data.data[sample_id].processed_data.loc[:,method]
+        cluster_group = self.data[sample_id].processed_data.loc[:,method]
         ind = np.isin(cluster_group, selected_clusters)
-        self.app_data.data[sample_id].cluster_mask = ind
+        self.data[sample_id].cluster_mask = ind
 
         self.actionClearFilters.setEnabled(True)
         self.actionClusterMask.setEnabled(True)
@@ -3129,8 +3138,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 mouse_point = pos_view
                 x, y = mouse_point.x(), mouse_point.y()
 
-                x_i = round(x*array.shape[1]/self.app_data.data[self.app_data.sample_id].x_range)
-                y_i = round(y*array.shape[0]/self.app_data.data[self.app_data.sample_id].y_range)
+                x_i = round(x*array.shape[1]/self.data[self.app_data.sample_id].x_range)
+                y_i = round(y*array.shape[0]/self.data[self.app_data.sample_id].y_range)
 
                 # if hover within lasermap array
                 if 0 <= x_i < array.shape[1] and 0 <= y_i < array.shape[0] :
@@ -3184,8 +3193,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Convert the click position to plot coordinates
         self.array_x = array.shape[1]
         self.array_y = array.shape[0]
-        x_i = round(x*self.array_x/self.app_data.data[self.app_data.sample_id].x_range)
-        y_i = round(y*self.array_y/self.app_data.data[self.app_data.sample_id].y_range)
+        x_i = round(x*self.array_x/self.data[self.app_data.sample_id].x_range)
+        y_i = round(y*self.array_y/self.data[self.app_data.sample_id].y_range)
 
         # Ensure indices are within plot bounds
         if not(0 <= x_i < self.array_x) or not(0 <= y_i < self.array_y):
@@ -3271,8 +3280,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         x_pos = min(max(x + xOffset, 0), self.plot.viewRect().width() - self.zoomViewBox.width())
         y_pos = min(max(y + yOffset, 0), self.plot.viewRect().height() - self.zoomViewBox.height())
 
-        x_range = self.app_data.data[self.app_data.sample_id].x_range
-        y_range = self.app_data.data[self.app_data.sample_id].y_range
+        x_range = self.data[self.app_data.sample_id].x_range
+        y_range = self.data[self.app_data.sample_id].y_range
 
         # Update the position of the zoom view
         self.zoomViewBox.setGeometry(x_pos, y_pos, self.zoomViewBox.width(), self.zoomViewBox.height())
@@ -3466,9 +3475,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         self.polygon.plot_existing_polygon(self.plot)
                 else:
                     if self.toolBox.currentIndex() == self.left_tab['process']:
-                        canvas, plot_info = plot_map_mpl(self, self.app_data, self.plot_style, field_type, field, add_histogram=True)
+                        canvas, plot_info = plot_map_mpl(self, self.data[self.app_data.sample_id], self.app_data, self.plot_style, field_type, field, add_histogram=True)
                     else:
-                        canvas, plot_info = plot_map_mpl(self, self.app_data, self.plot_style, field_type, field, add_histogram=False)
+                        canvas, plot_info = plot_map_mpl(self, self.data[self.app_data.sample_id], self.app_data, self.plot_style, field_type, field, add_histogram=False)
 
                     self.add_plotwidget_to_canvas(plot_info)
                     self.plot_tree.add_tree_item(plot_info)
@@ -3484,20 +3493,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             case 'correlation':
                 if self.comboBoxCorrelationMethod.currentText() == 'none':
                     return
-                canvas, self.plot_info = plot_correlation(self, self.app_data, self.plot_style)
+                canvas, self.plot_info = plot_correlation(self, self.data[self.app_data.sample_id], self.app_data, self.plot_style)
 
 
             case 'TEC' | 'Radar':
                 self.plot_ndim()
 
             case 'histogram':
-                canvas, self.plot_info = plot_histogram(self, self.app_data, self.plot_style)
+                canvas, self.plot_info = plot_histogram(self, self.data[self.app_data.sample_id], self.app_data, self.plot_style)
 
 
             case 'scatter' | 'heatmap':
                 if self.comboBoxFieldX.currentText() == self.comboBoxFieldY.currentText():
                     return
-                canvas, self.plot_info = plot_scatter(self, self.app_data, self.plot_style)
+                canvas, self.plot_info = plot_scatter(self, data, self.app_data, self.plot_style)
 
 
             case 'variance' | 'vectors' | 'PCA scatter' | 'PCA heatmap' | 'PCA score':
@@ -3570,8 +3579,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.sv_widget.show()
 
             if (self.plot_style.plot_type == 'analyte map') and (self.toolBox.currentIndex() == self.left_tab['sample']):
-                current_map_df = self.app_data.data[self.app_data.sample_id].get_map_data(plot_info['plot_name'], plot_info['field_type'], norm=self.plot_style.cscale)
-                plot_small_histogram(self, self.app_data, self.plot_style, current_map_df)
+                current_map_df = self.data[self.app_data.sample_id].get_map_data(plot_info['plot_name'], plot_info['field_type'], norm=self.plot_style.cscale)
+                plot_small_histogram(self, self.data[self.app_data.sample_id], self.app_data, self.plot_style, current_map_df)
         # add figure to MultiView canvas
         elif self.canvasWindow.currentIndex() == self.canvas_tab['mv']:
             #print('add_plotwidget_to_canvas: MV')
@@ -3807,15 +3816,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             row = i // ncol
 
             # get data for current analyte
-            current_plot_df = self.app_data.data[self.app_data.sample_id].get_map_data(analyte, 'Analyte')
-            reshaped_array = np.reshape(current_plot_df['array'].values, self.app_data.data[self.app_data.sample_id].array_size, order=self.app_data.data[self.app_data.sample_id].order)
+            current_plot_df = self.data[self.app_data.sample_id].get_map_data(analyte, 'Analyte')
+            reshaped_array = np.reshape(current_plot_df['array'].values, self.data[self.app_data.sample_id].array_size, order=self.data[self.app_data.sample_id].order)
 
             # add image to canvas
             cmap = self.plot_style.get_colormap()
-            cax = canvas.axes.imshow(reshaped_array, cmap=cmap,  aspect=self.app_data.data[self.app_data.sample_id].aspect_ratio, interpolation='none')
+            cax = canvas.axes.imshow(reshaped_array, cmap=cmap,  aspect=self.data[self.app_data.sample_id].aspect_ratio, interpolation='none')
             font = {'family': 'sans-serif', 'stretch': 'condensed', 'size': 8, 'weight': 'semibold'}
-            canvas.axes.text( 0.025*self.app_data.data[self.app_data.sample_id].array_size[0],
-                    0.1*self.app_data.data[self.app_data.sample_id].array_size[1],
+            canvas.axes.text( 0.025*self.data[self.app_data.sample_id].array_size[0],
+                    0.1*self.data[self.app_data.sample_id].array_size[1],
                     analyte,
                     fontdict=font,
                     color=self.plot_style.overlay_color,
@@ -3983,14 +3992,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     case 'analyte map':
                         field_type = self.plot_info['field_type']
                         field = self.plot_info['field']
-                        save_data = self.app_data.data[self.app_data.sample_id].get_map_data(field, field_type)
+                        save_data = self.data[self.app_data.sample_id].get_map_data(field, field_type)
                     case 'gradient map':
                         field_type = self.plot_info['field_type']
                         field = self.plot_info['field']
-                        save_data = self.app_data.data[self.app_data.sample_id].get_map_data(field, field_type)
+                        save_data = self.data[self.app_data.sample_id].get_map_data(field, field_type)
                         filtered_image = self.noise_red_array
                     case 'cluster':
-                        save_data= self.app_data.data[self.app_data.sample_id].processed_data[field]
+                        save_data= self.data[self.app_data.sample_id].processed_data[field]
                     case _:
                         save_data = self.plot_info['data']
                     
@@ -4117,9 +4126,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         numpy.ndarray
             An rgba array
         """
-        mask = self.app_data.data[self.app_data.sample_id].mask
+        mask = self.data[self.app_data.sample_id].mask
 
-        array = np.reshape(map_df['array'].values, self.app_data.data[self.app_data.sample_id].array_size, order=self.app_data.data[self.app_data.sample_id].order)
+        array = np.reshape(map_df['array'].values, self.data[self.app_data.sample_id].array_size, order=self.data[self.app_data.sample_id].order)
 
         # Step 1: Normalize your data array for colormap application
         norm = colors.Normalize(vmin=np.nanmin(array), vmax=np.nanmax(array))
@@ -4129,12 +4138,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         rgb_array = cmap(norm(array))[:, :, :3]  # Drop the alpha channel returned by cmap
         rgb_array = (rgb_array * 255).astype(np.uint8)
 
-        # Step 3: Create an RGBA array where the alpha channel is based on self.app_data.data[self.app_data.sample_id].mask
+        # Step 3: Create an RGBA array where the alpha channel is based on self.data[self.app_data.sample_id].mask
         rgba_array = np.zeros((*rgb_array.shape[:2], 4), dtype=np.uint8)
         rgba_array[:, :, :3] = rgb_array  # Set RGB channels
-        mask_r = np.reshape(mask, self.app_data.data[self.app_data.sample_id].array_size, order=self.app_data.data[self.app_data.sample_id].order)
+        mask_r = np.reshape(mask, self.data[self.app_data.sample_id].array_size, order=self.data[self.app_data.sample_id].order)
 
-        rgba_array[:, :, 3] = np.where(mask_r, 255, 100)  # Set alpha channel based on self.app_data.data[self.app_data.sample_id].mask
+        rgba_array[:, :, 3] = np.where(mask_r, 255, 100)  # Set alpha channel based on self.data[self.app_data.sample_id].mask
 
         return array, rgba_array
 
@@ -4159,7 +4168,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # get data for current map
         scale = self.plot_style.cscale
-        map_df = self.app_data.data[self.app_data.sample_id].get_map_data(field, field_type, norm=scale)
+        map_df = self.data[self.app_data.sample_id].get_map_data(field, field_type, norm=scale)
 
         # store map_df to save_data if data needs to be exported
         self.save_data = map_df
@@ -4194,10 +4203,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         img_item = ImageItem(image=self.array, antialias=False)
 
         #set aspect ratio of rectangle
-        img_item.setRect(self.app_data.data[self.app_data.sample_id].x.min(),
-                self.app_data.data[self.app_data.sample_id].y.min(),
-                self.app_data.data[self.app_data.sample_id].x_range,
-                self.app_data.data[self.app_data.sample_id].y_range)
+        img_item.setRect(self.data[self.app_data.sample_id].x.min(),
+                self.data[self.app_data.sample_id].y.min(),
+                self.data[self.app_data.sample_id].x_range,
+                self.data[self.app_data.sample_id].y_range)
 
         #--- add non-interactive image with integrated color ------------------
         plotWindow = graphicWidget.addPlot(0,0,title=field.replace('_',' '))
@@ -4213,7 +4222,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ## These cut off parts of the map when plotting.
         #plotWindow.setRange(yRange=[self.y.min(), self.y.max()])
         #plotWindow.setLimits(xMin=self.x.min(), xMax=self.x.max(), yMin=self.y.min(), yMax = self.y.max())
-        #plotWindow.setLimits(maxXRange=self.app_data.data[self.app_data.sample_id].x_range, maxYRange=self.app_data.data[self.app_data.sample_id].y_range)
+        #plotWindow.setLimits(maxXRange=self.data[self.app_data.sample_id].x_range, maxYRange=self.data[self.app_data.sample_id].y_range)
 
         #supress right click menu
         plotWindow.setMenuEnabled(False)
@@ -4317,7 +4326,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # add small histogram
         if (self.toolBox.currentIndex() == self.left_tab['sample']) and (view == self.canvas_tab['sv']):
-            plot_small_histogram(self, self.app_data, self.plot_style, map_df)
+            plot_small_histogram(self, self.data[self.app_data.sample_id], self.app_data, self.plot_style, map_df)
 
 
     # -------------------------------------
@@ -4421,7 +4430,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.app_data.hist_num_bins = self.spinBoxNBins.value()
 
         # get currently selected data
-        current_plot_df = self.app_data.data[self.app_data.sample_id].get_map_data(self.comboBoxHistField.currentText(), self.comboBoxHistFieldType.currentText())
+        current_plot_df = self.data[self.app_data.sample_id].get_map_data(self.comboBoxHistField.currentText(), self.comboBoxHistFieldType.currentText())
 
         # update bin width
         range = (np.nanmax(current_plot_df['array']) - np.nanmin(current_plot_df['array']))
@@ -4447,7 +4456,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.app_data.hist_bin_width = self.doubleSpinBoxBinWidth.value()
         try:
             # get currently selected data
-            map_df = self.app_data.data[self.app_data.sample_id].get_map_data(self.comboBoxHistField.currentText(), self.comboBoxHistFieldType.currentText())
+            map_df = self.data[self.app_data.sample_id].get_map_data(self.comboBoxHistField.currentText(), self.comboBoxHistFieldType.currentText())
 
             # update n bins
             self.spinBoxNBins.setValue( int((np.nanmax(map_df['array']) - np.nanmin(map_df['array'])) / self.doubleSpinBoxBinWidth.value()) )
@@ -4473,7 +4482,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #print('compute_pca')
         self.pca_results = {}
 
-        df_filtered, analytes = self.app_data.data[self.app_data.sample_id].get_processed_data()
+        df_filtered, analytes = self.data[self.app_data.sample_id].get_processed_data()
 
         # Preprocess the data
         scaler = StandardScaler()
@@ -4487,7 +4496,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.plot_style.clim = [np.amin(self.pca_results.components_), np.amax(self.pca_results.components_)]
 
         # Add PCA scores to DataFrame for easier plotting
-        self.app_data.data[self.app_data.sample_id].add_columns('pca score',pca_scores.columns,pca_scores.values,self.app_data.data[self.app_data.sample_id].mask)
+        self.data[self.app_data.sample_id].add_columns('pca score',pca_scores.columns,pca_scores.values,self.data[self.app_data.sample_id].mask)
 
         if update_ui:
              #update min and max of PCA spinboxes
@@ -4521,7 +4530,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.app_data.sample_id == '':
             return
 
-        if self.update_pca_flag or not self.app_data.data[self.app_data.sample_id].processed_data.match_attribute('data_type','pca score'):
+        if self.update_pca_flag or not self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','pca score'):
             self.compute_pca()
 
         # Determine which PCA plot to create based on the combobox selection
@@ -4652,7 +4661,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # pca_dict contains 'components_' from PCA analysis with columns for each variable
         # No need to transpose for heatmap representation
-        analytes = self.app_data.data[self.app_data.sample_id].processed_data.match_attribute('data_type','analyte')
+        analytes = self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','analyte')
 
         components = self.pca_results.components_
         # Number of components and variables
@@ -4726,7 +4735,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return
 
         # field labels
-        analytes = self.app_data.data[self.app_data.sample_id].processed_data.match_attribute('data_type','analyte')
+        analytes = self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','analyte')
         nfields = len(analytes)
 
         # components
@@ -4782,9 +4791,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 print('(MainWindow.plot_score_map) Unknown score type'+plot_type)
                 return canvas
 
-        reshaped_array = np.reshape(self.app_data.data[self.app_data.sample_id].processed_data[field].values, self.app_data.data[self.app_data.sample_id].array_size, order=self.app_data.data[self.app_data.sample_id].order)
+        reshaped_array = np.reshape(self.data[self.app_data.sample_id].processed_data[field].values, self.data[self.app_data.sample_id].array_size, order=self.data[self.app_data.sample_id].order)
 
-        cax = canvas.axes.imshow(reshaped_array, cmap=self.plot_style.cmap, aspect=self.app_data.data[self.app_data.sample_id].aspect_ratio, interpolation='none')
+        cax = canvas.axes.imshow(reshaped_array, cmap=self.plot_style.cmap, aspect=self.data[self.app_data.sample_id].aspect_ratio, interpolation='none')
         canvas.array = reshaped_array
 
          # Add a colorbar
@@ -4799,7 +4808,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # add scalebar
         self.add_scalebar(canvas.axes)
 
-        return canvas, self.app_data.data[self.app_data.sample_id].processed_data[field]
+        return canvas, self.data[self.app_data.sample_id].processed_data[field]
 
     def plot_cluster_map(self):
         """Produces a map of cluster categories
@@ -4813,10 +4822,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         method = self.comboBoxClusterMethod.currentText()
 
         # data frame for plotting
-        #groups = self.app_data.data[self.app_data.sample_id][plot_type][method].values
-        groups = self.app_data.data[self.app_data.sample_id].processed_data[method].values
+        #groups = self.data[self.app_data.sample_id][plot_type][method].values
+        groups = self.data[self.app_data.sample_id].processed_data[method].values
 
-        reshaped_array = np.reshape(groups, self.app_data.data[self.app_data.sample_id].array_size, order=self.app_data.data[self.app_data.sample_id].order)
+        reshaped_array = np.reshape(groups, self.data[self.app_data.sample_id].array_size, order=self.data[self.app_data.sample_id].order)
 
         n_clusters = len(np.unique(groups))
 
@@ -4826,8 +4835,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #norm = colors.BoundaryNorm(boundaries, cmap.N, clip=True)
         norm = self.plot_style.color_norm(n_clusters)
 
-        #cax = canvas.axes.imshow(self.array.astype('float'), cmap=self.plot_style.cmap, norm=norm, aspect = self.app_data.data[self.app_data.sample_id].aspect_ratio)
-        cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect=self.app_data.data[self.app_data.sample_id].aspect_ratio)
+        #cax = canvas.axes.imshow(self.array.astype('float'), cmap=self.plot_style.cmap, norm=norm, aspect = self.data[self.app_data.sample_id].aspect_ratio)
+        cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect=self.data[self.app_data.sample_id].aspect_ratio)
         canvas.array = reshaped_array
         #cax.cmap.set_under(style['Scale']['OverlayColor'])
 
@@ -4845,7 +4854,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # add scalebar
         self.add_scalebar(canvas.axes)
 
-        return canvas, self.app_data.data[self.app_data.sample_id].processed_data[method]
+        return canvas, self.data[self.app_data.sample_id].processed_data[method]
 
     def cluster_performance_plot(self):
         """Plots used to estimate the optimal number of clusters
@@ -4968,9 +4977,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.app_data.sample_id == '':
             return
 
-        df_filtered, isotopes = self.app_data.data[self.app_data.sample_id].get_processed_data()
+        df_filtered, isotopes = self.data[self.app_data.sample_id].get_processed_data()
         filtered_array = df_filtered.values
-        array = filtered_array[self.app_data.data[self.app_data.sample_id].mask]
+        array = filtered_array[self.data[self.app_data.sample_id].mask]
 
         # get clustering options
         if max_clusters is None:
@@ -5011,7 +5020,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # set all masked data to cluster id -1
         if max_clusters is None:
-            self.app_data.data[self.app_data.sample_id].processed_data[method] = 99
+            self.data[self.app_data.sample_id].processed_data[method] = 99
 
             # Create labels array filled with -1
             #groups = np.full(filtered_array.shape[0], -1, dtype=int)
@@ -5033,9 +5042,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     # produce k-means model from data
                     model = kmeans.fit(array)
 
-                    #add k-means results to self.app_data.data
+                    #add k-means results to self.data
                     if max_clusters is None:
-                        self.app_data.data[self.app_data.sample_id].add_columns('cluster', method, model.predict(array), self.app_data.data[self.app_data.sample_id].mask)
+                        self.data[self.app_data.sample_id].add_columns('cluster', method, model.predict(array), self.data[self.app_data.sample_id].mask)
                     else:
                         kmeans.fit(array)
                         cluster_results.append(kmeans.inertia_)
@@ -5057,13 +5066,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     labels = np.argmax(u, axis=0)
 
                     if max_clusters is None:
-                        # assign cluster scores to self.app_data.data
+                        # assign cluster scores to self.data
                         for n in range(nc):
-                            #self.app_data.data[self.app_data.sample_id]['computed_data']['cluster score'].loc[:,str(n)] = pd.NA
-                            self.app_data.data[self.app_data.sample_id].add_columns('cluster score', 'cluster' + str(n), u[n-1,:], self.app_data.data[self.app_data.sample_id].mask)
+                            #self.data[self.app_data.sample_id]['computed_data']['cluster score'].loc[:,str(n)] = pd.NA
+                            self.data[self.app_data.sample_id].add_columns('cluster score', 'cluster' + str(n), u[n-1,:], self.data[self.app_data.sample_id].mask)
 
-                        #add cluster results to self.app_data.data
-                        self.app_data.data[self.app_data.sample_id].add_columns('cluster', method, labels, self.app_data.data[self.app_data.sample_id].mask)
+                        #add cluster results to self.data
+                        self.data[self.app_data.sample_id].add_columns('cluster', method, labels, self.data[self.app_data.sample_id].mask)
                     else:
                         # weighted sum of squared errors (WSSE)
                         wsse = np.sum((u ** exponent) * (dist ** 2))
@@ -5077,7 +5086,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             
         if max_clusters is None:
             # make sure the column is all integer values
-            self.app_data.data[self.app_data.sample_id].processed_data[method] = self.app_data.data[self.app_data.sample_id].processed_data[method].astype(int)  
+            self.data[self.app_data.sample_id].processed_data[method] = self.data[self.app_data.sample_id].processed_data[method].astype(int)  
 
             # update cluster table in style menu
             self.group_changed()
@@ -5101,8 +5110,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         method = self.comboBoxClusterMethod.currentText()
         if self.update_cluster_flag or \
-                self.app_data.data[self.app_data.sample_id].processed_data[method].empty or \
-                (method not in list(self.app_data.data[self.app_data.sample_id].processed_data.columns)):
+                self.data[self.app_data.sample_id].processed_data[method].empty or \
+                (method not in list(self.data[self.app_data.sample_id].processed_data.columns)):
             self.compute_clusters()
 
 
@@ -5212,7 +5221,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         method = self.comboBoxClusterMethod.currentText()
         self.cluster_dict['active method'] = method
 
-        if method not in self.app_data.data[self.app_data.sample_id].processed_data.columns:
+        if method not in self.data[self.app_data.sample_id].processed_data.columns:
             self.update_cluster_flag = True
 
         # Number of Clusters
@@ -5333,7 +5342,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if not self.ndim_list:
             return
 
-        df_filtered, _  = self.app_data.data[self.app_data.sample_id].get_processed_data()
+        df_filtered, _  = self.data[self.app_data.sample_id].get_processed_data()
 
         # match self.comboBoxNorm.currentText():
         #     case 'log':
@@ -5343,7 +5352,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #     case 'linear':
         #         # do nothing
         #         pass
-        df_filtered = df_filtered[self.app_data.data[self.app_data.sample_id].mask]
+        df_filtered = df_filtered[self.data[self.app_data.sample_id].mask]
 
         ref_i = self.comboBoxNDimRefMaterial.currentIndex()
 
@@ -5390,9 +5399,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 canvas = mplc.MplCanvas(parent=self, proj='radar')
 
                 axes_interval = 5
-                if cluster_flag and method in self.app_data.data[self.app_data.sample_id].processed_data.columns:
+                if cluster_flag and method in self.data[self.app_data.sample_id].processed_data.columns:
                     # Get the cluster labels for the data
-                    cluster_group = self.app_data.data[self.app_data.sample_id].processed_data[method][self.app_data.data[self.app_data.sample_id].mask]
+                    cluster_group = self.data[self.app_data.sample_id].processed_data[method][self.data[self.app_data.sample_id].mask]
 
                     df_filtered['clusters'] = cluster_group
                     df_filtered = df_filtered[df_filtered['clusters'].isin(clusters)]
@@ -5419,9 +5428,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 canvas = mplc.MplCanvas(parent=self)
 
                 yl = [np.inf, -np.inf]
-                if cluster_flag and method in self.app_data.data[self.app_data.sample_id].processed_data.columns:
+                if cluster_flag and method in self.data[self.app_data.sample_id].processed_data.columns:
                     # Get the cluster labels for the data
-                    cluster_group = self.app_data.data[self.app_data.sample_id].processed_data[method][self.app_data.data[self.app_data.sample_id].mask]
+                    cluster_group = self.data[self.app_data.sample_id].processed_data[method][self.data[self.app_data.sample_id].mask]
 
                     df_filtered['clusters'] = cluster_group
 
@@ -5489,7 +5498,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # 
         def on_use_checkbox_state_changed(row, state):
             # Update the 'use' value in the filter_df for the given row
-            self.app_data.data[self.app_data.sample_id].filter_df.at[row, 'use'] = state == Qt.Checked
+            self.data[self.app_data.sample_id].filter_df.at[row, 'use'] = state == Qt.Checked
 
         if calling_widget == 'analyteAdd':
             el_list = [self.comboBoxNDimAnalyte.currentText().lower()]
@@ -5497,7 +5506,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         elif calling_widget == 'analytesetAdd':
             el_list = self.ndim_list_dict[self.comboBoxNDimAnalyteSet.currentText()]
 
-        analytes_list = self.app_data.data[self.app_data.sample_id].processed_data.match_attribute('data_type','analyte')
+        analytes_list = self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','analyte')
 
         analytes = [col for iso in el_list for col in analytes_list if re.sub(r'\d', '', col).lower() == re.sub(r'\d', '',iso).lower()]
 
@@ -5582,9 +5591,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.tableWidgetViewGroups.setHorizontalHeaderLabels(['Name','Link','Color'])
 
         method = self.comboBoxClusterMethod.currentText()
-        if method in self.app_data.data[self.app_data.sample_id].processed_data.columns:
-            if not self.app_data.data[self.app_data.sample_id].processed_data[method].empty:
-                clusters = self.app_data.data[self.app_data.sample_id].processed_data[method].dropna().unique()
+        if method in self.data[self.app_data.sample_id].processed_data.columns:
+            if not self.data[self.app_data.sample_id].processed_data[method].empty:
+                clusters = self.data[self.app_data.sample_id].processed_data[method].dropna().unique()
                 clusters.sort()
 
                 self.cluster_dict[method]['selected_clusters'] = []
@@ -5668,13 +5677,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     QMessageBox.warning(self, "Clusters", "Duplicate name not allowed.")
                     return
 
-            # Update self.app_data.data[self.app_data.sample_id].processed_data with the new name
-            if self.cluster_dict['active method'] in self.app_data.data[self.app_data.sample_id].processed_data.columns:
+            # Update self.data[self.app_data.sample_id].processed_data with the new name
+            if self.cluster_dict['active method'] in self.data[self.app_data.sample_id].processed_data.columns:
                 # Find the rows where the value matches cluster_id
-                rows_to_update = self.app_data.data[self.app_data.sample_id].processed_data.loc[:,self.cluster_dict['active method']] == cluster_id
+                rows_to_update = self.data[self.app_data.sample_id].processed_data.loc[:,self.cluster_dict['active method']] == cluster_id
 
                 # Update these rows with the new name
-                self.app_data.data[self.app_data.sample_id].processed_data.loc[rows_to_update, self.cluster_dict['active method']] = new_name
+                self.data[self.app_data.sample_id].processed_data.loc[rows_to_update, self.cluster_dict['active method']] = new_name
 
             # update current_group to reflect the new cluster name
             self.cluster_dict[self.cluster_dict['active method']][cluster_id]['name'] = new_name
@@ -5819,7 +5828,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 return
 
         # get Auto scale parameters and neg handling from analyte info
-        data = self.app_data.data[self.app_data.sample_id].processed_data
+        data = self.data[self.app_data.sample_id].processed_data
         parameters = data.column_attributes[field]
 
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
@@ -5852,13 +5861,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.mask_dock.filter_tab.lineEditFMax.value = data[field].max()
 
     def update_ratio_df(self,sample_id,analyte_1, analyte_2,norm):
-        parameter = self.app_data.data[sample_id]['ratio_info'].loc[(self.app_data.data[sample_id]['ratio_info']['analyte_1'] == analyte_1) & (self.app_data.data[sample_id]['ratio_info']['analyte_2'] == analyte_2)]
+        parameter = self.data[sample_id]['ratio_info'].loc[(self.data[sample_id]['ratio_info']['analyte_1'] == analyte_1) & (self.data[sample_id]['ratio_info']['analyte_2'] == analyte_2)]
         if parameter.empty:
             ratio_info = {'sample_id': self.app_data.sample_id, 'analyte_1':analyte_1, 'analyte_2':analyte_2, 'norm': norm,
                             'upper_bound':np.nan,'lower_bound':np.nan,'d_bound':np.nan,'use': True,'auto_scale': True}
-            self.app_data.data[sample_id]['ratio_info'].loc[len(self.app_data.data[sample_id]['ratio_info'])] = ratio_info
+            self.data[sample_id]['ratio_info'].loc[len(self.data[sample_id]['ratio_info'])] = ratio_info
 
-            self.app_data.data[self.app_data.sample_id].prep_data(sample_id, analyte_1=analyte_1, analyte_2=analyte_2)
+            self.data[self.app_data.sample_id].prep_data(sample_id, analyte_1=analyte_1, analyte_2=analyte_2)
             self.update_labels()
 
     def toggle_help_mode(self):
@@ -5919,7 +5928,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         field_type_list = ['Analyte', 'Analyte (normalized)']
         
-        data_type_dict = self.app_data.data[self.app_data.sample_id].processed_data.get_attribute_dict('data_type')
+        data_type_dict = self.data[self.app_data.sample_id].processed_data.get_attribute_dict('data_type')
 
         # add check for ratios
         if 'ratio' in data_type_dict:
@@ -5967,15 +5976,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def update_bounds(self,ub=None,lb=None,d_ub=None,d_lb=None):
         sample_id = self.app_data.sample_id
         # Apply to all analytes in sample
-        columns = self.app_data.data[self.app_data.sample_id].processed_data.columns
+        columns = self.data[self.app_data.sample_id].processed_data.columns
 
         # update column attributes
         if (lb and ub):
-            self.app_data.data[sample_id].set_attribute(columns, 'upper_bound', ub)
-            self.app_data.data[sample_id].set_attribute(columns, 'lower_bound', lb)
+            self.data[sample_id].set_attribute(columns, 'upper_bound', ub)
+            self.data[sample_id].set_attribute(columns, 'lower_bound', lb)
         else:
-            self.app_data.data[sample_id].set_attribute(columns, 'diff_upper_bound', d_ub)
-            self.app_data.data[sample_id].set_attribute(columns, 'diff_lower_bound', d_lb)
+            self.data[sample_id].set_attribute(columns, 'diff_upper_bound', d_ub)
+            self.data[sample_id].set_attribute(columns, 'diff_lower_bound', d_lb)
 
         # update data with new auto-scale/negative handling
 

@@ -2,11 +2,12 @@ import copy
 import numpy as np
 import pandas as pd
 import src.common.csvdict as csvdict
+from src.app.config import BASEDIR
 
 from src.common.Observable import Observable
 
 class AppData(Observable):
-    def __init__(self):
+    def __init__(self, data):
         super().__init__()
         self.default_preferences = {'Units':{'Concentration': 'ppm', 'Distance': 'µm', 'Temperature':'°C', 'Pressure':'MPa', 'Date':'Ma', 'FontSize':11, 'TickDir':'out'}}
         # in future will be set from preference ui
@@ -16,7 +17,8 @@ class AppData(Observable):
         self.csv_files = []
 
         # a dictionary of sample_id containing SampleObj data class
-        self.data = {}
+        self.data = data
+
         # a dictionary of the field_types in self.data[sample_id].processed_data.  "coord" is excluded.
         self._field_dict = {}
 
@@ -72,6 +74,7 @@ class AppData(Observable):
         self._ternary_color_x = ""
         self._ternary_color_y = ""
         self._ternary_color_z = ""
+        self._ternary_color_m = ""
 
         self._norm_reference = ""
 
@@ -89,7 +92,7 @@ class AppData(Observable):
         if 'REE' in self.ndim_list_dict.keys():
             self._ndim_analyte_set = 'REE'
         else:
-            self._ndim_analyte_set = self.ndim_list_dict.keys(0)
+            self._ndim_analyte_set = list(self.ndim_list_dict.keys())[0]
 
         self.ndim_analyte_df = pd.DataFrame(columns=['use', 'analyte'])
 
@@ -253,7 +256,7 @@ class AppData(Observable):
     
     @hist_num_bins.setter
     def hist_num_bins(self, new_num_bins):
-        if new_num_bins == self._new_num_bins:
+        if new_num_bins == self._hist_num_bins:
             return
         
         self._hist_num_bins = new_num_bins
@@ -514,6 +517,18 @@ class AppData(Observable):
         self._ternary_color_z = new_ternary_color_z
         self.notify_observers("ternary_color_z", new_ternary_color_z)
 
+    @property
+    def ternary_color_m(self):
+        return self._ternary_color_m
+    
+    @ternary_color_m.setter
+    def ternary_color_m(self, new_ternary_color_m):
+        if new_ternary_color_m == self._ternary_color_m:
+            return
+    
+        self._ternary_color_m = new_ternary_color_m
+        self.notify_observers("ternary_color_m", new_ternary_color_m)
+
     ### Multidimensional Properties ###
     @property
     def norm_reference(self):
@@ -536,7 +551,7 @@ class AppData(Observable):
         if new_ndim_analyte_set == self._ndim_analyte_set:
             return
         elif new_ndim_analyte_set not in self.ndim_list_dict.keys():
-            ValueError(f"N Dim list ({new_dim_analyte_set}) is not a defined option.")
+            ValueError(f"N Dim list ({new_ndim_analyte_set}) is not a defined option.")
     
         self._ndim_analyte_set = new_ndim_analyte_set
         self.notify_observers("ndim_analyte_set", new_ndim_analyte_set) 

@@ -12,10 +12,10 @@ from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToo
 import src.common.CustomMplCanvas as mplc
 import src.common.format as fmt
 from src.common.colorfunc import get_hex_color, get_rgb_color
-
+from src.common.scalebar import scalebar
 from src.common.ternary_plot import ternary
 
-def plot_map_mpl(parent, app_data, plot_style, field_type, field, add_histogram=False):
+def plot_map_mpl(parent, data, app_data, plot_style, field_type, field, add_histogram=False):
     """Create a matplotlib canvas for plotting a map
 
     Create a map using ``mplc.MplCanvas``.
@@ -33,17 +33,17 @@ def plot_map_mpl(parent, app_data, plot_style, field_type, field, add_histogram=
     canvas = mplc.MplCanvas(parent=parent)
 
     # set color limits
-    if field not in app_data.data[app_data.sample_id].axis_dict:
+    if field not in data.axis_dict:
         plot_style.initialize_axis_values(field_type,field)
         plot_style.set_style_widgets()
 
     # get data for current map
-    #scale = app_data.data[app_data.sample_id].processed_data.get_attribute(field, 'norm')
+    #scale = data.processed_data.get_attribute(field, 'norm')
     scale = plot_style.cscale
-    map_df = app_data.data[app_data.sample_id].get_map_data(field, field_type)
+    map_df = data.get_map_data(field, field_type)
 
-    array_size = app_data.data[app_data.sample_id].array_size
-    aspect_ratio = app_data.data[app_data.sample_id].aspect_ratio
+    array_size = data.array_size
+    aspect_ratio = data.aspect_ratio
 
     # store map_df to save_data if data needs to be exported
     parent.save_data = map_df.copy()
@@ -56,7 +56,7 @@ def plot_map_mpl(parent, app_data, plot_style, field_type, field, add_histogram=
         map_df.loc[sorted_data.index, 'array'] = cdf.values
 
     # plot map
-    reshaped_array = np.reshape(map_df['array'].values, array_size, order=app_data.data[app_data.sample_id].order)
+    reshaped_array = np.reshape(map_df['array'].values, array_size, order=data.order)
         
     norm = plot_style.color_norm()
 
@@ -78,8 +78,8 @@ def plot_map_mpl(parent, app_data, plot_style, field_type, field, add_histogram=
     cax.set_clim(clim[0], clim[1])
 
     # use mask to create an alpha layer
-    mask = app_data.data[app_data.sample_id].mask.astype(float)
-    reshaped_mask = np.reshape(mask, array_size, order=app_data.data[app_data.sample_id].order)
+    mask = data.mask.astype(float)
+    reshaped_mask = np.reshape(mask, array_size, order=data.order)
 
     alphas = colors.Normalize(0, 1, clip=False)(reshaped_mask)
     alphas = np.clip(alphas, .4, 1)
@@ -110,7 +110,7 @@ def plot_map_mpl(parent, app_data, plot_style, field_type, field, add_histogram=
 
     # add small histogram
     if add_histogram:
-        plot_small_histogram(parent, app_data, plot_style, map_df)
+        plot_small_histogram(parent, data, app_data, plot_style, map_df)
 
     plot_info = {
         'tree': field_type,
@@ -128,7 +128,7 @@ def plot_map_mpl(parent, app_data, plot_style, field_type, field, add_histogram=
     
     return canvas, plot_info
 
-def plot_small_histogram(parent, app_data, plot_style, current_plot_df):
+def plot_small_histogram(parent, data, app_data, plot_style, current_plot_df):
     """Creates a small histogram on the Samples and Fields tab associated with the selected map
 
     Parameters
@@ -144,7 +144,7 @@ def plot_small_histogram(parent, app_data, plot_style, current_plot_df):
 
     # Histogram
     #remove by mask and drop rows with na
-    mask = app_data.data[app_data.sample_id].mask
+    mask = data.mask
     if plot_style.cscale == 'log' or 'logit':
         mask = mask & current_plot_df['array'].notna() & (current_plot_df['array'] > 0)
     else:
@@ -210,7 +210,7 @@ def plot_small_histogram(parent, app_data, plot_style, current_plot_df):
     parent.clear_layout(parent.widgetHistView.layout())
     parent.widgetHistView.layout().addWidget(canvas)
 
-def plot_histogram(parent, app_data, plot_style):
+def plot_histogram(parent, data, app_data, plot_style):
     """Plots a histogramn in the canvas window"""
     
     plot_data = None
@@ -226,10 +226,10 @@ def plot_histogram(parent, app_data, plot_style):
 
     if app_data.hist_plot_style == 'log-scaling' and app_data.hist_field_type == 'Analyte':
         print('raw_data for log-scaling')
-        x = get_scatter_data(app_data, plot_style, processed=False)['x']
+        x = get_scatter_data(data, app_data, plot_style, processed=False)['x']
     else:
         print('processed_data for histogram')
-        x = get_scatter_data(app_data, plot_style, processed=True)['x']
+        x = get_scatter_data(data, app_data, plot_style, processed=True)['x']
 
     # determine edges
     xmin,xmax,xscale,xlbl = plot_style.get_axis_values(x['type'],x['field'])
@@ -271,7 +271,7 @@ def plot_histogram(parent, app_data, plot_style):
 
         # Get the cluster labels for the data
         cluster_color, cluster_label, _ = plot_style.get_cluster_colormap(app_data.cluster_dict[method],alpha=plot_style.marker_alpha)
-        cluster_group = app_data.data[app_data.sample_id].processed_data.loc[:,method]
+        cluster_group = data.processed_data.loc[:,method]
         clusters = app_data.cluster_dict[method]['selected_clusters']
 
         # Plot histogram for all clusters
@@ -353,18 +353,18 @@ def plot_histogram(parent, app_data, plot_style):
     else:
         font = {'font':plot_style.font, 'size':plot_style.font_size}
 
-    # set y-limits as p-axis min and max in app_data.data[app_data.sample_id].axis_dict
+    # set y-limits as p-axis min and max in data.axis_dict
     if app_data.hist_plot_style != 'log-scaling' :
         pflag = False
-        if 'pstatus' not in app_data.data[app_data.sample_id].axis_dict[x['field']]:
+        if 'pstatus' not in data.axis_dict[x['field']]:
             pflag = True
-        elif app_data.data[app_data.sample_id].axis_dict[x['field']]['pstatus'] == 'auto':
+        elif data.axis_dict[x['field']]['pstatus'] == 'auto':
             pflag = True
 
         if pflag:
             ymin, ymax = canvas.axes.get_ylim()
             d = {'pstatus':'auto', 'pmin':fmt.oround(ymin,order=2,toward=0), 'pmax':fmt.oround(ymax,order=2,toward=1)}
-            app_data.data[app_data.sample_id].axis_dict[x['field']].update(d)
+            data.axis_dict[x['field']].update(d)
             plot_style.set_axis_widgets('y', x['field'])
 
         # grab probablility axes limits
@@ -526,9 +526,9 @@ def add_scalebar(app_data, plot_style, ax):
     length = plot_style.scale_length
     if (length is not None) and (direction != 'none'):
         if direction == 'horizontal':
-            dd = app_data.data[app_data.sample_id].dx
+            dd = data.dx
         else:
-            dd = app_data.data[app_data.sample_id].dy
+            dd = data.dy
         sb = scalebar( width=length,
                 pixel_width=dd,
                 units=app_data.preferences['Units']['Distance'],
@@ -541,7 +541,7 @@ def add_scalebar(app_data, plot_style, ax):
     else:
         return
 
-def plot_correlation(parent, app_data, plot_style):
+def plot_correlation(parent, data, app_data, plot_style):
     """Creates an image of the correlation matrix"""
     #print('plot_correlation')
 
@@ -549,15 +549,15 @@ def plot_correlation(parent, app_data, plot_style):
     canvas.axes.clear()
 
     # get the data for computing correlations
-    df_filtered, analytes = app_data.data[app_data.sample_id].get_processed_data()
+    df_filtered, analytes = data.get_processed_data()
 
     # Calculate the correlation matrix
     method = app_data.corr_method.lower()
-    if app_data.cluster_method not in app_data.data[app_data.sample_id].processed_data.columns:
+    if app_data.cluster_method not in data.processed_data.columns:
         correlation_matrix = df_filtered.corr(method=method)
     else:
         algorithm = app_data.cluster_method
-        cluster_group = app_data.data[app_data.sample_id].processed_data.loc[:,algorithm]
+        cluster_group = data.processed_data.loc[:,algorithm]
         selected_clusters = app_data.cluster_dict[algorithm]['selected_clusters']
 
         ind = np.isin(cluster_group, selected_clusters)
@@ -640,7 +640,7 @@ def plot_correlation(parent, app_data, plot_style):
 
     return canvas, plot_info
 
-def get_scatter_data(app_data, plot_style, processed=True):
+def get_scatter_data(data, app_data, plot_style, processed=True):
 
     scatter_dict = {'x': {'type': None, 'field': None, 'label': None, 'array': None},
             'y': {'type': None, 'field': None, 'label': None, 'array': None},
@@ -650,40 +650,40 @@ def get_scatter_data(app_data, plot_style, processed=True):
     match plot_style.plot_type:
         case 'histogram':
             if processed or app_data.hist_field_type != 'Analyte':
-                scatter_dict['x'] = app_data.data[app_data.sample_id].get_vector(app_data.hist_field_type, app_data.hist_field, norm=plot_style.xscale)
+                scatter_dict['x'] = data.get_vector(app_data.hist_field_type, app_data.hist_field, norm=plot_style.xscale)
             else:
-                scatter_dict['x'] = app_data.data[app_data.sample_id].get_vector(app_data.hist_field_type, app_data.hist_field, norm=plot_style.xscale, processed=False)
+                scatter_dict['x'] = data.get_vector(app_data.hist_field_type, app_data.hist_field, norm=plot_style.xscale, processed=False)
         case 'PCA scatter' | 'PCA heatmap':
-            scatter_dict['x'] = app_data.data[app_data.sample_id].get_vector('PCA score', f'PC{app_data.dim_red_x}', norm=plot_style.xscale)
-            scatter_dict['y'] = app_data.data[app_data.sample_id].get_vector('PCA score', f'PC{app_data.dim_red_y}', norm=plot_style.yscale)
+            scatter_dict['x'] = data.get_vector('PCA score', f'PC{app_data.dim_red_x}', norm=plot_style.xscale)
+            scatter_dict['y'] = data.get_vector('PCA score', f'PC{app_data.dim_red_y}', norm=plot_style.yscale)
             if (plot_style.color_field_type is None) or (plot_style.color_field != ''):
-                scatter_dict['c'] = app_data.data[app_data.sample_id].get_vector(plot_style.color_field_type, plot_style.color_field)
+                scatter_dict['c'] = data.get_vector(plot_style.color_field_type, plot_style.color_field)
         case _:
-            scatter_dict['x'] = app_data.data[app_data.sample_id].get_vector(app_data.x_field_type, app_data.x_field, norm=plot_style.xscale)
-            scatter_dict['y'] = app_data.data[app_data.sample_id].get_vector(app_data.y_field_type, app_data.y_field, norm=plot_style.yscale)
+            scatter_dict['x'] = data.get_vector(app_data.x_field_type, app_data.x_field, norm=plot_style.xscale)
+            scatter_dict['y'] = data.get_vector(app_data.y_field_type, app_data.y_field, norm=plot_style.yscale)
             if (plot_style.color_field_type is not None) and (plot_style.color_field != ''):
-                scatter_dict['z'] = app_data.data[app_data.sample_id].get_vector(app_data.z_field_type, app_data.z_field, norm=plot_style.zscale)
+                scatter_dict['z'] = data.get_vector(app_data.z_field_type, app_data.z_field, norm=plot_style.zscale)
             elif (app_data.z_field_type is not None) and (app_data.z_field != ''):
-                scatter_dict['c'] = app_data.data[app_data.sample_id].get_vector(plot_style.color_field_type, plot_style.color_field, norm=plot_style.cscale)
+                scatter_dict['c'] = data.get_vector(plot_style.color_field_type, plot_style.color_field, norm=plot_style.cscale)
 
     # set axes widgets
     if (scatter_dict['x']['field'] is not None) and (scatter_dict['y']['field'] != ''):
-        if scatter_dict['x']['field'] not in app_data.data[app_data.sample_id].axis_dict.keys():
+        if scatter_dict['x']['field'] not in data.axis_dict.keys():
             plot_style.initialize_axis_values(scatter_dict['x']['type'], scatter_dict['x']['field'])
             plot_style.set_axis_widgets('x', scatter_dict['x']['field'])
 
     if (scatter_dict['y']['field'] is not None) and (scatter_dict['y']['field'] != ''):
-        if scatter_dict['y']['field'] not in app_data.data[app_data.sample_id].axis_dict.keys():
+        if scatter_dict['y']['field'] not in data.axis_dict.keys():
             plot_style.initialize_axis_values(scatter_dict['y']['type'], scatter_dict['y']['field'])
             plot_style.set_axis_widgets('y', scatter_dict['y']['field'])
 
     if (scatter_dict['z']['field'] is not None) and (scatter_dict['z']['field'] != ''):
-        if scatter_dict['z']['field'] not in app_data.data[app_data.sample_id].axis_dict.keys():
+        if scatter_dict['z']['field'] not in data.axis_dict.keys():
             plot_style.initialize_axis_values(scatter_dict['z']['type'], scatter_dict['z']['field'])
             plot_style.set_axis_widgets('z', scatter_dict['z']['field'])
 
     if (scatter_dict['c']['field'] is not None) and (scatter_dict['c']['field'] != ''):
-        if scatter_dict['c']['field'] not in app_data.data[app_data.sample_id].axis_dict.keys():
+        if scatter_dict['c']['field'] not in data.axis_dict.keys():
             plot_style.set_color_axis_widgets()
             plot_style.set_axis_widgets('c', scatter_dict['c']['field'])
 
@@ -692,7 +692,7 @@ def get_scatter_data(app_data, plot_style, processed=True):
 # -------------------------------------
 # Scatter/Heatmap functions
 # -------------------------------------
-def plot_scatter(parent, app_data, plot_style, canvas=None):
+def plot_scatter(parent, data, app_data, plot_style, canvas=None):
     """Creates a plots from self.toolBox Scatter page.
 
     Creates both scatter and heatmaps (spatial histograms) for bi- and ternary plots.
@@ -706,7 +706,7 @@ def plot_scatter(parent, app_data, plot_style, canvas=None):
     plot_type = plot_style.plot_type 
 
     # get data for plotting
-    scatter_dict = get_scatter_data(app_data, plot_style)
+    scatter_dict = get_scatter_data(data, app_data, plot_style)
     if (scatter_dict['x']['field'] == '') or (scatter_dict['y']['field'] == ''):
         return
 
@@ -721,19 +721,19 @@ def plot_scatter(parent, app_data, plot_style, canvas=None):
         case 'scatter':
             if (scatter_dict['z']['field'] is None) or (scatter_dict['z']['field'] == ''):
                 # biplot
-                plot_info = biplot(canvas, app_data, plot_style, scatter_dict['x'],scatter_dict['y'],scatter_dict['c'])
+                plot_info = biplot(canvas, data, app_data, plot_style, scatter_dict['x'],scatter_dict['y'],scatter_dict['c'])
             else:
                 # ternary
-                plot_info = ternary_scatter(canvas, app_data, plot_style, scatter_dict['x'],scatter_dict['y'],scatter_dict['z'],scatter_dict['c'])
+                plot_info = ternary_scatter(canvas, data, app_data, plot_style, scatter_dict['x'],scatter_dict['y'],scatter_dict['z'],scatter_dict['c'])
 
         # heatmap
         case 'heatmap':
             # biplot
             if (scatter_dict['z']['field'] is None) or (scatter_dict['z']['field'] == ''):
-                plot_info = hist2dbiplot(canvas, app_data, plot_style, scatter_dict['x'],scatter_dict['y'])
+                plot_info = hist2dbiplot(canvas, data, app_data, plot_style, scatter_dict['x'],scatter_dict['y'])
             # ternary
             else:
-                plot_info = hist2dternplot(canvas, app_data, plot_style, scatter_dict['x'],scatter_dict['y'],scatter_dict['z'],scatter_dict['c'])
+                plot_info = hist2dternplot(canvas, data, app_data, plot_style, scatter_dict['x'],scatter_dict['y'],scatter_dict['z'],scatter_dict['c'])
 
     canvas.axes.margins(x=0)
 
@@ -742,7 +742,7 @@ def plot_scatter(parent, app_data, plot_style, canvas=None):
 
         return canvas, plot_info
 
-def biplot(canvas, app_data, plot_style, x, y, c):
+def biplot(canvas, data, app_data, plot_style, x, y, c):
     """Creates scatter bi-plots
 
     A general function for creating scatter plots of 2-dimensions.
@@ -781,7 +781,7 @@ def biplot(canvas, app_data, plot_style, x, y, c):
                 return
 
         cluster_color, cluster_label, cmap = plot_style.get_cluster_colormap(app_data.cluster_dict[method],alpha=plot_style.marker_alpha)
-        cluster_group = app_data.data[app_data.sample_id].processed_data.loc[:,method]
+        cluster_group = data.processed_data.loc[:,method]
         selected_clusters = app_data.cluster_dict[method]['selected_clusters']
 
         ind = np.isin(cluster_group, selected_clusters)
@@ -865,7 +865,7 @@ def biplot(canvas, app_data, plot_style, x, y, c):
 
     return plot_info
 
-def ternary_scatter(canvas, app_data, plot_style, x, y, z, c):
+def ternary_scatter(canvas, data, app_data, plot_style, x, y, z, c):
     """Creates ternary scatter plots
 
     A general function for creating ternary scatter plots.
@@ -906,7 +906,7 @@ def ternary_scatter(canvas, app_data, plot_style, x, y, z, c):
                 return
 
         cluster_color, cluster_label, cmap = plot_style.get_cluster_colormap(app_data.cluster_dict[method],alpha=plot_style.marker_alpha)
-        cluster_group = app_data.data[app_data.sample_id].processed_data.loc[:,method]
+        cluster_group = data.processed_data.loc[:,method]
         selected_clusters = app_data.cluster_dict[method]['selected_clusters']
 
         ind = np.isin(cluster_group, selected_clusters)
@@ -963,7 +963,7 @@ def ternary_scatter(canvas, app_data, plot_style, x, y, z, c):
 
     return plot_info
 
-def hist2dbiplot(canvas, app_data, plot_style, x, y):
+def hist2dbiplot(canvas, data, app_data, plot_style, x, y):
     """Creates 2D histogram figure
 
     A general function for creating 2D histograms (heatmaps).
@@ -980,7 +980,7 @@ def hist2dbiplot(canvas, app_data, plot_style, x, y):
     # color by field
     norm = plot_style.color_norm()
     h = canvas.axes.hist2d(x['array'], y['array'], bins=plot_style.resolution, norm=norm, cmap=plot_style.get_colormap())
-    self.add_colorbar(canvas, h[3])
+    add_colorbar(plot_style, canvas, h[3])
 
     # axes
     xmin, xmax, xscale, xlbl = plot_style.get_axis_values(x['type'],x['field'])
@@ -1037,7 +1037,7 @@ def hist2dbiplot(canvas, app_data, plot_style, x, y):
 
     return plot_info
 
-def hist2dternplot(canvas, app_data, plot_style, x, y, z, c):
+def hist2dternplot(canvas, data, app_data, plot_style, x, y, z, c):
     """Creates a ternary histogram figure
 
     A general function for creating scatter plots of 2-dimensions.
@@ -1102,7 +1102,7 @@ def hist2dternplot(canvas, app_data, plot_style, x, y, z, c):
 
     return plot_info
 
-def plot_ternarymap(parent, app_data, plot_style):
+def plot_ternary_map(parent, data, app_data, plot_style):
     """Creates map colored by ternary coordinate positions"""
     if plot_style.plot_type != 'ternary map':
         app_data.plot_type = 'ternary map'
@@ -1114,26 +1114,26 @@ def plot_ternarymap(parent, app_data, plot_style):
     bfield = app_data.y_field
     cfield = app_data.z_field
 
-    a = app_data.data[app_data.sample_id].processed_data.loc[:,afield].values
-    b = app_data.data[app_data.sample_id].processed_data.loc[:,bfield].values
-    c = app_data.data[app_data.sample_id].processed_data.loc[:,cfield].values
+    a = data.processed_data.loc[:,afield].values
+    b = data.processed_data.loc[:,bfield].values
+    c = data.processed_data.loc[:,cfield].values
 
-    ca = get_rgb_color(get_hex_color(self.toolButtonTCmapXColor.palette().button().color()))
-    cb = get_rgb_color(get_hex_color(self.toolButtonTCmapYColor.palette().button().color()))
-    cc = get_rgb_color(get_hex_color(self.toolButtonTCmapZColor.palette().button().color()))
-    cm = get_rgb_color(get_hex_color(self.toolButtonTCmapMColor.palette().button().color()))
+    ca = get_rgb_color(get_hex_color(app_data.ternary_color_x))
+    cb = get_rgb_color(get_hex_color(app_data.ternary_color_y))
+    cc = get_rgb_color(get_hex_color(app_data.ternary_color_z))
+    cm = get_rgb_color(get_hex_color(app_data.ternary_color_m))
 
     t = ternary(canvas.axes)
 
     cval = t.terncolor(a, b, c, ca, cb, cc, cp=cm)
 
-    M, N = app_data.data[app_data.sample_id].array_size
+    M, N = data.array_size
 
     # Reshape the array into MxNx3
     map_data = np.zeros((M, N, 3), dtype=np.uint8)
-    map_data[:len(cval), :, :] = cval.reshape(M, N, 3, order=app_data.data[app_data.sample_id].order)
+    map_data[:len(cval), :, :] = cval.reshape(M, N, 3, order=data.order)
 
-    canvas.axes.imshow(map_data, aspect=app_data.data[app_data.sample_id].aspect_ratio)
+    canvas.axes.imshow(map_data, aspect=data.aspect_ratio)
     canvas.array = map_data
 
     # add scalebar

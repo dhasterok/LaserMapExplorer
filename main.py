@@ -236,9 +236,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Add this line to set the size policy
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
+        # initialize the application data
+        #   contains:
+        #       critical UI properties
+        #       notifiers when properties change
+        #       data structure and properties (DataHandling), app_data.data
         self.app_data = AppData()
         self.app_data.add_observer(self.update_widgets)
 
+        # [convention] maps notifier properties with their associated UI update functions
+        #   format of the UI update functions should be self.update_[property_name]_[widget_type]
+        #   there should be an associated update function for the widgets to update properties
+        #   with a similar format for the function name without _[widget_type]
         self.property_update_map = {
             "sample_list": self.update_sample_list_combobox,
             "sample_id": self.update_sample_id_combobox,
@@ -285,22 +294,45 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "dim_red_precondition": self.update_dim_red_precondition_checkbox,
             "num_basis_for_precondition": self.update_num_basis_for_precondition_spinbox,
             "selected_clusters": self.update_selected_clusters_spinbox,
-            ### styling widgets
+            ### plot_style properties
             "plot_type": self.update_plot_type_combobox,
             "xlim": self.update_xlim_lineedits,
             "xlabel": self.update_xlabel_lineedit,
             "xscale": self.update_xscale_combobox,
             "ylim": self.update_ylim_lineedits,
             "ylabel": self.update_ylabel_lineedit,
-            "yscale": self.update_yscale_combobox
+            "yscale": self.update_yscale_combobox,
+            "zlim": self.update_zlim_lineedits,
+            "zlabel": self.update_zlabel_lineedit,
+            "zscale": self.update_zscale_combobox,
+            "aspect_ratio": self.update_aspect_ratio_lineedit,
+            "tick_dir": self.update_tick_dir_combobox,
+            "font_family": self.update_font_family_combobox,
+            "font_size": self.update_font_size_spinbox,
+            "scale_dir": self.update_scale_dir_combobox,
+            "scale_location": self.update_scale_location_combobox,
+            "scale_length": self.update_scale_length_lineedit,
+            "overlay_color": self.update_overlay_color_toolbutton,
+            "marker_symbol": self.update_marker_symbol_combobox,
+            "marker_size": self.update_marker_size_spinbox,
+            "marker_color": self.update_marker_color_toolbutton,
+            "marker_alpha": self.update_marker_alpha_slider,
+            "line_width": self.update_line_width_combobox,
+            "line_multiplier": self.update_line_multiplier_lineedit,
+            "line_color": self.update_line_color_toolbutton,
+            "c_field_type": self.update_color_field_type_combobox,
+            "c_field": self.update_color_field_combobox,
+            "cmap": self.update_cmap_combobox,
+            "cbar_reverse": self.update_cbar_reverse_checkbox,
+            "cbar_direction": self.update_cbar_direction_combobox,
+            "clim": self.update_clim_lineedits,
+            "clabel": self.update_clabel_lineedit,
+            "cscale": self.update_cscale_combobox,
+            "resolution": self.update_resolution_spinbox
         }
 
-        self.buttons_layout = None  # create a reference to your layout
-
         #Initialize nested data which will hold the main sets of data for analysis
-        self.app_data.data = self.app_data.data
         self.BASEDIR = BASEDIR
-        self.app_data.sample_id = ''
 
         self.lasermaps = {}
         self.prev_plot = ''
@@ -487,7 +519,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # create dictionaries for default plot styles
         #-------------------------
-
         self.plot_types = {self.left_tab['sample']: [0, 'analyte map', 'histogram', 'correlation'],
             self.left_tab['process']: [0, 'analyte map', 'gradient map'],
             self.left_tab['spot']: [0, 'analyte map', 'gradient map'],
@@ -820,7 +851,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # initalize self.comboBoxPlotType
         self.update_plot_type_combobox_options()
-        self.comboBoxPlotType.currentIndexChanged.connect(self.on_plot_type_changed)
+        self.comboBoxPlotType.currentIndexChanged.connect(self.update_plot_type)
 
         # Initialize a variable to store the current plot type
         self.plot_style.plot_type = 'analyte map'
@@ -1183,14 +1214,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.plot_style.scheduler.schedule_update()
 
     def update_ternary_color_x_toolbutton(self, new_ternary_color_x):
+        self.toolButtonTCmapXColor.setStyleSheet("background-color: %s;" % new_color)
         if self.toolBox.currentIndex() == self.left_tab['scatter']:
             self.plot_style.scheduler.schedule_update()
 
     def update_ternary_color_y_toolbutton(self, new_ternary_color_y):
+        self.toolButtonTCmapYColor.setStyleSheet("background-color: %s;" % new_color)
         if self.toolBox.currentIndex() == self.left_tab['scatter']:
             self.plot_style.scheduler.schedule_update()
 
     def update_ternary_color_z_toolbutton(self, new_ternary_color_z):
+        self.toolButtonTCmapZColor.setStyleSheet("background-color: %s;" % new_color)
         if self.toolBox.currentIndex() == self.left_tab['scatter']:
             self.plot_style.scheduler.schedule_update()
 
@@ -1283,10 +1317,153 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.correlation_method_callback()
 
-    def update_color_field_combobox(self, value):
+    def update_xlim_lineedits(self, new_xlim):
+        self.lineEditXLB.value = new_xlim[0]
+        self.lineEditXUB.value = new_xlim[1]
+        self.plot_style.scheduler.schedule_update()
+
+    def update_xlabel_lineedit(self, new_label):
+        self.lineEditXLabel.setText(new_label)
+        self.plot_style.scheduler.schedule_update()
+        
+    def update_xscale_combobox(self, new_scale):
+        self.comboBoxXScale.setCurrentText(new_scale)
+        self.plot_style.scheduler.schedule_update()
+
+    def update_ylim_lineedits(self, new_ylim):
+        self.lineEditYLB.value = new_ylim[0]
+        self.lineEditYUB.value = new_ylim[1]
+        self.plot_style.scheduler.schedule_update()
+
+    def update_ylabel_lineedit(self, new_label):
+        self.lineEditYLabel.setText(new_label)
+        self.plot_style.scheduler.schedule_update()
+
+    def update_yscale_combobox(self, new_scale):
+        self.comboBoxYScale.setCurrentText(new_scale)
+        self.plot_style.scheduler.schedule_update()
+
+    def update_zlim_lineedits(self, new_zlim):
+        self.lineEditZLB.value = new_zlim[0]
+        self.lineEditZUB.value = new_zlim[1]
+        self.plot_style.scheduler.schedule_update()
+
+    def update_zlabel_lineedit(self, new_label):
+        self.lineEditZLabel.setText(new_label)
+        self.plot_style.scheduler.schedule_update()
+        
+    def update_zscale_combobox(self, new_scale):
+        self.comboBoxZScale.setCurrentText(new_scale)
+        self.plot_style.scheduler.schedule_update()
+
+    def update_aspect_ratio_lineedit(self, new_aspect_ratio):
+        self.lineEditAspectRatio.value = new_aspect_ratio
+        self.plot_style.scheduler.schedule_update()
+
+    def update_tick_dir_combobox(self, new_tick_dir):
+        self.comboBoxTickDirection.setCurrentText(new_tick_dir)
+        self.plot_style.scheduler.schedule_update()
+
+    def update_scale_dir_combobox(self, new_scale_dir):
+        self.comboBoxScaleDirection.setCurrentText(new_scale_dir)
+        self.plot_style.scheduler.schedule_update()
+
+    def update_scale_location_combobox(self, new_scale_location):
+        self.comboBoxScaleLocation.setCurrentText(new_scale_location)
+        self.plot_style.scheduler.schedule_update()
+
+    def update_scale_length_lineedit(self, new_scale_length):
+        self.lineEditScaleLength.value = new_scale_length
+        self.plot_style.scheduler.schedule_update()
+
+    def update_overlay_color_toolbutton(self, new_color):
+        self.toolButtonOverlayColor.setStyleSheet("background-color: %s;" % new_color)
+        self.plot_style.scheduler.schedule_update()
+
+    def update_marker_symbol_combobox(self, new_marker_symbol):
+        self.comboBoxMarker.setCurrentText(new_marker_symbol)
+        self.plot_style.scheduler.schedule_update()
+
+    def update_marker_size_spinbox(self, new_marker_size):
+        self.doubleSpinBoxMarkerSize.setValue(new_marker_size)
+        self.plot_style.scheduler.schedule_update()
+
+    def update_marker_color_toolbutton(self, new_color):
+        self.toolButtonMarkerColor.setStyleSheet("background-color: %s;" % new_color)
+        self.plot_style.scheduler.schedule_update()
+
+    def update_marker_alpha_slider(self, new_alpha):
+        self.horizontalSliderMarkerAlpha.setValue(new_alpha)
+        self.plot_style.scheduler.schedule_update()
+
+    def update_line_width_combobox(self, new_line_width):
+        self.doubleSpinBoxLineWidth.setValue(new_line_width)
+        self.plot_style.scheduler.schedule_update()
+
+    def update_line_multiplier_lineedit(self, new_multiplier):
+        self.lineEditLengthMultiplier.value = new_multiplier
+        self.plot_style.scheduler.schedule_update()
+
+    def update_line_color_toolbutton(self, new_color):
+        self.toolButtonLineColor.setStyleSheet("background-color: %s;" % new_color)
+        self.plot_style.scheduler.schedule_update()
+
+    def update_font_family_combobox(self, new_font_family):
+        self.fontComboBox.setCurrentText(new_font_family)
+        self.plot_style.scheduler.schedule_update()
+
+    def update_font_size_spinbox(self, new_font_size):
+        self.doubleSpinBoxFontSize.setValue(new_font_size)
+        self.plot_style.scheduler.schedule_update()
+
+    def update_color_field_type_combobox(self, new_field_type):
+        self.comboBoxColorByField.setCurrentText(new_field_type)
+
+        self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
+        self.plot_style.color_field = self.comboBoxColorField.currentText()
+        self.plot_style.update_color_field_spinbox()
+
+        self.plot_style.scheduler.schedule_update()
+
+    def update_color_field_combobox(self, new_field):
+        self.comboBoxColorField.setCurrentText(new_field)
+        self.plot_style.scheduler.schedule_update()
+
+    def update_color_field_spinbox(self, value):
         self.spinBoxColorField.setMinimum(0)
         self.spinBoxColorField.setMaximum(self.comboBoxColorField.count() - 1)
         #self.spinBoxFieldIndex.valueChanged.connect(self.hist_field_update)
+
+    def update_cmap_combobox(self, new_colormap):
+        self.comboBoxFieldColormap.setCurrentText(new_colormap)
+        self.plot_style.scheduler.schedule_update()
+
+    def update_cbar_reverse_checkbox(self, new_value):
+        self.checkBoxReverseColormap.setChecked(new_value)
+        self.plot_style.scheduler.schedule_update()
+
+    def update_cbar_direction_combobox(self, new_cbar_direction):
+        self.comboBoxCbarDirection.setCurrentText(new_cbar_direction)
+        self.plot_style.scheduler.schedule_update()
+
+    def update_clim_lineedits(self, new_xlim):
+        self.lineEditColorLB.value = new_xlim[0]
+        self.lineEditColorUB.value = new_xlim[1]
+        self.plot_style.scheduler.schedule_update()
+
+    def update_clabel_lineedit(self, new_label):
+        self.lineEditCbarLabel.setText(new_label)
+        self.plot_style.scheduler.schedule_update()
+        
+    def update_cscale_combobox(self, new_scale):
+        self.comboBoxColorScale.setCurrentText(new_scale)
+        self.plot_style.scheduler.schedule_update()
+
+    def update_resolution_spinbox(self, new_resolution):
+        self.spinBoxHeatmapResolution.setValue(new_resolution)
+
+        if self.plot_style.plot_type == "heatmap":
+            self.plot_style.scheduler.schedule_update()
 
     def toggle_spot_tab(self):
         #self.actionSpotTools.toggle()
@@ -1345,10 +1522,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             sys.stdout = sys.__stdout__  # Restore to default stdout    
 
     
-    def on_plot_type_changed(self):
-        # Update self.plot_style.plot_type whenever combo box changes
-        self.plot_style.plot_type = self.comboBoxPlotType.currentText()
-
     def on_field_type_changed(self):
         # Update self.field_type whenever combo box changes
         self.field_type = self.comboBoxColorByField.currentText()
@@ -2133,34 +2306,51 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.plot_style.set_style_widgets(self.plot_style.plot_type)
 
     def update_plot_type_combobox(self, new_plot_type):
-        self.comboBoxPlotType.currentText(new_plot_type)
-        self.plot_style.scheduler.schedule_update()
+        self.comboBoxPlotType.setCurrentText(new_plot_type)
 
-    def update_xlim_lineedits(self, new_xlim):
-        self.lineEditXLB.value = new_xlim[0]
-        self.lineEditXUB.value = new_xlim[1]
-        self.plot_style.scheduler.schedule_update()
+        self.plot_style.toggle_style_widgets()
 
-    def update_xlabel_lineedit(self, new_label):
-        self.lineEditXLabel.setText(new_label)
-        self.plot_style.scheduler.schedule_update()
+        self.plot_types[self.toolBox.currentIndex()][0] = self.comboBoxPlotType.currentIndex()
+
+        match self.plot_style.plot_type.lower():
+            case 'analyte map' | 'gradient map':
+                self.actionSwapAxes.setEnabled(True)
+            case 'scatter' | 'heatmap':
+                self.actionSwapAxes.setEnabled(True)
+            case 'correlation':
+                self.actionSwapAxes.setEnabled(False)
+                if self.comboBoxCorrelationMethod.currentText() == 'None':
+                    self.comboBoxCorrelationMethod.setCurrentText('Pearson')
+            case 'cluster performance':
+                self.labelClusterMax.show()
+                self.spinBoxClusterMax.show()
+                self.labelNClusters.hide()
+                self.spinBoxNClusters.hide()
+            case 'cluster' | 'cluster score':
+                self.labelClusterMax.hide()
+                self.spinBoxClusterMax.hide()
+                self.labelNClusters.show()
+                self.spinBoxNClusters.show()
+            case _:
+                self.actionSwapAxes.setEnabled(False)
+
+        self.signal_state = False
+        self.plot_style.set_style_widgets(plot_type=self.plot_style.plot_type)
+        self.signal_state = True
+        #self.check_analysis_type()
+
+        if self.plot_style.plot_type != '':
+            self.plot_style.scheduler.schedule_update()
+
+    def update_plot_type(self):
+        """Updates plot_style.plot_type in the StylingDock.
         
-    def update_xscale_combobox(self, new_scale):
-        self.comboBoxXScale.setCurrentText(new_scale)
-        self.plot_style.scheduler.schedule_update()
+        Updates the plot_type.  Updates to other plot style properties and widgets
+        is triggered by this change, but not handled in this method.
 
-    def update_ylim_lineedits(self, new_ylim):
-        self.lineEditYLB.value = new_ylim[0]
-        self.lineEditYUB.value = new_ylim[1]
-        self.plot_style.scheduler.schedule_update()
-
-    def update_ylabel_lineedit(self, new_label):
-        self.lineEditYLabel.setText(new_label)
-        self.plot_style.scheduler.schedule_update()
-
-    def update_yscale_combobox(self, new_scale):
-        self.comboBoxYScale.setCurrentText(new_scale)
-        self.plot_style.scheduler.schedule_update()
+        :see also: StylingDock.plot_type, self.update_plot_type_combobox
+        """
+        self.plot_style.plot_type = self.comboBoxPlotType.currentText()
 
 
 
@@ -2341,28 +2531,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if field != self.field:
                 self.comboBoxColorField.setCurrentText(field)
                 self.plot_style.color_field_callback(plot)
-    def update_resolution(self, axis ):  
-        """Updates DX and DY for a dataframe
-
-        Recalculates X and Y for a dataframe when the user changes the value of
-        ``MainWindow.lineEditDX`` or ``MainWindow.lineEditDY``
-
-        Parameter
-        ---------
-        axis : str
-            Indicates axis to update resolution, 'x' or 'y'.
-        """
-        # update resolution based on user change
-        if axis == 'x':
-            self.app_data.data[self.app_data.sample_id].dx = self.lineEditDX.value
-        elif axis == 'y':
-            self.app_data.data[self.app_data.sample_id].dy = self.lineEditDY.value
-
-        # update aspect ratio of maps
-        self.app_data.update_aspect_ratio_controls()
-
-        # trigger update to plot
-        self.plot_style.scheduler.schedule_update()
 
     
     def change_ref_material(self, ref_val):

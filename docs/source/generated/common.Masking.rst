@@ -30,12 +30,14 @@ common.Masking
       CustomComboBox
       CustomDockWidget
       CustomLineEdit
+      CustomTableWidget
       Figure
       FigureCanvas
       FilterTab
       MaskDock
       MaskObj
       PathCollection
+      PolygonManager
       PolygonTab
       QAbstractItemView
       QAction

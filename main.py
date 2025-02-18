@@ -240,14 +240,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # The data dictionary will hold the data with a key for each sample
         self.data = {}
-        # until there is actually some data to store, disable certain actions
-        self.actionReset.setEnabled(False)
-        self.actionFilters.setEnabled(False)
-        self.actionPolygons.setEnabled(False)
-        self.actionClusters.setEnabled(False)
-        self.actionProfiles.setEnabled(False)
-        self.actionInfo.setEnabled(False)
-        self.actionNotes.setEnabled(False)
+        # until there is actually some data to store, disable certain widgets
+        self.toggle_data_widgets()
 
         # initialize the application data
         #   contains:
@@ -1663,8 +1657,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
                 ##### Add back in the persistent filters
 
-                #clear polygons
-                self.mask_dock.polygon_tab.clear_polygons()
+            #clear polygons
+            if hasattr(self, "polygon"):
+                # self.polygon is created in mask_dock.polygon_tab
+                self.polygon.clear_polygons()
 
             #clear profiling
             if hasattr(self, "profile_dock"):
@@ -1718,47 +1714,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # if note dock has been open, set notes file to current filename
         if hasattr(self,'notes'):
             # change notes file to new sample.  This will initiate the new file and autosave timer.
-            self.notes.notes_file = os.path.join(self.selected_directory,self.app_data.sample_id+'.rst')
+            self.notes.notes_file = os.path.join(self.app_data.selected_directory,self.app_data.sample_id+'.rst')
 
         # obtain index of current sample
         index = self.app_data.sample_list.index(self.app_data.sample_id)
 
         # add sample to sample dictionary
         if self.app_data.sample_id not in self.data:
-            self.actionReset.setEnabled(True)
-            self.actionFilters.setEnabled(True)
-            self.actionPolygons.setEnabled(True)
-            self.actionClusters.setEnabled(True)
-            self.actionProfiles.setEnabled(True)
-            self.actionInfo.setEnabled(True)
-            self.actionNotes.setEnabled(True)
-
             # load sample's *.lame file
-            file_path = os.path.join(self.selected_directory, self.app_data.csv_files[index])
+            file_path = os.path.join(self.app_data.selected_directory, self.app_data.csv_files[index])
             self.data[self.app_data.sample_id] = SampleObj(self.app_data.sample_id, file_path, self.comboBoxOutlierMethod.currentText(), self.comboBoxNegativeMethod.currentText(), self.ref_chem, debug=self.logger_options['Data'])
             self.data[self.app_data.sample_id].add_observer(self.update_widgets)
+
+            # enable widgets that require self.data not be empty
+            self.toggle_data_widgets()
             
-            # get selected_analyte columns
-            selected_analytes = self.data[self.app_data.sample_id].processed_data.match_attributes({'data_type': 'analyte', 'use': True})
-
-            # updates a label on the statusBar that displays the
-            # number of negatives/zeros and nan values
-            self.update_labels()
-            
-            self.lineEditDX.editingFinished.connect(lambda: self.data[self.app_data.sample_id].update_resolution('x',  self.lineEditDX.value))
-            self.lineEditDY.editingFinished.connect(lambda: self.data[self.app_data.sample_id].update_resolution('y',  self.lineEditDY.value))
-
-            # set slot for swapXY button
-            self.actionFullMap.triggered.connect(self.data[self.app_data.sample_id].reset_crop)
-            self.toolButtonSwapResolution.clicked.connect(self.data[self.app_data.sample_id].swap_resolution)
-            #self.toolButtonResolutionReset.clicked.connect(self.data[self.app_data.sample_id].reset_crop)
-            self.toolButtonPixelResolutionReset.clicked.connect(self.data[self.app_data.sample_id].reset_resolution)
-            # update data handling parameters
-            self.data[self.app_data.sample_id].update_aspect_ratio_controls()
-            # set analyte map to first available analyte
-            if not selected_analytes:
-                self.plot_style.color_field = selected_analytes[0]
-
+            # add sample to the plot tree
             self.plot_tree.add_sample(self.app_data.sample_id)
             self.plot_tree.update_tree()
         else:
@@ -1784,6 +1755,27 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             self.update_tables()
 
+        # updates a label on the statusBar that displays the
+        # number of negatives/zeros and nan values
+        self.update_labels()
+        
+        # update slots that are connected to data
+        self.lineEditDX.editingFinished.connect(lambda: self.data[self.app_data.sample_id].update_resolution('x',  self.lineEditDX.value))
+        self.lineEditDY.editingFinished.connect(lambda: self.data[self.app_data.sample_id].update_resolution('y',  self.lineEditDY.value))
+        self.actionFullMap.triggered.connect(self.data[self.app_data.sample_id].reset_crop)
+        self.toolButtonSwapResolution.clicked.connect(self.data[self.app_data.sample_id].swap_resolution)
+        self.toolButtonPixelResolutionReset.clicked.connect(self.data[self.app_data.sample_id].reset_resolution)
+
+        # update data handling parameters
+        self.data[self.app_data.sample_id].update_aspect_ratio_controls()
+
+        # get selected_analyte columns
+        selected_analytes = self.data[self.app_data.sample_id].processed_data.match_attributes({'data_type': 'analyte', 'use': True})
+
+        # set analyte map to first available analyte
+        if not selected_analytes:
+            self.plot_style.color_field = selected_analytes[0]
+
         self.init_tabs()
         
         if hasattr(self,"info_dock"):
@@ -1793,8 +1785,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolButtonOutlierReset.clicked.connect(lambda: self.data[self.app_data.sample_id].reset_data_handling(self.comboBoxOutlierMethod.currentText(), self.comboBoxNegativeMethod.currentText()))
 
         # add spot data
-        if not self.data[self.app_data.sample_id].spotdata.empty:
-            self.populate_spot_table()
+        if hasattr(self, "spot_tab") and not self.data[self.app_data.sample_id].spotdata.empty:
+            self.io.populate_spot_table()
 
         # reset filters
         self.actionClusterMask.setEnabled(False)
@@ -1859,6 +1851,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # trigger update to plot
         self.plot_style.scheduler.schedule_update()
+
+    def toggle_data_widgets(self):
+        """Disables/enables widgets if self.data is empty."""
+        if self.data:
+            self.actionReset.setEnabled(True)
+            self.actionFilters.setEnabled(True)
+            self.actionPolygons.setEnabled(True)
+            self.actionClusters.setEnabled(True)
+            self.actionProfiles.setEnabled(True)
+            self.actionInfo.setEnabled(True)
+            self.actionNotes.setEnabled(True)
+        else:
+            self.actionReset.setEnabled(False)
+            self.actionFilters.setEnabled(False)
+            self.actionPolygons.setEnabled(False)
+            self.actionClusters.setEnabled(False)
+            self.actionProfiles.setEnabled(False)
+            self.actionInfo.setEnabled(False)
+            self.actionNotes.setEnabled(False)
+
 
     def hist_field_update(self):
         self.spinBoxFieldIndex.blockSignals(True)
@@ -1929,7 +1941,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         Opens mask dock, creates on first instance.
         """
         if not hasattr(self, 'mask_dock'):
-            self.polygon = PolygonManager(self, debug=self.logger_options['Polygon'])
             self.mask_dock = MaskDock(self, debug=self.logger_options['Masking'])
 
             self.mask_tab = {}
@@ -1984,7 +1995,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """            
         if not hasattr(self, 'notes'):
             if hasattr(self,'selected_directory') and self.app_data.sample_id != '':
-                notes_file = os.path.join(self.selected_directory,f"{self.app_data.sample_id}.rst")
+                notes_file = os.path.join(self.app_data.selected_directory,f"{self.app_data.sample_id}.rst")
             else:
                 notes_file = None
 

@@ -12,6 +12,7 @@ class AppData(Observable):
         self.default_preferences = {'Units':{'Concentration': 'ppm', 'Distance': 'µm', 'Temperature':'°C', 'Pressure':'MPa', 'Date':'Ma', 'FontSize':11, 'TickDir':'out'}}
         # in future will be set from preference ui
         self.preferences = copy.deepcopy(self.default_preferences)
+        self.selected_directory = ''
 
         self._sample_list = []
         self.csv_files = []

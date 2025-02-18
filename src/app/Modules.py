@@ -74,13 +74,15 @@ class Main():
         self.outlier_method = 'none'
         self.negative_method = 'ignore negatives'
         self.calc_dict = {}
-        self.selected_directory = ''
         self.csv_files = []
         self.laser_map_dict = {}
         self.persistent_filters = pd.DataFrame()
         self.persistent_filters = pd.DataFrame(columns=['use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'persistent'])
         self.plot_type = 'analyte map'
         self.field_type_list = ['Analyte', 'Analyte (normalized)']
+
+        self.app_data = AppData(self.data)
+
         # Plot Selector
         #-------------------------
         self.sort_method = 'mass'
@@ -175,7 +177,7 @@ class Main():
         # add sample to sample dictionary
         if self.sample_id not in self.data:
             # load sample's *.lame file
-            file_path = os.path.join(self.selected_directory, self.csv_files[index])
+            file_path = os.path.join(self.app_data.selected_directory, self.csv_files[index])
             self.data[self.sample_id] = SampleObj(self.sample_id, file_path, self.outlier_method, self.negative_method)
 
     # -------------------------------------

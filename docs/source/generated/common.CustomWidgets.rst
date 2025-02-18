@@ -37,6 +37,7 @@ common.CustomWidgets
       QDockWidget
       QDoubleValidator
       QFont
+      QHeaderView
       QIcon
       QLineEdit
       QMenu
@@ -50,6 +51,7 @@ common.CustomWidgets
       QTreeView
       QWidget
       Qt
+      RotatedHeaderView
       StandardItem
       ToggleSwitch
       pyqtProperty

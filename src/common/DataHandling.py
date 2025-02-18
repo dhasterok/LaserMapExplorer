@@ -856,7 +856,6 @@ class SampleObj(Observable):
 
         Executes setter functions for dx, dy, nx and ny and updates corresponding UI components s if observers exist.
         """ 
-       
         dy = self.dy
         dx = self.dx
         nx = self.nx

@@ -51,11 +51,11 @@ class LameIO():
             dialog.setNameFilter("LaME CSV (*.csv)")
             if dialog.exec():
                 file_list = dialog.selectedFiles()
-                parent.selected_directory = os.path.dirname(os.path.abspath(file_list[0]))
+                parent.app_data.selected_directory = os.path.dirname(os.path.abspath(file_list[0]))
             else:
                 return
         else:
-            parent.selected_directory = os.path.dirname(os.path.abspath(path))
+            parent.app_data.selected_directory = os.path.dirname(os.path.abspath(path))
         parent.app_data.csv_files = [os.path.split(file)[1] for file in file_list if file.endswith('.csv')]
         if parent.app_data.csv_files == []:
             # warning dialog
@@ -95,14 +95,14 @@ class LameIO():
             # dialog.setDirectory(os.getcwd())
             dialog.setDirectory(BASEDIR)
             if dialog.exec():
-                parent.selected_directory = dialog.selectedFiles()[0]
+                parent.app_data.selected_directory = dialog.selectedFiles()[0]
             else:
                 parent.statusBar.showMessage("Open directory canceled.")
                 return
         else:
-            parent.selected_directory = path
+            parent.app_data.selected_directory = path
 
-        file_list = os.listdir(parent.selected_directory)
+        file_list = os.listdir(parent.app_data.selected_directory)
         parent.app_data.csv_files = [file for file in file_list if file.endswith('.lame.csv')]
         if parent.app_data.csv_files == []:
             # warning dialog

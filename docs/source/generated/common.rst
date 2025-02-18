@@ -52,9 +52,7 @@
    common.plot_spider
    common.radar
    common.radar_factory
-   common.rotated
    common.scalebar
-   common.ternary_colormap
    common.ternary_plot
    common.varfunc
 

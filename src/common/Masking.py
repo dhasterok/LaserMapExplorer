@@ -21,6 +21,7 @@ from scipy.stats import percentileofscore
 
 from src.app.UITheme import default_font
 from src.app.config import BASEDIR
+from src.common.Polygon import PolygonManager
 from src.common.colorfunc import get_hex_color, get_rgb_color
 
 from src.common.TableFunctions import TableFcn as TableFcn
@@ -695,6 +696,8 @@ class PolygonTab():
     def polygon_state_changed(self):
         self.parent.main_window.profile_state = self.polygon_toggle.isChecked()
         if self.polygon_toggle.isChecked():
+            if not hasattr(self.parent.main_window,"polygon"):
+                self.parent.main_window.polygon = PolygonManager(self, debug=self.parent.main_window.logger_options['Polygon'])
             self.parent.main_window.update_plot_type_combobox()
             self.parent.main_window.profile_dock.profile_toggle.setChecked(False)
             self.parent.main_window.profile_dock.profile_state_changed()

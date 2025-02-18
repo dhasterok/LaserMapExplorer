@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from src.common.Observable import Observable
 from src.common.SortAnalytes import sort_analytes
 from src.common.outliers import chauvenet_criterion, quantile_and_difference
-from PyQt5.QtWidgets import QMessageBox
+from PyQt6.QtWidgets import QMessageBox
 
 class SampleObj(Observable):
     """Creates a sample object to store and manipulate geochemical data in map form
@@ -1648,18 +1648,16 @@ class SampleObj(Observable):
             ``True`` indicates user clicked ``Yes``, ``False`` for ``No``
         """        
         # Create a message box
-        msg_box = QMessageBox()
-        msg_box.setIcon(QMessageBox.Warning)
-        msg_box.setWindowTitle("Confirm Reset")
-        msg_box.setText("Resetting to the full map will delete all analyses, computed fields, and reset filters.")
-        msg_box.setInformativeText("Do you wish to proceed?")
-        msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-        msg_box.setDefaultButton(QMessageBox.No)
+        msgBox = QMessageBox.warning(self.parent,
+            "Confirm Reset", 
+            "Resetting to the full map will delete all analyses, computed fields, and reset filters.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.No
+        )
 
         # Show the message box and get the user's response
-        response = msg_box.exec()
+        response = msgBox.exec()
 
         # Check the user's response
-        if response == QMessageBox.No:
+        if response == QMessageBox.StandardButton.No:
             return False  # User chose not to proceed
         return True  # User chose to proceed

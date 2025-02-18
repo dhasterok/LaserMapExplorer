@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QTimer, QObject, pyqtSignal
+from PyQt6.QtCore import QTimer, QObject, pyqtSignal
 
 class Scheduler(QObject):
     """Scheduler sets a timer once an action is triggered and can be use to delay actions until all desired actions are complete.

@@ -1,6 +1,6 @@
-from PyQt5.QtCore import QRect, QSize
-from PyQt5.QtGui import QIcon, QFont
-from PyQt5.QtWidgets import ( 
+from PyQt6.QtCore import QRect, QSize
+from PyQt6.QtGui import QIcon, QFont
+from PyQt6.QtWidgets import ( 
         QWidget, QGroupBox, QVBoxLayout, QHBoxLayout, QScrollArea, QToolButton,
         QTableWidget, QTableWidgetItem, QSpacerItem, QFrame, QSizePolicy, QHeaderView
     )
@@ -67,11 +67,11 @@ class SpotPage(QWidget):
 
         # spot table
         header = self.tableWidgetSpots.horizontalHeader()
-        header.setSectionResizeMode(0,QHeaderView.Stretch)
-        header.setSectionResizeMode(1,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(2,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(3,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(4,QHeaderView.Stretch)
+        header.setSectionResizeMode(0,QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(1,QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(2,QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(3,QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(4,QHeaderView.ResizeMode.Stretch)
 
         self.toolbar = QHBoxLayout()
 

@@ -1,6 +1,6 @@
 import os, pickle
-from PyQt5.QtWidgets import QFileDialog, QTableWidgetItem, QMessageBox
-from PyQt5.QtGui import QIcon, QPixmap
+from PyQt6.QtWidgets import QFileDialog, QTableWidgetItem, QMessageBox
+from PyQt6.QtGui import QIcon, QPixmap
 import src.app.SpotImporter as SpotImporter
 import src.app.MapImporter as MapImporter
 from src.app.config import BASEDIR

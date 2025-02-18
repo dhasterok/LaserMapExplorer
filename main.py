@@ -1,12 +1,12 @@
 import sys, os, re, copy, random, darkdetect
-from PyQt5.QtCore import ( Qt, QTimer, QUrl, QSize, QRectF )
-from PyQt5.QtWidgets import (
+from PyQt6.QtCore import ( Qt, QTimer, QUrl, QSize, QRectF )
+from PyQt6.QtWidgets import (
     QCheckBox, QTableWidgetItem, QVBoxLayout, QGridLayout,
     QMessageBox, QHeaderView, QMenu, QFileDialog, QWidget, QToolButton,
     QDialog, QLabel, QTableWidget, QInputDialog, QAbstractItemView,
     QSplashScreen, QApplication, QMainWindow, QSizePolicy
 )
-from PyQt5.QtGui import ( QIntValidator, QDoubleValidator, QPixmap, QFont, QIcon )
+from PyQt6.QtGui import ( QIntValidator, QDoubleValidator, QPixmap, QFont, QIcon )
 from src.app.UITheme import UIThemes
 
 #from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
@@ -234,7 +234,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
 
         # Add this line to set the size policy
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+
+        self.actionReset.setEnabled(False)
 
         # The data dictionary will hold the data with a key for each sample
         self.data = {}
@@ -385,7 +387,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         layout_single_view.setSpacing(0)
         layout_single_view.setContentsMargins(0, 0, 0, 0)
         self.widgetSingleView.setLayout(layout_single_view)
-        self.widgetSingleView.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.widgetSingleView.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.mpl_toolbar = None
         #self.mpl_toolbar = NavigationToolbar(mplc.MplCanvas())
         # for button show hide
@@ -401,7 +403,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         layout_multi_view.setSpacing(0) # Set margins to 0 if you want to remove margins as well
         layout_multi_view.setContentsMargins(0, 0, 0, 0)
         self.widgetMultiView.setLayout(layout_multi_view)
-        self.widgetMultiView.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.widgetMultiView.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.toolButtonRemoveMVPlot.clicked.connect(lambda: self.remove_multi_plot(self.comboBoxPlots.currentText()))
         self.toolButtonRemoveAllMVPlots.clicked.connect(lambda: self.clear_layout(self.widgetMultiView.layout()))
 
@@ -410,7 +412,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         layout_quick_view.setSpacing(0) # Set margins to 0 if you want to remove margins as well
         layout_quick_view.setContentsMargins(0, 0, 0, 0)
         self.widgetQuickView.setLayout(layout_quick_view)
-        self.widgetQuickView.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.widgetQuickView.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
         try:
             self.QV_analyte_list = csvdict.import_csv_to_dict(os.path.join(BASEDIR,'resources/styles/qv_lists.csv'))
@@ -434,7 +436,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # layout_profile_view.setSpacing(0)
         # layout_profile_view.setContentsMargins(0, 0, 0, 0)
         # self.widgetProfilePlot.setLayout(layout_profile_view)
-        # self.widgetProfilePlot.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        # self.widgetProfilePlot.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
         #Flags to prevent plotting when widgets change
         self.point_selected = False
@@ -638,7 +640,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Selecting analytes
         #-------------------------
-        # Connect the currentIndexChanged signal of comboBoxSampleId to load_data method
         self.comboBoxSampleId.currentTextChanged.connect(self.update_sample_id)
         self.canvasWindow.currentChanged.connect(self.canvas_changed)
 
@@ -784,8 +785,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # N-dim table
         header = self.tableWidgetNDim.horizontalHeader()
-        header.setSectionResizeMode(0,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(1,QHeaderView.Stretch)
+        header.setSectionResizeMode(0,QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(1,QHeaderView.ResizeMode.Stretch)
 
         # Profile Tab
         #-------------------------
@@ -849,7 +850,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         # Styling Tab
         #-------------------------
-        self.plot_style = StylingDock(self, self.data, debug=self.logger_options['Styles'])
+        self.plot_style = StylingDock(self, debug=self.logger_options['Styles'])
         self.plot_style.load_theme_names()
         self.plot_style.add_observer(self.update_widgets)
 
@@ -1313,7 +1314,34 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.app_data.sample_id == self.comboBoxSampleId.currentText():
             return
 
+        if self.logger_options['Data']:
+            print(f"update_sample_id: {self.app_data.sample_id}\n")
+
+        # See if the user wants to really change samples and save or discard the current work
+        if self.data and self.app_data.sample_id != '':
+            # Create and configure the QMessageBox
+            msgBox = QMessageBox.warning(self,
+                    "Save sample",
+                    "Do you want to save the current analysis?",
+                    QMessageBox.StandardButton.Discard | QMessageBox.StandardButton.Cancel | QMessageBox.StandardButton.Save)
+            #iconWarning = QIcon(":/resources/icons/icon-warning-64.svg")
+            #msgBox.setWindowIcon(iconWarning)  # Set custom icon
+
+            # Display the dialog and wait for user action
+            response = msgBox.exec()
+
+            # If the user clicks discard, then no need to save, just change the sample
+            if response == QMessageBox.StandardButton.Save:
+                self.io.save_project()
+            elif response == QMessageBox.StandardButton.Cancel:
+                # change the sample ID back to the current sample
+                self.comboBoxSampleId.setCurrentText(self.app_data.sample_id)
+                return
+
+        # at this point, the user has decided to proceed with changing the sample
+        # update the current sample ID
         self.app_data.sample_id = self.comboBoxSampleId.currentText()
+
         self.change_sample()
 
     def update_equalize_color_scale(self):
@@ -1553,67 +1581,82 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.app_data.sample_id == '':
             return
 
-        if selection =='full':
-            if self.data:
-                # show dialog to to get confirmation from user
-                messageBoxResetSample = QMessageBox()
-                iconWarning = QIcon()
-                iconWarning.addPixmap(QPixmap(":/resources/icons/icon-warning-64.svg"), QIcon.Normal, QIcon.Off)
+        if selection =='full':  # nuke the current setup and start over fresh
+            # show dialog to to get confirmation from user
+            msgBox = QMessageBox.warning(self,
+                "Reset analyes",
+                "Do you wish to discard all work and reset analyses?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Save | QMessageBox.StandardButton.No
+            )
+            #iconWarning = QIcon()
+            #iconWarning.addPixmap(QPixmap(":/resources/icons/icon-warning-64.svg"), QIcon.Normal, QIcon.Off)
+            #msgBox.setWindowIcon(iconWarning)  # Set custom icon
 
-                messageBoxResetSample.setWindowIcon(iconWarning)  # Set custom icon
-                messageBoxResetSample.setText("Do you wish to discard all work and reset analysis?")
-                messageBoxResetSample.setWindowTitle("Reset analyses")
-                messageBoxResetSample.setStandardButtons(QMessageBox.Yes |QMessageBox.Save| QMessageBox.Cancel)
+            # Display the dialog and wait for user action
+            response = msgBox.exec()
 
-                # Display the dialog and wait for user action
-                response = messageBoxResetSample.exec_()
+            if response == QMessageBox.StandardButton.No:
+                return
+            elif response == QMessageBox.StandardButton.Save:
+                self.io.save_project()
 
-                if response == QMessageBox.Cancel:
-                    return
-                elif response == QMessageBox.Save:
-                    self.io.save_project()
+            #reset Data
+            self.data = {}
 
-                #reset self.data
-                self.data = {}
-                # self.plot_widget_dict = {
-                #     'Analyte':{},
-                #     'Histogram':{},
-                #     'Correlation':{},
-                #     'Multidimensional Analysis':{},
-                #     'Geochemistry':{},
-                #     'Calculated':{}
-                # }
-                self.multi_view_index = []
-                self.laser_map_dict = {}
-                self.multiview_info_label = {}
-                self.ndim_list = []
-                self.lasermaps = {}
-                #self.treeModel.clear()
-                self.prev_plot = ''
-                self.plot_tree = PlotTree(self)
+            #reset App, but keep the sample list and current sample
+            sample_id = self.app_data.sample_id
+            sample_list = self.app_data.sample_list
 
-                # reset styles
-                self.plot_style.reset_default_styles()
+            self.app_data = AppData(self.data)
 
-                # reset plot layouts
-                self.clear_layout(self.widgetSingleView.layout())
-                self.clear_layout(self.widgetMultiView.layout())
-                self.clear_layout(self.widgetQuickView.layout())
+            #reset Styling
+            self.plot_style = StylingDock(self.data, debug=self.logger_options['Style'])
 
-                # trigger update to plot
-                self.plot_style.scheduler.schedule_update()
+            self.multi_view_index = []
+            self.laser_map_dict = {}
+            self.multiview_info_label = {}
+            self.ndim_list = []
+            self.lasermaps = {}
+            #self.treeModel.clear()
+            self.prev_plot = ''
+            self.plot_tree = PlotTree(self)
 
-            # reset_sample id
-            self.app_data.sample_id = None
+            # reset styles
+            self.plot_style.reset_default_styles()
+
+            # reset plot layouts
+            self.clear_layout(self.widgetSingleView.layout())
+            self.clear_layout(self.widgetMultiView.layout())
+            self.clear_layout(self.widgetQuickView.layout())
+
+            # trigger update to plot
+            self.plot_style.scheduler.schedule_update()
+
+            self.mask_dock.filter_tab.tableWidgetFilters.clearContents()
+            self.mask_dock.filter_tab.tableWidgetFilters.setRowCount(0)
+
+            # reset sample_id and sample_list
+            self.app_data.sample_list = sample_list
+            self.app_data.sample_id = sample_id
         elif selection == 'sample': #sample is changed
 
             if hasattr(self, "mask_dock"):
-                #clear filter table
-                self.mask_dock.tableWidgetFilters.clearContents()
-                self.mask_dock.tableWidgetFilters.setRowCount(0)
+                #reset filter table, keeping any persistent filters
+                persistent = self.mask_dock.filter_tab.tableWidgetFilters.column_to_list("persistent")
+                if all(persistent):
+                    pass
+                elif any(persistent):
+                    for row in range(len(persistent)-1,-1,-1):
+                        if not persistent[row]:
+                            self.mask_dock.filter_tab.tableWidgetFilters.removeRow(row)
+                else:
+                    self.mask_dock.filter_tab.tableWidgetFilters.clearContents()
+                    self.mask_dock.filter_tab.tableWidgetFilters.setRowCount(0)
+
+                ##### Add back in the persistent filters
 
                 #clear polygons
-                self.mask_dock.polygon.clear_polygons()
+                self.mask_dock.polygon_tab.clear_polygons()
 
             #clear profiling
             if hasattr(self, "profile_dock"):
@@ -1657,48 +1700,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #self.ProfilingPage.setEnabled(True)
         #self.PTtPage.setEnabled(True)
 
-    def change_sample(self, save_analysis=True):
-        """Changes sample and plots first map
-
-        Parameters
-        ----------
-        index: int
-            index of sample name for identifying data.  The values are based on the
-            comboBoxSampleID
-        """
+    def change_sample(self):
+        """Changes sample and plots first map"""
         if self.logger_options['Data']:
-            print(f"change_sample: {self.app_data.sample_id}\n  save_analyis: {save_analysis}")
-
-        if self.data and save_analysis:
-            # Create and configure the QMessageBox
-            messageBoxChangeSample = QMessageBox()
-            iconWarning = QIcon()
-            iconWarning.addPixmap(QPixmap(":/resources/icons/icon-warning-64.svg"), QIcon.Normal, QIcon.Off)
-
-            messageBoxChangeSample.setWindowIcon(iconWarning)  # Set custom icon
-            messageBoxChangeSample.setText("Do you want to save current analysis")
-            messageBoxChangeSample.setWindowTitle("Save analysis")
-            messageBoxChangeSample.setStandardButtons(QMessageBox.Discard | QMessageBox.Cancel | QMessageBox.Save)
-
-            # Display the dialog and wait for user action
-            response = messageBoxChangeSample.exec_()
-
-            if response == QMessageBox.Save:
-                self.save_project()
-            elif response == QMessageBox.Discard:
-                pass
-            else: #user pressed cancel
-                self.comboBoxSampleId.setCurrentText(self.app_data.sample_id)
-                return
+            print(f"change_sample\n")
             
         self.reset_analysis('sample')
-        ######
-        # THIS DOESN'T DO ANYTHING ANYMORE, BUT WHEN A NEW SAMPLE IS LOADED, IT NEEDS TO CHECK FOR PERSISTANT FILTERS AND THEN ADD THEM TO THE NEW SAMPLEOBJ
-        # initialize filter_info dataframe for storing filter properties
-        # if self.filter_df is not None and not self.filter_info.empty:
-        #     if any(self.filter_info['persistent']):
-        #         # Keep only rows where 'persistent' is True
-        #         self.filter_info = self.filter_info[self.filter_info['persistent'] == True]
 
         # if note dock has been open, set notes file to current filename
         if hasattr(self,'notes'):
@@ -1710,6 +1717,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # add sample to sample dictionary
         if self.app_data.sample_id not in self.data:
+            self.actionReset.setEnabled(True)
+
             # load sample's *.lame file
             file_path = os.path.join(self.selected_directory, self.app_data.csv_files[index])
             self.data[self.app_data.sample_id] = SampleObj(self.app_data.sample_id, file_path, self.comboBoxOutlierMethod.currentText(), self.comboBoxNegativeMethod.currentText(), self.ref_chem, debug=self.logger_options['Data'])
@@ -2064,7 +2073,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.analyte_dialog = AnalyteDialog(self, debug=self.logger_options['Analyte selector'])
         self.analyte_dialog.show()
 
-        result = self.analyte_dialog.exec_()  # Store the result here
+        result = self.analyte_dialog.exec()  # Store the result here
         if result == QDialog.Accepted:
             self.update_analyte_ratio_selection(analyte_dict= self.analyte_dialog.norm_dict)   
             self.workflow.refresh_analyte_saved_lists_dropdown() #refresh saved analyte dropdown in blockly 
@@ -2086,7 +2095,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.field_dialog = FieldDialog()
         self.field_dialog.show()
 
-        result = self.field_dialog.exec_()  # Store the result here
+        result = self.field_dialog.exec()  # Store the result here
         if result == QDialog.Accepted:
             self.selected_fields = self.field_dialog.selected_fields
             self.workflow.refresh_custom_fields_lists_dropdown() #refresh saved analyte dropdown in blockly 
@@ -3144,7 +3153,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 # if hover within lasermap array
                 if 0 <= x_i < array.shape[1] and 0 <= y_i < array.shape[0] :
                     if not self.default_cursor and not self.actionCrop.isChecked():
-                        QApplication.setOverrideCursor(Qt.BlankCursor)
+                        QApplication.setOverrideCursor(Qt.CursorShape.BlankCursor)
                         self.default_cursor = True
                     any_plot_hovered = True
                     value = array[y_i, x_i]  # assuming self.array is numpy self.array
@@ -3967,7 +3976,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 # Save functionality for pyqtgraph
                 export = exportDialog.ExportDialog(canvas.getItem(0, 0).scene())
                 export.show(canvas.getItem(0, 0).getViewBox())
-                export.exec_()
+                export.exec()
                 
     def save_plot(self, action):
         """Sorts analyte table in dialog"""        
@@ -4406,11 +4415,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.app_data.hist_field = self.comboBoxHistField.currentText()
 
         if self.plot_style.plot_type == 'analyte map':
-            self.plot_style.color_field = self.comboBoxHistField.currentText()
+            self.plot_style.color_field = self.app_data.hist_field
         self.spinBoxFieldIndex.setValue(self.comboBoxHistField.currentIndex())
+
         self.update_histogram_bin_width()
 
-        self.plot_style.scheduler.schedule_update()
+        if self.plot_style.plot_type in ['analyte map', 'histogram']:
+            self.plot_style.scheduler.schedule_update()
 
     def update_histogram_num_bins(self):
         """Updates the bin width
@@ -5876,9 +5887,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         Toggles ``MainWindow.actionHelp``, when checked, the cursor will change so indicates help tool is active.
         """        
         if self.actionHelp.isChecked():
-            self.setCursor(Qt.WhatsThisCursor)
+            self.setCursor(Qt.CursorShape.WhatsThisCursor)
         else:
-            self.setCursor(Qt.ArrowCursor)
+            self.setCursor(Qt.CursorShape.ArrowCursor)
 
 
 
@@ -6007,9 +6018,7 @@ def create_app():
     global app
     app = QApplication(sys.argv)
 
-    # Enable high-DPI scaling
-    app.setAttribute(Qt.AA_EnableHighDpiScaling)
-    app.setAttribute(Qt.AA_UseHighDpiPixmaps)
+    # Enable high-DPI scaling (enabled by default in PyQt6)
 
     if darkdetect.isDark():
         ss = load_stylesheet('dark.qss')
@@ -6043,7 +6052,7 @@ def main():
     # Set the main window to fullscreen
     #main.showFullScreen()
     main.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 
 if __name__ == '__main__':

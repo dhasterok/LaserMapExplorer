@@ -5,14 +5,14 @@ import numpy as np
 import pandas as pd
 from src.common.varfunc import partial_match
 
-from PyQt5.QtCore import Qt, QSize, QUrl
-from PyQt5.QtWidgets import (
+from PyQt6.QtCore import Qt, QSize, QUrl
+from PyQt6.QtWidgets import (
         QMainWindow, QTextEdit, QWidget, QVBoxLayout, QMessageBox, QInputDialog, QLabel,
-        QToolBar, QComboBox, QToolButton, QAction, QDialog, QCheckBox, QDialogButtonBox, QPushButton,
+        QToolBar, QComboBox, QToolButton, QDialog, QCheckBox, QDialogButtonBox, QPushButton,
         QGroupBox, QHBoxLayout, QSpacerItem, QSizePolicy, QTableWidgetItem, QTableWidget, QTabWidget,
         QAbstractItemView, QFormLayout, QHeaderView
     )
-from PyQt5.QtGui import QIcon, QFont, QPixmap
+from PyQt6.QtGui import QIcon, QFont, QPixmap, QAction
 
 from src.common.CustomWidgets import CustomComboBox, CustomDockWidget
 from src.app.UIControl import UIFieldLogic

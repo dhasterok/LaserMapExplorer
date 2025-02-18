@@ -6,3 +6,19 @@
 # Produce regressions for individual clusters.
 # Add annotations for certain types of fits?
 # Add equations and stats
+
+from PyQt6.QtCore import QRect, QSize
+from PyQt6.QtGui import QIcon, QFont
+from PyQt6.QtWidgets import ( 
+        QWidget, QGroupBox, QVBoxLayout, QHBoxLayout, QScrollArea, QToolButton,
+        QTableWidget, QTableWidgetItem, QSpacerItem, QFrame, QSizePolicy, QHeaderView
+    )
+
+class RegressionPage(QWidget):
+    def __init__(self, page_index, parent=None):
+        super().__init__(parent)
+
+        if parent is None:
+            return
+
+        self.parent = parent

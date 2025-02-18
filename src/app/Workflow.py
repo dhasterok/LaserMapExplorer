@@ -1,11 +1,12 @@
 import sys, os, json
-from PyQt5.QtWidgets import ( QMainWindow, QVBoxLayout, QWidget, QTextEdit, QSizePolicy, QDockWidget, QToolBar, QAction )
-from PyQt5.QtWebEngineWidgets import QWebEngineView
-from PyQt5.QtWebChannel import QWebChannel
-from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import pyqtSlot, Qt, QObject, QUrl, QFile, QIODevice, QSize
+from PyQt6.QtWidgets import ( 
+    QMainWindow, QVBoxLayout, QWidget, QTextEdit, QSizePolicy, QDockWidget, QToolBar 
+)
+from PyQt6.QtWebEngineWidgets import QWebEngineView
+from PyQt6.QtWebChannel import QWebChannel
+from PyQt6.QtGui import QIcon, QAction
+from PyQt6.QtCore import pyqtSlot, Qt, QObject, QUrl, QFile, QIODevice, QSize
 from src.app.config import BASEDIR
-from PyQt5.QtWebEngineWidgets import QWebEngineSettings
 from src.common.CustomWidgets import CustomDockWidget
 
 import numpy as np

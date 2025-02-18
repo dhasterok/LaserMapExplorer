@@ -5,18 +5,18 @@ import numpy as np
 import pandas as pd
 from src.common.varfunc import partial_match
 
-from PyQt5.QtCore import Qt, QSize, QUrl
-from PyQt5.QtWidgets import (
+from PyQt6.QtCore import Qt, QSize, QUrl
+from PyQt6.QtWidgets import (
         QMainWindow, QTextEdit, QWidget, QVBoxLayout, QMessageBox, QInputDialog, QLabel,
-        QToolBar, QComboBox, QToolButton, QAction, QDialog, QCheckBox, QDialogButtonBox, QPushButton,
+        QToolBar, QComboBox, QToolButton, QDialog, QCheckBox, QDialogButtonBox, QPushButton,
         QGroupBox, QGridLayout, QHBoxLayout, QFrame, QSizePolicy, QScrollArea
     )
-from PyQt5.QtGui import QIcon
+from PyQt6.QtGui import QIcon, QAction
 
 from src.common.CustomWidgets import CustomComboBox, CustomDockWidget
 from src.app.UIControl import UIFieldLogic
 
-def calc_error(func, err, addinfo):
+def calc_error(parent, func, err, addinfo):
     """Raise a calculator-related error
 
     Parameters
@@ -28,11 +28,11 @@ def calc_error(func, err, addinfo):
     addinfo : str
         Additional info (generally exception raised)
     """        
-    if self.debug:
+    if parent.debug:
         print(f"calc_error\n  func: {func}\n  err: {err}\n  addinfo: {addinfo}")
 
-    self.message_label.setText(f"Error: {err}")
-    QMessageBox.warning(self,'Calculation Error',f"Error: {err}\n\n({func}) {addinfo}")
+    parent.message_label.setText(f"Error: {err}")
+    QMessageBox.warning(parent,"Calculation Error",f"Error: {err}\n\n({func}) {addinfo}",QMessageBox.StandardButton.Ok)
 
 # -------------------------------
 # Calculator
@@ -137,8 +137,8 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
         # calculator status
         self.message_label = QLabel()
         self.message_label.setWordWrap(True)
-        self.message_label.setFrameShape(QFrame.Box)
-        self.message_label.setFrameShadow(QFrame.Raised)
+        self.message_label.setFrameShape(QFrame.Shape.Box)
+        self.message_label.setFrameShadow(QFrame.Shadow.Raised)
         self.message_label.setAlignment(Qt.AlignmentFlag.AlignLeading | Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
         self.message_label.setWordWrap(True)
         self.message_label.setText("Ready..")
@@ -243,7 +243,7 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
             button = QPushButton()
             button.setContentsMargins(0,0,0,0)
             button.setMinimumHeight(30)
-            button.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Fixed)
+            button.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Fixed)
             button.setText(label)
             button_layout.addWidget(button, row, col)
             button.clicked.connect(create_handler(handler, text))
@@ -431,7 +431,7 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
 
         except FileNotFoundError as e:
             err = 'could not find file'
-            calc_error(func, err, e)
+            calc_error(self, func, err, e)
             pass
 
         # remove field from Calculated dataframe
@@ -486,7 +486,7 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
                 # check for valid field name
                 if partial_match(['_N',':'],new_field)[0]:
                     err = "new field name cannot have an '_N' or ':' in the name"
-                    calc_error(func, err, '')
+                    (func, err, '')
                     ok = False
                     
             if not ok:
@@ -519,7 +519,7 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
             except Exception as e:
                 # throw a warning that nam
                 err = 'could not save expression, problem with write.'
-                calc_error(func, err, e)
+                calc_error(self, func, err, e)
                 return
 
  
@@ -576,7 +576,7 @@ class CustomFieldCalculator():
                     cond_temp, expr_temp = c.split(',')
                 except Exception as e:
                     err = "a case statement must include a conditional and an expression separated by a comma, ',' and end with a ';'."
-                    calc_error(func, err, e)
+                    calc_error(self, func, err, e)
                     return None, None
 
                 # parse conditional and expression
@@ -593,12 +593,12 @@ class CustomFieldCalculator():
 
         if txt.count('(') != txt.count(')'):
             'mismatched parentheses in expr'
-            calc_error(func, err, '')
+            calc_error(self, func, err, '')
             return None
 
         if txt.count('{') != txt.count('}'):
             'mismatched braces in expr'
-            calc_error(func, err, '')
+            calc_error(self, func, err, '')
             return None
         
         field_list = re.findall(r'\{.*?\}', txt)
@@ -611,7 +611,7 @@ class CustomFieldCalculator():
                 field_type, field = field_str.split('.')
             except Exception as e:
                 err = "field type and field must be separated by a '.'"
-                calc_error(func, err, e)
+                calc_error(self, func, err, e)
             if field[-2:] == '_N':
                 field = field[:-2]
                 if field_type in ['Analyte', 'Ratio']:
@@ -663,7 +663,7 @@ class CustomFieldCalculator():
             data.add_columns('computed', new_field, result)
         elif expr is None:
             err = "expr returned 'None' could not evaluate formula. Check syntax."
-            calc_error(func, err, '')
+            calc_error(self, func, err, '')
             return
         else:   # conditionals
             # start with empty dataFrame
@@ -676,7 +676,7 @@ class CustomFieldCalculator():
                         res = self.calc_evaluate_expr(expr[0], val_dict=expr[1])
                     except Exception as e:
                         err = "could not evaluate otherwise expression. Check syntax."
-                        calc_error(func, err, e)
+                        calc_error(self, func, err, e)
                         return
                     data.add_columns('computed', new_field, result)
                     continue
@@ -686,24 +686,24 @@ class CustomFieldCalculator():
                     keep = self.calc_evaluate_expr(cond[i], val_dict=cond[i+1])
                 except Exception as e:
                     err = "could not evaluate conditional statement. Check syntax."
-                    calc_error(func, err, e)
+                    calc_error(self, func, err, e)
                     return
 
                 # check for missing or incorrectly type for conditional
                 if keep is None:
                     err = 'conditional did not return boolean result.'
-                    calc_error(func, err, '')
+                    calc_error(self, func, err, '')
                     return
                 elif not isinstance(keep, np.ndarray):
                     if not np.issubdtype(keep.dtype, np.bool_):
                         err = 'conditional did not return boolean result.\n  Did you swap the conditional and expression?'
-                        calc_error(func, err, '')
+                        calc_error(self, func, err, '')
                         return
 
                 # check for size error
                 if keep.shape[0] != result.shape[0]:
                     err = 'the conditional size does not match the size of expected computed array.'
-                    calc_error(func, err, '')
+                    calc_error(self, func, err, '')
                     return
 
                 # compute expression for indexes where keep==`True`
@@ -711,12 +711,12 @@ class CustomFieldCalculator():
                     res = self.calc_evaluate_expr(expr[i], val_dict=expr[i+1], keep=keep)
                 except Exception as e:
                     err = "could not evaluate expression. Check syntax."
-                    calc_error(func, err, e)
+                    calc_error(self, func, err, e)
                     return
 
                 if res is None:
                     err = 'the expression failed to return an array of values.'
-                    calc_error(func, err, '')
+                    calc_error(self, func, err, '')
                     return
 
                 result.loc[keep,new_field] = res
@@ -759,5 +759,5 @@ class CustomFieldCalculator():
                 return result[keep]
         except Exception as e:
             err = 'unable to evaluate expression.'
-            calc_error(func, err, e)
+            calc_error(self, func, err, e)
             return None

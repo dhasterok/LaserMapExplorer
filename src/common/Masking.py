@@ -1,12 +1,14 @@
 import os
-from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtGui import QStandardItem, QStandardItemModel, QIcon, QFont, QIntValidator
-from PyQt5.QtWidgets import ( 
+from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtGui import QStandardItem, QStandardItemModel, QIcon, QFont, QIntValidator, QAction
+from PyQt6.QtWidgets import ( 
         QMessageBox, QToolButton, QWidget, QTableWidgetItem, QVBoxLayout, QHBoxLayout, QGroupBox, QInputDialog,
         QDoubleSpinBox, QComboBox, QCheckBox, QSizePolicy, QFormLayout, QListView, QToolBar, QAbstractItemView,
-        QAction, QLabel, QHeaderView, QTableWidget, QScrollArea, QMainWindow, QWidgetAction, QTabWidget, QDockWidget
+        QLabel, QHeaderView, QTableWidget, QScrollArea, QMainWindow, QWidgetAction, QTabWidget, QDockWidget
     )
-from src.common.CustomWidgets import CustomDockWidget, CustomLineEdit, CustomComboBox, ToggleSwitch
+from src.common.CustomWidgets import (
+    CustomDockWidget, CustomTableWidget, CustomLineEdit, CustomComboBox, ToggleSwitch
+)
 from src.app.UIControl import UIFieldLogic
 from pyqtgraph import ( ScatterPlotItem )
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
@@ -14,6 +16,7 @@ from matplotlib.figure import Figure
 import matplotlib.colors as colors
 from matplotlib.collections import PathCollection
 import numpy as np
+import pandas as pd
 from scipy.stats import percentileofscore
 
 from src.app.UITheme import default_font
@@ -62,11 +65,11 @@ class MaskDock(CustomDockWidget, UIFieldLogic):
         self.font = default_font
 
         self.setObjectName("Mask Dock")
-        self.setAllowedAreas(Qt.BottomDockWidgetArea)
+        self.setAllowedAreas(Qt.DockWidgetArea.BottomDockWidgetArea)
         self.setWindowTitle(title)
         #self.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
@@ -74,9 +77,9 @@ class MaskDock(CustomDockWidget, UIFieldLogic):
         self.setMinimumSize(QSize(855, 367))
         self.setMaximumSize(QSize(524287, 524287))
         self.setFloating(False)
-        self.setFeatures(QDockWidget.DockWidgetFloatable)
+        self.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetFloatable)
 
-        parent.addDockWidget(Qt.BottomDockWidgetArea, self)
+        parent.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self)
 
         # create a container to hold the dock contents
         container = QWidget()
@@ -190,7 +193,7 @@ class FilterTab():
         # minimum value for filter
         labelFMinVal = QLabel("Min value", filter_tools_groupbox)
         self.lineEditFMin = CustomLineEdit(filter_tools_groupbox)
-        self.lineEditFMin.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+        self.lineEditFMin.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
         self.lineEditFMin.precision = 8
         self.lineEditFMin.toward = 0
         filter_tools_layout.addRow(labelFMinVal, self.lineEditFMin)
@@ -198,7 +201,7 @@ class FilterTab():
         # minimum quantile value for filter
         labelFMinQ = QLabel("Min quantile", filter_tools_groupbox)
         self.doubleSpinBoxFMinQ = QDoubleSpinBox(filter_tools_groupbox)
-        self.doubleSpinBoxFMinQ.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+        self.doubleSpinBoxFMinQ.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
         self.doubleSpinBoxFMinQ.setKeyboardTracking(False)
         self.doubleSpinBoxFMinQ.setMinimum(0.0)
         self.doubleSpinBoxFMinQ.setMaximum(100.0)
@@ -208,7 +211,7 @@ class FilterTab():
         labelFMaxVal = QLabel("Max value", filter_tools_groupbox)
         self.lineEditFMax = CustomLineEdit(filter_tools_groupbox)
         self.lineEditFMax.setMinimumSize(QSize(0, 0))
-        self.lineEditFMax.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+        self.lineEditFMax.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
         self.lineEditFMax.precision = 8
         self.lineEditFMax.toward = 1
         filter_tools_layout.addRow(labelFMaxVal, self.lineEditFMax)
@@ -216,7 +219,7 @@ class FilterTab():
         # maximum quantile value for filter
         labelFMaxQ = QLabel("Max quantile", filter_tools_groupbox)
         self.doubleSpinBoxFMaxQ = QDoubleSpinBox(filter_tools_groupbox)
-        self.doubleSpinBoxFMaxQ.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+        self.doubleSpinBoxFMaxQ.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
         self.doubleSpinBoxFMaxQ.setKeyboardTracking(False)
         self.doubleSpinBoxFMaxQ.setMinimum(0.0)
         self.doubleSpinBoxFMaxQ.setMaximum(100.0)
@@ -231,15 +234,15 @@ class FilterTab():
         filter_tools_layout.addRow(labelFilterOperator, self.comboBoxFilterOperator)
 
         # Filter Table
-        self.tableWidgetFilters = QTableWidget(self.filter_tab)
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        self.tableWidgetFilters = CustomTableWidget(self.filter_tab)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.tableWidgetFilters.sizePolicy().hasHeightForWidth())
         self.tableWidgetFilters.setSizePolicy(sizePolicy)
         self.tableWidgetFilters.setMinimumSize(QSize(400, 0))
         self.tableWidgetFilters.setMaximumSize(QSize(524287, 524287))
-        self.tableWidgetFilters.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.tableWidgetFilters.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.tableWidgetFilters.setObjectName("tableWidgetFilters")
         self.tableWidgetFilters.setColumnCount(8)
         self.tableWidgetFilters.setRowCount(0)
@@ -278,14 +281,14 @@ class FilterTab():
 
         self.tableWidgetFilters.horizontalHeader().setDefaultSectionSize(80)
         header = self.tableWidgetFilters.horizontalHeader()
-        header.setSectionResizeMode(0,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(1,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(2,QHeaderView.Stretch)
-        header.setSectionResizeMode(3,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(4,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(5,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(6,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(7,QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(0,QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(1,QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(2,QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(3,QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(4,QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(5,QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(6,QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(7,QHeaderView.ResizeMode.ResizeToContents)
 
         self.tableWidgetFilters.setHorizontalHeaderLabels(["Use", "Field Type", "Field", "Scale", "Min", "Max", "Operator", "Persistent"])
 
@@ -551,7 +554,7 @@ class FilterTab():
         filter_info = pd.read_csv(filter_file)
 
         # put filter_info into data and table
-        self.data[self.sample_id].filter_df = filter_info
+        self.main_window.data[self.main_window.app_data.sample_id].filter_df = filter_info
 
         self.update_filter_table()
 
@@ -652,16 +655,16 @@ class PolygonTab():
 
         tab_layout.addWidget(toolbar)
         
-        self.tableWidgetPolyPoints = QTableWidget()
+        self.tableWidgetPolyPoints = CustomTableWidget()
         self.tableWidgetPolyPoints.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.tableWidgetPolyPoints.setColumnCount(5)
 
         header = self.tableWidgetPolyPoints.horizontalHeader()
-        header.setSectionResizeMode(0,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(1,QHeaderView.Stretch)
-        header.setSectionResizeMode(2,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(3,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(4,QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(0,QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(1,QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(2,QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(3,QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(4,QHeaderView.ResizeMode.ResizeToContents)
 
         self.tableWidgetPolyPoints.setHorizontalHeaderLabels(["PolyID", "Name", "Link", "In/out", "Analysis"])
         
@@ -786,7 +789,7 @@ class ClusterTab():
         toolbar.addAction(self.actionGroupMask)
         toolbar.addAction(self.actionGroupMaskInverse)
 
-        self.tableWidgetViewGroups = QTableWidget()
+        self.tableWidgetViewGroups = CustomTableWidget()
         self.tableWidgetViewGroups.setSelectionMode(QAbstractItemView.MultiSelection)
         self.tableWidgetViewGroups.setObjectName("tableWidgetViewGroups")
         self.tableWidgetViewGroups.setColumnCount(3)

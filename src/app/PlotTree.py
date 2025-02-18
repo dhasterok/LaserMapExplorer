@@ -1,7 +1,7 @@
 import re, darkdetect
-from PyQt5.QtCore import ( Qt )
-from PyQt5.QtGui import ( QColor, QBrush, QStandardItemModel, QStandardItem )
-from PyQt5.QtWidgets import ( QMenu ) 
+from PyQt6.QtCore import ( Qt )
+from PyQt6.QtGui import ( QColor, QBrush, QStandardItemModel, QStandardItem )
+from PyQt6.QtWidgets import ( QMenu ) 
 import src.common.CustomMplCanvas as mplc
 from src.common.CustomWidgets import StandardItem, CustomTreeView
 from src.common.SortAnalytes import sort_analytes

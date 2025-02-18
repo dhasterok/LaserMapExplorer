@@ -4,7 +4,7 @@ import pandas as pd
 pd.options.mode.copy_on_write = True
 import matplotlib
 matplotlib.use('Qt5Agg')
-from PyQt5.QtWidgets import QWidget, QDialog
+from PyQt6.QtWidgets import QWidget, QDialog
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 #from matplotlib.figure import Figure
 #from matplotlib.projections.polar import PolarAxes

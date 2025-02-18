@@ -1,13 +1,12 @@
-from PyQt5.QtCore import (Qt, pyqtSignal, QObject, QEvent)
-from PyQt5.QtWidgets import (QWidget,QVBoxLayout, QGridLayout, QSizePolicy,QMenu, QDialog, QTableWidgetItem, QLabel, QComboBox, QHeaderView, QFileDialog, QMessageBox)
-from PyQt5.QtGui import (QImage, QColor, QFont, QPixmap, QPainter, QBrush)
+from PyQt6.QtCore import (Qt, pyqtSignal, QObject, QEvent)
+from PyQt6.QtWidgets import (QWidget,QVBoxLayout, QGridLayout, QSizePolicy,QMenu, QDialog, QTableWidgetItem, QLabel, QComboBox, QHeaderView, QFileDialog, QMessageBox)
+from PyQt6.QtGui import (QImage, QColor, QFont, QPixmap, QPainter, QBrush)
 from pyqtgraph import (
     ViewBox, 
     GraphicsLayoutWidget,
 )
 from pyqtgraph.GraphicsScene import exportDialog
 from src.ui.PlotViewer import Ui_widgetPlotViewer
-from src.common.rotated import RotatedHeaderView
 from src.app.config import BASEDIR
 from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToolbar
 import src.common.CustomMplCanvas as mplc

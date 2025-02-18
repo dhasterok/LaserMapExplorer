@@ -1,5 +1,5 @@
 import os, darkdetect
-from PyQt5.QtGui import QIcon, QFont
+from PyQt6.QtGui import QIcon, QFont
 from src.app.config import ICONPATH, load_stylesheet
 
 def default_font():

@@ -1,6 +1,6 @@
 import os, re, copy, pickle
-from PyQt5.QtWidgets import ( QColorDialog, QTableWidgetItem, QMessageBox, QInputDialog )
-from PyQt5.QtGui import ( QDoubleValidator, QFont, QFontDatabase )
+from PyQt6.QtWidgets import ( QColorDialog, QTableWidgetItem, QMessageBox, QInputDialog )
+from PyQt6.QtGui import ( QDoubleValidator, QFont, QFontDatabase )
 from pyqtgraph import colormap
 import src.common.format as fmt
 import numpy as np
@@ -543,7 +543,7 @@ class Styling(Observable):
     def scale_length(self, length):
         if length is None or isinstance(length, float):
             # check constraints on length
-            data = self.data[self.sample_id]
+            data = self.parent.data[self.parent.app_data.sample_id]
             scale_dir = self.style_dict[self._plot_type]['ScaleDir']
             if (length is None) or ((length <= 0) or (scale_dir == 'horizontal' and length > data.x_range) or (scale_dir == 'vertical' and length > data.y_range)):
                 length = self.default_scale_length()
@@ -835,7 +835,7 @@ class Styling(Observable):
 
         # try to load one of the preferred fonts
         default_font = ['Avenir','Candara','Myriad Pro','Myriad','Aptos','Calibri','Helvetica','Arial','Verdana']
-        names = QFontDatabase().families()
+        names = QFontDatabase.families()
 
         for font in default_font:
             if font in names:
@@ -923,6 +923,54 @@ class Styling(Observable):
 
         self.style_dict = styles
 
+    def update_style_dict(self):
+        """Update style dictionary from style properties"""
+        self.style_dict[self._plot_type] = {
+            # axes properties
+            'XLim': self._xlim,
+            'XScale': self._xscale,
+            'XLabel': self._xlabel,
+            'YLim': self._ylim,
+            'YScale': self._yscale,
+            'YLabel': self._ylabel,
+            'ZLim': self._zlim,
+            'ZScale': self._zscale,
+            'ZLabel': self._zlabel,
+            'AspectRatio': self._aspect_ratio,
+            'TickDir': self._tick_dir,
+
+            # annotation properties
+            'Font': self._font_family,
+            'FontSize': self._font_size,
+
+            # scale properties
+            'ScaleLocation': self._scale_location,
+            'ScaleDir': self._scale_dir,
+            'ScaleLength': self._scale_length,
+            'OverlayColor': self._overlay_color,
+
+            # update marker properties
+            'Marker': self._marker_symbol,
+            'MarkerSize': self._marker_size,
+            'MarkerAlpha': self._marker_alpha,
+            'MarkerColor': self._marker_color,
+
+            # update line properties
+            'LineWidth': self._line_width,
+            'LineMultiplier': self._line_multiplier,
+            'LineColor': self._line_color,
+
+            # update color properties
+            'ColorFieldType': self._color_field_type,
+            'ColorField': self._color_field,
+            'Colormap': self._cmap,
+            'CbarReverse': self._cbar_reverse,
+            'CLim': self._clim,
+            'CScale': self._cscale,
+            'CbarDir': self._cbar_dir,
+            'CLabel': self._clabel,
+            'Resolution': self._resolution
+        }
 
     # Themes
     # -------------------------------------
@@ -1000,12 +1048,10 @@ class Styling(Observable):
     
 
 class StylingDock(Styling):
-    def __init__(self, parent, data, debug=False):
+    def __init__(self, parent, debug=False):
         super().__init__(self, debug)
 
         self.parent = parent
-        self.sample_id = parent.app_data.sample_id
-        self.data = parent.data
         self.debug = debug
         self.add_observer(parent.update_widgets)
 
@@ -1326,7 +1372,7 @@ class StylingDock(Styling):
                 parent.toolButtonOverlayColor.setEnabled(True)
 
                 # marker properties
-                if self.sample_id != '' and len(self.data[self.sample_id].spotdata) != 0:
+                if parent.app_data.sample_id != '' and len(parent.data[parent.app_data.sample_id].spotdata) != 0:
                     parent.comboBoxMarker.setEnabled(True)
                     parent.doubleSpinBoxMarkerSize.setEnabled(True)
                     parent.horizontalSliderMarkerAlpha.setEnabled(True)
@@ -1699,7 +1745,7 @@ class StylingDock(Styling):
             Style dictionary for the current plot type. Defaults to ``None``
         """
         parent = self.parent
-        data = self.data[self.sample_id]
+        data = parent.data[parent.app_data.sample_id]
 
         style = self.style_dict[self.plot_type]
 
@@ -1722,7 +1768,7 @@ class StylingDock(Styling):
             style['YLim'] = [ymin, ymax]
             style['YScale'] = yscale
             style['YLabel'] = 'Y'
-            style['AspectRatio'] = self.data[self.sample_id].aspect_ratio
+            style['AspectRatio'] = parent.data[parent.app_data.sample_id].aspect_ratio
 
         if (style['ScaleLength'] is None) and (plot_type in self.map_plot_types):
             style['ScaleLength'] = self.default_scale_length()
@@ -1752,10 +1798,10 @@ class StylingDock(Styling):
 
         #print('set_style_widgets')
         parent = self.parent
-        if self.sample_id == '':
+        if parent.app_data.sample_id == '':
             return
 
-        data = self.data[self.sample_id]
+        data = parent.data[parent.app_data.sample_id]
 
         tab_id = parent.toolBox.currentIndex()
 
@@ -1801,7 +1847,7 @@ class StylingDock(Styling):
             style['YLim'] = [ymin, ymax]
             style['YScale'] = yscale
             style['YLabel'] = 'Y'
-            style['AspectRatio'] = self.data[self.sample_id].aspect_ratio
+            style['AspectRatio'] = parent.data[parent.app_data.sample_id].aspect_ratio
 
             # do not round axes limits for maps
             parent.lineEditXLB.precision = None
@@ -1927,56 +1973,56 @@ class StylingDock(Styling):
         # update plot (is this line needed)
         # self.update_SV()
 
-    def update_style_dict(self):
-        """Get style properties"""        
-        if self.debug:
-            print("update_style_dict")
-        parent = self.parent
+    # def update_style_dict(self):
+    #     """Get style properties"""        
+    #     if self.debug:
+    #         print("update_style_dict")
+    #     parent = self.parent
 
-        parent.plot_types[parent.toolBox.currentIndex()][0] = parent.comboBoxPlotType.currentIndex()
+    #     parent.plot_types[parent.toolBox.currentIndex()][0] = parent.comboBoxPlotType.currentIndex()
 
         
-        self.style_dict[self.plot_type] = {
-                # axes properties
-                'XLim': [float(parent.lineEditXLB.text()), float(parent.lineEditXUB.text())],
-                'XLabel': parent.lineEditXLabel.text(),
-                'YLim': [float(parent.lineEditYLB.text()), float(parent.lineEditYUB.text())],
-                'YLabel': parent.lineEditYLabel.text(),
-                'ZLabel': parent.lineEditZLabel.text(),
-                'AspectRatio': float(parent.lineEditAspectRatio.text()),
-                'TickDir': parent.comboBoxTickDirection.text(),
+    #     self.style_dict[self.plot_type] = {
+    #             # axes properties
+    #             'XLim': [float(parent.lineEditXLB.text()), float(parent.lineEditXUB.text())],
+    #             'XLabel': parent.lineEditXLabel.text(),
+    #             'YLim': [float(parent.lineEditYLB.text()), float(parent.lineEditYUB.text())],
+    #             'YLabel': parent.lineEditYLabel.text(),
+    #             'ZLabel': parent.lineEditZLabel.text(),
+    #             'AspectRatio': float(parent.lineEditAspectRatio.text()),
+    #             'TickDir': parent.comboBoxTickDirection.text(),
 
-                # annotation properties
-                'Font': parent.fontComboBox.currentFont(),
-                'FontSize': parent.doubleSpinBoxFontSize.value(),
+    #             # annotation properties
+    #             'Font': parent.fontComboBox.currentFont(),
+    #             'FontSize': parent.doubleSpinBoxFontSize.value(),
 
-                # scale properties
-                'ScaleLocation': parent.comboBoxScaleLocation.currentText(),
-                'ScaleDir': parent.comboBoxScaleDirection.currentText(),
-                'ScaleLength': parent.lineEditScaleLength.value,
-                'OverlayColor': get_hex_color(parent.toolButtonOverlayColor.palette().button().color()),
+    #             # scale properties
+    #             'ScaleLocation': parent.comboBoxScaleLocation.currentText(),
+    #             'ScaleDir': parent.comboBoxScaleDirection.currentText(),
+    #             'ScaleLength': parent.lineEditScaleLength.value,
+    #             'OverlayColor': get_hex_color(parent.toolButtonOverlayColor.palette().button().color()),
 
-                # update marker properties
-                'Marker': parent.comboBoxMarker.currentText(),
-                'MarkerSize': parent.doubleSpinBoxMarkerSize.value(),
-                'MarkerAlpha': float(parent.horizontalSliderMarkerAlpha.value()),
-                'MarkerColor': get_hex_color(parent.toolButtonMarkerColor.palette().button().color()),
+    #             # update marker properties
+    #             'Marker': parent.comboBoxMarker.currentText(),
+    #             'MarkerSize': parent.doubleSpinBoxMarkerSize.value(),
+    #             'MarkerAlpha': float(parent.horizontalSliderMarkerAlpha.value()),
+    #             'MarkerColor': get_hex_color(parent.toolButtonMarkerColor.palette().button().color()),
 
-                # update line properties
-                'LineWidth': float(parent.doubleSpinBoxLineWidth.value()),
-                'LineMultiplier': float(parent.lineEditLengthMultiplier.text()),
-                'LineColor': get_hex_color(parent.toolButtonLineColor.palette().button().color()),
+    #             # update line properties
+    #             'LineWidth': float(parent.doubleSpinBoxLineWidth.value()),
+    #             'LineMultiplier': float(parent.lineEditLengthMultiplier.text()),
+    #             'LineColor': get_hex_color(parent.toolButtonLineColor.palette().button().color()),
 
-                # update color properties
-                'ColorFieldType': parent.comboBoxColorByField.currentText(),
-                'ColorField': parent.comboBoxColorField.currentText(),
-                'Colormap': parent.comboBoxFieldColormap.currentText(),
-                'CbarReverse': parent.checkBoxReverseColormap.isChecked(),
-                'CLim': [float(parent.lineEditColorLB.text()), float(parent.lineEditColorUB.text())],
-                'CScale': parent.comboBoxColorScale.currentText(),
-                'CbarDir': parent.comboBoxCbarDirection.currentText(),
-                'CLabel': parent.lineEditCbarLabel.text(),
-                'Resolution': parent.spinBoxHeatmapResolution.value()}
+    #             # update color properties
+    #             'ColorFieldType': parent.comboBoxColorByField.currentText(),
+    #             'ColorField': parent.comboBoxColorField.currentText(),
+    #             'Colormap': parent.comboBoxFieldColormap.currentText(),
+    #             'CbarReverse': parent.checkBoxReverseColormap.isChecked(),
+    #             'CLim': [float(parent.lineEditColorLB.text()), float(parent.lineEditColorUB.text())],
+    #             'CScale': parent.comboBoxColorScale.currentText(),
+    #             'CbarDir': parent.comboBoxCbarDirection.currentText(),
+    #             'CLabel': parent.lineEditCbarLabel.text(),
+    #             'Resolution': parent.spinBoxHeatmapResolution.value()}
 
     # style widget callbacks
     # -------------------------------------
@@ -2189,7 +2235,7 @@ class StylingDock(Styling):
 
         # change label in dictionary
         field = self.get_axis_field(ax)
-        self.data[self.sample_id].axis_dict[field]['label'] = new_label
+        parent.data[parent.app_data.sample_id].axis_dict[field]['label'] = new_label
         if ax == 'c':
             self.style_dict[plot_type][ax.upper()+'Label'] = new_label
         else:
@@ -2214,7 +2260,7 @@ class StylingDock(Styling):
             print("axis_limit_edit_callback")
 
         parent = self.parent
-        axis_dict = self.data[self.sample_id].axis_dict
+        axis_dict = parent.data[parent.app_data.sample_id].axis_dict
         if ui_update:
             plot_type = parent.comboBoxPlotType.currentText()
         else:
@@ -2288,7 +2334,7 @@ class StylingDock(Styling):
         field = self.get_axis_field(ax)
 
         if plot_type != 'heatmap':
-            self.data[self.sample_id].axis_dict[field]['scale'] = new_value
+            parent.data[parent.app_data.sample_id].axis_dict[field]['scale'] = new_value
 
         if ax == 'c':
             styles['CScale'] = new_value
@@ -2306,7 +2352,7 @@ class StylingDock(Styling):
         #print('set_color_axis_widgets')
         parent = self.parent
 
-        axis_dict = self.data[self.sample_id].axis_dict
+        axis_dict = parent.data[parent.app_data.sample_id].axis_dict
 
         field = parent.comboBoxColorField.currentText()
         if field == '':
@@ -2338,33 +2384,33 @@ class StylingDock(Styling):
         match ax:
             case 'x':
                 if field == 'X':
-                    parent.lineEditXLB.value = self.data[self.sample_id].axis_dict[field]['min']
-                    parent.lineEditXUB.value = self.data[self.sample_id].axis_dict[field]['max']
+                    parent.lineEditXLB.value = parent.data[parent.app_data.sample_id].axis_dict[field]['min']
+                    parent.lineEditXUB.value = parent.data[parent.app_data.sample_id].axis_dict[field]['max']
                 else:
-                    parent.lineEditXLB.value = self.data[self.sample_id].axis_dict[field]['min']
-                    parent.lineEditXUB.value = self.data[self.sample_id].axis_dict[field]['max']
-                parent.lineEditXLabel.setText(self.data[self.sample_id].axis_dict[field]['label'])
-                parent.comboBoxXScale.setCurrentText(self.data[self.sample_id].axis_dict[field]['scale'])
+                    parent.lineEditXLB.value = parent.data[parent.app_data.sample_id].axis_dict[field]['min']
+                    parent.lineEditXUB.value = parent.data[parent.app_data.sample_id].axis_dict[field]['max']
+                parent.lineEditXLabel.setText(parent.data[parent.app_data.sample_id].axis_dict[field]['label'])
+                parent.comboBoxXScale.setCurrentText(parent.data[parent.app_data.sample_id].axis_dict[field]['scale'])
             case 'y':
                 if parent.comboBoxPlotType.currentText() == 'histogram':
-                    parent.lineEditYLB.value = self.data[self.sample_id].axis_dict[field]['pmin']
-                    parent.lineEditYUB.value = self.data[self.sample_id].axis_dict[field]['pmax']
+                    parent.lineEditYLB.value = parent.data[parent.app_data.sample_id].axis_dict[field]['pmin']
+                    parent.lineEditYUB.value = parent.data[parent.app_data.sample_id].axis_dict[field]['pmax']
                     parent.lineEditYLabel.setText(parent.comboBoxHistType.currentText())
                     parent.comboBoxYScale.setCurrentText('linear')
                 else:
                     if field == 'X':
-                        parent.lineEditYLB.value = self.data[self.sample_id].axis_dict[field]['min']
-                        parent.lineEditYUB.value = self.data[self.sample_id].axis_dict[field]['max']
+                        parent.lineEditYLB.value = parent.data[parent.app_data.sample_id].axis_dict[field]['min']
+                        parent.lineEditYUB.value = parent.data[parent.app_data.sample_id].axis_dict[field]['max']
                     else:
-                        parent.lineEditYLB.value = self.data[self.sample_id].axis_dict[field]['min']
-                        parent.lineEditYUB.value = self.data[self.sample_id].axis_dict[field]['max']
-                    parent.lineEditYLabel.setText(self.data[self.sample_id].axis_dict[field]['label'])
-                    parent.comboBoxYScale.setCurrentText(self.data[self.sample_id].axis_dict[field]['scale'])
+                        parent.lineEditYLB.value = parent.data[parent.app_data.sample_id].axis_dict[field]['min']
+                        parent.lineEditYUB.value = parent.data[parent.app_data.sample_id].axis_dict[field]['max']
+                    parent.lineEditYLabel.setText(parent.data[parent.app_data.sample_id].axis_dict[field]['label'])
+                    parent.comboBoxYScale.setCurrentText(parent.data[parent.app_data.sample_id].axis_dict[field]['scale'])
             case 'z':
-                parent.lineEditZLB.value = self.data[self.sample_id].axis_dict[field]['min']
-                parent.lineEditZUB.value = self.data[self.sample_id].axis_dict[field]['max']
-                parent.lineEditZLabel.setText(self.data[self.sample_id].axis_dict[field]['label'])
-                parent.comboBoxZScale.setCurrentText(self.data[self.sample_id].axis_dict[field]['scale'])
+                parent.lineEditZLB.value = parent.data[parent.app_data.sample_id].axis_dict[field]['min']
+                parent.lineEditZUB.value = parent.data[parent.app_data.sample_id].axis_dict[field]['max']
+                parent.lineEditZLabel.setText(parent.data[parent.app_data.sample_id].axis_dict[field]['label'])
+                parent.comboBoxZScale.setCurrentText(parent.data[parent.app_data.sample_id].axis_dict[field]['scale'])
 
     def axis_reset_callback(self, ax):
         """Resets axes widgets and plot axes to auto values
@@ -2411,7 +2457,7 @@ class StylingDock(Styling):
                         self.initialize_axis_values(field_type, field)
                         self.set_axis_widgets(ax, field)
                     else:
-                        self.data[self.sample_id].axis_dict[field].update({'pstatus':'auto', 'pmin':None, 'pmax':None})
+                        parent.data[parent.app_data.sample_id].axis_dict[field].update({'pstatus':'auto', 'pmin':None, 'pmax':None})
 
                 case 'scatter' | 'heatmap':
                     match ax:
@@ -2469,7 +2515,7 @@ class StylingDock(Styling):
             print(f"get_axis_values\n  field_type: {field_type}\n  field: {field}\n  axis: {ax}")
 
         #print('get_axis_values')
-        axis_dict = self.data[self.sample_id].axis_dict
+        axis_dict = self.parent.data[self.parent.app_data.sample_id].axis_dict
 
         if field not in axis_dict.keys():
             self.initialize_axis_values(field_type, field)
@@ -2502,7 +2548,7 @@ class StylingDock(Styling):
             print(f"get_axis_values\n  field_type: {field_type}\n  field: {field}")
 
         #print('initialize_axis_values')
-        data = self.data[self.sample_id]
+        data = self.parent.data[self.parent.app_data.sample_id]
 
         # initialize variables
         if field not in data.axis_dict.keys():
@@ -2735,7 +2781,7 @@ class StylingDock(Styling):
         if (self._plot_type not in self.map_plot_types) or (self.style_dict[self._plot_type]['ScaleDir'] == 'none'):
             return None
 
-        data = self.data[self.sample_id]
+        data = self.parent.data[self.parent.app_data.sample_id]
 
         x_range = data.x_range
         y_range = data.y_range
@@ -2775,7 +2821,7 @@ class StylingDock(Styling):
             print("scale_length_callback")
 
         parent = self.parent
-        data = self.data[self.sample_id]
+        data = parent.data[parent.app_data.sample_id]
 
         if self._plot_type in self.map_plot_types:
             # make sure user input is within bounds, do not change
@@ -3028,11 +3074,8 @@ class StylingDock(Styling):
 
         parent = self.parent
 
-        if self.sample_id == '':
-            return
-
         #print('color_field_callback')
-        data = self.data[self.sample_id]
+        data = parent.data[parent.app_data.sample_id]
 
         plot_type = parent.comboBoxPlotType.currentText()
         field = parent.comboBoxColorField.currentText()

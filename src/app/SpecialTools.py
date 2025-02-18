@@ -2,9 +2,9 @@ import numpy as np
 import pandas as pd
 import scipy.odr as odr
 
-from PyQt5.QtCore import Qt, QRect, QSize
-from PyQt5.QtGui import QIcon, QFont
-from PyQt5.QtWidgets import ( 
+from PyQt6.QtCore import Qt, QRect, QSize
+from PyQt6.QtGui import QIcon, QFont
+from PyQt6.QtWidgets import ( 
         QMessageBox, QWidget, QGroupBox, QVBoxLayout, QHBoxLayout, QScrollArea, QToolButton,
         QTableWidget, QTableWidgetItem, QSpacerItem, QFrame, QSizePolicy, QHeaderView, QTabWidget,
         QFormLayout, QComboBox, QLabel, QCheckBox, QGridLayout, QPushButton

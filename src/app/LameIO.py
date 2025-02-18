@@ -47,9 +47,9 @@ class LameIO():
         parent = self.parent
         if path is None:
             dialog = QFileDialog()
-            dialog.setFileMode(QFileDialog.ExistingFiles)
+            dialog.setFileMode(QFileDialog.FileMode.ExistingFiles)
             dialog.setNameFilter("LaME CSV (*.csv)")
-            if dialog.exec_():
+            if dialog.exec():
                 file_list = dialog.selectedFiles()
                 parent.selected_directory = os.path.dirname(os.path.abspath(file_list[0]))
             else:
@@ -90,11 +90,11 @@ class LameIO():
 
         if path is None:
             dialog = QFileDialog()
-            dialog.setFileMode(QFileDialog.Directory)
+            dialog.setFileMode(QFileDialog.FileMode.Directory)
             # Set the default directory to the current working directory
             # dialog.setDirectory(os.getcwd())
             dialog.setDirectory(BASEDIR)
-            if dialog.exec_():
+            if dialog.exec():
                 parent.selected_directory = dialog.selectedFiles()[0]
             else:
                 parent.statusBar.showMessage("Open directory canceled.")
@@ -169,11 +169,11 @@ class LameIO():
         
         # Open QFileDialog to enter a new project name
         file_dialog = QFileDialog(parent, "Save Project", projects_dir)
-        file_dialog.setAcceptMode(QFileDialog.AcceptSave)
-        file_dialog.setFileMode(QFileDialog.AnyFile)
-        file_dialog.setOption(QFileDialog.ShowDirsOnly, True)
+        file_dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptSave)
+        file_dialog.setFileMode(QFileDialog.FileMode.AnyFile)
+        file_dialog.setOption(QFileDialog.Option.ShowDirsOnly, True)
         
-        if file_dialog.exec_() == QFileDialog.Accepted:
+        if file_dialog.exec() == QFileDialog.DialogCode.Accepted:
             selected_dir = file_dialog.selectedFiles()[0]
             
             # Ensure a valid directory name is selected
@@ -226,22 +226,20 @@ class LameIO():
 
         if parent.data:
             # Create and configure the QMessageBox
-            messageBoxChangeSample = QMessageBox()
-            iconWarning = QIcon()
-            iconWarning.addPixmap(QPixmap(":/resources/icons/icon-warning-64.svg"), QIcon.Normal, QIcon.Off) # type: ignore
-
-            messageBoxChangeSample.setWindowIcon(iconWarning)  # Set custom icon
-            messageBoxChangeSample.setText("Do you want to save current analysis?")
-            messageBoxChangeSample.setWindowTitle("Save analysis")
-            messageBoxChangeSample.setStandardButtons(QMessageBox.Discard | QMessageBox.Cancel | QMessageBox.Save)
+            msgBox = QMessageBox.warning(
+                parent,
+                "Save analysis",
+                "Do you want to save the current analysis?",
+                QMessageBox.StandardButton.Discard | QMessageBox.StandardButton.Cancel | QMessageBox.StandardButton.Save
+            )
 
             # Display the dialog and wait for user action
-            response = messageBoxChangeSample.exec_()
+            response = msgBox.exec()
 
-            if response == QMessageBox.Save:
+            if response == QMessageBox.StandardButton.Save:
                 self.save_project()
                 parent.reset_analysis('full')
-            elif response == QMessageBox.Discard:
+            elif response == QMessageBox.StandardButton.Discard:
                 parent.reset_analysis('full')
             else:  # user pressed cancel
                 parent.comboBoxSampleId.setCurrentText(parent.sample_id)
@@ -251,10 +249,10 @@ class LameIO():
         
         # Open QFileDialog to select the project folder
         file_dialog = QFileDialog(parent, "Open Project", projects_dir)
-        file_dialog.setFileMode(QFileDialog.Directory)
-        file_dialog.setOption(QFileDialog.ShowDirsOnly, True)
+        file_dialog.setFileMode(QFileDialog.FileMode.Directory)
+        file_dialog.setOption(QFileDialog.Option.ShowDirsOnly, True)
         
-        if file_dialog.exec_() == QFileDialog.Accepted:
+        if file_dialog.exec() == QFileDialog.DialogCode.Accepted:
             selected_dir = file_dialog.selectedFiles()[0]
             
             # Ensure a valid directory is selected

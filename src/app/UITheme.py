@@ -6,7 +6,7 @@ def default_font():
     # set default font for application
     font = QFont()
     font.setPointSize(11)
-    font.setStyleStrategy(QFont.PreferDefault)
+    font.setStyleStrategy(QFont.StyleStrategy.PreferDefault)
 
     return font
 

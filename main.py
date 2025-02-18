@@ -240,6 +240,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # The data dictionary will hold the data with a key for each sample
         self.data = {}
+        # until there is actually some data to store, disable certain actions
+        self.actionReset.setEnabled(False)
+        self.actionFilters.setEnabled(False)
+        self.actionPolygons.setEnabled(False)
+        self.actionClusters.setEnabled(False)
+        self.actionProfiles.setEnabled(False)
+        self.actionInfo.setEnabled(False)
+        self.actionNotes.setEnabled(False)
 
         # initialize the application data
         #   contains:
@@ -1718,6 +1726,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # add sample to sample dictionary
         if self.app_data.sample_id not in self.data:
             self.actionReset.setEnabled(True)
+            self.actionFilters.setEnabled(True)
+            self.actionPolygons.setEnabled(True)
+            self.actionClusters.setEnabled(True)
+            self.actionProfiles.setEnabled(True)
+            self.actionInfo.setEnabled(True)
+            self.actionNotes.setEnabled(True)
 
             # load sample's *.lame file
             file_path = os.path.join(self.selected_directory, self.app_data.csv_files[index])

@@ -62,8 +62,6 @@ class MaskDock(CustomDockWidget, UIFieldLogic):
         self.main_window = parent
         self.debug = debug
 
-        self.font = default_font
-
         self.setObjectName("Mask Dock")
         self.setAllowedAreas(Qt.DockWidgetArea.BottomDockWidgetArea)
         self.setWindowTitle(title)
@@ -110,6 +108,9 @@ class MaskDock(CustomDockWidget, UIFieldLogic):
 class FilterTab():
     def __init__(self, parent):
         self.parent = parent
+
+        if parent.main_window.data and parent.main_window.app_data.sample_id != '':
+            self.data = self.parent.main_window.data[self.parent.main_window.app_data.sample_id]
 
         #init table_fcn
         self.table_fcn = TableFcn(self)
@@ -329,15 +330,16 @@ class FilterTab():
         Updates ``self.lineEditFMin`` and ``self.lineEditFMax`` values for display when the
         field in ``self.comboBoxFilterField`` is changed.
         """
-        if self.parent.main_window.sample_id == '':
+        if self.parent.main_window.app_data.sample_id == '':
             return
+
         
         # field = self.comboBoxFilterField.currentText()
         # if not field:
         #     return
         if not (field := self.comboBoxFilterField.currentText()): return
-        
-        data = self.parent.main_window.data[self.parent.main_window.sample_id].processed_data
+
+        data = self.parent.main_window.data[self.parent.main_window.app_data.sample_id]
 
         self.lineEditFMin.value = data[field].min()
         self.callback_lineEditFMin()
@@ -346,14 +348,16 @@ class FilterTab():
 
     def callback_lineEditFMin(self):
         """Updates ``self.doubleSpinBoxFMinQ.value`` when ``self.lineEditFMin.value`` is changed"""        
-        if self.parent.main_window.sample_id == '':
+        if self.parent.main_window.app_data.sample_id == '':
             return
 
         if (self.comboBoxFilterField.currentText() == '') or (self.comboBoxFilterFieldType.currentText() == ''):
             return
 
+        data = self.parent.main_window.data[self.parent.main_window.app_data.sample_id]
+
         try:
-            array = self.parent.main_window.data[self.parent.main_window.sample_id].get_map_data(self.comboBoxFilterField.currentText(), self.comboBoxFilterFieldType.currentText())['array'].dropna()
+            array = data.get_map_data(self.comboBoxFilterField.currentText(), self.comboBoxFilterFieldType.currentText())['array'].dropna()
         except:
             return
 
@@ -363,14 +367,16 @@ class FilterTab():
 
     def callback_lineEditFMax(self):
         """Updates ``MainWindow.doubleSpinBoxFMaxQ.value`` when ``MainWindow.lineEditFMax.value`` is changed"""        
-        if self.parent.main_window.sample_id == '':
+        if self.parent.main_window.app_data.sample_id == '':
             return
 
         if (self.comboBoxFilterField.currentText() == '') or (self.comboBoxFilterFieldType.currentText() == ''):
             return
 
+        data = self.parent.main_window.data[self.parent.main_window.app_data.sample_id]
+
         try:
-            array = self.parent.main_window.data[self.parent.main_window.sample_id].get_map_data(self.comboBoxFilterField.currentText(), self.comboBoxFilterFieldType.currentText())['array'].dropna()
+            array = data.get_map_data(self.comboBoxFilterField.currentText(), self.comboBoxFilterFieldType.currentText())['array'].dropna()
         except:
             return
 

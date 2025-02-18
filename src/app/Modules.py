@@ -91,9 +91,9 @@ class Main():
         self.default_preferences = {'Units':{'Concentration': 'ppm', 'Distance': 'µm', 'Temperature':'°C', 'Pressure':'MPa', 'Date':'Ma', 'FontSize':11, 'TickDir':'out'}}
         self.preferences = copy.deepcopy(self.default_preferences)
 
-        self.io = LameIO(self, ui_update= False)
+        self.io = LameIO(self, connect_actions=False)
 
-        self.plot_style = Styling(self, ui= False)
+        self.plot_style = Styling(self)
         
         # Initialise plotviewer form
         self.plot_viewer = PlotViewer(self)

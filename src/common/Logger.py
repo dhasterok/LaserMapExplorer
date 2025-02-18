@@ -44,7 +44,7 @@ class LoggerDock(CustomDockWidget):
         self.action_save.setToolTip("Save log to file")
 
         # Add spacer
-        spacer = QSpacerItem(20, 0, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        spacer = QSpacerItem(20, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         if hasattr(parent,'logger_options'):
             self.action_settings = QAction()

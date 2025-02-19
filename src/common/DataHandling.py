@@ -764,23 +764,6 @@ class SampleObj(Observable):
         if column_name in self.processed_data.column_attributes:
             del self.processed_data.column_attributes[column_name]
 
-    def get_attribute_dict(self, attribute_name):
-        """
-        Creates a dictionary from an attribute where the unique values of the attribute becomes the
-        keys and the items are lists with the column names that match each attribute_name.
-
-        Parameters
-        ----------
-        attribute_name : str
-            Name of attribute within the `processed_data.column_attributes` dictionary.
-
-        Returns
-        -------
-        dict
-            A dictionary with attribute_values and columns that match.
-        """
-        return self.processed_data.get_attribute_dict(attribute_name)
-
     def reset_resolution(self):
         """Resets dx and dy to initial values
         """        

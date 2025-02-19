@@ -6,7 +6,7 @@ class Scheduler(QObject):
     Parameters
     ----------
     QObject : QObject
-        _description_
+        Creates a pyqt object.
 
     Attributes
     ----------

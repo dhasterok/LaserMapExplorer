@@ -554,7 +554,6 @@ class Styling(Observable):
                 if self.parent.lineEditScaleLength.value != length:
                     self.parent.lineEditScaleLength.value = length
                 self.style_dict[self._plot_type]['ScaleLength'] = length
-                self.scheduler.schedule_update()
         else:
             raise TypeError("length must be of type float.")
 
@@ -1203,7 +1202,7 @@ class StylingDock(Styling):
         parent.comboBoxFieldColormap.activated.connect(self.field_colormap_callback)
         parent.comboBoxCbarDirection.activated.connect(self.cbar_direction_callback)
         # resolution
-        parent.spinBoxHeatmapResolution.valueChanged.connect(lambda: self.resolution_callback(update_plot=True))
+        parent.spinBoxHeatmapResolution.valueChanged.connect(self.resolution_callback)
 
         # ternary colormaps
         
@@ -1222,6 +1221,10 @@ class StylingDock(Styling):
         parent.toolButtonTCmapMColor.clicked.connect(lambda: self.button_color_select(parent.toolButtonTCmapMColor))
         parent.comboBoxTernaryColormap.currentIndexChanged.connect(lambda: self.ternary_colormap_changed())
         self.ternary_colormap_changed()
+
+    def schedule_update(self):
+        if self.parent.plot_flag:
+            self.scheduler.schedule_update()
 
     def toggle_signals(self):
         """Toggles signals from all style widgets.  Useful when updating many widgets."""        
@@ -3022,15 +3025,10 @@ class StylingDock(Styling):
         # update plot
         self.scheduler.schedule_update()
 
-    def resolution_callback(self, update_plot=False):
+    def resolution_callback(self):
         """Updates heatmap resolution
 
         Updates the resolution of heatmaps when ``MainWindow.spinBoxHeatmapResolution`` is changed.
-
-        Parameters
-        ----------
-        update_plot : bool, optional
-            Sets the resolution of a heatmap for either Cartesian or ternary plots and both *heatmap* and *pca heatmap*, by default ``False``
         """
         if self.debug:
             print("resolution_callback")
@@ -3041,8 +3039,7 @@ class StylingDock(Styling):
 
         style['Resolution'] = parent.spinBoxHeatmapResolution.value()
 
-        if update_plot:
-            self.scheduler.schedule_update()
+        self.scheduler.schedule_update()
 
     # updates scatter styles when ColorByField comboBox is changed
     def update_color_field_type(self):

@@ -321,6 +321,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "scale_location": self.update_scale_location_combobox,
             "scale_length": self.update_scale_length_lineedit,
             "overlay_color": self.update_overlay_color_toolbutton,
+            "show_mass": self.update_show_mass_checkbox,
             "marker_symbol": self.update_marker_symbol_combobox,
             "marker_size": self.update_marker_size_spinbox,
             "marker_color": self.update_marker_color_toolbutton,
@@ -873,8 +874,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxColorByField.currentIndexChanged.connect(self.on_field_type_changed)
 
         # Connect the checkbox's stateChanged signal to our update function
-        self.showMass = False
-        self.checkBoxShowMass.stateChanged.connect(self.on_checkBoxShowMass_changed)
         # self.doubleSpinBoxMarkerSize.valueChanged.connect(lambda: self.plot_scatter(save=False))
         #self.comboBoxColorByField.activated.connect(lambda: self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField))
 
@@ -1419,6 +1418,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolButtonOverlayColor.setStyleSheet("background-color: %s;" % new_color)
         self.plot_style.scheduler.schedule_update()
 
+    def update_show_mass_checkbox(self, new_value):
+        self.checkBoxShowMass.setChecked(new_value)
+        self.plot_style.scheduler.schedule_update()
+
     def update_marker_symbol_combobox(self, new_marker_symbol):
         self.comboBoxMarker.setCurrentText(new_marker_symbol)
         self.plot_style.scheduler.schedule_update()
@@ -1569,12 +1572,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Update self.field_type whenever combo box changes
         self.field = self.comboBoxColorField.currentText()
 
-    def on_checkBoxShowMass_changed(self, state):
+    def update_show_mass(self):
         """
-        Update self.showMass whenever the checkbox changes.
+        Update ``plot_style.show_mass`` whenever the checkbox changes.
         state is an int, so we convert it to bool by checking if it equals QtCore.Qt.Checked.
         """
-        self.showMass = (state == Qt.Checked)
+        self.plot_style.show_mass = self.checkBoxShowMass.isChecked()
+        self.plot_style.scheduler.schedule_update()
 
     # -------------------------------------
     # Reset to start
@@ -5534,7 +5538,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # 
         def on_use_checkbox_state_changed(row, state):
             # Update the 'use' value in the filter_df for the given row
-            self.data[self.app_data.sample_id].filter_df.at[row, 'use'] = state == Qt.Checked
+            self.data[self.app_data.sample_id].filter_df.at[row, 'use'] = state == Qt.CheckState.Checked
 
         if calling_widget == 'analyteAdd':
             el_list = [self.comboBoxNDimAnalyte.currentText().lower()]
@@ -5555,7 +5559,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             # Create a QCheckBox for the 'use' column
             chkBoxItem_use = QCheckBox()
-            chkBoxItem_use.setCheckState(Qt.Checked)
+            chkBoxItem_use.setCheckState(True)
             chkBoxItem_use.stateChanged.connect(lambda state, row=row: on_use_checkbox_state_changed(row, state))
 
             self.tableWidgetNDim.setCellWidget(row, 0, chkBoxItem_use)

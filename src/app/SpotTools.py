@@ -19,8 +19,8 @@ class SpotPage(QWidget):
         self.setGeometry(QRect(0, 0, 300, 321))
         self.setObjectName("SpotDataPage")
 
-        self.verticalLayout_46 = QVBoxLayout(self)
-        self.verticalLayout_46.setContentsMargins(3, 3, 3, 3)
+        page_layout = QVBoxLayout(self)
+        page_layout.setContentsMargins(3, 3, 3, 3)
 
         self.scrollAreaSpots = QScrollArea(self)
         self.scrollAreaSpots.setFrameShape(QFrame.Shape.NoFrame)
@@ -132,7 +132,8 @@ class SpotPage(QWidget):
         self.verticalLayout_44.addLayout(self.toolbar)
         self.verticalLayout_45.addWidget(self.groupBox)
         self.scrollAreaSpots.setWidget(self.scrollAreaWidgetContentsSpots)
-        self.verticalLayout_46.addWidget(self.scrollAreaSpots)
+
+        page_layout.addWidget(self.scrollAreaSpots)
         page_icon = QIcon(":/resources/icons/icon-spot-64.svg")
 
         self.parent.toolBox.insertItem(page_index+1, self, page_icon, "Spot Data")

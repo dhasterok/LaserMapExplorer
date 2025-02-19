@@ -191,6 +191,7 @@ class Styling(Observable):
         self._scale_location = 'southeast'
         self._scale_length = 100
         self._overlay_color = '#ffffff'
+        self._show_mass = False
 
         # markers and lines
         self._marker_symbol = 'circle'
@@ -568,6 +569,18 @@ class Styling(Observable):
             self.style_dict[self._plot_type]['OverlayColor'] = color
         else:
             raise TypeError("color must be a hex string, #rrggbb")
+
+    @property
+    def show_mass(self):
+        return self._show_mass
+    
+    @show_mass.setter
+    def show_mass(self, new_value):
+        if new_value == self._show_mass:
+            return
+    
+        self._show_mass = new_value
+        self.notify_observers("show_mass", new_value)
 
     # marker
     @property
@@ -1083,6 +1096,7 @@ class StylingDock(Styling):
 
         # comboBox with plot type
         # overlay and annotation properties
+        parent.checkBoxShowMass.stateChanged.connect(parent.update_show_mass)
         parent.toolButtonOverlayColor.clicked.connect(self.overlay_color_callback)
         parent.toolButtonMarkerColor.clicked.connect(self.marker_color_callback)
         parent.toolButtonLineColor.clicked.connect(self.line_color_callback)

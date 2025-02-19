@@ -1268,7 +1268,7 @@
         <string/>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>3</number>
        </property>
        <property name="tabSpacing">
         <number>2</number>
@@ -2095,6 +2095,76 @@
               <number>6</number>
              </property>
              <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_2">
+               <item>
+                <widget class="QComboBox" name="comboBoxHistFieldType">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>.AppleSystemUIFont</family>
+                   <pointsize>11</pointsize>
+                   <stylestrategy>PreferDefault</stylestrategy>
+                  </font>
+                 </property>
+                 <property name="toolTip">
+                  <string>Select field for x-axis or top vertex of ternary</string>
+                 </property>
+                 <item>
+                  <property name="text">
+                   <string>Analyte</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Ratio</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_30">
+                 <item>
+                  <widget class="QComboBox" name="comboBoxHistField">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <family>.AppleSystemUIFont</family>
+                     <pointsize>11</pointsize>
+                     <stylestrategy>PreferDefault</stylestrategy>
+                    </font>
+                   </property>
+                   <property name="toolTip">
+                    <string>Select field for x-axis or top ternary vertex</string>
+                   </property>
+                   <item>
+                    <property name="text">
+                     <string>New Item</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QSpinBox" name="spinBoxFieldIndex">
+                   <property name="readOnly">
+                    <bool>false</bool>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </item>
+             <item>
               <widget class="QGroupBox" name="groupBoxHistogram">
                <property name="title">
                 <string>Histogram</string>
@@ -2112,36 +2182,6 @@
                 <property name="bottomMargin">
                  <number>3</number>
                 </property>
-                <item row="0" column="0">
-                 <widget class="QComboBox" name="comboBoxHistFieldType">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <family>.AppleSystemUIFont</family>
-                    <pointsize>11</pointsize>
-                    <stylestrategy>PreferDefault</stylestrategy>
-                   </font>
-                  </property>
-                  <property name="toolTip">
-                   <string>Select field for x-axis or top vertex of ternary</string>
-                  </property>
-                  <item>
-                   <property name="text">
-                    <string>Analyte</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Ratio</string>
-                   </property>
-                  </item>
-                 </widget>
-                </item>
                 <item row="1" column="0">
                  <widget class="QLabel" name="labelBinWidth">
                   <property name="font">
@@ -2156,32 +2196,6 @@
                   </property>
                   <property name="alignment">
                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="1">
-                 <widget class="QSpinBox" name="spinBoxBinWidth">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <family>.AppleSystemUIFont</family>
-                    <pointsize>11</pointsize>
-                    <stylestrategy>PreferDefault</stylestrategy>
-                   </font>
-                  </property>
-                  <property name="toolTip">
-                   <string>Width of histogram bins</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                  </property>
-                  <property name="keyboardTracking">
-                   <bool>false</bool>
                   </property>
                  </widget>
                 </item>
@@ -2322,41 +2336,37 @@
                   </item>
                  </widget>
                 </item>
-                <item row="0" column="1">
-                 <layout class="QHBoxLayout" name="horizontalLayout_30">
-                  <item>
-                   <widget class="QComboBox" name="comboBoxHistField">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                    <property name="font">
-                     <font>
-                      <family>.AppleSystemUIFont</family>
-                      <pointsize>11</pointsize>
-                      <stylestrategy>PreferDefault</stylestrategy>
-                     </font>
-                    </property>
-                    <property name="toolTip">
-                     <string>Select field for x-axis or top ternary vertex</string>
-                    </property>
-                    <item>
-                     <property name="text">
-                      <string>New Item</string>
-                     </property>
-                    </item>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QSpinBox" name="spinBoxFieldIndex">
-                    <property name="readOnly">
-                     <bool>false</bool>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
+                <item row="1" column="1">
+                 <widget class="QDoubleSpinBox" name="doubleSpinBoxBinWidth">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <family>.AppleSystemUIFont</family>
+                    <pointsize>11</pointsize>
+                    <stylestrategy>PreferDefault</stylestrategy>
+                   </font>
+                  </property>
+                  <property name="toolTip">
+                   <string>Width of histogram bins</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  </property>
+                  <property name="keyboardTracking">
+                   <bool>false</bool>
+                  </property>
+                  <property name="maximum">
+                   <double>100000.000000000000000</double>
+                  </property>
+                  <property name="stepType">
+                   <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                  </property>
+                 </widget>
                 </item>
                </layout>
               </widget>
@@ -5062,6 +5072,7 @@
    <addaction name="separator"/>
    <addaction name="actionUpdatePlot"/>
    <addaction name="actionSavePlotToTree"/>
+   <addaction name="separator"/>
    <addaction name="actionNotes"/>
    <addaction name="actionCalculator"/>
    <addaction name="separator"/>
@@ -5210,7 +5221,7 @@
         <enum>QFrame::Raised</enum>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <property name="tabSpacing">
         <number>2</number>
@@ -6167,7 +6178,7 @@
               <x>0</x>
               <y>0</y>
               <width>264</width>
-              <height>256</height>
+              <height>251</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_70">
@@ -6441,88 +6452,20 @@
                  </property>
                 </widget>
                </item>
-               <item row="5" column="1">
-                <widget class="QComboBox" name="comboBoxLineWidth">
-                 <property name="maximumSize">
-                  <size>
-                   <width>125</width>
-                   <height>16777215</height>
-                  </size>
-                 </property>
-                 <property name="toolTip">
-                  <string>Set line width</string>
-                 </property>
-                 <item>
-                  <property name="text">
-                   <string>0</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>0.1</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>0.25</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>0.5</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>0.75</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>1</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>1.5</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>2</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>2.5</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>3</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>4</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>5</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>6</string>
-                  </property>
-                 </item>
-                </widget>
-               </item>
                <item row="4" column="1">
                 <widget class="Line" name="lineMarker">
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+               <item row="5" column="1">
+                <widget class="QDoubleSpinBox" name="doubleSpinBoxLineWidth">
+                 <property name="maximum">
+                  <double>10.000000000000000</double>
+                 </property>
+                 <property name="singleStep">
+                  <double>0.500000000000000</double>
                  </property>
                 </widget>
                </item>

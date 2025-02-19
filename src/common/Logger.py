@@ -1,10 +1,10 @@
 import sys
-from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtWidgets import (
+from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtWidgets import (
         QMainWindow, QTextEdit, QWidget, QVBoxLayout,
-        QToolBar, QSpacerItem, QSizePolicy, QAction, QDialog, QCheckBox, QDialogButtonBox
+        QToolBar, QSpacerItem, QSizePolicy, QDialog, QCheckBox, QDialogButtonBox
     )
-from PyQt5.QtGui import QIcon
+from PyQt6.QtGui import QIcon, QAction
 
 from src.common.CustomWidgets import CustomDockWidget
 
@@ -44,7 +44,7 @@ class LoggerDock(CustomDockWidget):
         self.action_save.setToolTip("Save log to file")
 
         # Add spacer
-        spacer = QSpacerItem(20, 0, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        spacer = QSpacerItem(20, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         if hasattr(parent,'logger_options'):
             self.action_settings = QAction()

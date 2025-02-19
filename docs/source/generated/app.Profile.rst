@@ -1,4 +1,4 @@
-﻿app.Profile
+app.Profile
 ===========
 
 .. automodule:: app.Profile

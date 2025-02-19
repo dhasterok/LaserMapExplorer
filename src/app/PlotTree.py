@@ -1,7 +1,7 @@
 import re, darkdetect
-from PyQt5.QtCore import ( Qt )
-from PyQt5.QtGui import ( QColor, QBrush, QStandardItemModel, QStandardItem )
-from PyQt5.QtWidgets import ( QMenu ) 
+from PyQt6.QtCore import ( Qt )
+from PyQt6.QtGui import ( QColor, QBrush, QStandardItemModel, QStandardItem )
+from PyQt6.QtWidgets import ( QMenu ) 
 import src.common.CustomMplCanvas as mplc
 from src.common.CustomWidgets import StandardItem, CustomTreeView
 from src.common.SortAnalytes import sort_analytes
@@ -75,7 +75,7 @@ class PlotTree():
             return
 
         # assign the two objects needed from self.parent
-        data = self.parent.data[sample_id].processed_data
+        data = self.parent.app_data.data[sample_id].processed_data
         treeView = self.parent.treeView
 
         # add sample_id to analyte branch
@@ -132,7 +132,7 @@ class PlotTree():
     def add_calculated_leaf(self, new_field):
 
         # assign the two objects needed from self.parent
-        sample_id = self.parent.sample_id
+        sample_id = self.parent.app_data.sample_id
         treeView = self.parent.treeView
 
         calculated_branch = treeView.branch_exists(self.tree['Calculated'], sample_id)
@@ -162,7 +162,7 @@ class PlotTree():
             method = action.text()
             self.sort_method = method
 
-        data = self.parent.data[self.parent.sample_id]
+        data = self.parent.app_data.data[self.parent.app_data.sample_id]
         treeView = self.parent.treeView
 
         # retrieve analyte_list
@@ -182,7 +182,7 @@ class PlotTree():
          
         # Reorder tree items according to the new analyte list
         # Sort the tree branches associated with analytes
-        for sample_id in self.parent.sample_ids:
+        for sample_id in self.parent.app_data.sample_list:
             sample_branch = treeView.find_leaf(self.tree['Analyte'], sample_id)
             if sample_branch:
                 treeView.sort_branch(sample_branch, sorted_analyte_list)
@@ -292,7 +292,7 @@ class PlotTree():
                     print(f"  plot_info does not exist, creating map")
 
                 # print('tree_double_click: plot_map_pg')
-                if self.parent.toolBox.currentIndex() not in [self.parent.left_tab['sample'], self.parent.left_tab['process'], self.parent.left_tab['polygons'], self.parent.left_tab['profile']]:
+                if self.parent.toolBox.currentIndex() not in [self.parent.left_tab['sample'], self.parent.left_tab['process']]:
                     self.parent.toolBox.setCurrentIndex(self.parent.left_tab['sample'])
 
                 # updates comboBoxColorByField and comboBoxColorField comboboxes and creates new plot
@@ -330,7 +330,7 @@ class PlotTree():
             print(f"update_tree, norm_update: {norm_update}")
 
         #print('update_tree')
-        sample_id = self.parent.sample_id
+        sample_id = self.parent.app_data.sample_id
         if sample_id == '':
             return
 
@@ -339,7 +339,7 @@ class PlotTree():
         else:
             hexcolor = self.parent.theme.highlight_color_light
 
-        data = self.parent.data[sample_id]
+        data = self.parent.app_data.data[sample_id]
         ref_chem = self.parent.ref_chem
 
         # Un-highlight all leaf in the trees

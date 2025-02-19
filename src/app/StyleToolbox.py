@@ -1,6 +1,6 @@
 import os, re, copy, pickle
-from PyQt5.QtWidgets import ( QColorDialog, QTableWidgetItem, QMessageBox, QInputDialog )
-from PyQt5.QtGui import ( QDoubleValidator, QFont, QFontDatabase )
+from PyQt6.QtWidgets import ( QColorDialog, QTableWidgetItem, QMessageBox, QInputDialog )
+from PyQt6.QtGui import ( QDoubleValidator, QFont, QFontDatabase )
 from pyqtgraph import colormap
 import src.common.format as fmt
 import numpy as np
@@ -10,12 +10,13 @@ import matplotlib.colors as colors
 import src.common.csvdict as csvdict
 from src.common.colorfunc import get_hex_color, get_rgb_color
 from src.app.config import BASEDIR
+from src.common.Observable import Observable
 from src.common.ScheduleTimer import Scheduler
 
 class StyleObj():
     pass
 
-class Styling():
+class Styling(Observable):
     """Manages plot styling for different plot types and syncs with main window UI.
 
     Attributes
@@ -134,8 +135,8 @@ class Styling():
         'MarkerAlpha' : (int) -- marker transparency, set by ``horizontalSliderMarkerAlpha``
 
         * associated with widgets in the toolBoxTreeView > Styling > Lines tab
-        'LineWidth' : (float) -- width of line objects, varies between plot types, set by ``comboBoxLineWidth``
-        'LineColor' : (float) -- width of line objects, varies between plot types, set by ``comboBoxLineWidth``
+        'LineWidth' : (float) -- width of line objects, varies between plot types, set by ``doubleSpinBoxLineWidth``
+        'LineColor' : (float) -- width of line objects, varies between plot types, set by ``doubleSpinBoxLineWidth``
         'Multiplier' : (hex str) -- color of markers, set by ``toolButtonLineColor``
 
         * associated with widgets in the toolBoxTreeView > Styling > Colors tab
@@ -157,20 +158,60 @@ class Styling():
             Prints debugging messages to stdout, by default ``False``
 
     """    
-    def __init__(self, parent, debug=False, ui= True):
+    def __init__(self, parent, debug=False):
+        super().__init__()
         self.parent = parent
         self.debug = debug
         
-        #super().__init__(parent)
-        self._signal_state = True
-        self.ui = ui
         # create the default style dictionary (self.style_dict for each plot type)
-        self.reset_default_styles(ui)
+        self.reset_default_styles()
         self.map_plot_types = ['analyte map', 'ternary map', 'PCA score', 'cluster', 'cluster score']
 
         self.marker_dict = {'circle':'o', 'square':'s', 'diamond':'d', 'triangle (up)':'^', 'triangle (down)':'v', 'hexagon':'h', 'pentagon':'p'}
 
-        self._plot_type = 'analyte map'
+        self._plot_type = ''
+
+        # axes
+        self._xlim = [0, 1]
+        self._xlabel = ''
+        self._xscale = ''
+        self._ylim = [0, 1]
+        self._ylabel = ''
+        self._yscale = ''
+        self._zlim = [0, 1]
+        self._zlabel = ''
+        self._zscale = ''
+        self._aspect_ratio = 1
+        self._tick_dir = ''
+
+        # annotations and scale
+        self._font_family = 'Avenir'
+        self._font_size = 10
+        self._scale_dir = 'none'
+        self._scale_location = 'southeast'
+        self._scale_length = 100
+        self._overlay_color = '#ffffff'
+        self._show_mass = False
+
+        # markers and lines
+        self._marker_symbol = 'circle'
+        self._marker_size = 6
+        self._marker_color = '#000000'
+        self._marker_alpha = 1.0
+        self._line_width = 0.5 
+        self._line_multiplier = 1
+        self._line_color = '#000000'
+
+        # color axis
+        self._color_field_type = ''
+        self._color_field = ''
+        self._cmap = 'viridis'
+        self._cbar_reverse = False
+        self._cbar_dir = 'vertical'
+        self._clim = [0, 1]
+        self._clabel = ''
+        self._cscale = ''
+        self._resolution = 10
 
         # colormaps
         # matplotlib colormaps
@@ -190,161 +231,10 @@ class Styling():
         self.ternary_colormaps = df.to_dict(orient='records')
 
 
-        schemes = []
+        self.color_schemes = []
         for cmap in self.ternary_colormaps:
-            schemes.append(cmap['scheme'])
+            self.color_schemes.append(cmap['scheme'])
 
-        if ui: # Initialise UI components associated with styles tab 
-
-
-            self.scheduler = Scheduler(callback=self.parent.update_SV)
-
-            parent.comboBoxHistType.activated.connect(self.scheduler.schedule_update)
-            parent.toolButtonNDimAnalyteAdd.clicked.connect(self.scheduler.schedule_update)
-            parent.toolButtonNDimAnalyteSetAdd.clicked.connect(self.scheduler.schedule_update)
-            parent.toolButtonNDimUp.clicked.connect(self.scheduler.schedule_update)
-            parent.toolButtonNDimDown.clicked.connect(self.scheduler.schedule_update)
-            parent.toolButtonNDimRemove.clicked.connect(self.scheduler.schedule_update)
-
-            
-            parent.comboBoxMarker.clear()
-            parent.comboBoxMarker.addItems(self.marker_dict.keys())
-
-            self._plot_type = self.parent.plot_type
-
-            # set style theme
-            parent.comboBoxStyleTheme.activated.connect(self.read_theme)
-
-            parent.comboBoxFieldX.activated.connect(lambda: self.axis_variable_changed(parent.comboBoxFieldTypeX.currentText(), parent.comboBoxFieldX.currentText(), 'x'))
-            parent.comboBoxFieldY.activated.connect(lambda: self.axis_variable_changed(parent.comboBoxFieldTypeY.currentText(), parent.comboBoxFieldY.currentText(), 'y'))
-            parent.comboBoxFieldZ.activated.connect(lambda: self.axis_variable_changed(parent.comboBoxFieldTypeZ.currentText(), parent.comboBoxFieldZ.currentText(), 'z'))
-
-            # comboBox with plot type
-            # overlay and annotation properties
-            parent.toolButtonOverlayColor.clicked.connect(self.overlay_color_callback)
-            parent.toolButtonMarkerColor.clicked.connect(self.marker_color_callback)
-            parent.toolButtonLineColor.clicked.connect(self.line_color_callback)
-            parent.toolButtonXAxisReset.clicked.connect(lambda: self.axis_reset_callback('x'))
-            parent.toolButtonYAxisReset.clicked.connect(lambda: self.axis_reset_callback('y'))
-            parent.toolButtonCAxisReset.clicked.connect(lambda: self.axis_reset_callback('c'))
-            #self.toolButtonOverlayColor.setStyleSheet("background-color: white;")
-
-            setattr(parent.comboBoxMarker, "allItems", lambda: [parent.comboBoxMarker.itemText(i) for i in range(parent.comboBoxMarker.count())])
-            setattr(parent.comboBoxLineWidth, "allItems", lambda: [parent.comboBoxLineWidth.itemText(i) for i in range(parent.comboBoxLineWidth.count())])
-            setattr(parent.comboBoxColorByField, "allItems", lambda: [parent.comboBoxColorByField.itemText(i) for i in range(parent.comboBoxColorByField.count())])
-            setattr(parent.comboBoxColorField, "allItems", lambda: [parent.comboBoxColorField.itemText(i) for i in range(parent.comboBoxColorField.count())])
-            setattr(parent.comboBoxFieldColormap, "allItems", lambda: [parent.comboBoxFieldColormap.itemText(i) for i in range(parent.comboBoxFieldColormap.count())])
-
-            # add list of colormaps to comboBoxFieldColormap and set callbacks
-            parent.comboBoxFieldColormap.clear()
-            parent.comboBoxFieldColormap.addItems(list(self.custom_color_dict.keys())+self.mpl_colormaps)
-            parent.comboBoxFieldColormap.activated.connect(self.field_colormap_callback)
-            parent.checkBoxReverseColormap.stateChanged.connect(self.colormap_direction_callback)
-
-            # callback functions
-            parent.comboBoxPlotType.currentTextChanged.connect(lambda: setattr(self, 'plot_type', parent.comboBoxPlotType.currentText()))
-            #parent.comboBoxPlotType.currentIndexChanged.connect(lambda: self.plot_type_callback(update=True))
-
-            parent.actionUpdatePlot.triggered.connect(parent.update_SV)
-            parent.toolButtonSaveTheme.clicked.connect(self.input_theme_name_dlg)
-            # axes
-            parent.lineEditXLabel.editingFinished.connect(lambda: self.axis_label_edit_callback('x',parent.lineEditXLabel.text()))
-            parent.lineEditYLabel.editingFinished.connect(lambda: self.axis_label_edit_callback('y',parent.lineEditYLabel.text()))
-            parent.lineEditZLabel.editingFinished.connect(lambda: self.axis_label_edit_callback('z',parent.lineEditZLabel.text()))
-            parent.lineEditCbarLabel.editingFinished.connect(lambda: self.axis_label_edit_callback('c',parent.lineEditCbarLabel.text()))
-
-            parent.comboBoxXScale.activated.connect(lambda: self.axis_scale_callback(parent.comboBoxXScale,'x'))
-            parent.comboBoxYScale.activated.connect(lambda: self.axis_scale_callback(parent.comboBoxYScale,'y'))
-            parent.comboBoxColorScale.activated.connect(lambda: self.axis_scale_callback(parent.comboBoxColorScale,'c'))
-
-            parent.lineEditXLB.setValidator(QDoubleValidator())
-            parent.lineEditXLB.precision = 3
-            parent.lineEditXLB.toward = 0
-            parent.lineEditXUB.setValidator(QDoubleValidator())
-            parent.lineEditXUB.precision = 3
-            parent.lineEditXUB.toward = 1
-            parent.lineEditYLB.setValidator(QDoubleValidator())
-            parent.lineEditYLB.precision = 3
-            parent.lineEditYLB.toward = 0
-            parent.lineEditYUB.setValidator(QDoubleValidator())
-            parent.lineEditYUB.precision = 3
-            parent.lineEditYUB.toward = 1
-            parent.lineEditZLB.setValidator(QDoubleValidator())
-            parent.lineEditZLB.precision = 3
-            parent.lineEditZLB.toward = 0
-            parent.lineEditZUB.setValidator(QDoubleValidator())
-            parent.lineEditZUB.precision = 3
-            parent.lineEditZUB.toward = 1
-            parent.lineEditColorLB.setValidator(QDoubleValidator())
-            parent.lineEditColorLB.precision = 3
-            parent.lineEditColorLB.toward = 0
-            parent.lineEditColorUB.setValidator(QDoubleValidator())
-            parent.lineEditColorUB.precision = 3
-            parent.lineEditColorUB.toward = 1
-            parent.lineEditAspectRatio.setValidator(QDoubleValidator())
-
-            parent.lineEditXLB.editingFinished.connect(lambda: self.axis_limit_edit_callback('x', 0, float(parent.lineEditXLB.text())))
-            parent.lineEditXUB.editingFinished.connect(lambda: self.axis_limit_edit_callback('x', 1, float(parent.lineEditXUB.text())))
-            parent.lineEditYLB.editingFinished.connect(lambda: self.axis_limit_edit_callback('y', 0, float(parent.lineEditYLB.text())))
-            parent.lineEditYUB.editingFinished.connect(lambda: self.axis_limit_edit_callback('y', 1, float(parent.lineEditYUB.text())))
-            parent.lineEditZLB.editingFinished.connect(lambda: self.axis_limit_edit_callback('z', 0, float(parent.lineEditZLB.text())))
-            parent.lineEditZUB.editingFinished.connect(lambda: self.axis_limit_edit_callback('z', 1, float(parent.lineEditZUB.text())))
-            parent.lineEditColorLB.editingFinished.connect(lambda: self.axis_limit_edit_callback('c', 0, float(parent.lineEditColorLB.text())))
-            parent.lineEditColorUB.editingFinished.connect(lambda: self.axis_limit_edit_callback('c', 1, float(parent.lineEditColorUB.text())))
-
-            parent.lineEditAspectRatio.editingFinished.connect(self.aspect_ratio_callback)
-            parent.comboBoxTickDirection.activated.connect(self.tickdir_callback)
-            # annotations
-            parent.fontComboBox.activated.connect(self.font_callback)
-            parent.doubleSpinBoxFontSize.valueChanged.connect(self.font_size_callback)
-            # ---------
-            # These are tools are for future use, when individual annotations can be added
-            parent.tableWidgetAnnotation.setVisible(False)
-            parent.toolButtonAnnotationDelete.setVisible(False)
-            parent.toolButtonAnnotationSelectAll.setVisible(False)
-            # ---------
-
-            # scales
-            parent.lineEditScaleLength.setValidator(QDoubleValidator())
-            parent.comboBoxScaleDirection.activated.connect(lambda: setattr(self, 'scale_dir', parent.comboBoxScaleDirection.currentText()))
-            #parent.comboBoxScaleDirection.activated.connect(self.scale_direction_callback)
-            parent.comboBoxScaleLocation.activated.connect(self.scale_location_callback)
-            #parent.lineEditScaleLength.editingFinished.connect(self.scale_length_callback)
-            parent.lineEditScaleLength.editingFinished.connect(lambda: setattr(self, 'scale_length', parent.lineEditScaleLength.value))
-            #overlay color
-            parent.comboBoxMarker.activated.connect(self.marker_symbol_callback)
-            parent.doubleSpinBoxMarkerSize.valueChanged.connect(self.marker_size_callback)
-            parent.horizontalSliderMarkerAlpha.sliderReleased.connect(self.slider_alpha_changed)
-            # lines
-            parent.comboBoxLineWidth.activated.connect(self.line_width_callback)
-            parent.lineEditLengthMultiplier.editingFinished.connect(self.length_multiplier_callback)
-            # colors
-            # marker color
-            parent.comboBoxColorByField.activated.connect(self.color_by_field_callback)
-            parent.comboBoxColorField.activated.connect(self.color_field_callback)
-            parent.spinBoxColorField.valueChanged.connect(self.color_field_update)
-            parent.comboBoxFieldColormap.activated.connect(self.field_colormap_callback)
-            parent.comboBoxCbarDirection.activated.connect(self.cbar_direction_callback)
-            # resolution
-            parent.spinBoxHeatmapResolution.valueChanged.connect(lambda: self.resolution_callback(update_plot=True))
-
-            # ternary colormaps
-            
-            parent.comboBoxTernaryColormap.clear()
-
-            parent.comboBoxTernaryColormap.addItems(schemes)
-            parent.comboBoxTernaryColormap.addItem('user defined')
-
-            # dialog for adding and saving new colormaps
-            parent.toolButtonSaveTernaryColormap.clicked.connect(parent.input_ternary_name_dlg)
-
-            # select new ternary colors
-            parent.toolButtonTCmapXColor.clicked.connect(lambda: self.button_color_select(parent.toolButtonTCmapXColor))
-            parent.toolButtonTCmapYColor.clicked.connect(lambda: self.button_color_select(parent.toolButtonTCmapYColor))
-            parent.toolButtonTCmapZColor.clicked.connect(lambda: self.button_color_select(parent.toolButtonTCmapZColor))
-            parent.toolButtonTCmapMColor.clicked.connect(lambda: self.button_color_select(parent.toolButtonTCmapMColor))
-            parent.comboBoxTernaryColormap.currentIndexChanged.connect(lambda: self.ternary_colormap_changed())
-            self.ternary_colormap_changed()
 
     # -------------------------------------
     # Styling properties
@@ -356,170 +246,271 @@ class Styling():
 
     @plot_type.setter
     def plot_type(self, new_plot_type):
-        if new_plot_type != self._plot_type:
-            self._plot_type = new_plot_type
-            if self.parent.plot_type != new_plot_type and ui:
-                self.parent.comboBoxPlotType.setCurrentText(new_plot_type)
-            self.plot_type_callback(update=True)
+        #if new_plot_type == self._plot_type:
+        #    return
+
+        # set new plot type
+        self._plot_type = new_plot_type
+
+        # reset all properties to style dictionary for new plot type
+        style = self.style_dict[self._plot_type]
+
+        # axes
+        self._xlim = style['XLim']
+        self._xlabel = style['XLabel']
+        self._xscale = style['XScale']
+        self._ylim = style['YLim']
+        self._ylabel = style['YLabel']
+        self._yscale = style['YScale']
+        self._zlim = style['ZLim']
+        self._zlabel = style['ZLabel']
+        self._zscale = style['ZScale']
+        self._aspect_ratio = style['AspectRatio']
+        self._tick_dir = style['TickDir']
+
+        # annotations and scale
+        self._font_family = style['Font']
+        self._font_size = style['FontSize']
+        self._scale_dir = style['ScaleDir']
+        self._scale_location = style['ScaleLocation']
+        self._scale_length = style['ScaleLength']
+        self._overlay_color = style['OverlayColor']
+
+        # markers and lines
+        self._marker_symbol = style['Marker']
+        self._marker_size = style['MarkerSize']
+        self._marker_color = style['MarkerColor']
+        self._marker_alpha = style['MarkerAlpha']
+        self._line_width = style['LineWidth']
+        self._line_multiplier = style['LineMultiplier']
+        self._line_color = style['LineColor']
+
+        # color axis
+        self._color_field_type = style['ColorFieldType']
+        self._color_field = style['ColorField']
+        self._cmap = style['Colormap']
+        self._cbar_reverse = style['CbarReverse']
+        self._cbar_direction = style['CbarDir']
+        self._clim = style['CLim']
+        self._clabel = style['CLabel']
+        self._cscale = style['CScale']
+        self._resolution = style['Resolution']
+
+        # update all notifiers
+        self.notify_observers("plot_type", new_plot_type)
+        self.notify_observers("xlim", self._xlim)
+        self.notify_observers("xlabel", self._xlabel)
+        self.notify_observers("xscale", self._xscale)
+        self.notify_observers("ylim", self._ylim)
+        self.notify_observers("ylabel", self._ylabel)
+        self.notify_observers("yscale", self._yscale)
+        self.notify_observers("zlim", self._zlim)
+        self.notify_observers("zlabel", self._zlabel)
+        self.notify_observers("zscale", self._zscale)
+        self.notify_observers("aspect_ratio", self._aspect_ratio)
+        self.notify_observers("tick_dir", self._tick_dir)
+
+        # annotations and scale
+        self.notify_observers("font_family", self._font_family)
+        self.notify_observers("font_size", self._font_size)
+        self.notify_observers("scale_dir", self._scale_dir)
+        self.notify_observers("scale_location", self._scale_location)
+        self.notify_observers("scale_length", self._scale_length)
+        self.notify_observers("overlay_color", self._overlay_color)
+
+        # markers and lines
+        self.notify_observers("marker_symbol", self._marker_symbol)
+        self.notify_observers("marker_size", self._marker_size)
+        self.notify_observers("marker_color", self._marker_color)
+        self.notify_observers("marker_alpha", self._marker_alpha)
+        self.notify_observers("line_width", self._line_width)
+        self.notify_observers("line_multiplier", self._line_multiplier)
+        self.notify_observers("line_color", self._line_color)
+
+        # color axis
+        self.notify_observers("color_field_type", self._color_field_type)
+        self.notify_observers("color_field", self._color_field)
+        self.notify_observers("cmap", self._cmap)
+        self.notify_observers("cbar_reverse", self._cbar_reverse)
+        self.notify_observers("cbar_direction", self._cbar_direction)
+        self.notify_observers("clim", self._clim)
+        self.notify_observers("clabel", self._clabel)
+        self.notify_observers("cscale", self._cscale)
+        self.notify_observers("resolution", self._resolution)
+
+        #self.plot_type_callback(update=True)
 
     # xlim
     @property
     def xlim(self):
-        return self.style_dict[self._plot_type]['XLim']
+        return self._xlim
 
     @xlim.setter
-    def xlim(self, value):
-        if value is None or self._is_valid_bounds(value):
-            self.style_dict[self._plot_type]['XLim'] = value
+    def xlim(self, new_value):
+        if new_value is None or self._is_valid_bounds(new_value):
+            self.style_dict[self._plot_type]['XLim'] = new_value
+            self.notify_observers("xlim", new_value)
         else:
             raise ValueError("xlim must be a list of two floats or None.")
 
     # xlabel
     @property
     def xlabel(self):
-        return self.style_dict[self._plot_type]['XLabel']
+        return self._xlabel
 
     @xlabel.setter
-    def xlabel(self, label):
-        if label is None or isinstance(label, str):
-            self.style_dict[self._plot_type]['XLabel'] = label
+    def xlabel(self, new_label):
+        if new_label is None or isinstance(new_label, str):
+            self.style_dict[self._plot_type]['XLabel'] = new_label
+            self.notify_observers("xlabel", new_label)
         else:
             raise TypeError("label must be of type str or None.")
 
     # xscale
     @property
     def xscale(self):
-        return self.style_dict[self._plot_type]['XScale']
+        return self._xscale
 
     @xscale.setter
-    def xscale(self, scale):
-        if self._is_valid_scale(scale):
-            self.style_dict[self._plot_type]['XScale'] = scale
+    def xscale(self, new_scale):
+        if self._is_valid_scale(new_scale):
+            self.style_dict[self._plot_type]['XScale'] = new_scale
+            self.notify_observers("xscale", new_scale)
         else:
             raise TypeError("scale must be linear, log or logit.")
 
     # ylim
     @property
     def ylim(self):
-        return self.style_dict[self._plot_type]['YLim']
+        return self._ylim
 
     @ylim.setter
-    def ylim(self, value):
-        if value is None or self._is_valid_bounds(value):
-            self.style_dict[self._plot_type]['YLim'] = value
+    def ylim(self, new_value):
+        if new_value is None or self._is_valid_bounds(new_value):
+            self.style_dict[self._plot_type]['YLim'] = new_value
+            self.notify_observers("ylim", new_value)
         else:
             raise ValueError("ylim must be a list of two floats or None.")
 
     # ylabel
     @property
     def ylabel(self):
-        return self.style_dict[self._plot_type]['YLabel']
+        return self._ylabel
 
     @ylabel.setter
-    def ylabel(self, label):
-        if label is None or isinstance(label, str):
-            self.style_dict[self._plot_type]['YLabel'] = label
+    def ylabel(self, new_label):
+        if new_label is None or isinstance(new_label, str):
+            self.style_dict[self._plot_type]['YLabel'] = new_label
+            self.notify_observers("ylabel", new_label)
         else:
             raise TypeError("label must be of type str or None.")
 
     # yscale
     @property
     def yscale(self):
-        return self.style_dict[self._plot_type]['YScale']
+        return self._yscale
 
     @yscale.setter
-    def yscale(self, scale):
-        if self._is_valid_scale(scale):
-            self.style_dict[self._plot_type]['YScale'] = scale
+    def yscale(self, new_scale):
+        if self._is_valid_scale(new_scale):
+            self.style_dict[self._plot_type]['YScale'] = new_scale
+            self.notify_observers("yscale", new_scale)
         else:
             raise TypeError("scale must be linear, log or logit.")
 
     # zlim
     @property
     def zlim(self):
-        return self.style_dict[self._plot_type]['ZLim']
+        return self._zlim
 
     @zlim.setter
-    def zlim(self, value):
-        if value is None or self._is_valid_bounds(value):
-            self.style_dict[self._plot_type]['ZLim'] = value
+    def zlim(self, new_value):
+        if new_value is None or self._is_valid_bounds(new_value):
+            self.style_dict[self._plot_type]['ZLim'] = new_value
+            self.notify_observers("zscale", new_value)
         else:
             raise ValueError("zlim must be a list of two floats or None.")
 
     # zlabel
     @property
     def zlabel(self):
-        return self.style_dict[self._plot_type]['ZLabel']
+        return self._zlabel
 
     @zlabel.setter
-    def zlabel(self, label):
-        if label is None or isinstance(label, str):
-            self.style_dict[self._plot_type]['ZLabel'] = label
+    def zlabel(self, new_label):
+        if new_label is None or isinstance(new_label, str):
+            self.style_dict[self._plot_type]['ZLabel'] = new_label
+            self.notify_observers("zlabel", new_label)
         else:
             raise TypeError("label must be of type str or None.")
 
     # zscale
     @property
     def zscale(self):
-        return self.style_dict[self._plot_type]['ZScale']
+        return self._zscale
 
-    @yscale.setter
-    def yscale(self, scale):
-        if self._is_valid_scale(scale):
-            self.style_dict[self._plot_type]['ZScale'] = scale
+    @zscale.setter
+    def zscale(self, new_scale):
+        if self._is_valid_scale(new_scale):
+            self.style_dict[self._plot_type]['ZScale'] = new_scale
+            self.notify_observers("zscale", new_scale)
         else:
             raise TypeError("scale must be linear, log or logit.")
 
     # aspect_ratio
     @property
     def aspect_ratio(self):
-        return self.style_dict[self._plot_type]['AspectRatio']
+        return self._aspect_ratio
     
     @aspect_ratio.setter
-    def aspect_ratio(self, value):
-        if value is None or isinstance(value, float):
-            self.style_dict[self._plot_type]['AspectRatio'] = value
+    def aspect_ratio(self, new_aspect_ratio):
+        if new_aspect_ratio is None or isinstance(new_aspect_ratio, float):
+            self.style_dict[self._plot_type]['AspectRatio'] = new_aspect_ratio
+            self.notify_observers("aspect_ratio", new_aspect_ratio)
 
     # tick_dir 
     @property
     def tick_dir(self):
-        return self.style_dict[self._plot_type]['TickDir']
+        return self._tick_dir
 
     @tick_dir.setter
-    def tick_dir(self, tickdir):
-        if isinstance(tickdir, str):
-            self.style_dict[self._plot_type]['TickDir'] = tickdir
+    def tick_dir(self, new_tickdir):
+        if isinstance(new_tickdir, str):
+            self.style_dict[self._plot_type]['TickDir'] = new_tickdir
+            self.notify_observers("tick_dir", new_tickdir)
         else:
             raise TypeError("tickdir must be of type str.")
 
     # font
     @property
     def font(self):
-        return self.style_dict[self._plot_type]['Font']
+        return self._font_family
 
     @font.setter
-    def font(self, font_family):
-        if isinstance(font_family, str):
-            self.style_dict[self._plot_type]['Font'] = font_family
+    def font(self, new_font_family):
+        if isinstance(new_font_family, str):
+            self.style_dict[self._plot_type]['Font'] = new_font_family
+            self.notify_observers("font_family", new_font_family)
         else:
             raise TypeError("font_family must be of type str.")
 
     # font_size
     @property
     def font_size(self):
-        return self.style_dict[self._plot_type]['FontSize']
+        return self._font_size
 
     @font_size.setter
-    def font_size(self, font_size):
-        if isinstance(font_size, float):
-            self.style_dict[self._plot_type]['FontSize'] = font_size
+    def font_size(self, new_font_size):
+        if isinstance(new_font_size, float):
+            self.style_dict[self._plot_type]['FontSize'] = new_font_size
+            self.notify_observers("font_size", new_font_size)
         else:
             raise TypeError("font_size must be of type float.")
 
     # scale_dir
     @property
     def scale_dir(self):
-        return self.style_dict[self._plot_type]['ScaleDir']
+        return self._scale_dir
 
     @scale_dir.setter
     def scale_dir(self, direction):
@@ -535,7 +526,7 @@ class Styling():
     # scale_location
     @property
     def scale_location(self):
-        return self.style_dict[self._plot_type]['ScaleLocation']
+        return self._scale_location
 
     @scale_location.setter
     def scale_location(self, location):
@@ -547,13 +538,13 @@ class Styling():
     # scale_length
     @property
     def scale_length(self):
-        return self.style_dict[self._plot_type]['ScaleLength']
+        return self._scale_length
 
     @scale_length.setter
     def scale_length(self, length):
         if length is None or isinstance(length, float):
             # check constraints on length
-            data = self.parent.data[self.parent.sample_id]
+            data = self.parent.data[self.parent.app_data.sample_id]
             scale_dir = self.style_dict[self._plot_type]['ScaleDir']
             if (length is None) or ((length <= 0) or (scale_dir == 'horizontal' and length > data.x_range) or (scale_dir == 'vertical' and length > data.y_range)):
                 length = self.default_scale_length()
@@ -563,14 +554,13 @@ class Styling():
                 if self.parent.lineEditScaleLength.value != length:
                     self.parent.lineEditScaleLength.value = length
                 self.style_dict[self._plot_type]['ScaleLength'] = length
-                self.scheduler.schedule_update()
         else:
             raise TypeError("length must be of type float.")
 
     # overlay_color
     @property
     def overlay_color(self):
-        return self.style_dict[self._plot_type]['OverlayColor']
+        return self._overlay_color
 
     @overlay_color.setter
     def overlay_color(self, color):
@@ -579,10 +569,22 @@ class Styling():
         else:
             raise TypeError("color must be a hex string, #rrggbb")
 
+    @property
+    def show_mass(self):
+        return self._show_mass
+    
+    @show_mass.setter
+    def show_mass(self, new_value):
+        if new_value == self._show_mass:
+            return
+    
+        self._show_mass = new_value
+        self.notify_observers("show_mass", new_value)
+
     # marker
     @property
     def marker(self):
-        return self.style_dict[self._plot_type]['Marker']
+        return self._marker_symbol
 
     @marker.setter
     def marker(self, marker_symbol):
@@ -594,7 +596,7 @@ class Styling():
     # marker_size
     @property
     def marker_size(self):
-        return self.style_dict[self._plot_type]['MarkerSize']
+        return self._marker_size
 
     @marker_size.setter
     def marker_size(self, size):
@@ -606,7 +608,7 @@ class Styling():
     # marker_color
     @property
     def marker_color(self):
-        return self.style_dict[self._plot_type]['MarkerColor']
+        return self._marker_color
 
     @marker_color.setter
     def marker_color(self, hexstr):
@@ -618,7 +620,7 @@ class Styling():
     # marker_alpha
     @property
     def marker_alpha(self):
-        return self.style_dict[self._plot_type]['MarkerAlpha']
+        return self._marker_alpha
 
     @marker_alpha.setter
     def marker_alpha(self, alpha):
@@ -630,7 +632,7 @@ class Styling():
     # line_width
     @property
     def line_width(self):
-        return self.style_dict[self._plot_type]['LineWidth']
+        return self._line_width
 
     @line_width.setter
     def line_width(self, width):
@@ -642,7 +644,7 @@ class Styling():
     # line_multiplier (for things like arrow length)
     @property
     def line_multiplier(self):
-        return self.style_dict[self._plot_type]['LineMultiplier']
+        return self._line_multiplier
 
     @line_multiplier.setter
     def line_multiplier(self, value):
@@ -654,7 +656,7 @@ class Styling():
     # line_color
     @property
     def line_color(self):
-        return self.style_dict[self._plot_type]['LineColor']
+        return self._line_color
 
     @line_color.setter
     def line_color(self, hexstr):
@@ -666,40 +668,43 @@ class Styling():
     # color_field_type
     @property
     def color_field_type(self):
-        return self.style_dict[self._plot_type]['ColorFieldType']
+        return self._color_field_type
 
     @color_field_type.setter
-    def color_field_type(self, field_type):
-        if (field_type is None) or isinstance(field_type, str):
+    def color_field_type(self, new_field_type):
+        if (new_field_type is None) or isinstance(new_field_type, str):
             #self.style_dict[self._plot_type]['ColorFieldType'] = field_type
-            if self.parent.comboBoxColorByField.currentText() != field_type:
-                self.parent.comboBoxColorByField.setCurrentText(field_type)
-
-                self.color_by_field_callback()
+            if new_field_type == self._color_field_type:
+                return
+                
+            self.parent.comboBoxColorByField.setCurrentText(new_field_type)
+            self.notify_observers("c_field_type", new_field_type)
         else:
             raise TypeError("field_type must be of type str.")
 
     # color_field
     @property
     def color_field(self):
-        return self.style_dict[self._plot_type]['ColorField']
+        return self._color_field
 
     @color_field.setter
-    def color_field(self, field):
-        if (field is None) or isinstance(field, str):
+    def color_field(self, new_field):
+        if (new_field is None) or isinstance(new_field, str):
             #self.style_dict[self._plot_type]['ColorField'] = field
             # update color field and associated style widgets
-            if self.parent.comboBoxColorField.currentText() != field:
-                self.parent.comboBoxColorField.setCurrentText(field)
+            if self.parent.comboBoxColorField.currentText() == new_field:
+                return
 
-                self.color_field_callback() 
+            self.parent.comboBoxColorField.setCurrentText(new_field)
+            self.color_field_callback() 
+            self.notify_observers("c_field", new_field)
         else:
             raise TypeError("field must be of type str or None.")
 
     # cmap - colormap
     @property
     def cmap(self):
-        return self.style_dict[self._plot_type]['Colormap']
+        return self._cmap
 
     @cmap.setter
     def cmap(self, name):
@@ -711,7 +716,7 @@ class Styling():
     # inverse
     @property
     def cbar_reverse(self):
-        return self.style_dict[self._plot_type]['CbarReverse']
+        return self._cbar_reverse
 
     @cbar_reverse.setter
     def cbar_reverse(self, flag):
@@ -723,7 +728,7 @@ class Styling():
     # cbar_dir
     @property
     def cbar_dir(self):
-        return self.style_dict[self._plot_type]['CbarDir']
+        return self._cbar_dir
 
     @cbar_dir.setter
     def cbar_dir(self, direction):
@@ -735,44 +740,47 @@ class Styling():
     # clim
     @property
     def clim(self):
-        return self.style_dict[self._plot_type]['CLim']
+        return self._clim
 
     @clim.setter
-    def clim(self, value):
-        if value is None or self._is_valid_bounds(value):
-            self.style_dict[self._plot_type]['CLim'] = value
+    def clim(self, new_value):
+        if new_value is None or self._is_valid_bounds(new_value):
+            self.style_dict[self._plot_type]['CLim'] = new_value
+            self.notify_observers("clim", new_value)
         else:
             raise ValueError("xlim must be a list of two floats or None.")
 
     # clabel
     @property
     def clabel(self):
-        return self.style_dict[self._plot_type]['CLabel']
+        return self._clabel
 
     @clabel.setter
-    def clabel(self, label):
-        if label is None or isinstance(label, str):
-            self.style_dict[self._plot_type]['CLabel'] = label
-            self.parent.lineEditCbarLabel.setText(label)
+    def clabel(self, new_label):
+        if new_label is None or isinstance(new_label, str):
+            self.style_dict[self._plot_type]['CLabel'] = new_label
+            self.parent.lineEditCbarLabel.setText(new_label)
+            self.notify_observers("clabel", new_label)
         else:
             raise TypeError("label must be of type str or None.")
 
     # cscale
     @property
     def cscale(self):
-        return self.style_dict[self._plot_type]['CScale']
+        return self._cscale
 
     @cscale.setter
-    def cscale(self, scale):
-        if self._is_valid_scale(scale):
-            self.style_dict[self._plot_type]['CScale'] = scale
+    def cscale(self, new_scale):
+        if self._is_valid_scale(new_scale):
+            self.style_dict[self._plot_type]['CScale'] = new_scale
+            self.notify_observers("cscale", new_scale)
         else:
             raise TypeError("scale must be linear, log or logit.")
 
     # resolution
     @property
     def resolution(self):
-        return self.style_dict[self._plot_type]['Resolution']
+        return self._resolution
 
     @resolution.setter
     def resolution(self, value):
@@ -816,75 +824,11 @@ class Styling():
     def print_properties(self):
         for attr, value in vars(self).items():
             print(f"{attr}: {value}")
-    
-    def toggle_signals(self):
-        """Toggles signals from all style widgets.  Useful when updating many widgets."""        
-
-        if self.debug:
-            print(f"toggle_signals, _signal_state: {self._signal_state}")
-
-        parent = self.parent
-
-        parent.comboBoxPlotType.blockSignals(self._signal_state)
-
-       # x-axis widgets
-        parent.lineEditXLB.blockSignals(self._signal_state)
-        parent.lineEditXUB.blockSignals(self._signal_state)
-        parent.comboBoxXScale.blockSignals(self._signal_state)
-        parent.lineEditXLabel.blockSignals(self._signal_state)
-
-        # y-axis widgets
-        parent.lineEditYLB.blockSignals(self._signal_state)
-        parent.lineEditYUB.blockSignals(self._signal_state)
-        parent.comboBoxYScale.blockSignals(self._signal_state)
-        parent.lineEditYLabel.blockSignals(self._signal_state)
-
-        # z-axis widgets
-        parent.lineEditZLB.blockSignals(self._signal_state)
-        parent.lineEditZUB.blockSignals(self._signal_state)
-        parent.comboBoxZScale.blockSignals(self._signal_state)
-        parent.lineEditZLabel.blockSignals(self._signal_state)
-
-        # other axis properties
-        parent.lineEditAspectRatio.blockSignals(self._signal_state)
-        parent.comboBoxTickDirection.blockSignals(self._signal_state)
-
-        # annotations
-        parent.fontComboBox.blockSignals(self._signal_state)
-        parent.doubleSpinBoxFontSize.blockSignals(self._signal_state)
-        parent.checkBoxShowMass.blockSignals(self._signal_state)
-
-        # scale
-        parent.comboBoxScaleDirection.blockSignals(self._signal_state)
-        parent.comboBoxScaleLocation.blockSignals(self._signal_state)
-        parent.lineEditScaleLength.blockSignals(self._signal_state)
-        parent.toolButtonOverlayColor.blockSignals(self._signal_state)
-
-        # markers and lines
-        parent.comboBoxMarker.blockSignals(self._signal_state)
-        parent.doubleSpinBoxMarkerSize.blockSignals(self._signal_state)
-        parent.toolButtonMarkerColor.blockSignals(self._signal_state)
-        parent.horizontalSliderMarkerAlpha.blockSignals(self._signal_state)
-        parent.comboBoxLineWidth.blockSignals(self._signal_state)
-        parent.toolButtonLineColor.blockSignals(self._signal_state)
-        parent.lineEditLengthMultiplier.blockSignals(self._signal_state)
-
-        # coloring
-        parent.comboBoxColorByField.blockSignals(self._signal_state)
-        parent.comboBoxColorField.blockSignals(self._signal_state)
-        parent.spinBoxHeatmapResolution.blockSignals(self._signal_state)
-        parent.comboBoxFieldColormap.blockSignals(self._signal_state)
-        parent.checkBoxReverseColormap.blockSignals(self._signal_state)
-        parent.lineEditColorLB.blockSignals(self._signal_state)
-        parent.lineEditColorUB.blockSignals(self._signal_state)
-        parent.comboBoxColorScale.blockSignals(self._signal_state)
-        parent.lineEditCbarLabel.blockSignals(self._signal_state)
-        parent.comboBoxCbarDirection.blockSignals(self._signal_state)
 
     # -------------------------------------
     # Style related fuctions/callbacks
     # -------------------------------------
-    def reset_default_styles(self, ui = True):
+    def reset_default_styles(self):
         """Resets ``MainWindow.styles`` dictionary to default values."""
 
         if self.debug:
@@ -893,8 +837,8 @@ class Styling():
         parent = self.parent
         styles = {}
 
-        default_plot_style = {
-                'XLim': [0,1], 'XScale': 'linear', 'XLabel': '', 'YLim': [0,1], 'YScale': 'linear', 'YLabel': '', 'ZLim': [0,1], 'ZLabel': '', 'ZScale': 'linear', 'AspectRatio': '1.0', 'TickDir': 'out',
+        self.default_plot_style = {
+                'XLim': [0,1], 'XScale': 'linear', 'XLabel': '', 'YLim': [0,1], 'YScale': 'linear', 'YLabel': '', 'ZLim': [0,1], 'ZLabel': '', 'ZScale': 'linear', 'AspectRatio': 1.0, 'TickDir': 'out',
                 'Font': '', 'FontSize': 11.0,
                 'ScaleDir': 'none', 'ScaleLocation': 'northeast', 'ScaleLength': None, 'OverlayColor': '#ffffff',
                 'Marker': 'circle', 'MarkerSize': 6, 'MarkerColor': '#1c75bc', 'MarkerAlpha': 30,
@@ -903,42 +847,37 @@ class Styling():
 
         # try to load one of the preferred fonts
         default_font = ['Avenir','Candara','Myriad Pro','Myriad','Aptos','Calibri','Helvetica','Arial','Verdana']
-        names = QFontDatabase().families()
+        names = QFontDatabase.families()
+
+        for font in default_font:
+            if font in names:
+                #parent.fontComboBox.setCurrentFont()
+                #self.default_plot_style['Font'] = parent.fontComboBox.currentFont().family()
+                self.default_plot_style['Font'] = QFont(font, 11).family()
+                break
 
 
+        styles = {'analyte map': copy.deepcopy(self.default_plot_style),
+                'correlation': copy.deepcopy(self.default_plot_style),
+                'histogram': copy.deepcopy(self.default_plot_style),
+                'gradient map': copy.deepcopy(self.default_plot_style),
+                'scatter': copy.deepcopy(self.default_plot_style),
+                'heatmap': copy.deepcopy(self.default_plot_style),
+                'ternary map': copy.deepcopy(self.default_plot_style),
+                'TEC': copy.deepcopy(self.default_plot_style),
+                'Radar': copy.deepcopy(self.default_plot_style),
+                'variance': copy.deepcopy(self.default_plot_style),
+                'vectors': copy.deepcopy(self.default_plot_style),
+                'PCA scatter': copy.deepcopy(self.default_plot_style),
+                'PCA heatmap': copy.deepcopy(self.default_plot_style),
+                'PCA score': copy.deepcopy(self.default_plot_style),
+                'cluster': copy.deepcopy(self.default_plot_style),
+                'cluster score': copy.deepcopy(self.default_plot_style),
+                'cluster performance': copy.deepcopy(self.default_plot_style),
+                'profile': copy.deepcopy(self.default_plot_style)}
 
-        styles = {'analyte map': copy.deepcopy(default_plot_style),
-                'correlation': copy.deepcopy(default_plot_style),
-                'histogram': copy.deepcopy(default_plot_style),
-                'gradient map': copy.deepcopy(default_plot_style),
-                'scatter': copy.deepcopy(default_plot_style),
-                'heatmap': copy.deepcopy(default_plot_style),
-                'ternary map': copy.deepcopy(default_plot_style),
-                'TEC': copy.deepcopy(default_plot_style),
-                'Radar': copy.deepcopy(default_plot_style),
-                'variance': copy.deepcopy(default_plot_style),
-                'vectors': copy.deepcopy(default_plot_style),
-                'PCA scatter': copy.deepcopy(default_plot_style),
-                'PCA heatmap': copy.deepcopy(default_plot_style),
-                'PCA score': copy.deepcopy(default_plot_style),
-                'cluster': copy.deepcopy(default_plot_style),
-                'cluster score': copy.deepcopy(default_plot_style),
-                'cluster performance': copy.deepcopy(default_plot_style),
-                'profile': copy.deepcopy(default_plot_style)}
-        if ui:
-            for font in default_font:
-                if font in names:
-                    parent.fontComboBox.setCurrentFont(QFont(font, 11))
-                    default_plot_style['Font'] = parent.fontComboBox.currentFont().family()
-                    break
-                # try:
-                #     self.fontComboBox.setCurrentFont(QFont(font, 11))
-                #     default_plot_style['Font'] = self.fontComboBox.currentFont().family()
-                # except:
-                #     print(f'Could not find {font} font')
-            # update default styles
-            for k in styles.keys():
-                styles[k]['Font'] = parent.fontComboBox.currentFont().family()
+        #for k in styles.keys():
+        #    styles[k]['Font'] = parent.fontComboBox.currentFont().family()
 
         styles['analyte map']['Colormap'] = 'plasma'
         styles['analyte map']['ColorFieldType'] = 'Analyte'
@@ -995,6 +934,55 @@ class Styling():
         styles['profile']['LineColor'] = '#d3d3d3'
 
         self.style_dict = styles
+
+    def update_style_dict(self):
+        """Update style dictionary from style properties"""
+        self.style_dict[self._plot_type] = {
+            # axes properties
+            'XLim': self._xlim,
+            'XScale': self._xscale,
+            'XLabel': self._xlabel,
+            'YLim': self._ylim,
+            'YScale': self._yscale,
+            'YLabel': self._ylabel,
+            'ZLim': self._zlim,
+            'ZScale': self._zscale,
+            'ZLabel': self._zlabel,
+            'AspectRatio': self._aspect_ratio,
+            'TickDir': self._tick_dir,
+
+            # annotation properties
+            'Font': self._font_family,
+            'FontSize': self._font_size,
+
+            # scale properties
+            'ScaleLocation': self._scale_location,
+            'ScaleDir': self._scale_dir,
+            'ScaleLength': self._scale_length,
+            'OverlayColor': self._overlay_color,
+
+            # update marker properties
+            'Marker': self._marker_symbol,
+            'MarkerSize': self._marker_size,
+            'MarkerAlpha': self._marker_alpha,
+            'MarkerColor': self._marker_color,
+
+            # update line properties
+            'LineWidth': self._line_width,
+            'LineMultiplier': self._line_multiplier,
+            'LineColor': self._line_color,
+
+            # update color properties
+            'ColorFieldType': self._color_field_type,
+            'ColorField': self._color_field,
+            'Colormap': self._cmap,
+            'CbarReverse': self._cbar_reverse,
+            'CLim': self._clim,
+            'CScale': self._cscale,
+            'CbarDir': self._cbar_dir,
+            'CLabel': self._clabel,
+            'Resolution': self._resolution
+        }
 
     # Themes
     # -------------------------------------
@@ -1069,6 +1057,239 @@ class Styling():
             QMessageBox.warning(parent,'Error','Could not save theme.')
 
             return
+    
+
+class StylingDock(Styling):
+    def __init__(self, parent, debug=False):
+        super().__init__(self, debug)
+
+        self.parent = parent
+        self.debug = debug
+        self.add_observer(parent.update_widgets)
+
+        self._signal_state = True
+
+        self.scheduler = Scheduler(callback=self.parent.update_SV)
+
+        parent.fontComboBox.setCurrentFont(QFont(self.default_plot_style['Font'], 11))
+
+        parent.comboBoxHistType.activated.connect(self.scheduler.schedule_update)
+        parent.toolButtonNDimAnalyteAdd.clicked.connect(self.scheduler.schedule_update)
+        parent.toolButtonNDimAnalyteSetAdd.clicked.connect(self.scheduler.schedule_update)
+        parent.toolButtonNDimUp.clicked.connect(self.scheduler.schedule_update)
+        parent.toolButtonNDimDown.clicked.connect(self.scheduler.schedule_update)
+        parent.toolButtonNDimRemove.clicked.connect(self.scheduler.schedule_update)
+
+        
+        parent.comboBoxMarker.clear()
+        parent.comboBoxMarker.addItems(self.marker_dict.keys())
+
+        self._plot_type = "analyte map"
+
+        # set style theme
+        parent.comboBoxStyleTheme.activated.connect(self.read_theme)
+
+        parent.comboBoxFieldX.activated.connect(lambda: self.axis_variable_changed(parent.comboBoxFieldTypeX.currentText(), parent.comboBoxFieldX.currentText(), 'x'))
+        parent.comboBoxFieldY.activated.connect(lambda: self.axis_variable_changed(parent.comboBoxFieldTypeY.currentText(), parent.comboBoxFieldY.currentText(), 'y'))
+        parent.comboBoxFieldZ.activated.connect(lambda: self.axis_variable_changed(parent.comboBoxFieldTypeZ.currentText(), parent.comboBoxFieldZ.currentText(), 'z'))
+
+        # comboBox with plot type
+        # overlay and annotation properties
+        parent.checkBoxShowMass.stateChanged.connect(parent.update_show_mass)
+        parent.toolButtonOverlayColor.clicked.connect(self.overlay_color_callback)
+        parent.toolButtonMarkerColor.clicked.connect(self.marker_color_callback)
+        parent.toolButtonLineColor.clicked.connect(self.line_color_callback)
+        parent.toolButtonXAxisReset.clicked.connect(lambda: self.axis_reset_callback('x'))
+        parent.toolButtonYAxisReset.clicked.connect(lambda: self.axis_reset_callback('y'))
+        parent.toolButtonCAxisReset.clicked.connect(lambda: self.axis_reset_callback('c'))
+        #self.toolButtonOverlayColor.setStyleSheet("background-color: white;")
+
+        setattr(parent.comboBoxMarker, "allItems", lambda: [parent.comboBoxMarker.itemText(i) for i in range(parent.comboBoxMarker.count())])
+        setattr(parent.comboBoxColorByField, "allItems", lambda: [parent.comboBoxColorByField.itemText(i) for i in range(parent.comboBoxColorByField.count())])
+        setattr(parent.comboBoxColorField, "allItems", lambda: [parent.comboBoxColorField.itemText(i) for i in range(parent.comboBoxColorField.count())])
+        setattr(parent.comboBoxFieldColormap, "allItems", lambda: [parent.comboBoxFieldColormap.itemText(i) for i in range(parent.comboBoxFieldColormap.count())])
+
+        # add list of colormaps to comboBoxFieldColormap and set callbacks
+        parent.comboBoxFieldColormap.clear()
+        parent.comboBoxFieldColormap.addItems(list(self.custom_color_dict.keys())+self.mpl_colormaps)
+        parent.comboBoxFieldColormap.activated.connect(self.field_colormap_callback)
+        parent.checkBoxReverseColormap.stateChanged.connect(self.colormap_direction_callback)
+
+        # callback functions
+        parent.comboBoxPlotType.currentTextChanged.connect(lambda: setattr(self, 'plot_type', parent.comboBoxPlotType.currentText()))
+        #parent.comboBoxPlotType.currentIndexChanged.connect(lambda: self.plot_type_callback(update=True))
+
+        parent.actionUpdatePlot.triggered.connect(parent.update_SV)
+        parent.toolButtonSaveTheme.clicked.connect(self.input_theme_name_dlg)
+        # axes
+        parent.lineEditXLabel.editingFinished.connect(lambda: self.axis_label_edit_callback('x',parent.lineEditXLabel.text()))
+        parent.lineEditYLabel.editingFinished.connect(lambda: self.axis_label_edit_callback('y',parent.lineEditYLabel.text()))
+        parent.lineEditZLabel.editingFinished.connect(lambda: self.axis_label_edit_callback('z',parent.lineEditZLabel.text()))
+        parent.lineEditCbarLabel.editingFinished.connect(lambda: self.axis_label_edit_callback('c',parent.lineEditCbarLabel.text()))
+
+        parent.comboBoxXScale.activated.connect(lambda: self.axis_scale_callback(parent.comboBoxXScale,'x'))
+        parent.comboBoxYScale.activated.connect(lambda: self.axis_scale_callback(parent.comboBoxYScale,'y'))
+        parent.comboBoxColorScale.activated.connect(lambda: self.axis_scale_callback(parent.comboBoxColorScale,'c'))
+
+        parent.lineEditXLB.setValidator(QDoubleValidator())
+        parent.lineEditXLB.precision = 3
+        parent.lineEditXLB.toward = 0
+        parent.lineEditXUB.setValidator(QDoubleValidator())
+        parent.lineEditXUB.precision = 3
+        parent.lineEditXUB.toward = 1
+        parent.lineEditYLB.setValidator(QDoubleValidator())
+        parent.lineEditYLB.precision = 3
+        parent.lineEditYLB.toward = 0
+        parent.lineEditYUB.setValidator(QDoubleValidator())
+        parent.lineEditYUB.precision = 3
+        parent.lineEditYUB.toward = 1
+        parent.lineEditZLB.setValidator(QDoubleValidator())
+        parent.lineEditZLB.precision = 3
+        parent.lineEditZLB.toward = 0
+        parent.lineEditZUB.setValidator(QDoubleValidator())
+        parent.lineEditZUB.precision = 3
+        parent.lineEditZUB.toward = 1
+        parent.lineEditColorLB.setValidator(QDoubleValidator())
+        parent.lineEditColorLB.precision = 3
+        parent.lineEditColorLB.toward = 0
+        parent.lineEditColorUB.setValidator(QDoubleValidator())
+        parent.lineEditColorUB.precision = 3
+        parent.lineEditColorUB.toward = 1
+        parent.lineEditAspectRatio.setValidator(QDoubleValidator())
+        parent.lineEditAspectRatio.precision = 3
+        parent.lineEditAspectRatio.toward = 1
+
+        parent.lineEditXLB.editingFinished.connect(lambda: self.axis_limit_edit_callback('x', 0, float(parent.lineEditXLB.text())))
+        parent.lineEditXUB.editingFinished.connect(lambda: self.axis_limit_edit_callback('x', 1, float(parent.lineEditXUB.text())))
+        parent.lineEditYLB.editingFinished.connect(lambda: self.axis_limit_edit_callback('y', 0, float(parent.lineEditYLB.text())))
+        parent.lineEditYUB.editingFinished.connect(lambda: self.axis_limit_edit_callback('y', 1, float(parent.lineEditYUB.text())))
+        parent.lineEditZLB.editingFinished.connect(lambda: self.axis_limit_edit_callback('z', 0, float(parent.lineEditZLB.text())))
+        parent.lineEditZUB.editingFinished.connect(lambda: self.axis_limit_edit_callback('z', 1, float(parent.lineEditZUB.text())))
+        parent.lineEditColorLB.editingFinished.connect(lambda: self.axis_limit_edit_callback('c', 0, float(parent.lineEditColorLB.text())))
+        parent.lineEditColorUB.editingFinished.connect(lambda: self.axis_limit_edit_callback('c', 1, float(parent.lineEditColorUB.text())))
+
+        parent.lineEditAspectRatio.editingFinished.connect(self.aspect_ratio_callback)
+        parent.comboBoxTickDirection.activated.connect(self.tickdir_callback)
+        # annotations
+        parent.fontComboBox.activated.connect(self.font_callback)
+        parent.doubleSpinBoxFontSize.valueChanged.connect(self.font_size_callback)
+        # ---------
+        # These are tools are for future use, when individual annotations can be added
+        parent.tableWidgetAnnotation.setVisible(False)
+        parent.toolButtonAnnotationDelete.setVisible(False)
+        parent.toolButtonAnnotationSelectAll.setVisible(False)
+        # ---------
+
+        # scales
+        parent.lineEditScaleLength.setValidator(QDoubleValidator())
+        parent.comboBoxScaleDirection.activated.connect(lambda: setattr(self, 'scale_dir', parent.comboBoxScaleDirection.currentText()))
+        #parent.comboBoxScaleDirection.activated.connect(self.scale_direction_callback)
+        parent.comboBoxScaleLocation.activated.connect(self.scale_location_callback)
+        #parent.lineEditScaleLength.editingFinished.connect(self.scale_length_callback)
+        parent.lineEditScaleLength.editingFinished.connect(lambda: setattr(self, 'scale_length', parent.lineEditScaleLength.value))
+        #overlay color
+        parent.comboBoxMarker.activated.connect(self.marker_symbol_callback)
+        parent.doubleSpinBoxMarkerSize.valueChanged.connect(self.marker_size_callback)
+        parent.horizontalSliderMarkerAlpha.sliderReleased.connect(self.slider_alpha_changed)
+        # lines
+        parent.doubleSpinBoxLineWidth.valueChanged.connect(self.line_width_callback)
+        parent.lineEditLengthMultiplier.editingFinished.connect(self.length_multiplier_callback)
+        # colors
+        # marker color
+        parent.comboBoxColorByField.activated.connect(self.update_color_field_type)
+        parent.comboBoxColorField.activated.connect(self.color_field_callback)
+        parent.spinBoxColorField.valueChanged.connect(self.color_field_update)
+        parent.comboBoxFieldColormap.activated.connect(self.field_colormap_callback)
+        parent.comboBoxCbarDirection.activated.connect(self.cbar_direction_callback)
+        # resolution
+        parent.spinBoxHeatmapResolution.valueChanged.connect(self.resolution_callback)
+
+        # ternary colormaps
+        
+        parent.comboBoxTernaryColormap.clear()
+
+        parent.comboBoxTernaryColormap.addItems(self.color_schemes)
+        parent.comboBoxTernaryColormap.addItem('user defined')
+
+        # dialog for adding and saving new colormaps
+        parent.toolButtonSaveTernaryColormap.clicked.connect(parent.input_ternary_name_dlg)
+
+        # select new ternary colors
+        parent.toolButtonTCmapXColor.clicked.connect(lambda: self.button_color_select(parent.toolButtonTCmapXColor))
+        parent.toolButtonTCmapYColor.clicked.connect(lambda: self.button_color_select(parent.toolButtonTCmapYColor))
+        parent.toolButtonTCmapZColor.clicked.connect(lambda: self.button_color_select(parent.toolButtonTCmapZColor))
+        parent.toolButtonTCmapMColor.clicked.connect(lambda: self.button_color_select(parent.toolButtonTCmapMColor))
+        parent.comboBoxTernaryColormap.currentIndexChanged.connect(lambda: self.ternary_colormap_changed())
+        self.ternary_colormap_changed()
+
+    def schedule_update(self):
+        if self.parent.plot_flag:
+            self.scheduler.schedule_update()
+
+    def toggle_signals(self):
+        """Toggles signals from all style widgets.  Useful when updating many widgets."""        
+
+        if self.debug:
+            print(f"toggle_signals, _signal_state: {self._signal_state}")
+
+        parent = self.parent
+
+        parent.comboBoxPlotType.blockSignals(self._signal_state)
+
+       # x-axis widgets
+        parent.lineEditXLB.blockSignals(self._signal_state)
+        parent.lineEditXUB.blockSignals(self._signal_state)
+        parent.comboBoxXScale.blockSignals(self._signal_state)
+        parent.lineEditXLabel.blockSignals(self._signal_state)
+
+        # y-axis widgets
+        parent.lineEditYLB.blockSignals(self._signal_state)
+        parent.lineEditYUB.blockSignals(self._signal_state)
+        parent.comboBoxYScale.blockSignals(self._signal_state)
+        parent.lineEditYLabel.blockSignals(self._signal_state)
+
+        # z-axis widgets
+        parent.lineEditZLB.blockSignals(self._signal_state)
+        parent.lineEditZUB.blockSignals(self._signal_state)
+        parent.comboBoxZScale.blockSignals(self._signal_state)
+        parent.lineEditZLabel.blockSignals(self._signal_state)
+
+        # other axis properties
+        parent.lineEditAspectRatio.blockSignals(self._signal_state)
+        parent.comboBoxTickDirection.blockSignals(self._signal_state)
+
+        # annotations
+        parent.fontComboBox.blockSignals(self._signal_state)
+        parent.doubleSpinBoxFontSize.blockSignals(self._signal_state)
+        parent.checkBoxShowMass.blockSignals(self._signal_state)
+
+        # scale
+        parent.comboBoxScaleDirection.blockSignals(self._signal_state)
+        parent.comboBoxScaleLocation.blockSignals(self._signal_state)
+        parent.lineEditScaleLength.blockSignals(self._signal_state)
+        parent.toolButtonOverlayColor.blockSignals(self._signal_state)
+
+        # markers and lines
+        parent.comboBoxMarker.blockSignals(self._signal_state)
+        parent.doubleSpinBoxMarkerSize.blockSignals(self._signal_state)
+        parent.toolButtonMarkerColor.blockSignals(self._signal_state)
+        parent.horizontalSliderMarkerAlpha.blockSignals(self._signal_state)
+        parent.doubleSpinBoxLineWidth.blockSignals(self._signal_state)
+        parent.toolButtonLineColor.blockSignals(self._signal_state)
+        parent.lineEditLengthMultiplier.blockSignals(self._signal_state)
+
+        # coloring
+        parent.comboBoxColorByField.blockSignals(self._signal_state)
+        parent.comboBoxColorField.blockSignals(self._signal_state)
+        parent.spinBoxHeatmapResolution.blockSignals(self._signal_state)
+        parent.comboBoxFieldColormap.blockSignals(self._signal_state)
+        parent.checkBoxReverseColormap.blockSignals(self._signal_state)
+        parent.lineEditColorLB.blockSignals(self._signal_state)
+        parent.lineEditColorUB.blockSignals(self._signal_state)
+        parent.comboBoxColorScale.blockSignals(self._signal_state)
+        parent.lineEditCbarLabel.blockSignals(self._signal_state)
+        parent.comboBoxCbarDirection.blockSignals(self._signal_state)
+
 
     # general style functions
     # -------------------------------------
@@ -1116,7 +1337,7 @@ class Styling():
         parent.doubleSpinBoxMarkerSize.setEnabled(False)
         parent.toolButtonMarkerColor.setEnabled(False)
         parent.horizontalSliderMarkerAlpha.setEnabled(False)
-        parent.comboBoxLineWidth.setEnabled(False)
+        parent.doubleSpinBoxLineWidth.setEnabled(False)
         parent.toolButtonLineColor.setEnabled(False)
         parent.lineEditLengthMultiplier.setEnabled(False)
 
@@ -1168,7 +1389,7 @@ class Styling():
                 parent.toolButtonOverlayColor.setEnabled(True)
 
                 # marker properties
-                if len(parent.spotdata) != 0:
+                if parent.app_data.sample_id != '' and len(parent.data[parent.app_data.sample_id].spotdata) != 0:
                     parent.comboBoxMarker.setEnabled(True)
                     parent.doubleSpinBoxMarkerSize.setEnabled(True)
                     parent.horizontalSliderMarkerAlpha.setEnabled(True)
@@ -1177,7 +1398,7 @@ class Styling():
                     parent.toolButtonMarkerColor.setEnabled(True)
 
                 # line properties
-                parent.comboBoxLineWidth.setEnabled(True)
+                parent.doubleSpinBoxLineWidth.setEnabled(True)
                 parent.toolButtonLineColor.setEnabled(True)
 
                 # color properties
@@ -1221,7 +1442,7 @@ class Styling():
                 parent.labelMarkerAlpha.setEnabled(True)
 
                 # line properties
-                parent.comboBoxLineWidth.setEnabled(True)
+                parent.doubleSpinBoxLineWidth.setEnabled(True)
                 parent.toolButtonLineColor.setEnabled(True)
 
                 # color properties
@@ -1262,7 +1483,7 @@ class Styling():
 
                 # line properties
                 if parent.comboBoxFieldZ.currentText() == '':
-                    parent.comboBoxLineWidth.setEnabled(True)
+                    parent.doubleSpinBoxLineWidth.setEnabled(True)
                     parent.toolButtonLineColor.setEnabled(True)
 
                 if plot_type == 'PCA scatter':
@@ -1310,7 +1531,7 @@ class Styling():
 
                 # line properties
                 if parent.comboBoxFieldZ.currentText() == '':
-                    parent.comboBoxLineWidth.setEnabled(True)
+                    parent.doubleSpinBoxLineWidth.setEnabled(True)
                     parent.toolButtonLineColor.setEnabled(True)
 
                 if plot_type == 'PCA heatmap':
@@ -1371,7 +1592,7 @@ class Styling():
                 parent.labelMarkerAlpha.setEnabled(True)
 
                 # line properties
-                parent.comboBoxLineWidth.setEnabled(True)
+                parent.doubleSpinBoxLineWidth.setEnabled(True)
                 parent.toolButtonLineColor.setEnabled(True)
 
                 # color properties
@@ -1396,7 +1617,7 @@ class Styling():
                 parent.doubleSpinBoxMarkerSize.setEnabled(True)
 
                 # line properties
-                parent.comboBoxLineWidth.setEnabled(True)
+                parent.doubleSpinBoxLineWidth.setEnabled(True)
                 parent.toolButtonLineColor.setEnabled(True)
 
                 # color properties
@@ -1424,7 +1645,7 @@ class Styling():
                     parent.toolButtonMarkerColor.setEnabled(True)
 
                 # line properties
-                parent.comboBoxLineWidth.setEnabled(True)
+                parent.doubleSpinBoxLineWidth.setEnabled(True)
                 parent.toolButtonLineColor.setEnabled(True)
 
                 # color properties
@@ -1452,7 +1673,7 @@ class Styling():
                 parent.doubleSpinBoxMarkerSize.setEnabled(True)
 
                 # line properties
-                parent.comboBoxLineWidth.setEnabled(True)
+                parent.doubleSpinBoxLineWidth.setEnabled(True)
                 parent.toolButtonLineColor.setEnabled(True)
 
                 # color properties
@@ -1502,7 +1723,7 @@ class Styling():
         parent.labelTransparency.setEnabled(parent.horizontalSliderMarkerAlpha.isEnabled())
 
         # line properties
-        parent.labelLineWidth.setEnabled(parent.comboBoxLineWidth.isEnabled())
+        parent.labelLineWidth.setEnabled(parent.doubleSpinBoxLineWidth.isEnabled())
         if parent.toolButtonLineColor.isEnabled():
             parent.toolButtonLineColor.setStyleSheet("background-color: %s;" % self.style_dict[self.plot_type]['LineColor'])
             parent.labelLineColor.setEnabled(True)
@@ -1541,7 +1762,7 @@ class Styling():
             Style dictionary for the current plot type. Defaults to ``None``
         """
         parent = self.parent
-        data = parent.data[parent.sample_id]
+        data = parent.data[parent.app_data.sample_id]
 
         style = self.style_dict[self.plot_type]
 
@@ -1564,7 +1785,7 @@ class Styling():
             style['YLim'] = [ymin, ymax]
             style['YScale'] = yscale
             style['YLabel'] = 'Y'
-            style['AspectRatio'] = parent.data[parent.sample_id].aspect_ratio
+            style['AspectRatio'] = parent.data[parent.app_data.sample_id].aspect_ratio
 
         if (style['ScaleLength'] is None) and (plot_type in self.map_plot_types):
             style['ScaleLength'] = self.default_scale_length()
@@ -1591,9 +1812,13 @@ class Styling():
         """
         if self.debug:
             print("set_style_widgets")
+
         #print('set_style_widgets')
         parent = self.parent
-        data = parent.data[parent.sample_id]
+        if parent.app_data.sample_id == '':
+            return
+
+        data = parent.data[parent.app_data.sample_id]
 
         tab_id = parent.toolBox.currentIndex()
 
@@ -1639,7 +1864,7 @@ class Styling():
             style['YLim'] = [ymin, ymax]
             style['YScale'] = yscale
             style['YLabel'] = 'Y'
-            style['AspectRatio'] = parent.data[parent.sample_id].aspect_ratio
+            style['AspectRatio'] = parent.data[parent.app_data.sample_id].aspect_ratio
 
             # do not round axes limits for maps
             parent.lineEditXLB.precision = None
@@ -1703,7 +1928,7 @@ class Styling():
         parent.labelMarkerAlpha.setText(str(parent.horizontalSliderMarkerAlpha.value()))
 
         # line properties
-        parent.comboBoxLineWidth.setCurrentText(str(style['LineWidth']))
+        parent.doubleSpinBoxLineWidth.setValue(style['LineWidth'])
         parent.lineEditLengthMultiplier.value = style['LineMultiplier']
         parent.toolButtonLineColor.setStyleSheet("background-color: %s;" % style['LineColor'])
 
@@ -1765,57 +1990,56 @@ class Styling():
         # update plot (is this line needed)
         # self.update_SV()
 
-    def get_style_dict(self):
-        """Get style properties"""        
-        if self.debug:
-            print("get_style_dict")
-        parent = self.parent
+    # def update_style_dict(self):
+    #     """Get style properties"""        
+    #     if self.debug:
+    #         print("update_style_dict")
+    #     parent = self.parent
 
-        plot_type = self.plot_type
-        parent.plot_types[parent.toolBox.currentIndex()][0] = parent.comboBoxPlotType.currentIndex()
+    #     parent.plot_types[parent.toolBox.currentIndex()][0] = parent.comboBoxPlotType.currentIndex()
 
         
-        self.style_dict[plot_type] = {
-                # axes properties
-                'XLim': [float(parent.lineEditXLB.text()), float(parent.lineEditXUB.text())],
-                'XLabel': parent.lineEditXLabel.text(),
-                'YLim': [float(parent.lineEditYLB.text()), float(parent.lineEditYUB.text())],
-                'YLabel': parent.lineEditYLabel.text(),
-                'ZLabel': parent.lineEditZLabel.text(),
-                'AspectRatio': float(parent.lineEditAspectRatio.text()),
-                'TickDir': parent.comboBoxTickDirection.text(),
+    #     self.style_dict[self.plot_type] = {
+    #             # axes properties
+    #             'XLim': [float(parent.lineEditXLB.text()), float(parent.lineEditXUB.text())],
+    #             'XLabel': parent.lineEditXLabel.text(),
+    #             'YLim': [float(parent.lineEditYLB.text()), float(parent.lineEditYUB.text())],
+    #             'YLabel': parent.lineEditYLabel.text(),
+    #             'ZLabel': parent.lineEditZLabel.text(),
+    #             'AspectRatio': float(parent.lineEditAspectRatio.text()),
+    #             'TickDir': parent.comboBoxTickDirection.text(),
 
-                # annotation properties
-                'Font': parent.fontComboBox.currentFont(),
-                'FontSize': parent.doubleSpinBoxFontSize.value(),
+    #             # annotation properties
+    #             'Font': parent.fontComboBox.currentFont(),
+    #             'FontSize': parent.doubleSpinBoxFontSize.value(),
 
-                # scale properties
-                'ScaleLocation': parent.comboBoxScaleLocation.currentText(),
-                'ScaleDir': parent.comboBoxScaleDirection.currentText(),
-                'ScaleLength': parent.lineEditScaleLength.value,
-                'OverlayColor': get_hex_color(parent.toolButtonOverlayColor.palette().button().color()),
+    #             # scale properties
+    #             'ScaleLocation': parent.comboBoxScaleLocation.currentText(),
+    #             'ScaleDir': parent.comboBoxScaleDirection.currentText(),
+    #             'ScaleLength': parent.lineEditScaleLength.value,
+    #             'OverlayColor': get_hex_color(parent.toolButtonOverlayColor.palette().button().color()),
 
-                # update marker properties
-                'Marker': parent.comboBoxMarker.currentText(),
-                'MarkerSize': parent.doubleSpinBoxMarkerSize.value(),
-                'MarkerAlpha': float(parent.horizontalSliderMarkerAlpha.value()),
-                'MarkerColor': get_hex_color(parent.toolButtonMarkerColor.palette().button().color()),
+    #             # update marker properties
+    #             'Marker': parent.comboBoxMarker.currentText(),
+    #             'MarkerSize': parent.doubleSpinBoxMarkerSize.value(),
+    #             'MarkerAlpha': float(parent.horizontalSliderMarkerAlpha.value()),
+    #             'MarkerColor': get_hex_color(parent.toolButtonMarkerColor.palette().button().color()),
 
-                # update line properties
-                'LineWidth': float(parent.comboBoxLineWidth.currentText()),
-                'LineMultiplier': float(parent.lineEditLengthMultiplier.text()),
-                'LineColor': get_hex_color(parent.toolButtonLineColor.palette().button().color()),
+    #             # update line properties
+    #             'LineWidth': float(parent.doubleSpinBoxLineWidth.value()),
+    #             'LineMultiplier': float(parent.lineEditLengthMultiplier.text()),
+    #             'LineColor': get_hex_color(parent.toolButtonLineColor.palette().button().color()),
 
-                # update color properties
-                'ColorFieldType': parent.comboBoxColorByField.currentText(),
-                'ColorField': parent.comboBoxColorField.currentText(),
-                'Colormap': parent.comboBoxFieldColormap.currentText(),
-                'CbarReverse': parent.checkBoxReverseColormap.isChecked(),
-                'CLim': [float(parent.lineEditColorLB.text()), float(parent.lineEditColorUB.text())],
-                'CScale': parent.comboBoxColorScale.currentText(),
-                'CbarDir': parent.comboBoxCbarDirection.currentText(),
-                'CLabel': parent.lineEditCbarLabel.text(),
-                'Resolution': parent.spinBoxHeatmapResolution.value()}
+    #             # update color properties
+    #             'ColorFieldType': parent.comboBoxColorByField.currentText(),
+    #             'ColorField': parent.comboBoxColorField.currentText(),
+    #             'Colormap': parent.comboBoxFieldColormap.currentText(),
+    #             'CbarReverse': parent.checkBoxReverseColormap.isChecked(),
+    #             'CLim': [float(parent.lineEditColorLB.text()), float(parent.lineEditColorUB.text())],
+    #             'CScale': parent.comboBoxColorScale.currentText(),
+    #             'CbarDir': parent.comboBoxCbarDirection.currentText(),
+    #             'CLabel': parent.lineEditCbarLabel.text(),
+    #             'Resolution': parent.spinBoxHeatmapResolution.value()}
 
     # style widget callbacks
     # -------------------------------------
@@ -2028,7 +2252,7 @@ class Styling():
 
         # change label in dictionary
         field = self.get_axis_field(ax)
-        parent.data[parent.sample_id].axis_dict[field]['label'] = new_label
+        parent.data[parent.app_data.sample_id].axis_dict[field]['label'] = new_label
         if ax == 'c':
             self.style_dict[plot_type][ax.upper()+'Label'] = new_label
         else:
@@ -2053,7 +2277,7 @@ class Styling():
             print("axis_limit_edit_callback")
 
         parent = self.parent
-        axis_dict = parent.data[parent.sample_id].axis_dict
+        axis_dict = parent.data[parent.app_data.sample_id].axis_dict
         if ui_update:
             plot_type = parent.comboBoxPlotType.currentText()
         else:
@@ -2127,7 +2351,7 @@ class Styling():
         field = self.get_axis_field(ax)
 
         if plot_type != 'heatmap':
-            parent.data[parent.sample_id].axis_dict[field]['scale'] = new_value
+            parent.data[parent.app_data.sample_id].axis_dict[field]['scale'] = new_value
 
         if ax == 'c':
             styles['CScale'] = new_value
@@ -2145,7 +2369,7 @@ class Styling():
         #print('set_color_axis_widgets')
         parent = self.parent
 
-        axis_dict = parent.data[parent.sample_id].axis_dict
+        axis_dict = parent.data[parent.app_data.sample_id].axis_dict
 
         field = parent.comboBoxColorField.currentText()
         if field == '':
@@ -2177,33 +2401,33 @@ class Styling():
         match ax:
             case 'x':
                 if field == 'X':
-                    parent.lineEditXLB.value = parent.data[parent.sample_id].axis_dict[field]['min']
-                    parent.lineEditXUB.value = parent.data[parent.sample_id].axis_dict[field]['max']
+                    parent.lineEditXLB.value = parent.data[parent.app_data.sample_id].axis_dict[field]['min']
+                    parent.lineEditXUB.value = parent.data[parent.app_data.sample_id].axis_dict[field]['max']
                 else:
-                    parent.lineEditXLB.value = parent.data[parent.sample_id].axis_dict[field]['min']
-                    parent.lineEditXUB.value = parent.data[parent.sample_id].axis_dict[field]['max']
-                parent.lineEditXLabel.setText(parent.data[parent.sample_id].axis_dict[field]['label'])
-                parent.comboBoxXScale.setCurrentText(parent.data[parent.sample_id].axis_dict[field]['scale'])
+                    parent.lineEditXLB.value = parent.data[parent.app_data.sample_id].axis_dict[field]['min']
+                    parent.lineEditXUB.value = parent.data[parent.app_data.sample_id].axis_dict[field]['max']
+                parent.lineEditXLabel.setText(parent.data[parent.app_data.sample_id].axis_dict[field]['label'])
+                parent.comboBoxXScale.setCurrentText(parent.data[parent.app_data.sample_id].axis_dict[field]['scale'])
             case 'y':
                 if parent.comboBoxPlotType.currentText() == 'histogram':
-                    parent.lineEditYLB.value = parent.data[parent.sample_id].axis_dict[field]['pmin']
-                    parent.lineEditYUB.value = parent.data[parent.sample_id].axis_dict[field]['pmax']
+                    parent.lineEditYLB.value = parent.data[parent.app_data.sample_id].axis_dict[field]['pmin']
+                    parent.lineEditYUB.value = parent.data[parent.app_data.sample_id].axis_dict[field]['pmax']
                     parent.lineEditYLabel.setText(parent.comboBoxHistType.currentText())
                     parent.comboBoxYScale.setCurrentText('linear')
                 else:
                     if field == 'X':
-                        parent.lineEditYLB.value = parent.data[parent.sample_id].axis_dict[field]['min']
-                        parent.lineEditYUB.value = parent.data[parent.sample_id].axis_dict[field]['max']
+                        parent.lineEditYLB.value = parent.data[parent.app_data.sample_id].axis_dict[field]['min']
+                        parent.lineEditYUB.value = parent.data[parent.app_data.sample_id].axis_dict[field]['max']
                     else:
-                        parent.lineEditYLB.value = parent.data[parent.sample_id].axis_dict[field]['min']
-                        parent.lineEditYUB.value = parent.data[parent.sample_id].axis_dict[field]['max']
-                    parent.lineEditYLabel.setText(parent.data[parent.sample_id].axis_dict[field]['label'])
-                    parent.comboBoxYScale.setCurrentText(parent.data[parent.sample_id].axis_dict[field]['scale'])
+                        parent.lineEditYLB.value = parent.data[parent.app_data.sample_id].axis_dict[field]['min']
+                        parent.lineEditYUB.value = parent.data[parent.app_data.sample_id].axis_dict[field]['max']
+                    parent.lineEditYLabel.setText(parent.data[parent.app_data.sample_id].axis_dict[field]['label'])
+                    parent.comboBoxYScale.setCurrentText(parent.data[parent.app_data.sample_id].axis_dict[field]['scale'])
             case 'z':
-                parent.lineEditZLB.value = parent.data[parent.sample_id].axis_dict[field]['min']
-                parent.lineEditZUB.value = parent.data[parent.sample_id].axis_dict[field]['max']
-                parent.lineEditZLabel.setText(parent.data[parent.sample_id].axis_dict[field]['label'])
-                parent.comboBoxZScale.setCurrentText(parent.data[parent.sample_id].axis_dict[field]['scale'])
+                parent.lineEditZLB.value = parent.data[parent.app_data.sample_id].axis_dict[field]['min']
+                parent.lineEditZUB.value = parent.data[parent.app_data.sample_id].axis_dict[field]['max']
+                parent.lineEditZLabel.setText(parent.data[parent.app_data.sample_id].axis_dict[field]['label'])
+                parent.comboBoxZScale.setCurrentText(parent.data[parent.app_data.sample_id].axis_dict[field]['scale'])
 
     def axis_reset_callback(self, ax):
         """Resets axes widgets and plot axes to auto values
@@ -2250,7 +2474,7 @@ class Styling():
                         self.initialize_axis_values(field_type, field)
                         self.set_axis_widgets(ax, field)
                     else:
-                        parent.data[parent.sample_id].axis_dict[field].update({'pstatus':'auto', 'pmin':None, 'pmax':None})
+                        parent.data[parent.app_data.sample_id].axis_dict[field].update({'pstatus':'auto', 'pmin':None, 'pmax':None})
 
                 case 'scatter' | 'heatmap':
                     match ax:
@@ -2308,7 +2532,7 @@ class Styling():
             print(f"get_axis_values\n  field_type: {field_type}\n  field: {field}\n  axis: {ax}")
 
         #print('get_axis_values')
-        axis_dict = self.parent.data[self.parent.sample_id].axis_dict
+        axis_dict = self.parent.data[self.parent.app_data.sample_id].axis_dict
 
         if field not in axis_dict.keys():
             self.initialize_axis_values(field_type, field)
@@ -2341,7 +2565,7 @@ class Styling():
             print(f"get_axis_values\n  field_type: {field_type}\n  field: {field}")
 
         #print('initialize_axis_values')
-        data = self.parent.data[self.parent.sample_id]
+        data = self.parent.data[self.parent.app_data.sample_id]
 
         # initialize variables
         if field not in data.axis_dict.keys():
@@ -2435,10 +2659,10 @@ class Styling():
         parent = self.parent
 
         plot_type = parent.comboBoxPlotType.currentText()
-        if self.style_dict[plot_type]['AspectRatio'] == parent.lineEditAspectRatio.text():
+        if self.style_dict[plot_type]['AspectRatio'] == parent.lineEditAspectRatio.value:
             return
 
-        self.style_dict[plot_type]['AspectRatio'] = parent.lineEditAspectRatio.text()
+        self.style_dict[plot_type]['AspectRatio'] = parent.lineEditAspectRatio.value
         self.scheduler.schedule_update()
 
     def tickdir_callback(self):
@@ -2574,7 +2798,7 @@ class Styling():
         if (self._plot_type not in self.map_plot_types) or (self.style_dict[self._plot_type]['ScaleDir'] == 'none'):
             return None
 
-        data = self.parent.data[self.parent.sample_id]
+        data = self.parent.data[self.parent.app_data.sample_id]
 
         x_range = data.x_range
         y_range = data.y_range
@@ -2614,7 +2838,7 @@ class Styling():
             print("scale_length_callback")
 
         parent = self.parent
-        data = parent.data[parent.sample_id]
+        data = parent.data[parent.app_data.sample_id]
 
         if self._plot_type in self.map_plot_types:
             # make sure user input is within bounds, do not change
@@ -2715,7 +2939,7 @@ class Styling():
     def line_width_callback(self):
         """Updates line width
 
-        Updates line width on current plot on change of ``MainWindow.comboBoxLineWidth.currentText().
+        Updates line width on current plot on change of ``MainWindow.doubleSpinBoxLineWidth.value().
         """
         if self.debug:
             print("line_width_callback")
@@ -2723,10 +2947,10 @@ class Styling():
         parent = self.parent
 
         plot_type = parent.comboBoxPlotType.currentText()
-        if self.style_dict[plot_type]['LineWidth'] == float(parent.comboBoxLineWidth.currentText()):
+        if self.style_dict[plot_type]['LineWidth'] == float(parent.doubleSpinBoxLineWidth.value()):
             return
 
-        self.style_dict[plot_type]['LineWidth'] = float(parent.comboBoxLineWidth.currentText())
+        self.style_dict[plot_type]['LineWidth'] = float(parent.doubleSpinBoxLineWidth.value())
         self.scheduler.schedule_update()
 
     def length_multiplier_callback(self):
@@ -2801,15 +3025,10 @@ class Styling():
         # update plot
         self.scheduler.schedule_update()
 
-    def resolution_callback(self, update_plot=False):
+    def resolution_callback(self):
         """Updates heatmap resolution
 
         Updates the resolution of heatmaps when ``MainWindow.spinBoxHeatmapResolution`` is changed.
-
-        Parameters
-        ----------
-        update_plot : bool, optional
-            Sets the resolution of a heatmap for either Cartesian or ternary plots and both *heatmap* and *pca heatmap*, by default ``False``
         """
         if self.debug:
             print("resolution_callback")
@@ -2820,11 +3039,10 @@ class Styling():
 
         style['Resolution'] = parent.spinBoxHeatmapResolution.value()
 
-        if update_plot:
-            self.scheduler.schedule_update()
+        self.scheduler.schedule_update()
 
     # updates scatter styles when ColorByField comboBox is changed
-    def color_by_field_callback(self):
+    def update_color_field_type(self):
         """Executes on change to *ColorByField* combobox
         
         Updates style associated with ``MainWindow.comboBoxColorByField``.  Also updates
@@ -2832,23 +3050,23 @@ class Styling():
         if self.debug:
             print("color_by_field_callback")
 
-        #print('color_by_field_callback')
         parent = self.parent
+
+        self.color_field_type = parent.comboBoxColorByFieldType.currentText()
 
         # need this line to update field comboboxes when colorby field is updated
         parent.update_field_combobox(parent.comboBoxColorByField, parent.comboBoxColorField)
         self.update_color_field_spinbox()
-        plot_type = parent.comboBoxPlotType.currentText()
-        if plot_type == '':
+        if self.plot_type == '':
             return
 
-        style = self.style_dict[plot_type]
+        style = self.style_dict[self.plot_type]
         if style['ColorFieldType'] == parent.comboBoxColorByField.currentText():
             return
 
         style['ColorFieldType'] = parent.comboBoxColorByField.currentText()
         if parent.comboBoxColorByField.currentText() != '':
-            self.set_style_widgets(plot_type)
+            self.set_style_widgets(self.plot_type)
 
         if parent.comboBoxPlotType.isEnabled() == False | parent.comboBoxColorByField.isEnabled() == False:
             return
@@ -2868,7 +3086,7 @@ class Styling():
         parent = self.parent
 
         #print('color_field_callback')
-        data = parent.data[parent.sample_id]
+        data = parent.data[parent.app_data.sample_id]
 
         plot_type = parent.comboBoxPlotType.currentText()
         field = parent.comboBoxColorField.currentText()
@@ -2944,7 +3162,7 @@ class Styling():
 
         parent = self.parent
 
-        plot_type = self.parent.plot_type
+        plot_type = self.plot_type
         if self.style_dict[plot_type]['CbarReverse'] == parent.checkBoxReverseColormap.isChecked():
             return
 
@@ -3045,7 +3263,7 @@ class Styling():
 
         parent = self.parent
 
-        plot_type = self.parent.plot_type
+        plot_type = self.plot_type
         if hasattr(parent,'canvas_tab') and hasattr(parent,'canvasWindow'):
             if parent.canvasWindow.currentIndex() == parent.canvas_tab['qv']:
                 plot_type = 'analyte map'
@@ -3104,7 +3322,7 @@ class Styling():
 
         parent = self.parent
 
-        plot_type = self.parent.plot_type
+        plot_type = self.plot_type
         if self.style_dict[plot_type]['CbarDir'] == parent.comboBoxCbarDirection.currentText():
             return
         self.style_dict[plot_type]['CbarDir'] = parent.comboBoxCbarDirection.currentText()

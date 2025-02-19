@@ -1,8 +1,8 @@
-from PyQt5.QtCore import (Qt, pyqtSignal, QObject, QEvent)
-from PyQt5.QtWidgets import (QMessageBox, QTableWidget, QDialog, QTableWidgetItem, QLabel, QComboBox, QHeaderView, QFileDialog)
-from PyQt5.QtGui import (QImage, QColor, QFont, QPixmap, QPainter, QBrush)
+from PyQt6.QtCore import (Qt, pyqtSignal, QObject, QEvent)
+from PyQt6.QtWidgets import (QMessageBox, QTableWidget, QDialog, QTableWidgetItem, QLabel, QComboBox, QHeaderView, QFileDialog)
+from PyQt6.QtGui import (QImage, QColor, QFont, QPixmap, QPainter, QBrush)
 from src.ui.AnalyteSelectionDialog import Ui_Dialog
-from src.common.rotated import RotatedHeaderView
+from src.common.CustomWidgets import RotatedHeaderView
 import os
 # Analyte GUI
 # -------------------------------

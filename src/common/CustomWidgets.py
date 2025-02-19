@@ -1,9 +1,12 @@
-from PyQt5.QtWidgets import ( 
-        QWidget, QLineEdit, QTableWidget, QComboBox, QPushButton, QCheckBox, QWidget, QTreeView, QAction, QMenu,
-        QDockWidget
+from PyQt6.QtWidgets import ( 
+        QWidget, QLineEdit, QTableWidget, QComboBox, QPushButton, QCheckBox, QWidget, QTreeView,
+        QMenu, QDockWidget, QHeaderView
     )
-from PyQt5.QtGui import QStandardItem, QStandardItemModel, QFont, QDoubleValidator, QIcon, QCursor, QPainter, QColor
-from PyQt5.QtCore import Qt, QRect, QPropertyAnimation, pyqtProperty, pyqtSignal
+from PyQt6.QtGui import (
+    QStandardItem, QStandardItemModel, QFont, QDoubleValidator, QIcon, QCursor, QPainter,
+    QColor, QAction
+)
+from PyQt6.QtCore import Qt, QRect, QPropertyAnimation, pyqtProperty, pyqtSignal
 import src.common.format as fmt
 import pandas as pd
 
@@ -216,6 +219,39 @@ class CustomTableWidget(QTableWidget):
                 column_data.append('')  # Handle empty cells if needed
         
         return column_data
+
+
+class RotatedHeaderView(QHeaderView):
+    """Rotates the column header of a table by 90 degrees
+
+    Parameters
+    ----------
+    parent : obj, optional
+        Parent table object
+    """    
+    def __init__(self, parent=None):
+        super(RotatedHeaderView, self).__init__(Qt.Orientation.Horizontal, parent)
+        self.setMinimumSectionSize(20)
+
+    def paintSection(self, painter, rect, logicalIndex ):
+        painter.save()
+        # translate the painter to the appropriate position
+        painter.translate(rect.x(), rect.y() + rect.height())
+        painter.rotate(-90)  # rotate by -90 degrees
+        # and have parent code paint at this location
+        newrect = QRect(0,0,rect.height(),rect.width())
+        super(RotatedHeaderView, self).paintSection(painter, newrect, logicalIndex)
+        painter.restore()
+
+    def minimumSizeHint(self):
+        size = super(RotatedHeaderView, self).minimumSizeHint()
+        size.transpose()
+        return size
+
+    def sectionSizeFromContents(self, logicalIndex):
+        size = super(RotatedHeaderView, self).sectionSizeFromContents(logicalIndex)
+        size.transpose()
+        return size
     
 class StandardItem(QStandardItem):
     def __init__(self, txt='', font_size=10, set_bold=False, data=None):
@@ -470,18 +506,18 @@ class ToggleSwitch(QWidget):
 
     def mousePressEvent(self, event):
         """Toggle switch on click"""
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             self.toggle()
 
     def paintEvent(self, event):
         """Draw switch"""
         painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         # Draw background
         bg_color = QColor(self.bg_right_color) if self._checked else QColor(self.bg_left_color)
         painter.setBrush(bg_color)
-        painter.setPen(Qt.NoPen)
+        painter.setPen(Qt.PenStyle.NoPen)
         painter.drawRoundedRect(0, 0, self.width, self.height, self.height // 2, self.height // 2)
 
         # Draw sliding thumb
@@ -496,4 +532,4 @@ class ToggleSwitch(QWidget):
         self._thumb_pos = pos
         self.update()  # Redraw switch
 
-    thumb_pos = pyqtProperty(int, get_thumb_pos, set_thumb_pos)
+    thumb_pos = property(get_thumb_pos, set_thumb_pos)

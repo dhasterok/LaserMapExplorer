@@ -1,4 +1,4 @@
-app.PlotViewerWindow
+﻿app.PlotViewerWindow
 ====================
 
 .. automodule:: app.PlotViewerWindow
@@ -41,7 +41,6 @@ app.PlotViewerWindow
       QVBoxLayout
       QWidget
       Qt
-      RotatedHeaderView
       Ui_widgetPlotViewer
       ViewBox
       pyqtSignal

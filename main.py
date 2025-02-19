@@ -1,12 +1,12 @@
 import sys, os, re, copy, random, darkdetect
-from PyQt5.QtCore import ( Qt, QTimer, QUrl, QSize, QRectF )
-from PyQt5.QtWidgets import (
+from PyQt6.QtCore import ( Qt, QTimer, QUrl, QSize, QRectF )
+from PyQt6.QtWidgets import (
     QCheckBox, QTableWidgetItem, QVBoxLayout, QGridLayout,
     QMessageBox, QHeaderView, QMenu, QFileDialog, QWidget, QToolButton,
     QDialog, QLabel, QTableWidget, QInputDialog, QAbstractItemView,
     QSplashScreen, QApplication, QMainWindow, QSizePolicy
 )
-from PyQt5.QtGui import ( QIntValidator, QDoubleValidator, QPixmap, QFont, QIcon )
+from PyQt6.QtGui import ( QIntValidator, QDoubleValidator, QPixmap, QFont, QIcon )
 from src.app.UITheme import UIThemes
 
 #from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
@@ -40,7 +40,7 @@ from sklearn.metrics import silhouette_score
 import skfuzzy as fuzz
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-from src.common.ternary_plot import ternary
+from src.common.ChemPlot import plot_map_mpl, plot_small_histogram, plot_histogram, plot_correlation, get_scatter_data, plot_scatter, plot_ternary_map
 from src.common.plot_spider import plot_spider_norm
 from src.common.scalebar import scalebar
 from src.app.LameIO import LameIO
@@ -59,7 +59,7 @@ from src.app.PlotTree import PlotTree
 from src.common.Masking import MaskDock
 from src.app.CropImage import CropTool
 from src.app.ImageProcessing import ImageProcessing as ip
-from src.app.StyleToolbox import Styling
+from src.app.StyleToolbox import StylingDock
 from src.app.Profile import Profiling, ProfileDock
 from src.common.Polygon import PolygonManager
 from src.app.SpotTools import SpotPage
@@ -78,6 +78,7 @@ from src.app.help_mapping import create_help_mapping
 from src.common.Logger import LoggerDock
 from src.common.Calculator import CalculatorDock
 from src.common.varfunc import ObservableDict
+from src.app.AppData import AppData
 
 # to prevent segmentation error at startup
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
@@ -231,15 +232,117 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super(MainWindow, self).__init__(*args, **kwargs)
 
         self.setupUi(self)
-        # Add this line to set the size policy
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
-        self.buttons_layout = None  # create a reference to your layout
+        # Add this line to set the size policy
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+
+        # this flag sets whether the plot can be updated.  Mostly off during change_sample
+        self.update_plot = False
+
+        # The data dictionary will hold the data with a key for each sample
+        self.data = {}
+        # until there is actually some data to store, disable certain widgets
+        self.toggle_data_widgets()
+
+        # initialize the application data
+        #   contains:
+        #       critical UI properties
+        #       notifiers when properties change
+        #       data structure and properties (DataHandling), data
+        self.app_data = AppData(self.data)
+        self.app_data.add_observer(self.update_widgets)
+
+        # [convention] maps notifier properties with their associated UI update functions
+        #   format of the UI update functions should be self.update_[property_name]_[widget_type]
+        #   there should be an associated update function for the widgets to update properties
+        #   with a similar format for the function name without _[widget_type]
+        self.property_update_map = {
+            "sample_list": self.update_sample_list_combobox,
+            "sample_id": self.update_sample_id_combobox,
+            "nx": self.update_nx_lineedit,
+            "ny": self.update_ny_lineedit,
+            "dx": self.update_dx_lineedit,
+            "dy": self.update_dy_lineedit,
+            "equalize_color_scale": self.update_equalize_color_scale_toolbutton,
+            "hist_field_type": self.update_hist_field_type_combobox,
+            "hist_field": self.update_hist_field_combobox,
+            "hist_bin_width": self.update_hist_bin_width_spinbox,
+            "hist_num_bins": self.update_hist_num_bins_spinbox,
+            "hist_plot_style": self.update_hist_plot_style_combobox,
+            "corr_method": self.update_corr_method_combobox,
+            "corr_squared": self.update_corr_squared_checkbox,
+            "noise_red_method": self.update_noise_red_method_combobox,
+            "noise_red_option1": self.update_noise_red_option1_spinbox,
+            "noise_red_option2": self.update_noise_red_option2_spinbox,
+            "gradient_flag": self.update_gradient_flag_checkbox,
+            "x_field_type": self.update_x_field_type_combobox,
+            "y_field_type": self.update_y_field_type_combobox,
+            "z_field_type": self.update_z_field_type_combobox,
+            "x_field": self.update_x_field_combobox,
+            "y_field": self.update_y_field_combobox,
+            "z_field": self.update_z_field_combobox,
+            "scatter_preset": self.update_scatter_preset_combobox,
+            "heatmap_style": self.update_heatmap_style_combobox,
+            "ternary_colormap": self.update_ternary_colormap_combobox,
+            "ternary_color_x": self.update_ternary_color_x_toolbutton,
+            "ternary_color_y": self.update_ternary_color_y_toolbutton,
+            "ternary_color_z": self.update_ternary_color_z_toolbutton,
+            "ternary_color_m": self.update_ternary_color_m_toolbutton,
+            "norm_reference": self.update_norm_reference_combobox,
+            "ndim_analyte_set": self.update_ndim_analyte_set_combobox,
+            "ndim_quantile_index": self.update_ndim_quantile_index_combobox,
+            "dim_red_method": self.update_dim_red_method_combobox,
+            "dim_red_x": self.update_dim_red_x_spinbox,
+            "dim_red_y": self.update_dim_red_y_spinbox,
+            "cluster_method": self.update_cluster_method_combobox,
+            "max_clusters": self.update_max_clusters_spinbox,
+            "num_clusters": self.update_num_clusters_spinbox,
+            "cluster_seed": self.update_cluster_seed_lineedit,
+            "cluster_exponent": self.update_cluster_exponent_slider,
+            "cluster_distance": self.update_cluster_distance_combobox,
+            "dim_red_precondition": self.update_dim_red_precondition_checkbox,
+            "num_basis_for_precondition": self.update_num_basis_for_precondition_spinbox,
+            "selected_clusters": self.update_selected_clusters_spinbox,
+            ### plot_style properties
+            "plot_type": self.update_plot_type_combobox,
+            "xlim": self.update_xlim_lineedits,
+            "xlabel": self.update_xlabel_lineedit,
+            "xscale": self.update_xscale_combobox,
+            "ylim": self.update_ylim_lineedits,
+            "ylabel": self.update_ylabel_lineedit,
+            "yscale": self.update_yscale_combobox,
+            "zlim": self.update_zlim_lineedits,
+            "zlabel": self.update_zlabel_lineedit,
+            "zscale": self.update_zscale_combobox,
+            "aspect_ratio": self.update_aspect_ratio_lineedit,
+            "tick_dir": self.update_tick_dir_combobox,
+            "font_family": self.update_font_family_combobox,
+            "font_size": self.update_font_size_spinbox,
+            "scale_dir": self.update_scale_dir_combobox,
+            "scale_location": self.update_scale_location_combobox,
+            "scale_length": self.update_scale_length_lineedit,
+            "overlay_color": self.update_overlay_color_toolbutton,
+            "show_mass": self.update_show_mass_checkbox,
+            "marker_symbol": self.update_marker_symbol_combobox,
+            "marker_size": self.update_marker_size_spinbox,
+            "marker_color": self.update_marker_color_toolbutton,
+            "marker_alpha": self.update_marker_alpha_slider,
+            "line_width": self.update_line_width_combobox,
+            "line_multiplier": self.update_line_multiplier_lineedit,
+            "line_color": self.update_line_color_toolbutton,
+            "c_field_type": self.update_color_field_type_combobox,
+            "c_field": self.update_color_field_combobox,
+            "cmap": self.update_cmap_combobox,
+            "cbar_reverse": self.update_cbar_reverse_checkbox,
+            "cbar_direction": self.update_cbar_direction_combobox,
+            "clim": self.update_clim_lineedits,
+            "clabel": self.update_clabel_lineedit,
+            "cscale": self.update_cscale_combobox,
+            "resolution": self.update_resolution_spinbox
+        }
 
         #Initialize nested data which will hold the main sets of data for analysis
-        self.data = {}
         self.BASEDIR = BASEDIR
-        self.sample_id = ''
 
         self.lasermaps = {}
         self.prev_plot = ''
@@ -257,11 +360,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.persistent_filters = pd.DataFrame()
         self.persistent_filters = pd.DataFrame(columns=['use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'persistent'])
         self.logger_options = {
-                'Input/output': False,
+                'IO': False,
                 'Data': False,
                 'Analyte selector': False,
                 'Plot selector': False,
                 'Plotting': True,
+                'Polygon': False,
+                'Profile': False,
+                'Masking': True,
                 'Styles': True,
                 'Calculator': True,
                 'Browser': False
@@ -285,7 +391,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         layout_single_view.setSpacing(0)
         layout_single_view.setContentsMargins(0, 0, 0, 0)
         self.widgetSingleView.setLayout(layout_single_view)
-        self.widgetSingleView.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.widgetSingleView.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.mpl_toolbar = None
         #self.mpl_toolbar = NavigationToolbar(mplc.MplCanvas())
         # for button show hide
@@ -301,7 +407,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         layout_multi_view.setSpacing(0) # Set margins to 0 if you want to remove margins as well
         layout_multi_view.setContentsMargins(0, 0, 0, 0)
         self.widgetMultiView.setLayout(layout_multi_view)
-        self.widgetMultiView.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.widgetMultiView.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.toolButtonRemoveMVPlot.clicked.connect(lambda: self.remove_multi_plot(self.comboBoxPlots.currentText()))
         self.toolButtonRemoveAllMVPlots.clicked.connect(lambda: self.clear_layout(self.widgetMultiView.layout()))
 
@@ -310,7 +416,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         layout_quick_view.setSpacing(0) # Set margins to 0 if you want to remove margins as well
         layout_quick_view.setContentsMargins(0, 0, 0, 0)
         self.widgetQuickView.setLayout(layout_quick_view)
-        self.widgetQuickView.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.widgetQuickView.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
         try:
             self.QV_analyte_list = csvdict.import_csv_to_dict(os.path.join(BASEDIR,'resources/styles/qv_lists.csv'))
@@ -334,7 +440,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # layout_profile_view.setSpacing(0)
         # layout_profile_view.setContentsMargins(0, 0, 0, 0)
         # self.widgetProfilePlot.setLayout(layout_profile_view)
-        # self.widgetProfilePlot.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        # self.widgetProfilePlot.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
         #Flags to prevent plotting when widgets change
         self.point_selected = False
@@ -423,7 +529,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # create dictionaries for default plot styles
         #-------------------------
-
         self.plot_types = {self.left_tab['sample']: [0, 'analyte map', 'histogram', 'correlation'],
             self.left_tab['process']: [0, 'analyte map', 'gradient map'],
             self.left_tab['spot']: [0, 'analyte map', 'gradient map'],
@@ -436,16 +541,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             -1: [0, 'analyte map']}
 
 
-        # initalize self.comboBoxPlotType
-        self.update_plot_type_combobox()
-        self.comboBoxPlotType.currentIndexChanged.connect(self.on_plot_type_changed)
-
-        # Initialize a variable to store the current plot type
-        self.plot_type = 'analyte map'
 
         # Menu and Toolbar
         #-------------------------
-        self.io = LameIO(self)
+        self.io = LameIO(parent=self, connect_actions=True, debug=self.logger_options['IO'])
 
         # Connect the "Open" action to a function
         self.actionQuit_LaME.triggered.connect(self.quit)
@@ -518,6 +617,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.ref_data = self.ref_data[self.ref_data['sigma']!=1]
         self.ref_list = self.ref_data['layer']+' ['+self.ref_data['model']+'] '+ self.ref_data['reference']
 
+        self.toolButtonScaleEqualize.clicked.connect(self.update_equalize_color_scale)
         self.comboBoxRefMaterial.addItems(self.ref_list.values)          # Select analyte Tab
         self.comboBoxRefMaterial.setCurrentIndex(0)
         self.comboBoxNDimRefMaterial.addItems(self.ref_list.values)      # NDim Tab
@@ -525,11 +625,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxRefMaterial.activated.connect(lambda: self.change_ref_material(self.comboBoxRefMaterial.currentText())) 
         self.comboBoxNDimRefMaterial.activated.connect(lambda: self.change_ref_material(self.comboBoxNDimRefMaterial.currentText()))
         self.comboBoxRefMaterial.setCurrentIndex(0)
+        self.spinBoxFieldIndex.valueChanged.connect(self.hist_field_update)
         self.ref_chem = None
 
         
 
-        self.comboBoxCorrelationMethod.activated.connect(self.correlation_method_callback)
+        self.comboBoxCorrelationMethod.activated.connect(self.update_corr_method)
         self.checkBoxCorrelationSquared.stateChanged.connect(self.correlation_squared_callback)
 
 
@@ -543,8 +644,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Selecting analytes
         #-------------------------
-        # Connect the currentIndexChanged signal of comboBoxSampleId to load_data method
-        self.comboBoxSampleId.activated.connect(lambda: self.change_sample(self.comboBoxSampleId.currentIndex()))
+        self.comboBoxSampleId.currentTextChanged.connect(self.update_sample_id)
         self.canvasWindow.currentChanged.connect(self.canvas_changed)
 
 
@@ -555,8 +655,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         pixelwidthvalidator.setBottom(0.0)
         self.lineEditDX.setValidator(pixelwidthvalidator)
         self.lineEditDY.setValidator(pixelwidthvalidator)
-        self.lineEditDX.editingFinished.connect(lambda: self.update_resolution('x'))
-        self.lineEditDY.editingFinished.connect(lambda: self.update_resolution('y'))
 
         # auto scale
         quantilevalidator = QDoubleValidator(0.0, 100, 3)
@@ -586,13 +684,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #-------------------------
         # histogram
         self.default_bins = 100
-        self.comboBoxHistFieldType.activated.connect(self.histogram_field_type_callback)
-        self.comboBoxHistField.activated.connect(self.histogram_field_callback)
+        #self.comboBoxHistFieldType.activated.connect()
+        self.comboBoxHistFieldType.activated.connect(self.update_histogram_field_type)
+        self.comboBoxHistField.activated.connect(self.update_histogram_field)
         self.spinBoxNBins.setValue(self.default_bins)
-        self.spinBoxNBins.valueChanged.connect(self.histogram_update_bin_width)
-        self.spinBoxBinWidth.valueChanged.connect(self.histogram_update_n_bins)
-        self.toolButtonHistogramReset.clicked.connect(self.histogram_reset_bins)
-        self.toolButtonHistogramReset.clicked.connect(self.plot_histogram)
+        self.spinBoxNBins.valueChanged.connect(self.update_histogram_num_bins)
+        self.doubleSpinBoxBinWidth.valueChanged.connect(self.update_histogram_bin_width)
+        self.toolButtonHistogramReset.clicked.connect(self.app_data.histogram_reset_bins)
+        self.toolButtonHistogramReset.clicked.connect(lambda: plot_histogram(self, self.app_data, self.plot_style))
 
         #uncheck crop is checked
         self.toolBox.currentChanged.connect(lambda: self.canvasWindow.setCurrentIndex(self.canvas_tab['sv']))
@@ -604,17 +703,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.crop_tool = CropTool(self)
         self.actionCrop.triggered.connect(self.crop_tool.init_crop)
 
-        # Spot Data Tab
-        #-------------------------
-        self.spotdata = AttributeDataFrame()
 
 
         # Filter Tabs
         #-------------------------
+        self.lineEditDX.editingFinished.connect(self.update_dx)
+        self.lineEditDY.editingFinished.connect(self.update_dy)
+        self.actionFullMap.triggered.connect(self.reset_crop)
+        self.toolButtonSwapResolution.clicked.connect(self.update_swap_resolution)
+        self.toolButtonPixelResolutionReset.clicked.connect(self.reset_pixel_resolution)
 
         # Scatter and Ternary Tab
         #-------------------------
-        self.toolButtonTernaryMap.clicked.connect(self.plot_ternarymap)
+        self.toolButtonTernaryMap.clicked.connect(lambda: plot_ternary_map(self, self.data[self.app_data.sample_id], self.app_data, self.plot_style))
 
         self.comboBoxFieldTypeX.activated.connect(lambda: self.update_field_combobox(self.comboBoxFieldTypeX, self.comboBoxFieldX))
         self.comboBoxFieldTypeY.activated.connect(lambda: self.update_field_combobox(self.comboBoxFieldTypeY, self.comboBoxFieldY))
@@ -630,12 +731,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Clustering Tab
         #-------------------------
         # cluster dictionary
-        self.cluster_dict = {
-            'active method' : 'k-means',
-            'k-means':{'n_clusters':5, 'seed':23, 'selected_clusters':[]},
-            'fuzzy c-means':{'n_clusters':5, 'exponent':2.1, 'distance':'euclidean', 'seed':23, 'selected_clusters':[]}
-        }
-
         # number of clusters
         self.spinBoxNClusters.valueChanged.connect(self.number_of_clusters_callback)
 
@@ -677,28 +772,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Scatter and Ternary Tab
         #-------------------------
-        self.comboBoxFieldX.activated.connect(lambda: self.plot_scatter())
-        self.comboBoxFieldY.activated.connect(lambda: self.plot_scatter())
-        self.comboBoxFieldZ.activated.connect(lambda: self.plot_scatter())
+        self.comboBoxFieldX.activated.connect(lambda: plot_scatter(self, self.app_data, self.plot_style))
+        self.comboBoxFieldY.activated.connect(lambda: plot_scatter(self, self.app_data, self.plot_style))
+        self.comboBoxFieldZ.activated.connect(lambda: plot_scatter(self, self.app_data, self.plot_style))
 
 
         # N-Dim Tab
         #-------------------------
-        # get N-Dim lists
-        self.ndim_list = []
-        self.ndim_list_filename = 'resources/app_data/TEC_presets.csv'
-        try:
-            self.ndim_list_dict = csvdict.import_csv_to_dict(os.path.join(BASEDIR,self.ndim_list_filename))
-        except:
-            self.ndim_list_dict = {
-                    'majors': ['Si','Ti','Al','Fe','Mn','Mg','Ca','Na','K','P'],
-                    'full trace': ['Cs','Rb','Ba','Th','U','K','Nb','Ta','La','Ce','Pb','Mo','Pr','Sr','P','Ga','Zr','Hf','Nd','Sm','Eu','Li','Ti','Gd','Dy','Ho','Y','Er','Yb','Lu'],
-                    'REE': ['La','Ce','Pr','Nd','Pm','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb','Lu'],
-                    'metals': ['Na','Al','Ca','Zn','Sc','Cu','Fe','Mn','V','Co','Mg','Ni','Cr']
-                }
         # setup comboBoxNDIM
         self.comboBoxNDimAnalyteSet.clear()
-        self.comboBoxNDimAnalyteSet.addItems(list(self.ndim_list_dict.keys()))
+        self.comboBoxNDimAnalyteSet.addItems(list(self.app_data.ndim_list_dict.keys()))
 
         #self.comboBoxNDimRefMaterial.addItems(self.ref_list.values) This is done with the Set analyte tab initialization above.
         self.toolButtonNDimAnalyteAdd.clicked.connect(lambda: self.update_ndim_table('analyteAdd'))
@@ -711,8 +794,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # N-dim table
         header = self.tableWidgetNDim.horizontalHeader()
-        header.setSectionResizeMode(0,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(1,QHeaderView.Stretch)
+        header.setSectionResizeMode(0,QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(1,QHeaderView.ResizeMode.Stretch)
 
         # Profile Tab
         #-------------------------
@@ -776,8 +859,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         # Styling Tab
         #-------------------------
-        self.plot_style = Styling(self, debug=self.logger_options['Styles'], ui=True)
+        self.plot_style = StylingDock(self, debug=self.logger_options['Styles'])
         self.plot_style.load_theme_names()
+        self.plot_style.add_observer(self.update_widgets)
+
+        # initalize self.comboBoxPlotType
+        self.update_plot_type_combobox_options()
+        self.comboBoxPlotType.currentIndexChanged.connect(self.update_plot_type)
+
+        # Initialize a variable to store the current plot type
+        self.plot_style.plot_type = 'analyte map'
+
 
         setattr(self.comboBoxMVPlots, "allItems", lambda: [self.comboBoxMVPlots.itemText(i) for i in range(self.comboBoxMVPlots.count())])
         
@@ -788,8 +880,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxColorByField.currentIndexChanged.connect(self.on_field_type_changed)
 
         # Connect the checkbox's stateChanged signal to our update function
-        self.showMass = False
-        self.checkBoxShowMass.stateChanged.connect(self.on_checkBoxShowMass_changed)
         # self.doubleSpinBoxMarkerSize.valueChanged.connect(lambda: self.plot_scatter(save=False))
         #self.comboBoxColorByField.activated.connect(lambda: self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField))
 
@@ -893,10 +983,562 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.dockWidgetPlotTree.setFloating(False)
         self.dockWidgetStyling.setFloating(False)
 
+    def update_widgets(self, prop_name, value):
+        """Use dictionary lookup to call the correct update method."""
+        if prop_name in self.property_update_map:
+            self.property_update_map[prop_name](value)
+
+    def update_sample_list_combobox(self, new_sample_list):
+        """Updates ``MainWindow.comboBoxSampleID.items()``
+
+        Called as an update to ``app_data.sample_list``.  Updates sample ID list.
+
+        Parameters
+        ----------
+        value : str
+            New sample ID.
+        """
+
+        # Populate the comboBoxSampleId with the sample names
+        self.comboBoxSampleId.clear()
+        self.comboBoxSampleId.addItems(new_sample_list)
+        self.comboBoxSampleId.setCurrentIndex(0)
+
+        self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
+        self.init_tabs()
+        self.change_sample()
+        # self.profile_dock.profiling.add_samples()
+        # self.polygon.add_samples()
+
+        self.plot_style.schedule_update()
+
+    def update_sample_id_combobox(self, new_sample_id):
+        """Updates ``MainWindow.comboBoxSampleID.currentText()``
+
+        Called as an update to ``app_data.sample_id``.  Updates sample ID and calls ``change_sample``
+
+        Parameters
+        ----------
+        value : str
+            New sample ID.
+        """
+        if new_sample_id == self.comboBoxSampleId.currentText():
+            return
+
+        self.comboBoxSampleId.setCurrentText(new_sample_id)
+
+        self.change_sample()
+        self.plot_style.schedule_update()
+
+
+    def update_equalize_color_scale_toolbutton(self, value):
+        self.toolButtonScaleEqualize.setChecked(value)
+
+        if self.plot_style.plot_type == 'analyte map':
+            self.plot_style.schedule_update()
+
+    def update_dx_lineedit(self,value):
+        """Updates ``MainWindow.lineEditDX.value``
+        Called as an update to ``app_data.d_x``.  Updates Dx and  Schedules a plot update.
+
+        Parameters
+        ----------
+        value : str
+            x dimension.
+        """
+        self.lineEditDX.value = value
+        if self.toolBox.currentIndex() == self.left_tab['process']:
+            self.plot_style.schedule_update()
+            field = "X"
+            # update x axis limits in style_dict 
+            self.plot_style.initialize_axis_values(self.field_type, field)
+            # update limits in styling tabs
+            self.plot_style.set_axis_widgets("x",field)
+
+    def update_dy_lineedit(self,value):
+        """Updates ``MainWindow.lineEditDY.value``
+        Called as an update to ``app_data.d_y``.  Updates Dy and  Schedules a plot update.
+
+        Parameters
+        ----------
+        value : str
+            x dimension.
+        """
+        self.lineEditDY.value = value
+        if self.toolBox.currentIndex() == self.left_tab['process']:
+            self.plot_style.schedule_update()
+            field = "Y"
+            # update y axis limits in style_dict 
+            self.plot_style.initialize_axis_values(self.field_type, field)
+            # update limits in styling tabs
+            self.plot_style.set_axis_widgets("y",field)
+
+    def update_nx_lineedit(self,value):
+        """Updates ``MainWindow.lineEditResolutionNx.value``
+        Called as an update to ``app_data.n_x``.  Updates Nx and  Schedules a plot update.
+
+        Parameters
+        ----------
+        value : str
+            x dimension.
+        """
+        self.lineEditResolutionNx.value = value
+        if self.toolBox.currentIndex() == self.left_tab['process']:
+            self.plot_style.schedule_update()
+
+    def update_ny_lineedit(self,value):
+        """Updates ``MainWindow.lineEditResolutionNx.value``
+        Called as an update to ``app_data.N_y``.  Updates Nx and  Schedules a plot update.
+
+        Parameters
+        ----------
+        value : str
+            x dimension.
+        """
+        self.lineEditResolutionNy.value = value
+        if self.toolBox.currentIndex() == self.left_tab['process']:
+            self.plot_style.schedule_update()
+
+    def update_hist_field_type_combobox(self, value):
+        """Updates ``MainWindow.comboBoxHistFieldType.currentText()``
+
+        Called as an update to ``app_data.hist_field_type``.  Updates the histogram field type (also controls analyte maps).  Schedules a plot update.
+
+        Parameters
+        ----------
+        value : str
+            New field type.
+        """
+        self.comboBoxHistFieldType.setCurrentText(value)
+        if self.plot_style.plot_type == "histogram":
+            self.plot_style.schedule_update()
+
+    def update_hist_field_combobox(self, value):
+        """Updates ``MainWindow.comboBoxHistFieldType.currentText()``
+
+        Called as an update to ``app_data.hist_field``.  Updates the histogram field.  Schedules a plot update.
+
+        Parameters
+        ----------
+        value : str
+            New field type.
+        """
+        self.comboBoxHistField.setCurrentText(value)
+
+        # update 
+        self.spinBoxFieldIndex.setMinimum(0)
+        self.spinBoxFieldIndex.setMaximum(self.comboBoxHistField.count() - 1)
+        self.spinBoxFieldIndex.setValue(self.comboBoxHistField.currentIndex())
+
+        if self.toolBox.currentIndex() == self.left_tab['sample'] and self.plot_style.plot_type in ['analyte map','histogram','correlation']:
+            self.plot_style.color_field_type = self.comboBoxHistFieldType.currentText()
+            self.plot_style.color_field = self.comboBoxHistField.currentText()
+
+            self.plot_style.schedule_update()
+
+    def update_hist_bin_width_spinbox(self, value):
+        self.doubleSpinBoxBinWidth.setValue(value)
+        if self.toolBox.currentIndex() == self.left_tab['sample'] and self.plot_style.plot_type == "histogram":
+            self.plot_style.schedule_update()
+
+    def update_hist_num_bins_spinbox(self, value):
+        self.spinBoxNBins.setValue(value)
+        if self.toolBox.currentIndex() == self.left_tab['sample'] and self.plot_style.plot_type == "histogram":
+            self.plot_style.schedule_update()
+
+    def update_hist_plot_style_combobox(self, new_hist_plot_style):
+        self.comboBoxHistType.setCurrentText(new_hist_plot_style)
+        if self.toolBox.currentIndex() == self.left_tab['sample'] and self.plot_style.plot_type == "histogram":
+            self.plot_style.schedule_update()
+
+    def update_corr_method_combobox(self, new_corr_method):
+        self.comboBoxCorrelationMethod.setCurrentText(new_corr_method)
+        if self.toolBox.currentIndex() == self.left_tab['sample'] and self.plot_style.plot_type == "correlation":
+            self.plot_style.schedule_update()
+
+    def update_corr_squared_checkbox(self, new_corr_squared):
+        self.checkBoxCorrelationSquared.setChecked(new_corr_squared)
+        if self.toolBox.currentIndex() == self.left_tab['sample'] and self.plot_style.plot_type == "correlation":
+            self.plot_style.schedule_update()
+    
+    def update_noise_red_method_combobox(self, new_noise_red_method):
+        self.comboBoxNoiseReductionMethod.setCurrentText(new_noise_red_method)
+        if self.toolBox.currentIndex() == self.left_tab['sample']:
+            self.plot_style.schedule_update()
+
+    def update_noise_red_option1_spinbox(self, new_noise_red_option1):
+        self.spinBoxNoiseOption1.setValue(new_noise_red_option1)
+        if self.toolBox.currentIndex() == self.left_tab['sample']:
+            self.plot_style.schedule_update()
+
+    def update_noise_red_option2_spinbox(self, new_noise_red_option2):
+        self.doubleSpinBoxNoiseOption2.setValue(new_noise_red_option2)
+        if self.toolBox.currentIndex() == self.left_tab['sample']:
+            self.plot_style.schedule_update()
+    
+    def update_gradient_flag_checkbox(self, new_gradient_flag):
+        self.checkBoxGradient.setChecked(new_gradient_flag)
+        if self.toolBox.currentIndex() == self.left_tab['sample']:
+            self.plot_style.schedule_update()
+
+    def update_x_field_type_combobox(self, new_field_type):
+        self.comboBoxFieldTypeX.setCurrentText(new_field_type)
+        if self.toolBox.currentIndex() == self.left_tab['scatter']:
+            self.plot_style.schedule_update()
+
+    def update_y_field_type_combobox(self, new_field_type):
+        self.comboBoxFieldTypeY.setCurrentText(new_field_type)
+        if self.toolBox.currentIndex() == self.left_tab['scatter']:
+            self.plot_style.schedule_update()
+
+    def update_z_field_type_combobox(self, new_field_type):
+        self.comboBoxFieldTypeZ.setCurrentText(new_field_type)
+        if self.toolBox.currentIndex() == self.left_tab['scatter']:
+            self.plot_style.schedule_update()
+
+    def update_x_field_combobox(self, new_field):
+        self.comboBoxFieldX.setCurrentText(new_field)
+        if self.toolBox.currentIndex() == self.left_tab['scatter']:
+            self.plot_style.schedule_update()
+
+    def update_y_field_combobox(self, new_field):
+        self.comboBoxFieldY.setCurrentText(new_field)
+        if self.toolBox.currentIndex() == self.left_tab['scatter']:
+            self.plot_style.schedule_update()
+
+    def update_z_field_combobox(self, new_field):
+        self.comboBoxFieldZ.setCurrentText(new_field)
+        if self.toolBox.currentIndex() == self.left_tab['scatter']:
+            self.plot_style.schedule_update()
+
+    def update_scatter_preset_combobox(self, new_scatter_preset):
+        if self.toolBox.currentIndex() == self.left_tab['scatter']:
+            self.plot_style.schedule_update()
+
+    def update_heatmap_style_combobox(self, new_heatmap_style):
+        self.comboBoxHeatmaps.setCurrentText(new_heatmap_style)
+        if self.toolBox.currentIndex() == self.left_tab['scatter']:
+            self.plot_style.schedule_update()
+
+    def update_ternary_colormap_combobox(self, new_ternary_colormap):
+        self.comboBoxTernaryColormap.setCurrentText(new_ternary_colormap)
+        if self.toolBox.currentIndex() == self.left_tab['scatter']:
+            self.plot_style.schedule_update()
+
+    def update_ternary_color_x_toolbutton(self, new_color):
+        self.toolButtonTCmapXColor.setStyleSheet("background-color: %s;" % new_color)
+        if self.toolBox.currentIndex() == self.left_tab['scatter']:
+            self.plot_style.schedule_update()
+
+    def update_ternary_color_y_toolbutton(self, new_color):
+        self.toolButtonTCmapYColor.setStyleSheet("background-color: %s;" % new_color)
+        if self.toolBox.currentIndex() == self.left_tab['scatter']:
+            self.plot_style.schedule_update()
+
+    def update_ternary_color_z_toolbutton(self, new_color):
+        self.toolButtonTCmapZColor.setStyleSheet("background-color: %s;" % new_color)
+        if self.toolBox.currentIndex() == self.left_tab['scatter']:
+            self.plot_style.schedule_update()
+
+    def update_ternary_color_m_toolbutton(self, new_color):
+        self.toolButtonTCmapMColor.setStyleSheet("background-color: %s;" % new_color)
+        if self.toolBox.currentIndex() == self.left_tab['scatter']:
+            self.plot_style.schedule_update()
+
+    def update_norm_reference_combobox(self, new_norm_reference):
+        if self.toolBox.currentIndex() == self.left_tab['ndim']:
+            self.plot_style.schedule_update()
+
+    def update_ndim_analyte_set_combobox(self, new_ndim_analyte_set):
+        self.comboBoxNDimAnalyteSet.setCurrentText(new_ndim_analyte_set)
+        if self.toolBox.currentIndex() == self.left_tab['ndim']:
+            self.plot_style.schedule_update()
+
+    def update_ndim_quantile_index_combobox(self, new_ndim_quantile_index):
+        self.comboBoxNDimQuantiles.setCurrentIndex(new_ndim_quantile_index)
+        if self.toolBox.currentIndex() == self.left_tab['ndim']:
+            self.plot_style.schedule_update()
+
+    def update_dim_red_method_combobox(self, new_dim_red_method):
+        self.comboBoxNoiseReductionMethod.setCurrentText(new_dim_red_method)
+        if self.toolBox.currentIndex() == self.left_tab['multidim']:
+            self.plot_style.schedule_update()
+
+    def update_dim_red_x_spinbox(self, new_dim_red_x):
+        self.spinBoxPCX.setValue(int(new_dim_red_x))
+        if self.toolBox.currentIndex() == self.left_tab['multidim']:
+            self.plot_style.schedule_update()
+
+    def update_dim_red_y_spinbox(self, new_dim_red_y):
+        self.spinBoxPCY.setValue(int(new_dim_red_y))
+        if self.toolBox.currentIndex() == self.left_tab['multidim']:
+            self.plot_style.schedule_update()
+
+    def update_cluster_method_combobox(self, new_cluster_method):
+        self.comboBoxClusterMethod.setCurrentText(new_cluster_method)
+        if self.toolBox.currentIndex() == self.left_tab['cluster']:
+            self.plot_style.schedule_update()
+
+    def update_max_clusters_spinbox(self, new_max_clusters):
+        self.spinBoxClusterMax.setValue(int(new_max_clusters))
+        if self.toolBox.currentIndex() == self.left_tab['cluster']:
+            self.plot_style.schedule_update()
+
+    def update_num_clusters_spinbox(self, new_num_clusters):
+        self.spinBoxNClusters.setValue(int(new_num_clusters))
+        if self.toolBox.currentIndex() == self.left_tab['cluster']:
+            self.plot_style.schedule_update()
+
+    def update_cluster_seed_lineedit(self, new_cluster_seed):
+        self.lineEditSeed.setText(str(new_cluster_seed))
+        if self.toolBox.currentIndex() == self.left_tab['cluster']:
+            self.plot_style.schedule_update()
+
+    def update_cluster_exponent_slider(self, new_cluster_exponent):
+        self.horizontalSliderClusterExponent.setValue(new_cluster_exponent)
+        if self.toolBox.currentIndex() == self.left_tab['cluster']:
+            self.plot_style.schedule_update()
+
+    def update_cluster_distance_combobox(self, new_cluster_distance):
+        if self.toolBox.currentIndex() == self.left_tab['cluster']:
+            self.plot_style.schedule_update()
+
+    def update_dim_red_precondition_checkbox(self, new_pca_precondition):
+        if self.toolBox.currentIndex() == self.left_tab['cluster']:
+            self.plot_style.schedule_update()
+
+    def update_num_basis_for_precondition_spinbox(self, new_num_pca_basis_for_precondition):
+        if self.toolBox.currentIndex() == self.left_tab['cluster']:
+            self.plot_style.schedule_update()
+
+    def update_selected_clusters_spinbox(self, new_selected_clusters):
+        if self.toolBox.currentIndex() == self.left_tab['cluster']:
+            self.plot_style.schedule_update()
+
+
+    def update_sample_id(self):
+        """Updates ``app_data.sample_id``"""
+        if self.app_data.sample_id == self.comboBoxSampleId.currentText():
+            return
+
+        if self.logger_options['Data']:
+            print(f"update_sample_id: {self.app_data.sample_id}\n")
+
+        # See if the user wants to really change samples and save or discard the current work
+        if self.data and self.app_data.sample_id != '':
+            # Create and configure the QMessageBox
+            msgBox = QMessageBox.warning(self,
+                    "Save sample",
+                    "Do you want to save the current analysis?",
+                    QMessageBox.StandardButton.Discard | QMessageBox.StandardButton.Cancel | QMessageBox.StandardButton.Save)
+            #iconWarning = QIcon(":/resources/icons/icon-warning-64.svg")
+            #msgBox.setWindowIcon(iconWarning)  # Set custom icon
+
+            # Display the dialog and wait for user action
+            response = msgBox.exec()
+
+            # If the user clicks discard, then no need to save, just change the sample
+            if response == QMessageBox.StandardButton.Save:
+                self.io.save_project()
+            elif response == QMessageBox.StandardButton.Cancel:
+                # change the sample ID back to the current sample
+                self.comboBoxSampleId.setCurrentText(self.app_data.sample_id)
+                return
+
+        # at this point, the user has decided to proceed with changing the sample
+        # update the current sample ID
+        self.app_data.sample_id = self.comboBoxSampleId.currentText()
+
+        self.change_sample()
+
+    def update_equalize_color_scale(self):
+        self.app_data.equalize_color_scale = self.toolButtonScaleEqualize.isChecked()
+        if self.plot_style.plot_type == "analyte map":
+            self.plot_style.schedule_update()
+
+    def update_corr_method(self):
+        self.app_data.corr_method = self.comboBoxCorrelationMethod.currentText()
+
+        self.correlation_method_callback()
+
+    def update_xlim_lineedits(self, new_xlim):
+        self.lineEditXLB.value = new_xlim[0]
+        self.lineEditXUB.value = new_xlim[1]
+        self.plot_style.schedule_update()
+
+    def update_xlabel_lineedit(self, new_label):
+        self.lineEditXLabel.setText(new_label)
+        self.plot_style.schedule_update()
+        
+    def update_xscale_combobox(self, new_scale):
+        self.comboBoxXScale.setCurrentText(new_scale)
+        self.plot_style.schedule_update()
+
+    def update_ylim_lineedits(self, new_ylim):
+        self.lineEditYLB.value = new_ylim[0]
+        self.lineEditYUB.value = new_ylim[1]
+        self.plot_style.schedule_update()
+
+    def update_ylabel_lineedit(self, new_label):
+        self.lineEditYLabel.setText(new_label)
+        self.plot_style.schedule_update()
+
+    def update_yscale_combobox(self, new_scale):
+        self.comboBoxYScale.setCurrentText(new_scale)
+        self.plot_style.schedule_update()
+
+    def update_zlim_lineedits(self, new_zlim):
+        self.lineEditZLB.value = new_zlim[0]
+        self.lineEditZUB.value = new_zlim[1]
+        self.plot_style.schedule_update()
+
+    def update_zlabel_lineedit(self, new_label):
+        self.lineEditZLabel.setText(new_label)
+        self.plot_style.schedule_update()
+        
+    def update_zscale_combobox(self, new_scale):
+        self.comboBoxZScale.setCurrentText(new_scale)
+        self.plot_style.schedule_update()
+
+    def update_aspect_ratio_lineedit(self, new_aspect_ratio):
+        self.lineEditAspectRatio.value = new_aspect_ratio
+        self.plot_style.schedule_update()
+
+    def update_tick_dir_combobox(self, new_tick_dir):
+        self.comboBoxTickDirection.setCurrentText(new_tick_dir)
+        self.plot_style.schedule_update()
+
+    def update_scale_dir_combobox(self, new_scale_dir):
+        self.comboBoxScaleDirection.setCurrentText(new_scale_dir)
+        self.plot_style.schedule_update()
+
+    def update_scale_location_combobox(self, new_scale_location):
+        self.comboBoxScaleLocation.setCurrentText(new_scale_location)
+        self.plot_style.schedule_update()
+
+    def update_scale_length_lineedit(self, new_scale_length):
+        self.lineEditScaleLength.value = new_scale_length
+        self.plot_style.schedule_update()
+
+    def update_overlay_color_toolbutton(self, new_color):
+        self.toolButtonOverlayColor.setStyleSheet("background-color: %s;" % new_color)
+        self.plot_style.schedule_update()
+
+    def update_show_mass_checkbox(self, new_value):
+        self.checkBoxShowMass.setChecked(new_value)
+        self.plot_style.schedule_update()
+
+    def update_marker_symbol_combobox(self, new_marker_symbol):
+        self.comboBoxMarker.setCurrentText(new_marker_symbol)
+        self.plot_style.schedule_update()
+
+    def update_marker_size_spinbox(self, new_marker_size):
+        self.doubleSpinBoxMarkerSize.setValue(new_marker_size)
+        self.plot_style.schedule_update()
+
+    def update_marker_color_toolbutton(self, new_color):
+        self.toolButtonMarkerColor.setStyleSheet("background-color: %s;" % new_color)
+        self.plot_style.schedule_update()
+
+    def update_marker_alpha_slider(self, new_alpha):
+        self.horizontalSliderMarkerAlpha.setValue(new_alpha)
+        self.plot_style.schedule_update()
+
+    def update_line_width_combobox(self, new_line_width):
+        self.doubleSpinBoxLineWidth.setValue(new_line_width)
+        self.plot_style.schedule_update()
+
+    def update_line_multiplier_lineedit(self, new_multiplier):
+        self.lineEditLengthMultiplier.value = new_multiplier
+        self.plot_style.schedule_update()
+
+    def update_line_color_toolbutton(self, new_color):
+        self.toolButtonLineColor.setStyleSheet("background-color: %s;" % new_color)
+        self.plot_style.schedule_update()
+
+    def update_font_family_combobox(self, new_font_family):
+        self.fontComboBox.setCurrentText(new_font_family)
+        self.plot_style.schedule_update()
+
+    def update_font_size_spinbox(self, new_font_size):
+        self.doubleSpinBoxFontSize.setValue(new_font_size)
+        self.plot_style.schedule_update()
+
+    def update_color_field_type_combobox(self, new_field_type):
+        self.comboBoxColorByField.setCurrentText(new_field_type)
+
+        self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
+        self.plot_style.color_field = self.comboBoxColorField.currentText()
+        self.plot_style.update_color_field_spinbox()
+
+        self.plot_style.schedule_update()
+
+    def update_color_field_combobox(self, new_field):
+        self.comboBoxColorField.setCurrentText(new_field)
+        self.plot_style.schedule_update()
+
+    def update_color_field_spinbox(self, value):
+        self.spinBoxColorField.setMinimum(0)
+        self.spinBoxColorField.setMaximum(self.comboBoxColorField.count() - 1)
+        #self.spinBoxFieldIndex.valueChanged.connect(self.hist_field_update)
+
+    def update_cmap_combobox(self, new_colormap):
+        self.comboBoxFieldColormap.setCurrentText(new_colormap)
+        self.plot_style.schedule_update()
+
+    def update_cbar_reverse_checkbox(self, new_value):
+        self.checkBoxReverseColormap.setChecked(new_value)
+        self.plot_style.schedule_update()
+
+    def update_cbar_direction_combobox(self, new_cbar_direction):
+        self.comboBoxCbarDirection.setCurrentText(new_cbar_direction)
+        self.plot_style.schedule_update()
+
+    def update_clim_lineedits(self, new_xlim):
+        self.lineEditColorLB.value = new_xlim[0]
+        self.lineEditColorUB.value = new_xlim[1]
+        self.plot_style.schedule_update()
+
+    def update_clabel_lineedit(self, new_label):
+        self.lineEditCbarLabel.setText(new_label)
+        self.plot_style.schedule_update()
+        
+    def update_cscale_combobox(self, new_scale):
+        self.comboBoxColorScale.setCurrentText(new_scale)
+        self.plot_style.schedule_update()
+
+    def update_resolution_spinbox(self, new_resolution):
+        self.spinBoxHeatmapResolution.setValue(new_resolution)
+
+        if self.plot_style.plot_type == "heatmap":
+            self.plot_style.schedule_update()
+
+    
+    def update_dx(self):
+        self.data[self.app_data.sample_id].update_resolution('x', self.lineEditDX.value)
+        self.plot_style.schedule_update()
+
+    def update_dy(self):
+        self.data[self.app_data.sample_id].update_resolution('y', self.lineEditDY.value)
+        self.plot_style.schedule_update()
+
+    def reset_crop(self):
+        self.data[self.app_data.sample_id].reset_crop
+        self.plot_style.schedule_update()
+
+    def update_swap_resolution(self):
+        self.data[self.app_data.sample_id].swap_resolution 
+        self.plot_style.schedule_update()
+
+    def reset_pixel_resolution(self):
+        self.data[self.app_data.sample_id].reset_resolution
+        self.plot_style.schedule_update()
+
 
     def toggle_spot_tab(self):
         #self.actionSpotTools.toggle()
         if self.actionSpotTools.isChecked():
+            # add spot page to MainWindow.toolBox
             self.spot_tools = SpotPage(self.left_tab['sample'], self)
             self.actionImportSpots.setVisible(True)
         else:
@@ -950,10 +1592,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             sys.stdout = sys.__stdout__  # Restore to default stdout    
 
     
-    def on_plot_type_changed(self):
-        # Update self.plot_type whenever combo box changes
-        self.plot_type = self.comboBoxPlotType.currentText()
-
     def on_field_type_changed(self):
         # Update self.field_type whenever combo box changes
         self.field_type = self.comboBoxColorByField.currentText()
@@ -962,89 +1600,105 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Update self.field_type whenever combo box changes
         self.field = self.comboBoxColorField.currentText()
 
-    def on_checkBoxShowMass_changed(self, state):
+    def update_show_mass(self):
         """
-        Update self.showMass whenever the checkbox changes.
+        Update ``plot_style.show_mass`` whenever the checkbox changes.
         state is an int, so we convert it to bool by checking if it equals QtCore.Qt.Checked.
         """
-        self.showMass = (state == Qt.Checked)
+        self.plot_style.show_mass = self.checkBoxShowMass.isChecked()
+        self.plot_style.schedule_update()
 
     # -------------------------------------
     # Reset to start
     # -------------------------------------
     def reset_analysis(self, selection='full'):
-        if self.sample_id == '':
+        if self.app_data.sample_id == '':
             return
 
+        if selection =='full':  # nuke the current setup and start over fresh
+            # show dialog to to get confirmation from user
+            msgBox = QMessageBox.warning(self,
+                "Reset analyes",
+                "Do you wish to discard all work and reset analyses?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Save | QMessageBox.StandardButton.No
+            )
+            #iconWarning = QIcon()
+            #iconWarning.addPixmap(QPixmap(":/resources/icons/icon-warning-64.svg"), QIcon.Normal, QIcon.Off)
+            #msgBox.setWindowIcon(iconWarning)  # Set custom icon
 
+            # Display the dialog and wait for user action
+            response = msgBox.exec()
 
-        if selection =='full':
-            if self.data:
-                # show dialog to to get confirmation from user
-                messageBoxResetSample = QMessageBox()
-                iconWarning = QIcon()
-                iconWarning.addPixmap(QPixmap(":/resources/icons/icon-warning-64.svg"), QIcon.Normal, QIcon.Off)
+            if response == QMessageBox.StandardButton.No:
+                return
+            elif response == QMessageBox.StandardButton.Save:
+                self.io.save_project()
 
-                messageBoxResetSample.setWindowIcon(iconWarning)  # Set custom icon
-                messageBoxResetSample.setText("Do you wish to discard all work and reset analysis?")
-                messageBoxResetSample.setWindowTitle("Reset analyses")
-                messageBoxResetSample.setStandardButtons(QMessageBox.Yes |QMessageBox.Save| QMessageBox.Cancel)
+            #reset Data
+            self.data = {}
 
-                # Display the dialog and wait for user action
-                response = messageBoxResetSample.exec_()
+            #reset App, but keep the sample list and current sample
+            sample_id = self.app_data.sample_id
+            sample_list = self.app_data.sample_list
 
-                if response == QMessageBox.Cancel:
-                    return
-                elif response == QMessageBox.Save:
-                    self.io.save_project()
+            self.app_data = AppData(self.data)
 
+            #reset Styling
+            self.plot_style = StylingDock(self.data, debug=self.logger_options['Style'])
 
-                #reset self.data
-                self.data = {}
-                # self.plot_widget_dict = {
-                #     'Analyte':{},
-                #     'Histogram':{},
-                #     'Correlation':{},
-                #     'Multidimensional Analysis':{},
-                #     'Geochemistry':{},
-                #     'Calculated':{}
-                # }
-                self.multi_view_index = []
-                self.laser_map_dict = {}
-                self.multiview_info_label = {}
-                self.ndim_list = []
-                self.lasermaps = {}
-                #self.treeModel.clear()
-                self.prev_plot = ''
-                self.plot_tree = PlotTree(self)
-                self.change_sample(self.comboBoxSampleId.currentIndex())
+            self.multi_view_index = []
+            self.laser_map_dict = {}
+            self.multiview_info_label = {}
+            self.ndim_list = []
+            self.lasermaps = {}
+            #self.treeModel.clear()
+            self.prev_plot = ''
+            self.plot_tree = PlotTree(self)
 
-                # reset styles
-                self.plot_style.reset_default_styles()
+            # reset styles
+            self.plot_style.reset_default_styles()
 
-                # reset plot layouts
-                self.clear_layout(self.widgetSingleView.layout())
-                self.clear_layout(self.widgetMultiView.layout())
-                self.clear_layout(self.widgetQuickView.layout())
+            # reset plot layouts
+            self.clear_layout(self.widgetSingleView.layout())
+            self.clear_layout(self.widgetMultiView.layout())
+            self.clear_layout(self.widgetQuickView.layout())
 
-                # make the first plot
-                self.plot_flag = True
-                # self.update_SV()
-            # reset_sample id
-            self.sample_id = None
+            # trigger update to plot
+            self.plot_style.schedule_update()
+
+            self.mask_dock.filter_tab.tableWidgetFilters.clearContents()
+            self.mask_dock.filter_tab.tableWidgetFilters.setRowCount(0)
+
+            # reset sample_id and sample_list
+            self.app_data.sample_list = sample_list
+            self.app_data.sample_id = sample_id
         elif selection == 'sample': #sample is changed
 
-            #clear filter table
-            self.tableWidgetFilters.clearContents()
-            self.tableWidgetFilters.setRowCount(0)
+            if hasattr(self, "mask_dock"):
+                #reset filter table, keeping any persistent filters
+                persistent = self.mask_dock.filter_tab.tableWidgetFilters.column_to_list("persistent")
+                if all(persistent):
+                    pass
+                elif any(persistent):
+                    for row in range(len(persistent)-1,-1,-1):
+                        if not persistent[row]:
+                            self.mask_dock.filter_tab.tableWidgetFilters.removeRow(row)
+                else:
+                    self.mask_dock.filter_tab.tableWidgetFilters.clearContents()
+                    self.mask_dock.filter_tab.tableWidgetFilters.setRowCount(0)
+
+                ##### Add back in the persistent filters
+
+            #clear polygons
+            if hasattr(self, "polygon"):
+                # self.polygon is created in mask_dock.polygon_tab
+                self.polygon.clear_polygons()
 
             #clear profiling
             if hasattr(self, "profile_dock"):
                 self.profile_dock.profiling.clear_profiles()
                 self.profile_dock.profile_toggle.setChecked(False)
 
-            #clear polygons
-            self.polygon.clear_polygons()
 
 
     def toggle_dock_visibility(self, dock, button=None):
@@ -1082,101 +1736,47 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #self.ProfilingPage.setEnabled(True)
         #self.PTtPage.setEnabled(True)
 
-    def change_sample(self, index, save_analysis=True):
-        """Changes sample and plots first map
+    def change_sample(self):
+        """Changes sample and plots first map"""
+        self.update_plot = False
 
-        Parameters
-        ----------
-        index: int
-            index of sample name for identifying data.  The values are based on the
-            comboBoxSampleID
-        """
-        if DEBUG:
-            print(f"change_sample, index: {index}")
-
-        if self.sample_id == self.sample_ids[index]:
-            # if selected sample id is same as previous
-            return
-
-        if self.data and save_analysis:
-            # Create and configure the QMessageBox
-            messageBoxChangeSample = QMessageBox()
-            iconWarning = QIcon()
-            iconWarning.addPixmap(QPixmap(":/resources/icons/icon-warning-64.svg"), QIcon.Normal, QIcon.Off)
-
-            messageBoxChangeSample.setWindowIcon(iconWarning)  # Set custom icon
-            messageBoxChangeSample.setText("Do you want to save current analysis")
-            messageBoxChangeSample.setWindowTitle("Save analysis")
-            messageBoxChangeSample.setStandardButtons(QMessageBox.Discard | QMessageBox.Cancel | QMessageBox.Save)
-
-            # Display the dialog and wait for user action
-            response = messageBoxChangeSample.exec_()
-
-            if response == QMessageBox.Save:
-                self.save_project()
-            elif response == QMessageBox.Discard:
-                pass
-            else: #user pressed cancel
-                self.comboBoxSampleId.setCurrentText(self.sample_id)
-                return
+        if self.logger_options['Data']:
+            print(f"change_sample\n")
             
-            
-        self.sample_id = self.sample_ids[index]
         self.reset_analysis('sample')
-        ######
-        # THIS DOESN'T DO ANYTHING ANYMORE, BUT WHEN A NEW SAMPLE IS LOADED, IT NEEDS TO CHECK FOR PERSISTANT FILTERS AND THEN ADD THEM TO THE NEW SAMPLEOBJ
-        # initialize filter_info dataframe for storing filter properties
-        # if self.filter_df is not None and not self.filter_info.empty:
-        #     if any(self.filter_info['persistent']):
-        #         # Keep only rows where 'persistent' is True
-        #         self.filter_info = self.filter_info[self.filter_info['persistent'] == True]
 
-        # if note dock has been open, set notes file to current filename
-        if hasattr(self,'notes'):
-            # change notes file to new sample.  This will initiate the new file and autosave timer.
-            self.notes.notes_file = os.path.join(self.selected_directory,self.sample_id+'.rst')
-
+        # obtain index of current sample
+        index = self.app_data.sample_list.index(self.app_data.sample_id)
 
         # add sample to sample dictionary
-        if self.sample_id not in self.data:
+        if self.app_data.sample_id not in self.data:
             # load sample's *.lame file
-            file_path = os.path.join(self.selected_directory, self.csv_files[index])
-            self.data[self.sample_id] = SampleObj(self.sample_id, file_path, self.comboBoxOutlierMethod.currentText(), self.comboBoxNegativeMethod.currentText(), self.ref_chem, debug=self.logger_options['Data'])
+            file_path = os.path.join(self.app_data.selected_directory, self.app_data.csv_files[index])
+            self.data[self.app_data.sample_id] = SampleObj(self.app_data.sample_id, file_path, self.comboBoxOutlierMethod.currentText(), self.comboBoxNegativeMethod.currentText(), self.ref_chem, debug=self.logger_options['Data'])
+            self.data[self.app_data.sample_id].add_observer(self.update_widgets)
 
-            # get selected_analyte columns
-            selected_analytes = self.data[self.sample_id].processed_data.match_attributes({'data_type': 'analyte', 'use': True})
-
-            self.update_labels()
-
-            # set slot for swapXY button
-            self.actionFullMap.triggered.connect(self.data[self.sample_id].reset_crop)
-            self.toolButtonSwapResolution.clicked.connect(self.data[self.sample_id].swap_resolution)
-            #self.toolButtonResolutionReset.clicked.connect(self.data[self.sample_id].reset_crop)
-            self.toolButtonPixelResolutionReset.clicked.connect(self.data[self.sample_id].reset_resolution)
-            self.update_aspect_ratio_controls()
-
-            # set analyte map to first available analyte
-            if not selected_analytes:
-                self.plot_style.color_field = selected_analytes[0]
-
-            self.plot_tree.add_sample(self.sample_id)
+            # enable widgets that require self.data not be empty
+            self.toggle_data_widgets()
+            
+            # add sample to the plot tree
+            self.plot_tree.add_sample(self.app_data.sample_id)
             self.plot_tree.update_tree()
         else:
             #update filters, polygon, profiles with existing data
             self.actionClearFilters.setEnabled(False)
-            if np.all(self.data[self.sample_id].filter_mask):
+            if np.all(self.data[self.app_data.sample_id].filter_mask):
                 self.actionFilterToggle.setEnabled(False)
             else:
                 self.actionFilterToggle.setEnabled(True)
                 self.actionClearFilters.setEnabled(True)
 
-            if np.all(self.data[self.sample_id].polygon_mask):
+            if np.all(self.data[self.app_data.sample_id].polygon_mask):
                 self.actionPolygonMask.setEnabled(False)
             else:
                 self.actionPolygonMask.setEnabled(True)
                 self.actionClearFilters.setEnabled(True)
 
-            if np.all(self.data[self.sample_id].cluster_mask):
+            if np.all(self.data[self.app_data.sample_id].cluster_mask):
                 self.actionClusterMask.setEnabled(False)
             else:
                 self.actionClusterMask.setEnabled(True)
@@ -1184,24 +1784,45 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             self.update_tables()
 
-            #return
+        # if note dock has been open, set notes file to current filename
+        if hasattr(self,'notes'):
+            # change notes file to new sample.  This will initiate the new file and autosave timer.
+            self.notes.notes_file = os.path.join(self.app_data.selected_directory,self.app_data.sample_id+'.rst')
+
+
+        # updates a label on the statusBar that displays the
+        # number of negatives/zeros and nan values
+        self.update_labels()
+        
+        # update data handling parameters
+        self.data[self.app_data.sample_id].update_aspect_ratio_controls()
+
+        # get selected_analyte columns
+        selected_analytes = self.data[self.app_data.sample_id].processed_data.match_attributes({'data_type': 'analyte', 'use': True})
+
+        # set analyte map to first available analyte
+        if not selected_analytes:
+            self.plot_style.color_field = selected_analytes[0]
+
+        self.init_tabs()
         
         if hasattr(self,"info_dock"):
             self.info_dock.update_tab_widget()
 
         # update slot connections that depend on the sample
-        self.toolButtonOutlierReset.clicked.connect(lambda: self.data[self.sample_id].reset_data_handling(self.comboBoxOutlierMethod.currentText(), self.comboBoxNegativeMethod.currentText()))
+        self.toolButtonOutlierReset.clicked.connect(lambda: self.data[self.app_data.sample_id].reset_data_handling(self.comboBoxOutlierMethod.currentText(), self.comboBoxNegativeMethod.currentText()))
 
         # add spot data
-        if not self.spotdata.empty:
-            self.populate_spot_table()
+        if hasattr(self, "spot_tab") and not self.data[self.app_data.sample_id].spotdata.empty:
+            self.io.populate_spot_table()
 
         # reset filters
         self.actionClusterMask.setEnabled(False)
         self.actionPolygonMask.setEnabled(False)
-        if not self.checkBoxPersistentFilter.isChecked():
-            self.actionClearFilters.setEnabled(False)
-            self.actionFilterToggle.setEnabled(False)
+        # this should come from the filter table checkboxes, not the UI checkbox
+        #if not self.checkBoxPersistentFilter.isChecked():
+        #    self.actionClearFilters.setEnabled(False)
+        #    self.actionFilterToggle.setEnabled(False)
         self.actionNoiseReduction.setEnabled(False)
 
         # sort data
@@ -1215,13 +1836,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # precalculate custom fields
         if self.calculator.precalculate_custom_fields:
             for name in self.calc_dict.keys():
-                if name in self.data[self.sample_id].processed_data.columns:
+                if name in self.data[self.app_data.sample_id].processed_data.columns:
                     continue
                 self.comboBoxCalcFormula.setCurrentText(name)
                 self.calculate_new_field(save=False)
 
         #update UI with auto scale and neg handling parameters from 'Analyte Info'
-        analyte_list = self.data[self.sample_id].processed_data.match_attribute('data_type','analyte')
+        analyte_list = self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','analyte')
 
         self.update_spinboxes(field_type='Analyte', field=analyte_list[0])
 
@@ -1232,7 +1853,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
         self.toolBoxStyle.setCurrentIndex(0)
         self.toolBox.setCurrentIndex(self.left_tab['sample'])
-        self.plot_style.set_style_widgets(self.plot_type)
+        self.plot_style.set_style_widgets(self.plot_style.plot_type)
 
         # update comboboxes to reflect list of available field types and fields
         self.update_all_field_comboboxes()
@@ -1248,20 +1869,38 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if hasattr(self, 'workflow'):
             self.update_blockly_field_types()
 
-        self.spinBoxColorField.setMinimum(0)
-        self.spinBoxColorField.setMaximum(self.comboBoxColorField.count() - 1)
-        self.spinBoxFieldIndex.setMinimum(0)
-        self.spinBoxFieldIndex.setMaximum(self.comboBoxHistField.count() - 1)
-        self.spinBoxFieldIndex.valueChanged.connect(self.hist_field_update)
 
-        self.update_filter_values()
-        self.histogram_update_bin_width()
+        if hasattr(self,"mask_dock"):
+            self.mask_dock.filter_tab.update_filter_values()
+        self.update_histogram_bin_width()
 
         # update toolbar
         self.canvas_changed()
 
+        self.update_plot = True
+
         # trigger update to plot
-        self.plot_style.scheduler.schedule_update()
+        self.plot_style.schedule_update()
+
+    def toggle_data_widgets(self):
+        """Disables/enables widgets if self.data is empty."""
+        if self.data:
+            self.actionReset.setEnabled(True)
+            self.actionFilters.setEnabled(True)
+            self.actionPolygons.setEnabled(True)
+            self.actionClusters.setEnabled(True)
+            self.actionProfiles.setEnabled(True)
+            self.actionInfo.setEnabled(True)
+            self.actionNotes.setEnabled(True)
+        else:
+            self.actionReset.setEnabled(False)
+            self.actionFilters.setEnabled(False)
+            self.actionPolygons.setEnabled(False)
+            self.actionClusters.setEnabled(False)
+            self.actionProfiles.setEnabled(False)
+            self.actionInfo.setEnabled(False)
+            self.actionNotes.setEnabled(False)
+
 
     def hist_field_update(self):
         self.spinBoxFieldIndex.blockSignals(True)
@@ -1287,19 +1926,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 value: scale used (linear/log/logit)
         """
         #update self.data['norm'] with selection
-        for analyte in self.data[self.sample_id].processed_data.match_attribute('data_type','Analyte'):
+        for analyte in self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','Analyte'):
             if analyte in list(analyte_dict.keys()):
-                self.data[self.sample_id].processed_data.set_attribute(analyte, 'use', True)
+                self.data[self.app_data.sample_id].processed_data.set_attribute(analyte, 'use', True)
             else:
-                self.data[self.sample_id].processed_data.set_attribute(analyte, 'use', False)
+                self.data[self.app_data.sample_id].processed_data.set_attribute(analyte, 'use', False)
 
         for analyte, norm in analyte_dict.items():
             if '/' in analyte:
-                if analyte not in self.data[self.sample_id].processed_data.columns:
+                if analyte not in self.data[self.app_data.sample_id].processed_data.columns:
                     analyte_1, analyte_2 = analyte.split(' / ') 
-                    self.data[self.sample_id].compute_ratio(analyte_1, analyte_2)
+                    self.data[self.app_data.sample_id].compute_ratio(analyte_1, analyte_2)
 
-            self.data[self.sample_id].processed_data.set_attribute(analyte,'norm',norm)
+            self.data[self.app_data.sample_id].processed_data.set_attribute(analyte,'norm',norm)
 
         self.plot_tree.update_tree(norm_update=True)
         #update analysis type combo in styles
@@ -1332,8 +1971,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         Opens mask dock, creates on first instance.
         """
         if not hasattr(self, 'mask_dock'):
-            self.polygon = PolygonManager(self)
-            self.mask_dock = MaskDock(self)
+            self.mask_dock = MaskDock(self, debug=self.logger_options['Masking'])
 
             self.mask_tab = {}
             for tid in range(self.mask_dock.tabWidgetMask.count()):
@@ -1353,6 +1991,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if not (self.mask_dock in self.help_mapping.keys()):
                 self.help_mapping[self.mask_dock] = 'filtering'
 
+            self.mask_dock.filter_tab.callback_lineEditFMin()
+            self.mask_dock.filter_tab.callback_lineEditFMax()
+
         self.mask_dock.show()
 
         if tab_name is not None:
@@ -1367,7 +2008,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             Profile
         """
         if not hasattr(self, 'profile'):
-            self.profile_dock = ProfileDock(self)
+            self.profile_dock = ProfileDock(self, debug=self.logger_options['Profile'])
 
             if not (self.profile_dock in self.help_mapping.keys()):
                 self.help_mapping[self.profile_dock] = 'profiles'
@@ -1383,8 +2024,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             NoteTaking
         """            
         if not hasattr(self, 'notes'):
-            if hasattr(self,'selected_directory') and self.sample_id != '':
-                notes_file = os.path.join(self.selected_directory,f"{self.sample_id}.rst")
+            if hasattr(self,'selected_directory') and self.app_data.sample_id != '':
+                notes_file = os.path.join(self.app_data.selected_directory,f"{self.app_data.sample_id}.rst")
             else:
                 notes_file = None
 
@@ -1481,17 +2122,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         .. seealso::
             :ref:`AnalyteSelectionWindow` for the dialog
         """
-        if self.sample_id == '':
+        if self.app_data.sample_id == '':
             return
 
         self.analyte_dialog = AnalyteDialog(self, debug=self.logger_options['Analyte selector'])
         self.analyte_dialog.show()
 
-        result = self.analyte_dialog.exec_()  # Store the result here
-        if result == QDialog.Accepted:
+        result = self.analyte_dialog.exec()  # Store the result here
+        if result == QDialog.DialogCode.Accepted:
             self.update_analyte_ratio_selection(analyte_dict= self.analyte_dialog.norm_dict)   
             self.workflow.refresh_analyte_saved_lists_dropdown() #refresh saved analyte dropdown in blockly 
-        if result == QDialog.Rejected:
+        if result == QDialog.DialogCode.Rejected:
             pass
 
 
@@ -1503,17 +2144,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         .. seealso::
             :ref:`AnalyteSelectionWindow` for the dialog
         """
-        if self.sample_id == '':
+        if self.app_data.sample_id == '':
             return
         
         self.field_dialog = FieldDialog()
         self.field_dialog.show()
 
-        result = self.field_dialog.exec_()  # Store the result here
-        if result == QDialog.Accepted:
+        result = self.field_dialog.exec()  # Store the result here
+        if result == QDialog.DialogCode.Accepted:
             self.selected_fields = self.field_dialog.selected_fields
             self.workflow.refresh_custom_fields_lists_dropdown() #refresh saved analyte dropdown in blockly 
-        if result == QDialog.Rejected:
+        if result == QDialog.DialogCode.Rejected:
             pass
     
     # -------------------------------
@@ -1551,8 +2192,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.toolBox.setCurrentIndex(self.left_tab['spot'])
                 self.toolBox.show()
             case 'polygons':
-                self.tabWidgetMask.setCurrentIndex(self.mask_tab['polygon'])
-                self.tabWidgetMask.show()
+                self.mask_dock.tabWidgetMask.setCurrentIndex(self.mask_tab['polygon'])
+                self.mask_dock.show()
             case 'scatter':
                 self.toolBox.setCurrentIndex(self.left_tab['scatter'])
                 self.toolBox.show()
@@ -1563,24 +2204,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.toolBox.setCurrentIndex(self.left_tab['multidim'])
                 self.toolBox.show()
             case 'filters':
-                self.tabWidgetMask.setCurrentIndex(self.mask_tab['filter'])
-                self.tabWidgetMask.show()
+                self.mask_dock.tabWidgetMask.setCurrentIndex(self.mask_tab['filter'])
+                self.mask_dock.tabWidgetMask.show()
             case 'clustering':
                 self.toolBox.setCurrentIndex(self.left_tab['cluster'])
                 self.toolBox.show()
             case 'clusters':
-                self.tabWidgetMask.setCurrentIndex(self.mask_tab['cluster'])
-                self.tabWidgetMask.show()
+                self.mask_dock.tabWidgetMask.setCurrentIndex(self.mask_tab['cluster'])
+                self.mask_dock.tabWidgetMask.show()
             case 'special':
                 self.toolBox.setCurrentIndex(self.left_tab['special'])
                 self.toolBox.show()
             case 'info':
-                self.tabWidgetInfo.setCurrentIndex(self.info_tab['info'])
-                self.tabWidgetInfo.show()
+                self.info_dock.tabWidgetInfo.setCurrentIndex(self.info_tab['info'])
+                self.info_dock.tabWidgetInfo.show()
 
     def canvas_changed(self):
         """Sets visibility of canvas tools and updates canvas plots"""        
-        if self.sample_id == '':
+        if self.app_data.sample_id == '':
             self.toolButtonHome.setVisible(False)
             self.toolButtonPan.setVisible(False)
             self.toolButtonZoom.setVisible(False)
@@ -1723,7 +2364,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             self.display_QV()
 
-    def update_plot_type_combobox(self):
+    def update_plot_type_combobox_options(self):
         """Updates plot type combobox based on current toolbox index or certain dock widget controls."""
         self.comboBoxPlotType.clear()
         if self.profile_state == True or self.polygon_state == True:
@@ -1733,9 +2374,59 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.comboBoxPlotType.addItems(self.plot_types[plot_idx][1:])
         self.comboBoxPlotType.setCurrentIndex(self.plot_types[plot_idx][0])
-        self.plot_type = self.comboBoxPlotType.currentText()
+        self.plot_style.plot_type = self.comboBoxPlotType.currentText()
         if hasattr(self,"plot_style"):
-            self.plot_style.set_style_widgets(self.plot_type)
+            self.plot_style.set_style_widgets(self.plot_style.plot_type)
+
+    def update_plot_type_combobox(self, new_plot_type):
+        self.comboBoxPlotType.setCurrentText(new_plot_type)
+
+        self.plot_style.toggle_style_widgets()
+
+        self.plot_types[self.toolBox.currentIndex()][0] = self.comboBoxPlotType.currentIndex()
+
+        match self.plot_style.plot_type.lower():
+            case 'analyte map' | 'gradient map':
+                self.actionSwapAxes.setEnabled(True)
+            case 'scatter' | 'heatmap':
+                self.actionSwapAxes.setEnabled(True)
+            case 'correlation':
+                self.actionSwapAxes.setEnabled(False)
+                if self.comboBoxCorrelationMethod.currentText() == 'None':
+                    self.comboBoxCorrelationMethod.setCurrentText('Pearson')
+            case 'cluster performance':
+                self.labelClusterMax.show()
+                self.spinBoxClusterMax.show()
+                self.labelNClusters.hide()
+                self.spinBoxNClusters.hide()
+            case 'cluster' | 'cluster score':
+                self.labelClusterMax.hide()
+                self.spinBoxClusterMax.hide()
+                self.labelNClusters.show()
+                self.spinBoxNClusters.show()
+            case _:
+                self.actionSwapAxes.setEnabled(False)
+
+        self.signal_state = False
+        self.plot_style.set_style_widgets(plot_type=self.plot_style.plot_type)
+        self.signal_state = True
+        #self.check_analysis_type()
+
+        if self.plot_style.plot_type != '':
+            self.plot_style.schedule_update()
+
+    def update_plot_type(self):
+        """Updates plot_style.plot_type in the StylingDock.
+        
+        Updates the plot_type.  Updates to other plot style properties and widgets
+        is triggered by this change, but not handled in this method.
+
+        :see also: StylingDock.plot_type, self.update_plot_type_combobox
+        """
+        self.plot_style.plot_type = self.comboBoxPlotType.currentText()
+
+
+
 
     def toolbox_changed(self, update=True):
         """Updates styles associated with toolbox page
@@ -1750,14 +2441,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if DEBUG:
             print(f"toolbox_changed, update: {update}")
 
-        if self.sample_id == '':
+        if self.app_data.sample_id == '':
             return
 
         tab_id = self.toolBox.currentIndex()
 
         # update the plot type comboBox options
         self.comboBoxPlotType.blockSignals(True)
-        self.update_plot_type_combobox()
+        self.update_plot_type_combobox_options()
         self.comboBoxPlotType.setCurrentIndex(self.plot_types[self.toolBox.currentIndex()][0])
         self.comboBoxPlotType.blockSignals(False)
 
@@ -1779,13 +2470,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 
         # get the current plot type
-        #plot_type = self.plot_type
+        #plot_type = self.plot_style.plot_type
         #self.plot_style.set_style_widgets(plot_type=plot_type, style=self.plot_style.plot_type[plot_type])
 
         # If canvasWindow is set to SingleView, update the plot
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv'] and update:
         # trigger update to plot
-            self.plot_style.scheduler.schedule_update()
+            self.plot_style.schedule_update()
 
     def open_ternary(self):
         """Executes on actionTernary
@@ -1794,7 +2485,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         self.open_tab('scatter')
 
-        if self.sample_id:
+        if self.app_data.sample_id:
             idx = 0
             while self.comboBoxFieldX.currentText() == self.comboBoxFieldY.currentText():
                 self.comboBoxFieldY.setCurrentIndex(idx)
@@ -1832,12 +2523,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Executes on ``MainWindow.toolButtonSwapXY.clicked``.  Updates data dictionary and other map related derived results.
         """
-        match self.plot_type:
+        match self.plot_style.plot_type:
             case 'analyte map':
                 # swap x and y
-                self.data[self.sample_id].swap_xy()
-
-                self.update_aspect_ratio_controls()
+                self.data[self.app_data.sample_id].swap_xy()
 
             case 'scatter' | 'heatmap':
                 if self.comboBoxFieldZ.currentText() != '':
@@ -1874,7 +2563,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 return
 
         # trigger update to plot
-        self.plot_style.scheduler.schedule_update()
+        self.plot_style.schedule_update()
         # self.update_all_plots()
 
     def update_aspect_ratio_controls(self):
@@ -1882,27 +2571,27 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Swaps ``lineEditDX`` and ``lineEditDY``
         """ 
-        self.lineEditDX.value = self.data[self.sample_id].dx
-        self.lineEditDY.value = self.data[self.sample_id].dy
+        self.lineEditDX.value = self.data[self.app_data.sample_id].dx
+        self.lineEditDY.value = self.data[self.app_data.sample_id].dy
 
-        array_size = self.data[self.sample_id].array_size
+        array_size = self.data[self.app_data.sample_id].array_size
         self.lineEditResolutionNx.value = array_size[1]
         self.lineEditResolutionNy.value = array_size[0]
 
         # trigger update to plot
-        self.plot_style.scheduler.schedule_update()
+        self.plot_style.schedule_update()
 
     def update_norm(self, norm, field=None):
 
-        self.data[self.sample_id].update_norm(norm=norm, field=field)
+        self.data[self.app_data.sample_id].update_norm(norm=norm, field=field)
 
         # trigger update to plot
-        self.plot_style.scheduler.schedule_update()
+        self.plot_style.schedule_update()
 
     def update_fields(self, sample_id, plot_type, field_type, field,  plot=False):
         # updates comboBoxPlotType,comboBoxColorByField and comboBoxColorField comboboxes using tree, branch and leaf
-        if sample_id == self.sample_id:
-            if plot_type != self.plot_type:
+        if sample_id == self.app_data.sample_id:
+            if plot_type != self.plot_style.plot_type:
                 self.comboBoxPlotType.setCurrentText(plot_type)
 
             if field_type != self.field_type:
@@ -1915,29 +2604,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if field != self.field:
                 self.comboBoxColorField.setCurrentText(field)
                 self.plot_style.color_field_callback(plot)
-            
-    def update_resolution(self, axis):
-        """Updates DX and DY for a dataframe
-
-        Recalculates X and Y for a dataframe when the user changes the value of
-        ``MainWindow.lineEditDX`` or ``MainWindow.lineEditDY``
-
-        Parameter
-        ---------
-        axis : str
-            Indicates axis to update resolution, 'x' or 'y'.
-        """
-        # update resolution based on user change
-        if axis == 'x':
-            self.data[self.sample_id].dx = self.lineEditDX.value
-        elif axis == 'y':
-            self.data[self.sample_id].dy = self.lineEditDY.value
-
-        # update aspect ratio of maps
-        self.update_aspect_ratio_controls()
-
-        # trigger update to plot
-        self.plot_style.scheduler.schedule_update()
 
     
     def change_ref_material(self, ref_val):
@@ -1973,7 +2639,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             ref_chem = self.ref_data.iloc[ref_index]
             ref_chem.index = [col.replace('_ppm', '') for col in ref_chem.index]
 
-            self.data[self.sample_id].ref_chem = ref_chem
+            self.data[self.app_data.sample_id].ref_chem = ref_chem
 
             return ref_index
 
@@ -1994,11 +2660,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             
             # loop through normalized ratios and enable/disable ratios based
             # on the new reference's analytes
-            if self.sample_id == '':
+            if self.app_data.sample_id == '':
                 return
 
             tree = 'Ratio (normalized)'
-            branch = self.sample_id
+            branch = self.app_data.sample_id
             for ratio in self.data[branch].processed_data.match_attribute('data_type','ratio'):
                 item, check = self.plot_tree.find_leaf(tree, branch, leaf=ratio)
                 if item is None:
@@ -2008,8 +2674,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 if check:
                     # ratio normalized
                     # check if ratio can be normalized (note: normalization is not handled here)
-                    refval_1 = self.data[self.sample_id].ref_chem[re.sub(r'\d', '', analyte_1).lower()]
-                    refval_2 = self.data[self.sample_id].ref_chem[re.sub(r'\d', '', analyte_2).lower()]
+                    refval_1 = self.data[self.app_data.sample_id].ref_chem[re.sub(r'\d', '', analyte_1).lower()]
+                    refval_2 = self.data[self.app_data.sample_id].ref_chem[re.sub(r'\d', '', analyte_2).lower()]
                     ratio_flag = False
                     if (refval_1 > 0) and (refval_2 > 0):
                         ratio_flag = True
@@ -2028,7 +2694,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         item.setEnabled(False)
 
             # trigger update to plot
-            self.plot_style.scheduler.schedule_update()
+            self.plot_style.schedule_update()
         #self.update_all_plots()
 
      # for a disappearing button
@@ -2043,7 +2709,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def update_labels(self):
         """Updates flags on statusbar indicating negative/zero and nan values within the processed_data_frame"""        
 
-        data = self.data[self.sample_id].processed_data
+        data = self.data[self.app_data.sample_id].processed_data
 
         columns = data.match_attributes({'data_type': 'analyte', 'use': True}) + data.match_attributes({'data_type': 'ratio', 'use': True})
         negative_count = any(data[columns] <= 0)
@@ -2153,10 +2819,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.prep_data(sample_id, analyte_1,analyte_2)
                 self.update_labels()
         
-        self.update_filter_values()
+        if hasattr(self,"mask_dock"):
+            self.mask_dock.filter_tab.update_filter_values()
 
         # trigger update to plot
-        self.plot_style.scheduler.schedule_update()
+        self.plot_style.schedule_update()
         #self.show()
         
     def update_neg_handling(self, method):
@@ -2177,7 +2844,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             
         if self.checkBoxApplyAll.isChecked():
             # Apply to all iolties
-            analyte_list = self.data[self.sample_id].processed_data.match_attribute('data_type', 'analyte') + self.data[self.sample_id].processed_data.match_attribute('data_type', 'ratio')
+            analyte_list = self.data[self.app_data.sample_id].processed_data.match_attribute('data_type', 'analyte') + self.data[self.app_data.sample_id].processed_data.match_attribute('data_type', 'ratio')
             self.data[sample_id].negative_method = method
             # clear existing plot info from tree to ensure saved plots using most recent data
             for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
@@ -2188,10 +2855,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.data[sample_id].prep_data(field)
         
         self.update_labels()
-        self.update_filter_values()
+        if hasattr(self,"mask_dock"):
+            self.mask_dock.filter_tab.update_filter_values()
 
         # trigger update to plot
-        self.plot_style.scheduler.schedule_update()
+        self.plot_style.schedule_update()
 
     def update_outlier_removal(self, method):
         """Removes outliers from one or all analytes.
@@ -2200,10 +2868,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ----------
         method : str
             Method used to remove outliers."""        
-        if self.data[self.sample_id].outlier_method == method:
+        if self.data[self.app_data.sample_id].outlier_method == method:
             return
 
-        self.data[self.sample_id].outlier_method = method
+        self.data[self.app_data.sample_id].outlier_method = method
 
         match method.lower():
             case 'none':
@@ -2279,7 +2947,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         field_type = self.field_type
         field = self.field
-        current_plot_df = self.data[self.sample_id].get_map_data(field, field_type)
+        current_plot_df = self.data[self.app_data.sample_id].get_map_data(field, field_type)
         
         data.mask = data.mask[data.crop_mask]
         data.polygon_mask = data.polygon_mask[data.crop_mask]
@@ -2314,7 +2982,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             If ``True``, filters are ignored, otherwise the map is filtered, by default ``False``
         """
         #reset all masks in current sample id
-        sample_id = self.sample_id
+        sample_id = self.app_data.sample_id
 
         # remove all masks
         if fullmap:
@@ -2355,7 +3023,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # if single view is active
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
             # trigger update to plot
-            self.plot_style.scheduler.schedule_update()
+            self.plot_style.schedule_update()
 
     # Field filter functions
     # -------------------------------
@@ -2369,7 +3037,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         update_plot : bool, optional
             If true, calls ``MainWindow.apply_filters`` which also calls ``MainWindow.update_SV``, by default True
         """        
-        sample_id = self.sample_id
+        sample_id = self.app_data.sample_id
 
         # create array of all true
         self.data[sample_id].filter_mask = np.ones_like(self.data[sample_id].mask, dtype=bool)
@@ -2381,7 +3049,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # apply interval filters
         #print(self.data[sample_id].filter_df)
-        self.data[self.sample_id].apply_field_filters()
+        self.data[self.app_data.sample_id].apply_field_filters()
 
         if update_plot:
             self.apply_filters(fullmap=False)
@@ -2398,7 +3066,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         update_plot : bool, optional
             If true, calls ``MainWindow.apply_filters`` which also calls ``MainWindow.update_SV``, by default True
         """        
-        sample_id = self.sample_id
+        sample_id = self.app_data.sample_id
 
         # create array of all true
         self.data[sample_id].polygon_mask = np.ones_like(self.data[sample_id].mask, dtype=bool)
@@ -2431,7 +3099,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 inside_polygon = path.contains_points(points)
 
                 # Reshape the result back to the shape of self.array
-                inside_polygon_mask = np.array(inside_polygon).reshape(self.data[self.sample_id].array_size, order =  'C')
+                inside_polygon_mask = np.array(inside_polygon).reshape(self.data[self.app_data.sample_id].array_size, order =  'C')
                 inside_polygon = inside_polygon_mask.flatten('F')
                 # Update the polygon mask - include points that are inside this polygon
                 self.data[sample_id].polygon_mask &= inside_polygon
@@ -2461,14 +3129,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         update_plot : bool, optional
             If true, calls ``MainWindow.apply_filters`` which also calls ``MainWindow.update_SV``, by default True
         """
-        sample_id = self.sample_id
+        sample_id = self.app_data.sample_id
 
-        method = self.cluster_dict['active method']
-        selected_clusters = self.cluster_dict[method]['selected_clusters']
+        method = self.app_data.cluster_dict['active method']
+        selected_clusters = self.app_data.cluster_dict[method]['selected_clusters']
 
         # Invert list of selected clusters
         if not inverse:
-            selected_clusters = [cluster_idx for cluster_idx in range(self.cluster_dict[method]['n_clusters']) if cluster_idx not in selected_clusters]
+            selected_clusters = [cluster_idx for cluster_idx in range(self.app_data.cluster_dict[method]['n_clusters']) if cluster_idx not in selected_clusters]
 
         # create boolean array with selected_clusters == True
         cluster_group = self.data[sample_id].processed_data.loc[:,method]
@@ -2534,13 +3202,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 mouse_point = pos_view
                 x, y = mouse_point.x(), mouse_point.y()
 
-                x_i = round(x*array.shape[1]/self.data[self.sample_id].x_range)
-                y_i = round(y*array.shape[0]/self.data[self.sample_id].y_range)
+                x_i = round(x*array.shape[1]/self.data[self.app_data.sample_id].x_range)
+                y_i = round(y*array.shape[0]/self.data[self.app_data.sample_id].y_range)
 
                 # if hover within lasermap array
                 if 0 <= x_i < array.shape[1] and 0 <= y_i < array.shape[0] :
                     if not self.default_cursor and not self.actionCrop.isChecked():
-                        QApplication.setOverrideCursor(Qt.BlankCursor)
+                        QApplication.setOverrideCursor(Qt.CursorShape.BlankCursor)
                         self.default_cursor = True
                     any_plot_hovered = True
                     value = array[y_i, x_i]  # assuming self.array is numpy self.array
@@ -2589,8 +3257,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Convert the click position to plot coordinates
         self.array_x = array.shape[1]
         self.array_y = array.shape[0]
-        x_i = round(x*self.array_x/self.data[self.sample_id].x_range)
-        y_i = round(y*self.array_y/self.data[self.sample_id].y_range)
+        x_i = round(x*self.array_x/self.data[self.app_data.sample_id].x_range)
+        y_i = round(y*self.array_y/self.data[self.app_data.sample_id].y_range)
 
         # Ensure indices are within plot bounds
         if not(0 <= x_i < self.array_x) or not(0 <= y_i < self.array_y):
@@ -2676,8 +3344,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         x_pos = min(max(x + xOffset, 0), self.plot.viewRect().width() - self.zoomViewBox.width())
         y_pos = min(max(y + yOffset, 0), self.plot.viewRect().height() - self.zoomViewBox.height())
 
-        x_range = self.data[self.sample_id].x_range
-        y_range = self.data[self.sample_id].y_range
+        x_range = self.data[self.app_data.sample_id].x_range
+        y_range = self.data[self.app_data.sample_id].y_range
 
         # Update the position of the zoom view
         self.zoomViewBox.setGeometry(x_pos, y_pos, self.zoomViewBox.width(), self.zoomViewBox.height())
@@ -2726,31 +3394,29 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         plot_type : str
             The plot type helps to define the set of field types available, by default ``''`` (no change)
         """
-        if self.sample_id == '':
+        if self.app_data.sample_id == '':
             return
-
-        data_type_dict = self.data[self.sample_id].processed_data.get_attribute_dict('data_type')
 
         match plot_type.lower():
             case 'correlation' | 'histogram' | 'tec':
-                if 'cluster' in data_type_dict:
-                    field_list = ['cluster']
+                if 'cluster' in self.app_data.field_dict:
+                    field_list = ['Cluster']
                 else:
                     field_list = []
             case 'cluster score':
-                if 'cluster score' in data_type_dict:
-                    field_list = ['cluster score']
+                if 'cluster score' in self.app_data.field_dict:
+                    field_list = ['Cluster score']
                 else:
                     field_list = []
             case 'cluster':
-                if 'cluster' in data_type_dict:
-                    field_list = ['cluster']
+                if 'cluster' in self.app_data.field_dict:
+                    field_list = ['Cluster']
                 else:
-                    field_list = ['cluster score']
+                    field_list = ['Cluster score']
             case 'cluster performance':
                 field_list = []
             case 'pca score':
-                if 'pca score' in data_type_dict:
+                if 'pca score' in self.app_data.field_dict:
                     field_list = ['PCA score']
                 else:
                     field_list = []
@@ -2761,17 +3427,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 field_list = ['Analyte', 'Analyte (normalized)']
 
                 # add check for ratios
-                if 'ratio' in data_type_dict:
+                if 'ratio' in self.app_data.field_dict:
                     field_list.append('Ratio')
                     field_list.append('Ratio (normalized)')
 
-                if 'pca score' in data_type_dict:
+                if 'pca score' in self.app_data.field_dict:
                     field_list.append('PCA score')
 
-                if 'cluster' in data_type_dict:
+                if 'cluster' in self.app_data.field_dict:
                     field_list.append('Cluster')
 
-                if 'cluster score' in data_type_dict:
+                if 'cluster score' in self.app_data.field_dict:
                     field_list.append('Cluster score')
 
         self.plot_style.toggle_style_widgets()
@@ -2794,20 +3460,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """Updates comboBoxes with fields for plots or analysis
 
         Updates lists of fields in comboBoxes that are used to generate plots or used for analysis.
-        Calls ``MainWindow.get_field_list()`` to construct the list.
 
         Parameters
         ----------
         parentBox : QComboBox, None
-            ComboBox used to select field type ('Analyte', 'Analyte (normalized)', 'Ratio', etc.), if None, then 'Analyte'
+            ComboBox used to select field type
 
         childBox : QComboBox
             ComboBox with list of field values
         """
+
         if parentBox is None:
-            fields = self.get_field_list('Analyte')
+            fields = self.app_data.field_dict['analyte']
         else:
-            fields = self.get_field_list(set_name=parentBox.currentText())
+            if parentBox.currentText() == 'None':
+                childBox.clear()
+                return
+            field_type = parentBox.currentText()
+            if 'normalized' in field_type:
+                field_type = field_type.replace(' (normalized)','')
+            fields = self.app_data.field_dict[field_type.lower()]
 
         childBox.clear()
         childBox.addItems(fields)
@@ -2824,52 +3496,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # gets the set of fields
 
-    def get_field_list(self, set_name='Analyte', filter='all'):
-        """Gets the fields associated with a defined set
-
-        Set names are consistent with QComboBox.
-
-        Parameters
-        ----------
-        set_name : str, optional
-            name of set list, options include ``Analyte``, ``Analyte (normalized)``, ``Ratio``, ``Calcualated Field``,
-            ``PCA Score``, ``Cluster``, ``Cluster Score``, ``Special``, Defaults to ``Analyte``
-        filter : str, optional
-            Optionally filters data to columns selected for analysis, options are ``'all'`` and ``'used'``,
-            by default `'all'`
-
-        Returns
-        -------
-        list
-            Set_fields, a list of fields within the input set
-        """
-        if self.sample_id == '':
-            return ['']
-
-        data = self.data[self.sample_id].processed_data
-
-        if filter not in ['all', 'used']:
-            raise ValueError("filter must be 'all' or 'used'.")
-
-        match set_name:
-            case 'Analyte' | 'Analyte (normalized)':
-                if filter == 'used':
-                    set_fields = data.match_attributes({'data_type': 'analyte', 'use': True})
-                else:
-                    set_fields = data.match_attribute('data_type', 'analyte')
-            case 'Ratio' | 'Ratio (normalized)':
-                if filter == 'used':
-                    set_fields = data.match_attributes({'data_type': 'ratio', 'use': True})
-                else:
-                    set_fields = data.match_attribute('data_type', 'ratio')
-            case 'None':
-                return []
-            case _:
-                set_fields = data.match_attribute('data_type', set_name.lower())
-
-        return set_fields    
-
-
     # -------------------------------------
     # General plot functions
     # -------------------------------------
@@ -2881,18 +3507,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         save : bool, optional
             save plot to plot selector, Defaults to False.
         """
-        if DEBUG:
+        if self.logger_options['Plotting']:
             print(f"update_SV\n  plot_type: {plot_type}\n  field_type: {field_type}\n  field: {field}")
 
-        if self.sample_id == '' or not self.plot_type:
+        if self.app_data.sample_id == '' or not self.plot_style.plot_type:
             return
 
         if not plot_type:
-            plot_type = self.plot_type
+            plot_type = self.plot_style.plot_type
         
         match plot_type:
             case 'analyte map':
-                sample_id = self.sample_id
+                sample_id = self.app_data.sample_id
                 if not field_type:
                     field_type = self.field_type
                 
@@ -2905,14 +3531,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 if (hasattr(self, "mask_dock") and self.mask_dock.polygon_tab.polygon_toggle.isChecked()) or (hasattr(self, "profile_dock") and self.profile_dock.profile_toggle.isChecked()):
                     self.plot_map_pg(sample_id, field_type, field)
                     # show created profiles if exists
-                    if (hasattr(self, "profile_dock") and self.profile_dock.profile_toggle.isChecked()) and (self.sample_id in self.profile_dock.profiling.profiles):
+                    if (hasattr(self, "profile_dock") and self.profile_dock.profile_toggle.isChecked()) and (self.app_data.sample_id in self.profile_dock.profiling.profiles):
                         self.profile_dock.profiling.clear_plot()
                         self.profile_dock.profiling.plot_existing_profile(self.plot)
-                    elif (hasattr(self, "mask_dock") and self.mask_dock.polygon_tab.polygon_toggle.isChecked()) and (self.sample_id in self.polygon.polygons):  
+                    elif (hasattr(self, "mask_dock") and self.mask_dock.polygon_tab.polygon_toggle.isChecked()) and (self.app_data.sample_id in self.polygon.polygons):  
                         self.polygon.clear_plot()
                         self.polygon.plot_existing_polygon(self.plot)
                 else:
-                    self.plot_map_mpl(sample_id, field_type, field)
+                    if self.toolBox.currentIndex() == self.left_tab['process']:
+                        canvas, plot_info = plot_map_mpl(self, self.data[self.app_data.sample_id], self.app_data, self.plot_style, field_type, field, add_histogram=True)
+                    else:
+                        canvas, plot_info = plot_map_mpl(self, self.data[self.app_data.sample_id], self.app_data, self.plot_style, field_type, field, add_histogram=False)
+
+                    self.add_plotwidget_to_canvas(plot_info)
+                    self.plot_tree.add_tree_item(plot_info)
                 
                 #update UI with auto scale and neg handling parameters from 'Analyte/Ratio Info'
                 self.update_spinboxes(field, field_type)
@@ -2925,18 +3557,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             case 'correlation':
                 if self.comboBoxCorrelationMethod.currentText() == 'none':
                     return
-                self.plot_correlation()
+                canvas, self.plot_info = plot_correlation(self, self.data[self.app_data.sample_id], self.app_data, self.plot_style)
+
 
             case 'TEC' | 'Radar':
                 self.plot_ndim()
 
             case 'histogram':
-                self.plot_histogram()
+                canvas, self.plot_info = plot_histogram(self, self.data[self.app_data.sample_id], self.app_data, self.plot_style)
+
 
             case 'scatter' | 'heatmap':
                 if self.comboBoxFieldX.currentText() == self.comboBoxFieldY.currentText():
                     return
-                self.plot_scatter()
+                canvas, self.plot_info = plot_scatter(self, data, self.app_data, self.plot_style)
+
 
             case 'variance' | 'vectors' | 'PCA scatter' | 'PCA heatmap' | 'PCA score':
                 self.plot_pca()
@@ -2946,6 +3581,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             
             case 'cluster performance':
                 self.cluster_performance_plot()
+
+        self.clear_layout(self.widgetSingleView.layout())
+        self.widgetSingleView.layout().addWidget(canvas)
 
         if hasattr(self,"info_dock"):
             self.info_dock.plot_info_tab.update_plot_info_tab(self.plot_info)
@@ -3004,9 +3642,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.update_canvas(self.sv_widget)
             self.sv_widget.show()
 
-            if (self.plot_type == 'analyte map') and (self.toolBox.currentIndex() == self.left_tab['sample']):
-                current_map_df = self.data[self.sample_id].get_map_data(plot_info['plot_name'], plot_info['field_type'], norm=self.plot_style.cscale)
-                self.plot_small_histogram(current_map_df)
+            if (self.plot_style.plot_type == 'analyte map') and (self.toolBox.currentIndex() == self.left_tab['sample']):
+                current_map_df = self.data[self.app_data.sample_id].get_map_data(plot_info['plot_name'], plot_info['field_type'], norm=self.plot_style.cscale)
+                plot_small_histogram(self, self.data[self.app_data.sample_id], self.app_data, self.plot_style, current_map_df)
         # add figure to MultiView canvas
         elif self.canvasWindow.currentIndex() == self.canvas_tab['mv']:
             #print('add_plotwidget_to_canvas: MV')
@@ -3145,7 +3783,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return
 
         # add plot to dictionary for tree
-        #self.plot_widget_dict[self.plot_info['tree']][self.sample_id][self.plot_info['plot_name']] = {'info':self.plot_info, 'view':view, 'position':None}
+        #self.plot_widget_dict[self.plot_info['tree']][self.app_data.sample_id][self.plot_info['plot_name']] = {'info':self.plot_info, 'view':view, 'position':None}
 
         # updates tree with new plot name
         self.plot_tree.add_tree_item(self.plot_info)
@@ -3214,7 +3852,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Adds plots of predefined analytes to the Quick View tab in a grid layout."""
         self.canvasWindow.setCurrentIndex(self.canvas_tab['qv'])
-        if self.sample_id == '':
+        if self.app_data.sample_id == '':
             return
 
         key = self.comboBoxQVList.currentText()
@@ -3225,7 +3863,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ncol = int(np.sqrt(len(self.QV_analyte_list[key])*ratio))
 
         # fields in current sample
-        fields = self.get_field_list()
+        fields = self.app_data.field_dict['analyte']
 
         # clear the quickView layout
         self.clear_layout(self.widgetQuickView.layout())
@@ -3242,15 +3880,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             row = i // ncol
 
             # get data for current analyte
-            current_plot_df = self.data[self.sample_id].get_map_data(analyte, 'Analyte')
-            reshaped_array = np.reshape(current_plot_df['array'].values, self.data[self.sample_id].array_size, order=self.data[self.sample_id].order)
+            current_plot_df = self.data[self.app_data.sample_id].get_map_data(analyte, 'Analyte')
+            reshaped_array = np.reshape(current_plot_df['array'].values, self.data[self.app_data.sample_id].array_size, order=self.data[self.app_data.sample_id].order)
 
             # add image to canvas
             cmap = self.plot_style.get_colormap()
-            cax = canvas.axes.imshow(reshaped_array, cmap=cmap,  aspect=self.data[self.sample_id].aspect_ratio, interpolation='none')
+            cax = canvas.axes.imshow(reshaped_array, cmap=cmap,  aspect=self.data[self.app_data.sample_id].aspect_ratio, interpolation='none')
             font = {'family': 'sans-serif', 'stretch': 'condensed', 'size': 8, 'weight': 'semibold'}
-            canvas.axes.text( 0.025*self.data[self.sample_id].array_size[0],
-                    0.1*self.data[self.sample_id].array_size[1],
+            canvas.axes.text( 0.025*self.data[self.app_data.sample_id].array_size[0],
+                    0.1*self.data[self.app_data.sample_id].array_size[1],
                     analyte,
                     fontdict=font,
                     color=self.plot_style.overlay_color,
@@ -3384,7 +4022,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             # since the canvas is moved to the dialog, the figure needs to be recreated in the main window
             # trigger update to plot        
-            self.plot_style.scheduler.schedule_update()
+            self.plot_style.schedule_update()
 
         if function == 'save':
             if isinstance(canvas,mplc.MplCanvas):
@@ -3393,7 +4031,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 # Save functionality for pyqtgraph
                 export = exportDialog.ExportDialog(canvas.getItem(0, 0).scene())
                 export.show(canvas.getItem(0, 0).getViewBox())
-                export.exec_()
+                export.exec()
                 
     def save_plot(self, action):
         """Sorts analyte table in dialog"""        
@@ -3418,14 +4056,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     case 'analyte map':
                         field_type = self.plot_info['field_type']
                         field = self.plot_info['field']
-                        save_data = self.data[self.sample_id].get_map_data(field, field_type)
+                        save_data = self.data[self.app_data.sample_id].get_map_data(field, field_type)
                     case 'gradient map':
                         field_type = self.plot_info['field_type']
                         field = self.plot_info['field']
-                        save_data = self.data[self.sample_id].get_map_data(field, field_type)
+                        save_data = self.data[self.app_data.sample_id].get_map_data(field, field_type)
                         filtered_image = self.noise_red_array
                     case 'cluster':
-                        save_data= self.data[self.sample_id].processed_data[field]
+                        save_data= self.data[self.app_data.sample_id].processed_data[field]
                     case _:
                         save_data = self.plot_info['data']
                     
@@ -3440,33 +4078,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 
 
 
-    def add_scalebar(self, ax):
-        """Add a scalebar to a map
-
-        Parameters
-        ----------
-        ax : 
-            Axes to place scalebar on.
-        """        
-        # add scalebar
-        direction = self.plot_style.scale_dir
-        length = self.plot_style.scale_length
-        if (length is not None) and (direction != 'none'):
-            if direction == 'horizontal':
-                dd = self.data[self.sample_id].dx
-            else:
-                dd = self.data[self.sample_id].dy
-            sb = scalebar( width=length,
-                    pixel_width=dd,
-                    units=self.preferences['Units']['Distance'],
-                    location=self.plot_style.scale_location,
-                    orientation=direction,
-                    color=self.plot_style.overlay_color,
-                    ax=ax )
-
-            sb.create()
-        else:
-            return
 
     def add_colorbar(self, canvas, cax, cbartype='continuous', grouplabels=None, groupcolors=None):
         """Adds a colorbar to a MPL figure
@@ -3522,7 +4133,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # continuous colormap - plot with colorbar
         else:
             if self.plot_style.cbar_dir == 'vertical':
-                if self.plot_type == 'correlation':
+                if self.plot_style.plot_type == 'correlation':
                     loc = 'left'
                 else:
                     loc = 'right'
@@ -3579,9 +4190,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         numpy.ndarray
             An rgba array
         """
-        mask = self.data[self.sample_id].mask
+        mask = self.data[self.app_data.sample_id].mask
 
-        array = np.reshape(map_df['array'].values, self.data[self.sample_id].array_size, order=self.data[self.sample_id].order)
+        array = np.reshape(map_df['array'].values, self.data[self.app_data.sample_id].array_size, order=self.data[self.app_data.sample_id].order)
 
         # Step 1: Normalize your data array for colormap application
         norm = colors.Normalize(vmin=np.nanmin(array), vmax=np.nanmax(array))
@@ -3591,132 +4202,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         rgb_array = cmap(norm(array))[:, :, :3]  # Drop the alpha channel returned by cmap
         rgb_array = (rgb_array * 255).astype(np.uint8)
 
-        # Step 3: Create an RGBA array where the alpha channel is based on self.data[self.sample_id].mask
+        # Step 3: Create an RGBA array where the alpha channel is based on self.data[self.app_data.sample_id].mask
         rgba_array = np.zeros((*rgb_array.shape[:2], 4), dtype=np.uint8)
         rgba_array[:, :, :3] = rgb_array  # Set RGB channels
-        mask_r = np.reshape(mask, self.data[self.sample_id].array_size, order=self.data[self.sample_id].order)
+        mask_r = np.reshape(mask, self.data[self.app_data.sample_id].array_size, order=self.data[self.app_data.sample_id].order)
 
-        rgba_array[:, :, 3] = np.where(mask_r, 255, 100)  # Set alpha channel based on self.data[self.sample_id].mask
+        rgba_array[:, :, 3] = np.where(mask_r, 255, 100)  # Set alpha channel based on self.data[self.app_data.sample_id].mask
 
         return array, rgba_array
 
-    def plot_map_mpl(self, sample_id, field_type, field):
-        """Create a matplotlib canvas for plotting a map
-
-        Create a map using ``mplc.MplCanvas``.
-
-        Parameters
-        ----------
-        sample_id : str
-            Sample identifier
-        field_type : str
-            Type of field for plotting
-        field : str
-            Field for plotting
-        """        
-        # create plot canvas
-        canvas = mplc.MplCanvas(parent=self)
-
-        # set color limits
-        if field not in self.data[self.sample_id].axis_dict:
-            self.plot_style.initialize_axis_values(field_type,field)
-            self.plot_style.set_style_widgets()
-
-        # get data for current map
-        #scale = self.data[self.sample_id].processed_data.get_attribute(field, 'norm')
-        scale = self.plot_style.cscale
-        map_df = self.data[self.sample_id].get_map_data(field, field_type)
-
-        array_size = self.data[self.sample_id].array_size
-        aspect_ratio = self.data[self.sample_id].aspect_ratio
-
-        # store map_df to save_data if data needs to be exported
-        self.save_data = map_df.copy()
-
-        # equalized color bins to CDF function
-        if self.toolButtonScaleEqualize.isChecked():
-            sorted_data = map_df['array'].sort_values()
-            cum_sum = sorted_data.cumsum()
-            cdf = cum_sum / cum_sum.iloc[-1]
-            map_df.loc[sorted_data.index, 'array'] = cdf.values
-
-        # plot map
-        reshaped_array = np.reshape(map_df['array'].values, array_size, order=self.data[self.sample_id].order)
-            
-        norm = self.plot_style.color_norm()
-
-        cax = canvas.axes.imshow(reshaped_array,
-                                cmap=self.plot_style.get_colormap(),
-                                aspect=aspect_ratio, interpolation='none',
-                                norm=norm)
-        
-        
-
-        self.add_colorbar(canvas, cax)
-        match self.plot_style.cscale:
-            case 'linear':
-                clim = self.plot_style.clim
-            case 'log':
-                clim = self.plot_style.clim
-                #clim = np.log10(self.plot_style.clim)
-            case 'logit':
-                print('Color limits for logit are not currently implemented')
-
-        cax.set_clim(clim[0], clim[1])
-
-        # use mask to create an alpha layer
-        mask = self.data[self.sample_id].mask.astype(float)
-        reshaped_mask = np.reshape(mask, array_size, order=self.data[self.sample_id].order)
-
-        alphas = colors.Normalize(0, 1, clip=False)(reshaped_mask)
-        alphas = np.clip(alphas, .4, 1)
-
-        alpha_mask = np.where(reshaped_mask == 0, 0.5, 0)  
-        canvas.axes.imshow(np.ones_like(alpha_mask), aspect=aspect_ratio, interpolation='none', cmap='Greys', alpha=alpha_mask)
-        canvas.array = reshaped_array
-
-        canvas.axes.tick_params(direction=None,
-            labelbottom=False, labeltop=False, labelright=False, labelleft=False,
-            bottom=False, top=False, left=False, right=False)
-
-        canvas.set_initial_extent()
-        
-        # axes
-        #xmin, xmax, xscale, xlbl = self.plot_style.get_axis_values(None,field= 'X')
-        #ymin, ymax, yscale, ylbl = self.plot_style.get_axis_values(None,field= 'Y')
-
-
-        # axes limits
-        #canvas.axes.set_xlim(xmin,xmax)
-        #canvas.axes.set_ylim(ymin,ymax)
-
-        # add scalebar
-        self.add_scalebar(canvas.axes)
-
-        canvas.fig.tight_layout()
-
-        # add small histogram
-        if (self.toolBox.currentIndex() == self.left_tab['sample']) and (self.canvasWindow.currentIndex() == self.canvas_tab['sv']):
-            self.plot_small_histogram(map_df)
-
-        self.plot_info = {
-            'tree': field_type,
-            'sample_id': sample_id,
-            'plot_name': field,
-            'plot_type': 'analyte map',
-            'field_type': field_type,
-            'field': field,
-            'figure': canvas,
-            'style': self.plot_style.style_dict[self.plot_style.plot_type],
-            'cluster_groups': None,
-            'view': [True,False],
-            'position': None
-            }
-        
-        self.add_plotwidget_to_canvas(self.plot_info)
-        # self.widgetSingleView.layout().addWidget(canvas)
-
-        self.plot_tree.add_tree_item(self.plot_info)
 
     def plot_map_pg(self, sample_id, field_type, field):
         """Create a graphic widget for plotting a map
@@ -3738,7 +4232,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # get data for current map
         scale = self.plot_style.cscale
-        map_df = self.data[self.sample_id].get_map_data(field, field_type, norm=scale)
+        map_df = self.data[self.app_data.sample_id].get_map_data(field, field_type, norm=scale)
 
         # store map_df to save_data if data needs to be exported
         self.save_data = map_df
@@ -3773,10 +4267,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         img_item = ImageItem(image=self.array, antialias=False)
 
         #set aspect ratio of rectangle
-        img_item.setRect(self.data[self.sample_id].x.min(),
-                self.data[self.sample_id].y.min(),
-                self.data[self.sample_id].x_range,
-                self.data[self.sample_id].y_range)
+        img_item.setRect(self.data[self.app_data.sample_id].x.min(),
+                self.data[self.app_data.sample_id].y.min(),
+                self.data[self.app_data.sample_id].x_range,
+                self.data[self.app_data.sample_id].y_range)
 
         #--- add non-interactive image with integrated color ------------------
         plotWindow = graphicWidget.addPlot(0,0,title=field.replace('_',' '))
@@ -3792,7 +4286,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ## These cut off parts of the map when plotting.
         #plotWindow.setRange(yRange=[self.y.min(), self.y.max()])
         #plotWindow.setLimits(xMin=self.x.min(), xMax=self.x.max(), yMin=self.y.min(), yMax = self.y.max())
-        #plotWindow.setLimits(maxXRange=self.data[self.sample_id].x_range, maxYRange=self.data[self.sample_id].y_range)
+        #plotWindow.setLimits(maxXRange=self.data[self.app_data.sample_id].x_range, maxYRange=self.data[self.app_data.sample_id].y_range)
 
         #supress right click menu
         plotWindow.setMenuEnabled(False)
@@ -3896,7 +4390,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # add small histogram
         if (self.toolBox.currentIndex() == self.left_tab['sample']) and (view == self.canvas_tab['sv']):
-            self.plot_small_histogram(map_df)
+            plot_small_histogram(self, self.data[self.app_data.sample_id], self.app_data, self.plot_style, map_df)
 
 
     # -------------------------------------
@@ -3904,11 +4398,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     # -------------------------------------
     def correlation_method_callback(self):
         """Updates colorbar label for correlation plots"""
-        method = self.comboBoxCorrelationMethod.currentText()
+        method = self.app_data.corr_method
         if self.plot_style.clabel == method:
             return
 
-        if self.checkBoxCorrelationSquared.isChecked():
+        if self.app_data.corr_squared:
             power = '^2'
         else:
             power = ''
@@ -3922,12 +4416,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             case 'Kendall':
                 self.plot_style.clabel = method + "'s $\\tau" + power + "$"
 
-        if self.plot_type != 'correlation':
-            self.comboBoxPlotType.setCurrentText('correlation')
+        if self.plot_style.plot_type != 'correlation':
             self.plot_style.set_style_widgets('correlation')
 
         # trigger update to plot
-        self.plot_style.scheduler.schedule_update()
+        self.plot_style.schedule_update()
 
     def correlation_squared_callback(self):
         """Produces a plot of the squared correlation."""        
@@ -3948,138 +4441,44 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.correlation_method_callback()
 
         # trigger update to plot
-        self.plot_style.scheduler.schedule_update()
+        self.plot_style.schedule_update()
 
-    def plot_correlation(self):
-        """Creates an image of the correlation matrix"""
-        #print('plot_correlation')
-
-        canvas = mplc.MplCanvas(parent=self)
-        canvas.axes.clear()
-
-        # get the data for computing correlations
-        df_filtered, analytes = self.data[self.sample_id].get_processed_data()
-
-        # Calculate the correlation matrix
-        method = self.comboBoxCorrelationMethod.currentText().lower()
-        if self.field_type.lower() == 'none':
-            correlation_matrix = df_filtered.corr(method=method)
-        else:
-            algorithm = self.field
-            cluster_group = self.data[self.sample_id].processed_data.loc[:,algorithm]
-            selected_clusters = self.cluster_dict[algorithm]['selected_clusters']
-
-            ind = np.isin(cluster_group, selected_clusters)
-
-            correlation_matrix = df_filtered[ind].corr(method=method)
-        
-        columns = correlation_matrix.columns
-
-        font = {'size':self.plot_style.font_size}
-
-        # mask lower triangular matrix to show only upper triangle
-        mask = np.zeros_like(correlation_matrix, dtype=bool)
-        mask[np.tril_indices_from(mask)] = True
-        correlation_matrix = np.ma.masked_where(mask, correlation_matrix)
-
-        norm = self.plot_style.color_norm()
-
-        # plot correlation or correlation^2
-        square_flag = self.checkBoxCorrelationSquared.isChecked()
-        if square_flag:
-            cax = canvas.axes.imshow(correlation_matrix**2, cmap=self.plot_style.get_colormap(), norm=norm)
-            canvas.array = correlation_matrix**2
-        else:
-            cax = canvas.axes.imshow(correlation_matrix, cmap=self.plot_style.get_colormap(), norm=norm)
-            canvas.array = correlation_matrix
-            
-        # store correlation_matrix to save_data if data needs to be exported
-        self.save_data = canvas.array
-
-        canvas.axes.spines['top'].set_visible(False)
-        canvas.axes.spines['bottom'].set_visible(False)
-        canvas.axes.spines['left'].set_visible(False)
-        canvas.axes.spines['right'].set_visible(False)
-
-        # Add colorbar to the plot
-        self.add_colorbar(canvas, cax)
-
-        # set color limits
-        cax.set_clim(self.plot_style.clim[0], self.plot_style.clim[1])
-
-        # Set tick labels
-        ticks = np.arange(len(columns))
-        canvas.axes.tick_params(length=0, labelsize=8,
-                        labelbottom=False, labeltop=True, labelleft=False, labelright=True,
-                        bottom=False, top=True, left=False, right=True)
-
-        canvas.axes.set_yticks(ticks, minor=False)
-        canvas.axes.set_xticks(ticks, minor=False)
-
-        labels = self.plot_style.toggle_mass(columns)
-
-        canvas.axes.set_xticklabels(labels, rotation=90, ha='center', va='bottom', fontproperties=font)
-        canvas.axes.set_yticklabels(labels, ha='left', va='center', fontproperties=font)
-
-        canvas.axes.set_title('')
-
-        self.plot_style.update_figure_font(canvas, self.plot_style.font)
-
-        if square_flag:
-            plot_name = method+'_squared'
-        else:
-            plot_name = method
-
-        self.plot_info = {
-            'tree': 'Correlation',
-            'sample_id': self.sample_id,
-            'plot_name': plot_name,
-            'plot_type': 'correlation',
-            'method': method,
-            'square_flag': square_flag,
-            'field_type': None,
-            'field': None,
-            'figure': canvas,
-            'style': self.plot_style.style_dict[self.plot_style.plot_type],
-            'cluster_groups': [],
-            'view': [True,False],
-            'position': [],
-            'data': correlation_matrix,
-        }
-
-        self.clear_layout(self.widgetSingleView.layout())
-        self.widgetSingleView.layout().addWidget(canvas)
 
 
     # -------------------------------------
     # Histogram functions and plotting
     # -------------------------------------
-    def histogram_field_type_callback(self):
+    def update_histogram_field_type(self):
         """"Executes when the histogram field type is changed"""
+        self.app_data.hist_field_type = self.comboBoxHistFieldType.currentText()
         self.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
-        #if self.plot_type != 'histogram':
+        #if self.plot_style.plot_type != 'histogram':
         #    self.comboBoxPlotType.setCurrentText('histogram')
-        if self.plot_type == 'analyte map':
+        if self.plot_style.plot_type == 'analyte map':
             self.plot_style.color_field_type = self.comboBoxHistFieldType.currentText()
 
         self.histogram_update_bin_width()
 
         self.spinBoxFieldIndex.setMaximum(self.comboBoxHistField.count())
 
-        self.plot_style.scheduler.schedule_update()
+        self.plot_style.schedule_update()
 
-    def histogram_field_callback(self):
+    def update_histogram_field(self):
         """Executes when the histogram field is changed"""
-        #if self.plot_type != 'histogram':
+        #if self.plot_style.plot_type != 'histogram':
         #    self.comboBoxPlotType.setCurrentText('histogram')
-        if self.plot_type == 'analyte map':
-            self.plot_style.color_field = self.comboBoxHistField.currentText()
+        self.app_data.hist_field = self.comboBoxHistField.currentText()
+
+        if self.plot_style.plot_type == 'analyte map':
+            self.plot_style.color_field = self.app_data.hist_field
         self.spinBoxFieldIndex.setValue(self.comboBoxHistField.currentIndex())
-        self.histogram_update_bin_width()
 
-        self.plot_style.scheduler.schedule_update()
+        self.update_histogram_bin_width()
 
-    def histogram_update_bin_width(self):
+        if self.plot_style.plot_type in ['analyte map', 'histogram']:
+            self.plot_style.schedule_update()
+
+    def update_histogram_num_bins(self):
         """Updates the bin width
 
         Generally called when the number of bins is changed by the user.  Updates the plot.
@@ -4093,22 +4492,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #print('histogram_update_bin_width')
         self.update_bins = False
 
+        # update app_data.histogram_num_bins
+        self.app_data.hist_num_bins = self.spinBoxNBins.value()
+
         # get currently selected data
-        current_plot_df = self.data[self.sample_id].get_map_data(self.comboBoxHistField.currentText(), self.comboBoxHistFieldType.currentText())
+        current_plot_df = self.data[self.app_data.sample_id].get_map_data(self.comboBoxHistField.currentText(), self.comboBoxHistFieldType.currentText())
 
         # update bin width
         range = (np.nanmax(current_plot_df['array']) - np.nanmin(current_plot_df['array']))
-        self.spinBoxBinWidth.setMinimum(int(range / self.spinBoxNBins.maximum()))
-        self.spinBoxBinWidth.setMaximum(int(range / self.spinBoxNBins.minimum()))
-        self.spinBoxBinWidth.setValue( int(range / self.spinBoxNBins.value()) )
+        self.doubleSpinBoxBinWidth.setMinimum(int(range / self.spinBoxNBins.maximum()))
+        self.doubleSpinBoxBinWidth.setMaximum(int(range / self.spinBoxNBins.minimum()))
+        self.doubleSpinBoxBinWidth.setValue( int(range / self.spinBoxNBins.value()) )
         self.update_bins = True
 
         # update histogram
-        if self.plot_type == 'histogram':
+        if self.plot_style.plot_type == 'histogram':
             # trigger update to plot
-            self.plot_style.scheduler.schedule_update()
+            self.plot_style.schedule_update()
 
-    def histogram_update_n_bins(self):
+    def update_histogram_bin_width(self):
         """Updates the number of bins
 
         Generally called when the bin width is changed by the user.  Updates the plot.
@@ -4117,878 +4519,27 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return
         #print('update_n_bins')
         self.update_bins = False
+        self.app_data.hist_bin_width = self.doubleSpinBoxBinWidth.value()
         try:
             # get currently selected data
-            map_df = self.data[self.sample_id].get_map_data(self.comboBoxHistField.currentText(), self.comboBoxHistFieldType.currentText())
+            map_df = self.data[self.app_data.sample_id].get_map_data(self.comboBoxHistField.currentText(), self.comboBoxHistFieldType.currentText())
 
             # update n bins
-            self.spinBoxNBins.setValue( int((np.nanmax(map_df['array']) - np.nanmin(map_df['array'])) / self.spinBoxBinWidth.value()) )
+            self.spinBoxNBins.setValue( int((np.nanmax(map_df['array']) - np.nanmin(map_df['array'])) / self.doubleSpinBoxBinWidth.value()) )
             self.update_bins = True
         except:
             self.update_bins = True
             return
 
         # update histogram
-        if self.plot_type == 'histogram':
+        if self.plot_style.plot_type == 'histogram':
             # trigger update to plot
-            self.plot_style.scheduler.schedule_update()
+            self.plot_style.schedule_update()
 
-    def histogram_reset_bins(self):
-        """Resets number of histogram bins to default
-
-        Resets ``MainWindow.spinBoxNBins.value()`` to default number of bins.  Updates bin width
-        ``MainWindow.spinBoxBinWidth.value()`` if an analysis and field are selected
-        """
-        # update number of bins (should automatically trigger update of histogram bin widths)
-        self.spinBoxNBins.setValue(self.default_bins)
-
-        # update bin width
-        #self.histogram_update_bin_width()
-
-        if self.plot_type == 'histogram':
-            # trigger update to plot
-            self.plot_style.scheduler.schedule_update()
-
-    def plot_small_histogram(self, current_plot_df):
-        """Creates a small histogram on the Samples and Fields tab associated with the selected map
-
-        Parameters
-        ----------
-        current_plot_df : dict
-            Current data for plotting
-        field : str
-            Name of field to plot
-        """
-        #print('plot_small_histogram')
-        # create Mpl canvas
-        canvas = mplc.SimpleMplCanvas()
-        #canvas.axes.clear()
-
-
-        # Histogram
-        #remove by mask and drop rows with na
-        mask = self.data[self.sample_id].mask
-        if self.plot_style.cscale == 'log' or 'logit':
-            mask = mask & current_plot_df['array'].notna() & (current_plot_df['array'] > 0)
-        else:
-            mask = mask & current_plot_df['array'].notna()
-
-        array = current_plot_df['array'][mask].values
-
-        logflag = False
-        # check the analyte map cscale, the histogram needs to be the same
-        if self.plot_style.cscale == 'log':
-            print('log scale')
-            logflag = True
-            if any(array <= 0):
-                print(f"Warning issues with values <= 0, (-): {sum(array < 0)}, (0): {sum(array == 0)}")
-                return
-
-        bin_width = (np.nanmax(array) - np.nanmin(array)) / self.default_bins
-        edges = np.arange(np.nanmin(array), np.nanmax(array) + bin_width, bin_width)
-
-        if sum(mask) != len(mask):
-            canvas.axes.hist( 
-                current_plot_df['array'], 
-                bins=edges, 
-                density=True, 
-                color='#b3b3b3', 
-                edgecolor=None, 
-                linewidth=self.plot_style.line_width, 
-                log=logflag, 
-                alpha=0.6, 
-                label='unmasked' )
-
-        _, _, patches = canvas.axes.hist(array,
-                bins=edges,
-                density=True,
-                color=self.plot_style.marker_color,
-                edgecolor=None,
-                linewidth=self.plot_style.line_width,
-                log=logflag,
-                alpha=0.6 )
-
-        # color histogram bins by analyte colormap?
-        if self.checkBoxShowHistCmap.isChecked():
-            cmap = self.plot_style.get_colormap()
-            for j, p in enumerate(patches):
-                p.set_facecolor(cmap(j / len(patches)))
-
-        # Turn off axis box
-        canvas.axes.spines['top'].set_visible(False)
-        canvas.axes.spines['bottom'].set_visible(True)
-        canvas.axes.spines['left'].set_visible(False)
-        canvas.axes.spines['right'].set_visible(False)
-
-        # Set ticks and labels labels
-        canvas.axes.tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
-        canvas.axes.tick_params(axis='x', which='both', bottom=True, top=False, labelbottom=True, labelsize=8)
-        canvas.axes.set_xlabel(self.plot_style.clabel, fontdict={'size':8})
-
-        # Size the histogram in the widget
-        canvas.axes.margins(x=0)
-        pos = canvas.axes.get_position()
-        canvas.axes.set_position((pos.x0/2, 3*pos.y0, pos.width+pos.x0, pos.height-1.5*pos.y0))
-
-        self.clear_layout(self.widgetHistView.layout())
-        self.widgetHistView.layout().addWidget(canvas)
 
         #self.widgetHistView.hide()
         #self.widgetHistView.show()
 
-    def plot_histogram(self):
-        """Plots a histogramn in the canvas window"""
-        
-        plot_data = None
-        #print('plot histogram')
-        # create Mpl canvas
-        canvas = mplc.MplCanvas(parent=self)
-
-        nbins = int(self.spinBoxNBins.value())
-
-        analysis = self.comboBoxHistFieldType.currentText()
-        field = self.comboBoxHistField.currentText()
-        #if analysis == 'Ratio':
-        #    analyte_1 = field.split(' / ')[0]
-        #    analyte_2 = field.split(' / ')[1]
-
-        if self.comboBoxHistType.currentText() == 'log-scaling' and self.comboBoxHistFieldType.currentText() == 'Analyte':
-            print('raw_data for log-scaling')
-            x = self.get_scatter_data('histogram', processed=False)['x']
-        else:
-            print('processed_data for histogram')
-            x = self.get_scatter_data('histogram', processed=True)['x']
-
-        # determine edges
-        xmin,xmax,xscale,xlbl = self.plot_style.get_axis_values(x['type'],x['field'])
-        self.plot_style.xlim = [xmin, xmax]
-        self.plot_style.xscale = xscale
-        #if xscale == 'log':
-        #    x['array'] = np.log10(x['array'])
-        #    xmin = np.log10(xmin)
-        #    xmax = np.log10(xmax)
-
-        #bin_width = (xmax - xmin) / nbins
-        #print(nbins)
-        #print(bin_width)
-        
-        if (xscale == 'linear') or (xscale == 'scientific'):
-            edges = np.linspace(xmin, xmax, nbins)
-        else:
-            edges = np.linspace(10**xmin, 10**xmax, nbins)
-
-        #print(edges)
-
-        # histogram style
-        lw = self.plot_style.line_width
-        if lw > 0:
-            htype = 'step'
-        else:
-            htype = 'bar'
-
-        # CDF or PDF
-        match self.comboBoxHistType.currentText():
-            case 'CDF':
-                cumflag = True
-            case _:
-                cumflag = False
-
-        # Check if the algorithm is in the current group and if results are available
-        if self.field_type == 'cluster' and self.field != '':
-            method = self.cluster_dict['active method']
-
-            # Get the cluster labels for the data
-            cluster_color, cluster_label, _ = self.plot_style.get_cluster_colormap(self.cluster_dict[method],alpha=self.plot_style.marker_alpha)
-            cluster_group = self.data[self.sample_id].processed_data.loc[:,method]
-            clusters = self.cluster_dict[method]['selected_clusters']
-
-            # Plot histogram for all clusters
-            for i in clusters:
-                cluster_data = x['array'][cluster_group == i]
-
-                bar_color = cluster_color[int(i)]
-                if htype == 'step':
-                    ecolor = bar_color
-                else:
-                    ecolor = None
-
-                if self.comboBoxHistType.currentText() != 'log-scaling' :
-                    plot_data = canvas.axes.hist( cluster_data,
-                            cumulative=cumflag,
-                            histtype=htype,
-                            bins=edges,
-                            color=bar_color, edgecolor=ecolor,
-                            linewidth=lw,
-                            label=cluster_label[int(i)],
-                            alpha=self.plot_style.marker_alpha/100,
-                            density=True
-                        )
-                else:
-                    # Filter out NaN and zero values
-                    filtered_data = cluster_data[~np.isnan(cluster_data) & (cluster_data > 0)]
-
-                    # Sort the data in ascending order
-                    sorted_data = np.sort(filtered_data)
-
-                    # Calculate log(number of values > x)
-                    log_values = np.log10(sorted_data)
-                    log_counts = np.log10(len(sorted_data) - np.arange(len(sorted_data)))
-
-                    # Plot the data
-                    canvas.axes.plot(log_values, log_counts, label=cluster_label[int(i)], color=bar_color, lw=lw)
-
-            # Add a legend
-            self.add_colorbar(canvas, None, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color, alpha=self.plot_style.marker_alpha/100)
-            #canvas.axes.legend()
-        else:
-            clusters = None
-            # Regular histogram
-            bar_color = self.plot_style.marker_color
-            if htype == 'step':
-                ecolor = self.plot_style.line_color
-            else:
-                ecolor = None
-
-            if self.comboBoxHistType.currentText() != 'log-scaling' :
-                plot_data = canvas.axes.hist( x['array'],
-                        cumulative=cumflag,
-                        histtype=htype,
-                        bins=edges,
-                        color=bar_color, edgecolor=ecolor,
-                        linewidth=lw,
-                        alpha=self.plot_style.marker_alpha/100,
-                        density=True
-                    )
-            else:
-                # Filter out NaN and zero values
-                filtered_data = x['array'][~np.isnan(x['array']) & (x['array'] > 0)]
-
-                # Sort the data in ascending order
-                sorted_data = np.sort(filtered_data)
-
-                # Calculate log(number of values > x)
-                #log_values = np.log10(sorted_data)
-                counts = len(sorted_data) - np.arange(len(sorted_data))
-
-                # Plot the data
-                #canvas.axes.plot(log_values, log_counts, label=cluster_label[int(i)], color=bar_color, lw=lw)
-                canvas.axes.plot(sorted_data, counts, color=bar_color, lw=lw, alpha=self.plot_style.marker_alpha/100)
-
-        # axes
-        # label font
-        if 'font' == '':
-            font = {'size':self.plot_style.font}
-        else:
-            font = {'font':self.plot_style.font, 'size':self.plot_style.font_size}
-
-        # set y-limits as p-axis min and max in self.data[self.sample_id].axis_dict
-        if self.comboBoxHistType.currentText() != 'log-scaling' :
-            pflag = False
-            if 'pstatus' not in self.data[self.sample_id].axis_dict[x['field']]:
-                pflag = True
-            elif self.data[self.sample_id].axis_dict[x['field']]['pstatus'] == 'auto':
-                pflag = True
-
-            if pflag:
-                ymin, ymax = canvas.axes.get_ylim()
-                d = {'pstatus':'auto', 'pmin':fmt.oround(ymin,order=2,toward=0), 'pmax':fmt.oround(ymax,order=2,toward=1)}
-                self.data[self.sample_id].axis_dict[x['field']].update(d)
-                self.plot_style.set_axis_widgets('y', x['field'])
-
-            # grab probablility axes limits
-            _, _, _, _, ymin, ymax = self.plot_style.get_axis_values(x['type'],x['field'],ax='p')
-
-            # x-axis
-            canvas.axes.set_xlabel(xlbl, fontdict=font)
-            if xscale == 'log':
-            #    self.logax(canvas.axes, [xmin,xmax], axis='x', label=xlbl)
-                canvas.axes.set_xscale(xscale,base=10)
-            # if self.plot_style.xscale == 'linear':
-            # else:
-            #     canvas.axes.set_xlim(xmin,xmax)
-            canvas.axes.set_xlim(xmin,xmax)
-
-            if xscale == 'scientific':
-                canvas.axes.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
-
-            # y-axis
-            canvas.axes.set_ylabel(self.comboBoxHistType.currentText(), fontdict=font)
-            canvas.axes.set_ylim(ymin,ymax)
-        else:
-            canvas.axes.set_xscale('log',base=10)
-            canvas.axes.set_yscale('log',base=10)
-
-            canvas.axes.set_xlabel(r"$\log_{10}($" + f"{field}" + r"$)$", fontdict=font)
-            canvas.axes.set_ylabel(r"$\log_{10}(N > \log_{10}$" + f"{field}" + r"$)$", fontdict=font)
-
-        canvas.axes.tick_params(labelsize=self.plot_style.font_size,direction=self.plot_style.tick_dir)
-        canvas.axes.set_box_aspect(self.plot_style.aspect_ratio)
-
-        self.plot_style.update_figure_font(canvas, self.plot_style.font)
-
-        canvas.fig.tight_layout()
-
-        self.plot_info = {
-            'tree': 'Histogram',
-            'sample_id': self.sample_id,
-            'plot_name': analysis+'_'+field,
-            'field_type': analysis,
-            'field': field,
-            'plot_type': 'histogram',
-            'type': self.comboBoxHistType.currentText(),
-            'nbins': nbins,
-            'figure': canvas,
-            'style': self.plot_style.style_dict[self.plot_style.plot_type],
-            'cluster_groups': clusters,
-            'view': [True,False],
-            'position': [],
-            'data': plot_data
-        }
-
-        self.clear_layout(self.widgetSingleView.layout())
-        self.widgetSingleView.layout().addWidget(canvas)
-
-
-    # -------------------------------------
-    # Scatter/Heatmap functions
-    # -------------------------------------
-    def get_scatter_data(self, plot_type, processed=True):
-
-        scatter_dict = {'x': {'type': None, 'field': None, 'label': None, 'array': None},
-                'y': {'type': None, 'field': None, 'label': None, 'array': None},
-                'z': {'type': None, 'field': None, 'label': None, 'array': None},
-                'c': {'type': None, 'field': None, 'label': None, 'array': None}}
-
-        match plot_type:
-            case 'histogram':
-                if processed or self.comboBoxHistFieldType.currentText() != 'Analyte':
-                    scatter_dict['x'] = self.data[self.sample_id].get_vector(self.comboBoxHistFieldType.currentText(), self.comboBoxHistField.currentText(), norm=self.plot_style.xscale)
-                else:
-                    scatter_dict['x'] = self.data[self.sample_id].get_vector(self.comboBoxHistFieldType.currentText(), self.comboBoxHistField.currentText(), norm=self.plot_style.xscale, processed=False)
-            case 'PCA scatter' | 'PCA heatmap':
-                scatter_dict['x'] = self.data[self.sample_id].get_vector('PCA score', f'PC{self.spinBoxPCX.value()}', norm=self.plot_style.xscale)
-                scatter_dict['y'] = self.data[self.sample_id].get_vector('PCA score', f'PC{self.spinBoxPCY.value()}', norm=self.plot_style.yscale)
-                if (self.field_type is None) or (self.comboBoxColorByField.currentText != ''):
-                    scatter_dict['c'] = self.data[self.sample_id].get_vector(self.field_type, self.field)
-            case _:
-                scatter_dict['x'] = self.data[self.sample_id].get_vector(self.comboBoxFieldTypeX.currentText(), self.comboBoxFieldX.currentText(), norm=self.plot_style.xscale)
-                scatter_dict['y'] = self.data[self.sample_id].get_vector(self.comboBoxFieldTypeY.currentText(), self.comboBoxFieldY.currentText(), norm=self.plot_style.yscale)
-                if (self.field_type is not None) and (self.field_type != ''):
-                    scatter_dict['z'] = self.data[self.sample_id].get_vector(self.comboBoxFieldTypeZ.currentText(), self.comboBoxFieldZ.currentText(), norm=self.plot_style.zscale)
-                elif (self.comboBoxFieldZ.currentText() is not None) and (self.comboBoxFieldZ.currentText() != ''):
-                    scatter_dict['c'] = self.data[self.sample_id].get_vector(self.field_type, self.field, norm=self.plot_style.cscale)
-
-        # set axes widgets
-        if (scatter_dict['x']['field'] is not None) and (scatter_dict['y']['field'] != ''):
-            if scatter_dict['x']['field'] not in self.data[self.sample_id].axis_dict.keys():
-                self.plot_style.initialize_axis_values(scatter_dict['x']['type'], scatter_dict['x']['field'])
-                self.plot_style.set_axis_widgets('x', scatter_dict['x']['field'])
-
-        if (scatter_dict['y']['field'] is not None) and (scatter_dict['y']['field'] != ''):
-            if scatter_dict['y']['field'] not in self.data[self.sample_id].axis_dict.keys():
-                self.plot_style.initialize_axis_values(scatter_dict['y']['type'], scatter_dict['y']['field'])
-                self.plot_style.set_axis_widgets('y', scatter_dict['y']['field'])
-
-        if (scatter_dict['z']['field'] is not None) and (scatter_dict['z']['field'] != ''):
-            if scatter_dict['z']['field'] not in self.data[self.sample_id].axis_dict.keys():
-                self.plot_style.initialize_axis_values(scatter_dict['z']['type'], scatter_dict['z']['field'])
-                self.plot_style.set_axis_widgets('z', scatter_dict['z']['field'])
-
-        if (scatter_dict['c']['field'] is not None) and (scatter_dict['c']['field'] != ''):
-            if scatter_dict['c']['field'] not in self.data[self.sample_id].axis_dict.keys():
-                self.plot_style.set_color_axis_widgets()
-                self.plot_style.set_axis_widgets('c', scatter_dict['c']['field'])
-
-        return scatter_dict
-
-
-    def plot_scatter(self, canvas=None):
-        """Creates a plots from self.toolBox Scatter page.
-
-        Creates both scatter and heatmaps (spatial histograms) for bi- and ternary plots.
-
-        Parameters
-        ----------
-        canvas : MplCanvas
-            canvas within gui for plotting, by default ``None``
-        """
-        #print('plot_scatter')
-        plot_type = self.plot_style.plot_type 
-
-        # get data for plotting
-        scatter_dict = self.get_scatter_data(plot_type)
-        if (scatter_dict['x']['field'] == '') or (scatter_dict['y']['field'] == ''):
-            return
-
-        if canvas is None:
-            plot_flag = True
-            canvas = mplc.MplCanvas(parent=self)
-        else:
-            plot_flag = False
-
-        match plot_type.split()[-1]:
-            # scatter
-            case 'scatter':
-                if (scatter_dict['z']['field'] is None) or (scatter_dict['z']['field'] == ''):
-                    # biplot
-                    self.biplot(canvas,scatter_dict['x'],scatter_dict['y'],scatter_dict['c'])
-                else:
-                    # ternary
-                    self.ternary_scatter(canvas,scatter_dict['x'],scatter_dict['y'],scatter_dict['z'],scatter_dict['c'])
-
-            # heatmap
-            case 'heatmap':
-                # biplot
-                if (scatter_dict['z']['field'] is None) or (scatter_dict['z']['field'] == ''):
-                    self.hist2dbiplot(canvas,scatter_dict['x'],scatter_dict['y'])
-                # ternary
-                else:
-                    self.hist2dternplot(canvas,scatter_dict['x'],scatter_dict['y'],scatter_dict['z'],scatter_dict['c'])
-
-        canvas.axes.margins(x=0)
-
-        if plot_flag:
-            self.plot_style.update_figure_font(canvas, self.plot_style.font)
-            self.clear_layout(self.widgetSingleView.layout())
-            self.widgetSingleView.layout().addWidget(canvas)
-
-    def biplot(self, canvas, x, y, c):
-        """Creates scatter bi-plots
-
-        A general function for creating scatter plots of 2-dimensions.
-
-        Parameters
-        ----------
-        canvas : MplCanvas
-            Canvas to be added to main window
-        x : dict
-            Data associated with field ``MainWindow.comboBoxFieldX.currentText()`` as x coordinate
-        y : dict
-            Data associated with field ``MainWindow.comboBoxFieldX.currentText()`` as y coordinate
-        c : dict
-            Data associated with field ``MainWindow.comboBoxColorField.currentText()`` as marker colors
-        style : dict
-            Style parameters
-        """
-        if (c['field'] is None) or (c['field'] == ''):
-            # single color
-            canvas.axes.scatter(x['array'], y['array'], c=self.plot_style.marker_color,
-                s=self.plot_style.marker_size,
-                marker=self.plot_style.marker_dict[self.plot_style.marker],
-                edgecolors='none',
-                alpha=self.plot_style.marker_alpha/100)
-            cb = None
-            
-            plot_data = pd.DataFrame(np.vstack((x['array'], y['array'])).T, columns = ['x','y'])
-            
-        elif self.plot_style.color_field_type == 'cluster':
-            # color by cluster
-            method = self.field
-            if method not in list(self.cluster_dict.keys()):
-                return
-            else:
-                if 0 not in list(self.cluster_dict[method].keys()):
-                    return
-
-            cluster_color, cluster_label, cmap = self.plot_style.get_cluster_colormap(self.cluster_dict[method],alpha=self.plot_style.marker_alpha)
-            cluster_group = self.data[self.sample_id].processed_data.loc[:,method]
-            selected_clusters = self.cluster_dict[method]['selected_clusters']
-
-            ind = np.isin(cluster_group, selected_clusters)
-
-            norm = self.plot_style.color_norm(self.cluster_dict[method]['n_clusters'])
-
-            cb = canvas.axes.scatter(x['array'][ind], y['array'][ind], c=c['array'][ind],
-                s=self.plot_style.marker_size,
-                marker=self.plot_style.marker_dict[self.plot_style.marker],
-                edgecolors='none',
-                cmap=cmap,
-                alpha=self.plot_style.marker_alpha/100,
-                norm=norm)
-
-            self.add_colorbar(canvas, cb, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color)
-            plot_data = pd.DataFrame(np.vstack((x['array'][ind],y['array'][ind], c['array'][ind], cluster_group[ind])).T, columns = ['x','y','c','cluster_group'])
-        else:
-            # color by field
-            norm = self.plot_style.color_norm()
-            cb = canvas.axes.scatter(x['array'], y['array'], c=c['array'],
-                s=self.plot_style.marker_size,
-                marker=self.plot_style.marker_dict[self.plot_style.marker],
-                edgecolors='none',
-                cmap=self.plot_style.get_colormap(),
-                alpha=self.plot_style.marker_alpha/100,
-                norm=norm)
-
-            self.add_colorbar(canvas, cb)
-            plot_data = pd.DataFrame(np.vstack((x['array'], y['array'], c['array'])).T, columns = ['x','y','c'])
-            
-
-        # axes
-        xmin, xmax, xscale, xlbl = self.plot_style.get_axis_values(x['type'],x['field'])
-        ymin, ymax, yscale, ylbl = self.plot_style.get_axis_values(y['type'],y['field'])
-
-        # labels
-        font = {'size':self.plot_style.font_size}
-        canvas.axes.set_xlabel(xlbl, fontdict=font)
-        canvas.axes.set_ylabel(ylbl, fontdict=font)
-
-        # axes limits
-        canvas.axes.set_xlim(xmin,xmax)
-        canvas.axes.set_ylim(ymin,ymax)
-
-        # tick marks
-        canvas.axes.tick_params(direction=self.plot_style.tick_dir,
-            labelsize=self.plot_style.font_size,
-            labelbottom=True, labeltop=False, labelleft=True, labelright=False,
-            bottom=True, top=True, left=True, right=True)
-
-        # aspect ratio
-        canvas.axes.set_box_aspect(self.plot_style.aspect_ratio)
-        canvas.fig.tight_layout()
-
-        if xscale == 'log':
-            canvas.axes.set_xscale(xscale,base=10)
-        if yscale == 'log':
-            canvas.axes.set_yscale(yscale,base=10)
-
-        if xscale == 'scientific':
-            canvas.axes.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
-        if yscale == 'scientific':
-            canvas.axes.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
-
-        plot_name = f"{x['field']}_{y['field']}_{'scatter'}"
-
-        self.plot_info = {
-            'tree': 'Geochemistry',
-            'sample_id': self.sample_id,
-            'plot_name': plot_name,
-            'plot_type': 'scatter',
-            'field_type': [x['type'], y['type'], '', c['type']],
-            'field': [x['field'], y['field'], '', c['field']],
-            'figure': canvas,
-            'style': self.plot_style.style_dict[self.plot_style.plot_type],
-            'cluster_groups': [],
-            'view': [True,False],
-            'position': [],
-            'data':  plot_data
-        }
-
-    def ternary_scatter(self, canvas, x, y, z, c):
-        """Creates ternary scatter plots
-
-        A general function for creating ternary scatter plots.
-
-        Parameters
-        ----------
-        canvas : MplCanvas
-            Canvas that contains axes and figure
-        x : dict
-            coordinate associated with top vertex
-        y : dict
-            coordinate associated with left vertex
-        z : dict
-            coordinate associated with right vertex
-        c : dict
-            color dimension
-        """
-        labels = [x['field'], y['field'], z['field']]
-        tp = ternary(canvas.axes, labels, 'scatter')
-
-        if (c['field'] is None) or (c['field'] == ''):
-            tp.ternscatter( x['array'], y['array'], z['array'],
-                    marker=self.plot_style.marker_dict[self.plot_style.marker],
-                    size=self.plot_style.marker_size,
-                    color=self.plot_style.marker_color,
-                    alpha=self.plot_style.marker_alpha/100,
-                )
-            cb = None
-            plot_data = pd.DataFrame(np.vstack((x['array'],y['array'], z['array'])).T, columns = ['x','y','z'])
-            
-        elif self.plot_style.color_field_type == 'cluster':
-            # color by cluster
-            method = self.field
-            if method not in list(self.cluster_dict.keys()):
-                return
-            else:
-                if 0 not in list(self.cluster_dict[method].keys()):
-                    return
-
-            cluster_color, cluster_label, cmap = self.plot_style.get_cluster_colormap(self.cluster_dict[method],alpha=self.plot_style.marker_alpha)
-            cluster_group = self.data[self.sample_id].processed_data.loc[:,method]
-            selected_clusters = self.cluster_dict[method]['selected_clusters']
-
-            ind = np.isin(cluster_group, selected_clusters)
-
-            norm = self.plot_style.color_norm(self.cluster_dict[method]['n_clusters'])
-
-            _, cb = tp.ternscatter( x['array'][ind], y['array'][ind], z['array'][ind],
-                    categories=c['array'][ind],
-                    marker=self.marker_dict[self.plot_style.marker],
-                    size=self.plot_style.marker_size,
-                    cmap=cmap,
-                    norm=norm,
-                    labels=True,
-                    alpha=self.plot_style.marker_alpha/100,
-                    orientation='None' )
-
-            self.add_colorbar(canvas, cb, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color)
-            plot_data = pd.DataFrame(np.vstack((x['array'][ind],y['array'][ind], z['array'][ind], cluster_group[ind])).T, columns = ['x','y','z','cluster_group'])
-        else:
-            # color field
-            norm = self.plot_style.color_norm()
-            _, cb = tp.ternscatter(x['array'], y['array'], z['array'],
-                    categories=c['array'],
-                    marker=self.plot_style.marker_dict[self.plot_style.marker],
-                    size=self.plot_style.marker_size,
-                    cmap=self.plot_style.cmap,
-                    norm=norm,
-                    alpha=self.plot_style.marker_alpha/100,
-                    orientation=self.plot_style.cbar_dir )
-            
-            if cb:
-                cb.set_label(c['label'])
-                plot_data = pd.DataFrame(np.vstack((x['array'], y['array'], c['array'])).T, columns = ['x','y','c'])
-
-        # axes limits
-        canvas.axes.set_xlim(-1.01,1.01)
-        canvas.axes.set_ylim(-0.01,1)
-
-        plot_name = f"{x['field']}_{y['field']}_{z['field']}_{'ternscatter'}"
-        self.plot_info = {
-            'tree': 'Geochemistry',
-            'sample_id': self.sample_id,
-            'plot_name': plot_name,
-            'plot_type': 'scatter',
-            'field_type': [x['type'], y['type'], z['type'], c['type']],
-            'field': [x['field'], y['field'], z['field'], c['field']],
-            'figure': canvas,
-            'style': self.plot_style.style_dict[self.plot_style.plot_type],
-            'cluster_groups': [],
-            'view': [True,False],
-            'position': [],
-            'data': plot_data
-        }
-
-    def hist2dbiplot(self, canvas, x, y):
-        """Creates 2D histogram figure
-
-        A general function for creating 2D histograms (heatmaps).
-
-        Parameters
-        ----------
-        canvas : MplCanvas
-            plotting canvas
-        x : dict
-            X-axis dictionary
-        y : dict
-            Y-axis dictionary
-        """
-        # color by field
-        norm = self.plot_style.color_norm()
-        h = canvas.axes.hist2d(x['array'], y['array'], bins=self.plot_style.resolution, norm=norm, cmap=self.plot_style.get_colormap())
-        self.add_colorbar(canvas, h[3])
-
-        # axes
-        xmin, xmax, xscale, xlbl = self.plot_style.get_axis_values(x['type'],x['field'])
-        ymin, ymax, yscale, ylbl = self.plot_style.get_axis_values(y['type'],y['field'])
-
-        # labels
-        font = {'size':self.plot_style.font_size}
-        canvas.axes.set_xlabel(xlbl, fontdict=font)
-        canvas.axes.set_ylabel(ylbl, fontdict=font)
-
-        # axes limits
-        canvas.axes.set_xlim(xmin,xmax)
-        canvas.axes.set_ylim(ymin,ymax)
-
-        if yscale == 'scientific':
-            canvas.axes.ticklabel_format(axis='y', style=yscale)
-        if yscale == 'scientific':
-            canvas.axes.ticklabel_format(axis='y', style=yscale)
-
-        # tick marks
-        canvas.axes.tick_params(direction=self.plot_style.tick_dir,
-                        labelsize=self.plot_style.font_size,
-                        labelbottom=True, labeltop=False, labelleft=True, labelright=False,
-                        bottom=True, top=True, left=True, right=True)
-
-        # aspect ratio
-        canvas.axes.set_box_aspect(self.plot_style.aspect_ratio)
-
-        if xscale == 'log':
-            canvas.axes.set_xscale(xscale,base=10)
-        if yscale == 'log':
-            canvas.axes.set_yscale(yscale,base=10)
-
-        if xscale == 'scientific':
-            canvas.axes.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
-        if yscale == 'scientific':
-            canvas.axes.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
-
-        plot_name = f"{x['field']}_{y['field']}_{'heatmap'}"
-        self.plot_info = {
-            'tree': 'Geochemistry',
-            'sample_id': self.sample_id,
-            'plot_name': plot_name,
-            'plot_type': 'heatmap',
-            'field_type': [x['type'], y['type'], '', ''],
-            'field': [x['field'], y['field'], '', ''],
-            'figure': canvas,
-            'style': self.plot_style.style_dict[self.plot_style.plot_type],
-            'cluster_groups': [],
-            'view': [True,False],
-            'position': [],
-            'data': pd.DataFrame(np.vstack((x['array'],y['array'])).T, columns = ['x','y'])
-        }
-
-    def hist2dternplot(self, canvas, x, y, z, c):
-        """Creates a ternary histogram figure
-
-        A general function for creating scatter plots of 2-dimensions.
-
-        Parameters
-        ----------
-        fig : matplotlib.figure
-            Figure object
-        x, y, z : dict
-            Coordinates associated with top, left and right vertices, respectively
-        style:  dict
-            Style parameters
-        save : bool
-            Saves figure widget to plot tree
-        c : str
-            Display, mean, median, standard deviation plots for a fourth dimension in
-            addition to histogram map. Default is None, which produces a histogram.
-        """
-        labels = [x['field'], y['field'], z['field']]
-
-        if (c['field'] is None) or (c['field'] == ''):
-            tp = ternary(canvas.axes, labels, 'heatmap')
-
-            norm = self.plot_style.color_norm()
-            hexbin_df, cb = tp.ternhex(a=x['array'], b=y['array'], c=z['array'],
-                bins=self.plot_style.resolution,
-                plotfield='n',
-                cmap=self.plot_style.cmap,
-                orientation=self.plot_style.cbar_dir,
-                norm=norm)
-
-            if cb is not None:
-                cb.set_label('log(N)')
-        else:
-            pass
-            # axs = fig.subplot_mosaic([['left','upper right'],['left','lower right']], layout='constrained', width_ratios=[1.5, 1])
-
-            # for idx, ax in enumerate(axs):
-            #     tps[idx] = ternary(ax, labels, 'heatmap')
-
-            # hexbin_df = ternary.ternhex(a=x['array'], b=y['array'], c=z['array'], val=c['array'], bins=self.plot_style.resolution)
-
-            # cb.set_label(c['label'])
-
-            # #tp.ternhex(hexbin_df=hexbin_df, plotfield='n', cmap=self.plot_style.cmap, orientation='vertical')
-
-        plot_name = f"{x['field']}_{y['field']}_{z['field']}_{'heatmap'}"
-        self.plot_info = {
-            'tree': 'Geochemistry',
-            'sample_id': self.sample_id,
-            'plot_name': plot_name,
-            'plot_type': 'heatmap',
-            'field_type': [x['type'], y['type'], z['type'], ''],
-            'field': [x['field'], y['field'], z['field'], ''],
-            'figure': canvas,
-            'style': self.plot_style.style_dict[self.plot_style.plot_type],
-            'cluster_groups': [],
-            'view': [True,False],
-            'position': [],
-            'data' : pd.DataFrame(np.vstack((x['array'],y['array'], z['array'])).T, columns = ['x','y','z'])
-        }
-
-    def plot_ternarymap(self, canvas):
-        """Creates map colored by ternary coordinate positions"""
-        if self.plot_type != 'ternary map':
-            self.comboBoxPlotType.setCurrentText('ternary map')
-            self.plot_style.set_style_widgets('ternary map')
-
-        canvas = mplc.MplCanvas(sub=121,parent=self)
-
-        afield = self.comboBoxFieldX.currentText()
-        bfield = self.comboBoxFieldY.currentText()
-        cfield = self.comboBoxFieldZ.currentText()
-
-        a = self.data[self.sample_id].processed_data.loc[:,afield].values
-        b = self.data[self.sample_id].processed_data.loc[:,bfield].values
-        c = self.data[self.sample_id].processed_data.loc[:,cfield].values
-
-        ca = get_rgb_color(get_hex_color(self.toolButtonTCmapXColor.palette().button().color()))
-        cb = get_rgb_color(get_hex_color(self.toolButtonTCmapYColor.palette().button().color()))
-        cc = get_rgb_color(get_hex_color(self.toolButtonTCmapZColor.palette().button().color()))
-        cm = get_rgb_color(get_hex_color(self.toolButtonTCmapMColor.palette().button().color()))
-
-        t = ternary(canvas.axes)
-
-        cval = t.terncolor(a, b, c, ca, cb, cc, cp=cm)
-
-        M, N = self.data[self.sample_id].array_size
-
-        # Reshape the array into MxNx3
-        map_data = np.zeros((M, N, 3), dtype=np.uint8)
-        map_data[:len(cval), :, :] = cval.reshape(M, N, 3, order=self.data[self.sample_id].order)
-
-        canvas.axes.imshow(map_data, aspect=self.data[self.sample_id].aspect_ratio)
-        canvas.array = map_data
-
-        # add scalebar
-        self.add_scalebar(canvas.axes)
-
-        grid = None
-        if self.plot_style.cbar_dir == 'vertical':
-            grid = gs.GridSpec(5,1)
-        elif self.plot_style.cbar_dir == 'horizontal':
-            grid = gs.GridSpec(1,5)
-        else:
-            self.clear_layout(self.widgetSingleView.layout())
-            self.widgetSingleView.layout().addWidget(canvas)
-            return
-
-        canvas.axes.set_position(grid[0:4].get_position(canvas.fig))
-        canvas.axes.set_subplotspec(grid[0:4])              # only necessary if using tight_layout()
-
-        canvas.axes2 = canvas.fig.add_subplot(grid[4])
-
-        canvas.fig.tight_layout()
-
-        t2 = ternary(canvas.axes2, labels=[afield,bfield,cfield])
-
-        hbin = t2.hexagon(10)
-        xc = np.array([v['xc'] for v in hbin])
-        yc = np.array([v['yc'] for v in hbin])
-        at,bt,ct = t2.xy2tern(xc,yc)
-        cv = t2.terncolor(at,bt,ct, ca=ca, cb=cb, cc=cc, cp=cm)
-        for i, hb in enumerate(hbin):
-            t2.ax.fill(hb['xv'], hb['yv'], color=cv[i]/255, edgecolor='none')
-
-        plot_name = f'{afield}_{bfield}_{cfield}_ternarymap'
-        self.plot_info = {
-            'tree': 'Geochemistry',
-            'sample_id': self.sample_id,
-            'plot_name': plot_name,
-            'plot_type': 'ternary map',
-            'field_type': [self.comboBoxFieldTypeX.currentText(),
-                self.comboBoxFieldTypeY.currentText(),
-                self.comboBoxFieldTypeZ.currentText(),
-                ''],
-            'field': [afield, bfield, cfield, ''],
-            'figure': canvas,
-            'style': self.plot_style.style_dict[self.plot_style.plot_type],
-            'cluster_groups': [],
-            'view': [True,False],
-            'position': [],
-            'data': map_data
-        }
-
-        self.clear_layout(self.widgetSingleView.layout())
-        self.widgetSingleView.layout().addWidget(canvas)
 
     # -------------------------------------
     # PCA functions and plotting
@@ -4997,7 +4548,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #print('compute_pca')
         self.pca_results = {}
 
-        df_filtered, analytes = self.data[self.sample_id].get_processed_data()
+        df_filtered, analytes = self.data[self.app_data.sample_id].get_processed_data()
 
         # Preprocess the data
         scaler = StandardScaler()
@@ -5011,7 +4562,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.plot_style.clim = [np.amin(self.pca_results.components_), np.amax(self.pca_results.components_)]
 
         # Add PCA scores to DataFrame for easier plotting
-        self.data[self.sample_id].add_columns('pca score',pca_scores.columns,pca_scores.values,self.data[self.sample_id].mask)
+        self.data[self.app_data.sample_id].add_columns('pca score',pca_scores.columns,pca_scores.values,self.data[self.app_data.sample_id].mask)
 
         if update_ui:
              #update min and max of PCA spinboxes
@@ -5042,14 +4593,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             ``MainWindow.plot_scatter``
         """
         #'plot_pca')
-        if self.sample_id == '':
+        if self.app_data.sample_id == '':
             return
 
-        if self.update_pca_flag or not self.data[self.sample_id].processed_data.match_attribute('data_type','pca score'):
+        if self.update_pca_flag or not self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','pca score'):
             self.compute_pca()
 
         # Determine which PCA plot to create based on the combobox selection
-        plot_type = self.plot_type
+        plot_type = self.plot_style.plot_type
 
         match plot_type.lower():
             # make a plot of explained variance
@@ -5074,7 +4625,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 # Assuming pca_df contains scores for the principal components
                 # uncomment to use plot scatter instead of ax.scatter
                 canvas = mplc.MplCanvas(parent=self)
-                self.plot_scatter(canvas=canvas)
+                plot_scatter(self, self.app_data, self.plot_style, canvas=canvas)
 
                 plot_data= self.plot_pca_components(canvas)
 
@@ -5094,9 +4645,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.plot_info = {
             'tree': 'Multidimensional Analysis',
-            'sample_id': self.sample_id,
+            'sample_id': self.app_data.sample_id,
             'plot_name': plot_name,
-            'plot_type': self.plot_type,
+            'plot_type': self.plot_style.plot_type,
             'field_type':self.field_type,
             'field':  self.field,
             'figure': canvas,
@@ -5176,7 +4727,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # pca_dict contains 'components_' from PCA analysis with columns for each variable
         # No need to transpose for heatmap representation
-        analytes = self.data[self.sample_id].processed_data.match_attribute('data_type','analyte')
+        analytes = self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','analyte')
 
         components = self.pca_results.components_
         # Number of components and variables
@@ -5250,7 +4801,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return
 
         # field labels
-        analytes = self.data[self.sample_id].processed_data.match_attribute('data_type','analyte')
+        analytes = self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','analyte')
         nfields = len(analytes)
 
         # components
@@ -5291,7 +4842,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         canvas = mplc.MplCanvas(parent=self)
 
-        plot_type = self.plot_type
+        plot_type = self.plot_style.plot_type
 
         # data frame for plotting
         match plot_type:
@@ -5306,9 +4857,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 print('(MainWindow.plot_score_map) Unknown score type'+plot_type)
                 return canvas
 
-        reshaped_array = np.reshape(self.data[self.sample_id].processed_data[field].values, self.data[self.sample_id].array_size, order=self.data[self.sample_id].order)
+        reshaped_array = np.reshape(self.data[self.app_data.sample_id].processed_data[field].values, self.data[self.app_data.sample_id].array_size, order=self.data[self.app_data.sample_id].order)
 
-        cax = canvas.axes.imshow(reshaped_array, cmap=self.plot_style.cmap, aspect=self.data[self.sample_id].aspect_ratio, interpolation='none')
+        cax = canvas.axes.imshow(reshaped_array, cmap=self.plot_style.cmap, aspect=self.data[self.app_data.sample_id].aspect_ratio, interpolation='none')
         canvas.array = reshaped_array
 
          # Add a colorbar
@@ -5323,7 +4874,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # add scalebar
         self.add_scalebar(canvas.axes)
 
-        return canvas, self.data[self.sample_id].processed_data[field]
+        return canvas, self.data[self.app_data.sample_id].processed_data[field]
 
     def plot_cluster_map(self):
         """Produces a map of cluster categories
@@ -5333,25 +4884,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         print('plot_cluster_map')
         canvas = mplc.MplCanvas(parent=self)
 
-        plot_type = self.plot_type
+        plot_type = self.plot_style.plot_type
         method = self.comboBoxClusterMethod.currentText()
 
         # data frame for plotting
-        #groups = self.data[self.sample_id][plot_type][method].values
-        groups = self.data[self.sample_id].processed_data[method].values
+        #groups = self.data[self.app_data.sample_id][plot_type][method].values
+        groups = self.data[self.app_data.sample_id].processed_data[method].values
 
-        reshaped_array = np.reshape(groups, self.data[self.sample_id].array_size, order=self.data[self.sample_id].order)
+        reshaped_array = np.reshape(groups, self.data[self.app_data.sample_id].array_size, order=self.data[self.app_data.sample_id].order)
 
         n_clusters = len(np.unique(groups))
 
-        cluster_color, cluster_label, cmap = self.plot_style.get_cluster_colormap(self.cluster_dict[method], alpha=self.plot_style.marker_alpha)
+        cluster_color, cluster_label, cmap = self.plot_style.get_cluster_colormap(self.app_data.cluster_dict[method], alpha=self.plot_style.marker_alpha)
 
         #boundaries = np.arange(-0.5, n_clusters, 1)
         #norm = colors.BoundaryNorm(boundaries, cmap.N, clip=True)
         norm = self.plot_style.color_norm(n_clusters)
 
-        #cax = canvas.axes.imshow(self.array.astype('float'), cmap=self.plot_style.cmap, norm=norm, aspect = self.data[self.sample_id].aspect_ratio)
-        cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect=self.data[self.sample_id].aspect_ratio)
+        #cax = canvas.axes.imshow(self.array.astype('float'), cmap=self.plot_style.cmap, norm=norm, aspect = self.data[self.app_data.sample_id].aspect_ratio)
+        cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect=self.data[self.app_data.sample_id].aspect_ratio)
         canvas.array = reshaped_array
         #cax.cmap.set_under(style['Scale']['OverlayColor'])
 
@@ -5369,7 +4920,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # add scalebar
         self.add_scalebar(canvas.axes)
 
-        return canvas, self.data[self.sample_id].processed_data[method]
+        return canvas, self.data[self.app_data.sample_id].processed_data[method]
 
     def cluster_performance_plot(self):
         """Plots used to estimate the optimal number of clusters
@@ -5402,7 +4953,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         * Calculate the silhouette score for each k.
         * Choose the k with the highest silhouette score.
         """        
-        if self.sample_id == '':
+        if self.app_data.sample_id == '':
             return
 
         method = self.comboBoxClusterMethod.currentText()
@@ -5462,20 +5013,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #print(f"Second derivative of inertia: {second_derivative}")
         #print(f"Optimal number of clusters: {optimal_k}")
 
-        plot_type = self.plot_type
+        plot_type = self.plot_style.plot_type
         plot_name = f"{plot_type}_{method}"
         plot_data = {'inertia': inertia, '2nd derivative': second_derivative}
 
         self.plot_info = {
             'tree': 'Multidimensional Analysis',
-            'sample_id': self.sample_id,
+            'sample_id': self.app_data.sample_id,
             'plot_name': plot_name,
-            'plot_type': self.plot_type,
+            'plot_type': self.plot_style.plot_type,
             'field_type':self.field_type,
             'field':  self.field,
             'figure': canvas,
             'style': self.plot_style.style_dict[self.plot_style.plot_type],
-            'cluster_groups': self.cluster_dict[method],
+            'cluster_groups': self.app_data.cluster_dict[method],
             'view': [True,False],
             'position': [],
             'data': plot_data
@@ -5489,12 +5040,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         Cluster properties are defined in the ``MainWindow.toolBox.ClusterPage``."""
         #print('\n===compute_clusters===')
-        if self.sample_id == '':
+        if self.app_data.sample_id == '':
             return
 
-        df_filtered, isotopes = self.data[self.sample_id].get_processed_data()
+        df_filtered, isotopes = self.data[self.app_data.sample_id].get_processed_data()
         filtered_array = df_filtered.values
-        array = filtered_array[self.data[self.sample_id].mask]
+        array = filtered_array[self.data[self.app_data.sample_id].mask]
 
         # get clustering options
         if max_clusters is None:
@@ -5535,7 +5086,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # set all masked data to cluster id -1
         if max_clusters is None:
-            self.data[self.sample_id].processed_data[method] = 99
+            self.data[self.app_data.sample_id].processed_data[method] = 99
 
             # Create labels array filled with -1
             #groups = np.full(filtered_array.shape[0], -1, dtype=int)
@@ -5559,7 +5110,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
                     #add k-means results to self.data
                     if max_clusters is None:
-                        self.data[self.sample_id].add_columns('cluster', method, model.predict(array), self.data[self.sample_id].mask)
+                        self.data[self.app_data.sample_id].add_columns('cluster', method, model.predict(array), self.data[self.app_data.sample_id].mask)
                     else:
                         kmeans.fit(array)
                         cluster_results.append(kmeans.inertia_)
@@ -5583,11 +5134,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     if max_clusters is None:
                         # assign cluster scores to self.data
                         for n in range(nc):
-                            #self.data[self.sample_id]['computed_data']['cluster score'].loc[:,str(n)] = pd.NA
-                            self.data[self.sample_id].add_columns('cluster score', 'cluster' + str(n), u[n-1,:], self.data[self.sample_id].mask)
+                            #self.data[self.app_data.sample_id]['computed_data']['cluster score'].loc[:,str(n)] = pd.NA
+                            self.data[self.app_data.sample_id].add_columns('cluster score', 'cluster' + str(n), u[n-1,:], self.data[self.app_data.sample_id].mask)
 
                         #add cluster results to self.data
-                        self.data[self.sample_id].add_columns('cluster', method, labels, self.data[self.sample_id].mask)
+                        self.data[self.app_data.sample_id].add_columns('cluster', method, labels, self.data[self.app_data.sample_id].mask)
                     else:
                         # weighted sum of squared errors (WSSE)
                         wsse = np.sum((u ** exponent) * (dist ** 2))
@@ -5601,7 +5152,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             
         if max_clusters is None:
             # make sure the column is all integer values
-            self.data[self.sample_id].processed_data[method] = self.data[self.sample_id].processed_data[method].astype(int)  
+            self.data[self.app_data.sample_id].processed_data[method] = self.data[self.app_data.sample_id].processed_data[method].astype(int)  
 
             # update cluster table in style menu
             self.group_changed()
@@ -5620,19 +5171,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         Will produce plots of Clusters or Cluster Scores and computes clusters if necesseary.
         """        
         print('plot_clusters')
-        if self.sample_id == '':
+        if self.app_data.sample_id == '':
             return
 
         method = self.comboBoxClusterMethod.currentText()
         if self.update_cluster_flag or \
-                self.data[self.sample_id].processed_data[method].empty or \
-                (method not in list(self.data[self.sample_id].processed_data.columns)):
+                self.data[self.app_data.sample_id].processed_data[method].empty or \
+                (method not in list(self.data[self.app_data.sample_id].processed_data.columns)):
             self.compute_clusters()
 
 
-        self.cluster_dict['active method'] = method
+        self.app_data.cluster_dict['active method'] = method
 
-        plot_type = self.plot_type
+        plot_type = self.plot_style.plot_type
 
         match plot_type:
             case 'cluster':
@@ -5650,14 +5201,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.plot_info = {
             'tree': 'Multidimensional Analysis',
-            'sample_id': self.sample_id,
+            'sample_id': self.app_data.sample_id,
             'plot_name': plot_name,
-            'plot_type': self.plot_type,
+            'plot_type': self.plot_style.plot_type,
             'field_type':self.field_type,
             'field':  self.field,
             'figure': canvas,
             'style': self.plot_style.style_dict[self.plot_style.plot_type],
-            'cluster_groups': self.cluster_dict[method],
+            'cluster_groups': self.app_data.cluster_dict[method],
             'view': [True,False],
             'position': [],
             'data': plot_data
@@ -5671,44 +5222,44 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Updates ``MainWindow.cluster_dict[*method*]['n_clusters'] from ``MainWindow.spinBoxNClusters``.  Updates cluster results.
         """
-        self.cluster_dict[self.comboBoxClusterMethod.currentText()]['n_clusters'] = self.spinBoxNClusters.value()
+        self.app_data.cluster_dict[self.comboBoxClusterMethod.currentText()]['n_clusters'] = self.spinBoxNClusters.value()
 
         self.update_cluster_flag = True
         # trigger update to plot
-        self.plot_style.scheduler.schedule_update()
+        self.plot_style.schedule_update()
 
     def cluster_distance_callback(self):
         """Updates cluster dictionary with the new distance metric
 
         Updates ``MainWindow.cluster_dict[*method*]['distance'] from ``MainWindow.comboBoxClusterDistance``.  Updates cluster results.
         """
-        self.cluster_dict[self.comboBoxClusterMethod.currentText()]['distance'] = self.comboBoxClusterDistance.currentText()
+        self.app_data.cluster_dict[self.comboBoxClusterMethod.currentText()]['distance'] = self.comboBoxClusterDistance.currentText()
 
         self.update_cluster_flag = True
         # trigger update to plot
-        self.plot_style.scheduler.schedule_update()
+        self.plot_style.schedule_update()
 
     def cluster_exponent_callback(self):
         """Updates cluster dictionary with the new exponent
 
         Updates ``MainWindow.cluster_dict[*method*]['exponent'] from ``MainWindow.horizontalSliderClusterExponent``.  Updates cluster results.
         """
-        self.cluster_dict[self.comboBoxClusterMethod.currentText()]['exponent'] = self.horizontalSliderClusterExponent.value()/10
+        self.app_data.cluster_dict[self.comboBoxClusterMethod.currentText()]['exponent'] = self.horizontalSliderClusterExponent.value()/10
 
         self.update_cluster_flag = True
         # trigger update to plot
-        self.plot_style.scheduler.schedule_update()
+        self.plot_style.schedule_update()
     
     def cluster_seed_callback(self):
         """Updates cluster dictionary with the new exponent
 
         Updates ``MainWindow.cluster_dict[*method*]['seed'] from ``MainWindow.lineEditSeed``.  Updates cluster results.
         """
-        self.cluster_dict[self.comboBoxClusterMethod.currentText()]['exponent'] = int(self.lineEditSeed.text())
+        self.app_data.cluster_dict[self.comboBoxClusterMethod.currentText()]['exponent'] = int(self.lineEditSeed.text())
 
         self.update_cluster_flag = True
         # trigger update to plot
-        self.plot_style.scheduler.schedule_update()
+        self.plot_style.schedule_update()
 
     def generate_random_seed(self):
         """Generates a random seed for clustering
@@ -5717,11 +5268,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """        
         r = random.randint(0,1000000000)
         self.lineEditSeed.value = r
-        self.cluster_dict[self.comboBoxClusterMethod.currentText()]['seed'] = r
+        self.app_data.cluster_dict[self.comboBoxClusterMethod.currentText()]['seed'] = r
 
         self.update_cluster_flag = True
         # trigger update to plot
-        self.plot_style.scheduler.schedule_update()
+        self.plot_style.schedule_update()
 
     def cluster_method_callback(self):
         """Updates clustering-related widgets
@@ -5729,21 +5280,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         Enables/disables widgets in *Left Toolbox \\ Clustering* page.  Updates widget values/text with values saved in ``MainWindow.cluster_dict``.
         """
         print('cluster_method_callback')
-        if self.sample_id == '':
+        if self.app_data.sample_id == '':
             return
 
         # update_clusters_ui - Enables/disables tools associated with clusters
         method = self.comboBoxClusterMethod.currentText()
-        self.cluster_dict['active method'] = method
+        self.app_data.cluster_dict['active method'] = method
 
-        if method not in self.data[self.sample_id].processed_data.columns:
+        if method not in self.data[self.app_data.sample_id].processed_data.columns:
             self.update_cluster_flag = True
 
         # Number of Clusters
         self.labelNClusters.setEnabled(True)
         self.spinBoxNClusters.blockSignals(True)
         self.spinBoxNClusters.setEnabled(True)
-        self.spinBoxNClusters.setValue(int(self.cluster_dict[method]['n_clusters']))
+        self.spinBoxNClusters.setValue(int(self.app_data.cluster_dict[method]['n_clusters']))
         self.spinBoxNClusters.blockSignals(False)
 
         match method:
@@ -5761,7 +5312,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 # Seed
                 self.labelClusterStartingSeed.setEnabled(True)
                 self.lineEditSeed.setEnabled(True)
-                self.lineEditSeed.value = self.cluster_dict[method]['seed']
+                self.lineEditSeed.value = self.app_data.cluster_dict[method]['seed']
 
             case 'fuzzy c-means':
                 # Enable parameters relevant to Fuzzy Clustering
@@ -5769,20 +5320,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.labelExponent.setEnabled(True)
                 self.labelClusterExponent.setEnabled(True)
                 self.horizontalSliderClusterExponent.setEnabled(True)
-                self.horizontalSliderClusterExponent.setValue(int(self.cluster_dict[method]['exponent']*10))
+                self.horizontalSliderClusterExponent.setValue(int(self.app_data.cluster_dict[method]['exponent']*10))
 
                 # Distance
                 self.labelClusterDistance.setEnabled(True)
                 self.comboBoxClusterDistance.setEnabled(True)
-                self.comboBoxClusterDistance.setCurrentText(self.cluster_dict[method]['distance'])
+                self.comboBoxClusterDistance.setCurrentText(self.app_data.cluster_dict[method]['distance'])
 
                 # Seed
                 self.labelClusterStartingSeed.setEnabled(True)
                 self.lineEditSeed.setEnabled(True)
-                self.lineEditSeed.value = self.cluster_dict[method]['seed']
+                self.lineEditSeed.value = self.app_data.cluster_dict[method]['seed']
 
         if self.update_cluster_flag:
-            self.plot_style.scheduler.schedule_update()
+            self.plot_style.schedule_update()
 
     def update_clusters(self):
         """Executed on update to cluster table.
@@ -5791,7 +5342,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """        
         if not self.isUpdatingTable:
             selected_clusters = []
-            method = self.cluster_dict['active method']
+            method = self.app_data.cluster_dict['active method']
 
             # get the selected clusters
             for idx in self.tableWidgetViewGroups.selectionModel().selectedRows():
@@ -5800,16 +5351,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             # update selected cluster list in cluster_dict
             if selected_clusters:
-                if np.array_equal(self.cluster_dict[method]['selected_clusters'], selected_clusters):
+                if np.array_equal(self.app_data.cluster_dict[method]['selected_clusters'], selected_clusters):
                     return
-                self.cluster_dict[method]['selected_clusters'] = selected_clusters
+                self.app_data.cluster_dict[method]['selected_clusters'] = selected_clusters
             else:
-                self.cluster_dict[method]['selected_clusters'] = []
+                self.app_data.cluster_dict[method]['selected_clusters'] = []
 
             # update plot
-            if (self.plot_type not in ['cluster', 'cluster score']) and (self.field_type == 'cluster'):
+            if (self.plot_style.plot_type not in ['cluster', 'cluster score']) and (self.field_type == 'cluster'):
                 # trigger update to plot
-                self.plot_style.scheduler.schedule_update()
+                self.plot_style.schedule_update()
 
     # 4. Davies-Bouldin Index
     # The Davies-Bouldin Index (DBI) measures the ratio of within-cluster scatter to between-cluster separation. Lower values indicate better clustering.
@@ -5857,7 +5408,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if not self.ndim_list:
             return
 
-        df_filtered, _  = self.data[self.sample_id].get_processed_data()
+        df_filtered, _  = self.data[self.app_data.sample_id].get_processed_data()
 
         # match self.comboBoxNorm.currentText():
         #     case 'log':
@@ -5867,11 +5418,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #     case 'linear':
         #         # do nothing
         #         pass
-        df_filtered = df_filtered[self.data[self.sample_id].mask]
+        df_filtered = df_filtered[self.data[self.app_data.sample_id].mask]
 
         ref_i = self.comboBoxNDimRefMaterial.currentIndex()
 
-        plot_type = self.plot_type
+        plot_type = self.plot_style.plot_type
         plot_data = None
 
         # Get quantile for plotting TEC & radar plots
@@ -5894,7 +5445,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             
         if self.field_type == 'cluster' and self.field != '':
             method = self.field
-            cluster_dict = self.cluster_dict[method]
+            cluster_dict = self.app_data.cluster_dict[method]
             cluster_color, cluster_label, cmap = self.plot_style.get_cluster_colormap(cluster_dict, alpha=self.plot_style.marker_alpha)
 
             clusters = cluster_dict['selected_clusters']
@@ -5914,9 +5465,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 canvas = mplc.MplCanvas(parent=self, proj='radar')
 
                 axes_interval = 5
-                if cluster_flag and method in self.data[self.sample_id].processed_data.columns:
+                if cluster_flag and method in self.data[self.app_data.sample_id].processed_data.columns:
                     # Get the cluster labels for the data
-                    cluster_group = self.data[self.sample_id].processed_data[method][self.data[self.sample_id].mask]
+                    cluster_group = self.data[self.app_data.sample_id].processed_data[method][self.data[self.app_data.sample_id].mask]
 
                     df_filtered['clusters'] = cluster_group
                     df_filtered = df_filtered[df_filtered['clusters'].isin(clusters)]
@@ -5943,9 +5494,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 canvas = mplc.MplCanvas(parent=self)
 
                 yl = [np.inf, -np.inf]
-                if cluster_flag and method in self.data[self.sample_id].processed_data.columns:
+                if cluster_flag and method in self.data[self.app_data.sample_id].processed_data.columns:
                     # Get the cluster labels for the data
-                    cluster_group = self.data[self.sample_id].processed_data[method][self.data[self.sample_id].mask]
+                    cluster_group = self.data[self.app_data.sample_id].processed_data[method][self.data[self.app_data.sample_id].mask]
 
                     df_filtered['clusters'] = cluster_group
 
@@ -5989,7 +5540,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.plot_info = {
             'tree': 'Geochemistry',
-            'sample_id': self.sample_id,
+            'sample_id': self.app_data.sample_id,
             'plot_name': plot_name,
             'plot_type': plot_type,
             'field_type': 'analyte',
@@ -6013,7 +5564,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # 
         def on_use_checkbox_state_changed(row, state):
             # Update the 'use' value in the filter_df for the given row
-            self.data[self.sample_id].filter_df.at[row, 'use'] = state == Qt.Checked
+            self.data[self.app_data.sample_id].filter_df.at[row, 'use'] = state == Qt.CheckState.Checked
 
         if calling_widget == 'analyteAdd':
             el_list = [self.comboBoxNDimAnalyte.currentText().lower()]
@@ -6021,7 +5572,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         elif calling_widget == 'analytesetAdd':
             el_list = self.ndim_list_dict[self.comboBoxNDimAnalyteSet.currentText()]
 
-        analytes_list = self.data[self.sample_id].processed_data.match_attribute('data_type','analyte')
+        analytes_list = self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','analyte')
 
         analytes = [col for iso in el_list for col in analytes_list if re.sub(r'\d', '', col).lower() == re.sub(r'\d', '',iso).lower()]
 
@@ -6034,7 +5585,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             # Create a QCheckBox for the 'use' column
             chkBoxItem_use = QCheckBox()
-            chkBoxItem_use.setCheckState(Qt.Checked)
+            chkBoxItem_use.setCheckState(True)
             chkBoxItem_use.stateChanged.connect(lambda state, row=row: on_use_checkbox_state_changed(row, state))
 
             self.tableWidgetNDim.setCellWidget(row, 0, chkBoxItem_use)
@@ -6094,7 +5645,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             print('Incorrect axis argument. Please use "x" or "y".')
 
     def group_changed(self):
-        if self.sample_id == '':
+        if self.app_data.sample_id == '':
             return
 
         # block signals
@@ -6106,21 +5657,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.tableWidgetViewGroups.setHorizontalHeaderLabels(['Name','Link','Color'])
 
         method = self.comboBoxClusterMethod.currentText()
-        if method in self.data[self.sample_id].processed_data.columns:
-            if not self.data[self.sample_id].processed_data[method].empty:
-                clusters = self.data[self.sample_id].processed_data[method].dropna().unique()
+        if method in self.data[self.app_data.sample_id].processed_data.columns:
+            if not self.data[self.app_data.sample_id].processed_data[method].empty:
+                clusters = self.data[self.app_data.sample_id].processed_data[method].dropna().unique()
                 clusters.sort()
 
-                self.cluster_dict[method]['selected_clusters'] = []
+                self.app_data.cluster_dict[method]['selected_clusters'] = []
                 try:
-                    self.cluster_dict[method].pop(99)
+                    self.app_data.cluster_dict[method].pop(99)
                 except:
                     pass
 
                 i = 0
                 while True:
                     try:
-                        self.cluster_dict[method].pop(i)
+                        self.app_data.cluster_dict[method].pop(i)
                         i += 1
                     except:
                         break
@@ -6143,7 +5694,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 for c in clusters:
                     if c == 99:
                         cluster_name = 'Mask'
-                        self.cluster_dict[method].update({c: {'name':cluster_name, 'link':[], 'color':hexcolor[-1]}})
+                        self.app_data.cluster_dict[method].update({c: {'name':cluster_name, 'link':[], 'color':hexcolor[-1]}})
                         break
                     else:
                         cluster_name = f'Cluster {c+1}'
@@ -6156,16 +5707,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     #self.tableWidgetViewGroups.setItem(i, 2, QTableWidgetItem(cluster_color))
                     self.tableWidgetViewGroups.selectRow(c)
                     
-                    self.cluster_dict[method].update({c: {'name':cluster_name, 'link':[], 'color':hexcolor[c]}})
+                    self.app_data.cluster_dict[method].update({c: {'name':cluster_name, 'link':[], 'color':hexcolor[c]}})
 
                 if 99 in clusters:
-                    self.cluster_dict[method]['selected_clusters'] = clusters[:-1]
+                    self.app_data.cluster_dict[method]['selected_clusters'] = clusters[:-1]
                 else:
-                    self.cluster_dict[method]['selected_clusters'] = clusters
+                    self.app_data.cluster_dict[method]['selected_clusters'] = clusters
         else:
             print(f'(group_changed) Cluster method, ({method}) is not defined')
 
-        #print(self.cluster_dict)
+        #print(self.app_data.cluster_dict)
         self.tableWidgetViewGroups.blockSignals(False)
         self.spinBoxClusterGroup.blockSignals(False)
         self.isUpdatingTable = False
@@ -6183,7 +5734,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # Extract the cluster id (assuming it's stored in the table)
             cluster_id = row
 
-            old_name = self.cluster_dict[self.cluster_dict['active method']][cluster_id]['name']
+            old_name = self.app_data.cluster_dict[self.app_data.cluster_dict['active method']][cluster_id]['name']
             # Check for duplicate names
             for i in range(self.tableWidgetViewGroups.rowCount()):
                 if i != row and self.tableWidgetViewGroups.item(i, 0).text() == new_name:
@@ -6192,20 +5743,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     QMessageBox.warning(self, "Clusters", "Duplicate name not allowed.")
                     return
 
-            # Update self.data[self.sample_id].processed_data with the new name
-            if self.cluster_dict['active method'] in self.data[self.sample_id].processed_data.columns:
+            # Update self.data[self.app_data.sample_id].processed_data with the new name
+            if self.app_data.cluster_dict['active method'] in self.data[self.app_data.sample_id].processed_data.columns:
                 # Find the rows where the value matches cluster_id
-                rows_to_update = self.data[self.sample_id].processed_data.loc[:,self.cluster_dict['active method']] == cluster_id
+                rows_to_update = self.data[self.app_data.sample_id].processed_data.loc[:,self.app_data.cluster_dict['active method']] == cluster_id
 
                 # Update these rows with the new name
-                self.data[self.sample_id].processed_data.loc[rows_to_update, self.cluster_dict['active method']] = new_name
+                self.data[self.app_data.sample_id].processed_data.loc[rows_to_update, self.app_data.cluster_dict['active method']] = new_name
 
             # update current_group to reflect the new cluster name
-            self.cluster_dict[self.cluster_dict['active method']][cluster_id]['name'] = new_name
+            self.app_data.cluster_dict[self.app_data.cluster_dict['active method']][cluster_id]['name'] = new_name
 
             # update plot with new cluster name
             # trigger update to plot
-            self.plot_style.scheduler.schedule_update()
+            self.plot_style.schedule_update()
 
     def toggle_color_widgets(self, switch):
         """Toggles enabled state of color related widgets
@@ -6253,8 +5804,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
 
         # filters
-        self.update_field_type_combobox(self.mask_dock.filter_tab.comboBoxFilterFieldType)
-        self.update_field_combobox(self.mask_dock.filter_tab.comboBoxFilterFieldType, self.mask_dock.filter_tab.comboBoxFilterField)
+        if hasattr(self, "mask_dock"):
+            self.update_field_type_combobox(self.mask_dock.filter_tab.comboBoxFilterFieldType)
+            self.update_field_combobox(self.mask_dock.filter_tab.comboBoxFilterFieldType, self.mask_dock.filter_tab.comboBoxFilterField)
 
         # scatter and heatmaps
         self.update_field_type_combobox(self.comboBoxFieldTypeX)
@@ -6283,9 +5835,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # colors
         addNone = True
-        if self.plot_type in ['analyte map','PCA score','cluster','cluster score']:
+        if self.plot_style.plot_type in ['analyte map','PCA score','cluster','cluster score']:
             addNone = False
-        self.update_field_type_combobox(self.comboBoxColorByField, addNone=addNone, plot_type=self.plot_type)
+        self.update_field_type_combobox(self.comboBoxColorByField, addNone=addNone, plot_type=self.plot_style.plot_type)
         self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
         self.spinBoxColorField.setFixedWidth(20)
         self.spinBoxColorField.setMinimum(0)
@@ -6310,7 +5862,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         #print('check_analysis_type')
         self.check_analysis = True
-        self.update_field_type_combobox(self.comboBoxColorByField, addNone=True, plot_type=self.plot_type)
+        self.update_field_type_combobox(self.comboBoxColorByField, addNone=True, plot_type=self.plot_style.plot_type)
         self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
         self.spinBoxColorField.setMinimum(0)
         self.spinBoxColorField.setMaximum(self.comboBoxColorField.count() - 1)
@@ -6342,7 +5894,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 return
 
         # get Auto scale parameters and neg handling from analyte info
-        data = self.data[self.sample_id].processed_data
+        data = self.data[self.app_data.sample_id].processed_data
         parameters = data.column_attributes[field]
 
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
@@ -6370,19 +5922,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.comboBoxNegativeMethod.setCurrentIndex(index)
             
             # Update filter UI 
-            self.mask_dock.filter_tab.lineEditFMin.value = data[field].min()
-            self.mask_dock.filter_tab.lineEditFMax.value = data[field].max()
-            self.mask_dock.filter_tab.callback_lineEditFMin()
-            self.mask_dock.filter_tab.callback_lineEditFMax()
+            if hasattr(self, "mask_dock"):
+                self.mask_dock.filter_tab.lineEditFMin.value = data[field].min()
+                self.mask_dock.filter_tab.lineEditFMax.value = data[field].max()
 
     def update_ratio_df(self,sample_id,analyte_1, analyte_2,norm):
         parameter = self.data[sample_id]['ratio_info'].loc[(self.data[sample_id]['ratio_info']['analyte_1'] == analyte_1) & (self.data[sample_id]['ratio_info']['analyte_2'] == analyte_2)]
         if parameter.empty:
-            ratio_info = {'sample_id': self.sample_id, 'analyte_1':analyte_1, 'analyte_2':analyte_2, 'norm': norm,
+            ratio_info = {'sample_id': self.app_data.sample_id, 'analyte_1':analyte_1, 'analyte_2':analyte_2, 'norm': norm,
                             'upper_bound':np.nan,'lower_bound':np.nan,'d_bound':np.nan,'use': True,'auto_scale': True}
             self.data[sample_id]['ratio_info'].loc[len(self.data[sample_id]['ratio_info'])] = ratio_info
 
-            self.data[self.sample_id].prep_data(sample_id, analyte_1=analyte_1, analyte_2=analyte_2)
+            self.data[self.app_data.sample_id].prep_data(sample_id, analyte_1=analyte_1, analyte_2=analyte_2)
             self.update_labels()
 
     def toggle_help_mode(self):
@@ -6391,9 +5942,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         Toggles ``MainWindow.actionHelp``, when checked, the cursor will change so indicates help tool is active.
         """        
         if self.actionHelp.isChecked():
-            self.setCursor(Qt.WhatsThisCursor)
+            self.setCursor(Qt.CursorShape.WhatsThisCursor)
         else:
-            self.setCursor(Qt.ArrowCursor)
+            self.setCursor(Qt.CursorShape.ArrowCursor)
 
 
 
@@ -6443,7 +5994,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         field_type_list = ['Analyte', 'Analyte (normalized)']
         
-        data_type_dict = self.data[self.sample_id].processed_data.get_attribute_dict('data_type')
+        data_type_dict = self.data[self.app_data.sample_id].processed_data.get_attribute_dict('data_type')
 
         # add check for ratios
         if 'ratio' in data_type_dict:
@@ -6489,9 +6040,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 
     def update_bounds(self,ub=None,lb=None,d_ub=None,d_lb=None):
-        sample_id = self.sample_id
+        sample_id = self.app_data.sample_id
         # Apply to all analytes in sample
-        columns = self.data[self.sample_id].processed_data.columns
+        columns = self.data[self.app_data.sample_id].processed_data.columns
 
         # update column attributes
         if (lb and ub):
@@ -6522,9 +6073,7 @@ def create_app():
     global app
     app = QApplication(sys.argv)
 
-    # Enable high-DPI scaling
-    app.setAttribute(Qt.AA_EnableHighDpiScaling)
-    app.setAttribute(Qt.AA_UseHighDpiPixmaps)
+    # Enable high-DPI scaling (enabled by default in PyQt6)
 
     if darkdetect.isDark():
         ss = load_stylesheet('dark.qss')
@@ -6550,12 +6099,15 @@ def main():
 
     # Uncomment this line to set icon to App
     app.setWindowIcon(QIcon(os.path.join(BASEDIR, os.path.join(ICONPATH,'LaME-64.svg'))))
+
+    # create application data properties with notifiable observers that can be used to
+    # update widgets in the UI
     main = MainWindow()
 
     # Set the main window to fullscreen
     #main.showFullScreen()
     main.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 
 if __name__ == '__main__':

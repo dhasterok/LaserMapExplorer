@@ -1,4 +1,4 @@
-﻿common.CustomWidgets
+common.CustomWidgets
 ====================
 
 .. automodule:: common.CustomWidgets
@@ -37,6 +37,7 @@
       QDockWidget
       QDoubleValidator
       QFont
+      QHeaderView
       QIcon
       QLineEdit
       QMenu
@@ -50,6 +51,7 @@
       QTreeView
       QWidget
       Qt
+      RotatedHeaderView
       StandardItem
       ToggleSwitch
       pyqtProperty

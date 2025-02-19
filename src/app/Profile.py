@@ -1,10 +1,12 @@
 import os, pickle
-from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtGui import QStandardItem, QStandardItemModel, QIcon, QFont, QIntValidator
-from PyQt5.QtWidgets import ( 
+from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtGui import (
+    QStandardItem, QStandardItemModel, QIcon, QFont, QIntValidator, QAction
+)
+from PyQt6.QtWidgets import ( 
         QMessageBox, QInputDialog, QWidget, QTableWidgetItem, QVBoxLayout, QHBoxLayout, QGroupBox,
         QToolButton, QComboBox, QSpinBox, QSizePolicy, QFormLayout, QListView, QToolBar,
-        QAction, QLabel, QHeaderView, QTableWidget, QScrollArea, QMainWindow, QWidgetAction
+        QLabel, QHeaderView, QTableWidget, QScrollArea, QMainWindow, QWidgetAction
     )
 from src.common.CustomWidgets import CustomDockWidget, CustomLineEdit, CustomComboBox, ToggleSwitch
 from src.app.UIControl import UIFieldLogic
@@ -16,12 +18,13 @@ from matplotlib.collections import PathCollection
 import numpy as np
 
 class ProfileDock(CustomDockWidget, UIFieldLogic):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, debug=False):
         if not isinstance(parent, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
 
         super().__init__(parent)
         self.main_window = parent
+        self.debug = debug
 
         self.profiling = Profiling(self)
 

@@ -1,4 +1,4 @@
-app.Workflow
+﻿app.Workflow
 ============
 
 .. automodule:: app.Workflow
@@ -40,7 +40,6 @@ app.Workflow
       QUrl
       QVBoxLayout
       QWebChannel
-      QWebEngineSettings
       QWebEngineView
       QWidget
       Qt

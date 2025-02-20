@@ -513,15 +513,14 @@ class Styling(Observable):
         return self._scale_dir
 
     @scale_dir.setter
-    def scale_dir(self, direction):
-        if (direction is not None) and isinstance(direction, str) and (direction in ['none', 'horizontal', 'vertical']):
-            if direction != self.style_dict[self._plot_type]['ScaleDir']:
-                if self.parent.comboBoxScaleDirection.currentText() != direction:
-                    self.parent.comboBoxScaleDirection.setCurrentText(direction)
-                self.style_dict[self._plot_type]['ScaleDir'] = direction
-                self.scale_direction_callback()
+    def scale_dir(self, new_dir):
+        if (new_dir is not None) and isinstance(new_dir, str) and (new_dir in ['none', 'horizontal', 'vertical']):
+            if new_dir == self._scale_dir or new_dir != self.style_dict[self._plot_type]['ScaleDir']:
+                self.style_dict[self._plot_type]['ScaleDir'] = new_dir
+                self._scale_dir = new_dir
+                self.notify_observers("scale_dir", new_dir)
         else:
-            raise TypeError("direction must be of type str.")
+            raise TypeError("new_dir must be of type str.")
 
     # scale_location
     @property
@@ -1182,8 +1181,8 @@ class StylingDock(Styling):
 
         # scales
         parent.lineEditScaleLength.setValidator(QDoubleValidator())
-        parent.comboBoxScaleDirection.activated.connect(lambda: setattr(self, 'scale_dir', parent.comboBoxScaleDirection.currentText()))
-        #parent.comboBoxScaleDirection.activated.connect(self.scale_direction_callback)
+        parent.comboBoxScaleDirection.activated.connect(self.update_scale_direction)
+        #parent.comboBoxScaleDirection.activated.connect(self.update_scale_direction)
         parent.comboBoxScaleLocation.activated.connect(self.scale_location_callback)
         #parent.lineEditScaleLength.editingFinished.connect(self.scale_length_callback)
         parent.lineEditScaleLength.editingFinished.connect(lambda: setattr(self, 'scale_length', parent.lineEditScaleLength.value))
@@ -1637,12 +1636,12 @@ class StylingDock(Styling):
                 parent.toolButtonOverlayColor.setEnabled(True)
 
                 # marker properties
-                if len(parent.spotdata) != 0:
-                    parent.comboBoxMarker.setEnabled(True)
-                    parent.doubleSpinBoxMarkerSize.setEnabled(True)
-                    parent.horizontalSliderMarkerAlpha.setEnabled(True)
-                    parent.labelMarkerAlpha.setEnabled(True)
-                    parent.toolButtonMarkerColor.setEnabled(True)
+                # if len(parent.spotdata) != 0:
+                #     parent.comboBoxMarker.setEnabled(True)
+                #     parent.doubleSpinBoxMarkerSize.setEnabled(True)
+                #     parent.horizontalSliderMarkerAlpha.setEnabled(True)
+                #     parent.labelMarkerAlpha.setEnabled(True)
+                #     parent.toolButtonMarkerColor.setEnabled(True)
 
                 # line properties
                 parent.doubleSpinBoxLineWidth.setEnabled(True)
@@ -2757,32 +2756,44 @@ class StylingDock(Styling):
 
     # scales
     # -------------------------------------
-    def scale_direction_callback(self):
+    def update_scale_direction_combobox(self, new_dir):
         """Sets scale direction on figure"""        
         if self.debug:
-            print("scale_direction_callback")
+            print("update_scale_direction")
+            
+        self.parent.comboBoxScaleDirection.setCurrentText(new_dir)
+        self.toggle_scale_widgets()
 
+        self.schedule_update()
+
+    def update_scale_direction(self):
+        self.scale_direction = self.parent.comboBoxScaleDirection.currentText()
+        self.toggle_scale_widgets()
+
+        self.schedule_update()
+
+    def toggle_scale_widgets(self):
+        """Toggles state of scale widgets.
+         
+        Enables/disables widgets based on ``self.scale_dir``, including the scale location and scale length."""
         parent = self.parent
-
-        if self.style_dict[self._plot_type]['ScaleDir'] == 'none':
+        if self.scale_dir == 'none':
             parent.labelScaleLocation.setEnabled(False)
             parent.comboBoxScaleLocation.setEnabled(False)
             parent.labelScaleLength.setEnabled(False)
             parent.lineEditScaleLength.setEnabled(False)
             parent.lineEditScaleLength.value = None
         else:
-            plot_type = self._plot_type
             parent.labelScaleLocation.setEnabled(True)
             parent.comboBoxScaleLocation.setEnabled(True)
             parent.labelScaleLength.setEnabled(True)
             parent.lineEditScaleLength.setEnabled(True)
             # set scalebar length if plot is a map type
-            if plot_type not in self.map_plot_types:
+            if self.plot_type not in self.map_plot_types:
                 self.scale_length = None
             else:
                 self.scale_length = self.default_scale_length()
 
-        self.scheduler.schedule_update()
 
     def default_scale_length(self):
         """Sets default length of a scale bar for map-type plots

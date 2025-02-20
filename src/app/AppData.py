@@ -729,6 +729,14 @@ class AppData(Observable):
             self._field_dict.pop("coordinate")
         return self._field_dict
 
+    @property
+    def selected_analytes(self):
+        """Gets the list of selected analytes for use in analyses."""
+        if self.data and self.sample_id != '':
+            return self.data[self.sample_id].processed_data.match_attributes({'data_type': 'analyte', 'use': True})
+
+        return None
+
     def get_field_list(self, set_name='Analyte', filter='all'):
         """Gets the fields associated with a defined set
 

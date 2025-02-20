@@ -63,6 +63,8 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
         # super().__init__(self, parent=None)
         if not isinstance(parent, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
+        elif parent is None:
+            return
         
         super().__init__(parent)
 
@@ -98,29 +100,29 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
         toolbar.setMovable(False)  # Optional: Prevent toolbar from being dragged out
 
         # calculate new field based on formula entered by user
-        self.action_calculate = QAction()
-        self.action_calculate.setIcon(QIcon(":resources/icons/icon-calculator-64.svg"))
-        self.action_calculate.setToolTip("Calculate field")
-        toolbar.addAction(self.action_calculate)
+        self.actionCalculate = QAction()
+        self.actionCalculate.setIcon(QIcon(":resources/icons/icon-calculator-64.svg"))
+        self.actionCalculate.setToolTip("Calculate field")
+        toolbar.addAction(self.actionCalculate)
 
         # save the current formula to a  dictionary
-        self.action_save = QAction()
-        self.action_save.setIcon(QIcon(":resources/icons/icon-save-file-64.svg"))
-        self.action_save.setToolTip("Calculate and save field")
-        toolbar.addAction(self.action_save)
+        self.actionSave = QAction()
+        self.actionSave.setIcon(QIcon(":resources/icons/icon-save-file-64.svg"))
+        self.actionSave.setToolTip("Calculate and save field")
+        toolbar.addAction(self.actionSave)
 
         # clear the calculator screen
-        self.action_clear = QAction()
-        self.action_clear.setIcon(QIcon(":resources/icons/icon-reject-64.svg"))
-        self.action_clear.setToolTip("Clear current formula")
-        toolbar.addAction(self.action_clear)
+        self.actionClear = QAction()
+        self.actionClear.setIcon(QIcon(":resources/icons/icon-reject-64.svg"))
+        self.actionClear.setToolTip("Clear current formula")
+        toolbar.addAction(self.actionClear)
 
         # link the calculator to help
-        self.action_help = QAction()
-        self.action_help.setIcon(QIcon(':resources/icons/icon-info-64.svg'))
-        self.action_help.triggered.connect(self.calc_help)
-        self.action_help.setToolTip("Get help calculating fields")
-        toolbar.addAction(self.action_help)
+        self.actionHelp = QAction()
+        self.actionHelp.setIcon(QIcon(':resources/icons/icon-info-64.svg'))
+        self.actionHelp.triggered.connect(self.calc_help)
+        self.actionHelp.setToolTip("Get help calculating fields")
+        toolbar.addAction(self.actionHelp)
 
         calculator_layout.addWidget(toolbar)
 
@@ -148,46 +150,46 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
 
         # Equations
         equation_select_layout = QHBoxLayout()
-        self.formula_combobox = QComboBox()
-        self.formula_combobox.activated.connect(self.calc_load_formula)
+        self.comboBoxFormula = QComboBox()
+        self.comboBoxFormula.activated.connect(self.calc_load_formula)
 
-        self.delete_formula_button = QToolButton()
+        self.toolButtonFormulaDelete = QToolButton()
         delete_icon = QIcon(":resources/icons/icon-delete-64.svg")
         if not delete_icon.isNull():
-            self.delete_formula_button.setIcon(delete_icon)
+            self.toolButtonFormulaDelete.setIcon(delete_icon)
         else:
-            self.delete_formula_button.setText("Delete")
-        self.delete_formula_button.setToolTip("Delete selected equation")
-        self.delete_formula_button.clicked.connect(self.calc_delete_formula)
+            self.toolButtonFormulaDelete.setText("Delete")
+        self.toolButtonFormulaDelete.setToolTip("Delete selected equation")
+        self.toolButtonFormulaDelete.clicked.connect(self.calc_delete_formula)
 
-        equation_select_layout.addWidget(self.formula_combobox)
-        equation_select_layout.addWidget(self.delete_formula_button)
+        equation_select_layout.addWidget(self.comboBoxFormula)
+        equation_select_layout.addWidget(self.toolButtonFormulaDelete)
         calculator_layout.addLayout(equation_select_layout)
 
 
         # Field Control
-        self.field_type_combobox = CustomComboBox(update_callback=lambda: self.update_field_type_combobox(self.field_type_combobox))
-        self.field_type_combobox.setToolTip("Select field type")
-        self.field_type_combobox.activated.connect(lambda: self.update_field_combobox(self.field_type_combobox, self.field_combobox))
-        calculator_layout.addWidget(self.field_type_combobox)
+        self.comboBoxFieldType = CustomComboBox(update_callback=lambda: self.update_field_type_combobox(self.comboBoxFieldType))
+        self.comboBoxFieldType.setToolTip("Select field type")
+        self.comboBoxFieldType.activated.connect(lambda: self.update_field_combobox(self.comboBoxFieldType, self.comboBoxField))
+        calculator_layout.addWidget(self.comboBoxFieldType)
 
         field_layout = QHBoxLayout()
-        self.field_combobox = QComboBox()
-        self.field_combobox.setToolTip("Select field")
+        self.comboBoxField = QComboBox()
+        self.comboBoxField.setToolTip("Select field")
 
-        self.add_field_button = QToolButton()
+        self.toolButtonAddFormula = QToolButton()
         add_icon = QIcon(":resources/icons/icon-accept-64.svg")
         if not add_icon.isNull():
-            self.add_field_button.setIcon(add_icon)
+            self.toolButtonAddFormula.setIcon(add_icon)
         else:
-            self.add_field_button.setText("Select a field to add it to the formula")
-        self.add_field_button.clicked.connect(self.calc_add_field)
+            self.toolButtonAddFormula.setText("Select a field to add it to the formula")
+        self.toolButtonAddFormula.clicked.connect(self.calc_add_field)
 
-        field_layout.addWidget(self.field_combobox)
-        field_layout.addWidget(self.add_field_button)
+        field_layout.addWidget(self.comboBoxField)
+        field_layout.addWidget(self.toolButtonAddFormula)
         calculator_layout.addLayout(field_layout)
 
-        self.update_field_combobox(self.field_type_combobox, self.field_combobox)
+        self.update_field_combobox(self.comboBoxFieldType, self.comboBoxField)
 
         # keypad_checkbox
         keypad_checkbox = QCheckBox()
@@ -266,10 +268,10 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
         parent.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self)
 
         # connect actions to methods
-        self.action_calculate.triggered.connect(self.calculate_new_field)
-        self.action_save.triggered.connect(lambda: self.calculate_new_field(save=True))
-        self.action_clear.triggered.connect(self.calc_text_edit.clear)
-        self.action_clear.triggered.connect(lambda: self.message_label.setText("Ready..."))
+        self.actionCalculate.triggered.connect(self.calculate_new_field)
+        self.actionSave.triggered.connect(lambda: self.calculate_new_field(save=True))
+        self.actionClear.triggered.connect(self.calc_text_edit.clear)
+        self.actionClear.triggered.connect(lambda: self.message_label.setText("Ready..."))
 
         # update UI with pre-saved formulas
         self.calc_load_dict()
@@ -348,8 +350,8 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
             print("calc_add_field")
 
         # get field type and name
-        field_type = self.field_type_combobox.currentText()
-        field = self.field_combobox.currentText()
+        field_type = self.comboBoxFieldType.currentText()
+        field = self.comboBoxField.currentText()
 
         # combine name in calculator style
         match field_type:
@@ -392,9 +394,9 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
                         self.calc_dict[name] = expression
 
                 # update formula_combobox
-                self.formula_combobox.clear()
+                self.comboBoxFormula.clear()
                 name_list = list(self.calc_dict.keys())
-                self.formula_combobox.addItems(name_list)
+                self.comboBoxFormula.addItems(name_list)
         except FileNotFoundError as e:
             # Return an empty dictionary if the file does not exist
             QMessageBox.warning(self,'Warning','Could not load custom calculated fields.\n Starting with empty custom field dictionary.')
@@ -411,10 +413,10 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
         func = 'calc_delete_formula'
 
         # get name of formula
-        name = self.formula_combobox.currentText()
+        name = self.comboBoxFormula.currentText()
 
         # remove name from formula_combobox
-        self.formula_combobox.removeItem(self.formula_combobox.currentIndex())
+        self.comboBoxFormula.removeItem(self.comboBoxFormula.currentIndex())
 
         # remove line with name from calculator formula file
         try:
@@ -444,7 +446,7 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
         if self.debug:
             print("calc_load_formula")
 
-        name = self.formula_combobox.currentText()
+        name = self.comboBoxFormula.currentText()
 
         self.calc_text_edit.clear()
         self.calc_text_edit.setText(self.calc_dict[name])
@@ -492,20 +494,20 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
             if not ok:
                 return
         else:
-            new_field = self.formula_combobox.currentText()
+            new_field = self.comboBoxFormula.currentText()
 
         # Use CustomFieldCalculator to compute new field
         self.cfc.calculate_new_field(self.parent.app_data.data[self.parent.app_data.sample_id].processed_data, self.parent.ref_chem, new_field)
 
         # update formula_combobox
-        self.formula_combobox.addItem(new_field)
-        self.formula_combobox.setCurrentText(new_field)
+        self.comboBoxFormula.addItem(new_field)
+        self.comboBoxFormula.setCurrentText(new_field)
 
         # add new calculated field to self.treeView
         self.parent.plot_tree.add_calculated_leaf(new_field)
 
         if self.parent.field_type_combobox.currentText == 'Calculated':
-            self.update_field_combobox(self.field_type_combobox, self.field_combobox)
+            self.update_field_combobox(self.comboBoxFieldType, self.comboBoxField)
 
         # get the formula and add to custom field dictionary
         formula = self.calc_text_edit.toPlainText()
@@ -540,6 +542,11 @@ class CustomFieldCalculator():
         ref_chem : pandas.DataFrame
             Reference chemistry used when normalization is required
         txt : str
+
+        Returns
+        -------
+        str, str :
+            returns the conditional (cond) and expression (expr)
         """
         if self.debug:
             print(f"calc_parse, text: {txt}")
@@ -547,6 +554,9 @@ class CustomFieldCalculator():
         func = 'CustomFieldCalculator.calc_parse'
 
         # remove whitespace
+        if txt is None:
+            return None, None
+
         txt = ''.join(txt.split())
 
         txt = txt.replace('^','**')

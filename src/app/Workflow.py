@@ -1,11 +1,12 @@
 import sys, os, json
-from PyQt5.QtWidgets import ( QMainWindow, QVBoxLayout, QWidget, QTextEdit, QSizePolicy, QDockWidget, QToolBar, QAction )
-from PyQt5.QtWebEngineWidgets import QWebEngineView
-from PyQt5.QtWebChannel import QWebChannel
-from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import pyqtSlot, Qt, QObject, QUrl, QFile, QIODevice, QSize
+from PyQt6.QtWidgets import ( 
+    QMainWindow, QVBoxLayout, QWidget, QTextEdit, QSizePolicy, QDockWidget, QToolBar 
+)
+from PyQt6.QtWebEngineWidgets import QWebEngineView
+from PyQt6.QtWebChannel import QWebChannel
+from PyQt6.QtGui import QIcon, QAction
+from PyQt6.QtCore import pyqtSlot, Qt, QObject, QUrl, QFile, QIODevice, QSize
 from src.app.config import BASEDIR
-from PyQt5.QtWebEngineWidgets import QWebEngineSettings
 from src.common.CustomWidgets import CustomDockWidget
 
 import numpy as np
@@ -59,7 +60,7 @@ class BlocklyBridge(QObject):
     
     @pyqtSlot(result=str)
     def getBaseDir(self):
-        return self.parent.main.BASEDIR
+        return BASEDIR
     
     @pyqtSlot(result=list)
     def getRefValueList(self):
@@ -191,7 +192,7 @@ class Workflow(CustomDockWidget):
 
         # Create a web engine view
         self.web_view = QWebEngineView()
-        self.web_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.web_view.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
         # Setup the WebChannel for communication
         self.channel = QWebChannel()
@@ -201,7 +202,7 @@ class Workflow(CustomDockWidget):
 
         # Load the qwebchannel.js file and inject it into the page
         api_file = QFile(":/qtwebchannel/qwebchannel.js")
-        if not api_file.open(QIODevice.ReadOnly):
+        if not api_file.open(QIODevice.OpenModeFlag.ReadOnly):
             print("Couldn't load Qt's QWebChannel API!")
         api_script = str(api_file.readAll(), 'utf-8')
         api_file.close()
@@ -220,9 +221,9 @@ class Workflow(CustomDockWidget):
 
         self.setFloating(True)
         self.setWindowTitle("Workflow Method Design")
-        self.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
+        self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowMinMaxButtonsHint | Qt.WindowType.WindowCloseButtonHint)
 
-        parent.addDockWidget(Qt.BottomDockWidgetArea, self)
+        parent.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self)
 
         # Initiate Main class from Modules.py
         # self.main will hold instance of Main code without any UI interactions

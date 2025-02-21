@@ -37,7 +37,6 @@
       QTableWidget
       QTableWidgetItem
       Qt
-      RotatedHeaderView
       Ui_FieldDialog
       pyqtSignal
    

@@ -1,7 +1,7 @@
-from PyQt5 import QtCore, QtGui
-from PyQt5.QtCore import ( Qt, QRectF, QPointF )
-from PyQt5.QtWidgets import ( QGraphicsRectItem )
-from PyQt5.QtGui import ( QColor, QPen, QCursor )
+from PyQt6 import QtCore, QtGui
+from PyQt6.QtCore import ( Qt, QRectF, QPointF )
+from PyQt6.QtWidgets import ( QGraphicsRectItem )
+from PyQt6.QtGui import ( QColor, QPen, QCursor )
 import numpy as np
 
 # Cropping

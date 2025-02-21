@@ -2,12 +2,12 @@ import os, re, darkdetect
 from collections import defaultdict
 import pandas as pd
 import numpy as np
-from PyQt5.QtWidgets import (
+from PyQt6.QtWidgets import (
     QApplication, QDialog, QFileDialog, QTableWidget, QTableWidgetItem, QInputDialog, QComboBox,
     QWidget, QCheckBox, QHeaderView, QProgressBar, QLineEdit, QMessageBox, QVBoxLayout, QPushButton, QHBoxLayout
 )
-from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import Qt, QUrl
+from PyQt6.QtGui import QIcon
+from PyQt6.QtCore import Qt, QUrl
 import src.common.csvdict as csvdict
 from src.ui.MapImportDialog import Ui_MapImportDialog
 from src.ui.FileSelectorDialog import Ui_FileSelectorDialog
@@ -90,9 +90,9 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         header = self.tableWidgetMetadata.horizontalHeader()
         for col in range(self.tableWidgetMetadata.columnCount()):
             if self.tableWidgetMetadata.horizontalHeaderItem(col).text() == 'Sample_ID':
-                header.setSectionResizeMode(col,QHeaderView.Stretch)
+                header.setSectionResizeMode(col,QHeaderView.ResizeMode.Stretch)
             else:
-                header.setSectionResizeMode(col,QHeaderView.ResizeToContents)
+                header.setSectionResizeMode(col,QHeaderView.ResizeMode.ResizeToContents)
 
         self.comboBoxDataType.currentIndexChanged.connect(self.data_type_changed)
         self.comboBoxMethod.currentIndexChanged.connect(self.method_changed)
@@ -372,9 +372,9 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         header = self.tableWidgetMetadata.horizontalHeader()
         for col in range(self.tableWidgetMetadata.columnCount()):
             if self.tableWidgetMetadata.horizontalHeaderItem(col).text() == 'Sample_ID':
-                header.setSectionResizeMode(col,QHeaderView.Stretch)
+                header.setSectionResizeMode(col,QHeaderView.ResizeMode.Stretch)
             else:
-                header.setSectionResizeMode(col,QHeaderView.ResizeToContents)
+                header.setSectionResizeMode(col,QHeaderView.ResizeMode.ResizeToContents)
             
         self.table_update = True
         for i in range(len(self.sample_ids)):
@@ -1217,9 +1217,9 @@ class FileSelectData(QDialog, Ui_FileSelectorDialog):
         header = self.tableWidgetFileMetadata.horizontalHeader()
         for col in range(self.tableWidgetFileMetadata.columnCount()):
             if self.tableWidgetFileMetadata.horizontalHeaderItem(col).text() == 'Filename':
-                header.setSectionResizeMode(col,QHeaderView.Stretch)
+                header.setSectionResizeMode(col,QHeaderView.ResizeMode.Stretch)
             else:
-                header.setSectionResizeMode(col,QHeaderView.ResizeToContents)
+                header.setSectionResizeMode(col,QHeaderView.ResizeMode.ResizeToContents)
 
         # Add buttons for OK and Cancel
         self.buttonBox.ok_button = QPushButton("OK")

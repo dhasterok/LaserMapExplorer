@@ -1,4 +1,4 @@
-﻿common.Masking
+common.Masking
 ==============
 
 .. automodule:: common.Masking
@@ -14,6 +14,9 @@
    .. autosummary::
    
       default_font
+      get_hex_color
+      get_rgb_color
+      percentileofscore
    
    
 
@@ -27,15 +30,18 @@
       CustomComboBox
       CustomDockWidget
       CustomLineEdit
+      CustomTableWidget
       Figure
       FigureCanvas
       FilterTab
       MaskDock
       MaskObj
       PathCollection
+      PolygonManager
       PolygonTab
       QAbstractItemView
       QAction
+      QCheckBox
       QComboBox
       QDockWidget
       QDoubleSpinBox
@@ -45,6 +51,7 @@
       QHBoxLayout
       QHeaderView
       QIcon
+      QInputDialog
       QIntValidator
       QLabel
       QListView
@@ -53,7 +60,6 @@
       QScrollArea
       QSize
       QSizePolicy
-      QSpinBox
       QStandardItem
       QStandardItemModel
       QTabWidget
@@ -66,6 +72,7 @@
       QWidgetAction
       Qt
       ScatterPlotItem
+      TableFcn
       ToggleSwitch
       UIFieldLogic
    

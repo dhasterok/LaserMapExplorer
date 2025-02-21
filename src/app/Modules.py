@@ -4,7 +4,7 @@ import pandas as pd
 pd.options.mode.copy_on_write = True
 import matplotlib
 matplotlib.use('Qt5Agg')
-from PyQt5.QtWidgets import QWidget, QDialog
+from PyQt6.QtWidgets import QWidget, QDialog
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 #from matplotlib.figure import Figure
 #from matplotlib.projections.polar import PolarAxes
@@ -74,13 +74,15 @@ class Main():
         self.outlier_method = 'none'
         self.negative_method = 'ignore negatives'
         self.calc_dict = {}
-        self.selected_directory = ''
         self.csv_files = []
         self.laser_map_dict = {}
         self.persistent_filters = pd.DataFrame()
         self.persistent_filters = pd.DataFrame(columns=['use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'persistent'])
         self.plot_type = 'analyte map'
         self.field_type_list = ['Analyte', 'Analyte (normalized)']
+
+        self.app_data = AppData(self.data)
+
         # Plot Selector
         #-------------------------
         self.sort_method = 'mass'
@@ -91,9 +93,9 @@ class Main():
         self.default_preferences = {'Units':{'Concentration': 'ppm', 'Distance': 'µm', 'Temperature':'°C', 'Pressure':'MPa', 'Date':'Ma', 'FontSize':11, 'TickDir':'out'}}
         self.preferences = copy.deepcopy(self.default_preferences)
 
-        self.io = LameIO(self, ui_update= False)
+        self.io = LameIO(self, connect_actions=False)
 
-        self.plot_style = Styling(self, ui= False)
+        self.plot_style = Styling(self)
         
         # Initialise plotviewer form
         self.plot_viewer = PlotViewer(self)
@@ -175,7 +177,7 @@ class Main():
         # add sample to sample dictionary
         if self.sample_id not in self.data:
             # load sample's *.lame file
-            file_path = os.path.join(self.selected_directory, self.csv_files[index])
+            file_path = os.path.join(self.app_data.selected_directory, self.csv_files[index])
             self.data[self.sample_id] = SampleObj(self.sample_id, file_path, self.outlier_method, self.negative_method)
 
     # -------------------------------------
@@ -217,11 +219,11 @@ class Main():
         self.analyte_dialog = AnalyteDialog(self)
         self.analyte_dialog.show()
 
-        result = self.analyte_dialog.exec_()  # Store the result here
-        if result == QDialog.Accepted:
+        result = self.analyte_dialog.exec()  # Store the result here
+        if result == QDialog.DialogCode.Accepted:
             self.update_analyte_ratio_selection(analyte_dict= self.analyte_dialog.norm_dict)   
             
-        if result == QDialog.Rejected:
+        if result == QDialog.DialogCode.Rejected:
             pass
     
     def open_field_selector_dialog(self):
@@ -238,11 +240,11 @@ class Main():
         self.field_selection_dialog = FieldDialog(self)
         self.field_selection_dialog.show()
 
-        result = self.field_selection_dialog.exec_()  # Store the result here
-        if result == QDialog.Accepted:
+        result = self.field_selection_dialog.exec()  # Store the result here
+        if result == QDialog.DialogCode.Accepted:
             self.selected_fields =  self.field_selection_dialog.selected_fields
             
-        if result == QDialog.Rejected:
+        if result == QDialog.DialogCode.Rejected:
             pass
 
     def update_analyte_ratio_selection(self,analyte_dict):
@@ -420,7 +422,7 @@ class Main():
         # update histogram
         if self.plot_type == 'histogram':
             # trigger update to plot
-            self.plot_style.scheduler.schedule_update()
+            self.plot_style.schedule_update()
 
     def plot_histogram(self, hist_type, field_type, field, n_bins):
         """Plots a histogramn in the canvas window"""

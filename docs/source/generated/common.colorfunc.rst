@@ -1,4 +1,4 @@
-﻿common.colorfunc
+common.colorfunc
 ================
 
 .. automodule:: common.colorfunc

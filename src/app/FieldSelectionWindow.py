@@ -1,11 +1,10 @@
-from PyQt5.QtCore import (Qt, pyqtSignal, QObject, QEvent)
-from PyQt5.QtWidgets import (
+from PyQt6.QtCore import (Qt, pyqtSignal, QObject, QEvent)
+from PyQt6.QtWidgets import (
     QMessageBox, QTableWidget, QDialog, QTableWidgetItem, QLabel, QComboBox,
     QHeaderView, QFileDialog, QListWidget, QAbstractItemView
 )
-from PyQt5.QtGui import (QImage, QColor, QFont, QPixmap, QPainter, QBrush)
+from PyQt6.QtGui import (QImage, QColor, QFont, QPixmap, QPainter, QBrush)
 from src.ui.FieldSelectionDialog import Ui_FieldDialog
-from src.common.rotated import RotatedHeaderView
 from src.app.config import BASEDIR
 import os
 
@@ -47,14 +46,14 @@ class FieldDialog(QDialog, Ui_FieldDialog):
         }
 
         # Set up the UI elements for multi-selection:
-        self.listWidgetFieldList.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.tableWidgetSelectedFields.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.tableWidgetSelectedFields.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self.listWidgetFieldList.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
+        self.tableWidgetSelectedFields.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.tableWidgetSelectedFields.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
 
         # Configure tableWidgetSelectedFields with two columns: Field and Field Type
         self.tableWidgetSelectedFields.setColumnCount(2)
         self.tableWidgetSelectedFields.setHorizontalHeaderLabels(["Field", "Field Type"])
-        self.tableWidgetSelectedFields.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.tableWidgetSelectedFields.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
 
         # Data structure to store selected fields as tuples: (field_type, field_name)
         self.selected_fields = []
@@ -262,12 +261,12 @@ class FieldDialog(QDialog, Ui_FieldDialog):
             reply = QMessageBox.question(
                 self, 'Unsaved Changes',
                 "You have unsaved changes. Do you want to save them before exiting?",
-                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel
             )
-            if reply == QMessageBox.Yes:
+            if reply == QMessageBox.StandardButton.Yes:
                 self.save_selection()
                 self.accept()
-            elif reply == QMessageBox.No:
+            elif reply == QMessageBox.StandardButton.No:
                 self.accept()
             else:
                 # Cancel: do nothing, stay in dialog
@@ -284,12 +283,12 @@ class FieldDialog(QDialog, Ui_FieldDialog):
             reply = QMessageBox.question(
                 self, 'Unsaved Changes',
                 "You have unsaved changes. Do you want to save them before exiting?",
-                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel
             )
-            if reply == QMessageBox.Yes:
+            if reply == QMessageBox.StandardButton.Yes:
                 self.save_selection()
                 self.reject()
-            elif reply == QMessageBox.No:
+            elif reply == QMessageBox.StandardButton.No:
                 self.reject()
             else:
                 # Cancel: do nothing, stay in dialog
@@ -308,12 +307,12 @@ class FieldDialog(QDialog, Ui_FieldDialog):
             reply = QMessageBox.question(
                 self, 'Unsaved Changes',
                 "You have unsaved changes. Do you want to save them?",
-                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel
             )
-            if reply == QMessageBox.Yes:
+            if reply == QMessageBox.StandardButton.Yes:
                 self.save_selection()
                 event.accept()
-            elif reply == QMessageBox.No:
+            elif reply == QMessageBox.StandardButton.No:
                 event.accept()
             else:
                 event.ignore()

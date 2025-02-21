@@ -1064,7 +1064,6 @@ class StylingDock(Styling):
 
         self.parent = parent
         self.debug = debug
-        self.add_observer(parent.update_widgets)
 
         self._signal_state = True
 

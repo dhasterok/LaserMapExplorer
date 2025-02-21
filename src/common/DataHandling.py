@@ -1673,3 +1673,22 @@ class SampleObj(Observable):
         if response == QMessageBox.StandardButton.No:
             return False  # User chose not to proceed
         return True  # User chose to proceed
+
+    def sort_data(self, method):
+        # retrieve analyte_list
+        analyte_list = self.processed_data.match_attribute('data_type','analyte')
+       
+        # sort analyte sort based on method chosen by user
+        sorted_analyte_list = sort_analytes(method, analyte_list)
+        
+        # Ensure all analytes in self.analyte_list are actually columns in the DataFrame
+        # Does this ever happen?
+        # This step filters out any items in self.analyte_list that are not columns in the DataFrame
+        #columns_to_order = [analyte for analyte in analyte_list if analyte in data.raw_data.columns]
+        
+        # Reorder the columns of the DataFrame based on self.analyte_list
+        self.raw_data.sort_columns(sorted_analyte_list)
+        if hasattr(self, "processed_data"):
+            self.processed_data.sort_columns(sorted_analyte_list)
+
+        return analyte_list, sorted_analyte_list

@@ -1,4 +1,4 @@
-import copy
+import os, copy
 import numpy as np
 import pandas as pd
 import src.common.csvdict as csvdict
@@ -13,6 +13,14 @@ class AppData(Observable):
         # in future will be set from preference ui
         self.preferences = copy.deepcopy(self.default_preferences)
         self.selected_directory = ''
+
+        self._sort_method = 'mass'
+
+        # reference chemistry
+        self.ref_data = pd.read_excel(os.path.join(BASEDIR,'resources/app_data/earthref.xlsx'))
+        self.ref_data = self.ref_data[self.ref_data['sigma']!=1]
+        self.ref_list = self.ref_data['layer']+' ['+self.ref_data['model']+'] '+ self.ref_data['reference']
+        self._ref_index = 0
 
         self._sample_list = []
         self.csv_files = []
@@ -147,6 +155,36 @@ class AppData(Observable):
     #         return true
     #     else:
     #         valueerror("field not found.")
+    @property
+    def sort_method(self):
+        return self._sort_method
+    
+    @sort_method.setter
+    def sort_method(self, new_method):
+        if new_method == self._sort_method:
+            return
+
+        self._sort_method = new_method
+        self.notify_observers("sort_method", new_method)
+
+    @property
+    def ref_index(self):
+        return self._ref_index
+    
+    @ref_index.setter
+    def ref_index(self, new_index):
+        if new_index == self._ref_index:
+            return
+
+        self._ref_index = new_index
+        self.notify_observers("ref_index", new_index)
+
+    @property
+    def ref_chem(self):
+        chem = self.ref_data.iloc[self._ref_index]
+        chem.index = [col.replace('_ppm', '') for col in chem.index]
+
+        return chem
 
     @property
     def sample_list(self):

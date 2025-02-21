@@ -255,6 +255,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # The data dictionary will hold the data with a key for each sample
         self.data = {}
+
         # until there is actually some data to store, disable certain widgets
         self.toggle_data_widgets()
 
@@ -264,102 +265,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #       notifiers when properties change
         #       data structure and properties (DataHandling), data
         self.app_data = AppData(self.data)
-        self.app_data.add_observer(self.update_widgets)
+        self.connect_app_data_observers(self.app_data)
 
         # initialize the styling data and dock
         self.plot_style = StylingDock(self, debug=self.logger_options['Styles'])
         self.plot_style.load_theme_names()
-        self.plot_style.add_observer(self.update_widgets)
+        self.connect_plot_style_observers(self.plot_style)
 
         # [convention] maps notifier properties with their associated UI update functions
         #   format of the UI update functions should be self.update_[property_name]_[widget_type]
         #   there should be an associated update function for the widgets to update properties
         #   with a similar format for the function name without _[widget_type]
-        self.property_update_map = {
-            "sample_list": self.update_sample_list_combobox,
-            "sample_id": self.update_sample_id_combobox,
-            "nx": self.update_nx_lineedit,
-            "ny": self.update_ny_lineedit,
-            "dx": self.update_dx_lineedit,
-            "dy": self.update_dy_lineedit,
-            "apply_process_to_all_data": self.update_autoscale_checkbox,
-            "equalize_color_scale": self.update_equalize_color_scale_toolbutton,
-            "hist_field_type": self.update_hist_field_type_combobox,
-            "hist_field": self.update_hist_field_combobox,
-            "hist_bin_width": self.update_hist_bin_width_spinbox,
-            "hist_num_bins": self.update_hist_num_bins_spinbox,
-            "hist_plot_style": self.update_hist_plot_style_combobox,
-            "corr_method": self.update_corr_method_combobox,
-            "corr_squared": self.update_corr_squared_checkbox,
-            "noise_red_method": self.update_noise_red_method_combobox,
-            "noise_red_option1": self.update_noise_red_option1_spinbox,
-            "noise_red_option2": self.update_noise_red_option2_spinbox,
-            "gradient_flag": self.update_gradient_flag_checkbox,
-            "x_field_type": self.update_x_field_type_combobox,
-            "y_field_type": self.update_y_field_type_combobox,
-            "z_field_type": self.update_z_field_type_combobox,
-            "x_field": self.update_x_field_combobox,
-            "y_field": self.update_y_field_combobox,
-            "z_field": self.update_z_field_combobox,
-            "scatter_preset": self.update_scatter_preset_combobox,
-            "heatmap_style": self.update_heatmap_style_combobox,
-            "ternary_colormap": self.update_ternary_colormap_combobox,
-            "ternary_color_x": self.update_ternary_color_x_toolbutton,
-            "ternary_color_y": self.update_ternary_color_y_toolbutton,
-            "ternary_color_z": self.update_ternary_color_z_toolbutton,
-            "ternary_color_m": self.update_ternary_color_m_toolbutton,
-            "norm_reference": self.update_norm_reference_combobox,
-            "ndim_analyte_set": self.update_ndim_analyte_set_combobox,
-            "ndim_quantile_index": self.update_ndim_quantile_index_combobox,
-            "dim_red_method": self.update_dim_red_method_combobox,
-            "dim_red_x": self.update_dim_red_x_spinbox,
-            "dim_red_y": self.update_dim_red_y_spinbox,
-            "cluster_method": self.update_cluster_method_combobox,
-            "max_clusters": self.update_max_clusters_spinbox,
-            "num_clusters": self.update_num_clusters_spinbox,
-            "cluster_seed": self.update_cluster_seed_lineedit,
-            "cluster_exponent": self.update_cluster_exponent_slider,
-            "cluster_distance": self.update_cluster_distance_combobox,
-            "dim_red_precondition": self.update_dim_red_precondition_checkbox,
-            "num_basis_for_precondition": self.update_num_basis_for_precondition_spinbox,
-            "selected_clusters": self.update_selected_clusters_spinbox,
-            ### plot_style properties
-            "plot_type": self.update_plot_type_combobox,
-            "xlim": self.update_xlim_lineedits,
-            "xlabel": self.update_xlabel_lineedit,
-            "xscale": self.update_xscale_combobox,
-            "ylim": self.update_ylim_lineedits,
-            "ylabel": self.update_ylabel_lineedit,
-            "yscale": self.update_yscale_combobox,
-            "zlim": self.update_zlim_lineedits,
-            "zlabel": self.update_zlabel_lineedit,
-            "zscale": self.update_zscale_combobox,
-            "aspect_ratio": self.update_aspect_ratio_lineedit,
-            "tick_dir": self.update_tick_dir_combobox,
-            "font_family": self.update_font_family_combobox,
-            "font_size": self.update_font_size_spinbox,
-            "scale_dir": self.plot_style.update_scale_direction_combobox,
-            "scale_location": self.update_scale_location_combobox,
-            "scale_length": self.update_scale_length_lineedit,
-            "overlay_color": self.update_overlay_color_toolbutton,
-            "show_mass": self.update_show_mass_checkbox,
-            "marker_symbol": self.update_marker_symbol_combobox,
-            "marker_size": self.update_marker_size_spinbox,
-            "marker_color": self.update_marker_color_toolbutton,
-            "marker_alpha": self.update_marker_alpha_slider,
-            "line_width": self.update_line_width_combobox,
-            "line_multiplier": self.update_line_multiplier_lineedit,
-            "line_color": self.update_line_color_toolbutton,
-            "c_field_type": self.update_color_field_type_combobox,
-            "c_field": self.update_color_field_combobox,
-            "cmap": self.update_cmap_combobox,
-            "cbar_reverse": self.update_cbar_reverse_checkbox,
-            "cbar_direction": self.update_cbar_direction_combobox,
-            "clim": self.update_clim_lineedits,
-            "clabel": self.update_clabel_lineedit,
-            "cscale": self.update_cscale_combobox,
-            "resolution": self.update_resolution_spinbox
-        }
 
         #Initialize nested data which will hold the main sets of data for analysis
         self.BASEDIR = BASEDIR
@@ -382,13 +298,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
 
         #initialise status bar
-        self.statusBar = self.statusBar()
+        #self.statusBar = self.statusBar()
 
-        # Plot Selector
-        #-------------------------
-        self.sort_method = 'mass'
-
-        
         # Plot Layouts
         #-------------------------
         # Central widget plot view layouts
@@ -519,7 +430,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 case 'regression':
                     self.style_tab.update({'regression': tid})
 
-
         self.toolBar.insertWidget(self.actionSelectAnalytes,self.widgetSampleSelect)
         self.toolBar.insertWidget(self.actionUpdatePlot,self.widgetPlotTypeSelect)
 
@@ -531,7 +441,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.mask_dock.tabWidgetMask.setCurrentIndex(self.mask_tab['filter'])
         self.toolBoxStyle.setCurrentIndex(0)
         self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
-
 
         # create dictionaries for default plot styles
         #-------------------------
@@ -619,22 +528,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Select analyte Tab
         #-------------------------
-        self.ref_data = pd.read_excel(os.path.join(BASEDIR,'resources/app_data/earthref.xlsx'))
-        self.ref_data = self.ref_data[self.ref_data['sigma']!=1]
-        self.ref_list = self.ref_data['layer']+' ['+self.ref_data['model']+'] '+ self.ref_data['reference']
+        # The reference chemistry is shown in two comboboxes... they should always display the same
+        # reference chemistry
+        self.comboBoxRefMaterial.addItems(self.app_data.ref_list.values)          # Select analyte Tab
+        self.comboBoxNDimRefMaterial.addItems(self.app_data.ref_list.values)      # NDim Tab
+        self.comboBoxRefMaterial.activated.connect(lambda: self.update_ref_chem_combobox(self.comboBoxRefMaterial.currentText())) 
+        self.comboBoxNDimRefMaterial.activated.connect(lambda: self.update_ref_chem_combobox(self.comboBoxNDimRefMaterial.currentText()))
+        self.comboBoxRefMaterial.setCurrentIndex(0)
+        self.comboBoxNDimRefMaterial.setCurrentIndex(0)
 
         self.toolButtonScaleEqualize.clicked.connect(self.update_equalize_color_scale)
-        self.comboBoxRefMaterial.addItems(self.ref_list.values)          # Select analyte Tab
-        self.comboBoxRefMaterial.setCurrentIndex(0)
-        self.comboBoxNDimRefMaterial.addItems(self.ref_list.values)      # NDim Tab
-        self.comboBoxNDimRefMaterial.setCurrentIndex(0)
-        self.comboBoxRefMaterial.activated.connect(lambda: self.change_ref_material(self.comboBoxRefMaterial.currentText())) 
-        self.comboBoxNDimRefMaterial.activated.connect(lambda: self.change_ref_material(self.comboBoxNDimRefMaterial.currentText()))
-        self.comboBoxRefMaterial.setCurrentIndex(0)
         self.spinBoxFieldIndex.valueChanged.connect(self.hist_field_update)
-        self.ref_chem = None
-
-        
 
         self.comboBoxCorrelationMethod.activated.connect(self.update_corr_method)
         self.checkBoxCorrelationSquared.stateChanged.connect(self.correlation_squared_callback)
@@ -789,7 +693,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxNDimAnalyteSet.clear()
         self.comboBoxNDimAnalyteSet.addItems(list(self.app_data.ndim_list_dict.keys()))
 
-        #self.comboBoxNDimRefMaterial.addItems(self.ref_list.values) This is done with the Set analyte tab initialization above.
+        #self.comboBoxNDimRefMaterial.addItems(self.app_data.ref_list.values) This is done with the Set analyte tab initialization above.
         self.toolButtonNDimAnalyteAdd.clicked.connect(lambda: self.update_ndim_table('analyteAdd'))
         self.toolButtonNDimAnalyteSetAdd.clicked.connect(lambda: self.update_ndim_table('analytesetAdd'))
         self.toolButtonNDimUp.clicked.connect(lambda: self.table_fcn.move_row_up(self.tableWidgetNDim))
@@ -986,10 +890,92 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.dockWidgetPlotTree.setFloating(False)
         self.dockWidgetStyling.setFloating(False)
 
-    def update_widgets(self, prop_name, value):
-        """Use dictionary lookup to call the correct update method."""
-        if prop_name in self.property_update_map:
-            self.property_update_map[prop_name](value)
+    def connect_app_data_observers(self, app_data):
+        app_data.add_observer("sort_method", self.update_sort_method)
+        app_data.add_observer("ref_chem", self.update_ref_index_combobox)
+        app_data.add_observer("sample_list", self.update_sample_list_combobox)
+        app_data.add_observer("sample_id", self.update_sample_id_combobox)
+        app_data.add_observer("apply_process_to_all_data", self.update_autoscale_checkbox)
+        app_data.add_observer("equalize_color_scale", self.update_equalize_color_scale_toolbutton)
+        app_data.add_observer("hist_field_type", self.update_hist_field_type_combobox)
+        app_data.add_observer("hist_field", self.update_hist_field_combobox)
+        app_data.add_observer("hist_bin_width", self.update_hist_bin_width_spinbox)
+        app_data.add_observer("hist_num_bins", self.update_hist_num_bins_spinbox)
+        app_data.add_observer("hist_plot_style", self.update_hist_plot_style_combobox)
+        app_data.add_observer("corr_method", self.update_corr_method_combobox)
+        app_data.add_observer("corr_squared", self.update_corr_squared_checkbox)
+        app_data.add_observer("noise_red_method", self.update_noise_red_method_combobox)
+        app_data.add_observer("noise_red_option1", self.update_noise_red_option1_spinbox)
+        app_data.add_observer("noise_red_option2", self.update_noise_red_option2_spinbox)
+        app_data.add_observer("gradient_flag", self.update_gradient_flag_checkbox)
+        app_data.add_observer("x_field_type", self.update_x_field_type_combobox)
+        app_data.add_observer("y_field_type", self.update_y_field_type_combobox)
+        app_data.add_observer("z_field_type", self.update_z_field_type_combobox)
+        app_data.add_observer("x_field", self.update_x_field_combobox)
+        app_data.add_observer("y_field", self.update_y_field_combobox)
+        app_data.add_observer("z_field", self.update_z_field_combobox)
+        app_data.add_observer("scatter_preset", self.update_scatter_preset_combobox)
+        app_data.add_observer("heatmap_style", self.update_heatmap_style_combobox)
+        app_data.add_observer("ternary_colormap", self.update_ternary_colormap_combobox)
+        app_data.add_observer("ternary_color_x", self.update_ternary_color_x_toolbutton)
+        app_data.add_observer("ternary_color_y", self.update_ternary_color_y_toolbutton)
+        app_data.add_observer("ternary_color_z", self.update_ternary_color_z_toolbutton)
+        app_data.add_observer("ternary_color_m", self.update_ternary_color_m_toolbutton)
+        app_data.add_observer("norm_reference", self.update_norm_reference_combobox)
+        app_data.add_observer("ndim_analyte_set", self.update_ndim_analyte_set_combobox)
+        app_data.add_observer("ndim_quantile_index", self.update_ndim_quantile_index_combobox)
+        app_data.add_observer("dim_red_method", self.update_dim_red_method_combobox)
+        app_data.add_observer("dim_red_x", self.update_dim_red_x_spinbox)
+        app_data.add_observer("dim_red_y", self.update_dim_red_y_spinbox)
+        app_data.add_observer("cluster_method", self.update_cluster_method_combobox)
+        app_data.add_observer("max_clusters", self.update_max_clusters_spinbox)
+        app_data.add_observer("num_clusters", self.update_num_clusters_spinbox)
+        app_data.add_observer("cluster_seed", self.update_cluster_seed_lineedit)
+        app_data.add_observer("cluster_exponent", self.update_cluster_exponent_slider)
+        app_data.add_observer("cluster_distance", self.update_cluster_distance_combobox)
+        app_data.add_observer("dim_red_precondition", self.update_dim_red_precondition_checkbox)
+        app_data.add_observer("num_basis_for_precondition", self.update_num_basis_for_precondition_spinbox)
+        app_data.add_observer("selected_clusters", self.update_selected_clusters_spinbox)
+
+    def connect_plot_style_observers(self, plot_style):
+        plot_style.add_observer("plot_type", self.update_plot_type_combobox)
+        plot_style.add_observer("xlim", self.update_xlim_lineedits)
+        plot_style.add_observer("xlabel", self.update_xlabel_lineedit)
+        plot_style.add_observer("xscale", self.update_xscale_combobox)
+        plot_style.add_observer("ylim", self.update_ylim_lineedits)
+        plot_style.add_observer("ylabel", self.update_ylabel_lineedit)
+        plot_style.add_observer("yscale", self.update_yscale_combobox)
+        plot_style.add_observer("zlim", self.update_zlim_lineedits)
+        plot_style.add_observer("zlabel", self.update_zlabel_lineedit)
+        plot_style.add_observer("zscale", self.update_zscale_combobox)
+        plot_style.add_observer("aspect_ratio", self.update_aspect_ratio_lineedit)
+        plot_style.add_observer("tick_dir", self.update_tick_dir_combobox)
+        plot_style.add_observer("font_family", self.update_font_family_combobox)
+        plot_style.add_observer("font_size", self.update_font_size_spinbox)
+        plot_style.add_observer("scale_dir", self.plot_style.update_scale_direction_combobox)
+        plot_style.add_observer("scale_location", self.update_scale_location_combobox)
+        plot_style.add_observer("scale_length", self.update_scale_length_lineedit)
+        plot_style.add_observer("overlay_color", self.update_overlay_color_toolbutton)
+        plot_style.add_observer("show_mass", self.update_show_mass_checkbox)
+        plot_style.add_observer("marker_symbol", self.update_marker_symbol_combobox)
+        plot_style.add_observer("marker_size", self.update_marker_size_spinbox)
+        plot_style.add_observer("marker_color", self.update_marker_color_toolbutton)
+        plot_style.add_observer("marker_alpha", self.update_marker_alpha_slider)
+        plot_style.add_observer("line_width", self.update_line_width_combobox)
+        plot_style.add_observer("line_multiplier", self.update_line_multiplier_lineedit)
+        plot_style.add_observer("line_color", self.update_line_color_toolbutton)
+        plot_style.add_observer("c_field_type", self.update_color_field_type_combobox)
+        plot_style.add_observer("c_field", self.update_color_field_combobox)
+        plot_style.add_observer("cmap", self.update_cmap_combobox)
+        plot_style.add_observer("cbar_reverse", self.update_cbar_reverse_checkbox)
+        plot_style.add_observer("cbar_direction", self.update_cbar_direction_combobox)
+        plot_style.add_observer("clim", self.update_clim_lineedits)
+        plot_style.add_observer("clabel", self.update_clabel_lineedit)
+        plot_style.add_observer("cscale", self.update_cscale_combobox)
+        plot_style.add_observer("resolution", self.update_resolution_spinbox)
+
+    def update_sort_method(self, new_method):
+        self.plot_tree.sort_tree(None, method=new_method)
 
     def update_sample_list_combobox(self, new_sample_list):
         """Updates ``MainWindow.comboBoxSampleID.items()``
@@ -1762,8 +1748,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.app_data.sample_id not in self.data:
             # load sample's *.lame file
             file_path = os.path.join(self.app_data.selected_directory, self.app_data.csv_files[index])
-            self.data[self.app_data.sample_id] = SampleObj(self.app_data.sample_id, file_path, self.comboBoxOutlierMethod.currentText(), self.comboBoxNegativeMethod.currentText(), self.ref_chem, debug=self.logger_options['Data'])
-            self.data[self.app_data.sample_id].add_observer(self.update_widgets)
+            self.data[self.app_data.sample_id] = SampleObj(self.app_data.sample_id, file_path, self.comboBoxOutlierMethod.currentText(), self.comboBoxNegativeMethod.currentText(), self.app_data.ref_chem, debug=self.logger_options['Data'])
+            self.connect_data_observers(self.data[self.app_data.sample_id])
 
             # enable widgets that require self.data not be empty
             self.toggle_data_widgets()
@@ -1792,6 +1778,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             else:
                 self.actionClusterMask.setEnabled(True)
                 self.actionClearFilters.setEnabled(True)
+
+
+        # sort data
+        self.plot_tree.sort_tree(None, method=self.app_data.sort_method)
 
         # precalculate custom fields
         if self.calculator.precalculate_custom_fields:
@@ -1844,53 +1834,47 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #    self.actionFilterToggle.setEnabled(False)
         self.actionNoiseReduction.setEnabled(False)
 
-        # sort data
-        self.plot_tree.sort_tree(None, method=self.sort_method)
-
         # reset flags
         self.update_cluster_flag = True
         self.update_pca_flag = True
 
-        #update UI with auto scale and neg handling parameters from 'Analyte Info'
-        analyte_list = self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','analyte')
-
-        self.update_spinboxes(field_type='Analyte', field=analyte_list[0])
-
         # reset all plot types on change of tab to the first option
         for key in self.plot_types.keys():
             self.plot_types[key][0] = 0
+
         # set to single-view, tree view, and sample and fields tab
-        self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
         self.toolBoxStyle.setCurrentIndex(0)
         self.toolBox.setCurrentIndex(self.left_tab['sample'])
         self.plot_style.set_style_widgets(self.plot_style.plot_type)
 
+        # set canvas to single view
+        self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
+        self.canvas_changed()
+        
+        # set toolbox
+        self.toolBox.setCurrentIndex(self.left_tab['sample'])
+        self.toolbox_changed()
+
         # update comboboxes to reflect list of available field types and fields
         self.update_all_field_comboboxes()
-        #self.update_field_combobox(self.comboBoxColorByField,self.comboBoxColorField)
-
         # set color field and hist field as 'Analyte'
         self.plot_style.color_field_type = 'Analyte'
         self.plot_style.color_field = analyte_list[0]
 
-        
-        self.toolBox.setCurrentIndex(self.left_tab['sample'])
-        self.toolbox_changed()
-
         if self.plot_style.plot_type != 'analyte map':
             self.plot_style.plot_type = 'analyte map'
-
-
-        self.update_histogram_bin_width()
-
-        # update toolbar
-        self.canvas_changed()
 
         # allow plots to be updated again
         self.plot_flag = True
 
         # trigger update to plot
         self.plot_style.schedule_update()
+
+    def connect_data_observers(self, data):
+        data.add_observer("nx", self.update_nx_lineedit)
+        data.add_observer("ny", self.update_ny_lineedit)
+        data.add_observer("dx", self.update_dx_lineedit)
+        data.add_observer("dy", self.update_dy_lineedit)
 
     def update_ui_on_sample_change(self):
         # update dx, dy, nx, ny
@@ -1911,6 +1895,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # hist_bin_width and should be updated along with hist_num_bins
         self.app_data.hist_num_bins = self.app_data.default_hist_num_bins
 
+        # update UI with auto scale and neg handling parameters from 'Analyte Info'
+        self.update_spinboxes(field_type='Analyte', field=analyte_list[0])
         # update noise reduction, outlier detection, neg. handling, quantile bounds, diff bounds
         self.data[self.app_data.sample_id].negative_method = self.data[self.app_data.sample_id].processed_data.get_attribute(field,'negative_method')
         self.data[self.app_data.sample_id].outlier_method = self.data[self.app_data.sample_id].processed_data.get_attribute(field,'outlier_method')
@@ -1919,8 +1905,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.data[self.app_data.sample_id].data_max_quantile = self.data[self.app_data.sample_id].processed_data.get_attribute(field,'upper_bound')
         self.data[self.app_data.sample_id].data_min_diff_quantile = self.data[self.app_data.sample_id].processed_data.get_attribute(field,'diff_lower_bound')
         self.data[self.app_data.sample_id].data_max_diff_quantile = self.data[self.app_data.sample_id].processed_data.get_attribute(field,'diff_upper_bound')
-        self.update_ref_chem_comboBox(self.data[self.app_data.sample_id].ref_chem)
 
+        # reference chemistry is set when the data are initialized
+        #self.data[self.app_data.sample_id].ref_chem = self.app_data.ref_chem
+        ref_name = self.data[self.app_data.sample_id].ref_chem.reference
+        if ref_name in self.app_data.ref_list:
+            self.app_data.ref_index = self.app_data.ref_list.tolist().index(ref_name)
 
         # update multidim method, pcx to 1 and pcy to 2 (if pca exists)
         # ???
@@ -2679,47 +2669,47 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if field != self.field:
                 self.comboBoxColorField.setCurrentText(field)
                 self.plot_style.color_field_callback(plot)
+    
+    def update_ref_index_combobox(self, new_index):
+        rev_val = self.app_data.ref_list[new_index]
+        self.update_ref_chem_combobox(rev_val)
 
     
-    def change_ref_material(self, ref_val):
+    def update_ref_chem_combobox(self, ref_val):
         """Changes reference computing normalized analytes
 
-        Sets all `self.ref_chem` to a common normalizing reference.
+        Sets all `self.app_data.ref_chem` to a common normalizing reference.
 
         Parameters
         ----------
         ref_val : str
             Name of reference value from combobox/dropdown
         """
-        # update `self.ref_chem`
-        ref_index = self.change_ref_material_BE(ref_val)
-        self.change_ref_material_UI(ref_index)
+        # update `self.app_data.ref_chem`
+        ref_index = self.update_ref_chem_combobox_BE(ref_val)
+        self.update_ref_chem_combobox_UI(ref_index)
     
     
     # toolbar functions
-    def change_ref_material_BE(self, ref_val):
+    def update_ref_chem_combobox_BE(self, ref_val):
         """Changes reference computing normalized analytes
 
-        Sets all `self.ref_chem` to a common normalizing reference.
+        Sets all `self.app_data.ref_chem` to a common normalizing reference.
 
         Parameters
         ----------
         ref_val : str
             Name of reference value from combobox/dropdown
         """
-        ref_index =  self.ref_list.tolist().index(ref_val)
+        ref_index =  self.app_data.ref_list.tolist().index(ref_val)
 
-        if (ref_index):
-
-            ref_chem = self.ref_data.iloc[ref_index]
-            ref_chem.index = [col.replace('_ppm', '') for col in ref_chem.index]
-
-            self.data[self.app_data.sample_id].ref_chem = ref_chem
+        if ref_index:
+            self.data[self.app_data.sample_id].ref_chem = self.app_data.ref_chem
 
             return ref_index
 
 
-    def change_ref_material_UI(self, ref_index):
+    def update_ref_chem_combobox_UI(self, ref_index):
         """Changes reference computing normalized analytes
 
         Sets all QComboBox to a common normalizing reference.
@@ -2771,15 +2761,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # trigger update to plot
             self.plot_style.schedule_update()
         #self.update_all_plots()
-
-     # for a disappearing button
-    # def mouseEnter(self, event):
-    #     self.toolButtonPopFigure.setVisible(True)
-
-    # def mouseLeave(self, event):
-    #     self.toolButtonPopFigure.setVisible(False)
-
-    # color picking functions
 
     def update_invalid_data_labels(self):
         """Updates flags on statusbar indicating negative/zero and nan values within the processed_data_frame"""        
@@ -5575,8 +5556,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         #print(f'Cluster {i}')
                         canvas.axes, yl_tmp, _ = plot_spider_norm(
                                 data=df_filtered.loc[df_filtered['clusters']==i,:],
-                                ref_data=self.ref_data, norm_ref_data=self.ref_data['model'][ref_i],
-                                layer=self.ref_data['layer'][ref_i], el_list=self.ndim_list ,
+                                ref_data=self.app_data.ref_data, norm_ref_data=self.app_data.ref_data['model'][ref_i],
+                                layer=self.app_data.ref_data['layer'][ref_i], el_list=self.ndim_list ,
                                 style='Quanta', quantiles=quantiles, ax=canvas.axes, c=cluster_color[i], label=cluster_label[i]
                             )
                         #store max y limit to convert the set y limit of axis
@@ -5594,10 +5575,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
                     canvas.axes.set_xticklabels(labels, rotation=angle)
                 else:
-                    canvas.axes, yl, plot_data = plot_spider_norm(data=df_filtered, ref_data=self.ref_data, norm_ref_data=self.ref_data['model'][ref_i], layer=self.ref_data['layer'][ref_i], el_list=self.ndim_list, style='Quanta', quantiles=quantiles, ax=canvas.axes)
+                    canvas.axes, yl, plot_data = plot_spider_norm(data=df_filtered, ref_data=self.app_data.ref_data, norm_ref_data=self.app_data.ref_data['model'][ref_i], layer=self.app_data.ref_data['layer'][ref_i], el_list=self.ndim_list, style='Quanta', quantiles=quantiles, ax=canvas.axes)
 
                     canvas.axes.set_xticklabels(labels, rotation=angle)
-                canvas.axes.set_ylabel(f"Abundance / [{self.ref_data['model'][ref_i]}, {self.ref_data['layer'][ref_i]}]")
+                canvas.axes.set_ylabel(f"Abundance / [{self.app_data.ref_data['model'][ref_i]}, {self.app_data.ref_data['layer'][ref_i]}]")
                 canvas.fig.tight_layout()
 
         if cluster_flag:

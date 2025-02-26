@@ -110,7 +110,7 @@ class LameIO():
                 parent.statusBar.showMessage("No valid csv files found.")
             return
                 #clear the current analysis
-        self.parent.reset_analysis()
+
         self.initialize_samples_and_tabs()
 
 

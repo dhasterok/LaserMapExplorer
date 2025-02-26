@@ -31,3 +31,13 @@ self.dockWidgetLeftToolbox
 self.dockWidgetRightToolbox
 self.dockWidgetMaskToolbox
 self.dockWidgetInfoToolbox
+self.comboBoxHistFieldType
+self.comboBoxHistField
+self.comboBoxColorByField
+self.comboBoxColorField
+self.comboBoxFieldTypeX
+self.comboBoxFieldX
+self.comboBoxFieldTypeY
+self.comboBoxFieldY
+self.comboBoxFieldTypeZ
+self.comboBoxFieldZ

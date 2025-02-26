@@ -67,6 +67,7 @@ get_widget_type() {
     self.lineEdit*) echo "LineEdit" ;;
     self.treeView*) echo "TreeView" ;;
     self.dockWidget*) echo "DockWidget" ;;
+    self.comboBox*) echo "ComboBox" ;;
     # Add more patterns as needed
     *) echo "Unknown" ;;
   esac

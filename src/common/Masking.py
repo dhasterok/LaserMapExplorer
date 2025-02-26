@@ -89,9 +89,9 @@ class MaskDock(CustomDockWidget, UIFieldLogic):
         self.tabWidgetMask = QTabWidget(container)
         self.tabWidgetMask.setObjectName("Mask Tab Widget")
 
-        self.filter_tab = FilterTab(self)
-        self.polygon_tab = PolygonTab(self)
-        self.cluster_tab = ClusterTab(self)
+        self.filter_tab = FilterTab(self, debug=debug)
+        self.polygon_tab = PolygonTab(self, debug=debug)
+        self.cluster_tab = ClusterTab(self, debug=debug)
 
         dock_layout.addWidget(self.tabWidgetMask)
         self.setWidget(container)
@@ -107,10 +107,13 @@ class MaskDock(CustomDockWidget, UIFieldLogic):
         self.filter_tab.update_filter_values()
 
 class FilterTab():
-    def __init__(self, parent):
+    def __init__(self, parent, debug=False):
         self.parent = parent
+        self.main_window = parent.main_window
 
-        if parent.main_window.data and parent.main_window.app_data.sample_id != '':
+        self.debug = debug
+
+        if self.main_window.data and parent.main_window.app_data.sample_id != '':
             self.data = self.parent.main_window.data[self.parent.main_window.app_data.sample_id]
 
         #init table_fcn
@@ -187,9 +190,11 @@ class FilterTab():
         filter_tools_layout.addRow(labelFilterPresets, self.comboBoxFilterPresets)
 
         # field type and field comboboxes
-        self.comboBoxFilterFieldType = QComboBox(filter_tools_groupbox)
+        self.comboBoxFilterFieldType = CustomComboBox(filter_tools_groupbox)
+        self.comboBoxFilterFieldType.update_callback = lambda: self.main_window.update_field_type_combobox_options(self.comboBoxFilterFieldType, self.comboBoxFilterField, global_list=True)
 
-        self.comboBoxFilterField = QComboBox(filter_tools_groupbox)
+        self.comboBoxFilterField = CustomComboBox(filter_tools_groupbox)
+        self.comboBoxFilterField.update_callback = lambda: self.main_window.update_field_combobox_options(self.comboBoxFilterField, self.comboBoxFilterFieldType, add_none=False)
         filter_tools_layout.addRow(self.comboBoxFilterFieldType, self.comboBoxFilterField)
 
         # minimum value for filter
@@ -315,8 +320,7 @@ class FilterTab():
 
         # filter widget connections
         self.comboBoxFilterPresets.activated.connect(self.read_filter_table)
-        self.comboBoxFilterFieldType.activated.connect(lambda: self.parent.main_window.update_field_combobox(self.comboBoxFilterFieldType, self.comboBoxFilterField))
-        self.comboBoxFilterField.currentIndexChanged.connect(self.update_filter_values)
+        self.comboBoxFilterField.currentTextChanged.connect(self.update_filter_values)
         self.lineEditFMin.editingFinished.connect(self.callback_lineEditFMin)
         self.doubleSpinBoxFMinQ.valueChanged.connect(self.callback_doubleSpinBoxFMinQ)
         self.lineEditFMax.editingFinished.connect(self.callback_lineEditFMax)
@@ -417,7 +421,7 @@ class FilterTab():
 
                 # Create and set the checkbox for 'use'
                 chkBoxItem_use = QCheckBox()
-                chkBoxItem_use.setCheckState(Qt.Checked if row['use'] else Qt.Unchecked)
+                chkBoxItem_use.setCheckState(Qt.CheckState.Checked if row['use'] else Qt.CheckState.Unchecked)
                 chkBoxItem_use.stateChanged.connect(lambda state, row=current_row: on_use_checkbox_state_changed(row, state))
                 self.tableWidgetFilters.setCellWidget(current_row, 0, chkBoxItem_use)
 
@@ -431,7 +435,7 @@ class FilterTab():
 
                 # Create and set the checkbox for selection (assuming this is a checkbox similar to 'use')
                 chkBoxItem_select = QCheckBox()
-                chkBoxItem_select.setCheckState(Qt.Checked if row.get('select', False) else Qt.Unchecked)
+                chkBoxItem_select.setCheckState(Qt.CheckState.Checked if row.get('select', False) else Qt.CheckState.Unchecked)
                 self.tableWidgetFilters.setCellWidget(current_row, 7, chkBoxItem_select)
 
         else:
@@ -440,7 +444,7 @@ class FilterTab():
 
             def on_use_checkbox_state_changed(row, state):
                 # Update the 'use' value in the filter_df for the given row
-                self.parent.main_window.data[self.parent.main_window.sample_id].filter_df.at[row, 'use'] = state == Qt.Checked
+                self.parent.main_window.data[self.parent.main_window.sample_id].filter_df.at[row, 'use'] = state == Qt.CheckState.Checked
 
             field_type = self.comboBoxFilterFieldType.currentText()
             field = self.comboBoxFilterField.currentText()
@@ -453,20 +457,20 @@ class FilterTab():
 
             # Create a QCheckBox for the 'use' column
             chkBoxItem_use = QCheckBox()
-            chkBoxItem_use.setCheckState(Qt.Checked)
+            chkBoxItem_use.setCheckState(Qt.CheckState.Checked)
             chkBoxItem_use.stateChanged.connect(lambda state, row=row: on_use_checkbox_state_changed(row, state))
 
             chkBoxItem_select = QTableWidgetItem()
-            chkBoxItem_select.setFlags(Qt.ItemIsUserCheckable |
-                                Qt.ItemIsEnabled)
+            chkBoxItem_select.setFlags(Qt.ItemFlag.ItemIsUserCheckable |
+                                Qt.ItemFlag.ItemIsEnabled)
 
             if 'Analyte' in field_type:
-                chkBoxItem_select.setCheckState(Qt.Unchecked)
+                chkBoxItem_select.setCheckState(Qt.CheckState.Unchecked)
                 analyte_1 = field
                 analyte_2 = None
                 scale = self.parent.main_window.data[self.parent.main_window.sample_id].processed_data.get_attribute(field,'norm')
             elif 'Ratio' in field_type:
-                chkBoxItem_select.setCheckState(Qt.Unchecked)
+                chkBoxItem_select.setCheckState(Qt.CheckState.Unchecked)
                 analyte_1, analyte_2 = field.split(' / ')
                 scale = self.parent.main_window.data[self.parent.main_window.sample_id].processed_data.get_attribute(field,'norm')
             else:
@@ -500,7 +504,7 @@ class FilterTab():
             chkBoxItem = self.tableWidgetFilters.item(row, 7)
             field_type = self.tableWidgetFilters.item(row, 1).text()
             field = self.tableWidgetFilters.item(row, 2).text()
-            if chkBoxItem.checkState() == Qt.Checked:
+            if chkBoxItem.checkState() == Qt.CheckState.Checked:
                 self.tableWidgetFilters.removeRow(row)
                 self.parent.main_window.data[sample_id].filter_df.drop(self.parent.main_window.data[sample_id].filter_df[(self.parent.main_window.data[sample_id].filter_df['field'] == field)].index, inplace=True)
 
@@ -566,8 +570,10 @@ class FilterTab():
         self.update_filter_table()
 
 class PolygonTab():
-    def __init__(self, parent):
+    def __init__(self, parent, debug=False):
         self.parent = parent
+
+        self.debug = debug
 
         #init table_fcn
         self.table_fcn = TableFcn(self)
@@ -733,7 +739,7 @@ class PolygonTab():
 
 
 class ClusterTab():
-    def __init__(self, parent):
+    def __init__(self, parent, debug=False):
         self.parent = parent
 
         self.main_window = self.parent.main_window
@@ -872,7 +878,7 @@ class ClusterTab():
 
         # update plot
         if self.parent.main_window.comboBoxColorByField.currentText() == 'cluster':
-            self.scheduler.schedule_update()
+            self.parent.main_window.plot_style.schedule_update()
 
     def select_cluster_group_callback(self):
         """Set cluster color button background after change of selected cluster group

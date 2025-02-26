@@ -38,7 +38,6 @@ from src.app.AnalyteSelectionWindow import AnalyteDialog
 from src.common.TableFunctions import TableFcn as TableFcn
 import src.common.CustomMplCanvas as mplc
 from src.app.PlotViewerWindow import PlotViewer
-from src.app.Actions import Actions
 from src.common.DataHandling import SampleObj
 from src.app.PlotTree import PlotTree
 from src.app.CropImage import CropTool

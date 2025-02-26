@@ -1,12 +1,12 @@
 from PyQt6.QtWidgets import ( 
         QWidget, QLineEdit, QTableWidget, QComboBox, QPushButton, QCheckBox, QWidget, QTreeView,
-        QMenu, QDockWidget, QHeaderView
+        QMenu, QDockWidget, QHeaderView, QToolButton
     )
 from PyQt6.QtGui import (
     QStandardItem, QStandardItemModel, QFont, QDoubleValidator, QIcon, QCursor, QPainter,
-    QColor, QAction
+    QColor, QAction, QIcon
 )
-from PyQt6.QtCore import Qt, QRect, QPropertyAnimation, pyqtProperty, pyqtSignal
+from PyQt6.QtCore import Qt, QRect, QPropertyAnimation, pyqtProperty, pyqtSignal, QSize
 import src.common.format as fmt
 import pandas as pd
 
@@ -533,3 +533,32 @@ class ToggleSwitch(QWidget):
         self.update()  # Redraw switch
 
     thumb_pos = property(get_thumb_pos, set_thumb_pos)
+
+class CustomCheckButton(QToolButton):
+    """A button that changes icons when checked
+    
+    Properties
+    ----------
+    """
+    def __init__(self, icon_unchecked: QIcon, icon_checked: QIcon, parent=None):
+        super().__init__()
+
+        # icons for checked and unchecked states
+        self.icon_checked = icon_checked
+        self.icon_unchecked = icon_checked
+
+        # button properties
+        self.setFixedSize(24, 24)
+        self.setIconSize(QSize(18, 18))
+
+        # initialize checked state and icon
+        self.setCheckable(True)
+        self.setChecked(False)
+        self.update_icon()
+    
+    def update_icon(self):
+        """Update the icon based on the button's checked state."""
+        if self.isChecked():
+            self.setIcon(self.icon_checked)
+        else:
+            self.setIcon(self.icon_unchecked)

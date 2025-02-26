@@ -246,6 +246,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "ny": self.update_ny,
             "dx": self.update_dx,
             "dy": self.update_dy,
+            "data_min_quantile": self.update_data_min_quanitle,
+            "data_max_quantile": self.update_data_max_quanitle,
+            "data_min_diff_quantile": self.update_data_min_diff_quanitle,
+            "data_max_diff_quantile": self.update_data_min_diff_quanitle,
+            "data_auto_scale_value": self.update__auto_scale_value,
+            "apply_outlier_to_all": self.update_apply_outlier_to_all,
             "equalize_color_scale": self.update_equalize_color_scale_toolbutton,
             "hist_field_type": self.update_hist_field_type_combobox,
             "hist_field": self.update_hist_field_combobox,
@@ -1043,6 +1049,132 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.lineEditResolutionNy.value = value
         if self.toolBox.currentIndex() == self.left_tab['process']:
             self.plot_style.scheduler.schedule_update()
+
+
+    def update_data_min_quantile(self,value):
+        """Updates ``MainWindow.lineEditLowerQuantile.value``
+        Called as an update to ``DataHandling.lineEditLowerQuantile``. 
+
+        Parameters
+        ----------
+        value : float
+            lower quantile value.
+        """
+        self.lineEditLowerQuantile.value = value
+        self.update_labels()
+        if hasattr(self,"mask_dock"):
+            self.mask_dock.filter_tab.update_filter_values()
+        if self.toolBox.currentIndex() == self.left_tab['process']:
+            self.plot_style.scheduler.schedule_update()
+
+
+    def update_data_max_quantile(self,value):
+        """Updates ``MainWindow.lineEditLowerQuantile.value``
+        Called as an update to ``DataHandling.lineEditLowerQuantile``. 
+        
+        Parameters
+        ----------
+        value : float
+            lower quantile value.
+        """
+        self.lineEditUpperQuantile.value = value
+        self.update_labels()
+        if hasattr(self,"mask_dock"):
+            self.mask_dock.filter_tab.update_filter_values()
+        if self.toolBox.currentIndex() == self.left_tab['process']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_data_min_diff_quantile(self,value):
+        """Updates ``MainWindow.lineEditLowerQuantile.value``
+        Called as an update to ``DataHandling.lineEditLowerQuantile``. 
+
+        Parameters
+        ----------
+        value : float
+            lower quantile value.
+        """
+        self.lineEditDifferenceLowerQuantile.value = value
+        self.update_labels()
+        if hasattr(self,"mask_dock"):
+            self.mask_dock.filter_tab.update_filter_values()
+        if self.toolBox.currentIndex() == self.left_tab['process']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_data_max_diff_quantile(self,value):
+        """Updates ``MainWindow.lineEditLowerQuantile.value``
+        Called as an update to ``DataHandling.lineEditLowerQuantile``. 
+        
+        Parameters
+        ----------
+        value : float
+            lower quantile value.
+        """
+        self.lineEditDifferenceLowerQuantile.value = value
+        self.update_labels()
+        if hasattr(self,"mask_dock"):
+            self.mask_dock.filter_tab.update_filter_values()
+        if self.toolBox.currentIndex() == self.left_tab['process']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_data_max_diff_quantile(self,value):
+        """Updates ``MainWindow.lineEditLowerQuantile.value``
+        Called as an update to ``DataHandling.lineEditLowerQuantile``. 
+        
+        Parameters
+        ----------
+        value : float
+            lower quantile value.
+        """
+        self.lineEditDifferenceLowerQuantile.value = value
+        self.update_labels()
+        if hasattr(self,"mask_dock"):
+            self.mask_dock.filter_tab.update_filter_values()
+        if self.toolBox.currentIndex() == self.left_tab['process']:
+            self.plot_style.scheduler.schedule_update()
+
+
+    def update_auto_scale_value(self,value):
+        """Updates ``MainWindow.lineEditLowerQuantile.value``
+        Called as an update to ``DataHandling.lineEditLowerQuantile``. 
+        
+        Parameters
+        ----------
+        value : float
+            lower quantile value.
+        """
+        self.toolButtonAutoScale.setChecked(value)
+        if value:
+            self.lineEditDifferenceLowerQuantile.setEnabled(True)
+            self.lineEditDifferenceUpperQuantile.setEnabled(True)
+        else:
+            self.lineEditDifferenceLowerQuantile.setEnabled(False)
+            self.lineEditDifferenceUpperQuantile.setEnabled(False)
+        if hasattr(self,"mask_dock"):
+            self.mask_dock.filter_tab.update_filter_values()
+        if self.toolBox.currentIndex() == self.left_tab['process']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_apply_outlier_to_all(self,value):
+        """Updates ``MainWindow.lineEditLowerQuantile.value``
+        Called as an update to ``DataHandling.lineEditLowerQuantile``. 
+        
+        Parameters
+        ----------
+        value : float
+            lower quantile value.
+        """
+        self.checkBoxApplyAll.setChecked(value)
+        ratio = ('/' in self.plot_info['field'])
+        if value and not ratio: 
+            # clear existing plot info from tree to ensure saved plots using most recent data
+            for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
+                self.plot_tree.clear_tree_data(tree)
+        elif value and not ratio:
+            # clear existing plot info from tree to ensure saved plots using most recent data
+            for tree in [ 'Ratio', 'Ratio (normalized)']:
+                self.plot_tree.clear_tree_data(tree) 
+
+    
 
     def update_hist_field_type_combobox(self, value):
         """Updates ``MainWindow.comboBoxHistFieldType.currentText()``
@@ -2532,9 +2664,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 # Apply to all analytes in sample
                 columns = self.app_data.data[sample_id].processed_data.columns
 
-                # clear existing plot info from tree to ensure saved plots using most recent data
-                for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
-                    self.plot_tree.clear_tree_data(tree)
             else:
                 columns = analyte_1
 

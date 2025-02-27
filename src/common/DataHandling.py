@@ -526,6 +526,19 @@ class SampleObj(Observable):
         self.notify_observers("apply_outlier_to_all", new_apply_outlier_to_all)
 
     @property
+    def auto_scale_value(self):
+        return self._auto_scale_value
+    
+    @auto_scale_value.setter
+    def auto_scale_value(self, new_auto_scale_value):
+        if new_auto_scale_value == self._auto_scale_value:
+            return
+        self._auto_scale_value = new_auto_scale_value
+        self.prep_data()
+        self.notify_observers("auto_scale_value", new_auto_scale_value)
+
+
+    @property
     def outlier_method(self):
         """str: Method for predicting and clipping outliers."""        
         return self._outlier_method
@@ -542,7 +555,7 @@ class SampleObj(Observable):
     def negative_method(self):
         """str: Method for negative handling."""        
         return self._negative_method
-
+ 
     @negative_method.setter
     def negative_method(self, method):
         if method == self._negative_method:
@@ -813,7 +826,8 @@ class SampleObj(Observable):
         """        
         self.dx = self._orig_dx
         self.dy = self._orig_dy
-        
+        self.update_aspect_ratio_controls()
+
     def swap_xy(self):
         """Swaps data in a SampleObj."""        
         if self.debug:
@@ -1674,22 +1688,99 @@ class SampleObj(Observable):
         if response == QMessageBox.StandardButton.No:
             return False  # User chose not to proceed
         return True  # User chose to proceed
+    
 
-    def sort_data(self, method):
-        # retrieve analyte_list
-        analyte_list = self.processed_data.match_attribute('data_type','analyte')
-       
-        # sort analyte sort based on method chosen by user
-        sorted_analyte_list = sort_analytes(method, analyte_list)
-        
-        # Ensure all analytes in self.analyte_list are actually columns in the DataFrame
-        # Does this ever happen?
-        # This step filters out any items in self.analyte_list that are not columns in the DataFrame
-        #columns_to_order = [analyte for analyte in analyte_list if analyte in data.raw_data.columns]
-        
-        # Reorder the columns of the DataFrame based on self.analyte_list
-        self.raw_data.sort_columns(sorted_analyte_list)
-        if hasattr(self, "processed_data"):
-            self.processed_data.sort_columns(sorted_analyte_list)
 
-        return analyte_list, sorted_analyte_list
+    def auto_scale(self,sample_id, field, update = False):
+        """Auto-scales pixel values in map
+
+        Executes on ``MainWindow.toolButtonAutoScale`` click.
+
+        Outliers can make it difficult to view the variations of values within a map.
+        This is a larger problem for linear scales, but can happen when log-scaled. Auto-
+        scaling the data clips the values at a lower and upper bound.  Auto-scaling may be
+        acceptable as minerals that were not specifically calibrated can have erroneously
+        high or low (even negative) values.
+
+        Parameters
+        ----------
+        update : bool
+            Update auto scale parameters, by default, False
+        """
+        if '/' in field:
+            analyte_1, analyte_2 = field.split(' / ')
+        else:
+            analyte_1 = field
+            analyte_2 = None
+
+
+
+        lb = self.data_min_quantile
+        ub = self.data_max_quantile
+        d_lb = self.data_min_diff_quantile
+        d_ub = self.data_max_diff_quantile
+        auto_scale = self.auto_scale_value
+
+        if auto_scale and not update:
+            #reset to default auto scale values
+            lb = 0.05
+            ub = 99.5
+            d_lb = 99
+            d_ub = 99
+
+            self.data_min_quantile = lb
+            self.data_max_quantile = ub
+            self.data_min_diff_quantile.value = d_lb
+            self.data_max_diff_quantile = d_ub
+            self.auto_scale_value = True
+
+        elif not auto_scale and not update:
+            # show unbounded plot when auto scale switched off
+            lb = 0
+            ub = 100
+            self.data_min_quantile = lb
+            self.data_max_quantile = ub
+            self.data_min_diff_quantile.setEnabled(False)
+            self.auto_scale_value = False
+
+        # if update is true
+        if analyte_1 and not analyte_2:
+            if (self.apply_outlier_to_all):
+                # Apply to all analytes in sample
+                columns = self.processed_data.columns
+
+                # clear existing plot info from tree to ensure saved plots using most recent data
+                for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
+                    self.plot_tree.clear_tree_data(tree)
+            else:
+                columns = analyte_1
+
+            # update column attributes
+            self.processed_data.set_attribute(columns, 'auto_scale', auto_scale)
+            self.processed_data.set_attribute(columns, 'upper_bound', ub)
+            self.processed_data.set_attribute(columns, 'lower_bound', lb)
+            self.processed_data.set_attribute(columns, 'diff_upper_bound', d_ub)
+            self.processed_data.set_attribute(columns, 'diff_lower_bound', d_lb)
+            self.processed_data.set_attribute(columns, 'negative_method', self.comboBoxNegativeMethod.currentText())
+
+            # update data with new auto-scale/negative handling
+            self.prep_data(sample_id)
+            
+
+        else:
+            if self.apply_outlier_to_all:
+                # Apply to all ratios in sample
+                self.processed_data['ratio_info']['auto_scale'] = auto_scale
+                self.processed_data['ratio_info']['upper_bound']= ub
+                self.processed_data['ratio_info']['lower_bound'] = lb
+                self.processed_data['ratio_info']['d_l_bound'] = d_lb
+                self.processed_data['ratio_info']['d_u_bound'] = d_ub
+                self.prep_data(sample_id)
+            else:
+                self.processed_data['ratio_info'].loc[ (self.processed_data['ratio_info']['analyte_1']==analyte_1)
+                                            & (self.processed_data['ratio_info']['analyte_2']==analyte_2),'auto_scale']  = auto_scale
+                self.processed_data['ratio_info'].loc[ (self.processed_data['ratio_info']['analyte_1']==analyte_1)
+                                            & (self.processed_data['ratio_info']['analyte_2']==analyte_2),
+                                            ['upper_bound','lower_bound','d_l_bound', 'd_u_bound']] = [ub,lb,d_lb, d_ub]
+                self.prep_data(sample_id, analyte_1,analyte_2)
+        return True  # User chose to proceed

@@ -1343,6 +1343,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.toolBox.currentIndex() == self.left_tab['process']:
             self.plot_style.schedule_update()
 
+
+    def update_data_min_quantile(self,value):
+        """Updates ``MainWindow.lineEditLowerQuantile.value``
+        Called as an update to ``DataHandling.lineEditLowerQuantile``. 
+
+        Parameters
+        ----------
+        value : float
+            lower quantile value.
+        """
+        self.lineEditLowerQuantile.value = value
+        self.update_labels()
+        if hasattr(self,"mask_dock"):
+            self.mask_dock.filter_tab.update_filter_values()
+        if self.toolBox.currentIndex() == self.left_tab['process']:
+            self.plot_style.schedule_update()
+
     def update_hist_field_type_combobox(self, value):
         """Updates ``MainWindow.comboBoxHistFieldType.currentText()``
 

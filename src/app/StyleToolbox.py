@@ -3078,7 +3078,7 @@ class StylingDock(Styling):
         else:
             cmap = self.create_custom_colormap(self.cmap, N)
 
-        if self.style_dict[plot_type]['CbarReverse']:
+        if self.cbar_reverse:
             cmap = cmap.reversed()
 
         return cmap

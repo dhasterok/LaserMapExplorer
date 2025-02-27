@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import ( 
         QWidget, QLineEdit, QTableWidget, QComboBox, QPushButton, QCheckBox, QWidget, QTreeView,
-        QMenu, QDockWidget, QHeaderView, QToolButton
+        QMenu, QDockWidget, QHeaderView, QToolButton, QSlider
     )
 from PyQt6.QtGui import (
     QStandardItem, QStandardItemModel, QFont, QDoubleValidator, QIcon, QCursor, QPainter,
@@ -541,7 +541,7 @@ class CustomCheckButton(QToolButton):
     ----------
     """
     def __init__(self, icon_unchecked: QIcon, icon_checked: QIcon, parent=None):
-        super().__init__()
+        super().__init__(parent)
 
         # icons for checked and unchecked states
         self.icon_checked = icon_checked
@@ -562,3 +562,196 @@ class CustomCheckButton(QToolButton):
             self.setIcon(self.icon_checked)
         else:
             self.setIcon(self.icon_unchecked)
+
+class CustomSlider(QWidget):
+    """A custom slider with a label.
+
+    The slider range, step and position can be initialized using the paramters below, or be set/changed using
+    QSlider equivalent methods.
+    
+    Parameters
+    ----------
+    min_value : float (optional)
+        Minimum value of slider range
+    max_value : float (optional)
+        Maximum value of slider range
+    step: float (optional)
+        Step size for slider position
+    initial_value : float (optional)
+        Initial position of slider handle
+    parent : (optional)
+        Parent object"""
+    valueChanged = pyqtSignal(int)
+    sliderMoved = pyqtSignal(int)
+    sliderReleased = pyqtSignal(int)
+    sliderPressed = pyqtSignal(int)
+
+    def __init__(self, min_value=0, max_value=100, step=1, initial_value=50, parent=None):
+        super().__init__(parent)
+        
+        self.layout = QVBoxLayout()
+        
+        # Create label to display slider value
+        self.label = QLabel(f"Value: {initial_value}")
+        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        # Create slider
+        self.slider = QSlider(Qt.Orientation.Horizontal)
+        self.slider.setMinimum(min_value)
+        self.slider.setMaximum(max_value)
+        self.slider.setSingleStep(step)
+        self.slider.setValue(initial_value)
+        
+        # Connect slider movement to label update
+        self.slider.valueChanged.connect(self.update_label)
+        self.slider.valueChanged.connect(self.valueChanged.emit)  # Emit custom signal
+        self.slider.sliderMoved.connect(self.update_label)
+        self.slider.sliderMoved.connect(self.sliderMoved.emit)
+        self.slider.sliderReleased.connect(self.update_label)
+        self.slider.sliderReleased.connect(self.sliderReleased.emit)
+        self.slider.sliderPressed.connect(self.sliderPressed.emit)
+        
+        # Add widgets to layout
+        self.layout.addWidget(self.label)
+        self.layout.addWidget(self.slider)
+        
+        self.setLayout(self.layout)
+    
+    def update_label(self, value):
+        self.label.setText(f"{value}")
+    
+    def setMinimum(self, value):
+        self.slider.setMinimum(value)
+    
+    def setMaximum(self, value):
+        self.slider.setMaximum(value)
+    
+    def setStep(self, value):
+        self.slider.setSingleStep(value)
+    
+    def setValue(self, value):
+        self.slider.setValue(value)
+    
+    def value(self):
+        return self.slider.value()
+
+    def slider(self):
+        return self.slider
+
+
+class DoubleSlider(QWidget):
+    valueChanged = pyqtSignal(int, int)  # Signal emitting both slider values
+    sliderMoved = pyqtSignal(int, int)  # Signal emitting both slider values
+    sliderReleased = pyqtSignal(int, int)  # Signal emitting both slider values
+    sliderPressed = pyqtSignal(int, int)  # Signal emitting both slider values
+
+    def __init__(self, min_value=0, max_value=100, step=1, initial_left=25, initial_right=75, parent=None):
+        super().__init__(parent)
+        
+        self.layout = QVBoxLayout()
+        
+        # Create horizontal layout for sliders
+        self.slider_layout = QHBoxLayout()
+        
+        # Create left slider
+        self.left_slider = QSlider(Qt.Orientation.Horizontal)
+        self.left_slider.setMinimum(min_value)
+        self.left_slider.setMaximum(max_value)
+        self.left_slider.setSingleStep(step)
+        self.left_slider.setValue(initial_left)
+        
+        # Create right slider
+        self.right_slider = QSlider(Qt.Orientation.Horizontal)
+        self.right_slider.setMinimum(min_value)
+        self.right_slider.setMaximum(max_value)
+        self.right_slider.setSingleStep(step)
+        self.right_slider.setValue(initial_right)
+        
+        # Connect slider changes
+        self.left_slider.valueChanged.connect(self.update_values)
+        self.right_slider.valueChanged.connect(self.update_values)
+        self.left_slider.valueChanged.connect(self.valueChanged.emit)
+        self.right_slider.valueChanged.connect(self.valueChanged.emit)
+
+        self.left_slider.sliderMoved.connect(self.update_label)
+        self.right_slider.sliderMoved.connect(self.update_label)
+        self.left_slider.sliderMoved.connect(self.sliderMoved.emit)
+        self.right_slider.sliderMoved.connect(self.sliderMoved.emit)
+
+        self.left_slider.sliderReleased.connect(self.update_label)
+        self.right_slider.sliderReleased.connect(self.update_label)
+        self.left_slider.sliderReleased.connect(self.sliderReleased.emit)
+        self.right_slider.sliderReleased.connect(self.sliderReleased.emit)
+
+        self.left_slider.sliderPressed.connect(self.sliderPressed.emit)
+        self.right_slider.sliderPressed.connect(self.sliderPressed.emit)
+        
+        self.slider_layout.addWidget(self.left_slider)
+        self.slider_layout.addWidget(self.right_slider)
+        
+        # Create horizontal layout for line edits
+        self.input_layout = QHBoxLayout()
+        
+        self.left_input = QLineEdit(str(initial_left))
+        self.right_input = QLineEdit(str(initial_right))
+        
+        self.left_input.setFixedWidth(50)
+        self.right_input.setFixedWidth(50)
+        
+        self.left_input.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.right_input.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        self.left_input.editingFinished.connect(self.update_sliders)
+        self.right_input.editingFinished.connect(self.update_sliders)
+        
+        self.input_layout.addWidget(self.left_input)
+        self.input_layout.addStretch()
+        self.input_layout.addWidget(self.right_input)
+        
+        self.layout.addLayout(self.slider_layout)
+        self.layout.addLayout(self.input_layout)
+        
+        self.setLayout(self.layout)
+    
+    def update_values(self):
+        left_value = self.left_slider.value()
+        right_value = self.right_slider.value()
+        
+        self.left_input.setText(str(left_value))
+        self.right_input.setText(str(right_value))
+        
+        self.valueChanged.emit(left_value, right_value)
+    
+    def update_sliders(self):
+        try:
+            left_value = int(self.left_input.text())
+            right_value = int(self.right_input.text())
+            self.left_slider.setValue(left_value)
+            self.right_slider.setValue(right_value)
+        except ValueError:
+            pass
+    
+    def setMinimum(self, value):
+        self.left_slider.setMinimum(value)
+        self.right_slider.setMinimum(value)
+    
+    def setMaximum(self, value):
+        self.left_slider.setMaximum(value)
+        self.right_slider.setMaximum(value)
+    
+    def setStep(self, value):
+        self.left_slider.setSingleStep(value)
+        self.right_slider.setSingleStep(value)
+
+    def setLeftValue(self, value):
+        self.left_slider.setValue(value)
+
+    def setRightValue(self, value):
+        self.right_slider.setValue(value)
+
+    def setValues(self, values):
+        self.left_slider.setValue(values[0])
+        self.right_slider.setValue(values[1])
+    
+    def values(self):
+        return self.left_slider.value(), self.right_slider.value()

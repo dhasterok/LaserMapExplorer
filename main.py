@@ -127,7 +127,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # initialize the styling data and dock
         self.plot_style = StylingDock(self, debug=self.logger_options['Styles'])
-        self.plot_style.load_theme_names()
         self.connect_plot_style_observers(self.plot_style)
 
         self.init_ui()
@@ -302,7 +301,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxHistField.update_callback = lambda: self.update_field_combobox_options(self.comboBoxHistField, self.comboBoxHistFieldType)
         self.comboBoxHistField.currentTextChanged.connect(lambda: setattr(self.app_data, "hist_field", self.comboBoxHistField.currentText()))
 
-        self.comboBoxColorByField.update_callback = lambda: self.update_field_type_combobox_options(self.comboBoxColorByField, self.comboBoxColorField, global_list=True)
+        self.comboBoxColorByField.update_callback = lambda: self.update_field_type_combobox_options(self.comboBoxColorByField, self.comboBoxColorField, add_none=True, global_list=True)
         self.comboBoxColorByField.currentTextChanged.connect(lambda: setattr(self.plot_style, "color_field_type", self.comboBoxColorByField.currentText()))
         self.comboBoxColorField.update_callback = lambda: self.update_field_combobox_options(self.comboBoxColorField, self.comboBoxColorByField, add_none=True)
         self.comboBoxColorField.currentTextChanged.connect(lambda: setattr(self.plot_style, "color_field", self.comboBoxColorField.currentText()))
@@ -326,7 +325,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.toolButtonSwapResolution.clicked.connect(self.update_swap_resolution)
 
-    def update_field_type_combobox_options(self, parentbox, childbox=None, global_list=False):
+    def update_field_type_combobox_options(self, parentbox, childbox=None, add_none=False, global_list=False):
         """Updates a field type comobobox list.
 
         This method can be used on popup or by forcing an update.
@@ -403,6 +402,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     if 'cluster score' in field_dict.keys():
                         new_list.append('Cluster score')
 
+        # add 'None' as first option if required.
+        if add_none:
+            new_list.insert(0,'None')
+
         # if the list hasn't changed then don't change anything
         if old_list and new_list == old_list:
             return
@@ -417,18 +420,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             parentbox.setCurrentIndex(0)
 
         # if a childbox is supplied, then update it based on the field type
-        if childbox is not None:
-            if 'normalized' in old_field_type:
-                old_field_type = old_field_type.replace(' (normalized)','')
+        if childbox is None:
+            return
 
-            if old_field_type not in new_list:
-                childbox.clear()
-                childbox.addItems(field_dict[new_list[0].lower()])
-                childbox.setCurrentIndex(0)
-            elif childbox.currentText() not in field_dict[old_field_type.lower()]:
-                childbox.clear()
-                childbox.addItems(field_dict[old_field_type.lower()])
-                childbox.setCurrentIndex(0)
+        if parentbox.currentText() == 'None':
+            childbox.clear()
+            return
+
+        if 'normalized' in old_field_type:
+            old_field_type = old_field_type.replace(' (normalized)','')
+
+        if old_field_type not in new_list:
+            childbox.clear()
+            childbox.addItems(field_dict[new_list[0].lower()])
+            childbox.setCurrentIndex(0)
+        elif childbox.currentText() not in field_dict[old_field_type.lower()]:
+            childbox.clear()
+            childbox.addItems(field_dict[old_field_type.lower()])
+            childbox.setCurrentIndex(0)
             
     def update_field_combobox_options(self, childbox, parentbox=None, add_none=False):
         """Updates a field comobobox list.
@@ -461,9 +470,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 field_type = field_type.replace(' (normalized)','')
             field_list = self.app_data.field_dict[field_type.lower()]
 
-        # add 'none' as first option if required
+        # add 'None' as first option if required
         if add_none:
-            field_list.insert(0,'none')
+            field_list.insert(0,'None')
 
         # if the new list is same as old, then nothing to update
         if old_list == field_list:
@@ -559,10 +568,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.labelNClusters.hide()
                 self.spinBoxNClusters.hide()
             
-        # get the current plot type
-        #plot_type = self.plot_style.plot_type
-        #self.plot_style.set_style_widgets(plot_type=plot_type, style=self.plot_style.plot_type[plot_type])
-
         # If canvasWindow is set to SingleView, update the plot
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
         # trigger update to plot
@@ -875,7 +880,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         app_data.add_observer("selected_clusters", self.update_selected_clusters_spinbox)
 
     def connect_plot_style_observers(self, plot_style):
-        plot_style.add_observer("plot_type", self.update_plot_type_combobox)
+        plot_style.add_observer("plot_type", self.plot_style.update_plot_type)
         plot_style.add_observer("xlim", self.update_xlim_lineedits)
         plot_style.add_observer("xlabel", self.update_xlabel_lineedit)
         plot_style.add_observer("xscale", self.update_xscale_combobox)
@@ -1100,8 +1105,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_ui_on_sample_change()
         self.update_widget_data_on_sample_change()
 
-        #if self.plot_style.plot_type != 'analyte map':
-        #    self.plot_style.plot_type = 'analyte map'
+        if self.plot_style.plot_type != 'analyte map':
+            self.plot_style.plot_type = 'analyte map'
 
         # allow plots to be updated again
         self.plot_flag = True
@@ -1141,24 +1146,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
         self.canvas_changed()
         
+        # update combobox to reflect list of available field types and fields
+        self.update_field_type_combobox_options(self.comboBoxHistFieldType, self.comboBoxHistField)
+        self.update_field_type_combobox_options(self.comboBoxColorByField, self.comboBoxColorField, add_none=True)
+
         # set toolbox tab indexes
         self.toolBoxStyle.setCurrentIndex(0)
         self.toolBox.setCurrentIndex(self.left_tab['sample'])
         self.toolbox_changed()
-
-        # set plot style to analyte map
-        self.plot_style.plot_type = 'analyte map'
-
-        # update combobox to reflect list of available field types and fields
-        self.update_field_type_combobox_options(self.comboBoxHistFieldType, self.comboBoxHistField)
-        self.update_field_type_combobox_options(self.comboBoxColorByField, self.comboBoxColorField)
-
-        # set color field and hist field as 'Analyte'
-        #self.plot_style.color_field_type = 'Analyte'
-        #self.plot_style.color_field = self.app_data.selected_analytes[0]
-
-        # set to single-view, tree view, and sample and fields tab
-        self.plot_style.set_style_widgets(self.plot_style.plot_type)
 
 
     def update_widget_data_on_sample_change(self):
@@ -1552,6 +1547,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def update_cluster_exponent_slider(self, new_cluster_exponent):
         self.horizontalSliderClusterExponent.setValue(new_cluster_exponent)
+        self.labelClusterExponent.setText(str(new_cluster_exponent))
         if self.toolBox.currentIndex() == self.left_tab['cluster']:
             self.plot_style.schedule_update()
 
@@ -1607,42 +1603,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.change_sample()
 
-    def update_plot_type_combobox(self, new_plot_type):
-        self.comboBoxPlotType.setCurrentText(new_plot_type)
-
-        self.plot_style.toggle_style_widgets()
-
-        self.plot_types[self.toolBox.currentIndex()][0] = self.comboBoxPlotType.currentIndex()
-
-        match self.plot_style.plot_type.lower():
-            case 'analyte map' | 'gradient map':
-                self.actionSwapAxes.setEnabled(True)
-            case 'scatter' | 'heatmap':
-                self.actionSwapAxes.setEnabled(True)
-            case 'correlation':
-                self.actionSwapAxes.setEnabled(False)
-                if self.comboBoxCorrelationMethod.currentText() == 'None':
-                    self.comboBoxCorrelationMethod.setCurrentText('Pearson')
-            case 'cluster performance':
-                self.labelClusterMax.show()
-                self.spinBoxClusterMax.show()
-                self.labelNClusters.hide()
-                self.spinBoxNClusters.hide()
-            case 'cluster' | 'cluster score':
-                self.labelClusterMax.hide()
-                self.spinBoxClusterMax.hide()
-                self.labelNClusters.show()
-                self.spinBoxNClusters.show()
-            case _:
-                self.actionSwapAxes.setEnabled(False)
-
-        self.signal_state = False
-        self.plot_style.set_style_widgets(plot_type=self.plot_style.plot_type)
-        self.signal_state = True
-        #self.check_analysis_type()
-
-        if self.plot_style.plot_type != '':
-            self.plot_style.schedule_update()
 
     def update_plot_type_combobox_options(self):
         """Updates plot type combobox based on current toolbox index or certain dock widget controls."""
@@ -1654,10 +1614,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.comboBoxPlotType.addItems(self.plot_types[plot_idx][1:])
         self.comboBoxPlotType.setCurrentIndex(self.plot_types[plot_idx][0])
-        self.plot_style.plot_type = self.comboBoxPlotType.currentText()
-        if hasattr(self,"plot_style"):
-            self.plot_style.set_style_widgets(self.plot_style.plot_type)
 
+        self.plot_style.plot_type = self.comboBoxPlotType.currentText()
 
     def update_equalize_color_scale(self):
         self.app_data.equalize_color_scale = self.toolButtonScaleEqualize.isChecked()
